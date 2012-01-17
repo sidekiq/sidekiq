@@ -1,0 +1,20 @@
+PATH
+  remote: .
+  specs:
+    sidekiq (0.1.0)
+      connection_pool
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    connection_pool (0.1.0)
+    minitest (2.10.0)
+    rake (0.9.2.2)
+
+PLATFORMS
+  java
+
+DEPENDENCIES
+  minitest
+  rake
+  sidekiq!
