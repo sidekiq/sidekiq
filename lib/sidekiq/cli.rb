@@ -5,6 +5,8 @@ module Sidekiq
   class CLI
     def initialize
       parse_options
+      validate!
+      enable_rails3 if File.exist?("config/application.rb")
     end
 
     def run
@@ -23,6 +25,11 @@ module Sidekiq
 
     private
 
+    def enable_rails3
+      APP_PATH = File.expand_path('config/application.rb')
+      require File.expand_path('config/boot.rb')
+    end
+
     def log(str)
       STDOUT.puts str
     end
@@ -31,41 +38,47 @@ module Sidekiq
       @STDERR.puts "ERROR: #{str}"
     end
 
+    def validate!
+      if @options[:queues].size == 0
+        log "========== Please configure at least one queue to process =========="
+        log @parser
+      end
+    end
+
     def parse_options(argv=ARGV)
       @options = {
-        :quiet => false,
+        :verbose => false,
         :queues => [],
-        :worker_threads => 25,
+        :worker_count => 25,
         :server => 'localhost:6379'
       }
 
       @parser = OptionParser.new do |o|
-        o.on "-q", "--queue QUEUE", "Queue to process" do |arg|
-          @options[:queues].concat arg.split(",")
-        end
-
-        o.on "-C", "--config PATH", "Load PATH as a config file" do |arg|
-          @options[:config_file] = arg
+        o.on "-q", "--queue QUEUE,WEIGHT", "Queue to process, with optional weight" do |arg|
+          (q, weight) = arg.split(",")
+          (weight || 1).times do
+            @options[:queues] << q
+          end
         end
 
         o.on "--pidfile PATH", "Use PATH as a pidfile" do |arg|
           @options[:pidfile] = arg
         end
 
-        o.on "-q", "--quiet", "Quiet down the output" do
-          @options[:quiet] = true
+        o.on "-v", "--verbose", "Print more verbose output" do
+          @options[:verbose] = true
         end
 
         o.on "-s", "--server LOCATION", "Where to find the server" do |arg|
           @options[:server] = arg
         end
 
-        o.on '-t', '--threads INT', "worker threads to use" do |arg|
-          @options[:worker_threads] = arg.to_i
+        o.on '-c', '--count INT', "worker count to use" do |arg|
+          @options[:worker_count] = arg.to_i
         end
       end
 
-      @parser.banner = "sidekiq <options>"
+      @parser.banner = "sidekiq -q foo,1 -q bar,2 <options>"
       @parser.on_tail "-h", "--help", "Show help" do
         log @parser
         exit 1

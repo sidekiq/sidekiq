@@ -2,11 +2,13 @@ PATH
   remote: .
   specs:
     sidekiq (0.1.0)
+      celluloid
       connection_pool
 
 GEM
   remote: http://rubygems.org/
   specs:
+    celluloid (0.7.2)
     connection_pool (0.1.0)
     minitest (2.10.0)
     rake (0.9.2.2)

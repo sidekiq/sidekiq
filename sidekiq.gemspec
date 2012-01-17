@@ -14,6 +14,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Sidekiq::VERSION
   gem.add_dependency                  'connection_pool'
+  gem.add_dependency                  'celluloid'
   gem.add_development_dependency      'minitest'
   gem.add_development_dependency      'rake'
 end
