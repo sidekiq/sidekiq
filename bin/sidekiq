@@ -3,7 +3,7 @@
 require 'sidekiq/cli'
 
 begin
-  cli = Sidekiq::CLI.new ARGV
+  cli = Sidekiq::CLI.new
   cli.run
 rescue => e
   raise e if $DEBUG
