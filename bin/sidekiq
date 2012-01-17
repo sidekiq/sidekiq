@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require 'sidekiq/cli'
+
+begin
+  cli = Sidekiq::CLI.new ARGV
+  cli.run
+rescue => e
+  raise e if $DEBUG
+  STDERR.puts e.message
+  exit 1
+end
