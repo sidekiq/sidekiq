@@ -1,4 +1,5 @@
 require 'optparse'
+require 'sidekiq'
 
 module Sidekiq
   class CLI
@@ -6,21 +7,21 @@ module Sidekiq
       parse_options
     end
 
-    private
-
     def run
       write_pid
 
       server = Sidekiq::Server.new(@options[:server], @options)
       begin
         log 'Starting processing, hit Ctrl-C to stop'
-        server.run.join
+        server.run
       rescue Interrupt
         log 'Shutting down...'
         server.stop
         log '...bye!'
       end
     end
+
+    private
 
     def log(str)
       STDOUT.puts str
@@ -35,7 +36,7 @@ module Sidekiq
         :quiet => false,
         :queues => [],
         :worker_threads => 25,
-        :location => 'localhost:6379'
+        :server => 'localhost:6379'
       }
 
       @parser = OptionParser.new do |o|
