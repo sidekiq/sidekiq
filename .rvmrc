@@ -1,1 +1,2 @@
+export JRUBY_OPTS="--1.9"
 rvm use jruby@sidekiq --create

@@ -26,7 +26,7 @@ module Sidekiq
     private
 
     def enable_rails3
-      APP_PATH = File.expand_path('config/application.rb')
+      #APP_PATH = File.expand_path('config/application.rb')
       require File.expand_path('config/boot.rb')
     end
 
@@ -47,10 +47,12 @@ module Sidekiq
 
     def parse_options(argv=ARGV)
       @options = {
+        :daemon => false,
         :verbose => false,
         :queues => [],
         :worker_count => 25,
-        :server => 'localhost:6379'
+        :server => 'localhost:6379',
+        :pidfile => nil,
       }
 
       @parser = OptionParser.new do |o|
@@ -59,6 +61,10 @@ module Sidekiq
           (weight || 1).times do
             @options[:queues] << q
           end
+        end
+
+        o.on "-d", "Daemonize" do |arg|
+          @options[:daemon] = arg
         end
 
         o.on "--pidfile PATH", "Use PATH as a pidfile" do |arg|
@@ -73,12 +79,12 @@ module Sidekiq
           @options[:server] = arg
         end
 
-        o.on '-c', '--count INT', "worker count to use" do |arg|
+        o.on '-c', '--concurrency INT', "Worker threads to use" do |arg|
           @options[:worker_count] = arg.to_i
         end
       end
 
-      @parser.banner = "sidekiq -q foo,1 -q bar,2 <options>"
+      @parser.banner = "sidekiq -q foo,1 -q bar,2 <more options>"
       @parser.on_tail "-h", "--help", "Show help" do
         log @parser
         exit 1
