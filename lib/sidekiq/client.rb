@@ -1,4 +1,5 @@
 require 'multi_json'
+require 'redis'
 
 module Sidekiq
   class Client

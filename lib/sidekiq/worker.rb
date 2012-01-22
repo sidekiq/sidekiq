@@ -2,17 +2,17 @@ module Sidekiq
   class Worker
     include Celluloid
 
-    def process(hash)
+    def process(msg)
       begin
-        klass = hash['class'].constantize
-        klass.new.perform(*hash['args'])
+        klass = msg['class'].constantize
+        klass.new.perform(*msg['args'])
       rescue => ex
-        airbrake(json, ex) if defined?(::Airbrake)
+        send_to_airbrake(msg, ex) if defined?(::Airbrake)
         raise ex
       end
     end
 
-    def airbrake(json, ex)
+    def send_to_airbrake(msg, ex)
       ::Airbrake.notify(:error_class   => ex.class.name,
                         :error_message => "#{ex.class.name}: #{e.message}",
                         :parameters    => json)
