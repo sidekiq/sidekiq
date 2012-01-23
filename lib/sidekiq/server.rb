@@ -2,6 +2,7 @@ require 'celluloid'
 require 'redis'
 require 'multi_json'
 
+require 'sidekiq/util'
 require 'sidekiq/worker'
 
 module Sidekiq
@@ -24,7 +25,7 @@ module Sidekiq
       @queues = options[:queues]
       @queue_idx = 0
       @queues_size = @queues.size
-      @redis = Redis.new(:host => options[:redis_host], :port => options[:redis_port])
+      @redis = Redis.connect(:url => location)
 
       @done = false
       @busy = []
@@ -39,9 +40,8 @@ module Sidekiq
       @ready.each(&:terminate)
       @ready.clear
 
-      after(30) do
-        @busy.each(&:terminate)
-        terminate
+      after(5) do
+        signal(:shutdown)
       end
     end
 
@@ -61,11 +61,14 @@ module Sidekiq
 
     def worker_died(worker, reason)
       @busy.delete(worker)
-      log "Worker death: #{reason}"
-      log reason.backtrace.join("\n") if reason
+
+      if reason
+        log "Worker death: #{reason}"
+        log reason.backtrace.join("\n")
+      end
 
       unless stopped?
-        @ready << Worker.new_link 
+        @ready << Worker.new_link
         dispatch
       end
     end

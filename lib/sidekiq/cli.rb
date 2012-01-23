@@ -9,7 +9,7 @@ module Sidekiq
     def initialize
       parse_options
       validate!
-      enable_rails3 if File.exist?("config/application.rb")
+      boot_rails
     end
 
     def run
@@ -19,24 +19,33 @@ module Sidekiq
       begin
         log 'Starting processing, hit Ctrl-C to stop'
         server.start!
-        sleep 1_000_000_000
+        sleep 1000
       rescue Interrupt
         log 'Shutting down...'
         server.stop!
+        server.wait(:shutdown)
       end
     end
 
     private
 
-    def enable_rails3
+    def boot_rails
       #APP_PATH = File.expand_path('config/application.rb')
-      require File.expand_path('config/boot.rb')
+      ENV['RAILS_ENV'] = 'production'
+      require File.expand_path("#{@options[:rails]}/config/environment.rb")
+      Rails.application.config.threadsafe!
     end
 
     def validate!
       $DEBUG = @options[:verbose]
       if @options[:queues].size == 0
         log "========== Please configure at least one queue to process =========="
+        log @parser
+        exit(1)
+      end
+
+      if !File.exist?("#{@options[:rails]}/config/boot.rb")
+        log "========== Please point sidekiq to a Rails 3 application =========="
         log @parser
         exit(1)
       end
@@ -50,6 +59,7 @@ module Sidekiq
         :worker_count => 25,
         :server => 'redis://localhost:6379/0',
         :pidfile => nil,
+        :rails => '.',
       }
 
       @parser = OptionParser.new do |o|
@@ -74,6 +84,10 @@ module Sidekiq
 
         o.on "-s", "--server LOCATION", "Where to find the server" do |arg|
           @options[:server] = arg
+        end
+
+        o.on '-r', '--rails PATH', "Rails application with workers" do |arg|
+          @options[:rails] = arg
         end
 
         o.on '-c', '--concurrency INT', "Worker threads to use" do |arg|

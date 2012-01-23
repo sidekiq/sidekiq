@@ -1,3 +1,5 @@
+require 'active_support/inflector'
+
 module Sidekiq
   class Worker
     include Celluloid
