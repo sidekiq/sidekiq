@@ -1,8 +1,11 @@
 require 'optparse'
 require 'sidekiq'
+require 'sidekiq/server'
 
 module Sidekiq
   class CLI
+    include Util
+
     def initialize
       parse_options
       validate!
@@ -10,16 +13,16 @@ module Sidekiq
     end
 
     def run
-      write_pid
+      write_pid if @options[:daemon]
 
       server = Sidekiq::Server.new(@options[:server], @options)
       begin
         log 'Starting processing, hit Ctrl-C to stop'
-        server.run
+        server.start!
+        sleep 1_000_000_000
       rescue Interrupt
         log 'Shutting down...'
-        server.stop
-        log '...bye!'
+        server.stop!
       end
     end
 
@@ -30,18 +33,12 @@ module Sidekiq
       require File.expand_path('config/boot.rb')
     end
 
-    def log(str)
-      STDOUT.puts str
-    end
-
-    def error(str)
-      @STDERR.puts "ERROR: #{str}"
-    end
-
     def validate!
+      $DEBUG = @options[:verbose]
       if @options[:queues].size == 0
         log "========== Please configure at least one queue to process =========="
         log @parser
+        exit(1)
       end
     end
 
@@ -51,7 +48,7 @@ module Sidekiq
         :verbose => false,
         :queues => [],
         :worker_count => 25,
-        :server => 'localhost:6379',
+        :server => 'redis://localhost:6379/0',
         :pidfile => nil,
       }
 
@@ -84,7 +81,7 @@ module Sidekiq
         end
       end
 
-      @parser.banner = "sidekiq -q foo,1 -q bar,2 <more options>"
+      @parser.banner = "sidekiq -q foo -q bar <more options>"
       @parser.on_tail "-h", "--help", "Show help" do
         log @parser
         exit 1

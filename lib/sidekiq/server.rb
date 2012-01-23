@@ -1,3 +1,9 @@
+require 'celluloid'
+require 'redis'
+require 'multi_json'
+
+require 'sidekiq/worker'
+
 module Sidekiq
 
   ##
@@ -12,14 +18,20 @@ module Sidekiq
     trap_exit :worker_died
 
     def initialize(location, options={})
+      log "Starting sidekiq #{Sidekiq::VERSION} with Redis at #{location}"
+      verbose options.inspect
       @count = options[:worker_count]
       @queues = options[:queues]
       @queue_idx = 0
       @queues_size = @queues.size
-      @redis = Redis.new(location)
+      @redis = Redis.new(:host => options[:redis_host], :port => options[:redis_port])
 
-      start
-      dispatch
+      @done = false
+      @busy = []
+      @ready = []
+      @count.times do
+        @ready << Worker.new_link
+      end
     end
 
     def stop
@@ -34,16 +46,11 @@ module Sidekiq
     end
 
     def start
-      @done = false
-      @busy = []
-      @ready = []
-      @count.times do
-        @ready << Worker.new_link
-      end
+      dispatch
     end
 
     def worker_done(worker)
-      @busy.remove(worker)
+      @busy.delete(worker)
       if stopped?
         worker.terminate
       else
@@ -53,11 +60,17 @@ module Sidekiq
     end
 
     def worker_died(worker, reason)
-      @busy.remove(worker)
-      @ready << Worker.new_link unless stopped?
+      @busy.delete(worker)
       log "Worker death: #{reason}"
-      log reason.backtrace.join("\n")
+      log reason.backtrace.join("\n") if reason
+
+      unless stopped?
+        @ready << Worker.new_link 
+        dispatch
+      end
     end
+
+    private
 
     def dispatch
       watchdog("Fatal error in sidekiq, dispatch loop died") do
@@ -67,26 +80,29 @@ module Sidekiq
         queue_idx = 0
         none_found = true
         loop do
-          break if @ready.size == 0
+          # return so that we don't dispatch again until worker_done
+          return if @ready.size == 0
+
+          current_queue = @queues[queue_idx]
+          msg = @redis.lpop("queue:#{current_queue}")
+          if msg
+            worker = @ready.pop
+            @busy << worker
+            worker.process! MultiJson.decode(msg)
+            none_found = false
+          end
 
           queue_idx += 1
 
-          # we loop through the queues, looking for a message in each.
+          # Loop through the queues, looking for a message in each.
           # if we find no messages in any of the queues, we can break
           # out of the loop.  Otherwise we loop again.
-          if (queue_idx % @queues.size == 0) && none_found
+          lastq = (queue_idx % @queues.size == 0)
+          if lastq && none_found
             break
-          else
+          elsif lastq
             queue_idx = 0
             none_found = true
-          end
-
-          current_queue = @queues[queue_idx]
-          msg = redis.lpop("queue:#{current_queue}")
-          if msg
-            @busy << worker = @ready.pop
-            worker.process! MultiJson.decode(msg)
-            none_found = false
           end
         end
 

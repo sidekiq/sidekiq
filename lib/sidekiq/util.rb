@@ -17,5 +17,9 @@ module Sidekiq
       STDOUT.puts(msg)
     end
 
+    def verbose(msg)
+      STDOUT.puts(msg) if $DEBUG
+    end
+
   end
 end
