@@ -16,6 +16,10 @@ GEM
     multi_json (1.0.4)
     rake (0.9.2.2)
     redis (2.2.2)
+    simplecov (0.5.4)
+      multi_json (~> 1.0.3)
+      simplecov-html (~> 0.5.3)
+    simplecov-html (0.5.3)
 
 PLATFORMS
   java
@@ -25,3 +29,4 @@ DEPENDENCIES
   minitest
   rake
   sidekiq!
+  simplecov
