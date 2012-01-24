@@ -1,2 +1,3 @@
 - monitoring hooks
 - resque-ui web ui?
+- graceful shutdown

@@ -6,8 +6,7 @@ Simple, efficient message processing for Ruby.
 Sidekiq aims to be a drop-in replacement for Resque.  It uses the exact same
 message format as Resque so it can slowly replace an existing Resque processing farm.
 You can have Sidekiq and Resque run side-by-side at the same time and
-use the Resque client to enqueue messages in Redis to be
-processed by Sidekiq.
+use the Resque client to enqueue messages in Redis to be processed by Sidekiq.
 
 Sidekiq is different from Resque in how it processes messages: it
 processes many messages concurrently per process.  Resque only processes
@@ -44,13 +43,13 @@ Client
 
 The Sidekiq client can be used to enqueue messages for processing:
 
-    Sidekiq::Client.push('some_queue', :class => SomeWorker, :args => ['bob', 2, foo: 'bar'])
+    Sidekiq::Client.push('some_queue', 'class' => SomeWorker, 'args' => ['bob', 2, foo: 'bar'])
 
 
 How it works
 -----------------
 
-Sidekiq assumes you are running a Rails 3 application with workers in app/workers.  Each message has a format like:
+Sidekiq assumes you are running a Rails 3 application.  Each message has a format like:
 
     { class: 'SomeWorker', args: ['bob', 2, {foo: 'bar'}] }
 
@@ -63,7 +62,9 @@ with args splatted:
     end
 
 This is the main API difference between Resque and Sidekiq: the perform
-method is an *instance* method, not a *class* method.
+method is an *instance* method, not a *class* method.  This difference
+is here because you, as a developer, must make your workers threadsafe.
+I don't want to call a Resque worker which might be non-threadsafe.
 
 
 Connections
@@ -104,3 +105,9 @@ Author
 -----------------
 
 Mike Perham, [@mperham](https://twitter.com/mperham), [http://mikeperham.com](http://mikeperham.com)
+
+If your company uses and enjoys sidekiq, click below to support my
+open source efforts.  I spend hundreds of hours of my spare time working
+on projects like this.
+
+<a href='http://www.pledgie.com/campaigns/16623'><img alt='Click here to lend your support to Open Source and make a donation at www.pledgie.com !' src='http://www.pledgie.com/campaigns/16623.png?skin_name=chrome' border='0' /></a>
