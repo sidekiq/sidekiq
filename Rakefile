@@ -6,10 +6,3 @@ Rake::TestTask.new(:test) do |test|
 end
 
 task :default => :test
-
-desc 'Code coverage analysis'
-task :cov => [:simplecov, :test]
-task :simplecov do
-  require 'simplecov'
-  SimpleCov.start
-end
