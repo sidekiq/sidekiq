@@ -19,7 +19,7 @@ module Sidekiq
     trap_exit :worker_died
 
     def initialize(location, options={})
-      log "Starting sidekiq #{Sidekiq::VERSION} with Redis at #{location}"
+      log "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{location}"
       verbose options.inspect
       @count = options[:worker_count]
       @queues = options[:queues]
@@ -31,7 +31,7 @@ module Sidekiq
       @busy = []
       @ready = []
       @count.times do
-        @ready << Worker.new_link
+        @ready << Worker.new_link(current_actor)
       end
     end
 
@@ -46,7 +46,7 @@ module Sidekiq
     end
 
     def start
-      dispatch
+      dispatch(true)
     end
 
     def worker_done(worker)
@@ -68,48 +68,51 @@ module Sidekiq
       end
 
       unless stopped?
-        @ready << Worker.new_link
+        @ready << Worker.new_link(current_actor)
         dispatch
       end
     end
 
     private
 
-    def dispatch
+    def find_work(queue_idx)
+      current_queue = @queues[queue_idx]
+      msg = @redis.lpop("queue:#{current_queue}")
+      if msg
+        worker = @ready.pop
+        @busy << worker
+        worker.process! MultiJson.decode(msg)
+      end
+      msg
+    end
+
+    def dispatch(schedule = false)
       watchdog("Fatal error in sidekiq, dispatch loop died") do
         return if stopped?
 
         # Our dispatch loop
+        # Loop through the queues, looking for a message in each.
         queue_idx = 0
-        none_found = true
+        found = false
         loop do
           # return so that we don't dispatch again until worker_done
-          return if @ready.size == 0
+          break verbose('no workers') if @ready.size == 0
 
-          current_queue = @queues[queue_idx]
-          msg = @redis.lpop("queue:#{current_queue}")
-          if msg
-            worker = @ready.pop
-            @busy << worker
-            worker.process! MultiJson.decode(msg)
-            none_found = false
-          end
-
+          found ||= find_work(queue_idx)
           queue_idx += 1
 
-          # Loop through the queues, looking for a message in each.
           # if we find no messages in any of the queues, we can break
           # out of the loop.  Otherwise we loop again.
           lastq = (queue_idx % @queues.size == 0)
-          if lastq && none_found
-            break
+          if lastq && !found
+            verbose('nothing to process'); break
           elsif lastq
             queue_idx = 0
-            none_found = true
+            found = false
           end
         end
 
-        after(1) { dispatch }
+        after(1) { verbose('ping'); dispatch(schedule) } if schedule
       end
     end
 

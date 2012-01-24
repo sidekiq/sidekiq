@@ -1,6 +1,7 @@
 require 'optparse'
 require 'sidekiq'
 require 'sidekiq/server'
+require 'connection_pool'
 
 module Sidekiq
   class CLI
@@ -12,14 +13,17 @@ module Sidekiq
       boot_rails
     end
 
+    FOREVER = 2_000_000_000
+
     def run
       write_pid if @options[:daemon]
 
+      ::Sidekiq::Client.redis = ConnectionPool.new { Redis.connect(:url => @options[:server]) }
       server = Sidekiq::Server.new(@options[:server], @options)
       begin
         log 'Starting processing, hit Ctrl-C to stop'
         server.start!
-        sleep 1000
+        sleep FOREVER
       rescue Interrupt
         log 'Shutting down...'
         server.stop!
@@ -30,10 +34,9 @@ module Sidekiq
     private
 
     def boot_rails
-      #APP_PATH = File.expand_path('config/application.rb')
-      ENV['RAILS_ENV'] = 'production'
+      ENV['RAILS_ENV'] = @options[:environment] || 'production'
       require File.expand_path("#{@options[:rails]}/config/environment.rb")
-      Rails.application.config.threadsafe!
+      Rails.application.eager_load!
     end
 
     def validate!
@@ -60,6 +63,7 @@ module Sidekiq
         :server => 'redis://localhost:6379/0',
         :pidfile => nil,
         :rails => '.',
+        :environment => 'production',
       }
 
       @parser = OptionParser.new do |o|
@@ -84,6 +88,10 @@ module Sidekiq
 
         o.on "-s", "--server LOCATION", "Where to find the server" do |arg|
           @options[:server] = arg
+        end
+
+        o.on '-e', '--environment ENV', "Rails application environment" do |arg|
+          @options[:environment] = arg
         end
 
         o.on '-r', '--rails PATH', "Rails application with workers" do |arg|
