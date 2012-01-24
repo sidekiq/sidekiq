@@ -16,8 +16,6 @@ module Sidekiq
     FOREVER = 2_000_000_000
 
     def run
-      write_pid if @options[:daemon]
-
       ::Sidekiq::Client.redis = ConnectionPool.new { Redis.connect(:url => @options[:server]) }
       server = Sidekiq::Server.new(@options[:server], @options)
       begin
@@ -34,18 +32,13 @@ module Sidekiq
     private
 
     def boot_rails
-      ENV['RAILS_ENV'] = @options[:environment] || 'production'
+      ENV['RAILS_ENV'] = @options[:environment]
       require File.expand_path("#{@options[:rails]}/config/environment.rb")
       Rails.application.eager_load!
     end
 
     def validate!
       $DEBUG = @options[:verbose]
-      if @options[:queues].size == 0
-        log "========== Please configure at least one queue to process =========="
-        log @parser
-        exit(1)
-      end
 
       if !File.exist?("#{@options[:rails]}/config/boot.rb")
         log "========== Please point sidekiq to a Rails 3 application =========="
@@ -56,12 +49,10 @@ module Sidekiq
 
     def parse_options(argv=ARGV)
       @options = {
-        :daemon => false,
         :verbose => false,
-        :queues => [],
+        :queues => ['default'],
         :worker_count => 25,
         :server => 'redis://localhost:6379/0',
-        :pidfile => nil,
         :rails => '.',
         :environment => 'production',
       }
@@ -72,14 +63,6 @@ module Sidekiq
           (weight || 1).times do
             @options[:queues] << q
           end
-        end
-
-        o.on "-d", "Daemonize" do |arg|
-          @options[:daemon] = arg
-        end
-
-        o.on "--pidfile PATH", "Use PATH as a pidfile" do |arg|
-          @options[:pidfile] = arg
         end
 
         o.on "-v", "--verbose", "Print more verbose output" do
@@ -103,20 +86,12 @@ module Sidekiq
         end
       end
 
-      @parser.banner = "sidekiq -q foo -q bar <more options>"
+      @parser.banner = "sidekiq [options]"
       @parser.on_tail "-h", "--help", "Show help" do
         log @parser
         exit 1
       end
       @parser.parse!(argv)
-    end
-
-    def write_pid
-      if path = @options[:pidfile]
-        File.open(path, "w") do |f|
-          f.puts Process.pid
-        end
-      end
     end
 
   end
