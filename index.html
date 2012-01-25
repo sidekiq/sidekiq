@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>sidekiq</title>
+    <title>sidekiq - simple efficient message processing for Ruby and Rails</title>
     <meta content="sidekiq - simple message processing for Ruby" name="description">
     <link href="site.css" media="all" rel="stylesheet" type="text/css">
   </head>
@@ -9,7 +9,7 @@
     <nav>
         <ul>
           <li>
-            <a href="http://blog.carbonfive.com/2011/04/20/asynchronous-processing-with-girl_friday/">Introduction</a>
+            <a href="#">Introduction</a>
           </li>
           <li>
             <a href="http://blog.carbonfive.com/2011/04/19/concurrency-with-actors/">Actors</a>
@@ -26,7 +26,6 @@
         </ul>
       </nav>
       <header>
-        <img alt="logo" src="images/girl.png" width="135" height="160">
         <div class="slogan">
           <h1>sidekiq</h1>
           <p>Simple, efficient message processing for Rails</p>
@@ -51,7 +50,7 @@ class HardWorker
   end
 end</pre></td></tr></table>
         <p>
-          In your controller action or model, you can call <tt>HardWorker.perform_async</tt>:
+          In your controller action or model, call <tt>HardWorker.perform_async</tt>:
         </p>
         <table class="CodeRay"><tr><td class="code"><pre>
 HardWorker.perform_async('bob', 5)
@@ -67,7 +66,7 @@ sidekiq
         <p>
           Please see the
           <a href="https://github.com/mperham/sidekiq/wiki">sidekiq wiki</a>
-          for more detail and advanced options and tuning.
+          for more detail, advanced features and tuning.
         </p>
         <h3>Author</h3>
         <p>

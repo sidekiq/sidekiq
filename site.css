@@ -524,7 +524,7 @@ ol.CodeRay li {
 
 /* boolean */
 html {
-  background: url("background.png");
+  background: #9b7;
 }
 
 body {
@@ -538,7 +538,7 @@ body {
 h1, h2, h3, h4, h5 {
   color: black;
   font-variant: small-caps;
-  text-shadow: #aaaaaa 2px 2px 2px;
+  text-shadow: #666 2px 2px 2px;
 }
 
 h1 {
@@ -551,7 +551,6 @@ h3 {
 
 #wrapper {
   width: 780px;
-  margin-left: 150px;
   clear: both;
 }
 
@@ -565,7 +564,6 @@ header {
 header .slogan {
   width: 750px;
   float: left;
-  padding-left: 20px;
   padding-bottom: 20px;
 }
 header .slogan p {
@@ -576,7 +574,7 @@ header .slogan p.catch-phrase {
   font-style: italic;
 }
 header .slogan h1 {
-  text-shadow: #aaaaaa 2px 2px 2px;
+  text-shadow: #666 2px 2px 2px;
 }
 header img {
   float: left;
