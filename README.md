@@ -107,13 +107,16 @@ More Information
 Please see the [Sidekiq wiki](https://github.com/mperham/sidekiq/wiki) for more information.
 
 
+License
+-----------------
+
+sidekiq is GPLv3 licensed for **non-commercial use only**.  For a commercial
+license, you must give $50 to my [Pledgie campaign](http://www.pledgie.com/campaigns/16623).
+
+<a href='http://www.pledgie.com/campaigns/16623'><img alt='Click here to lend your support to Open Source and make a donation at www.pledgie.com !' src='http://www.pledgie.com/campaigns/16623.png?skin_name=chrome' border='0' /></a>
+
 Author
 -----------------
 
 Mike Perham, [@mperham](https://twitter.com/mperham), [http://mikeperham.com](http://mikeperham.com)
 
-If your company uses and enjoys sidekiq, click below to support my
-open source efforts.  I spend hundreds of hours of my spare time working
-on projects like this.
-
-<a href='http://www.pledgie.com/campaigns/16623'><img alt='Click here to lend your support to Open Source and make a donation at www.pledgie.com !' src='http://www.pledgie.com/campaigns/16623.png?skin_name=chrome' border='0' /></a>
