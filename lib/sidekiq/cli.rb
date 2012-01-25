@@ -1,5 +1,7 @@
 require 'optparse'
-require 'sidekiq'
+require 'sidekiq/version'
+require 'sidekiq/util'
+require 'sidekiq/client'
 require 'sidekiq/server'
 require 'connection_pool'
 
@@ -34,7 +36,7 @@ module Sidekiq
     def boot_rails
       ENV['RAILS_ENV'] = @options[:environment]
       require File.expand_path("#{@options[:rails]}/config/environment.rb")
-      Rails.application.eager_load!
+      ::Rails.application.eager_load!
     end
 
     def validate!
@@ -51,7 +53,7 @@ module Sidekiq
       @options = {
         :verbose => false,
         :queues => ['default'],
-        :worker_count => 25,
+        :processor_count => 25,
         :server => 'redis://localhost:6379/0',
         :rails => '.',
         :environment => 'production',
@@ -77,12 +79,12 @@ module Sidekiq
           @options[:environment] = arg
         end
 
-        o.on '-r', '--rails PATH', "Rails application with workers" do |arg|
+        o.on '-r', '--rails PATH', "Rails application with processors" do |arg|
           @options[:rails] = arg
         end
 
-        o.on '-c', '--concurrency INT', "Worker threads to use" do |arg|
-          @options[:worker_count] = arg.to_i
+        o.on '-c', '--concurrency INT', "processor threads to use" do |arg|
+          @options[:processor_count] = arg.to_i
         end
       end
 

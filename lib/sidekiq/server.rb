@@ -3,25 +3,25 @@ require 'redis'
 require 'multi_json'
 
 require 'sidekiq/util'
-require 'sidekiq/worker'
+require 'sidekiq/processor'
 
 module Sidekiq
 
   ##
   # This is the main router in the system.  This
-  # manages the worker state and fetches messages
-  # from Redis to be dispatched to ready workers.
+  # manages the processor state and fetches messages
+  # from Redis to be dispatched to ready processor.
   #
   class Server
     include Util
     include Celluloid
 
-    trap_exit :worker_died
+    trap_exit :processor_died
 
     def initialize(location, options={})
       log "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{location}"
       verbose options.inspect
-      @count = options[:worker_count]
+      @count = options[:processor_count]
       @queues = options[:queues]
       @queue_idx = 0
       @queues_size = @queues.size
@@ -31,7 +31,7 @@ module Sidekiq
       @busy = []
       @ready = []
       @count.times do
-        @ready << Worker.new_link(current_actor)
+        @ready << Processor.new_link(current_actor)
       end
     end
 
@@ -49,26 +49,26 @@ module Sidekiq
       dispatch(true)
     end
 
-    def worker_done(worker)
-      @busy.delete(worker)
+    def processor_done(processor)
+      @busy.delete(processor)
       if stopped?
-        worker.terminate
+        processor.terminate
       else
-        @ready << worker
+        @ready << processor
       end
       dispatch
     end
 
-    def worker_died(worker, reason)
-      @busy.delete(worker)
+    def processor_died(processor, reason)
+      @busy.delete(processor)
 
       if reason
-        log "Worker death: #{reason}"
+        log "Processor death: #{reason}"
         log reason.backtrace.join("\n")
       end
 
       unless stopped?
-        @ready << Worker.new_link(current_actor)
+        @ready << Processor.new_link(current_actor)
         dispatch
       end
     end
@@ -79,9 +79,9 @@ module Sidekiq
       current_queue = @queues[queue_idx]
       msg = @redis.lpop("queue:#{current_queue}")
       if msg
-        worker = @ready.pop
-        @busy << worker
-        worker.process! MultiJson.decode(msg)
+        processor = @ready.pop
+        @busy << processor
+        processor.process! MultiJson.decode(msg)
       end
       msg
     end
@@ -95,8 +95,8 @@ module Sidekiq
         queue_idx = 0
         found = false
         loop do
-          # return so that we don't dispatch again until worker_done
-          break verbose('no workers') if @ready.size == 0
+          # return so that we don't dispatch again until processor_done
+          break verbose('no processors') if @ready.size == 0
 
           found ||= find_work(queue_idx)
           queue_idx += 1
