@@ -101,6 +101,12 @@ fresh worker.  Just make sure you have Airbrake configured in your Rails
 app.
 
 
+More Information
+-----------------
+
+Please see the [Sidekiq wiki](https://github.com/mperham/sidekiq/wiki) for more information.
+
+
 Author
 -----------------
 

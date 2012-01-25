@@ -3,5 +3,5 @@
 require 'sidekiq'
 
 10.times do
-  Sidekiq::Client.push('foo', 'class' => 'HardWorker', 'args' => ['bob', 1])
+  Sidekiq::Client.push('class' => 'HardWorker', 'args' => ['bob', 1])
 end
