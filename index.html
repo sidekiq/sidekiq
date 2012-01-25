@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>sidekiq</title>
+    <meta content="sidekiq - simple message processing for Ruby" name="description">
+    <link href="site.css" media="all" rel="stylesheet" type="text/css">
+  </head>
+  <body class="index content">
+    <nav>
+        <ul>
+          <li>
+            <a href="http://blog.carbonfive.com/2011/04/20/asynchronous-processing-with-girl_friday/">Introduction</a>
+          </li>
+          <li>
+            <a href="http://blog.carbonfive.com/2011/04/19/concurrency-with-actors/">Actors</a>
+          </li>
+          <li>
+            <a href="http://www.mikeperham.com/">Blog</a>
+          </li>
+          <li>
+            <a href="http://github.com/mperham/sidekiq/wiki">Wiki</a>
+          </li>
+          <li>
+            <a href="http://github.com/mperham/sidekiq">Source</a>
+          </li>
+        </ul>
+      </nav>
+      <header>
+        <img alt="logo" src="images/girl.png" width="135" height="160">
+        <div class="slogan">
+          <h1>sidekiq</h1>
+          <p>Simple, efficient message processing for Rails</p>
+        </div>
+      </header>
+      <div id="wrapper">
+        <h3>Installation</h3>
+        <p>
+          Put sidekiq in your <tt>Gemfile</tt>:
+        </p>
+        <table class="CodeRay"><tr><td class="code"><pre>gem 'sidekiq'</pre></td></tr></table>
+        <p>
+        Place your worker classes in <tt>app/workers</tt>:
+        </p>
+        <table class="CodeRay"><tr><td class="code"><pre>
+# app/workers/hard_worker.rb
+class HardWorker
+  def perform(name, count)
+    puts 'Doing hard work'
+  end
+end</pre></td></tr></table>
+        <p>Add <tt>app/workers</tt> to the autoload path in <tt>config/application.rb</tt>:</p>
+        <table class="CodeRay"><tr><td
+class="code"><pre>config.autoload_paths += "#{config.root}/app/workers"</pre></td></tr></table>
+        <p>
+          In your controller action or model, you can call <tt>Sidekiq::Client.push</tt>:
+        </p>
+        <table class="CodeRay"><tr><td class="code"><pre>
+Sidekiq::Client.push('class' =&gt; 'HardWorker', 'args' =&gt; ['bob', 5])
+</pre></td></tr></table>
+        <p>
+          Finally, start sidekiq from the root directory of your Rails
+          app.
+        </p>
+        <table class="CodeRay"><tr><td class="code"><pre>
+sidekiq
+</pre></td></tr></table>
+        <h3>More Detail</h3>
+        <p>
+          Please see the
+          <a href="https://github.com/mperham/sidekiq/wiki">sidekiq wiki</a>
+          for more detail and advanced options and tuning.
+        </p>
+        <h3>Author</h3>
+        <p>
+          Mike Perham
+          <a href="http://www.twitter.com/mperham">@mperham</a>
+          <a href="http://www.mikeperham.com">mikeperham.com</a>
+        </p>
+        <p class="kudos">
+          Site design by Chad Seeger (
+          <a href="http://www.twitter.com/cs44">@cs44</a>
+          )
+        </p>
+      </div>
+  </body>
+</html>
