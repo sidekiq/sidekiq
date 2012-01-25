@@ -44,18 +44,17 @@
         <table class="CodeRay"><tr><td class="code"><pre>
 # app/workers/hard_worker.rb
 class HardWorker
+  include Sidekiq::Worker
+
   def perform(name, count)
     puts 'Doing hard work'
   end
 end</pre></td></tr></table>
-        <p>Add <tt>app/workers</tt> to the autoload path in <tt>config/application.rb</tt>:</p>
-        <table class="CodeRay"><tr><td
-class="code"><pre>config.autoload_paths += "#{config.root}/app/workers"</pre></td></tr></table>
         <p>
-          In your controller action or model, you can call <tt>Sidekiq::Client.push</tt>:
+          In your controller action or model, you can call <tt>HardWorker.perform_async</tt>:
         </p>
         <table class="CodeRay"><tr><td class="code"><pre>
-Sidekiq::Client.push('class' =&gt; 'HardWorker', 'args' =&gt; ['bob', 5])
+HardWorker.perform_async('bob', 5)
 </pre></td></tr></table>
         <p>
           Finally, start sidekiq from the root directory of your Rails
