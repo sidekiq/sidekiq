@@ -1,3 +1,5 @@
-- monitoring hooks
-- resque-ui web ui?
+- processing stats
+- resque-ui-esque web ui?
 - graceful shutdown
+- monit/god example scripts
+- nice homepage
