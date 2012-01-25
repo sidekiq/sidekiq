@@ -1,5 +1,6 @@
 require 'helper'
 require 'sidekiq/client'
+require 'sidekiq/worker'
 
 class TestClient < MiniTest::Unit::TestCase
   describe 'with mock redis' do
@@ -26,9 +27,17 @@ class TestClient < MiniTest::Unit::TestCase
     end
 
     class MyWorker
+      include Sidekiq::Worker
       def self.queue
         'foo'
       end
+    end
+
+    it 'handles perform_async' do
+      @redis.expect :rpush, 1, ['queue:default', String]
+      count = MyWorker.perform_async(1, 2)
+      assert count > 0
+      @redis.verify
     end
 
     it 'enqueues messages to redis' do

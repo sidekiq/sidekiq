@@ -20,10 +20,23 @@ module Sidekiq
   #
   # Note that perform_async is a class method, perform is an instance method.
   module Worker
-    extend self
+    def self.included(base)
+      base.extend(ClassMethods)
+    end
 
-    def perform_async(*args)
-      Sidekiq::Client.enqueue('class' => self.name, 'args' => args)
+    def info(msg)
+      print "#{msg}\n"
+    end
+    alias_method :log, :info
+
+    def debug(msg)
+      print "#{msg}\n" if $DEBUG
+    end
+
+    module ClassMethods
+      def perform_async(*args)
+        Sidekiq::Client.push('class' => self.name, 'args' => args)
+      end
     end
   end
 end
