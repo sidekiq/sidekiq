@@ -2,4 +2,4 @@
 - resque-ui-esque web ui?
 - graceful shutdown
 - monit/god example scripts
-- nice homepage
+- prettier homepage

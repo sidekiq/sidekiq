@@ -4,12 +4,12 @@ require File.expand_path('../lib/sidekiq/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["Mike Perham"]
   gem.email         = ["mperham@gmail.com"]
-  gem.description   = gem.summary = ""
-  gem.homepage      = ""
+  gem.description   = gem.summary = "Simple, efficient message processing for Ruby"
+  gem.homepage      = "http://mperham.github.com/sidekiq"
 
-  gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  gem.executables   = ['bin/sidekiq']
   gem.files         = `git ls-files`.split("\n")
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  gem.test_files    = `git ls-files -- test/*`.split("\n")
   gem.name          = "sidekiq"
   gem.require_paths = ["lib"]
   gem.version       = Sidekiq::VERSION

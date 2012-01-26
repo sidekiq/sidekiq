@@ -1,3 +1,4 @@
+$TESTING = true
 if false
   require 'simplecov'
   SimpleCov.start
