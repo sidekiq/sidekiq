@@ -14,7 +14,7 @@ module Sidekiq
       begin
         klass = constantize(msg['class'])
         klass.new.perform(*msg['args'])
-        @boss.processor_done!(self)
+        @boss.processor_done!(current_actor)
       rescue => ex
         send_to_airbrake(msg, ex) if defined?(::Airbrake)
         raise ex
