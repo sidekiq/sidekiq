@@ -71,7 +71,7 @@ module Sidekiq
           @options[:verbose] = true
         end
 
-        o.on "-s", "--server LOCATION", "Where to find the server" do |arg|
+        o.on "-s", "--server LOCATION", "Where to find Redis" do |arg|
           @options[:server] = arg
         end
 
@@ -79,7 +79,7 @@ module Sidekiq
           @options[:environment] = arg
         end
 
-        o.on '-r', '--rails PATH', "Rails application with processors" do |arg|
+        o.on '-r', '--rails PATH', "Location of Rails application with workers" do |arg|
           @options[:rails] = arg
         end
 

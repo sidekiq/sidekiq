@@ -15,7 +15,7 @@ You'll find that you might need 50 200MB resque processes to peg your CPU
 whereas one 300MB Sidekiq process will peg the same CPU and perform the
 same amount of work.  Please see [my blog post on Resque's memory
 efficiency](http://blog.carbonfive.com/2011/09/16/improving-resques-memory-efficiency/)
- and how I was able to shrink a Carbon Five client's processing farm
+ and how I was able to shrink a Carbon Five client's resque processing farm
 from 9 machines to 1 machine.
 
 
@@ -32,79 +32,16 @@ Installation
    gem install sidekiq
 
 
-Usage
+Getting Started
 -----------------
 
-See `sidekiq -h` for usage details.
-
-
-Client
------------------
-
-The Sidekiq client can be used to enqueue messages for processing:
-
-    Sidekiq::Client.push('some_queue', 'class' => SomeWorker, 'args' => ['bob', 2, foo: 'bar'])
-
-
-How it works
------------------
-
-Sidekiq assumes you are running a Rails 3 application.  Each message has a format like:
-
-    { class: 'SomeWorker', args: ['bob', 2, {foo: 'bar'}] }
-
-Sidekiq will instantiate a new instance of SomeWorker and call perform
-with args splatted:
-
-    class SomeWorker
-      def perform(name, count, options)
-      end
-    end
-
-This is the main API difference between Resque and Sidekiq: the perform
-method is an *instance* method, not a *class* method.  This difference
-is here because you, as a developer, must make your workers threadsafe.
-I don't want to call a Resque worker which might be non-threadsafe.
-
-
-Connections
------------------
-
-If your workers are connecting to mongo, memcached, redis, cassandra,
-etc you might want to set up a shared connection pool that all workers
-can use so you aren't opening a new connection for every message
-processed.  Sidekiq contains a connection pool API which you can use in your code to
-ensure safe, simple access to shared IO connections.  Please see the
-[connection\_pool gem](https://github.com/mperham/connection_pool) for more information.
-Your worker would do something like this:
-
-    class Worker
-      REDIS_POOL = ConnectionPool.new(:size => 10, :timeout => 3) { Redis.new }
-      def perform(args)
-        REDIS_POOL.with_connection do |redis|
-          redis.lsize(:foo)
-        end
-      end
-    end
-
-This ensures that if you have a concurrency setting of 50, you'll still only
-have a maximum of 10 connections open to Redis.
-
-
-Error Handling
------------------
-
-Sidekiq has built-in support for Airbrake.  If a worker raises an
-exception, Sidekiq will optionally send that error with the message
-context to Airbrake, log the error and then replace the worker with a
-fresh worker.  Just make sure you have Airbrake configured in your Rails
-app.
+See the [sidekiq home page](http://mperham.github.com/sidekiq) for the simple 4-step process.
 
 
 More Information
 -----------------
 
-Please see the [Sidekiq wiki](https://github.com/mperham/sidekiq/wiki) for more information.
+Please see the [sidekiq wiki](https://github.com/mperham/sidekiq/wiki) for more information.
 
 
 License
@@ -112,6 +49,9 @@ License
 
 sidekiq is GPLv3 licensed for **non-commercial use only**.  For a commercial
 license, you must give $50 to my [Pledgie campaign](http://www.pledgie.com/campaigns/16623).
+Considering the hundreds of hours I've spent writing OSS, I hope you
+think this is a reasonable price.  BTW, the commercial license is in
+COMM-LICENSE and is the [Sencha commercial license v1.10](http://www.sencha.com/legal/sencha-commercial-software-license-agreement/) with the Support (section 11) terms removed.
 
 <a href='http://www.pledgie.com/campaigns/16623'><img alt='Click here to lend your support to Open Source and make a donation at www.pledgie.com !' src='http://www.pledgie.com/campaigns/16623.png?skin_name=chrome' border='0' /></a>
 
