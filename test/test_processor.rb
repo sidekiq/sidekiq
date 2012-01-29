@@ -7,6 +7,7 @@ class TestProcessor < MiniTest::Unit::TestCase
       $invokes = 0
       $errors = []
       @boss = MiniTest::Mock.new
+      Celluloid.logger = nil
     end
 
     class MockWorker
@@ -20,11 +21,6 @@ class TestProcessor < MiniTest::Unit::TestCase
       msg = { 'class' => MockWorker.to_s, 'args' => ['myarg'] }
       processor = ::Sidekiq::Processor.new(@boss)
       @boss.expect(:processor_done!, nil, [processor])
-      class << processor
-        def current_actor
-          self
-        end
-      end
       processor.process(msg)
       @boss.verify
       assert_equal 1, $invokes

@@ -4,7 +4,7 @@ require 'celluloid'
 module Sidekiq
   class Processor
     include Util
-    include Celluloid unless $TESTING
+    include Celluloid
 
     def initialize(boss)
       @boss = boss
@@ -25,6 +25,11 @@ module Sidekiq
       ::Airbrake.notify(:error_class   => ex.class.name,
                         :error_message => "#{ex.class.name}: #{ex.message}",
                         :parameters    => msg)
+    end
+
+    # See http://github.com/tarcieri/celluloid/issues/22
+    def inspect
+      "Sidekiq::Processor<#{object_id}>"
     end
   end
 end
