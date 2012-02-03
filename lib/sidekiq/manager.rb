@@ -8,11 +8,11 @@ require 'sidekiq/processor'
 module Sidekiq
 
   ##
-  # This is the main router in the system.  This
+  # The main router in the system.  This
   # manages the processor state and fetches messages
-  # from Redis to be dispatched to ready processor.
+  # from Redis to be dispatched to an idle processor.
   #
-  class Server
+  class Manager
     include Util
     include Celluloid
 
@@ -21,7 +21,7 @@ module Sidekiq
     def initialize(location, options={})
       log "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{location}"
       verbose options.inspect
-      @count = options[:processor_count]
+      @count = options[:processor_count] || 25
       @queues = options[:queues]
       @queue_idx = 0
       @queues_size = @queues.size
@@ -49,7 +49,12 @@ module Sidekiq
       dispatch(true)
     end
 
+    def when_done
+      @done_callback = Proc.new
+    end
+
     def processor_done(processor)
+      @done_callback.call(processor)
       @busy.delete(processor)
       if stopped?
         processor.terminate
@@ -83,7 +88,7 @@ module Sidekiq
         @busy << processor
         processor.process! MultiJson.decode(msg)
       end
-      msg
+      !!msg
     end
 
     def dispatch(schedule = false)
@@ -112,6 +117,9 @@ module Sidekiq
           end
         end
 
+        # This is the polling loop that ensures we check Redis every
+        # second for work, even if there was nothing to do this time
+        # around.
         after(1) { verbose('ping'); dispatch(schedule) } if schedule
       end
     end

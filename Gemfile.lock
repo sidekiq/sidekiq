@@ -10,7 +10,7 @@ PATH
 GEM
   remote: http://rubygems.org/
   specs:
-    celluloid (0.7.2)
+    celluloid (0.8.0)
     connection_pool (0.1.0)
     minitest (2.10.0)
     multi_json (1.0.4)

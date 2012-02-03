@@ -2,7 +2,7 @@ require 'optparse'
 require 'sidekiq/version'
 require 'sidekiq/util'
 require 'sidekiq/client'
-require 'sidekiq/server'
+require 'sidekiq/manager'
 require 'connection_pool'
 
 module Sidekiq
@@ -19,15 +19,15 @@ module Sidekiq
 
     def run
       ::Sidekiq::Client.redis = ConnectionPool.new { Redis.connect(:url => @options[:server]) }
-      server = Sidekiq::Server.new(@options[:server], @options)
+      manager = Sidekiq::Manager.new(@options[:server], @options)
       begin
         log 'Starting processing, hit Ctrl-C to stop'
-        server.start!
+        manager.start!
         sleep FOREVER
       rescue Interrupt
         log 'Shutting down...'
-        server.stop!
-        server.wait(:shutdown)
+        manager.stop!
+        manager.wait(:shutdown)
       end
     end
 

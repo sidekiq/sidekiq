@@ -25,7 +25,7 @@ module Sidekiq
     end
 
     def log(msg)
-      STDOUT.puts(msg)
+      STDOUT.puts(msg) unless $TESTING
     end
 
     def verbose(msg)
