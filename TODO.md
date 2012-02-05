@@ -1,5 +1,4 @@
-- processing stats
-- resque-ui-esque web ui?
-- graceful shutdown
-- monit/god example scripts
-- prettier homepage
+- monitoring stats
+- resque-ui-esque web ui
+- graceful shutdown (ideally Celluloid will provide this)
+- monit/god/etc example scripts

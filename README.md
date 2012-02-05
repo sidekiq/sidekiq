@@ -52,6 +52,8 @@ license, you must give $50 to my [Pledgie campaign](http://www.pledgie.com/campa
 Considering the hundreds of hours I've spent writing OSS, I hope you
 think this is a reasonable price.  BTW, the commercial license is in
 COMM-LICENSE and is the [Sencha commercial license v1.10](http://www.sencha.com/legal/sencha-commercial-software-license-agreement/) with the Support (section 11) terms removed.
+Support is provided through GitHub Issues.  You are welcome to try the
+software for 2 weeks.
 
 <a href='http://www.pledgie.com/campaigns/16623'><img alt='Click here to lend your support to Open Source and make a donation at www.pledgie.com !' src='http://www.pledgie.com/campaigns/16623.png?skin_name=chrome' border='0' /></a>
 
