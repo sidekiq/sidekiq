@@ -3,8 +3,8 @@ Sidekiq
 
 Simple, efficient message processing for Ruby.
 
-Sidekiq aims to be a drop-in replacement for Resque.  It uses the exact same
-message format as Resque so it can slowly replace an existing Resque processing farm.
+Sidekiq aims to be compatible with Resque.  It uses the exact same
+message format as Resque so it can integrate into an existing Resque processing farm.
 You can have Sidekiq and Resque run side-by-side at the same time and
 use the Resque client to enqueue messages in Redis to be processed by Sidekiq.
 
