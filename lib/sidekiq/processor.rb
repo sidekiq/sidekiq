@@ -1,4 +1,5 @@
 require 'sidekiq/util'
+require 'sidekiq/middleware'
 require 'celluloid'
 
 module Sidekiq
@@ -11,20 +12,26 @@ module Sidekiq
     end
 
     def process(msg)
-      begin
-        klass = constantize(msg['class'])
-        klass.new.perform(*msg['args'])
-        @boss.processor_done!(current_actor)
-      rescue => ex
-        send_to_airbrake(msg, ex) if defined?(::Airbrake)
-        raise ex
+      klass = constantize(msg['class'])
+      invoke_chain(klass.new, msg) do |worker, msg|
+        worker.perform(*msg['args'])
       end
     end
 
-    def send_to_airbrake(msg, ex)
-      ::Airbrake.notify(:error_class   => ex.class.name,
-                        :error_message => "#{ex.class.name}: #{ex.message}",
-                        :parameters    => msg)
+    def invoke_chain(worker, msg, &block)
+      invoke_link(0, worker, msg, &block)
+      @boss.processor_done!(current_actor)
+    end
+
+    def invoke_link(idx, worker, msg, &block)
+      chain = Sidekiq::Middleware::Chain.retrieve
+      if chain.size == idx
+        block.call(worker, msg)
+      else
+        chain[idx].call(worker, msg) do
+          invoke_link(idx + 1, worker, msg, &block)
+        end
+      end
     end
 
     # See http://github.com/tarcieri/celluloid/issues/22
