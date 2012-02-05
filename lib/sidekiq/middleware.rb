@@ -36,7 +36,7 @@ module Sidekiq
       end
 
       def self.chain
-        @chain || default
+        defined?(@chain) ? @chain : default
       end
 
       def self.retrieve
