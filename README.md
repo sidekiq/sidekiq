@@ -23,7 +23,7 @@ Requirements
 -----------------
 
 I test on Ruby 1.9.3 and JRuby 1.6.5 in 1.9 mode.  Other versions/VMs are
-untested.
+untested but I will do my best to support them.  Ruby 1.8 is not supported.
 
 
 Installation
