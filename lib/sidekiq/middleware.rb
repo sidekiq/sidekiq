@@ -23,33 +23,35 @@ module Sidekiq
   module Middleware
     class Chain
       def self.register(&block)
-        @chain ||= default
-        self.instance_exec(&block)
+        instance_exec(&block)
       end
 
       def self.default
-        [Entry.new(Airbrake), Entry.new(ActiveRecord)]
+        @default ||= [Entry.new(Airbrake), Entry.new(ActiveRecord)]
       end
 
-      def self.use(klass, options=nil)
-        @chain << Entry.new(klass, options)
+      def self.use(klass, *args)
+        chain << Entry.new(klass, args)
       end
 
       def self.chain
-        defined?(@chain) ? @chain : default
+        @chain ||= default
       end
 
       def self.retrieve
-        Thread.current[:sidekiq_chain] ||= chain.map { |entry| entry.klass.new(entry.options) }
+        Thread.current[:sidekiq_chain] ||= chain.map { |entry| entry.make_new }
       end
     end
 
     class Entry
-      attr_accessor :klass
-      attr_accessor :options
-      def initialize(klass, options=nil)
+      attr_reader :klass
+      def initialize(klass, args = [])
         @klass = klass
-        @options = options
+        @args  = args
+      end
+
+      def make_new
+        @klass.new(*@args)
       end
     end
   end
@@ -62,7 +64,7 @@ module Sidekiq
       yield
     rescue => ex
       send_to_airbrake(msg, ex) if defined?(::Airbrake)
-      raise ex
+      raise
     end
 
     private
@@ -78,7 +80,7 @@ module Sidekiq
     def initialize(options=nil)
     end
 
-    def call(*_)
+    def call(*)
       yield
     ensure
       ActiveRecord::Base.clear_active_connections! if defined?(::ActiveRecord)
