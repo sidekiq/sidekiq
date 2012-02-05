@@ -7,7 +7,8 @@ module Sidekiq
     def self.redis
       @redis ||= begin
         # autoconfig for Heroku
-        hash = { :url => ENV['REDISTOGO_URL'] } if ENV['REDISTOGO_URL']
+        hash = {}
+        hash[:url] = ENV['REDISTOGO_URL'] if ENV['REDISTOGO_URL']
         Redis.connect(hash)
       end
     end

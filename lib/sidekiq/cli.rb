@@ -23,9 +23,12 @@ module Sidekiq
       begin
         log 'Starting processing, hit Ctrl-C to stop'
         manager.start!
+        # HACK need to determine how to pause main thread while
+        # waiting for signals.
         sleep FOREVER
       rescue Interrupt
-        log 'Shutting down...'
+        # TODO Need clean shutdown support from Celluloid
+        log 'Shutting down, pausing 5 seconds to let workers finish...'
         manager.stop!
         manager.wait(:shutdown)
       end

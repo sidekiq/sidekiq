@@ -26,6 +26,7 @@ module Sidekiq
       @queue_idx = 0
       @queues_size = @queues.size
       @redis = Redis.connect(:url => location)
+      @done_callback = nil
 
       @done = false
       @busy = []
@@ -54,7 +55,7 @@ module Sidekiq
     end
 
     def processor_done(processor)
-      @done_callback.call(processor)
+      @done_callback.call(processor) if @done_callback
       @busy.delete(processor)
       if stopped?
         processor.terminate
