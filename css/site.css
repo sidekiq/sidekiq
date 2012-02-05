@@ -1,0 +1,25 @@
+body {
+  background: #fff url("../img/grid.png") 0 0 repeat-x;
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+h2 {
+  margin-bottom: 30px;
+}
+#design {
+  float: right;
+}
+
+.hero-unit {
+  background: #000 url("../img/hero.jpg") 0 0 repeat-x;
+  box-shadow: 0 8px 8px #444;
+}
+.hero-unit h1,
+.hero-unit p {
+  color: #fff;
+}
+.hero-unit h1 {
+  color: #99ff99;
+  text-shadow: 0 4px 4px #000;
+}
+
