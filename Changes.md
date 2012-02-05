@@ -1,4 +1,4 @@
-HEAD
+0.5.0
 -----------
 
-- Still working on an initial release!
+- Initial release!
