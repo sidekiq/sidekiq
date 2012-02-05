@@ -5,7 +5,11 @@ module Sidekiq
   class Client
 
     def self.redis
-      @redis ||= Redis.new
+      @redis ||= begin
+        # autoconfig for Heroku
+        hash = { :url => ENV['REDISTOGO_URL'] } if ENV['REDISTOGO_URL']
+        Redis.connect(hash)
+      end
     end
 
     def self.redis=(redis)
