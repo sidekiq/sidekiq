@@ -20,8 +20,8 @@
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="images/favicon.ico">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon-114x114.png">
   </head>
 
   <body>
@@ -62,12 +62,11 @@
 
       <!-- Main hero unit for a primary marketing message or call to action -->
       <div class="hero-unit">
-        <h1>Simple, efficient message processing for Ruby.</h1>
+        <h1>Simple, efficient message processing for your Rails 3 application.</h1>
         <p>
-          <strong>Sidekiq</strong> is a drop-in replacement for Resque, using the exact same message format. Because it
-          processes many messages concurrently in each process, it's far
-          more memory efficient.  What if <strong>1</strong> process could
-          do the work of <strong>20</strong>?</p>
+          What if <strong>1</strong> Sidekiq process could
+          do the work of <strong>20</strong> Resque processes?
+        </p>
         <p>
           <a class="btn btn-success btn-large"
           href="https://github.com/mperham/sidekiq">Get it on GitHub</a>
@@ -82,7 +81,7 @@
           <p>
             Put sidekiq in your <tt>Gemfile</tt>:
           </p>
-          <pre class='prettyprint linenums'>gem 'sidekiq'</pre>
+          <pre class='prettyprint'>gem 'sidekiq'</pre>
           <p>
             Install the gem with <a href='http://gembundler.com/'>Bundler</a>:
           </p>
@@ -93,7 +92,7 @@
           <p>
             Place your worker classes in <tt>app/workers</tt>:
           </p>
-          <pre class='prettyprint linenums'>
+          <pre class='prettyprint'>
 # app/workers/hard_worker.rb
 class HardWorker
   include Sidekiq::Worker
@@ -105,7 +104,7 @@ end</pre>
           <p>
             In your controller action or model, call <tt>HardWorker.perform_async</tt>:
           </p>
-          <pre class='prettyprint linenums'>HardWorker.perform_async('bob', 5)</pre>
+          <pre class='prettyprint'>HardWorker.perform_async('bob', 5)</pre>
           <p><a class='btn'
           href="https://github.com/mperham/sidekiq/wiki">Learn More &rarr;</a></p>
        </div>
