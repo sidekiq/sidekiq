@@ -13,25 +13,20 @@ module Sidekiq
 
     def process(msg)
       klass = constantize(msg['class'])
-      invoke_chain(klass.new, msg) do |worker, msg|
-        worker.perform(*msg['args'])
-      end
-    end
-
-    def invoke_chain(worker, msg, &block)
-      invoke_link(0, worker, msg, &block)
+      invoke_chain(klass.new, msg)
       @boss.processor_done!(current_actor)
     end
 
-    def invoke_link(idx, worker, msg, &block)
-      chain = Sidekiq::Middleware::Chain.retrieve
-      if chain.size == idx
-        block.call(worker, msg)
-      else
-        chain[idx].call(worker, msg) do
-          invoke_link(idx + 1, worker, msg, &block)
+    def invoke_chain(worker, msg)
+      chain = Sidekiq::Middleware::Chain.retrieve.dup
+      traverse_chain = lambda do
+        if chain.empty?
+          worker.perform(*msg['args'])
+        else
+          chain.shift.call(worker, msg, &traverse_chain)
         end
       end
+      traverse_chain.call
     end
 
     # See http://github.com/tarcieri/celluloid/issues/22
