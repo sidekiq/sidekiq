@@ -83,11 +83,15 @@ module Sidekiq
 
     def find_work(queue_idx)
       current_queue = @queues[queue_idx]
-      msg = @redis.lpop("queue:#{current_queue}")
+      queue_key = "queue:#{current_queue}"
+      encoded_payloads_key = "queue:encoded:#{current_queue}"
+      msg = @redis.lpop(queue_key)
       if msg
+        payload = MultiJson.decode(msg)
+        @redis.srem(encoded_payloads_key, Base64.encode64(msg))
         processor = @ready.pop
         @busy << processor
-        processor.process! MultiJson.decode(msg)
+        processor.process!(payload)
       end
       !!msg
     end

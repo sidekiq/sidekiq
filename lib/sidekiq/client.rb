@@ -1,8 +1,13 @@
 require 'multi_json'
 require 'redis'
+require 'base64'
 
 module Sidekiq
   class Client
+
+    class << self
+      attr_accessor :push_unique_only
+    end
 
     def self.redis
       @redis ||= begin
@@ -24,7 +29,16 @@ module Sidekiq
       raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") if !item['class'] || !item['args']
 
       item['class'] = item['class'].to_s if !item['class'].is_a?(String)
-      redis.rpush("queue:#{queue}", MultiJson.encode(item))
+      queue_key = "queue:#{queue}"
+      encoded_payloads_key = "queue:encoded:#{queue}"
+      payload = MultiJson.encode(item)
+      encoded_payload = Base64.encode64(payload)
+      return if push_unique_only && already_queued?(encoded_payloads_key, encoded_payload)
+
+      redis.multi do
+        redis.sadd(encoded_payloads_key, encoded_payload)
+        redis.rpush(queue_key, payload)
+      end
     end
 
     # Please use .push if possible instead.
@@ -43,6 +57,10 @@ module Sidekiq
     def self.enqueue(klass, *args)
       queue = (klass.respond_to?(:queue) && klass.queue) || 'default'
       push(queue, { 'class' => klass.name, 'args' => args })
+    end
+
+    def self.already_queued?(queue_key, encoded_payload)
+      redis.sismember(queue_key, encoded_payload)
     end
   end
 end
