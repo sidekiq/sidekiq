@@ -1,7 +1,7 @@
 require 'helper'
 require 'sidekiq'
 require 'sidekiq/manager'
-require 'timed_queue'
+require 'connection_pool'
 
 class TestManager < MiniTest::Unit::TestCase
   describe 'with redis' do
