@@ -93,7 +93,7 @@ module Sidekiq
       def call(worker, msg, queue)
         yield
       ensure
-        @redis.srem("queue:encoded:#{queue}", Base64.encode64(MultiJson.encode(msg)))
+        @redis.srem("queue:msg_hashes:#{queue}", Digest::MD5.hexdigest(MultiJson.encode(msg)))
       end
     end
   end

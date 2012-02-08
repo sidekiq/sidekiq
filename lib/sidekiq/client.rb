@@ -1,6 +1,5 @@
 require 'multi_json'
 require 'redis'
-require 'base64'
 
 module Sidekiq
   class Client
@@ -31,13 +30,13 @@ module Sidekiq
 
       item['class'] = item['class'].to_s if !item['class'].is_a?(String)
       queue_key = "queue:#{queue}"
-      encoded_payloads_key = "queue:encoded:#{queue}"
+      hashed_payloads_key = "queue:msg_hashes:#{queue}"
       payload = MultiJson.encode(item)
-      encoded_payload = Base64.encode64(payload)
-      return if ignore_duplicate_jobs? && already_queued?(encoded_payloads_key, encoded_payload)
+      payload_hash = Digest::MD5.hexdigest(payload)
+      return if ignore_duplicate_jobs? && already_queued?(hashed_payloads_key, payload_hash)
 
       redis.multi do
-        redis.sadd(encoded_payloads_key, encoded_payload)
+        redis.sadd(hashed_payloads_key, payload_hash)
         redis.rpush(queue_key, payload)
       end
     end
@@ -60,8 +59,8 @@ module Sidekiq
       push(queue, { 'class' => klass.name, 'args' => args })
     end
 
-    def self.already_queued?(queue_key, encoded_payload)
-      redis.sismember(queue_key, encoded_payload)
+    def self.already_queued?(queue_key, payload_hash)
+      redis.sismember(queue_key, payload_hash)
     end
   end
 end
