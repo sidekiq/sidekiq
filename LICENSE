@@ -1,9 +1,16 @@
 Copyright (c) Mike Perham
 
-Sidekiq is open source licensed under the GPLv3 for non-commerical use:
+You may choose to license Sidekiq in one of two ways:
+
+- Open Source under the GPLv3
 
   Please see <http://www.gnu.org/licenses/gpl-3.0.html> for license text.
 
-To purchase a commercial license, you must pledge $50 to my Pledgie
-fund at http://www.pledgie.com/campaigns/16623.  The commercial license can
-be found in COMM-LICENSE.
+- Commercial License
+
+  The Sencha commercial software license in COMM-LICENSE.  You must pledge
+  $50 to my Pledgie fund at http://www.pledgie.com/campaigns/16623 to use
+  this license.
+
+This commercial license is just meant to help support my OSS work.  If
+you do buy the commercial licensing option, thank you for your support!
