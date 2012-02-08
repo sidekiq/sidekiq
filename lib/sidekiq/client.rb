@@ -1,6 +1,7 @@
 require 'multi_json'
 require 'redis'
 
+require 'sidekiq/redis_connection'
 require 'sidekiq/middleware/chain'
 require 'sidekiq/middleware/client/unique_jobs'
 
@@ -12,10 +13,7 @@ module Sidekiq
 
     def self.redis
       @redis ||= begin
-        # autoconfig for Heroku
-        hash = {}
-        hash[:url] = ENV['REDISTOGO_URL'] if ENV['REDISTOGO_URL']
-        Redis.connect(hash)
+        RedisConnection.create
       end
     end
 

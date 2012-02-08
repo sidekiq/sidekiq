@@ -1,9 +1,9 @@
 require 'optparse'
 require 'sidekiq/version'
 require 'sidekiq/util'
+require 'sidekiq/redis_connection'
 require 'sidekiq/client'
 require 'sidekiq/manager'
-require 'connection_pool'
 
 module Sidekiq
   class CLI
@@ -18,8 +18,9 @@ module Sidekiq
     FOREVER = 2_000_000_000
 
     def run
-      ::Sidekiq::Client.redis = ConnectionPool.new { Redis.connect(:url => @options[:server]) }
-      manager = Sidekiq::Manager.new(@options[:server], @options)
+      ::Sidekiq::Client.redis = ::Sidekiq::RedisConnection.create(@options[:server], @options[:namespace])
+      manager_redis = ::Sidekiq::RedisConnection.create(@options[:server], @options[:namespace], false)
+      manager = Sidekiq::Manager.new(manager_redis, @options)
       begin
         log 'Starting processing, hit Ctrl-C to stop'
         manager.start!
@@ -75,6 +76,10 @@ module Sidekiq
 
         o.on "-v", "--verbose", "Print more verbose output" do
           @options[:verbose] = true
+        end
+
+        o.on "-n", "--namespace NAMESPACE", "namespace worker queues are under" do |arg|
+          @options[:namespace] = arg
         end
 
         o.on "-s", "--server LOCATION", "Where to find Redis" do |arg|
