@@ -43,6 +43,9 @@ module Sidekiq
     end
 
     def validate!
+      @options[:queues] << 'default' if @options[:queues].empty?
+      @options[:queues].shuffle!
+
       $DEBUG = @options[:verbose]
 
       if !File.exist?("#{@options[:rails]}/config/boot.rb")
@@ -55,7 +58,7 @@ module Sidekiq
     def parse_options(argv=ARGV)
       @options = {
         :verbose => false,
-        :queues => ['default'],
+        :queues => [],
         :processor_count => 25,
         :server => ENV['REDISTOGO_URL'] || 'redis://localhost:6379/0',
         :rails => '.',
