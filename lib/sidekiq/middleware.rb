@@ -91,8 +91,8 @@ module Sidekiq
       end
 
       def call(worker, msg, queue)
-        @redis.srem("queue:encoded:#{queue}", Base64.encode64(msg.to_json))
         yield
+        @redis.srem("queue:encoded:#{queue}", Base64.encode64(msg.to_json))
       end
     end
   end
