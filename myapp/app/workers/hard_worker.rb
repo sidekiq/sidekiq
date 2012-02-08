@@ -1,6 +1,8 @@
 class HardWorker
+  include Sidekiq::Worker
+
   def perform(name, count)
-    sleep 0.01
-    puts 'done'
+    sleep 1
+    print "#{Time.now}\n"
   end
 end
