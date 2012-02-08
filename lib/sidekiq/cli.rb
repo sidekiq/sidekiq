@@ -37,7 +37,7 @@ module Sidekiq
     private
 
     def boot_rails
-      ENV['RAILS_ENV'] = @options[:environment]
+      ENV['RAILS_ENV'] = @options[:environment] || ENV['RAILS_ENV'] || 'development'
       require File.expand_path("#{@options[:rails]}/config/environment.rb")
       ::Rails.application.eager_load!
     end
@@ -59,7 +59,7 @@ module Sidekiq
         :processor_count => 25,
         :server => ENV['REDISTOGO_URL'] || 'redis://localhost:6379/0',
         :rails => '.',
-        :environment => 'production',
+        :environment => nil,
       }
 
       @parser = OptionParser.new do |o|
