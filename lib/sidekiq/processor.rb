@@ -11,19 +11,19 @@ module Sidekiq
       @boss = boss
     end
 
-    def process(msg)
+    def process(msg, queue)
       klass = constantize(msg['class'])
-      invoke_chain(klass.new, msg)
+      invoke_chain(klass.new, msg, queue)
       @boss.processor_done!(current_actor)
     end
 
-    def invoke_chain(worker, msg)
+    def invoke_chain(worker, msg, queue)
       chain = Sidekiq::Middleware::Chain.retrieve.dup
       traverse_chain = lambda do
         if chain.empty?
           worker.perform(*msg['args'])
         else
-          chain.shift.call(worker, msg, &traverse_chain)
+          chain.shift.call(worker, msg, queue, &traverse_chain)
         end
       end
       traverse_chain.call

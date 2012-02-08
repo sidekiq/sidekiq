@@ -6,7 +6,8 @@ module Sidekiq
   class Client
 
     class << self
-      attr_accessor :push_unique_only
+      attr_accessor :ignore_duplicate_jobs
+      alias_method :ignore_duplicate_jobs?, :ignore_duplicate_jobs
     end
 
     def self.redis
@@ -33,7 +34,7 @@ module Sidekiq
       encoded_payloads_key = "queue:encoded:#{queue}"
       payload = MultiJson.encode(item)
       encoded_payload = Base64.encode64(payload)
-      return if push_unique_only && already_queued?(encoded_payloads_key, encoded_payload)
+      return if ignore_duplicate_jobs? && already_queued?(encoded_payloads_key, encoded_payload)
 
       redis.multi do
         redis.sadd(encoded_payloads_key, encoded_payload)

@@ -15,7 +15,7 @@ class TestMiddleware < MiniTest::Unit::TestCase
         @recorder = recorder
       end
 
-      def call(worker, msg)
+      def call(worker, msg, queue)
         @recorder << [@name, 'before']
         yield
         @recorder << [@name, 'after']
@@ -42,6 +42,10 @@ class TestMiddleware < MiniTest::Unit::TestCase
     end
 
     it 'executes middleware in the proper order' do
+      Sidekiq::Middleware::EncodedMessageRemover.class_eval do
+        def call(worker, msg, queue); yield; end
+      end
+
       recorder = []
       msg = { 'class' => CustomWorker.to_s, 'args' => [recorder] }
 
@@ -51,7 +55,7 @@ class TestMiddleware < MiniTest::Unit::TestCase
 
       processor = Sidekiq::Processor.new(@boss)
       @boss.expect(:processor_done!, nil, [processor])
-      processor.process(msg)
+      processor.process(msg, 'default')
       assert_equal recorder.flatten, %w(0 before 1 before work_performed 1 after 0 after)
     end
   end
