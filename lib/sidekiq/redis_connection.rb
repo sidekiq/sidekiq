@@ -5,7 +5,7 @@ module Sidekiq
   class RedisConnection
     def self.create(url = nil, namespace = nil, pool = true)
       @namespace = namespace if namespace
-      @url = url if url
+      @url = url ? url : nil
       if pool
         ConnectionPool.new { connect }
       else
@@ -27,7 +27,7 @@ module Sidekiq
     end
 
     def self.url
-      ENV['REDISTOGO_URL'] || (@url = nil)
+      @url || ENV['REDISTOGO_URL'] || 'redis://localhost:6379/0'
     end
 
     def self.namespace=(namespace)
