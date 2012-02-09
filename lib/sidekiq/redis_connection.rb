@@ -27,7 +27,7 @@ module Sidekiq
     end
 
     def self.url
-      ENV['REDISTOGO_URL'] || @url
+      ENV['REDISTOGO_URL'] || (@url = nil)
     end
 
     def self.namespace=(namespace)
