@@ -61,7 +61,6 @@ module Sidekiq
         :verbose => false,
         :queues => [],
         :processor_count => 25,
-        :server => ENV['REDISTOGO_URL'] || 'redis://localhost:6379/0',
         :rails => '.',
         :environment => nil,
       }
