@@ -6,5 +6,5 @@
 0.5.2
 -----------
 
-- Added support for flexible client-side and server-side middleware (Ryan)
+- Refactored middleware support, introducing ability to add client/server middleware (Ryan)
 - Added middleware for ignoring duplicate jobs (Ryan)
