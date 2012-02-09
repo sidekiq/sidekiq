@@ -38,6 +38,11 @@ class TestMiddleware < MiniTest::Unit::TestCase
       end
     end
 
+    class NonYieldingMiddleware
+      def call(*args)
+      end
+    end
+
     it 'executes middleware in the proper order' do
       Sidekiq::Middleware::Server::UniqueJobs.class_eval do
         def call(worker, msg); yield; end
@@ -55,9 +60,20 @@ class TestMiddleware < MiniTest::Unit::TestCase
       processor.process(msg)
       assert_equal recorder.flatten, %w(0 before 1 before work_performed 1 after 0 after)
     end
+
+    it 'allows middleware to abruptly stop processing rest of chain' do
+      recorder = []
+      chain = Sidekiq::Middleware::Chain.new
+
+      chain.register do
+        use NonYieldingMiddleware
+        use CustomMiddleware, 1, recorder
+      end
+
+      final_action = nil
+      chain.invoke { final_action = true }
+      assert_equal final_action, nil
+      assert_equal recorder, []
+    end
   end
 end
-
-
-
-
