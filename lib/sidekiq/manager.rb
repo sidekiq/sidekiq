@@ -50,8 +50,8 @@ module Sidekiq
       dispatch(true)
     end
 
-    def when_done
-      @done_callback = Proc.new
+    def when_done(&blk)
+      @done_callback = blk
     end
 
     def processor_done(processor)
