@@ -18,14 +18,14 @@ module Sidekiq
 
     trap_exit :processor_died
 
-    def initialize(location, options={})
-      log "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{location}"
+    def initialize(redis, options={})
+      log "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{redis.client.location}"
       verbose options.inspect
       @count = options[:processor_count] || 25
       @queues = options[:queues]
       @queue_idx = 0
       @queues_size = @queues.size
-      @redis = Redis.connect(:url => location)
+      @redis = redis
       @done_callback = nil
 
       @done = false
@@ -50,8 +50,8 @@ module Sidekiq
       dispatch(true)
     end
 
-    def when_done
-      @done_callback = Proc.new
+    def when_done(&blk)
+      @done_callback = blk
     end
 
     def processor_done(processor)
