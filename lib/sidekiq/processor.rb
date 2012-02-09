@@ -14,6 +14,8 @@ module Sidekiq
     def self.middleware
       @middleware ||= begin
         chain = Middleware::Chain.new
+
+        # default middleware
         chain.register do
           use Middleware::Server::UniqueJobs, Sidekiq::Client.redis
           use Middleware::Server::Airbrake
