@@ -10,7 +10,7 @@ module Sidekiq
           @redis = redis
         end
 
-        def call(item)
+        def call(item, queue)
           payload_hash = Digest::MD5.hexdigest(MultiJson.encode(item))
           return if already_scheduled?(payload_hash)
 

@@ -39,7 +39,7 @@ module Sidekiq
       raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") if !item['class'] || !item['args']
 
       item['class'] = item['class'].to_s if !item['class'].is_a?(String)
-      middleware.invoke(item) do
+      middleware.invoke(item, queue) do
         redis.rpush("queue:#{queue}", MultiJson.encode(item))
       end
     end
