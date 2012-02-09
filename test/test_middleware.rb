@@ -1,5 +1,6 @@
 require 'helper'
-require 'sidekiq/middleware'
+require 'sidekiq/middleware/chain'
+require 'sidekiq/middleware/server/unique_jobs'
 require 'sidekiq/processor'
 
 class TestMiddleware < MiniTest::Unit::TestCase
@@ -22,17 +23,13 @@ class TestMiddleware < MiniTest::Unit::TestCase
       end
     end
 
-    it 'configures default middleware' do
-      chain = Sidekiq::Middleware::Chain.chain
-      assert_equal chain, Sidekiq::Middleware::Chain.default
-    end
-
     it 'supports custom middleware' do
-      Sidekiq::Middleware::Chain.register do
+      chain = Sidekiq::Middleware::Chain.new
+      chain.register do
         use CustomMiddleware, 1, []
       end
-      chain = Sidekiq::Middleware::Chain.chain
-      assert_equal chain.last.klass, CustomMiddleware
+
+      assert_equal chain.entries.last.klass, CustomMiddleware
     end
 
     class CustomWorker
@@ -41,11 +38,20 @@ class TestMiddleware < MiniTest::Unit::TestCase
       end
     end
 
+    class NonYieldingMiddleware
+      def call(*args)
+      end
+    end
+
     it 'executes middleware in the proper order' do
+      Sidekiq::Middleware::Server::UniqueJobs.class_eval do
+        def call(worker, msg); yield; end
+      end
+
       recorder = []
       msg = { 'class' => CustomWorker.to_s, 'args' => [recorder] }
 
-      Sidekiq::Middleware::Chain.register do
+      Sidekiq::Processor.middleware.register do
         2.times { |i| use CustomMiddleware, i.to_s, recorder }
       end
 
@@ -54,9 +60,20 @@ class TestMiddleware < MiniTest::Unit::TestCase
       processor.process(msg)
       assert_equal recorder.flatten, %w(0 before 1 before work_performed 1 after 0 after)
     end
+
+    it 'allows middleware to abruptly stop processing rest of chain' do
+      recorder = []
+      chain = Sidekiq::Middleware::Chain.new
+
+      chain.register do
+        use NonYieldingMiddleware
+        use CustomMiddleware, 1, recorder
+      end
+
+      final_action = nil
+      chain.invoke { final_action = true }
+      assert_equal final_action, nil
+      assert_equal recorder, []
+    end
   end
 end
-
-
-
-

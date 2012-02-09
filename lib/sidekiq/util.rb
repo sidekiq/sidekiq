@@ -31,6 +31,5 @@ module Sidekiq
     def verbose(msg)
       STDOUT.puts(msg) if $DEBUG
     end
-
   end
 end

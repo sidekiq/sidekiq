@@ -30,7 +30,7 @@ class TestManager < MiniTest::Unit::TestCase
         q << 'done' if $processed == 2
       end
       mgr.start!
-      result = q.timed_pop
+      result = q.timed_pop(1.0)
       assert_equal 'done', result
       mgr.stop
     end
