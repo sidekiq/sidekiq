@@ -4,8 +4,9 @@ require 'redis/namespace'
 module Sidekiq
   class RedisConnection
     def self.create(url = nil, namespace = nil, pool = true)
-      @namespace = namespace if namespace
+      @namespace = namespace ? namespace : nil
       @url = url ? url : nil
+
       if pool
         ConnectionPool.new { connect }
       else
@@ -23,7 +24,7 @@ module Sidekiq
     end
 
     def self.namespace
-      @namespace ||= nil
+      @namespace
     end
 
     def self.url
