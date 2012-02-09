@@ -3,6 +3,7 @@ require 'redis'
 
 require 'sidekiq/redis_connection'
 require 'sidekiq/middleware/chain'
+require 'sidekiq/middleware/client/resque_web_compatability'
 require 'sidekiq/middleware/client/unique_jobs'
 
 module Sidekiq
