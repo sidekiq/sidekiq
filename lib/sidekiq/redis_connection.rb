@@ -16,6 +16,7 @@ module Sidekiq
 
     def self.connect
       r = Redis.connect(:url => url)
+
       if namespace
         Redis::Namespace.new(namespace, :redis => r)
       else
@@ -29,10 +30,6 @@ module Sidekiq
 
     def self.url
       @url || ENV['REDISTOGO_URL'] || 'redis://localhost:6379/0'
-    end
-
-    def self.namespace=(namespace)
-      @namespace = namespace
     end
   end
 end
