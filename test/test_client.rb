@@ -26,7 +26,8 @@ class TestClient < MiniTest::Unit::TestCase
     before do
       @redis = MiniTest::Mock.new
       def @redis.multi; yield; end
-      def @redis.sadd(*); true; end
+      def @redis.set(*); true; end
+      def @redis.expire(*); true; end
       Sidekiq::Client.redis = @redis
       Sidekiq::Client.ignore_duplicate_jobs = false
     end

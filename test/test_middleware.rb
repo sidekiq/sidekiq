@@ -1,5 +1,6 @@
 require 'helper'
-require 'sidekiq/middleware'
+require 'sidekiq/middleware/chain'
+require 'sidekiq/middleware/server/unique_jobs'
 require 'sidekiq/processor'
 
 class TestMiddleware < MiniTest::Unit::TestCase
@@ -15,24 +16,20 @@ class TestMiddleware < MiniTest::Unit::TestCase
         @recorder = recorder
       end
 
-      def call(worker, msg, queue)
+      def call(worker, msg)
         @recorder << [@name, 'before']
         yield
         @recorder << [@name, 'after']
       end
     end
 
-    it 'configures default middleware' do
-      chain = Sidekiq::Middleware::Chain.chain
-      assert_equal chain, Sidekiq::Middleware::Chain.default
-    end
-
     it 'supports custom middleware' do
-      Sidekiq::Middleware::Chain.register do
+      chain = Sidekiq::Middleware::Chain.new
+      chain.register do
         use CustomMiddleware, 1, []
       end
-      chain = Sidekiq::Middleware::Chain.chain
-      assert_equal chain.last.klass, CustomMiddleware
+
+      assert_equal chain.entries.last.klass, CustomMiddleware
     end
 
     class CustomWorker
@@ -42,20 +39,20 @@ class TestMiddleware < MiniTest::Unit::TestCase
     end
 
     it 'executes middleware in the proper order' do
-      Sidekiq::Middleware::EncodedMessageRemover.class_eval do
-        def call(worker, msg, queue); yield; end
+      Sidekiq::Middleware::Server::UniqueJobs.class_eval do
+        def call(worker, msg); yield; end
       end
 
       recorder = []
       msg = { 'class' => CustomWorker.to_s, 'args' => [recorder] }
 
-      Sidekiq::Middleware::Chain.register do
+      Sidekiq::Processor.middleware.register do
         2.times { |i| use CustomMiddleware, i.to_s, recorder }
       end
 
       processor = Sidekiq::Processor.new(@boss)
       @boss.expect(:processor_done!, nil, [processor])
-      processor.process(msg, 'default')
+      processor.process(msg)
       assert_equal recorder.flatten, %w(0 before 1 before work_performed 1 after 0 after)
     end
   end

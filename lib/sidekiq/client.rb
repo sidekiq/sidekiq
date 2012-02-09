@@ -1,12 +1,13 @@
 require 'multi_json'
 require 'redis'
 
+require 'sidekiq/middleware/chain'
+require 'sidekiq/middleware/client/unique_jobs'
+
 module Sidekiq
   class Client
-
-    class << self
-      attr_accessor :ignore_duplicate_jobs
-      alias_method :ignore_duplicate_jobs?, :ignore_duplicate_jobs
+    def self.middleware
+      @middleware ||= Middleware::Chain.new
     end
 
     def self.redis
@@ -22,6 +23,17 @@ module Sidekiq
       @redis = redis
     end
 
+    def self.ignore_duplicate_jobs=(value)
+      @ignore_duplicate_jobs = value
+      if @ignore_duplicate_jobs
+        middleware.register do
+          use Middleware::Client::UniqueJobs, Client.redis
+        end
+      else
+        middleware.unregister(Middleware::Client::UniqueJobs)
+      end
+    end
+
     # Example usage:
     # Sidekiq::Client.push('my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
     def self.push(queue='default', item)
@@ -29,15 +41,8 @@ module Sidekiq
       raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") if !item['class'] || !item['args']
 
       item['class'] = item['class'].to_s if !item['class'].is_a?(String)
-      queue_key = "queue:#{queue}"
-      hashed_payloads_key = "queue:msg_hashes:#{queue}"
-      payload = MultiJson.encode(item)
-      payload_hash = Digest::MD5.hexdigest(payload)
-      return if ignore_duplicate_jobs? && already_queued?(hashed_payloads_key, payload_hash)
-
-      redis.multi do
-        redis.sadd(hashed_payloads_key, payload_hash)
-        redis.rpush(queue_key, payload)
+      middleware.invoke(item) do
+        redis.rpush("queue:#{queue}", MultiJson.encode(item))
       end
     end
 
@@ -57,10 +62,6 @@ module Sidekiq
     def self.enqueue(klass, *args)
       queue = (klass.respond_to?(:queue) && klass.queue) || 'default'
       push(queue, { 'class' => klass.name, 'args' => args })
-    end
-
-    def self.already_queued?(queue_key, payload_hash)
-      redis.sismember(queue_key, payload_hash)
     end
   end
 end
