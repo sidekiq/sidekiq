@@ -1,3 +1,5 @@
+require 'digest'
+
 module Sidekiq
   module Middleware
     module Client
