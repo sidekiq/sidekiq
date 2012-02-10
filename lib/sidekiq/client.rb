@@ -1,7 +1,9 @@
 require 'multi_json'
 require 'redis'
 
+require 'sidekiq/redis_connection'
 require 'sidekiq/middleware/chain'
+require 'sidekiq/middleware/client/resque_web_compatability'
 require 'sidekiq/middleware/client/unique_jobs'
 
 module Sidekiq
@@ -12,10 +14,7 @@ module Sidekiq
 
     def self.redis
       @redis ||= begin
-        # autoconfig for Heroku
-        hash = {}
-        hash[:url] = ENV['REDISTOGO_URL'] if ENV['REDISTOGO_URL']
-        Redis.connect(hash)
+        RedisConnection.create
       end
     end
 
@@ -41,7 +40,7 @@ module Sidekiq
       raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") if !item['class'] || !item['args']
 
       item['class'] = item['class'].to_s if !item['class'].is_a?(String)
-      middleware.invoke(item) do
+      middleware.invoke(item, queue) do
         redis.rpush("queue:#{queue}", MultiJson.encode(item))
       end
     end
