@@ -55,22 +55,24 @@ module Sidekiq
     end
 
     def processor_done(processor)
-      @done_callback.call(processor) if @done_callback
-      @busy.delete(processor)
-      if stopped?
-        processor.terminate
-      else
-        @ready << processor
+      watchdog('sidekiq processor_done crashed!') do
+        @done_callback.call(processor) if @done_callback
+        @busy.delete(processor)
+        if stopped?
+          processor.terminate
+        else
+          @ready << processor
+        end
+        dispatch
       end
-      dispatch
     end
 
     def processor_died(processor, reason)
       @busy.delete(processor)
 
       if reason
-        log "Processor death: #{reason}"
-        log reason.backtrace.join("\n")
+        err "Processor death: #{reason}"
+        err reason.backtrace.join("\n")
       end
 
       unless stopped?
