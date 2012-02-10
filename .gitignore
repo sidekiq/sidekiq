@@ -1,2 +1,4 @@
 tags
 Gemfile.lock
+*.swp
+dump.rdb

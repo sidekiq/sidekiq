@@ -3,10 +3,33 @@ require 'sidekiq/client'
 require 'sidekiq/worker'
 
 class TestClient < MiniTest::Unit::TestCase
+  describe 'with real redis' do
+    before do
+      Sidekiq::Client.redis = Redis.connect(:url => 'redis://localhost/sidekiq_test')
+      Sidekiq::Client.redis.flushdb
+    end
+
+    it 'does not push duplicate messages when configured for unique only' do
+      Sidekiq::Client.ignore_duplicate_jobs = true
+      10.times { Sidekiq::Client.push('customqueue', 'class' => 'Foo', 'args' => [1, 2]) }
+      assert_equal Sidekiq::Client.redis.llen("queue:customqueue"), 1
+    end
+
+    it 'does push duplicate messages when not configured for unique only' do
+      Sidekiq::Client.ignore_duplicate_jobs = false
+      10.times { Sidekiq::Client.push('customqueue2', 'class' => 'Foo', 'args' => [1, 2]) }
+      assert_equal Sidekiq::Client.redis.llen("queue:customqueue2"), 10
+    end
+  end
+
   describe 'with mock redis' do
     before do
       @redis = MiniTest::Mock.new
+      def @redis.multi; yield; end
+      def @redis.set(*); true; end
+      def @redis.expire(*); true; end
       Sidekiq::Client.redis = @redis
+      Sidekiq::Client.ignore_duplicate_jobs = false
     end
 
     it 'raises ArgumentError with invalid params' do
