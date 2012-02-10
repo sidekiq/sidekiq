@@ -1,6 +1,8 @@
 require 'helper'
 require 'sidekiq'
 require 'sidekiq/manager'
+
+# for TimedQueue
 require 'connection_pool'
 
 class TestManager < MiniTest::Unit::TestCase
@@ -9,24 +11,28 @@ class TestManager < MiniTest::Unit::TestCase
       Sidekiq::Client.redis = @redis = Sidekiq::RedisConnection.create(:url => 'redis://localhost/sidekiq_test')
       @redis.flushdb
       $processed = 0
+      $mutex = Mutex.new
     end
 
     class IntegrationWorker
       include Sidekiq::Worker
 
       def perform(a, b)
-        $processed += 1
+        $mutex.synchronize do
+          $processed += 1
+        end
         a + b
       end
     end
 
     it 'processes messages' do
+      Sidekiq::Client.ignore_duplicate_jobs = false
       Sidekiq::Client.push(:foo, 'class' => IntegrationWorker, 'args' => [1, 2])
       Sidekiq::Client.push(:foo, 'class' => IntegrationWorker, 'args' => [1, 2])
 
       q = TimedQueue.new
       redis = Sidekiq::RedisConnection.create(:url => 'redis://localhost/sidekiq_test')
-      mgr = Sidekiq::Manager.new(redis, :queues => [:foo])
+      mgr = Sidekiq::Manager.new(@redis, :queues => [:foo], :processor_count => 2)
       mgr.when_done do |_|
         q << 'done' if $processed == 2
       end

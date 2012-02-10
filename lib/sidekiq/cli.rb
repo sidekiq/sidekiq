@@ -60,11 +60,11 @@ module Sidekiq
 
       $DEBUG = @options[:verbose]
 
-      if !File.exist?(@options[:require]) &&
-         !File.exist?("#{@options[:require]}/config/application.rb")
+      if !File.exist?(@options[:require]) ||
+         (File.directory?(@options[:require]) && !File.exist?("#{@options[:require]}/config/application.rb"))
         log "=================================================================="
         log "  Please point sidekiq to a Rails 3 application or a Ruby file    "
-        log "  to load your worker classes."
+        log "  to load your worker classes with -r [DIR|FILE]."
         log "=================================================================="
         log @parser
         exit(1)

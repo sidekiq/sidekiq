@@ -5,10 +5,6 @@ require 'sidekiq/processor'
 
 class TestMiddleware < MiniTest::Unit::TestCase
   describe 'middleware chain' do
-    before do
-      @boss = MiniTest::Mock.new
-      Celluloid.logger = nil
-    end
 
     class CustomMiddleware
       def initialize(name, recorder)
@@ -55,8 +51,9 @@ class TestMiddleware < MiniTest::Unit::TestCase
         2.times { |i| use CustomMiddleware, i.to_s, recorder }
       end
 
-      processor = Sidekiq::Processor.new(@boss)
-      @boss.expect(:processor_done!, nil, [processor])
+      boss = MiniTest::Mock.new
+      processor = Sidekiq::Processor.new(boss)
+      boss.expect(:processor_done!, nil, [processor])
       processor.process(msg)
       assert_equal %w(0 before 1 before work_performed 1 after 0 after), recorder.flatten
     end

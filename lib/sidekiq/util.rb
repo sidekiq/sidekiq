@@ -15,9 +15,9 @@ module Sidekiq
     def watchdog(last_words)
       yield
     rescue => ex
-      STDERR.puts last_words
-      STDERR.puts ex
-      STDERR.puts ex.backtrace.join("\n")
+      err last_words
+      err ex
+      err ex.backtrace.join("\n")
     end
 
     def err(msg)
