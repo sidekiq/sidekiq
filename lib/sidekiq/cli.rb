@@ -18,8 +18,8 @@ module Sidekiq
     FOREVER = 2_000_000_000
 
     def run
-      ::Sidekiq::Client.redis = Sidekiq::RedisConnection.create(@options[:server], @options[:namespace])
-      manager_redis = Sidekiq::RedisConnection.create(@options[:server], @options[:namespace], false)
+      Sidekiq::Client.redis = RedisConnection.create(:url => @options[:server], :namespace => @options[:namespace], :use_pool => true)
+      manager_redis = RedisConnection.create(:url => @options[:server], :namespace => @options[:namespace])
       manager = Sidekiq::Manager.new(manager_redis, @options)
       begin
         log 'Starting processing, hit Ctrl-C to stop'

@@ -22,9 +22,8 @@ module Sidekiq
       @redis = redis
     end
 
-    def self.ignore_duplicate_jobs=(value)
-      @ignore_duplicate_jobs = value
-      if @ignore_duplicate_jobs
+    def self.ignore_duplicate_jobs=(ignore)
+      if ignore
         middleware.register do
           use Middleware::Client::UniqueJobs, Client.redis
         end

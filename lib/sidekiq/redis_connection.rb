@@ -3,37 +3,21 @@ require 'redis/namespace'
 
 module Sidekiq
   class RedisConnection
-    def self.create(url = nil, namespace = nil, pool = true)
-      @namespace = namespace ? namespace : nil
-      @url = url ? url : nil
-
-      if pool
-        ConnectionPool.new { connect }
-      else
-        connect
-      end
+    def self.create(options={})
+      url = options[:url] || ENV['REDISTOGO_URL'] || 'redis://localhost:6379/0'
+      client = build_client(url, options[:namespace])
+      return ConnectionPool.new { client } if options[:use_pool]
+      client
     end
 
-    def self.connect
+    def self.build_client(url, namespace)
+      client = Redis.connect(:url => url)
       if namespace
-        Redis::Namespace.new(namespace, :redis => redis_connection)
+        Redis::Namespace.new(namespace, :redis => client)
       else
-        redis_connection
+        client
       end
     end
-
-    def self.namespace
-      @namespace
-    end
-
-    def self.url
-      @url || ENV['REDISTOGO_URL'] || 'redis://localhost:6379/0'
-    end
-
-    private
-    
-    def self.redis_connection
-      Redis.connect(:url => url)
-    end
+    private_class_method :build_client
   end
 end
