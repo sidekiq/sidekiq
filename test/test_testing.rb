@@ -14,11 +14,15 @@ class TestTesting < MiniTest::Unit::TestCase
     it 'calls the worker directly when in testing mode' do
       begin
         # Override Sidekiq::Worker
-        load 'sidekiq/testing.rb'
+        require 'sidekiq/testing'
         assert_equal 3, DirectWorker.perform_async(1, 2)
       ensure
         # Undo override
-        load 'sidekiq/worker.rb'
+        Sidekiq::Worker::ClassMethods.class_eval do
+          remove_method :perform_async
+          alias_method :perform_async, :perform_async_old
+          remove_method :perform_async_old
+        end
       end
     end
 
