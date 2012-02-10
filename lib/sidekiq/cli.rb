@@ -12,7 +12,7 @@ module Sidekiq
     def initialize
       parse_options
       validate!
-      boot_rails
+      boot_system
     end
 
     FOREVER = 2_000_000_000
@@ -37,10 +37,21 @@ module Sidekiq
 
     private
 
-    def boot_rails
-      ENV['RAILS_ENV'] = @options[:environment] || ENV['RAILS_ENV'] || 'development'
-      require File.expand_path("#{@options[:rails]}/config/environment.rb")
-      ::Rails.application.eager_load!
+    def detected_environment
+      @options[:environment] || ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
+    end
+
+    def boot_system
+      ENV['RACK_ENV'] = ENV['RAILS_ENV'] = detected_environment
+
+      raise ArgumentError, "#{@options[:require]} does not exist" if !File.exist?(@options[:require])
+
+      if File.directory?(@options[:require])
+        require File.expand_path("#{@options[:require]}/config/environment.rb")
+        ::Rails.application.eager_load!
+      else
+        require @options[:require]
+      end
     end
 
     def validate!
@@ -49,8 +60,12 @@ module Sidekiq
 
       $DEBUG = @options[:verbose]
 
-      if !File.exist?("#{@options[:rails]}/config/boot.rb")
-        log "========== Please point sidekiq to a Rails 3 application =========="
+      if !File.exist?(@options[:require]) &&
+         !File.exist?("#{@options[:require]}/config/application.rb")
+        log "=================================================================="
+        log "  Please point sidekiq to a Rails 3 application or a Ruby file    "
+        log "  to load your worker classes."
+        log "=================================================================="
         log @parser
         exit(1)
       end
@@ -61,7 +76,7 @@ module Sidekiq
         :verbose => false,
         :queues => [],
         :processor_count => 25,
-        :rails => '.',
+        :require => '.',
         :environment => nil,
       }
 
@@ -85,12 +100,12 @@ module Sidekiq
           @options[:server] = arg
         end
 
-        o.on '-e', '--environment ENV', "Rails application environment" do |arg|
+        o.on '-e', '--environment ENV', "Application environment" do |arg|
           @options[:environment] = arg
         end
 
-        o.on '-r', '--rails PATH', "Location of Rails application with workers" do |arg|
-          @options[:rails] = arg
+        o.on '-r', '--require [PATH|DIR]', "Location of Rails application with workers or file to require" do |arg|
+          @options[:require] = arg
         end
 
         o.on '-c', '--concurrency INT', "processor threads to use" do |arg|

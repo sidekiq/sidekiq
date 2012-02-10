@@ -12,13 +12,13 @@ class TestClient < MiniTest::Unit::TestCase
     it 'does not push duplicate messages when configured for unique only' do
       Sidekiq::Client.ignore_duplicate_jobs = true
       10.times { Sidekiq::Client.push('customqueue', 'class' => 'Foo', 'args' => [1, 2]) }
-      assert_equal Sidekiq::Client.redis.llen("queue:customqueue"), 1
+      assert_equal 1, Sidekiq::Client.redis.llen("queue:customqueue")
     end
 
     it 'does push duplicate messages when not configured for unique only' do
       Sidekiq::Client.ignore_duplicate_jobs = false
       10.times { Sidekiq::Client.push('customqueue2', 'class' => 'Foo', 'args' => [1, 2]) }
-      assert_equal Sidekiq::Client.redis.llen("queue:customqueue2"), 10
+      assert_equal 10, Sidekiq::Client.redis.llen("queue:customqueue2")
     end
   end
 
@@ -51,9 +51,6 @@ class TestClient < MiniTest::Unit::TestCase
 
     class MyWorker
       include Sidekiq::Worker
-      def self.queue
-        'foo'
-      end
     end
 
     it 'handles perform_async' do
@@ -64,7 +61,7 @@ class TestClient < MiniTest::Unit::TestCase
     end
 
     it 'enqueues messages to redis' do
-      @redis.expect :rpush, 1, ['queue:foo', String]
+      @redis.expect :rpush, 1, ['queue:default', String]
       count = Sidekiq::Client.enqueue(MyWorker, 1, 2)
       assert count > 0
       @redis.verify

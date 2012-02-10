@@ -2,13 +2,14 @@ module Sidekiq
   # Middleware is code configured to run before/after
   # a message is processed.  It is patterned after Rack
   # middleware. Middleware exists for the client side
-  # as well as the server side.
+  # (pushing jobs onto the queue) as well as the server
+  # side (when jobs are actually processed).
   #
   # Default middleware for the server side:
   #
   # Sidekiq::Processor.middleware.register do
-  #   use Sidekiq::Airbrake
-  #   use Sidekiq::ActiveRecord
+  #   use Middleware::Server::Airbrake
+  #   use Middleware::Server::ActiveRecord
   # end
   #
   # To add middleware for the client, do:

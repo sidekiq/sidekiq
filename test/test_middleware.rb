@@ -29,7 +29,7 @@ class TestMiddleware < MiniTest::Unit::TestCase
         use CustomMiddleware, 1, []
       end
 
-      assert_equal chain.entries.last.klass, CustomMiddleware
+      assert_equal CustomMiddleware, chain.entries.last.klass
     end
 
     class CustomWorker
@@ -58,7 +58,7 @@ class TestMiddleware < MiniTest::Unit::TestCase
       processor = Sidekiq::Processor.new(@boss)
       @boss.expect(:processor_done!, nil, [processor])
       processor.process(msg)
-      assert_equal recorder.flatten, %w(0 before 1 before work_performed 1 after 0 after)
+      assert_equal %w(0 before 1 before work_performed 1 after 0 after), recorder.flatten
     end
 
     it 'allows middleware to abruptly stop processing rest of chain' do
@@ -72,8 +72,8 @@ class TestMiddleware < MiniTest::Unit::TestCase
 
       final_action = nil
       chain.invoke { final_action = true }
-      assert_equal final_action, nil
-      assert_equal recorder, []
+      assert_equal nil, final_action
+      assert_equal [], recorder
     end
   end
 end

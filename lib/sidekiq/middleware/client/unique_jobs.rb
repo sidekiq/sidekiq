@@ -15,7 +15,7 @@ module Sidekiq
           return if already_scheduled?(payload_hash)
 
           @redis.multi do
-            @redis.set(payload_hash, payload_hash)
+            @redis.set(payload_hash, 1)
             @redis.expire(payload_hash, HASH_KEY_EXPIRATION)
           end
 

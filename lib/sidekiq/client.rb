@@ -3,7 +3,7 @@ require 'redis'
 
 require 'sidekiq/redis_connection'
 require 'sidekiq/middleware/chain'
-require 'sidekiq/middleware/client/resque_web_compatability'
+require 'sidekiq/middleware/client/resque_web_compatibility'
 require 'sidekiq/middleware/client/unique_jobs'
 
 module Sidekiq
@@ -51,16 +51,10 @@ module Sidekiq
     #
     #   Sidekiq::Client.enqueue(MyWorker, 'foo', 1, :bat => 'bar')
     #
-    # Messages are enqueued to the 'default' queue.  Optionally,
-    # MyWorker can define a queue class method:
-    #
-    #   def self.queue
-    #     'my_queue'
-    #   end
+    # Messages are enqueued to the 'default' queue.
     #
     def self.enqueue(klass, *args)
-      queue = (klass.respond_to?(:queue) && klass.queue) || 'default'
-      push(queue, { 'class' => klass.name, 'args' => args })
+      push('default', { 'class' => klass.name, 'args' => args })
     end
   end
 end
