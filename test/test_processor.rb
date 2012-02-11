@@ -11,6 +11,7 @@ class TestProcessor < MiniTest::Unit::TestCase
     end
 
     class MockWorker
+      include Sidekiq::Worker
       def perform(args)
         raise "kerboom!" if args == 'boom'
         $invokes += 1
@@ -21,7 +22,7 @@ class TestProcessor < MiniTest::Unit::TestCase
       msg = { 'class' => MockWorker.to_s, 'args' => ['myarg'] }
       processor = ::Sidekiq::Processor.new(@boss)
       @boss.expect(:processor_done!, nil, [processor])
-      processor.process(msg)
+      processor.process(msg, 'default')
       @boss.verify
       assert_equal 1, $invokes
       assert_equal 0, $errors.size
@@ -31,7 +32,7 @@ class TestProcessor < MiniTest::Unit::TestCase
       msg = { 'class' => MockWorker.to_s, 'args' => ['boom'] }
       processor = ::Sidekiq::Processor.new(@boss)
       assert_raises RuntimeError do
-        processor.process(msg)
+        processor.process(msg, 'default')
       end
       @boss.verify
       assert_equal 0, $invokes

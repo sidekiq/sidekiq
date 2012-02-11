@@ -31,5 +31,9 @@ module Sidekiq
     def verbose(msg)
       STDOUT.puts(msg) if $DEBUG
     end
+
+    def redis
+      Sidekiq::Client.redis
+    end
   end
 end
