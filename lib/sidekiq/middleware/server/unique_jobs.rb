@@ -6,10 +6,10 @@ module Sidekiq
           @redis = redis
         end
 
-        def call(worker, msg)
+        def call(*args)
           yield
         ensure
-          @redis.del(Digest::MD5.hexdigest(MultiJson.encode(msg)))
+          @redis.del(Digest::MD5.hexdigest(MultiJson.encode(args[1])))
         end
       end
     end

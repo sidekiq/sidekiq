@@ -89,7 +89,7 @@ module Sidekiq
       if msg
         processor = @ready.pop
         @busy << processor
-        processor.process!(MultiJson.decode(msg))
+        processor.process!(MultiJson.decode(msg), current_queue)
       end
       !!msg
     end

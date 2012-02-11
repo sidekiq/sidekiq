@@ -32,7 +32,10 @@ class TestClient < MiniTest::Unit::TestCase
       def @redis.multi; yield; end
       def @redis.set(*); true; end
       def @redis.sadd(*); true; end
+      def @redis.srem(*); true; end
       def @redis.get(*); nil; end
+      def @redis.del(*); nil; end
+      def @redis.incrby(*); nil; end
       def @redis.expire(*); true; end
       Sidekiq::Client.redis = @redis
     end
