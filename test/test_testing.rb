@@ -15,7 +15,9 @@ class TestTesting < MiniTest::Unit::TestCase
       begin
         # Override Sidekiq::Worker
         require 'sidekiq/testing'
-        assert_equal 3, DirectWorker.perform_async(1, 2)
+        assert_equal 0, DirectWorker.jobs.size
+        assert DirectWorker.perform_async(1, 2)
+        assert_equal 1, DirectWorker.jobs.size
       ensure
         # Undo override
         Sidekiq::Worker::ClassMethods.class_eval do

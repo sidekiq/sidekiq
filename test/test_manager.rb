@@ -27,7 +27,7 @@ class TestManager < MiniTest::Unit::TestCase
 
     it 'processes messages' do
       Sidekiq::Client.push(:foo, 'class' => IntegrationWorker, 'args' => [1, 2])
-      Sidekiq::Client.push(:foo, 'class' => IntegrationWorker, 'args' => [1, 2])
+      Sidekiq::Client.push(:foo, 'class' => IntegrationWorker, 'args' => [1, 3])
 
       q = TimedQueue.new
       mgr = Sidekiq::Manager.new(@redis, :queues => [:foo], :processor_count => 2)
