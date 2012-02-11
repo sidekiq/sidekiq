@@ -27,7 +27,7 @@ module Sidekiq
 
     def initialize(boss)
       @boss = boss
-      redis.sadd(:workers, self)
+      redis.sadd('workers', self)
     end
 
     def process(msg, queue)
@@ -54,7 +54,6 @@ module Sidekiq
 
     def stats(worker, msg, queue)
       redis.multi do
-        redis.sadd("worker", self)
         redis.set("worker:#{self}:started", Time.now.to_s)
         redis.set("worker:#{self}", MultiJson.encode(:queue => queue, :payload => msg,
                                                      :run_at => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z")))
@@ -69,7 +68,7 @@ module Sidekiq
         redis.multi do
           redis.incrby("stat:failed", 1)
           redis.del("stat:processed:#{self}")
-          redis.srem("worker", self)
+          redis.srem("workers", self)
         end
         raise
       ensure
