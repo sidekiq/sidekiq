@@ -33,7 +33,7 @@ module Sidekiq
     end
 
     def redis
-      Sidekiq::Client.redis
+      Sidekiq::Manager.redis
     end
   end
 end

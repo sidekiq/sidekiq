@@ -11,7 +11,7 @@ class TestTesting < MiniTest::Unit::TestCase
       end
     end
 
-    it 'calls the worker directly when in testing mode' do
+    it 'stubs the async call when in testing mode' do
       begin
         # Override Sidekiq::Worker
         require 'sidekiq/testing'

@@ -18,7 +18,7 @@ module Sidekiq
         # default middleware
         chain.register do
           use Middleware::Server::Airbrake
-          use Middleware::Server::UniqueJobs, Sidekiq::Client.redis
+          use Middleware::Server::UniqueJobs, Sidekiq::Manager.redis
           use Middleware::Server::ActiveRecord
         end
         chain
@@ -53,10 +53,12 @@ module Sidekiq
     private
 
     def stats(worker, msg, queue)
-      redis.multi do
-        redis.set("worker:#{self}:started", Time.now.to_s)
-        redis.set("worker:#{self}", MultiJson.encode(:queue => queue, :payload => msg,
-                                                     :run_at => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z")))
+      redis.with_connection do |conn|
+        conn.multi do
+          conn.set("worker:#{self}:started", Time.now.to_s)
+          conn.set("worker:#{self}", MultiJson.encode(:queue => queue, :payload => msg,
+                                                   :run_at => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z")))
+        end
       end
 
       dying = false
@@ -65,18 +67,22 @@ module Sidekiq
       rescue
         dying = true
         # Uh oh, error.  We will die so unregister as much as we can first.
-        redis.multi do
-          redis.incrby("stat:failed", 1)
-          redis.del("stat:processed:#{self}")
-          redis.srem("workers", self)
+        redis.with_connection do |conn|
+          conn.multi do
+            conn.incrby("stat:failed", 1)
+            conn.del("stat:processed:#{self}")
+            conn.srem("workers", self)
+          end
         end
         raise
       ensure
-        redis.multi do
-          redis.del("worker:#{self}")
-          redis.del("worker:#{self}:started")
-          redis.incrby("stat:processed", 1)
-          redis.incrby("stat:processed:#{self}", 1) unless dying
+        redis.with_connection do |conn|
+          conn.multi do
+            conn.del("worker:#{self}")
+            conn.del("worker:#{self}:started")
+            conn.incrby("stat:processed", 1)
+            conn.incrby("stat:processed:#{self}", 1) unless dying
+          end
         end
       end
 

@@ -36,6 +36,7 @@ class TestClient < MiniTest::Unit::TestCase
       def @redis.get(*); nil; end
       def @redis.del(*); nil; end
       def @redis.incrby(*); nil; end
+      def @redis.setex(*); nil; end
       def @redis.expire(*); true; end
       Sidekiq::Client.redis = @redis
     end

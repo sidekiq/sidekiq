@@ -5,6 +5,10 @@ require 'sidekiq/processor'
 
 class TestMiddleware < MiniTest::Unit::TestCase
   describe 'middleware chain' do
+    before do
+      Sidekiq::Manager.redis = @redis = Sidekiq::RedisConnection.create(:url => 'redis://localhost/sidekiq_test')
+      Sidekiq::Client.redis = nil
+    end
 
     class CustomMiddleware
       def initialize(name, recorder)

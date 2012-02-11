@@ -18,12 +18,15 @@ module Sidekiq
 
     trap_exit :processor_died
 
-    def initialize(redis, options={})
+    class << self
+      attr_accessor :redis
+    end
+
+    def initialize(options={})
       log "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{redis.client.location}"
       verbose options.inspect
       @count = options[:processor_count] || 25
       @queues = options[:queues]
-      @redis = redis
       @done_callback = nil
 
       @done = false
@@ -38,6 +41,12 @@ module Sidekiq
 
       after(5) do
         signal(:shutdown)
+      end
+
+      redis.with_connection do |conn|
+        conn.smembers('workers').each do |name|
+          conn.srem('workers', name) if name =~ /:#{Process.pid}:/
+        end
       end
     end
 
@@ -79,7 +88,7 @@ module Sidekiq
     private
 
     def find_work(queue)
-      msg = @redis.lpop("queue:#{queue}")
+      msg = redis.lpop("queue:#{queue}")
       if msg
         processor = @ready.pop
         @busy << processor

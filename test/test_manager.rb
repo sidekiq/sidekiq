@@ -8,7 +8,7 @@ require 'connection_pool'
 class TestManager < MiniTest::Unit::TestCase
   describe 'with redis' do
     before do
-      Sidekiq::Client.redis = @redis = Sidekiq::RedisConnection.create(:url => 'redis://localhost/sidekiq_test')
+      Sidekiq::Manager.redis = Sidekiq::Client.redis = @redis = Sidekiq::RedisConnection.create(:url => 'redis://localhost/sidekiq_test')
       @redis.flushdb
       $processed = 0
       $mutex = Mutex.new
@@ -30,7 +30,7 @@ class TestManager < MiniTest::Unit::TestCase
       Sidekiq::Client.push(:foo, 'class' => IntegrationWorker, 'args' => [1, 3])
 
       q = TimedQueue.new
-      mgr = Sidekiq::Manager.new(@redis, :queues => [:foo], :processor_count => 2)
+      mgr = Sidekiq::Manager.new(:queues => [:foo], :processor_count => 2)
       mgr.when_done do |_|
         q << 'done' if $processed == 2
       end

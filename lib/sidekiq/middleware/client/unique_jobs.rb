@@ -14,10 +14,7 @@ module Sidekiq
           payload_hash = Digest::MD5.hexdigest(MultiJson.encode(item))
           return if already_scheduled?(payload_hash)
 
-          @redis.multi do
-            @redis.set(payload_hash, 1)
-            @redis.expire(payload_hash, HASH_KEY_EXPIRATION)
-          end
+          @redis.setex(payload_hash, HASH_KEY_EXPIRATION, 1)
 
           yield
         end
