@@ -8,40 +8,46 @@ require 'sidekiq/middleware/client/unique_jobs'
 
 module Sidekiq
   class Client
+
     def self.middleware
-      @middleware ||= Middleware::Chain.new
+      @middleware ||= begin
+        m = Middleware::Chain.new
+        m.register do
+          use Middleware::Client::UniqueJobs, Client.redis
+          use Middleware::Client::ResqueWebCompatibility, Client.redis
+        end
+        m
+      end
+    end
+
+    def self.queues
+      @queues ||= {}
     end
 
     def self.redis
-      @redis ||= begin
-        RedisConnection.create
-      end
+      @redis ||= RedisConnection.create
     end
 
     def self.redis=(redis)
       @redis = redis
     end
 
-    def self.ignore_duplicate_jobs=(ignore)
-      if ignore
-        middleware.register do
-          use Middleware::Client::UniqueJobs, Client.redis
-        end
-      else
-        middleware.unregister(Middleware::Client::UniqueJobs)
-      end
-    end
-
     # Example usage:
     # Sidekiq::Client.push('my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
-    def self.push(queue='default', item)
+    def self.push(queue=nil, item)
       raise(ArgumentError, "Message must be a Hash of the form: { 'class' => SomeClass, 'args' => ['bob', 1, :foo => 'bar'] }") unless item.is_a?(Hash)
       raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") if !item['class'] || !item['args']
 
+      queue = queue || queues[item['class'].to_s] || 'default'
+
       item['class'] = item['class'].to_s if !item['class'].is_a?(String)
+
+      pushed = false
       middleware.invoke(item, queue) do
         redis.rpush("queue:#{queue}", MultiJson.encode(item))
+        pushed = true
       end
+      pushed
     end
 
     # Please use .push if possible instead.
@@ -53,7 +59,7 @@ module Sidekiq
     # Messages are enqueued to the 'default' queue.
     #
     def self.enqueue(klass, *args)
-      push('default', { 'class' => klass.name, 'args' => args })
+      push(nil, { 'class' => klass.name, 'args' => args })
     end
   end
 end

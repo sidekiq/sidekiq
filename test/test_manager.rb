@@ -26,7 +26,6 @@ class TestManager < MiniTest::Unit::TestCase
     end
 
     it 'processes messages' do
-      Sidekiq::Client.ignore_duplicate_jobs = false
       Sidekiq::Client.push(:foo, 'class' => IntegrationWorker, 'args' => [1, 2])
       Sidekiq::Client.push(:foo, 'class' => IntegrationWorker, 'args' => [1, 2])
 

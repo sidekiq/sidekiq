@@ -53,7 +53,11 @@ module Sidekiq
       end
 
       def use(klass, *args)
-        entries << Entry.new(klass, *args)
+        entries << Entry.new(klass, *args) unless exists?(klass)
+      end
+
+      def exists?(klass)
+        entries.any? { |entry| entry.klass == klass }
       end
 
       def retrieve

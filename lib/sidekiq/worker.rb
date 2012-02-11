@@ -37,6 +37,10 @@ module Sidekiq
       def perform_async(*args)
         Sidekiq::Client.push('class' => self.name, 'args' => args)
       end
+
+      def queue(name)
+        Sidekiq::Client.queues[self.name] = name.to_s
+      end
     end
   end
 end

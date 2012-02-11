@@ -10,13 +10,17 @@ class TestClient < MiniTest::Unit::TestCase
     end
 
     it 'does not push duplicate messages when configured for unique only' do
-      Sidekiq::Client.ignore_duplicate_jobs = true
+      Sidekiq::Client.middleware.entries.clear
+      Sidekiq::Client.middleware.register do
+        use Sidekiq::Middleware::Client::UniqueJobs, Sidekiq::Client.redis
+        use Sidekiq::Middleware::Client::ResqueWebCompatibility, Sidekiq::Client.redis
+      end
       10.times { Sidekiq::Client.push('customqueue', 'class' => 'Foo', 'args' => [1, 2]) }
       assert_equal 1, Sidekiq::Client.redis.llen("queue:customqueue")
     end
 
     it 'does push duplicate messages when not configured for unique only' do
-      Sidekiq::Client.ignore_duplicate_jobs = false
+      Sidekiq::Client.middleware.unregister(Sidekiq::Middleware::Client::UniqueJobs)
       10.times { Sidekiq::Client.push('customqueue2', 'class' => 'Foo', 'args' => [1, 2]) }
       assert_equal 10, Sidekiq::Client.redis.llen("queue:customqueue2")
     end
@@ -27,9 +31,10 @@ class TestClient < MiniTest::Unit::TestCase
       @redis = MiniTest::Mock.new
       def @redis.multi; yield; end
       def @redis.set(*); true; end
+      def @redis.sadd(*); true; end
+      def @redis.get(*); nil; end
       def @redis.expire(*); true; end
       Sidekiq::Client.redis = @redis
-      Sidekiq::Client.ignore_duplicate_jobs = false
     end
 
     it 'raises ArgumentError with invalid params' do
@@ -44,8 +49,8 @@ class TestClient < MiniTest::Unit::TestCase
 
     it 'pushes messages to redis' do
       @redis.expect :rpush, 1, ['queue:foo', String]
-      count = Sidekiq::Client.push('foo', 'class' => 'Foo', 'args' => [1, 2])
-      assert count > 0
+      pushed = Sidekiq::Client.push('foo', 'class' => 'Foo', 'args' => [1, 2])
+      assert pushed
       @redis.verify
     end
 
@@ -55,15 +60,28 @@ class TestClient < MiniTest::Unit::TestCase
 
     it 'handles perform_async' do
       @redis.expect :rpush, 1, ['queue:default', String]
-      count = MyWorker.perform_async(1, 2)
-      assert count > 0
+      pushed = MyWorker.perform_async(1, 2)
+      assert pushed
       @redis.verify
     end
 
     it 'enqueues messages to redis' do
       @redis.expect :rpush, 1, ['queue:default', String]
-      count = Sidekiq::Client.enqueue(MyWorker, 1, 2)
-      assert count > 0
+      pushed = Sidekiq::Client.enqueue(MyWorker, 1, 2)
+      assert pushed
+      @redis.verify
+    end
+
+    class QueuedWorker
+      include Sidekiq::Worker
+
+      queue :flimflam
+    end
+
+    it 'enqueues to the named queue' do
+      @redis.expect :rpush, 1, ['queue:flimflam', String]
+      pushed = QueuedWorker.perform_async(1, 2)
+      assert pushed
       @redis.verify
     end
   end

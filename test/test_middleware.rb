@@ -55,7 +55,7 @@ class TestMiddleware < MiniTest::Unit::TestCase
       processor = Sidekiq::Processor.new(boss)
       boss.expect(:processor_done!, nil, [processor])
       processor.process(msg)
-      assert_equal %w(0 before 1 before work_performed 1 after 0 after), recorder.flatten
+      assert_equal %w(0 before work_performed 0 after), recorder.flatten
     end
 
     it 'allows middleware to abruptly stop processing rest of chain' do
