@@ -47,7 +47,7 @@ module Sidekiq
     end
 
     def to_s
-      @str ||= "#{hostname}:#{Process.pid}:#{Thread.current.object_id}"
+      @str ||= "#{hostname}:#{Process.pid}-#{Thread.current.object_id}:default"
     end
 
     private
