@@ -82,7 +82,7 @@ module Sidekiq
       @parser = OptionParser.new do |o|
         o.on "-q", "--queue QUEUE,WEIGHT", "Queue to process, with optional weight" do |arg|
           (q, weight) = arg.split(",")
-          (weight || 1).times do
+          (weight || 1).to_i.times do
             @options[:queues] << q
           end
         end

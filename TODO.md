@@ -1,4 +1,3 @@
-- monitoring stats
 - resque-ui-esque web ui
 - graceful shutdown (ideally Celluloid will provide this)
 - monit/god/etc example scripts
