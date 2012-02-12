@@ -25,7 +25,7 @@ module Sidekiq
     def initialize(options={})
       log "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{redis.client.location}"
       verbose options.inspect
-      @count = options[:processor_count] || 25
+      @count = (options[:processor_count] || 25).to_i
       @queues = options[:queues]
       @done_callback = nil
 
