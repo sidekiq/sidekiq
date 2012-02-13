@@ -2,15 +2,20 @@ require 'optparse'
 require 'sidekiq/version'
 require 'sidekiq/util'
 require 'sidekiq/redis_connection'
-require 'sidekiq/client'
 require 'sidekiq/manager'
 
 module Sidekiq
   class CLI
     include Util
 
+    attr_accessor :options, :code
+
     def initialize
-      parse_options
+      @code = nil
+    end
+
+    def parse(args=ARGV)
+      parse_options(args)
       validate!
       boot_system
     end
@@ -35,6 +40,10 @@ module Sidekiq
     end
 
     private
+
+    def die(code)
+      exit(code)
+    end
 
     def detected_environment
       @options[:environment] || ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
@@ -66,11 +75,11 @@ module Sidekiq
         log "  to load your worker classes with -r [DIR|FILE]."
         log "=================================================================="
         log @parser
-        exit(1)
+        die(1)
       end
     end
 
-    def parse_options(argv=ARGV)
+    def parse_options(argv)
       @options = {
         :verbose => false,
         :queues => [],
@@ -115,7 +124,7 @@ module Sidekiq
       @parser.banner = "sidekiq [options]"
       @parser.on_tail "-h", "--help", "Show help" do
         log @parser
-        exit 1
+        die 1
       end
       @parser.parse!(argv)
     end
