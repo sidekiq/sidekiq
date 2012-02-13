@@ -20,8 +20,6 @@ module Sidekiq
       boot_system
     end
 
-    FOREVER = 2_000_000_000
-
     def run
       Sidekiq::Manager.redis = RedisConnection.create(:url => @options[:server], :namespace => @options[:namespace])
       manager = Sidekiq::Manager.new(@options)
@@ -30,7 +28,7 @@ module Sidekiq
         manager.start!
         # HACK need to determine how to pause main thread while
         # waiting for signals.
-        sleep FOREVER
+        sleep
       rescue Interrupt
         # TODO Need clean shutdown support from Celluloid
         log 'Shutting down, pausing 5 seconds to let workers finish...'
