@@ -1,3 +1,9 @@
+trap 'INT' do
+  # Handle Ctrl-C in JRuby like MRI
+  # http://jira.codehaus.org/browse/JRUBY-4637
+  Thread.main.raise Interrupt
+end
+
 require 'optparse'
 require 'sidekiq/version'
 require 'sidekiq/util'

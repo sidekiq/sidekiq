@@ -1,3 +1,4 @@
 export RUBYOPT="-Ilib:test"
 export JRUBY_OPTS="--1.9"
 rvm use 1.9.3@sidekiq --create
+#rvm use jruby@sidekiq --create
