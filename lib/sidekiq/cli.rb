@@ -4,6 +4,11 @@ trap 'INT' do
   Thread.main.raise Interrupt
 end
 
+trap 'TERM' do
+  # Heroku sends TERM and then waits 10 seconds for process to exit.
+  Thread.main.raise Interrupt
+end
+
 require 'optparse'
 require 'sidekiq/version'
 require 'sidekiq/util'
