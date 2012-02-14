@@ -1,4 +1,4 @@
-HEAD
+0.6.0
 -----------
 
 - Resque-compatible processing stats in redis (mperham)
