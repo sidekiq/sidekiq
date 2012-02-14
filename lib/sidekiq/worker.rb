@@ -24,13 +24,8 @@ module Sidekiq
       base.extend(ClassMethods)
     end
 
-    def info(msg)
-      print "#{msg}\n"
-    end
-    alias_method :log, :info
-
-    def debug(msg)
-      print "#{msg}\n" if $DEBUG
+    def logger
+      Sidekiq::Util.logger
     end
 
     module ClassMethods

@@ -23,8 +23,8 @@ module Sidekiq
     end
 
     def initialize(options={})
-      log "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{redis.client.location}"
-      verbose options.inspect
+      logger.info "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{redis.client.location}"
+      logger.debug { options.inspect }
       @count = options[:processor_count] || 25
       @queues = options[:queues]
       @done_callback = nil
@@ -74,11 +74,6 @@ module Sidekiq
     def processor_died(processor, reason)
       @busy.delete(processor)
 
-      if reason
-        err "Processor death: #{reason}"
-        err reason.backtrace.join("\n")
-      end
-
       unless stopped?
         @ready << Processor.new_link(current_actor)
         dispatch
@@ -103,18 +98,20 @@ module Sidekiq
 
         # Dispatch loop
         loop do
-          break verbose('no processors') if @ready.empty?
+          break logger.debug('no processors') if @ready.empty?
           found = false
           @ready.size.times do
             found ||= find_work(@queues.sample)
           end
-          break verbose('nothing to process') unless found
+          break logger.debug('nothing to process') unless found
         end
 
         # This is the polling loop that ensures we check Redis every
         # second for work, even if there was nothing to do this time
         # around.
-        after(1) { verbose('ping'); dispatch(schedule) } if schedule
+        after(1) do
+          dispatch(schedule)
+        end if schedule
       end
     end
 

@@ -19,6 +19,7 @@ module Sidekiq
   class CLI
     include Util
 
+    # Used for CLI testing
     attr_accessor :options, :code
 
     def initialize
@@ -26,6 +27,7 @@ module Sidekiq
     end
 
     def parse(args=ARGV)
+      Sidekiq::Util.logger
       parse_options(args)
       validate!
       boot_system
@@ -35,14 +37,14 @@ module Sidekiq
       Sidekiq::Manager.redis = RedisConnection.create(:url => @options[:server], :namespace => @options[:namespace])
       manager = Sidekiq::Manager.new(@options)
       begin
-        log 'Starting processing, hit Ctrl-C to stop'
+        logger.info 'Starting processing, hit Ctrl-C to stop'
         manager.start!
         # HACK need to determine how to pause main thread while
         # waiting for signals.
         sleep
       rescue Interrupt
         # TODO Need clean shutdown support from Celluloid
-        log 'Shutting down, pausing 5 seconds to let workers finish...'
+        logger.info 'Shutting down, pausing 5 seconds to let workers finish...'
         manager.stop!
         manager.wait(:shutdown)
       end
@@ -75,22 +77,19 @@ module Sidekiq
       @options[:queues] << 'default' if @options[:queues].empty?
       @options[:queues].shuffle!
 
-      $DEBUG = @options[:verbose]
-
       if !File.exist?(@options[:require]) ||
          (File.directory?(@options[:require]) && !File.exist?("#{@options[:require]}/config/application.rb"))
-        log "=================================================================="
-        log "  Please point sidekiq to a Rails 3 application or a Ruby file    "
-        log "  to load your worker classes with -r [DIR|FILE]."
-        log "=================================================================="
-        log @parser
+        logger.info "=================================================================="
+        logger.info "  Please point sidekiq to a Rails 3 application or a Ruby file    "
+        logger.info "  to load your worker classes with -r [DIR|FILE]."
+        logger.info "=================================================================="
+        logger.info @parser
         die(1)
       end
     end
 
     def parse_options(argv)
       @options = {
-        :verbose => false,
         :queues => [],
         :processor_count => 25,
         :require => '.',
@@ -106,7 +105,7 @@ module Sidekiq
         end
 
         o.on "-v", "--verbose", "Print more verbose output" do
-          @options[:verbose] = true
+          Sidekiq::Util.logger.level = Logger::DEBUG
         end
 
         o.on "-n", "--namespace NAMESPACE", "namespace worker queues are under" do |arg|
@@ -132,7 +131,7 @@ module Sidekiq
 
       @parser.banner = "sidekiq [options]"
       @parser.on_tail "-h", "--help", "Show help" do
-        log @parser
+        logger.info @parser
         die 1
       end
       @parser.parse!(argv)

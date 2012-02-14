@@ -1,5 +1,19 @@
+require 'logger'
+
 module Sidekiq
   module Util
+
+    def self.logger
+      @logger ||= begin
+        log = Logger.new(STDERR)
+        log.level = Logger::INFO
+        log
+      end
+    end
+
+    def self.logger=(log)
+      @logger = (log ? log : Logger.new('/dev/null'))
+    end
 
     def constantize(camel_cased_word)
       names = camel_cased_word.split('::')
@@ -15,21 +29,13 @@ module Sidekiq
     def watchdog(last_words)
       yield
     rescue => ex
-      err last_words
-      err ex
-      err ex.backtrace.join("\n")
+      logger.error last_words
+      logger.error ex
+      logger.error ex.backtrace.join("\n")
     end
 
-    def err(msg)
-      STDERR.puts(msg)
-    end
-
-    def log(msg)
-      STDOUT.puts(msg) unless $TESTING
-    end
-
-    def verbose(msg)
-      STDOUT.puts(msg) if $DEBUG
+    def logger
+      Sidekiq::Util.logger
     end
 
     def redis
