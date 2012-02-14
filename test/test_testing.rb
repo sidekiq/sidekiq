@@ -11,13 +11,15 @@ class TestTesting < MiniTest::Unit::TestCase
       end
     end
 
-    it 'stubs the async call when in testing mode' do
+    it 'stubs the async call when in testing mode and be able to reset it' do
       begin
         # Override Sidekiq::Worker
         require 'sidekiq/testing'
         assert_equal 0, DirectWorker.jobs.size
         assert DirectWorker.perform_async(1, 2)
         assert_equal 1, DirectWorker.jobs.size
+        DirectWorker.reset_jobs!
+        assert_equal 0, DirectWorker.jobs.size
       ensure
         # Undo override
         Sidekiq::Worker::ClassMethods.class_eval do
@@ -27,6 +29,5 @@ class TestTesting < MiniTest::Unit::TestCase
         end
       end
     end
-
   end
 end

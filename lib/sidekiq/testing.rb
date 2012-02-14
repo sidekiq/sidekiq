@@ -26,6 +26,10 @@ module Sidekiq
         true
       end
 
+      def reset_jobs!
+        @pushed = []
+      end
+
       def jobs
         @pushed ||= []
       end
