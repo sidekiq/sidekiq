@@ -60,10 +60,15 @@ module Sidekiq
       @options[:environment] ||= ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
     end
 
+    def rails_or_ruby?
+      @options[:require] && File.exist?(@options[:require]) ||
+        (File.directory?(@options[:require]) && File.exist?("#{@options[:require]}/config/application.rb"))
+    end
+
     def boot_system
       ENV['RACK_ENV'] = ENV['RAILS_ENV'] = detected_environment
 
-      raise ArgumentError, "#{@options[:require]} does not exist" if !File.exist?(@options[:require])
+      raise ArgumentError, "#{@options[:require]} does not exist" unless @options[:require] && File.exist?(@options[:require])
 
       if File.directory?(@options[:require])
         require File.expand_path("#{@options[:require]}/config/environment.rb")
@@ -77,8 +82,7 @@ module Sidekiq
       @options[:queues] << 'default' if @options[:queues].empty?
       @options[:queues].shuffle!
 
-      if !File.exist?(@options[:require]) ||
-         (File.directory?(@options[:require]) && !File.exist?("#{@options[:require]}/config/application.rb"))
+      unless rails_or_ruby?
         logger.info "=================================================================="
         logger.info "  Please point sidekiq to a Rails 3 application or a Ruby file    "
         logger.info "  to load your worker classes with -r [DIR|FILE]."
