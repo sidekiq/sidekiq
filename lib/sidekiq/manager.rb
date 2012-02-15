@@ -45,7 +45,7 @@ module Sidekiq
 
       redis.with_connection do |conn|
         conn.smembers('workers').each do |name|
-          conn.srem('workers', name) if name =~ /:#{Process.pid}:/
+          conn.srem('workers', name) if name =~ /:#{Process.pid}-/
         end
       end
     end
