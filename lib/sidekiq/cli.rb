@@ -29,6 +29,7 @@ module Sidekiq
     def parse(args=ARGV)
       Sidekiq::Util.logger
       parse_options(args)
+      write_pid
       validate!
       boot_system
     end
@@ -127,6 +128,10 @@ module Sidekiq
         o.on '-c', '--concurrency INT', "processor threads to use" do |arg|
           @options[:processor_count] = arg.to_i
         end
+
+        o.on '-P', '--pidfile PATH', "path to use" do |arg|
+          @options[:pidfile] = arg
+        end
       end
 
       @parser.banner = "sidekiq [options]"
@@ -135,6 +140,14 @@ module Sidekiq
         die 1
       end
       @parser.parse!(argv)
+    end
+
+    def write_pid
+      if path = @options[:pidfile]
+        File.open(path, 'w') do |f|
+          f.puts Process.pid
+        end
+      end
     end
 
   end
