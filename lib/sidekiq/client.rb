@@ -21,7 +21,7 @@ module Sidekiq
     end
 
     def self.queues
-      self.redis.smembers('queues')
+      @queues ||= {}
     end
 
     def self.redis
