@@ -41,7 +41,7 @@ class TestCli < MiniTest::Unit::TestCase
         @tmp_path = @tmp_file.path
         @tmp_file.close!
         File.unlink @tmp_path if File.exist? @tmp_path
-        @cli.parse(['sidekiq', '-p', @tmp_path, '-r', './test/fake_env.rb'])
+        @cli.parse(['sidekiq', '-P', @tmp_path, '-r', './test/fake_env.rb'])
       end
 
       after do

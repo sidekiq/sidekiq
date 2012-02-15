@@ -129,7 +129,7 @@ module Sidekiq
           @options[:processor_count] = arg.to_i
         end
 
-        o.on '-p', '--pidfile PATH', "path to use" do |arg|
+        o.on '-P', '--pidfile PATH', "path to use" do |arg|
           @options[:pidfile] = arg
         end
       end
