@@ -88,5 +88,15 @@ class TestClient < MiniTest::Unit::TestCase
       assert pushed
       @redis.verify
     end
+
+    it 'retrieves queues' do
+      @redis.expect :smembers, ['bob'], ['queues']
+      assert_equal ['bob'], Sidekiq::Client.registered_queues
+    end
+
+    it 'retrieves workers' do
+      @redis.expect :smembers, ['bob'], ['workers']
+      assert_equal ['bob'], Sidekiq::Client.registered_workers
+    end
   end
 end

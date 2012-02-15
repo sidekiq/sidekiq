@@ -34,7 +34,7 @@ module Sidekiq
       end
 
       def queue(name)
-        Sidekiq::Client.queues[self.name] = name.to_s
+        Sidekiq::Client.queue_mappings[self.name] = name.to_s
       end
     end
   end

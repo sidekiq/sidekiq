@@ -20,8 +20,16 @@ module Sidekiq
       end
     end
 
-    def self.queues
-      @queues ||= {}
+    def self.registered_workers
+      redis.smembers('workers')
+    end
+
+    def self.registered_queues
+      redis.smembers('queues')
+    end
+
+    def self.queue_mappings
+      @queue_mappings ||= {}
     end
 
     def self.redis
@@ -38,7 +46,7 @@ module Sidekiq
       raise(ArgumentError, "Message must be a Hash of the form: { 'class' => SomeClass, 'args' => ['bob', 1, :foo => 'bar'] }") unless item.is_a?(Hash)
       raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") if !item['class'] || !item['args']
 
-      queue = queue || queues[item['class'].to_s] || 'default'
+      queue = queue || queue_mappings[item['class'].to_s] || 'default'
 
       item['class'] = item['class'].to_s if !item['class'].is_a?(String)
 
