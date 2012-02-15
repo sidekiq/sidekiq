@@ -44,7 +44,10 @@ module Sidekiq
       end
 
       redis.with_connection do |conn|
-        conn.smembers('workers').each do |name|
+        workers = conn.smembers('workers')
+        logger.info "My tag: ':#{Process.pid}-'"
+        logger.info "Current workers: #{workers.inspect}"
+        workers.each do |name|
           conn.srem('workers', name) if name =~ /:#{Process.pid}-/
         end
       end
