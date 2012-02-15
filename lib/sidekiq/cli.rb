@@ -57,7 +57,7 @@ module Sidekiq
     end
 
     def detected_environment
-      @options[:environment] || ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
+      @options[:environment] ||= ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
     end
 
     def boot_system
