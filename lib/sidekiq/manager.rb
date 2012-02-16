@@ -25,7 +25,7 @@ module Sidekiq
     def initialize(options={})
       logger.info "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{redis.client.location}"
       logger.debug { options.inspect }
-      @count = options[:processor_count] || 25
+      @count = options[:concurrency] || 25
       @queues = options[:queues]
       @done_callback = nil
 
