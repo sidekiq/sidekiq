@@ -28,7 +28,19 @@ module Sidekiq
 
     def parse(args=ARGV)
       Sidekiq::Util.logger
-      parse_options(args)
+
+      @options = {
+        :queues => [],
+        :concurrency => 25,
+        :require => '.',
+        :environment => nil,
+      }
+      cli = parse_options(args)
+      config = parse_config(cli)
+      @options.merge!(config.merge(cli))
+
+      set_logger_level_to_debug if @options[:verbose]
+
       write_pid
       validate!
       boot_system
@@ -64,7 +76,7 @@ module Sidekiq
     def boot_system
       ENV['RACK_ENV'] = ENV['RAILS_ENV'] = detected_environment
 
-      raise ArgumentError, "#{@options[:require]} does not exist" if !File.exist?(@options[:require])
+      raise ArgumentError, "#{@options[:require]} does not exist" unless File.exist?(@options[:require])
 
       if File.directory?(@options[:require])
         require File.expand_path("#{@options[:require]}/config/environment.rb")
@@ -90,47 +102,44 @@ module Sidekiq
     end
 
     def parse_options(argv)
-      @options = {
-        :queues => [],
-        :processor_count => 25,
-        :require => '.',
-        :environment => nil,
-      }
+      opts = {}
 
       @parser = OptionParser.new do |o|
         o.on "-q", "--queue QUEUE,WEIGHT", "Queue to process, with optional weight" do |arg|
           (q, weight) = arg.split(",")
-          (weight || 1).to_i.times do
-            @options[:queues] << q
-          end
+          parse_queues(q, weight)
         end
 
         o.on "-v", "--verbose", "Print more verbose output" do
-          Sidekiq::Util.logger.level = Logger::DEBUG
+          set_logger_level_to_debug
         end
 
         o.on "-n", "--namespace NAMESPACE", "namespace worker queues are under" do |arg|
-          @options[:namespace] = arg
+          opts[:namespace] = arg
         end
 
         o.on "-s", "--server LOCATION", "Where to find Redis" do |arg|
-          @options[:server] = arg
+          opts[:server] = arg
         end
 
         o.on '-e', '--environment ENV', "Application environment" do |arg|
-          @options[:environment] = arg
+          opts[:environment] = arg
         end
 
         o.on '-r', '--require [PATH|DIR]', "Location of Rails application with workers or file to require" do |arg|
-          @options[:require] = arg
+          opts[:require] = arg
         end
 
         o.on '-c', '--concurrency INT', "processor threads to use" do |arg|
-          @options[:processor_count] = arg.to_i
+          opts[:concurrency] = arg.to_i
         end
 
-        o.on '-P', '--pidfile PATH', "path to use" do |arg|
-          @options[:pidfile] = arg
+        o.on '-P', '--pidfile PATH', "path to pidfile" do |arg|
+          opts[:pidfile] = arg
+        end
+
+        o.on '-C', '--config PATH', "path to YAML config file" do |arg|
+          opts[:config_file] = arg
         end
       end
 
@@ -140,6 +149,7 @@ module Sidekiq
         die 1
       end
       @parser.parse!(argv)
+      opts
     end
 
     def write_pid
@@ -148,6 +158,29 @@ module Sidekiq
           f.puts Process.pid
         end
       end
+    end
+
+    def parse_config(cli)
+      opts = {}
+      if cli[:config_file] && File.exist?(cli[:config_file])
+        require 'yaml'
+        opts = YAML.load_file cli[:config_file]
+        queues = opts.delete(:queues) || []
+        if @options[:queues].empty?
+          queues.each { |pair| parse_queues(*pair) }
+        end
+      end
+      opts
+    end
+
+    def parse_queues(q, weight)
+      (weight || 1).to_i.times do
+        @options[:queues] << q
+      end
+    end
+
+    def set_logger_level_to_debug
+      Sidekiq::Util.logger.level = Logger::DEBUG
     end
 
   end

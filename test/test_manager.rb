@@ -30,7 +30,7 @@ class TestManager < MiniTest::Unit::TestCase
       Sidekiq::Client.push(:foo, 'class' => IntegrationWorker, 'args' => [1, 3])
 
       q = TimedQueue.new
-      mgr = Sidekiq::Manager.new(:queues => [:foo], :processor_count => 2)
+      mgr = Sidekiq::Manager.new(:queues => [:foo], :concurrency => 2)
       mgr.when_done do |_|
         q << 'done' if $processed == 2
       end
