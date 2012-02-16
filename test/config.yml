@@ -5,7 +5,7 @@ server:       127.0.0.1:1234
 environment:  xzibit
 require:      ./test/fake_env.rb
 pidfile:      /tmp/sidekiq-config-test.pid
-processor_count:  50
+concurrency:  50
 queues:
   - [often, 2]
   - [seldom, 1]

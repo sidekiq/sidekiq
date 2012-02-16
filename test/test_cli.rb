@@ -22,7 +22,7 @@ class TestCli < MiniTest::Unit::TestCase
 
     it 'changes concurrency' do
       @cli.parse(['sidekiq', '-c', '60', '-r', './test/fake_env.rb'])
-      assert_equal 60, @cli.options[:processor_count]
+      assert_equal 60, @cli.options[:concurrency]
     end
 
     it 'changes queues' do
@@ -124,8 +124,8 @@ class TestCli < MiniTest::Unit::TestCase
         File.unlink @tmp_path if File.exist? @tmp_path
       end
 
-      it 'uses processor count flag' do
-        assert_equal 100, @cli.options[:processor_count]
+      it 'uses concurrency flag' do
+        assert_equal 100, @cli.options[:concurrency]
       end
       
       it 'uses namespace flag' do
@@ -138,10 +138,6 @@ class TestCli < MiniTest::Unit::TestCase
 
       it 'uses environment flag' do
         assert_equal 'snoop', @cli.options[:environment]
-      end
-
-      it 'uses concurrency flag' do
-        assert_equal 100, @cli.options[:processor_count]
       end
 
       it 'uses pidfile flag' do

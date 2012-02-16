@@ -93,7 +93,7 @@ module Sidekiq
     def parse_options(argv)
       @options = {
         :queues => [],
-        :processor_count => 25,
+        :concurrency => 25,
         :require => '.',
         :environment => nil,
       }
@@ -125,7 +125,7 @@ module Sidekiq
         end
 
         o.on '-c', '--concurrency INT', "processor threads to use" do |arg|
-          @options[:processor_count] = arg.to_i
+          @options[:concurrency] = arg.to_i
         end
 
         o.on '-P', '--pidfile PATH', "path to pidfile" do |arg|
@@ -172,7 +172,10 @@ module Sidekiq
         opts.each do |option, value|
           @options[option.intern] ||= value
         end
-        @options[:concurrency] = opts['processor_count'] if opts['processor_count']
+        concurrency = opts.delete('concurrency')
+        if @options[:concurrency] == 25 && concurrency
+          @options[:concurrency] = concurrency
+        end
         set_logger_level_to_debug if @options[:verbose]
       end
     end
