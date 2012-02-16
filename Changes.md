@@ -1,3 +1,8 @@
+HEAD
+-----------
+- Added config file support. See test/config.yml for an example file.
+- Added pidfile for tools like monit
+
 0.6.0
 -----------
 

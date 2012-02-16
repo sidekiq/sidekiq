@@ -29,6 +29,7 @@ module Sidekiq
     def parse(args=ARGV)
       Sidekiq::Util.logger
       parse_options(args)
+      parse_config
       write_pid
       validate!
       boot_system
@@ -64,7 +65,7 @@ module Sidekiq
     def boot_system
       ENV['RACK_ENV'] = ENV['RAILS_ENV'] = detected_environment
 
-      raise ArgumentError, "#{@options[:require]} does not exist" if !File.exist?(@options[:require])
+      raise ArgumentError, "#{@options[:require]} does not exist" unless File.exist?(@options[:require])
 
       if File.directory?(@options[:require])
         require File.expand_path("#{@options[:require]}/config/environment.rb")
@@ -100,13 +101,11 @@ module Sidekiq
       @parser = OptionParser.new do |o|
         o.on "-q", "--queue QUEUE,WEIGHT", "Queue to process, with optional weight" do |arg|
           (q, weight) = arg.split(",")
-          (weight || 1).to_i.times do
-            @options[:queues] << q
-          end
+          parse_queues(q, weight)
         end
 
         o.on "-v", "--verbose", "Print more verbose output" do
-          Sidekiq::Util.logger.level = Logger::DEBUG
+          set_logger_level_to_debug
         end
 
         o.on "-n", "--namespace NAMESPACE", "namespace worker queues are under" do |arg|
@@ -129,8 +128,12 @@ module Sidekiq
           @options[:processor_count] = arg.to_i
         end
 
-        o.on '-P', '--pidfile PATH', "path to use" do |arg|
+        o.on '-P', '--pidfile PATH', "path to pidfile" do |arg|
           @options[:pidfile] = arg
+        end
+
+        o.on '-C', '--config PATH', "path to YAML config file" do |arg|
+          @options[:config_file] = arg
         end
       end
 
@@ -148,6 +151,40 @@ module Sidekiq
           f.puts Process.pid
         end
       end
+    end
+
+    def parse_config
+      if @options[:config_file] && File.exist?(@options[:config_file])
+        require 'yaml'
+        opts = YAML.load_file @options[:config_file]
+        queues = if @options[:queues].empty?
+                  opts.delete('queues')
+                 else
+                   []
+                 end
+        queues.each { |pair| parse_queues(*pair) }
+
+        require_file = opts.delete('require')
+        if @options[:require] == '.' && require_file
+          @options[:require] = require_file
+        end
+
+        opts.each do |option, value|
+          @options[option.intern] ||= value
+        end
+        @options[:concurrency] = opts['processor_count'] if opts['processor_count']
+        set_logger_level_to_debug if @options[:verbose]
+      end
+    end
+
+    def parse_queues(q, weight)
+      (weight || 1).to_i.times do
+        @options[:queues] << q
+      end
+    end
+
+    def set_logger_level_to_debug
+      Sidekiq::Util.logger.level = Logger::DEBUG
     end
 
   end
