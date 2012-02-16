@@ -28,8 +28,19 @@ module Sidekiq
 
     def parse(args=ARGV)
       Sidekiq::Util.logger
-      parse_options(args)
-      parse_config
+
+      @options = {
+        :queues => [],
+        :concurrency => 25,
+        :require => '.',
+        :environment => nil,
+      }
+      cli = parse_options(args)
+      config = parse_config(cli)
+      @options.merge!(config.merge(cli))
+
+      set_logger_level_to_debug if @options[:verbose]
+
       write_pid
       validate!
       boot_system
@@ -91,12 +102,7 @@ module Sidekiq
     end
 
     def parse_options(argv)
-      @options = {
-        :queues => [],
-        :concurrency => 25,
-        :require => '.',
-        :environment => nil,
-      }
+      opts = {}
 
       @parser = OptionParser.new do |o|
         o.on "-q", "--queue QUEUE,WEIGHT", "Queue to process, with optional weight" do |arg|
@@ -109,31 +115,31 @@ module Sidekiq
         end
 
         o.on "-n", "--namespace NAMESPACE", "namespace worker queues are under" do |arg|
-          @options[:namespace] = arg
+          opts[:namespace] = arg
         end
 
         o.on "-s", "--server LOCATION", "Where to find Redis" do |arg|
-          @options[:server] = arg
+          opts[:server] = arg
         end
 
         o.on '-e', '--environment ENV', "Application environment" do |arg|
-          @options[:environment] = arg
+          opts[:environment] = arg
         end
 
         o.on '-r', '--require [PATH|DIR]', "Location of Rails application with workers or file to require" do |arg|
-          @options[:require] = arg
+          opts[:require] = arg
         end
 
         o.on '-c', '--concurrency INT', "processor threads to use" do |arg|
-          @options[:concurrency] = arg.to_i
+          opts[:concurrency] = arg.to_i
         end
 
         o.on '-P', '--pidfile PATH', "path to pidfile" do |arg|
-          @options[:pidfile] = arg
+          opts[:pidfile] = arg
         end
 
         o.on '-C', '--config PATH', "path to YAML config file" do |arg|
-          @options[:config_file] = arg
+          opts[:config_file] = arg
         end
       end
 
@@ -143,6 +149,7 @@ module Sidekiq
         die 1
       end
       @parser.parse!(argv)
+      opts
     end
 
     def write_pid
@@ -153,31 +160,17 @@ module Sidekiq
       end
     end
 
-    def parse_config
-      if @options[:config_file] && File.exist?(@options[:config_file])
+    def parse_config(cli)
+      opts = {}
+      if cli[:config_file] && File.exist?(cli[:config_file])
         require 'yaml'
-        opts = YAML.load_file @options[:config_file]
-        queues = if @options[:queues].empty?
-                  opts.delete('queues')
-                 else
-                   []
-                 end
-        queues.each { |pair| parse_queues(*pair) }
-
-        require_file = opts.delete('require')
-        if @options[:require] == '.' && require_file
-          @options[:require] = require_file
+        opts = YAML.load_file cli[:config_file]
+        queues = opts.delete(:queues) || []
+        if @options[:queues].empty?
+          queues.each { |pair| parse_queues(*pair) }
         end
-
-        opts.each do |option, value|
-          @options[option.intern] ||= value
-        end
-        concurrency = opts.delete('concurrency')
-        if @options[:concurrency] == 25 && concurrency
-          @options[:concurrency] = concurrency
-        end
-        set_logger_level_to_debug if @options[:verbose]
       end
+      opts
     end
 
     def parse_queues(q, weight)
