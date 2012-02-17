@@ -25,7 +25,7 @@ module Sidekiq
     def initialize(options={})
       logger.info "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{redis.client.location}"
       logger.debug { options.inspect }
-      @count = options[:processor_count] || 25
+      @count = options[:concurrency] || 25
       @queues = options[:queues]
       @done_callback = nil
 
@@ -45,8 +45,9 @@ module Sidekiq
       end
 
       redis.with_connection do |conn|
-        conn.smembers('workers').each do |name|
-          conn.srem('workers', name) if name =~ /:#{Process.pid}-/
+        workers = conn.smembers('workers')
+        workers.each do |name|
+          conn.srem('workers', name) if name =~ /:#{process_id}-/
         end
       end
     end
