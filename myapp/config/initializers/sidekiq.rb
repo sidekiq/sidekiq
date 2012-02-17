@@ -1,1 +1,1 @@
-Sidekiq.redis = Sidekiq::RedisConnection.create(:namespace => 'resque')
+Sidekiq.redis = Sidekiq::RedisConnection.create(:namespace => 'resque', :size => 5)

@@ -4,7 +4,10 @@ require 'sidekiq/worker'
 require 'sidekiq/rails' if defined?(::Rails)
 
 module Sidekiq
-  class << self
-    attr_accessor :redis
+  def self.redis
+    @redis ||= Sidekiq::RedisConnection.create
+  end
+  def self.redis=(r)
+    @redis = r
   end
 end
