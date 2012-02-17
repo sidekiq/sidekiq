@@ -18,10 +18,6 @@ module Sidekiq
 
     trap_exit :processor_died
 
-    class << self
-      attr_accessor :redis
-    end
-
     def initialize(options={})
       logger.info "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{redis.client.location}"
       logger.debug { options.inspect }

@@ -5,24 +5,24 @@ require 'sidekiq/worker'
 class TestClient < MiniTest::Unit::TestCase
   describe 'with real redis' do
     before do
-      Sidekiq::Client.redis = Redis.connect(:url => 'redis://localhost/sidekiq_test')
-      Sidekiq::Client.redis.flushdb
+      Sidekiq.redis = Sidekiq::RedisConnection.create(:url => 'redis://localhost/sidekiq_test')
+      Sidekiq.redis.flushdb
     end
 
     it 'does not push duplicate messages when configured for unique only' do
       Sidekiq::Client.middleware.entries.clear
       Sidekiq::Client.middleware.register do
-        use Sidekiq::Middleware::Client::UniqueJobs, Sidekiq::Client.redis
-        use Sidekiq::Middleware::Client::ResqueWebCompatibility, Sidekiq::Client.redis
+        use Sidekiq::Middleware::Client::UniqueJobs
+        use Sidekiq::Middleware::Client::ResqueWebCompatibility
       end
       10.times { Sidekiq::Client.push('customqueue', 'class' => 'Foo', 'args' => [1, 2]) }
-      assert_equal 1, Sidekiq::Client.redis.llen("queue:customqueue")
+      assert_equal 1, Sidekiq.redis.llen("queue:customqueue")
     end
 
     it 'does push duplicate messages when not configured for unique only' do
       Sidekiq::Client.middleware.unregister(Sidekiq::Middleware::Client::UniqueJobs)
       10.times { Sidekiq::Client.push('customqueue2', 'class' => 'Foo', 'args' => [1, 2]) }
-      assert_equal 10, Sidekiq::Client.redis.llen("queue:customqueue2")
+      assert_equal 10, Sidekiq.redis.llen("queue:customqueue2")
     end
   end
 
@@ -38,7 +38,8 @@ class TestClient < MiniTest::Unit::TestCase
       def @redis.incrby(*); nil; end
       def @redis.setex(*); nil; end
       def @redis.expire(*); true; end
-      Sidekiq::Client.redis = @redis
+      def @redis.with_connection; yield self; end
+      Sidekiq.redis = @redis
     end
 
     it 'raises ArgumentError with invalid params' do

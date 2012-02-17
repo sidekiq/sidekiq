@@ -47,7 +47,7 @@ module Sidekiq
     end
 
     def run
-      Sidekiq::Manager.redis = RedisConnection.create(:url => @options[:server], :namespace => @options[:namespace])
+      Sidekiq.redis = RedisConnection.create(:url => @options[:server], :namespace => @options[:namespace])
       manager = Sidekiq::Manager.new(@options)
       begin
         logger.info 'Starting processing, hit Ctrl-C to stop'

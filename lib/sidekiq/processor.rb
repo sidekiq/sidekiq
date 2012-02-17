@@ -18,7 +18,7 @@ module Sidekiq
         # default middleware
         chain.register do
           use Middleware::Server::Airbrake
-          use Middleware::Server::UniqueJobs, Sidekiq::Manager.redis
+          use Middleware::Server::UniqueJobs
           use Middleware::Server::ActiveRecord
         end
         chain
