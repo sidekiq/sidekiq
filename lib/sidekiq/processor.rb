@@ -5,7 +5,7 @@ require 'sidekiq/middleware/chain'
 require 'sidekiq/middleware/server/active_record'
 require 'sidekiq/middleware/server/airbrake'
 require 'sidekiq/middleware/server/unique_jobs'
-require 'sidekiq/middleware/server/resque_failure'
+require 'sidekiq/middleware/server/failure_jobs'
 
 module Sidekiq
   class Processor

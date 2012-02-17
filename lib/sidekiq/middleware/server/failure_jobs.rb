@@ -1,7 +1,7 @@
 module Sidekiq
   module Middleware
     module Server
-      class ResqueFailure
+      class FailureJobs
         def initialize(redis)
           @redis = redis
         end
