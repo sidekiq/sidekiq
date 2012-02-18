@@ -35,15 +35,22 @@ module Sidekiq
       @ready.each(&:terminate)
       @ready.clear
 
-      after(5) do
-        signal(:shutdown)
-      end
-
       redis.with_connection do |conn|
         workers = conn.smembers('workers')
         workers.each do |name|
           conn.srem('workers', name) if name =~ /:#{process_id}-/
         end
+      end
+
+      if @busy.empty?
+        return signal(:shutdown)
+      end
+
+      logger.info("Pausing 5 seconds to allow workers to finish...")
+      after(5) do
+        @busy.each(&:terminate)
+        #@busy.each(&:requeue)
+        signal(:shutdown)
       end
     end
 

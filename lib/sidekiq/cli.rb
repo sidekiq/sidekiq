@@ -57,7 +57,7 @@ module Sidekiq
         sleep
       rescue Interrupt
         # TODO Need clean shutdown support from Celluloid
-        logger.info 'Shutting down, pausing 5 seconds to let workers finish...'
+        logger.info 'Shutting down'
         manager.stop!
         manager.wait(:shutdown)
       end
