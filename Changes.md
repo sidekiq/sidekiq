@@ -1,9 +1,12 @@
 HEAD
 -----------
 
-- Add `delay` extensions for ActionMailer and ActiveRecord.
-- Added config file support. See test/config.yml for an example file.
-- Added pidfile for tools like monit
+- Upon shutdown, workers are now terminated after 5 seconds.  This is to
+  meet Heroku's hard limit of 10 seconds for a process to shutdown. (mperham)
+- Refactor middleware API for simplicity, see sidekiq/middleware/chain. (mperham)
+- Add `delay` extensions for ActionMailer and ActiveRecord. (mperham)
+- Added config file support. See test/config.yml for an example file.  (jc00ke)
+- Added pidfile for tools like monit (jc00ke)
 
 0.6.0
 -----------

@@ -5,34 +5,37 @@ module Sidekiq
   # (pushing jobs onto the queue) as well as the server
   # side (when jobs are actually processed).
   #
-  # Default middleware for the server:
-  #
-  # Sidekiq.server_middleware do |chain|
-  #   chain.use Middleware::Server::Airbrake
-  #   chain.use Middleware::Server::ActiveRecord
-  # end
-  #
   # To add middleware for the client:
   #
   # Sidekiq.client_middleware do |chain|
-  #   chain.use MyClientHook
+  #   chain.add MyClientHook
   # end
   #
   # To modify middleware for the server, just call
   # with another block:
   #
-  # Sidekiq::Processor.middleware do |chain|
-  #   chain.use MyServerHook
+  # Sidekiq.server_middleware do |chain|
+  #   chain.add MyServerHook
   #   chain.remove ActiveRecord
   # end
   #
-  # This is an example of a minimal middleware:
+  # This is an example of a minimal server middleware:
   #
   # class MyServerHook
   #   def call(worker, msg, queue)
   #     puts "Before work"
   #     yield
   #     puts "After work"
+  #   end
+  # end
+  #
+  # This is an example of a minimal client middleware:
+  #
+  # class MyClientHook
+  #   def call(msg, queue)
+  #     puts "Before push"
+  #     yield
+  #     puts "After push"
   #   end
   # end
   #
