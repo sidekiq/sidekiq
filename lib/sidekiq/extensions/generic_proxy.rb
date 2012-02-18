@@ -1,6 +1,6 @@
 module Sidekiq
   module Extensions
-    class Proxy < BasicObject
+    class Proxy < ::BasicObject
       def initialize(performable, target)
         @performable = performable
         @target = target
@@ -13,7 +13,7 @@ module Sidekiq
         # to JSON and then deserialized on the other side back into a
         # Ruby object.
         obj = [@target, name, args]
-        Sidekiq::Client.push('class' => @performable.name, 'args' => [YAML.dump(obj)])
+        ::Sidekiq::Client.push('class' => @performable.name, 'args' => [::YAML.dump(obj)])
       end
     end
 
