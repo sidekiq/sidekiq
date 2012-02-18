@@ -24,9 +24,7 @@ class TestMiddleware < MiniTest::Unit::TestCase
 
     it 'supports custom middleware' do
       chain = Sidekiq::Middleware::Chain.new
-      chain.register do
-        use CustomMiddleware, 1, []
-      end
+      chain.add CustomMiddleware, 1, []
 
       assert_equal CustomMiddleware, chain.entries.last.klass
     end
@@ -51,8 +49,9 @@ class TestMiddleware < MiniTest::Unit::TestCase
       recorder = []
       msg = { 'class' => CustomWorker.to_s, 'args' => [recorder] }
 
-      Sidekiq::Processor.middleware.register do
-        2.times { |i| use CustomMiddleware, i.to_s, recorder }
+      Sidekiq.server_middleware do |chain|
+        # should only add once, second should be ignored
+        2.times { |i| chain.add CustomMiddleware, i.to_s, recorder }
       end
 
       boss = MiniTest::Mock.new
@@ -65,11 +64,8 @@ class TestMiddleware < MiniTest::Unit::TestCase
     it 'allows middleware to abruptly stop processing rest of chain' do
       recorder = []
       chain = Sidekiq::Middleware::Chain.new
-
-      chain.register do
-        use NonYieldingMiddleware
-        use CustomMiddleware, 1, recorder
-      end
+      chain.add NonYieldingMiddleware
+      chain.add CustomMiddleware, 1, recorder
 
       final_action = nil
       chain.invoke { final_action = true }

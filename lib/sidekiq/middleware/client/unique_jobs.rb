@@ -1,3 +1,4 @@
+require 'multi_json'
 require 'digest'
 
 module Sidekiq

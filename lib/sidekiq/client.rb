@@ -10,14 +10,7 @@ module Sidekiq
   class Client
 
     def self.middleware
-      @middleware ||= begin
-        m = Middleware::Chain.new
-        m.register do
-          use Middleware::Client::UniqueJobs
-          use Middleware::Client::ResqueWebCompatibility
-        end
-        m
-      end
+      raise "Sidekiq::Client.middleware is now Sidekiq.client_middleware"
     end
 
     def self.registered_workers
@@ -43,7 +36,7 @@ module Sidekiq
       item['class'] = item['class'].to_s if !item['class'].is_a?(String)
 
       pushed = false
-      middleware.invoke(item, queue) do
+      Sidekiq.client_middleware.invoke(item, queue) do
         Sidekiq.redis.rpush("queue:#{queue}", MultiJson.encode(item))
         pushed = true
       end

@@ -5,31 +5,31 @@ module Sidekiq
   # (pushing jobs onto the queue) as well as the server
   # side (when jobs are actually processed).
   #
-  # Default middleware for the server side:
+  # Default middleware for the server:
   #
-  # Sidekiq::Processor.middleware.register do
-  #   use Middleware::Server::Airbrake
-  #   use Middleware::Server::ActiveRecord
+  # Sidekiq.server_middleware do |chain|
+  #   chain.use Middleware::Server::Airbrake
+  #   chain.use Middleware::Server::ActiveRecord
   # end
   #
-  # To add middleware for the client, do:
+  # To add middleware for the client:
   #
-  # Sidekiq::Client.middleware.register do
-  #  use MyClientHook
+  # Sidekiq.client_middleware do |chain|
+  #   chain.use MyClientHook
   # end
   #
-  # To add middleware for the server, do:
+  # To modify middleware for the server, just call
+  # with another block:
   #
-  # Sidekiq::Processor.middleware.register do
-  #   use MyServerHook
+  # Sidekiq::Processor.middleware do |chain|
+  #   chain.use MyServerHook
+  #   chain.remove ActiveRecord
   # end
   #
   # This is an example of a minimal middleware:
   #
-  # class MyHook
-  #   def initialize(options=nil)
-  #   end
-  #   def call(worker, msg)
+  # class MyServerHook
+  #   def call(worker, msg, queue)
   #     puts "Before work"
   #     yield
   #     puts "After work"
@@ -44,15 +44,11 @@ module Sidekiq
         @entries = []
       end
 
-      def register(&block)
-        instance_eval(&block)
-      end
-
-      def unregister(klass)
+      def remove(klass)
         entries.delete_if { |entry| entry.klass == klass }
       end
 
-      def use(klass, *args)
+      def add(klass, *args)
         entries << Entry.new(klass, *args) unless exists?(klass)
       end
 
