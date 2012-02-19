@@ -11,6 +11,7 @@ require 'sidekiq/middleware/chain'
 require 'sidekiq/middleware/server/active_record'
 require 'sidekiq/middleware/server/airbrake'
 require 'sidekiq/middleware/server/unique_jobs'
+require 'sidekiq/middleware/server/failure_jobs'
 require 'sidekiq/middleware/client/resque_web_compatibility'
 require 'sidekiq/middleware/client/unique_jobs'
 
