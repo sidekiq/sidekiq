@@ -10,34 +10,19 @@ module Sidekiq
   class Client
 
     def self.middleware
-      @middleware ||= begin
-        m = Middleware::Chain.new
-        m.register do
-          use Middleware::Client::UniqueJobs, Client.redis
-          use Middleware::Client::ResqueWebCompatibility, Client.redis
-        end
-        m
-      end
+      raise "Sidekiq::Client.middleware is now Sidekiq.client_middleware"
     end
 
     def self.registered_workers
-      redis.smembers('workers')
+      Sidekiq.redis.smembers('workers')
     end
 
     def self.registered_queues
-      redis.smembers('queues')
+      Sidekiq.redis.smembers('queues')
     end
 
     def self.queue_mappings
       @queue_mappings ||= {}
-    end
-
-    def self.redis
-      @redis ||= RedisConnection.create
-    end
-
-    def self.redis=(redis)
-      @redis = redis
     end
 
     # Example usage:
@@ -51,8 +36,8 @@ module Sidekiq
       item['class'] = item['class'].to_s if !item['class'].is_a?(String)
 
       pushed = false
-      middleware.invoke(item, queue) do
-        redis.rpush("queue:#{queue}", MultiJson.encode(item))
+      Sidekiq.client_middleware.invoke(item, queue) do
+        Sidekiq.redis.rpush("queue:#{queue}", MultiJson.encode(item))
         pushed = true
       end
       pushed

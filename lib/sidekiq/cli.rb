@@ -47,7 +47,7 @@ module Sidekiq
     end
 
     def run
-      Sidekiq::Manager.redis = RedisConnection.create(:url => @options[:server], :namespace => @options[:namespace])
+      Sidekiq.redis = RedisConnection.create(:url => @options[:server], :namespace => @options[:namespace])
       manager = Sidekiq::Manager.new(@options)
       begin
         logger.info 'Starting processing, hit Ctrl-C to stop'
@@ -57,7 +57,7 @@ module Sidekiq
         sleep
       rescue Interrupt
         # TODO Need clean shutdown support from Celluloid
-        logger.info 'Shutting down, pausing 5 seconds to let workers finish...'
+        logger.info 'Shutting down'
         manager.stop!
         manager.wait(:shutdown)
       end

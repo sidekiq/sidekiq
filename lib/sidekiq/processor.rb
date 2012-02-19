@@ -1,11 +1,5 @@
 require 'celluloid'
-
 require 'sidekiq/util'
-require 'sidekiq/middleware/chain'
-require 'sidekiq/middleware/server/active_record'
-require 'sidekiq/middleware/server/airbrake'
-require 'sidekiq/middleware/server/unique_jobs'
-require 'sidekiq/middleware/server/failure_jobs'
 
 module Sidekiq
   class Processor
@@ -13,17 +7,7 @@ module Sidekiq
     include Celluloid
 
     def self.middleware
-      @middleware ||= begin
-        chain = Middleware::Chain.new
-
-        # default middleware
-        chain.register do
-          use Middleware::Server::Airbrake
-          use Middleware::Server::UniqueJobs, Sidekiq::Manager.redis
-          use Middleware::Server::ActiveRecord
-        end
-        chain
-      end
+      raise "Sidekiq::Processor.middleware is now Sidekiq.server_middleware"
     end
 
     def initialize(boss)
@@ -35,7 +19,7 @@ module Sidekiq
       klass  = constantize(msg['class'])
       worker = klass.new
       stats(worker, msg, queue) do
-        self.class.middleware.invoke(worker, msg, queue) do
+        Sidekiq.server_middleware.invoke(worker, msg, queue) do
           worker.perform(*msg['args'])
         end
       end

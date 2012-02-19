@@ -1,6 +1,9 @@
 require 'logger'
 
 module Sidekiq
+  ##
+  # This module is part of Sidekiq core and not intended for extensions.
+  #
   module Util
 
     def self.logger
@@ -39,7 +42,7 @@ module Sidekiq
     end
 
     def redis
-      Sidekiq::Manager.redis
+      Sidekiq.redis
     end
 
     def process_id
