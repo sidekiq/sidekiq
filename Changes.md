@@ -1,6 +1,8 @@
 HEAD
 -----------
 
+- Add optional middleware FailureJobs which saves failed jobs to a
+  'failed' queue (fbjork)
 - Upon shutdown, workers are now terminated after 5 seconds.  This is to
   meet Heroku's hard limit of 10 seconds for a process to shutdown. (mperham)
 - Refactor middleware API for simplicity, see sidekiq/middleware/chain. (mperham)
