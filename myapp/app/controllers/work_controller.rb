@@ -3,13 +3,20 @@ class WorkController < ApplicationController
     @count = rand(100)
     puts "Adding #{@count} jobs"
     @count.times do |x|
-      HardWorker.perform_async('bubba', x)
+      HardWorker.perform_async('bubba', 0.01, x)
     end
   end
 
   def email
     UserMailer.delay.greetings(Time.now)
     render :nothing => true
+  end
+
+  def long
+    10.times do |x|
+      HardWorker.perform_async('bob', 10, x)
+    end
+    render :text => 'enqueued'
   end
 
   def delayed_post

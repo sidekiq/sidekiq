@@ -5,4 +5,5 @@ Myapp::Application.routes.draw do
   get "work" => "work#index"
   get "work/email" => "work#email"
   get "work/post" => "work#delayed_post"
+  get "work/long" => "work#long"
 end

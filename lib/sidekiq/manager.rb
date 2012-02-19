@@ -67,7 +67,7 @@ module Sidekiq
         @done_callback.call(processor) if @done_callback
         @busy.delete(processor)
         if stopped?
-          processor.terminate
+          processor.terminate if processor.alive?
         else
           @ready << processor
         end
