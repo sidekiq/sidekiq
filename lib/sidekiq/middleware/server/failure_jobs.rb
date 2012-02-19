@@ -2,10 +2,6 @@ module Sidekiq
   module Middleware
     module Server
       class FailureJobs
-        def initialize(redis)
-          @redis = redis
-        end
-
         def call(*args)
           yield
         rescue => e
@@ -18,8 +14,8 @@ module Sidekiq
             :worker => args[1]['class'],
             :queue => args[2]
           }
-          
-          @redis.rpush(:failed, MultiJson.encode(data))
+
+          Sidekiq.redis.rpush(:failed, MultiJson.encode(data))
           raise
         end
       end
