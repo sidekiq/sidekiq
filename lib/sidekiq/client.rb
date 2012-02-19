@@ -13,6 +13,13 @@ module Sidekiq
       raise "Sidekiq::Client.middleware is now Sidekiq.client_middleware"
     end
 
+    def self.default_middleware
+      Middleware::Chain.new do |m|
+        m.add Middleware::Client::UniqueJobs
+        m.add Middleware::Client::ResqueWebCompatibility
+      end
+    end
+
     def self.registered_workers
       Sidekiq.redis.smembers('workers')
     end

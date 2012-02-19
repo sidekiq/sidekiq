@@ -22,17 +22,17 @@ class TestCli < MiniTest::Unit::TestCase
 
     it 'changes concurrency' do
       @cli.parse(['sidekiq', '-c', '60', '-r', './test/fake_env.rb'])
-      assert_equal 60, @cli.options[:concurrency]
+      assert_equal 60, Sidekiq.options[:concurrency]
     end
 
     it 'changes queues' do
       @cli.parse(['sidekiq', '-q', 'foo', '-r', './test/fake_env.rb'])
-      assert_equal ['foo'], @cli.options[:queues]
+      assert_equal ['foo'], Sidekiq.options[:queues]
     end
 
     it 'handles weights' do
       @cli.parse(['sidekiq', '-q', 'foo,3', '-q', 'bar', '-r', './test/fake_env.rb'])
-      assert_equal %w(bar foo foo foo), @cli.options[:queues].sort
+      assert_equal %w(bar foo foo foo), Sidekiq.options[:queues].sort
     end
 
     describe 'with pidfile' do
@@ -49,7 +49,7 @@ class TestCli < MiniTest::Unit::TestCase
       end
 
       it 'sets pidfile path' do
-        assert_equal @tmp_path, @cli.options[:pidfile]
+        assert_equal @tmp_path, Sidekiq.options[:pidfile]
       end
 
       it 'writes pidfile' do
@@ -63,36 +63,36 @@ class TestCli < MiniTest::Unit::TestCase
       end
 
       it 'takes a path' do
-        assert_equal './test/config.yml', @cli.options[:config_file]
+        assert_equal './test/config.yml', Sidekiq.options[:config_file]
       end
 
       it 'sets verbose' do
-        refute @cli.options[:verbose]
+        refute Sidekiq.options[:verbose]
       end
-      
+
       it 'sets namespace' do
-        assert_equal "test_namespace", @cli.options[:namespace]
+        assert_equal "test_namespace", Sidekiq.options[:namespace]
       end
 
       it 'sets require file' do
-        assert_equal './test/fake_env.rb', @cli.options[:require]
+        assert_equal './test/fake_env.rb', Sidekiq.options[:require]
       end
 
       it 'sets environment' do
-        assert_equal 'xzibit', @cli.options[:environment]
+        assert_equal 'xzibit', Sidekiq.options[:environment]
       end
 
       it 'sets concurrency' do
-        assert_equal 50, @cli.options[:concurrency]
+        assert_equal 50, Sidekiq.options[:concurrency]
       end
 
       it 'sets pid file' do
-        assert_equal '/tmp/sidekiq-config-test.pid', @cli.options[:pidfile]
+        assert_equal '/tmp/sidekiq-config-test.pid', Sidekiq.options[:pidfile]
       end
 
       it 'sets queues' do
-        assert_equal 2, @cli.options[:queues].select{ |q| q == 'often' }.length
-        assert_equal 1, @cli.options[:queues].select{ |q| q == 'seldom' }.length
+        assert_equal 2, Sidekiq.options[:queues].select{ |q| q == 'often' }.length
+        assert_equal 1, Sidekiq.options[:queues].select{ |q| q == 'seldom' }.length
       end
     end
 
@@ -125,28 +125,28 @@ class TestCli < MiniTest::Unit::TestCase
       end
 
       it 'uses concurrency flag' do
-        assert_equal 100, @cli.options[:concurrency]
+        assert_equal 100, Sidekiq.options[:concurrency]
       end
-      
+
       it 'uses namespace flag' do
-        assert_equal "sweet_story_bro", @cli.options[:namespace]
+        assert_equal "sweet_story_bro", Sidekiq.options[:namespace]
       end
 
       it 'uses require file flag' do
-        assert_equal @tmp_lib_path, @cli.options[:require]
+        assert_equal @tmp_lib_path, Sidekiq.options[:require]
       end
 
       it 'uses environment flag' do
-        assert_equal 'snoop', @cli.options[:environment]
+        assert_equal 'snoop', Sidekiq.options[:environment]
       end
 
       it 'uses pidfile flag' do
-        assert_equal @tmp_path, @cli.options[:pidfile]
+        assert_equal @tmp_path, Sidekiq.options[:pidfile]
       end
 
       it 'sets queues' do
-        assert_equal 7, @cli.options[:queues].select{ |q| q == 'often' }.length
-        assert_equal 3, @cli.options[:queues].select{ |q| q == 'seldom' }.length
+        assert_equal 7, Sidekiq.options[:queues].select{ |q| q == 'often' }.length
+        assert_equal 3, Sidekiq.options[:queues].select{ |q| q == 'seldom' }.length
       end
     end
 

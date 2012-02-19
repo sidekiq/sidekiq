@@ -1,7 +1,10 @@
 require 'helper'
+require 'sidekiq'
 require 'active_record'
 require 'action_mailer'
-require 'sidekiq'
+require 'sidekiq/extensions/action_mailer'
+require 'sidekiq/extensions/active_record'
+
 
 class TestExtensions < MiniTest::Unit::TestCase
   describe 'sidekiq extensions' do
@@ -16,7 +19,7 @@ class TestExtensions < MiniTest::Unit::TestCase
       end
     end
 
-    it 'allowed delayed exection of ActiveRecord class methods' do
+    it 'allows delayed exection of ActiveRecord class methods' do
       @redis.expect(:rpush, @redis, ['queue:default', "{\"class\":\"Sidekiq::Extensions::DelayedModel\",\"args\":[\"---\\n- !ruby/class 'TestExtensions::MyModel'\\n- :long_class_method\\n- []\\n\"]}"])
       MyModel.delay.long_class_method
       @redis.verify
@@ -32,7 +35,7 @@ class TestExtensions < MiniTest::Unit::TestCase
       end
     end
 
-    it 'allowed delayed delivery of ActionMailer mails' do
+    it 'allows delayed delivery of ActionMailer mails' do
       @redis.expect(:rpush, @redis, ['queue:default', "{\"class\":\"Sidekiq::Extensions::DelayedMailer\",\"args\":[\"---\\n- !ruby/class 'TestExtensions::UserMailer'\\n- :greetings\\n- - 1\\n  - 2\\n\"]}"])
       UserMailer.delay.greetings(1, 2)
       @redis.verify

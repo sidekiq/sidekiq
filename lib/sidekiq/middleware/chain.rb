@@ -45,6 +45,7 @@ module Sidekiq
 
       def initialize
         @entries = []
+        yield self if block_given?
       end
 
       def remove(klass)

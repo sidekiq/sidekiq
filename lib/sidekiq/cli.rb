@@ -9,8 +9,9 @@ trap 'TERM' do
   Thread.main.raise Interrupt
 end
 
+require 'yaml'
 require 'optparse'
-require 'sidekiq/version'
+require 'sidekiq'
 require 'sidekiq/util'
 require 'sidekiq/redis_connection'
 require 'sidekiq/manager'
@@ -20,7 +21,7 @@ module Sidekiq
     include Util
 
     # Used for CLI testing
-    attr_accessor :options, :code
+    attr_accessor :code
 
     def initialize
       @code = nil
@@ -29,17 +30,11 @@ module Sidekiq
     def parse(args=ARGV)
       Sidekiq::Util.logger
 
-      @options = {
-        :queues => [],
-        :concurrency => 25,
-        :require => '.',
-        :environment => nil,
-      }
       cli = parse_options(args)
       config = parse_config(cli)
-      @options.merge!(config.merge(cli))
+      options.merge!(config.merge(cli))
 
-      set_logger_level_to_debug if @options[:verbose]
+      set_logger_level_to_debug if options[:verbose]
 
       write_pid
       validate!
@@ -47,8 +42,8 @@ module Sidekiq
     end
 
     def run
-      Sidekiq.redis = RedisConnection.create(:url => @options[:server], :namespace => @options[:namespace])
-      manager = Sidekiq::Manager.new(@options)
+      Sidekiq.redis ||= RedisConnection.create(:url => options[:server], :namespace => options[:namespace])
+      manager = Sidekiq::Manager.new(options)
       begin
         logger.info 'Starting processing, hit Ctrl-C to stop'
         manager.start!
@@ -69,29 +64,33 @@ module Sidekiq
       exit(code)
     end
 
+    def options
+      Sidekiq.options
+    end
+
     def detected_environment
-      @options[:environment] ||= ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
+      options[:environment] ||= ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
     end
 
     def boot_system
       ENV['RACK_ENV'] = ENV['RAILS_ENV'] = detected_environment
 
-      raise ArgumentError, "#{@options[:require]} does not exist" unless File.exist?(@options[:require])
+      raise ArgumentError, "#{options[:require]} does not exist" unless File.exist?(options[:require])
 
-      if File.directory?(@options[:require])
-        require File.expand_path("#{@options[:require]}/config/environment.rb")
+      if File.directory?(options[:require])
+        require File.expand_path("#{options[:require]}/config/environment.rb")
         ::Rails.application.eager_load!
       else
-        require @options[:require]
+        require options[:require]
       end
     end
 
     def validate!
-      @options[:queues] << 'default' if @options[:queues].empty?
-      @options[:queues].shuffle!
+      options[:queues] << 'default' if options[:queues].empty?
+      options[:queues].shuffle!
 
-      if !File.exist?(@options[:require]) ||
-         (File.directory?(@options[:require]) && !File.exist?("#{@options[:require]}/config/application.rb"))
+      if !File.exist?(options[:require]) ||
+         (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))
         logger.info "=================================================================="
         logger.info "  Please point sidekiq to a Rails 3 application or a Ruby file    "
         logger.info "  to load your worker classes with -r [DIR|FILE]."
@@ -107,7 +106,7 @@ module Sidekiq
       @parser = OptionParser.new do |o|
         o.on "-q", "--queue QUEUE,WEIGHT", "Queue to process, with optional weight" do |arg|
           (q, weight) = arg.split(",")
-          parse_queues(q, weight)
+          parse_queues(opts, q, weight)
         end
 
         o.on "-v", "--verbose", "Print more verbose output" do
@@ -153,7 +152,7 @@ module Sidekiq
     end
 
     def write_pid
-      if path = @options[:pidfile]
+      if path = options[:pidfile]
         File.open(path, 'w') do |f|
           f.puts Process.pid
         end
@@ -163,19 +162,16 @@ module Sidekiq
     def parse_config(cli)
       opts = {}
       if cli[:config_file] && File.exist?(cli[:config_file])
-        require 'yaml'
         opts = YAML.load_file cli[:config_file]
         queues = opts.delete(:queues) || []
-        if @options[:queues].empty?
-          queues.each { |pair| parse_queues(*pair) }
-        end
+        queues.each { |pair| parse_queues(opts, *pair) }
       end
       opts
     end
 
-    def parse_queues(q, weight)
+    def parse_queues(opts, q, weight)
       (weight || 1).to_i.times do
-        @options[:queues] << q
+        (opts[:queues] ||= []) << q
       end
     end
 

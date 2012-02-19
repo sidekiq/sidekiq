@@ -1,6 +1,11 @@
 require 'celluloid'
 require 'sidekiq/util'
 
+require 'sidekiq/middleware/server/active_record'
+require 'sidekiq/middleware/server/airbrake'
+require 'sidekiq/middleware/server/unique_jobs'
+require 'sidekiq/middleware/server/failure_jobs'
+
 module Sidekiq
   class Processor
     include Util
@@ -8,6 +13,14 @@ module Sidekiq
 
     def self.middleware
       raise "Sidekiq::Processor.middleware is now Sidekiq.server_middleware"
+    end
+
+    def self.default_middleware
+      Middleware::Chain.new do |m|
+        m.add Middleware::Server::Airbrake
+        m.add Middleware::Server::UniqueJobs
+        m.add Middleware::Server::ActiveRecord
+      end
     end
 
     def initialize(boss)
