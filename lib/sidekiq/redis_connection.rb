@@ -6,7 +6,7 @@ module Sidekiq
     def self.create(options={})
       url = options[:url] || ENV['REDISTOGO_URL'] || 'redis://localhost:6379/0'
       client = build_client(url, options[:namespace])
-      return ConnectionPool.new(:timeout => 1, :size => Sidekiq.options[:concurrency] || 25) { client } unless options[:use_pool] == false
+      return ConnectionPool.new(:timeout => 1, :size => (options[:size] || Sidekiq.options[:concurrency] || 25)) { client } unless options[:use_pool] == false
       client
     end
 

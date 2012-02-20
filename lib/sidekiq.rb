@@ -25,15 +25,30 @@ module Sidekiq
   end
 
   ##
-  # Configuration for Sidekiq, use like:
+  # Configuration for Sidekiq server, use like:
   #
-  #   Sidekiq.configure do |config|
+  #   Sidekiq.configure_server do |config|
+  #     config.redis = Sidekiq::RedisConnection.create(:namespace => 'myapp', :size => 25, :url => 'redis://myhost:8877/mydb')
   #     config.server_middleware do |chain|
   #       chain.add MyServerHook
   #     end
   #   end
-  def self.configure
-    yield self
+  def self.configure_server
+    yield self if server?
+  end
+
+  ##
+  # Configuration for Sidekiq client, use like:
+  #
+  #   Sidekiq.configure_client do |config|
+  #     config.redis = Sidekiq::RedisConnection.create(:namespace => 'myapp', :size => 1, :url => 'redis://myhost:8877/mydb')
+  #   end
+  def self.configure_client
+    yield self unless server?
+  end
+
+  def self.server?
+    defined?(Sidekiq::CLI)
   end
 
   def self.redis
