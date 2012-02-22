@@ -18,7 +18,6 @@ module Sidekiq
         private
 
         def send_to_airbrake(msg, ex)
-          logger.debug "Reporting error to Airbrake"
           ::Airbrake.notify(:error_class   => ex.class.name,
                             :error_message => "#{ex.class.name}: #{ex.message}",
                             :parameters    => msg)
@@ -26,11 +25,8 @@ module Sidekiq
 
         def send_to_exceptional(msg, ex)
           if ::Exceptional::Config.should_send_to_api?
-            logger.debug "Reporting error to Exceptional"
             ::Exceptional.context(msg)
             ::Exceptional::Remote.error(::Exceptional::ExceptionData.new(ex))
-          else
-            logger.debug "Not reporting error to Exceptional"
           end
         end
       end
