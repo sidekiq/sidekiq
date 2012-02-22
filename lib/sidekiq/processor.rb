@@ -2,7 +2,7 @@ require 'celluloid'
 require 'sidekiq/util'
 
 require 'sidekiq/middleware/server/active_record'
-require 'sidekiq/middleware/server/airbrake'
+require 'sidekiq/middleware/server/exception_handler'
 require 'sidekiq/middleware/server/unique_jobs'
 require 'sidekiq/middleware/server/failure_jobs'
 
@@ -17,7 +17,7 @@ module Sidekiq
 
     def self.default_middleware
       Middleware::Chain.new do |m|
-        m.add Middleware::Server::Airbrake
+        m.add Middleware::Server::ExceptionHandler
         m.add Middleware::Server::UniqueJobs
         m.add Middleware::Server::ActiveRecord
       end
