@@ -1,6 +1,8 @@
-HEAD
+0.7.0
 -----------
 
+- Refactor global configuration into Sidekiq.configure\_server and
+  Sidekiq.configure\_client blocks. (mperham)
 - Add optional middleware FailureJobs which saves failed jobs to a
   'failed' queue (fbjork)
 - Upon shutdown, workers are now terminated after 5 seconds.  This is to
