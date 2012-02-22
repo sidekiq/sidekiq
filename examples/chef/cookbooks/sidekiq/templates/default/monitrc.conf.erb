@@ -1,0 +1,8 @@
+<% (@num_workers || 1).times do |num| %>
+check process sidekiq_<%= @app_name %>_<%= num %>
+  with pidfile /var/run/engineyard/sidekiq/<%= @app_name %>/sidekiq_<%= num %>.pid
+  start program = "/engineyard/bin/sidekiq <%= @app_name %> start <%= @rails_env  %> sidekiq_<%= num %>.yml" with timeout 90 seconds
+  stop program = "/engineyard/bin/sidekiq <%= @app_name %> stop <%= @rails_env  %> sidekiq_<%= num %>.yml" with timeout 90 seconds
+  if totalmem is greater than 300 MB for 2 cycles then restart # eating up memory?
+  group <%= @app_name %>_sidekiq
+<% end %>
