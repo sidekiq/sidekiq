@@ -1,3 +1,8 @@
+master (unreleased)
+-----------
+
+- Add support for Exceptional error reporting (bensie)
+
 0.7.0
 -----------
 
