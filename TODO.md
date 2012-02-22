@@ -1,2 +1,1 @@
 - resque-ui-esque web ui
-- monit/god/etc example scripts

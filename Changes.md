@@ -1,6 +1,7 @@
 0.7.0
 -----------
 
+- Example chef recipe and monitrc script (jc00ke)
 - Refactor global configuration into Sidekiq.configure\_server and
   Sidekiq.configure\_client blocks. (mperham)
 - Add optional middleware FailureJobs which saves failed jobs to a
