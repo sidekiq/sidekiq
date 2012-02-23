@@ -1,6 +1,7 @@
-master (unreleased)
+HEAD
 -----------
 
+- Messages for terminated workers are now automatically requeued (mperham)
 - Add support for Exceptional error reporting (bensie)
 
 0.7.0

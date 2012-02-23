@@ -23,6 +23,8 @@ module Sidekiq
       end
     end
 
+    attr_accessor :msg, :queue
+
     def initialize(boss)
       @boss = boss
       redis.sadd('workers', self)
