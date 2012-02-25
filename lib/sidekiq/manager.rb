@@ -18,10 +18,6 @@ module Sidekiq
 
     trap_exit :processor_died
 
-    class << self
-      attr_accessor :redis
-    end
-
     def initialize(options={})
       logger.info "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{redis.client.location}"
       logger.debug { options.inspect }
@@ -40,15 +36,28 @@ module Sidekiq
       @ready.each(&:terminate)
       @ready.clear
 
-      after(5) do
-        signal(:shutdown)
-      end
-
       redis.with_connection do |conn|
         workers = conn.smembers('workers')
         workers.each do |name|
           conn.srem('workers', name) if name =~ /:#{process_id}-/
         end
+      end
+
+      if @busy.empty?
+        return signal(:shutdown)
+      end
+
+      logger.info("Pausing 5 seconds to allow workers to finish...")
+      after(5) do
+        @busy.each(&:terminate)
+        redis.with_connection do |conn|
+          conn.multi do
+            @busy.each do |busy|
+              conn.lpush("queue:#{busy.queue}", busy.msg)
+            end
+          end
+        end
+        signal(:shutdown)
       end
     end
 
@@ -64,8 +73,9 @@ module Sidekiq
       watchdog('sidekiq processor_done crashed!') do
         @done_callback.call(processor) if @done_callback
         @busy.delete(processor)
+        processor.msg = processor.queue = nil
         if stopped?
-          processor.terminate
+          processor.terminate if processor.alive?
         else
           @ready << processor
         end
@@ -89,6 +99,8 @@ module Sidekiq
       if msg
         processor = @ready.pop
         @busy << processor
+        processor.msg = msg
+        processor.queue = queue
         processor.process!(MultiJson.decode(msg), queue)
       end
       !!msg

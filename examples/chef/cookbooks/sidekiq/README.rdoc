@@ -1,0 +1,7 @@
+= DESCRIPTION:
+
+Sidekiq is a Redis-backed Ruby library for creating background jobs, placing those jobs on multiple queues, and processing them later.
+
+= USAGE: 
+
+add require_recipe "sidekiq" to main/recipes/default.rb

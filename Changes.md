@@ -1,7 +1,23 @@
 HEAD
 -----------
-- Added config file support. See test/config.yml for an example file.
-- Added pidfile for tools like monit
+
+- Messages for terminated workers are now automatically requeued (mperham)
+- Add support for Exceptional error reporting (bensie)
+
+0.7.0
+-----------
+
+- Example chef recipe and monitrc script (jc00ke)
+- Refactor global configuration into Sidekiq.configure\_server and
+  Sidekiq.configure\_client blocks. (mperham)
+- Add optional middleware FailureJobs which saves failed jobs to a
+  'failed' queue (fbjork)
+- Upon shutdown, workers are now terminated after 5 seconds.  This is to
+  meet Heroku's hard limit of 10 seconds for a process to shutdown. (mperham)
+- Refactor middleware API for simplicity, see sidekiq/middleware/chain. (mperham)
+- Add `delay` extensions for ActionMailer and ActiveRecord. (mperham)
+- Added config file support. See test/config.yml for an example file.  (jc00ke)
+- Added pidfile for tools like monit (jc00ke)
 
 0.6.0
 -----------
