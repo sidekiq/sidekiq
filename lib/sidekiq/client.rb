@@ -34,9 +34,9 @@ module Sidekiq
 
     # Example usage:
     # Sidekiq::Client.push('my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
-    def self.push(queue=nil, item)
+    def self.push(queue=nil, item=nil)
       raise(ArgumentError, "Message must be a Hash of the form: { 'class' => SomeClass, 'args' => ['bob', 1, :foo => 'bar'] }") unless item.is_a?(Hash)
-      raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") if !item['class'] || !item['args']
+      raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") unless item && item['class'] && item['args']
 
       queue = queue || queue_mappings[item['class'].to_s] || 'default'
 
