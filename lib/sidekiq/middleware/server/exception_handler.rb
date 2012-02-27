@@ -20,7 +20,8 @@ module Sidekiq
         def send_to_airbrake(msg, ex)
           ::Airbrake.notify(:error_class   => ex.class.name,
                             :error_message => "#{ex.class.name}: #{ex.message}",
-                            :parameters    => msg)
+                            :parameters    => msg,
+                            :backtrace     => ex.backtrace)
         end
 
         def send_to_exceptional(msg, ex)
