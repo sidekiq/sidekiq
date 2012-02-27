@@ -1,7 +1,7 @@
 HEAD
 -----------
 
-- Add capistrano support, just require 'sidekiq/capistrano' in config/deploy.rb.
+- Add capistrano support (mperham)
 - Workers now log upon start and finish (mperham)
 - Messages for terminated workers are now automatically requeued (mperham)
 - Add support for Exceptional error reporting (bensie)
