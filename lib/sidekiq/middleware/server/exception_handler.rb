@@ -19,9 +19,7 @@ module Sidekiq
         private
 
         def send_to_airbrake(msg, ex)
-          ::Airbrake.notify(:error_class   => ex.class.name,
-                            :error_message => "#{ex.class.name}: #{ex.message}",
-                            :parameters    => msg)
+          ::Airbrake.notify(ex, :parameters => msg)
         end
 
         def send_to_exceptional(msg, ex)
@@ -32,7 +30,7 @@ module Sidekiq
         end
 
         def send_to_exception_notifier(msg, ex)
-          ::ExceptionNotifier::Notifier.background_exception_notification(e, :data => { :message => msg })
+          ::ExceptionNotifier::Notifier.background_exception_notification(ex, :data => { :message => msg })
         end
       end
     end
