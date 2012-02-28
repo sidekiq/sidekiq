@@ -13,7 +13,6 @@ require 'yaml'
 require 'optparse'
 require 'sidekiq'
 require 'sidekiq/util'
-require 'sidekiq/redis_connection'
 require 'sidekiq/manager'
 
 module Sidekiq
@@ -42,7 +41,6 @@ module Sidekiq
     end
 
     def run
-      Sidekiq.redis ||= RedisConnection.create(:url => options[:server], :namespace => options[:namespace])
       manager = Sidekiq::Manager.new(options)
       begin
         logger.info 'Starting processing, hit Ctrl-C to stop'
@@ -113,12 +111,12 @@ module Sidekiq
           set_logger_level_to_debug
         end
 
-        o.on "-n", "--namespace NAMESPACE", "namespace worker queues are under" do |arg|
-          opts[:namespace] = arg
+        o.on "-n", "--namespace NAMESPACE", "namespace worker queues are under (DEPRECATED)" do |arg|
+          puts "Namespace support has been removed, see https://github.com/mperham/sidekiq/issues/61"
         end
 
-        o.on "-s", "--server LOCATION", "Where to find Redis" do |arg|
-          opts[:server] = arg
+        o.on "-s", "--server LOCATION", "Where to find Redis (DEPRECATED)" do |arg|
+          puts "Server location support has been removed, see https://github.com/mperham/sidekiq/issues/61"
         end
 
         o.on '-e', '--environment ENV', "Application environment" do |arg|

@@ -1,7 +1,5 @@
 ---
 :verbose:      false
-:namespace:    test_namespace
-:server:       127.0.0.1:1234
 :environment:  xzibit
 :require:      ./test/fake_env.rb
 :pidfile:      /tmp/sidekiq-config-test.pid

@@ -70,10 +70,6 @@ class TestCli < MiniTest::Unit::TestCase
         refute Sidekiq.options[:verbose]
       end
 
-      it 'sets namespace' do
-        assert_equal "test_namespace", Sidekiq.options[:namespace]
-      end
-
       it 'sets require file' do
         assert_equal './test/fake_env.rb', Sidekiq.options[:require]
       end
@@ -110,7 +106,6 @@ class TestCli < MiniTest::Unit::TestCase
 
         @cli.parse(['sidekiq',
                     '-C', './test/config.yml',
-                    '-n', 'sweet_story_bro',
                     '-e', 'snoop',
                     '-c', '100',
                     '-r', @tmp_lib_path,
@@ -126,10 +121,6 @@ class TestCli < MiniTest::Unit::TestCase
 
       it 'uses concurrency flag' do
         assert_equal 100, Sidekiq.options[:concurrency]
-      end
-
-      it 'uses namespace flag' do
-        assert_equal "sweet_story_bro", Sidekiq.options[:namespace]
       end
 
       it 'uses require file flag' do
