@@ -6,7 +6,7 @@ require 'sidekiq/processor'
 class TestMiddleware < MiniTest::Unit::TestCase
   describe 'middleware chain' do
     before do
-      Sidekiq.redis = Sidekiq::RedisConnection.create(:url => 'redis://localhost/sidekiq_test')
+      Sidekiq.redis = { :url => 'redis://localhost/sidekiq_test' }
     end
 
     class CustomMiddleware

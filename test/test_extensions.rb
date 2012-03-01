@@ -10,7 +10,8 @@ class TestExtensions < MiniTest::Unit::TestCase
   describe 'sidekiq extensions' do
     before do
       Sidekiq.client_middleware.entries.clear
-      Sidekiq.redis = @redis = MiniTest::Mock.new
+      Sidekiq.instance_variable_set(:@redis, MiniTest::Mock.new)
+      @redis = Sidekiq.redis
     end
 
     class MyModel < ActiveRecord::Base
