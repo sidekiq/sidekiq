@@ -37,7 +37,6 @@ class TestProcessor < MiniTest::Unit::TestCase
       @boss.verify
       assert_equal 0, $invokes
       assert_equal 1, $errors.size
-      assert_equal "RuntimeError", $errors[0][:error_class]
       assert_equal msg, $errors[0][:parameters]
     end
 
@@ -45,7 +44,7 @@ class TestProcessor < MiniTest::Unit::TestCase
 end
 
 class FakeAirbrake
-  def self.notify(hash)
+  def self.notify(ex, hash)
     $errors << hash
   end
 end

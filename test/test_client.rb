@@ -5,7 +5,7 @@ require 'sidekiq/worker'
 class TestClient < MiniTest::Unit::TestCase
   describe 'with real redis' do
     before do
-      Sidekiq.redis = Sidekiq::RedisConnection.create(:url => 'redis://localhost/sidekiq_test')
+      Sidekiq.redis = { :url => 'redis://localhost/sidekiq_test' }
       Sidekiq.redis.flushdb
     end
 
@@ -39,7 +39,7 @@ class TestClient < MiniTest::Unit::TestCase
       def @redis.setex(*); nil; end
       def @redis.expire(*); true; end
       def @redis.with_connection; yield self; end
-      Sidekiq.redis = @redis
+      Sidekiq.instance_variable_set(:@redis, @redis)
     end
 
     it 'raises ArgumentError with invalid params' do

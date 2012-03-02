@@ -55,8 +55,18 @@ module Sidekiq
     @redis ||= Sidekiq::RedisConnection.create
   end
 
-  def self.redis=(r)
-    @redis = r
+  def self.redis=(hash)
+    if !hash.is_a?(Hash)
+      puts "*****************************************************
+Sidekiq.redis now takes a Hash:
+old: Sidekiq.redis = Sidekiq::RedisConnection.create(:url => 'redis://foo.com', :namespace => 'abc', :size => 12)
+new: Sidekiq.redis = { :url => 'redis://foo.com', :namespace => 'xyz', :size => 12 }
+Called from #{caller[0]}
+*****************************************************"
+      @redis = hash
+    else
+      @redis = RedisConnection.create(hash)
+    end
   end
 
   def self.client_middleware

@@ -1,0 +1,11 @@
+# Sample configuration file for Sidekiq.
+# Options here can still be overridden by cmd line args.
+#   sidekiq -C config.yml
+---
+:verbose:      false
+:namespace:    test_namespace
+:server:       127.0.0.1:1234
+:concurrency:  25
+:queues:
+  - [often, 2]
+  - [seldom, 1]

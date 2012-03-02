@@ -12,15 +12,14 @@ module Sidekiq
           logger.warn ex.backtrace.join("\n")
           send_to_airbrake(args[1], ex) if defined?(::Airbrake)
           send_to_exceptional(args[1], ex) if defined?(::Exceptional)
+          send_to_exception_notifier(args[1], ex) if defined?(::ExceptionNotifier)
           raise
         end
 
         private
 
         def send_to_airbrake(msg, ex)
-          ::Airbrake.notify(:error_class   => ex.class.name,
-                            :error_message => "#{ex.class.name}: #{ex.message}",
-                            :parameters    => msg)
+          ::Airbrake.notify(ex, :parameters => msg)
         end
 
         def send_to_exceptional(msg, ex)
@@ -28,6 +27,10 @@ module Sidekiq
             ::Exceptional.context(msg)
             ::Exceptional::Remote.error(::Exceptional::ExceptionData.new(ex))
           end
+        end
+
+        def send_to_exception_notifier(msg, ex)
+          ::ExceptionNotifier::Notifier.background_exception_notification(ex, :data => { :message => msg })
         end
       end
     end
