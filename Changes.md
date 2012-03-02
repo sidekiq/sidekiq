@@ -1,4 +1,4 @@
-HEAD
+0.8.0
 -----------
 
 - Remove :namespace and :server CLI options (mperham)
