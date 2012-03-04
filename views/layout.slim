@@ -1,0 +1,23 @@
+doctype html
+html
+  head
+    link href='assets/application.css' media='screen' rel='stylesheet' type='text/css'
+    title Sidekiq
+  body
+    div class="navbar navbar-fixed-top"
+      div class="navbar-inner"
+        div class="container"
+          a class='brand' href=''
+            | Sidekiq
+          ul class='nav'
+            li
+              a href='' Home
+
+    div class="container"
+
+      == yield
+
+      footer class="footer"
+        p © #{Time.now.year} Mike Perham
+
+    script type="text/javascript" src="assets/application.js"

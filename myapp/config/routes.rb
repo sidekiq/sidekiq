@@ -1,7 +1,7 @@
-require 'resque/server'
+require 'sidekiq/web'
 
 Myapp::Application.routes.draw do
-  mount Resque::Server.new, :at => '/resque'
+  mount Sidekiq::Web => '/sidekiq'
   get "work" => "work#index"
   get "work/email" => "work#email"
   get "work/post" => "work#delayed_post"
