@@ -32,10 +32,32 @@ module Sidekiq
     dir = File.expand_path(File.dirname(__FILE__) + "/../../web")
     set :views,  "#{dir}/views"
     set :root, "#{dir}/public"
+    set :slim, :pretty => true
     use SprocketsMiddleware, :root => dir
+
+    helpers do
+      def workers
+        Sidekiq.redis.smembers('workers')
+      end
+      def queues
+        Sidekiq.redis.smembers('queues')
+      end
+      def location
+        Sidekiq.redis.client.location
+      end
+      def root_path
+        "#{env['SCRIPT_NAME']}/"
+      end
+    end
 
     get "/" do
       slim :index
+    end
+
+    get "/queues/:name" do
+      @name = params[:name]
+      @messages = Sidekiq.redis.lrange("queue:#{params[:name]}", 0, 10).map { |str| MultiJson.decode(str) }
+      slim :queue
     end
   end
 

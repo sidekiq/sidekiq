@@ -1,5 +1,27 @@
 header
-  h1 Index
-div class="row"
-  div class="span12"
-    | Index goes here
+  h1 Overview
+
+.tabbable
+  ul.nav.nav-tabs
+    li.active
+      a href="#queues" data-toggle="tab" Queues
+    li
+      a href="#workers" data-toggle="tab" Workers
+  .tab-content
+    #queues.tab-pane.active
+      table class="table table-striped table-bordered"
+        tr
+          th Queue
+        - queues.each do |queue|
+          tr
+            td
+              a href="queues/#{queue}" #{queue}
+
+    #workers.tab-pane
+      table class="table table-striped table-bordered"
+        tr
+          th Workers
+        - workers.each do |worker|
+          tr
+            td
+              a href="workers/#{worker}" #{worker}

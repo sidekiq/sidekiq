@@ -1,23 +1,21 @@
 doctype html
 html
   head
-    link href='assets/application.css' media='screen' rel='stylesheet' type='text/css'
+    link href='#{{root_path}}assets/application.css' media='screen' rel='stylesheet' type='text/css'
     title Sidekiq
   body
-    div class="navbar navbar-fixed-top"
-      div class="navbar-inner"
-        div class="container"
-          a class='brand' href=''
+    .navbar.navbar-fixed-top
+      .navbar-inner
+        .container
+          a class='brand' href='#{{root_path}}'
             | Sidekiq
           ul class='nav'
             li
-              a href='' Home
+              a href='#{{root_path}}' Home
+            li.pull-right
+              a Redis: #{location}
 
-    div class="container"
-
+    .container
       == yield
 
-      footer class="footer"
-        p © #{Time.now.year} Mike Perham
-
-    script type="text/javascript" src="assets/application.js"
+    script type="text/javascript" src="#{{root_path}}assets/application.js"
