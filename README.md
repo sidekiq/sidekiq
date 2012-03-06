@@ -42,6 +42,8 @@ More Information
 -----------------
 
 Please see the [sidekiq wiki](https://github.com/mperham/sidekiq/wiki) for more information.
+[#sidekiq on irc.freenode.net](irc://irc.freenode.net/#sidekiq) is dedicated to this project,
+but bug reports or feature requests suggestions should still go through [issues on Github](https://github.com/mperham/sidekiq/issues).
 
 
 License
