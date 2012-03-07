@@ -55,19 +55,7 @@ module Sidekiq
     end
 
     def process_id
-      Sidekiq::Util.process_id
-    end
-
-    def self.process_id
-      @pid ||= begin
-        if Process.pid == 1
-          # Heroku does not expose pids.
-          require 'securerandom'
-          (SecureRandom.random_number * 4_000_000_000).floor.to_s(16)
-        else
-          Process.pid
-        end
-      end
+      Process.pid
     end
   end
 end
