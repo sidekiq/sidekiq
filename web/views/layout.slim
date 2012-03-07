@@ -7,13 +7,16 @@ html
     .navbar.navbar-fixed-top
       .navbar-inner
         .container
-          a class='brand' href='#{{root_path}}'
+          a.brand href='#{{root_path}}'
             | Sidekiq
-          ul class='nav'
+          ul.nav
             li
               a href='#{{root_path}}' Home
-            li.pull-right
+          ul.nav.pull-right
+            li
               a Redis: #{location}
+            li
+              a #{Time.now.utc}
 
     .container
       == yield

@@ -37,16 +37,33 @@ module Sidekiq
 
     helpers do
       def workers
-        Sidekiq.redis.smembers('workers')
+        @workers ||= begin
+          Sidekiq.redis.smembers('workers').map do |w|
+            msg = Sidekiq.redis.get("worker:#{w}")
+            msg = MultiJson.decode(msg) if msg
+            [w, msg]
+          end.sort { |x| x[1] ? -1 : 1 }
+        end
       end
+
       def queues
-        Sidekiq.redis.smembers('queues')
+        Sidekiq.redis.smembers('queues').map do |q|
+          [q, Sidekiq.redis.llen("queue:#{q}") || 0]
+        end.sort { |x,y| x[1] <=> y[1] }
       end
+
       def location
         Sidekiq.redis.client.location
       end
+
       def root_path
         "#{env['SCRIPT_NAME']}/"
+      end
+
+      def status
+        return 'down' if workers.size == 0
+        return 'idle' if workers.size > 0 && workers.map { |x| x[1] }.compact.size == 0
+        return 'active'
       end
     end
 
@@ -56,7 +73,7 @@ module Sidekiq
 
     get "/queues/:name" do
       @name = params[:name]
-      @messages = Sidekiq.redis.lrange("queue:#{params[:name]}", 0, 10).map { |str| MultiJson.decode(str) }
+      @messages = Sidekiq.redis.lrange("queue:#{@name}", 0, 10).map { |str| MultiJson.decode(str) }
       slim :queue
     end
   end

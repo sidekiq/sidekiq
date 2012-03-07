@@ -1,5 +1,6 @@
-header
-  h1 Overview
+
+.hero-unit
+  h1 Sidekiq is #{status}
 
 .tabbable
   ul.nav.nav-tabs
@@ -12,16 +13,26 @@ header
       table class="table table-striped table-bordered"
         tr
           th Queue
-        - queues.each do |queue|
+          th Size
+        - queues.each do |(queue, size)|
           tr
             td
               a href="queues/#{queue}" #{queue}
+            td= size
 
     #workers.tab-pane
       table class="table table-striped table-bordered"
         tr
-          th Workers
-        - workers.each do |worker|
+          th Worker
+          th Queue
+          th Class
+          th Arguments
+        - workers.each do |(worker, msg)|
           tr
-            td
-              a href="workers/#{worker}" #{worker}
+            td= worker
+            - if msg
+              td= msg['queue']
+              td= msg['payload']['class']
+              td= msg['payload']['args'].inspect[0..100]
+            - else
+              td colspan=3 Idle
