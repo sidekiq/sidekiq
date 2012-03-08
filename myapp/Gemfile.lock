@@ -32,6 +32,10 @@ GEM
       activesupport (= 3.2.2)
       arel (~> 3.0.2)
       tzinfo (~> 0.3.29)
+    activerecord-jdbc-adapter (1.2.2)
+    activerecord-jdbcsqlite3-adapter (1.2.2)
+      activerecord-jdbc-adapter (~> 1.2.2)
+      jdbc-sqlite3 (~> 3.7.2)
     activeresource (3.2.2)
       activemodel (= 3.2.2)
       activesupport (= 3.2.2)
@@ -39,6 +43,7 @@ GEM
       i18n (~> 0.6)
       multi_json (~> 1.0)
     arel (3.0.2)
+    bouncy-castle-java (1.5.0146.1)
     builder (3.0.0)
     capistrano (2.11.2)
       highline
@@ -52,8 +57,12 @@ GEM
     highline (1.6.11)
     hike (1.2.1)
     i18n (0.6.0)
+    jdbc-sqlite3 (3.7.2)
     journey (1.0.3)
+    jruby-openssl (0.7.6.1)
+      bouncy-castle-java (>= 1.5.0146.1)
     json (1.6.5)
+    json (1.6.5-java)
     mail (2.4.1)
       i18n (>= 0.4.0)
       mime-types (~> 1.16)
@@ -119,10 +128,13 @@ GEM
     tzinfo (0.3.32)
 
 PLATFORMS
+  java
   ruby
 
 DEPENDENCIES
+  activerecord-jdbcsqlite3-adapter
   capistrano
+  jruby-openssl
   rails (= 3.2.2)
   sidekiq!
   sinatra

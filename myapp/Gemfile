@@ -1,7 +1,15 @@
 source 'https://rubygems.org'
 
+platforms :ruby do
+    gem 'sqlite3'
+end
+
+platforms :jruby do
+  gem 'jruby-openssl'
+  gem 'activerecord-jdbcsqlite3-adapter'
+end
+
 gem 'rails', '3.2.2'
-gem 'sqlite3'
 gem 'sidekiq', :path => '..'
 gem 'capistrano'
 
