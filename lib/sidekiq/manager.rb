@@ -72,10 +72,10 @@ module Sidekiq
       watchdog('sidekiq processor_done crashed!') do
         @done_callback.call(processor) if @done_callback
         @busy.delete(processor)
-        processor.msg = processor.queue = nil
         if stopped?
           processor.terminate if processor.alive?
         else
+          processor.msg = processor.queue = nil
           @ready << processor
         end
         dispatch
