@@ -38,18 +38,30 @@ module Sidekiq
     helpers do
       def workers
         @workers ||= begin
-          Sidekiq.redis.smembers('workers').map do |w|
-            msg = Sidekiq.redis.get("worker:#{w}")
-            msg = MultiJson.decode(msg) if msg
-            [w, msg]
-          end.sort { |x| x[1] ? -1 : 1 }
+          Sidekiq.redis.with_connection do |conn|
+            conn.smembers('workers').map do |w|
+              msg = conn.get("worker:#{w}")
+              msg = MultiJson.decode(msg) if msg
+              [w, msg]
+            end.sort { |x| x[1] ? -1 : 1 }
+          end
         end
       end
 
+      def processed
+        Sidekiq.redis.get('stat:processed') || 0
+      end
+
+      def failed
+        Sidekiq.redis.get('stat:failed') || 0
+      end
+
       def queues
-        Sidekiq.redis.smembers('queues').map do |q|
-          [q, Sidekiq.redis.llen("queue:#{q}") || 0]
-        end.sort { |x,y| x[1] <=> y[1] }
+        Sidekiq.redis.with_connection do |conn|
+          conn.smembers('queues').map do |q|
+            [q, conn.llen("queue:#{q}") || 0]
+          end.sort { |x,y| x[1] <=> y[1] }
+        end
       end
 
       def location

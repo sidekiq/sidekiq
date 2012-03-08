@@ -1,26 +1,18 @@
 
 .hero-unit
   h1 Sidekiq is #{status}
+  p Processed: #{processed}
+  p Failed: #{failed}
+  p Workers: #{workers.size}
 
 .tabbable
   ul.nav.nav-tabs
     li.active
-      a href="#queues" data-toggle="tab" Queues
-    li
       a href="#workers" data-toggle="tab" Workers
+    li
+      a href="#queues" data-toggle="tab" Queues
   .tab-content
-    #queues.tab-pane.active
-      table class="table table-striped table-bordered"
-        tr
-          th Queue
-          th Size
-        - queues.each do |(queue, size)|
-          tr
-            td
-              a href="queues/#{queue}" #{queue}
-            td= size
-
-    #workers.tab-pane
+    #workers.tab-pane.active
       table class="table table-striped table-bordered"
         tr
           th Worker
@@ -36,3 +28,15 @@
               td= msg['payload']['args'].inspect[0..100]
             - else
               td colspan=3 Idle
+
+    #queues.tab-pane
+      table class="table table-striped table-bordered"
+        tr
+          th Queue
+          th Size
+        - queues.each do |(queue, size)|
+          tr
+            td
+              a href="queues/#{queue}" #{queue}
+            td= size
+
