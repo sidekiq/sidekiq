@@ -12,5 +12,11 @@ You may choose to license Sidekiq in one of two ways:
   $50 to my Pledgie fund at http://www.pledgie.com/campaigns/16623 to use
   this license.
 
-This commercial license is just meant to help support my OSS work.  If
+The commercial license is just meant to help support my OSS work.  If
 you do buy the commercial licensing option, thank you for your support!
+
+The commercial license is meant to be per-site.  Consulting shops must buy
+one license per client engagement which uses Sidekiq.  For instance,
+GitHub could license Sidekiq for $50 for their own internal use but they
+must pay $50 per GitHub::FI install because FI is a separate installation
+from the GitHub website managed by the FI customer.
