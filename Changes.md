@@ -1,3 +1,12 @@
+HEAD
+-----------
+
+- TERM shutdown timeout is now configurable, defaults to 5 seconds. (mperham)
+- USR1 signal now stops Sidekiq from accepting new work,
+  capistrano sends USR1 at start of deploy and TERM at end of deploy
+  giving workers the maximum amount of time to finish. (mperham)
+- New Sidekiq::Web rack application available (mperham)
+
 0.8.0
 -----------
 

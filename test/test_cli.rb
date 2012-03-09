@@ -2,10 +2,20 @@ require 'helper'
 require 'sidekiq/cli'
 require 'tempfile'
 
+cli = Sidekiq::CLI.instance
+def cli.die(code)
+  @code = code
+end
+
+def cli.valid?
+  !@code
+end
+
 class TestCli < MiniTest::Unit::TestCase
   describe 'with cli' do
+
     before do
-      @cli = new_cli
+      @cli = Sidekiq::CLI.instance
     end
 
     it 'blows up with an invalid require' do
@@ -14,7 +24,7 @@ class TestCli < MiniTest::Unit::TestCase
       end
     end
 
-    it 'blows up with invalid Ruby' do
+    it 'requires the specified Ruby code' do
       @cli.parse(['sidekiq', '-r', './test/fake_env.rb'])
       assert($LOADED_FEATURES.any? { |x| x =~ /fake_env/ })
       assert @cli.valid?
@@ -28,6 +38,11 @@ class TestCli < MiniTest::Unit::TestCase
     it 'changes queues' do
       @cli.parse(['sidekiq', '-q', 'foo', '-r', './test/fake_env.rb'])
       assert_equal ['foo'], Sidekiq.options[:queues]
+    end
+
+    it 'changes timeout' do
+      @cli.parse(['sidekiq', '-t', '30', '-r', './test/fake_env.rb'])
+      assert_equal 30, Sidekiq.options[:timeout]
     end
 
     it 'handles weights' do
@@ -140,17 +155,6 @@ class TestCli < MiniTest::Unit::TestCase
         assert_equal 3, Sidekiq.options[:queues].select{ |q| q == 'seldom' }.length
       end
     end
-
-    def new_cli
-      cli = Sidekiq::CLI.new
-      def cli.die(code)
-        @code = code
-      end
-
-      def cli.valid?
-        !@code
-      end
-      cli
-    end
   end
+
 end

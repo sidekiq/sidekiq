@@ -9,7 +9,14 @@ trap 'TERM' do
   Thread.main.raise Interrupt
 end
 
+trap 'USR1' do
+  Sidekiq::Util.logger.info "Received USR1, no longer accepting new work"
+  mgr = Sidekiq::CLI.instance.manager
+  mgr.stop! if mgr
+end
+
 require 'yaml'
+require 'singleton'
 require 'optparse'
 require 'sidekiq'
 require 'sidekiq/util'
@@ -18,40 +25,40 @@ require 'sidekiq/manager'
 module Sidekiq
   class CLI
     include Util
+    include Singleton
 
     # Used for CLI testing
-    attr_accessor :code
+    attr_accessor :code, :manager
 
     def initialize
       @code = nil
+      @manager = nil
     end
 
     def parse(args=ARGV)
+      @code = nil
       Sidekiq::Util.logger
 
       cli = parse_options(args)
       config = parse_config(cli)
       options.merge!(config.merge(cli))
 
-      set_logger_level_to_debug if options[:verbose]
+      Sidekiq::Util.logger.level = Logger::DEBUG if options[:verbose]
 
-      write_pid
       validate!
+      write_pid
       boot_system
     end
 
     def run
-      manager = Sidekiq::Manager.new(options)
+      @manager = Sidekiq::Manager.new(options)
       begin
         logger.info 'Starting processing, hit Ctrl-C to stop'
         manager.start!
-        # HACK need to determine how to pause main thread while
-        # waiting for signals.
         sleep
       rescue Interrupt
-        # TODO Need clean shutdown support from Celluloid
         logger.info 'Shutting down'
-        manager.stop!
+        manager.stop!(:shutdown => true, :timeout => options[:timeout])
         manager.wait(:shutdown)
       end
     end
@@ -111,16 +118,12 @@ module Sidekiq
           set_logger_level_to_debug
         end
 
-        o.on "-n", "--namespace NAMESPACE", "namespace worker queues are under (DEPRECATED)" do |arg|
-          puts "Namespace support has been removed, see https://github.com/mperham/sidekiq/issues/61"
-        end
-
-        o.on "-s", "--server LOCATION", "Where to find Redis (DEPRECATED)" do |arg|
-          puts "Server location support has been removed, see https://github.com/mperham/sidekiq/issues/61"
-        end
-
         o.on '-e', '--environment ENV', "Application environment" do |arg|
           opts[:environment] = arg
+        end
+
+        o.on '-t', '--timeout NUM', "Shutdown timeout" do |arg|
+          opts[:timeout] = arg.to_i
         end
 
         o.on '-r', '--require [PATH|DIR]', "Location of Rails application with workers or file to require" do |arg|
@@ -171,10 +174,6 @@ module Sidekiq
       (weight || 1).to_i.times do
         (opts[:queues] ||= []) << q
       end
-    end
-
-    def set_logger_level_to_debug
-      Sidekiq::Util.logger.level = Logger::DEBUG
     end
 
   end

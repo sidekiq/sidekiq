@@ -30,7 +30,10 @@ module Sidekiq
       @ready = @count.times.map { Processor.new_link(current_actor) }
     end
 
-    def stop
+    def stop(options={})
+      shutdown = options[:shutdown]
+      timeout = options[:timeout]
+
       @done = true
       @ready.each(&:terminate)
       @ready.clear
@@ -42,21 +45,25 @@ module Sidekiq
         end
       end
 
-      if @busy.empty?
-        return signal(:shutdown)
-      end
+      if shutdown
+        if @busy.empty?
+          # after(0) needed to avoid deadlock in Celluoid after USR1 + TERM
+          return after(0) { signal(:shutdown) }
+        else
+          logger.info { "Pausing #{timeout} seconds to allow workers to finish..." }
+        end
 
-      logger.info("Pausing 5 seconds to allow workers to finish...")
-      after(5) do
-        @busy.each(&:terminate)
-        redis.with_connection do |conn|
-          conn.multi do
-            @busy.each do |busy|
-              conn.lpush("queue:#{busy.queue}", busy.msg)
+        after(timeout) do
+          @busy.each(&:terminate)
+          redis.with_connection do |conn|
+            conn.multi do
+              @busy.each do |busy|
+                conn.lpush("queue:#{busy.queue}", busy.msg)
+              end
             end
           end
+          signal(:shutdown)
         end
-        signal(:shutdown)
       end
     end
 

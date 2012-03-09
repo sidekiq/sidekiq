@@ -14,6 +14,7 @@ module Sidekiq
     :concurrency => 25,
     :require => '.',
     :environment => nil,
+    :timeout => 5,
   }
 
   def self.options

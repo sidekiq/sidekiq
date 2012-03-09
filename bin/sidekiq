@@ -10,7 +10,7 @@ rescue LoadError
 end
 
 begin
-  cli = Sidekiq::CLI.new
+  cli = Sidekiq::CLI.instance
   cli.parse
   cli.run
 rescue => e
