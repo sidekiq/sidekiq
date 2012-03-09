@@ -59,19 +59,22 @@ module Sidekiq
         conn.multi do
           conn.set("worker:#{self}:started", Time.now.to_s)
           conn.set("worker:#{self}", MultiJson.encode(:queue => queue, :payload => msg,
-                                                   :run_at => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z")))
+                                                      :run_at => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z")))
         end
       end
 
       dying = false
       begin
         yield
-      rescue
+      rescue StandardError => error
         dying = true
         # Uh oh, error.  We will die so unregister as much as we can first.
         redis.with_connection do |conn|
           conn.multi do
             conn.incrby("stat:failed", 1)
+            conn.rpush('failed', MultiJson.encode(:timestamp => Time.now.utc, :worker => self.to_s, 
+                                                  :error => error.to_s, :backtrace => error.backtrace,
+                                                  :queue => queue))
             conn.del("stat:processed:#{self}")
             conn.srem("workers", self)
           end
