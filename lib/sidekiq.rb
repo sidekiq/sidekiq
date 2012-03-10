@@ -1,11 +1,11 @@
 require 'sidekiq/version'
 require 'sidekiq/client'
 require 'sidekiq/worker'
-require 'sidekiq/rails' if defined?(::Rails)
+require 'sidekiq/rails'
 require 'sidekiq/redis_connection'
 
-require 'sidekiq/extensions/action_mailer' if defined?(::ActionMailer)
-require 'sidekiq/extensions/active_record' if defined?(::ActiveRecord)
+require 'sidekiq/extensions/action_mailer'
+require 'sidekiq/extensions/active_record'
 
 module Sidekiq
 

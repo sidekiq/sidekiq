@@ -5,6 +5,7 @@ require 'action_mailer'
 require 'sidekiq/extensions/action_mailer'
 require 'sidekiq/extensions/active_record'
 
+Sidekiq.hook_rails!
 
 class TestExtensions < MiniTest::Unit::TestCase
   describe 'sidekiq extensions' do
