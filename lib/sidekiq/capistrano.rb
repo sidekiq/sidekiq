@@ -13,7 +13,7 @@ Capistrano::Configuration.instance.load do
 
     desc "Stop sidekiq"
     task :stop do
-      run "sleep #{fetch :sidekiq_timeout} && kill -9 `cat #{current_path}/tmp/pids/sidekiq.pid` && rm #{current_path}/tmp/pids/sidekiq.pid"
+      run "sleep #{fetch :sidekiq_timeout} && kill `cat #{current_path}/tmp/pids/sidekiq.pid` && rm #{current_path}/tmp/pids/sidekiq.pid"
     end
 
     desc "Start sidekiq"
@@ -27,6 +27,11 @@ Capistrano::Configuration.instance.load do
       stop
       start
     end
-
+    
+    desc "Kill sidekiq"
+    task :kill do
+      run "kill -9 `cat #{current_path}/tmp/pids/sidekiq.pid` && rm #{current_path}/tmp/pids/sidekiq.pid"
+    end
+    
   end
 end
