@@ -10,9 +10,8 @@ Sidekiq.hook_rails!
 class TestExtensions < MiniTest::Unit::TestCase
   describe 'sidekiq extensions' do
     before do
-      Sidekiq.client_middleware.entries.clear
-      Sidekiq.instance_variable_set(:@redis, MiniTest::Mock.new)
-      @redis = Sidekiq.redis
+      Sidekiq.redis = { :url => 'redis://localhost/sidekiq_test' }
+      Sidekiq.redis.flushdb
     end
 
     class MyModel < ActiveRecord::Base
@@ -22,9 +21,11 @@ class TestExtensions < MiniTest::Unit::TestCase
     end
 
     it 'allows delayed exection of ActiveRecord class methods' do
-      @redis.expect(:rpush, @redis, ['queue:default', "{\"class\":\"Sidekiq::Extensions::DelayedModel\",\"args\":[\"---\\n- !ruby/class 'TestExtensions::MyModel'\\n- :long_class_method\\n- []\\n\"]}"])
+      assert_equal [], Sidekiq::Client.registered_queues
+      assert_equal 0, Sidekiq.redis.llen('queue:default')
       MyModel.delay.long_class_method
-      @redis.verify
+      assert_equal ['default'], Sidekiq::Client.registered_queues
+      assert_equal 1, Sidekiq.redis.llen('queue:default')
     end
 
     it 'allows delayed exection of ActiveRecord instance methods' do
@@ -38,9 +39,11 @@ class TestExtensions < MiniTest::Unit::TestCase
     end
 
     it 'allows delayed delivery of ActionMailer mails' do
-      @redis.expect(:rpush, @redis, ['queue:default', "{\"class\":\"Sidekiq::Extensions::DelayedMailer\",\"args\":[\"---\\n- !ruby/class 'TestExtensions::UserMailer'\\n- :greetings\\n- - 1\\n  - 2\\n\"]}"])
+      assert_equal [], Sidekiq::Client.registered_queues
+      assert_equal 0, Sidekiq.redis.llen('queue:default')
       UserMailer.delay.greetings(1, 2)
-      @redis.verify
+      assert_equal ['default'], Sidekiq::Client.registered_queues
+      assert_equal 1, Sidekiq.redis.llen('queue:default')
     end
 
   end

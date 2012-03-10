@@ -13,7 +13,6 @@ class TestClient < MiniTest::Unit::TestCase
       Sidekiq.client_middleware.entries.clear
       Sidekiq.client_middleware do |chain|
         chain.add Sidekiq::Middleware::Client::UniqueJobs
-        chain.add Sidekiq::Middleware::Client::ResqueWebCompatibility
       end
       10.times { Sidekiq::Client.push('customqueue', 'class' => 'Foo', 'args' => [1, 2]) }
       assert_equal 1, Sidekiq.redis.llen("queue:customqueue")

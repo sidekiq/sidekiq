@@ -1,9 +1,12 @@
 require 'helper'
+require 'sidekiq'
 require 'sidekiq/worker'
 require 'active_record'
 require 'action_mailer'
 require 'sidekiq/extensions/action_mailer'
 require 'sidekiq/extensions/active_record'
+
+Sidekiq.hook_rails!
 
 class TestTesting < MiniTest::Unit::TestCase
   describe 'sidekiq testing' do
