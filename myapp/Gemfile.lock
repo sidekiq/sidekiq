@@ -139,4 +139,5 @@ DEPENDENCIES
   sidekiq!
   sinatra
   slim
+  sprockets
   sqlite3

@@ -23,7 +23,5 @@ module Sidekiq
       end
     end
 
-    ::ActiveRecord::Base.extend(ActiveRecord)
-    ::ActiveRecord::Base.send(:include, ActiveRecord)
   end
-end if defined?(::ActiveRecord)
+end

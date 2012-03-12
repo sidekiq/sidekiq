@@ -55,13 +55,6 @@ module Sidekiq
 
         after(timeout) do
           @busy.each(&:terminate)
-          redis.with_connection do |conn|
-            conn.multi do
-              @busy.each do |busy|
-                conn.lpush("queue:#{busy.queue}", busy.msg)
-              end
-            end
-          end
           signal(:shutdown)
         end
       end
@@ -81,8 +74,8 @@ module Sidekiq
         @busy.delete(processor)
         if stopped?
           processor.terminate if processor.alive?
+          signal(:shutdown) if @busy.empty?
         else
-          processor.msg = processor.queue = nil
           @ready << processor
         end
         dispatch
@@ -95,6 +88,8 @@ module Sidekiq
       unless stopped?
         @ready << Processor.new_link(current_actor)
         dispatch
+      else
+        signal(:shutdown) if @busy.empty?
       end
     end
 
@@ -105,8 +100,6 @@ module Sidekiq
       if msg
         processor = @ready.pop
         @busy << processor
-        processor.msg = msg
-        processor.queue = queue
         processor.process!(MultiJson.decode(msg), queue)
       end
       !!msg
