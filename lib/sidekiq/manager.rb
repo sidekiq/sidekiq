@@ -74,6 +74,7 @@ module Sidekiq
         @busy.delete(processor)
         if stopped?
           processor.terminate if processor.alive?
+          signal(:shutdown) if @busy.empty?
         else
           @ready << processor
         end
@@ -87,6 +88,8 @@ module Sidekiq
       unless stopped?
         @ready << Processor.new_link(current_actor)
         dispatch
+      else
+        signal(:shutdown) if @busy.empty?
       end
     end
 
