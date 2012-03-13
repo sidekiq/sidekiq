@@ -35,7 +35,7 @@ module Sidekiq
       timeout = options[:timeout]
 
       @done = true
-      @ready.each(&:terminate)
+      @ready.each { |x| x.terminate if x.alive? }
       @ready.clear
 
       redis.with_connection do |conn|
@@ -54,7 +54,7 @@ module Sidekiq
         end
 
         after(timeout) do
-          @busy.each(&:terminate)
+          @busy.each { |x| x.terminate if x.alive? }
           signal(:shutdown)
         end
       end
@@ -76,7 +76,7 @@ module Sidekiq
           processor.terminate if processor.alive?
           signal(:shutdown) if @busy.empty?
         else
-          @ready << processor
+          @ready << processor if processor.alive?
         end
         dispatch
       end
@@ -108,6 +108,10 @@ module Sidekiq
     def dispatch(schedule = false)
       watchdog("Fatal error in sidekiq, dispatch loop died") do
         return if stopped?
+
+        # This is a safety check to ensure we haven't leaked
+        # processors somehow.
+        raise "BUG: No processors, cannot continue!" if @ready.empty? && @busy.empty?
 
         # Dispatch loop
         loop do
