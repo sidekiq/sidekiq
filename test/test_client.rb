@@ -5,7 +5,7 @@ require 'sidekiq/worker'
 class TestClient < MiniTest::Unit::TestCase
   describe 'with real redis' do
     before do
-      Sidekiq.redis = { :url => 'redis://localhost/sidekiq_test' }
+      Sidekiq.redis = REDIS
       Sidekiq.redis.flushdb
     end
 

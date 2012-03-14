@@ -12,7 +12,7 @@ class TestWeb < MiniTest::Unit::TestCase
     end
 
     before do
-      Sidekiq.redis = { :url => 'redis://localhost/sidekiq_test' }
+      Sidekiq.redis = REDIS
       Sidekiq.redis.flushdb
     end
 

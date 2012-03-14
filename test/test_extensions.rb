@@ -10,7 +10,7 @@ Sidekiq.hook_rails!
 class TestExtensions < MiniTest::Unit::TestCase
   describe 'sidekiq extensions' do
     before do
-      Sidekiq.redis = { :url => 'redis://localhost/sidekiq_test' }
+      Sidekiq.redis = REDIS
       Sidekiq.redis.flushdb
     end
 

@@ -5,48 +5,50 @@ require 'sidekiq/processor'
 class TestStats < MiniTest::Unit::TestCase
   describe 'with redis' do
     before do
-      Sidekiq.redis = { :url => 'redis://localhost/sidekiq_test' }
-      @redis = Sidekiq.redis
-      @redis.flushdb
+      @redis = Sidekiq.redis = REDIS
+      Sidekiq.redis.flushdb
     end
 
     class DumbWorker
       include Sidekiq::Worker
 
-      def perform(redis)
-        raise 'bang' if redis == nil
+      def perform(arg)
+        raise 'bang' if arg == nil
       end
     end
 
     it 'updates global stats in the success case' do
-      msg = { 'class' => DumbWorker.to_s, 'args' => [@redis] }
+      msg = { 'class' => DumbWorker.to_s, 'args' => [""] }
       boss = MiniTest::Mock.new
 
-      set = @redis.smembers('workers')
-      assert_equal 0, set.size
+      @redis.with do |conn|
 
-      processor = Sidekiq::Processor.new(boss)
-      boss.expect(:processor_done!, nil, [processor])
+        set = conn.smembers('workers')
+        assert_equal 0, set.size
 
-      # adds to the workers set upon initialize
-      set = @redis.smembers('workers')
-      assert_equal 1, set.size
-      assert_match(/#{Regexp.escape(`hostname`.strip)}/, set.first)
+        processor = Sidekiq::Processor.new(boss)
+        boss.expect(:processor_done!, nil, [processor])
 
-      assert_equal 0, @redis.get('stat:failed').to_i
-      assert_equal 0, @redis.get('stat:processed').to_i
-      assert_equal 0, @redis.get("stat:processed:#{processor}").to_i
+        # adds to the workers set upon initialize
+        set = conn.smembers('workers')
+        assert_equal 1, set.size
+        assert_match(/#{Regexp.escape(`hostname`.strip)}/, set.first)
 
-      processor.process(msg, 'xyzzy')
-      processor.process(msg, 'xyzzy')
-      processor.process(msg, 'xyzzy')
+        assert_equal 0, conn.get('stat:failed').to_i
+        assert_equal 0, conn.get('stat:processed').to_i
+        assert_equal 0, conn.get("stat:processed:#{processor}").to_i
 
-      set = @redis.smembers('workers')
-      assert_equal 1, set.size
-      assert_match(/#{Regexp.escape(`hostname`.strip)}/, set.first)
-      assert_equal 0, @redis.get('stat:failed').to_i
-      assert_equal 3, @redis.get('stat:processed').to_i
-      assert_equal 3, @redis.get("stat:processed:#{processor}").to_i
+        processor.process(msg, 'xyzzy')
+        processor.process(msg, 'xyzzy')
+        processor.process(msg, 'xyzzy')
+
+        set = conn.smembers('workers')
+        assert_equal 1, set.size
+        assert_match(/#{Regexp.escape(`hostname`.strip)}/, set.first)
+        assert_equal 0, conn.get('stat:failed').to_i
+        assert_equal 3, conn.get('stat:processed').to_i
+        assert_equal 3, conn.get("stat:processed:#{processor}").to_i
+      end
     end
 
     it 'updates global stats in the error case' do
@@ -72,8 +74,5 @@ class TestStats < MiniTest::Unit::TestCase
       assert_equal nil, @redis.get("stat:processed:#{pstr}")
     end
 
-    it 'should set various stats during processing' do
-      skip 'TODO'
-    end
   end
 end

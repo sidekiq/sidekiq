@@ -60,7 +60,7 @@ module Sidekiq
     @redis = if hash.is_a?(Hash)
       RedisConnection.create(hash)
     else
-      puts "*****************************************************
+      Sidekiq::Util.logger.info "*****************************************************
 Sidekiq.redis now takes a Hash:
 old: Sidekiq.redis = Sidekiq::RedisConnection.create(:url => 'redis://foo.com', :namespace => 'abc', :size => 12)
 new: Sidekiq.redis = { :url => 'redis://foo.com', :namespace => 'xyz', :size => 12 }

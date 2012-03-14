@@ -8,9 +8,8 @@ require 'connection_pool'
 class TestManager < MiniTest::Unit::TestCase
   describe 'with redis' do
     before do
-      Sidekiq.redis = { :url => 'redis://localhost/sidekiq_test' }
-      @redis = Sidekiq.redis
-      @redis.flushdb
+      Sidekiq.redis = REDIS
+      Sidekiq.redis.flushdb
       $processed = 0
       $mutex = Mutex.new
     end
