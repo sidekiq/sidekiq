@@ -7,6 +7,7 @@
   capistrano sends USR1 at start of deploy and TERM at end of deploy
   giving workers the maximum amount of time to finish.
 - New Sidekiq::Web rack application available
+- Updated Sidekiq.redis API
 
 0.8.0
 -----------

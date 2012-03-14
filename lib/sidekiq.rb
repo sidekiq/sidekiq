@@ -52,8 +52,21 @@ module Sidekiq
     defined?(Sidekiq::CLI)
   end
 
-  def self.redis
+  def self.redis(&block)
     @redis ||= Sidekiq::RedisConnection.create
+    if block_given?
+      @redis.with(&block)
+    else
+      Sidekiq::Util.logger.info "*****************************************************
+Sidekiq.redis now takes a block:
+
+  Sidekiq.redis { |connection| connection.smembers('myset') }
+
+Please update your code accordingly.
+Called from #{caller[0]}
+*****************************************************"
+      @redis
+    end
   end
 
   def self.redis=(hash)

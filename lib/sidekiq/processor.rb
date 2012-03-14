@@ -27,7 +27,7 @@ module Sidekiq
 
     def initialize(boss)
       @boss = boss
-      redis.sadd('workers', self)
+      redis {|x| x.sadd('workers', self) }
     end
 
     def process(msg, queue)
@@ -53,7 +53,7 @@ module Sidekiq
     private
 
     def stats(worker, msg, queue)
-      redis.with_connection do |conn|
+      redis do |conn|
         conn.multi do
           conn.set("worker:#{self}:started", Time.now.to_s)
           conn.set("worker:#{self}", MultiJson.encode(:queue => queue, :payload => msg,
@@ -67,7 +67,7 @@ module Sidekiq
       rescue
         dying = true
         # Uh oh, error.  We will die so unregister as much as we can first.
-        redis.with_connection do |conn|
+        redis do |conn|
           conn.multi do
             conn.incrby("stat:failed", 1)
             conn.del("stat:processed:#{self}")
@@ -76,7 +76,7 @@ module Sidekiq
         end
         raise
       ensure
-        redis.with_connection do |conn|
+        redis do |conn|
           conn.multi do
             conn.del("worker:#{self}")
             conn.del("worker:#{self}:started")

@@ -3,7 +3,7 @@ PATH
   specs:
     sidekiq (0.9.0)
       celluloid
-      connection_pool
+      connection_pool (>= 0.9.0)
       multi_json
       redis
       redis-namespace
@@ -52,7 +52,7 @@ GEM
       net-ssh (>= 2.0.14)
       net-ssh-gateway (>= 1.1.0)
     celluloid (0.9.0)
-    connection_pool (0.1.0)
+    connection_pool (0.9.0)
     erubis (2.7.0)
     highline (1.6.11)
     hike (1.2.1)

@@ -9,9 +9,9 @@ module Sidekiq
 
         def call(item, queue)
           payload_hash = Digest::MD5.hexdigest(MultiJson.encode(item))
-          Sidekiq.redis.with_connection do |redis|
-            return if redis.get(payload_hash)
-            redis.setex(payload_hash, HASH_KEY_EXPIRATION, 1)
+          Sidekiq.redis do |conn|
+            return if conn.get(payload_hash)
+            conn.setex(payload_hash, HASH_KEY_EXPIRATION, 1)
           end
 
           yield

@@ -50,8 +50,8 @@ module Sidekiq
       Sidekiq::Util.logger
     end
 
-    def redis
-      Sidekiq.redis
+    def redis(&block)
+      Sidekiq.redis(&block)
     end
 
     def process_id

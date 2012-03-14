@@ -4,6 +4,7 @@ require 'multi_json'
 
 require 'sidekiq/util'
 require 'sidekiq/processor'
+require 'connection_pool/version'
 
 module Sidekiq
 
@@ -19,7 +20,8 @@ module Sidekiq
     trap_exit :processor_died
 
     def initialize(options={})
-      logger.info "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{redis.client.location}"
+      logger.info "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{redis {|x| x.client.location}}"
+      logger.info "Running in #{RUBY_DESCRIPTION}"
       logger.debug { options.inspect }
       @count = options[:concurrency] || 25
       @queues = options[:queues]
@@ -38,7 +40,7 @@ module Sidekiq
       @ready.each { |x| x.terminate if x.alive? }
       @ready.clear
 
-      redis.with_connection do |conn|
+      redis do |conn|
         workers = conn.smembers('workers')
         workers.each do |name|
           conn.srem('workers', name) if name =~ /:#{process_id}-/
@@ -96,7 +98,7 @@ module Sidekiq
     private
 
     def find_work(queue)
-      msg = redis.lpop("queue:#{queue}")
+      msg = redis { |x| x.lpop("queue:#{queue}") }
       if msg
         processor = @ready.pop
         @busy << processor

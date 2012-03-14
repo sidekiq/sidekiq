@@ -38,6 +38,7 @@ class TestClient < MiniTest::Unit::TestCase
       def @redis.setex(*); nil; end
       def @redis.expire(*); true; end
       def @redis.with_connection; yield self; end
+      def @redis.with; yield self; end
       Sidekiq.instance_variable_set(:@redis, @redis)
     end
 
