@@ -56,8 +56,8 @@ module Sidekiq
         Sidekiq.redis.get('stat:failed') || 0
       end
 
-      def messages
-        Sidekiq.redis.lrange("queue:#{@name}", 0, 10).map { |str| MultiJson.decode(str) }
+      def messages(name)
+        Sidekiq.redis.lrange("queue:#{name}", 0, 10).map { |str| MultiJson.decode(str) }
       end
 
       def failed_jobs
@@ -96,8 +96,9 @@ module Sidekiq
     end
 
     get "/queues/:name" do
-      @name = params[:name]
-      @messages = messages
+      @name     = params[:name]
+      redirect '/' unless @name
+      @messages = messages(@name)
       slim :queue
     end
 

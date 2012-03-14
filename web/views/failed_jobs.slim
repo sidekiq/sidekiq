@@ -1,26 +1,15 @@
 h1 Failed Jobs
 p Showing #{@failed_jobs.length} failures
 
-- unless @failed_jobs.empty?
+table class="table table-striped table-bordered"
+  tr
+    th Worker
+    th Queue
+    th Timestamp
+    th Error
   - @failed_jobs.each do |job|
-    .well
-      p 
-        strong Worker: 
-        span.code = job['worker']
-
-      p 
-        strong Queue:
-        span.code = job['queue']
-
-      p 
-        strong Timestamp: 
-        span.code = job['timestamp']
-
-      p
-        strong Backtrace: 
-        p.code #{job['error']} 
-        - job['backtrace'].each do |line|
-          p.code = line
-
-- else
-  p No failed jobs!
+    tr
+      td= job['worker']
+      td= job['queue']
+      td= job['timestamp']
+      td= job['error']
