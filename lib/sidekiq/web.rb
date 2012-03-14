@@ -56,6 +56,14 @@ module Sidekiq
         Sidekiq.redis.get('stat:failed') || 0
       end
 
+      def messages(name)
+        Sidekiq.redis.lrange("queue:#{name}", 0, 10).map { |str| MultiJson.decode(str) }
+      end
+
+      def failed_jobs
+        Sidekiq.redis.lrange('failed', 0, -1).map { |str| MultiJson.decode str }
+      end
+
       def queues
         Sidekiq.redis.with_connection do |conn|
           conn.smembers('queues').map do |q|
@@ -72,6 +80,10 @@ module Sidekiq
         "#{env['SCRIPT_NAME']}/"
       end
 
+      def failed_path
+        "#{env['SCRIPT_NAME']}/failed_jobs"
+      end
+
       def status
         return 'down' if workers.size == 0
         return 'idle' if workers.size > 0 && workers.map { |x| x[1] }.compact.size == 0
@@ -84,9 +96,15 @@ module Sidekiq
     end
 
     get "/queues/:name" do
-      @name = params[:name]
-      @messages = Sidekiq.redis.lrange("queue:#{@name}", 0, 10).map { |str| MultiJson.decode(str) }
+      @name     = params[:name]
+      redirect '/' unless @name
+      @messages = messages(@name)
       slim :queue
+    end
+
+    get '/failed_jobs' do
+      @failed_jobs = failed_jobs
+      slim :failed_jobs
     end
   end
 

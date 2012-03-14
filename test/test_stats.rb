@@ -36,6 +36,7 @@ class TestStats < MiniTest::Unit::TestCase
       assert_equal 0, @redis.get('stat:failed').to_i
       assert_equal 0, @redis.get('stat:processed').to_i
       assert_equal 0, @redis.get("stat:processed:#{processor}").to_i
+      assert_empty @redis.lrange('failed', 0, -1)
 
       processor.process(msg, 'xyzzy')
       processor.process(msg, 'xyzzy')
@@ -70,6 +71,7 @@ class TestStats < MiniTest::Unit::TestCase
       assert_equal 1, @redis.get('stat:failed').to_i
       assert_equal 1, @redis.get('stat:processed').to_i
       assert_equal nil, @redis.get("stat:processed:#{pstr}")
+      assert @redis.lrange('failed', 0, -1).length > 0
     end
 
     it 'should set various stats during processing' do
