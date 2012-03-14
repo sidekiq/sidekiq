@@ -115,7 +115,7 @@ module Sidekiq
         end
 
         o.on "-v", "--verbose", "Print more verbose output" do
-          set_logger_level_to_debug
+          Sidekiq::Util.logger.level = Logger::DEBUG
         end
 
         o.on '-e', '--environment ENV', "Application environment" do |arg|
