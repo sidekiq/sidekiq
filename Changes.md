@@ -1,3 +1,8 @@
+0.9.1
+-----------
+
+- Fix missed deprecations, poor method name in web UI
+
 0.9.0
 -----------
 

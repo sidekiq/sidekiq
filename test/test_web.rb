@@ -47,5 +47,15 @@ class TestWeb < MiniTest::Unit::TestCase
       assert_match last_response.body, /foo/
     end
 
+    it 'handles queues with no name' do
+      get '/queues'
+      assert_equal 404, last_response.status
+    end
+
+    it 'handles queue view' do
+      get '/queues/default'
+      assert_equal 200, last_response.status
+    end
+
   end
 end

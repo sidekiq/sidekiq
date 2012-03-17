@@ -38,7 +38,7 @@ module Sidekiq
     helpers do
       def workers
         @workers ||= begin
-          Sidekiq.redis.with_connection do |conn|
+          Sidekiq.redis do |conn|
             conn.smembers('workers').map do |w|
               msg = conn.get("worker:#{w}")
               msg = MultiJson.decode(msg) if msg
@@ -49,15 +49,15 @@ module Sidekiq
       end
 
       def processed
-        Sidekiq.redis.get('stat:processed') || 0
+        Sidekiq.redis { |conn| conn.get('stat:processed') } || 0
       end
 
       def failed
-        Sidekiq.redis.get('stat:failed') || 0
+        Sidekiq.redis { |conn| conn.get('stat:failed') } || 0
       end
 
       def queues
-        Sidekiq.redis.with_connection do |conn|
+        Sidekiq.redis do |conn|
           conn.smembers('queues').map do |q|
             [q, conn.llen("queue:#{q}") || 0]
           end.sort { |x,y| x[1] <=> y[1] }
@@ -65,14 +65,14 @@ module Sidekiq
       end
 
       def location
-        Sidekiq.redis.client.location
+        Sidekiq.redis { |conn| conn.client.location }
       end
 
       def root_path
         "#{env['SCRIPT_NAME']}/"
       end
 
-      def status
+      def current_status
         return 'down' if workers.size == 0
         return 'idle' if workers.size > 0 && workers.map { |x| x[1] }.compact.size == 0
         return 'active'
@@ -84,8 +84,9 @@ module Sidekiq
     end
 
     get "/queues/:name" do
+      halt 404 unless params[:name]
       @name = params[:name]
-      @messages = Sidekiq.redis.lrange("queue:#{@name}", 0, 10).map { |str| MultiJson.decode(str) }
+      @messages = Sidekiq.redis {|conn| conn.lrange("queue:#{@name}", 0, 10) }.map { |str| MultiJson.decode(str) }
       slim :queue
     end
   end

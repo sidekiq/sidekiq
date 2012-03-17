@@ -3,6 +3,7 @@ require 'sidekiq/client'
 require 'sidekiq/worker'
 require 'sidekiq/rails'
 require 'sidekiq/redis_connection'
+require 'sidekiq/util'
 
 require 'sidekiq/extensions/action_mailer'
 require 'sidekiq/extensions/active_record'
