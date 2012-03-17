@@ -1,2 +1,1 @@
-- resque-ui-esque web ui
-- scheduled tasks [GH-66]
+- reschedule failed tasks
