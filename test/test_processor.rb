@@ -8,6 +8,7 @@ class TestProcessor < MiniTest::Unit::TestCase
       $errors = []
       @boss = MiniTest::Mock.new
       Celluloid.logger = nil
+      Sidekiq.redis = REDIS
     end
 
     class MockWorker
@@ -49,4 +50,3 @@ class FakeAirbrake
   end
 end
 Airbrake = FakeAirbrake
-

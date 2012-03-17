@@ -42,10 +42,6 @@ class TestMiddleware < MiniTest::Unit::TestCase
     end
 
     it 'executes middleware in the proper order' do
-      Sidekiq::Middleware::Server::UniqueJobs.class_eval do
-        def call(*args); yield; end
-      end
-
       recorder = []
       msg = { 'class' => CustomWorker.to_s, 'args' => [recorder] }
 
