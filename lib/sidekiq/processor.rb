@@ -4,7 +4,7 @@ require 'sidekiq/util'
 require 'sidekiq/middleware/server/active_record'
 require 'sidekiq/middleware/server/exception_handler'
 require 'sidekiq/middleware/server/unique_jobs'
-require 'sidekiq/middleware/server/failure_jobs'
+require 'sidekiq/middleware/server/retry_jobs'
 require 'sidekiq/middleware/server/logging'
 
 module Sidekiq
@@ -21,6 +21,7 @@ module Sidekiq
         m.add Middleware::Server::ExceptionHandler
         m.add Middleware::Server::Logging
         m.add Middleware::Server::UniqueJobs
+        #m.add Middleware::Server::RetryJobs
         m.add Middleware::Server::ActiveRecord
       end
     end
