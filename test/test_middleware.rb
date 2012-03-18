@@ -6,7 +6,20 @@ require 'sidekiq/processor'
 class TestMiddleware < MiniTest::Unit::TestCase
   describe 'middleware chain' do
     before do
+      $errors = []
       Sidekiq.redis = REDIS
+    end
+
+    it 'handles errors' do
+      handler = Sidekiq::Middleware::Server::ExceptionHandler.new
+
+      assert_raises ArgumentError do
+        handler.call('', { :a => 1 }, 'default') do
+          raise ArgumentError
+        end
+      end
+      assert_equal 1, $errors.size
+      assert_equal({ :a => 1 }, $errors[0][:parameters])
     end
 
     class CustomMiddleware
@@ -70,3 +83,10 @@ class TestMiddleware < MiniTest::Unit::TestCase
     end
   end
 end
+
+class FakeAirbrake
+  def self.notify(ex, hash)
+    $errors << hash
+  end
+end
+Airbrake = FakeAirbrake

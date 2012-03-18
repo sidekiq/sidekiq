@@ -64,6 +64,10 @@ module Sidekiq
         entries.map(&:make_new)
       end
 
+      def clear
+        entries.clear
+      end
+
       def invoke(*args, &final_action)
         chain = retrieve.dup
         traverse_chain = lambda do
