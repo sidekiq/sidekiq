@@ -1,3 +1,6 @@
+require 'sidekiq'
+require 'celluloid'
+
 module Sidekiq
   ##
   # Sidekiq's retry support assumes a typical development lifecycle:
