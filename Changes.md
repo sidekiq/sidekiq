@@ -1,3 +1,11 @@
+0.10.0
+-----------
+
+- Automatic failure retry!  Sidekiq will now save failed messages
+  and retry them, with an exponential backoff, over about 20 days.
+  Did a message fail to process?  Just deploy a bug fix in the next
+  few days and Sidekiq will retry the message eventually.
+
 0.9.1
 -----------
 

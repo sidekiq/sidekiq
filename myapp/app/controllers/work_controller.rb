@@ -19,6 +19,11 @@ class WorkController < ApplicationController
     render :text => 'enqueued'
   end
 
+  def crash
+    HardWorker.perform_async('crash', 1, Time.now.to_f)
+    render :text => 'enqueued'
+  end
+
   def delayed_post
     p = Post.first
     unless p

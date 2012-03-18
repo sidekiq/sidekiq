@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    sidekiq (0.9.1)
+    sidekiq (0.10.0)
       celluloid
       connection_pool (>= 0.9.0)
       multi_json

@@ -21,7 +21,7 @@ module Sidekiq
         m.add Middleware::Server::ExceptionHandler
         m.add Middleware::Server::Logging
         m.add Middleware::Server::UniqueJobs
-        #m.add Middleware::Server::RetryJobs
+        m.add Middleware::Server::RetryJobs
         m.add Middleware::Server::ActiveRecord
       end
     end

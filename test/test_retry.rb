@@ -10,10 +10,10 @@ class TestRetry < MiniTest::Unit::TestCase
       Sidekiq.instance_variable_set(:@redis, @redis)
 
       def @redis.with; yield self; end
-      @redis.expect :zadd, 1, ['retry', Float, String]
     end
 
     it 'handles a new failed message' do
+      @redis.expect :zadd, 1, ['retry', String, String]
       msg = { 'class' => 'Bob', 'args' => [1,2,'foo'] }
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
@@ -30,6 +30,7 @@ class TestRetry < MiniTest::Unit::TestCase
     end
 
     it 'handles a recurring failed message' do
+      @redis.expect :zadd, 1, ['retry', String, String]
       now = Time.now.utc
       msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>10}
       handler = Sidekiq::Middleware::Server::RetryJobs.new
@@ -45,6 +46,18 @@ class TestRetry < MiniTest::Unit::TestCase
       assert msg["failed_at"]
       @redis.verify
     end
+
+    it 'throws away old messages after too many retries' do
+      now = Time.now.utc
+      msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>25}
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      assert_raises RuntimeError do
+        handler.call('', msg, 'default') do
+          raise "kerblammo!"
+        end
+      end
+      @redis.verify
+    end
   end
 
   describe 'poller' do
@@ -52,16 +65,17 @@ class TestRetry < MiniTest::Unit::TestCase
       @redis = MiniTest::Mock.new
       Sidekiq.instance_variable_set(:@redis, @redis)
 
-      fake_msg = MultiJson.encode({ 'class' => 'Bob', 'args' => [1,2], 'queue' => 'someq' })
-
       def @redis.with; yield self; end
-      @redis.expect :zremrangebyscore, [fake_msg], ['retry', '-inf', String]
-      @redis.expect :rpush, 1, ['someq', fake_msg]
     end
 
     it 'should poll like a bad mother...SHUT YO MOUTH' do
+      fake_msg = MultiJson.encode({ 'class' => 'Bob', 'args' => [1,2], 'queue' => 'someq' })
+      @redis.expect :multi, [[fake_msg], 1], []
+      @redis.expect :rpush, 1, ['queue:someq', fake_msg]
+
       inst = Sidekiq::Retry::Poller.new
       inst.poll
+
       @redis.verify
     end
   end

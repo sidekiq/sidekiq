@@ -21,6 +21,9 @@ module Sidekiq
       # We don't store the backtrace as that can add a lot of overhead
       # to the message and everyone is using Airbrake, right?
       class RetryJobs
+        include Sidekiq::Util
+        include Sidekiq::Retry
+
         def call(worker, msg, queue)
           yield
         rescue => e
@@ -35,19 +38,21 @@ module Sidekiq
             msg['retry_count'] = 0
           end
 
-          if count <= Sidekiq::Retry::MAX_COUNT
-            retry_at = Time.now.to_f + Sidekiq::Retry::DELAY.call(count)
+          if count <= MAX_COUNT
+            delay = DELAY.call(count)
+            logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
+            retry_at = Time.now.to_f + delay
             payload = MultiJson.encode(msg)
             Sidekiq.redis do |conn|
-              conn.zadd('retry', retry_at, payload)
+              conn.zadd('retry', retry_at.to_s, payload)
             end
           else
-            # Pour a 40 out for our friend.  Goodbye dear message,
-            # You (re)tried your best, I'm sure.
-            Sidekiq::Util.logger.info("Dropping message after hitting the retry maximum: #{message}")
+            # Goodbye dear message, you (re)tried your best I'm sure.
+            logger.debug { "Dropping message after hitting the retry maximum: #{msg}" }
           end
           raise
         end
+
       end
     end
   end

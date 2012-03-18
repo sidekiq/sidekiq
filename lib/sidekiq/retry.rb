@@ -27,21 +27,31 @@ module Sidekiq
     # workers can pick it up like any other message.
     class Poller
       include Celluloid
+      include Sidekiq::Util
 
       def poll
-        Sidekiq.redis do |conn|
-          # A message's "score" in Redis is the time at which it should be retried.
-          # Just check Redis for the set of messages with a timestamp before now.
-          messages = conn.zremrangebyscore 'retry', '-inf', Time.now.to_f.to_s
-          messages.each do |message|
-            msg = MultiJson.decode(message)
-            conn.rpush(msg['queue'], message)
+        watchdog('retry poller thread died!') do
+
+          Sidekiq.redis do |conn|
+            # A message's "score" in Redis is the time at which it should be retried.
+            # Just check Redis for the set of messages with a timestamp before now.
+            messages = nil
+            now = Time.now.to_f.to_s
+            (messages, _) = conn.multi do
+              conn.zrangebyscore('retry', '-inf', now)
+              conn.zremrangebyscore('retry', '-inf', now)
+            end
+
+            messages.each do |message|
+              logger.debug { "Retrying #{message}" }
+              msg = MultiJson.decode(message)
+              conn.rpush("queue:#{msg['queue']}", message)
+            end
           end
+
+          after(POLL_INTERVAL) { poll }
         end
-
-        after(POLL_INTERVAL) { poll }
       end
-
     end
   end
 end

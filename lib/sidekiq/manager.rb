@@ -122,7 +122,7 @@ module Sidekiq
           @ready.size.times do
             found ||= find_work(@queues.sample)
           end
-          break logger.debug('nothing to process') unless found
+          break unless found
         end
 
         # This is the polling loop that ensures we check Redis every
