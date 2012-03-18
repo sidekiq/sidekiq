@@ -56,6 +56,17 @@ module Sidekiq
         Sidekiq.redis { |conn| conn.get('stat:failed') } || 0
       end
 
+      def retry_count
+        Sidekiq.redis { |conn| conn.zcard('retry') }
+      end
+
+      def retries
+        Sidekiq.redis do |conn|
+          results = conn.zrange('retry', 0, 25, :withscores => true)
+          results.each_slice(2).to_a.map { |x| [MultiJson.decode(x[0]), Float(x[1])] }
+        end
+      end
+
       def queues
         Sidekiq.redis do |conn|
           conn.smembers('queues').map do |q|

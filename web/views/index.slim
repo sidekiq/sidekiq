@@ -4,6 +4,7 @@
   p Processed: #{processed}
   p Failed: #{failed}
   p Workers: #{workers.size}
+  p Retries Pending: #{retry_count}
 
 .tabbable
   ul.nav.nav-tabs
@@ -11,6 +12,8 @@
       a href="#workers" data-toggle="tab" Workers
     li
       a href="#queues" data-toggle="tab" Queues
+    li
+      a href="#retries" data-toggle="tab" Retries
   .tab-content
     #workers.tab-pane.active
       table class="table table-striped table-bordered"
@@ -39,4 +42,21 @@
             td
               a href="queues/#{queue}" #{queue}
             td= size
+
+    #retries.tab-pane
+      table class="table table-striped table-bordered"
+        tr
+          th Next Retry
+          th Retry Count
+          th Queue
+          th Worker
+          th Args
+        - retries.each do |(msg, score)|
+          tr
+            td= Time.at(score)
+            td= msg['retry_count']
+            td
+              a href="queues/#{msg['queue']}" #{msg['queue']}
+            td= msg['class']
+            td= msg['args'].inspect[0..100]
 
