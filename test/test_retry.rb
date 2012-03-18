@@ -52,13 +52,17 @@ class TestRetry < MiniTest::Unit::TestCase
       @redis = MiniTest::Mock.new
       Sidekiq.instance_variable_set(:@redis, @redis)
 
+      fake_msg = MultiJson.encode({ 'class' => 'Bob', 'args' => [1,2], 'queue' => 'someq' })
+
       def @redis.with; yield self; end
-      @redis.expect :zremrangebyscore, [], ['retry', '-inf', String]
+      @redis.expect :zremrangebyscore, [fake_msg], ['retry', '-inf', String]
+      @redis.expect :rpush, 1, ['someq', fake_msg]
     end
 
     it 'should poll like a bad mother...SHUT YO MOUTH' do
       inst = Sidekiq::Retry::Poller.new
       inst.poll
+      @redis.verify
     end
   end
 

@@ -28,10 +28,6 @@ class TestExtensions < MiniTest::Unit::TestCase
       assert_equal 1, Sidekiq.redis.llen('queue:default')
     end
 
-    it 'allows delayed exection of ActiveRecord instance methods' do
-      skip('requires a database')
-    end
-
     class UserMailer < ActionMailer::Base
       def greetings(a, b)
         raise "Should not be called!"
