@@ -1,5 +1,4 @@
-$TESTING = true
-if false
+if ENV.has_key?("SIMPLECOV")
   require 'simplecov'
   SimpleCov.start
 end
