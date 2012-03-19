@@ -1,1 +1,1 @@
-- reschedule failed tasks
+- Make the Web UI less ugly
