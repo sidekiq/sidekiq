@@ -63,7 +63,7 @@ module Sidekiq
       def retries
         Sidekiq.redis do |conn|
           results = conn.zrange('retry', 0, 25, :withscores => true)
-          results.each_slice(2).to_a.map { |x| [MultiJson.decode(x[0]), Float(x[1])] }
+          results.each_slice(2).map { |msg, score| [MultiJson.decode(msg), Float(score)] }
         end
       end
 
