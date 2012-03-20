@@ -32,7 +32,6 @@ module Sidekiq
 
     def initialize
       @code = nil
-      @manager = nil
     end
 
     def parse(args=ARGV)
