@@ -2,7 +2,8 @@
 # Cookbook Name:: sidekiq
 # Recipe:: default
 #
-if ['solo', 'util'].include?(node[:instance_role])
+role = node[:instance_role]
+if role == 'solo' || (role == 'util' && node[:name] =~ /sidekiq/)
 
   # for now
   worker_count = 1

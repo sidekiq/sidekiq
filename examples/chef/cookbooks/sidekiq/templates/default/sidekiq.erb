@@ -140,13 +140,13 @@ APP_SHARED="${APP_DIR}/shared"
 APP_CONFIG="${APP_SHARED}/config"
 
 if [ -e "${APP_CONFIG}/${CONF_FILE}" ]; then
-  logger -t "sidekiq_${APP}" -s "Good, found a config file. Proceeding..."
+  logger -t "sidekiq_${APP}" -s "Good, found a conf file. Proceeding..."
 else
   logger -t "sidekiq_${APP}" -s "/data/${APP}/shared/config/${CONF_FILE} not found for app: ${APP}"
   exit 1
 fi
 
-WORKER_REF=`echo $CONF_FILE | sed s/.yml.conf//`
+WORKER_REF=`echo $CONF_FILE | sed s/.conf//`
 LOG_FILE="$APP_ROOT/log/$WORKER_REF.log"
 LOCK_FILE="/tmp/$WORKER_REF.monit-lock"
 PID_FILE="/var/run/engineyard/sidekiq/$APP/$WORKER_REF.pid"
