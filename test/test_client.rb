@@ -28,17 +28,19 @@ class TestClient < MiniTest::Unit::TestCase
   describe 'with mock redis' do
     before do
       @redis = MiniTest::Mock.new
-      def @redis.multi; yield; end
+      def @redis.multi; yield if block_given?; end
       def @redis.set(*); true; end
       def @redis.sadd(*); true; end
       def @redis.srem(*); true; end
       def @redis.get(*); nil; end
       def @redis.del(*); nil; end
       def @redis.incrby(*); nil; end
-      def @redis.setex(*); nil; end
+      def @redis.setex(*); true; end
       def @redis.expire(*); true; end
+      def @redis.watch(*); true; end
       def @redis.with_connection; yield self; end
       def @redis.with; yield self; end
+      def @redis.exec; true; end
       Sidekiq.instance_variable_set(:@redis, @redis)
     end
 
