@@ -4,13 +4,14 @@ require 'multi_json'
 
 require 'sidekiq/util'
 require 'sidekiq/processor'
+require 'sidekiq/fetch'
 require 'connection_pool/version'
 
 module Sidekiq
 
   ##
   # The main router in the system.  This
-  # manages the processor state and fetches messages
+  # manages the processor state and accepts messages
   # from Redis to be dispatched to an idle processor.
   #
   class Manager
@@ -24,12 +25,12 @@ module Sidekiq
       logger.info "Running in #{RUBY_DESCRIPTION}"
       logger.debug { options.inspect }
       @count = options[:concurrency] || 25
-      @queues = options[:queues]
       @done_callback = nil
 
       @done = false
       @busy = []
       @ready = @count.times.map { Processor.new_link(current_actor) }
+      @fetcher = Sidekiq::Fetcher.new(current_actor, options[:queues])
     end
 
     def stop(options={})
@@ -37,6 +38,8 @@ module Sidekiq
       timeout = options[:timeout]
 
       @done = true
+
+      @fetcher.terminate if @fetcher.alive?
       @ready.each { |x| x.terminate if x.alive? }
       @ready.clear
 
@@ -63,7 +66,7 @@ module Sidekiq
     end
 
     def start
-      dispatch(true)
+      dispatch
     end
 
     def when_done(&blk)
@@ -71,7 +74,7 @@ module Sidekiq
     end
 
     def processor_done(processor)
-      watchdog('sidekiq processor_done crashed!') do
+      watchdog('Manager#processor_done died') do
         @done_callback.call(processor) if @done_callback
         @busy.delete(processor)
         if stopped?
@@ -85,53 +88,37 @@ module Sidekiq
     end
 
     def processor_died(processor, reason)
-      @busy.delete(processor)
+      watchdog("Manager#processor_died died") do
+        @busy.delete(processor)
 
-      unless stopped?
-        @ready << Processor.new_link(current_actor)
+        unless stopped?
+          @ready << Processor.new_link(current_actor)
+          dispatch
+        else
+          signal(:shutdown) if @busy.empty?
+        end
+      end
+    end
+
+    def assign(msg, queue)
+      watchdog("Manager#assign died") do
+        processor = @ready.pop
+        @busy << processor
+        processor.process!(MultiJson.decode(msg), queue)
         dispatch
-      else
-        signal(:shutdown) if @busy.empty?
       end
     end
 
     private
 
-    def find_work(queue)
-      msg = redis { |x| x.lpop("queue:#{queue}") }
-      if msg
-        processor = @ready.pop
-        @busy << processor
-        processor.process!(MultiJson.decode(msg), queue)
-      end
-      !!msg
-    end
+    def dispatch
+      return if stopped?
+      # This is a safety check to ensure we haven't leaked
+      # processors somehow.
+      raise "BUG: No processors, cannot continue!" if @ready.empty? && @busy.empty?
+      return if @ready.empty?
 
-    def dispatch(schedule = false)
-      watchdog("Fatal error in sidekiq, dispatch loop died") do
-        return if stopped?
-
-        # This is a safety check to ensure we haven't leaked
-        # processors somehow.
-        raise "BUG: No processors, cannot continue!" if @ready.empty? && @busy.empty?
-
-        # Dispatch loop
-        loop do
-          break logger.debug('no processors') if @ready.empty?
-          found = false
-          @ready.size.times do
-            found ||= find_work(@queues.sample)
-          end
-          break unless found
-        end
-
-        # This is the polling loop that ensures we check Redis every
-        # second for work, even if there was nothing to do this time
-        # around.
-        after(1) do
-          dispatch(schedule)
-        end if schedule
-      end
+      @fetcher.fetch!
     end
 
     def stopped?
