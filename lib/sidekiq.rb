@@ -16,7 +16,7 @@ module Sidekiq
     :require => '.',
     :environment => nil,
     :timeout => 5,
-    :hook_rails => true,
+    :enable_rails_extensions => true,
   }
 
   def self.options

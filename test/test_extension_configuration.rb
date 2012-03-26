@@ -11,16 +11,16 @@ class TestExtensionConfiguration < MiniTest::Unit::TestCase
       Sidekiq.options = @options
     end
     
-    it 'should set hook_rails option to true by default' do
-      assert_equal true, Sidekiq.options[:hook_rails]
+    it 'should set enable_rails_extensions option to true by default' do
+      assert_equal true, Sidekiq.options[:enable_rails_extensions]
     end
 
-    it 'should extend ActiveRecord and ActiveMailer if hook_rails is true' do
+    it 'should extend ActiveRecord and ActiveMailer if enable_rails_extensions is true' do
       assert_equal ActionMailer::Base, Sidekiq.hook_rails!
     end
 
-    it 'should not extend ActiveRecord and ActiveMailer if hook_rails is false' do
-      Sidekiq.options = { :hook_rails => false }
+    it 'should not extend ActiveRecord and ActiveMailer if enable_rails_extensions is false' do
+      Sidekiq.options = { :enable_rails_extensions => false }
       assert_equal nil, Sidekiq.hook_rails!
     end
 
