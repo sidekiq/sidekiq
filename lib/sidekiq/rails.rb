@@ -1,5 +1,6 @@
 module Sidekiq
   def self.hook_rails!
+    return unless Sidekiq.options[:hook_rails]
     if defined?(ActiveRecord)
       ActiveRecord::Base.extend(Sidekiq::Extensions::ActiveRecord)
       ActiveRecord::Base.send(:include, Sidekiq::Extensions::ActiveRecord)
