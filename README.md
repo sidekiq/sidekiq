@@ -3,20 +3,20 @@ Sidekiq
 
 Simple, efficient message processing for Ruby.
 
-Sidekiq aims to be compatible with Resque.  It uses the exact same
+Sidekiq is compatible with Resque.  It uses the exact same
 message format as Resque so it can integrate into an existing Resque processing farm.
 You can have Sidekiq and Resque run side-by-side at the same time and
 use the Resque client to enqueue messages in Redis to be processed by Sidekiq.
 
-Sidekiq is different from Resque in how it processes messages: it
-processes many messages concurrently per process.  Resque only processes
-one message at a time per process so it is far less memory efficient.
+At the same time, Sidekiq uses multithreading so it much more memory efficient than Resque (which forks a new process for every job).
 You'll find that you might need 50 200MB resque processes to peg your CPU
 whereas one 300MB Sidekiq process will peg the same CPU and perform the
 same amount of work.  Please see [my blog post on Resque's memory
 efficiency](http://blog.carbonfive.com/2011/09/16/improving-resques-memory-efficiency/)
  and how I was able to shrink a Carbon Five client's resque processing farm
 from 9 machines to 1 machine.
+
+In sum, if your jobs are well-behaved and threadsafe, Sidekiq is probably a good replacement for Resque. If your jobs are not thread-safe or they leak memory, you may want to continue using Resque, because its forking model gives you more protection.
 
 
 Requirements
