@@ -29,44 +29,46 @@ module Sidekiq
 
       @done = false
       @busy = []
+      @fetcher = Fetcher.new(current_actor, options[:queues])
       @ready = @count.times.map { Processor.new_link(current_actor) }
-      @fetcher = Sidekiq::Fetcher.new(current_actor, options[:queues])
     end
 
     def stop(options={})
-      shutdown = options[:shutdown]
-      timeout = options[:timeout]
+      watchdog('Manager#stop died') do
+        shutdown = options[:shutdown]
+        timeout = options[:timeout]
 
-      @done = true
+        @done = true
 
-      @fetcher.terminate if @fetcher.alive?
-      @ready.each { |x| x.terminate if x.alive? }
-      @ready.clear
+        @fetcher.terminate if @fetcher.alive?
+        @ready.each { |x| x.terminate if x.alive? }
+        @ready.clear
 
-      redis do |conn|
-        workers = conn.smembers('workers')
-        workers.each do |name|
-          conn.srem('workers', name) if name =~ /:#{process_id}-/
-        end
-      end
-
-      if shutdown
-        if @busy.empty?
-          # after(0) needed to avoid deadlock in Celluoid after USR1 + TERM
-          return after(0) { signal(:shutdown) }
-        else
-          logger.info { "Pausing #{timeout} seconds to allow workers to finish..." }
+        redis do |conn|
+          workers = conn.smembers('workers')
+          workers.each do |name|
+            conn.srem('workers', name) if name =~ /:#{process_id}-/
+          end
         end
 
-        after(timeout) do
-          @busy.each { |x| x.terminate if x.alive? }
-          signal(:shutdown)
+        if shutdown
+          if @busy.empty?
+            # after(0) needed to avoid deadlock in Celluoid after USR1 + TERM
+            return after(0) { signal(:shutdown) }
+          else
+            logger.info { "Pausing #{timeout} seconds to allow workers to finish..." }
+          end
+
+          after(timeout) do
+            @busy.each { |x| x.terminate if x.alive? }
+            signal(:shutdown)
+          end
         end
       end
     end
 
     def start
-      dispatch
+      @ready.each { dispatch }
     end
 
     def when_done(&blk)
@@ -105,7 +107,6 @@ module Sidekiq
         processor = @ready.pop
         @busy << processor
         processor.process!(MultiJson.decode(msg), queue)
-        dispatch
       end
     end
 
@@ -116,7 +117,7 @@ module Sidekiq
       # This is a safety check to ensure we haven't leaked
       # processors somehow.
       raise "BUG: No processors, cannot continue!" if @ready.empty? && @busy.empty?
-      return if @ready.empty?
+      raise "No ready processor!?" if @ready.empty?
 
       @fetcher.fetch!
     end
