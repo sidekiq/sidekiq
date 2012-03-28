@@ -2,42 +2,72 @@
 
 require 'fileutils'
 
+class Sidekiqctl
+
+  attr_reader :stage, :pidfile, :timeout
+
+  def initialize(stage, pidfile, timeout)
+    @stage = stage
+    @pidfile = pidfile
+    @timeout = timeout
+
+    done 'No pidfile given' if !pidfile
+    done 'Pidfile does not exist' if !File.exist?(pidfile)
+    done 'Invalid pidfile content' if pid == 0
+
+    fetch_process
+
+    begin
+      send(stage)
+    rescue NoMethodError
+      done 'Invalid control command'
+    end
+  end
+
+  def fetch_process
+    Process.getpgid(pid)
+  rescue Errno::ESRCH
+    done "Process doesn't exist"
+  end
+
+  def done(msg)
+    puts msg
+    exit(0)
+  end
+
+  def pid
+    File.read(pidfile).to_i
+  end
+
+  def quiet
+    `kill -USR1 #{pid}`
+  end
+
+  def stop
+    `kill -TERM #{pid}`
+    timeout.times do
+      begin
+        Process.getpgid(pid)
+      rescue Errno::ESRCH
+        FileUtils.rm_f pidfile
+        done 'Sidekiq shut down gracefully.'
+      end
+      sleep 1
+    end
+    `kill -9 #{pid}`
+    done 'Sidekiq shut down forcefully.'
+  end
+
+  def shutdown
+    quiet
+    stop
+  end
+
+end
+
 stage = ARGV[0]
 pidfile = ARGV[1]
 timeout = ARGV[2].to_i
 timeout = 10 if timeout == 0
 
-def done(msg)
-  puts msg
-  exit(0)
-end
-
-done 'No pidfile given' if !pidfile
-done 'Pidfile does not exist' if !File.exist?(pidfile)
-
-pid = File.read(pidfile).to_i
-done 'Invalid pidfile content' if pid == 0
-
-begin
-  Process.getpgid(pid)
-rescue Errno::ESRCH
-  done "Process doesn't exist"
-end
-
-case stage
-when 'quiet'
-  `kill -USR1 #{pid}`
-when 'stop'
-  `kill -TERM #{pid}`
-  timeout.times do
-    begin
-      Process.getpgid(pid)
-    rescue Errno::ESRCH
-      FileUtils.rm_f pidfile
-      done 'Sidekiq shut down gracefully.'
-    end
-    sleep 1
-  end
-  `kill -9 #{pid}`
-  done 'Sidekiq shut down forcefully.'
-end
+Sidekiqctl.new(stage, pidfile, timeout)
