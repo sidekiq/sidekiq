@@ -5,6 +5,8 @@
   p Failed: #{failed}
   p Workers: #{workers.size}
   p Retries Pending: #{retry_count}
+  form(action="/sidekiq/reset" method="post")
+    button(class="btn" type="submit") Clear worker list 
 
 .tabbable
   ul.nav.nav-tabs
