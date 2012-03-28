@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+
+stage = ARGV[0]
+pidfile = ARGV[1]
+timeout = ARGV[2].to_i
+timeout = 10 if timeout == 0
+
+def done(msg)
+  puts msg
+  exit(0)
+end
+
+done 'No pidfile given' if !pidfile
+done 'Pidfile does not exist' if !File.exist?(pidfile)
+
+pid = File.read(pidfile).to_i
+done 'Invalid pidfile content' if pid == 0
+
+begin
+  Process.getpgid(pid)
+rescue Errno::ESRCH
+  done "Process doesn't exist"
+end
+
+case stage
+when 'quiet'
+  `kill -USR1 #{pid}`
+when 'stop'
+  `kill -TERM #{pid}`
+  timeout.times do
+    begin
+      Process.getpgid(pid)
+    rescue Errno::ESRCH
+      FileUtils.rm_f pidfile
+      done 'Sidekiq shut down gracefully.'
+    end
+    sleep 1
+  end
+  `kill -9 #{pid}`
+  done 'Sidekiq shut down forcefully.'
+end

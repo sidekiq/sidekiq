@@ -2,18 +2,18 @@ Capistrano::Configuration.instance.load do
   before "deploy", "sidekiq:quiet"
   after "deploy", "sidekiq:restart"
 
-  _cset(:sidekiq_timeout) { 5 }
+  _cset(:sidekiq_timeout) { 10 }
 
   namespace :sidekiq do
 
     desc "Quiet sidekiq (stop accepting new work)"
     task :quiet do
-      run "cd #{current_path} && kill -USR1 `cat #{current_path}/tmp/pids/sidekiq.pid`"
+      run "cd #{current_path} && sidekiqctl quiet #{current_path}/tmp/pids/sidekiq.pid"
     end
 
     desc "Stop sidekiq"
     task :stop do
-      run "cd #{current_path} && kill `cat #{current_path}/tmp/pids/sidekiq.pid` && sleep #{fetch :sidekiq_timeout} && kill -9 `cat #{current_path}/tmp/pids/sidekiq.pid` ; rm #{current_path}/tmp/pids/sidekiq.pid"
+      run "cd #{current_path} && sidekiqctl stop #{current_path}/tmp/pids/sidekiq.pid #{fetch :sidekiq_timeout}"
     end
 
     desc "Start sidekiq"
