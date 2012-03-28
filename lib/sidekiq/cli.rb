@@ -29,6 +29,7 @@ module Sidekiq
 
     # Used for CLI testing
     attr_accessor :code
+    attr_accessor :manager
 
     def initialize
       @code = nil
@@ -51,18 +52,18 @@ module Sidekiq
     end
 
     def run
-      manager = Sidekiq::Manager.new(options)
+      @manager = Sidekiq::Manager.new(options)
       poller = Sidekiq::Retry::Poller.new
       begin
         logger.info 'Starting processing, hit Ctrl-C to stop'
-        manager.start!
+        @manager.start!
         poller.poll!
         sleep
       rescue Interrupt
         logger.info 'Shutting down'
         poller.terminate
-        manager.stop!(:shutdown => true, :timeout => options[:timeout])
-        manager.wait(:shutdown)
+        @manager.stop!(:shutdown => true, :timeout => options[:timeout])
+        @manager.wait(:shutdown)
       end
     end
 
