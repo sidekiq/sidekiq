@@ -3,7 +3,7 @@ PATH
   specs:
     sidekiq (0.10.0)
       celluloid
-      connection_pool (>= 0.9.0)
+      connection_pool (~> 0.9.0)
       multi_json
       redis
       redis-namespace
