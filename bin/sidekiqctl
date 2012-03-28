@@ -24,10 +24,11 @@ rescue Errno::ESRCH
   done "Process doesn't exist"
 end
 
-case stage
-when 'quiet'
+def quiet
   `kill -USR1 #{pid}`
-when 'stop'
+end
+
+def stop
   `kill -TERM #{pid}`
   timeout.times do
     begin
@@ -40,4 +41,10 @@ when 'stop'
   end
   `kill -9 #{pid}`
   done 'Sidekiq shut down forcefully.'
+end
+
+case stage
+when 'quiet'          then quiet
+when 'stop'           then stop
+when 'quiet_and_stop' then quiet && stop
 end
