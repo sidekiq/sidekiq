@@ -1,6 +1,7 @@
 0.10.0
 -----------
 
+- Reworked capistrano recipe to make it more fault-tolerant [#94].
 - Automatic failure retry!  Sidekiq will now save failed messages
   and retry them, with an exponential backoff, over about 20 days.
   Did a message fail to process?  Just deploy a bug fix in the next
