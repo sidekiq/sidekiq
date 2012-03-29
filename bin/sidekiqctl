@@ -55,6 +55,7 @@ class Sidekiqctl
       sleep 1
     end
     `kill -9 #{pid}`
+    FileUtils.rm_f pidfile
     done 'Sidekiq shut down forcefully.'
   end
 
