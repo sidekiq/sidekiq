@@ -56,7 +56,7 @@
         - retries.each do |(msg, score)|
           tr
             td
-              a href="retries/#{score}" #{Time.at(score)}
+              a href="retries/#{score}"== relative_time(Time.at(score))
             td= msg['retry_count']
             td
               a href="queues/#{msg['queue']}" #{msg['queue']}
