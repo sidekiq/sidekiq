@@ -32,7 +32,7 @@
               td= msg['payload']['args'].inspect[0..100]
               td== relative_time(Time.parse(msg['run_at']))
             - else
-              td colspan=3 Idle
+              td colspan=4 Idle
       form action="#{root_path}reset" method="post"
         button.btn type="submit" Clear worker list
 
