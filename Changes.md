@@ -1,6 +1,7 @@
 HEAD
 -----------
 - Add details page for jobs in retry queue (jcoene)
+- Display relative timestamps in web interface (jcoene)
 
 0.10.0
 -----------
