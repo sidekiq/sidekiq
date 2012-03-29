@@ -1,3 +1,7 @@
+HEAD
+-----------
+- Add details page for jobs in retry queue (jcoene)
+
 0.10.0
 -----------
 
