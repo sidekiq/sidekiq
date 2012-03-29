@@ -3,42 +3,38 @@ header
 
 - retries_with_score(@score).each do |(msg, score)|
   table class="table table-striped table-bordered"
-    thead
-      tr
-        th Key
-        th Value
     tbody
       tr
-        td Queue
+        th Queue
         td
           a href="queues/#{msg['queue']}" #{msg['queue']}
       tr
-        td Job Class
+        th Job Class
         td
           code= msg['class']
       tr
-        td Job Arguments
+        th Job Arguments
         td
-          code= msg['args'].inspect[0..100]
+          code= msg['args'].inspect[0..1000]
       tr
-        td Error Class
+        th Error Class
         td
           code= msg['error_class']
       tr
-        td Error Message
+        th Error Message
         td= msg['error_message']
       - if msg['retry_count'] > 0
         tr
-          td Retry Count
+          th Retry Count
           td= msg['retry_count']
         tr
-          td Last Retry
+          th Last Retry
           td= Time.parse(msg['retried_at'])
       - else
         tr
-          td Originally Failed
+          th Originally Failed
           td= Time.parse(msg['failed_at'])
       tr
-        td Next Retry
+        th Next Retry
         td= Time.at(score)
 
