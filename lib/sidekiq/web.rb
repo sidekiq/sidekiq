@@ -87,7 +87,7 @@ module Sidekiq
 
       def retries_with_score(score)
         Sidekiq.redis do |conn|
-          results = conn.zrangebyscore('retry', @score, @score, :withscores => true)
+          results = conn.zrangebyscore('retry', score, score, :withscores => true)
           results.each_slice(2).map { |msg, score| [MultiJson.decode(msg), Float(score)] }
         end
       end
