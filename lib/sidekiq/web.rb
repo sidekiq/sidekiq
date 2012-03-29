@@ -105,6 +105,10 @@ module Sidekiq
         return 'idle' if workers.size > 0 && workers.map { |x| x[1] }.compact.size == 0
         return 'active'
       end
+
+      def relative_time(time)
+        "<time datetime=\"#{time.getutc.iso8601}\">#{time}</time>"
+      end
     end
 
     get "/" do

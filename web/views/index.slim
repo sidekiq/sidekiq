@@ -22,6 +22,7 @@
           th Queue
           th Class
           th Arguments
+          th Started
         - workers.each do |(worker, msg)|
           tr
             td= worker
@@ -29,8 +30,9 @@
               td= msg['queue']
               td= msg['payload']['class']
               td= msg['payload']['args'].inspect[0..100]
+              td== relative_time(Time.parse(msg['run_at']))
             - else
-              td colspan=3 Idle
+              td colspan=4 Idle
       form action="#{root_path}reset" method="post"
         button.btn type="submit" Clear worker list
 
@@ -56,7 +58,7 @@
         - retries.each do |(msg, score)|
           tr
             td
-              a href="retries/#{score}" #{Time.at(score)}
+              a href="retries/#{score}"== relative_time(Time.at(score))
             td= msg['retry_count']
             td
               a href="queues/#{msg['queue']}" #{msg['queue']}
