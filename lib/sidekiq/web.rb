@@ -36,6 +36,17 @@ module Sidekiq
     use SprocketsMiddleware, :root => dir
 
     helpers do
+
+      def reset_worker_list
+        Sidekiq.redis do |conn|
+          workers = conn.smembers('workers')
+          workers.each do |name|
+            conn.srem('workers', name) # if name =~ /:#{process_id}-/
+          end
+      end
+
+      end
+
       def workers
         @workers ||= begin
           Sidekiq.redis do |conn|
@@ -92,6 +103,11 @@ module Sidekiq
 
     get "/" do
       slim :index
+    end
+
+    post "/reset" do
+      reset_worker_list 
+      redirect '/sidekiq'
     end
 
     get "/queues/:name" do
