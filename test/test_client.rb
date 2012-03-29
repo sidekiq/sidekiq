@@ -6,7 +6,7 @@ class TestClient < MiniTest::Unit::TestCase
   describe 'with real redis' do
     before do
       Sidekiq.redis = REDIS
-      Sidekiq.redis.flushdb
+      Sidekiq.redis {|c| c.flushdb }
     end
 
     it 'does not push duplicate messages when configured for unique only' do
@@ -15,13 +15,13 @@ class TestClient < MiniTest::Unit::TestCase
         chain.add Sidekiq::Middleware::Client::UniqueJobs
       end
       10.times { Sidekiq::Client.push('customqueue', 'class' => 'Foo', 'args' => [1, 2]) }
-      assert_equal 1, Sidekiq.redis.llen("queue:customqueue")
+      assert_equal 1, Sidekiq.redis {|c| c.llen("queue:customqueue") }
     end
 
     it 'does push duplicate messages when not configured for unique only' do
       Sidekiq.client_middleware.remove(Sidekiq::Middleware::Client::UniqueJobs)
       10.times { Sidekiq::Client.push('customqueue2', 'class' => 'Foo', 'args' => [1, 2]) }
-      assert_equal 10, Sidekiq.redis.llen("queue:customqueue2")
+      assert_equal 10, Sidekiq.redis {|c| c.llen("queue:customqueue2") }
     end
   end
 

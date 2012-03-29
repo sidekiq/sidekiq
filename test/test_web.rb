@@ -13,7 +13,7 @@ class TestWeb < MiniTest::Unit::TestCase
 
     before do
       Sidekiq.redis = REDIS
-      Sidekiq.redis.flushdb
+      Sidekiq.redis {|c| c.flushdb }
     end
 
     class WebWorker

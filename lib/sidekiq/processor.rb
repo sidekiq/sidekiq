@@ -12,10 +12,6 @@ module Sidekiq
     include Util
     include Celluloid
 
-    def self.middleware
-      raise "Sidekiq::Processor.middleware is now Sidekiq.server_middleware"
-    end
-
     def self.default_middleware
       Middleware::Chain.new do |m|
         m.add Middleware::Server::ExceptionHandler

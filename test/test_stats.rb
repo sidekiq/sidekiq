@@ -6,7 +6,7 @@ class TestStats < MiniTest::Unit::TestCase
   describe 'with redis' do
     before do
       @redis = Sidekiq.redis = REDIS
-      Sidekiq.redis.flushdb
+      Sidekiq.redis {|c| c.flushdb }
     end
 
     class DumbWorker

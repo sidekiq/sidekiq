@@ -56,32 +56,15 @@ module Sidekiq
 
   def self.redis(&block)
     @redis ||= Sidekiq::RedisConnection.create
-    if block_given?
-      @redis.with(&block)
-    else
-      Sidekiq::Util.logger.info "*****************************************************
-Sidekiq.redis now takes a block:
-
-  Sidekiq.redis { |connection| connection.smembers('myset') }
-
-Please update your code accordingly.
-Called from #{caller[0]}
-*****************************************************"
-      @redis
-    end
+    raise ArgumentError, "requires a block" if !block
+    @redis.with(&block)
   end
 
   def self.redis=(hash)
-    @redis = if hash.is_a?(Hash)
-      RedisConnection.create(hash)
+    if hash.is_a?(Hash)
+      @redis = RedisConnection.create(hash)
     else
-      Sidekiq::Util.logger.info "*****************************************************
-Sidekiq.redis now takes a Hash:
-old: Sidekiq.redis = Sidekiq::RedisConnection.create(:url => 'redis://foo.com', :namespace => 'abc', :size => 12)
-new: Sidekiq.redis = { :url => 'redis://foo.com', :namespace => 'xyz', :size => 12 }
-Called from #{caller[0]}
-*****************************************************"
-      hash
+      @redis = hash
     end
   end
 

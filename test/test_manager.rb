@@ -9,7 +9,7 @@ class TestManager < MiniTest::Unit::TestCase
   describe 'with redis' do
     before do
       Sidekiq.redis = REDIS
-      Sidekiq.redis.flushdb
+      Sidekiq.redis {|c| c.flushdb }
       $processed = 0
       $mutex = Mutex.new
     end

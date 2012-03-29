@@ -11,7 +11,7 @@ class TestExtensions < MiniTest::Unit::TestCase
   describe 'sidekiq extensions' do
     before do
       Sidekiq.redis = REDIS
-      Sidekiq.redis.flushdb
+      Sidekiq.redis {|c| c.flushdb }
     end
 
     class MyModel < ActiveRecord::Base
@@ -22,10 +22,10 @@ class TestExtensions < MiniTest::Unit::TestCase
 
     it 'allows delayed exection of ActiveRecord class methods' do
       assert_equal [], Sidekiq::Client.registered_queues
-      assert_equal 0, Sidekiq.redis.llen('queue:default')
+      assert_equal 0, Sidekiq.redis {|c| c.llen('queue:default') }
       MyModel.delay.long_class_method
       assert_equal ['default'], Sidekiq::Client.registered_queues
-      assert_equal 1, Sidekiq.redis.llen('queue:default')
+      assert_equal 1, Sidekiq.redis {|c| c.llen('queue:default') }
     end
 
     class UserMailer < ActionMailer::Base
@@ -36,10 +36,10 @@ class TestExtensions < MiniTest::Unit::TestCase
 
     it 'allows delayed delivery of ActionMailer mails' do
       assert_equal [], Sidekiq::Client.registered_queues
-      assert_equal 0, Sidekiq.redis.llen('queue:default')
+      assert_equal 0, Sidekiq.redis {|c| c.llen('queue:default') }
       UserMailer.delay.greetings(1, 2)
       assert_equal ['default'], Sidekiq::Client.registered_queues
-      assert_equal 1, Sidekiq.redis.llen('queue:default')
+      assert_equal 1, Sidekiq.redis {|c| c.llen('queue:default') }
     end
   end
 

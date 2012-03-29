@@ -43,8 +43,7 @@ module Sidekiq
           workers.each do |name|
             conn.srem('workers', name) # if name =~ /:#{process_id}-/
           end
-      end
-
+        end
       end
 
       def workers
@@ -106,8 +105,8 @@ module Sidekiq
     end
 
     post "/reset" do
-      reset_worker_list 
-      redirect '/sidekiq'
+      reset_worker_list
+      redirect root_path
     end
 
     get "/queues/:name" do
