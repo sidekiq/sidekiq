@@ -24,10 +24,6 @@ module Sidekiq
       base.extend(ClassMethods)
     end
 
-    def logger
-      Sidekiq::Util.logger
-    end
-
     module ClassMethods
       def perform_async(*args)
         Sidekiq::Client.push('class' => self.name, 'args' => args)

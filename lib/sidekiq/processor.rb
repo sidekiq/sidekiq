@@ -4,7 +4,7 @@ require 'sidekiq/util'
 require 'sidekiq/middleware/server/active_record'
 require 'sidekiq/middleware/server/exception_handler'
 require 'sidekiq/middleware/server/unique_jobs'
-require 'sidekiq/middleware/server/failure_jobs'
+require 'sidekiq/middleware/server/retry_jobs'
 require 'sidekiq/middleware/server/logging'
 
 module Sidekiq
@@ -12,24 +12,19 @@ module Sidekiq
     include Util
     include Celluloid
 
-    def self.middleware
-      raise "Sidekiq::Processor.middleware is now Sidekiq.server_middleware"
-    end
-
     def self.default_middleware
       Middleware::Chain.new do |m|
         m.add Middleware::Server::ExceptionHandler
         m.add Middleware::Server::Logging
         m.add Middleware::Server::UniqueJobs
+        m.add Middleware::Server::RetryJobs
         m.add Middleware::Server::ActiveRecord
       end
     end
 
-    attr_accessor :msg, :queue
-
     def initialize(boss)
       @boss = boss
-      redis.sadd('workers', self)
+      redis {|x| x.sadd('workers', self) }
     end
 
     def process(msg, queue)
@@ -55,7 +50,7 @@ module Sidekiq
     private
 
     def stats(worker, msg, queue)
-      redis.with_connection do |conn|
+      redis do |conn|
         conn.multi do
           conn.set("worker:#{self}:started", Time.now.to_s)
           conn.set("worker:#{self}", MultiJson.encode(:queue => queue, :payload => msg,
@@ -69,7 +64,7 @@ module Sidekiq
       rescue
         dying = true
         # Uh oh, error.  We will die so unregister as much as we can first.
-        redis.with_connection do |conn|
+        redis do |conn|
           conn.multi do
             conn.incrby("stat:failed", 1)
             conn.del("stat:processed:#{self}")
@@ -78,7 +73,7 @@ module Sidekiq
         end
         raise
       ensure
-        redis.with_connection do |conn|
+        redis do |conn|
           conn.multi do
             conn.del("worker:#{self}")
             conn.del("worker:#{self}:started")

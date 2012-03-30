@@ -1,0 +1,11 @@
+header
+  h1 Latest messages in #{@name}
+
+table class="table table-striped table-bordered"
+  tr
+    th Class
+    th Arguments
+  - @messages.each do |msg|
+    tr
+      td= msg['class']
+      td= msg['args'].inspect[0..100]

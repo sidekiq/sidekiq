@@ -1,11 +1,12 @@
 require 'sidekiq/version'
 require 'sidekiq/client'
 require 'sidekiq/worker'
-require 'sidekiq/rails' if defined?(::Rails)
+require 'sidekiq/rails'
 require 'sidekiq/redis_connection'
+require 'sidekiq/util'
 
-require 'sidekiq/extensions/action_mailer' if defined?(::ActionMailer)
-require 'sidekiq/extensions/active_record' if defined?(::ActiveRecord)
+require 'sidekiq/extensions/action_mailer'
+require 'sidekiq/extensions/active_record'
 
 module Sidekiq
 
@@ -14,6 +15,8 @@ module Sidekiq
     :concurrency => 25,
     :require => '.',
     :environment => nil,
+    :timeout => 5,
+    :enable_rails_extensions => true,
   }
 
   def self.options
@@ -28,7 +31,7 @@ module Sidekiq
   # Configuration for Sidekiq server, use like:
   #
   #   Sidekiq.configure_server do |config|
-  #     config.redis = Sidekiq::RedisConnection.create(:namespace => 'myapp', :size => 25, :url => 'redis://myhost:8877/mydb')
+  #     config.redis = { :namespace => 'myapp', :size => 25, :url => 'redis://myhost:8877/mydb' }
   #     config.server_middleware do |chain|
   #       chain.add MyServerHook
   #     end
@@ -41,7 +44,7 @@ module Sidekiq
   # Configuration for Sidekiq client, use like:
   #
   #   Sidekiq.configure_client do |config|
-  #     config.redis = Sidekiq::RedisConnection.create(:namespace => 'myapp', :size => 1, :url => 'redis://myhost:8877/mydb')
+  #     config.redis = { :namespace => 'myapp', :size => 1, :url => 'redis://myhost:8877/mydb' }
   #   end
   def self.configure_client
     yield self unless server?
@@ -51,21 +54,17 @@ module Sidekiq
     defined?(Sidekiq::CLI)
   end
 
-  def self.redis
+  def self.redis(&block)
     @redis ||= Sidekiq::RedisConnection.create
+    raise ArgumentError, "requires a block" if !block
+    @redis.with(&block)
   end
 
   def self.redis=(hash)
-    if !hash.is_a?(Hash)
-      puts "*****************************************************
-Sidekiq.redis now takes a Hash:
-old: Sidekiq.redis = Sidekiq::RedisConnection.create(:url => 'redis://foo.com', :namespace => 'abc', :size => 12)
-new: Sidekiq.redis = { :url => 'redis://foo.com', :namespace => 'xyz', :size => 12 }
-Called from #{caller[0]}
-*****************************************************"
-      @redis = hash
-    else
+    if hash.is_a?(Hash)
       @redis = RedisConnection.create(hash)
+    else
+      @redis = hash
     end
   end
 

@@ -7,7 +7,7 @@ Gem::Specification.new do |gem|
   gem.description   = gem.summary = "Simple, efficient message processing for Ruby"
   gem.homepage      = "http://mperham.github.com/sidekiq"
 
-  gem.executables   = ['sidekiq']
+  gem.executables   = ['sidekiq', 'sidekiqctl']
   gem.files         = `git ls-files`.split("\n")
   gem.test_files    = `git ls-files -- test/*`.split("\n")
   gem.name          = "sidekiq"
@@ -15,11 +15,13 @@ Gem::Specification.new do |gem|
   gem.version       = Sidekiq::VERSION
   gem.add_dependency                  'redis'
   gem.add_dependency                  'redis-namespace'
-  gem.add_dependency                  'connection_pool'
+  gem.add_dependency                  'connection_pool', '~> 0.9.0'
   gem.add_dependency                  'celluloid'
   gem.add_dependency                  'multi_json'
   gem.add_development_dependency      'minitest'
+  gem.add_development_dependency      'sinatra'
+  gem.add_development_dependency      'slim'
   gem.add_development_dependency      'rake'
-  gem.add_development_dependency      'actionmailer'
-  gem.add_development_dependency      'activerecord'
+  gem.add_development_dependency      'actionmailer', '~> 3'
+  gem.add_development_dependency      'activerecord', '~> 3'
 end

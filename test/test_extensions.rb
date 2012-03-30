@@ -5,13 +5,13 @@ require 'action_mailer'
 require 'sidekiq/extensions/action_mailer'
 require 'sidekiq/extensions/active_record'
 
+Sidekiq.hook_rails!
 
 class TestExtensions < MiniTest::Unit::TestCase
   describe 'sidekiq extensions' do
     before do
-      Sidekiq.client_middleware.entries.clear
-      Sidekiq.instance_variable_set(:@redis, MiniTest::Mock.new)
-      @redis = Sidekiq.redis
+      Sidekiq.redis = REDIS
+      Sidekiq.redis {|c| c.flushdb }
     end
 
     class MyModel < ActiveRecord::Base
@@ -21,13 +21,11 @@ class TestExtensions < MiniTest::Unit::TestCase
     end
 
     it 'allows delayed exection of ActiveRecord class methods' do
-      @redis.expect(:rpush, @redis, ['queue:default', "{\"class\":\"Sidekiq::Extensions::DelayedModel\",\"args\":[\"---\\n- !ruby/class 'TestExtensions::MyModel'\\n- :long_class_method\\n- []\\n\"]}"])
+      assert_equal [], Sidekiq::Client.registered_queues
+      assert_equal 0, Sidekiq.redis {|c| c.llen('queue:default') }
       MyModel.delay.long_class_method
-      @redis.verify
-    end
-
-    it 'allows delayed exection of ActiveRecord instance methods' do
-      skip('requires a database')
+      assert_equal ['default'], Sidekiq::Client.registered_queues
+      assert_equal 1, Sidekiq.redis {|c| c.llen('queue:default') }
     end
 
     class UserMailer < ActionMailer::Base
@@ -37,10 +35,34 @@ class TestExtensions < MiniTest::Unit::TestCase
     end
 
     it 'allows delayed delivery of ActionMailer mails' do
-      @redis.expect(:rpush, @redis, ['queue:default', "{\"class\":\"Sidekiq::Extensions::DelayedMailer\",\"args\":[\"---\\n- !ruby/class 'TestExtensions::UserMailer'\\n- :greetings\\n- - 1\\n  - 2\\n\"]}"])
+      assert_equal [], Sidekiq::Client.registered_queues
+      assert_equal 0, Sidekiq.redis {|c| c.llen('queue:default') }
       UserMailer.delay.greetings(1, 2)
-      @redis.verify
+      assert_equal ['default'], Sidekiq::Client.registered_queues
+      assert_equal 1, Sidekiq.redis {|c| c.llen('queue:default') }
+    end
+  end
+
+  describe 'sidekiq rails extensions configuration' do
+    before do
+      @options = Sidekiq.options
     end
 
+    after do
+      Sidekiq.options = @options
+    end
+
+    it 'should set enable_rails_extensions option to true by default' do
+      assert Sidekiq.options[:enable_rails_extensions]
+    end
+
+    it 'should extend ActiveRecord and ActiveMailer if enable_rails_extensions is true' do
+      assert Sidekiq.hook_rails!
+    end
+
+    it 'should not extend ActiveRecord and ActiveMailer if enable_rails_extensions is false' do
+      Sidekiq.options = { :enable_rails_extensions => false }
+      refute Sidekiq.hook_rails!
+    end
   end
 end

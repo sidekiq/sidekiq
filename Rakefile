@@ -1,7 +1,8 @@
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
   test.libs << 'test'
-  test.warning = true
+  #SO MUCH NOISE
+  #test.warning = true
   test.pattern = 'test/**/test_*.rb'
 end
 

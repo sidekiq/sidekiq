@@ -1,9 +1,7 @@
 require 'multi_json'
 require 'redis'
 
-require 'sidekiq/redis_connection'
 require 'sidekiq/middleware/chain'
-require 'sidekiq/middleware/client/resque_web_compatibility'
 require 'sidekiq/middleware/client/unique_jobs'
 
 module Sidekiq
@@ -16,16 +14,15 @@ module Sidekiq
     def self.default_middleware
       Middleware::Chain.new do |m|
         m.add Middleware::Client::UniqueJobs
-        m.add Middleware::Client::ResqueWebCompatibility
       end
     end
 
     def self.registered_workers
-      Sidekiq.redis.smembers('workers')
+      Sidekiq.redis { |x| x.smembers('workers') }
     end
 
     def self.registered_queues
-      Sidekiq.redis.smembers('queues')
+      Sidekiq.redis { |x| x.smembers('queues') }
     end
 
     def self.queue_mappings
@@ -44,7 +41,13 @@ module Sidekiq
 
       pushed = false
       Sidekiq.client_middleware.invoke(item, queue) do
-        Sidekiq.redis.rpush("queue:#{queue}", MultiJson.encode(item))
+        payload = MultiJson.encode(item)
+        Sidekiq.redis do |conn|
+          conn.multi do
+            conn.sadd('queues', queue)
+            conn.rpush("queue:#{queue}", payload)
+          end
+        end
         pushed = true
       end
       pushed

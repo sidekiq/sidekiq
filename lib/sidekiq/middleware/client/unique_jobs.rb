@@ -9,13 +9,23 @@ module Sidekiq
 
         def call(item, queue)
           payload_hash = Digest::MD5.hexdigest(MultiJson.encode(item))
-          Sidekiq.redis.with_connection do |redis|
-            return if redis.get(payload_hash)
-            redis.setex(payload_hash, HASH_KEY_EXPIRATION, 1)
+          unique = false
+
+          Sidekiq.redis do |conn|
+            conn.watch(payload_hash)
+
+            if conn.get(payload_hash)
+              conn.unwatch
+            else
+              unique = conn.multi do
+                conn.setex(payload_hash, HASH_KEY_EXPIRATION, 1)
+              end
+            end
           end
 
-          yield
+          yield if unique
         end
+
       end
     end
   end

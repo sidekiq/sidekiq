@@ -22,6 +22,5 @@ module Sidekiq
       end
     end
 
-    ::ActionMailer::Base.extend(ActionMailer)
   end
-end if defined?(::ActionMailer)
+end

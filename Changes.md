@@ -1,4 +1,36 @@
-HEAD
+0.10.1
+-----------
+
+- Add details page for jobs in retry queue (jcoene)
+- Display relative timestamps in web interface (jcoene)
+- Capistrano fixes (hinrik, bensie)
+
+0.10.0
+-----------
+
+- Reworked capistrano recipe to make it more fault-tolerant [#94].
+- Automatic failure retry!  Sidekiq will now save failed messages
+  and retry them, with an exponential backoff, over about 20 days.
+  Did a message fail to process?  Just deploy a bug fix in the next
+  few days and Sidekiq will retry the message eventually.
+
+0.9.1
+-----------
+
+- Fix missed deprecations, poor method name in web UI
+
+0.9.0
+-----------
+
+- Add -t option to configure the TERM shutdown timeout
+- TERM shutdown timeout is now configurable, defaults to 5 seconds.
+- USR1 signal now stops Sidekiq from accepting new work,
+  capistrano sends USR1 at start of deploy and TERM at end of deploy
+  giving workers the maximum amount of time to finish.
+- New Sidekiq::Web rack application available
+- Updated Sidekiq.redis API
+
+0.8.0
 -----------
 
 - Remove :namespace and :server CLI options (mperham)

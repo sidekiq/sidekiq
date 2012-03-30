@@ -1,1 +1,1 @@
-- resque-ui-esque web ui
+- Make the Web UI less ugly
