@@ -81,6 +81,11 @@ module Sidekiq
       options[:environment] ||= ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
     end
 
+    def rails_or_ruby?
+      @options[:require] && File.exist?(@options[:require]) ||
+        (File.directory?(@options[:require]) && File.exist?("#{@options[:require]}/config/application.rb"))
+    end
+
     def boot_system
       ENV['RACK_ENV'] = ENV['RAILS_ENV'] = detected_environment
 

@@ -29,7 +29,8 @@ module Sidekiq
 
       @done = false
       @busy = []
-      @ready = @count.times.map { Processor.new_link(current_actor) }
+      @ready = []
+      @count.times.each { @ready << Processor.new_link(current_actor) }
     end
 
     def stop(options={})
