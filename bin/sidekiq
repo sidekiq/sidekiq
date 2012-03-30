@@ -1,13 +1,6 @@
 #!/usr/bin/env ruby
 
-begin
-  require 'sidekiq/cli'
-rescue LoadError
-  # Better way to do this in dev?
-  dir = File.expand_path(File.dirname(__FILE__) + '/../lib') 
-  $LOAD_PATH << dir if File.exist?("#{dir}/sidekiq.rb")
-  require 'sidekiq/cli'
-end
+require_relative '../lib/sidekiq/cli'
 
 begin
   cli = Sidekiq::CLI.instance
