@@ -41,7 +41,7 @@ module Sidekiq
         Sidekiq.redis do |conn|
           workers = conn.smembers('workers')
           workers.each do |name|
-            conn.srem('workers', name) # if name =~ /:#{process_id}-/
+            conn.srem('workers', name)
           end
         end
       end
@@ -107,7 +107,7 @@ module Sidekiq
       end
 
       def relative_time(time)
-        "<time datetime=\"#{time.getutc.iso8601}\">#{time}</time>"
+        %{<time datetime="#{time.getutc.iso8601}">#{time}</time>}
       end
     end
 
