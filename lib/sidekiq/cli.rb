@@ -145,6 +145,11 @@ module Sidekiq
         o.on '-C', '--config PATH', "path to YAML config file" do |arg|
           opts[:config_file] = arg
         end
+
+        o.on '-V', '--version', "Print version and exit" do |arg|
+          puts "Sidekiq #{Sidekiq::VERSION}"
+          die(0)
+        end
       end
 
       @parser.banner = "sidekiq [options]"

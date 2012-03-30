@@ -1,3 +1,8 @@
+HEAD
+-----------
+
+- Add version CLI option
+
 0.10.1
 -----------
 
