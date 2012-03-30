@@ -1,7 +1,9 @@
-HEAD
+0.10.1
 -----------
+
 - Add details page for jobs in retry queue (jcoene)
 - Display relative timestamps in web interface (jcoene)
+- Capistrano fixes (hinrik, bensie)
 
 0.10.0
 -----------
