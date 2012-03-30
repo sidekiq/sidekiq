@@ -87,8 +87,8 @@ module Sidekiq
 
       def retries_with_score(score)
         Sidekiq.redis do |conn|
-          results = conn.zrangebyscore('retry', score, score, :withscores => true)
-          results.each_slice(2).map { |msg, score| [MultiJson.decode(msg), Float(score)] }
+          results = conn.zrangebyscore('retry', score, score)
+          results.map { |msg| MultiJson.decode(msg) }
         end
       end
 
@@ -129,8 +129,28 @@ module Sidekiq
 
     get "/retries/:score" do
       halt 404 unless params[:score]
-      @score = params[:score]
+      @score = params[:score].to_f
       slim :retry
+    end
+
+    post "/retries/:score" do
+      halt 404 unless params[:score]
+      score = params[:score].to_f
+      if params['retry']
+        Sidekiq.redis do |conn|
+          results = conn.zrangebyscore('retry', score, score)
+          conn.zremrangebyscore('retry', score, score)
+          results.map do |message|
+            msg = MultiJson.decode(message)
+            conn.rpush("queue:#{msg['queue']}", message)
+          end
+        end
+      elsif params['delete']
+        Sidekiq.redis do |conn|
+          conn.zremrangebyscore('retry', score, score)
+        end
+      end
+      redirect root_path
     end
   end
 
