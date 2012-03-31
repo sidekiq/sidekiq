@@ -1,6 +1,7 @@
 require 'sinatra/base'
 require 'slim'
 require 'sprockets'
+require 'multi_json'
 
 module Sidekiq
   class SprocketsMiddleware

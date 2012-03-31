@@ -18,9 +18,12 @@ end
 require 'yaml'
 require 'singleton'
 require 'optparse'
+require 'celluloid'
+
 require 'sidekiq'
 require 'sidekiq/util'
 require 'sidekiq/manager'
+require 'sidekiq/retry'
 
 module Sidekiq
   class CLI

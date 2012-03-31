@@ -37,7 +37,6 @@ module Sidekiq
         if msg
           @mgr.assign!(msg, queue.gsub(/\Aqueue:/, ''))
         else
-          puts 'All quiet'
           after(0) { fetch }
         end
       end

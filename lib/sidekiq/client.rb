@@ -1,5 +1,4 @@
 require 'multi_json'
-require 'redis'
 
 require 'sidekiq/middleware/chain'
 require 'sidekiq/middleware/client/unique_jobs'

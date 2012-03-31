@@ -1,11 +1,9 @@
 require 'celluloid'
-require 'redis'
 require 'multi_json'
 
 require 'sidekiq/util'
 require 'sidekiq/processor'
 require 'sidekiq/fetch'
-require 'connection_pool/version'
 
 module Sidekiq
 

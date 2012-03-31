@@ -1,5 +1,7 @@
 require 'sidekiq'
+require 'sidekiq/util'
 require 'celluloid'
+require 'multi_json'
 
 module Sidekiq
   ##

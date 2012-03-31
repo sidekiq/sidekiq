@@ -1,4 +1,5 @@
 require 'connection_pool'
+require 'redis'
 require 'redis/namespace'
 
 module Sidekiq
