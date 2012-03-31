@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 platforms :ruby do
-    gem 'sqlite3'
+  gem 'sqlite3'
 end
 
 platforms :jruby do
