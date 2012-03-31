@@ -40,8 +40,8 @@ module Sidekiq
 
         @done = true
 
-        @fetcher.terminate if @fetcher.alive?
-        @ready.each { |x| x.terminate if x.alive? }
+        @fetcher.terminate! if @fetcher.alive?
+        @ready.each { |x| x.terminate! if x.alive? }
         @ready.clear
 
         redis do |conn|

@@ -30,15 +30,16 @@ module Sidekiq
     # a new fetch if the current fetch turned up nothing.
     def fetch
       watchdog('Fetcher#fetch died') do
-
+        queue = nil
         msg = nil
-        Sidekiq.redis do |conn|
-          (queue, msg) = conn.blpop *@cmd
-          puts 'All quiet' unless msg
-          @mgr.assign! msg, queue.gsub(/\Aqueue:/, '') if msg
-        end
-        after(0) { fetch } if !msg
+        Sidekiq.redis { |conn| (queue, msg) = conn.blpop(*@cmd) }
 
+        if msg
+          @mgr.assign!(msg, queue.gsub(/\Aqueue:/, ''))
+        else
+          puts 'All quiet'
+          after(0) { fetch }
+        end
       end
     end
 
