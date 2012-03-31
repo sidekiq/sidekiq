@@ -45,9 +45,9 @@ class TestCli < MiniTest::Unit::TestCase
       assert_equal 30, Sidekiq.options[:timeout]
     end
 
-    it 'handles weights' do
-      @cli.parse(['sidekiq', '-q', 'foo,3', '-q', 'bar', '-r', './test/fake_env.rb'])
-      assert_equal %w(bar foo foo foo), Sidekiq.options[:queues].sort
+    it 'handles multiple queues' do
+      @cli.parse(['sidekiq', '-q', 'foo', '-q', 'bar', '-r', './test/fake_env.rb'])
+      assert_equal %w(foo bar), Sidekiq.options[:queues]
     end
 
     it 'sets verbose' do
@@ -110,8 +110,7 @@ class TestCli < MiniTest::Unit::TestCase
       end
 
       it 'sets queues' do
-        assert_equal 2, Sidekiq.options[:queues].select{ |q| q == 'often' }.length
-        assert_equal 1, Sidekiq.options[:queues].select{ |q| q == 'seldom' }.length
+        assert_equal %w(often seldom), Sidekiq.options[:queues]
       end
     end
 
@@ -133,8 +132,8 @@ class TestCli < MiniTest::Unit::TestCase
                     '-c', '100',
                     '-r', @tmp_lib_path,
                     '-P', @tmp_path,
-                    '-q', 'often,7',
-                    '-q', 'seldom,3'])
+                    '-q', 'often',
+                    '-q', 'seldom'])
       end
 
       after do
@@ -159,8 +158,7 @@ class TestCli < MiniTest::Unit::TestCase
       end
 
       it 'sets queues' do
-        assert_equal 7, Sidekiq.options[:queues].select{ |q| q == 'often' }.length
-        assert_equal 3, Sidekiq.options[:queues].select{ |q| q == 'seldom' }.length
+        assert_equal %w(often seldom), Sidekiq.options[:queues]
       end
     end
   end

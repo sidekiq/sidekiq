@@ -2,6 +2,11 @@ HEAD
 -----------
 
 - Add version CLI option
+- NO POLL!  Sidekiq no longer polls Redis, leading to lower network
+  utilization and lower latency for message processing.  As a side
+  effect of this change, queue weights are no longer supported. If you
+  wish to process multiple queues, list them in the order you want
+  them processed: `sidekiq -q critical -q high -q default -q low`
 
 0.10.1
 -----------
