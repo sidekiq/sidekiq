@@ -12,9 +12,21 @@ class TestRetry < MiniTest::Unit::TestCase
       def @redis.with; yield self; end
     end
 
+    it 'allows disabling retry' do
+      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => false }
+      msg2 = msg.dup
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      assert_raises RuntimeError do
+        handler.call('', msg2, 'default') do
+          raise "kerblammo!"
+        end
+      end
+      assert_equal msg, msg2
+    end
+
     it 'handles a new failed message' do
       @redis.expect :zadd, 1, ['retry', String, String]
-      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'] }
+      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
         handler.call('', msg, 'default') do
@@ -32,7 +44,7 @@ class TestRetry < MiniTest::Unit::TestCase
     it 'handles a recurring failed message' do
       @redis.expect :zadd, 1, ['retry', String, String]
       now = Time.now.utc
-      msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>10}
+      msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], 'retry' => true, "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>10}
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
         handler.call('', msg, 'default') do

@@ -1,12 +1,15 @@
 HEAD
 -----------
 
-- Add version CLI option
+- Client-side API changes, added sidekiq\_options for Sidekiq::Worker.
+  As a side effect of this change, the client API works on Ruby 1.8.
+  It's not officially supported but should work [#103]
 - NO POLL!  Sidekiq no longer polls Redis, leading to lower network
   utilization and lower latency for message processing.  As a side
   effect of this change, queue weights are no longer supported. If you
   wish to process multiple queues, list them in the order you want
   them processed: `sidekiq -q critical -q high -q default -q low`
+- Add --version CLI option
 
 0.10.1
 -----------

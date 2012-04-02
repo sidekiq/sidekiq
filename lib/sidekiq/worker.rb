@@ -26,11 +26,34 @@ module Sidekiq
 
     module ClassMethods
       def perform_async(*args)
-        Sidekiq::Client.push('class' => self.name, 'args' => args)
+        Sidekiq::Client.push('class' => self, 'args' => args)
       end
 
       def queue(name)
+        puts "DEPRECATED: `queue :name` is now `sidekiq_options :queue => :name`"
         Sidekiq::Client.queue_mappings[self.name] = name.to_s
+      end
+
+      ##
+      # Allows customization for this type of Worker.
+      # Legal options:
+      #
+      #   :unique - enable the UniqueJobs middleware for this Worker, default *true*
+      #   :queue - use a named queue for this Worker, default 'default'
+      #   :retry - enable the RetryJobs middleware for this Worker, default *true*
+      def sidekiq_options(opts={})
+        @sidekiq_options = get_sidekiq_options.merge(stringify_keys(opts || {}))
+      end
+
+      def get_sidekiq_options # :nodoc:
+        @sidekiq_options || { 'unique' => true, 'retry' => true, 'queue' => 'default' }
+      end
+
+      def stringify_keys(hash) # :nodoc:
+        hash.keys.each do |key|
+          hash[key.to_s] = hash.delete(key)
+        end
+        hash
       end
     end
   end

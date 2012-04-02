@@ -38,7 +38,7 @@ class TestWeb < MiniTest::Unit::TestCase
       assert_match last_response.body, /default/
       refute_match last_response.body, /foo/
 
-      assert Sidekiq::Client.push(:foo, 'class' => WebWorker, 'args' => [1, 3])
+      assert Sidekiq::Client.push('queue' => :foo, 'class' => WebWorker, 'args' => [1, 3])
 
       get '/'
       assert_equal 200, last_response.status

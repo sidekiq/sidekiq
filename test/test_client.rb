@@ -9,19 +9,21 @@ class TestClient < MiniTest::Unit::TestCase
       Sidekiq.redis {|c| c.flushdb }
     end
 
+    class QueueWorker
+      include Sidekiq::Worker
+      sidekiq_options :queue => 'customqueue'
+    end
+
     it 'does not push duplicate messages when configured for unique only' do
-      Sidekiq.client_middleware.entries.clear
-      Sidekiq.client_middleware do |chain|
-        chain.add Sidekiq::Middleware::Client::UniqueJobs
-      end
-      10.times { Sidekiq::Client.push('customqueue', 'class' => 'Foo', 'args' => [1, 2]) }
+      QueueWorker.sidekiq_options :unique => true
+      10.times { Sidekiq::Client.push('class' => QueueWorker, 'args' => [1, 2]) }
       assert_equal 1, Sidekiq.redis {|c| c.llen("queue:customqueue") }
     end
 
     it 'does push duplicate messages when not configured for unique only' do
-      Sidekiq.client_middleware.remove(Sidekiq::Middleware::Client::UniqueJobs)
-      10.times { Sidekiq::Client.push('customqueue2', 'class' => 'Foo', 'args' => [1, 2]) }
-      assert_equal 10, Sidekiq.redis {|c| c.llen("queue:customqueue2") }
+      QueueWorker.sidekiq_options :unique => false
+      10.times { Sidekiq::Client.push('class' => QueueWorker, 'args' => [1, 2]) }
+      assert_equal 10, Sidekiq.redis {|c| c.llen("queue:customqueue") }
     end
   end
 
@@ -56,7 +58,7 @@ class TestClient < MiniTest::Unit::TestCase
 
     it 'pushes messages to redis' do
       @redis.expect :rpush, 1, ['queue:foo', String]
-      pushed = Sidekiq::Client.push('foo', 'class' => 'Foo', 'args' => [1, 2])
+      pushed = Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1, 2])
       assert pushed
       @redis.verify
     end
@@ -82,7 +84,7 @@ class TestClient < MiniTest::Unit::TestCase
     class QueuedWorker
       include Sidekiq::Worker
 
-      queue :flimflam
+      sidekiq_options :queue => :flimflam
     end
 
     it 'enqueues to the named queue' do

@@ -27,6 +27,8 @@ module Sidekiq
         def call(worker, msg, queue)
           yield
         rescue => e
+          raise unless msg['retry']
+
           msg['queue'] = queue
           msg['error_message'] = e.message
           msg['error_class'] = e.class.name
