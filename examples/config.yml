@@ -5,5 +5,5 @@
 :verbose:      false
 :concurrency:  25
 :queues:
-  - [often, 2]
-  - [seldom, 1]
+  - often
+  - seldom

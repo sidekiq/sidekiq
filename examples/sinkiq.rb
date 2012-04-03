@@ -5,8 +5,10 @@
 # and then browse to http://localhost:4567
 #
 require 'sinatra'
-require 'sidekiq/worker'
-$redis = Sidekiq::RedisConnection.create
+require 'sidekiq'
+require 'redis'
+
+$redis = Redis.connect
 
 class SinatraWorker
   include Sidekiq::Worker
