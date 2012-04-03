@@ -1,6 +1,12 @@
 HEAD
 -----------
 
+- Fix fetch breaking retry when used with Redis namespaces. [#109]
+
+
+0.11.0
+-----------
+
 - Client-side API changes, added sidekiq\_options for Sidekiq::Worker.
   As a side effect of this change, the client API works on Ruby 1.8.
   It's not officially supported but should work [#103]

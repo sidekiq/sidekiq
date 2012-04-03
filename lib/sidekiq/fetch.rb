@@ -35,7 +35,7 @@ module Sidekiq
         Sidekiq.redis { |conn| (queue, msg) = conn.blpop(*@cmd) }
 
         if msg
-          @mgr.assign!(msg, queue.gsub(/\Aqueue:/, ''))
+          @mgr.assign!(msg, queue.gsub(/.*queue:/, ''))
         else
           after(0) { fetch }
         end
