@@ -8,12 +8,12 @@ Capistrano::Configuration.instance.load do
 
     desc "Quiet sidekiq (stop accepting new work)"
     task :quiet do
-      run "cd #{current_path} && bundle exec sidekiqctl quiet #{current_path}/tmp/pids/sidekiq.pid"
+      run "cd #{current_path} && if [ -f #{current_path}/tmp/pids/sidekiq.pid ]; then bundle exec sidekiqctl quiet #{current_path}/tmp/pids/sidekiq.pid ; fi"
     end
 
     desc "Stop sidekiq"
     task :stop do
-      run "cd #{current_path} && bundle exec sidekiqctl stop #{current_path}/tmp/pids/sidekiq.pid #{fetch :sidekiq_timeout}"
+      run "cd #{current_path} && if [ -f #{current_path}/tmp/pids/sidekiq.pid ]; then bundle exec sidekiqctl stop #{current_path}/tmp/pids/sidekiq.pid #{fetch :sidekiq_timeout} ; fi"
     end
 
     desc "Start sidekiq"
