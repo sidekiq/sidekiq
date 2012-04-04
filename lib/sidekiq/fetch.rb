@@ -15,7 +15,7 @@ module Sidekiq
 
     def initialize(mgr, queues)
       @mgr = mgr
-      @queues = queues
+      @queues = queues.map { |q| "queue:#{q}" }
       @num_queues = queues.uniq.size
     end
 
@@ -49,8 +49,7 @@ module Sidekiq
     # recreate the queue command each time we invoke Redis#blpop
     # to honor weights and avoid queue starvation.
     def queues_cmd
-      queues = @queues.sample(@num_queues)
-      cmd = queues.map { |q| "queue:#{q}" }
+      cmd = @queues.sample(@num_queues)
       cmd << TIMEOUT
       cmd
     end
