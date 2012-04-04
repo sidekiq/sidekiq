@@ -4,6 +4,7 @@ HEAD
 - Fix fetch breaking retry when used with Redis namespaces. [#109]
 - Redis connection now just a plain ConnectionPool, not CP::Wrapper.
 - Capistrano initial deploy fix [#106]
+- Re-implemented weighted queues support (ryanlecompte)
 
 0.11.0
 -----------
