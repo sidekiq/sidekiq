@@ -55,23 +55,25 @@ class TestStats < MiniTest::Unit::TestCase
       msg = { 'class' => DumbWorker.to_s, 'args' => [nil] }
       boss = MiniTest::Mock.new
 
-      assert_equal [], @redis.smembers('workers')
-      assert_equal 0, @redis.get('stat:failed').to_i
-      assert_equal 0, @redis.get('stat:processed').to_i
+      @redis.with do |conn|
+        assert_equal [], conn.smembers('workers')
+        assert_equal 0, conn.get('stat:failed').to_i
+        assert_equal 0, conn.get('stat:processed').to_i
 
-      processor = Sidekiq::Processor.new(boss)
-      assert_equal 1, @redis.smembers('workers').size
+        processor = Sidekiq::Processor.new(boss)
+        assert_equal 1, conn.smembers('workers').size
 
-      pstr = processor.to_s
-      assert_raises RuntimeError do
-        processor.process(msg, 'xyzzy')
+        pstr = processor.to_s
+        assert_raises RuntimeError do
+          processor.process(msg, 'xyzzy')
+        end
+
+        set = conn.smembers('workers')
+        assert_equal 0, set.size
+        assert_equal 1, conn.get('stat:failed').to_i
+        assert_equal 1, conn.get('stat:processed').to_i
+        assert_equal nil, conn.get("stat:processed:#{pstr}")
       end
-
-      set = @redis.smembers('workers')
-      assert_equal 0, set.size
-      assert_equal 1, @redis.get('stat:failed').to_i
-      assert_equal 1, @redis.get('stat:processed').to_i
-      assert_equal nil, @redis.get("stat:processed:#{pstr}")
     end
 
   end
