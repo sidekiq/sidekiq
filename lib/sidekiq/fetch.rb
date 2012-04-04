@@ -16,7 +16,7 @@ module Sidekiq
     def initialize(mgr, queues)
       @mgr = mgr
       @queues = queues.map { |q| "queue:#{q}" }
-      @num_queues = queues.uniq.size
+      @unique_queues = @queues.uniq
     end
 
     # Fetching is straightforward: the Manager makes a fetch
@@ -49,9 +49,9 @@ module Sidekiq
     # recreate the queue command each time we invoke Redis#blpop
     # to honor weights and avoid queue starvation.
     def queues_cmd
-      cmd = @queues.sample(@num_queues)
-      cmd << TIMEOUT
-      cmd
+      queues = @queues.sample(@unique_queues.size).uniq
+      queues.concat(@unique_queues - queues)
+      queues << TIMEOUT
     end
   end
 end
