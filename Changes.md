@@ -1,4 +1,4 @@
-HEAD
+0.11.1
 -----------
 
 - Fix fetch breaking retry when used with Redis namespaces. [#109]
