@@ -6,7 +6,9 @@ module Sidekiq
   class RedisConnection
     def self.create(options={})
       url = options[:url] || ENV['REDISTOGO_URL'] || 'redis://localhost:6379/0'
-      size = (options[:size] || Sidekiq.options[:concurrency] || 25)
+      # need a connection for Fetcher and Retry
+      size = options[:size] || (Sidekiq.options[:concurrency] + 2)
+
       ConnectionPool.new(:timeout => 1, :size => size) do
         build_client(url, options[:namespace])
       end
