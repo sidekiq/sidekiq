@@ -1,3 +1,9 @@
+HEAD
+-----------
+
+- Add support for a custom Capistrano role to limit Sidekiq to
+  a set of machines. [#113]
+
 0.11.1
 -----------
 
