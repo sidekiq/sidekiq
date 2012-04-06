@@ -19,6 +19,10 @@ module Sidekiq
     #   assert_equal 1, HardWorker.jobs.size
     #   assert_equal :something, HardWorker.jobs[0]['args'][0]
     #
+    #   assert_equal 0, Sidekiq::Extensions::DelayedMailer.jobs.size
+    #   MyMailer.delayed.send_welcome_email('foo@example.com')
+    #   assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs.size
+    #
     module ClassMethods
       alias_method :perform_async_old, :perform_async
       def perform_async(*args)
