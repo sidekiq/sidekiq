@@ -30,9 +30,11 @@ module Sidekiq
     def process(msg, queue)
       klass  = constantize(msg['class'])
       worker = klass.new
-      stats(worker, msg, queue) do
-        Sidekiq.server_middleware.invoke(worker, msg, queue) do
-          worker.perform(*msg['args'])
+      defer do
+        stats(worker, msg, queue) do
+          Sidekiq.server_middleware.invoke(worker, msg, queue) do
+            worker.perform(*msg['args'])
+          end
         end
       end
       @boss.processor_done!(current_actor)
