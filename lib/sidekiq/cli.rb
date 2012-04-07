@@ -67,6 +67,7 @@ module Sidekiq
         poller.terminate
         @manager.stop!(:shutdown => true, :timeout => options[:timeout])
         @manager.wait(:shutdown)
+        exit(0)
       end
     end
 

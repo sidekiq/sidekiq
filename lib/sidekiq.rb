@@ -15,7 +15,7 @@ module Sidekiq
     :concurrency => 25,
     :require => '.',
     :environment => nil,
-    :timeout => 5,
+    :timeout => 8,
     :enable_rails_extensions => true,
   }
 

@@ -25,6 +25,7 @@ module Sidekiq
       @count = options[:concurrency] || 25
       @done_callback = nil
 
+      @in_progress = {}
       @done = false
       @busy = []
       @fetcher = Fetcher.new(current_actor, options[:queues])
@@ -39,29 +40,22 @@ module Sidekiq
         @done = true
 
         @fetcher.terminate if @fetcher.alive?
+
+        logger.info { "Shutting down #{@ready.size} quiet workers" }
         @ready.each { |x| x.terminate if x.alive? }
         @ready.clear
 
-        redis do |conn|
+        logger.debug { "Clearing workers in redis" }
+        Sidekiq.redis do |conn|
           workers = conn.smembers('workers')
           workers.each do |name|
             conn.srem('workers', name) if name =~ /:#{process_id}-/
           end
         end
 
-        if shutdown
-          if @busy.empty?
-            # after(0) needed to avoid deadlock in Celluoid after USR1 + TERM
-            return after(0) { signal(:shutdown) }
-          else
-            logger.info { "Pausing #{timeout} seconds to allow workers to finish..." }
-          end
-
-          after(timeout) do
-            @busy.each { |x| x.terminate if x.alive? }
-            signal(:shutdown)
-          end
-        end
+        return after(0) { signal(:shutdown) } if @busy.empty?
+        logger.info { "Pausing up to #{timeout} seconds to allow workers to finish..." }
+        hard_shutdown_in(timeout) if shutdown
       end
     end
 
@@ -76,6 +70,7 @@ module Sidekiq
     def processor_done(processor)
       watchdog('Manager#processor_done died') do
         @done_callback.call(processor) if @done_callback
+        @in_progress.delete(processor.object_id)
         @busy.delete(processor)
         if stopped?
           processor.terminate if processor.alive?
@@ -89,6 +84,7 @@ module Sidekiq
 
     def processor_died(processor, reason)
       watchdog("Manager#processor_died died") do
+        @in_progress.delete(processor.object_id)
         @busy.delete(processor)
 
         unless stopped?
@@ -103,12 +99,36 @@ module Sidekiq
     def assign(msg, queue)
       watchdog("Manager#assign died") do
         processor = @ready.pop
+        @in_progress[processor.object_id] = [msg, queue]
         @busy << processor
         processor.process!(MultiJson.decode(msg), queue)
       end
     end
 
     private
+
+    def hard_shutdown_in(delay)
+      watchdog("Manager#watch_for_shutdown died") do
+        after(delay) do
+          # We've reached the timeout and we still have busy workers.
+          # They must die but their messages shall live on.
+          logger.info("Still waiting for #{@busy.size} busy workers")
+
+          Sidekiq.redis do |conn|
+            @busy.each do |processor|
+              # processor is an actor proxy and we can't call any methods
+              # that would go to the actor (since it's busy).  Instead
+              # we'll use the object_id to track the worker's data here.
+              msg, queue = @in_progress[processor.object_id]
+              conn.lpush("queue:#{queue}", msg)
+            end
+          end
+          logger.info("Pushed #{@busy.size} messages back to Redis")
+
+          after(0) { signal(:shutdown) }
+        end
+      end
+    end
 
     def dispatch
       return if stopped?
