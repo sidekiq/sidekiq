@@ -1,6 +1,7 @@
-HEAD
+0.11.2
 -----------
 
+- Work around Celluloid's small 4kb stack limit [#115]
 - Add support for a custom Capistrano role to limit Sidekiq to
   a set of machines. [#113]
 
