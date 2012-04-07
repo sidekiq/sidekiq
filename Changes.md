@@ -1,6 +1,10 @@
 0.11.2
 -----------
 
+- Implement "safe shutdown".  The messages for any workers that
+  are stil busy when we hit the TERM timeout will be requeued in
+  Redis so the messages are not lost when the Sidekiq process exits.
+  [#110]
 - Work around Celluloid's small 4kb stack limit [#115]
 - Add support for a custom Capistrano role to limit Sidekiq to
   a set of machines. [#113]
