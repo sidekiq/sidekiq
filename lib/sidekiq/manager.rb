@@ -38,7 +38,6 @@ module Sidekiq
         timeout = options[:timeout]
 
         @done = true
-
         @fetcher.terminate if @fetcher.alive?
 
         logger.info { "Shutting down #{@ready.size} quiet workers" }
@@ -55,7 +54,7 @@ module Sidekiq
 
         return after(0) { signal(:shutdown) } if @busy.empty?
         logger.info { "Pausing up to #{timeout} seconds to allow workers to finish..." }
-        hard_shutdown_in(timeout) if shutdown
+        hard_shutdown_in timeout if shutdown
       end
     end
 
@@ -108,8 +107,8 @@ module Sidekiq
     private
 
     def hard_shutdown_in(delay)
-      watchdog("Manager#watch_for_shutdown died") do
-        after(delay) do
+      after(delay) do
+        watchdog("Manager#watch_for_shutdown died") do
           # We've reached the timeout and we still have busy workers.
           # They must die but their messages shall live on.
           logger.info("Still waiting for #{@busy.size} busy workers")
