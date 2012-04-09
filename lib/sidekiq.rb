@@ -63,8 +63,10 @@ module Sidekiq
   def self.redis=(hash)
     if hash.is_a?(Hash)
       @redis = RedisConnection.create(hash)
-    else
+    elsif hash.is_a?(ConnectionPool)
       @redis = hash
+    else
+      raise ArgumentError, "redis= requires a Hash or ConnectionPool"
     end
   end
 
