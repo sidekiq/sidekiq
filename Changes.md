@@ -1,3 +1,14 @@
+1.0.0
+-----------
+
+Thanks to all Sidekiq users and contributors for helping me
+get to this big milestone!
+
+- Default concurrency on client-side to 5, not 25 so we don't
+  create as many unused Redis connections, same as ActiveRecord's
+  default pool size.
+- Ensure redis= is given a Hash or ConnectionPool.
+
 0.11.2
 -----------
 
