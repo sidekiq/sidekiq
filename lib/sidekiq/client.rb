@@ -33,6 +33,7 @@ module Sidekiq
       raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item['class'].ancestors.inspect}") if !item['class'].is_a?(Class) || !item['class'].respond_to?('get_sidekiq_options')
 
       item['retry'] = !!item['class'].get_sidekiq_options['retry']
+      item['retry_options'] = item['class'].get_sidekiq_retry_options if item['retry']
       queue = item['queue'] || item['class'].get_sidekiq_options['queue'] || queue_mappings[item['class'].to_s] || 'default'
       worker_class = item['class']
       item['class'] = item['class'].to_s

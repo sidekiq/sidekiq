@@ -70,6 +70,31 @@ class TestRetry < MiniTest::Unit::TestCase
       end
       @redis.verify
     end
+
+    it "handles an expiration date" do
+      @redis.expect :zadd, 1, ['retry', String, String]
+      now = Time.now.utc
+      msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry"=>true, "retry_count"=>0, "retry_options"=>{"expiration"=>(Time.now.utc + 60.0).to_s}}
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      assert_raises RuntimeError do
+        handler.call('', msg, 'default') do
+          raise "kerblammo!"
+        end
+      end
+      @redis.verify
+    end
+
+    it 'throws away an expired message' do
+      now = Time.now.utc
+      msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry"=>true, "retry_count"=>0, "retry_options"=>{"expiration"=>(Time.now.utc - 60.0).to_s}}
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      assert_raises RuntimeError do
+        handler.call('', msg, 'default') do
+          raise "kerblammo!"
+        end
+      end
+      @redis.verify
+    end
   end
 
   describe 'poller' do
