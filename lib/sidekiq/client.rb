@@ -41,14 +41,13 @@ module Sidekiq
       Sidekiq.client_middleware.invoke(worker_class, item, queue) do
         payload = MultiJson.encode(item)
         Sidekiq.redis do |conn|
-          conn.multi do
+          _, pushed = conn.multi do
             conn.sadd('queues', queue)
             conn.rpush("queue:#{queue}", payload)
           end
         end
-        pushed = true
       end
-      pushed
+      !! pushed
     end
 
     # Redis compatibility helper.  Example usage:

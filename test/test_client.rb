@@ -30,7 +30,7 @@ class TestClient < MiniTest::Unit::TestCase
   describe 'with mock redis' do
     before do
       @redis = MiniTest::Mock.new
-      def @redis.multi; yield if block_given?; end
+      def @redis.multi; [yield] * 2 if block_given?; end
       def @redis.set(*); true; end
       def @redis.sadd(*); true; end
       def @redis.srem(*); true; end
@@ -71,6 +71,13 @@ class TestClient < MiniTest::Unit::TestCase
       @redis.expect :rpush, 1, ['queue:default', String]
       pushed = MyWorker.perform_async(1, 2)
       assert pushed
+      @redis.verify
+    end
+
+    it 'handles perform_async on failure' do
+      @redis.expect :rpush, nil, ['queue:default', String]
+      pushed = MyWorker.perform_async(1, 2)
+      refute pushed
       @redis.verify
     end
 
