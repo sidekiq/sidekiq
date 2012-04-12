@@ -8,7 +8,6 @@ module Sidekiq
 
     def self.default_middleware
       Middleware::Chain.new do |m|
-        m.add Middleware::Client::UniqueJobs
       end
     end
 

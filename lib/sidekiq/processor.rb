@@ -3,7 +3,6 @@ require 'sidekiq/util'
 
 require 'sidekiq/middleware/server/active_record'
 require 'sidekiq/middleware/server/exception_handler'
-require 'sidekiq/middleware/server/unique_jobs'
 require 'sidekiq/middleware/server/retry_jobs'
 require 'sidekiq/middleware/server/logging'
 
@@ -16,7 +15,6 @@ module Sidekiq
       Middleware::Chain.new do |m|
         m.add Middleware::Server::ExceptionHandler
         m.add Middleware::Server::Logging
-        m.add Middleware::Server::UniqueJobs
         m.add Middleware::Server::RetryJobs
         m.add Middleware::Server::ActiveRecord
       end

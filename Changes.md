@@ -1,3 +1,25 @@
+HEAD
+-----------
+
+- Sidekiq::Client.push now returns whether the actual Redis
+  operation succeeded or not. [#123]
+- Remove UniqueJobs from the default middleware chain.  Its
+  functionality, while useful, is unexpected for new Sidekiq
+  users.  You can re-enable it with the following config.
+  Read #119 for more discussion.
+
+```ruby
+Sidekiq.client_middleware do |chain|
+  require 'sidekiq/middleware/client/unique_jobs'
+  chain.add Sidekiq::Middleware::Client::UniqueJobs
+end
+Sidekiq.server_middleware do |chain|
+  require 'sidekiq/middleware/server/unique_jobs'
+  chain.add Sidekiq::Middleware::Server::UniqueJobs
+end
+```
+
+
 1.0.0
 -----------
 
