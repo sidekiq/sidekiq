@@ -2,9 +2,9 @@ Copyright (c) Mike Perham
 
 You may choose to license Sidekiq in one of two ways:
 
-- Open Source under the GPLv3
+- Open Source under the LGPLv3
 
-  Please see <http://www.gnu.org/licenses/gpl-3.0.html> for license text.
+  Please see <http://www.gnu.org/licenses/lgpl-3.0.html> for license text.
 
 - Commercial License
 

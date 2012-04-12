@@ -1,6 +1,7 @@
 HEAD
 -----------
 
+- The Sidekiq license has switched from GPLv3 to LGPLv3!
 - Sidekiq::Client.push now returns whether the actual Redis
   operation succeeded or not. [#123]
 - Remove UniqueJobs from the default middleware chain.  Its
