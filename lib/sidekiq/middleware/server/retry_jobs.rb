@@ -65,7 +65,7 @@ module Sidekiq
 
         def can_be_retried?(msg, count, retry_options)
           # Check expiration
-          expiration = Time.parse(retry_options['expiration']) rescue nil if retry_options['expiration']
+          expiration = Time.parse(retry_options['expiration']) if retry_options['expiration']
           return false if expiration && Time.now.utc > expiration
 
           # Check retry count
