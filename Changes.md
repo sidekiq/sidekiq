@@ -10,13 +10,17 @@ HEAD
   Read #119 for more discussion.
 
 ```ruby
-Sidekiq.client_middleware do |chain|
+Sidekiq.configure_client do |config|
   require 'sidekiq/middleware/client/unique_jobs'
-  chain.add Sidekiq::Middleware::Client::UniqueJobs
+  cnfig.client_middleware do |chain|
+    chain.add Sidekiq::Middleware::Client::UniqueJobs
+  end
 end
-Sidekiq.server_middleware do |chain|
+Sidekiq.configure_server do |config|
   require 'sidekiq/middleware/server/unique_jobs'
-  chain.add Sidekiq::Middleware::Server::UniqueJobs
+  config.server_middleware do |chain|
+    chain.add Sidekiq::Middleware::Server::UniqueJobs
+  end
 end
 ```
 
