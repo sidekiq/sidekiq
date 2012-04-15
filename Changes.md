@@ -1,6 +1,12 @@
 HEAD
 -----------
 
+- Fix hang with sidekiq:start [#131]
+
+
+1.1.0
+-----------
+
 - The Sidekiq license has switched from GPLv3 to LGPLv3!
 - Sidekiq::Client.push now returns whether the actual Redis
   operation succeeded or not. [#123]
