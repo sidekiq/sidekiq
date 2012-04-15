@@ -52,6 +52,7 @@ module Sidekiq
       validate!
       daemonize
       write_pid
+      set_logfile
       boot_system
     end
 
@@ -82,6 +83,14 @@ module Sidekiq
     
     def daemonize
       Process.daemon(true) if options[:daemonize]
+    end
+    
+    def set_logfile
+      if options[:logfile]
+        $stdout.reopen(options[:logfile], "w")
+        $stdout.sync = true
+        $stderr.reopen($stdout)
+      end
     end
 
     def options
@@ -155,6 +164,10 @@ module Sidekiq
         
         o.on '-d', '--daemonize', "Daemonize process" do
           opts[:daemonize] = true
+        end
+        
+        o.on '-l', '--log FILE', "Log into file" do |arg|
+          opts[:logfile] = arg
         end
 
         o.on '-C', '--config PATH', "path to YAML config file" do |arg|
