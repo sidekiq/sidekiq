@@ -50,6 +50,7 @@ module Sidekiq
       Celluloid.logger = nil
 
       validate!
+      daemonize
       write_pid
       boot_system
     end
@@ -77,6 +78,10 @@ module Sidekiq
 
     def die(code)
       exit(code)
+    end
+    
+    def daemonize
+      Process.daemon(true) if options[:daemonize]
     end
 
     def options
@@ -146,6 +151,10 @@ module Sidekiq
 
         o.on '-P', '--pidfile PATH', "path to pidfile" do |arg|
           opts[:pidfile] = arg
+        end
+        
+        o.on '-d', '--daemonize', "Daemonize process" do
+          opts[:daemonize] = true
         end
 
         o.on '-C', '--config PATH', "path to YAML config file" do |arg|
