@@ -1,8 +1,8 @@
-HEAD
+1.1.1
 -----------
 
-- Fix hang with sidekiq:start [#131]
-
+- Fix race condition on shutdown [#134]
+- Fix hang with cap sidekiq:start [#131]
 
 1.1.0
 -----------
@@ -29,7 +29,6 @@ Sidekiq.configure_server do |config|
   end
 end
 ```
-
 
 1.0.0
 -----------
