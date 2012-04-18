@@ -1,3 +1,8 @@
+1.1.2
+-----------
+
+- Fix double restart with cap deploy [#137]
+
 1.1.1
 -----------
 
