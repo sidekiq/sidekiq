@@ -15,7 +15,7 @@ module Sidekiq
             :queue => args[2]
           }
 
-          Sidekiq.redis {|conn| conn.rpush(:failed, MultiJson.encode(data)) }
+          Sidekiq.redis {|conn| conn.rpush(:failed, MultiJson.dump(data)) }
           raise
         end
       end

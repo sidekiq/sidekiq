@@ -5,7 +5,7 @@ module Sidekiq
         def call(*args)
           yield
         ensure
-          json = MultiJson.encode(args[1])
+          json = MultiJson.dump(args[1])
           hash = Digest::MD5.hexdigest(json)
           Sidekiq.redis {|conn| conn.del(hash) }
         end
