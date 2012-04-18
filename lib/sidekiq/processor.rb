@@ -53,7 +53,7 @@ module Sidekiq
       redis do |conn|
         conn.multi do
           conn.set("worker:#{self}:started", Time.now.to_s)
-          conn.set("worker:#{self}", MultiJson.dump(:queue => queue, :payload => msg,
+          conn.set("worker:#{self}", MultiJson.encode(:queue => queue, :payload => msg,
                                                    :run_at => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z")))
         end
       end
