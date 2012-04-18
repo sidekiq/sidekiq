@@ -1,6 +1,7 @@
 1.1.1
 -----------
 
+- Set procline for easy monitoring of Sidekiq status via "ps aux"
 - Fix race condition on shutdown [#134]
 - Fix hang with cap sidekiq:start [#131]
 

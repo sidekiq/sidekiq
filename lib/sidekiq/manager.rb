@@ -30,6 +30,7 @@ module Sidekiq
       @busy = []
       @fetcher = Fetcher.new(current_actor, options[:queues])
       @ready = @count.times.map { Processor.new_link(current_actor) }
+      procline
     end
 
     def stop(options={})
@@ -151,6 +152,11 @@ module Sidekiq
 
     def stopped?
       @done
+    end
+
+    def procline
+      $0 = "sidekiq #{Sidekiq::VERSION} [#{@busy.size} of #{@count} busy]"
+      after(5) { procline }
     end
   end
 end
