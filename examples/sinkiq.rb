@@ -42,7 +42,7 @@ __END__
 </html>
 
 @@ index
-  <h1>Sinata + Sidekiq Example</h1>
+  <h1>Sinatra + Sidekiq Example</h1>
   <h2>Failed: <%= @failed %></h2>
   <h2>Processed: <%= @processed %></h2>
 
