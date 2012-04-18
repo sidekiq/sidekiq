@@ -24,7 +24,7 @@
 ```ruby
 Sidekiq.configure_client do |config|
   require 'sidekiq/middleware/client/unique_jobs'
-  cnfig.client_middleware do |chain|
+  config.client_middleware do |chain|
     chain.add Sidekiq::Middleware::Client::UniqueJobs
   end
 end
@@ -51,7 +51,7 @@ get to this big milestone!
 -----------
 
 - Implement "safe shutdown".  The messages for any workers that
-  are stil busy when we hit the TERM timeout will be requeued in
+  are still busy when we hit the TERM timeout will be requeued in
   Redis so the messages are not lost when the Sidekiq process exits.
   [#110]
 - Work around Celluloid's small 4kb stack limit [#115]
