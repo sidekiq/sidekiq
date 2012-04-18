@@ -1,3 +1,8 @@
+HEAD
+-----------
+
+- Gracefully rescue any errors thrown in the Fetcher and sleep for 1 second before retrying.
+
 1.1.2
 -----------
 

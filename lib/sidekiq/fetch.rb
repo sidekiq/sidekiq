@@ -12,6 +12,7 @@ module Sidekiq
 
     # Timeout for Redis#blpop.
     TIMEOUT = 1
+    RETRY_DELAY = 1
 
     def initialize(mgr, queues)
       @mgr = mgr
@@ -29,14 +30,21 @@ module Sidekiq
     # a new fetch if the current fetch turned up nothing.
     def fetch
       watchdog('Fetcher#fetch died') do
-        queue = nil
-        msg = nil
-        Sidekiq.redis { |conn| queue, msg = conn.blpop(*queues_cmd) }
+        begin
+          queue = nil
+          msg = nil
+          Sidekiq.redis { |conn| queue, msg = conn.blpop(*queues_cmd) }
 
-        if msg
-          @mgr.assign!(msg, queue.gsub(/.*queue:/, ''))
-        else
-          after(0) { fetch }
+          if msg
+            @mgr.assign!(msg, queue.gsub(/.*queue:/, ''))
+          else
+            after(0) { fetch }
+          end
+        rescue => ex
+          logger.error("Error while fetching messages: #{ex}")
+          logger.error(ex.backtrace.join("\n"))
+          sleep(RETRY_DELAY)
+          retry
         end
       end
     end
