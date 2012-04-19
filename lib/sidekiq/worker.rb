@@ -29,11 +29,6 @@ module Sidekiq
         Sidekiq::Client.push('class' => self, 'args' => args)
       end
 
-      def queue(name)
-        puts "DEPRECATED: `queue :name` is now `sidekiq_options :queue => :name`"
-        Sidekiq::Client.queue_mappings[self.name] = name.to_s
-      end
-
       ##
       # Allows customization for this type of Worker.
       # Legal options:
@@ -46,7 +41,7 @@ module Sidekiq
       end
 
       def get_sidekiq_options # :nodoc:
-        @sidekiq_options || { 'unique' => true, 'retry' => true, 'queue' => 'default' }
+        defined?(@sidekiq_options) ? @sidekiq_options : { 'unique' => true, 'retry' => true, 'queue' => 'default' }
       end
 
       def stringify_keys(hash) # :nodoc:

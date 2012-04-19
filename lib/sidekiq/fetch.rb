@@ -39,8 +39,8 @@ module Sidekiq
             after(0) { fetch }
           end
         rescue => ex
-          logger.error("Error while fetching messages: #{ex}")
-          logger.error(ex.backtrace.join("\n"))
+          logger.error("Error fetching message: #{ex}")
+          logger.error(ex.backtrace.first)
           sleep(TIMEOUT)
           after(0) { fetch }
         end

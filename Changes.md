@@ -1,7 +1,9 @@
 HEAD
 -----------
 
-- Gracefully rescue any errors thrown in the Fetcher and sleep for 1 second before retrying.
+- Better network error handling when fetching jobs from Redis.
+  Sidekiq will retry once per second until it can re-establish
+  a connection.
 
 1.1.2
 -----------
