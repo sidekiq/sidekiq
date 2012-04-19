@@ -10,9 +10,7 @@ module Sidekiq
     include Celluloid
     include Sidekiq::Util
 
-    # Timeout for Redis#blpop.
     TIMEOUT = 1
-    RETRY_DELAY = 1
 
     def initialize(mgr, queues)
       @mgr = mgr
@@ -43,7 +41,8 @@ module Sidekiq
         rescue => ex
           logger.error("Error while fetching messages: #{ex}")
           logger.error(ex.backtrace.join("\n"))
-          after(RETRY_DELAY) { fetch }
+          sleep(TIMEOUT)
+          after(0) { fetch }
         end
       end
     end
