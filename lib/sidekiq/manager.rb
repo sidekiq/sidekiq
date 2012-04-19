@@ -19,7 +19,14 @@ module Sidekiq
     trap_exit :processor_died
 
     def initialize(options={})
-      logger.info "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{redis {|x| x.client.uri}}"
+      @redis_version = Redis::VERSION.chr.to_i
+      if Redis::VERSION.chr.to_i >= 3
+        @redis_location = redis {|x| x.client.uri}
+      else
+        @redis_location = redis {|x| x.client.location}
+      end
+
+      logger.info "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{@redis_location} (client version #{Redis::VERSION})"
       logger.info "Running in #{RUBY_DESCRIPTION}"
       logger.debug { options.inspect }
       @count = options[:concurrency] || 25

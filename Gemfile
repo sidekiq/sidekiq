@@ -7,7 +7,7 @@ gem 'sass'
 gem 'rails'
 gem 'sqlite3'
 # for testing current unstable version
-gem 'redis', :git => "https://github.com/redis/redis-rb.git", :branch => "master"
+#gem 'redis', :git => "https://github.com/redis/redis-rb.git", :branch => "master"
 gem 'pry'
 gem 'sidekiq', :path => '../sidekiq'
 

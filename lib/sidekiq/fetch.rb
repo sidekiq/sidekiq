@@ -10,7 +10,13 @@ module Sidekiq
     include Celluloid
     include Sidekiq::Util
 
-    TIMEOUT = { :timeout => 1 }
+    if Redis::VERSION.chr.to_i >= 3
+      REDIS_TIMEOUT = { :timeout => 1 }
+    else
+      REDIS_TIMEOUT = 1
+    end
+
+    ERROR_TIMEOUT = 1
 
     def initialize(mgr, queues)
       @mgr = mgr
@@ -41,7 +47,7 @@ module Sidekiq
         rescue => ex
           logger.error("Error fetching message: #{ex}")
           logger.error(ex.backtrace.first)
-          sleep(TIMEOUT)
+          sleep(ERROR_TIMEOUT)
           after(0) { fetch }
         end
       end
@@ -57,7 +63,7 @@ module Sidekiq
     def queues_cmd
       queues = @queues.sample(@unique_queues.size).uniq
       queues.concat(@unique_queues - queues)
-      queues << TIMEOUT
+      queues << REDIS_TIMEOUT
     end
   end
 end
