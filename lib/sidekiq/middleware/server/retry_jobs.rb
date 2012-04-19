@@ -9,6 +9,13 @@ module Sidekiq
       #
       #     { 'class' => 'HardWorker', 'args' => [1, 2, 'foo'] }
       #
+      # Optionally contains a 'retry_options' hash with these options:
+      #
+      #  * 'max_count' - max number of tries
+      #  * 'falloff' - algorithm to use for falloff, 'linear' or 'exponential'
+      #  * 'interval' - interval in between retries for linear falloff
+      #  * 'expiration' - Do not retry after this date, can be nil
+      #
       # We'll add a bit more data to the message to support retries:
       #
       #  * 'queue' - the queue to use
@@ -39,9 +46,10 @@ module Sidekiq
             msg['failed_at'] = Time.now.utc
             msg['retry_count'] = 0
           end
+          retry_options = msg.fetch('retry_options', {})
 
-          if count <= MAX_COUNT
-            delay = DELAY.call(count)
+          if can_be_retried?(msg, count, retry_options)
+            delay = delay_time(msg, count, retry_options)
             logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
             retry_at = Time.now.to_f + delay
             payload = MultiJson.encode(msg)
@@ -53,6 +61,21 @@ module Sidekiq
             logger.debug { "Dropping message after hitting the retry maximum: #{msg}" }
           end
           raise
+        end
+
+        def can_be_retried?(msg, count, retry_options)
+          # Check expiration
+          expiration = Time.parse(retry_options['expiration']) if retry_options['expiration']
+          return false if expiration && Time.now.utc > expiration
+
+          # Check retry count
+          max_count = retry_options.fetch('max_count', MAX_COUNT)
+          count <= max_count
+        end
+
+        def delay_time(msg, count, retry_options)
+          return retry_options['interval'].to_f if retry_options['falloff'] == 'linear' && retry_options['interval']
+          DELAY.call(count)
         end
 
       end

@@ -44,6 +44,22 @@ module Sidekiq
         defined?(@sidekiq_options) ? @sidekiq_options : { 'unique' => true, 'retry' => true, 'queue' => 'default' }
       end
 
+      ##
+      # Allows for the customization of the retry logic for this type of Worker
+      # Legal options:
+      #
+      #  :max_count - Maximum number of retries, default 25
+      #  :falloff - Fall off algorithm for retry delay, :linear or :exponential, default :exponential
+      #  :interval - Number of seconds between :linear retries
+      #  :expiration - Do not retry this worker after specified expiration, default nil
+      def sidekiq_retry_options(opts={})
+        @sidekiq_retry_options = get_sidekiq_retry_options.merge(stringify_keys(opts || {}))
+      end
+
+      def get_sidekiq_retry_options # :nodoc:
+        @sidekiq_retry_options || {'max_count' => 25, 'falloff' => :exponential, 'expiration' => nil}
+      end
+
       def stringify_keys(hash) # :nodoc:
         hash.keys.each do |key|
           hash[key.to_s] = hash.delete(key)
