@@ -9,7 +9,7 @@ end
   #Sidekiq::Client.push('class' => 'HardWorker', 'args' => ['foo', 0.1, idx])
 #end
 
-#Sidekiq.redis { |conn| conn.zadd('retry', Time.now.utc.to_f + 3000, MultiJson.encode({
+#Sidekiq.redis { |conn| conn.zadd('retry', Time.now.utc.to_f + 3000, MultiJson.dump({
   #'class' => 'HardWorker', 'args' => ['foo', 0.1, Time.now.to_f],
   #'queue' => 'default', 'error_message' => 'No such method', 'error_class' => 'NoMethodError',
   #'failed_at' => Time.now.utc, 'retry_count' => 0 })) }
