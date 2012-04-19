@@ -19,7 +19,7 @@ module Sidekiq
     trap_exit :processor_died
 
     def initialize(options={})
-      logger.info "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{redis {|x| x.client.location}}"
+      logger.info "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{redis {|x| x.client.uri}}"
       logger.info "Running in #{RUBY_DESCRIPTION}"
       logger.debug { options.inspect }
       @count = options[:concurrency] || 25
@@ -110,7 +110,7 @@ module Sidekiq
           processor = @ready.pop
           @in_progress[processor.object_id] = [msg, queue]
           @busy << processor
-          processor.process!(MultiJson.decode(msg), queue)
+          processor.process!(MultiJson.load(msg), queue)
         end
       end
     end

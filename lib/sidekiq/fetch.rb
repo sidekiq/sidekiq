@@ -10,7 +10,7 @@ module Sidekiq
     include Celluloid
     include Sidekiq::Util
 
-    TIMEOUT = 1
+    TIMEOUT = { :timeout => 1 }
 
     def initialize(mgr, queues)
       @mgr = mgr

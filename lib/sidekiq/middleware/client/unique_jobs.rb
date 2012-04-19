@@ -10,7 +10,7 @@ module Sidekiq
         def call(worker_class, item, queue)
           enabled = worker_class.get_sidekiq_options['unique']
           if enabled
-            payload_hash = Digest::MD5.hexdigest(MultiJson.encode(item))
+            payload_hash = Digest::MD5.hexdigest(MultiJson.dump(item))
             unique = false
 
             Sidekiq.redis do |conn|
