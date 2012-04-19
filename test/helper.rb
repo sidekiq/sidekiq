@@ -4,7 +4,7 @@ if ENV.has_key?("SIMPLECOV")
 end
 
 require 'minitest/unit'
-require 'minitest/pride'
+#require 'minitest/pride'
 require 'minitest/autorun'
 
 require 'sidekiq'
