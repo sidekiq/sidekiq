@@ -1,9 +1,10 @@
-HEAD
+1.1.3
 -----------
 
 - Better network error handling when fetching jobs from Redis.
   Sidekiq will retry once per second until it can re-establish
-  a connection.
+  a connection. (ryanlecompte)
+- capistrano recipe now uses `bundle_cmd` if set [#147]
 
 1.1.2
 -----------
