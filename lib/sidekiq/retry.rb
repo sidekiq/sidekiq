@@ -46,7 +46,11 @@ module Sidekiq
 
             messages.each do |message|
               logger.debug { "Retrying #{message}" }
-              msg = MultiJson.decode(message)
+              msg = if MultiJson.respond_to?(:adapter)
+                MultiJson.load(message)
+              else
+                MultiJson.decode(message)
+              end
               conn.rpush("queue:#{msg['queue']}", message)
             end
           end

@@ -1,4 +1,5 @@
 require 'celluloid'
+require 'multi_json'
 require 'sidekiq/util'
 
 require 'sidekiq/middleware/server/active_record'
@@ -53,8 +54,12 @@ module Sidekiq
       redis do |conn|
         conn.multi do
           conn.set("worker:#{self}:started", Time.now.to_s)
-          conn.set("worker:#{self}", MultiJson.encode(:queue => queue, :payload => msg,
-                                                   :run_at => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z")))
+          hash = {:queue => queue, :payload => msg, :run_at => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z")}
+          if MultiJson.respond_to?(:dump)
+            conn.set("worker:#{self}", MultiJson.dump(hash))
+          else
+            conn.set("worker:#{self}", MultiJson.encode(hash))
+          end
         end
       end
 
