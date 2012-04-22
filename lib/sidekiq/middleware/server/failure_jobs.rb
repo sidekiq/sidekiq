@@ -16,11 +16,7 @@ module Sidekiq
             :worker => args[1]['class'],
             :queue => args[2]
           }
-          if MultiJson.respond_to?(:dump)
-            Sidekiq.redis {|conn| conn.rpush(:failed, MultiJson.dump(data)) }
-          else
-            Sidekiq.redis {|conn| conn.rpush(:failed, MultiJson.encode(data)) }
-          end
+          Sidekiq.redis {|conn| conn.rpush(:failed, Sidekiq.dump_json(data)) }
           raise
         end
       end

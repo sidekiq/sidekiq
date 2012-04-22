@@ -52,13 +52,7 @@ module Sidekiq
           Sidekiq.redis do |conn|
             conn.smembers('workers').map do |w|
               msg = conn.get("worker:#{w}")
-              if msg
-                msg = if MultiJson.respond_to?(:adapter)
-                  MultiJson.load(msg)
-                else
-                  MultiJson.decode(msg)
-                end
-              end
+              msg = Sidekiq.load_json(msg) if msg
               [w, msg]
             end.sort { |x| x[1] ? -1 : 1 }
           end
@@ -80,11 +74,7 @@ module Sidekiq
       def retries
         Sidekiq.redis do |conn|
           results = conn.zrange('retry', 0, 25, :withscores => true)
-          if MultiJson.respond_to?(:adapter)
-            results.each_slice(2).map { |msg, score| [MultiJson.load(msg), Float(score)] }
-          else
-            results.each_slice(2).map { |msg, score| [MultiJson.decode(msg), Float(score)] }
-          end
+          results.each_slice(2).map { |msg, score| [Sidekiq.load_json(msg), Float(score)] }
         end
       end
 
@@ -99,11 +89,7 @@ module Sidekiq
       def retries_with_score(score)
         Sidekiq.redis do |conn|
           results = conn.zrangebyscore('retry', score, score)
-          if MultiJson.respond_to?(:adapter)
-            results.map { |msg| MultiJson.load(msg) }
-          else
-            results.map { |msg| MultiJson.decode(msg) }
-          end
+          results.map { |msg| Sidekiq.load_json(msg) }
         end
       end
 
@@ -138,11 +124,7 @@ module Sidekiq
     get "/queues/:name" do
       halt 404 unless params[:name]
       @name = params[:name]
-      if MultiJson.respond_to?(:adapter)
-        @messages = Sidekiq.redis {|conn| conn.lrange("queue:#{@name}", 0, 10) }.map { |str| MultiJson.load(str) }
-      else
-        @messages = Sidekiq.redis {|conn| conn.lrange("queue:#{@name}", 0, 10) }.map { |str| MultiJson.decode(str) }
-      end
+      @messages = Sidekiq.redis {|conn| conn.lrange("queue:#{@name}", 0, 10) }.map { |str| Sidekiq.load_json(str) }
       slim :queue
     end
 
@@ -160,11 +142,7 @@ module Sidekiq
           results = conn.zrangebyscore('retry', score, score)
           conn.zremrangebyscore('retry', score, score)
           results.map do |message|
-            msg = if MultiJson.respond_to?(:adapter)
-              MultiJson.load(message)
-            else
-              MultiJson.decode(message)
-            end
+            msg = Sidekiq.load_json(message)
             conn.rpush("queue:#{msg['queue']}", message)
           end
         end

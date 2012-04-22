@@ -55,11 +55,7 @@ module Sidekiq
         conn.multi do
           conn.set("worker:#{self}:started", Time.now.to_s)
           hash = {:queue => queue, :payload => msg, :run_at => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z")}
-          if MultiJson.respond_to?(:dump)
-            conn.set("worker:#{self}", MultiJson.dump(hash))
-          else
-            conn.set("worker:#{self}", MultiJson.encode(hash))
-          end
+          conn.set("worker:#{self}", Sidekiq.dump_json(hash))
         end
       end
 

@@ -110,11 +110,7 @@ module Sidekiq
           processor = @ready.pop
           @in_progress[processor.object_id] = [msg, queue]
           @busy << processor
-          if MultiJson.respond_to?(:adapter)
-            processor.process!(MultiJson.load(msg), queue)
-          else
-            processor.process!(MultiJson.decode(msg), queue)
-          end
+          processor.process!(Sidekiq.load_json(msg), queue)
         end
       end
     end
