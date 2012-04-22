@@ -1,3 +1,5 @@
+require 'multi_json'
+
 module Sidekiq
   module Middleware
     module Server
@@ -14,8 +16,7 @@ module Sidekiq
             :worker => args[1]['class'],
             :queue => args[2]
           }
-
-          Sidekiq.redis {|conn| conn.rpush(:failed, MultiJson.encode(data)) }
+          Sidekiq.redis {|conn| conn.rpush(:failed, Sidekiq.dump_json(data)) }
           raise
         end
       end

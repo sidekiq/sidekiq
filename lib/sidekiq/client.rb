@@ -45,7 +45,7 @@ module Sidekiq
 
       pushed = false
       Sidekiq.client_middleware.invoke(worker_class, item, queue) do
-        payload = MultiJson.encode(item)
+        payload = Sidekiq.dump_json(item)
         Sidekiq.redis do |conn|
           _, pushed = conn.multi do
             conn.sadd('queues', queue)
