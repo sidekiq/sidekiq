@@ -1,3 +1,5 @@
+require 'multi_json'
+
 module Sidekiq
   module Middleware
     module Server
@@ -5,7 +7,7 @@ module Sidekiq
         def call(*args)
           yield
         ensure
-          json = MultiJson.encode(args[1])
+          json = Sidekiq.dump_json(args[1])
           hash = Digest::MD5.hexdigest(json)
           Sidekiq.redis {|conn| conn.del(hash) }
         end

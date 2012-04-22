@@ -110,7 +110,7 @@ module Sidekiq
           processor = @ready.pop
           @in_progress[processor.object_id] = [msg, queue]
           @busy << processor
-          processor.process!(MultiJson.decode(msg), queue)
+          processor.process!(Sidekiq.load_json(msg), queue)
         end
       end
     end
