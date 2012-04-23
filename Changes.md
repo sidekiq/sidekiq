@@ -5,6 +5,7 @@
   Sidekiq will retry once per second until it can re-establish
   a connection. (ryanlecompte)
 - capistrano recipe now uses `bundle_cmd` if set [#147]
+- handle multi\_json API changes (sferik)
 
 1.1.2
 -----------

@@ -82,21 +82,21 @@ module Sidekiq
     @server_chain
   end
 
-  def self.load_json(string, options={})
+  def self.load_json(string)
     # Can't reliably detect whether MultiJson responds to load, since it's
     # a reserved word. Use adapter as a proxy for new features.
     if MultiJson.respond_to?(:adapter)
-      MultiJson.load(string, options)
+      MultiJson.load(string)
     else
-      MultiJson.decode(string, options)
+      MultiJson.decode(string)
     end
   end
 
-  def self.dump_json(object, options={})
+  def self.dump_json(object)
     if MultiJson.respond_to?(:dump)
-      MultiJson.dump(object, options)
+      MultiJson.dump(object)
     else
-      MultiJson.encode(object, options)
+      MultiJson.encode(object)
     end
   end
 
