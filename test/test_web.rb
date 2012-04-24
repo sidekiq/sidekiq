@@ -27,14 +27,14 @@ class TestWeb < MiniTest::Unit::TestCase
     it 'shows active queues' do
       get '/'
       assert_equal 200, last_response.status
-      assert_match last_response.body, /Sidekiq is down/
+      assert_match last_response.body, /Sidekiq is idle/
       refute_match last_response.body, /default/
 
       assert WebWorker.perform_async(1, 2)
 
       get '/'
       assert_equal 200, last_response.status
-      assert_match last_response.body, /Sidekiq is down/
+      assert_match last_response.body, /Sidekiq is idle/
       assert_match last_response.body, /default/
       refute_match last_response.body, /foo/
 
@@ -42,7 +42,7 @@ class TestWeb < MiniTest::Unit::TestCase
 
       get '/'
       assert_equal 200, last_response.status
-      assert_match last_response.body, /Sidekiq is down/
+      assert_match last_response.body, /Sidekiq is idle/
       assert_match last_response.body, /default/
       assert_match last_response.body, /foo/
     end

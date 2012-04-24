@@ -1,3 +1,10 @@
+1.1.4
+-----------
+
+- Add 24 hr expiry for basic keys set in Redis, to avoid any possible leaking.
+- Only register workers in Redis while working, to avoid lingering
+  workers [#156]
+
 1.1.3
 -----------
 

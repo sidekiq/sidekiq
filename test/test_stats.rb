@@ -29,11 +29,6 @@ class TestStats < MiniTest::Unit::TestCase
         processor = Sidekiq::Processor.new(boss)
         boss.expect(:processor_done!, nil, [processor])
 
-        # adds to the workers set upon initialize
-        set = conn.smembers('workers')
-        assert_equal 1, set.size
-        assert_match(/#{Regexp.escape(`hostname`.strip)}/, set.first)
-
         assert_equal 0, conn.get('stat:failed').to_i
         assert_equal 0, conn.get('stat:processed').to_i
         assert_equal 0, conn.get("stat:processed:#{processor}").to_i
@@ -42,9 +37,6 @@ class TestStats < MiniTest::Unit::TestCase
         processor.process(msg, 'xyzzy')
         processor.process(msg, 'xyzzy')
 
-        set = conn.smembers('workers')
-        assert_equal 1, set.size
-        assert_match(/#{Regexp.escape(`hostname`.strip)}/, set.first)
         assert_equal 0, conn.get('stat:failed').to_i
         assert_equal 3, conn.get('stat:processed').to_i
         assert_equal 3, conn.get("stat:processed:#{processor}").to_i
@@ -61,15 +53,12 @@ class TestStats < MiniTest::Unit::TestCase
         assert_equal 0, conn.get('stat:processed').to_i
 
         processor = Sidekiq::Processor.new(boss)
-        assert_equal 1, conn.smembers('workers').size
 
         pstr = processor.to_s
         assert_raises RuntimeError do
           processor.process(msg, 'xyzzy')
         end
 
-        set = conn.smembers('workers')
-        assert_equal 0, set.size
         assert_equal 1, conn.get('stat:failed').to_i
         assert_equal 1, conn.get('stat:processed').to_i
         assert_equal nil, conn.get("stat:processed:#{pstr}")

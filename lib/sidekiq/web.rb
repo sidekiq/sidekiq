@@ -52,9 +52,8 @@ module Sidekiq
           Sidekiq.redis do |conn|
             conn.smembers('workers').map do |w|
               msg = conn.get("worker:#{w}")
-              msg = Sidekiq.load_json(msg) if msg
-              [w, msg]
-            end.sort { |x| x[1] ? -1 : 1 }
+              msg ? [w, Sidekiq.load_json(msg)] : nil
+            end.compact.sort { |x| x[1] ? -1 : 1 }
           end
         end
       end
@@ -102,8 +101,7 @@ module Sidekiq
       end
 
       def current_status
-        return 'down' if workers.size == 0
-        return 'idle' if workers.size > 0 && workers.map { |x| x[1] }.compact.size == 0
+        return 'idle' if workers.size == 0
         return 'active'
       end
 

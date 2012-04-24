@@ -23,7 +23,6 @@ module Sidekiq
 
     def initialize(boss)
       @boss = boss
-      redis {|x| x.sadd('workers', self) }
     end
 
     def process(msg, queue)
@@ -53,9 +52,10 @@ module Sidekiq
     def stats(worker, msg, queue)
       redis do |conn|
         conn.multi do
-          conn.set("worker:#{self}:started", Time.now.to_s)
+          conn.sadd('workers', self)
+          conn.setex("worker:#{self}:started", DEFAULT_EXPIRY, Time.now.to_s)
           hash = {:queue => queue, :payload => msg, :run_at => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z")}
-          conn.set("worker:#{self}", Sidekiq.dump_json(hash))
+          conn.setex("worker:#{self}", DEFAULT_EXPIRY, Sidekiq.dump_json(hash))
         end
       end
 
@@ -69,13 +69,13 @@ module Sidekiq
           conn.multi do
             conn.incrby("stat:failed", 1)
             conn.del("stat:processed:#{self}")
-            conn.srem("workers", self)
           end
         end
         raise
       ensure
         redis do |conn|
           conn.multi do
+            conn.srem("workers", self)
             conn.del("worker:#{self}")
             conn.del("worker:#{self}:started")
             conn.incrby("stat:processed", 1)
