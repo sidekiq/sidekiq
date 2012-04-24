@@ -155,7 +155,7 @@ module Sidekiq
     end
 
     def procline
-      $0 = "sidekiq #{Sidekiq::VERSION} [#{@busy.size} of #{@count} busy]"
+      $0 = "sidekiq #{Sidekiq::VERSION} [#{@busy.size} of #{@count} busy]#{stopped? ? ' stopping' : ''}"
       after(5) { procline }
     end
   end
