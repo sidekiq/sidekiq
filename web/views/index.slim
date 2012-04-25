@@ -3,13 +3,13 @@
   h1 Sidekiq is #{current_status}
   p Processed: #{processed}
   p Failed: #{failed}
-  p Workers: #{workers.size}
+  p Busy Workers: #{workers.size}
   p Retries Pending: #{retry_count}
 
 .tabbable
   ul.nav.nav-tabs
     li.active
-      a href="#workers" data-toggle="tab" Workers
+      a href="#workers" data-toggle="tab" Busy Workers
     li
       a href="#queues" data-toggle="tab" Queues
     li
@@ -26,13 +26,10 @@
         - workers.each do |(worker, msg)|
           tr
             td= worker
-            - if msg
-              td= msg['queue']
-              td= msg['payload']['class']
-              td= msg['payload']['args'].inspect[0..100]
-              td== relative_time(Time.parse(msg['run_at']))
-            - else
-              td colspan=4 Idle
+            td= msg['queue']
+            td= msg['payload']['class']
+            td= msg['payload']['args'].inspect[0..100]
+            td== relative_time(Time.parse(msg['run_at']))
       form action="#{root_path}reset" method="post"
         button.btn type="submit" Clear worker list
 
