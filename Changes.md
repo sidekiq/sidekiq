@@ -1,3 +1,8 @@
+1.1.5
+-----------
+
+- Fix delayed extensions not available in Workers [#152]
+
 1.1.4
 -----------
 
