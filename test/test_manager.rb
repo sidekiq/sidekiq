@@ -38,6 +38,13 @@ class TestManager < MiniTest::Unit::TestCase
       result = q.timed_pop(1.0)
       assert_equal 'done', result
       mgr.stop
+      mgr.terminate
+
+      # Gross bloody hack because I can't get the actor threads
+      # to shut down cleanly in the test.  Need @bascule's help here.
+      (Thread.list - [Thread.current]).each do |t|
+        t.raise Interrupt
+      end
     end
   end
 end
