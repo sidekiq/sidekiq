@@ -16,6 +16,7 @@ class TestManager < MiniTest::Unit::TestCase
 
     class IntegrationWorker
       include Sidekiq::Worker
+      sidekiq_options :queue => 'foo'
 
       def perform(a, b)
         $mutex.synchronize do
@@ -26,8 +27,8 @@ class TestManager < MiniTest::Unit::TestCase
     end
 
     it 'processes messages' do
-      Sidekiq::Client.push('queue' => :foo, 'class' => IntegrationWorker, 'args' => [1, 2])
-      Sidekiq::Client.push('queue' => :foo, 'class' => IntegrationWorker, 'args' => [1, 3])
+      IntegrationWorker.perform_async(1, 2)
+      IntegrationWorker.perform_async(1, 3)
 
       q = TimedQueue.new
       mgr = Sidekiq::Manager.new(:queues => [:foo], :concurrency => 2)

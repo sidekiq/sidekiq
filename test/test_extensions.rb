@@ -4,6 +4,7 @@ require 'active_record'
 require 'action_mailer'
 require 'sidekiq/extensions/action_mailer'
 require 'sidekiq/extensions/active_record'
+require 'sidekiq/rails'
 
 Sidekiq.hook_rails!
 

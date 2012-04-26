@@ -36,6 +36,7 @@ module Sidekiq
       #   :unique - enable the UniqueJobs middleware for this Worker, default *true*
       #   :queue - use a named queue for this Worker, default 'default'
       #   :retry - enable the RetryJobs middleware for this Worker, default *true*
+      #   :timeout - timeout the perform method after N seconds, default *nil*
       def sidekiq_options(opts={})
         @sidekiq_options = get_sidekiq_options.merge(stringify_keys(opts || {}))
       end

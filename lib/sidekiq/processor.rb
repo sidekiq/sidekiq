@@ -6,6 +6,7 @@ require 'sidekiq/middleware/server/active_record'
 require 'sidekiq/middleware/server/exception_handler'
 require 'sidekiq/middleware/server/retry_jobs'
 require 'sidekiq/middleware/server/logging'
+require 'sidekiq/middleware/server/timeout'
 
 module Sidekiq
   class Processor
@@ -18,6 +19,7 @@ module Sidekiq
         m.add Middleware::Server::Logging
         m.add Middleware::Server::RetryJobs
         m.add Middleware::Server::ActiveRecord
+        m.add Middleware::Server::Timeout
       end
     end
 

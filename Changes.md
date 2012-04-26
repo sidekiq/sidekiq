@@ -1,7 +1,20 @@
-1.1.5
+1.2.0
 -----------
 
-- Fix delayed extensions not available in Workers [#152]
+- Add Timeout middleware to optionally kill a worker after N seconds,
+  just configure like so.  (blackgold9)
+
+```ruby
+class HangingWorker
+  include Sidekiq::Worker
+  sidekiq_options :timeout => 600
+  def perform
+    # will be killed if it takes longer than 10 minutes
+  end
+end
+```
+
+- Fix delayed extensions not available in workers [#152]
 
 1.1.4
 -----------

@@ -38,10 +38,14 @@ module Sidekiq
       raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") if !item['class'] || !item['args']
       raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item['class'].ancestors.inspect}") if !item['class'].is_a?(Class) || !item['class'].respond_to?('get_sidekiq_options')
 
-      item['retry'] = !!item['class'].get_sidekiq_options['retry']
-      queue = item['queue'] || item['class'].get_sidekiq_options['queue'] || 'default'
       worker_class = item['class']
       item['class'] = item['class'].to_s
+      item['retry'] = !!worker_class.get_sidekiq_options['retry']
+      queue = item['queue'] || worker_class.get_sidekiq_options['queue'] || 'default'
+
+      if !item['timeout'] && worker_class.get_sidekiq_options['timeout']
+        item['timeout'] = worker_class.get_sidekiq_options['timeout']
+      end
 
       pushed = false
       Sidekiq.client_middleware.invoke(worker_class, item, queue) do

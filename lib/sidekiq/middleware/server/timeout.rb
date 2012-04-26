@@ -1,20 +1,21 @@
 require 'timeout'
-module Sidekiq
-	module Middleware
-		module Server
-			class Timeout
-				@timeout_in_seconds
 
-				def initialize(options={:timeout => 120})
-					@timeout_in_seconds = options[:timeout]
-				end
-				
-				def call(worker, msg, queue)
-					Timeout::timeout (@timeout_in_seconds) {
-						yield    
-					}    
-				end
-			end
-		end
-	end
+module Sidekiq
+  module Middleware
+    module Server
+      class Timeout
+
+        def call(worker, msg, queue)
+          if msg['timeout'] && msg['timeout'].to_i != 0
+            ::Timeout.timeout(msg['timeout'].to_i) do
+              yield
+            end
+          else
+            yield
+          end
+        end
+
+      end
+    end
+  end
 end
