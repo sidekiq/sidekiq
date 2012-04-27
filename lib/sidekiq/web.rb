@@ -21,7 +21,7 @@ module Sidekiq
     def call(env)
       # Solve the problem of people requesting /sidekiq when they need to request /sidekiq/ so
       # that relative links in templates resolve correctly.
-      return [301, { 'Location' => "#{env['SCRIPT_NAME']}/" }, ['redirecting']] if env['SCRIPT_NAME'] == env['REQUEST_PATH']
+      return [301, { 'Location' => "#{env['SCRIPT_NAME']}/", 'Content-Type' => 'text/html' }, ['redirecting']] if env['SCRIPT_NAME'] == env['REQUEST_PATH']
 
       return @app.call(env) unless @matcher =~ env["PATH_INFO"]
       env['PATH_INFO'].sub!(@matcher,'')
