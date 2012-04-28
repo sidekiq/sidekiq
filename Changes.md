@@ -1,6 +1,16 @@
 1.2.0
 -----------
 
+- Error backtraces can optionally be stored as part of the retry,
+  for display in the web UI if you aren't using an error service. [#155]
+
+```ruby
+class Worker
+  include Sidekiq::Worker
+  sidekiq_options :backtrace => true || 10
+end
+```
+
 - Add Timeout middleware to optionally kill a worker after N seconds,
   just configure like so.  (blackgold9)
 

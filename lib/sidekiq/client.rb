@@ -26,6 +26,7 @@ module Sidekiq
     #   class - the worker class to call, required
     #   args - an array of simple arguments to the perform method, must be JSON-serializable
     #   retry - whether to retry this job if it fails, true or false, default true
+    #   backtrace - whether to save any error backtrace, default false
     #
     # All options must be strings, not symbols.  NB: because we are serializing to JSON, all
     # symbols in 'args' will be converted to strings.
@@ -42,6 +43,10 @@ module Sidekiq
       item['class'] = item['class'].to_s
       item['retry'] = !!worker_class.get_sidekiq_options['retry']
       queue = item['queue'] || worker_class.get_sidekiq_options['queue'] || 'default'
+
+      if !item['backtrace'] && worker_class.get_sidekiq_options['backtrace']
+        item['backtrace'] = worker_class.get_sidekiq_options['backtrace']
+      end
 
       if !item['timeout'] && worker_class.get_sidekiq_options['timeout']
         item['timeout'] = worker_class.get_sidekiq_options['timeout']

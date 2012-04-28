@@ -23,6 +23,10 @@ header
       tr
         th Error Message
         td= msg['error_message']
+      - if !msg['error_backtrace'].nil?
+        tr
+          th Error Backtrace
+          td== msg['error_backtrace'].join("<br/>")
       - if msg['retry_count'] > 0
         tr
           th Retry Count

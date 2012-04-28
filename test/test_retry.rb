@@ -25,6 +25,34 @@ class TestRetry < MiniTest::Unit::TestCase
       assert_equal msg, msg2
     end
 
+    it 'saves backtraces' do
+      @redis.expect :zadd, 1, ['retry', String, String]
+      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true, 'backtrace' => true }
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      c = nil
+      assert_raises RuntimeError do
+        handler.call('', msg, 'default') do
+          c = caller(0); raise "kerblammo!"
+        end
+      end
+      assert msg["error_backtrace"]
+      assert_equal c, msg["error_backtrace"]
+    end
+
+    it 'saves partial backtraces' do
+      @redis.expect :zadd, 1, ['retry', String, String]
+      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true, 'backtrace' => 3 }
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      c = nil
+      assert_raises RuntimeError do
+        handler.call('', msg, 'default') do
+          c = caller(0)[0..3]; raise "kerblammo!"
+        end
+      end
+      assert msg["error_backtrace"]
+      assert_equal c, msg["error_backtrace"]
+    end
+
     it 'handles a new failed message' do
       @redis.expect :zadd, 1, ['retry', String, String]
       msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }
@@ -38,6 +66,7 @@ class TestRetry < MiniTest::Unit::TestCase
       assert_equal 'kerblammo!', msg["error_message"]
       assert_equal 'RuntimeError', msg["error_class"]
       assert_equal 0, msg["retry_count"]
+      refute msg["error_backtrace"]
       assert msg["failed_at"]
       @redis.verify
     end
