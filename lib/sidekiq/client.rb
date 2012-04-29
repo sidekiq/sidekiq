@@ -41,16 +41,10 @@ module Sidekiq
 
       worker_class = item['class']
       item['class'] = item['class'].to_s
-      item['retry'] = !!worker_class.get_sidekiq_options['retry']
-      queue = item['queue'] || worker_class.get_sidekiq_options['queue'] || 'default'
 
-      if !item['backtrace'] && worker_class.get_sidekiq_options['backtrace']
-        item['backtrace'] = worker_class.get_sidekiq_options['backtrace']
-      end
-
-      if !item['timeout'] && worker_class.get_sidekiq_options['timeout']
-        item['timeout'] = worker_class.get_sidekiq_options['timeout']
-      end
+      item = worker_class.get_sidekiq_options.merge(item)
+      item['retry'] = !!item['retry']
+      queue = item['queue']
 
       pushed = false
       Sidekiq.client_middleware.invoke(worker_class, item, queue) do
