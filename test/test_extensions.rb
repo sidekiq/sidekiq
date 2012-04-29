@@ -21,7 +21,7 @@ class TestExtensions < MiniTest::Unit::TestCase
       end
     end
 
-    it 'allows delayed exection of ActiveRecord class methods' do
+    it 'allows delayed execution of ActiveRecord class methods' do
       assert_equal [], Sidekiq::Client.registered_queues
       assert_equal 0, Sidekiq.redis {|c| c.llen('queue:default') }
       MyModel.delay.long_class_method
