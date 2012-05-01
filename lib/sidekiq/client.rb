@@ -66,7 +66,7 @@ module Sidekiq
     # Messages are enqueued to the 'default' queue.
     #
     def self.enqueue(klass, *args)
-      push('class' => klass, 'args' => args)
+      klass.perform_async(*args)
     end
   end
 end
