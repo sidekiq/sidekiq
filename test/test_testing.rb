@@ -11,8 +11,14 @@ Sidekiq.hook_rails!
 
 class TestTesting < MiniTest::Unit::TestCase
   describe 'sidekiq testing' do
-
     class DirectWorker
+      include Sidekiq::Worker
+      def perform(a, b)
+        a + b
+      end
+    end
+
+    class EnqueuedWorker
       include Sidekiq::Worker
       def perform(a, b)
         a + b
@@ -32,7 +38,7 @@ class TestTesting < MiniTest::Unit::TestCase
     end
 
     before do
-      require 'sidekiq/testing'
+      load 'sidekiq/testing.rb'
     end
 
     after do
@@ -44,23 +50,28 @@ class TestTesting < MiniTest::Unit::TestCase
       end
     end
 
-    it 'stubs the async call when in testing mode' do
-      # We can only have one it block here so all 'testing' tests
-      # have to go here because require 'sidekiq/testing' changes
-      # how Sidekiq works and we need to roll back those changes
-      # when the test is done.
+    it 'stubs the async call' do
       assert_equal 0, DirectWorker.jobs.size
       assert DirectWorker.perform_async(1, 2)
       assert_equal 1, DirectWorker.jobs.size
+    end
 
+    it 'stubs the delay call on mailers' do
       assert_equal 0, Sidekiq::Extensions::DelayedMailer.jobs.size
       FooMailer.delay.bar('hello!')
       assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs.size
+    end
 
+    it 'stubs the delay call on models' do
       assert_equal 0, Sidekiq::Extensions::DelayedModel.jobs.size
       FooModel.delay.bar('hello!')
       assert_equal 1, Sidekiq::Extensions::DelayedModel.jobs.size
     end
 
+    it 'stubs the enqueue call' do
+      assert_equal 0, EnqueuedWorker.jobs.size
+      assert Sidekiq::Client.enqueue(EnqueuedWorker, 1, 2)
+      assert_equal 1, EnqueuedWorker.jobs.size
+    end
   end
 end
