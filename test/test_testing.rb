@@ -89,7 +89,7 @@ class TestTesting < MiniTest::Unit::TestCase
 
       assert_equal 2, StoredWorker.jobs.size
       assert_raises PerformError do
-        StoredWorker.perform
+        StoredWorker.drain
       end
       assert_equal 0, StoredWorker.jobs.size
     end

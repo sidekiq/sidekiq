@@ -34,7 +34,7 @@ module Sidekiq
         @pushed ||= []
       end
 
-      def perform
+      def drain
         while job = jobs.shift do
           new.perform(*job['args'])
         end
