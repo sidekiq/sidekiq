@@ -33,6 +33,12 @@ module Sidekiq
       def jobs
         @pushed ||= []
       end
+
+      def perform
+        while job = jobs.shift do
+          new.perform(*job['args'])
+        end
+      end
     end
   end
 end

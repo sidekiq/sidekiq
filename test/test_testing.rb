@@ -11,6 +11,8 @@ Sidekiq.hook_rails!
 
 class TestTesting < MiniTest::Unit::TestCase
   describe 'sidekiq testing' do
+    class PerformError < RuntimeError; end
+
     class DirectWorker
       include Sidekiq::Worker
       def perform(a, b)
@@ -22,6 +24,13 @@ class TestTesting < MiniTest::Unit::TestCase
       include Sidekiq::Worker
       def perform(a, b)
         a + b
+      end
+    end
+
+    class StoredWorker
+      include Sidekiq::Worker
+      def perform(error)
+        raise PerformError if error
       end
     end
 
@@ -72,6 +81,17 @@ class TestTesting < MiniTest::Unit::TestCase
       assert_equal 0, EnqueuedWorker.jobs.size
       assert Sidekiq::Client.enqueue(EnqueuedWorker, 1, 2)
       assert_equal 1, EnqueuedWorker.jobs.size
+    end
+
+    it 'executes all stored jobs' do
+      assert StoredWorker.perform_async(false)
+      assert StoredWorker.perform_async(true)
+
+      assert_equal 2, StoredWorker.jobs.size
+      assert_raises PerformError do
+        StoredWorker.perform
+      end
+      assert_equal 0, StoredWorker.jobs.size
     end
   end
 end

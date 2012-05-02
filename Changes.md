@@ -26,6 +26,9 @@ end
 
 - Fix delayed extensions not available in workers [#152]
 
+- In test environments add the `#perform` class method to workers. This method
+  executes all previously queued jobs. (panthomakos)
+
 1.1.4
 -----------
 
