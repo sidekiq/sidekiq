@@ -29,6 +29,9 @@ end
 - In test environments add the `#drain` class method to workers. This method
   executes all previously queued jobs. (panthomakos)
 
+- Sidekiq workers can be run inline during tests by requiring the
+  `sidekiq/testing/inline` file. (panthomakos)
+
 1.1.4
 -----------
 
