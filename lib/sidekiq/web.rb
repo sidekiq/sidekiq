@@ -126,6 +126,14 @@ module Sidekiq
       slim :queue
     end
 
+    post "/queues/:name" do
+      Sidekiq.redis do |conn|
+        conn.del("queue:#{params[:name]}")
+        conn.srem("queues", params[:name])
+      end
+      redirect root_path
+    end
+
     get "/retries/:score" do
       halt 404 unless params[:score]
       @score = params[:score].to_f

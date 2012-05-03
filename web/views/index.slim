@@ -38,11 +38,15 @@
         tr
           th Queue
           th Size
+          th
         - queues.each do |(queue, size)|
           tr
             td
-              a href="queues/#{queue}" #{queue}
+              a href="#{root_path}queues/#{queue}" #{queue}
             td= size
+            td
+              form action="#{root_path}queues/#{queue}" method="post"
+                input.btn.btn-danger type="submit" name="delete" value="Delete"
 
     #retries.tab-pane
       table class="table table-striped table-bordered"

@@ -1,18 +1,16 @@
 1.2.0
 -----------
 
-- Error backtraces can optionally be stored as part of the retry,
+- Full or partial error backtraces can optionally be stored as part of the retry
   for display in the web UI if you aren't using an error service. [#155]
 
 ```ruby
 class Worker
   include Sidekiq::Worker
-  sidekiq_options :backtrace => true || 10
+  sidekiq_options :backtrace => [true || 10]
 end
 ```
-
-- Add Timeout middleware to optionally kill a worker after N seconds,
-  just configure like so.  (blackgold9)
+- Add Timeout middleware to optionally kill a worker after N seconds (blackgold9)
 
 ```ruby
 class HangingWorker
@@ -25,12 +23,10 @@ end
 ```
 
 - Fix delayed extensions not available in workers [#152]
-
 - In test environments add the `#drain` class method to workers. This method
   executes all previously queued jobs. (panthomakos)
-
-- Sidekiq workers can be run inline during tests by requiring the
-  `sidekiq/testing/inline` file. (panthomakos)
+- Sidekiq workers can be run inline during tests, just `require 'sidekiq/testing/inline'` (panthomakos)
+- Queues can now be deleted from the Sidekiq web UI [#154]
 
 1.1.4
 -----------

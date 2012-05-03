@@ -9,3 +9,11 @@ body {
   background-color: #aaa;
 }
 
+td form {
+  margin: 0;
+}
+
+td form .btn {
+  margin: 0;
+}
+
