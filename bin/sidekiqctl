@@ -12,7 +12,7 @@ class Sidekiqctl
     @timeout = timeout
 
     done 'No pidfile given' if !pidfile
-    done 'Pidfile does not exist' if !File.exist?(pidfile)
+    done "Pidfile #{pidfile} does not exist" if !File.exist?(pidfile)
     done 'Invalid pidfile content' if pid == 0
 
     fetch_process
