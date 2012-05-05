@@ -1,3 +1,4 @@
+ENV['RACK_ENV'] = ENV['RAILS_ENV'] = 'test'
 if ENV.has_key?("SIMPLECOV")
   require 'simplecov'
   SimpleCov.start

@@ -52,10 +52,31 @@ class TestWeb < MiniTest::Unit::TestCase
       assert_equal 404, last_response.status
     end
 
+    it 'handles missing retry' do
+      get '/retries/12391982.123'
+      assert_equal 302, last_response.status
+    end
+
     it 'handles queue view' do
       get '/queues/default'
       assert_equal 200, last_response.status
     end
 
+    it 'can delete a queue' do
+      Sidekiq.redis do |conn|
+        conn.rpush('queue:foo', '{}')
+        conn.sadd('queues', 'foo')
+      end
+
+      get '/queues/foo'
+      assert_equal 200, last_response.status
+
+      post '/queues/foo'
+      assert_equal 302, last_response.status
+
+      Sidekiq.redis do |conn|
+        refute conn.smembers('queues').include?('foo')
+      end
+    end
   end
 end
