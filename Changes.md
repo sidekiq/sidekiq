@@ -10,7 +10,7 @@ class Worker
   sidekiq_options :backtrace => [true || 10]
 end
 ```
-- Add Timeout middleware to optionally kill a worker after N seconds (blackgold9)
+- Add timeout option to kill a worker after N seconds (blackgold9)
 
 ```ruby
 class HangingWorker
