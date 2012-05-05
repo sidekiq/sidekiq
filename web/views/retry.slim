@@ -1,7 +1,7 @@
 header
-  h1 Retry Job
+  h1 Job
 
-- retries_with_score(@score).each do |msg|
+- @retries.each do |msg|
   table class="table table-striped table-bordered"
     tbody
       tr
@@ -16,17 +16,6 @@ header
         th Job Arguments
         td
           code= msg['args'].inspect[0..1000]
-      tr
-        th Error Class
-        td
-          code= msg['error_class']
-      tr
-        th Error Message
-        td= msg['error_message']
-      - if !msg['error_backtrace'].nil?
-        tr
-          th Error Backtrace
-          td== msg['error_backtrace'].join("<br/>")
       - if msg['retry_count'] > 0
         tr
           th Retry Count
@@ -42,6 +31,21 @@ header
         th Next Retry
         td== relative_time(Time.at(@score))
 
+  h1 Error
+  table class="table table-striped table-bordered"
+    tbody
+      tr
+        th Error Class
+        td
+          code= msg['error_class']
+      tr
+        th Error Message
+        td= msg['error_message']
+      - if !msg['error_backtrace'].nil?
+        tr
+          th Error Backtrace
+          td
+            code== msg['error_backtrace'].join("<br/>")
   form.form-horizontal action="#{root_path}retries/#{@score}" method="post"
     a.btn href="#{root_path}" &larr; Back
     input.btn.btn-primary type="submit" name="retry" value="Retry Now"

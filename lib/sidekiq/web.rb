@@ -137,6 +137,8 @@ module Sidekiq
     get "/retries/:score" do
       halt 404 unless params[:score]
       @score = params[:score].to_f
+      @retries = retries_with_score(@score)
+      redirect root_path if @retries.empty?
       slim :retry
     end
 
