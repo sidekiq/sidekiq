@@ -64,7 +64,7 @@ module Sidekiq
         sleep
       rescue Interrupt
         logger.info 'Shutting down'
-        poller.terminate if poller.alive?
+        poller.terminate! if poller.alive?
         @manager.stop!(:shutdown => true, :timeout => options[:timeout])
         @manager.wait(:shutdown)
         # Explicitly exit so busy Processor threads can't block
