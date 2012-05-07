@@ -107,8 +107,9 @@ module Sidekiq
 
     get "/queues/:name" do
       halt 404 unless params[:name]
+      count = (params[:count] || 10).to_i
       @name = params[:name]
-      @messages = Sidekiq.redis {|conn| conn.lrange("queue:#{@name}", 0, 10) }.map { |str| Sidekiq.load_json(str) }
+      @messages = Sidekiq.redis {|conn| conn.lrange("queue:#{@name}", 0, count) }.map { |str| Sidekiq.load_json(str) }
       slim :queue
     end
 

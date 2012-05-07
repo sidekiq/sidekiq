@@ -27,6 +27,7 @@ end
   executes all previously queued jobs. (panthomakos)
 - Sidekiq workers can be run inline during tests, just `require 'sidekiq/testing/inline'` (panthomakos)
 - Queues can now be deleted from the Sidekiq web UI [#154]
+- Fix unnecessary shutdown delay due to Retry Poller [#174]
 
 1.1.4
 -----------
