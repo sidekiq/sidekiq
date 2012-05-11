@@ -15,7 +15,7 @@ header
       tr
         th Job Arguments
         td
-          code= msg['args'].inspect[0..1000]
+          code= display_args(msg['args'], 1000)
       - if msg['retry_count'] > 0
         tr
           th Retry Count
@@ -47,6 +47,6 @@ header
           td
             code== msg['error_backtrace'].join("<br/>")
   form.form-horizontal action="#{root_path}retries/#{@score}" method="post"
-    a.btn href="#{root_path}" &larr; Back
+    a.btn href="#{root_path}retries" &larr; Back
     input.btn.btn-primary type="submit" name="retry" value="Retry Now"
     input.btn.btn-danger type="submit" name="delete" value="Delete"

@@ -1,3 +1,8 @@
+1.2.1
+-----------
+
+- Overhaul retries Web UI with new index page and bulk operations #184
+
 1.2.0
 -----------
 

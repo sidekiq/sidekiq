@@ -61,15 +61,15 @@ module Sidekiq
         Sidekiq.redis { |conn| conn.zcard('retry') }
       end
 
-      def retries
+      def retries(count=50)
         Sidekiq.redis do |conn|
-          results = conn.zrange('retry', 0, 25, :withscores => true)
+          results = conn.zrange('retry', 0, count, :withscores => true)
           results.each_slice(2).map { |msg, score| [Sidekiq.load_json(msg), Float(score)] }
         end
       end
 
       def queues
-        Sidekiq.redis do |conn|
+        @queues ||= Sidekiq.redis do |conn|
           conn.smembers('queues').map do |q|
             [q, conn.llen("queue:#{q}") || 0]
           end.sort { |x,y| x[1] <=> y[1] }
@@ -99,6 +99,10 @@ module Sidekiq
       def relative_time(time)
         %{<time datetime="#{time.getutc.iso8601}">#{time}</time>}
       end
+
+      def display_args(args, count=100)
+        args.map { |arg| a = arg.inspect; a.size > count ? "#{a[0..count]}..." : a }.join(", ")
+      end
     end
 
     get "/" do
@@ -125,14 +129,42 @@ module Sidekiq
       halt 404 unless params[:score]
       @score = params[:score].to_f
       @retries = retries_with_score(@score)
-      redirect root_path if @retries.empty?
+      redirect "#{root_path}retries" if @retries.empty?
       slim :retry
+    end
+
+    get '/retries' do
+      @retries = retries
+      slim :retries
+    end
+
+    post '/retries' do
+      halt 404 unless params[:score]
+      params[:score].each do |score|
+        s = score.to_f
+        if params['retry']
+          process_score(s, :retry)
+        elsif params['delete']
+          process_score(s, :delete)
+        end
+      end
+      redirect root_path
     end
 
     post "/retries/:score" do
       halt 404 unless params[:score]
       score = params[:score].to_f
       if params['retry']
+        process_score(score, :retry)
+      elsif params['delete']
+        process_score(score, :delete)
+      end
+      redirect root_path
+    end
+
+    def process_score(score, operation)
+      case operation
+      when :retry
         Sidekiq.redis do |conn|
           results = conn.zrangebyscore('retry', score, score)
           conn.zremrangebyscore('retry', score, score)
@@ -141,13 +173,13 @@ module Sidekiq
             conn.rpush("queue:#{msg['queue']}", message)
           end
         end
-      elsif params['delete']
+      when :delete
         Sidekiq.redis do |conn|
           conn.zremrangebyscore('retry', score, score)
         end
       end
-      redirect root_path
     end
+
   end
 
 end

@@ -1,0 +1,29 @@
+h1 Retries
+
+- if @retries.size > 0
+  form action="#{root_path}retries" method="post"
+    table class="table table-striped table-bordered"
+      tr
+        th
+          input type="checkbox" class="check_all"
+        th Next Retry
+        th Retry Count
+        th Queue
+        th Worker
+        th Args
+      - @retries.each do |(msg, score)|
+        tr
+          td
+            input type='checkbox' name='score[]' value='#{score}'
+          td
+            a href="#{root_path}retries/#{score}"== relative_time(Time.at(score))
+          td= msg['retry_count']
+          td
+            a href="#{root_path}queues/#{msg['queue']}" #{msg['queue']}
+          td= msg['class']
+          td= display_args(msg['args'])
+    input.btn.btn-primary type="submit" name="retry" value="Retry Now"
+    input.btn.btn-danger type="submit" name="delete" value="Delete"
+- else
+  p No retries found.
+  a href="#{root_path}" Back
