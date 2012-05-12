@@ -64,13 +64,11 @@ module Sidekiq
       dying = false
       begin
         yield
-      rescue
+      rescue Exception
         dying = true
-        # Uh oh, error.  We will die so unregister as much as we can first.
         redis do |conn|
           conn.multi do
             conn.incrby("stat:failed", 1)
-            conn.del("stat:processed:#{self}")
           end
         end
         raise
@@ -81,7 +79,6 @@ module Sidekiq
             conn.del("worker:#{self}")
             conn.del("worker:#{self}:started")
             conn.incrby("stat:processed", 1)
-            conn.incrby("stat:processed:#{self}", 1) unless dying
           end
         end
       end

@@ -33,7 +33,6 @@ class TestStats < MiniTest::Unit::TestCase
 
         assert_equal 0, conn.get('stat:failed').to_i
         assert_equal 0, conn.get('stat:processed').to_i
-        assert_equal 0, conn.get("stat:processed:#{processor}").to_i
 
         processor.process(msg, 'xyzzy')
         processor.process(msg, 'xyzzy')
@@ -41,7 +40,6 @@ class TestStats < MiniTest::Unit::TestCase
 
         assert_equal 0, conn.get('stat:failed').to_i
         assert_equal 3, conn.get('stat:processed').to_i
-        assert_equal 3, conn.get("stat:processed:#{processor}").to_i
       end
     end
 
@@ -63,7 +61,6 @@ class TestStats < MiniTest::Unit::TestCase
 
         assert_equal 1, conn.get('stat:failed').to_i
         assert_equal 1, conn.get('stat:processed').to_i
-        assert_equal nil, conn.get("stat:processed:#{pstr}")
       end
     end
 
