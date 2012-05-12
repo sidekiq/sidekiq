@@ -15,6 +15,13 @@ trap 'USR1' do
   mgr.stop! if mgr
 end
 
+trap 'INFO' do
+  Thread.list.each do |thread|
+    puts "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
+    puts thread.backtrace.join("\n")
+  end
+end
+
 require 'yaml'
 require 'singleton'
 require 'optparse'
