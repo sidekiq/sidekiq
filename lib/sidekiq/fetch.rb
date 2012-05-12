@@ -28,6 +28,8 @@ module Sidekiq
     # a new fetch if the current fetch turned up nothing.
     def fetch
       watchdog('Fetcher#fetch died') do
+        return if Sidekiq::Fetcher.done?
+
         begin
           queue = nil
           msg = nil
@@ -45,6 +47,17 @@ module Sidekiq
           after(0) { fetch }
         end
       end
+    end
+
+    # Ugh.  Say hello to a bloody hack.
+    # Can't find a clean way to get the fetcher to just stop processing
+    # its mailbox when shutdown starts.
+    def self.done!
+      @done = true
+    end
+
+    def self.done?
+      @done
     end
 
     private

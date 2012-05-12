@@ -39,6 +39,7 @@ module Sidekiq
         timeout = options[:timeout]
 
         @done = true
+        Sidekiq::Fetcher.done!
         @fetcher.terminate! if @fetcher.alive?
 
         logger.info { "Shutting down #{@ready.size} quiet workers" }

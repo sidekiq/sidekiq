@@ -1,6 +1,7 @@
 1.2.1
 -----------
 
+- Fix issue with Fetcher slowing Sidekiq shutdown
 - Print backtraces for all threads upon INFO signal [#183]
 - Overhaul retries Web UI with new index page and bulk operations [#184]
 
