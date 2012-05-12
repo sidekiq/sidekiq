@@ -27,25 +27,25 @@ class TestWeb < MiniTest::Unit::TestCase
     it 'shows active queues' do
       get '/'
       assert_equal 200, last_response.status
-      assert_match last_response.body, /Sidekiq is idle/
-      refute_match last_response.body, /default/
+      assert_match /Sidekiq is idle/, last_response.body
+      refute_match /default/, last_response.body
 
       assert WebWorker.perform_async(1, 2)
 
       get '/'
       assert_equal 200, last_response.status
-      assert_match last_response.body, /Sidekiq is idle/
-      assert_match last_response.body, /default/
-      refute_match last_response.body, /foo/
+      assert_match /Sidekiq is idle/, last_response.body
+      assert_match /default/, last_response.body
+      refute_match /foo/, last_response.body
 
       assert Sidekiq::Client.push('queue' => :foo, 'class' => WebWorker, 'args' => [1, 3])
 
       get '/'
       assert_equal 200, last_response.status
-      assert_match last_response.body, /Sidekiq is idle/
-      assert_match last_response.body, /default/
-      assert_match last_response.body, /foo/
-      assert_match last_response.body, /Backlog: 2/
+      assert_match /Sidekiq is idle/, last_response.body
+      assert_match /default/, last_response.body
+      assert_match /foo/, last_response.body
+      assert_match /Backlog: 2/, last_response.body
     end
 
     it 'handles queues with no name' do
@@ -83,15 +83,15 @@ class TestWeb < MiniTest::Unit::TestCase
     it 'can display retries' do
       get '/retries'
       assert_equal 200, last_response.status
-      assert_match last_response.body, /found/
-      refute_match last_response.body, /HardWorker/
+      assert_match /found/, last_response.body
+      refute_match /HardWorker/, last_response.body
 
       add_retry
 
       get '/retries'
       assert_equal 200, last_response.status
-      refute_match last_response.body, /found/
-      assert_match last_response.body, /HardWorker/
+      refute_match /found/, last_response.body
+      assert_match /HardWorker/, last_response.body
     end
 
     it 'can display a single retry' do
@@ -101,7 +101,7 @@ class TestWeb < MiniTest::Unit::TestCase
 
       get "/retries/#{score}"
       assert_equal 200, last_response.status
-      assert_match last_response.body, /HardWorker/
+      assert_match /HardWorker/, last_response.body
     end
 
     def add_retry
