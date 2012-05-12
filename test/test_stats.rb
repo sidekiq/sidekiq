@@ -28,6 +28,8 @@ class TestStats < MiniTest::Unit::TestCase
 
         processor = Sidekiq::Processor.new(boss)
         boss.expect(:processor_done!, nil, [processor])
+        boss.expect(:processor_done!, nil, [processor])
+        boss.expect(:processor_done!, nil, [processor])
 
         assert_equal 0, conn.get('stat:failed').to_i
         assert_equal 0, conn.get('stat:processed').to_i
