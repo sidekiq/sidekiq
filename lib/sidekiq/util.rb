@@ -1,6 +1,3 @@
-require 'time'
-require 'logger'
-
 module Sidekiq
   ##
   # This module is part of Sidekiq core and not intended for extensions.
@@ -8,26 +5,6 @@ module Sidekiq
   module Util
 
     EXPIRY = 24 * 60 * 60
-
-    class Pretty < Logger::Formatter
-      # Provide a call() method that returns the formatted message.
-      def call(severity, time, program_name, message)
-        "#{time.utc.iso8601} #{Process.pid} TID-#{Thread.current.object_id.to_s(36)} #{severity}: #{message}\n"
-      end
-    end
-
-    def self.logger
-      @logger ||= begin
-        log = Logger.new(STDOUT)
-        log.level = Logger::INFO
-        log.formatter = Pretty.new
-        log
-      end
-    end
-
-    def self.logger=(log)
-      @logger = (log ? log : Logger.new('/dev/null'))
-    end
 
     def constantize(camel_cased_word)
       names = camel_cased_word.split('::')
@@ -49,7 +26,7 @@ module Sidekiq
     end
 
     def logger
-      Sidekiq::Util.logger
+      Sidekiq::Logger.logger
     end
 
     def redis(&block)

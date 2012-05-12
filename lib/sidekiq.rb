@@ -1,4 +1,5 @@
 require 'sidekiq/version'
+require 'sidekiq/logger'
 require 'sidekiq/client'
 require 'sidekiq/worker'
 require 'sidekiq/redis_connection'

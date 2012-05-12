@@ -2,6 +2,7 @@ module Sidekiq
   module Middleware
     module Server
       class Logging
+
         def call(*args)
           static = "#{args[0].class.to_s} MSG-#{args[0].object_id.to_s(36)}" if logger.info?
           start = Time.now
@@ -18,7 +19,7 @@ module Sidekiq
         end
 
         def logger
-          Sidekiq::Util.logger
+          Sidekiq::Logger.logger
         end
       end
     end

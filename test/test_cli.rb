@@ -51,11 +51,11 @@ class TestCli < MiniTest::Unit::TestCase
     end
 
     it 'sets verbose' do
-      old = Sidekiq::Util.logger.level
+      old = Sidekiq::Logger.logger.level
       @cli.parse(['sidekiq', '-v', '-r', './test/fake_env.rb'])
-      assert_equal Logger::DEBUG, Sidekiq::Util.logger.level
+      assert_equal ::Logger::DEBUG, Sidekiq::Logger.logger.level
       # If we leave the logger at DEBUG it'll add a lot of noise to the test output
-      Sidekiq::Util.logger.level = old
+      Sidekiq::Logger.logger.level = old
     end
 
     describe 'with pidfile' do
