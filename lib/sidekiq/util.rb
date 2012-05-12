@@ -4,7 +4,7 @@ module Sidekiq
   #
   module Util
 
-    EXPIRY = 24 * 60 * 60
+    EXPIRY = 60 * 60
 
     def constantize(camel_cased_word)
       names = camel_cased_word.split('::')
