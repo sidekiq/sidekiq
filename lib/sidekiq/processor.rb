@@ -55,9 +55,9 @@ module Sidekiq
       redis do |conn|
         conn.multi do
           conn.sadd('workers', self)
-          conn.setex("worker:#{self}:started", DEFAULT_EXPIRY, Time.now.to_s)
+          conn.setex("worker:#{self}:started", EXPIRY, Time.now.to_s)
           hash = {:queue => queue, :payload => msg, :run_at => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z")}
-          conn.setex("worker:#{self}", DEFAULT_EXPIRY, Sidekiq.dump_json(hash))
+          conn.setex("worker:#{self}", EXPIRY, Sidekiq.dump_json(hash))
         end
       end
 

@@ -7,7 +7,7 @@ module Sidekiq
   #
   module Util
 
-    DEFAULT_EXPIRY = 24 * 60 * 60
+    EXPIRY = 24 * 60 * 60
 
     class Pretty < Logger::Formatter
       # Provide a call() method that returns the formatted message.
