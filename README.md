@@ -12,7 +12,7 @@ message format as Resque so it can integrate into an existing Resque processing 
 You can have Sidekiq and Resque run side-by-side at the same time and
 use the Resque client to enqueue messages in Redis to be processed by Sidekiq.
 
-At the same time, Sidekiq uses multithreading so it much more memory efficient than
+At the same time, Sidekiq uses multithreading so it is much more memory efficient than
 Resque (which forks a new process for every job).  You'll find that you might need
 50 200MB resque processes to peg your CPU whereas one 300MB Sidekiq process will peg
 the same CPU and perform the same amount of work.  Please see [my blog post on Resque's memory
