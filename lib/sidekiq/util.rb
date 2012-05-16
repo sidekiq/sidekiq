@@ -26,7 +26,7 @@ module Sidekiq
     end
 
     def logger
-      Sidekiq::Logger.logger
+      Sidekiq.logger
     end
 
     def redis(&block)

@@ -25,7 +25,7 @@ module Sidekiq
     end
 
     def logger
-      Sidekiq::Logger.logger
+      Sidekiq.logger
     end
 
     module ClassMethods

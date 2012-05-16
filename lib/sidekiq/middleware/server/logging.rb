@@ -4,14 +4,17 @@ module Sidekiq
       class Logging
 
         def call(*args)
-          static = "#{args[0].class.to_s} MSG-#{args[0].object_id.to_s(36)}" if logger.info?
-          start = Time.now
-          logger.info { "#{static} start" }
-          yield
-          logger.info { "#{static} done: #{elapsed(start)} sec" }
-        rescue
-          logger.info { "#{static} fail: #{elapsed(start)} sec" }
-          raise
+          Sidekiq::Logging.with_context("#{args[0].class.to_s} MSG-#{args[0].object_id.to_s(36)}") do
+            begin
+              start = Time.now
+              logger.info { "start" }
+              yield
+              logger.info { "done: #{elapsed(start)} sec" }
+            rescue
+              logger.info { "fail: #{elapsed(start)} sec" }
+              raise
+            end
+          end
         end
 
         def elapsed(start)
@@ -19,7 +22,7 @@ module Sidekiq
         end
 
         def logger
-          Sidekiq::Logger.logger
+          Sidekiq.logger
         end
       end
     end

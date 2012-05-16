@@ -10,7 +10,7 @@ trap 'TERM' do
 end
 
 trap 'USR1' do
-  Sidekiq::Logger.logger.info "Received USR1, no longer accepting new work"
+  Sidekiq.logger.info "Received USR1, no longer accepting new work"
   mgr = Sidekiq::CLI.instance.manager
   mgr.stop! if mgr
 end
@@ -47,13 +47,13 @@ module Sidekiq
 
     def parse(args=ARGV)
       @code = nil
-      Sidekiq::Logger.logger
+      Sidekiq.logger
 
       cli = parse_options(args)
       config = parse_config(cli)
       options.merge!(config.merge(cli))
 
-      Sidekiq::Logger.logger.level = ::Logger::DEBUG if options[:verbose]
+      Sidekiq.logger.level = Logger::DEBUG if options[:verbose]
       Celluloid.logger = nil
 
       validate!
@@ -134,7 +134,7 @@ module Sidekiq
         end
 
         o.on "-v", "--verbose", "Print more verbose output" do
-          Sidekiq::Logger.logger.level = ::Logger::DEBUG
+          Sidekiq.logger.level = ::Logger::DEBUG
         end
 
         o.on '-e', '--environment ENV', "Application environment" do |arg|

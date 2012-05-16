@@ -1,5 +1,5 @@
 require 'sidekiq/version'
-require 'sidekiq/logger'
+require 'sidekiq/logging'
 require 'sidekiq/client'
 require 'sidekiq/worker'
 require 'sidekiq/redis_connection'
@@ -89,6 +89,10 @@ module Sidekiq
 
   def self.dump_json(object)
     MultiJson.encode(object)
+  end
+
+  def self.logger
+    Sidekiq::Logging.logger
   end
 
 end

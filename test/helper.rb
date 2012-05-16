@@ -10,7 +10,7 @@ require 'minitest/autorun'
 
 require 'sidekiq'
 require 'sidekiq/util'
-Sidekiq::Logger.logger.level = Logger::ERROR
+Sidekiq.logger.level = Logger::ERROR
 
 require 'sidekiq/redis_connection'
 REDIS = Sidekiq::RedisConnection.create(:url => "redis://localhost/15", :namespace => 'testy')
