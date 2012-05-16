@@ -4,7 +4,7 @@
 - Sidekiq::Worker now has access to Sidekiq's standard logger
 - Fix issue with non-StandardErrors leading to Processor exhaustion
 - Fix issue with Fetcher slowing Sidekiq shutdown
-- Print backtraces for all threads upon INFO signal [#183]
+- Print backtraces for all threads upon TTIN signal [#183]
 - Overhaul retries Web UI with new index page and bulk operations [#184]
 
 1.2.0
