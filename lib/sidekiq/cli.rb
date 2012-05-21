@@ -1,12 +1,12 @@
 trap 'INT' do
   # Handle Ctrl-C in JRuby like MRI
   # http://jira.codehaus.org/browse/JRUBY-4637
-  Thread.main.raise Interrupt
+  Sidekiq::CLI.instance.interrupt
 end
 
 trap 'TERM' do
   # Heroku sends TERM and then waits 10 seconds for process to exit.
-  Thread.main.raise Interrupt
+  Sidekiq::CLI.instance.interrupt
 end
 
 trap 'USR1' do
@@ -43,6 +43,8 @@ module Sidekiq
 
     def initialize
       @code = nil
+      @interrupt_mutex = Mutex.new
+      @interrupted = false
     end
 
     def parse(args=ARGV)
@@ -77,6 +79,15 @@ module Sidekiq
         # Explicitly exit so busy Processor threads can't block
         # process shutdown.
         exit(0)
+      end
+    end
+
+    def interrupt
+      @interrupt_mutex.synchronize do
+        unless @interrupted
+          @interrupted = true
+          Thread.main.raise Interrupt
+        end
       end
     end
 
