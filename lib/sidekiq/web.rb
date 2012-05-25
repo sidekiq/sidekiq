@@ -76,6 +76,10 @@ module Sidekiq
         end
       end
 
+      def backlog
+        queues.map {|name, size| size }.inject(0) {|memo, val| memo + val }
+      end
+
       def retries_with_score(score)
         Sidekiq.redis do |conn|
           results = conn.zrangebyscore('retry', score, score)
