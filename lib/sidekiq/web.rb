@@ -170,7 +170,8 @@ module Sidekiq
           conn.zremrangebyscore('retry', score, score)
           results.map do |message|
             msg = Sidekiq.load_json(message)
-            conn.rpush("queue:#{msg['queue']}", message)
+            msg['retry_count'] = msg['retry_count'] - 1
+            conn.rpush("queue:#{msg['queue']}", Sidekiq.dump_json(msg))
           end
         end
       when :delete
