@@ -1,5 +1,3 @@
-require 'multi_json'
-
 require 'sidekiq/middleware/chain'
 require 'sidekiq/middleware/client/unique_jobs'
 
@@ -50,9 +48,13 @@ module Sidekiq
       Sidekiq.client_middleware.invoke(worker_class, item, queue) do
         payload = Sidekiq.dump_json(item)
         Sidekiq.redis do |conn|
-          _, pushed = conn.multi do
-            conn.sadd('queues', queue)
-            conn.rpush("queue:#{queue}", payload)
+          if item['at']
+            pushed = (conn.zadd('schedule', item['at'].to_s, payload) == 1)
+          else
+            _, pushed = conn.multi do
+              conn.sadd('queues', queue)
+              conn.rpush("queue:#{queue}", payload)
+            end
           end
         end
       end

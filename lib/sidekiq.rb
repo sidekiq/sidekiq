@@ -9,6 +9,8 @@ require 'sidekiq/extensions/action_mailer'
 require 'sidekiq/extensions/active_record'
 require 'sidekiq/rails' if defined?(::Rails)
 
+require 'multi_json'
+
 module Sidekiq
 
   DEFAULTS = {

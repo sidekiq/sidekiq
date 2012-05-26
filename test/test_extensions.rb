@@ -29,6 +29,12 @@ class TestExtensions < MiniTest::Unit::TestCase
       assert_equal 1, Sidekiq.redis {|c| c.llen('queue:default') }
     end
 
+    it 'allows delayed scheduling of AR class methods' do
+      assert_equal 0, Sidekiq.redis {|c| c.zcard('schedule') }
+      MyModel.delay_for(5.days).long_class_method
+      assert_equal 1, Sidekiq.redis {|c| c.zcard('schedule') }
+    end
+
     class UserMailer < ActionMailer::Base
       def greetings(a, b)
         raise "Should not be called!"
@@ -41,6 +47,12 @@ class TestExtensions < MiniTest::Unit::TestCase
       UserMailer.delay.greetings(1, 2)
       assert_equal ['default'], Sidekiq::Client.registered_queues
       assert_equal 1, Sidekiq.redis {|c| c.llen('queue:default') }
+    end
+
+    it 'allows delayed scheduling of AM mails' do
+      assert_equal 0, Sidekiq.redis {|c| c.zcard('schedule') }
+      UserMailer.delay_for(5.days).greetings(1, 2)
+      assert_equal 1, Sidekiq.redis {|c| c.zcard('schedule') }
     end
   end
 

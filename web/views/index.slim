@@ -4,7 +4,8 @@
   p Processed: #{processed}
   p Failed: #{failed}
   p Busy Workers: #{workers.size}
-  p Retries Pending: #{retry_count}
+  p Scheduled: #{zcard('schedule')}
+  p Retries Pending: #{zcard('retry')}
   p Queue Backlog: #{backlog}
 
 .tabbable

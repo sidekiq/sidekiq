@@ -1,6 +1,5 @@
 require 'helper'
-require 'multi_json'
-require 'sidekiq/retry'
+require 'sidekiq/scheduled'
 require 'sidekiq/middleware/server/retry_jobs'
 
 class TestRetry < MiniTest::Unit::TestCase
@@ -115,7 +114,7 @@ class TestRetry < MiniTest::Unit::TestCase
       @redis.expect :multi, [[fake_msg], 1], []
       @redis.expect :rpush, 1, ['queue:someq', fake_msg]
 
-      inst = Sidekiq::Retry::Poller.new
+      inst = Sidekiq::Scheduled::Poller.new
       inst.poll
 
       @redis.verify

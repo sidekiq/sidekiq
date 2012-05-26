@@ -30,7 +30,7 @@ require 'celluloid'
 require 'sidekiq'
 require 'sidekiq/util'
 require 'sidekiq/manager'
-require 'sidekiq/retry'
+require 'sidekiq/scheduled'
 
 module Sidekiq
   class CLI
@@ -65,7 +65,7 @@ module Sidekiq
 
     def run
       @manager = Sidekiq::Manager.new(options)
-      poller = Sidekiq::Retry::Poller.new
+      poller = Sidekiq::Scheduled::Poller.new
       begin
         logger.info 'Starting processing, hit Ctrl-C to stop'
         @manager.start!

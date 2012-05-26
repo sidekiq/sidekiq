@@ -33,6 +33,13 @@ module Sidekiq
         Sidekiq::Client.push('class' => self, 'args' => args)
       end
 
+      def perform_in(interval, *args)
+        int = interval.to_f
+        ts = (int < 1_000_000_000 ? Time.now.to_f + int : int)
+        Sidekiq::Client.push('class' => self, 'args' => args, 'at' => ts)
+      end
+      alias_method :perform_at, :perform_in
+
       ##
       # Allows customization for this type of Worker.
       # Legal options:

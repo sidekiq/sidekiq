@@ -1,5 +1,4 @@
 require 'celluloid'
-require 'multi_json'
 require 'sidekiq/util'
 
 require 'sidekiq/middleware/server/active_record'

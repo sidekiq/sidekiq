@@ -1,5 +1,3 @@
-require 'multi_json'
-
 module Sidekiq
   module Middleware
     module Server

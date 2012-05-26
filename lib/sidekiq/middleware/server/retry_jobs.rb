@@ -1,12 +1,21 @@
-require 'multi_json'
-
-require 'sidekiq/retry'
+require 'sidekiq/scheduled'
 
 module Sidekiq
   module Middleware
     module Server
       ##
       # Automatically retry jobs that fail in Sidekiq.
+      # Sidekiq's retry support assumes a typical development lifecycle:
+      # 0. push some code changes with a bug in it
+      # 1. bug causes message processing to fail, sidekiq's middleware captures
+      #    the message and pushes it onto a retry queue
+      # 2. sidekiq retries messages in the retry queue multiple times with
+      #    an exponential delay, the message continues to fail
+      # 3. after a few days, a developer deploys a fix.  the message is
+      #    reprocessed successfully.
+      # 4. if 3 never happens, sidekiq will eventually give up and throw the
+      #    message away.
+      #
       # A message looks like:
       #
       #     { 'class' => 'HardWorker', 'args' => [1, 2, 'foo'] }
@@ -24,7 +33,10 @@ module Sidekiq
       # to the message and everyone is using Airbrake, right?
       class RetryJobs
         include Sidekiq::Util
-        include Sidekiq::Retry
+
+        # delayed_job uses the same basic formula
+        MAX_COUNT = 25
+        DELAY = proc { |count| (count ** 4) + 15 }
 
         def call(worker, msg, queue)
           yield

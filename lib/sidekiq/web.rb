@@ -1,8 +1,6 @@
 require 'sinatra/base'
 require 'slim'
 require 'sprockets'
-require 'multi_json'
-
 module Sidekiq
   class SprocketsMiddleware
     def initialize(app, options={})
@@ -57,13 +55,20 @@ module Sidekiq
         Sidekiq.redis { |conn| conn.get('stat:failed') } || 0
       end
 
-      def retry_count
-        Sidekiq.redis { |conn| conn.zcard('retry') }
+      def zcard(name)
+        Sidekiq.redis { |conn| conn.zcard(name) }
       end
 
       def retries(count=50)
         Sidekiq.redis do |conn|
           results = conn.zrange('retry', 0, count, :withscores => true)
+          results.each_slice(2).map { |msg, score| [Sidekiq.load_json(msg), Float(score)] }
+        end
+      end
+
+      def scheduled(count=50)
+        Sidekiq.redis do |conn|
+          results = conn.zrange('schedule', 0, count, :withscores => true)
           results.each_slice(2).map { |msg, score| [Sidekiq.load_json(msg), Float(score)] }
         end
       end
@@ -142,14 +147,29 @@ module Sidekiq
       slim :retries
     end
 
+    get '/scheduled' do
+      @scheduled = scheduled
+      slim :scheduled
+    end
+
+    post '/scheduled' do
+      halt 404 unless params[:score]
+      halt 404 unless params['delete']
+      params[:score].each do |score|
+        s = score.to_f
+        process_score('schedule', s, :delete)
+      end
+      redirect root_path
+    end
+
     post '/retries' do
       halt 404 unless params[:score]
       params[:score].each do |score|
         s = score.to_f
         if params['retry']
-          process_score(s, :retry)
+          process_score('retry', s, :retry)
         elsif params['delete']
-          process_score(s, :delete)
+          process_score('retry', s, :delete)
         end
       end
       redirect root_path
@@ -166,12 +186,12 @@ module Sidekiq
       redirect root_path
     end
 
-    def process_score(score, operation)
+    def process_score(set, score, operation)
       case operation
       when :retry
         Sidekiq.redis do |conn|
-          results = conn.zrangebyscore('retry', score, score)
-          conn.zremrangebyscore('retry', score, score)
+          results = conn.zrangebyscore(set, score, score)
+          conn.zremrangebyscore(set, score, score)
           results.map do |message|
             msg = Sidekiq.load_json(message)
             msg['retry_count'] = msg['retry_count'] - 1
@@ -180,7 +200,7 @@ module Sidekiq
         end
       when :delete
         Sidekiq.redis do |conn|
-          conn.zremrangebyscore('retry', score, score)
+          conn.zremrangebyscore(set, score, score)
         end
       end
     end

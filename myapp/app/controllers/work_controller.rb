@@ -8,7 +8,7 @@ class WorkController < ApplicationController
   end
 
   def email
-    UserMailer.delay.greetings(Time.now)
+    UserMailer.delay_for(30.seconds).greetings(Time.now)
     render :nothing => true
   end
 

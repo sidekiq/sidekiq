@@ -1,3 +1,32 @@
+2.0.0
+-----------
+
+- **SCHEDULED JOBS**!
+  You can now use `perform_at` and `perform_in` to schedule jobs
+to run at arbitrary points in the future, like so:
+
+```ruby
+  SomeWorker.perform_in(5.days, 'bob', 13)
+  SomeWorker.perform_at(5.days.from_now, 'bob', 13)
+```
+
+It also works with the delay extensions:
+
+```ruby
+  UserMailer.delay_for(5.days).send_welcome_email(user.id)
+```
+
+The time is approximately when the job will be placed on the queue;
+it is not guaranteed to run at precisely at that moment in time.
+
+This functionality is meant for one-off, arbitrary jobs.  I still
+recommend `whenever` or `clockwork` if you want cron-like,
+recurring jobs.  See `examples/scheduling.rb`
+
+I want to specially thank @yabawock for his work on sidekiq-scheduler.
+His extension for Sidekiq 1.x filled an obvious functional gap that I now think is
+useful enough to implement in Sidekiq proper.
+
 1.2.1
 -----------
 

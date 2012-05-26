@@ -21,6 +21,9 @@ module Sidekiq
       def delay
         Proxy.new(DelayedModel, self)
       end
+      def delay_for(interval)
+        Proxy.new(DelayedModel, self, Time.now + interval)
+      end
     end
 
   end

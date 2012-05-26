@@ -1,5 +1,4 @@
 require 'digest'
-require 'multi_json'
 
 module Sidekiq
   module Middleware

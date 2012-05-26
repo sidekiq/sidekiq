@@ -1,9 +1,10 @@
 module Sidekiq
   module Extensions
     class Proxy < (RUBY_VERSION < '1.9' ? Object : BasicObject)
-      def initialize(performable, target)
+      def initialize(performable, target, at=nil)
         @performable = performable
         @target = target
+        @at = at
       end
 
       def method_missing(name, *args)
@@ -13,7 +14,11 @@ module Sidekiq
         # to JSON and then deserialized on the other side back into a
         # Ruby object.
         obj = [@target, name, args]
-        @performable.perform_async(::YAML.dump(obj))
+        if @at
+          @performable.perform_at(@at, ::YAML.dump(obj))
+        else
+          @performable.perform_async(::YAML.dump(obj))
+        end
       end
     end
 

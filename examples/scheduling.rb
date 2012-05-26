@@ -1,4 +1,4 @@
-# Sidekiq defers scheduling to other, better suited gems.
+# Sidekiq defers scheduling cron-like tasks to other, better suited gems.
 # If you want to run a job regularly, here's an example
 # of using the 'whenever' gem to push jobs to Sidekiq
 # regularly.
