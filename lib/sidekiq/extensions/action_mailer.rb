@@ -25,7 +25,7 @@ module Sidekiq
         Proxy.new(DelayedMailer, self)
       end
       def delay_for(interval)
-        Proxy.new(DelayedMailer, self, Time.now + interval)
+        Proxy.new(DelayedMailer, self, Time.now.to_f + interval.to_f)
       end
     end
 
