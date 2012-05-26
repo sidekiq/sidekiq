@@ -1,8 +1,9 @@
 2.0.0
 -----------
 
-- **SCHEDULED JOBS**!
-  You can now use `perform_at` and `perform_in` to schedule jobs
+**SCHEDULED JOBS**!
+
+You can now use `perform_at` and `perform_in` to schedule jobs
 to run at arbitrary points in the future, like so:
 
 ```ruby
