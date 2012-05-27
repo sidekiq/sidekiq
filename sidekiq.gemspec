@@ -13,7 +13,7 @@ Gem::Specification.new do |gem|
   gem.name          = "sidekiq"
   gem.require_paths = ["lib"]
   gem.version       = Sidekiq::VERSION
-  gem.add_dependency                  'redis'
+  gem.add_dependency                  'redis', '~> 3'
   gem.add_dependency                  'redis-namespace'
   gem.add_dependency                  'connection_pool', '~> 0.9.0'
   gem.add_dependency                  'celluloid', '~> 0.10.0'

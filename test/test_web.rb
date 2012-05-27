@@ -80,6 +80,20 @@ class TestWeb < MiniTest::Unit::TestCase
       end
     end
 
+    it 'can display scheduled' do
+      get '/scheduled'
+      assert_equal 200, last_response.status
+      assert_match /found/, last_response.body
+      refute_match /HardWorker/, last_response.body
+
+      add_scheduled
+
+      get '/scheduled'
+      assert_equal 200, last_response.status
+      refute_match /found/, last_response.body
+      assert_match /HardWorker/, last_response.body
+    end
+
     it 'can display retries' do
       get '/retries'
       assert_equal 200, last_response.status
@@ -102,6 +116,17 @@ class TestWeb < MiniTest::Unit::TestCase
       get "/retries/#{score}"
       assert_equal 200, last_response.status
       assert_match /HardWorker/, last_response.body
+    end
+
+    def add_scheduled
+      msg = { 'class' => 'HardWorker',
+              'args' => ['bob', 1, Time.now.to_f],
+              'at' => Time.now.to_f }
+      score = Time.now.to_f
+      Sidekiq.redis do |conn|
+        conn.zadd('schedule', score, Sidekiq.dump_json(msg))
+      end
+      [msg, score]
     end
 
     def add_retry

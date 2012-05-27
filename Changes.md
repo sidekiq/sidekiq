@@ -28,6 +28,9 @@ I want to specially thank @yabawock for his work on sidekiq-scheduler.
 His extension for Sidekiq 1.x filled an obvious functional gap that I now think is
 useful enough to implement in Sidekiq proper.
 
+- Fixed issues due to Redis 3.x API changes.  Sidekiq now requires
+  the Redis 3.x client.
+
 1.2.1
 -----------
 

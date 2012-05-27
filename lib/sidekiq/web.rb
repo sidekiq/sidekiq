@@ -60,16 +60,17 @@ module Sidekiq
       end
 
       def retries(count=50)
-        Sidekiq.redis do |conn|
-          results = conn.zrange('retry', 0, count, :withscores => true)
-          results.each_slice(2).map { |msg, score| [Sidekiq.load_json(msg), Float(score)] }
-        end
+        zcontents('retry', count)
       end
 
       def scheduled(count=50)
+        zcontents('schedule', count)
+      end
+
+      def zcontents(name, count)
         Sidekiq.redis do |conn|
-          results = conn.zrange('schedule', 0, count, :withscores => true)
-          results.each_slice(2).map { |msg, score| [Sidekiq.load_json(msg), Float(score)] }
+          results = conn.zrange(name, 0, count, :withscores => true)
+          results.map { |msg, score| [Sidekiq.load_json(msg), score] }
         end
       end
 
