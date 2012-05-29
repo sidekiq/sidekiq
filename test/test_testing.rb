@@ -83,6 +83,12 @@ class TestTesting < MiniTest::Unit::TestCase
       assert_equal 1, EnqueuedWorker.jobs.size
     end
 
+    it 'clears jobs' do
+      Sidekiq::Client.enqueue(EnqueuedWorker, 1, 2)
+      EnqueuedWorker.clear_jobs
+      assert_equal 0, EnqueuedWorker.jobs.size
+    end
+
     it 'executes all stored jobs' do
       assert StoredWorker.perform_async(false)
       assert StoredWorker.perform_async(true)
