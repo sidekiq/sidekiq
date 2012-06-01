@@ -12,11 +12,19 @@ Sidekiq.hook_rails!
 class TestInline < MiniTest::Unit::TestCase
   describe 'sidekiq inline testing' do
     class InlineError < RuntimeError; end
+    class ParameterIsNotString < RuntimeError; end
 
     class InlineWorker
       include Sidekiq::Worker
       def perform(pass)
         raise InlineError unless pass
+      end
+    end
+
+    class InlineWorkerWithTimeParam
+      include Sidekiq::Worker
+      def perform(time)
+        raise ParameterIsNotString unless time.is_a?(String)
       end
     end
 
@@ -70,6 +78,10 @@ class TestInline < MiniTest::Unit::TestCase
       assert_raises InlineError do
         Sidekiq::Client.enqueue(InlineWorker, false)
       end
+    end
+
+    it 'should relay parameters through json' do
+      assert Sidekiq::Client.enqueue(InlineWorkerWithTimeParam, Time.now)
     end
   end
 end
