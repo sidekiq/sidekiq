@@ -1,7 +1,7 @@
 2.0.0
 -----------
 
-**SCHEDULED JOBS**!
+- **SCHEDULED JOBS**!
 
 You can now use `perform_at` and `perform_in` to schedule jobs
 to run at arbitrary points in the future, like so:
@@ -30,6 +30,8 @@ useful enough to implement in Sidekiq proper.
 
 - Fixed issues due to Redis 3.x API changes.  Sidekiq now requires
   the Redis 3.x client.
+- Inline testing now round trips arguments through JSON to catch
+  serialization issues (betelgeuse)
 
 1.2.1
 -----------
