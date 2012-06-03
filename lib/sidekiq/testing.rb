@@ -30,6 +30,16 @@ module Sidekiq
         true
       end
 
+      alias_method :perform_in_old, :perform_in
+      alias_method :perform_at_old, :perform_at
+      def perform_in(interval, *args)
+        int = interval.to_f
+        ts = (int < 1_000_000_000 ? Time.now.to_f + int : int)
+        jobs << { 'class' => self.name, 'args' => args, 'at' => ts }
+        true
+      end
+      alias_method :perform_at, :perform_in
+
       def jobs
         @pushed ||= []
       end

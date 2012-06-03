@@ -53,9 +53,11 @@ class TestTesting < MiniTest::Unit::TestCase
     after do
       # Undo override
       Sidekiq::Worker::ClassMethods.class_eval do
-        remove_method :perform_async
-        alias_method :perform_async, :perform_async_old
-        remove_method :perform_async_old
+        %w(async at in).each do |token|
+          remove_method :"perform_#{token}"
+          alias_method :"perform_#{token}", :"perform_#{token}_old"
+          remove_method :"perform_#{token}_old"
+        end
       end
     end
 
@@ -63,6 +65,11 @@ class TestTesting < MiniTest::Unit::TestCase
       assert_equal 0, DirectWorker.jobs.size
       assert DirectWorker.perform_async(1, 2)
       assert_equal 1, DirectWorker.jobs.size
+      assert DirectWorker.perform_in(10, 1, 2)
+      assert_equal 2, DirectWorker.jobs.size
+      assert DirectWorker.perform_at(10, 1, 2)
+      assert_equal 3, DirectWorker.jobs.size
+      assert_in_delta 10.seconds.from_now.to_f, DirectWorker.jobs.last['at'], 0.01
     end
 
     it 'stubs the delay call on mailers' do

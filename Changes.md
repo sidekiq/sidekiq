@@ -1,3 +1,14 @@
+2.0.1
+-----------
+
+- Update sidekiq/testing to support new scheduled jobs API:
+
+    require 'sidekiq/testing'
+    DirectWorker.perform_in(10.seconds, 1, 2)
+    assert_equal 1, DirectWorker.jobs.size
+    assert_in_delta 10.seconds.from_now.to_f, DirectWorker.jobs.last['at'], 0.01
+
+
 2.0.0
 -----------
 
