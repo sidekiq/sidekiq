@@ -36,6 +36,15 @@ module Sidekiq
 
     helpers do
 
+      def reset_worker_list
+        Sidekiq.redis do |conn|
+          workers = conn.smembers('workers')
+          workers.each do |name|
+            conn.srem('workers', name)
+          end
+        end
+      end
+
       def workers
         @workers ||= begin
           Sidekiq.redis do |conn|
@@ -125,6 +134,11 @@ module Sidekiq
       @name = params[:name]
       @messages = Sidekiq.redis {|conn| conn.lrange("queue:#{@name}", 0, count) }.map { |str| Sidekiq.load_json(str) }
       slim :queue
+    end
+
+    post "/reset" do
+      reset_worker_list
+      redirect root_path
     end
 
     post "/queues/:name" do

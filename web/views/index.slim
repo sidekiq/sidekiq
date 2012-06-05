@@ -30,6 +30,8 @@
             td= msg['payload']['class']
             td= msg['payload']['args'].inspect[0..100]
             td== relative_time(Time.parse(msg['run_at']))
+      form action="#{root_path}reset" method="post"
+         button.btn type="submit" title="If you kill -9 Sidekiq, this table can fill up with old data." Clear worker list
 
     #queues.tab-pane
       table class="table table-striped table-bordered"
