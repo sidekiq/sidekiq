@@ -1,6 +1,8 @@
 2.0.1
 -----------
 
+- Add "Clear Workers" button to UI.  If you kill -9 Sidekiq, the workers
+  set can fill up with stale entries.
 - Update sidekiq/testing to support new scheduled jobs API:
 
    ```ruby
