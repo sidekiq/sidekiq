@@ -24,33 +24,20 @@ class TestWeb < MiniTest::Unit::TestCase
       end
     end
 
-    it 'shows active queues' do
+    it 'can display home' do
       get '/'
       assert_equal 200, last_response.status
       assert_match /Sidekiq is idle/, last_response.body
       refute_match /default/, last_response.body
-
-      assert WebWorker.perform_async(1, 2)
-
-      get '/'
-      assert_equal 200, last_response.status
-      assert_match /Sidekiq is idle/, last_response.body
-      assert_match /default/, last_response.body
-      refute_match /foo/, last_response.body
-
-      assert Sidekiq::Client.push('queue' => :foo, 'class' => WebWorker, 'args' => [1, 3])
-
-      get '/'
-      assert_equal 200, last_response.status
-      assert_match /Sidekiq is idle/, last_response.body
-      assert_match /default/, last_response.body
-      assert_match /foo/, last_response.body
-      assert_match /Backlog: 2/, last_response.body
     end
 
-    it 'handles queues with no name' do
+    it 'can display queues' do
+      assert Sidekiq::Client.push('queue' => :foo, 'class' => WebWorker, 'args' => [1, 3])
+
       get '/queues'
-      assert_equal 404, last_response.status
+      assert_equal 200, last_response.status
+      assert_match /foo/, last_response.body
+      refute_match /HardWorker/, last_response.body
     end
 
     it 'handles missing retry' do

@@ -1,4 +1,3 @@
-
 .hero-unit
   h1 Sidekiq is #{current_status}
   p Processed: #{processed}
@@ -8,44 +7,19 @@
   p Retries Pending: #{zcard('retry')}
   p Queue Backlog: #{backlog}
 
-.tabbable
-  ul.nav.nav-tabs
-    li.active
-      a href="#workers" data-toggle="tab" Busy Workers
-    li
-      a href="#queues" data-toggle="tab" Queues
-  .tab-content
-    #workers.tab-pane.active
-      table class="table table-striped table-bordered"
-        tr
-          th Worker
-          th Queue
-          th Class
-          th Arguments
-          th Started
-        - workers.each do |(worker, msg)|
-          tr
-            td= worker
-            td= msg['queue']
-            td= msg['payload']['class']
-            td= msg['payload']['args'].inspect[0..100]
-            td== relative_time(Time.parse(msg['run_at']))
-      form action="#{root_path}reset" method="post"
-         button.btn type="submit" title="If you kill -9 Sidekiq, this table can fill up with old data." Clear worker list
-
-    #queues.tab-pane
-      table class="table table-striped table-bordered"
-        tr
-          th Queue
-          th Size
-          th
-        - queues.each do |(queue, size)|
-          tr
-            td
-              a href="#{root_path}queues/#{queue}" #{queue}
-            td= size
-            td
-              form action="#{root_path}queues/#{queue}" method="post"
-                input.btn.btn-danger type="submit" name="delete" value="Delete"
-
-
+table class="table table-striped table-bordered"
+  tr
+    th Worker
+    th Queue
+    th Class
+    th Arguments
+    th Started
+  - workers.each do |(worker, msg)|
+    tr
+      td= worker
+      td= msg['queue']
+      td= msg['payload']['class']
+      td= msg['payload']['args'].inspect[0..100]
+      td== relative_time(Time.parse(msg['run_at']))
+form action="#{root_path}reset" method="post"
+   button.btn type="submit" title="If you kill -9 Sidekiq, this table can fill up with old data." Clear worker list
