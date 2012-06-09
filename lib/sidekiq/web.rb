@@ -128,6 +128,11 @@ module Sidekiq
       slim :index
     end
 
+    get "/queues" do
+      @queues = queues
+      slim :queues
+    end
+
     get "/queues/:name" do
       halt 404 unless params[:name]
       count = (params[:count] || 10).to_i
@@ -146,7 +151,7 @@ module Sidekiq
         conn.del("queue:#{params[:name]}")
         conn.srem("queues", params[:name])
       end
-      redirect root_path
+      redirect "#{root_path}queues"
     end
 
     get "/retries/:score" do
