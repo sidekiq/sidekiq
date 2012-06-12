@@ -1,0 +1,19 @@
+h1 Queues
+
+- if @queues.size > 0
+  table class="table table-striped table-bordered"
+    tr
+      th Queue
+      th Size
+      th
+    - queues.each do |(queue, size)|
+      tr
+        td
+          a href="#{root_path}queues/#{queue}" #{queue}
+        td= size
+        td
+          form action="#{root_path}queues/#{queue}" method="post"
+            input.btn.btn-danger type="submit" name="delete" value="Delete"
+- else
+  p No queues found.
+  a href="#{root_path}" Back
