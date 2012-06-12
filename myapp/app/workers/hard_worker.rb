@@ -1,6 +1,6 @@
 class HardWorker
   include Sidekiq::Worker
-  sidekiq_options :timeout => 60, :backtrace => 5, :timeout => 20
+  sidekiq_options :timeout => 20, :backtrace => 5
 
   def perform(name, count, salt)
     raise name if name == 'crash'
