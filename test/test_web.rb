@@ -104,6 +104,22 @@ class TestWeb < MiniTest::Unit::TestCase
       assert_equal 200, last_response.status
       assert_match /HardWorker/, last_response.body
     end
+    
+    it 'can delete a single retry' do
+      Sidekiq.redis do |conn|
+        conn.del('retry')
+      end
+            
+      score = add_retry[1].to_s
+
+      post "/retries/#{score}", 'delete' => 'Delete'
+      assert_equal 302, last_response.status
+      assert_equal 'http://example.org/', last_response.header['Location']
+      
+      get "/retries"
+      assert_equal 200, last_response.status
+      refute_match /#{score}/, last_response.body
+    end
 
     def add_scheduled
       msg = { 'class' => 'HardWorker',
