@@ -106,11 +106,7 @@ class TestWeb < MiniTest::Unit::TestCase
     end
     
     it 'can delete a single retry' do
-      Sidekiq.redis do |conn|
-        conn.del('retry')
-      end
-            
-      score = add_retry[1].to_s
+      _, score = add_retry
 
       post "/retries/#{score}", 'delete' => 'Delete'
       assert_equal 302, last_response.status
@@ -119,6 +115,18 @@ class TestWeb < MiniTest::Unit::TestCase
       get "/retries"
       assert_equal 200, last_response.status
       refute_match /#{score}/, last_response.body
+    end
+    
+    it 'can retry a single retry now' do
+      msg, score = add_retry
+
+      post "/retries/#{score}", 'retry' => 'Retry'
+      assert_equal 302, last_response.status
+      assert_equal 'http://example.org/', last_response.header['Location']
+      
+      get '/queues/default'
+      assert_equal 200, last_response.status
+      assert_match /#{msg['args'][2]}/, last_response.body
     end
 
     def add_scheduled
