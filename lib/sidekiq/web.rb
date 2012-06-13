@@ -199,9 +199,9 @@ module Sidekiq
       halt 404 unless params[:score]
       score = params[:score].to_f
       if params['retry']
-        process_score(score, :retry)
+        process_score('retry', score, :retry)
       elsif params['delete']
-        process_score(score, :delete)
+        process_score('retry', score, :delete)
       end
       redirect root_path
     end
