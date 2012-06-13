@@ -1,3 +1,8 @@
+2.0.2
+-----------
+
+- Fix "Retry Now" button on individual retry page. (ezkl)
+
 2.0.1
 -----------
 

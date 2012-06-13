@@ -8,6 +8,10 @@ require 'sidekiq/middleware/server/logging'
 require 'sidekiq/middleware/server/timeout'
 
 module Sidekiq
+  ##
+  # The Processor receives a message from the Manager and actually
+  # processes it.  It instantiates the worker, runs the middleware
+  # chain and then calls Sidekiq::Worker#perform.
   class Processor
     include Util
     include Celluloid
@@ -29,6 +33,11 @@ module Sidekiq
     def process(msg, queue)
       klass  = constantize(msg['class'])
       worker = klass.new
+
+      # Celluloid actor calls are performed within a Fiber.
+      # This would give us a terribly small 4KB stack on MRI
+      # so we use Celluloid's defer to run things in a thread pool
+      # in order to get a full-sized stack for the Worker.
       defer do
         stats(worker, msg, queue) do
           Sidekiq.server_middleware.invoke(worker, msg, queue) do
