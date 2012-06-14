@@ -115,5 +115,17 @@ class TestClient < MiniTest::Unit::TestCase
       @redis.expect :smembers, ['bob'], ['workers']
       assert_equal ['bob'], Sidekiq::Client.registered_workers
     end
+
+    class QueuedWorker
+      include Sidekiq::Worker
+      sidekiq_options :queue => :flimflam
+    end
+
+    class SubclassedWorker < QueuedWorker
+    end
+
+    it 'inherits sidekiq_options in subclass' do
+      assert_equal SubclassedWorker.get_sidekiq_options, QueuedWorker.get_sidekiq_options
+    end
   end
 end

@@ -51,11 +51,16 @@ module Sidekiq
       #   :backtrace - whether to save any error backtrace in the retry payload to display in web UI,
       #      can be true, false or an integer number of lines to save, default *false*
       def sidekiq_options(opts={})
-        @sidekiq_options = get_sidekiq_options.merge(stringify_keys(opts || {}))
+        options = get_sidekiq_options.merge(stringify_keys(opts))
+        (class << self; self; end).send(:define_method, :custom_sidekiq_options) { options }
+      end
+
+      def default_sidekiq_options
+        { 'unique' => true, 'retry' => true, 'queue' => 'default' }
       end
 
       def get_sidekiq_options # :nodoc:
-        defined?(@sidekiq_options) ? @sidekiq_options : { 'unique' => true, 'retry' => true, 'queue' => 'default' }
+        respond_to?(:custom_sidekiq_options) ? custom_sidekiq_options : default_sidekiq_options
       end
 
       def stringify_keys(hash) # :nodoc:
