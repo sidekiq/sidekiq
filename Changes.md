@@ -1,3 +1,9 @@
+HEAD
+-----------
+
+- Add random jitter to scheduler to spread polls across POLL\_INTERVAL
+  window. [#247]
+
 2.0.2
 -----------
 

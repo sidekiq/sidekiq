@@ -69,7 +69,7 @@ module Sidekiq
       begin
         logger.info 'Starting processing, hit Ctrl-C to stop'
         @manager.start!
-        poller.poll!
+        poller.poll!(true)
         sleep
       rescue Interrupt
         logger.info 'Shutting down'

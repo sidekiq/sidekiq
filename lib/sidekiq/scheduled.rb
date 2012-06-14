@@ -18,8 +18,10 @@ module Sidekiq
 
       SETS = %w(retry schedule)
 
-      def poll
+      def poll(first_time=false)
         watchdog('scheduling poller thread died!') do
+          add_jitter if first_time
+
           # A message's "score" in Redis is the time at which it should be processed.
           # Just check Redis for the set of messages with a timestamp before now.
           now = Time.now.to_f.to_s
@@ -39,6 +41,17 @@ module Sidekiq
           end
 
           after(POLL_INTERVAL) { poll }
+        end
+      end
+
+      private
+
+      def add_jitter
+        begin
+          sleep(POLL_INTERVAL * rand)
+        rescue Celluloid::Task::TerminatedError
+          # Hit Ctrl-C when Sidekiq is finished booting and we have a chance
+          # to get here.
         end
       end
 
