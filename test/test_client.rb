@@ -73,6 +73,10 @@ class TestClient < MiniTest::Unit::TestCase
       include Sidekiq::Worker
     end
 
+    it 'has default options' do
+      assert_equal Sidekiq::Worker::ClassMethods::DEFAULT_OPTIONS, MyWorker.get_sidekiq_options
+    end
+
     it 'handles perform_async' do
       @redis.expect :rpush, 1, ['queue:default', String]
       pushed = MyWorker.perform_async(1, 2)
@@ -116,4 +120,22 @@ class TestClient < MiniTest::Unit::TestCase
       assert_equal ['bob'], Sidekiq::Client.registered_workers
     end
   end
+
+  class BaseWorker
+    include Sidekiq::Worker
+    sidekiq_options 'retry' => 'base'
+  end
+  class AWorker < BaseWorker
+  end
+  class BWorker < BaseWorker
+    sidekiq_options 'retry' => 'b'
+  end
+
+  describe 'inheritance' do
+    it 'should inherit sidekiq options' do
+      assert_equal 'base', AWorker.get_sidekiq_options['retry']
+      assert_equal 'b', BWorker.get_sidekiq_options['retry']
+    end
+  end
+
 end

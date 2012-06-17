@@ -1,4 +1,5 @@
 require 'sidekiq/client'
+require 'sidekiq/core_ext'
 
 module Sidekiq
 
@@ -22,6 +23,7 @@ module Sidekiq
   module Worker
     def self.included(base)
       base.extend(ClassMethods)
+      base.class_attribute :sidekiq_options_hash
     end
 
     def logger
@@ -51,11 +53,13 @@ module Sidekiq
       #   :backtrace - whether to save any error backtrace in the retry payload to display in web UI,
       #      can be true, false or an integer number of lines to save, default *false*
       def sidekiq_options(opts={})
-        @sidekiq_options = get_sidekiq_options.merge(stringify_keys(opts || {}))
+        self.sidekiq_options_hash = get_sidekiq_options.merge(stringify_keys(opts || {}))
       end
 
+      DEFAULT_OPTIONS = { 'unique' => true, 'retry' => true, 'queue' => 'default' }
+
       def get_sidekiq_options # :nodoc:
-        defined?(@sidekiq_options) ? @sidekiq_options : { 'unique' => true, 'retry' => true, 'queue' => 'default' }
+        self.sidekiq_options_hash ||= DEFAULT_OPTIONS
       end
 
       def stringify_keys(hash) # :nodoc:
