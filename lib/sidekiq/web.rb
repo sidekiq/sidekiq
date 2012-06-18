@@ -179,7 +179,7 @@ module Sidekiq
         s = score.to_f
         process_score('schedule', s, :delete)
       end
-      redirect root_path
+      redirect "#{root_path}scheduled"
     end
 
     post '/retries' do
