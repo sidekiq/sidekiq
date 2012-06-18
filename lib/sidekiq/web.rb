@@ -192,7 +192,7 @@ module Sidekiq
           process_score('retry', s, :delete)
         end
       end
-      redirect root_path
+      redirect "#{root_path}retries"
     end
 
     post "/retries/:score" do
@@ -203,7 +203,7 @@ module Sidekiq
       elsif params['delete']
         process_score('retry', score, :delete)
       end
-      redirect root_path
+      redirect "#{root_path}retries"
     end
 
     def process_score(set, score, operation)

@@ -110,7 +110,7 @@ class TestWeb < MiniTest::Unit::TestCase
 
       post "/retries/#{score}", 'delete' => 'Delete'
       assert_equal 302, last_response.status
-      assert_equal 'http://example.org/', last_response.header['Location']
+      assert_equal 'http://example.org/retries', last_response.header['Location']
       
       get "/retries"
       assert_equal 200, last_response.status
@@ -122,7 +122,7 @@ class TestWeb < MiniTest::Unit::TestCase
 
       post "/retries/#{score}", 'retry' => 'Retry'
       assert_equal 302, last_response.status
-      assert_equal 'http://example.org/', last_response.header['Location']
+      assert_equal 'http://example.org/retries', last_response.header['Location']
       
       get '/queues/default'
       assert_equal 200, last_response.status
