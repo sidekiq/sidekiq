@@ -115,5 +115,14 @@ class TestClient < MiniTest::Unit::TestCase
       @redis.expect :smembers, ['bob'], ['workers']
       assert_equal ['bob'], Sidekiq::Client.registered_workers
     end
+
+    it 'removes scheduled jobs' do
+      @redis.expect :lrem, 1, ['schedule:123.0', 0, String]
+      @redis.expect :llen, 0, ['schedule:123.0']
+      @redis.expect :zrem, 1, ['schedule', 123.0]
+      removed = Sidekiq::Client.unschedule(123, MyWorker, 1, 2)
+      assert removed
+      @redis.verify
+    end
   end
 end
