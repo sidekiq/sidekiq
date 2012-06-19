@@ -77,10 +77,20 @@ module Sidekiq
       end
 
       def zcontents(name, count)
+        jobs = []
         Sidekiq.redis do |conn|
           results = conn.zrange(name, 0, count, :withscores => true)
-          results.map { |msg, score| [Sidekiq.load_json(msg), score] }
+          if name == 'retry'
+            results.each { |msg, score| jobs << [Sidekiq.load_json(msg), score] }
+          else
+            results.each do |msg, score|
+              conn.lrange("schedule:#{score}", 0, count).each do |job|
+                jobs << [Sidekiq.load_json(job), score]
+              end
+            end
+          end
         end
+        jobs
       end
 
       def queues
@@ -176,8 +186,7 @@ module Sidekiq
       halt 404 unless params[:score]
       halt 404 unless params['delete']
       params[:score].each do |score|
-        s = score.to_f
-        process_score('schedule', s, :delete)
+        process_score('schedule', score, :delete)
       end
       redirect "#{root_path}scheduled"
     end
@@ -220,7 +229,13 @@ module Sidekiq
         end
       when :delete
         Sidekiq.redis do |conn|
-          conn.zremrangebyscore(set, score, score)
+          if set == 'retry'
+            conn.zremrangebyscore(set, score, score)
+          else
+            score, msg = score.split("_")
+            msg = Sidekiq.load_json(msg)
+            Sidekiq::Client.unschedule(score, msg['class'].constantize, *msg['args'])
+          end
         end
       end
     end

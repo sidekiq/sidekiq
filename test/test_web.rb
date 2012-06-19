@@ -146,7 +146,8 @@ class TestWeb < MiniTest::Unit::TestCase
               'at' => Time.now.to_f }
       score = Time.now.to_f
       Sidekiq.redis do |conn|
-        conn.zadd('schedule', score, Sidekiq.dump_json(msg))
+        conn.zadd('schedule', score, score)
+        conn.rpush("schedule:#{score}", Sidekiq.dump_json(msg))
       end
       [msg, score]
     end

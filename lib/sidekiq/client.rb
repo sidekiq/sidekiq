@@ -49,7 +49,10 @@ module Sidekiq
         payload = Sidekiq.dump_json(item)
         Sidekiq.redis do |conn|
           if item['at']
-            pushed = (conn.zadd('schedule', item['at'].to_s, payload) == 1)
+            _, pushed = conn.multi do
+              conn.zadd('schedule', item['at'].to_s, item['at'].to_s)
+              conn.rpush("schedule:#{item['at']}", payload)
+            end
           else
             _, pushed = conn.multi do
               conn.sadd('queues', queue)
@@ -69,6 +72,31 @@ module Sidekiq
     #
     def self.enqueue(klass, *args)
       klass.perform_async(*args)
+    end
+
+    def self.unschedule(timestamp, klass, *args)
+      timestamp = timestamp.to_f
+
+      item = {'class' => klass.to_s, 'args' => args, 'at' => timestamp}
+      item = klass.get_sidekiq_options.merge(item)
+      item['retry'] = !!item['retry']
+      payload = Sidekiq.dump_json(item)
+
+      removed = Sidekiq.redis { |conn| conn.lrem("schedule:#{timestamp}", 0, payload) }
+      remove_scheduled_queue(timestamp)
+      !! removed
+    end
+
+    def self.remove_scheduled_queue(timestamp)
+      key = "schedule:#{timestamp.to_f}"
+      Sidekiq.redis do |conn|
+        if 0 == conn.llen(key)
+          conn.multi do
+            conn.del(key)
+            conn.zrem('schedule', timestamp)
+          end
+        end
+      end
     end
   end
 end
