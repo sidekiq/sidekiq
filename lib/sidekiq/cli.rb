@@ -22,6 +22,8 @@ trap 'TTIN' do
   end
 end
 
+$stdout.sync = true
+
 require 'yaml'
 require 'singleton'
 require 'optparse'
