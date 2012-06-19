@@ -5,6 +5,7 @@ HEAD
   their superclass [#221]
 - Add random jitter to scheduler to spread polls across POLL\_INTERVAL
   window. [#247]
+- Add note in README about new mailing list: sidekiq@librelist.org
 
 2.0.2
 -----------
