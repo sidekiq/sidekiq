@@ -6,6 +6,7 @@ Gem::Specification.new do |gem|
   gem.email         = ["mperham@gmail.com"]
   gem.description   = gem.summary = "Simple, efficient message processing for Ruby"
   gem.homepage      = "http://mperham.github.com/sidekiq"
+  gem.license       = "LGPL-3.0"
 
   gem.executables   = ['sidekiq', 'sidekiqctl']
   gem.files         = `git ls-files`.split("\n")
