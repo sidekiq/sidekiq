@@ -97,4 +97,8 @@ module Sidekiq
     Sidekiq::Logging.logger
   end
 
+  def self.poll_interval=(interval)
+    self.options[:poll_interval] = interval
+  end
+
 end
