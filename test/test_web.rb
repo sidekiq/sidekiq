@@ -81,6 +81,17 @@ class TestWeb < MiniTest::Unit::TestCase
       assert_match /HardWorker/, last_response.body
     end
 
+    it 'can delete scheduled' do
+      msg,score = add_scheduled
+      Sidekiq.redis do |conn|
+        assert_equal 1, conn.zcard('schedule')
+        post '/scheduled', 'score' => [score], 'delete' => 'Delete'
+        assert_equal 302, last_response.status
+        assert_equal 'http://example.org/scheduled', last_response.header['Location']
+        assert_equal 0, conn.zcard('schedule')
+      end
+    end
+
     it 'can display retries' do
       get '/retries'
       assert_equal 200, last_response.status
@@ -110,7 +121,7 @@ class TestWeb < MiniTest::Unit::TestCase
 
       post "/retries/#{score}", 'delete' => 'Delete'
       assert_equal 302, last_response.status
-      assert_equal 'http://example.org/', last_response.header['Location']
+      assert_equal 'http://example.org/retries', last_response.header['Location']
       
       get "/retries"
       assert_equal 200, last_response.status
@@ -122,7 +133,7 @@ class TestWeb < MiniTest::Unit::TestCase
 
       post "/retries/#{score}", 'retry' => 'Retry'
       assert_equal 302, last_response.status
-      assert_equal 'http://example.org/', last_response.header['Location']
+      assert_equal 'http://example.org/retries', last_response.header['Location']
       
       get '/queues/default'
       assert_equal 200, last_response.status
