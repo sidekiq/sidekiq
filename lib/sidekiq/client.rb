@@ -49,7 +49,7 @@ module Sidekiq
         payload = Sidekiq.dump_json(item)
         Sidekiq.redis do |conn|
           if item['at']
-            pushed = (conn.zadd('schedule', item['at'].to_s, payload) == 1)
+            pushed = conn.zadd('schedule', item['at'].to_s, payload)
           else
             _, pushed = conn.multi do
               conn.sadd('queues', queue)
