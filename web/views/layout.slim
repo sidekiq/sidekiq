@@ -7,22 +7,27 @@ html
     .navbar.navbar-fixed-top
       .navbar-inner
         .container
+          a.btn.btn-navbar data-toggle="collapse" data-target=".nav-collapse"
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
           a.brand href='#{{root_path}}'
             | Sidekiq
-          ul.nav
-            li
-              a href='#{{root_path}}' Home
-            li
-              a href='#{{root_path}}queues' Queues
-            li
-              a href='#{{root_path}}retries' Retries
-            li
-              a href='#{{root_path}}scheduled' Scheduled
-          ul.nav.pull-right
-            li
-              a Redis: #{location}
-            li
-              a #{Time.now.utc}
+          div.nav-collapse  
+            ul.nav
+              li
+                a href='#{{root_path}}' Home
+              li
+                a href='#{{root_path}}queues' Queues
+              li
+                a href='#{{root_path}}retries' Retries
+              li
+                a href='#{{root_path}}scheduled' Scheduled
+            ul.nav.pull-right
+              li
+                a Redis: #{location}
+              li
+                a #{Time.now.utc}
 
     .container
       == yield

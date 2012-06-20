@@ -1,0 +1,22 @@
+body {
+  position: relative;
+  padding-top: 90px;
+}
+
+td form {
+  margin: 0;
+}
+
+td form .btn {
+  margin: 0;
+}
+
+code {
+  padding: 0;
+  border: 0;
+  background-color: inherit;
+}
+
+.hero-unit {
+  padding: 30px;
+}

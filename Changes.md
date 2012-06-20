@@ -1,6 +1,7 @@
 HEAD
 -----------
-
+- Fix sidekiq-web's navbar on mobile devices and windows <= 980px (ezkl)
+- Fix Capistrano task for first deploys [#259]
 - Worker subclasses now properly inherit sidekiq\_options set in
   their superclass [#221]
 - Add random jitter to scheduler to spread polls across POLL\_INTERVAL
