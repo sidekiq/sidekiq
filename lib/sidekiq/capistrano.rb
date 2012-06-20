@@ -11,12 +11,12 @@ Capistrano::Configuration.instance.load do
 
     desc "Quiet sidekiq (stop accepting new work)"
     task :quiet, :roles => lambda { fetch(:sidekiq_role) }, :on_no_matching_servers => :continue do
-      run "cd #{current_path} && if [ -f #{current_path}/tmp/pids/sidekiq.pid ]; then #{fetch(:bundle_cmd, "bundle")} exec sidekiqctl quiet #{current_path}/tmp/pids/sidekiq.pid ; fi"
+      run "if [ -f #{current_path} ] && [ -f #{current_path}/tmp/pids/sidekiq.pid ]; then cd #{current_path} && #{fetch(:bundle_cmd, "bundle")} exec sidekiqctl quiet #{current_path}/tmp/pids/sidekiq.pid ; fi"
     end
 
     desc "Stop sidekiq"
     task :stop, :roles => lambda { fetch(:sidekiq_role) }, :on_no_matching_servers => :continue do
-      run "cd #{current_path} && if [ -f #{current_path}/tmp/pids/sidekiq.pid ]; then #{fetch(:bundle_cmd, "bundle")} exec sidekiqctl stop #{current_path}/tmp/pids/sidekiq.pid #{fetch :sidekiq_timeout} ; fi"
+      run "if [ -f #{current_path} ] && [ -f #{current_path}/tmp/pids/sidekiq.pid ]; then cd #{current_path} && #{fetch(:bundle_cmd, "bundle")} exec sidekiqctl stop #{current_path}/tmp/pids/sidekiq.pid #{fetch :sidekiq_timeout} ; fi"
     end
 
     desc "Start sidekiq"
