@@ -1,4 +1,4 @@
-HEAD
+2.0.3
 -----------
 - Fix sidekiq-web's navbar on mobile devices and windows <= 980px (ezkl)
 - Fix Capistrano task for first deploys [#259]
