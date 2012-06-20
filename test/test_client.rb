@@ -60,11 +60,29 @@ class TestClient < MiniTest::Unit::TestCase
       assert_raises ArgumentError do
         Sidekiq::Client.push('foo', :class => 'Foo', :noargs => [1, 2])
       end
-    end
 
+      assert_raises ArgumentError do
+        Sidekiq::Client.push_batch('queue' => 'foo', 'class' => MyWorker, 'at' => Time.now, :args => [[1, 2], [3, 4]])
+      end
+    end
+    
     it 'pushes messages to redis' do
       @redis.expect :rpush, 1, ['queue:foo', String]
       pushed = Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1, 2])
+      assert pushed
+      @redis.verify
+    end
+
+    it 'pushes batch messages to redis' do
+      @redis.expect :rpush, 1, ['queue:foo', Array]
+      pushed = Sidekiq::Client.push_batch('queue' => 'foo', 'class' => MyWorker, 'args' => [[1, 2], [2, 3]])
+      assert pushed 
+      @redis.verify
+    end
+
+    it 'does not attempt to batch regular pushes with nested arrays' do
+      @redis.expect :rpush, 1, ['queue:foo', String]
+      pushed = Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [[1, 2], [3, 7]])
       assert pushed
       @redis.verify
     end
@@ -84,9 +102,23 @@ class TestClient < MiniTest::Unit::TestCase
       @redis.verify
     end
 
+    it 'handles perform_batch_async' do
+      @redis.expect :rpush, 1, ['queue:default', Array]
+      pushed = MyWorker.perform_batch_async([3, 4],[1, 2])
+      assert pushed
+      @redis.verify
+    end
+
     it 'handles perform_async on failure' do
       @redis.expect :rpush, nil, ['queue:default', String]
       pushed = MyWorker.perform_async(1, 2)
+      refute pushed
+      @redis.verify
+    end
+
+    it 'handles perform_batch_async on failure' do
+      @redis.expect :rpush, nil, ['queue:default', Array]
+      pushed = MyWorker.perform_batch_async([[1, 2], [3, 4]])
       refute pushed
       @redis.verify
     end
@@ -106,6 +138,13 @@ class TestClient < MiniTest::Unit::TestCase
     it 'enqueues to the named queue' do
       @redis.expect :rpush, 1, ['queue:flimflam', String]
       pushed = QueuedWorker.perform_async(1, 2)
+      assert pushed
+      @redis.verify
+    end
+
+    it 'enqueues in batches to the named queue' do
+      @redis.expect :rpush, 1, ['queue:flimflam', Array]
+      pushed = QueuedWorker.perform_batch_async([[1, 2], [3, 4]])
       assert pushed
       @redis.verify
     end
