@@ -30,15 +30,16 @@ module Sidekiq
       @boss = boss
     end
 
-    def process(msg, queue)
-      klass  = constantize(msg['class'])
-      worker = klass.new
-
+    def process(msgstr, queue)
       # Celluloid actor calls are performed within a Fiber.
       # This would give us a terribly small 4KB stack on MRI
       # so we use Celluloid's defer to run things in a thread pool
       # in order to get a full-sized stack for the Worker.
       defer do
+        msg = Sidekiq.load_json(msgstr)
+        klass  = constantize(msg['class'])
+        worker = klass.new
+
         stats(worker, msg, queue) do
           Sidekiq.server_middleware.invoke(worker, msg, queue) do
             worker.perform(*msg['args'])

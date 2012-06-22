@@ -18,7 +18,7 @@ class TestStats < MiniTest::Unit::TestCase
     end
 
     it 'updates global stats in the success case' do
-      msg = { 'class' => DumbWorker.to_s, 'args' => [""] }
+      msg = Sidekiq.dump_json({ 'class' => DumbWorker.to_s, 'args' => [""] })
       boss = MiniTest::Mock.new
 
       @redis.with do |conn|
@@ -44,7 +44,7 @@ class TestStats < MiniTest::Unit::TestCase
     end
 
     it 'updates global stats in the error case' do
-      msg = { 'class' => DumbWorker.to_s, 'args' => [nil] }
+      msg = Sidekiq.dump_json({ 'class' => DumbWorker.to_s, 'args' => [nil] })
       boss = MiniTest::Mock.new
 
       @redis.with do |conn|

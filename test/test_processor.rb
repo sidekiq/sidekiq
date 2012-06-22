@@ -20,7 +20,7 @@ class TestProcessor < MiniTest::Unit::TestCase
     end
 
     it 'processes as expected' do
-      msg = { 'class' => MockWorker.to_s, 'args' => ['myarg'] }
+      msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
       processor = ::Sidekiq::Processor.new(@boss)
       @boss.expect(:processor_done!, nil, [processor])
       processor.process(msg, 'default')

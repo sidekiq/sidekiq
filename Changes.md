@@ -1,3 +1,9 @@
+HEAD
+-----------
+
+- Defer loading JSON until a full Thread stack is available.  Celluloid's
+  standard 4k actor stack will lead to crashes when parsing large payloads.
+
 2.0.3
 -----------
 - Fix sidekiq-web's navbar on mobile devices and windows <= 980px (ezkl)
