@@ -40,11 +40,15 @@ module Sidekiq
             end
           end
 
-          after(POLL_INTERVAL) { poll }
+          after(poll_interval) { poll }
         end
       end
 
       private
+
+      def poll_interval
+        Sidekiq.options[:poll_interval] || POLL_INTERVAL
+      end
 
       def add_jitter
         begin
