@@ -153,7 +153,7 @@ PID_FILE="/var/run/engineyard/sidekiq/$APP/$WORKER_REF.pid"
 GEMFILE="$APP_ROOT/Gemfile"
 SIDEKIQ="sidekiq"
 if [ -f $GEMFILE ];then
-  SIDEKIQ="bundle exec $APP_ROOT/ey_bundler_binstubs/sidekiq"
+  SIDEKIQ="$APP_ROOT/ey_bundler_binstubs/sidekiq"
 fi
 
 if [ -d $APP_ROOT ]; then
