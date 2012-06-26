@@ -10,3 +10,6 @@ notifications:
   email:
     recipients:
       - sidekiq@librelist.org
+matrix:
+  allow_failures:
+    - rvm: jruby-19mode
