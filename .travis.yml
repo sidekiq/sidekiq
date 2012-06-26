@@ -1,0 +1,11 @@
+rvm:
+  - 1.9.3
+  - jruby
+branches:
+  only:
+    - master
+notifications:
+  irc: "irc.freenode.org#sidekiq"
+  email:
+    recipients:
+      - sidekiq@librelist.org
