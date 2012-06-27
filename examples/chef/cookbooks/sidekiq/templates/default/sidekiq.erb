@@ -109,7 +109,7 @@ else
   exit 1
 fi
 
-WORKER_REF=`echo $CONF_FILE | sed s/.conf//`
+WORKER_REF=`echo $CONF_FILE | sed s/.yml//`
 LOG_FILE="$APP_ROOT/log/$WORKER_REF.log"
 LOCK_FILE="/tmp/$WORKER_REF.monit-lock"
 PID_FILE="/var/run/engineyard/sidekiq/$APP/$WORKER_REF.pid"
