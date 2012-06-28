@@ -69,7 +69,7 @@ module Sidekiq
         hash
       end
 
-      def client_push(*args)
+      def client_push(*args) # :nodoc:
         Sidekiq::Client.push(*args)
       end
 
