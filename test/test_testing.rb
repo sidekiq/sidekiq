@@ -53,11 +53,9 @@ class TestTesting < MiniTest::Unit::TestCase
     after do
       # Undo override
       Sidekiq::Worker::ClassMethods.class_eval do
-        %w(async at in).each do |token|
-          remove_method :"perform_#{token}"
-          alias_method :"perform_#{token}", :"perform_#{token}_old"
-          remove_method :"perform_#{token}_old"
-        end
+        remove_method :client_push
+        alias_method :client_push, :client_push_old
+        remove_method :client_push_old
       end
     end
 
