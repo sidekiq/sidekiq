@@ -31,7 +31,7 @@ untested but I will do my best to support them.  Ruby 1.8 is not supported.
 Installation
 -----------------
 
-   gem install sidekiq
+    gem install sidekiq
 
 
 Getting Started
