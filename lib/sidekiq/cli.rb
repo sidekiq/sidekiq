@@ -17,8 +17,8 @@ end
 
 trap 'TTIN' do
   Thread.list.each do |thread|
-    puts "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
-    puts thread.backtrace.join("\n")
+    Sidekiq.logger.info "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
+    Sidekiq.logger.info thread.backtrace.join("\n")
   end
 end
 
