@@ -42,44 +42,7 @@ signal_worker() {
   if [ -f $PID_FILE ]; then
     set_pid_from_file
     logger -t "monit-sidekiq[$$]" "Issuing kill with -$SIG $PID"
-    SLEEP_COUNT=0
     kill -$SIG $PID 
-  fi
-}
-
-signal_worker_fatally(){
-  signal_worker() 
-  if [ -f $PID_FILE ]; then
-    if [ -n "$ALLOW_TIMEOUT" ]; then
-      while [ -e /proc/$PID ]; do
-        sleep .25
-        let "SLEEP_COUNT+=1"
-        let "REPORT_TIME = $SLEEP_COUNT%4"
-        if(( "$SLEEP_COUNT" > $GRACE_TIME )); then
-          logger -t "monit-sidekiq[$$]" "Sidekiq worker with pid $PID for $WORKER_REF still running, issuing -TERM"
-          kill -15 $PID 2>/dev/null; true
-        elif(( $REPORT_TIME == 0 )); then
-          let "RUNTIME = $SLEEP_COUNT/4"
-          logger -t "monit-sidekiq[$$]" "waiting for $PID to die ( for $RUNTIME seconds now)"
-        fi 
-      done
-    fi
-    sleep 1
-    if [ -d /proc/$PID ];then 
-      for child in $(ps axo pid,ppid | awk "{ if ( \$2 == $PID ) { print \$1 }}");
-      do
-        kill -9 $child 2>/dev/null; true
-        logger -t "monit-sidekiq[$$]" "Murdering Sidekiq workers child with $child for $WORKER_REF"
-        break
-      done    
-      while [ -d /proc/$PID ]; do
-        logger -t "monit-sidekiq[$$]" "Murdering Sidekiq worker with $PID for $WORKER_REF"
-        kill -9 $PID
-        sleep 1
-      done
-    fi
-    logger -t "monit-sidekiq[$$]" "Removing pid file for $PID - $WORKER_REF"
-    [ -e "$PID_FILE" -a ! -d /proc/$PID ] && rm -f $PID_FILE
   fi
 }
 
@@ -146,7 +109,7 @@ else
   exit 1
 fi
 
-WORKER_REF=`echo $CONF_FILE | sed s/.conf//`
+WORKER_REF=`echo $CONF_FILE | sed s/.yml//`
 LOG_FILE="$APP_ROOT/log/$WORKER_REF.log"
 LOCK_FILE="/tmp/$WORKER_REF.monit-lock"
 PID_FILE="/var/run/engineyard/sidekiq/$APP/$WORKER_REF.pid"
@@ -201,8 +164,6 @@ if [ -d $APP_ROOT ]; then
       legacy_fix
       lock
       SIG="INT"
-      [ -z "$GRACE_TIME" ] && GRACE_TIME=60
-      ALLOW_TIMEOUT=1
       signal_worker
       [ -e "$LOCK_FILE" ] && rm $LOCK_FILE
       unlock_and_exit_cleanly  
