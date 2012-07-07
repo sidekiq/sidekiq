@@ -35,7 +35,10 @@ module Sidekiq
               messages.each do |message|
                 logger.debug { "enqueued #{sorted_set}: #{message}" }
                 msg = Sidekiq.load_json(message)
-                conn.rpush("queue:#{msg['queue']}", message)
+                conn.multi do
+                  conn.sadd('queues', msg['queue'])
+                  conn.rpush("queue:#{msg['queue']}", message)
+                end
               end
             end
           end
