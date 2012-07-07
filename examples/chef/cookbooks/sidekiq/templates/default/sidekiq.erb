@@ -77,7 +77,7 @@ legacy_fix() {
         while [ -e /proc/$child ]; do
           logger -t "monit-sidekiq[$$]" "killing legacy worker: $child"
           [ -e /proc/$child ] && kill -9 $child 2> /dev/null
-	  sleep 1 
+    sleep 1 
         done
       done
       [ -e /proc/$PID   ] && kill -9 $PID   2> /dev/null
@@ -116,7 +116,7 @@ PID_FILE="/var/run/engineyard/sidekiq/$APP/$WORKER_REF.pid"
 GEMFILE="$APP_ROOT/Gemfile"
 SIDEKIQ="sidekiq"
 if [ -f $GEMFILE ];then
-  SIDEKIQ="$APP_ROOT/ey_bundler_binstubs/sidekiq"
+  SIDEKIQ="bundle exec ey_bundler_binstubs/sidekiq"
 fi
 
 if [ -d $APP_ROOT ]; then
@@ -152,7 +152,7 @@ if [ -d $APP_ROOT ]; then
         fi
       fi
       if [ ! -f $PID_FILE ]; then
-        sudo -u $USER -H $COMMAND  >> $LOG_FILE 2>&1 &
+        sudo -u $USER -H -i $COMMAND  >> $LOG_FILE 2>&1 &
         RESULT=$?
         logger -t "monit-sidekiq[$$]" "Started with pid $! and exit $RESULT"
         echo $! > $PID_FILE
@@ -177,4 +177,3 @@ else
   echo "/data/$APP/current doesn't exist."
   usage
 fi
-
