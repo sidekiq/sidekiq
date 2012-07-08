@@ -32,7 +32,7 @@ module Sidekiq
                 conn.zremrangebyscore(sorted_set, '-inf', now)
               end
 
-              messages.each do |message|
+              messages && messages.each do |message|
                 logger.debug { "enqueued #{sorted_set}: #{message}" }
                 msg = Sidekiq.load_json(message)
                 conn.multi do
