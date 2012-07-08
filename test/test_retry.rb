@@ -113,7 +113,8 @@ class TestRetry < MiniTest::Unit::TestCase
       fake_msg = Sidekiq.dump_json({ 'class' => 'Bob', 'args' => [1,2], 'queue' => 'someq' })
       @redis.expect :multi, [[fake_msg], 1], []
       @redis.expect :multi, [[], nil], []
-      @redis.expect :rpush, 1, ['queue:someq', fake_msg]
+      @redis.expect :multi, [[], nil], []
+      @redis.expect :multi, [[], nil], []
 
       inst = Sidekiq::Scheduled::Poller.new
       inst.poll
