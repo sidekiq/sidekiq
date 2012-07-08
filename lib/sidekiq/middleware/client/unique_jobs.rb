@@ -13,12 +13,12 @@ module Sidekiq
 
             # Enabled unique scheduled 
             if enabled == :all && item.has_key?('at')
-              expiration = item['at'].to_i - Time.new.to_i
+              expiration = worker_class.get_sidekiq_options['expiration'] || (item['at'].to_i - Time.new.to_i)
               payload = item.clone
               payload.delete('at')
               payload_hash = Digest::MD5.hexdigest(Sidekiq.dump_json(Hash[payload.sort]))
             else
-              expiration = HASH_KEY_EXPIRATION
+              expiration = worker_class.get_sidekiq_options['expiration'] || HASH_KEY_EXPIRATION
               payload_hash = Digest::MD5.hexdigest(Sidekiq.dump_json(item))
             end
 
