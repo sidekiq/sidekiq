@@ -8,6 +8,7 @@ h1 Failures
         th Failed at
         th Queue
         th Worker
+        th Args
         th Backtrace
       - @failures.each do |msg|
         tr
@@ -15,6 +16,7 @@ h1 Failures
           td= msg['failed_at']
           td= msg['queue']
           td= msg['worker']
+          td= msg['payload']['args']
           td= msg['backtrace']
     input.btn.btn-danger type="submit" name="delete" value="Delete All"
 - else

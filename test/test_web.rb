@@ -92,6 +92,31 @@ class TestWeb < MiniTest::Unit::TestCase
       end
     end
 
+    it 'can display failures' do
+      get '/failures'
+      assert_equal 200, last_response.status
+      assert_match /found/, last_response.body
+      refute_match /HardWorker/, last_response.body
+      
+      add_failure
+
+      get '/failures'
+      assert_equal 200, last_response.status
+      refute_match /found/, last_response.body
+      assert_match /HardWorker/, last_response.body      
+    end
+
+    it 'can delete all failures' do
+      add_failure
+      Sidekiq.redis do |conn|
+        assert_equal 1, conn.llen('failed')
+        post "/failures", 'delete' => 'Delete'
+        assert_equal 302, last_response.status
+        assert_equal 'http://example.org/failures', last_response.header['Location']
+        assert_equal 0, conn.llen('failed')
+      end
+    end
+
     it 'can display retries' do
       get '/retries'
       assert_equal 200, last_response.status
@@ -149,6 +174,23 @@ class TestWeb < MiniTest::Unit::TestCase
         conn.zadd('schedule', score, Sidekiq.dump_json(msg))
       end
       [msg, score]
+    end
+
+    def add_failure
+      msg = { 
+        :failed_at => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z"),
+        :payload => {
+          "args"=>["bob", 1, Time.now.to_f]
+         },
+        :exception => 'RuntimeError',
+        :error => 'Some fake message',
+        :backtrace => [],
+        :worker => 'HardWorker',
+        :queue => 'default'
+      }
+      Sidekiq.redis do |conn|
+        conn.rpush('failed', Sidekiq.dump_json(msg))
+      end
     end
 
     def add_retry
