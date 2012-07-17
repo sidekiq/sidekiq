@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 gemspec
 
-gem 'celluloid', :github => 'celluloid/celluloid'
+gem 'celluloid'
 gem 'slim'
 gem 'sprockets'
 gem 'sass'

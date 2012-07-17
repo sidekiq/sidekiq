@@ -1,8 +1,9 @@
 HEAD
 -----------
 
-- Defer loading JSON until a full Thread stack is available.  Celluloid's
-  standard 4k actor stack will lead to crashes when parsing large payloads.
+- Tune Celluloid to no longer run message processing within a Fiber.
+  This gives us a full Thread stack and also lowers Sidekiq's memory
+  usage.
 
 2.0.3
 -----------
