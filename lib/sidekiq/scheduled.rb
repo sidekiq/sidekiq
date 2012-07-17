@@ -55,7 +55,7 @@ module Sidekiq
 
       def add_jitter
         begin
-          sleep(POLL_INTERVAL * rand)
+          sleep(poll_interval * rand)
         rescue Celluloid::Task::TerminatedError
           # Hit Ctrl-C when Sidekiq is finished booting and we have a chance
           # to get here.
