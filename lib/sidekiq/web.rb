@@ -68,6 +68,13 @@ module Sidekiq
         Sidekiq.redis { |conn| conn.get('stat:failed') } || 0
       end
 
+      def failures
+        Sidekiq.redis do |conn|
+          results = conn.lrange('failed', 0, -1)
+          results.map { |msg| Sidekiq.load_json(msg) }
+        end
+      end
+
       def zcard(name)
         Sidekiq.redis { |conn| conn.zcard(name) }
       end
@@ -144,6 +151,11 @@ module Sidekiq
       redirect "#{root_path}queues"
     end
 
+    get "/failures" do
+      @failures = failures
+      slim :failures
+    end
+
     get "/retries/:score" do
       halt 404 unless params[:score]
       @score = params[:score].to_f
@@ -174,6 +186,13 @@ module Sidekiq
         process_score('schedule', s, :delete)
       end
       redirect "#{root_path}scheduled"
+    end
+
+    post '/failures' do
+      Sidekiq.redis do |conn|
+        conn.del('failed')
+      end
+      redirect "#{root_path}failures"
     end
 
     post '/retries' do
