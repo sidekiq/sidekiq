@@ -9,7 +9,7 @@ platforms :jruby do
   gem 'activerecord-jdbcsqlite3-adapter'
 end
 
-gem 'rails', '3.2.2'
+gem 'rails', '3.2.6'
 gem 'sidekiq', :path => '..'
 gem 'capistrano'
 

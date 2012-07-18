@@ -4,6 +4,7 @@ HEAD
 - Tune Celluloid to no longer run message processing within a Fiber.
   This gives us a full Thread stack and also lowers Sidekiq's memory
   usage.
+- Add pagination for lists within the Web UI [#253]
 
 2.0.3
 -----------

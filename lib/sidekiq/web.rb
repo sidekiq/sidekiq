@@ -1,6 +1,8 @@
 require 'sinatra/base'
 require 'slim'
 require 'sprockets'
+require 'sidekiq/paginator'
+
 module Sidekiq
   class SprocketsMiddleware
     def initialize(app, options={})
@@ -28,6 +30,8 @@ module Sidekiq
   end
 
   class Web < Sinatra::Base
+    include Sidekiq::Paginator
+
     dir = File.expand_path(File.dirname(__FILE__) + "/../../web")
     set :views,  "#{dir}/views"
     set :root, "#{dir}/public"
@@ -66,21 +70,6 @@ module Sidekiq
 
       def zcard(name)
         Sidekiq.redis { |conn| conn.zcard(name) }
-      end
-
-      def retries(count=50)
-        zcontents('retry', count)
-      end
-
-      def scheduled(count=50)
-        zcontents('schedule', count)
-      end
-
-      def zcontents(name, count)
-        Sidekiq.redis do |conn|
-          results = conn.zrange(name, 0, count, :withscores => true)
-          results.map { |msg, score| [Sidekiq.load_json(msg), score] }
-        end
       end
 
       def queues
@@ -135,9 +124,10 @@ module Sidekiq
 
     get "/queues/:name" do
       halt 404 unless params[:name]
-      count = (params[:count] || 10).to_i
+      @count = (params[:count] || 25).to_i
       @name = params[:name]
-      @messages = Sidekiq.redis {|conn| conn.lrange("queue:#{@name}", 0, count) }.map { |str| Sidekiq.load_json(str) }
+      (@current_page, @total_size, @messages) = page("queue:#{@name}", params[:page], @count)
+      @messages = @messages.map {|msg| Sidekiq.load_json(msg) }
       slim :queue
     end
 
@@ -163,12 +153,16 @@ module Sidekiq
     end
 
     get '/retries' do
-      @retries = retries
+      @count = (params[:count] || 25).to_i
+      (@current_page, @total_size, @retries) = page("retry", params[:page], @count)
+      @retries = @retries.map {|msg, score| [Sidekiq.load_json(msg), score] }
       slim :retries
     end
 
     get '/scheduled' do
-      @scheduled = scheduled
+      @count = (params[:count] || 25).to_i
+      (@current_page, @total_size, @scheduled) = page("schedule", params[:page], @count)
+      @scheduled = @scheduled.map {|msg, score| [Sidekiq.load_json(msg), score] }
       slim :scheduled
     end
 

@@ -1,5 +1,7 @@
 header
-  h1 Latest messages in #{@name}
+  h1 Current messages in #{@name}
+
+== slim :_paging, :locals => { :url => "#{root_path}queues/#{@name}" }
 
 table class="table table-striped table-bordered"
   tr
@@ -9,3 +11,5 @@ table class="table table-striped table-bordered"
     tr
       td= msg['class']
       td= msg['args'].inspect[0..100]
+
+== slim :_paging, :locals => { :url => "#{root_path}queues/#{@name}" }
