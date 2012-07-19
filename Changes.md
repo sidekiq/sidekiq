@@ -5,6 +5,7 @@ HEAD
   This gives us a full Thread stack and also lowers Sidekiq's memory
   usage.
 - Add pagination for lists within the Web UI [#253]
+- Add possibility to specify which Redis driver to use: *hiredis*, *synchrony* or *ruby* (default)
 
 2.0.3
 -----------
