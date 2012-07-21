@@ -1,6 +1,5 @@
 require 'helper'
 require 'sidekiq/middleware/chain'
-require 'sidekiq/middleware/server/unique_jobs'
 require 'sidekiq/processor'
 
 class TestMiddleware < MiniTest::Unit::TestCase
