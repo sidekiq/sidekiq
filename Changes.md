@@ -1,11 +1,13 @@
-HEAD
+2.1.0
 -----------
 
 - Tune Celluloid to no longer run message processing within a Fiber.
   This gives us a full Thread stack and also lowers Sidekiq's memory
   usage.
-- Add pagination for lists within the Web UI [#253]
-- Add possibility to specify which Redis driver to use: *hiredis*, *synchrony* or *ruby* (default)
+- Add pagination within the Web UI [#253]
+- Specify which Redis driver to use: *hiredis* or *ruby* (default)
+- Remove FailureJobs and UniqueJobs, which have been optional server
+  middleware. [#302]
 
 2.0.3
 -----------

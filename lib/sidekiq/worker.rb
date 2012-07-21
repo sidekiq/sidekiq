@@ -46,7 +46,6 @@ module Sidekiq
       # Allows customization for this type of Worker.
       # Legal options:
       #
-      #   :unique - enable the UniqueJobs middleware for this Worker, default *true*
       #   :queue - use a named queue for this Worker, default 'default'
       #   :retry - enable the RetryJobs middleware for this Worker, default *true*
       #   :timeout - timeout the perform method after N seconds, default *nil*
@@ -56,7 +55,7 @@ module Sidekiq
         self.sidekiq_options_hash = get_sidekiq_options.merge(stringify_keys(opts || {}))
       end
 
-      DEFAULT_OPTIONS = { 'unique' => true, 'retry' => true, 'queue' => 'default' }
+      DEFAULT_OPTIONS = { 'retry' => true, 'queue' => 'default' }
 
       def get_sidekiq_options # :nodoc:
         self.sidekiq_options_hash ||= DEFAULT_OPTIONS
