@@ -6,8 +6,8 @@
   usage.
 - Add pagination within the Web UI [#253]
 - Specify which Redis driver to use: *hiredis* or *ruby* (default)
-- Remove FailureJobs and UniqueJobs, which have been optional server
-  middleware. [#302]
+- Remove FailureJobs and UniqueJobs, which were optional middleware
+  that I don't want to support in core. [#302]
 
 2.0.3
 -----------
