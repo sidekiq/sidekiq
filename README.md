@@ -38,6 +38,7 @@ Getting Started
 -----------------
 
 See the [sidekiq home page](http://mperham.github.com/sidekiq) for the simple 4-step process.
+You can watch [Railscast #366](http://railscasts.com/episodes/366-sidekiq) to see Sidekiq in action.
 
 
 More Information
@@ -51,7 +52,6 @@ There's also a mailing list via [Librelist](http://librelist.org) that you can s
 and email to <sidekiq@librelist.org> with a greeting in the body. To unsubscribe, send an email to <sidekiq-unsubscribe@librelist.org> and that's it!
 Once archiving begins, you'll be able to visit [the archives](http://librelist.com/browser/sidekiq/) to see past threads.
 
-Last but not the least, watch a [Railscast #366](http://railscasts.com/episodes/366-sidekiq).
 
 License
 -----------------
