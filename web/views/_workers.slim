@@ -1,0 +1,14 @@
+table class="table table-striped table-bordered workers"
+  tr
+    th Worker
+    th Queue
+    th Class
+    th Arguments
+    th Started
+  - workers.each do |(worker, msg)|
+    tr
+      td= worker
+      td= msg['queue']
+      td= msg['payload']['class']
+      td= msg['payload']['args'].inspect[0..100]
+      td== relative_time(Time.parse(msg['run_at']))
