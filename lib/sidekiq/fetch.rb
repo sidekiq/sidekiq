@@ -16,7 +16,7 @@ module Sidekiq
       @mgr = mgr
       @strictly_ordered_queues = strict
       @queues = queues.map { |q| "queue:#{q}" }
-      @unique_ordered_queues = @queues.uniq.sort {|a, b| @queues.count(b) <=> @queues.count(a)}
+      @unique_ordered_queues = @queues.group_by {|q| q}.sort_by { |k, v| -v.size }.map(&:first)
     end
 
     # Fetching is straightforward: the Manager makes a fetch
