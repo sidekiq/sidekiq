@@ -124,7 +124,6 @@ module Sidekiq
 
     def validate!
       options[:queues] << 'default' if options[:queues].empty?
-      options[:queues].shuffle!
 
       if !File.exist?(options[:require]) ||
          (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))
@@ -141,9 +140,13 @@ module Sidekiq
       opts = {}
 
       @parser = OptionParser.new do |o|
-         o.on "-q", "--queue QUEUE,WEIGHT", "Queue to process, with optional weight" do |arg|
-          q, weight = arg.split(",")
-          parse_queues(opts, q, weight)
+        o.on "-q", "--queue QUEUE[,WEIGHT]...", "Queues to process with optional weights" do |arg|
+          queues_and_weights = arg.scan(/(\w+),?(\d*)/)
+          queues_and_weights.each {|queue_and_weight| parse_queues(opts, *queue_and_weight)}
+        end
+
+        o.on "-s", "--strict", "Use strictly ordered queues (e.g. all jobs in higher priority queues are performed before any jobs in lower priority queues)" do
+          opts[:strict] = true
         end
 
         o.on "-v", "--verbose", "Print more verbose output" do
@@ -208,7 +211,7 @@ module Sidekiq
     end
 
     def parse_queues(opts, q, weight)
-      (weight || 1).to_i.times do
+      [weight.to_i, 1].max.times do
        (opts[:queues] ||= []) << q
       end
     end
