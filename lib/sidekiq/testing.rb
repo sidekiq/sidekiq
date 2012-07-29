@@ -17,7 +17,7 @@ module Sidekiq
     #   assert_equal 0, HardWorker.jobs.size
     #   HardWorker.perform_async(:something)
     #   assert_equal 1, HardWorker.jobs.size
-    #   assert_equal :something, HardWorker.jobs[0]['args'][0]
+    #   assert HardWorker.has_queued?(:something)
     #
     #   assert_equal 0, Sidekiq::Extensions::DelayedMailer.jobs.size
     #   MyMailer.delayed.send_welcome_email('foo@example.com')
@@ -34,10 +34,18 @@ module Sidekiq
         @pushed ||= []
       end
 
+      def perform_next
+        job = jobs.shift
+        new.perform(*job['args']) if job
+        job
+      end
+
       def drain
-        while job = jobs.shift do
-          new.perform(*job['args'])
-        end
+        while perform_next do; end
+      end
+
+      def has_queued?(*args)
+        jobs.any? { |job| job['args'] == args }
       end
     end
   end
