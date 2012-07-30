@@ -1,3 +1,8 @@
+HEAD
+-----------
+
+- Handle networking errors causing the scheduler thread to die [#309]
+
 2.1.0
 -----------
 
