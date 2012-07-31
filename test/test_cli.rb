@@ -40,14 +40,29 @@ class TestCli < MiniTest::Unit::TestCase
       assert_equal ['foo'], Sidekiq.options[:queues]
     end
 
+    it 'sets strictly ordered queues if weights are not present' do
+      @cli.parse(['sidekiq', '-q', 'foo,bar', '-r', './test/fake_env.rb'])
+      assert_equal true, !!Sidekiq.options[:strict]
+    end
+
+    it 'does not set strictly ordered queues if weights are present' do
+      @cli.parse(['sidekiq', '-q', 'foo,3', '-r', './test/fake_env.rb'])
+      assert_equal false, !!Sidekiq.options[:strict]
+    end
+
     it 'changes timeout' do
       @cli.parse(['sidekiq', '-t', '30', '-r', './test/fake_env.rb'])
       assert_equal 30, Sidekiq.options[:timeout]
     end
 
-    it 'handles multiple queues with weights' do
+    it 'handles multiple queues with weights with multiple switches' do
       @cli.parse(['sidekiq', '-q', 'foo,3', '-q', 'bar', '-r', './test/fake_env.rb'])
-      assert_equal %w(bar foo foo foo), Sidekiq.options[:queues].sort
+      assert_equal %w(foo foo foo bar), Sidekiq.options[:queues]
+    end
+
+    it 'handles multiple queues with weights with a single switch' do
+      @cli.parse(['sidekiq', '-q', 'bar,foo,3', '-r', './test/fake_env.rb'])
+      assert_equal %w(bar foo foo foo), Sidekiq.options[:queues]
     end
 
     it 'sets verbose' do
@@ -161,6 +176,24 @@ class TestCli < MiniTest::Unit::TestCase
       it 'sets queues' do
         assert_equal 7, Sidekiq.options[:queues].count { |q| q == 'often' }
         assert_equal 3, Sidekiq.options[:queues].count { |q| q == 'seldom' }
+      end
+    end
+
+    describe 'Sidekiq::CLI#parse_queues' do
+      describe 'when weight is present' do
+        it 'concatenates queue to opts[:queues] weight number of times' do
+          opts = {}
+          @cli.send :parse_queues, opts, 'often', 7
+          assert_equal %w[often] * 7, opts[:queues]
+        end
+      end
+
+      describe 'when weight is not present' do
+        it 'concatenates queue to opts[:queues] once' do
+          opts = {}
+          @cli.send :parse_queues, opts, 'once', nil
+          assert_equal %w[once], opts[:queues]
+        end
       end
     end
   end

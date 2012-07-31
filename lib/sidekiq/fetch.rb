@@ -12,8 +12,9 @@ module Sidekiq
 
     TIMEOUT = 1
 
-    def initialize(mgr, queues)
+    def initialize(mgr, queues, strict)
       @mgr = mgr
+      @strictly_ordered_queues = strict
       @queues = queues.map { |q| "queue:#{q}" }
       @unique_queues = @queues.uniq
     end
@@ -68,6 +69,7 @@ module Sidekiq
     # recreate the queue command each time we invoke Redis#blpop
     # to honor weights and avoid queue starvation.
     def queues_cmd
+      return @unique_queues.dup << TIMEOUT if @strictly_ordered_queues
       queues = @queues.sample(@unique_queues.size).uniq
       queues.concat(@unique_queues - queues)
       queues << TIMEOUT
