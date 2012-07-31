@@ -18,3 +18,32 @@ $(function() {
     }
   });
 });
+
+$(function() {
+  $('a[name=poll]').data('polling', false);
+
+  $('a[name=poll]').on('click', function(e) {
+    e.preventDefault();
+    var pollLink = $(this);
+    if (pollLink.data('polling')) {
+      clearInterval(pollLink.data('interval'));
+      pollLink.text('Live Poll');
+      $('.poll-status').text('');
+    }
+    else {
+      var href = pollLink.attr('href');
+      pollLink.data('interval', setInterval(function() {
+        $.get(href, function(data) {
+          var responseHtml = $(data);
+          $('.hero-unit').replaceWith(responseHtml.find('.hero-unit'));
+          $('.workers').replaceWith(responseHtml.find('.workers'));
+        });
+        var currentTime = new Date();
+        $('.poll-status').text('Last polled at: ' + currentTime.getHours() + ':' + currentTime.getMinutes() + ':' + currentTime.getSeconds());
+      }, 2000));
+      $('.poll-status').text('Starting to poll...');
+      pollLink.text('Stop Polling');
+    }
+    pollLink.data('polling', !pollLink.data('polling'));
+  })
+});

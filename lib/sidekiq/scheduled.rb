@@ -22,25 +22,31 @@ module Sidekiq
         watchdog('scheduling poller thread died!') do
           add_jitter if first_time
 
-          # A message's "score" in Redis is the time at which it should be processed.
-          # Just check Redis for the set of messages with a timestamp before now.
-          now = Time.now.to_f.to_s
-          Sidekiq.redis do |conn|
-            SETS.each do |sorted_set|
-              (messages, _) = conn.multi do
-                conn.zrangebyscore(sorted_set, '-inf', now)
-                conn.zremrangebyscore(sorted_set, '-inf', now)
-              end
+          begin
+            # A message's "score" in Redis is the time at which it should be processed.
+            # Just check Redis for the set of messages with a timestamp before now.
+            now = Time.now.to_f.to_s
+            Sidekiq.redis do |conn|
+              SETS.each do |sorted_set|
+                (messages, _) = conn.multi do
+                  conn.zrangebyscore(sorted_set, '-inf', now)
+                  conn.zremrangebyscore(sorted_set, '-inf', now)
+                end
 
-              messages.each do |message|
-                logger.debug { "enqueued #{sorted_set}: #{message}" }
-                msg = Sidekiq.load_json(message)
-                conn.multi do
-                  conn.sadd('queues', msg['queue'])
-                  conn.rpush("queue:#{msg['queue']}", message)
+                messages.each do |message|
+                  logger.debug { "enqueued #{sorted_set}: #{message}" }
+                  msg = Sidekiq.load_json(message)
+                  conn.multi do
+                    conn.sadd('queues', msg['queue'])
+                    conn.rpush("queue:#{msg['queue']}", message)
+                  end
                 end
               end
             end
+          rescue SystemCallError => ex
+            # ECONNREFUSED, etc.  Most likely a problem with
+            # redis networking.  Punt and try again at the next interval
+            logger.warn ex.message
           end
 
           after(poll_interval) { poll }
