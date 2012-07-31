@@ -2,10 +2,10 @@ require 'celluloid'
 require 'sidekiq/util'
 
 require 'sidekiq/middleware/server/active_record'
-require 'sidekiq/middleware/server/exception_handler'
 require 'sidekiq/middleware/server/retry_jobs'
 require 'sidekiq/middleware/server/logging'
 require 'sidekiq/middleware/server/timeout'
+require 'sidekiq/exception_handler'
 
 module Sidekiq
   ##
@@ -17,10 +17,10 @@ module Sidekiq
     include Celluloid
 
     exclusive :process
+    attr_writer :exception_handler
 
     def self.default_middleware
       Middleware::Chain.new do |m|
-        m.add Middleware::Server::ExceptionHandler
         m.add Middleware::Server::Logging
         m.add Middleware::Server::RetryJobs
         m.add Middleware::Server::ActiveRecord
@@ -43,6 +43,9 @@ module Sidekiq
         end
       end
       @boss.processor_done!(current_actor)
+    rescue StandardError => ex
+      exception_handler.handle(ex,msg)
+      raise
     end
 
     # See http://github.com/tarcieri/celluloid/issues/22
@@ -92,6 +95,10 @@ module Sidekiq
 
     def hostname
       @h ||= `hostname`.strip
+    end
+
+    def exception_handler
+      @exception_handler ||= Sidekiq::ExceptionHandler
     end
   end
 end
