@@ -40,9 +40,14 @@ class TestCli < MiniTest::Unit::TestCase
       assert_equal ['foo'], Sidekiq.options[:queues]
     end
 
-    it 'sets strictly ordered queues' do
-      @cli.parse(['sidekiq', '-s', '-r', './test/fake_env.rb'])
-      assert_equal true, Sidekiq.options[:strict]
+    it 'sets strictly ordered queues if weights are not present' do
+      @cli.parse(['sidekiq', '-q', 'foo,bar', '-r', './test/fake_env.rb'])
+      assert_equal true, !!Sidekiq.options[:strict]
+    end
+
+    it 'does not set strictly ordered queues if weights are present' do
+      @cli.parse(['sidekiq', '-q', 'foo,3', '-r', './test/fake_env.rb'])
+      assert_equal false, !!Sidekiq.options[:strict]
     end
 
     it 'changes timeout' do

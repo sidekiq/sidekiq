@@ -16,7 +16,7 @@ module Sidekiq
       @mgr = mgr
       @strictly_ordered_queues = strict
       @queues = queues.map { |q| "queue:#{q}" }
-      @unique_ordered_queues = @queues.group_by {|q| q}.sort_by { |k, v| -v.size }.map(&:first)
+      @unique_queues = @queues.uniq
     end
 
     # Fetching is straightforward: the Manager makes a fetch
@@ -69,9 +69,9 @@ module Sidekiq
     # recreate the queue command each time we invoke Redis#blpop
     # to honor weights and avoid queue starvation.
     def queues_cmd
-      return @unique_ordered_queues.dup << TIMEOUT if @strictly_ordered_queues
-      queues = @queues.sample(@unique_ordered_queues.size).uniq
-      queues.concat(@unique_ordered_queues - queues)
+      return @unique_queues.dup << TIMEOUT if @strictly_ordered_queues
+      queues = @queues.sample(@unique_queues.size).uniq
+      queues.concat(@unique_queues - queues)
       queues << TIMEOUT
     end
   end

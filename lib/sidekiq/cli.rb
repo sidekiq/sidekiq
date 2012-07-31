@@ -143,10 +143,7 @@ module Sidekiq
         o.on "-q", "--queue QUEUE[,WEIGHT]...", "Queues to process with optional weights" do |arg|
           queues_and_weights = arg.scan(/(\w+),?(\d*)/)
           queues_and_weights.each {|queue_and_weight| parse_queues(opts, *queue_and_weight)}
-        end
-
-        o.on "-s", "--strict", "Use strictly ordered queues (e.g. all jobs in higher priority queues are performed before any jobs in lower priority queues)" do
-          opts[:strict] = true
+          opts[:strict] = queues_and_weights.collect(&:last).none? {|weight| weight != ''}
         end
 
         o.on "-v", "--verbose", "Print more verbose output" do
