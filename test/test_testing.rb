@@ -98,5 +98,24 @@ class TestTesting < MiniTest::Unit::TestCase
       end
       assert_equal 0, StoredWorker.jobs.size
     end
+
+    it 'performs next stored job' do
+      2.times { assert StoredWorker.perform_async(false) }
+
+      assert_equal 2, StoredWorker.jobs.size
+      StoredWorker.perform_next
+      assert_equal 1, StoredWorker.jobs.size
+      StoredWorker.perform_next
+      assert_equal 0, StoredWorker.jobs.size
+    end
+
+    it 'says if specific job is queued or not' do
+      assert DirectWorker.perform_async(3, 4)
+      assert DirectWorker.perform_async(4, 2)
+
+      assert DirectWorker.has_queued?(3, 4)
+      assert !DirectWorker.has_queued?(1, 5)
+      assert DirectWorker.has_queued?(4, 2)
+    end
   end
 end
