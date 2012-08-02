@@ -55,6 +55,14 @@ and email to <sidekiq@librelist.org> with a greeting in the body. To unsubscribe
 Once archiving begins, you'll be able to visit [the archives](http://librelist.com/browser/sidekiq/) to see past threads.
 
 
+Problems?
+-----------------
+
+**Please do not directly email any Sidekiq committers with questions or problems.**  A community is best served when discussions are held in public.
+
+If you have a problem, please review the [FAQ](wiki/FAQ) and [Troubleshooting](wiki/Problems-and-Troubleshooting) wiki pages.  Searching the issues for your problem is also a good idea.  If that doesn't help, feel free to email the Sidekiq mailing list or open a new issue.
+
+
 License
 -----------------
 
