@@ -7,10 +7,14 @@ require 'logger'
 ExceptionHandlerTestException = Class.new(StandardError)
 TEST_EXCEPTION = ExceptionHandlerTestException.new("Something didn't work!")
 
-def invoke_exception(args)
-  raise TEST_EXCEPTION
-rescue ExceptionHandlerTestException => e
-  Sidekiq::ExceptionHandler.handle(e,args)
+class Component
+  include Sidekiq::Util
+
+  def invoke_exception(args)
+    raise TEST_EXCEPTION
+  rescue ExceptionHandlerTestException => e
+    handle_exception(e,args)
+  end
 end
 
 class TestExceptionHandler < MiniTest::Unit::TestCase
@@ -26,11 +30,12 @@ class TestExceptionHandler < MiniTest::Unit::TestCase
     end
 
     it "logs the exception to Sidekiq.logger" do
-      invoke_exception(:a => 1)
+      Component.new.invoke_exception(:a => 1)
       @str_logger.rewind
       log = @str_logger.readlines
-      assert_match /Something didn't work!/, log[0], "didn't include the exception message"
-      assert_match /test\/test_exception_handler.rb/, log[1], "didn't include the backtrace"
+      assert_match /a=>1/, log[0], "didn't include the context"
+      assert_match /Something didn't work!/, log[1], "didn't include the exception message"
+      assert_match /test\/test_exception_handler.rb/, log[2], "didn't include the backtrace"
     end
   end
 
@@ -45,7 +50,7 @@ class TestExceptionHandler < MiniTest::Unit::TestCase
 
     it "notifies Airbrake" do
       ::Airbrake.expect(:notify,nil,[TEST_EXCEPTION,:parameters => { :a => 1 }])
-      invoke_exception(:a => 1)
+      Component.new.invoke_exception(:a => 1)
       ::Airbrake.verify
     end
   end
@@ -62,7 +67,7 @@ class TestExceptionHandler < MiniTest::Unit::TestCase
 
     it "notifies ExceptionNotifier" do
       ::ExceptionNotifier::Notifier.expect(:background_exception_notification,nil,[TEST_EXCEPTION, :data => { :message => { :b => 2 } }])
-      invoke_exception(:b => 2)
+      Component.new.invoke_exception(:b => 2)
       ::ExceptionNotifier::Notifier.verify
     end
   end
@@ -94,7 +99,7 @@ class TestExceptionHandler < MiniTest::Unit::TestCase
       exception_data = MiniTest::Mock.new
       ::Exceptional::Remote.expect(:error,nil,[exception_data])
       ::Exceptional::ExceptionData.expect(:new,exception_data,[TEST_EXCEPTION])
-      invoke_exception(:c => 3)
+      Component.new.invoke_exception(:c => 3)
       assert_equal({:c => 3},::Exceptional.check_context,"did not record arguments properly")
       ::Exceptional::Config.verify
       ::Exceptional::Remote.verify

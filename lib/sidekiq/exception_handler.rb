@@ -1,13 +1,10 @@
-require 'sidekiq/util'
-
 module Sidekiq
   module ExceptionHandler
-    extend self
-    extend Util
 
-    def handle(ex,msg)
-      logger.warn ex
-      logger.warn ex.backtrace.join("\n")
+    def handle_exception(ex, msg)
+      Sidekiq.logger.warn msg
+      Sidekiq.logger.warn ex
+      Sidekiq.logger.warn ex.backtrace.join("\n")
       send_to_airbrake(msg, ex) if defined?(::Airbrake)
       send_to_exceptional(msg, ex) if defined?(::Exceptional)
       send_to_exception_notifier(msg, ex) if defined?(::ExceptionNotifier)

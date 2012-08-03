@@ -5,7 +5,6 @@ require 'sidekiq/middleware/server/active_record'
 require 'sidekiq/middleware/server/retry_jobs'
 require 'sidekiq/middleware/server/logging'
 require 'sidekiq/middleware/server/timeout'
-require 'sidekiq/exception_handler'
 
 module Sidekiq
   ##
@@ -17,7 +16,6 @@ module Sidekiq
     include Celluloid
 
     exclusive :process
-    attr_writer :exception_handler
 
     def self.default_middleware
       Middleware::Chain.new do |m|
@@ -43,8 +41,8 @@ module Sidekiq
         end
       end
       @boss.processor_done!(current_actor)
-    rescue StandardError => ex
-      exception_handler.handle(ex,msg)
+    rescue => ex
+      handle_exception(ex, msg || { :message => msgstr })
       raise
     end
 
@@ -95,10 +93,6 @@ module Sidekiq
 
     def hostname
       @h ||= `hostname`.strip
-    end
-
-    def exception_handler
-      @exception_handler ||= Sidekiq::ExceptionHandler
     end
   end
 end

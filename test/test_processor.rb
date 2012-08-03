@@ -12,7 +12,6 @@ class TestProcessor < MiniTest::Unit::TestCase
       @processor = ::Sidekiq::Processor.new(@boss)
       Celluloid.logger = nil
       Sidekiq.redis = REDIS
-      @exception_handler = MiniTest::Mock.new
     end
 
     class MockWorker
@@ -33,10 +32,12 @@ class TestProcessor < MiniTest::Unit::TestCase
 
     it 'passes exceptions to ExceptionHandler' do
       msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'] })
-      @processor.exception_handler = @exception_handler
-      @exception_handler.expect(:handle,nil,[TEST_EXCEPTION,{"class"=>"TestProcessor::MockWorker", "args"=>["boom"]}])
-      @processor.process(msg, 'default') rescue TestException
-      @exception_handler.verify
+      begin
+        @processor.process(msg, 'default')
+        flunk "Expected #process to raise exception"
+      rescue TestException
+      end
+
       assert_equal 0, $invokes
     end
 

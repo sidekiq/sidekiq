@@ -1,8 +1,11 @@
+require 'sidekiq/exception_handler'
+
 module Sidekiq
   ##
   # This module is part of Sidekiq core and not intended for extensions.
   #
   module Util
+    include ExceptionHandler
 
     EXPIRY = 60 * 60
 
@@ -20,9 +23,7 @@ module Sidekiq
     def watchdog(last_words)
       yield
     rescue => ex
-      logger.error last_words
-      logger.error ex
-      logger.error ex.backtrace.join("\n")
+      handle_exception(ex, { :context => last_words })
     end
 
     def logger
