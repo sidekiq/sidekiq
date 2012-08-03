@@ -2,7 +2,7 @@ HEAD
 -----------
 
 - Handle networking errors causing the scheduler thread to die [#309]
-- Rework exception handling to log all Processor and actor death (#325, sublesky)
+- Rework exception handling to log all Processor and actor death (#325, subelsky)
 
 2.1.0
 -----------
