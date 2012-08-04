@@ -3,7 +3,7 @@ HEAD
 
 - Handle networking errors causing the scheduler thread to die [#309]
 - Rework exception handling to log all Processor and actor death (#325, subelsky)
-- Clone arguments when calling worker so modifications are discarded. (hakanensari)
+- Clone arguments when calling worker so modifications are discarded. (#265, hakanensari)
 
 2.1.0
 -----------
