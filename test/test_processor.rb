@@ -18,6 +18,7 @@ class TestProcessor < MiniTest::Unit::TestCase
       include Sidekiq::Worker
       def perform(args)
         raise TEST_EXCEPTION if args == 'boom'
+        args.pop if args.is_a? Array
         $invokes += 1
       end
     end
@@ -52,6 +53,15 @@ class TestProcessor < MiniTest::Unit::TestCase
       end
 
       assert re_raise, "does not re-raise exceptions after handling"
+    end
+
+    it 'does not modify original arguments' do
+      msg = { 'class' => MockWorker.to_s, 'args' => [['myarg']] }
+      msgstr = Sidekiq.dump_json(msg)
+      processor = ::Sidekiq::Processor.new(@boss)
+      @boss.expect(:processor_done!, nil, [processor])
+      processor.process(msgstr, 'default')
+      assert_equal [['myarg']], msg['args']
     end
   end
 end

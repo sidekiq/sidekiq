@@ -37,7 +37,7 @@ module Sidekiq
 
       stats(worker, msg, queue) do
         Sidekiq.server_middleware.invoke(worker, msg, queue) do
-          worker.perform(*msg['args'])
+          worker.perform(*cloned(msg['args']))
         end
       end
       @boss.processor_done!(current_actor)
@@ -56,6 +56,9 @@ module Sidekiq
     end
 
     private
+
+    # Singleton classes are not clonable.
+    SINGLETON_CLASSES = [ NilClass, TrueClass, FalseClass, Numeric, Symbol ].freeze
 
     def stats(worker, msg, queue)
       redis do |conn|
@@ -88,7 +91,15 @@ module Sidekiq
           end
         end
       end
+    end
 
+    # Clone the arguments passed to the worker so that if
+    # the message fails, what is pushed back onto Redis hasn't
+    # been mutated by the worker.
+    def cloned(ary)
+      ary.map do |val|
+        SINGLETON_CLASSES.include?(val.class) ? val : val.clone
+      end
     end
 
     def hostname
