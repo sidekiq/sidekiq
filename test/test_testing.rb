@@ -3,6 +3,7 @@ require 'sidekiq'
 require 'sidekiq/worker'
 require 'active_record'
 require 'action_mailer'
+require 'timecop'
 require 'sidekiq/rails'
 require 'sidekiq/extensions/action_mailer'
 require 'sidekiq/extensions/active_record'
@@ -28,6 +29,13 @@ class TestTesting < MiniTest::Unit::TestCase
     end
 
     class StoredWorker
+      include Sidekiq::Worker
+      def perform(error)
+        raise PerformError if error
+      end
+    end
+
+    class ScheduledWorker
       include Sidekiq::Worker
       def perform(error)
         raise PerformError if error
@@ -97,6 +105,26 @@ class TestTesting < MiniTest::Unit::TestCase
         StoredWorker.drain
       end
       assert_equal 0, StoredWorker.jobs.size
+    end
+
+    it 'executes all scheduled jobs' do
+      assert ScheduledWorker.perform_in(10, true)
+      assert ScheduledWorker.perform_async(false)
+
+      assert_equal 2, ScheduledWorker.jobs.size
+      ScheduledWorker.drain_due_jobs
+      assert_equal 1, ScheduledWorker.jobs.size
+
+      Timecop.travel(Time.now + 5) do
+        ScheduledWorker.drain_due_jobs
+        assert_equal 1, ScheduledWorker.jobs.size
+        Timecop.travel(Time.now + 5) do
+          assert_raises PerformError do
+            ScheduledWorker.drain_due_jobs
+          end
+          assert_equal 0, ScheduledWorker.jobs.size
+        end
+      end
     end
   end
 end
