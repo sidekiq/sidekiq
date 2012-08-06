@@ -57,9 +57,6 @@ module Sidekiq
 
     private
 
-    # Singleton classes are not clonable.
-    SINGLETON_CLASSES = [ NilClass, TrueClass, FalseClass, Numeric, Symbol ].freeze
-
     def stats(worker, msg, queue)
       redis do |conn|
         conn.multi do
@@ -92,6 +89,9 @@ module Sidekiq
         end
       end
     end
+
+    # Singleton classes are not clonable.
+    SINGLETON_CLASSES = [ NilClass, TrueClass, FalseClass, Symbol, Fixnum, Float ].freeze
 
     # Clone the arguments passed to the worker so that if
     # the message fails, what is pushed back onto Redis hasn't
