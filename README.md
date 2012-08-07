@@ -1,5 +1,8 @@
-Sidekiq [![Build Status](https://secure.travis-ci.org/mperham/sidekiq.png)](http://travis-ci.org/mperham/sidekiq)
+Sidekiq
 ==============
+
+[![Build Status](https://secure.travis-ci.org/mperham/sidekiq.png)](http://travis-ci.org/mperham/sidekiq)
+[![Dependency Status](https://gemnasium.com/mperham/sidekiq.png)](https://gemnasium.com/mperham/sidekiq)
 
 Simple, efficient message processing for Ruby.
 

@@ -5,7 +5,7 @@ gem 'celluloid'
 gem 'slim'
 gem 'sprockets'
 gem 'sass'
-gem 'rails', '3.2.6'
+gem 'rails', '3.2.7'
 gem 'sqlite3'
 
 group :test do
