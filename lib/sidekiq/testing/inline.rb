@@ -32,6 +32,11 @@ module Sidekiq
         new.perform(*Sidekiq.load_json(Sidekiq.dump_json(args)))
         true
       end
+      alias_method :perform_in_queue_old, :perform_in_queue
+      def perform_in_queue(queue, *args)
+        new.perform(*Sidekiq.load_json(Sidekiq.dump_json(args)))
+        true
+      end
     end
   end
 end
