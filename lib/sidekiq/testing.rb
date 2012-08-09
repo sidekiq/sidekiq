@@ -39,6 +39,18 @@ module Sidekiq
           new.perform(*job['args'])
         end
       end
+
+      def drain_due_jobs
+        scheduled = []
+        while job = jobs.shift do
+          if (at = job['at']) && at > Time.now.to_f
+            scheduled << job
+          else
+            new.perform(*job['args'])
+          end
+        end
+        jobs.concat(scheduled)
+      end
     end
   end
 end
