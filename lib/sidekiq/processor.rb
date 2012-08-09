@@ -2,7 +2,6 @@ require 'celluloid'
 require 'sidekiq/util'
 
 require 'sidekiq/middleware/server/active_record'
-require 'sidekiq/middleware/server/exception_handler'
 require 'sidekiq/middleware/server/retry_jobs'
 require 'sidekiq/middleware/server/logging'
 require 'sidekiq/middleware/server/timeout'
@@ -16,9 +15,10 @@ module Sidekiq
     include Util
     include Celluloid
 
+    exclusive :process
+
     def self.default_middleware
       Middleware::Chain.new do |m|
-        m.add Middleware::Server::ExceptionHandler
         m.add Middleware::Server::Logging
         m.add Middleware::Server::RetryJobs
         m.add Middleware::Server::ActiveRecord
@@ -31,23 +31,20 @@ module Sidekiq
     end
 
     def process(msgstr, queue)
-      # Celluloid actor calls are performed within a Fiber.
-      # This would give us a terribly small 4KB stack on MRI
-      # so we use Celluloid's defer to run things in a thread pool
-      # in order to get a full-sized stack for the Worker.
-      defer do
-        msg = Sidekiq.load_json(msgstr)
-        klass  = constantize(msg['class'])
-        worker = klass.new
-        worker.class.sidekiq_options(:queue => queue)
+      msg = Sidekiq.load_json(msgstr)
+      klass  = constantize(msg['class'])
+      worker = klass.new
+      worker.class.sidekiq_options(:queue => queue)
 
-        stats(worker, msg, queue) do
-          Sidekiq.server_middleware.invoke(worker, msg, queue) do
-            worker.perform(*msg['args'])
-          end
+      stats(worker, msg, queue) do
+        Sidekiq.server_middleware.invoke(worker, msg, queue) do
+          worker.perform(*cloned(msg['args']))
         end
       end
       @boss.processor_done!(current_actor)
+    rescue => ex
+      handle_exception(ex, msg || { :message => msgstr })
+      raise
     end
 
     # See http://github.com/tarcieri/celluloid/issues/22
@@ -92,7 +89,18 @@ module Sidekiq
           end
         end
       end
+    end
 
+    # Singleton classes are not clonable.
+    SINGLETON_CLASSES = [ NilClass, TrueClass, FalseClass, Symbol, Fixnum, Float ].freeze
+
+    # Clone the arguments passed to the worker so that if
+    # the message fails, what is pushed back onto Redis hasn't
+    # been mutated by the worker.
+    def cloned(ary)
+      ary.map do |val|
+        SINGLETON_CLASSES.include?(val.class) ? val : val.clone
+      end
     end
 
     def hostname

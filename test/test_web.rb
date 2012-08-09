@@ -31,6 +31,14 @@ class TestWeb < MiniTest::Unit::TestCase
       refute_match /default/, last_response.body
     end
 
+    it 'can display poll' do
+      get '/poll'
+      assert_equal 200, last_response.status
+      assert_match /hero-unit/, last_response.body
+      assert_match /workers/, last_response.body
+      refute_match /navbar/, last_response.body
+    end
+
     it 'can display queues' do
       assert Sidekiq::Client.push('queue' => :foo, 'class' => WebWorker, 'args' => [1, 3])
 
@@ -115,26 +123,26 @@ class TestWeb < MiniTest::Unit::TestCase
       assert_equal 200, last_response.status
       assert_match /HardWorker/, last_response.body
     end
-    
+
     it 'can delete a single retry' do
       _, score = add_retry
 
       post "/retries/#{score}", 'delete' => 'Delete'
       assert_equal 302, last_response.status
       assert_equal 'http://example.org/retries', last_response.header['Location']
-      
+
       get "/retries"
       assert_equal 200, last_response.status
       refute_match /#{score}/, last_response.body
     end
-    
+
     it 'can retry a single retry now' do
       msg, score = add_retry
 
       post "/retries/#{score}", 'retry' => 'Retry'
       assert_equal 302, last_response.status
       assert_equal 'http://example.org/retries', last_response.header['Location']
-      
+
       get '/queues/default'
       assert_equal 200, last_response.status
       assert_match /#{msg['args'][2]}/, last_response.body

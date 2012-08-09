@@ -27,7 +27,7 @@ module Sidekiq
       @in_progress = {}
       @done = false
       @busy = []
-      @fetcher = Fetcher.new(current_actor, options[:queues])
+      @fetcher = Fetcher.new(current_actor, options[:queues], !!options[:strict])
       @ready = @count.times.map { Processor.new_link(current_actor) }
       procline
     end

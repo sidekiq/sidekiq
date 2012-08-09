@@ -7,22 +7,26 @@ module Sidekiq
   #
   # To add middleware for the client:
   #
-  # Sidekiq.client_middleware do |chain|
-  #   chain.add MyClientHook
+  # Sidekiq.configure_client do |config|
+  #   config.client_middleware do |chain|
+  #     chain.add MyClientHook
+  #   end
   # end
   #
   # To modify middleware for the server, just call
   # with another block:
   #
-  # Sidekiq.server_middleware do |chain|
-  #   chain.add MyServerHook
-  #   chain.remove ActiveRecord
+  # Sidekiq.configure_server do |config|
+  #   config.server_middleware do |chain|
+  #     chain.add MyServerHook
+  #     chain.remove ActiveRecord
+  #   end
   # end
   #
   # This is an example of a minimal server middleware:
   #
   # class MyServerHook
-  #   def call(worker, msg, queue)
+  #   def call(worker_instance, msg, queue)
   #     puts "Before work"
   #     yield
   #     puts "After work"
@@ -32,7 +36,7 @@ module Sidekiq
   # This is an example of a minimal client middleware:
   #
   # class MyClientHook
-  #   def call(msg, queue)
+  #   def call(worker_class, msg, queue)
   #     puts "Before push"
   #     yield
   #     puts "After push"

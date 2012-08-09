@@ -1,5 +1,4 @@
 require 'sidekiq/middleware/chain'
-require 'sidekiq/middleware/client/unique_jobs'
 
 module Sidekiq
   class Client

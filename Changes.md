@@ -1,8 +1,20 @@
 HEAD
 -----------
 
-- Defer loading JSON until a full Thread stack is available.  Celluloid's
-  standard 4k actor stack will lead to crashes when parsing large payloads.
+- Handle networking errors causing the scheduler thread to die [#309]
+- Rework exception handling to log all Processor and actor death (#325, subelsky)
+- Clone arguments when calling worker so modifications are discarded. (#265, hakanensari)
+
+2.1.0
+-----------
+
+- Tune Celluloid to no longer run message processing within a Fiber.
+  This gives us a full Thread stack and also lowers Sidekiq's memory
+  usage.
+- Add pagination within the Web UI [#253]
+- Specify which Redis driver to use: *hiredis* or *ruby* (default)
+- Remove FailureJobs and UniqueJobs, which were optional middleware
+  that I don't want to support in core. [#302]
 
 2.0.3
 -----------

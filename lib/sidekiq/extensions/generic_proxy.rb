@@ -1,6 +1,6 @@
 module Sidekiq
   module Extensions
-    class Proxy < (RUBY_VERSION < '1.9' ? Object : BasicObject)
+    class Proxy < BasicObject
       def initialize(performable, target, at=nil)
         @performable = performable
         @target = target
