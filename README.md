@@ -1,5 +1,8 @@
-Sidekiq [![Build Status](https://secure.travis-ci.org/mperham/sidekiq.png)](http://travis-ci.org/mperham/sidekiq)
+Sidekiq
 ==============
+
+[![Build Status](https://secure.travis-ci.org/mperham/sidekiq.png)](http://travis-ci.org/mperham/sidekiq)
+[![Dependency Status](https://gemnasium.com/mperham/sidekiq.png)](https://gemnasium.com/mperham/sidekiq)
 
 Simple, efficient message processing for Ruby.
 
@@ -60,7 +63,8 @@ Problems?
 
 **Please do not directly email any Sidekiq committers with questions or problems.**  A community is best served when discussions are held in public.
 
-If you have a problem, please review the [FAQ](/mperham/sidekiq/wiki/FAQ) and [Troubleshooting](/mperham/sidekiq/wiki/Problems-and-Troubleshooting) wiki pages.  Searching the issues for your problem is also a good idea.  If that doesn't help, feel free to email the Sidekiq mailing list or open a new issue.
+If you have a problem, please review the [FAQ](/mperham/sidekiq/wiki/FAQ) and [Troubleshooting](/mperham/sidekiq/wiki/Problems-and-Troubleshooting) wiki pages. Searching the issues for your problem is also a good idea.  If that doesn't help, feel free to email the Sidekiq mailing list or open a new issue.
+The mailing list is the preferred place to ask questions on usage. If you are encountering what you think is a bug, please open an issue.
 
 
 License
