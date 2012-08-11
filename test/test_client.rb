@@ -36,6 +36,7 @@ class TestClient < MiniTest::Unit::TestCase
       @redis.expect :rpush, 1, ['queue:foo', String]
       pushed = Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1, 2])
       assert pushed
+      assert_equal 24, pushed.size
       @redis.verify
     end
 

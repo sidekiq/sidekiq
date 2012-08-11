@@ -19,13 +19,13 @@ class TestScheduling < MiniTest::Unit::TestCase
 
     it 'schedules a job via interval' do
       @redis.expect :zadd, true, ['schedule', String, String]
-      assert_equal true, ScheduledWorker.perform_in(600, 'mike')
+      assert ScheduledWorker.perform_in(600, 'mike')
       @redis.verify
     end
 
     it 'schedules a job via timestamp' do
       @redis.expect :zadd, true, ['schedule', String, String]
-      assert_equal true, ScheduledWorker.perform_in(5.days.from_now, 'mike')
+      assert ScheduledWorker.perform_in(5.days.from_now, 'mike')
       @redis.verify
     end
   end

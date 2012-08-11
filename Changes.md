@@ -1,3 +1,10 @@
+HEAD
+-----------
+
+- Sidekiq::Client now generates and returns a random, 128-bit Job ID 'jid' which
+  can be used to track the processing of a Job, e.g. for calling back to a webhook
+  when a job is finished.
+
 2.1.1
 -----------
 
