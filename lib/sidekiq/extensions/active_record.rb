@@ -11,8 +11,8 @@ module Sidekiq
     class DelayedModel
       include Sidekiq::Worker
 
-      def perform(yml)
-        (target, method_name, args) = YAML.load(yml)
+      def perform(marshal, method_name, args)
+        target = ::Marshal.load(marshal)
         target.send(method_name, *args)
       end
     end

@@ -13,11 +13,10 @@ module Sidekiq
         # serialize the objects to a String.  The YAML will be converted
         # to JSON and then deserialized on the other side back into a
         # Ruby object.
-        obj = [@target, name, args]
         if @at
-          @performable.perform_at(@at, ::YAML.dump(obj))
+          @performable.perform_at(@at, ::Marshal.dump(@target), name, args)
         else
-          @performable.perform_async(::YAML.dump(obj))
+          @performable.perform_async(::Marshal.dump(@target), name, args)
         end
       end
     end
