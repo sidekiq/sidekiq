@@ -14,8 +14,8 @@ module Sidekiq
       # than 30 seconds to send.
       sidekiq_options :timeout => 30
 
-      def perform(yml)
-        (target, method_name, args) = YAML.load(yml)
+      def perform(marshal, method_name, args)
+        target = ::Marshal.load(marshal)
         target.send(method_name, *args).deliver
       end
     end
