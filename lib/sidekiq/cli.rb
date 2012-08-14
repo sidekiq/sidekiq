@@ -58,7 +58,7 @@ module Sidekiq
       options.merge!(config.merge(cli))
 
       Sidekiq.logger.level = Logger::DEBUG if options[:verbose]
-      Celluloid.logger = nil
+      Celluloid.logger = nil unless options[:verbose]
 
       validate!
       write_pid
