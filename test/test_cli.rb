@@ -65,6 +65,11 @@ class TestCli < MiniTest::Unit::TestCase
       assert_equal %w(bar foo foo foo), Sidekiq.options[:queues]
     end
 
+    it 'handles queues with multi-word names' do
+      @cli.parse(['sidekiq', '-q', 'queue_one,queue-two', '-r', './test/fake_env.rb'])
+      assert_equal %w(queue_one queue-two), Sidekiq.options[:queues]
+    end
+
     it 'sets verbose' do
       old = Sidekiq.logger.level
       @cli.parse(['sidekiq', '-v', '-r', './test/fake_env.rb'])
