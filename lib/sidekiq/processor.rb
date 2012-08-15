@@ -15,7 +15,7 @@ module Sidekiq
     include Util
     include Celluloid
 
-    exclusive :process
+    exclusive :process if ENV['SIDEKIQ_EXCLUSIVE']
 
     def self.default_middleware
       Middleware::Chain.new do |m|
