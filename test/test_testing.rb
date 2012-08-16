@@ -76,10 +76,15 @@ class TestTesting < MiniTest::Unit::TestCase
       assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs.size
     end
 
+    class Something
+      def self.foo(x)
+      end
+    end
+
     it 'stubs the delay call on models' do
-      assert_equal 0, Sidekiq::Extensions::DelayedModel.jobs.size
-      FooModel.delay.bar('hello!')
-      assert_equal 1, Sidekiq::Extensions::DelayedModel.jobs.size
+      assert_equal 0, Sidekiq::Extensions::DelayedClass.jobs.size
+      Something.delay.foo(Date.today)
+      assert_equal 1, Sidekiq::Extensions::DelayedClass.jobs.size
     end
 
     it 'stubs the enqueue call' do

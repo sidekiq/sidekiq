@@ -1,6 +1,13 @@
 HEAD
 -----------
 
+- Add extension to delay any arbitrary class method to Sidekiq.
+  Previously this was limited to ActiveRecord classes.
+
+```ruby
+SomeClass.delay.class_method(1, 'mike', Date.today)
+```
+
 - Sidekiq::Client now generates and returns a random, 128-bit Job ID 'jid' which
   can be used to track the processing of a Job, e.g. for calling back to a webhook
   when a job is finished.
