@@ -43,7 +43,7 @@ module Sidekiq
                 end
               end
             end
-          rescue SystemCallError => ex
+          rescue SystemCallError, Redis::TimeoutError, Redis::ConnectionError => ex
             # ECONNREFUSED, etc.  Most likely a problem with
             # redis networking.  Punt and try again at the next interval
             logger.warn ex.message
