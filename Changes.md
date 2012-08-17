@@ -1,4 +1,4 @@
-HEAD
+2.2.0
 -----------
 
 - Add extension to delay any arbitrary class method to Sidekiq.
