@@ -1,6 +1,7 @@
 2.2.0
 -----------
 
+- Roll back Celluloid optimizations in 2.1.0 which caused instability.
 - Add extension to delay any arbitrary class method to Sidekiq.
   Previously this was limited to ActiveRecord classes.
 
