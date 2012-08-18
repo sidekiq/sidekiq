@@ -12,8 +12,8 @@ module Sidekiq
     class DelayedClass
       include Sidekiq::Worker
 
-      def perform(yml)
-        (target, method_name, args) = YAML.load(yml)
+      def perform(*msg)
+        (target, method_name, args) = ArgsSerializer.deserialize_message(*msg)
         target.send(method_name, *args)
       end
     end

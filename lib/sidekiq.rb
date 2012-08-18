@@ -5,6 +5,7 @@ require 'sidekiq/worker'
 require 'sidekiq/redis_connection'
 require 'sidekiq/util'
 
+require 'sidekiq/extensions/args_serializer'
 require 'sidekiq/extensions/class_methods'
 require 'sidekiq/extensions/action_mailer'
 require 'sidekiq/extensions/active_record'
