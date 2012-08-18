@@ -49,6 +49,10 @@ class TestInline < MiniTest::Unit::TestCase
         remove_method :perform_async
         alias_method :perform_async, :perform_async_old
         remove_method :perform_async_old
+
+        remove_method :perform_async_with_options
+        alias_method :perform_async_with_options, :perform_async_with_options_old
+        remove_method :perform_async_with_options_old
       end
     end
 
