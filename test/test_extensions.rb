@@ -22,7 +22,7 @@ class TestExtensions < MiniTest::Unit::TestCase
       
       old_db = File.join(dir, 'test.sqlite3')
       FileUtils.rm(old_db) if File.exists?(old_db)
-      FileUtils.cp(File.join(dir, '.blank.sqlite3'), File.join(dir, 'test.sqlite3'))
+      FileUtils.cp(File.join(dir, '_blank.sqlite3'), File.join(dir, 'test.sqlite3'))
 
       ActiveRecord::Base.establish_connection adapter: "sqlite3", database: File.join(File.dirname(__FILE__), "db/test.sqlite3")
     end
