@@ -28,11 +28,12 @@ module Sidekiq
       end
       
       module InstanceMethods
-        def delay
-          Proxy.new(DelayedModel, self)
+        def delay(options={})
+          Proxy.new(DelayedModel, self, options)
         end
-        def delay_for(interval)
-          Proxy.new(DelayedModel, self, Time.now.to_f + interval.to_f)
+        def delay_for(interval, options={})
+          options = options.reverse_merge(at: Time.now.to_f + interval.to_f)
+          delay(options)
         end
 
         def sidekiq_serialize

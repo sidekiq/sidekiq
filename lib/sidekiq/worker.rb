@@ -35,6 +35,15 @@ module Sidekiq
         client_push('class' => self, 'args' => args)
       end
 
+      def perform_async_with_options(options, *args)
+        if options[:at]
+          int = options[:at].to_f
+          options[:at] = (int < 1_000_000_000 ? Time.now.to_f + int : int)
+        end
+        options = stringify_keys(options)
+        client_push(options.merge('class' => self, 'args' => args))
+      end
+
       def perform_in(interval, *args)
         int = interval.to_f
         ts = (int < 1_000_000_000 ? Time.now.to_f + int : int)

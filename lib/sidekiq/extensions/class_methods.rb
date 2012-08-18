@@ -19,11 +19,12 @@ module Sidekiq
     end
 
     module Klass
-      def delay
-        Proxy.new(DelayedClass, self)
+      def delay(options={})
+        Proxy.new(DelayedClass, self, options)
       end
-      def delay_for(interval)
-        Proxy.new(DelayedClass, self, Time.now.to_f + interval.to_f)
+      def delay_for(interval, options={})
+        options = options.reverse_merge(at: Time.now.to_f + interval.to_f)
+        delay(options)
       end
 
       def sidekiq_serialize

@@ -1,10 +1,10 @@
 module Sidekiq
   module Extensions
     class Proxy < BasicObject
-      def initialize(performable, target, at=nil)
+      def initialize(performable, target, options={})
         @performable = performable
         @target = target
-        @at = at
+        @options = options
       end
 
       def method_missing(name, *args)
@@ -15,11 +15,7 @@ module Sidekiq
         # Ruby object.
         serialized_args = ArgsSerializer.serialize_message(@target, name, *args)
 
-        if @at
-          @performable.perform_at(@at, *serialized_args)
-        else
-          @performable.perform_async(*serialized_args)
-        end
+        @performable.perform_async_with_options(@options, *serialized_args)
       end
     end
 

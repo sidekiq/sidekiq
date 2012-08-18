@@ -55,7 +55,7 @@ class TestExtensions < MiniTest::Unit::TestCase
     it 'allows delayed execution of ActiveRecord instance methods' do
       assert_equal [], Sidekiq::Client.registered_queues
       assert_equal 0, Sidekiq.redis {|c| c.llen('queue:default') }
-      user = User.create
+      user = User.create!
       user.delay.long_instance_method("with_argument")
       assert_equal ['default'], Sidekiq::Client.registered_queues
       assert_equal 1, Sidekiq.redis {|c| c.llen('queue:default') }
@@ -67,6 +67,15 @@ class TestExtensions < MiniTest::Unit::TestCase
       assert_equal 0, Sidekiq.redis {|c| c.zcard('schedule') }
       User.delay_for(5.days).long_class_method
       assert_equal 1, Sidekiq.redis {|c| c.zcard('schedule') }
+    end
+
+    it 'allows setting queue from options' do
+      assert_equal [], Sidekiq::Client.registered_queues
+      assert_equal 0, Sidekiq.redis {|c| c.llen('queue:custom_queue') }
+      user = User.create!
+      user.delay(queue: :custom_queue).long_instance_method("with_argument")
+      assert_equal ['custom_queue'], Sidekiq::Client.registered_queues
+      assert_equal 1, Sidekiq.redis {|c| c.llen('queue:custom_queue') }
     end
 
     ActionMailer::Base.perform_deliveries = false
