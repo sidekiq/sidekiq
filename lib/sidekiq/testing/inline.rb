@@ -37,6 +37,7 @@ module Sidekiq
         true
       end
 
+      alias_method :perform_async_with_options_old, :perform_async_with_options
       def perform_async_with_options(options, *args)
         new.perform(*
           Sidekiq::Extensions::ArgsSerializer.deserialize(
