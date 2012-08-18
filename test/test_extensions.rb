@@ -1,5 +1,6 @@
 require 'helper'
 require 'sidekiq'
+require 'fileutils'
 require 'active_record'
 require 'action_mailer'
 require 'sidekiq/extensions/action_mailer'
