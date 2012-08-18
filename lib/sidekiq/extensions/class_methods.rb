@@ -27,7 +27,7 @@ module Sidekiq
       end
 
       def sidekiq_serialize
-        "SIDEKIQ:CLASS@#{self.name}"
+        "SIDEKIQ@#{self.name}"
       end
     end
 

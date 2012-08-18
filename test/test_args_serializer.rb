@@ -24,13 +24,13 @@ class TestArgsSerializer < MiniTest::Unit::TestCase
     end
 
     it 'serializes active record class' do
-      assert_equal "SIDEKIQ:CLASS@TestArgsSerializer::User", ser(User)
+      assert_equal "SIDEKIQ@TestArgsSerializer::User", ser(User)
       assert_equal TestArgsSerializer::User, deser(ser(User))
     end
 
     it 'serializes active record instance' do
       user = User.create!
-      assert_equal "SIDEKIQ:AR@TestArgsSerializer::User@#{user.id}", ser(user)
+      assert_equal "SIDEKIQ@TestArgsSerializer::User@#{user.id}", ser(user)
       assert_equal user, deser(ser(user))
     end
 
@@ -41,12 +41,12 @@ class TestArgsSerializer < MiniTest::Unit::TestCase
     end
 
     it 'serializes class' do
-      assert_equal "SIDEKIQ:CLASS@TestArgsSerializer::SomeClass", ser(SomeClass)
+      assert_equal "SIDEKIQ@TestArgsSerializer::SomeClass", ser(SomeClass)
       assert_equal SomeClass, deser(ser(SomeClass))
     end
 
     it 'serializes module' do
-      assert_equal "SIDEKIQ:CLASS@TestArgsSerializer::SomeModule", ser(SomeModule)
+      assert_equal "SIDEKIQ@TestArgsSerializer::SomeModule", ser(SomeModule)
       assert_equal SomeModule, deser(ser(SomeModule))
     end
 

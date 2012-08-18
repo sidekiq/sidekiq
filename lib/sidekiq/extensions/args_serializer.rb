@@ -1,8 +1,7 @@
 module Sidekiq
   module Extensions
     class ArgsSerializer
-      # inspired by DelayedJob
-      SIDEKIQ_CUSTOM_SERIALIZATION_FORMAT = /\ASIDEKIQ\:(?:\w+)@(.+)/
+      SIDEKIQ_CUSTOM_SERIALIZATION_FORMAT = /\ASIDEKIQ@(.+)/
 
       def self.serialize(obj)
         if obj.respond_to?(:sidekiq_serialize)
