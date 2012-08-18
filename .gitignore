@@ -4,5 +4,3 @@ Gemfile.lock
 dump.rdb
 .rbx
 coverage/
-
-/test/db/test.sqlite3
