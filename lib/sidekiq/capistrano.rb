@@ -1,5 +1,5 @@
 Capistrano::Configuration.instance.load do
-  before "deploy",        "sidekiq:quiet"
+  before "deploy:update_code", "sidekiq:quiet"
   after "deploy:stop",    "sidekiq:stop"
   after "deploy:start",   "sidekiq:start"
   after "deploy:restart", "sidekiq:restart"

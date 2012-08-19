@@ -1,3 +1,9 @@
+HEAD
+-----------
+
+- Change capistrano recipe to run 'quiet' before deploy:update\_code so
+  it is run upon both 'deploy' and 'deploy:migrations'. [#352]
+
 2.2.0
 -----------
 
