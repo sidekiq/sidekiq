@@ -20,6 +20,8 @@ $(function() {
 });
 
 $(function() {
+  function pad(n) { return ('0' + n).slice(-2); }
+
   $('a[name=poll]').data('polling', false);
 
   $('a[name=poll]').on('click', function(e) {
@@ -39,7 +41,7 @@ $(function() {
           $('.workers').replaceWith(responseHtml.find('.workers'));
         });
         var currentTime = new Date();
-        $('.poll-status').text('Last polled at: ' + currentTime.getHours() + ':' + currentTime.getMinutes() + ':' + currentTime.getSeconds());
+        $('.poll-status').text('Last polled at: ' + currentTime.getHours() + ':' + pad(currentTime.getMinutes()) + ':' + pad(currentTime.getSeconds()));
       }, 2000));
       $('.poll-status').text('Starting to poll...');
       pollLink.text('Stop Polling');
