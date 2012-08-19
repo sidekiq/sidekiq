@@ -14,18 +14,19 @@ module Sidekiq
       # than 30 seconds to send.
       sidekiq_options :timeout => 30
 
-      def perform(yml)
-        (target, method_name, args) = YAML.load(yml)
+      def perform(*msg)
+        (target, method_name, args) = ArgsSerializer.deserialize_message(*msg)
         target.send(method_name, *args).deliver
       end
     end
 
     module ActionMailer
-      def delay
-        Proxy.new(DelayedMailer, self)
+      def delay(options={})
+        Proxy.new(DelayedMailer, self, options)
       end
-      def delay_for(interval)
-        Proxy.new(DelayedMailer, self, Time.now.to_f + interval.to_f)
+      def delay_for(interval, options={})
+        options = options.reverse_merge(at: Time.now.to_f + interval.to_f)
+        delay(options)
       end
     end
 

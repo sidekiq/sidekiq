@@ -1,4 +1,5 @@
 require 'sidekiq/middleware/chain'
+require 'active_support'
 
 module Sidekiq
   class Client

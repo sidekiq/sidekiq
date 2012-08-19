@@ -12,7 +12,7 @@ Sidekiq.hook_rails!
 class TestInline < MiniTest::Unit::TestCase
   describe 'sidekiq inline testing' do
     class InlineError < RuntimeError; end
-    class ParameterIsNotString < RuntimeError; end
+    class ParameterIsNotTime < RuntimeError; end
 
     class InlineWorker
       include Sidekiq::Worker
@@ -24,7 +24,7 @@ class TestInline < MiniTest::Unit::TestCase
     class InlineWorkerWithTimeParam
       include Sidekiq::Worker
       def perform(time)
-        raise ParameterIsNotString unless time.is_a?(String)
+        raise ParameterIsNotTime unless time.is_a?(Time)
       end
     end
 
@@ -49,6 +49,10 @@ class TestInline < MiniTest::Unit::TestCase
         remove_method :perform_async
         alias_method :perform_async, :perform_async_old
         remove_method :perform_async_old
+
+        remove_method :perform_async_with_options
+        alias_method :perform_async_with_options, :perform_async_with_options_old
+        remove_method :perform_async_with_options_old
       end
     end
 

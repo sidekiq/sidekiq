@@ -29,7 +29,21 @@ module Sidekiq
     module ClassMethods
       alias_method :perform_async_old, :perform_async
       def perform_async(*args)
-        new.perform(*Sidekiq.load_json(Sidekiq.dump_json(args)))
+        new.perform(*
+          Sidekiq::Extensions::ArgsSerializer.deserialize(
+            Sidekiq::Extensions::ArgsSerializer.serialize(args)
+          )
+        )
+        true
+      end
+
+      alias_method :perform_async_with_options_old, :perform_async_with_options
+      def perform_async_with_options(options, *args)
+        new.perform(*
+          Sidekiq::Extensions::ArgsSerializer.deserialize(
+            Sidekiq::Extensions::ArgsSerializer.serialize(args)
+          )
+        )
         true
       end
     end

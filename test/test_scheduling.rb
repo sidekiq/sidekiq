@@ -1,5 +1,6 @@
 require 'helper'
 require 'sidekiq/scheduled'
+require 'active_support/time'
 
 class TestScheduling < MiniTest::Unit::TestCase
   describe 'middleware' do

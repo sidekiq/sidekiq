@@ -14,18 +14,36 @@ module Sidekiq
     class DelayedModel
       include Sidekiq::Worker
 
-      def perform(yml)
-        (target, method_name, args) = YAML.load(yml)
+      def perform(*msg)
+        (target, method_name, args) = ArgsSerializer.deserialize_message(*msg)
         target.send(method_name, *args)
       end
     end
 
     module ActiveRecord
-      def delay
-        Proxy.new(DelayedModel, self)
+      module ClassMethods
+        def sidekiq_deserialize(string)
+          where(id: string.to_i).first
+        end
       end
-      def delay_for(interval)
-        Proxy.new(DelayedModel, self, Time.now.to_f + interval.to_f)
+      
+      module InstanceMethods
+        def delay(options={})
+          Proxy.new(DelayedModel, self, options)
+        end
+        def delay_for(interval, options={})
+          options = options.reverse_merge(at: Time.now.to_f + interval.to_f)
+          delay(options)
+        end
+
+        def sidekiq_serialize
+          "SIDEKIQ@#{self.class.name}@#{self.id}"
+        end
+      end
+      
+      def self.included(receiver)
+        receiver.extend         ClassMethods
+        receiver.send :include, InstanceMethods
       end
     end
 

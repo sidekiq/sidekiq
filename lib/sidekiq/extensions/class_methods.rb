@@ -12,18 +12,23 @@ module Sidekiq
     class DelayedClass
       include Sidekiq::Worker
 
-      def perform(yml)
-        (target, method_name, args) = YAML.load(yml)
+      def perform(*msg)
+        (target, method_name, args) = ArgsSerializer.deserialize_message(*msg)
         target.send(method_name, *args)
       end
     end
 
     module Klass
-      def delay
-        Proxy.new(DelayedClass, self)
+      def delay(options={})
+        Proxy.new(DelayedClass, self, options)
       end
-      def delay_for(interval)
-        Proxy.new(DelayedClass, self, Time.now.to_f + interval.to_f)
+      def delay_for(interval, options={})
+        options = options.reverse_merge(at: Time.now.to_f + interval.to_f)
+        delay(options)
+      end
+
+      def sidekiq_serialize
+        "SIDEKIQ@#{self.name}"
       end
     end
 
@@ -31,3 +36,4 @@ module Sidekiq
 end
 
 Class.send(:include, Sidekiq::Extensions::Klass)
+Module.send(:include, Sidekiq::Extensions::Klass)
