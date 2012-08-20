@@ -22,11 +22,11 @@ header
           td= msg['retry_count']
         tr
           th Last Retry
-          td== relative_time(Time.parse(msg['retried_at']))
+          td== relative_time(msg['retried_at'].is_a?(Numeric) ? Time.at(msg['retried_at']) : Time.parse(msg['retried_at']))
       - else
         tr
           th Originally Failed
-          td== relative_time(Time.parse(msg['failed_at']))
+          td== relative_time(msg['failed_at'].is_a?(Numeric) ? Time.at(msg['failed_at']) : Time.parse(msg['failed_at']))
       tr
         th Next Retry
         td== relative_time(Time.at(@score))
