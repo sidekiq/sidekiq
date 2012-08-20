@@ -58,7 +58,7 @@ module Sidekiq
       options.merge!(config.merge(cli))
 
       Sidekiq.logger.level = Logger::DEBUG if options[:verbose]
-      Celluloid.logger = nil
+      Celluloid.logger = nil unless options[:verbose]
 
       validate!
       write_pid
@@ -141,7 +141,7 @@ module Sidekiq
 
       @parser = OptionParser.new do |o|
         o.on "-q", "--queue QUEUE[,WEIGHT]...", "Queues to process with optional weights" do |arg|
-          queues_and_weights = arg.scan(/(\w+),?(\d*)/)
+          queues_and_weights = arg.scan(/([\w-]+),?(\d*)/)
           queues_and_weights.each {|queue_and_weight| parse_queues(opts, *queue_and_weight)}
           opts[:strict] = queues_and_weights.collect(&:last).none? {|weight| weight != ''}
         end

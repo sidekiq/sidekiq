@@ -1,6 +1,27 @@
 HEAD
 -----------
 
+- Change capistrano recipe to run 'quiet' before deploy:update\_code so
+  it is run upon both 'deploy' and 'deploy:migrations'. [#352]
+
+2.2.0
+-----------
+
+- Roll back Celluloid optimizations in 2.1.0 which caused instability.
+- Add extension to delay any arbitrary class method to Sidekiq.
+  Previously this was limited to ActiveRecord classes.
+
+```ruby
+SomeClass.delay.class_method(1, 'mike', Date.today)
+```
+
+- Sidekiq::Client now generates and returns a random, 128-bit Job ID 'jid' which
+  can be used to track the processing of a Job, e.g. for calling back to a webhook
+  when a job is finished.
+
+2.1.1
+-----------
+
 - Handle networking errors causing the scheduler thread to die [#309]
 - Rework exception handling to log all Processor and actor death (#325, subelsky)
 - Clone arguments when calling worker so modifications are discarded. (#265, hakanensari)

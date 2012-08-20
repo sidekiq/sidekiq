@@ -15,8 +15,6 @@ module Sidekiq
     include Util
     include Celluloid
 
-    exclusive :process
-
     def self.default_middleware
       Middleware::Chain.new do |m|
         m.add Middleware::Server::Logging
@@ -31,20 +29,27 @@ module Sidekiq
     end
 
     def process(msgstr, queue)
-      msg = Sidekiq.load_json(msgstr)
-      klass  = constantize(msg['class'])
-      worker = klass.new
-      worker.class.sidekiq_options(:queue => queue)
+      # Defer worker execution to Celluloid's thread pool since all actor
+      # invocations are run within a Fiber, which dramatically limits
+      # our stack size.
+      defer do
+        begin
+          msg = Sidekiq.load_json(msgstr)
+          klass  = constantize(msg['class'])
+          worker = klass.new
+          worker.class.sidekiq_options(:queue => queue)
 
-      stats(worker, msg, queue) do
-        Sidekiq.server_middleware.invoke(worker, msg, queue) do
-          worker.perform(*cloned(msg['args']))
+          stats(worker, msg, queue) do
+            Sidekiq.server_middleware.invoke(worker, msg, queue) do
+              worker.perform(*cloned(msg['args']))
+            end
+          end
+        rescue => ex
+          handle_exception(ex, msg || { :message => msgstr })
+          raise
         end
       end
       @boss.processor_done!(current_actor)
-    rescue => ex
-      handle_exception(ex, msg || { :message => msgstr })
-      raise
     end
 
     # See http://github.com/tarcieri/celluloid/issues/22

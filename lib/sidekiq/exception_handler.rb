@@ -24,7 +24,7 @@ module Sidekiq
     end
 
     def send_to_exception_notifier(msg, ex)
-      ::ExceptionNotifier::Notifier.background_exception_notification(ex, :data => { :message => msg })
+      ::ExceptionNotifier::Notifier.background_exception_notification(ex, :data => { :message => msg }).deliver
     end
   end
 end

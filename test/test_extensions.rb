@@ -54,6 +54,15 @@ class TestExtensions < MiniTest::Unit::TestCase
       UserMailer.delay_for(5.days).greetings(1, 2)
       assert_equal 1, Sidekiq.redis {|c| c.zcard('schedule') }
     end
+
+    class SomeClass
+      def self.doit(arg)
+      end
+    end
+
+    it 'allows delay of any ole class method' do
+      SomeClass.delay.doit(Date.today)
+    end
   end
 
   describe 'sidekiq rails extensions configuration' do

@@ -28,6 +28,8 @@ module Sidekiq
     # All options must be strings, not symbols.  NB: because we are serializing to JSON, all
     # symbols in 'args' will be converted to strings.
     #
+    # Returns nil if not pushed to Redis or a unique Job ID if pushed.
+    #
     # Example:
     #   Sidekiq::Client.push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
     #
@@ -42,6 +44,7 @@ module Sidekiq
       item = worker_class.get_sidekiq_options.merge(item)
       item['retry'] = !!item['retry']
       queue = item['queue']
+      item['jid'] = SecureRandom.base64
 
       pushed = false
       Sidekiq.client_middleware.invoke(worker_class, item, queue) do
@@ -57,7 +60,7 @@ module Sidekiq
           end
         end
       end
-      !! pushed
+      pushed ? item['jid'] : nil
     end
 
     # Resque compatibility helpers. 

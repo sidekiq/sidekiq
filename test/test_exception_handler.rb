@@ -66,9 +66,12 @@ class TestExceptionHandler < MiniTest::Unit::TestCase
     end
 
     it "notifies ExceptionNotifier" do
-      ::ExceptionNotifier::Notifier.expect(:background_exception_notification,nil,[TEST_EXCEPTION, :data => { :message => { :b => 2 } }])
+      mail = MiniTest::Mock.new
+      mail.expect(:deliver,nil)
+      ::ExceptionNotifier::Notifier.expect(:background_exception_notification,mail,[TEST_EXCEPTION, :data => { :message => { :b => 2 } }])
       Component.new.invoke_exception(:b => 2)
       ::ExceptionNotifier::Notifier.verify
+      mail.verify
     end
   end
 
