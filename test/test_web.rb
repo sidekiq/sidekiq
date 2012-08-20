@@ -148,6 +148,15 @@ class TestWeb < MiniTest::Unit::TestCase
       assert_match /#{msg['args'][2]}/, last_response.body
     end
 
+    it 'can show user defined tab' do
+      Sidekiq::Web.tabs << 'Custom Tab'
+
+      get '/'
+      assert_match 'Custom Tab', last_response.body
+
+      Sidekiq::Web.tabs.delete 'Custom Tab'
+    end
+
     def add_scheduled
       msg = { 'class' => 'HardWorker',
               'args' => ['bob', 1, Time.now.to_f],
