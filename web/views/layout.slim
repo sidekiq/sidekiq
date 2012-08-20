@@ -17,12 +17,10 @@ html
             ul.nav
               li
                 a href='#{{root_path}}' Home
-              li
-                a href='#{{root_path}}queues' Queues
-              li
-                a href='#{{root_path}}retries' Retries
-              li
-                a href='#{{root_path}}scheduled' Scheduled
+              - tabs.each do |tab|
+                li
+                  a href='#{{root_path}}#{{tab.downcase}}': #{tab}
+
             ul.nav.pull-right
               li
                 a Redis: #{location}

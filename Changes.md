@@ -1,6 +1,7 @@
 HEAD
 -----------
 
+- Add support for custom tabs to Sidekiq::Web [#346]
 - Change capistrano recipe to run 'quiet' before deploy:update\_code so
   it is run upon both 'deploy' and 'deploy:migrations'. [#352]
 

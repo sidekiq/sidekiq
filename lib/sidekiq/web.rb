@@ -111,6 +111,10 @@ module Sidekiq
       def display_args(args, count=100)
         args.map { |arg| a = arg.inspect; a.size > count ? "#{a[0..count]}..." : a }.join(", ")
       end
+
+      def tabs
+        Sidekiq::Web.tabs
+      end
     end
 
     get "/" do
@@ -221,6 +225,10 @@ module Sidekiq
           conn.zremrangebyscore(set, score, score)
         end
       end
+    end
+
+    def self.tabs
+      @tabs ||= ["Queues", "Retries", "Scheduled"]
     end
 
   end
