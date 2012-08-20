@@ -24,7 +24,7 @@ class TestInline < MiniTest::Unit::TestCase
     class InlineWorkerWithTimeParam
       include Sidekiq::Worker
       def perform(time)
-        raise ParameterIsNotString unless time.is_a?(String)
+        raise ParameterIsNotString unless time.is_a?(String) || time.is_a?(Numeric)
       end
     end
 

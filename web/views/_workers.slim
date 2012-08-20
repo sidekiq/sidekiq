@@ -11,4 +11,4 @@ table class="table table-striped table-bordered workers"
       td= msg['queue']
       td= msg['payload']['class']
       td= msg['payload']['args'].inspect[0..100]
-      td== relative_time(Time.parse(msg['run_at']))
+      td== relative_time(msg['run_at'].is_a?(Numeric) ? Time.at(msg['run_at']) : Time.parse(msg['run_at']))
