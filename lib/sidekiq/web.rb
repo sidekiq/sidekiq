@@ -113,7 +113,7 @@ module Sidekiq
       end
 
       def tabs
-        Sidekiq::Web.tabs
+        self.class.tabs
       end
     end
 
