@@ -37,7 +37,6 @@ module Sidekiq
           msg = Sidekiq.load_json(msgstr)
           klass  = constantize(msg['class'])
           worker = klass.new
-          worker.class.sidekiq_options(:queue => queue)
 
           stats(worker, msg, queue) do
             Sidekiq.server_middleware.invoke(worker, msg, queue) do
