@@ -40,6 +40,13 @@ module Sidekiq
 
     helpers do
 
+      def reset_stats
+        Sidekiq.redis do |conn|
+          conn.set("stat:failed", 0)
+          conn.set("stat:processed", 0)
+        end
+      end
+      
       def reset_worker_list
         Sidekiq.redis do |conn|
           workers = conn.smembers('workers')
@@ -141,6 +148,11 @@ module Sidekiq
 
     post "/reset" do
       reset_worker_list
+      redirect root_path
+    end
+    
+    post "/reset_stats" do
+      reset_stats
       redirect root_path
     end
 

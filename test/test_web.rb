@@ -147,6 +147,16 @@ class TestWeb < MiniTest::Unit::TestCase
       assert_equal 200, last_response.status
       assert_match /#{msg['args'][2]}/, last_response.body
     end
+    
+    it 'can reset stats' do
+      Sidekiq.redis do |conn|
+        conn.set('stat:processed', 5)
+        conn.set('stat:failed', 10)
+        post '/reset_stats'
+        assert_equal '0', conn.get('stat:processed')
+        assert_equal '0', conn.get('stat:failed')
+      end
+    end
 
     it 'can show user defined tab' do
       Sidekiq::Web.tabs << 'Custom Tab'

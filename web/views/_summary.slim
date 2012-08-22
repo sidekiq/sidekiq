@@ -1,5 +1,7 @@
 .hero-unit
   h1 Sidekiq is #{current_status}
+  form action="#{root_path}reset_stats" method="post"
+    button.btn.pull-right type="submit" title="Reset the processed and failed stat counts." Reset Stats
   p Processed: #{processed}
   p Failed: #{failed}
   p Busy Workers: #{workers.size}
