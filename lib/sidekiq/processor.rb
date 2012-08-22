@@ -43,7 +43,7 @@ module Sidekiq
               worker.perform(*cloned(msg['args']))
             end
           end
-        rescue => ex
+        rescue Exception => ex
           handle_exception(ex, msg || { :message => msgstr })
           raise
         end

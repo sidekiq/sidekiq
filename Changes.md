@@ -4,6 +4,8 @@ HEAD
 - Add support for custom tabs to Sidekiq::Web [#346]
 - Change capistrano recipe to run 'quiet' before deploy:update\_code so
   it is run upon both 'deploy' and 'deploy:migrations'. [#352]
+- Rescue Exception rather than StandardError to catch and log any sort
+  of Processor death.
 
 2.2.0
 -----------
