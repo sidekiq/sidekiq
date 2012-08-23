@@ -1,4 +1,4 @@
-HEAD
+2.2.1
 -----------
 
 - Add support for custom tabs to Sidekiq::Web [#346]
