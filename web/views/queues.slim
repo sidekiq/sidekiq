@@ -13,7 +13,7 @@ h1 Queues
         td= size
         td
           form action="#{root_path}queues/#{queue}" method="post"
-            input.btn.btn-danger type="submit" name="delete" value="Delete"
+            input.btn.btn-danger type="submit" name="delete" value="Delete" data-confirm="Are you sure you want to delete the #{queue} queue?"
 - else
   p No queues found.
   a href="#{root_path}" Back
