@@ -1,3 +1,5 @@
+require 'securerandom'
+
 require 'sidekiq/middleware/chain'
 
 module Sidekiq
