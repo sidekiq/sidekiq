@@ -72,7 +72,7 @@ module Sidekiq
     def self.get_payload(item)
       payload = []
       args = item.delete('args')
-      args.each do |arguments|
+      args.first.each do |arguments|
         payload << Sidekiq.dump_json(item.merge({'args' => arguments}))
       end
       payload
