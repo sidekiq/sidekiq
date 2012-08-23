@@ -39,6 +39,7 @@ $(function() {
           var responseHtml = $(data);
           $('.hero-unit').replaceWith(responseHtml.find('.hero-unit'));
           $('.workers').replaceWith(responseHtml.find('.workers'));
+          $('time').timeago();
         });
         var currentTime = new Date();
         $('.poll-status').text('Last polled at: ' + currentTime.getHours() + ':' + pad(currentTime.getMinutes()) + ':' + pad(currentTime.getSeconds()));
