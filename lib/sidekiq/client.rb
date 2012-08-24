@@ -87,22 +87,18 @@ module Sidekiq
       item['class'].get_sidekiq_options.merge normalized_item
     end
 
-    def self.prepare_payload(item, batch)
+    def self.prepare_batch_payload(item)
       base_message = item.dup
 
-      args = batch ? base_message['args'] : [base_message['args']]
-      payload = args.collect do |arguments|
-        jid = batch ? SecureRandom.base64 : item['jid']
-        Sidekiq.dump_json base_message.merge({'args' => arguments, 'jid' => jid})
+      item['args'].collect do |arguments|
+        Sidekiq.dump_json base_message.merge({'args' => arguments, 'jid' => SecureRandom.base64})
       end
-
-      batch ? payload : payload.first
     end
 
     #Push the message to redis
     def self.push_to_queue(item, batch)
       normalized_item = normalize_item item
-      payload = prepare_payload normalized_item, batch
+      payload = batch ? prepare_batch_payload(normalized_item) : Sidekiq.dump_json(normalized_item)
 
       pushed = false
 

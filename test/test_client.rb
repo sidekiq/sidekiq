@@ -47,14 +47,14 @@ class TestClient < MiniTest::Unit::TestCase
     it 'pushes batch messages to redis' do
       @redis.expect :rpush, 1, ['queue:foo', Array]
       pushed = Sidekiq::Client.push_batch('queue' => 'foo', 'class' => MyWorker, 'args' => [[1, 2], [2, 3]])
-      assert pushed
+      assert pushed.count == 2, 'An array with two JIDs should be returned'
       @redis.verify
     end
 
     it 'does not attempt to batch regular pushes with nested arrays' do
       @redis.expect :rpush, 1, ['queue:foo', String]
       pushed = Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [[1, 2], [3, 7]])
-      assert pushed
+      assert pushed.class == String, 'a JID should be returned'
       @redis.verify
     end
 
@@ -69,14 +69,14 @@ class TestClient < MiniTest::Unit::TestCase
     it 'handles perform_async' do
       @redis.expect :rpush, 1, ['queue:default', String]
       pushed = MyWorker.perform_async(1, 2)
-      assert pushed
+      assert pushed.class == String, 'a JID should be returned'
       @redis.verify
     end
 
     it 'handles perform_batch_async' do
       @redis.expect :rpush, 1, ['queue:default', Array]
       pushed = MyWorker.perform_batch_async([3, 4],[1, 2])
-      assert pushed.count == 2
+      assert pushed.count == 2, 'An array with two JIDs should be returned'
       @redis.verify
     end
 
@@ -97,7 +97,7 @@ class TestClient < MiniTest::Unit::TestCase
     it 'enqueues messages to redis' do
       @redis.expect :rpush, 1, ['queue:default', String]
       pushed = Sidekiq::Client.enqueue(MyWorker, 1, 2)
-      assert pushed
+      assert pushed.class == String, 'a JID should be returned'
       @redis.verify
     end
 
@@ -109,14 +109,14 @@ class TestClient < MiniTest::Unit::TestCase
     it 'enqueues to the named queue' do
       @redis.expect :rpush, 1, ['queue:flimflam', String]
       pushed = QueuedWorker.perform_async(1, 2)
-      assert pushed
+      assert pushed.class == String, 'a JID should be returned'
       @redis.verify
     end
 
     it 'enqueues in batches to the named queue' do
       @redis.expect :rpush, 1, ['queue:flimflam', Array]
       pushed = QueuedWorker.perform_batch_async([1, 2], [3, 4])
-      assert pushed.count == 2
+      assert pushed.count == 2, 'An array with two JIDs should be returned'
       @redis.verify
     end
 
