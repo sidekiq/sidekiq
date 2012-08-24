@@ -76,7 +76,7 @@ class TestClient < MiniTest::Unit::TestCase
     it 'handles perform_batch_async' do
       @redis.expect :rpush, 1, ['queue:default', Array]
       pushed = MyWorker.perform_batch_async([3, 4],[1, 2])
-      assert pushed
+      assert pushed.count == 2
       @redis.verify
     end
 
@@ -89,7 +89,7 @@ class TestClient < MiniTest::Unit::TestCase
 
     it 'handles perform_batch_async on failure' do
       @redis.expect :rpush, nil, ['queue:default', Array]
-      pushed = MyWorker.perform_batch_async([[1, 2], [3, 4]])
+      pushed = MyWorker.perform_batch_async([1, 2], [3, 4])
       refute pushed
       @redis.verify
     end
@@ -115,8 +115,8 @@ class TestClient < MiniTest::Unit::TestCase
 
     it 'enqueues in batches to the named queue' do
       @redis.expect :rpush, 1, ['queue:flimflam', Array]
-      pushed = QueuedWorker.perform_batch_async([[1, 2], [3, 4]])
-      assert pushed
+      pushed = QueuedWorker.perform_batch_async([1, 2], [3, 4])
+      assert pushed.count == 2
       @redis.verify
     end
 

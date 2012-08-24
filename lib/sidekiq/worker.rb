@@ -35,6 +35,14 @@ module Sidekiq
         client_push('class' => self, 'args' => args)
       end
 
+      ##
+      # Allows multiple jobs to be pushed to Redis in one command. However, it skips all client-side middleware.
+      #
+      #   args - a list of arrays of the parameters passed to the class' perform function
+      #
+      # Example:
+      #   HardWorker.perform_batch_async([1, 2, 3], [4, 5, 6])
+      #
       def perform_batch_async(*args)
         Sidekiq::Client.push_batch('class' => self, 'args' => args)
       end

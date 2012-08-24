@@ -38,8 +38,9 @@ module Sidekiq
     end
 
     ##
-    # Sibling of the push method, push_batch implies multiple messages should be delivered, in batch, to
-    # the specified worker.
+    # Sibling of the push method, push_batch implies multiple jobs should be pushed, in batch, to Redis. This method
+    # skips all client-side middleware.
+    #
     #   queue - the named queue to use, default 'default'
     #   class - the worker class to call, required
     #   args - an array of arrays of simple arguments to the perform method.  The arrays within the base array must be JSON serializable
@@ -48,6 +49,9 @@ module Sidekiq
     #
     # All options must be strings, not symbols.  NB: because we are serializing to JSON, all
     # symbols in 'args' will be converted to strings.
+    #
+    # Returns nil if not pushed to Redis or an array of unique Job IDs if pushed.
+    #
     # Example:
     #   Sidekiq::Client.push_batch('queue' => 'my_queue', 'class' => MyWorker, 'args' => [['bar', 2, :bat => 'foo'], ['foo', 1, :bat => 'bar']])
     #
@@ -69,45 +73,66 @@ module Sidekiq
 
     private
 
-    def self.get_payload(item)
-      payload = []
-      args = item.delete('args')
-      args.first.each do |arguments|
-        payload << Sidekiq.dump_json(item.merge({'args' => arguments}))
-      end
-      payload
-    end
-
-    #Push the message to redis
-    def self.push_to_queue(item, batch)
+    def self.normalize_item(item)
       raise(ArgumentError, "Message must be a Hash of the form: { 'class' => SomeWorker, 'args' => ['bob', 1, :foo => 'bar'] }") unless item.is_a?(Hash)
       raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") if !item['class'] || !item['args']
       raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item['class'].ancestors.inspect}") if !item['class'].is_a?(Class) || !item['class'].respond_to?('get_sidekiq_options')
 
-      worker_class = item['class']
-      item['class'] = item['class'].to_s
+      normalized_item = item.dup
 
-      item = worker_class.get_sidekiq_options.merge(item)
-      item['retry'] = !!item['retry']
-      queue = item['queue']
-      item['jid'] = SecureRandom.base64
+      normalized_item['class'] = normalized_item['class'].to_s
+      normalized_item['retry'] = !!normalized_item['retry']
+      normalized_item['jid'] = SecureRandom.base64
+
+      item['class'].get_sidekiq_options.merge normalized_item
+    end
+
+    def self.prepare_payload(item, batch)
+      base_message = item.dup
+
+      args = batch ? base_message['args'] : [base_message['args']]
+      payload = args.collect do |arguments|
+        jid = batch ? SecureRandom.base64 : item['jid']
+        Sidekiq.dump_json base_message.merge({'args' => arguments, 'jid' => jid})
+      end
+
+      batch ? payload : payload.first
+    end
+
+    #Push the message to redis
+    def self.push_to_queue(item, batch)
+      normalized_item = normalize_item item
+      payload = prepare_payload normalized_item, batch
 
       pushed = false
 
-      Sidekiq.client_middleware.invoke(worker_class, item, queue) do
-        payload = batch ? self.get_payload(item) : Sidekiq.dump_json(item)
-        Sidekiq.redis do |conn|
-          if item['at']
-            pushed = conn.zadd('schedule', item['at'].to_s, payload)
-          else
-            _, pushed = conn.multi do
-              conn.sadd('queues', queue)
-              conn.rpush("queue:#{queue}", payload)
-            end
+      if batch
+        pushed = perform_push normalized_item['queue'], payload
+      else
+        Sidekiq.client_middleware.invoke(item['class'], normalized_item, normalized_item['queue']) do
+          pushed = perform_push normalized_item['queue'], payload, normalized_item['at']
+        end
+      end
+
+      return nil unless pushed
+      batch ? payload.collect {|job| Sidekiq.load_json(job)['jid']} : normalized_item['jid']
+    end
+
+    def self.perform_push(queue, payload, at = nil)
+      pushed = false
+
+      Sidekiq.redis do |conn|
+        if at
+          pushed = conn.zadd('schedule', at.to_s, payload)
+        else
+          _, pushed = conn.multi do
+            conn.sadd('queues', queue)
+            conn.rpush("queue:#{queue}", payload)
           end
         end
       end
-      pushed ? item['jid'] : nil
+
+      pushed
     end
   end
 end
