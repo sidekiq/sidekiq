@@ -10,7 +10,7 @@ module Sidekiq
               logger.info { "start" }
               yield
               logger.info { "done: #{elapsed(start)} sec" }
-            rescue
+            rescue Exception
               logger.info { "fail: #{elapsed(start)} sec" }
               raise
             end
