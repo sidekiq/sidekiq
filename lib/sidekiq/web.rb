@@ -31,7 +31,6 @@ module Sidekiq
 
   class Web < Sinatra::Base
     include Sidekiq::Paginator
-    include ActionView::Helpers::NumberHelper
 
     dir = File.expand_path(File.dirname(__FILE__) + "/../../web")
     set :views,  "#{dir}/views"
@@ -115,6 +114,27 @@ module Sidekiq
 
       def tabs
         self.class.tabs
+      end
+
+      def number_with_delimiter(number, options = {})
+        options.symbolize_keys!
+
+        begin
+          Float(number)
+        rescue ArgumentError, TypeError
+          if options[:raise]
+            raise InvalidNumberError, number
+          else
+            return number
+          end
+        end
+
+        defaults = I18n.translate(:'number.format', :locale => options[:locale], :default => {})
+        options = options.reverse_merge(defaults)
+
+        parts = number.to_s.to_str.split('.')
+        parts[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{options[:delimiter]}")
+        parts.join(options[:separator]).html_safe
       end
     end
 
