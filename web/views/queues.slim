@@ -10,7 +10,7 @@ h1 Queues
       tr
         td
           a href="#{root_path}queues/#{queue}" #{queue}
-        td= size
+        td= number_with_delimiter(size)
         td
           form action="#{root_path}queues/#{queue}" method="post"
             input.btn.btn-danger type="submit" name="delete" value="Delete" data-confirm="Are you sure you want to delete the #{queue} queue?"
