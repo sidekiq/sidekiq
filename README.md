@@ -7,8 +7,8 @@ Sidekiq
 Simple, efficient message processing for Ruby.
 
 Sidekiq uses threads to handle many messages at the same time in the
-same process.  It integrates tightly with Rails 3 to make background
-message processing dead simple.
+same process.  It does not require Rails but will integrate tightly with
+Rails 3 to make background message processing dead simple.
 
 Sidekiq is compatible with Resque.  It uses the exact same
 message format as Resque so it can integrate into an existing Resque processing farm.
