@@ -117,8 +117,6 @@ module Sidekiq
       end
 
       def number_with_delimiter(number, options = {})
-        options.symbolize_keys!
-
         begin
           Float(number)
         rescue ArgumentError, TypeError
@@ -129,12 +127,12 @@ module Sidekiq
           end
         end
 
-        defaults = I18n.translate(:'number.format', :locale => options[:locale], :default => {})
-        options = options.reverse_merge(defaults)
+        defaults = {:delimiter => ',', :separator => '.'}
+        options = defaults.merge(options)
 
         parts = number.to_s.to_str.split('.')
         parts[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{options[:delimiter]}")
-        parts.join(options[:separator]).html_safe
+        parts.join(options[:separator])
       end
     end
 
