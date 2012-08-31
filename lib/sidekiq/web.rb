@@ -31,6 +31,7 @@ module Sidekiq
 
   class Web < Sinatra::Base
     include Sidekiq::Paginator
+    include ActionView::Helpers::NumberHelper
 
     dir = File.expand_path(File.dirname(__FILE__) + "/../../web")
     set :views,  "#{dir}/views"
