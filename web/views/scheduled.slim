@@ -16,7 +16,7 @@ h1 Scheduled Jobs
         tr
           td
             input type='checkbox' name='score[]' value='#{score}'
-          td== relative_time(Time.at(score))
+          td== relative_time(Time.at(msg['at']))
           td
             a href="#{root_path}queues/#{msg['queue']}" #{msg['queue']}
           td= msg['class']

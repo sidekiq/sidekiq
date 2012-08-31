@@ -14,7 +14,7 @@ module Sidekiq
         case type
         when 'zset'
           total_size = conn.zcard(key)
-          items = conn.zrange(key, starting, ending, :with_scores => true)
+          items = Hash[*conn.zrange(key, starting, ending, :with_scores => true)]
         when 'list'
           total_size = conn.llen(key)
           items = conn.lrange(key, starting, ending)
