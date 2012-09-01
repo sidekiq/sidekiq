@@ -116,20 +116,14 @@ module Sidekiq
         self.class.tabs
       end
 
-      def number_with_delimiter(number, options = {})
+      def number_with_delimiter(number)
         begin
           Float(number)
         rescue ArgumentError, TypeError
-          if options[:raise]
-            raise InvalidNumberError, number
-          else
-            return number
-          end
+          return number
         end
 
-        defaults = {:delimiter => ',', :separator => '.'}
-        options = defaults.merge(options)
-
+        options = {:delimiter => ',', :separator => '.'}
         parts = number.to_s.to_str.split('.')
         parts[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{options[:delimiter]}")
         parts.join(options[:separator])
