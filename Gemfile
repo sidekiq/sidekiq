@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 gemspec
 
-gem 'celluloid'
+gem 'celluloid', ">= 0.12.0.pre"
 gem 'slim'
 gem 'sprockets'
 gem 'sass'
