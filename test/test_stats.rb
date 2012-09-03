@@ -65,8 +65,8 @@ class TestStats < MiniTest::Unit::TestCase
       end
     end
 
-    describe "queues_with_counts" do
-      it "returns queue names and corresponding job counts" do
+    describe "counting methods" do
+      before do
         @redis.with do |conn|
           conn.rpush 'queue:foo', '{}'
           conn.sadd 'queues', 'foo'
@@ -75,7 +75,16 @@ class TestStats < MiniTest::Unit::TestCase
           conn.rpush 'queue:bar', '{}'
           conn.sadd 'queues', 'bar'
         end
-        assert_equal [["foo", 1], ["bar", 2]], Sidekiq::Stats.queues_with_sizes
+      end
+      describe "queues_with_counts" do
+        it "returns queue names and corresponding job counts" do
+          assert_equal [["foo", 1], ["bar", 2]], Sidekiq::Stats.queues_with_sizes
+        end
+      end
+      describe "backlog" do
+        it "returns count of all jobs yet to be processed" do
+          assert_equal 3, Sidekiq::Stats.backlog
+        end
       end
     end
 

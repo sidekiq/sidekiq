@@ -77,7 +77,7 @@ module Sidekiq
       end
 
       def backlog
-        queues.map {|name, size| size }.inject(0) {|memo, val| memo + val }
+        Sidekiq::Stats.backlog
       end
 
       def retries_with_score(score)

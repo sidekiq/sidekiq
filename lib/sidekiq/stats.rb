@@ -18,5 +18,9 @@ module Sidekiq
         }.sort_by { |_, size| size }
       }
     end
+
+    def backlog
+      queues_with_sizes.map {|_, size| size }.inject(0) {|memo, val| memo + val }
+    end
   end
 end
