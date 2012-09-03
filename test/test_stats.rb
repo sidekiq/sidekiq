@@ -11,6 +11,7 @@ class TestStats < MiniTest::Unit::TestCase
 
     class DumbWorker
       include Sidekiq::Worker
+      sidekiq_options :queue => 'dumbq'
 
       def perform(arg)
         raise 'bang' if arg == nil
@@ -61,6 +62,20 @@ class TestStats < MiniTest::Unit::TestCase
 
         assert_equal 1, Sidekiq::Stats.failed
         assert_equal 1, Sidekiq::Stats.processed
+      end
+    end
+
+    describe "queues_with_counts" do
+      it "returns queue names and corresponding job counts" do
+        @redis.with do |conn|
+          conn.rpush 'queue:foo', '{}'
+          conn.sadd 'queues', 'foo'
+
+          conn.rpush 'queue:bar', '{}'
+          conn.rpush 'queue:bar', '{}'
+          conn.sadd 'queues', 'bar'
+        end
+        assert_equal [["foo", 1], ["bar", 2]], Sidekiq::Stats.queues_with_sizes
       end
     end
 

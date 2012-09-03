@@ -73,11 +73,7 @@ module Sidekiq
       end
 
       def queues
-        @queues ||= Sidekiq.redis do |conn|
-          conn.smembers('queues').map do |q|
-            [q, conn.llen("queue:#{q}") || 0]
-          end.sort { |x,y| x[1] <=> y[1] }
-        end
+        @queues ||= Sidekiq::Stats.queues_with_sizes
       end
 
       def backlog
