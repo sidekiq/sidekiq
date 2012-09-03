@@ -22,5 +22,14 @@ module Sidekiq
     def backlog
       queues_with_sizes.map {|_, size| size }.inject(0) {|memo, val| memo + val }
     end
+
+    def size(*queues)
+      return backlog if queues.empty?
+      queues.
+        map(&:to_s).
+        inject(0) { |memo, queue|
+          memo += Sidekiq.redis { |conn| conn.llen("queue:#{queue}") }
+        }
+    end
   end
 end

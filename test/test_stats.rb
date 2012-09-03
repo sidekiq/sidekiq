@@ -76,14 +76,25 @@ class TestStats < MiniTest::Unit::TestCase
           conn.sadd 'queues', 'bar'
         end
       end
+
       describe "queues_with_counts" do
         it "returns queue names and corresponding job counts" do
           assert_equal [["foo", 1], ["bar", 2]], Sidekiq::Stats.queues_with_sizes
         end
       end
+
       describe "backlog" do
         it "returns count of all jobs yet to be processed" do
           assert_equal 3, Sidekiq::Stats.backlog
+        end
+      end
+
+      describe "size" do
+        it "returns size of queues" do
+          assert_equal 1, Sidekiq::Stats.size(:foo)
+          assert_equal 1, Sidekiq::Stats.size("foo")
+          assert_equal 3, Sidekiq::Stats.size("foo", "bar")
+          assert_equal 3, Sidekiq::Stats.size
         end
       end
     end
