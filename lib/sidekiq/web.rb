@@ -65,7 +65,7 @@ module Sidekiq
       end
 
       def failed
-        Sidekiq.redis { |conn| conn.get('stat:failed') } || 0
+        Sidekiq::Stats.failed
       end
 
       def zcard(name)

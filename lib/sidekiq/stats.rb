@@ -3,7 +3,11 @@ module Sidekiq
     module_function
 
     def processed
-      Sidekiq.redis { |conn| conn.get('stat:processed') }.to_i || 0
+      (Sidekiq.redis { |conn| conn.get('stat:processed') } || 0).to_i
+    end
+
+    def failed
+      (Sidekiq.redis { |conn| conn.get('stat:failed') } || 0).to_i
     end
   end
 end
