@@ -32,14 +32,14 @@ class TestStats < MiniTest::Unit::TestCase
         boss.expect(:processor_done!, nil, [processor])
 
         assert_equal 0, conn.get('stat:failed').to_i
-        assert_equal 0, conn.get('stat:processed').to_i
+        assert_equal 0, Sidekiq::Stats.processed
 
         processor.process(msg, 'xyzzy')
         processor.process(msg, 'xyzzy')
         processor.process(msg, 'xyzzy')
 
         assert_equal 0, conn.get('stat:failed').to_i
-        assert_equal 3, conn.get('stat:processed').to_i
+        assert_equal 3, Sidekiq::Stats.processed
       end
     end
 
@@ -50,7 +50,7 @@ class TestStats < MiniTest::Unit::TestCase
       @redis.with do |conn|
         assert_equal [], conn.smembers('workers')
         assert_equal 0, conn.get('stat:failed').to_i
-        assert_equal 0, conn.get('stat:processed').to_i
+        assert_equal 0, Sidekiq::Stats.processed
 
         processor = Sidekiq::Processor.new(boss)
 
@@ -60,7 +60,7 @@ class TestStats < MiniTest::Unit::TestCase
         end
 
         assert_equal 1, conn.get('stat:failed').to_i
-        assert_equal 1, conn.get('stat:processed').to_i
+        assert_equal 1, Sidekiq::Stats.processed
       end
     end
 

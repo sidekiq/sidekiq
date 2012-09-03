@@ -61,7 +61,7 @@ module Sidekiq
       end
 
       def processed
-        Sidekiq.redis { |conn| conn.get('stat:processed') } || 0
+        Sidekiq::Stats.processed
       end
 
       def failed
