@@ -18,8 +18,6 @@ module Sidekiq
     trap_exit :processor_died
 
     def initialize(options={})
-      logger.info "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{redis {|x| x.client.id}}"
-      logger.info "Running in #{RUBY_DESCRIPTION}"
       logger.debug { options.inspect }
       @count = options[:concurrency] || 25
       @done_callback = nil
