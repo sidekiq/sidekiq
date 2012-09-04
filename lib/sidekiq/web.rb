@@ -60,12 +60,16 @@ module Sidekiq
         end
       end
 
+      def info
+        @info ||= Sidekiq.info
+      end
+
       def processed
-        Sidekiq.info[:processed]
+        info[:processed]
       end
 
       def failed
-        Sidekiq.info[:failed]
+        info[:failed]
       end
 
       def zcard(name)
@@ -77,7 +81,7 @@ module Sidekiq
       end
 
       def backlog
-        Sidekiq.info[:backlog]
+        info[:backlog]
       end
 
       def retries_with_score(score)
