@@ -61,11 +61,11 @@ module Sidekiq
       end
 
       def processed
-        Sidekiq::Stats.processed
+        Sidekiq.info[:processed]
       end
 
       def failed
-        Sidekiq::Stats.failed
+        Sidekiq.info[:failed]
       end
 
       def zcard(name)
@@ -73,11 +73,11 @@ module Sidekiq
       end
 
       def queues
-        @queues ||= Sidekiq::Stats.queues_with_sizes
+        @queues ||= Sidekiq.queues_with_sizes
       end
 
       def backlog
-        Sidekiq::Stats.backlog
+        Sidekiq.info[:backlog]
       end
 
       def retries_with_score(score)
