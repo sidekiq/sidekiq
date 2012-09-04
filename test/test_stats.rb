@@ -79,7 +79,7 @@ class TestStats < MiniTest::Unit::TestCase
 
       describe "queues_with_sizes" do
         it "returns queue names and corresponding job counts" do
-          assert_equal [["foo", 1], ["bar", 2]], Sidekiq.queues_with_sizes
+          assert_equal [["foo", 1], ["bar", 2]], Sidekiq.info[:queues_with_sizes]
         end
       end
 

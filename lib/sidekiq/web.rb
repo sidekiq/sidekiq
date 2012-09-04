@@ -73,7 +73,7 @@ module Sidekiq
       end
 
       def queues
-        @queues ||= Sidekiq.queues_with_sizes
+        @queues ||= Sidekiq.info[:queues_with_sizes]
       end
 
       def backlog

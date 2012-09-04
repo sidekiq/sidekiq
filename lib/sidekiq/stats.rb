@@ -11,7 +11,7 @@ module Sidekiq
         futures[:queues] = conn.smembers('queues')
       end
     }
-    queues_with_sizes = Sidekiq.redis do |conn|
+    results[:queues_with_sizes] = Sidekiq.redis do |conn|
       futures[:queues].value.inject({}) { |memo, q|
         memo[q] = conn.llen("queue:#{q}")
         memo
@@ -19,19 +19,10 @@ module Sidekiq
     end
     results[:processed] = (futures[:processed].value || 0).to_i
     results[:failed] = (futures[:failed].value || 0).to_i
-    results[:backlog] = queues_with_sizes.
+    results[:backlog] = results[:queues_with_sizes].
                           map {|_, size| size }.
                           inject(0) {|memo, val| memo + val }
     results
-  end
-
-  def queues_with_sizes
-    Sidekiq.redis { |conn|
-      conn.smembers('queues').inject({}) { |memo, q|
-        memo[q] = conn.llen("queue:#{q}")
-        memo
-      }.sort_by { |_, size| size }
-    }
   end
 
   def size(*queues)
