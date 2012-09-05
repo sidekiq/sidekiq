@@ -1,3 +1,10 @@
+2.3.0
+-----------
+
+- Upgrade Celluloid to 0.12
+- Upgrade Twitter Bootstrap to 2.1.0
+- Rescue more Exceptions
+
 2.2.1
 -----------
 
