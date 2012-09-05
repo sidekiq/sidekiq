@@ -22,5 +22,9 @@ code {
 }
 
 .poll-status {
-  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.navbar a.brand {
+  color: white;
 }
