@@ -4,6 +4,7 @@
 - Upgrade Celluloid to 0.12
 - Upgrade Twitter Bootstrap to 2.1.0
 - Rescue more Exceptions
+- Change Job ID to be Hex, rather than Base64, for HTTP safety
 
 2.2.1
 -----------
