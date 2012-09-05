@@ -60,12 +60,16 @@ module Sidekiq
         end
       end
 
+      def info
+        @info ||= Sidekiq.info
+      end
+
       def processed
-        Sidekiq.redis { |conn| conn.get('stat:processed') } || 0
+        info[:processed]
       end
 
       def failed
-        Sidekiq.redis { |conn| conn.get('stat:failed') } || 0
+        info[:failed]
       end
 
       def zcard(name)
@@ -73,15 +77,11 @@ module Sidekiq
       end
 
       def queues
-        @queues ||= Sidekiq.redis do |conn|
-          conn.smembers('queues').map do |q|
-            [q, conn.llen("queue:#{q}") || 0]
-          end.sort { |x,y| x[1] <=> y[1] }
-        end
+        @queues ||= Sidekiq.info[:queues_with_sizes]
       end
 
       def backlog
-        queues.map {|name, size| size }.inject(0) {|memo, val| memo + val }
+        info[:backlog]
       end
 
       def retries_with_score(score)
