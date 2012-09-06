@@ -13,7 +13,7 @@ module Sidekiq
     private
 
     def send_to_airbrake(msg, ex)
-      ::Airbrake.notify(ex, :parameters => msg)
+      ::Airbrake.notify_or_ignore(ex, :parameters => msg)
     end
 
     def send_to_exceptional(msg, ex)

@@ -49,7 +49,7 @@ class TestExceptionHandler < MiniTest::Unit::TestCase
     end
 
     it "notifies Airbrake" do
-      ::Airbrake.expect(:notify,nil,[TEST_EXCEPTION,:parameters => { :a => 1 }])
+      ::Airbrake.expect(:notify_or_ignore,nil,[TEST_EXCEPTION,:parameters => { :a => 1 }])
       Component.new.invoke_exception(:a => 1)
       ::Airbrake.verify
     end
