@@ -5,6 +5,7 @@
 - Upgrade Twitter Bootstrap to 2.1.0
 - Rescue more Exceptions
 - Change Job ID to be Hex, rather than Base64, for HTTP safety
+- Use `Airbrake#notify_or_ignore`
 
 2.2.1
 -----------
