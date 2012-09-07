@@ -22,7 +22,7 @@ module Sidekiq
 
     def watchdog(last_words)
       yield
-    rescue => ex
+    rescue Exception => ex
       handle_exception(ex, { :context => last_words })
     end
 

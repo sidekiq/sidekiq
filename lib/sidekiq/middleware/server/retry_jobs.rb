@@ -40,8 +40,8 @@ module Sidekiq
 
         def call(worker, msg, queue)
           yield
-        rescue => e
-          raise unless msg['retry']
+        rescue Exception => e
+          raise e unless msg['retry']
 
           msg['queue'] = queue
           msg['error_message'] = e.message
@@ -72,7 +72,7 @@ module Sidekiq
             # Goodbye dear message, you (re)tried your best I'm sure.
             logger.debug { "Dropping message after hitting the retry maximum: #{msg}" }
           end
-          raise
+          raise e
         end
 
       end

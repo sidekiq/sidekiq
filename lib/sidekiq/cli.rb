@@ -66,6 +66,10 @@ module Sidekiq
     end
 
     def run
+      logger.info "Booting Sidekiq #{Sidekiq::VERSION} with Redis at #{redis {|x| x.client.id}}"
+      logger.info "Running in #{RUBY_DESCRIPTION}"
+      logger.info Sidekiq::LICENSE
+
       @manager = Sidekiq::Manager.new(options)
       poller = Sidekiq::Scheduled::Poller.new
       begin

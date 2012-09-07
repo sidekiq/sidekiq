@@ -1,3 +1,5 @@
+require 'securerandom'
+
 require 'sidekiq/middleware/chain'
 
 module Sidekiq
@@ -44,7 +46,7 @@ module Sidekiq
       item = worker_class.get_sidekiq_options.merge(item)
       item['retry'] = !!item['retry']
       queue = item['queue']
-      item['jid'] = SecureRandom.base64
+      item['jid'] = SecureRandom.hex(12)
 
       pushed = false
       Sidekiq.client_middleware.invoke(worker_class, item, queue) do

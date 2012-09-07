@@ -18,8 +18,6 @@ module Sidekiq
     trap_exit :processor_died
 
     def initialize(options={})
-      logger.info "Booting sidekiq #{Sidekiq::VERSION} with Redis at #{redis {|x| x.client.id}}"
-      logger.info "Running in #{RUBY_DESCRIPTION}"
       logger.debug { options.inspect }
       @count = options[:concurrency] || 25
       @done_callback = nil
@@ -129,6 +127,7 @@ module Sidekiq
               # processor is an actor proxy and we can't call any methods
               # that would go to the actor (since it's busy).  Instead
               # we'll use the object_id to track the worker's data here.
+              processor.terminate if processor.alive?
               msg, queue = @in_progress[processor.object_id]
               conn.lpush("queue:#{queue}", msg)
             end

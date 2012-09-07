@@ -1,10 +1,11 @@
 == slim :_summary
 
-.poll
-  a*{name: 'poll'} href='#{{root_path}}poll' Live Poll
-  span class="poll-status"
+.actions
+  form.pull-left action="#{root_path}reset" method="post"
+    button.btn.btn-small type="submit" title="If you kill -9 Sidekiq, this table can fill up with old data." Clear worker list
+  .pull-right
+    span.poll-status
+    a.btn.btn-small name='poll' href='#{{root_path}}poll' Live Poll
 
 == slim :_workers
 
-form action="#{root_path}reset" method="post"
-  button.btn type="submit" title="If you kill -9 Sidekiq, this table can fill up with old data." Clear worker list

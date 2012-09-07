@@ -4,6 +4,7 @@ require 'sidekiq/client'
 require 'sidekiq/worker'
 require 'sidekiq/redis_connection'
 require 'sidekiq/util'
+require 'sidekiq/stats'
 
 require 'sidekiq/extensions/class_methods'
 require 'sidekiq/extensions/action_mailer'
@@ -13,6 +14,7 @@ require 'sidekiq/rails' if defined?(::Rails::Engine)
 require 'multi_json'
 
 module Sidekiq
+  LICENSE = 'See LICENSE and the LGPL-3.0 for licensing details.'
 
   DEFAULTS = {
     :queues => [],

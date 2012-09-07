@@ -17,7 +17,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency                  'redis', '~> 3'
   gem.add_dependency                  'redis-namespace'
   gem.add_dependency                  'connection_pool', '~> 0.9.2'
-  gem.add_dependency                  'celluloid', '~> 0.11.1'
+  gem.add_dependency                  'celluloid', '~> 0.12.0'
   gem.add_dependency                  'multi_json', '~> 1'
   gem.add_development_dependency      'minitest', '~> 3'
   gem.add_development_dependency      'sinatra'
@@ -25,4 +25,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency      'rake'
   gem.add_development_dependency      'actionmailer', '~> 3'
   gem.add_development_dependency      'activerecord', '~> 3'
+  gem.add_development_dependency      'pry'
 end
