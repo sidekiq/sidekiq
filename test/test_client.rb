@@ -69,6 +69,27 @@ class TestClient < MiniTest::Unit::TestCase
       @redis.verify
     end
 
+    it 'handles perform_in_queue' do
+      @redis.expect :rpush, 1, ['queue:custom_queue', String]
+      pushed = MyWorker.perform_in_queue(:custom_queue, 1, 2)
+      assert pushed
+      @redis.verify
+    end
+
+    it 'handles perform_in_queue on failure' do
+      @redis.expect :rpush, nil, ['queue:custom_queue', String]
+      pushed = MyWorker.perform_in_queue(:custom_queue, 1, 2)
+      refute pushed
+      @redis.verify
+    end
+
+    it 'enqueues messages to redis' do
+      @redis.expect :rpush, 1, ['queue:custom_queue', String]
+      pushed = Sidekiq::Client.enqueue_to(:custom_queue, MyWorker, 1, 2)
+      assert pushed
+      @redis.verify
+    end
+
     class QueuedWorker
       include Sidekiq::Worker
       sidekiq_options :queue => :flimflam, :timeout => 1
