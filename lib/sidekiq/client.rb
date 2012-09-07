@@ -65,22 +65,22 @@ module Sidekiq
       pushed ? item['jid'] : nil
     end
 
-    # Resque compatibility helpers. 
+    # Resque compatibility helpers.
     #
-    # Example usage: 
-    # Sidekiq::Client.enqueue(MyWorker, 'foo', 1, :bat => 'bar')
+    # Example usage:
+    #   Sidekiq::Client.enqueue(MyWorker, 'foo', 1, :bat => 'bar')
     #
     # Messages are enqueued to the 'default' queue.
     #
     def self.enqueue(klass, *args)
-      klass.perform_async(*args)
+      klass.client_push('class' => self, 'args' => args)
     end
 
-    # Example usage: 
-    # Sidekiq::Client.enqueue_to(:queue_name, MyWorker, 'foo', 1, :bat => 'bar')
+    # Example usage:
+    #   Sidekiq::Client.enqueue_to(:queue_name, MyWorker, 'foo', 1, :bat => 'bar')
     #
     def self.enqueue_to(queue, klass, *args)
-      klass.perform_in_queue(queue, *args)
+      klass.client_push('queue' => queue, 'class' => self, 'args' => args)
     end
   end
 end

@@ -35,10 +35,6 @@ module Sidekiq
         client_push('class' => self, 'args' => args)
       end
 
-      def perform_in_queue(queue, *args)
-        client_push('queue' => queue, 'class' => self, 'args' => args)
-      end
-      
       def perform_in(interval, *args)
         int = interval.to_f
         ts = (int < 1_000_000_000 ? Time.now.to_f + int : int)
