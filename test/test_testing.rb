@@ -48,6 +48,7 @@ class TestTesting < MiniTest::Unit::TestCase
 
     before do
       load 'sidekiq/testing.rb'
+      EnqueuedWorker.jobs.clear
     end
 
     after do
@@ -90,6 +91,12 @@ class TestTesting < MiniTest::Unit::TestCase
     it 'stubs the enqueue call' do
       assert_equal 0, EnqueuedWorker.jobs.size
       assert Sidekiq::Client.enqueue(EnqueuedWorker, 1, 2)
+      assert_equal 1, EnqueuedWorker.jobs.size
+    end
+
+    it 'stubs the enqueue_to call' do
+      assert_equal 0, EnqueuedWorker.jobs.size
+      assert Sidekiq::Client.enqueue_to('someq', EnqueuedWorker, 1, 2)
       assert_equal 1, EnqueuedWorker.jobs.size
     end
 
