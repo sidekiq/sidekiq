@@ -1,8 +1,8 @@
 module Sidekiq
-  module Worker
+  class Client
 
     ##
-    # The Sidekiq inline infrastructure overrides the perform_async so that it
+    # The Sidekiq inline infrastructure overrides perform_async so that it
     # actually calls perform instead. This allows workers to be run inline in a
     # testing environment.
     #
@@ -26,10 +26,10 @@ module Sidekiq
     #   ExternalWorker.perform_async
     #   assert_equal 1, $external_variable
     #
-    module ClassMethods
-      alias_method :perform_async_old, :perform_async
-      def perform_async(*args)
-        new.perform(*Sidekiq.load_json(Sidekiq.dump_json(args)))
+    singleton_class.class_eval do
+      alias_method :push_old, :push
+      def push(hash)
+        hash['class'].new.perform(*Sidekiq.load_json(Sidekiq.dump_json(hash['args'])))
         true
       end
     end

@@ -45,10 +45,10 @@ class TestInline < MiniTest::Unit::TestCase
     end
 
     after do
-      Sidekiq::Worker::ClassMethods.class_eval do
-        remove_method :perform_async
-        alias_method :perform_async, :perform_async_old
-        remove_method :perform_async_old
+      Sidekiq::Client.singleton_class.class_eval do
+        remove_method :push
+        alias_method :push, :push_old
+        remove_method :push_old
       end
     end
 

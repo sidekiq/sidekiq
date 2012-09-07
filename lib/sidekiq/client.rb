@@ -73,14 +73,14 @@ module Sidekiq
     # Messages are enqueued to the 'default' queue.
     #
     def self.enqueue(klass, *args)
-      klass.client_push('class' => self, 'args' => args)
+      klass.client_push('class' => klass, 'args' => args)
     end
 
     # Example usage:
     #   Sidekiq::Client.enqueue_to(:queue_name, MyWorker, 'foo', 1, :bat => 'bar')
     #
     def self.enqueue_to(queue, klass, *args)
-      klass.client_push('queue' => queue, 'class' => self, 'args' => args)
+      klass.client_push('queue' => queue, 'class' => klass, 'args' => args)
     end
   end
 end
