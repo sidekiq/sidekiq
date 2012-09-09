@@ -7,7 +7,7 @@ module Sidekiq
   module Util
     include ExceptionHandler
 
-    EXPIRY = 60 * 60
+    EXPIRY = 60 * 60 * 24
 
     def constantize(camel_cased_word)
       names = camel_cased_word.split('::')
