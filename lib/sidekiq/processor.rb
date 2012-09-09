@@ -15,7 +15,7 @@ module Sidekiq
     include Util
     include Celluloid
 
-    task_class Celluloid::TaskThread
+#    exclusive :process
 
     def self.default_middleware
       Middleware::Chain.new do |m|
