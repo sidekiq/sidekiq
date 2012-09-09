@@ -9,7 +9,7 @@ Gem::Specification.new do |gem|
   gem.license       = "LGPL-3.0"
 
   gem.executables   = ['sidekiq', 'sidekiqctl']
-  gem.files         = `git ls-files`.split("\n")
+  gem.files         = `git ls-files | grep -v myapp`.split("\n")
   gem.test_files    = `git ls-files -- test/*`.split("\n")
   gem.name          = "sidekiq"
   gem.require_paths = ["lib"]
