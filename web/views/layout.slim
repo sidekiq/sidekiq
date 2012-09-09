@@ -2,7 +2,7 @@ doctype html
 html
   head
     link href='#{{root_path}}assets/application.css' media='screen' rel='stylesheet' type='text/css'
-    title Sidekiq
+    title= Sidekiq::NAME
   body
     .navbar.navbar-fixed-top.navbar-inverse
       .navbar-inner
@@ -12,7 +12,7 @@ html
             span.icon-bar
             span.icon-bar
           a.brand href='#{{root_path}}'
-            | Sidekiq
+            = Sidekiq::NAME
           div.nav-collapse
             ul.nav
               li

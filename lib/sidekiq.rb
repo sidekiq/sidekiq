@@ -14,6 +14,7 @@ require 'sidekiq/rails' if defined?(::Rails::Engine)
 require 'multi_json'
 
 module Sidekiq
+  NAME = "Sidekiq"
   LICENSE = 'See LICENSE and the LGPL-3.0 for licensing details.'
 
   DEFAULTS = {
