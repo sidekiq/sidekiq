@@ -1,3 +1,4 @@
+require 'socket'
 require 'celluloid'
 require 'sidekiq/util'
 
@@ -105,7 +106,7 @@ module Sidekiq
     end
 
     def hostname
-      @h ||= `hostname`.strip
+      @h ||= Socket.gethostname
     end
   end
 end
