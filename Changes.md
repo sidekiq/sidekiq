@@ -1,3 +1,8 @@
+2.3.1
+-----------
+
+- Add support for multiple processes per host to Capistrano recipe
+
 2.3.0
 -----------
 
