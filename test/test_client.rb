@@ -99,6 +99,14 @@ class TestClient < MiniTest::Unit::TestCase
     end
   end
 
+  describe 'batch' do
+    it 'can push a large set of jobs at once' do
+      a = Time.now
+      count = Sidekiq::Client.push_batch('class' => QueuedWorker, 'args' => (1..1_000).to_a.map { |x| Array(x) })
+      assert_equal 1_000, count
+    end
+  end
+
   class BaseWorker
     include Sidekiq::Worker
     sidekiq_options 'retry' => 'base'
