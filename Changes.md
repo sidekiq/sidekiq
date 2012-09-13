@@ -1,6 +1,7 @@
 2.3.1
 -----------
 
+- Re-enable Celluloid::Actor#defer to fix stack overflow issues [#398]
 - Add support for multiple processes per host to Capistrano recipe
 
 2.3.0

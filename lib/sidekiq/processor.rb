@@ -32,19 +32,21 @@ module Sidekiq
     end
 
     def process(msgstr, queue)
-      begin
-        msg = Sidekiq.load_json(msgstr)
-        klass  = constantize(msg['class'])
-        worker = klass.new
+      defer do
+        begin
+          msg = Sidekiq.load_json(msgstr)
+          klass  = constantize(msg['class'])
+          worker = klass.new
 
-        stats(worker, msg, queue) do
-          Sidekiq.server_middleware.invoke(worker, msg, queue) do
-            worker.perform(*cloned(msg['args']))
+          stats(worker, msg, queue) do
+            Sidekiq.server_middleware.invoke(worker, msg, queue) do
+              worker.perform(*cloned(msg['args']))
+            end
           end
+          rescue Exception => ex
+            handle_exception(ex, msg || { :message => msgstr })
+          raise
         end
-      rescue Exception => ex
-        handle_exception(ex, msg || { :message => msgstr })
-        raise
       end
       @boss.processor_done!(current_actor)
     end
