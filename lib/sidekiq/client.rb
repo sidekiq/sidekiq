@@ -49,7 +49,7 @@ module Sidekiq
             conn.rpush("queue:#{normed['queue']}", payload)
           end
         end
-      end
+      end if normed
       pushed ? normed['jid'] : nil
     end
 
