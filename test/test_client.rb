@@ -99,6 +99,14 @@ class TestClient < MiniTest::Unit::TestCase
     end
   end
 
+  describe 'batch' do
+    it 'can push a large set of jobs at once' do
+      a = Time.now
+      count = Sidekiq::Client.push_batch('class' => QueuedWorker, 'args' => (1..1_000).to_a.map { |x| Array(x) })
+      assert_equal 1_000, count
+    end
+  end
+
   class BaseWorker
     include Sidekiq::Worker
     sidekiq_options 'retry' => 'base'
@@ -107,6 +115,26 @@ class TestClient < MiniTest::Unit::TestCase
   end
   class BWorker < BaseWorker
     sidekiq_options 'retry' => 'b'
+  end
+
+  describe 'client middleware' do
+
+    class Stopper
+      def call(worker_class, message, queue)
+        yield if message['args'].first.odd?
+      end
+    end
+
+    it 'can stop some of the jobs from pushing' do
+      Sidekiq.client_middleware.add Stopper
+      begin
+        assert_equal nil, Sidekiq::Client.push('class' => MyWorker, 'args' => [0])
+        assert_match /[0-9a-f]{12}/, Sidekiq::Client.push('class' => MyWorker, 'args' => [1])
+        assert_equal 1, Sidekiq::Client.push_batch('class' => MyWorker, 'args' => [[0], [1]])
+      ensure
+        Sidekiq.client_middleware.remove Stopper
+      end
+    end
   end
 
   describe 'inheritance' do
