@@ -1,6 +1,8 @@
 2.3.1
 -----------
 
+- Add Sidekiq::Client.push\_batch for bulk adding of jobs to Redis.
+  My own simple test case shows pushing 10,000 jobs goes from 5 sec to 1.5 sec.
 - Re-enable Celluloid::Actor#defer to fix stack overflow issues [#398]
 - Add support for multiple processes per host to Capistrano recipe
 
