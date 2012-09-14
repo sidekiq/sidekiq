@@ -60,7 +60,9 @@ module Sidekiq
             msg['error_backtrace'] = e.backtrace[0..msg['backtrace'].to_i]
           end
 
-          if count <= MAX_COUNT
+          if e.is_a?(Sidekiq::PermanentError)
+            logger.debug { "Dropping message because of an error that will not go away" }
+          elsif count <= MAX_COUNT
             delay = DELAY.call(count)
             logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
             retry_at = Time.now.to_f + delay
