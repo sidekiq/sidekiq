@@ -66,7 +66,7 @@ module Sidekiq
     # Returns the number of jobs pushed or nil if the pushed failed.  The number of jobs
     # pushed can be less than the number given if the middleware stopped processing for one
     # or more jobs.
-    def self.push_batch(items)
+    def self.push_bulk(items)
       normed = normalize_item(items)
       payloads = items['args'].map do |args|
         _, payload = process_single(items['class'], normed.merge('args' => args, 'jid' => SecureRandom.hex(12)))

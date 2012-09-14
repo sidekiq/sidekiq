@@ -99,10 +99,10 @@ class TestClient < MiniTest::Unit::TestCase
     end
   end
 
-  describe 'batch' do
+  describe 'bulk' do
     it 'can push a large set of jobs at once' do
       a = Time.now
-      count = Sidekiq::Client.push_batch('class' => QueuedWorker, 'args' => (1..1_000).to_a.map { |x| Array(x) })
+      count = Sidekiq::Client.push_bulk('class' => QueuedWorker, 'args' => (1..1_000).to_a.map { |x| Array(x) })
       assert_equal 1_000, count
     end
   end
@@ -130,7 +130,7 @@ class TestClient < MiniTest::Unit::TestCase
       begin
         assert_equal nil, Sidekiq::Client.push('class' => MyWorker, 'args' => [0])
         assert_match /[0-9a-f]{12}/, Sidekiq::Client.push('class' => MyWorker, 'args' => [1])
-        assert_equal 1, Sidekiq::Client.push_batch('class' => MyWorker, 'args' => [[0], [1]])
+        assert_equal 1, Sidekiq::Client.push_bulk('class' => MyWorker, 'args' => [[0], [1]])
       ensure
         Sidekiq.client_middleware.remove Stopper
       end
