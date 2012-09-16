@@ -37,5 +37,9 @@ module Sidekiq
     def process_id
       Process.pid
     end
+
+    def hostname
+      Socket.gethostname
+    end
   end
 end

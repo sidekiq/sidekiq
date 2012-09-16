@@ -67,7 +67,7 @@ module Sidekiq
         conn.multi do
           conn.sadd('workers', self)
           conn.setex("worker:#{self}:started", EXPIRY, Time.now.to_s)
-          hash = {:queue => queue, :payload => msg, :run_at => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z")}
+          hash = {:queue => queue, :payload => msg, :run_at => Time.now.to_i }
           conn.setex("worker:#{self}", EXPIRY, Sidekiq.dump_json(hash))
         end
       end
@@ -105,10 +105,6 @@ module Sidekiq
       ary.map do |val|
         SINGLETON_CLASSES.include?(val.class) ? val : val.clone
       end
-    end
-
-    def hostname
-      @h ||= Socket.gethostname
     end
   end
 end
