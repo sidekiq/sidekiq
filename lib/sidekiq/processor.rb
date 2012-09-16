@@ -1,4 +1,3 @@
-require 'socket'
 require 'celluloid'
 require 'sidekiq/util'
 

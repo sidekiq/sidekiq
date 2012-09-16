@@ -1,3 +1,4 @@
+require 'socket'
 require 'sidekiq/exception_handler'
 
 module Sidekiq
