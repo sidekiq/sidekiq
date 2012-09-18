@@ -144,4 +144,9 @@ class TestClient < MiniTest::Unit::TestCase
     end
   end
 
+  describe 'item normalization' do
+    it 'defaults retry to true' do
+      assert_equal true, Sidekiq::Client.normalize_item('class' => QueuedWorker, 'args' => [])['retry']
+    end
+  end
 end
