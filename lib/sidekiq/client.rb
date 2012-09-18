@@ -118,12 +118,12 @@ module Sidekiq
       raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") if !item['class'] || !item['args']
       raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item['class'].ancestors.inspect}") if !item['class'].is_a?(Class) || !item['class'].respond_to?('get_sidekiq_options')
 
-      normalized_item = item.dup
+      normalized_item = item['class'].get_sidekiq_options.merge(item.dup)
       normalized_item['class'] = normalized_item['class'].to_s
       normalized_item['retry'] = !!normalized_item['retry']
       normalized_item['jid'] = SecureRandom.hex(12)
 
-      item['class'].get_sidekiq_options.merge normalized_item
+      normalized_item
     end
 
   end
