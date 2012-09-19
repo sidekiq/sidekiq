@@ -42,6 +42,10 @@ module Sidekiq
       end
       alias_method :perform_at, :perform_in
 
+      def perform_bulk_async(args)
+        Sidekiq::Client.push_bulk('class' => self, 'args' => args)
+      end
+
       ##
       # Allows customization for this type of Worker.
       # Legal options:
@@ -71,7 +75,6 @@ module Sidekiq
       def client_push(*args) # :nodoc:
         Sidekiq::Client.push(*args)
       end
-
     end
   end
 end
