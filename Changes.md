@@ -1,3 +1,8 @@
+2.3.2
+-----------
+
+- Fix retry.  2.3.1 accidentally disabled it.
+
 2.3.1
 -----------
 
