@@ -23,7 +23,6 @@ module Sidekiq
     :require => '.',
     :environment => nil,
     :timeout => 8,
-    :enable_rails_extensions => true,
   }
 
   def self.options
