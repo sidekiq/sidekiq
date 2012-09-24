@@ -71,8 +71,10 @@ module Sidekiq
       @redis = RedisConnection.create(hash)
     elsif hash.is_a?(ConnectionPool)
       @redis = hash
+    elsif hash.is_a?(Redis) || hash.is_a?(Redis::Namespace)
+      @redis = hash
     else
-      raise ArgumentError, "redis= requires a Hash or ConnectionPool"
+      raise ArgumentError, "redis= requires a Hash, ConnectionPool, Redis or Redis::Namespace object"
     end
   end
 
