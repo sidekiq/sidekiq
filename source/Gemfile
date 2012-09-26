@@ -1,0 +1,51 @@
+source :rubygems
+
+# session store - disabled by default
+# gem 'dalli', :require => 'rack/session/dalli'
+# gem 'kgio'
+
+gem 'settingslogic'
+gem 'rake'
+
+# rack
+gem 'rack'
+gem 'rack-contrib', :require => 'rack/contrib'
+gem 'rack-protection', :require => 'rack/protection'
+
+# sinatra
+gem 'sinatra'
+gem 'sinatra-flash', :require => 'sinatra/flash' # enables flash[:notice] && flash[:error]
+
+# faster better stronger
+gem 'erubis'
+
+# email notifications
+gem 'pony'
+
+# workers, disabled for now.
+# gem 'sidekiq'
+
+gem 'listen'
+gem 'heroku'
+
+
+group :development do 
+  gem 'growl'
+  gem 'rb-fsevent'
+  gem 'rack-livereload'
+  gem 'guard' , '~> 1.3.1'
+  gem 'guard-livereload'
+end
+
+group :assets do
+  # sprockets
+  gem 'sprockets'
+  gem 'sprockets-sass'
+  gem 'sprockets-helpers'
+  gem 'compass'
+  gem 'compass'
+  gem 'uglifier'
+  gem 'oily_png'
+  gem 'handlebars_assets'
+  gem 'coffee-script'
+end

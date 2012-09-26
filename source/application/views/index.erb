@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
@@ -6,29 +5,37 @@
 <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <link rel="shortcut icon" href="/images/favicon.ico">
-  <title>Sidekiq - Simple, efficient message processing for Ruby.</title>
-  <meta name="description" content="">
+  <title><%= @title %></title>
+  <meta name="description" content="Simple, efficient message processing for Ruby">
+  <meta property="og:title" content="<%=@title%>" />
+  <meta property="og:type" content="company" />
+  <meta property="og:site_name" content="Simple, efficient message processing for Ruby" />
+  <meta property="og:url" content="http://sidekiq.org" />
+  <meta property="og:image" content="null" />
+  <meta property="og:description" content="<%=@description%>" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <link rel="stylesheet" href="/assets/vendor-1d5fb2469b6334862d0c1dd6d2ec177d.css" media="all">
-  <link rel="stylesheet" href="/assets/style-dece47650a19e83806b845522acaac51.css" media="all">
+  <link rel="shortcut icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon-57x57-precomposed.png" />
+  <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72-precomposed.png" />
+  <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114-precomposed.png" />
+  <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144-precomposed.png" />
+
+  <link rel="stylesheet" href="<%= stylesheet_path('vendor') %>" media="all">
+  <link rel="stylesheet" href="<%= stylesheet_path('style') %>" media="all">
 
 </head>
 <body data-target=".navbar">
   <!--[if lt IE 7]>
     <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
   <![endif]-->
-
   <div class="hero-unit centered" id="top">
     <h1 class='title reset'>
-      <span class='image'><img src="/assets/logo-107352d9ca5a092d93beb2dc101a313f.png" class='logo' /></span><span class='text'>Sidekiq</span>
+      <span class='image'><img src="<%=image_path('logo.png')%>" class='logo' /></span><span class='text'>Sidekiq</span>
     </h1>
     <p>Simple, efficient message processing for Ruby.</p>
   </div>
-
-
 
   <div id="page">
     <div class="container">
@@ -115,7 +122,7 @@ end</pre>
         <div class="container">
           <ul class="nav">
             <li>
-              <a class="brand" href="#top"><img src="/assets/logo-107352d9ca5a092d93beb2dc101a313f.png" class='smallogo'/><span>Sidekiq</span></a>
+              <a class="brand" href="#top"><img src="<%=image_path('logo.png')%>" class='smallogo'/><span>Sidekiq</span></a>
             </li>
             <li>
               <a href="http://blog.carbonfive.com/2011/04/19/concurrency-with-actors/">Actors</a>
@@ -151,10 +158,9 @@ end</pre>
 
 
   <script src='//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js'></script>
-  <script src='/assets/vendor-502658aa00f8220b9f3acfcc99d51763.js'></script>
-  <script src='/assets/app-44eaabcdbf7b494dfb2c076bba94f911.js'></script>
+  <script src='<%= javascript_path('vendor') %>'></script>
+  <script src='<%= javascript_path('app') %>'></script>
   <style type="text/css">
   </style>
 </body>
 </html>
-

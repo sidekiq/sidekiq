@@ -1,0 +1,52 @@
+defaults: &defaults
+  livereload:   false
+  dalli:        false
+  debug:        false
+  logging:      false
+  serve_static: false
+  app_title:    Sidekiq
+  google_analytics: UA-XXX-XXX
+  notifications:
+    sender:     service@example.com
+    recipients: 
+      - you@example.com
+      - me@example.com
+      - him@example.com
+  sprockets:
+    digest: true
+    assets_prefix: /assets
+    precompile: 
+      - app.js
+      - vendor.js
+      - vendor.css
+      - style.css
+  paths:
+    public_folder: public
+    js:          javascripts
+    css:         stylesheets
+    images:      images
+    templates:   templates
+    fonts:       stylesheets/fonts
+    static:
+      - images
+      - fonts
+
+development:
+  <<: *defaults
+  livereload: true
+  debug: true
+  logging: true
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults
+  livereload: false
+  google_analytics: <%=ENV['GA_CODE']%>
+  notifications:
+    sender: <%=ENV['NOTIFICATIONS_SENDER']%>
+    recipients:
+      - you@example.com
+      - me@example.com
+      - him@example.com

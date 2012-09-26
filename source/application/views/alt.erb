@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <link rel="shortcut icon" href="<%= image_path('favicon.ico') %>">
+  <title><%= @title %></title>
+  <meta name="description" content="">
+  <meta property="og:title" content="<%=@title%>" />
+  <meta property="og:type" content="company" />
+  <meta property="og:site_name" content="site_name" />
+  <meta property="og:url" content="http://site_url" />
+  <meta property="og:image" content="null" />
+  <meta property="og:description" content="<%=@description%>" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <link rel="stylesheet" href="<%= stylesheet_path('vendor') %>" media="all">
+  <link rel="stylesheet" href="<%= stylesheet_path('style') %>" media="all">
+
+</head>
+<body data-target=".navbar">
+  <!--[if lt IE 7]>
+    <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+  <![endif]-->
+
+  <div class="hero-unit centered" id="top">
+    <h1 class='title reset'>
+      <span class='image'><img src="<%=image_path('logo.png')%>" class='logo' /></span><span class='text'>Sidekiq</span>
+    </h1>
+    <p>Simple, efficient message processing for Ruby.</p>
+    <div class="container">
+      <div class="row">
+        <div class="span3 offset3">
+          <a class="btn btn-large btn-block btn-primary" id="download_btn" href="https://github.com/mperham/sidekiq">Get it on GitHub</a>
+        </div>
+        <div class="span3">
+          <a class="btn btn-large btn-block" href="https://github.com/mperham/sidekiq/wiki">Learn more &rarr;</a>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+
+
+<!--   <div class="navbar-container">
+    <div class="navbar navbar-static-top affix-top" data-offset-top="255" data-spy="affix">
+      <div class="navbar-inner">
+        <div class="container">
+          <ul class="nav">
+            <li>
+              <a class="brand" href="#top"><img src="<%=image_path('logo.png')%>" class='smallogo'/><span>Sidekiq</span></a>
+            </li>
+            <li>
+              <a href="http://blog.carbonfive.com/2011/04/19/concurrency-with-actors/">Actors</a>
+            </li>
+            <li>
+              <a href="http://www.mikeperham.com/">Blog</a>
+            </li>
+            <li>
+              <a href="http://github.com/mperham/sidekiq/wiki">Wiki</a>
+            </li>
+            <li>
+              <a href="http://github.com/mperham/sidekiq">Source</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div> -->
+
+  <div id="page">
+    <div class="container">
+      <div class="row">
+        <div class="span3" id="call_to_action">
+          <ul class="nav nav-stacked nav-list">
+            <li> <a class="brand" href="#top"><img src="<%=image_path('logo.png')%>" class='smallogo'/><span>Sidekiq</span></a> </li>
+            <li> <a href="http://blog.carbonfive.com/2011/04/19/concurrency-with-actors/">Actors</a> </li>
+            <li> <a href="http://www.mikeperham.com/">Blog</a> </li>
+            <li> <a href="http://github.com/mperham/sidekiq/wiki">Wiki</a> </li>
+            <li> <a href="http://github.com/mperham/sidekiq">Source</a> </li>
+          </ul>
+        </div>
+
+        <div class="span9">
+          <h2 class='subheader'>
+            What if <strong>1</strong> Sidekiq process could do the work of <strong>20</strong> Resque or DelayedJob processes?
+          </h2>
+
+
+
+          <div class="page-header">
+            <h3>Install It</h3>
+          </div>
+          <div class="row">
+            <div class="span4">
+              <p>
+                Put sidekiq in your <tt>Gemfile</tt>:
+                <pre class='prettyprint'>gem 'sidekiq'</pre>
+              </p>
+            </div>
+            <div class="span4 offset1">
+              <p>
+                Install the gem with <a href='http://gembundler.com/'>Bundler</a>:
+                <pre class='prettyprint'>bundle install</pre>
+              </p>
+            </div>
+          </div>
+
+
+          <div class="page-header">
+            <h3>Call It</h3>
+          </div>
+          <div class="row">
+            <div class="span4">
+              <p>
+               Place your worker classes in <tt>app/workers</tt>: 
+                <pre class='prettyprint'>
+# app/workers/hard_worker.rb
+class HardWorker
+  include Sidekiq::Worker
+
+  def perform(name, count)
+    puts 'Doing hard work'
+  end
+end</pre>
+             </p>
+            </div>
+            <div class="span4 offset1">
+              <p>
+                In your controller action or model, call <code>HardWorker.perform_async</code> : 
+              </p>
+              <pre class='prettyprint'>HardWorker.perform_async('bob', 5)</pre>
+            </div>
+          </div>
+
+
+
+          <div class="page-header">
+            <h3>Start It</h3>
+          </div>
+          <div class="row">
+            <div class="span4">
+              <p>
+                Finally, start sidekiq from the root directory of your Rails app.
+              </p>
+              <pre class='prettyprint'>bundle exec sidekiq</pre>
+            </div>
+            <div class="span4 offset1">
+              <p>
+                <a class='btn btn-large btn-block' href="https://github.com/mperham/sidekiq/wiki">Learn More &rarr;</a>
+              </p>
+            </div>
+          </div>
+
+        </div>  
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <div class='row'>
+        <div class='span4'>
+          Modified <a href='http://twitter.github.com/bootstrap/'>Twitter Bootstrap</a>
+          design by <a href='http://hull.io'>the hullers</a>
+        </div>
+        <div class='span8'>
+          &copy; 2012 Mike Perham,
+          <a href="http://www.twitter.com/mperham">@mperham</a> /
+          <a href="http://www.mikeperham.com">mikeperham.com</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+
+  <script src='//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js'></script>
+  <script src='<%= javascript_path('vendor') %>'></script>
+  <script src='<%= javascript_path('app') %>'></script>
+  <style type="text/css">
+  </style>
+</body>
+</html>

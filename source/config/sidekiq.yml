@@ -1,0 +1,11 @@
+---
+:concurrency: 50
+:pidfile: ./tmp/worker.pid
+:require: ./application/workers.rb
+:queues:
+  - [savages, 4]
+  - [cleanup, 1]
+  - [covers, 2]
+  - [profiles,2]
+  - [notifs, 1]
+  - [default, 1]
