@@ -1,97 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>sidekiq - simple efficient message processing for Ruby and Rails</title>
-    <meta content="sidekiq - simple message processing for Ruby and Rails" name="description">
-    <meta name="author" content="Mike Perham">
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient message processing for Ruby">
+  <meta property="og:title" content="Sidekiq" />
+  <meta property="og:type" content="company" />
+  <meta property="og:site_name" content="Simple, efficient message processing for Ruby" />
+  <meta property="og:url" content="http://sidekiq.org" />
+  <meta property="og:image" content="null" />
+  <meta property="og:description" content="Sidekiq" />
 
-    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
-    <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-    <!-- Le styles -->
-    <link href="css/bootstrap.css" rel="stylesheet">
-    <link href="css/site.css" rel="stylesheet">
-    <link href="css/bootstrap-responsive.css" rel="stylesheet">
-    <link href="css/google-code-prettify.css" rel="stylesheet">
+  <link rel="shortcut icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" href="css/bootstrap.css" media="all">
+  <link rel="stylesheet" href="css/bootstrap-responsive.css" media="all">
+  <link rel="stylesheet" href="css/style.css" media="all">
 
-    <!-- Le fav and touch icons -->
-    <link rel="shortcut icon" href="images/favicon.ico">
-    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="apple-touch-icon" href="images/apple-touch-icon-72x72.png">
-    <link rel="apple-touch-icon" href="images/apple-touch-icon-114x114.png">
-  </head>
+</head>
+<body data-target=".navbar">
+  <!--[if lt IE 7]>
+    <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+  <![endif]-->
+  <div class="hero-unit centered" id="top">
+    <h1 class='title reset'>
+      <span class='image'><img src="img/logo.png" class='logo' /></span><span class='text'>Sidekiq</span>
+    </h1>
+    <p>Simple, efficient message processing for Ruby.</p>
+  </div>
 
-  <body>
+  <div id="page">
+    <div class="container">
+      <div class="row tagline">
+        <div class="span8">
+          <h2 class='subheader'>
+            What if <strong>1</strong> Sidekiq process could do the work of <strong>20</strong> Resque or DelayedJob processes?
+          </h2>
+        </div>
 
-    <div class="navbar navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <a class="brand" href="#">Sidekiq</a>
-          <div class="nav-collapse">
-            <ul class="nav">
-              <li class='active'>
-                <a href="#">Introduction</a>
-              </li>
-              <li>
-                <a href="http://blog.carbonfive.com/2011/04/19/concurrency-with-actors/">Actors</a>
-              </li>
-              <li>
-                <a href="http://www.mikeperham.com/">Blog</a>
-              </li>
-              <li>
-                <a href="http://github.com/mperham/sidekiq/wiki">Wiki</a>
-              </li>
-              <li>
-                <a href="http://github.com/mperham/sidekiq">Source</a>
-              </li>
-            </ul>
-          </div><!--/.nav-collapse -->
+        <div class="span3 offset1" id="call_to_action">
+          <a class="btn btn-large btn-block btn-primary" id="download_btn" href="https://github.com/mperham/sidekiq">Get it on GitHub</a>
+          <a class="btn btn-large btn-block" href="https://github.com/mperham/sidekiq/wiki">Learn more &rarr;</a>
         </div>
       </div>
-    </div>
 
-    <div class="container">
-
-      <!-- Main hero unit for a primary marketing message or call to action -->
-      <div class="hero-unit">
-        <h1>Simple, efficient message processing for Ruby.</h1>
-        <p>
-          What if <strong>1</strong> Sidekiq process could
-          do the work of <strong>20</strong> Resque or DelayedJob processes?
-        </p>
-        <p>
-          <a class="btn btn-success btn-large"
-          href="https://github.com/mperham/sidekiq">Get it on GitHub</a>
-          <a class="btn btn-large" href="https://github.com/mperham/sidekiq/wiki">Learn more &raquo;</a>
-        </p>
-      </div>
-
-      <!-- Example row of columns -->
       <div class="row">
-        <div class="span4">
-          <h2>Install It</h2>
+
+        <section class='span3' id="install">
+          <div class="page-header">
+            <h4>Install It</h4>
+          </div>
+
           <p>
             Put sidekiq in your <tt>Gemfile</tt>:
           </p>
+
           <pre class='prettyprint'>gem 'sidekiq'</pre>
+
           <p>
             Install the gem with <a href='http://gembundler.com/'>Bundler</a>:
           </p>
-          <pre>bundle install</pre>          
-        </div>
-        <div class="span4">
-          <h2>Call It</h2>
+
+          <pre class='prettyprint'>bundle install</pre>          
+        </section>
+
+        <section class='span4 offset1' id="call">
+          <div class="page-header">
+            <h4>Call It</h4>
+          </div>
+
           <p>
             Place your worker classes in <tt>app/workers</tt>:
           </p>
+
           <pre class='prettyprint'>
 # app/workers/hard_worker.rb
 class HardWorker
@@ -101,51 +86,77 @@ class HardWorker
     puts 'Doing hard work'
   end
 end</pre>
+
           <p>
-            In your controller action or model, call <tt>HardWorker.perform_async</tt>:
+            In your controller action or model, call <code>HardWorker.perform_async</code> :
           </p>
+
           <pre class='prettyprint'>HardWorker.perform_async('bob', 5)</pre>
-          <p><a class='btn'
-          href="https://github.com/mperham/sidekiq/wiki">Learn More &rarr;</a></p>
-       </div>
-        <div class="span4">
-          <h2>Start It</h2>
+
+        </section>
+
+        <section class='span3 offset1' id="start">
+          <div class="page-header">
+            <h4>Start It</h4>
+          </div>
           <p>
             Finally, start sidekiq from the root directory of your Rails
             app.
           </p>
-          <pre>bundle exec sidekiq</pre>
-          <p><a class='btn'
-          href="https://github.com/mperham/sidekiq/wiki">Learn More &rarr;</a></p>
-        </div>
+
+          <pre class='prettyprint'>bundle exec sidekiq</pre>
+
+        </section>
       </div>
 
-      <hr>
+    </div>
+  </div>
 
-      <footer>
-        <p id='design'>
-          Modified <a href='http://twitter.github.com/bootstrap/'>Twitter
-          Bootstrap</a> design by
-          <a href='http://twitter.com/wbruce'>Bruce Williams</a>
-        </p>
-        <p id='attribution'>
+  <div class="navbar-container">
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <ul class="nav">
+            <li>
+              <a class="brand" href="#top"><img src="img/logo.png" class='smallogo'/><span>Sidekiq</span></a>
+            </li>
+            <li>
+              <a href="http://blog.carbonfive.com/2011/04/19/concurrency-with-actors/">Actors</a>
+            </li>
+            <li>
+              <a href="http://www.mikeperham.com/">Blog</a>
+            </li>
+            <li>
+              <a href="http://github.com/mperham/sidekiq/wiki">Wiki</a>
+            </li>
+            <li>
+              <a href="http://github.com/mperham/sidekiq">Source</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <div class='row'>
+        <span class='edits'>
+          Modified <a href='http://twitter.github.com/bootstrap/'>Twitter Bootstrap</a>
+          design by <a href='http://hull.io'>the hullers</a>
+        </span>
           &copy; 2012 Mike Perham,
           <a href="http://www.twitter.com/mperham">@mperham</a> /
           <a href="http://www.mikeperham.com">mikeperham.com</a>
-        </p>
-      </footer>
+      </div>
+    </div>
+  </footer>
 
-    </div> <!-- /container -->
 
-    <!-- Le javascript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster
-    -->
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="js/google-code-prettify.js"></script>
-    <script>
-      $(function() { prettyPrint(); } )
-    </script>
-    <script src="js/bootstrap.min.js"></script>
-  </body>
+  <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js'></script>
+  <script src='js/bootstrap.js'></script>
+  <script src='js/bootstrap-transition.js'></script>
+  <script src='js/google-code-prettify.js'></script>
+  <script src='js/app.js'></script>
+</body>
 </html>
