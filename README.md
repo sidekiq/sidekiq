@@ -16,4 +16,4 @@ Here's a summary of our edits.
 * Examples for compass spriting, and webfonts inclusion
 * Ready for Pow…
 
-For the rest, please checkout the original [here][l3ck](https://github.com/l3ck/sinatra-boilerplate)
+For the rest, please checkout the original [here](https://github.com/l3ck/sinatra-boilerplate)
