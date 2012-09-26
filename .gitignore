@@ -1,2 +1,5 @@
 .sass-cache*
-public/assets*
+public/assets/*
+
+.DS_Store
+/source/public/assets/
