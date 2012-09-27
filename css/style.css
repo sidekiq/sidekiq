@@ -53,7 +53,7 @@ font-size: 32px
 
 }
 .hero-unit {
-  background: none
+  background: none;
   padding: 40px;
 }
 @media (max-width: 500px) {.hero-unit {
@@ -101,7 +101,7 @@ margin-right: 40px
 padding: 0px 20px 40px 20px
 }
 .tagline {
-margin-bottom: 40px
+margin-bottom: 20px
 }
 .centered {
 text-align: center
