@@ -1,0 +1,44 @@
+@import "compass";
+
+// $main               : #149D63;
+
+$off_white             : #f3f3f3;
+$main                  : saturate(#B1003E, 10%);
+$active                : darken($main, 20%);
+$dark_gray             : lighten(#242222, 20%);
+$light_gray            : #FAFAFA;
+
+
+$gradient              : $light_gray;
+$gradient_dark         : darken($light_gray, 5%);
+
+$primary_gradient      : $main;
+$primary_gradient_dark : darken($primary_gradient, 5%);
+
+$danger_gradient      : saturate($main, 20%);
+$danger_gradient_dark : darken($danger_gradient, 5%);
+
+
+
+$highlight_color       : $main;
+$text                  : $dark_gray;
+$title_color           : $main;
+$link_color            : $main;
+$link_active_color     : $active;
+
+$background            : $off_white;
+
+$btn                   : $gradient;
+$btn_dark              : $gradient_dark;
+$btn_gradient          : linear-gradient($btn, $btn_dark);
+
+$btn_primary           : $primary_gradient;
+$btn_primary_dark      : $primary_gradient_dark;
+$btn_primary_gradient  : linear-gradient($primary_gradient,$primary_gradient_dark);
+
+$btn_danger_dark      : $primary_gradient_dark;
+$btn_danger_gradient  : linear-gradient($danger_gradient,$danger_gradient_dark);
+
+$title_primary_gradient:linear-gradient($primary_gradient,darken($primary_gradient_dark, 20%));
+$smooth_shadow         : 0px 0px 2px rgba(0,0,0,0.4);
+$highlight             : 0px 1px 0px white;

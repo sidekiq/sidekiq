@@ -1,0 +1,13 @@
+.navbar-inner
+  .container
+    a.btn.btn-navbar data-toggle="collapse" data-target=".nav-collapse"
+      span.icon-bar
+      span.icon-bar
+      span.icon-bar
+    a.brand href='#{{root_path}}'
+      = Sidekiq::NAME
+    div.nav-collapse
+      ul.nav
+        - tabs.each do |title, url|
+          li class="#{(current_path==url) ? 'active':''}"
+            a href='#{{root_path}}#{{url}}' #{title}

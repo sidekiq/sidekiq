@@ -10,3 +10,7 @@ gem 'sqlite3'
 group :test do
   gem 'simplecov', :require => false
 end
+
+group :development do
+  gem 'compass'
+end

@@ -25,31 +25,55 @@ $(function() {
 
   $('a[name=poll]').data('polling', false);
 
+  pollStatus = $('.poll-status')
+  pollStatusText = pollStatus.find('.text')
+  pollStatusBadge = pollStatus.find('.badge')
+
+  pollStatusBadge.hide();
+
   $('a[name=poll]').on('click', function(e) {
     e.preventDefault();
+
     var pollLink = $(this);
+
     if (pollLink.data('polling')) {
+
       clearInterval(pollLink.data('interval'));
-      pollLink.text('Live Poll');
-      $('.poll-status').text('');
-    }
-    else {
+      pollLink.text(pollLink.data('text'));
+
+      pollStatus.hide('');
+      pollStatusBadge.hide();
+
+    } else {
+
       var href = pollLink.attr('href');
-      pollLink.data('interval', setInterval(function() {
-        $.get(href, function(data) {
-          var responseHtml = $(data);
-          $('.hero-unit').replaceWith(responseHtml.find('.hero-unit'));
-          $('.workers').replaceWith(responseHtml.find('.workers'));
-          $('time').timeago();
-        });
-        var currentTime = new Date();
-        $('.poll-status').text('Last polled at: ' + currentTime.getHours() + ':' + pad(currentTime.getMinutes()) + ':' + pad(currentTime.getSeconds()));
-      }, 2000));
-      $('.poll-status').text('Starting to poll...');
+
+      pollLink.data('text', pollLink.text());
       pollLink.text('Stop Polling');
+      pollLink.data('interval', setInterval(function(){
+        livePoll(href);
+      }, 2000));
+
+      pollStatusText.text('Starting to poll...');
     }
+
     pollLink.data('polling', !pollLink.data('polling'));
-  })
+
+  });
+
+  livePoll = function livePoll(href){
+    console.log('href',href)
+    $.get(href, function(data) {
+      var responseHtml = $(data);
+      $('.summary').replaceWith(responseHtml.find('.summary'));
+      $('.status').html(responseHtml.find('.status').html().toString());
+      $('.workers').replaceWith(responseHtml.find('.workers'));
+      $('time').timeago();
+    });
+    var currentTime = new Date();
+    $('.poll-status .text').text('Last polled : ')
+    $('.poll-status .badge').show().addClass('badge-success').text(currentTime.getHours() + ':' + pad(currentTime.getMinutes()) + ':' + pad(currentTime.getSeconds()));
+  }
 });
 
 $(function() {

@@ -1,33 +1,38 @@
 doctype html
 html
   head
+    link href='#{{root_path}}assets/vendors.css' media='screen' rel='stylesheet' type='text/css'
     link href='#{{root_path}}assets/application.css' media='screen' rel='stylesheet' type='text/css'
     title= Sidekiq::NAME
-  body
-    .navbar.navbar-fixed-top.navbar-inverse
-      .navbar-inner
-        .container
-          a.btn.btn-navbar data-toggle="collapse" data-target=".nav-collapse"
-            span.icon-bar
-            span.icon-bar
-            span.icon-bar
-          a.brand href='#{{root_path}}'
-            = Sidekiq::NAME
-          div.nav-collapse
-            ul.nav
-              li
-                a href='#{{root_path}}' Home
-              - tabs.each do |tab|
-                li
-                  a href='#{{root_path}}#{{tab.downcase}}': #{tab}
+  body.admin
+    .navbar.navbar-fixed-top
+      ==slim :_nav
 
-            ul.nav.pull-right
-              li
-                a Redis: #{location}
-              li
-                a #{Time.now.utc}
+    #page
+      .container
+        .row
+          .span3.summary_bar
+            h3
+              span.title Status
+              == slim :_status
+            == slim :_summary
+            .row
+              .span3
+                a.btn.btn-block name='poll' href='#{{root_path}}poll' Live Poll
+              .span3.poll-status
+                p
+                  span.text
+                  span.badge
 
-    .container
-      == yield
+            ul.unstyled
+              li
+                span.desc Redis
+                div.data  #{location}
+              li
+                span.desc Time
+                div.data #{Time.now.utc.strftime('%H:%M:%S UTC')}
+
+          .span9
+            == yield
 
     script type="text/javascript" src="#{{root_path}}assets/application.js"
