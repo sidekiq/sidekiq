@@ -2,6 +2,7 @@ HEAD
 -----------
 
 - Remove option to disable Rails hooks. [#401]
+- Allow delay of any module class method
 
 2.3.2
 -----------
