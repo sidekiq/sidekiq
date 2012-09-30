@@ -63,5 +63,14 @@ class TestExtensions < MiniTest::Unit::TestCase
     it 'allows delay of any ole class method' do
       SomeClass.delay.doit(Date.today)
     end
+
+    module SomeModule
+      def self.doit(arg)
+      end
+    end
+
+    it 'allows delay of any module class method' do
+      SomeModule.delay.doit(Date.today)
+    end
   end
 end

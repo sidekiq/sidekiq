@@ -30,4 +30,4 @@ module Sidekiq
   end
 end
 
-Class.send(:include, Sidekiq::Extensions::Klass)
+Module.send(:include, Sidekiq::Extensions::Klass)
