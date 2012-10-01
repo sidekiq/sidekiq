@@ -72,7 +72,6 @@ License
 
 Please see LICENSE for licensing details.
 
-<a href='http://www.pledgie.com/campaigns/16623'><img alt='Click here to lend your support to Open Source and make a donation at www.pledgie.com !' src='http://www.pledgie.com/campaigns/16623.png?skin_name=chrome' border='0' /></a>
 
 Author
 -----------------
