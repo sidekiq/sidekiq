@@ -1,4 +1,4 @@
-HEAD
+2.3.3
 -----------
 
 - Remove option to disable Rails hooks. [#401]
