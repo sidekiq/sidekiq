@@ -43,7 +43,7 @@ module Sidekiq
             end
           end
           rescue Exception => ex
-            handle_exception(ex, msg || { :message => msgstr })
+            handle_exception(ex, msg || { :message => msgstr }) if worker.should_handle_exception?(ex, msg)
           raise
         end
       end

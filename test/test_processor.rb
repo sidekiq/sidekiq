@@ -23,6 +23,12 @@ class TestProcessor < MiniTest::Unit::TestCase
       end
     end
 
+    class SansNotificationMockWorker < MockWorker
+      def should_handle_exception?(exception, message)
+        false
+      end
+    end
+
     it 'processes as expected' do
       msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
       @boss.expect(:processor_done!, nil, [@processor])
@@ -31,15 +37,42 @@ class TestProcessor < MiniTest::Unit::TestCase
       assert_equal 1, $invokes
     end
 
-    it 'passes exceptions to ExceptionHandler' do
-      msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'] })
-      begin
-        @processor.process(msg, 'default')
-        flunk "Expected #process to raise exception"
-      rescue TestException
+    describe 'handling exceptions' do
+      before do
+        @old_logger = Sidekiq.logger
+        @str_logger = StringIO.new
+        Sidekiq.logger = Logger.new(@str_logger)
+        Sidekiq.logger.level = Logger::WARN
       end
 
-      assert_equal 0, $invokes
+      it 'passes exceptions to ExceptionHandler' do
+        msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'] })
+        begin
+          @processor.process(msg, 'default')
+          flunk "Expected #process to raise exception"
+        rescue TestException
+        end
+
+        assert_equal 0, $invokes
+        @str_logger.rewind
+        log = @str_logger.read
+        assert_match /Exception/, log, "Exception wasn't handled"
+      end
+
+      it 'does not pass exceptions to ExceptionHandler when specified by worker' do
+        msg = Sidekiq.dump_json({ 'class' => SansNotificationMockWorker.to_s, 'args' => ['boom'] })
+        begin
+          @processor.process(msg, 'default')
+          flunk "Expected #process to raise exception"
+        rescue TestException
+        end
+
+        assert_equal 0, $invokes
+        @str_logger.rewind
+        log = @str_logger.read
+        assert_equal 0, log.size
+      end
+
     end
 
     it 're-raises exceptions after handling' do
