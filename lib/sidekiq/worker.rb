@@ -35,7 +35,7 @@ module Sidekiq
     # exception is encountered during processing.
     # Useful if the caller wishes to leverage retry, but
     # does not want a notification for each failure.
-    def should_handle_exception?(exception, message)
+    def should_handle_exception?(exception, retry_count)
       true
     end
 

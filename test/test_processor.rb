@@ -24,7 +24,7 @@ class TestProcessor < MiniTest::Unit::TestCase
     end
 
     class SansNotificationMockWorker < MockWorker
-      def should_handle_exception?(exception, message)
+      def should_handle_exception?(exception, retry_count)
         false
       end
     end
