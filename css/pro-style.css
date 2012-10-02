@@ -1,0 +1,239 @@
+@import url(http://fonts.googleapis.com/css?family=Armata);
+
+h1, h2, h3 {
+  color: #B1003E;
+  font-family: Armata;
+}
+
+h1.top {
+  display: inline-block;
+  -webkit-transition: all 0.2s ease-out;
+  -webkit-transition-delay: 0.18s;
+  -moz-transition: all 0.2s ease-out 0.18s;
+  -o-transition: all 0.2s ease-out 0.18s;
+  transition: all 0.2s ease-out 0.18s;
+  -webkit-transform: rotate(2deg);
+  -moz-transform: rotate(2deg);
+  -ms-transform: rotate(2deg);
+  -o-transform: rotate(2deg);
+  transform: rotate(2deg)
+}
+
+#introp {
+  font-size: 18px;
+  line-height: 24px;
+}
+#introp UL, #introp LI {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+body {
+  background-color: #eee;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 300;
+}
+
+.sidebar {
+  border-radius: 10px;
+}
+
+a {
+  color: #70001A;
+}
+
+footer {
+  background-color: #eee;
+  padding: 30px 0;
+  margin-top: 20px;
+}
+
+#main {
+  min-height: 500px;
+}
+
+#contact {
+  margin-top: 10px;
+}
+
+#features i {
+  background-image: url("../img/glyphicons-halflings.png");
+}
+
+.testi {
+  border-radius: 10px;
+  background-color: white;
+  display: inline-block;
+  width: 275px;
+  padding: 20px;
+  margin-right: 20px;
+  margin-bottom: 20px;
+  vertical-align: top;
+  min-height: 220px;
+}
+
+.andmore {
+  border-radius: 10px;
+  background-color: white;
+  display: inline-block;
+  width: 615px;
+  padding: 20px;
+  margin-bottom: 20px;
+  min-height: 150px;
+}
+
+.andmore img {
+  vertical-align: top;
+  margin: 5px;
+}
+
+
+.testi img {
+  margin-bottom: 10px;
+}
+
+#page_header h1.top {
+  font-size: 3em;
+}
+#page_header h2 {
+  text-shadow: #fff 0 1px 1px;
+  color: #aaa;
+  font-size: 1.2em;
+}
+#page_header {
+  padding: 20px 0 0;
+  margin-bottom: 0;
+}
+#page_header h1 a {
+  color: #B1003E;
+}
+#page_header h1 a:hover {
+  text-decoration: none;
+}
+#page_header #contact {
+  padding-top: 20px;
+}
+
+@media (min-width: 768px) {
+  #features {
+    margin-bottom: 20px;
+  }
+  #features #slider_wrapper {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: #ccc 0 0 6px;
+  }
+  #features .slider {
+    padding: 0;
+    margin: 0;
+  }
+  #features .slider li {
+    padding: 40px 20px 40px;
+    background-image: url("../img/blue.png");
+    border-bottom: 1px #e6e6e6 solid;
+  }
+  #features .slider li h3 {
+    width: 640px;
+    text-shadow: #fff 0 1px 1px;
+    margin: 0 auto 20px;
+  }
+  #features .slider li p {
+    width: 640px;
+    margin: 0 auto;
+    font-size: 16px;
+    line-height: 28px;
+    margin-bottom: 20px;
+  }
+}
+@media (max-width: 767px) {
+  #features ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  #features ul li {
+    padding: 20px 0;
+  }
+}
+
+p {
+  font-size: 16px;
+  line-height: 28px;
+  margin-bottom: 20px;
+}
+#features .names {
+  list-style: none;
+  margin: 20px 0 0;
+  cursor: pointer;
+}
+#features .names li {
+  font-size: 24px;
+  margin: 0;
+  padding: 0 0 30px;
+  text-align: center;
+}
+#features .names li span {
+  display: block;
+  text-align: center;
+  padding: 10px 15px;
+}
+#features .names li.selected {
+  color: #B1003E;
+  text-shadow: #fff 0 0 5px;
+  font-weight: bold;
+  background: url("../img/triangle.png") bottom center no-repeat;
+}
+#features img {
+  display: block;
+  margin: 0 auto;
+  -moz-box-shadow: 0 4px 10px 1px #000;
+  -webkit-box-shadow: 0 4px 10px 1px #000;
+  box-shadow: 0 4px 10px 1px #000;
+}
+#customers ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+#customers li {
+}
+#customers ul li.quoted {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: #ccc 0 0 6px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+#customers ul li img {
+  margin: 0 auto;
+}
+#customers ul li blockquote {
+  padding: 20px 0 0;
+  border: 0;
+  font-style: italic;
+}
+#page_header a {
+  display: block;
+  text-align: center;
+}
+.wepay-store-widget {
+  border-radius: 8px;
+  box-shadow: #ccc 0 0 6px;
+}
+@media (max-width: 767px) {
+.wepay-store-widget {
+  width: 100%;
+}
+
+.item-price-box {
+  padding: 10px;
+  color: #B1003E;
+  font-weight: bold;
+  font-family: Armata;
+}
+footer {
+  border-top: 1px #ccc solid;
+  text-align: center;
+}
