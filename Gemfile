@@ -12,5 +12,7 @@ group :test do
 end
 
 group :development do
+  gem 'sprockets-sass'
   gem 'compass'
+  gem 'shotgun'
 end

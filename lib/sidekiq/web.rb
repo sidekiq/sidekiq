@@ -1,6 +1,8 @@
 require 'sinatra/base'
 require 'slim'
 require 'sprockets'
+require 'sprockets-sass'
+require 'sass'
 require 'compass'
 require 'sidekiq/paginator'
 
@@ -18,27 +20,29 @@ module Sidekiq
       @environment.append_path 'assets/stylesheets/vendor'
       @environment.append_path 'assets/images'
 
-      configure do
-        Compass.configuration do |config|
+      Compass.configuration do |config|
 
-          config.project_path = @root
+        config.project_path = "#{@root}/assets"
 
-          config.sass_dir = 'views'
-          config.images_dir           = 'assets/images'
-          config.sass_dir             = 'assets/stylesheets'
-          config.css_dir              = 'assets/stylesheets'
-          config.javascripts_dir      = 'assets/javascripts'
-          config.fonts_dir            = 'assets/stylesheets/fonts'
+        config.images_dir           = 'images'
+        config.sass_dir             = 'stylesheets'
+        config.css_dir              = 'stylesheets'
+        config.javascripts_dir      = 'javascripts'
+        config.fonts_dir            = 'stylesheets/fonts'
 
-          # You can select your preferred output style here (can be overridden via the command line):
-          output_style = :compressed
+        config.http_images_path     = '/assets'
+        config.http_generated_images_path     = '/assets'
+        config.http_javascripts_path     = '/assets'
+        config.http_stylesheets_path     = '/assets'
 
-          # To enable relative paths to assets via compass helper functions. Uncomment:
-          relative_assets = true
+        # You can select your preferred output style here (can be overridden via the command line):
+        output_style = :compressed
 
-          # To disable debugging comments that display the original location of your selectors. Uncomment:
-          line_comments = false
-        end
+        # To enable relative paths to assets via compass helper functions. Uncomment:
+        relative_assets = true
+
+        # To disable debugging comments that display the original location of your selectors. Uncomment:
+        line_comments = false
       end
 
 
