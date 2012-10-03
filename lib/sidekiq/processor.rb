@@ -42,8 +42,10 @@ module Sidekiq
               worker.perform(*cloned(msg['args']))
             end
           end
-          rescue Exception => ex
-            handle_exception(ex, msg || { :message => msgstr })
+        rescue Exception => ex
+          msg = msg || { :message => msgstr }
+          retry_count = msg['retry_count'] || 0
+          handle_exception(ex, msg) if worker.should_handle_exception?(ex, retry_count)
           raise
         end
       end

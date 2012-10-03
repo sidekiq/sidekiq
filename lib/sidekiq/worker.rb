@@ -30,6 +30,15 @@ module Sidekiq
       Sidekiq.logger
     end
 
+    # Allow sub classes an opportunity to specify if
+    # sidekiq should send an exception notification if an
+    # exception is encountered during processing.
+    # Useful if the caller wishes to leverage retry, but
+    # does not want a notification for each failure.
+    def should_handle_exception?(exception, retry_count)
+      true
+    end
+
     module ClassMethods
       def perform_async(*args)
         client_push('class' => self, 'args' => args)
