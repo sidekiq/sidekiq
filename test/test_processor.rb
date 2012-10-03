@@ -25,7 +25,7 @@ class TestProcessor < MiniTest::Unit::TestCase
 
     class SansNotificationMockWorker < MockWorker
       def should_handle_exception?(exception, retry_count)
-        false
+        retry_count > 0
       end
     end
 
@@ -71,6 +71,20 @@ class TestProcessor < MiniTest::Unit::TestCase
         @str_logger.rewind
         log = @str_logger.read
         assert_equal 0, log.size
+      end
+
+      it 'passes exceptions to ExceptionHandler when specified by the worker' do
+        msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'], 'retry_count' => 1 })
+        begin
+          @processor.process(msg, 'default')
+          flunk "Expected #process to raise exception"
+        rescue TestException
+        end
+
+        assert_equal 0, $invokes
+        @str_logger.rewind
+        log = @str_logger.read
+        assert_match /Exception/, log, "Exception wasn't handled"
       end
 
     end
