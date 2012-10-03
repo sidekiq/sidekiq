@@ -73,8 +73,8 @@ class TestProcessor < MiniTest::Unit::TestCase
         assert_equal 0, log.size
       end
 
-      it 'passes exceptions to ExceptionHandler when specified by the worker' do
-        msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'], 'retry_count' => 1 })
+      it 'passes the retry_count to the worker' do
+        msg = Sidekiq.dump_json({ 'class' => SansNotificationMockWorker.to_s, 'args' => ['boom'], 'retry_count' => 1 })
         begin
           @processor.process(msg, 'default')
           flunk "Expected #process to raise exception"
