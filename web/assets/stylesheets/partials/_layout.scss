@@ -133,3 +133,12 @@ form{
     margin-right:5px;
   }
 }
+
+@media (max-width: 979px){
+  .navbar-fixed-top, .navbar-fixed-bottom{
+    margin: 0 -20px;
+  }
+  .admin #page{
+    padding-top:20px;
+  }
+}
