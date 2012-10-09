@@ -4,7 +4,8 @@
 //= require_tree .
 
 $(function() {
-  $.timeago.settings.allowFuture = true
+  $.timeago.settings.allowFuture = true;
+  $.timeago.settings.refreshMillis = 0;
   $("time").timeago();
 });
 
