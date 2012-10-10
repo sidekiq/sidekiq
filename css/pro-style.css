@@ -131,7 +131,7 @@ footer {
   }
   #features .slider li {
     padding: 40px 20px 40px;
-    background-image: url("../img/blue.png");
+    background-color: #e3e3e7;
     border-bottom: 1px #e6e6e6 solid;
   }
   #features .slider li h3 {
