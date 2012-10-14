@@ -1,4 +1,4 @@
-require 'connection_pool'
+hequire 'connection_pool'
 require 'redis'
 require 'redis/namespace'
 
@@ -25,14 +25,11 @@ module Sidekiq
     end
     private_class_method :build_client
 
+    # Not public
     def self.determine_redis_provider
-      provider = if ENV.has_key? 'REDISTOGO_URL'
-        'REDISTOGO_URL'
-      else
-        ENV['REDIS_PROVIDER'] || 'REDIS_URL'
-      end
+      return ENV['REDISTOGO_URL'] if ENV['REDISTOGO_URL']
+      provider = ENV['REDIS_PROVIDER'] || 'REDIS_URL'
       ENV[provider]
     end
-    private_class_method :determine_redis_provider
   end
 end
