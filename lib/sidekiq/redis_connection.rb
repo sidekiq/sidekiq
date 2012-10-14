@@ -1,4 +1,4 @@
-hequire 'connection_pool'
+require 'connection_pool'
 require 'redis'
 require 'redis/namespace'
 
