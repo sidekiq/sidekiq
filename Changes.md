@@ -1,3 +1,8 @@
+HEAD
+-----------
+
+- Allow generic Redis provider as environment variable. [#443]
+
 2.3.3
 -----------
 
