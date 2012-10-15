@@ -39,6 +39,22 @@ class TestExceptionHandler < MiniTest::Unit::TestCase
     end
   end
 
+  describe "with fake HoptoadNotifier" do
+    before do
+      ::HoptoadNotifier = MiniTest::Mock.new
+    end
+
+    after do
+      Object.send(:remove_const, "HoptoadNotifier") # HACK should probably inject Hoptoad etc into this class in the future
+    end
+
+    it "notifies Hoptoad" do
+      ::HoptoadNotifier.expect(:notify_or_ignore,nil,[TEST_EXCEPTION,:parameters => { :a => 1 }])
+      Component.new.invoke_exception(:a => 1)
+      ::HoptoadNotifier.verify
+    end
+  end
+
   describe "with fake Airbrake" do
     before do
       ::Airbrake = MiniTest::Mock.new
