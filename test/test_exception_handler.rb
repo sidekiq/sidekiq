@@ -45,10 +45,10 @@ class TestExceptionHandler < MiniTest::Unit::TestCase
     end
 
     after do
-      Object.send(:remove_const, "HoptoadNotifier") # HACK should probably inject Airbrake etc into this class in the future
+      Object.send(:remove_const, "HoptoadNotifier") # HACK should probably inject Hoptoad etc into this class in the future
     end
 
-    it "notifies Airbrake" do
+    it "notifies Hoptoad" do
       ::HoptoadNotifier.expect(:notify_or_ignore,nil,[TEST_EXCEPTION,:parameters => { :a => 1 }])
       Component.new.invoke_exception(:a => 1)
       ::HoptoadNotifier.verify
