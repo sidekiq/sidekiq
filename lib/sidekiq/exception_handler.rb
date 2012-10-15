@@ -5,12 +5,17 @@ module Sidekiq
       Sidekiq.logger.warn msg
       Sidekiq.logger.warn ex
       Sidekiq.logger.warn ex.backtrace.join("\n")
+      send_to_hoptoad(msg, ex) if defined?(::HoptoadNotifier)
       send_to_airbrake(msg, ex) if defined?(::Airbrake)
       send_to_exceptional(msg, ex) if defined?(::Exceptional)
       send_to_exception_notifier(msg, ex) if defined?(::ExceptionNotifier)
     end
 
     private
+
+    def send_to_hoptoad(msg, ex)
+      ::HoptoadNotifier.notify_or_ignore(ex, :parameters => msg)
+    end
 
     def send_to_airbrake(msg, ex)
       ::Airbrake.notify_or_ignore(ex, :parameters => msg)
