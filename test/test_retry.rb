@@ -90,14 +90,16 @@ class TestRetry < MiniTest::Unit::TestCase
 
     it 'throws away old messages after too many retries' do
       now = Time.now.utc
-      msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>25}
+      msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry"=>true, "retry_count"=>25}
+      @redis.expect :zadd, 1, [ 'retry', String, String ]
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
         handler.call('', msg, 'default') do
           raise "kerblammo!"
         end
       end
-      @redis.verify
+      # MiniTest can't assert that a method call did NOT happen!?
+      assert_raises(MockExpectationError) { @redis.verify }
     end
   end
 
