@@ -21,11 +21,11 @@ module Sidekiq
     end
 
     module ActionMailer
-      def delay
-        Proxy.new(DelayedMailer, self)
+      def delay(options={})
+        Proxy.new(DelayedMailer, self, options)
       end
-      def delay_for(interval)
-        Proxy.new(DelayedMailer, self, Time.now.to_f + interval.to_f)
+      def delay_for(interval, options={})
+        Proxy.new(DelayedMailer, self, options.merge('at' => Time.now.to_f + interval.to_f))
       end
     end
 

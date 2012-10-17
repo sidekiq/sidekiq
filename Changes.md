@@ -2,6 +2,14 @@ HEAD
 -----------
 
 - Allow generic Redis provider as environment variable. [#443]
+- Add ability to customize sidekiq\_options with delay calls [#450]
+
+```ruby
+Foo.delay(:retry => false).bar
+Foo.delay(:retry => 10).bar
+Foo.delay(:timeout => 10.seconds).bar
+Foo.delay_for(5.minutes, :timeout => 10.seconds).bar
+```
 
 2.3.3
 -----------
