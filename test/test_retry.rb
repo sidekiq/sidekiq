@@ -88,9 +88,41 @@ class TestRetry < MiniTest::Unit::TestCase
       @redis.verify
     end
 
-    it 'throws away old messages after too many retries' do
+    it 'handles a recurring failed message before reaching user-specifed max' do
+      @redis.expect :zadd, 1, ['retry', String, String]
+      now = Time.now.utc
+      msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], 'retry' => 11, "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>10}
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      assert_raises RuntimeError do
+        handler.call('', msg, 'default') do
+          raise "kerblammo!"
+        end
+      end
+      assert_equal 'default', msg["queue"]
+      assert_equal 'kerblammo!', msg["error_message"]
+      assert_equal 'RuntimeError', msg["error_class"]
+      assert_equal 11, msg["retry_count"]
+      assert msg["failed_at"]
+      @redis.verify
+    end
+
+    it 'throws away old messages after too many retries (using the default)' do
       now = Time.now.utc
       msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry"=>true, "retry_count"=>25}
+      @redis.expect :zadd, 1, [ 'retry', String, String ]
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      assert_raises RuntimeError do
+        handler.call('', msg, 'default') do
+          raise "kerblammo!"
+        end
+      end
+      # MiniTest can't assert that a method call did NOT happen!?
+      assert_raises(MockExpectationError) { @redis.verify }
+    end
+
+    it 'throws away old messages after too many retries (using user-specified max)' do
+      now = Time.now.utc
+      msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry"=>3, "retry_count"=>3}
       @redis.expect :zadd, 1, [ 'retry', String, String ]
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
