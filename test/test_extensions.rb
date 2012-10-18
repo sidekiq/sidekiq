@@ -29,6 +29,14 @@ class TestExtensions < MiniTest::Unit::TestCase
       assert_equal 1, Sidekiq.redis {|c| c.llen('queue:default') }
     end
 
+    it 'uses and stringifies specified options' do
+      assert_equal [], Sidekiq::Client.registered_queues
+      assert_equal 0, Sidekiq.redis {|c| c.llen('queue:notdefault') }
+      MyModel.delay(queue: :notdefault).long_class_method
+      assert_equal ['notdefault'], Sidekiq::Client.registered_queues
+      assert_equal 1, Sidekiq.redis {|c| c.llen('queue:notdefault') }
+    end
+
     it 'allows delayed scheduling of AR class methods' do
       assert_equal 0, Sidekiq.redis {|c| c.zcard('schedule') }
       MyModel.delay_for(5.days).long_class_method

@@ -20,6 +20,13 @@ module Sidekiq
       #
       #     { 'class' => 'HardWorker', 'args' => [1, 2, 'foo'] }
       #
+      # The 'retry' option also accepts a number (in place of 'true'):
+      #
+      #     { 'class' => 'HardWorker', 'args' => [1, 2, 'foo'], 'retry' => 5 }
+      #
+      # The job will be retried this number of times before giving up. (If simply
+      # 'true', Sidekiq retries 25 times)
+      #
       # We'll add a bit more data to the message to support retries:
       #
       #  * 'queue' - the queue to use
@@ -35,13 +42,14 @@ module Sidekiq
         include Sidekiq::Util
 
         # delayed_job uses the same basic formula
-        MAX_COUNT = 25
+        DEFAULT_MAX_RETRY_ATTEMPTS = 25
         DELAY = proc { |count| (count ** 4) + 15 }
 
         def call(worker, msg, queue)
           yield
         rescue Exception => e
           raise e unless msg['retry']
+          max_retry_attempts = retry_attempts_from(msg['retry'], DEFAULT_MAX_RETRY_ATTEMPTS)
 
           msg['queue'] = queue
           msg['error_message'] = e.message
@@ -60,7 +68,7 @@ module Sidekiq
             msg['error_backtrace'] = e.backtrace[0..msg['backtrace'].to_i]
           end
 
-          if count <= MAX_COUNT
+          if count <= max_retry_attempts
             delay = DELAY.call(count)
             logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
             retry_at = Time.now.to_f + delay
@@ -73,6 +81,14 @@ module Sidekiq
             logger.debug { "Dropping message after hitting the retry maximum: #{msg}" }
           end
           raise e
+        end
+
+        def retry_attempts_from(msg_retry, default)
+          if msg_retry.is_a?(Fixnum)
+            msg_retry
+          else
+            default
+          end
         end
 
       end

@@ -68,8 +68,8 @@ module Sidekiq
         hash
       end
 
-      def client_push(*args) # :nodoc:
-        Sidekiq::Client.push(*args)
+      def client_push(item) # :nodoc:
+        Sidekiq::Client.push(stringify_keys(item))
       end
 
     end
