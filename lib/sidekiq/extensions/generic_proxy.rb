@@ -4,7 +4,7 @@ module Sidekiq
       def initialize(performable, target, options={})
         @performable = performable
         @target = target
-        @opts = performable.stringify_keys(options)
+        @opts = options
       end
 
       def method_missing(name, *args)
