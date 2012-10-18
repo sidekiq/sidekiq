@@ -1,6 +1,7 @@
 HEAD
 -----------
 
+- Logging now uses "MSG-#{Job ID}", not a random msg ID
 - Allow generic Redis provider as environment variable. [#443]
 - Add ability to customize sidekiq\_options with delay calls [#450]
 

@@ -3,8 +3,8 @@ module Sidekiq
     module Server
       class Logging
 
-        def call(*args)
-          Sidekiq::Logging.with_context("#{args[0].class.to_s} MSG-#{args[0].object_id.to_s(36)}") do
+        def call(worker, item, queue)
+          Sidekiq::Logging.with_context("#{worker.class.to_s} MSG-#{item['jid']}") do
             begin
               start = Time.now
               logger.info { "start" }
