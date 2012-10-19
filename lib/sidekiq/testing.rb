@@ -1,6 +1,5 @@
 module Sidekiq
   module Worker
-
     ##
     # The Sidekiq testing infrastructure overrides perform_async
     # so that it does not actually touch the network.  Instead it
@@ -20,24 +19,82 @@ module Sidekiq
     #   assert_equal :something, HardWorker.jobs[0]['args'][0]
     #
     #   assert_equal 0, Sidekiq::Extensions::DelayedMailer.jobs.size
-    #   MyMailer.delayed.send_welcome_email('foo@example.com')
+    #   MyMailer.delay.send_welcome_email('foo@example.com')
     #   assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs.size
+    #
+    # You can also clear and drain all workers' jobs:
+    #
+    #   assert_equal 0, Sidekiq::Extensions::DelayedMailer.jobs.size
+    #   assert_equal 0, Sidekiq::Extensions::DelayedModel.jobs.size
+    #
+    #   MyMailer.delay.send_welcome_email('foo@example.com')
+    #   MyModel.delay.do_something_hard
+    #
+    #   assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs.size
+    #   assert_equal 1, Sidekiq::Extensions::DelayedModel.jobs.size
+    #
+    #   Sidekiq::Worker.clear_all # or .drain_all
+    #
+    #   assert_equal 0, Sidekiq::Extensions::DelayedMailer.jobs.size
+    #   assert_equal 0, Sidekiq::Extensions::DelayedModel.jobs.size
+    #
+    # This can be useful to make sure jobs don't linger between tests:
+    #
+    #   RSpec.configure do |config|
+    #     config.before(:each) do
+    #       Sidekiq::Worker.clear_all
+    #     end
+    #   end
+    #
+    # or for acceptance testing, i.e. with cucumber:
+    #
+    #   AfterStep do
+    #     Sidekiq::Worker.drain_all
+    #   end
+    #
+    #   When I sign up as "foo@example.com"
+    #   Then I should receive a welcome email to "foo@example.com"
     #
     module ClassMethods
       alias_method :client_push_old, :client_push
+
       def client_push(opts)
         jobs << opts
         true
       end
 
+      # Jobs queued for this worker
       def jobs
-        @pushed ||= []
+        Worker.jobs[self]
       end
 
+      # Clear all jobs for this worker
+      def clear
+        jobs.clear
+      end
+
+      # Drain and run all jobs for this worker
       def drain
         while job = jobs.shift do
           new.perform(*job['args'])
         end
+      end
+    end
+
+    class << self
+      def jobs # :nodoc:
+        @jobs ||= Hash.new { |hash, key| hash[key] = [] }
+      end
+
+      # Clear all queued jobs across all workers
+      def clear_all
+        jobs.clear
+      end
+
+      # Drain all queued jobs across all workers
+      def drain_all
+        jobs.keys.each(&:drain)
+        clear_all
       end
     end
   end

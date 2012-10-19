@@ -110,5 +110,72 @@ class TestTesting < MiniTest::Unit::TestCase
       end
       assert_equal 0, StoredWorker.jobs.size
     end
+
+    class FirstWorker
+      include Sidekiq::Worker
+      class_attribute :count
+      self.count = 0
+      def perform
+        self.class.count += 1
+      end
+    end
+
+    class SecondWorker
+      include Sidekiq::Worker
+      class_attribute :count
+      self.count = 0
+      def perform
+        self.class.count += 1
+      end
+    end
+
+    it 'clears jobs across all workers' do
+      Sidekiq::Worker.jobs.clear
+      FirstWorker.count = 0
+      SecondWorker.count = 0
+
+      assert_equal 0, FirstWorker.jobs.size
+      assert_equal 0, SecondWorker.jobs.size
+
+      FirstWorker.perform_async
+      SecondWorker.perform_async
+
+      assert_equal 1, FirstWorker.jobs.size
+      assert_equal 1, SecondWorker.jobs.size
+
+      Sidekiq::Worker.clear_all
+
+      assert_equal 0, FirstWorker.jobs.size
+      assert_equal 0, SecondWorker.jobs.size
+
+      assert_equal 0, FirstWorker.count
+      assert_equal 0, SecondWorker.count
+    end
+
+    it 'drains jobs across all workers' do
+      Sidekiq::Worker.jobs.clear
+      FirstWorker.count = 0
+      SecondWorker.count = 0
+
+      assert_equal 0, FirstWorker.jobs.size
+      assert_equal 0, SecondWorker.jobs.size
+
+      assert_equal 0, FirstWorker.count
+      assert_equal 0, SecondWorker.count
+
+      FirstWorker.perform_async
+      SecondWorker.perform_async
+
+      assert_equal 1, FirstWorker.jobs.size
+      assert_equal 1, SecondWorker.jobs.size
+
+      Sidekiq::Worker.drain_all
+
+      assert_equal 0, FirstWorker.jobs.size
+      assert_equal 0, SecondWorker.jobs.size
+
+      assert_equal 1, FirstWorker.count
+      assert_equal 1, SecondWorker.count
+    end
   end
 end
