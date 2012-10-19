@@ -1,4 +1,4 @@
-HEAD
+2.4.0
 -----------
 
 - ActionMailer.delay.method now only tries to deliver if method returns a valid message.
