@@ -16,7 +16,8 @@ module Sidekiq
 
       def perform(yml)
         (target, method_name, args) = YAML.load(yml)
-        target.send(method_name, *args).deliver
+        msg = target.send(method_name, *args)
+        msg.deliver if msg
       end
     end
 
