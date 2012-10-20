@@ -29,7 +29,6 @@ module Sidekiq
     end
 
     def each(&block)
-      # page thru the sorted set backwards so deleting entries doesn't screw up indexing
       page = 0
       page_size = 50
 
@@ -97,6 +96,10 @@ module Sidekiq
     def initialize(score, item)
       super(item)
       @score = score
+    end
+
+    def retry_at
+      Time.at(@score)
     end
 
     def delete

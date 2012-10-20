@@ -53,6 +53,7 @@ class TestApi < MiniTest::Unit::TestCase
       assert_equal 'ApiWorker', retri.klass
       assert_equal 'default', retri.queue
       assert_equal 'bob', retri.jid
+      assert_in_delta Time.now.to_f, retri.retry_at.to_f, 0.01
     end
 
     it 'can delete retries' do
