@@ -1,3 +1,9 @@
+HEAD
+-----------
+
+- Add APIs for manipulating the retry and job queues.  See sidekiq/api. [#457]
+
+
 2.4.0
 -----------
 
