@@ -7,9 +7,15 @@ table class="table table-striped table-bordered"
   tr
     th Class
     th Arguments
-  - @messages.each do |msg|
+  - @messages.each_with_index do |msg, index|
     tr
       td= msg['class']
-      td= msg['args'].inspect[0..100]
+      td
+        - if msg['args'] and msg['args'].to_s.size > 100
+          = msg['args'].inspect[0..100] + "... "
+          button data-toggle="collapse" data-target="#worker_#{index}" class="btn btn-mini" Show All
+          .collapse[id="worker_#{index}"]= msg['args']
+        - else
+          = msg['args']
 
 == slim :_paging, :locals => { :url => "#{root_path}queues/#{@name}" }
