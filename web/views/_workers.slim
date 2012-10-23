@@ -5,10 +5,16 @@ table class="table table-striped table-bordered workers"
     th Class
     th Arguments
     th Started
-  - workers.each do |(worker, msg)|
+  - workers.each_with_index do |(worker, msg), index|
     tr
       td= worker
       td= msg['queue']
       td= msg['payload']['class']
-      td= msg['payload']['args'].inspect[0..100]
+      td
+        - if msg['payload']['args'].to_s.size > 100
+          = msg['payload']['args'].inspect[0..100] + "... "
+          button data-toggle="collapse" data-target="#worker_#{index}" class="btn btn-mini" Show All
+          .collapse[id="worker_#{index}" style="max-width: 750px;"]= msg['payload']['args']
+        - else
+          = msg['payload']['args']
       td== relative_time(msg['run_at'].is_a?(Numeric) ? Time.at(msg['run_at']) : Time.parse(msg['run_at']))
