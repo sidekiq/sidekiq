@@ -7,6 +7,7 @@ table class="table table-striped table-bordered"
   tr
     th Class
     th Arguments
+    th
   - @messages.each_with_index do |msg, index|
     tr
       td= msg['class']
@@ -17,5 +18,8 @@ table class="table table-striped table-bordered"
           .collapse[id="worker_#{index}"]= msg['args']
         - else
           = msg['args']
-
+      td 
+        form action="#{root_path}queues/#{@name}/delete" method="post" 
+          input name="key_val" value="#{msg.to_json}" type="hidden"
+          input.btn.btn-danger.btn-mini type="submit" name="delete" value="Delete" data-confirm="Are you sure you want to delete this job?"
 == slim :_paging, :locals => { :url => "#{root_path}queues/#{@name}" }
