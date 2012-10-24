@@ -74,6 +74,24 @@ class TestWeb < MiniTest::Unit::TestCase
         refute conn.smembers('queues').include?('foo')
       end
     end
+    
+    it 'can delete a job' do
+      Sidekiq.redis do |conn|
+        conn.rpush('queue:foo', "{}")
+        conn.rpush('queue:foo', "{\"foo\":\"bar\"}")
+        conn.rpush('queue:foo', "{\"foo2\":\"bar2\"}")
+      end
+
+      get '/queues/foo'
+      assert_equal 200, last_response.status
+
+      post '/queues/foo/delete', key_val: "{\"foo\":\"bar\"}"
+      assert_equal 302, last_response.status
+
+      Sidekiq.redis do |conn|
+        refute conn.lrange('queue:foo', 0, -1).include?("{\"foo\":\"bar\"}")
+      end
+    end
 
     it 'can display scheduled' do
       get '/scheduled'
