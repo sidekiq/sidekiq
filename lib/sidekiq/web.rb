@@ -165,6 +165,13 @@ module Sidekiq
       redirect "#{root_path}queues"
     end
 
+    post "/queues/:name/delete" do
+      Sidekiq.redis do |conn|
+        conn.lrem("queue:#{params[:name]}", 0, params[:key_val])
+      end
+      redirect "#{root_path}queues/#{params[:name]}"
+    end
+
     get "/retries/:score" do
       halt 404 unless params[:score]
       @score = params[:score].to_f
