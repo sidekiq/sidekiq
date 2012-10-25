@@ -70,6 +70,11 @@ class TestCli < MiniTest::Unit::TestCase
       assert_equal %w(queue_one queue-two), Sidekiq.options[:queues]
     end
 
+    it 'handles queues with dots in the name' do
+      @cli.parse(['sidekiq', '-q', 'foo.bar', '-r', './test/fake_env.rb'])
+      assert_equal ['foo.bar'], Sidekiq.options[:queues]
+    end
+
     it 'sets verbose' do
       old = Sidekiq.logger.level
       @cli.parse(['sidekiq', '-v', '-r', './test/fake_env.rb'])
