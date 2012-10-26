@@ -102,8 +102,6 @@ header.row{
     }
     li{
       padding:8px 0 5px 0;
-      border-bottom:1px solid #DDD;
-      @include box-shadow(0 1px 0 white);
     }
     .desc{
       font-size:0.8em;
@@ -113,6 +111,7 @@ header.row{
       color: $highlight_color;
       font-size: 1.5em;
       font-weight:bold;
+      float:right;
     }
   }
   .poll-status{
@@ -133,10 +132,7 @@ form{
     margin-right:5px;
   }
 }
-<<<<<<< HEAD
-=======
 
->>>>>>> Layout fixes
 @media (max-width: 979px){
   .navbar-fixed-top, .navbar-fixed-bottom{
     margin: 0 -20px;

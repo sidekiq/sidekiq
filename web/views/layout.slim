@@ -11,15 +11,15 @@ html
     #page
       .container
         .row
-          .span3.summary_bar
+          .span2.summary_bar
             h3
               span.title Status
               == slim :_status
             == slim :_summary
             .row
-              .span3
+              .span2
                 a.btn.btn-block name='poll' href='#{{root_path}}poll' Live Poll
-              .span3.poll-status
+              .span2.poll-status
                 p
                   span.text
                   span.badge
@@ -32,7 +32,7 @@ html
                 span.desc Time
                 div.data #{Time.now.utc.strftime('%H:%M:%S UTC')}
 
-          .span9
+          .span10
             == yield
 
     script type="text/javascript" src="#{{root_path}}assets/application.js"

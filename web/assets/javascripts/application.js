@@ -26,10 +26,11 @@ $(function() {
   $('a[name=poll]').data('polling', false);
 
   pollStatus = $('.poll-status')
+
   pollStatusText = pollStatus.find('.text')
   pollStatusBadge = pollStatus.find('.badge')
-
   pollStatusBadge.hide();
+  pollStatusMarkup = pollStatus.html();
 
   $('a[name=poll]').on('click', function(e) {
     e.preventDefault();
@@ -41,7 +42,7 @@ $(function() {
       clearInterval(pollLink.data('interval'));
       pollLink.text(pollLink.data('text'));
 
-      pollStatus.hide('');
+      pollStatus.html(pollStatusMarkup);
       pollStatusBadge.hide();
 
     } else {
@@ -62,7 +63,6 @@ $(function() {
   });
 
   livePoll = function livePoll(href){
-    console.log('href',href)
     $.get(href, function(data) {
       var responseHtml = $(data);
       $('.summary').replaceWith(responseHtml.find('.summary'));
