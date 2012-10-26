@@ -210,3 +210,25 @@ img.smallogo{
     }
   }
 }
+
+#call_to_action{
+  position:relative;
+  #pro_button{
+    @media(min-width: 979px){
+      @include transition(-webkit-transform $kick_time ease-out);
+      &:hover{
+        @include transform( rotate(2deg) scale(0.99, 0.99) );
+      };
+      position:absolute;
+      font-size:24px;
+      top: -250px;
+      right: 0px;
+      line-height: 24px;
+      width: 200px;
+      height: 200px;
+      padding:55px 0 0 0;
+      @include border-radius(200px);
+      @include rotate(5deg);
+    }
+  }
+}
