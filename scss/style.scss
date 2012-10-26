@@ -172,6 +172,10 @@ img.smallogo{
 
     @include transform(rotate(2deg));
   }
+
+  .pro &{
+    font-size:64px;
+  }
 }
 
 .csstransforms3d{
@@ -229,6 +233,17 @@ img.smallogo{
       padding:55px 0 0 0;
       @include border-radius(200px);
       @include rotate(5deg);
+    }
+  }
+}
+
+
+.pro{
+  .hero-unit{
+    .title{
+      strong{
+        color:$off_black;
+      }
     }
   }
 }
