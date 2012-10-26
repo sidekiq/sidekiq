@@ -46,9 +46,9 @@ class TestInline < MiniTest::Unit::TestCase
 
     after do
       Sidekiq::Client.singleton_class.class_eval do
-        remove_method :push
-        alias_method :push, :push_old
-        remove_method :push_old
+        remove_method :raw_push
+        alias_method :raw_push, :raw_push_old
+        remove_method :raw_push_old
       end
     end
 

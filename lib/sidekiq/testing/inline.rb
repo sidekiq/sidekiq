@@ -27,9 +27,9 @@ module Sidekiq
     #   assert_equal 1, $external_variable
     #
     singleton_class.class_eval do
-      alias_method :push_old, :push
-      def push(hash)
-        hash['class'].new.perform(*Sidekiq.load_json(Sidekiq.dump_json(hash['args'])))
+      alias_method :raw_push_old, :raw_push
+      def raw_push(hash, _)
+        hash['class'].constantize.new.perform(*Sidekiq.load_json(Sidekiq.dump_json(hash['args'])))
         true
       end
     end
