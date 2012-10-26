@@ -27,220 +27,222 @@
       <p>Black belt functionality for Sidekiq.</p>
     </div>
 
-    <div class="container">
-      <div class="row centered" id="call_to_action">
-        <div class="span4 offset2">
-          <h4>Buy it now !</h4>
-          <a class="wepay-widget-button wepay-green" id="wepay_widget_anchor_504cfd38b30db" href="https://www.wepay.com/stores/sidekiq/item/sidekiq-pro-207264">Buy Now</a>
+    <div id="page">
+      <div class="container">
+        <div class="row centered" id="call_to_action">
+          <div class="span4 offset2">
+            <h4>Buy it now !</h4>
+            <a class="wepay-widget-button wepay-green" id="wepay_widget_anchor_504cfd38b30db" href="https://www.wepay.com/stores/sidekiq/item/sidekiq-pro-207264">Buy Now</a>
+          </div>
+          <div class="span4">
+            <h4>Questions?</h4>
+            <p>
+              Email : <a href="mailto:mperham&#64;gmail.com">mperham&#64;gmail.com</a>
+            </p>
+            <a href='/'>Looking for opensource version ?</a>
+          </div>
         </div>
-        <div class="span4">
-          <h4>Questions?</h4>
-          <p>
-            Email : <a href="mailto:mperham&#64;gmail.com">mperham&#64;gmail.com</a>
-          </p>
-          <a href='/'>Looking for opensource version ?</a>
-        </div>
-      </div>
-      <div class="row">
+        <div class="row">
 
-        <section class='span10 offset1' id='features'>
-    
-            <div class='row names hidden-phone' id="features_bullets">
-              <div class='entry span3 selected'><h4>Batches</h4> <div class="arrow up"></div></div>
-              <div class='entry span4'><h4>Notifications</h4> <div class="arrow up"></div></div>
-              <div class='entry span3'><h4>Metrics</h4> <div class="arrow up"></div></div>
-            </div>
-    
-            <div class="well">
-              <div class="slider">
-                <div class='content'>
-                  <h2 class='visible-phone'>Batches</h2>
-                  <h3>Group jobs into a set and follow their progress.</h3>
-                  <p>Create a set of jobs which can be tracked as a group,
-                    programmatically or within the Sidekiq Web interface.
-                    You can see success and failure counts along with error
-                    information for failed jobs within the batch.
-                  </p>
-                  <p>
-                    We use batches
-                    at <a href="http://www.theclymb.com/invite-from/mperham">The
-                    Clymb</a> when uploading product catalogs to our
-                    database.  Each product becomes a job, uploading 1000
-                    products makes 1000 jobs, which are quickly processed by
-                    our swarm of Sidekiq workers.  Once finished, the
-                    catalog team is notified of the results.
-                  </p>
-                  <img alt="" src="../examples/batches.png" />
-                </div>
-                <div class='content'>
-                  <h2 class='visible-phone'>Notifications</h2>
-                  <h3>Receive notification via several different mediums when a batch completes.</h3>
-                  <p>
-                    <strong>Are you a human?</strong>  Receive an email or
-                    campfire notification when a batch has completed
-                    processing.
-                  </p>
-                  <p>
-                    <strong>Are you a robot?</strong>  Receive a webhook
-                    callback or use Redis pub/sub to
-                    receive <strong>real-time</strong> updates as your batch
-                    processes.
-                  </p>
-                  <p>
-                    Want support for other notification mediums?  Contact me
-                    and let me know.
-                  </p>
-                  <img alt=""  src="../examples/webhook.png"/>
-                </div>
-                <div class='content'>
-                  <h2 class='visible-phone'>Metrics</h2>
-                  <h3>Send runtime data to Statsd for distribution to your favorite metrics service.</h3>
-                  <p>
-                    Sidekiq Pro can send processing time and success/failure
-                    metrics to Statsd for visualization within tools like
-                    Graphite, Librato Metrics, etc.  Here's a simple graph
-                    showing processing time for two different types of
-                    workers over time.
-                  </p>
-                  <img alt="" src="../examples/librato.png"/>
+          <section class='span10 offset1' id='features'>
+      
+              <div class='row names hidden-phone' id="features_bullets">
+                <div class='entry span3 selected'><h4>Batches</h4> <div class="arrow up"></div></div>
+                <div class='entry span4'><h4>Notifications</h4> <div class="arrow up"></div></div>
+                <div class='entry span3'><h4>Metrics</h4> <div class="arrow up"></div></div>
+              </div>
+      
+              <div class="well">
+                <div class="slider">
+                  <div class='content'>
+                    <h2 class='visible-phone'>Batches</h2>
+                    <h3>Group jobs into a set and follow their progress.</h3>
+                    <p>Create a set of jobs which can be tracked as a group,
+                      programmatically or within the Sidekiq Web interface.
+                      You can see success and failure counts along with error
+                      information for failed jobs within the batch.
+                    </p>
+                    <p>
+                      We use batches
+                      at <a href="http://www.theclymb.com/invite-from/mperham">The
+                      Clymb</a> when uploading product catalogs to our
+                      database.  Each product becomes a job, uploading 1000
+                      products makes 1000 jobs, which are quickly processed by
+                      our swarm of Sidekiq workers.  Once finished, the
+                      catalog team is notified of the results.
+                    </p>
+                    <img alt="" src="../examples/batches.png" />
+                  </div>
+                  <div class='content'>
+                    <h2 class='visible-phone'>Notifications</h2>
+                    <h3>Receive notification via several different mediums when a batch completes.</h3>
+                    <p>
+                      <strong>Are you a human?</strong>  Receive an email or
+                      campfire notification when a batch has completed
+                      processing.
+                    </p>
+                    <p>
+                      <strong>Are you a robot?</strong>  Receive a webhook
+                      callback or use Redis pub/sub to
+                      receive <strong>real-time</strong> updates as your batch
+                      processes.
+                    </p>
+                    <p>
+                      Want support for other notification mediums?  Contact me
+                      and let me know.
+                    </p>
+                    <img alt=""  src="../examples/webhook.png"/>
+                  </div>
+                  <div class='content'>
+                    <h2 class='visible-phone'>Metrics</h2>
+                    <h3>Send runtime data to Statsd for distribution to your favorite metrics service.</h3>
+                    <p>
+                      Sidekiq Pro can send processing time and success/failure
+                      metrics to Statsd for visualization within tools like
+                      Graphite, Librato Metrics, etc.  Here's a simple graph
+                      showing processing time for two different types of
+                      workers over time.
+                    </p>
+                    <img alt="" src="../examples/librato.png"/>
+                  </div>
                 </div>
               </div>
+          </section>
+
+       </div>
+
+        <div class='row'>
+
+          <section id="main" class='span7'>
+
+            <div class="page-header">
+              <h3>Documentation</h3>
             </div>
-        </section>
-
-     </div>
-
-      <div class='row'>
-
-        <section id="main" class='span7'>
-
-          <div class="page-header">
-            <h3>Documentation</h3>
-          </div>
-          <p>
-            Detailed documentation about configuring and using each Pro
-            feature can be found in the
-            <a href="https://github.com/mperham/sidekiq/wiki/">Sidekiq
-            wiki</a>.
-          </p>
+            <p>
+              Detailed documentation about configuring and using each Pro
+              feature can be found in the
+              <a href="https://github.com/mperham/sidekiq/wiki/">Sidekiq
+              wiki</a>.
+            </p>
 
 
-          <div class="page-header">
-            <h3>Licensing</h3>
-          </div>
-          <p>
-            Sidekiq is available under the terms of
-            the <a href="http://www.gnu.org/copyleft/lesser.html">LGPLv3</a>
-            license.
-          </p>
-          <p>
-            In addition to its useful functionality, buying Sidekiq Pro
-            grants your organization a Sidekiq commercial license
-            instead of the LGPL, avoiding any legal issues with code
-            linking, private forks/modifications, etc.  Please see the
-            wiki for further detail on licensing.
-          </p>
+            <div class="page-header">
+              <h3>Licensing</h3>
+            </div>
+            <p>
+              Sidekiq is available under the terms of
+              the <a href="http://www.gnu.org/copyleft/lesser.html">LGPLv3</a>
+              license.
+            </p>
+            <p>
+              In addition to its useful functionality, buying Sidekiq Pro
+              grants your organization a Sidekiq commercial license
+              instead of the LGPL, avoiding any legal issues with code
+              linking, private forks/modifications, etc.  Please see the
+              wiki for further detail on licensing.
+            </p>
 
 
-          <div class="page-header">
-            <h3>Installation</h3>
-          </div>
-          <p>
-            When you buy Sidekiq Pro, a custom URL associated with your
-            email address will be emailed to you which can be used in
-            your Gemfile. Everything else is seamless. You configure
-            and use Sidekiq Pro exactly like you would Sidekiq.
-          </p>
+            <div class="page-header">
+              <h3>Installation</h3>
+            </div>
+            <p>
+              When you buy Sidekiq Pro, a custom URL associated with your
+              email address will be emailed to you which can be used in
+              your Gemfile. Everything else is seamless. You configure
+              and use Sidekiq Pro exactly like you would Sidekiq.
+            </p>
 
 
-          <div class="page-header">
-            <h3>Upgrades</h3>
-          </div>
-          <p>
-            Sidekiq Pro will receive bug fixes and new functionality
-            over time. All upgrades will be free to customers with a
-            simple <code>bundle update sidekiq-pro</code>.
-          </p>
+            <div class="page-header">
+              <h3>Upgrades</h3>
+            </div>
+            <p>
+              Sidekiq Pro will receive bug fixes and new functionality
+              over time. All upgrades will be free to customers with a
+              simple <code>bundle update sidekiq-pro</code>.
+            </p>
 
 
-          <div class="page-header">
-            <h3>Support</h3>
-          </div>
-          <p>
-            Sales of Sidekiq Pro ensure that Sidekiq will remain
-            well-supported for the foreseeable future. If you have an
-            issue or question with Sidekiq Pro, just enter an issue in
-            the <a href="https://github.com/mperham/sidekiq/issues">Sidekiq
-            issue tracker</a> or send an email to
-            the <a href="https://github.com/mperham/sidekiq#more-information">Sidekiq
-            mailing list</a> as normal. Pro features will be supported
-            as if they are normal Sidekiq features.
-          </p>
+            <div class="page-header">
+              <h3>Support</h3>
+            </div>
+            <p>
+              Sales of Sidekiq Pro ensure that Sidekiq will remain
+              well-supported for the foreseeable future. If you have an
+              issue or question with Sidekiq Pro, just enter an issue in
+              the <a href="https://github.com/mperham/sidekiq/issues">Sidekiq
+              issue tracker</a> or send an email to
+              the <a href="https://github.com/mperham/sidekiq#more-information">Sidekiq
+              mailing list</a> as normal. Pro features will be supported
+              as if they are normal Sidekiq features.
+            </p>
 
 
-          <div class="page-header">
-            <h3>Contact</h3>
-          </div>
-          <p>Questions?  Concerns?</p>
-          Email : <a class='btn btn-primary' href="mailto:mperham&#64;gmail.com">mperham&#64;gmail.com</a>
-        </section>
+            <div class="page-header">
+              <h3>Contact</h3>
+            </div>
+            <p>Questions?  Concerns?</p>
+            Email : <a class='btn btn-primary' href="mailto:mperham&#64;gmail.com">mperham&#64;gmail.com</a>
+          </section>
 
-        <section id='customers' class='span4 offset1'>
-          <ul class='thumbnails'>
-            <li class='quoted well'>
-              <img alt="" src="../img/travis.png" width="205"/>
-              <blockquote>
-                <p>"Sidekiq is a critical part of our Travis CI infrastructure and works perfectly!"</p>
-              </blockquote>
-              <p><strong>Mathias Meyer</strong>, @roidrage<br/>Infrastructure Head Honcho</p>
-            </li>
-            <li class='quoted well'>
-              <img alt="" src="../img/site5.png" width="205"/>
-              <blockquote>
-                <p>"Replacing Resque with Sidekiq reduced our job processing hardware cost by a factor of six."</p>
-              </blockquote>
-              <p><strong>Justin Mazzi</strong>, @jmazzi<br/>Chief of Engineering</p>
-            </li>
-            <li class='span2'>
-              <span class='thumbnail'>
-                <img alt="" src="../img/banjo.png" width="216"/></li>
-              </span>
-            <li class='span2'>
-              <span class='thumbnail'>
-                <img alt="" src="../img/mogo.png" width="216"/></li>
-              </span>
-            <li class='span2'>
-              <span class='thumbnail'>
-                <img alt="" src="../img/rosette.png" width="205"/></li>
-              </span>
-            <li class='span2'>
-              <span class='thumbnail'>
-                <img alt="" src="../img/customer-io.png" width="216" style="margin-top: 15px;"/></li>
-              </span>
-            <li class='span4'>
-              <h6>
-                If you are a Pro customer and want your logo here, email me!
-              </h6>
-            </li>
-              
-          </ul>
-        </section>
-      </div>
-
-      <footer>
-        <div class="container">
-          <div class='row'>
-            <span class='edits'>
-              Modified <a href='http://twitter.github.com/bootstrap/'>Twitter Bootstrap</a>
-              design by <a href='http://hull.io'>hull.io</a>
-            </span>
-              &copy; 2012 Mike Perham, Thank you for supporting Open Source software!
-              <a href="http://www.twitter.com/mperham">@mperham</a> /
-              <a href="http://www.mikeperham.com">mikeperham.com</a>
-          </div>
+          <section id='customers' class='span4 offset1'>
+            <ul class='thumbnails'>
+              <li class='quoted well'>
+                <img alt="" src="../img/travis.png" width="205"/>
+                <blockquote>
+                  <p>"Sidekiq is a critical part of our Travis CI infrastructure and works perfectly!"</p>
+                </blockquote>
+                <p><strong>Mathias Meyer</strong>, @roidrage<br/>Infrastructure Head Honcho</p>
+              </li>
+              <li class='quoted well'>
+                <img alt="" src="../img/site5.png" width="205"/>
+                <blockquote>
+                  <p>"Replacing Resque with Sidekiq reduced our job processing hardware cost by a factor of six."</p>
+                </blockquote>
+                <p><strong>Justin Mazzi</strong>, @jmazzi<br/>Chief of Engineering</p>
+              </li>
+              <li class='span2'>
+                <span class='thumbnail'>
+                  <img alt="" src="../img/banjo.png" width="216"/></li>
+                </span>
+              <li class='span2'>
+                <span class='thumbnail'>
+                  <img alt="" src="../img/mogo.png" width="216"/></li>
+                </span>
+              <li class='span2'>
+                <span class='thumbnail'>
+                  <img alt="" src="../img/rosette.png" width="205"/></li>
+                </span>
+              <li class='span2'>
+                <span class='thumbnail'>
+                  <img alt="" src="../img/customer-io.png" width="216" style="margin-top: 15px;"/></li>
+                </span>
+              <li class='span4'>
+                <h6>
+                  If you are a Pro customer and want your logo here, email me!
+                </h6>
+              </li>
+                
+            </ul>
+          </section>
         </div>
-      </footer>
-    </div>  
+
+        <footer>
+          <div class="container">
+            <div class='row'>
+              <span class='edits'>
+                Modified <a href='http://twitter.github.com/bootstrap/'>Twitter Bootstrap</a>
+                design by <a href='http://hull.io'>hull.io</a>
+              </span>
+                &copy; 2012 Mike Perham, Thank you for supporting Open Source software!
+                <a href="http://www.twitter.com/mperham">@mperham</a> /
+                <a href="http://www.mikeperham.com">mikeperham.com</a>
+            </div>
+          </div>
+        </footer>
+      </div>  
+    </div>
 
     <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js'></script>
     <script src='../js/modernizr.js'></script>
