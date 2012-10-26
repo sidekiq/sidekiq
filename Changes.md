@@ -1,6 +1,9 @@
 HEAD
 -----------
 
+- Inline testing runs the client middleware before executing jobs [#465]
+- Web UI can now remove jobs from queue. [#466, dleung]
+- Web UI can now show the full message, not just 100 chars [#464, dleung]
 - Add APIs for manipulating the retry and job queues.  See sidekiq/api. [#457]
 
 
