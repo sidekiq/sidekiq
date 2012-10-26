@@ -250,3 +250,34 @@ img.smallogo{
     }
   }
 }
+
+.arrow{
+  width: 0;
+  height: 0;
+  $arrow_color : white;
+  $arrow_size: 20px;
+  &.up, &.down{
+    margin:0 auto;
+  }
+  &.up{
+    border-left  : $arrow_size solid transparent;
+    border-right : $arrow_size solid transparent;
+    border-bottom: $arrow_size solid $arrow_color;
+  }
+  &.down{
+    border-left  : $arrow_size solid transparent;
+    border-right : $arrow_size solid transparent;
+    border-top   : $arrow_size solid $arrow_color;  
+  }
+  &.left{
+    border-top   : $arrow_size solid transparent;
+    border-bottom: $arrow_size solid transparent; 
+    border-right :$arrow_size solid $arrow_color; 
+  }
+  &.right{
+    border-top   : $arrow_size solid transparent;
+    border-bottom: $arrow_size solid transparent;
+    border-left  : $arrow_size solid $arrow_color;
+  }
+}
+
