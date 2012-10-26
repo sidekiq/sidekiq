@@ -36,31 +36,6 @@
         <section class="sidebar offset1 span2">
           <p>
               <a class="wepay-widget-button wepay-green" id="wepay_widget_anchor_504cfd38b30db" href="https://www.wepay.com/stores/sidekiq/item/sidekiq-pro-207264">Buy Now</a>
-              <script type="text/javascript">
-                var WePay = WePay || {};
-                WePay.load_widgets = WePay.load_widgets || function() { };
-                WePay.widgets = WePay.widgets || [];
-                WePay.widgets.push( {
-                  object_id: 207264,
-                  widget_type: "store_item_buy_now",
-                  anchor_id: "wepay_widget_anchor_504cfd38b30db",
-                  widget_options: {
-                    store_id: 989219,
-                    show_item_custom_options: true,
-                    show_item_images: false,
-                    show_item_price: true,
-                    button_text_sold_out: "Sold Out",
-                    button_text: "Buy Now"
-                  }
-                });
-                if (!WePay.script) {
-                  WePay.script = document.createElement('script');WePay.script.type = 'text/javascript';WePay.script.async = true;
-                  WePay.script.src = 'https://static.wepay.com/min/js/widgets.v2.js';
-                  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(WePay.script, s);
-                } else if (WePay.load_widgets) {
-                  WePay.load_widgets();
-                }
-              </script>
           </p>
         </section>
       </header>
@@ -236,6 +211,31 @@
         ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
       })();
+    </script>
+    <script type="text/javascript">
+      var WePay = WePay || {};
+      WePay.load_widgets = WePay.load_widgets || function() { };
+      WePay.widgets = WePay.widgets || [];
+      WePay.widgets.push( {
+        object_id: 207264,
+        widget_type: "store_item_buy_now",
+        anchor_id: "wepay_widget_anchor_504cfd38b30db",
+        widget_options: {
+          store_id: 989219,
+          show_item_custom_options: true,
+          show_item_images: false,
+          show_item_price: true,
+          button_text_sold_out: "Sold Out",
+          button_text: "Buy Now"
+        }
+      });
+      if (!WePay.script) {
+        WePay.script = document.createElement('script');WePay.script.type = 'text/javascript';WePay.script.async = true;
+        WePay.script.src = 'https://static.wepay.com/min/js/widgets.v2.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(WePay.script, s);
+      } else if (WePay.load_widgets) {
+        WePay.load_widgets();
+      }
     </script>
   </body>
 </html>
