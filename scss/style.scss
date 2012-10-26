@@ -237,11 +237,22 @@ img.smallogo{
   }
 }
 
+.highlighted.well{
+  background-color:white;
+  border:7px solid white;
+  @include box-shadow(0 1px 40px rgba(0, 0, 0, 0.3) );
+  @include border-radius(7px);
+}
 
 .pro{
   #features{
     margin-bottom:20px;
-    margin-top:60px;
+    margin-top   :20px;
+  }
+  #call_to_action{
+    h2{
+      color:$main;
+    }
   }
   .hero-unit{
     .title{
@@ -250,43 +261,11 @@ img.smallogo{
       }
     }
   }
-  #call_to_action{
-    margin-top: 0px;
-  }
+
   #customers{
     .quoted, .thumbnail{
       background-color:white;
       min-height: 100px;
-    }
-  }
-
-  #features{
-    .names{
-      h4{
-        text-align:center;
-      }
-    }
-    .well{
-      background-color:white;
-      border:7px solid white;
-      @include box-shadow(0 1px 40px rgba(0, 0, 0, 0.3) );
-      @include border-radius(7px);
-    }
-    .content{
-      background-color:white;
-    }
-    .entry{
-      cursor:pointer;
-    }
-  }
-  #features_bullets{
-    .arrow{
-      position:relative;
-      top: 2px;
-      display:none;
-    }
-    .selected .arrow{
-      display:block;
     }
   }
 
@@ -299,6 +278,40 @@ img.smallogo{
     padding : 0;
     margin  : 0;
     width   : 100%;  
+  }
+}
+
+#features{
+  .names{
+    h4{
+      text-align:center;
+    }
+  }
+  .content{
+    @media (max-width: 767px) {
+      margin-bottom:50px;
+    }
+    background-color:white;
+  }
+  .entry{
+    cursor:pointer;
+  }
+  h3, h2{
+    color:$main;
+  }
+}
+
+#features_bullets{
+  .arrow{
+    position:relative;
+    top: 2px;
+    display:none;
+  }
+  .selected{
+    color:$main;
+  }
+  .selected .arrow{
+    display:block;
   }
 }
 
@@ -331,4 +344,3 @@ img.smallogo{
     border-left  : $arrow_size solid $arrow_color;
   }
 }
-
