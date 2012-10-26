@@ -239,8 +239,9 @@ img.smallogo{
 
 
 .pro{
-  .hero-unit, #features{
+  #features{
     margin-bottom:20px;
+    margin-top:60px;
   }
   .hero-unit{
     .title{
@@ -250,7 +251,7 @@ img.smallogo{
     }
   }
   #call_to_action{
-    margin-top: 30px;
+    margin-top: 0px;
   }
   #customers{
     .quoted, .thumbnail{
