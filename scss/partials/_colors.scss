@@ -5,7 +5,8 @@
 $off_white            : #f3f3f3;
 $main                 : saturate(#B1003E, 10%);
 $active               : darken($main, 20%);
-$dark_gray            : lighten(#242222, 20%);
+$off_black            : #242222;
+$dark_gray            : lighten($off_black, 20%);
 $light_gray           : #FAFAFA;
 
 
@@ -32,6 +33,9 @@ $btn_gradient         : linear-gradient($btn, $btn_dark);
 $btn_primary          : $primary_gradient;
 $btn_primary_dark     : $primary_gradient_dark;
 $btn_primary_gradient : linear-gradient($primary_gradient,$primary_gradient_dark);
+$black_gradient       : linear-gradient($off_black,lighten($off_black, 10%));
 
 $smooth_shadow        : 0px 0px 2px rgba(0,0,0,0.4);
-$highlight     : 0px 1px 0px white;
+$smooth_shadow_hover  : 0px 1px 3px rgba(0,0,0,0.4), inset 0 0 3px rgba(255,255,255,0.5);
+$highlight            : 0px 1px 0px white;
+$large_shadow         : inset 0px 0px 5px rgba(0, 0, 0, 0.5);

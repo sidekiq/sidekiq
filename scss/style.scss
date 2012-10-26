@@ -16,15 +16,30 @@ $kick_time : 0.2s;
   @include border-radius(3px);
   @include box-shadow($smooth_shadow);
   @include background-image($btn_gradient);
+  background-color:$btn_dark;
   &:hover{
+    @include box-shadow($smooth_shadow_hover);
     background-color:$btn_dark;
   }
 }
 
 .btn-primary{
   @include background-image($btn_primary_gradient);
+  background-color:$btn_primary_dark;
   &:hover{
     background-color:$btn_primary_dark;
+  }
+}
+
+
+.btn.btn-inverse{
+  @include background-image($black_gradient);
+  color:white;
+  &:hover{
+    background-color:lighten($off_black, 10%);
+  }
+  strong{
+    color: $main;
   }
 }
 
