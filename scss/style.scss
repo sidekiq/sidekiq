@@ -249,6 +249,56 @@ img.smallogo{
       }
     }
   }
+  #call_to_action{
+    margin-top: 30px;
+  }
+  #customers{
+    .quoted, .thumbnail{
+      background-color:white;
+      min-height: 100px;
+    }
+  }
+
+  #features{
+    .names{
+      h4{
+        text-align:center;
+      }
+    }
+    .well{
+      background-color:white;
+      border:7px solid white;
+      @include box-shadow(0 1px 40px rgba(0, 0, 0, 0.3) );
+      @include border-radius(7px);
+    }
+    .content{
+      background-color:white;
+    }
+    .entry{
+      cursor:pointer;
+    }
+  }
+  #features_bullets{
+    .arrow{
+      position:relative;
+      top: 2px;
+      display:none;
+    }
+    .selected .arrow{
+      display:block;
+    }
+  }
+
+  .wepay-store-widget{
+    .item-price-box{
+      display:inline-block;
+      text-align:left;
+    }
+    background:transparent;
+    padding : 0;
+    margin  : 0;
+    width   : 100%;  
+  }
 }
 
 .arrow{
