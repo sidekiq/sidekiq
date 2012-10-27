@@ -55,6 +55,22 @@ class TestExceptionHandler < MiniTest::Unit::TestCase
     end
   end
 
+  describe "with fake Honeybadger" do
+    before do
+      ::Honeybadger = MiniTest::Mock.new
+    end
+
+    after do
+      Object.send(:remove_const, "Honeybadger") # HACK should probably inject Honeybadger etc into this class in the future
+    end
+
+    it "notifies Honeybadger" do
+      ::Honeybadger.expect(:notify_or_ignore,nil,[TEST_EXCEPTION,:parameters => { :a => 1 }])
+      Component.new.invoke_exception(:a => 1)
+      ::Honeybadger.verify
+    end
+  end
+
   describe "with fake ExceptionNotifier" do
     before do
       ::ExceptionNotifier = Module.new
