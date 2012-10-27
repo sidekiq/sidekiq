@@ -34,7 +34,7 @@ module Sidekiq
       defer do
         begin
           msg = Sidekiq.load_json(msgstr)
-          klass  = constantize(msg['class'])
+          klass  = msg['class'].constantize
           worker = klass.new
 
           stats(worker, msg, queue) do

@@ -31,6 +31,7 @@ module Sidekiq
     end
 
     module ClassMethods
+
       def perform_async(*args)
         client_push('class' => self, 'args' => args)
       end
@@ -52,7 +53,7 @@ module Sidekiq
       #   :backtrace - whether to save any error backtrace in the retry payload to display in web UI,
       #      can be true, false or an integer number of lines to save, default *false*
       def sidekiq_options(opts={})
-        self.sidekiq_options_hash = get_sidekiq_options.merge(stringify_keys(opts || {}))
+        self.sidekiq_options_hash = get_sidekiq_options.merge((opts || {}).stringify_keys)
       end
 
       DEFAULT_OPTIONS = { 'retry' => true, 'queue' => 'default' }
@@ -61,15 +62,8 @@ module Sidekiq
         self.sidekiq_options_hash ||= DEFAULT_OPTIONS
       end
 
-      def stringify_keys(hash) # :nodoc:
-        hash.keys.each do |key|
-          hash[key.to_s] = hash.delete(key)
-        end
-        hash
-      end
-
       def client_push(item) # :nodoc:
-        Sidekiq::Client.push(stringify_keys(item))
+        Sidekiq::Client.push(item.stringify_keys)
       end
 
     end
