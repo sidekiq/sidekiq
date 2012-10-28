@@ -1,8 +1,8 @@
 header
-  h1 Job
+  h3 Job
 
 - @retries.each do |msg|
-  table class="table table-striped table-bordered"
+  table class="retry table table-bordered table-striped"
     tbody
       tr
         th Queue
@@ -31,8 +31,8 @@ header
         th Next Retry
         td== relative_time(Time.at(@score))
 
-  h1 Error
-  table class="table table-striped table-bordered"
+  h3 Error
+  table class="error table table-bordered table-striped"
     tbody
       tr
         th Error Class
@@ -47,6 +47,6 @@ header
           td
             code== msg['error_backtrace'].join("<br/>")
   form.form-horizontal action="#{root_path}retries/#{@score}" method="post"
-    a.btn href="#{root_path}retries" &larr; Back
+    a.btn href="#{root_path}retries" ← Back
     input.btn.btn-primary type="submit" name="retry" value="Retry Now"
     input.btn.btn-danger type="submit" name="delete" value="Delete"

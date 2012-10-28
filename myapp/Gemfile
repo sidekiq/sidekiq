@@ -16,4 +16,5 @@ gem 'capistrano'
 # sidekiq-web dependencies
 gem 'slim'
 gem 'sinatra'
+gem 'compass'
 gem 'sprockets'

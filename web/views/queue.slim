@@ -1,10 +1,13 @@
-header
-  h1 Current messages in #{@name}
+header.row
+  .span5
+    h3
+      | Current messages in 
+      span.title #{@name}
+  .span4
+    == slim :_paging, :locals => { :url => "#{root_path}queues/#{@name}" }
 
-== slim :_paging, :locals => { :url => "#{root_path}queues/#{@name}" }
-
-table class="table table-striped table-bordered"
-  tr
+table class="queue table table-hover table-bordered table-striped"
+  thead
     th Class
     th Arguments
     th

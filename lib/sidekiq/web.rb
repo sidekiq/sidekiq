@@ -1,6 +1,9 @@
 require 'sinatra/base'
 require 'slim'
 require 'sprockets'
+require 'sprockets-sass'
+require 'sass'
+require 'compass'
 require 'sidekiq/paginator'
 
 module Sidekiq
@@ -16,6 +19,33 @@ module Sidekiq
       @environment.append_path 'assets/stylesheets'
       @environment.append_path 'assets/stylesheets/vendor'
       @environment.append_path 'assets/images'
+
+      Compass.configuration do |config|
+
+        config.project_path = "#{@root}/assets"
+
+        config.images_dir           = 'images'
+        config.sass_dir             = 'stylesheets'
+        config.css_dir              = 'stylesheets'
+        config.javascripts_dir      = 'javascripts'
+        config.fonts_dir            = 'stylesheets/fonts'
+
+        config.http_images_path     = '/assets'
+        config.http_generated_images_path     = '/assets'
+        config.http_javascripts_path     = '/assets'
+        config.http_stylesheets_path     = '/assets'
+
+        # You can select your preferred output style here (can be overridden via the command line):
+        output_style = :compressed
+
+        # To enable relative paths to assets via compass helper functions. Uncomment:
+        relative_assets = true
+
+        # To disable debugging comments that display the original location of your selectors. Uncomment:
+        line_comments = false
+      end
+
+
     end
 
     def call(env)
@@ -36,7 +66,9 @@ module Sidekiq
     set :views,  "#{dir}/views"
     set :root, "#{dir}/public"
     set :slim, :pretty => true
+
     use SprocketsMiddleware, :root => dir
+
 
     helpers do
 
@@ -97,6 +129,10 @@ module Sidekiq
 
       def root_path
         "#{env['SCRIPT_NAME']}/"
+      end
+
+      def current_path
+        @current_path ||= request.path_info.gsub(/^\//,'')
       end
 
       def current_status
@@ -248,7 +284,12 @@ module Sidekiq
     end
 
     def self.tabs
-      @tabs ||= ["Queues", "Retries", "Scheduled"]
+      @tabs ||= {
+        "Workers"   =>'',
+        "Queues"    =>'queues',
+        "Retries"   =>'retries',
+        "Scheduled" =>'scheduled'
+      }
     end
 
   end
