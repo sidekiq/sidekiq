@@ -2,149 +2,45 @@ $split_width: 500px;
 $kick_time : 0.2s;
 
 @import 'compass';
+
 @import 'partials/fonts';
 @import 'partials/colors';
+@import 'partials/mixins';
 @import 'partials/variables';
+
 @import 'partials/base';
 @import 'partials/layout';
+
+@import 'partials/navbar';
 @import 'partials/prettify';
 
 
+
 .btn{
-  font-weight: 700;
-  border     : none;
-  @include border-radius(3px);
-  @include box-shadow($smooth_shadow);
-  @include background-image($btn_gradient);
-  background-color:$btn_dark;
-  &:hover{
-    @include box-shadow($smooth_shadow_hover);
-    background-color:$btn_dark;
-  }
+  @include button;
 }
 
-.btn-primary{
-  @include background-image($btn_primary_gradient);
-  background-color:$btn_primary_dark;
-  &:hover{
-    background-color:$btn_primary_dark;
-  }
+.btn.btn-primary{
+  @include primary_button()
 }
 
 
 .btn.btn-inverse{
-  @include background-image($black_gradient);
-  color:white;
-  &:hover{
-    background-color:lighten($off_black, 10%);
-  }
-  strong{
-    color: $main;
-  }
+  @include inverse_button()
 }
 
-
-.navbar-container{
-  height:40px;
-
-  .brand{
-    @include transition(all $kick_time ease-out);
-    span{
-      @include transition(all $kick_time*1.5 ease-in);
-      display:inline-block;
-    }
-  }
-}
-
-.navbar-container{
-  .brand{
-    padding:4px 0;
-    margin-left:-1150px;
-    @media (min-width: 1450px) {
-      margin-left:-1250px;
-    }
-    @media (min-width: 1650px) {
-      margin-left:-1350px;
-    }
-    @media (min-width: 1850px) {
-      margin-left:-1450px;
-    }
-    @media (min-width: 2050px) {
-      margin-left:-1550px;
-    }
-    @media (min-width: 2250px) {
-      margin-left:-1650px;
-    }
-    @media (min-width: 2450px) {
-      margin-left:-1750px;
-    }
-    @media (min-width: 2650px) {
-      margin-left:-1850px;
-    }
-    span{
-      margin-left:0;
-      // padding: 10px 0;
-    }
-  }
-  .affix{
-    .brand{
-      // margin-left:60px;
-      margin-left:0px;
-      span{
-        // padding: 10px 20px 10px 5px;
-      }
-    }
-  }
-}
-
-.navbar {
-  ul.nav{
-    text-align:center;
-    float     :none;
-    a{
-      font-weight: 700;
-      font-size  :16px;
-      padding: 15px;
-      @media (max-width: $split_width) {
-        padding: 15px 5px;
-      }
-
-      &.brand{
-        font-weight:400;
-        padding:0 15px 0 0;
-        @media (max-width: $split_width) {
-          padding-right:5px;
-        }
-        color  :$btn_primary_dark;
-        @include text-shadow(none);
-      }
-    }
-    li{
-      display:inline-block;
-      float  :none;
-    }
-  }
-  &.affix{
-    top:0;
-    width:100%;
-    z-index: 10;
-  }
-}
-
-.navbar-inner{
-  @include border-radius(0);
-  border-left:0;
-  border-right:0;
-  @media (max-width: $split_width) {
-    padding:0;
-  }
-}
 
 img.smallogo{
   width:30px;
   margin: 0px 0px 6px 0px;
 }
 
+.highlighted.well{
+  background-color:white;
+  border:7px solid white;
+  @include box-shadow(0 1px 40px rgba(0, 0, 0, 0.3) );
+  @include border-radius(7px);
+}
 
 .title{
   position:relative;
@@ -237,20 +133,20 @@ img.smallogo{
   }
 }
 
-.highlighted.well{
-  background-color:white;
-  border:7px solid white;
-  @include box-shadow(0 1px 40px rgba(0, 0, 0, 0.3) );
-  @include border-radius(7px);
-}
-
 .pro{
   #features{
     margin-bottom:20px;
     margin-top   :20px;
   }
   #call_to_action{
+    margin-top:40px;
+    padding-top:13px;
+    @media (max-width: 767px) {
+      @include border-radius(0);
+    }
+
     h2{
+      margin: 0;
       color:$main;
     }
   }
@@ -270,14 +166,35 @@ img.smallogo{
   }
 
   .wepay-store-widget{
+    position:relative;
+    min-width:0;
     .item-price-box{
-      display:inline-block;
-      text-align:left;
+      color:$off_black;
+      text-align:center;
+      font-weight:bold;
+      line-height:35px;
+      .item-price-currency{
+        color:$off_black;
+      }
+    }
+    .wepay-widget-button{
+      min-width:0;
+      @include button();
+      @include primary_button();
+      float: left;
+      margin: 0;
+      width: 100%;
+      &:hover{
+        @include inverse_button()
+      };
     }
     background:transparent;
     padding : 0;
     margin  : 0;
     width   : 100%;  
+  }
+  .title .text{
+    @include transform3d(translateX(35px) rotateZ(0deg));
   }
 }
 
