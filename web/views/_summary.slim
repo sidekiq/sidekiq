@@ -1,7 +1,7 @@
 ul.unstyled.summary
   li
     span.count #{number_with_delimiter(processed)}
-    span.desc  Processed 
+    span.desc  Processed
   li
     span.count #{number_with_delimiter(failed)}
     span.desc  Failed
@@ -13,7 +13,7 @@ ul.unstyled.summary
     span.desc  Scheduled
   li
     span.count #{number_with_delimiter(zcard('retry'))}
-    span.desc  Retries pending
+    span.desc  Retries
   li
     span.count #{number_with_delimiter(backlog)}
     span.desc  Queue
