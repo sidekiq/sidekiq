@@ -3,7 +3,8 @@
     h3 Workers
 
 == slim :_workers
-.row
-  .span2
-    form action="#{root_path}reset" method="post"
-      button.btn.btn-primary.btn-block type="submit" title="If you kill -9 Sidekiq, this table can fill up with old data." Clear worker list
+- if workers.size > 0
+  .row
+    .span2
+      form action="#{root_path}reset" method="post"
+        button.btn.btn-primary.btn-block type="submit" title="If you kill -9 Sidekiq, this table can fill up with old data." Clear worker list
