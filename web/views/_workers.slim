@@ -1,5 +1,5 @@
-table class="table table-striped table-bordered workers"
-  tr
+table class="workers table table-hover table-bordered table-striped"
+  thead
     th Worker
     th Queue
     th Class
@@ -8,7 +8,8 @@ table class="table table-striped table-bordered workers"
   - workers.each_with_index do |(worker, msg), index|
     tr
       td= worker
-      td= msg['queue']
+      td
+        a href="queues/#{msg['queue']}" = msg['queue']
       td= msg['payload']['class']
       td
         - if msg['payload']['args'].to_s.size > 100

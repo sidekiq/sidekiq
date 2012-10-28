@@ -1,15 +1,19 @@
-h1 Retries
+header.row
+  .span5
+    h3 Retries
+  .span4
+    - if @retries.size > 0
+      == slim :_paging, :locals => { :url => "#{root_path}retries" }
 
 - if @retries.size > 0
-  == slim :_paging, :locals => { :url => "#{root_path}retries" }
 
   form action="#{root_path}retries" method="post"
     table class="table table-striped table-bordered"
       tr
-        th
+        th width="20px"
           input type="checkbox" class="check_all"
-        th Next Retry
-        th Retry Count
+        th width="25%" Next Retry
+        th width="11%" Retry count
         th Queue
         th Worker
         th Args
@@ -24,8 +28,8 @@ h1 Retries
             a href="#{root_path}queues/#{msg['queue']}" #{msg['queue']}
           td= msg['class']
           td= display_args(msg['args'])
-    input.btn.btn-primary type="submit" name="retry" value="Retry Now"
+    input.btn.btn-primary type="submit" name="retry" value="Retry Now" 
     input.btn.btn-danger type="submit" name="delete" value="Delete"
 - else
   p No retries found.
-  a href="#{root_path}" Back
+  a href="#{root_path}" ← Back

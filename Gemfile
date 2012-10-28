@@ -10,3 +10,9 @@ gem 'sqlite3'
 group :test do
   gem 'simplecov', :require => false
 end
+
+group :development do
+  gem 'sprockets-sass'
+  gem 'compass'
+  gem 'shotgun'
+end

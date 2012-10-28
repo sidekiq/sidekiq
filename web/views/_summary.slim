@@ -1,8 +1,19 @@
-.hero-unit
-  h1 Sidekiq is #{current_status}
-  p Processed: #{number_with_delimiter(processed)}
-  p Failed: #{number_with_delimiter(failed)}
-  p Busy Workers: #{number_with_delimiter(workers.size)}
-  p Scheduled: #{number_with_delimiter(zcard('schedule'))}
-  p Retries Pending: #{number_with_delimiter(zcard('retry'))}
-  p Queue Backlog: #{number_with_delimiter(backlog)}
+ul.unstyled.summary
+  li
+    span.count #{number_with_delimiter(processed)}
+    span.desc  Processed 
+  li
+    span.count #{number_with_delimiter(failed)}
+    span.desc  Failed
+  li
+    span.count #{number_with_delimiter(workers.size)}
+    span.desc  Busy
+  li
+    span.count #{number_with_delimiter(zcard('schedule'))}
+    span.desc  Scheduled
+  li
+    span.count #{number_with_delimiter(zcard('retry'))}
+    span.desc  Retries pending
+  li
+    span.count #{number_with_delimiter(backlog)}
+    span.desc  Queue
