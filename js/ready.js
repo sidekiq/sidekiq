@@ -1,7 +1,7 @@
 $(document).ready(function() {
-
   if (document.documentElement.clientWidth >= 768) {
-    var names = $('#features .names li');
+
+    var names = $('#features .names .entry');
     var slider = $('#features .slider').bxSlider({
       controls: false,
       onBeforeSlide: function(slide) {
