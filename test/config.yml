@@ -5,5 +5,5 @@
 :pidfile:      /tmp/sidekiq-config-test.pid
 :concurrency:  50
 :queues:
-  - [often, 2]
+  - [<%="very_"%>often, 2]
   - [seldom, 1]
