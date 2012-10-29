@@ -135,7 +135,7 @@ class TestCli < MiniTest::Unit::TestCase
       end
 
       it 'sets queues' do
-        assert_equal 2, Sidekiq.options[:queues].count { |q| q == 'often' }
+        assert_equal 2, Sidekiq.options[:queues].count { |q| q == 'very_often' }
         assert_equal 1, Sidekiq.options[:queues].count { |q| q == 'seldom' }
       end
     end
