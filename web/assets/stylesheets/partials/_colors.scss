@@ -7,6 +7,7 @@ $main                  : saturate(#B1003E, 10%);
 $active                : darken($main, 20%);
 $dark_gray             : lighten(#242222, 20%);
 $light_gray            : #FAFAFA;
+$success               : #009300;
 
 
 $gradient              : $light_gray;
@@ -25,6 +26,7 @@ $text                  : $dark_gray;
 $title_color           : $main;
 $link_color            : $main;
 $link_active_color     : $active;
+$success_color         : $success;
 
 $background            : $off_white;
 
