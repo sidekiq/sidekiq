@@ -19,6 +19,9 @@ Gem::Specification.new do |gem|
   gem.add_dependency                  'connection_pool', '~> 0.9.2'
   gem.add_dependency                  'celluloid', '~> 0.12.0'
   gem.add_dependency                  'multi_json', '~> 1'
+  gem.add_dependency                  'sprockets-sass'
+  gem.add_dependency                  'sass'
+  gem.add_dependency                  'compass'
   gem.add_development_dependency      'minitest', '~> 3'
   gem.add_development_dependency      'sinatra'
   gem.add_development_dependency      'slim'
@@ -26,5 +29,4 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency      'actionmailer', '~> 3'
   gem.add_development_dependency      'activerecord', '~> 3'
   gem.add_development_dependency      'pry'
-  gem.add_development_dependency      'compass'
 end
