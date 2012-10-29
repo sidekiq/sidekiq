@@ -4,3 +4,4 @@ Gemfile.lock
 dump.rdb
 .rbx
 coverage/
+.sass-cache/
