@@ -12,25 +12,24 @@ html
       .container
         .row
           .span2.summary_bar
-            h3
+            h4
               span.title Status
               == slim :_status
             == slim :_summary
             .row
               .span2
-                a.btn.btn-block name='poll' href='#{{root_path}}poll' Live Poll
+                a#live-poll.btn.btn-block.btn-primary name='poll' href='#{{root_path}}poll' Live Poll
               .span2.poll-status
-                p
-                  span.text
-                  span.badge
+                span.text
+                span.time
 
-            ul.unstyled
+            ul#tiny-details.unstyled
               li
+                span.data.pull-right #{location}
                 span.desc Redis
-                div.data  #{location}
               li
+                span.data.pull-right #{Time.now.utc.strftime('%H:%M:%S UTC')}
                 span.desc Time
-                div.data #{Time.now.utc.strftime('%H:%M:%S UTC')}
 
           .span10
             == yield

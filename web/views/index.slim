@@ -5,6 +5,6 @@
 == slim :_workers
 - if workers.size > 0
   .row
-    .span2
+    .span2.pull-right
       form action="#{root_path}reset" method="post"
-        button.btn.btn-primary.btn-block type="submit" title="If you kill -9 Sidekiq, this table can fill up with old data." Clear worker list
+        button.btn.btn-primary.btn-block type="submit" title="If you kill -9 Sidekiq, this table can fill up with old data." Clear Worker List

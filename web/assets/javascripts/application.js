@@ -39,6 +39,8 @@ $(function() {
 
     if (pollLink.data('polling')) {
 
+      $(this).removeClass('active');
+
       clearInterval(pollLink.data('interval'));
       pollLink.text(pollLink.data('text'));
 
@@ -46,6 +48,8 @@ $(function() {
       pollStatusBadge.hide();
 
     } else {
+
+      $(this).addClass('active');
 
       var href = pollLink.attr('href');
 
@@ -72,7 +76,7 @@ $(function() {
     });
     var currentTime = new Date();
     $('.poll-status .text').text('Last polled : ')
-    $('.poll-status .badge').show().addClass('badge-success').text(currentTime.getHours() + ':' + pad(currentTime.getMinutes()) + ':' + pad(currentTime.getSeconds()));
+    $('.poll-status .time').show().text(currentTime.getHours() + ':' + pad(currentTime.getMinutes()) + ':' + pad(currentTime.getSeconds()));
   }
 });
 
