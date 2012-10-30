@@ -75,7 +75,7 @@ $(function() {
       $('time').timeago();
     });
     var currentTime = new Date();
-    $('.poll-status .text').text('Last polled : ')
+    $('.poll-status .text').text('Last polled: ')
     $('.poll-status .time').show().text(currentTime.getHours() + ':' + pad(currentTime.getMinutes()) + ':' + pad(currentTime.getSeconds()));
   }
 });
