@@ -43,7 +43,7 @@ module Sidekiq
 
         # delayed_job uses the same basic formula
         DEFAULT_MAX_RETRY_ATTEMPTS = 25
-        DELAY = proc { |count| (count ** 4) + 15 }
+        DELAY = proc { |count| (count ** 4) + 15 + (rand(30)*(count+1)) }
 
         def call(worker, msg, queue)
           yield
