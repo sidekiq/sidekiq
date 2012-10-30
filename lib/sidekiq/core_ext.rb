@@ -55,11 +55,11 @@ begin
   require 'active_support/core_ext/hash/keys'
 rescue LoadError
   class Hash
-    def stringify_keys(hash)
-      hash.keys.each do |key|
-        hash[key.to_s] = hash.delete(key)
+    def stringify_keys
+      keys.each do |key|
+        self[key.to_s] = delete(key)
       end
-      hash
+      self
     end
   end if !{}.respond_to?(:stringify_keys)
 end
