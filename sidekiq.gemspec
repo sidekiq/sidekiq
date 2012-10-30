@@ -20,7 +20,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency                  'celluloid', '~> 0.12.0'
   gem.add_dependency                  'multi_json', '~> 1'
   gem.add_dependency                  'sprockets-sass'
-  gem.add_dependency                  'sass'
+  gem.add_dependency                  'sass', '~> 3.2.1'
   gem.add_dependency                  'compass'
   gem.add_development_dependency      'minitest', '~> 3'
   gem.add_development_dependency      'sinatra'
