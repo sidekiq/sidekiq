@@ -61,7 +61,7 @@ rescue LoadError
       end
       hash
     end
-  end if !{}.responds_to(:stringify_keys)
+  end if !{}.respond_to?(:stringify_keys)
 end
 
 begin
@@ -78,7 +78,7 @@ rescue LoadError
       end
       constant
     end
-  end if !"".responds_to(:constantize)
+  end if !"".respond_to?(:constantize)
 end
 
 
