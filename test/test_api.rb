@@ -37,14 +37,14 @@ class TestApi < MiniTest::Unit::TestCase
     end
 
     it 'shows empty retries' do
-      r = Sidekiq::Retries.new
+      r = Sidekiq::RetrySet.new
       assert_equal 0, r.size
     end
 
     it 'can enumerate retries' do
       add_retry
 
-      r = Sidekiq::Retries.new
+      r = Sidekiq::RetrySet.new
       assert_equal 1, r.size
       array = r.to_a
       assert_equal 1, array.size
@@ -58,7 +58,7 @@ class TestApi < MiniTest::Unit::TestCase
 
     it 'can delete retries' do
       add_retry
-      r = Sidekiq::Retries.new
+      r = Sidekiq::RetrySet.new
       assert_equal 1, r.size
       r.map(&:delete)
       assert_equal 0, r.size

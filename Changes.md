@@ -1,7 +1,7 @@
-HEAD
+2.5.0
 -----------
 
-- REDESIGNED WEB UI! [unity]
+- REDESIGNED WEB UI! [unity, cavneb]
 - Support Honeybadger for error delivery
 - Inline testing runs the client middleware before executing jobs [#465]
 - Web UI can now remove jobs from queue. [#466, dleung]

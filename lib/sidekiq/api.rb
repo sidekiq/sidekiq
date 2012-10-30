@@ -46,7 +46,9 @@ module Sidekiq
   end
 
   ##
-  # Encapsulates a pending job within a Sidekiq queue.
+  # Encapsulates a pending job within a Sidekiq queue or
+  # sorted set.
+  #
   # The job should be considered immutable but may be
   # removed from the queue via Job#delete.
   #
@@ -89,44 +91,33 @@ module Sidekiq
     end
   end
 
-  # Encapsulates a single job awaiting retry
-  class Retry < Job
+  class SortedEntry < Job
     attr_reader :score
 
-    def initialize(score, item)
+    def initialize(parent, score, item)
       super(item)
       @score = score
+      @parent = parent
     end
 
-    def retry_at
+    def at
       Time.at(@score)
     end
 
     def delete
-      count = Sidekiq.redis do |conn|
-        conn.zremrangebyscore('retry', @score, @score)
-      end
-      count != 0
+      @parent.delete(@score)
     end
   end
 
-  ##
-  # Allows enumeration of all retries pending in Sidekiq.
-  # Based on this, you can search/filter for jobs.  Here's an
-  # example where I'm selecting all jobs of a certain type
-  # and deleting them from the retry queue.
-  #
-  #   r = Sidekiq::Retries.new
-  #   r.select do |retri|
-  #     retri.klass == 'Sidekiq::Extensions::DelayedClass' &&
-  #     retri.args[0] == 'User' &&
-  #     retri.args[1] == 'setup_new_subscriber'
-  #   end.map(&:delete)
-  class Retries
+  class SortedSet
     include Enumerable
 
+    def initialize(name)
+      @zset = name
+    end
+
     def size
-      Sidekiq.redis {|c| c.zcard('retry') }
+      Sidekiq.redis {|c| c.zcard(@zset) }
     end
 
     def each(&block)
@@ -135,15 +126,58 @@ module Sidekiq
       page_size = 50
 
       loop do
-        retries = Sidekiq.redis do |conn|
-          conn.zrange 'retry', page * page_size, (page * page_size) + (page_size - 1), :with_scores => true
+        elements = Sidekiq.redis do |conn|
+          conn.zrange @zset, page * page_size, (page * page_size) + (page_size - 1), :with_scores => true
         end
-        break if retries.empty?
+        break if elements.empty?
         page -= 1
-        retries.each do |retri, score|
-          block.call Retry.new(score, retri)
+        elements.each do |element, score|
+          block.call SortedEntry.new(self, score, element)
         end
       end
+    end
+
+    def delete(score)
+      count = Sidekiq.redis do |conn|
+        conn.zremrangebyscore(@zset, score, score)
+      end
+      count != 0
+    end
+  end
+
+  ##
+  # Allows enumeration of scheduled jobs within Sidekiq.
+  # Based on this, you can search/filter for jobs.  Here's an
+  # example where I'm selecting all jobs of a certain type
+  # and deleting them from the retry queue.
+  #
+  #   r = Sidekiq::ScheduledSet.new
+  #   r.select do |retri|
+  #     retri.klass == 'Sidekiq::Extensions::DelayedClass' &&
+  #     retri.args[0] == 'User' &&
+  #     retri.args[1] == 'setup_new_subscriber'
+  #   end.map(&:delete)
+  class ScheduledSet < SortedSet
+    def initialize
+      super 'schedule'
+    end
+  end
+
+  ##
+  # Allows enumeration of retries within Sidekiq.
+  # Based on this, you can search/filter for jobs.  Here's an
+  # example where I'm selecting all jobs of a certain type
+  # and deleting them from the retry queue.
+  #
+  #   r = Sidekiq::RetrySet.new
+  #   r.select do |retri|
+  #     retri.klass == 'Sidekiq::Extensions::DelayedClass' &&
+  #     retri.args[0] == 'User' &&
+  #     retri.args[1] == 'setup_new_subscriber'
+  #   end.map(&:delete)
+  class RetrySet < SortedSet
+    def initialize
+      super 'retry'
     end
   end
 
