@@ -7,6 +7,18 @@ html
   body.admin
     .navbar.navbar-fixed-top
       ==slim :_nav
+    .navbar.navbar-fixed-bottom.navbar-inverse
+      .navbar-inner
+        .container
+          .nav-collapse
+            ul.nav
+              li
+                p.navbar-text style="color:white;" Sidekiq v#{Sidekiq::VERSION}
+              li
+                p.navbar-text Redis: #{location}
+              li
+                p.navbar-text Time: #{Time.now.utc.strftime('%H:%M:%S UTC')}
+
 
     #page
       .container
@@ -22,14 +34,6 @@ html
               .span2.poll-status
                 span.text
                 span.time
-
-            ul#tiny-details.unstyled
-              li
-                span.data.pull-right #{location}
-                span.desc Redis
-              li
-                span.data.pull-right #{Time.now.utc.strftime('%H:%M:%S UTC')}
-                span.desc Time
 
           .span10
             == yield
