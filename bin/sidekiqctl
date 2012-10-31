@@ -43,6 +43,10 @@ class Sidekiqctl
     `kill -USR1 #{pid}`
   end
 
+  def sleep
+    `kill -USR2 #{pid}`
+  end
+
   def stop
     `kill -TERM #{pid}`
     timeout.times do

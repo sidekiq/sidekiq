@@ -35,9 +35,7 @@ module Sidekiq
         shutdown = options[:shutdown]
         timeout = options[:timeout]
 
-        @done = true
-        Sidekiq::Fetcher.done!
-        @fetcher.terminate! if @fetcher.alive?
+        stop_fetcher!
 
         logger.info { "Shutting down #{@ready.size} quiet workers" }
         @ready.each { |x| x.terminate if x.alive? }
@@ -54,6 +52,12 @@ module Sidekiq
         return after(0) { signal(:shutdown) } if @busy.empty?
         logger.info { "Pausing up to #{timeout} seconds to allow workers to finish..." }
         hard_shutdown_in timeout if shutdown
+      end
+    end
+
+    def sleep
+      watchdog('Manager#sleep sleeping') do
+        stop_fetcher!
       end
     end
 
@@ -151,6 +155,12 @@ module Sidekiq
 
     def stopped?
       @done
+    end
+
+    def stop_fetcher!
+      @done = true
+      Sidekiq::Fetcher.done!
+      @fetcher.terminate! if @fetcher.alive?
     end
 
     def procline(tag)

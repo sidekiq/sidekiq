@@ -15,6 +15,12 @@ trap 'USR1' do
   mgr.stop! if mgr
 end
 
+trap 'USR2' do
+  Sidekiq.logger.info "Received USR2. Only stopping Fetcher. Current workers will show up in the UI until finished."
+  mgr = Sidekiq::CLI.instance.manager
+  mgr.sleep if mgr
+end
+
 trap 'TTIN' do
   Thread.list.each do |thread|
     Sidekiq.logger.info "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
