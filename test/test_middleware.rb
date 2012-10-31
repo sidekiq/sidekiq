@@ -43,7 +43,6 @@ class TestMiddleware < MiniTest::Unit::TestCase
     end
 
     it 'executes middleware in the proper order' do
-      recorder = []
       msg = Sidekiq.dump_json({ 'class' => CustomWorker.to_s, 'args' => [$recorder] })
 
       Sidekiq.server_middleware do |chain|
