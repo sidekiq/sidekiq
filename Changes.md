@@ -1,3 +1,12 @@
+HEAD
+-----------
+
+- Add -g option so the procline better identifies a Sidekiq process, defaults to File.basename(Rails.root). [#486]
+
+    sidekiq 2.5.1 myapp [0 of 25 busy]
+
+- Add splay to retry time so groups of failed jobs don't fire all at once. [#483]
+
 2.5.1
 -----------
 

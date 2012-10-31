@@ -126,6 +126,7 @@ module Sidekiq
         require 'sidekiq/rails'
         require File.expand_path("#{options[:require]}/config/environment.rb")
         ::Rails.application.eager_load!
+        options[:tag] ||= File.basename(::Rails.root)
       else
         require options[:require]
       end
@@ -164,7 +165,11 @@ module Sidekiq
         end
 
         o.on '-t', '--timeout NUM', "Shutdown timeout" do |arg|
-          opts[:timeout] = arg.to_i
+          opts[:timeout] = Integer(arg)
+        end
+
+        o.on '-g', '--tag TAG', "Process tag for procline" do |arg|
+          opts[:tag] = arg
         end
 
         o.on '-r', '--require [PATH|DIR]', "Location of Rails application with workers or file to require" do |arg|
@@ -172,7 +177,7 @@ module Sidekiq
         end
 
         o.on '-c', '--concurrency INT', "processor threads to use" do |arg|
-          opts[:concurrency] = arg.to_i
+          opts[:concurrency] = Integer(arg)
         end
 
         o.on '-P', '--pidfile PATH', "path to pidfile" do |arg|
