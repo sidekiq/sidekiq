@@ -154,7 +154,8 @@ module Sidekiq
     end
 
     def procline
-      $0 = "sidekiq #{Sidekiq::VERSION} [#{@busy.size} of #{@count} busy]#{stopped? ? ' stopping' : ''}"
+      namespace = Sidekiq::RedisConnection.class_variable_defined?(:@@namespace) ? " [#{Sidekiq::RedisConnection.class_variable_get(:@@namespace)}]" : ''
+      $0 = "sidekiq #{Sidekiq::VERSION} [#{@busy.size} of #{@count} busy]#{namespace}#{stopped? ? ' stopping' : ''}"
       after(5) { procline }
     end
   end
