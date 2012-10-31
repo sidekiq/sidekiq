@@ -55,7 +55,6 @@ class TestStats < MiniTest::Unit::TestCase
 
         processor = Sidekiq::Processor.new(boss)
 
-        pstr = processor.to_s
         assert_raises RuntimeError do
           processor.process(msg, 'xyzzy')
         end
