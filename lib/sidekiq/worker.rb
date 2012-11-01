@@ -23,7 +23,7 @@ module Sidekiq
   module Worker
     def self.included(base)
       base.extend(ClassMethods)
-      base.class_attribute :sidekiq_options_hash
+      base.class_attribute :sidekiq_options_hash, :jid
     end
 
     def logger
