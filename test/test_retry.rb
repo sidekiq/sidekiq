@@ -35,7 +35,7 @@ class TestRetry < MiniTest::Unit::TestCase
         end
       end
       assert msg["error_backtrace"]
-      assert_equal c, msg["error_backtrace"]
+      assert_equal c[0], msg["error_backtrace"][0]
     end
 
     it 'saves partial backtraces' do
