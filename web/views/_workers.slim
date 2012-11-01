@@ -9,7 +9,7 @@ table class="workers table table-hover table-bordered table-striped table-white"
     tr
       td= worker
       td
-        a href="queues/#{msg['queue']}" = msg['queue']
+        a href="#{root_path}queues/#{msg['queue']}" = msg['queue']
       td= msg['payload']['class']
       td
         - if msg['payload']['args'].to_s.size > 100
