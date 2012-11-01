@@ -93,8 +93,9 @@ module Sidekiq
 
       # Drain all queued jobs across all workers
       def drain_all
-        jobs.keys.each(&:drain)
-        clear_all
+        until jobs.values.all?(&:empty?) do
+          jobs.keys.each(&:drain)
+        end
       end
     end
   end
