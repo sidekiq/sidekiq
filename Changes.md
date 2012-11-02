@@ -1,6 +1,7 @@
 HEAD
 -----------
 
+- Remove asset pipeline from Web UI for much faster, simpler runtime.  [#499, #490, #481]
 - Add -g option so the procline better identifies a Sidekiq process, defaults to File.basename(Rails.root). [#486]
 
     sidekiq 2.5.1 myapp [0 of 25 busy]
