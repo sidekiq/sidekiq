@@ -17,7 +17,6 @@ module Sidekiq
       @environment.append_path 'assets/javascripts'
       @environment.append_path 'assets/javascripts/vendor'
       @environment.append_path 'assets/stylesheets'
-      @environment.append_path 'assets/stylesheets/vendor'
       @environment.append_path 'assets/images'
 
       Compass.configuration do |config|
