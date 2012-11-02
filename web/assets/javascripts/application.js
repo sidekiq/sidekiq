@@ -1,8 +1,3 @@
-//= require vendor/jquery
-//= require vendor/jquery.timeago
-//= require bootstrap
-//= require_tree .
-
 $(function() {
   $.timeago.settings.allowFuture = true;
   $.timeago.settings.refreshMillis = 0;
