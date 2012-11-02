@@ -1,4 +1,4 @@
-HEAD
+2.5.2
 -----------
 
 - Remove asset pipeline from Web UI for much faster, simpler runtime.  [#499, #490, #481]
