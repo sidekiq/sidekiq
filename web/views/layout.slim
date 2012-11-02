@@ -1,8 +1,8 @@
 doctype html
 html
   head
-    link href='#{{root_path}}assets/vendors.css' media='screen' rel='stylesheet' type='text/css'
-    link href='#{{root_path}}assets/application.css' media='screen' rel='stylesheet' type='text/css'
+    link href='#{{root_path}}stylesheets/bootstrap.css' media='screen' rel='stylesheet' type='text/css'
+    link href='#{{root_path}}stylesheets/application.css' media='screen' rel='stylesheet' type='text/css'
     title= Sidekiq::NAME
   body.admin
     .navbar.navbar-fixed-top
@@ -38,4 +38,7 @@ html
           .span10
             == yield
 
-    script type="text/javascript" src="#{{root_path}}assets/application.js"
+    script type="text/javascript" src="#{{root_path}}javascripts/vendor/jquery.js"
+    script type="text/javascript" src="#{{root_path}}javascripts/vendor/jquery.timeago.js"
+    script type="text/javascript" src="#{{root_path}}javascripts/vendor/bootstrap.js"
+    script type="text/javascript" src="#{{root_path}}javascripts/application.js"
