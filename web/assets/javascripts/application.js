@@ -20,12 +20,12 @@ $(function() {
 
   $('a[name=poll]').data('polling', false);
 
-  pollStatus = $('.poll-status')
+  var pollStatus = $('.poll-status');
 
-  pollStatusText = pollStatus.find('.text')
-  pollStatusBadge = pollStatus.find('.badge')
+  var pollStatusText = pollStatus.find('.text');
+  var pollStatusBadge = pollStatus.find('.badge');
   pollStatusBadge.hide();
-  pollStatusMarkup = pollStatus.html();
+  var pollStatusMarkup = pollStatus.html();
 
   $('a[name=poll]').on('click', function(e) {
     e.preventDefault();
@@ -70,9 +70,9 @@ $(function() {
       $('time').timeago();
     });
     var currentTime = new Date();
-    $('.poll-status .text').text('Last polled: ')
+    $('.poll-status .text').text('Last polled: ');
     $('.poll-status .time').show().text(currentTime.getHours() + ':' + pad(currentTime.getMinutes()) + ':' + pad(currentTime.getSeconds()));
-  }
+  };
 });
 
 $(function() {
