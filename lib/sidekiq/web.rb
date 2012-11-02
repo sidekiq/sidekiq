@@ -1,8 +1,8 @@
 require 'sinatra/base'
 require 'slim'
+require 'sass'
 require 'sprockets'
 require 'sprockets-sass'
-require 'sass'
 require 'compass'
 require 'sidekiq/paginator'
 
