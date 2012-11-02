@@ -3,7 +3,6 @@ gemspec
 
 gem 'celluloid', "~> 0.12.0"
 gem 'slim'
-gem 'sass'
 gem 'rails', '3.2.8'
 gem 'sqlite3'
 
@@ -12,7 +11,5 @@ group :test do
 end
 
 group :development do
-  gem 'sprockets-sass'
-  gem 'compass'
   gem 'shotgun'
 end

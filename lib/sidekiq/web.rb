@@ -1,73 +1,16 @@
 require 'sinatra/base'
 require 'slim'
-require 'sprockets'
-require 'sprockets-sass'
-require 'sass'
-require 'compass'
 require 'sidekiq/paginator'
 
 module Sidekiq
-  class SprocketsMiddleware
-    def initialize(app, options={})
-      @app = app
-      @root = options[:root]
-      path   =  options[:path] || 'assets'
-      @matcher = /^\/#{path}\/*/
-      @environment = ::Sprockets::Environment.new(@root)
-      @environment.append_path 'assets/javascripts'
-      @environment.append_path 'assets/javascripts/vendor'
-      @environment.append_path 'assets/stylesheets'
-      @environment.append_path 'assets/images'
-
-      Compass.configuration do |config|
-
-        config.project_path = "#{@root}/assets"
-
-        config.images_dir           = 'images'
-        config.sass_dir             = 'stylesheets'
-        config.css_dir              = 'stylesheets'
-        config.javascripts_dir      = 'javascripts'
-        config.fonts_dir            = 'stylesheets/fonts'
-
-        config.http_images_path     = '/assets'
-        config.http_generated_images_path     = '/assets'
-        config.http_javascripts_path     = '/assets'
-        config.http_stylesheets_path     = '/assets'
-
-        # You can select your preferred output style here (can be overridden via the command line):
-        output_style = :compressed
-
-        # To enable relative paths to assets via compass helper functions. Uncomment:
-        relative_assets = true
-
-        # To disable debugging comments that display the original location of your selectors. Uncomment:
-        line_comments = false
-      end
-
-
-    end
-
-    def call(env)
-      # Solve the problem of people requesting /sidekiq when they need to request /sidekiq/ so
-      # that relative links in templates resolve correctly.
-      return [301, { 'Location' => "#{env['SCRIPT_NAME']}/", 'Content-Type' => 'text/html' }, ['redirecting']] if env['SCRIPT_NAME'] == env['REQUEST_PATH']
-
-      return @app.call(env) unless @matcher =~ env["PATH_INFO"]
-      env['PATH_INFO'].sub!(@matcher,'')
-      @environment.call(env)
-    end
-  end
-
   class Web < Sinatra::Base
     include Sidekiq::Paginator
 
     dir = File.expand_path(File.dirname(__FILE__) + "/../../web")
+    set :public_folder, "#{dir}/assets"
     set :views,  "#{dir}/views"
     set :root, "#{dir}/public"
     set :slim, :pretty => true
-
-    use SprocketsMiddleware, :root => dir
-
 
     helpers do
 
@@ -294,3 +237,4 @@ module Sidekiq
   end
 
 end
+
