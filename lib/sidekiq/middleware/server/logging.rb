@@ -4,7 +4,7 @@ module Sidekiq
       class Logging
 
         def call(worker, item, queue)
-          Sidekiq::Logging.with_context("#{worker.class.to_s} MSG-#{item['jid']}") do
+          Sidekiq::Logging.with_context("#{worker.class.to_s} JID-#{item['jid']}") do
             begin
               start = Time.now
               logger.info { "start" }
