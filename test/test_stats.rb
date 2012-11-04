@@ -21,6 +21,7 @@ class TestStats < MiniTest::Unit::TestCase
     it 'updates global stats in the success case' do
       msg = Sidekiq.dump_json({ 'class' => DumbWorker.to_s, 'args' => [""] })
       boss = MiniTest::Mock.new
+      actor = MiniTest::Mock.new
 
       @redis.with do |conn|
 
@@ -28,9 +29,10 @@ class TestStats < MiniTest::Unit::TestCase
         assert_equal 0, set.size
 
         processor = Sidekiq::Processor.new(boss)
-        boss.expect(:processor_done!, nil, [processor])
-        boss.expect(:processor_done!, nil, [processor])
-        boss.expect(:processor_done!, nil, [processor])
+        3.times do
+          actor.expect(:processor_done, nil, [processor])
+          boss.expect(:async, actor, [])
+        end
 
         assert_equal 0, Sidekiq.info[:failed]
         assert_equal 0, Sidekiq.info[:processed]

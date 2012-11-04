@@ -47,7 +47,7 @@ module Sidekiq
           raise
         end
       end
-      @boss.processor_done!(current_actor)
+      @boss.async.processor_done(current_actor)
     end
 
     # See http://github.com/tarcieri/celluloid/issues/22

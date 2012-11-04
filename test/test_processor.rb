@@ -25,7 +25,9 @@ class TestProcessor < MiniTest::Unit::TestCase
 
     it 'processes as expected' do
       msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
-      @boss.expect(:processor_done!, nil, [@processor])
+      actor = MiniTest::Mock.new
+      actor.expect(:processor_done, nil, [@processor])
+      @boss.expect(:async, actor, [])
       @processor.process(msg, 'default')
       @boss.verify
       assert_equal 1, $invokes
@@ -59,7 +61,9 @@ class TestProcessor < MiniTest::Unit::TestCase
       msg = { 'class' => MockWorker.to_s, 'args' => [['myarg']] }
       msgstr = Sidekiq.dump_json(msg)
       processor = ::Sidekiq::Processor.new(@boss)
-      @boss.expect(:processor_done!, nil, [processor])
+      actor = MiniTest::Mock.new
+      actor.expect(:processor_done, nil, [processor])
+      @boss.expect(:async, actor, [])
       processor.process(msgstr, 'default')
       assert_equal [['myarg']], msg['args']
     end

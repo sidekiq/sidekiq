@@ -37,7 +37,7 @@ module Sidekiq
 
         @done = true
         Sidekiq::Fetcher.done!
-        @fetcher.terminate! if @fetcher.alive?
+        @fetcher.async.terminate if @fetcher.alive?
 
         logger.info { "Shutting down #{@ready.size} quiet workers" }
         @ready.each { |x| x.terminate if x.alive? }
@@ -108,7 +108,7 @@ module Sidekiq
           processor = @ready.pop
           @in_progress[processor.object_id] = [msg, queue]
           @busy << processor
-          processor.process!(msg, queue)
+          processor.async.process(msg, queue)
         end
       end
     end
@@ -146,7 +146,7 @@ module Sidekiq
       raise "BUG: No processors, cannot continue!" if @ready.empty? && @busy.empty?
       raise "No ready processor!?" if @ready.empty?
 
-      @fetcher.fetch!
+      @fetcher.async.fetch
     end
 
     def stopped?

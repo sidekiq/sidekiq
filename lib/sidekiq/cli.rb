@@ -12,7 +12,7 @@ end
 trap 'USR1' do
   Sidekiq.logger.info "Received USR1, no longer accepting new work"
   mgr = Sidekiq::CLI.instance.manager
-  mgr.stop! if mgr
+  mgr.async.stop if mgr
 end
 
 trap 'TTIN' do
@@ -79,13 +79,13 @@ module Sidekiq
       poller = Sidekiq::Scheduled::Poller.new
       begin
         logger.info 'Starting processing, hit Ctrl-C to stop'
-        @manager.start!
-        poller.poll!(true)
+        @manager.async.start
+        poller.async.poll(true)
         sleep
       rescue Interrupt
         logger.info 'Shutting down'
-        poller.terminate! if poller.alive?
-        @manager.stop!(:shutdown => true, :timeout => options[:timeout])
+        poller.async.terminate if poller.alive?
+        @manager.async.stop(:shutdown => true, :timeout => options[:timeout])
         @manager.wait(:shutdown)
         # Explicitly exit so busy Processor threads can't block
         # process shutdown.
