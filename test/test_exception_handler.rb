@@ -8,7 +8,7 @@ ExceptionHandlerTestException = Class.new(StandardError)
 TEST_EXCEPTION = ExceptionHandlerTestException.new("Something didn't work!")
 
 class Component
-  include Sidekiq::Util
+  include Sidekiq::ExceptionHandler
 
   def invoke_exception(args)
     raise TEST_EXCEPTION
