@@ -115,7 +115,7 @@ class TestExceptionHandler < MiniTest::Unit::TestCase
 
     it "notifies Exceptional" do
       ::Exceptional::Config.expect(:should_send_to_api?,true)
-      exception_data = MiniTest::Mock.new
+      exception_data = Object.new
       ::Exceptional::Remote.expect(:error,nil,[exception_data])
       ::Exceptional::ExceptionData.expect(:new,exception_data,[TEST_EXCEPTION])
       Component.new.invoke_exception(:c => 3)
