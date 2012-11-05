@@ -2,6 +2,7 @@ language: ruby
 rvm:
   - 1.9.3
   - jruby-19mode
+  - 2.0.0-preview1
 branches:
   only:
     - master
@@ -13,3 +14,4 @@ notifications:
 matrix:
   allow_failures:
     - rvm: jruby-19mode
+    - rvm: 2.0.0-preview1
