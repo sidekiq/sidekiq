@@ -191,9 +191,29 @@ class TestCli < MiniTest::Unit::TestCase
 
     describe 'Sidekiq::CLI#parse_queues' do
       describe 'when weight is present' do
+        it 'concatenates queues by factor of weight and sets strict to false' do
+          opts = {}
+          @cli.send :parse_queues, opts, [['often', 7]]
+          assert_equal %w[often] * 7, opts[:queues]
+          assert !opts[:strict]
+        end
+      end
+
+      describe 'when weight is not present' do
+        it 'returns queues and sets strict' do
+          opts = {}
+          @cli.send :parse_queues, opts, [['once']]
+          assert_equal %w[once], opts[:queues]
+          assert opts[:strict]
+        end
+      end
+    end
+
+    describe 'Sidekiq::CLI#parse_queue' do
+      describe 'when weight is present' do
         it 'concatenates queue to opts[:queues] weight number of times' do
           opts = {}
-          @cli.send :parse_queues, opts, 'often', 7
+          @cli.send :parse_queue, opts, 'often', 7
           assert_equal %w[often] * 7, opts[:queues]
         end
       end
@@ -201,7 +221,7 @@ class TestCli < MiniTest::Unit::TestCase
       describe 'when weight is not present' do
         it 'concatenates queue to opts[:queues] once' do
           opts = {}
-          @cli.send :parse_queues, opts, 'once', nil
+          @cli.send :parse_queue, opts, 'once', nil
           assert_equal %w[once], opts[:queues]
         end
       end
