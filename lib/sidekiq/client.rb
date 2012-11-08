@@ -126,7 +126,7 @@ module Sidekiq
 
       normalized_item = item['class'].get_sidekiq_options.merge(item.dup)
       normalized_item['class'] = normalized_item['class'].to_s
-      normalized_item['retry'] = !!normalized_item['retry']
+      normalized_item['retry'] = !!normalized_item['retry'] unless normalized_item['retry'].is_a?(Fixnum)
       normalized_item['jid'] = SecureRandom.hex(12)
 
       normalized_item
