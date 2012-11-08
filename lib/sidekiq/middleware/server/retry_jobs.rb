@@ -68,7 +68,7 @@ module Sidekiq
             msg['error_backtrace'] = e.backtrace[0..msg['backtrace'].to_i]
           end
 
-          if count <= max_retry_attempts
+          if count < max_retry_attempts
             delay = DELAY.call(count)
             logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
             retry_at = Time.now.to_f + delay
