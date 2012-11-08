@@ -152,8 +152,7 @@ module Sidekiq
       @parser = OptionParser.new do |o|
         o.on "-q", "--queue QUEUE[,WEIGHT]...", "Queues to process with optional weights" do |arg|
           queues_and_weights = arg.scan(/([\w\.-]+),?(\d*)/)
-          queues_and_weights.each {|queue_and_weight| parse_queues(opts, *queue_and_weight)}
-          opts[:strict] = queues_and_weights.collect(&:last).none? {|weight| weight != ''}
+          parse_queues opts, queues_and_weights
         end
 
         o.on "-v", "--verbose", "Print more verbose output" do
@@ -215,13 +214,17 @@ module Sidekiq
       opts = {}
       if cli[:config_file] && File.exist?(cli[:config_file])
         opts = YAML.load(ERB.new(IO.read(cli[:config_file])).result)
-        queues = opts.delete(:queues) || []
-        queues.each { |name, weight| parse_queues(opts, name, weight) }
+        parse_queues opts, opts.delete(:queues) || []
       end
       opts
     end
 
-    def parse_queues(opts, q, weight)
+    def parse_queues(opts, queues_and_weights)
+      queues_and_weights.each {|queue_and_weight| parse_queue(opts, *queue_and_weight)}
+      opts[:strict] = queues_and_weights.all? {|_, weight| weight.to_s.empty? }
+    end
+
+    def parse_queue(opts, q, weight=nil)
       [weight.to_i, 1].max.times do
        (opts[:queues] ||= []) << q
       end
