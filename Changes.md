@@ -1,3 +1,14 @@
+HEAD
+-----------
+
+- Add `delay_until` so you can delay jobs until a specific timestamp:
+
+```ruby
+Auction.delay_until(@auction.ends_at).close(@auction.id)
+```
+
+This is identical to the existing Sidekiq::Worker method, `perform_at`.
+
 2.5.2
 -----------
 

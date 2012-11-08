@@ -43,6 +43,12 @@ class TestExtensions < MiniTest::Unit::TestCase
       assert_equal 1, Sidekiq.redis {|c| c.zcard('schedule') }
     end
 
+    it 'allows until delayed scheduling of AR class methods' do
+      assert_equal 0, Sidekiq.redis {|c| c.zcard('schedule') }
+      MyModel.delay_until(1.day.from_now).long_class_method
+      assert_equal 1, Sidekiq.redis {|c| c.zcard('schedule') }
+    end
+
     class UserMailer < ActionMailer::Base
       def greetings(a, b)
         raise "Should not be called!"
@@ -63,13 +69,21 @@ class TestExtensions < MiniTest::Unit::TestCase
       assert_equal 1, Sidekiq.redis {|c| c.zcard('schedule') }
     end
 
+    it 'allows until delay scheduling of AM mails' do
+      assert_equal 0, Sidekiq.redis {|c| c.zcard('schedule') }
+      UserMailer.delay_until(5.days.from_now).greetings(1, 2)
+      assert_equal 1, Sidekiq.redis {|c| c.zcard('schedule') }
+    end
+
     class SomeClass
       def self.doit(arg)
       end
     end
 
     it 'allows delay of any ole class method' do
+      assert_equal 0, queue_size
       SomeClass.delay.doit(Date.today)
+      assert_equal 1, queue_size
     end
 
     module SomeModule
@@ -78,7 +92,14 @@ class TestExtensions < MiniTest::Unit::TestCase
     end
 
     it 'allows delay of any module class method' do
+      assert_equal 0, queue_size
       SomeModule.delay.doit(Date.today)
+      assert_equal 1, queue_size
+    end
+
+    def queue_size(name='default')
+      Sidekiq::Queue.new(name).size
     end
   end
+
 end
