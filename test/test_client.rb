@@ -116,6 +116,9 @@ class TestClient < MiniTest::Unit::TestCase
   class BWorker < BaseWorker
     sidekiq_options 'retry' => 'b'
   end
+  class CWorker < BaseWorker
+    sidekiq_options 'retry' => 2
+  end
 
   describe 'client middleware' do
 
@@ -147,6 +150,10 @@ class TestClient < MiniTest::Unit::TestCase
   describe 'item normalization' do
     it 'defaults retry to true' do
       assert_equal true, Sidekiq::Client.normalize_item('class' => QueuedWorker, 'args' => [])['retry']
+    end
+
+    it 'should not normalize numeric retry\'s' do
+      assert_equal 2, Sidekiq::Client.normalize_item('class' => CWorker, 'args' => [])['retry']
     end
   end
 end
