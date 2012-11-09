@@ -23,6 +23,31 @@ class TestRetry < MiniTest::Unit::TestCase
       end
       assert_equal msg, msg2
     end
+    
+    it 'allows a numeric retry' do
+      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => 2 }
+      msg2 = msg.dup
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      assert_raises RuntimeError do
+        handler.call('', msg2, 'default') do
+          raise "kerblammo!"
+        end
+      end
+      assert_equal msg, msg2
+    end
+    
+    it 'retries the correct number of times' do
+      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => 2 }
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      attempts = 0
+      assert_raises RuntimeError do
+        handler.call('', msg2, 'default') do
+          attempts += 1
+          raise "kerblammo!"
+        end
+      end
+      assert_equal attempts, 3    # one try plus two retries
+    end
 
     it 'allows a numeric retry' do
       @redis.expect :zadd, 1, ['retry', String, String]
