@@ -24,6 +24,21 @@ class TestRetry < MiniTest::Unit::TestCase
       assert_equal msg, msg2
     end
 
+    it 'allows a numeric retry' do
+      @redis.expect :zadd, 1, ['retry', String, String]
+      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => 2 }
+      msg2 = msg.dup
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      assert_raises RuntimeError do
+        handler.call('', msg2, 'default') do
+          raise "kerblammo!"
+        end
+      end
+      msg2.delete('failed_at')
+      assert_equal({"class"=>"Bob", "args"=>[1, 2, "foo"], "retry"=>2, "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "retry_count"=>0}, msg2)
+      @redis.verify
+    end
+
     it 'saves backtraces' do
       @redis.expect :zadd, 1, ['retry', String, String]
       msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true, 'backtrace' => true }
@@ -36,6 +51,7 @@ class TestRetry < MiniTest::Unit::TestCase
       end
       assert msg["error_backtrace"]
       assert_equal c[0], msg["error_backtrace"][0]
+      @redis.verify
     end
 
     it 'saves partial backtraces' do
@@ -91,7 +107,7 @@ class TestRetry < MiniTest::Unit::TestCase
     it 'handles a recurring failed message before reaching user-specifed max' do
       @redis.expect :zadd, 1, ['retry', String, String]
       now = Time.now.utc
-      msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], 'retry' => 11, "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>10}
+      msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], 'retry' => 10, "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>8}
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
         handler.call('', msg, 'default') do
@@ -101,7 +117,7 @@ class TestRetry < MiniTest::Unit::TestCase
       assert_equal 'default', msg["queue"]
       assert_equal 'kerblammo!', msg["error_message"]
       assert_equal 'RuntimeError', msg["error_class"]
-      assert_equal 11, msg["retry_count"]
+      assert_equal 9, msg["retry_count"]
       assert msg["failed_at"]
       @redis.verify
     end
