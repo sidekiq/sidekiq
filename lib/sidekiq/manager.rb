@@ -43,14 +43,6 @@ module Sidekiq
         @ready.each { |x| x.terminate if x.alive? }
         @ready.clear
 
-        logger.debug { "Clearing workers in redis" }
-        Sidekiq.redis do |conn|
-          workers = conn.smembers('workers')
-          workers.each do |name|
-            conn.srem('workers', name) if name =~ /:#{process_id}-/
-          end
-        end
-
         return after(0) { signal(:shutdown) } if @busy.empty?
         logger.info { "Pausing up to #{timeout} seconds to allow workers to finish..." }
         hard_shutdown_in timeout if shutdown
@@ -123,6 +115,12 @@ module Sidekiq
           logger.info("Still waiting for #{@busy.size} busy workers")
 
           Sidekiq.redis do |conn|
+            logger.debug { "Clearing workers in redis" }
+            workers = conn.smembers('workers')
+            workers.each do |name|
+              conn.srem('workers', name) if name =~ /:#{process_id}-/
+            end
+
             @busy.each do |processor|
               # processor is an actor proxy and we can't call any methods
               # that would go to the actor (since it's busy).  Instead
