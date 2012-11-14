@@ -1,10 +1,6 @@
 @import url(//fonts.googleapis.com/css?family=Gudea:400,700);
 @import url(//fonts.googleapis.com/css?family=Armata);
 
-//
-// Base
-//
-
 * {
   box-sizing: border-box;
 }
@@ -107,10 +103,6 @@ code {
   background: none;
   border: none;
 }
-
-//
-// Layout
-//
 
 section {
   padding-top: 10px;
@@ -294,10 +286,6 @@ td form {
   }
 }
 
-//
-// Prettify
-//
-
 .com {
   color: #93a1a1;
 }
@@ -352,10 +340,6 @@ ol.linenums li {
   line-height: 18px;
   text-shadow: 0 1px 0 #fff;
 }
-
-//
-// Navbar
-//
 
 .navbar-container {
   height: 40px;
@@ -462,14 +446,12 @@ img.smallogo {
   margin-right: 20px;
 }
 
-//
-// Sprites
-//
-
-.status-sprite, .status-active, .status-idle {
-  background: url('/assets/status-sd8051fd480.png') no-repeat;
+.status-sprite {
+  background-image: url(/images/status-sd8051fd480.png);
+  height: 30px;
+  width: 30px;
+  display: inline-block;
 }
-
 .status-active {
   background-position: 0 0;
 }
@@ -477,10 +459,6 @@ img.smallogo {
 .status-idle {
   background-position: 0 -80px;
 }
-
-//
-// Style
-//
 
 .btn {
   font-weight: 700;
@@ -527,17 +505,5 @@ img.smallogo {
 
 .poll-status {
   padding: 10px 0;
-}
-
-.status-idle {
-  height: 30px;
-  width: 30px;
-  display: inline-block;
-}
-
-.status-active {
-  height: 30px;
-  width: 30px;
-  display: inline-block;
 }
 
