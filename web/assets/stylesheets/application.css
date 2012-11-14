@@ -69,7 +69,6 @@ h1, h2, h3, h4, h5, h6, strong {
 .title, .admin .brand {
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #b1003e), color-stop(100%, #310011));
   background: -webkit-linear-gradient(#b1003e, #310011);
-  background: -moz-linear-gradient(#b1003e, #310011);
   background: -o-linear-gradient(#b1003e, #310011);
   background: linear-gradient(#b1003e, #310011);
   -webkit-background-clip: text;
