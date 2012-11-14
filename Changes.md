@@ -1,6 +1,7 @@
 HEAD
 -----------
 
+- Small Web UI fixes
 - Add `delay_until` so you can delay jobs until a specific timestamp:
 
 ```ruby
