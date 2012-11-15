@@ -122,10 +122,17 @@ module Sidekiq
     def self.normalize_item(item)
       raise(ArgumentError, "Message must be a Hash of the form: { 'class' => SomeWorker, 'args' => ['bob', 1, :foo => 'bar'] }") unless item.is_a?(Hash)
       raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") if !item['class'] || !item['args']
-      raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item['class'].ancestors.inspect}") if !item['class'].is_a?(Class) || !item['class'].respond_to?('get_sidekiq_options')
+      raise(ArgumentError, "Message class must be either a Class or String representation of the class name") unless item['class'].is_a?(Class) || item['class'].is_a?(String)
 
-      normalized_item = item['class'].get_sidekiq_options.merge(item.dup)
-      normalized_item['class'] = normalized_item['class'].to_s
+      if item['class'].is_a?(Class)
+        raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item['class'].ancestors.inspect}") if !item['class'].is_a?(Class) || !item['class'].respond_to?('get_sidekiq_options')
+        normalized_item = item['class'].get_sidekiq_options.merge(item.dup)
+        normalized_item['class'] = normalized_item['class'].to_s
+      else
+        normalized_item = item.dup
+        normalized_item['queue'] = 'default' unless normalized_item['queue']
+      end
+
       normalized_item['retry'] = !!normalized_item['retry'] unless normalized_item['retry'].is_a?(Fixnum)
       normalized_item['jid'] = SecureRandom.hex(12)
 
