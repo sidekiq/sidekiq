@@ -8,6 +8,7 @@ module Sidekiq
     #
     #    UserMailer.delay.send_welcome_email(new_user)
     #    UserMailer.delay_for(5.days).send_welcome_email(new_user)
+    #    UserMailer.delay_until(5.days.from_now).send_welcome_email(new_user)
     class DelayedMailer
       include Sidekiq::Worker
       # I think it's reasonable to assume that emails should take less
