@@ -130,10 +130,10 @@ module Sidekiq
         normalized_item['class'] = normalized_item['class'].to_s
       else
         normalized_item = item.dup
-        normalized_item['queue'] = 'default' unless normalized_item['queue']
       end
 
-      normalized_item['retry'] = !!normalized_item['retry'] unless normalized_item['retry'].is_a?(Fixnum)
+      normalized_item['queue'] ||= Sidekiq::Worker::ClassMethods::DEFAULT_OPTIONS['queue']
+      normalized_item['retry'] ||= Sidekiq::Worker::ClassMethods::DEFAULT_OPTIONS['retry']
       normalized_item['jid'] = SecureRandom.hex(12)
 
       normalized_item
