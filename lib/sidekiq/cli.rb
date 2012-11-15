@@ -126,10 +126,21 @@ module Sidekiq
         require 'sidekiq/rails'
         require File.expand_path("#{options[:require]}/config/environment.rb")
         ::Rails.application.eager_load!
-        options[:tag] ||= File.basename(::Rails.root)
+        options[:tag] ||= default_tag
       else
         require options[:require]
       end
+    end
+
+    def default_tag
+      dir = ::Rails.root
+      name = File.basename(dir)
+      if name.to_i != 0 && prevdir = File.dirname(dir) # Capistrano release directory?
+        if File.basename(prevdir) == 'releases'
+          return File.basename(File.dirname(prevdir))
+        end
+      end
+      name
     end
 
     def validate!
