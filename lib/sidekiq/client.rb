@@ -59,19 +59,14 @@ module Sidekiq
     # or more jobs.
     def self.push_bulk(items)
       normed = normalize_item(items)
+
       payloads = items['args'].map do |args|
         _, payload = process_single(items['class'], normed.merge('args' => args, 'jid' => SecureRandom.hex(12)))
         payload
       end.compact
 
       pushed = false
-      Sidekiq.redis do |conn|
-        _, pushed = conn.multi do
-          conn.sadd('queues', normed['queue'])
-          conn.rpush("queue:#{normed['queue']}", payloads)
-        end
-      end
-
+      pushed = raw_push(normed, payloads) if normed
       pushed ? payloads.size : nil
     end
 
