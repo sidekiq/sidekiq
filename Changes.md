@@ -1,6 +1,13 @@
 HEAD
 -----------
 
+- `Sidekiq::Client.push` now accepts the worker class as a string so the
+  Sidekiq client does not have to load your worker classes at all.  [#524]
+
+
+2.5.3
+-----------
+
 - Small Web UI fixes
 - Add `delay_until` so you can delay jobs until a specific timestamp:
 
