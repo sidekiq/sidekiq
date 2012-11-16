@@ -125,17 +125,14 @@ module Sidekiq
       raise(ArgumentError, "Message class must be either a Class or String representation of the class name") unless item['class'].is_a?(Class) || item['class'].is_a?(String)
 
       if item['class'].is_a?(Class)
-        raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item['class'].ancestors.inspect}") if !item['class'].is_a?(Class) || !item['class'].respond_to?('get_sidekiq_options')
-        normalized_item = item['class'].get_sidekiq_options.merge(item.dup)
+        raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item['class'].ancestors.inspect}") if !item['class'].respond_to?('get_sidekiq_options')
+        normalized_item = item['class'].get_sidekiq_options.merge(item)
         normalized_item['class'] = normalized_item['class'].to_s
       else
-        normalized_item = item.dup
+        normalized_item = Sidekiq::Worker::ClassMethods::DEFAULT_OPTIONS.merge(item)
       end
 
-      normalized_item['queue'] ||= Sidekiq::Worker::ClassMethods::DEFAULT_OPTIONS['queue']
-      normalized_item['retry'] ||= Sidekiq::Worker::ClassMethods::DEFAULT_OPTIONS['retry']
       normalized_item['jid'] = SecureRandom.hex(12)
-
       normalized_item
     end
 
