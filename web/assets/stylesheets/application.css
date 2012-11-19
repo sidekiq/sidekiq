@@ -447,7 +447,7 @@ img.smallogo {
 }
 
 .status-sprite {
-  background-image: url(/images/status-sd8051fd480.png);
+  background-image: url(../images/status-sd8051fd480.png);
   height: 30px;
   width: 30px;
   display: inline-block;
