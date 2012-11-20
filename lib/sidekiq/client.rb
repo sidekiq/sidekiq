@@ -92,7 +92,9 @@ module Sidekiq
     def self.raw_push(normed, payload) # :nodoc:
       pushed = false
       Sidekiq.redis do |conn|
-        if normed['at']
+        if normed['at'] && payload.is_a?(Array)
+          pushed = conn.zadd('schedule', payload.map {|hash| [normed['at'].to_s, hash]})
+        elsif normed['at']
           pushed = conn.zadd('schedule', normed['at'].to_s, payload)
         else
           _, pushed = conn.multi do
