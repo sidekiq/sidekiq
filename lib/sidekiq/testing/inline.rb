@@ -28,8 +28,11 @@ module Sidekiq
     #
     singleton_class.class_eval do
       alias_method :raw_push_old, :raw_push
-      def raw_push(hash, _)
-        hash['class'].constantize.new.perform(*Sidekiq.load_json(Sidekiq.dump_json(hash['args'])))
+      def raw_push(normed, payload)
+        Array.wrap(payload).each do |hash|
+          normed['class'].constantize.new.perform(*Sidekiq.load_json(hash)['args'])
+        end
+
         true
       end
     end
