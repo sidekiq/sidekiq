@@ -65,13 +65,7 @@ module Sidekiq
       end.compact
 
       pushed = false
-      Sidekiq.redis do |conn|
-        _, pushed = conn.multi do
-          conn.sadd('queues', normed['queue'])
-          conn.rpush("queue:#{normed['queue']}", payloads)
-        end
-      end
-
+      pushed = raw_push(normed, payloads)
       pushed ? payloads.size : nil
     end
 
