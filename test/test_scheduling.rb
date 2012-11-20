@@ -28,6 +28,12 @@ class TestScheduling < MiniTest::Unit::TestCase
       assert ScheduledWorker.perform_in(5.days.from_now, 'mike')
       @redis.verify
     end
+
+    it 'schedules multiple jobs at once' do
+      @redis.expect :zadd, true, ['schedule', Array]
+      assert Sidekiq::Client.push_bulk('class' => ScheduledWorker, 'args' => ['mike', 'mike'], 'at' => 600)
+      @redis.verify
+    end
   end
 
 end
