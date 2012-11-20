@@ -57,21 +57,20 @@ module Sidekiq
     # Returns the number of jobs pushed or nil if the pushed failed.  The number of jobs
     # pushed can be less than the number given if the middleware stopped processing for one
     # or more jobs.
+    #
+    # Example:
+    #   Sidekiq::Client.push_bulk('queue' => 'my_queue', 'class' => MyWorker, 'args' => [['foo', 1, :bat => 'bar'],['bar', 2, :bat => 'foo']])
+    #
     def self.push_bulk(items)
       normed = normalize_item(items)
+
       payloads = items['args'].map do |args|
         _, payload = process_single(items['class'], normed.merge('args' => args, 'jid' => SecureRandom.hex(12)))
         payload
       end.compact
 
       pushed = false
-      Sidekiq.redis do |conn|
-        _, pushed = conn.multi do
-          conn.sadd('queues', normed['queue'])
-          conn.rpush("queue:#{normed['queue']}", payloads)
-        end
-      end
-
+      pushed = raw_push(normed, payloads) if normed
       pushed ? payloads.size : nil
     end
 
