@@ -49,7 +49,7 @@ class TestWeb < MiniTest::Unit::TestCase
     end
 
     it 'handles missing retry' do
-      get '/retries/12391982.123'
+      get '/retries/2c4c17969825a384a92f023b'
       assert_equal 302, last_response.status
     end
 
@@ -107,17 +107,6 @@ class TestWeb < MiniTest::Unit::TestCase
       assert_match /HardWorker/, last_response.body
     end
 
-    it 'can delete scheduled' do
-      msg,score = add_scheduled
-      Sidekiq.redis do |conn|
-        assert_equal 1, conn.zcard('schedule')
-        post '/scheduled', 'score' => [score], 'delete' => 'Delete'
-        assert_equal 302, last_response.status
-        assert_equal 'http://example.org/scheduled', last_response.header['Location']
-        assert_equal 0, conn.zcard('schedule')
-      end
-    end
-
     it 'can display retries' do
       get '/retries'
       assert_equal 200, last_response.status
@@ -133,37 +122,45 @@ class TestWeb < MiniTest::Unit::TestCase
     end
 
     it 'can display a single retry' do
-      get '/retries/12938712.123333'
+      get '/retries/2c4c17969825a384a92f023b'
       assert_equal 302, last_response.status
-      _, score = add_retry
-
-      get "/retries/#{score}"
+      msg = add_retry
+      get "/retries/#{msg['jid']}"
       assert_equal 200, last_response.status
       assert_match /HardWorker/, last_response.body
     end
 
     it 'can delete a single retry' do
-      _, score = add_retry
-
-      post "/retries/#{score}", 'delete' => 'Delete'
+      msg = add_retry
+      post "/retries/#{msg['jid']}", 'delete' => 'Delete'
       assert_equal 302, last_response.status
       assert_equal 'http://example.org/retries', last_response.header['Location']
 
       get "/retries"
       assert_equal 200, last_response.status
-      refute_match /#{score}/, last_response.body
+      refute_match /#{msg['args'][2]}/, last_response.body
     end
 
     it 'can retry a single retry now' do
-      msg, score = add_retry
-
-      post "/retries/#{score}", 'retry' => 'Retry'
+      msg = add_retry
+      post "/retries/#{msg['jid']}", 'retry' => 'Retry'
       assert_equal 302, last_response.status
       assert_equal 'http://example.org/retries', last_response.header['Location']
 
       get '/queues/default'
       assert_equal 200, last_response.status
       assert_match /#{msg['args'][2]}/, last_response.body
+    end
+
+    it 'can delete scheduled' do
+      msg = add_scheduled
+      Sidekiq.redis do |conn|
+        assert_equal 1, conn.zcard('schedule')
+        post '/scheduled', 'jid' => [msg['jid']], 'delete' => 'Delete'
+        assert_equal 302, last_response.status
+        assert_equal 'http://example.org/scheduled', last_response.header['Location']
+        assert_equal 0, conn.zcard('schedule')
+      end
     end
 
     it 'can show user defined tab' do
@@ -179,14 +176,14 @@ class TestWeb < MiniTest::Unit::TestCase
     end
 
     def add_scheduled
+      score = Time.now.to_f
       msg = { 'class' => 'HardWorker',
               'args' => ['bob', 1, Time.now.to_f],
-              'at' => Time.now.to_f }
-      score = Time.now.to_f
+              'at' => score }
       Sidekiq.redis do |conn|
         conn.zadd('schedule', score, Sidekiq.dump_json(msg))
       end
-      [msg, score]
+      msg
     end
 
     def add_retry
@@ -196,12 +193,13 @@ class TestWeb < MiniTest::Unit::TestCase
               'error_message' => 'Some fake message',
               'error_class' => 'RuntimeError',
               'retry_count' => 0,
-              'failed_at' => Time.now.utc, }
+              'failed_at' => Time.now.utc,
+              'jid' => "f39af2a05e8f4b24dbc0f1e4"}
       score = Time.now.to_f
       Sidekiq.redis do |conn|
         conn.zadd('retry', score, Sidekiq.dump_json(msg))
       end
-      [msg, score]
+      msg
     end
   end
 end

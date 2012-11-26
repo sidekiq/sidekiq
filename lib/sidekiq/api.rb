@@ -101,11 +101,24 @@ module Sidekiq
     end
 
     def at
-      Time.at(@score)
+      Time.at(score)
     end
 
     def delete
-      @parent.delete(@score)
+      @parent.delete(score)
+    end
+
+    def retry
+      raise "Retry not available on jobs not in the Retry queue." unless item["failed_at"]
+      Sidekiq.redis do |conn|
+        results = conn.zrangebyscore('retry', score, score)
+        conn.zremrangebyscore('retry', score, score)
+        results.map do |message|
+          msg = Sidekiq.load_json(message)
+          msg['retry_count'] = msg['retry_count'] - 1
+          conn.rpush("queue:#{msg['queue']}", Sidekiq.dump_json(msg))
+        end
+      end
     end
   end
 

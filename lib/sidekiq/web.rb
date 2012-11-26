@@ -150,19 +150,48 @@ module Sidekiq
       redirect "#{root_path}queues/#{params[:name]}"
     end
 
-    get "/retries/:score" do
-      halt 404 unless params[:score]
-      @score = params[:score].to_f
-      @retries = retries_with_score(@score)
-      redirect "#{root_path}retries" if @retries.empty?
-      slim :retry
-    end
-
     get '/retries' do
       @count = (params[:count] || 25).to_i
       (@current_page, @total_size, @retries) = page("retry", params[:page], @count)
       @retries = @retries.map {|msg, score| [Sidekiq.load_json(msg), score] }
       slim :retries
+    end
+
+    get "/retries/:jid" do
+      halt 404 unless params[:jid]
+      @retry = Sidekiq::RetrySet.new.select do |retri|
+        retri.jid == params[:jid]
+      end.first
+      redirect "#{root_path}retries" if @retry.nil?
+      slim :retry
+    end
+
+    post '/retries' do
+      halt 404 unless params['jid']
+      if params['delete']
+        Sidekiq::RetrySet.new.select do |job|
+          job.jid.in?(params['jid'])
+        end.map(&:delete)
+      elsif params['retry']
+        Sidekiq::RetrySet.new.select do |job|
+          job.jid.in?(params['jid'])
+        end.map(&:retry)
+      end
+      redirect "#{root_path}retries"
+    end
+
+    post "/retries/:jid" do
+      halt 404 unless params['jid']
+      if params['retry']
+        Sidekiq::RetrySet.new.select do |job|
+          job.jid == params['jid']
+        end.first.retry
+      elsif params['delete']
+        Sidekiq::RetrySet.new.select do |job|
+          job.jid == params['jid']
+        end.first.delete
+      end
+      redirect "#{root_path}retries"
     end
 
     get '/scheduled' do
@@ -173,56 +202,12 @@ module Sidekiq
     end
 
     post '/scheduled' do
-      halt 404 unless params[:score]
+      halt 404 unless params['jid']
       halt 404 unless params['delete']
-      params[:score].each do |score|
-        s = score.to_f
-        process_score('schedule', s, :delete)
-      end
+      Sidekiq::ScheduledSet.new.select do |job|
+        job.jid.in?(params['jid'])
+      end.map(&:delete)
       redirect "#{root_path}scheduled"
-    end
-
-    post '/retries' do
-      halt 404 unless params[:score]
-      params[:score].each do |score|
-        s = score.to_f
-        if params['retry']
-          process_score('retry', s, :retry)
-        elsif params['delete']
-          process_score('retry', s, :delete)
-        end
-      end
-      redirect "#{root_path}retries"
-    end
-
-    post "/retries/:score" do
-      halt 404 unless params[:score]
-      score = params[:score].to_f
-      if params['retry']
-        process_score('retry', score, :retry)
-      elsif params['delete']
-        process_score('retry', score, :delete)
-      end
-      redirect "#{root_path}retries"
-    end
-
-    def process_score(set, score, operation)
-      case operation
-      when :retry
-        Sidekiq.redis do |conn|
-          results = conn.zrangebyscore(set, score, score)
-          conn.zremrangebyscore(set, score, score)
-          results.map do |message|
-            msg = Sidekiq.load_json(message)
-            msg['retry_count'] = msg['retry_count'] - 1
-            conn.rpush("queue:#{msg['queue']}", Sidekiq.dump_json(msg))
-          end
-        end
-      when :delete
-        Sidekiq.redis do |conn|
-          conn.zremrangebyscore(set, score, score)
-        end
-      end
     end
 
     def self.tabs

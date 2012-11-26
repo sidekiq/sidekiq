@@ -64,9 +64,21 @@ class TestApi < MiniTest::Unit::TestCase
       assert_equal 0, r.size
     end
 
+    it 'can retry a retry' do
+      add_retry
+      r = Sidekiq::RetrySet.new
+      assert_equal 1, r.size
+      r.first.retry
+      assert_equal 0, r.size
+      assert_equal 1, Sidekiq::Queue.new('default').size
+      job = Sidekiq::Queue.new('default').first
+      assert_equal 'bob', job.jid
+      assert_equal 1, job['retry_count']
+    end
+
     def add_retry
       at = Time.now.to_f
-      payload = Sidekiq.dump_json('class' => 'ApiWorker', 'args' => [1, 'mike'], 'queue' => 'default', 'jid' => 'bob')
+      payload = Sidekiq.dump_json('class' => 'ApiWorker', 'args' => [1, 'mike'], 'queue' => 'default', 'jid' => 'bob', 'retry_count' => 2, 'failed_at' => Time.now.utc)
       Sidekiq.redis do |conn|
         conn.zadd('retry', at.to_s, payload)
       end

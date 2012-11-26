@@ -1,52 +1,55 @@
 header
   h3 Job
 
-- @retries.each do |msg|
-  table class="retry table table-bordered table-striped"
-    tbody
+table class="retry table table-bordered table-striped"
+  tbody
+    tr
+      th Queue
+      td
+        a href="#{root_path}queues/#{@retry['queue']}" #{@retry['queue']}
+    tr
+      th Job Class
+      td
+        code= @retry['class']
+    tr
+      th Job Arguments
+      td
+        code= display_args(@retry['args'], 1000)
+    tr
+      th Job ID
+      td
+        code= @retry.jid
+    - if @retry['retry_count'] > 0
       tr
-        th Queue
-        td
-          a href="#{root_path}queues/#{msg['queue']}" #{msg['queue']}
+        th Retry Count
+        td= @retry['retry_count']
       tr
-        th Job Class
-        td
-          code= msg['class']
+        th Last Retry
+        td== relative_time(@retry['retried_at'].is_a?(Numeric) ? Time.at(@retry['retried_at']) : Time.parse(@retry['retried_at']))
+    - else
       tr
-        th Job Arguments
-        td
-          code= display_args(msg['args'], 1000)
-      - if msg['retry_count'] > 0
-        tr
-          th Retry Count
-          td= msg['retry_count']
-        tr
-          th Last Retry
-          td== relative_time(msg['retried_at'].is_a?(Numeric) ? Time.at(msg['retried_at']) : Time.parse(msg['retried_at']))
-      - else
-        tr
-          th Originally Failed
-          td== relative_time(msg['failed_at'].is_a?(Numeric) ? Time.at(msg['failed_at']) : Time.parse(msg['failed_at']))
-      tr
-        th Next Retry
-        td== relative_time(Time.at(@score))
+        th Originally Failed
+        td== relative_time(@retry['failed_at'].is_a?(Numeric) ? Time.at(@retry['failed_at']) : Time.parse(@retry['failed_at']))
+    tr
+      th Next Retry
+      td== relative_time(Time.at(@retry.score))
 
-  h3 Error
-  table class="error table table-bordered table-striped"
-    tbody
+h3 Error
+table class="error table table-bordered table-striped"
+  tbody
+    tr
+      th Error Class
+      td
+        code= @retry['error_class']
+    tr
+      th Error Message
+      td= @retry['error_message']
+    - if !@retry['error_backtrace'].nil?
       tr
-        th Error Class
+        th Error Backtrace
         td
-          code= msg['error_class']
-      tr
-        th Error Message
-        td= msg['error_message']
-      - if !msg['error_backtrace'].nil?
-        tr
-          th Error Backtrace
-          td
-            code== msg['error_backtrace'].join("<br/>")
-  form.form-horizontal action="#{root_path}retries/#{@score}" method="post"
-    a.btn href="#{root_path}retries" ← Back
-    input.btn.btn-primary type="submit" name="retry" value="Retry Now"
-    input.btn.btn-danger type="submit" name="delete" value="Delete"
+          code== @retry['error_backtrace'].join("<br/>")
+form.form-horizontal action="#{root_path}retries/#{@retry.jid}" method="post"
+  a.btn href="#{root_path}retries" ← Back
+  input.btn.btn-primary type="submit" name="retry" value="Retry Now"
+  input.btn.btn-danger type="submit" name="delete" value="Delete"

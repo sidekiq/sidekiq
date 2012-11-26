@@ -17,18 +17,18 @@ header.row
         th Queue
         th Worker
         th Args
-      - @retries.each do |(msg, score)|
+      - @retries.each do |msg, score|
         tr
           td
-            input type='checkbox' name='score[]' value='#{score}'
+            input type='checkbox' name='jid[]' value='#{msg['jid']}'
           td
-            a href="#{root_path}retries/#{score}"== relative_time(Time.at(score))
+            a href="#{root_path}retries/#{msg['jid']}"== relative_time(Time.at(score))
           td= msg['retry_count']
           td
             a href="#{root_path}queues/#{msg['queue']}" #{msg['queue']}
           td= msg['class']
           td= display_args(msg['args'])
     input.btn.btn-danger.btn-small.pull-right type="submit" name="delete" value="Delete"
-    input.btn.btn-primary.btn-small.pull-right type="submit" name="retry" value="Retry Now" 
+    input.btn.btn-primary.btn-small.pull-right type="submit" name="retry" value="Retry Now"
 - else
   .alert.alert-success No retries were found

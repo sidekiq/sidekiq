@@ -16,10 +16,10 @@ header.row
         th width="10%" Queue
         th Worker
         th Args
-      - @scheduled.each do |(msg, score)|
+      - @scheduled.each do |msg, score|
         tr
           td
-            input type='checkbox' name='score[]' value='#{score}'
+            input type='checkbox' name='jid[]' value='#{msg['jid']}'
           td== relative_time(Time.at(score))
           td
             a href="#{root_path}queues/#{msg['queue']}" #{msg['queue']}
