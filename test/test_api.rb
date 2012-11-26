@@ -56,21 +56,23 @@ class TestApi < MiniTest::Unit::TestCase
       assert_in_delta Time.now.to_f, retri.at.to_f, 0.01
     end
 
-    it 'can delete retries' do
-      add_retry
-      r = Sidekiq::RetrySet.new
-      assert_equal 1, r.size
-      r.map(&:delete)
-      assert_equal 0, r.size
-    end
-
-    it 'can delete a single retry' do
+    it 'can delete multiple retries from score' do
       same_time = Time.now.to_f
       add_retry('bob1', same_time)
       add_retry('bob2', same_time)
       r = Sidekiq::RetrySet.new
       assert_equal 2, r.size
-      r.first.delete
+      Sidekiq::RetrySet.new.delete(same_time)
+      assert_equal 0, r.size
+    end
+
+    it 'can delete a single retry from score and jid' do
+      same_time = Time.now.to_f
+      add_retry('bob1', same_time)
+      add_retry('bob2', same_time)
+      r = Sidekiq::RetrySet.new
+      assert_equal 2, r.size
+      Sidekiq::RetrySet.new.delete(same_time, 'bob1')
       assert_equal 1, r.size
     end
 

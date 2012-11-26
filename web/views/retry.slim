@@ -49,7 +49,7 @@ table class="error table table-bordered table-striped"
         th Error Backtrace
         td
           code== @retry['error_backtrace'].join("<br/>")
-form.form-horizontal action="#{root_path}retries/#{@retry.jid}" method="post"
+form.form-horizontal action="#{root_path}retries/#{job_params(@retry, @retry.score)}" method="post"
   a.btn href="#{root_path}retries" ← Back
   input.btn.btn-primary type="submit" name="retry" value="Retry Now"
   input.btn.btn-danger type="submit" name="delete" value="Delete"

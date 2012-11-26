@@ -20,9 +20,9 @@ header.row
       - @retries.each do |msg, score|
         tr
           td
-            input type='checkbox' name='jid[]' value='#{msg['jid']}'
+            input type='checkbox' name='key[]' value='#{job_params(msg, score)}'
           td
-            a href="#{root_path}retries/#{msg['jid']}"== relative_time(Time.at(score))
+            a href="#{root_path}retries/#{job_params(msg, score)}"== relative_time(Time.at(score))
           td= msg['retry_count']
           td
             a href="#{root_path}queues/#{msg['queue']}" #{msg['queue']}

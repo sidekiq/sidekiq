@@ -105,7 +105,7 @@ module Sidekiq
     end
 
     def delete
-      @parent.delete(score)
+      @parent.delete(score, jid)
     end
 
     def retry
@@ -150,11 +150,41 @@ module Sidekiq
       end
     end
 
-    def delete(score)
-      count = Sidekiq.redis do |conn|
-        conn.zremrangebyscore(@zset, score, score)
+    def fetch(score, jid = nil)
+      elements = Sidekiq.redis do |conn|
+        conn.zrangebyscore(@zset, score, score)
       end
-      count != 0
+
+      elements.inject([]) do |result, element|
+        entry = SortedEntry.new(self, score, element)
+        if jid
+          result << entry if entry.jid == jid
+        else
+          result << entry
+        end
+      end
+    end
+
+    def delete(score, jid = nil)
+      if jid
+        elements = Sidekiq.redis do |conn|
+          conn.zrangebyscore(@zset, score, score)
+        end
+
+        elements_with_jid = elements.map do |element|
+          message = Sidekiq.load_json(element)
+
+          if message["jid"] == jid
+            Sidekiq.redis { |conn| conn.zrem(@zset, element) }
+          end
+        end
+        elements_with_jid.count != 0
+      else
+        count = Sidekiq.redis do |conn|
+          conn.zremrangebyscore(@zset, score, score)
+        end
+        count != 0
+      end
     end
   end
 

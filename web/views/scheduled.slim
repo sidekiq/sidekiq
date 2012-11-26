@@ -19,7 +19,7 @@ header.row
       - @scheduled.each do |msg, score|
         tr
           td
-            input type='checkbox' name='jid[]' value='#{msg['jid']}'
+            input type='checkbox' name='key[]' value='#{job_params(msg, score)}'
           td== relative_time(Time.at(score))
           td
             a href="#{root_path}queues/#{msg['queue']}" #{msg['queue']}

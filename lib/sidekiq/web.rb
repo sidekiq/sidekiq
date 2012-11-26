@@ -3,8 +3,17 @@ require 'slim'
 require 'sidekiq/paginator'
 
 module Sidekiq
+  module Helpers
+    def job_params(job, score)
+      "#{score}-#{job['jid']}"
+    end
+  end
+end
+
+module Sidekiq
   class Web < Sinatra::Base
     include Sidekiq::Paginator
+    include Sidekiq::Helpers
 
     dir = File.expand_path(File.dirname(__FILE__) + "/../../web")
     set :public_folder, "#{dir}/assets"
@@ -86,6 +95,11 @@ module Sidekiq
         %{<time datetime="#{time.getutc.iso8601}">#{time}</time>}
       end
 
+      def parse_params(params)
+        score, jid = params.split("-")
+        [score.to_f, jid]
+      end
+
       def display_args(args, count=100)
         args.map { |arg| a = arg.inspect; a.size > count ? "#{a[0..count]}..." : a }.join(", ")
       end
@@ -157,39 +171,34 @@ module Sidekiq
       slim :retries
     end
 
-    get "/retries/:jid" do
-      halt 404 unless params[:jid]
-      @retry = Sidekiq::RetrySet.new.select do |retri|
-        retri.jid == params[:jid]
-      end.first
+    get "/retries/:key" do
+      halt 404 unless params['key']
+      @retry = Sidekiq::RetrySet.new.fetch(*parse_params(params['key'])).first
       redirect "#{root_path}retries" if @retry.nil?
       slim :retry
     end
 
     post '/retries' do
-      halt 404 unless params['jid']
-      if params['delete']
-        Sidekiq::RetrySet.new.select do |job|
-          job.jid.in?(params['jid'])
-        end.map(&:delete)
-      elsif params['retry']
-        Sidekiq::RetrySet.new.select do |job|
-          job.jid.in?(params['jid'])
-        end.map(&:retry)
+      halt 404 unless params['key']
+
+      params['key'].each do |key|
+        job = Sidekiq::RetrySet.new.fetch(*parse_params(key)).first
+        if params['retry']
+          job.retry
+        elsif params['delete']
+          job.delete
+        end
       end
       redirect "#{root_path}retries"
     end
 
-    post "/retries/:jid" do
-      halt 404 unless params['jid']
+    post "/retries/:key" do
+      halt 404 unless params['key']
+      job = Sidekiq::RetrySet.new.fetch(*parse_params(params['key'])).first
       if params['retry']
-        Sidekiq::RetrySet.new.select do |job|
-          job.jid == params['jid']
-        end.first.retry
+        job.retry
       elsif params['delete']
-        Sidekiq::RetrySet.new.select do |job|
-          job.jid == params['jid']
-        end.first.delete
+        job.delete
       end
       redirect "#{root_path}retries"
     end
@@ -202,11 +211,11 @@ module Sidekiq
     end
 
     post '/scheduled' do
-      halt 404 unless params['jid']
+      halt 404 unless params['key']
       halt 404 unless params['delete']
-      Sidekiq::ScheduledSet.new.select do |job|
-        job.jid.in?(params['jid'])
-      end.map(&:delete)
+      params['key'].each do |key|
+        Sidekiq::ScheduledSet.new.fetch(*parse_params(key)).first.delete
+      end
       redirect "#{root_path}scheduled"
     end
 
