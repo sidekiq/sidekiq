@@ -216,12 +216,12 @@ header.row .pagination {
   padding: 4px 0 2px 0;
 }
 .summary_bar ul .desc {
-  font-size: 1.1em;
+  font-size: 1em;
   font-weight: normal;
 }
 .summary_bar ul .count {
   color: #b1003e;
-  font-size: 1.1em;
+  font-size: 1em;
   font-weight: bold;
   float: right;
 }
