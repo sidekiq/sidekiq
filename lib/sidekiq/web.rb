@@ -136,10 +136,7 @@ module Sidekiq
     end
 
     post "/queues/:name" do
-      Sidekiq.redis do |conn|
-        conn.del("queue:#{params[:name]}")
-        conn.srem("queues", params[:name])
-      end
+      Sidekiq::Queue.new(params[:name]).clear
       redirect "#{root_path}queues"
     end
 
@@ -191,6 +188,18 @@ module Sidekiq
         elsif params['delete']
           process_score('retry', s, :delete)
         end
+      end
+      redirect "#{root_path}retries"
+    end
+
+    post "/retries/all/delete" do
+      Sidekiq::RetrySet.new.clear
+      redirect "#{root_path}retries"
+    end
+
+    post "/retries/all/retry" do
+      Sidekiq::RetrySet.new.each do |job|
+        process_score('retry', job.score, :retry)
       end
       redirect "#{root_path}retries"
     end
