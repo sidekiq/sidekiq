@@ -1,4 +1,4 @@
-HEAD
+2.5.4
 -----------
 
 - `Sidekiq::Client.push` now accepts the worker class as a string so the
