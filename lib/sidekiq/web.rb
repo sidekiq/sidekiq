@@ -141,9 +141,7 @@ module Sidekiq
     end
 
     post "/queues/:name/delete" do
-      Sidekiq.redis do |conn|
-        conn.lrem("queue:#{params[:name]}", 0, params[:key_val])
-      end
+      Sidekiq::Job.new(params[:key_val], params[:name]).delete
       redirect "#{root_path}queues/#{params[:name]}"
     end
 
