@@ -9,7 +9,7 @@ class WorkController < ApplicationController
 
   def email
     UserMailer.delay_for(30.seconds).greetings(Time.now)
-    render :nothing => true
+    render :text => 'enqueued'
   end
 
   def long
@@ -33,6 +33,6 @@ class WorkController < ApplicationController
       p2 = Post.second
     end
     p.delay.long_method(p2)
-    render :nothing => true
+    render :text => 'enqueued'
   end
 end

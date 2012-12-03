@@ -86,6 +86,15 @@ module Sidekiq
         %{<time datetime="#{time.getutc.iso8601}">#{time}</time>}
       end
 
+      def job_params(job, score)
+        "#{score}-#{job['jid']}"
+      end
+
+      def parse_params(params)
+        score, jid = params.split("-")
+        [score.to_f, jid]
+      end
+
       def display_args(args, count=100)
         args.map { |arg| a = arg.inspect; a.size > count ? "#{a[0..count]}..." : a }.join(", ")
       end
@@ -145,14 +154,6 @@ module Sidekiq
       redirect "#{root_path}queues/#{params[:name]}"
     end
 
-    get "/retries/:score" do
-      halt 404 unless params[:score]
-      @score = params[:score].to_f
-      @retries = retries_with_score(@score)
-      redirect "#{root_path}retries" if @retries.empty?
-      slim :retry
-    end
-
     get '/retries' do
       @count = (params[:count] || 25).to_i
       (@current_page, @total_size, @retries) = page("retry", params[:page], @count)
@@ -160,31 +161,22 @@ module Sidekiq
       slim :retries
     end
 
-    get '/scheduled' do
-      @count = (params[:count] || 25).to_i
-      (@current_page, @total_size, @scheduled) = page("schedule", params[:page], @count)
-      @scheduled = @scheduled.map {|msg, score| [Sidekiq.load_json(msg), score] }
-      slim :scheduled
-    end
-
-    post '/scheduled' do
-      halt 404 unless params[:score]
-      halt 404 unless params['delete']
-      params[:score].each do |score|
-        s = score.to_f
-        process_score('schedule', s, :delete)
-      end
-      redirect "#{root_path}scheduled"
+    get "/retries/:key" do
+      halt 404 unless params['key']
+      @retry = Sidekiq::RetrySet.new.fetch(*parse_params(params['key'])).first
+      redirect "#{root_path}retries" if @retry.nil?
+      slim :retry
     end
 
     post '/retries' do
-      halt 404 unless params[:score]
-      params[:score].each do |score|
-        s = score.to_f
+      halt 404 unless params['key']
+
+      params['key'].each do |key|
+        job = Sidekiq::RetrySet.new.fetch(*parse_params(key)).first
         if params['retry']
-          process_score('retry', s, :retry)
+          job.retry
         elsif params['delete']
-          process_score('retry', s, :delete)
+          job.delete
         end
       end
       redirect "#{root_path}retries"
@@ -196,40 +188,35 @@ module Sidekiq
     end
 
     post "/retries/all/retry" do
-      Sidekiq::RetrySet.new.each do |job|
-        process_score('retry', job.score, :retry)
-      end
+      Sidekiq::RetrySet.new.each { |job| job.retry }
       redirect "#{root_path}retries"
     end
 
-    post "/retries/:score" do
-      halt 404 unless params[:score]
-      score = params[:score].to_f
+    post "/retries/:key" do
+      halt 404 unless params['key']
+      job = Sidekiq::RetrySet.new.fetch(*parse_params(params['key'])).first
       if params['retry']
-        process_score('retry', score, :retry)
+        job.retry
       elsif params['delete']
-        process_score('retry', score, :delete)
+        job.delete
       end
       redirect "#{root_path}retries"
     end
 
-    def process_score(set, score, operation)
-      case operation
-      when :retry
-        Sidekiq.redis do |conn|
-          results = conn.zrangebyscore(set, score, score)
-          conn.zremrangebyscore(set, score, score)
-          results.map do |message|
-            msg = Sidekiq.load_json(message)
-            msg['retry_count'] = msg['retry_count'] - 1
-            conn.rpush("queue:#{msg['queue']}", Sidekiq.dump_json(msg))
-          end
-        end
-      when :delete
-        Sidekiq.redis do |conn|
-          conn.zremrangebyscore(set, score, score)
-        end
+    get '/scheduled' do
+      @count = (params[:count] || 25).to_i
+      (@current_page, @total_size, @scheduled) = page("schedule", params[:page], @count)
+      @scheduled = @scheduled.map {|msg, score| [Sidekiq.load_json(msg), score] }
+      slim :scheduled
+    end
+
+    post '/scheduled' do
+      halt 404 unless params['key']
+      halt 404 unless params['delete']
+      params['key'].each do |key|
+        Sidekiq::ScheduledSet.new.fetch(*parse_params(key)).first.delete
       end
+      redirect "#{root_path}scheduled"
     end
 
     def self.tabs
