@@ -6,10 +6,13 @@ require 'rack/test'
 class TestWeb < MiniTest::Unit::TestCase
   describe 'sidekiq web' do
     include Rack::Test::Methods
-    include Sidekiq::Helpers
 
     def app
       Sidekiq::Web
+    end
+
+    def job_params(job, score)
+      "#{score}-#{job['jid']}"
     end
 
     before do

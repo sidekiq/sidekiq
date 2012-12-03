@@ -3,17 +3,8 @@ require 'slim'
 require 'sidekiq/paginator'
 
 module Sidekiq
-  module Helpers
-    def job_params(job, score)
-      "#{score}-#{job['jid']}"
-    end
-  end
-end
-
-module Sidekiq
   class Web < Sinatra::Base
     include Sidekiq::Paginator
-    include Sidekiq::Helpers
 
     dir = File.expand_path(File.dirname(__FILE__) + "/../../web")
     set :public_folder, "#{dir}/assets"
@@ -93,6 +84,10 @@ module Sidekiq
 
       def relative_time(time)
         %{<time datetime="#{time.getutc.iso8601}">#{time}</time>}
+      end
+
+      def job_params(job, score)
+        "#{score}-#{job['jid']}"
       end
 
       def parse_params(params)
