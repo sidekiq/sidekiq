@@ -68,9 +68,10 @@ class TestWeb < MiniTest::Unit::TestCase
 
       Sidekiq.redis do |conn|
         refute conn.smembers('queues').include?('foo')
+        refute conn.exists('queues:foo')
       end
     end
-    
+
     it 'can delete a job' do
       Sidekiq.redis do |conn|
         conn.rpush('queue:foo', "{}")
@@ -128,6 +129,15 @@ class TestWeb < MiniTest::Unit::TestCase
       refute_match /#{params.first['args'][2]}/, last_response.body
     end
 
+    it 'can delete all retries' do
+      3.times { add_retry }
+
+      post "/retries/all/delete", 'delete' => 'Delete'
+      assert_equal 0, Sidekiq::RetrySet.new.size
+      assert_equal 302, last_response.status
+      assert_equal 'http://example.org/retries', last_response.header['Location']
+    end
+
     it 'can retry a single retry now' do
       params = add_retry
       post "/retries/#{job_params(*params)}", 'retry' => 'Retry'
@@ -162,6 +172,20 @@ class TestWeb < MiniTest::Unit::TestCase
         assert_equal 'http://example.org/scheduled', last_response.header['Location']
         assert_equal 0, conn.zcard('schedule')
       end
+    end
+
+    it 'can retry all retries' do
+      msg, score = add_retry
+      add_retry
+
+      post "/retries/all/retry", 'retry' => 'Retry'
+      assert_equal 302, last_response.status
+      assert_equal 'http://example.org/retries', last_response.header['Location']
+      assert_equal 2, Sidekiq::Queue.new("default").size
+
+      get '/queues/default'
+      assert_equal 200, last_response.status
+      assert_match /#{msg['args'][2]}/, last_response.body
     end
 
     it 'can show user defined tab' do

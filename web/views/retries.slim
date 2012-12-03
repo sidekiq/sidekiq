@@ -28,7 +28,13 @@ header.row
             a href="#{root_path}queues/#{msg['queue']}" #{msg['queue']}
           td= msg['class']
           td= display_args(msg['args'])
-    input.btn.btn-danger.btn-small.pull-right type="submit" name="delete" value="Delete"
-    input.btn.btn-primary.btn-small.pull-right type="submit" name="retry" value="Retry Now"
+    input.btn.btn-primary.btn-small.pull-left type="submit" name="retry" value="Retry Now"
+    input.btn.btn-danger.btn-small.pull-left type="submit" name="delete" value="Delete"
+
+  form action="#{root_path}retries/all/delete" method="post"
+    input.btn.btn-danger.btn-small.pull-right type="submit" name="delete" value="Delete All" data-confirm="Are you sure?"
+  form action="#{root_path}retries/all/retry" method="post"
+    input.btn.btn-danger.btn-small.pull-right type="submit" name="retry" value="Retry All" data-confirm="Are you sure?"
+
 - else
   .alert.alert-success No retries were found

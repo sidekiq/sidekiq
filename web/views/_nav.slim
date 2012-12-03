@@ -9,5 +9,9 @@
     div.nav-collapse
       ul.nav
         - tabs.each do |title, url|
-          li class="#{(current_path==url) ? 'active':''}"
-            a href='#{{root_path}}#{{url}}' #{title}
+          - if url == ''
+            li class="#{(current_path == url) ? 'active':''}"
+              a href='#{{root_path}}#{{url}}' #{title}
+          - else
+            li class="#{(current_path =~ Regexp.new(url)) ? 'active':''}"
+              a href='#{{root_path}}#{{url}}' #{title}

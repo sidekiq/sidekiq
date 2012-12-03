@@ -1,10 +1,11 @@
-HEAD
+2.5.4
 -----------
 
 - `Sidekiq::Client.push` now accepts the worker class as a string so the
   Sidekiq client does not have to load your worker classes at all.  [#524]
 - `Sidekiq::Client.push_bulk` now works with inline testing.
 - **Really** fix status icon in Web UI this time.
+- Add "Delete All" and "Retry All" buttons to Retries in Web UI
 
 
 2.5.3

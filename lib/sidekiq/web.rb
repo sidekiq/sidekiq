@@ -150,17 +150,12 @@ module Sidekiq
     end
 
     post "/queues/:name" do
-      Sidekiq.redis do |conn|
-        conn.del("queue:#{params[:name]}")
-        conn.srem("queues", params[:name])
-      end
+      Sidekiq::Queue.new(params[:name]).clear
       redirect "#{root_path}queues"
     end
 
     post "/queues/:name/delete" do
-      Sidekiq.redis do |conn|
-        conn.lrem("queue:#{params[:name]}", 0, params[:key_val])
-      end
+      Sidekiq::Job.new(params[:key_val], params[:name]).delete
       redirect "#{root_path}queues/#{params[:name]}"
     end
 
@@ -189,6 +184,16 @@ module Sidekiq
           job.delete
         end
       end
+      redirect "#{root_path}retries"
+    end
+
+    post "/retries/all/delete" do
+      Sidekiq::RetrySet.new.clear
+      redirect "#{root_path}retries"
+    end
+
+    post "/retries/all/retry" do
+      Sidekiq::RetrySet.new.each { |job| job.retry }
       redirect "#{root_path}retries"
     end
 

@@ -43,6 +43,15 @@ module Sidekiq
         end
       end
     end
+
+    def clear
+      Sidekiq.redis do |conn|
+        conn.multi do
+          conn.del("queue:#{name}")
+          conn.srem("queues", name)
+        end
+      end
+    end
   end
 
   ##
@@ -184,6 +193,12 @@ module Sidekiq
           conn.zremrangebyscore(@zset, score, score)
         end
         count != 0
+      end
+    end
+
+    def clear
+      Sidekiq.redis do |conn|
+        conn.del(@zset)
       end
     end
   end

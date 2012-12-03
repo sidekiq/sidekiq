@@ -36,6 +36,17 @@ class TestApi < MiniTest::Unit::TestCase
       assert_equal 0, q.size
     end
 
+    it 'can clear a queue' do
+      q = Sidekiq::Queue.new
+      2.times { ApiWorker.perform_async(1, 'mike') }
+      q.clear
+
+      Sidekiq.redis do |conn|
+        refute conn.smembers('queues').include?('foo')
+        refute conn.exists('queues:foo')
+      end
+    end
+
     it 'shows empty retries' do
       r = Sidekiq::RetrySet.new
       assert_equal 0, r.size
@@ -86,6 +97,15 @@ class TestApi < MiniTest::Unit::TestCase
       job = Sidekiq::Queue.new('default').first
       assert_equal 'bob', job.jid
       assert_equal 1, job['retry_count']
+    end
+
+    it 'can clear retries' do
+      add_retry
+      add_retry('test')
+      r = Sidekiq::RetrySet.new
+      assert_equal 2, r.size
+      r.clear
+      assert_equal 0, r.size
     end
 
     def add_retry(jid = 'bob', at = Time.now.to_f)

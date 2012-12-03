@@ -62,15 +62,6 @@ h1, h2, h3, h4, h5, h6, strong {
   text-shadow: none;
 }
 
-.title, .admin .brand {
-  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #b1003e), color-stop(100%, #310011));
-  background: -webkit-linear-gradient(#b1003e, #310011);
-  background: -o-linear-gradient(#b1003e, #310011);
-  background: linear-gradient(#b1003e, #310011);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
 .hero-unit {
   background: none;
 }
@@ -216,12 +207,12 @@ header.row .pagination {
   padding: 4px 0 2px 0;
 }
 .summary_bar ul .desc {
-  font-size: 1.1em;
+  font-size: 1em;
   font-weight: normal;
 }
 .summary_bar ul .count {
   color: #b1003e;
-  font-size: 1.1em;
+  font-size: 1em;
   font-weight: bold;
   float: right;
 }
