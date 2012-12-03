@@ -171,6 +171,7 @@ module Sidekiq
         else
           result << entry
         end
+        result
       end
     end
 

@@ -47,6 +47,24 @@ class TestApi < MiniTest::Unit::TestCase
       end
     end
 
+    it 'can fetch by score' do
+      same_time = Time.now.to_f
+      add_retry('bob1', same_time)
+      add_retry('bob2', same_time)
+      r = Sidekiq::RetrySet.new
+      assert_equal 2, r.fetch(same_time).size
+    end
+
+    it 'can fetch by score and jid' do
+      same_time = Time.now.to_f
+      add_retry('bob1', same_time)
+      add_retry('bob2', same_time)
+      r = Sidekiq::RetrySet.new
+      # jobs = r.fetch(same_time)
+      # puts jobs[1].jid
+      assert_equal 1, r.fetch(same_time, 'bob1').size
+    end
+
     it 'shows empty retries' do
       r = Sidekiq::RetrySet.new
       assert_equal 0, r.size
