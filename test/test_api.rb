@@ -47,6 +47,24 @@ class TestApi < MiniTest::Unit::TestCase
       end
     end
 
+    it 'can fetch by score' do
+      same_time = Time.now.to_f
+      add_retry('bob1', same_time)
+      add_retry('bob2', same_time)
+      r = Sidekiq::RetrySet.new
+      assert_equal 2, r.fetch(same_time).size
+    end
+
+    it 'can fetch by score and jid' do
+      same_time = Time.now.to_f
+      add_retry('bob1', same_time)
+      add_retry('bob2', same_time)
+      r = Sidekiq::RetrySet.new
+      # jobs = r.fetch(same_time)
+      # puts jobs[1].jid
+      assert_equal 1, r.fetch(same_time, 'bob1').size
+    end
+
     it 'shows empty retries' do
       r = Sidekiq::RetrySet.new
       assert_equal 0, r.size
@@ -67,12 +85,36 @@ class TestApi < MiniTest::Unit::TestCase
       assert_in_delta Time.now.to_f, retri.at.to_f, 0.01
     end
 
-    it 'can delete retries' do
+    it 'can delete multiple retries from score' do
+      same_time = Time.now.to_f
+      add_retry('bob1', same_time)
+      add_retry('bob2', same_time)
+      r = Sidekiq::RetrySet.new
+      assert_equal 2, r.size
+      Sidekiq::RetrySet.new.delete(same_time)
+      assert_equal 0, r.size
+    end
+
+    it 'can delete a single retry from score and jid' do
+      same_time = Time.now.to_f
+      add_retry('bob1', same_time)
+      add_retry('bob2', same_time)
+      r = Sidekiq::RetrySet.new
+      assert_equal 2, r.size
+      Sidekiq::RetrySet.new.delete(same_time, 'bob1')
+      assert_equal 1, r.size
+    end
+
+    it 'can retry a retry' do
       add_retry
       r = Sidekiq::RetrySet.new
       assert_equal 1, r.size
-      r.map(&:delete)
+      r.first.retry
       assert_equal 0, r.size
+      assert_equal 1, Sidekiq::Queue.new('default').size
+      job = Sidekiq::Queue.new('default').first
+      assert_equal 'bob', job.jid
+      assert_equal 1, job['retry_count']
     end
 
     it 'can clear retries' do
@@ -84,9 +126,8 @@ class TestApi < MiniTest::Unit::TestCase
       assert_equal 0, r.size
     end
 
-    def add_retry(jid = 'bob')
-      at = Time.now.to_f
-      payload = Sidekiq.dump_json('class' => 'ApiWorker', 'args' => [1, 'mike'], 'queue' => 'default', 'jid' => jid)
+    def add_retry(jid = 'bob', at = Time.now.to_f)
+      payload = Sidekiq.dump_json('class' => 'ApiWorker', 'args' => [1, 'mike'], 'queue' => 'default', 'jid' => jid, 'retry_count' => 2, 'failed_at' => Time.now.utc)
       Sidekiq.redis do |conn|
         conn.zadd('retry', at.to_s, payload)
       end

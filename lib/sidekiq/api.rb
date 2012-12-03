@@ -110,11 +110,24 @@ module Sidekiq
     end
 
     def at
-      Time.at(@score)
+      Time.at(score)
     end
 
     def delete
-      @parent.delete(@score)
+      @parent.delete(score, jid)
+    end
+
+    def retry
+      raise "Retry not available on jobs not in the Retry queue." unless item["failed_at"]
+      Sidekiq.redis do |conn|
+        results = conn.zrangebyscore('retry', score, score)
+        conn.zremrangebyscore('retry', score, score)
+        results.map do |message|
+          msg = Sidekiq.load_json(message)
+          msg['retry_count'] = msg['retry_count'] - 1
+          conn.rpush("queue:#{msg['queue']}", Sidekiq.dump_json(msg))
+        end
+      end
     end
   end
 
@@ -146,11 +159,42 @@ module Sidekiq
       end
     end
 
-    def delete(score)
-      count = Sidekiq.redis do |conn|
-        conn.zremrangebyscore(@zset, score, score)
+    def fetch(score, jid = nil)
+      elements = Sidekiq.redis do |conn|
+        conn.zrangebyscore(@zset, score, score)
       end
-      count != 0
+
+      elements.inject([]) do |result, element|
+        entry = SortedEntry.new(self, score, element)
+        if jid
+          result << entry if entry.jid == jid
+        else
+          result << entry
+        end
+        result
+      end
+    end
+
+    def delete(score, jid = nil)
+      if jid
+        elements = Sidekiq.redis do |conn|
+          conn.zrangebyscore(@zset, score, score)
+        end
+
+        elements_with_jid = elements.map do |element|
+          message = Sidekiq.load_json(element)
+
+          if message["jid"] == jid
+            Sidekiq.redis { |conn| conn.zrem(@zset, element) }
+          end
+        end
+        elements_with_jid.count != 0
+      else
+        count = Sidekiq.redis do |conn|
+          conn.zremrangebyscore(@zset, score, score)
+        end
+        count != 0
+      end
     end
 
     def clear
