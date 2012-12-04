@@ -8,22 +8,20 @@ class TestApi < MiniTest::Unit::TestCase
 
     describe "processed" do
       it "is initially zero" do
-        s = Sidekiq::Stats.new
-        assert_equal 0, s.processed
+        assert_equal 0, Sidekiq::Stats.processed
       end
     end
 
     describe "failed" do
       it "is initially zero" do
-        s = Sidekiq::Stats.new
-        assert_equal 0, s.processed
+        assert_equal 0, Sidekiq::Stats.processed
       end
     end
 
     describe "queues" do
       it "is initially empty" do
         s = Sidekiq::Stats.new
-        assert_equal 0, s.queues.size
+        assert_equal 0, Sidekiq::Stats.queues.size
       end
 
       it "returns a hash of queue and size" do
@@ -35,18 +33,16 @@ class TestApi < MiniTest::Unit::TestCase
           conn.sadd 'queues', 'bar'
         end
 
-        s = Sidekiq::Stats.new
-        assert_equal ({ "foo" => 1, "bar" => 3 }), s.queues
+        assert_equal ({ "foo" => 1, "bar" => 3 }), Sidekiq::Stats.queues
       end
     end
 
-    describe "queued" do
+    describe "enqueued" do
       it "is initially empty" do
-        s = Sidekiq::Stats.new
-        assert_equal 0, s.queued
+        assert_equal 0, Sidekiq::Stats.enqueued
       end
 
-      it "returns total queued jobs" do
+      it "returns total enqueued jobs" do
         Sidekiq.redis do |conn|
           conn.rpush 'queue:foo', '{}'
           conn.sadd 'queues', 'foo'
@@ -55,8 +51,7 @@ class TestApi < MiniTest::Unit::TestCase
           conn.sadd 'queues', 'bar'
         end
 
-        s = Sidekiq::Stats.new
-        assert_equal 4, s.queued
+        assert_equal 4, Sidekiq::Stats.enqueued
       end
     end
   end
