@@ -15,5 +15,5 @@ ul.unstyled.summary
     span.count #{number_with_delimiter(zcard('retry'))}
     span.desc  Retries
   li
-    span.count #{number_with_delimiter(backlog)}
-    span.desc  Queue
+    span.count #{number_with_delimiter(enqueued)}
+    span.desc  Enqueued
