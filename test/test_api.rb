@@ -38,7 +38,7 @@ class TestApi < MiniTest::Unit::TestCase
         assert_equal 0, s.queues.size
       end
 
-      it "returns a hash of queue and size" do
+      it "returns a hash of queue and size in order" do
         Sidekiq.redis do |conn|
           conn.rpush 'queue:foo', '{}'
           conn.sadd 'queues', 'foo'
@@ -49,6 +49,7 @@ class TestApi < MiniTest::Unit::TestCase
 
         s = Sidekiq::Stats.new
         assert_equal ({ "foo" => 1, "bar" => 3 }), s.queues
+        assert_equal "bar", s.queues.first.first
       end
     end
 

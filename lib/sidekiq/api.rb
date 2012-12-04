@@ -21,10 +21,12 @@ module Sidekiq
       Sidekiq.redis do |conn|
         queues = conn.smembers('queues')
 
-        queues.inject({}) do |memo, queue|
+        array_of_arrays = queues.inject({}) do |memo, queue|
           memo[queue] = conn.llen("queue:#{queue}")
           memo
-        end
+        end.sort_by { |_, size| size }
+
+        Hash[array_of_arrays.reverse]
       end
     end
 
