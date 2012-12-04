@@ -23,14 +23,4 @@ module Sidekiq
                           inject(0) {|memo, val| memo + val }
     results
   end
-
-  def size(*queues)
-    return info[:backlog] if queues.empty?
-
-    Sidekiq.redis { |conn|
-      conn.multi {
-        queues.map { |q| conn.llen("queue:#{q}") }
-      }
-    }.inject(0) { |memo, count| memo += count }
-  end
 end

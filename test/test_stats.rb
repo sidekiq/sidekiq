@@ -92,15 +92,6 @@ class TestStats < MiniTest::Unit::TestCase
         end
       end
 
-      describe "size" do
-        it "returns size of queues" do
-          assert_equal 0, Sidekiq.size("foox")
-          assert_equal 1, Sidekiq.size(:foo)
-          assert_equal 1, Sidekiq.size("foo")
-          assert_equal 4, Sidekiq.size("foo", "bar")
-          assert_equal 6, Sidekiq.size
-        end
-      end
     end
 
   end

@@ -1,6 +1,66 @@
 require 'helper'
 
 class TestApi < MiniTest::Unit::TestCase
+  describe "stats" do
+    before do
+      Sidekiq.redis {|c| c.flushdb }
+    end
+
+    describe "processed" do
+      it "is initially zero" do
+        s = Sidekiq::Stats.new
+        assert_equal 0, s.processed
+      end
+    end
+
+    describe "failed" do
+      it "is initially zero" do
+        s = Sidekiq::Stats.new
+        assert_equal 0, s.processed
+      end
+    end
+
+    describe "queues" do
+      it "is initially empty" do
+        s = Sidekiq::Stats.new
+        assert_equal 0, s.queues.size
+      end
+
+      it "returns a hash of queue and size" do
+        Sidekiq.redis do |conn|
+          conn.rpush 'queue:foo', '{}'
+          conn.sadd 'queues', 'foo'
+
+          3.times { conn.rpush 'queue:bar', '{}' }
+          conn.sadd 'queues', 'bar'
+        end
+
+        s = Sidekiq::Stats.new
+        assert_equal ({ "foo" => 1, "bar" => 3 }), s.queues
+      end
+    end
+
+    describe "queued" do
+      it "is initially empty" do
+        s = Sidekiq::Stats.new
+        assert_equal 0, s.queued
+      end
+
+      it "returns total queued jobs" do
+        Sidekiq.redis do |conn|
+          conn.rpush 'queue:foo', '{}'
+          conn.sadd 'queues', 'foo'
+
+          3.times { conn.rpush 'queue:bar', '{}' }
+          conn.sadd 'queues', 'bar'
+        end
+
+        s = Sidekiq::Stats.new
+        assert_equal 4, s.queued
+      end
+    end
+  end
+
   describe 'with an empty database' do
     before do
       Sidekiq.redis {|c| c.flushdb }
