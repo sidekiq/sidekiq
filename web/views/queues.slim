@@ -1,3 +1,15 @@
 h3 Queues
 
-== slim :_queues
+table class="queues table table-hover table-bordered table-striped table-white"
+  thead
+    th Queue
+    th Size
+    th Actions
+  - queues.each do |(queue, size)|
+    tr
+      td
+        a href="#{root_path}queues/#{queue}" #{queue}
+      td= number_with_delimiter(size)
+      td width="20%"
+        form action="#{root_path}queues/#{queue}" method="post"
+          input.btn.btn-danger.btn-small type="submit" name="delete" value="Delete" data-confirm="Are you sure you want to delete the #{queue} queue?"

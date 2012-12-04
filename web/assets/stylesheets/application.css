@@ -216,17 +216,6 @@ header.row .pagination {
   font-weight: bold;
   float: right;
 }
-.summary_bar .poll-status {
-  height: 58px;
-  text-align: center;
-}
-.summary_bar .poll-status .text {
-  font-weight: 300;
-}
-.summary_bar .poll-status .time {
-  color: #008800;
-  font-weight: 320;
-}
 
 table.table-white {
   background-color: #fff;
