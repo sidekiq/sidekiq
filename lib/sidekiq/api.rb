@@ -3,33 +3,33 @@ require 'sidekiq'
 module Sidekiq
 
   class Stats
-    class << self
-      def processed
-        Sidekiq.redis do |conn|
-          conn.get("stat:processed")
-        end || 0
-      end
+    def processed
+      count = Sidekiq.redis do |conn|
+                conn.get("stat:processed")
+              end
+      count.nil? ? 0 : count.to_i
+    end
 
-      def failed
-        Sidekiq.redis do |conn|
-          conn.get("stat:failed")
-        end || 0
-      end
+    def failed
+      count = Sidekiq.redis do |conn|
+                conn.get("stat:failed")
+              end
+      count.nil? ? 0 : count.to_i
+    end
 
-      def queues
-        Sidekiq.redis do |conn|
-          queues = conn.smembers('queues')
+    def queues
+      Sidekiq.redis do |conn|
+        queues = conn.smembers('queues')
 
-          queues.inject({}) do |memo, queue|
-            memo[queue] = conn.llen("queue:#{queue}")
-            memo
-          end
+        queues.inject({}) do |memo, queue|
+          memo[queue] = conn.llen("queue:#{queue}")
+          memo
         end
       end
+    end
 
-      def enqueued
-        queues.values.inject(&:+) || 0
-      end
+    def enqueued
+      queues.values.inject(&:+) || 0
     end
   end
 
