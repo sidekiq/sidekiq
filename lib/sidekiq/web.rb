@@ -121,10 +121,6 @@ module Sidekiq
       slim :index
     end
 
-    get "/poll" do
-      slim :poll, layout: false
-    end
-
     get "/queues" do
       @queues = queues
       slim :queues

@@ -4,6 +4,11 @@ html
     link href='#{{root_path}}stylesheets/bootstrap.css' media='screen' rel='stylesheet' type='text/css'
     link href='#{{root_path}}stylesheets/application.css' media='screen' rel='stylesheet' type='text/css'
     title= Sidekiq::NAME
+
+  - if params[:poll]
+    javascript:
+      setInterval("window.location.reload(true)", 2000);
+
   body.admin
     .navbar.navbar-fixed-top
       ==slim :_nav
@@ -19,7 +24,6 @@ html
               li
                 p.navbar-text Time: #{Time.now.utc.strftime('%H:%M:%S UTC')}
 
-
     #page
       .container
         .row
@@ -30,15 +34,12 @@ html
             == slim :_summary
             .row
               .span2
-                a#live-poll.btn.btn-block.btn-primary name='poll' href='#{{root_path}}poll' Live Poll
-              .span2.poll-status
-                span.text
-                span.time
+                - if params[:poll]
+                  a#live-poll.btn.btn-block.btn-primary.active href='#{{root_path}}#{{current_path}}' Stop Polling
+                - else
+                  a#live-poll.btn.btn-block.btn-primary href='#{{root_path}}#{{current_path}}?poll=true' Live Poll
 
           .span10
             == yield
 
-    script type="text/javascript" src="#{{root_path}}javascripts/vendor/jquery.js"
-    script type="text/javascript" src="#{{root_path}}javascripts/vendor/jquery.timeago.js"
-    script type="text/javascript" src="#{{root_path}}javascripts/vendor/bootstrap.js"
     script type="text/javascript" src="#{{root_path}}javascripts/application.js"

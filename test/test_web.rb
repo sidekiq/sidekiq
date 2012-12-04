@@ -35,14 +35,6 @@ class TestWeb < MiniTest::Unit::TestCase
       refute_match /default/, last_response.body
     end
 
-    it 'can display poll' do
-      get '/poll'
-      assert_equal 200, last_response.status
-      assert_match /summary/, last_response.body
-      assert_match /workers/, last_response.body
-      refute_match /navbar/, last_response.body
-    end
-
     it 'can display queues' do
       assert Sidekiq::Client.push('queue' => :foo, 'class' => WebWorker, 'args' => [1, 3])
 
