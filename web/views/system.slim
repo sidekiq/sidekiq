@@ -1,0 +1,19 @@
+h3 System
+
+h4 Redis Info
+table class="queues table table-hover table-bordered table-striped table-white"
+  thead
+    th Key
+    th Value
+  - @redis_info.each do |key, value|
+    tr
+      td= key
+      td= value
+
+h4 Redis Keys
+table class="queues table table-hover table-bordered table-striped table-white"
+  thead
+    th Key
+  - @redis_keys.each do |key|
+    tr
+      td= key
