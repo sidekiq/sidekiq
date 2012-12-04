@@ -67,6 +67,7 @@ $(function() {
       $('.summary').replaceWith(responseHtml.find('.summary'));
       $('.status').html(responseHtml.find('.status').html().toString());
       $('.workers').replaceWith(responseHtml.find('.workers'));
+      $('.queues').replaceWith(responseHtml.find('.queues'));
       $('time').timeago();
     });
     var currentTime = new Date();
@@ -76,7 +77,7 @@ $(function() {
 });
 
 $(function() {
-  $('[data-confirm]').click(function() {
+  $(document).on("click", "[data-confirm]", function() {
     return confirm($(this).attr('data-confirm'));
   });
 });
