@@ -1,3 +1,5 @@
+- Enable polling for every tab in Web UI
+
 2.5.4
 -----------
 
