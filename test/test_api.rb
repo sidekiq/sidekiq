@@ -1,6 +1,79 @@
 require 'helper'
 
 class TestApi < MiniTest::Unit::TestCase
+  describe "stats" do
+    before do
+      Sidekiq.redis {|c| c.flushdb }
+    end
+
+    describe "processed" do
+      it "is initially zero" do
+        s = Sidekiq::Stats.new
+        assert_equal 0, s.processed
+      end
+
+      it "returns number of processed jobs" do
+        Sidekiq.redis { |conn| conn.set("stat:processed", 5) }
+        s = Sidekiq::Stats.new
+        assert_equal 5, s.processed
+      end
+    end
+
+    describe "failed" do
+      it "is initially zero" do
+        s = Sidekiq::Stats.new
+        assert_equal 0, s.processed
+      end
+
+      it "returns number of failed jobs" do
+        Sidekiq.redis { |conn| conn.set("stat:failed", 5) }
+        s = Sidekiq::Stats.new
+        assert_equal 5, s.failed
+      end
+    end
+
+    describe "queues" do
+      it "is initially empty" do
+        s = Sidekiq::Stats.new
+        assert_equal 0, s.queues.size
+      end
+
+      it "returns a hash of queue and size in order" do
+        Sidekiq.redis do |conn|
+          conn.rpush 'queue:foo', '{}'
+          conn.sadd 'queues', 'foo'
+
+          3.times { conn.rpush 'queue:bar', '{}' }
+          conn.sadd 'queues', 'bar'
+        end
+
+        s = Sidekiq::Stats.new
+        assert_equal ({ "foo" => 1, "bar" => 3 }), s.queues
+        assert_equal "bar", s.queues.first.first
+      end
+    end
+
+    describe "enqueued" do
+      it "is initially empty" do
+        s = Sidekiq::Stats.new
+        assert_equal 0, s.enqueued
+      end
+
+      it "returns total enqueued jobs" do
+        Sidekiq.redis do |conn|
+          conn.rpush 'queue:foo', '{}'
+          conn.sadd 'queues', 'foo'
+
+          3.times { conn.rpush 'queue:bar', '{}' }
+          conn.sadd 'queues', 'bar'
+        end
+
+        s = Sidekiq::Stats.new
+        assert_equal 4, s.enqueued
+      end
+    end
+  end
+
   describe 'with an empty database' do
     before do
       Sidekiq.redis {|c| c.flushdb }
