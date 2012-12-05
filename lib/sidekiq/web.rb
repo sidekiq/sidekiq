@@ -34,20 +34,16 @@ module Sidekiq
         end
       end
 
-      def processed
-        Sidekiq::Stats.new.processed
+      def stats
+        @stats ||= Sidekiq::Stats.new
       end
 
-      def failed
-        Sidekiq::Stats.new.failed
+      def scheduled_job_count
+        Sidekiq::ScheduledSet.new.size
       end
 
-      def zcard(name)
-        Sidekiq.redis { |conn| conn.zcard(name) }
-      end
-
-      def enqueued
-        Sidekiq::Stats.new.enqueued
+      def retry_job_count
+        Sidekiq::RetrySet.new.size
       end
 
       def retries_with_score(score)
