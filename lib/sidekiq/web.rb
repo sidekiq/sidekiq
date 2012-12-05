@@ -203,12 +203,23 @@ module Sidekiq
       redirect "#{root_path}scheduled"
     end
 
+    get '/system' do
+      @redis_keys, @redis_info =  Sidekiq.redis do |conn|
+                        conn.pipelined do
+                          conn.keys
+                          conn.info
+                        end
+                      end
+      slim :system
+    end
+
     def self.tabs
       @tabs ||= {
         "Workers"   =>'',
         "Queues"    =>'queues',
         "Retries"   =>'retries',
-        "Scheduled" =>'scheduled'
+        "Scheduled" =>'scheduled',
+        "System"    =>'system'
       }
     end
 

@@ -195,6 +195,18 @@ class TestWeb < MiniTest::Unit::TestCase
       end
     end
 
+    describe "system view" do
+      it 'loads successfully' do
+        get '/system'
+        assert_equal 200, last_response.status
+      end
+
+      it  'displays redis version' do
+        get '/system'
+        assert_match /redis_version/, last_response.body
+      end
+    end
+
     def add_scheduled
       score = Time.now.to_f
       msg = { 'class' => 'HardWorker',
