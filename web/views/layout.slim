@@ -1,9 +1,10 @@
 doctype html
 html
   head
+    title= Sidekiq::NAME
     link href='#{{root_path}}stylesheets/bootstrap.css' media='screen' rel='stylesheet' type='text/css'
     link href='#{{root_path}}stylesheets/application.css' media='screen' rel='stylesheet' type='text/css'
-    title= Sidekiq::NAME
+    script type="text/javascript" src="#{{root_path}}javascripts/application.js"
 
   - if params[:poll]
     javascript:
@@ -41,5 +42,3 @@ html
 
           .span10
             == yield
-
-    script type="text/javascript" src="#{{root_path}}javascripts/application.js"
