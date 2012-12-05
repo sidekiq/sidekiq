@@ -19,8 +19,9 @@ class SinatraWorker
 end
 
 get '/' do
-  @failed = Sidekiq.info[:failed]
-  @processed = Sidekiq.info[:processed]
+  stats = Sidekiq::Stats.new
+  @failed = stats.failed
+  @processed = stats.processed
   @messages = $redis.lrange('sinkiq-example-messages', 0, -1)
   erb :index
 end

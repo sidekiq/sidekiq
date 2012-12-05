@@ -2,6 +2,39 @@ require 'sidekiq'
 
 module Sidekiq
 
+  class Stats
+    def processed
+      count = Sidekiq.redis do |conn|
+                conn.get("stat:processed")
+              end
+      count.nil? ? 0 : count.to_i
+    end
+
+    def failed
+      count = Sidekiq.redis do |conn|
+                conn.get("stat:failed")
+              end
+      count.nil? ? 0 : count.to_i
+    end
+
+    def queues
+      Sidekiq.redis do |conn|
+        queues = conn.smembers('queues')
+
+        array_of_arrays = queues.inject({}) do |memo, queue|
+          memo[queue] = conn.llen("queue:#{queue}")
+          memo
+        end.sort_by { |_, size| size }
+
+        Hash[array_of_arrays.reverse]
+      end
+    end
+
+    def enqueued
+      queues.values.inject(&:+) || 0
+    end
+  end
+
   ##
   # Encapsulates a queue within Sidekiq.
   # Allows enumeration of all jobs within the queue

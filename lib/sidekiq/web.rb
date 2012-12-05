@@ -34,28 +34,16 @@ module Sidekiq
         end
       end
 
-      def info
-        @info ||= Sidekiq.info
+      def stats
+        @stats ||= Sidekiq::Stats.new
       end
 
-      def processed
-        info[:processed]
+      def scheduled_job_count
+        Sidekiq::ScheduledSet.new.size
       end
 
-      def failed
-        info[:failed]
-      end
-
-      def zcard(name)
-        Sidekiq.redis { |conn| conn.zcard(name) }
-      end
-
-      def queues
-        @queues ||= Sidekiq.info[:queues_with_sizes]
-      end
-
-      def backlog
-        info[:backlog]
+      def retry_job_count
+        Sidekiq::RetrySet.new.size
       end
 
       def retries_with_score(score)
@@ -122,7 +110,7 @@ module Sidekiq
     end
 
     get "/queues" do
-      @queues = queues
+      @queues = Sidekiq::Stats.new.queues
       slim :queues
     end
 

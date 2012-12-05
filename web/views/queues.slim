@@ -5,7 +5,7 @@ table class="queues table table-hover table-bordered table-striped table-white"
     th Queue
     th Size
     th Actions
-  - queues.each do |(queue, size)|
+  - @queues.each do |queue, size|
     tr
       td
         a href="#{root_path}queues/#{queue}" #{queue}
