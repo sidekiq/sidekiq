@@ -1,4 +1,5 @@
 - Enable polling for every tab in Web UI
+- Add Stats API
 
 2.5.4
 -----------
