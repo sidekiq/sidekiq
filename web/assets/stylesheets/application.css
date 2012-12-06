@@ -41,11 +41,6 @@ h1, h2, h3, h4, h5, h6, strong {
   color: #b1003e;
 }
 
-.navbar .brand {
-  color: #b1003e;
-  text-shadow: none;
-}
-
 pre {
   font-size: 11px;
 }
@@ -93,14 +88,6 @@ h3 {
 
 header.row .pagination {
   margin: 12px 0;
-}
-
-.navbar .status {
-  position: relative;
-}
-.navbar .status i {
-  position: absolute;
-  left: -28px;
 }
 
 .summary_bar .status {
@@ -165,6 +152,22 @@ form .btn {
 
 td form {
   margin-bottom: 0;
+}
+
+.navbar .brand {
+  color: #b1003e;
+  text-shadow: none;
+}
+
+@media (max-width: 450px) {
+  .navbar ul.nav li a {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .navbar-fixed-bottom li p {
+    font-size: 0.85em;
+  }
 }
 
 @media (max-width: 979px) {
