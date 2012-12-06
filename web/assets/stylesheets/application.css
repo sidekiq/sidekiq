@@ -321,69 +321,6 @@ ol.linenums li {
   text-shadow: 0 1px 0 #fff;
 }
 
-.navbar-container {
-  height: 40px;
-}
-.navbar-container .brand {
-  -webkit-transition: all 0.2s ease-out;
-  -moz-transition: all 0.2s ease-out;
-  -o-transition: all 0.2s ease-out;
-  transition: all 0.2s ease-out;
-}
-.navbar-container .brand span {
-  -webkit-transition: all 0.3s ease-in;
-  -moz-transition: all 0.3s ease-in;
-  -o-transition: all 0.3s ease-in;
-  transition: all 0.3s ease-in;
-  display: inline-block;
-}
-
-.navbar-container .brand {
-  padding: 4px 0;
-  margin-left: -1150px;
-}
-@media (min-width: 1450px) {
-  .navbar-container .brand {
-    margin-left: -1250px;
-  }
-}
-@media (min-width: 1650px) {
-  .navbar-container .brand {
-    margin-left: -1350px;
-  }
-}
-@media (min-width: 1850px) {
-  .navbar-container .brand {
-    margin-left: -1450px;
-  }
-}
-@media (min-width: 2050px) {
-  .navbar-container .brand {
-    margin-left: -1550px;
-  }
-}
-@media (min-width: 2250px) {
-  .navbar-container .brand {
-    margin-left: -1650px;
-  }
-}
-@media (min-width: 2450px) {
-  .navbar-container .brand {
-    margin-left: -1750px;
-  }
-}
-@media (min-width: 2650px) {
-  .navbar-container .brand {
-    margin-left: -1850px;
-  }
-}
-.navbar-container .brand span {
-  margin-left: 0;
-}
-.navbar-container .affix .brand {
-  margin-left: 0px;
-}
-
 .navbar-footer .navbar ul.nav {
   text-align: center;
   float: none;
