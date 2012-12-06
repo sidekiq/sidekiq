@@ -15,14 +15,13 @@ html
     .navbar.navbar-fixed-bottom.navbar-inverse
       .navbar-inner
         .container
-          .nav-collapse
-            ul.nav
-              li
-                p.navbar-text style="color:white;" Sidekiq v#{Sidekiq::VERSION}
-              li
-                p.navbar-text Redis: #{location}
-              li
-                p.navbar-text Time: #{Time.now.utc.strftime('%H:%M:%S UTC')}
+          ul.nav
+            li
+              p.navbar-text style="color:white;" Sidekiq v#{Sidekiq::VERSION}
+            li
+              p.navbar-text Redis: #{location}
+            li
+              p.navbar-text Time: #{Time.now.utc.strftime('%H:%M:%S UTC')}
 
     #page
       .container
