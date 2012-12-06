@@ -1,7 +1,6 @@
 require 'sidekiq'
 
 module Sidekiq
-
   class Stats
     def processed
       count = Sidekiq.redis do |conn|
@@ -32,6 +31,41 @@ module Sidekiq
 
     def enqueued
       queues.values.inject(&:+) || 0
+    end
+
+    class History
+      def initialize(days_previous, start_date = nil)
+        @days_previous = days_previous
+        @start_date = start_date || Time.now.utc.to_date
+      end
+
+      def processed
+        date_stat_hash("processed")
+      end
+
+      def failed
+        date_stat_hash("failed")
+      end
+
+      private
+
+      def date_stat_hash(stat)
+        i = 0
+        stat_hash = {}
+
+        Sidekiq.redis do |conn|
+          while i < @days_previous
+            date = @start_date - i
+            value = conn.get("stat:#{stat}:#{date}")
+
+            stat_hash[date.to_s] = value ? value.to_i : 0
+
+            i += 1
+          end
+        end
+
+        stat_hash
+      end
     end
   end
 
