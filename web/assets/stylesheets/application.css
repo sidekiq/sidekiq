@@ -159,27 +159,6 @@ td form {
   text-shadow: none;
 }
 
-@media (max-width: 450px) {
-  .navbar ul.nav li a {
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-
-  .navbar-fixed-bottom li p {
-    font-size: 0.85em;
-  }
-}
-
-@media (max-width: 979px) {
-  .navbar-fixed-top, .navbar-fixed-bottom {
-    margin: 0 -20px;
-  }
-
-  .admin #page {
-    padding-top: 20px;
-  }
-}
-
 .navbar-footer .navbar ul.nav {
   text-align: center;
   float: none;
@@ -189,20 +168,12 @@ td form {
   font-size: 16px;
   padding: 15px;
 }
-@media (max-width: 500px) {
-  .navbar-footer .navbar ul.nav a {
-    padding: 15px 5px;
-  }
-}
+
 .navbar-footer .navbar ul.nav a.brand {
   font-weight: 400;
   padding: 0 15px 0 0;
 }
-@media (max-width: 500px) {
-  .navbar-footer .navbar ul.nav a.brand {
-    padding-right: 5px;
-  }
-}
+
 .navbar-footer .navbar ul.nav li {
   display: inline-block;
   float: none;
@@ -281,5 +252,60 @@ img.smallogo {
 
 .poll-status {
   padding: 10px 0;
+}
+
+@media (max-width: 450px) {
+  .navbar .container {
+    text-align: center
+  }
+
+  .navbar .brand {
+    float: none;
+  }
+
+  .navbar ul.nav li a {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .navbar.navbar-fixed-top ul {
+    float: none;
+    margin-right: 0;
+  }
+
+  .navbar.navbar-fixed-top li {
+    float: none;
+    margin-right: 0;
+  }
+
+  .navbar.navbar-fixed-bottom ul {
+    float: none;
+    margin-right: 0;
+  }
+
+  .navbar.navbar-fixed-bottom li {
+    float: none;
+    margin-right: 0;
+  }
+
+  .navbar-text {
+    line-height: 30px;
+  }
+}
+
+@media (max-width: 979px) {
+  .navbar-fixed-top, .navbar-fixed-bottom {
+    margin: 0 -20px;
+  }
+
+  .admin #page {
+    padding-top: 10px;
+  }
+}
+
+@media (max-width: 500px) {
+  .navbar-footer .navbar ul.nav a.brand {
+    padding-right: 5px;
+  }
 }
 
