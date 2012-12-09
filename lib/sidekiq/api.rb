@@ -37,6 +37,7 @@ module Sidekiq
       def initialize(days_previous, start_date = nil)
         @days_previous = days_previous
         @start_date = start_date || Time.now.utc.to_date
+        @days_of_stats_to_keep = 180
       end
 
       def processed
@@ -45,6 +46,25 @@ module Sidekiq
 
       def failed
         date_stat_hash("failed")
+      end
+
+      def cleanup
+        today = Time.now.utc.to_date
+        delete_before_date = Time.now.utc.to_date - @days_of_stats_to_keep
+
+        Sidekiq.redis do |conn|
+          processed_keys = conn.keys("stat:processed:*")
+
+          processed_keys.each do |key|
+            conn.del(key) if key < "stat:processed:#{delete_before_date.to_s}"
+          end
+
+          failed_keys = conn.keys("stat:failed:*")
+
+          failed_keys.each do |key|
+            conn.del(key) if key < "stat:failed:#{delete_before_date.to_s}"
+          end
+        end
       end
 
       private
