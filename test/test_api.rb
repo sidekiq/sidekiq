@@ -124,8 +124,7 @@ class TestApi < MiniTest::Unit::TestCase
             c.incrby("stat:processed:2012-07-03", 1)
           end
           Time.stub(:now, Time.parse("2012-12-01 1:00:00 -0500")) do
-            s = Sidekiq::Stats::History.new(0)
-            s.cleanup
+            Sidekiq::Stats::History.cleanup
             assert_equal false, Sidekiq.redis { |c| c.exists("stat:processed:2012-05-03") }
           end
         end
@@ -137,8 +136,7 @@ class TestApi < MiniTest::Unit::TestCase
             c.incrby("stat:failed:2012-07-03", 1)
           end
           Time.stub(:now, Time.parse("2012-12-01 1:00:00 -0500")) do
-            s = Sidekiq::Stats::History.new(0)
-            s.cleanup
+            Sidekiq::Stats::History.cleanup
             assert_equal false, Sidekiq.redis { |c| c.exists("stat:failed:2012-05-03") }
           end
         end
