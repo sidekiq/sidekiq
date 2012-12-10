@@ -80,6 +80,7 @@ module Sidekiq
         redis do |conn|
           conn.multi do
             conn.incrby("stat:failed", 1)
+            conn.incrby("stat:failed:#{Time.now.utc.to_date}", 1)
           end
         end
         raise
@@ -90,6 +91,7 @@ module Sidekiq
             conn.del("worker:#{self}")
             conn.del("worker:#{self}:started")
             conn.incrby("stat:processed", 1)
+            conn.incrby("stat:processed:#{Time.now.utc.to_date}", 1)
           end
         end
       end

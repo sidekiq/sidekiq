@@ -67,5 +67,58 @@ class TestProcessor < MiniTest::Unit::TestCase
       processor.process(msgstr, 'default')
       assert_equal [['myarg']], msg['args']
     end
+
+    describe 'stats' do
+      before do
+        Sidekiq.redis {|c| c.flushdb }
+      end
+
+      describe 'when successful' do
+        def successful_job
+          msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
+          actor = MiniTest::Mock.new
+          actor.expect(:processor_done, nil, [@processor])
+          @boss.expect(:async, actor, [])
+          @processor.process(msg, 'default')
+        end
+
+        it 'increments processed stat' do
+          successful_job
+          assert_equal 1, Sidekiq::Stats.new.processed
+        end
+
+        it 'increments date processed stat' do
+          Time.stub(:now, Time.parse("2012-12-25 1:00:00 -0500")) do
+            successful_job
+            date_processed = Sidekiq.redis { |conn| conn.get("stat:processed:2012-12-25") }.to_i
+            assert_equal 1, date_processed
+          end
+        end
+      end
+
+      describe 'when failed' do
+        def failed_job
+          msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'] })
+          begin
+            @processor.process(msg, 'default')
+          rescue TestException
+          end
+        end
+
+        it 'increments failed stat' do
+          failed_job
+          assert_equal 1, Sidekiq::Stats.new.failed
+        end
+
+        it 'increments date failed stat' do
+          Time.stub(:now, Time.parse("2012-12-25 1:00:00 -0500")) do
+            failed_job
+            date_failed = Sidekiq.redis { |conn| conn.get("stat:failed:2012-12-25") }.to_i
+            assert_equal 1, date_failed
+          end
+        end
+      end
+
+    end
   end
 end

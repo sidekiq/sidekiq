@@ -1,7 +1,6 @@
 require 'sidekiq'
 
 module Sidekiq
-
   class Stats
     def processed
       count = Sidekiq.redis do |conn|
@@ -32,6 +31,61 @@ module Sidekiq
 
     def enqueued
       queues.values.inject(&:+) || 0
+    end
+
+    class History
+      def initialize(days_previous, start_date = nil)
+        @days_previous = days_previous
+        @start_date = start_date || Time.now.utc.to_date
+      end
+
+      def processed
+        date_stat_hash("processed")
+      end
+
+      def failed
+        date_stat_hash("failed")
+      end
+
+      def self.cleanup
+        days_of_stats_to_keep = 180
+        today = Time.now.utc.to_date
+        delete_before_date = Time.now.utc.to_date - days_of_stats_to_keep
+
+        Sidekiq.redis do |conn|
+          processed_keys = conn.keys("stat:processed:*")
+
+          processed_keys.each do |key|
+            conn.del(key) if key < "stat:processed:#{delete_before_date.to_s}"
+          end
+
+          failed_keys = conn.keys("stat:failed:*")
+
+          failed_keys.each do |key|
+            conn.del(key) if key < "stat:failed:#{delete_before_date.to_s}"
+          end
+        end
+      end
+
+      private
+
+      def date_stat_hash(stat)
+        i = 0
+        stat_hash = {}
+
+        Sidekiq.redis do |conn|
+          while i < @days_previous
+            date = @start_date - i
+            value = conn.get("stat:#{stat}:#{date}")
+
+            stat_hash[date.to_s] = value ? value.to_i : 0
+
+            i += 1
+          end
+        end
+
+        stat_hash
+      end
     end
   end
 
