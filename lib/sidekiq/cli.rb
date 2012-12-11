@@ -15,6 +15,11 @@ trap 'USR1' do
   mgr.async.stop if mgr
 end
 
+trap 'USR2' do
+  Sidekiq.logger.info "Received USR2, reopening log file"
+  Sidekiq.logger = Sidekiq::Logging.new_file_logger(Sidekiq.options[:logfile])
+end
+
 trap 'TTIN' do
   Thread.list.each do |thread|
     Sidekiq.logger.info "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
