@@ -56,15 +56,12 @@ module Sidekiq
 
     def parse(args=ARGV)
       @code = nil
-      Sidekiq.logger
 
       cli = parse_options(args)
       config = parse_config(cli)
       options.merge!(config.merge(cli))
 
-      Sidekiq.logger.level = Logger::DEBUG if options[:verbose]
-      Celluloid.logger = nil unless options[:verbose]
-
+      initialize_logger
       validate!
       write_pid
       boot_system
@@ -200,6 +197,10 @@ module Sidekiq
           opts[:config_file] = arg
         end
 
+        o.on '-L', '--logfile PATH', "path to writable logfile" do |arg|
+          opts[:logfile] = arg
+        end
+
         o.on '-V', '--version', "Print version and exit" do |arg|
           puts "Sidekiq #{Sidekiq::VERSION}"
           die(0)
@@ -213,6 +214,17 @@ module Sidekiq
       end
       @parser.parse!(argv)
       opts
+    end
+
+    def initialize_logger
+      if options[:logfile]
+        Sidekiq.logger = Sidekiq::Logging.new_file_logger(options[:logfile])
+      else
+        Sidekiq.logger
+      end
+
+      Sidekiq.logger.level = Logger::DEBUG if options[:verbose]
+      Celluloid.logger = nil unless options[:verbose]
     end
 
     def write_pid
