@@ -28,7 +28,6 @@ module Sidekiq
       @fetcher = Fetcher.new(current_actor, options[:queues], !!options[:strict])
       @ready = @count.times.map { Processor.new_link(current_actor) }
       procline(options[:tag] ? "#{options[:tag]} " : '')
-      Sidekiq::Stats::History.cleanup
     end
 
     def stop(options={})

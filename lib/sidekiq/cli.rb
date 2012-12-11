@@ -75,6 +75,8 @@ module Sidekiq
       logger.info "Running in #{RUBY_DESCRIPTION}"
       logger.info Sidekiq::LICENSE
 
+      Sidekiq::Stats::History.cleanup
+
       @manager = Sidekiq::Manager.new(options)
       poller = Sidekiq::Scheduled::Poller.new
       begin
