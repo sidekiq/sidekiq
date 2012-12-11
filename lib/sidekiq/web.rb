@@ -213,7 +213,6 @@ module Sidekiq
 
     get '/dashboard/update' do
       stats = Sidekiq::Stats.new
-
       content_type :json
       Sidekiq.dump_json({ processed: stats.processed, failed: stats.failed })
     end
