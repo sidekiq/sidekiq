@@ -16,8 +16,10 @@ trap 'USR1' do
 end
 
 trap 'USR2' do
-  Sidekiq.logger.info "Received USR2, reopening log file"
-  Sidekiq.logger = Sidekiq::Logging.new_file_logger(Sidekiq.options[:logfile])
+  if Sidekiq.options[:logfile]
+    Sidekiq.logger.info "Received USR2, reopening log file"
+    Sidekiq.logger = Sidekiq::Logging.new_file_logger(Sidekiq.options[:logfile])
+  end
 end
 
 trap 'TTIN' do
