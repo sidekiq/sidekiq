@@ -54,16 +54,14 @@ module Sidekiq
 
         Sidekiq.redis do |conn|
           processed_keys = conn.keys("stat:processed:*")
-
-          processed_keys.each do |key|
-            conn.del(key) if key < "stat:processed:#{delete_before_date.to_s}"
-          end
+          earliest = "stat:processed:#{delete_before_date.to_s}"
+          pkeys = processed_keys.select { |key| key < earliest }
+          conn.del(pkeys) if pkeys.size > 0
 
           failed_keys = conn.keys("stat:failed:*")
-
-          failed_keys.each do |key|
-            conn.del(key) if key < "stat:failed:#{delete_before_date.to_s}"
-          end
+          earliest = "stat:failed:#{delete_before_date.to_s}"
+          fkeys = failed_keys.select { |key| key < earliest }
+          conn.del(fkeys) if fkeys.size > 0
         end
       end
 
