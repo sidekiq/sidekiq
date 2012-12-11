@@ -72,6 +72,76 @@ class TestApi < MiniTest::Unit::TestCase
         assert_equal 4, s.enqueued
       end
     end
+
+    describe "over time" do
+      describe "processed" do
+        it 'retrieves hash of dates' do
+          Sidekiq.redis do |c|
+            c.incrby("stat:processed:2012-12-24", 4)
+            c.incrby("stat:processed:2012-12-25", 1)
+            c.incrby("stat:processed:2012-12-26", 6)
+            c.incrby("stat:processed:2012-12-27", 2)
+          end
+          Time.stub(:now, Time.parse("2012-12-26 1:00:00 -0500")) do
+            s = Sidekiq::Stats::History.new(2)
+            assert_equal ({ "2012-12-26" => 6, "2012-12-25" => 1 }), s.processed
+
+            s = Sidekiq::Stats::History.new(3)
+            assert_equal ({ "2012-12-26" => 6, "2012-12-25" => 1, "2012-12-24" => 4 }), s.processed
+
+            s = Sidekiq::Stats::History.new(2, Date.parse("2012-12-25"))
+            assert_equal ({ "2012-12-25" => 1, "2012-12-24" => 4 }), s.processed
+          end
+        end
+      end
+
+      describe "failed" do
+        it 'retrieves hash of dates' do
+          Sidekiq.redis do |c|
+            c.incrby("stat:failed:2012-12-24", 4)
+            c.incrby("stat:failed:2012-12-25", 1)
+            c.incrby("stat:failed:2012-12-26", 6)
+            c.incrby("stat:failed:2012-12-27", 2)
+          end
+          Time.stub(:now, Time.parse("2012-12-26 1:00:00 -0500")) do
+            s = Sidekiq::Stats::History.new(2)
+            assert_equal ({ "2012-12-26" => 6, "2012-12-25" => 1 }), s.failed
+
+            s = Sidekiq::Stats::History.new(3)
+            assert_equal ({ "2012-12-26" => 6, "2012-12-25" => 1, "2012-12-24" => 4 }), s.failed
+
+            s = Sidekiq::Stats::History.new(2, Date.parse("2012-12-25"))
+            assert_equal ({ "2012-12-25" => 1, "2012-12-24" => 4 }), s.failed
+          end
+        end
+      end
+
+      describe "cleanup" do
+        it 'removes processed stats outside of keep window' do
+          Sidekiq.redis do |c|
+            c.incrby("stat:processed:2012-05-03", 4)
+            c.incrby("stat:processed:2012-06-03", 4)
+            c.incrby("stat:processed:2012-07-03", 1)
+          end
+          Time.stub(:now, Time.parse("2012-12-01 1:00:00 -0500")) do
+            Sidekiq::Stats::History.cleanup
+            assert_equal false, Sidekiq.redis { |c| c.exists("stat:processed:2012-05-03") }
+          end
+        end
+
+        it 'removes failed stats outside of keep window' do
+          Sidekiq.redis do |c|
+            c.incrby("stat:failed:2012-05-03", 4)
+            c.incrby("stat:failed:2012-06-03", 4)
+            c.incrby("stat:failed:2012-07-03", 1)
+          end
+          Time.stub(:now, Time.parse("2012-12-01 1:00:00 -0500")) do
+            Sidekiq::Stats::History.cleanup
+            assert_equal false, Sidekiq.redis { |c| c.exists("stat:failed:2012-05-03") }
+          end
+        end
+      end
+    end
   end
 
   describe 'with an empty database' do
