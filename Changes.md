@@ -1,5 +1,9 @@
-- Enable polling for every tab in Web UI
+2.6.0
+-----------
+
+- Enable live polling for every section in Web UI
 - Add Stats API
+- Add Stats::History API
 
 2.5.4
 -----------
