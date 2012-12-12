@@ -211,7 +211,7 @@ module Sidekiq
       slim :dashboard
     end
 
-    get '/dashboard/update' do
+    get '/dashboard/stats' do
       stats = Sidekiq::Stats.new
       content_type :json
       Sidekiq.dump_json({ processed: stats.processed, failed: stats.failed })
