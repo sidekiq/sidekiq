@@ -21,17 +21,14 @@ var realtimeGraph = function(updatePath) {
         maxDataPoints: 100,
     })
   });
-  graph.render();
 
-  var ticksTreatment = 'glow';
-
-  var yAxis = new Rickshaw.Graph.Axis.Y( {
+  var y_axis = new Rickshaw.Graph.Axis.Y( {
     graph: graph,
     tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-    ticksTreatment: ticksTreatment
+    ticksTreatment: 'glow'
   });
 
-  yAxis.render();
+  graph.render();
 
   var hoverDetail = new Rickshaw.Graph.HoverDetail({
     graph: graph,
@@ -81,17 +78,15 @@ var historyGraph = function() {
       }
     ]
   } );
-  graph.render();
+  var x_axis = new Rickshaw.Graph.Axis.Time( { graph: graph } );
 
-  var ticksTreatment = 'glow';
-
-  var yAxis = new Rickshaw.Graph.Axis.Y({
+  var y_axis = new Rickshaw.Graph.Axis.Y({
     graph: graph,
     tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-    ticksTreatment: ticksTreatment
+    ticksTreatment: 'glow'
   });
 
-  yAxis.render();
+  graph.render();
 
   var hoverDetail = new Rickshaw.Graph.HoverDetail({
     graph: graph,
