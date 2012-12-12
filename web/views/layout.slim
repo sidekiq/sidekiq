@@ -1,10 +1,11 @@
 doctype html
 html
   head
+    title= Sidekiq::NAME
     meta name="viewport" content="width=device-width,initial-scale=1.0"
     link href='#{{root_path}}stylesheets/bootstrap.css' media='screen' rel='stylesheet' type='text/css'
     link href='#{{root_path}}stylesheets/application.css' media='screen' rel='stylesheet' type='text/css'
-    title= Sidekiq::NAME
+    script type="text/javascript" src="#{{root_path}}javascripts/application.js"
 
   - if params[:poll]
     javascript:
@@ -32,14 +33,13 @@ html
               span.title Status
               == slim :_status
             == slim :_summary
-            .row
-              .span2
-                - if params[:poll]
-                  a#live-poll.btn.btn-block.btn-primary.active href='#{{root_path}}#{{current_path}}' Stop Polling
-                - else
-                  a#live-poll.btn.btn-block.btn-primary href='#{{root_path}}#{{current_path}}?poll=true' Live Poll
+            - unless current_path.include?("dashboard")
+              .row
+                .span2
+                  - if params[:poll]
+                    a#live-poll.btn.btn-block.btn-primary.active href='#{{root_path}}#{{current_path}}' Stop Polling
+                  - else
+                    a#live-poll.btn.btn-block.btn-primary href='#{{root_path}}#{{current_path}}?poll=true' Live Poll
 
           .span10
             == yield
-
-    script type="text/javascript" src="#{{root_path}}javascripts/application.js"
