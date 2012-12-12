@@ -18,7 +18,7 @@ end
 trap 'USR2' do
   if Sidekiq.options[:logfile]
     Sidekiq.logger.info "Received USR2, reopening log file"
-    Sidekiq.logger = Sidekiq::Logging.new_file_logger(Sidekiq.options[:logfile])
+    Sidekiq::Logging.initialize_logger(Sidekiq.options[:logfile])
   end
 end
 
@@ -172,8 +172,8 @@ module Sidekiq
           parse_queues opts, queues_and_weights
         end
 
-        o.on "-v", "--verbose", "Print more verbose output" do
-          Sidekiq.logger.level = ::Logger::DEBUG
+        o.on "-v", "--verbose", "Print more verbose output" do |arg|
+          opts[:verbose] = arg
         end
 
         o.on '-e', '--environment ENV', "Application environment" do |arg|
@@ -224,11 +224,7 @@ module Sidekiq
     end
 
     def initialize_logger
-      if options[:logfile]
-        Sidekiq.logger = Sidekiq::Logging.new_file_logger(options[:logfile])
-      else
-        Sidekiq.logger
-      end
+      Sidekiq::Logging.initialize_logger(options[:logfile]) if options[:logfile]
 
       Sidekiq.logger.level = Logger::DEBUG if options[:verbose]
       Celluloid.logger = nil unless options[:verbose]

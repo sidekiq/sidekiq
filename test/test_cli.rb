@@ -80,6 +80,7 @@ class TestCli < MiniTest::Unit::TestCase
       @cli.parse(['sidekiq', '-v', '-r', './test/fake_env.rb'])
       assert_equal Logger::DEBUG, Sidekiq.logger.level
       # If we leave the logger at DEBUG it'll add a lot of noise to the test output
+      Sidekiq.options.delete(:verbose)
       Sidekiq.logger.level = old
     end
 

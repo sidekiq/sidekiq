@@ -25,12 +25,15 @@ module Sidekiq
       end
     end
 
-    def self.new_file_logger(file_path)
-      initialize_logger(file_path)
+    def self.initialize_logger(log_target = STDOUT)
+      @logger = Logger.new(log_target)
+      @logger.level = Logger::INFO
+      @logger.formatter = Pretty.new
+      @logger
     end
 
     def self.logger
-      @logger ||= initialize_logger(STDOUT)
+      @logger || initialize_logger
     end
 
     def self.logger=(log)
@@ -39,15 +42,6 @@ module Sidekiq
 
     def logger
       Sidekiq::Logging.logger
-    end
-
-    private
-
-    def self.initialize_logger(log_target)
-      log = Logger.new(log_target)
-      log.level = Logger::INFO
-      log.formatter = Pretty.new
-      log
     end
   end
 end
