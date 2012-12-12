@@ -33,12 +33,13 @@ html
               span.title Status
               == slim :_status
             == slim :_summary
-            .row
-              .span2
-                - if params[:poll]
-                  a#live-poll.btn.btn-block.btn-primary.active href='#{{root_path}}#{{current_path}}' Stop Polling
-                - else
-                  a#live-poll.btn.btn-block.btn-primary href='#{{root_path}}#{{current_path}}?poll=true' Live Poll
+            - unless current_path.include?("dashboard")
+              .row
+                .span2
+                  - if params[:poll]
+                    a#live-poll.btn.btn-block.btn-primary.active href='#{{root_path}}#{{current_path}}' Stop Polling
+                  - else
+                    a#live-poll.btn.btn-block.btn-primary href='#{{root_path}}#{{current_path}}?poll=true' Live Poll
 
           .span10
             == yield
