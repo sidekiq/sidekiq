@@ -287,6 +287,61 @@ img.smallogo {
   text-decoration: none;
 }
 
+@media (max-width: 550px) {
+  .navbar .container {
+    text-align: center
+  }
+
+  .navbar .brand {
+    float: none;
+  }
+
+  .navbar ul.nav li a {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .navbar.navbar-fixed-top ul {
+    float: none;
+    margin-right: 0;
+  }
+
+  .navbar.navbar-fixed-top li {
+    float: none;
+    margin-right: 0;
+  }
+
+  .navbar.navbar-fixed-bottom ul {
+    float: none;
+    margin-right: 0;
+  }
+
+  .navbar.navbar-fixed-bottom li {
+    float: none;
+    margin-right: 0;
+  }
+
+  .navbar-text {
+    line-height: 30px;
+  }
+}
+
+@media (max-width: 979px) {
+  .navbar-fixed-top, .navbar-fixed-bottom {
+    margin: 0 -20px;
+  }
+
+  .admin #page {
+    padding-top: 10px;
+  }
+}
+
+@media (max-width: 500px) {
+  .navbar-footer .navbar ul.nav a.brand {
+    padding-right: 5px;
+  }
+}
+
 /* Rickshaw */
 
 .rickshaw_graph .detail {
@@ -595,58 +650,4 @@ img.smallogo {
 .rickshaw_legend li:active {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 3px;
-=======
-@media (max-width: 450px) {
-  .navbar .container {
-    text-align: center
-  }
-
-  .navbar .brand {
-    float: none;
-  }
-
-  .navbar ul.nav li a {
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-
-  .navbar.navbar-fixed-top ul {
-    float: none;
-    margin-right: 0;
-  }
-
-  .navbar.navbar-fixed-top li {
-    float: none;
-    margin-right: 0;
-  }
-
-  .navbar.navbar-fixed-bottom ul {
-    float: none;
-    margin-right: 0;
-  }
-
-  .navbar.navbar-fixed-bottom li {
-    float: none;
-    margin-right: 0;
-  }
-
-  .navbar-text {
-    line-height: 30px;
-  }
-}
-
-@media (max-width: 979px) {
-  .navbar-fixed-top, .navbar-fixed-bottom {
-    margin: 0 -20px;
-  }
-
-  .admin #page {
-    padding-top: 10px;
-  }
-}
-
-@media (max-width: 500px) {
-  .navbar-footer .navbar ul.nav a.brand {
-    padding-right: 5px;
-  }
 }
