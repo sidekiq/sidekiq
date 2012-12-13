@@ -203,12 +203,27 @@ module Sidekiq
       redirect "#{root_path}scheduled"
     end
 
+    get '/dashboard' do
+      @redis_info = Sidekiq.redis{ |conn| conn.info }
+      stats_history = Sidekiq::Stats::History.new((params[:days] || 30).to_i)
+      @processed_history = stats_history.processed
+      @failed_history = stats_history.failed
+      slim :dashboard
+    end
+
+    get '/dashboard/stats' do
+      stats = Sidekiq::Stats.new
+      content_type :json
+      Sidekiq.dump_json({ processed: stats.processed, failed: stats.failed })
+    end
+
     def self.tabs
       @tabs ||= {
         "Workers"   =>'',
         "Queues"    =>'queues',
         "Retries"   =>'retries',
-        "Scheduled" =>'scheduled'
+        "Scheduled" =>'scheduled',
+        "Dashboard" =>'dashboard'
       }
     end
 

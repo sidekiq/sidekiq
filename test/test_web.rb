@@ -195,6 +195,11 @@ class TestWeb < MiniTest::Unit::TestCase
       end
     end
 
+    it 'can display the dashboard' do
+      get '/dashboard'
+      assert_equal 200, last_response.status
+    end
+
     def add_scheduled
       score = Time.now.to_f
       msg = { 'class' => 'HardWorker',
