@@ -200,6 +200,16 @@ class TestWeb < MiniTest::Unit::TestCase
       assert_equal 200, last_response.status
     end
 
+    it 'can refresh dashboard stats' do
+      Sidekiq.redis do |conn|
+        conn.set("stat:processed", 5)
+        conn.set("stat:failed", 2)
+      end
+      get '/dashboard/stats'
+      assert_equal 200, last_response.status
+      assert_equal "{\"processed\":5,\"failed\":2}", last_response.body
+    end
+
     def add_scheduled
       score = Time.now.to_f
       msg = { 'class' => 'HardWorker',
