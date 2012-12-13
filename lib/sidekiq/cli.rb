@@ -15,6 +15,13 @@ trap 'USR1' do
   mgr.async.stop if mgr
 end
 
+trap 'USR2' do
+  if Sidekiq.options[:logfile]
+    Sidekiq.logger.info "Received USR2, reopening log file"
+    Sidekiq::Logging.initialize_logger(Sidekiq.options[:logfile])
+  end
+end
+
 trap 'TTIN' do
   Thread.list.each do |thread|
     Sidekiq.logger.info "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
@@ -56,15 +63,12 @@ module Sidekiq
 
     def parse(args=ARGV)
       @code = nil
-      Sidekiq.logger
 
       cli = parse_options(args)
       config = parse_config(cli)
       options.merge!(config.merge(cli))
 
-      Sidekiq.logger.level = Logger::DEBUG if options[:verbose]
-      Celluloid.logger = nil unless options[:verbose]
-
+      initialize_logger
       validate!
       write_pid
       boot_system
@@ -168,8 +172,8 @@ module Sidekiq
           parse_queues opts, queues_and_weights
         end
 
-        o.on "-v", "--verbose", "Print more verbose output" do
-          Sidekiq.logger.level = ::Logger::DEBUG
+        o.on "-v", "--verbose", "Print more verbose output" do |arg|
+          opts[:verbose] = arg
         end
 
         o.on '-e', '--environment ENV', "Application environment" do |arg|
@@ -200,6 +204,10 @@ module Sidekiq
           opts[:config_file] = arg
         end
 
+        o.on '-L', '--logfile PATH', "path to writable logfile" do |arg|
+          opts[:logfile] = arg
+        end
+
         o.on '-V', '--version', "Print version and exit" do |arg|
           puts "Sidekiq #{Sidekiq::VERSION}"
           die(0)
@@ -213,6 +221,13 @@ module Sidekiq
       end
       @parser.parse!(argv)
       opts
+    end
+
+    def initialize_logger
+      Sidekiq::Logging.initialize_logger(options[:logfile]) if options[:logfile]
+
+      Sidekiq.logger.level = Logger::DEBUG if options[:verbose]
+      Celluloid.logger = nil unless options[:verbose]
     end
 
     def write_pid

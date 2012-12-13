@@ -80,7 +80,49 @@ class TestCli < MiniTest::Unit::TestCase
       @cli.parse(['sidekiq', '-v', '-r', './test/fake_env.rb'])
       assert_equal Logger::DEBUG, Sidekiq.logger.level
       # If we leave the logger at DEBUG it'll add a lot of noise to the test output
+      Sidekiq.options.delete(:verbose)
       Sidekiq.logger.level = old
+    end
+
+    describe 'with logfile' do
+      before do
+        @old_logger = Sidekiq.logger
+        @tmp_log_path = '/tmp/sidekiq.log'
+      end
+
+      after do
+        Sidekiq.logger = @old_logger
+        Sidekiq.options.delete(:logfile)
+        File.unlink @tmp_log_path if File.exists?(@tmp_log_path)
+      end
+
+      it 'sets the logfile path' do
+        @cli.parse(['sidekiq', '-L', @tmp_log_path, '-r', './test/fake_env.rb'])
+
+        assert_equal @tmp_log_path, Sidekiq.options[:logfile]
+      end
+
+      it 'creates and writes to a logfile' do
+        @cli.parse(['sidekiq', '-L', @tmp_log_path, '-r', './test/fake_env.rb'])
+
+        Sidekiq.logger.info('test message')
+
+        assert_match /test message/, File.read(@tmp_log_path), "didn't include the log message"
+      end
+
+      it 'appends messages to a logfile' do
+        File.open(@tmp_log_path, 'w') do |f|
+          f.puts 'already existant log message'
+        end
+
+        @cli.parse(['sidekiq', '-L', @tmp_log_path, '-r', './test/fake_env.rb'])
+
+        Sidekiq.logger.info('test message')
+
+        log_file_content = File.read(@tmp_log_path)
+        assert_match /already existant/, log_file_content, "didn't include the old message"
+        assert_match /test message/, log_file_content, "didn't include the new message"
+      end
     end
 
     describe 'with pidfile' do
@@ -132,6 +174,10 @@ class TestCli < MiniTest::Unit::TestCase
 
       it 'sets pid file' do
         assert_equal '/tmp/sidekiq-config-test.pid', Sidekiq.options[:pidfile]
+      end
+
+      it 'sets logfile' do
+        assert_equal '/tmp/sidekiq.log', Sidekiq.options[:logfile]
       end
 
       it 'sets queues' do
