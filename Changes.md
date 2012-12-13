@@ -4,6 +4,7 @@
 - Enable live polling for every section in Web UI
 - Add Stats API
 - Add Stats::History API
+- Add Dashboard to WEB UI with live and historical stat graphs
 
 2.5.4
 -----------
