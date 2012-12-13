@@ -5,6 +5,7 @@
 - Add Stats API
 - Add Stats::History API
 - Add Dashboard to WEB UI with live and historical stat graphs
+- Add option to log output to a file, reopen log file on USR2 signal [#581]
 
 2.5.4
 -----------
