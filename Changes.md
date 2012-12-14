@@ -1,11 +1,12 @@
 2.6.0
 -----------
 
-- Enable live polling for every section in Web UI
-- Add Stats API
-- Add Stats::History API
-- Add Dashboard to WEB UI with live and historical stat graphs
-- Add option to log output to a file, reopen log file on USR2 signal [#581]
+- Web UI much more mobile friendly now [brandonhilkert, #573]
+- Enable live polling for every section in Web UI [brandonhilkert, #567]
+- Add Stats API [brandonhilkert, #565]
+- Add Stats::History API [brandonhilkert, #570]
+- Add Dashboard to Web UI with live and historical stat graphs [brandonhilkert, #580]
+- Add option to log output to a file, reopen log file on USR2 signal [mrnugget, #581]
 
 2.5.4
 -----------
