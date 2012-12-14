@@ -90,11 +90,11 @@ module Sidekiq
   end
 
   def self.load_json(string)
-    MultiJson.load(string)
+    MultiJson.decode(string)
   end
 
   def self.dump_json(object)
-    MultiJson.dump(object)
+    MultiJson.encode(object)
   end
 
   def self.logger
