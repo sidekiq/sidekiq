@@ -15,22 +15,27 @@ h5
 br
 h5 Redis
 
-.stat
-  h3= @redis_info.fetch("redis_version")
-  p Version
+- if @redis_info.fetch("redis_version", nil)
+  .stat
+    h3= @redis_info.fetch("redis_version")
+    p Version
 
-.stat
-  h3= @redis_info.fetch("uptime_in_days")
-  p Uptime (days)
+- if @redis_info.fetch("uptime_in_days", nil)
+  .stat
+    h3= @redis_info.fetch("uptime_in_days")
+    p Uptime (days)
 
-.stat
-  h3= @redis_info.fetch("connected_clients")
-  p Connections
+- if @redis_info.fetch("connected_clients", nil)
+  .stat
+    h3= @redis_info.fetch("connected_clients")
+    p Connections
 
-.stat
-  h3= @redis_info.fetch("used_memory_human")
-  p Memory Usage
+- if @redis_info.fetch("used_memory_human", nil)
+  .stat
+    h3= @redis_info.fetch("used_memory_human")
+    p Memory Usage
 
-.stat
-  h3= @redis_info.fetch("used_memory_peak_human")
-  p Peak Memory Usage
+- if @redis_info.fetch("used_memory_peak_human", nil)
+  .stat
+    h3= @redis_info.fetch("used_memory_peak_human")
+    p Peak Memory Usage
