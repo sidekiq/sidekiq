@@ -43,8 +43,8 @@ module Sidekiq
               worker.perform(*cloned(msg['args']))
             end
           end
-          rescue Exception => ex
-            handle_exception(ex, msg || { :message => msgstr })
+        rescue Exception => ex
+          handle_exception(ex, msg || { :message => msgstr })
           raise
         end
       end
@@ -72,11 +72,9 @@ module Sidekiq
         end
       end
 
-      dying = false
       begin
         yield
       rescue Exception
-        dying = true
         redis do |conn|
           conn.multi do
             conn.incrby("stat:failed", 1)
