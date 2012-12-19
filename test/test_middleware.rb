@@ -74,8 +74,8 @@ class TestMiddleware < MiniTest::Unit::TestCase
       Sidekiq.server_middleware do |chain|
         # should only add once, second should be ignored
         2.times { |i| chain.add CustomMiddleware, i.to_s, $recorder }
-        chain.add_before CustomMiddleware, AnotherCustomMiddleware, '2', $recorder
-        chain.add_after AnotherCustomMiddleware, YetAnotherCustomMiddleware, '3', $recorder
+        chain.insert_before CustomMiddleware, AnotherCustomMiddleware, '2', $recorder
+        chain.insert_after AnotherCustomMiddleware, YetAnotherCustomMiddleware, '3', $recorder
       end
 
       boss = MiniTest::Mock.new

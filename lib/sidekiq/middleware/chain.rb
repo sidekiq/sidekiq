@@ -27,7 +27,7 @@ module Sidekiq
   #
   # Sidekiq.configure_client do |config|
   #   config.client_middleware do |chain|
-  #     chain.add_before ActiveRecord, MyClientHook
+  #     chain.insert_before ActiveRecord, MyClientHook
   #   end
   # end
   #
@@ -35,7 +35,7 @@ module Sidekiq
   #
   # Sidekiq.configure_client do |config|
   #   config.client_middleware do |chain|
-  #     chain.add_after ActiveRecord, MyClientHook
+  #     chain.insert_after ActiveRecord, MyClientHook
   #   end
   # end
   #
@@ -76,12 +76,12 @@ module Sidekiq
         entries << Entry.new(klass, *args) unless exists?(klass)
       end
 
-      def add_before(oldklass, newklass, *args)
+      def insert_before(oldklass, newklass, *args)
         i = entries.find_index { |entry| entry.klass == oldklass } || 0
         entries.insert(i, Entry.new(newklass, *args)) unless exists?(newklass)
       end
 
-      def add_after(oldklass, newklass, *args)
+      def insert_after(oldklass, newklass, *args)
         i = entries.find_index { |entry| entry.klass == oldklass } || entries.count - 1
         entries.insert(i+1, Entry.new(newklass, *args)) unless exists?(newklass)
       end
