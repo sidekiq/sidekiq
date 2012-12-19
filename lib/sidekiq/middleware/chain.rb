@@ -77,13 +77,15 @@ module Sidekiq
       end
 
       def insert_before(oldklass, newklass, *args)
+        new_entry = entries.delete { |entry| entry.klass == newklass } || Entry.new(newklass, *args)
         i = entries.find_index { |entry| entry.klass == oldklass } || 0
-        entries.insert(i, Entry.new(newklass, *args)) unless exists?(newklass)
+        entries.insert(i, new_entry)
       end
 
       def insert_after(oldklass, newklass, *args)
+        new_entry = entries.delete { |entry| entry.klass == newklass } || Entry.new(newklass, *args)
         i = entries.find_index { |entry| entry.klass == oldklass } || entries.count - 1
-        entries.insert(i+1, Entry.new(newklass, *args)) unless exists?(newklass)
+        entries.insert(i+1, new_entry)
       end
 
       def exists?(klass)
