@@ -78,12 +78,12 @@ module Sidekiq
 
       def add_before(oldklass, newklass, *args)
         i = entries.find_index { |entry| entry.klass == oldklass } || 0
-        entries.insert(i, Entry.new(klass, *args)) unless exists?(klass)
+        entries.insert(i, Entry.new(newklass, *args)) unless exists?(newklass)
       end
 
       def add_after(oldklass, newklass, *args)
         i = entries.find_index { |entry| entry.klass == oldklass } || entries.count - 1
-        entries.insert(i+1, Entry.new(klass, *args)) unless exists?(klass)
+        entries.insert(i+1, Entry.new(newklass, *args)) unless exists?(newklass)
       end
 
       def exists?(klass)
