@@ -1,3 +1,9 @@
+HEAD
+-----------
+
+- Add middleware chain APIs `insert_before` and `insert_after` for fine
+  tuning the order of middleware. [jackrg, #595]
+
 2.6.0
 -----------
 
