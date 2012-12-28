@@ -40,6 +40,20 @@ class TestInline < MiniTest::Unit::TestCase
       end
     end
 
+    class InlineMiddleware
+      def call(worker, msg, queue)
+        msg['args'][0] = true
+        yield
+      end
+    end
+
+    class InlineWorkerRequiringMiddleware
+      include Sidekiq::Worker
+      def perform(middleware)
+        raise InlineError unless middleware
+      end
+    end
+
     before do
       load 'sidekiq/testing/inline.rb'
     end
@@ -50,6 +64,9 @@ class TestInline < MiniTest::Unit::TestCase
         alias_method :raw_push, :raw_push_old
         remove_method :raw_push_old
       end
+
+      Sidekiq.client_middleware.remove InlineMiddleware
+      Sidekiq.server_middleware.remove InlineMiddleware
     end
 
     it 'stubs the async call when in testing mode' do
@@ -90,6 +107,16 @@ class TestInline < MiniTest::Unit::TestCase
 
     it 'should relay parameters through json' do
       assert Sidekiq::Client.enqueue(InlineWorkerWithTimeParam, Time.now)
+    end
+
+    it 'invokes client middleware' do
+      Sidekiq.client_middleware.add InlineMiddleware
+      assert InlineWorkerRequiringMiddleware.perform_async(false)
+    end
+
+    it 'invokes server middleware' do
+      Sidekiq.server_middleware.add InlineMiddleware
+      assert InlineWorkerRequiringMiddleware.perform_async(false)
     end
   end
 end
