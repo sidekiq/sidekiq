@@ -30,7 +30,14 @@ module Sidekiq
       alias_method :raw_push_old, :raw_push
       def raw_push(normed, payload)
         Array.wrap(payload).each do |hash|
-          normed['class'].constantize.new.perform(*Sidekiq.load_json(hash)['args'])
+          msg = Sidekiq.load_json(hash)
+          klass = msg['class'].constantize
+          worker = klass.new
+          queue = normed['queue']
+
+          Sidekiq.server_middleware.invoke(worker, msg, queue) do
+            worker.perform(*msg['args'])
+          end
         end
 
         true
