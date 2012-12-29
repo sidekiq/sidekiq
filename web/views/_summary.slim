@@ -1,19 +1,19 @@
 ul.unstyled.summary
-  li
+  li.processed
     span.count #{number_with_delimiter(stats.processed)}
     span.desc  Processed
-  li
+  li.failed
     span.count #{number_with_delimiter(stats.failed)}
     span.desc  Failed
   li
     span.count #{number_with_delimiter(workers.size)}
     span.desc  Busy
-  li
+  li.scheduled
     span.count #{number_with_delimiter(scheduled_job_count)}
     span.desc  Scheduled
-  li
+  li.retries
     span.count #{number_with_delimiter(retry_job_count)}
     span.desc  Retries
-  li
+  li.enqueued
     span.count #{number_with_delimiter(stats.enqueued)}
     span.desc  Enqueued

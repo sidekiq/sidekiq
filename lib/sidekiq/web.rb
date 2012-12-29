@@ -214,7 +214,13 @@ module Sidekiq
     get '/dashboard/stats' do
       stats = Sidekiq::Stats.new
       content_type :json
-      Sidekiq.dump_json({ processed: stats.processed, failed: stats.failed })
+      Sidekiq.dump_json({
+        processed: stats.processed,
+        failed: stats.failed,
+        enqueued: stats.enqueued,
+        scheduled: Sidekiq::ScheduledSet.new.size,
+        retries: Sidekiq::RetrySet.new.size
+      })
     end
 
     def self.tabs
