@@ -205,9 +205,12 @@ class TestWeb < MiniTest::Unit::TestCase
         conn.set("stat:processed", 5)
         conn.set("stat:failed", 2)
       end
+      2.times { add_retry }
+      3.times { add_scheduled }
+
       get '/dashboard/stats'
       assert_equal 200, last_response.status
-      assert_equal "{\"processed\":5,\"failed\":2}", last_response.body
+      assert_equal "{\"processed\":5,\"failed\":2,\"enqueued\":0,\"scheduled\":3,\"retries\":2}", last_response.body
     end
 
     def add_scheduled

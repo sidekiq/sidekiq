@@ -52,6 +52,8 @@ var realtimeGraph = function(updatePath) {
 
       Sidekiq.processed = data.processed;
       Sidekiq.failed = data.failed;
+
+      updateStatsSummary(data);
     });
     i++;
   }, timeInterval);
@@ -102,6 +104,24 @@ var createSeries = function(obj) {
     series.unshift(point);
   }
   return series;
+};
+
+var updateStatsSummary = function(data) {
+  $('ul.summary li.processed span.count').html(data.processed.numberWithDelimiter())
+  $('ul.summary li.failed span.count').html(data.failed.numberWithDelimiter())
+  $('ul.summary li.scheduled span.count').html(data.scheduled.numberWithDelimiter())
+  $('ul.summary li.retries span.count').html(data.retries.numberWithDelimiter())
+  $('ul.summary li.enqueued span.count').html(data.enqueued.numberWithDelimiter())
+}
+
+Number.prototype.numberWithDelimiter = function(delimiter) {
+  var number = this + '', delimiter = delimiter || ',';
+  var split = number.split('.');
+  split[0] = split[0].replace(
+      /(\d)(?=(\d\d\d)+(?!\d))/g,
+      '$1' + delimiter
+  );
+  return split.join('.');
 };
 
 $(function(){
