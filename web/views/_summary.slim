@@ -9,10 +9,10 @@ ul.unstyled.summary
     span.count #{number_with_delimiter(workers.size)}
     span.desc  Busy
   li.scheduled
-    span.count #{number_with_delimiter(scheduled_job_count)}
+    span.count #{number_with_delimiter(stats.scheduled_size)}
     span.desc  Scheduled
   li.retries
-    span.count #{number_with_delimiter(retry_job_count)}
+    span.count #{number_with_delimiter(stats.retry_size)}
     span.desc  Retries
   li.enqueued
     span.count #{number_with_delimiter(stats.enqueued)}

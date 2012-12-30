@@ -33,6 +33,14 @@ module Sidekiq
       queues.values.inject(&:+) || 0
     end
 
+    def scheduled_size
+      Sidekiq.redis {|c| c.zcard('schedule') }
+    end
+
+    def retry_size
+      Sidekiq.redis {|c| c.zcard('retry') }
+    end
+
     class History
       def initialize(days_previous, start_date = nil)
         @days_previous = days_previous

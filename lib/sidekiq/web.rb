@@ -38,14 +38,6 @@ module Sidekiq
         @stats ||= Sidekiq::Stats.new
       end
 
-      def scheduled_job_count
-        Sidekiq::ScheduledSet.new.size
-      end
-
-      def retry_job_count
-        Sidekiq::RetrySet.new.size
-      end
-
       def retries_with_score(score)
         Sidekiq.redis do |conn|
           results = conn.zrangebyscore('retry', score, score)
@@ -204,7 +196,7 @@ module Sidekiq
     end
 
     get '/dashboard' do
-      @redis_info = Sidekiq.redis{ |conn| conn.info }
+      @redis_info = Sidekiq.redis { |conn| conn.info }
       stats_history = Sidekiq::Stats::History.new((params[:days] || 30).to_i)
       @processed_history = stats_history.processed
       @failed_history = stats_history.failed
@@ -218,8 +210,8 @@ module Sidekiq
         processed: stats.processed,
         failed: stats.failed,
         enqueued: stats.enqueued,
-        scheduled: Sidekiq::ScheduledSet.new.size,
-        retries: Sidekiq::RetrySet.new.size
+        scheduled: stats.scheduled_size,
+        retries: stats.retry_size,
       })
     end
 
