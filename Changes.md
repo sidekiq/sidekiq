@@ -4,7 +4,6 @@ HEAD
 - Dashboard now live updates summary stats also. [brandonhilkert, #605]
 - Add middleware chain APIs `insert_before` and `insert_after` for fine
   tuning the order of middleware. [jackrg, #595]
-- Summary stats are updated in real-time on the Web UI Dashboard view
 
 2.6.0
 -----------
