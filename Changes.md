@@ -1,4 +1,4 @@
-HEAD
+2.6.1
 -----------
 
 - Dashboard now live updates summary stats also. [brandonhilkert, #605]
