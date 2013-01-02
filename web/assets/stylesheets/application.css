@@ -268,6 +268,92 @@ img.smallogo {
   font-size: 0.9em;
 }
 
+.beacon {
+  width: 10px;
+  height: 10px;
+  background-color: #80002d;
+  display: inline-block;
+  border-radius: 10px;
+  margin-left: 10px;
+  margin-bottom: 5px;
+  box-shadow: 0 0 9px #666;
+  -moz-box-shadow: 0 0 9px #666;
+  -webkit-box-shadow: 0 0 9px #666;
+  border: 3px solid transparent;
+}
+
+.beacon.pulse {
+  -webkit-animation: beacon-pulse 1s ease-out;
+  -moz-animation: beacon-pulse 1s ease-out;
+  animation: beacon-pulse 1s ease-out;
+  -webkit-animation-iteration-count: 1;
+  -moz-animation-iteration-count: 1;
+  animation-iteration-count: 1;
+}
+
+@-webkit-keyframes beacon-pulse {
+  from {
+    background-color: #80002d;
+    -webkit-box-shadow: 0 0 9px #666;
+    -moz-box-shadow: 0 0 9px #666;
+    box-shadow: 0 0 9px #666;
+  }
+  50% {
+    background-color: #c90047;
+    -webkit-box-shadow: 0 0 18px #666;
+    -moz-box-shadow: 0 0 18px #666;
+    box-shadow: 0 0 18px #666;
+  }
+  to {
+    background-color: #80002d;
+    -webkit-box-shadow: 0 0 9px #666;
+    -moz-box-shadow: 0 0 9px #666;
+    box-shadow: 0 0 9px #666;
+  }
+}
+
+@-moz-keyframes beacon-pulse {
+  from {
+    background-color: #80002d;
+    -webkit-box-shadow: 0 0 9px #666;
+    -moz-box-shadow: 0 0 9px #666;
+    box-shadow: 0 0 9px #666;
+  }
+  50% {
+    background-color: #c90047;
+    -webkit-box-shadow: 0 0 18px #666;
+    -moz-box-shadow: 0 0 18px #666;
+    box-shadow: 0 0 18px #666;
+  }
+  to {
+    background-color: #80002d;
+    -webkit-box-shadow: 0 0 9px #666;
+    -moz-box-shadow: 0 0 9px #666;
+    box-shadow: 0 0 9px #666;
+  }
+}
+
+@keyframes beacon-pulse {
+  from {
+    background-color: #80002d;
+    -webkit-box-shadow: 0 0 9px #666;
+    -moz-box-shadow: 0 0 9px #666;
+    box-shadow: 0 0 9px #666;
+  }
+  50% {
+    background-color: #c90047;
+    -webkit-box-shadow: 0 0 18px #666;
+    -moz-box-shadow: 0 0 18px #666;
+    box-shadow: 0 0 18px #666;
+  }
+  to {
+    background-color: #80002d;
+    -webkit-box-shadow: 0 0 9px #666;
+    -moz-box-shadow: 0 0 9px #666;
+    box-shadow: 0 0 9px #666;
+  }
+}
+
 .history-heading {
   padding-right: 15px;
 }
@@ -343,7 +429,6 @@ img.smallogo {
 }
 
 /* Rickshaw */
-
 .rickshaw_graph .detail {
   pointer-events: none;
   position: absolute;
