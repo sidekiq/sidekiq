@@ -1,4 +1,8 @@
+2.6.2
+-----------
+
 - Add Dashboard beacon indicating when stats are updated. [brandonhilkert, #606]
+- Revert issue with capistrano restart. [#598]
 
 2.6.1
 -----------
