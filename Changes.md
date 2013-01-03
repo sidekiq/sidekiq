@@ -1,3 +1,5 @@
+- Add Dashboard beacon indicating when stats are updated. [brandonhilkert, #606]
+
 2.6.1
 -----------
 
