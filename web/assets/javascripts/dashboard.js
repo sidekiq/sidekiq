@@ -117,10 +117,14 @@ var updateStatsSummary = function(data) {
 
 var pulseBeacon = function(){
   $beacon = $('.beacon')
-  $beacon.addClass('pulse').delay(1000).queue(function(){
+  $beacon.find('.dot').addClass('pulse').delay(1000).queue(function(){
     $(this).removeClass('pulse');
     $(this).dequeue();
-  })
+  });
+  $beacon.find('.ring').addClass('pulse').delay(1000).queue(function(){
+    $(this).removeClass('pulse');
+    $(this).dequeue();
+  });
 }
 
 Number.prototype.numberWithDelimiter = function(delimiter) {
