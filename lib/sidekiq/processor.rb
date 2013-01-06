@@ -30,7 +30,9 @@ module Sidekiq
       @boss = boss
     end
 
-    def process(msgstr, queue)
+    def process(work)
+      msgstr = work.message
+      queue = work.queue_name
       defer do
         begin
           msg = Sidekiq.load_json(msgstr)
@@ -46,6 +48,8 @@ module Sidekiq
         rescue Exception => ex
           handle_exception(ex, msg || { :message => msgstr })
           raise
+        ensure
+          work.acknowledge
         end
       end
       @boss.async.processor_done(current_actor)

@@ -25,7 +25,7 @@ module Sidekiq
       @in_progress = {}
       @done = false
       @busy = []
-      @fetcher = Fetcher.new(current_actor, options[:queues], !!options[:strict])
+      @fetcher = Fetcher.new(current_actor, options)
       @ready = @count.times.map { Processor.new_link(current_actor) }
       procline(options[:tag] ? "#{options[:tag]} " : '')
     end
@@ -86,21 +86,19 @@ module Sidekiq
       end
     end
 
-    def assign(msg, queue)
+    def assign(work)
       watchdog("Manager#assign died") do
         if stopped?
           # Race condition between Manager#stop if Fetcher
           # is blocked on redis and gets a message after
           # all the ready Processors have been stopped.
           # Push the message back to redis.
-          Sidekiq.redis do |conn|
-            conn.lpush("queue:#{queue}", msg)
-          end
+          work.requeue
         else
           processor = @ready.pop
-          @in_progress[processor.object_id] = [msg, queue]
+          @in_progress[processor.object_id] = work
           @busy << processor
-          processor.async.process(msg, queue)
+          processor.async.process(work)
         end
       end
     end

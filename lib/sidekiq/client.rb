@@ -99,7 +99,7 @@ module Sidekiq
         else
           _, pushed = conn.multi do
             conn.sadd('queues', normed['queue'])
-            conn.rpush("queue:#{normed['queue']}", payload)
+            conn.lpush("queue:#{normed['queue']}", payload)
           end
         end
       end

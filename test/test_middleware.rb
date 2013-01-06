@@ -41,7 +41,7 @@ class TestMiddleware < MiniTest::Unit::TestCase
       def call(*args)
       end
     end
-    
+
     class AnotherCustomMiddleware
       def initialize(name, recorder)
         @name = name
@@ -83,7 +83,7 @@ class TestMiddleware < MiniTest::Unit::TestCase
       actor = MiniTest::Mock.new
       actor.expect(:processor_done, nil, [processor])
       boss.expect(:async, actor, [])
-      processor.process(msg, 'default')
+      processor.process(Sidekiq::BasicFetch::UnitOfWork.new('queue:default', msg))
       assert_equal %w(2 before 3 before 0 before work_performed 0 after 3 after 2 after), $recorder.flatten
     end
 
