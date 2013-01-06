@@ -192,6 +192,10 @@ module Sidekiq
           opts[:require] = arg
         end
 
+        o.on '-i', '--index INT', "unique process index on this machine" do |arg|
+          opts[:index] = Integer(arg)
+        end
+
         o.on '-c', '--concurrency INT', "processor threads to use" do |arg|
           opts[:concurrency] = Integer(arg)
         end

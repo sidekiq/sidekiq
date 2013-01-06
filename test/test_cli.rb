@@ -40,6 +40,11 @@ class TestCli < MiniTest::Unit::TestCase
       assert_equal ['foo'], Sidekiq.options[:queues]
     end
 
+    it 'accepts a process index' do
+      @cli.parse(['sidekiq', '-i', '7', '-r', './test/fake_env.rb'])
+      assert_equal 7, Sidekiq.options[:index]
+    end
+
     it 'sets strictly ordered queues if weights are not present' do
       @cli.parse(['sidekiq', '-q', 'foo,bar', '-r', './test/fake_env.rb'])
       assert_equal true, !!Sidekiq.options[:strict]
