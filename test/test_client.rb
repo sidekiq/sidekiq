@@ -39,6 +39,10 @@ class TestClient < MiniTest::Unit::TestCase
         Sidekiq::Client.push('queue' => 'foo', 'class' => 42, 'args' => [1, 2])
       end
 
+      assert_raises ArgumentError do
+        Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => 1)
+      end
+
     end
 
     it 'pushes messages to redis' do
