@@ -11,28 +11,32 @@ class Sidekiqctl
     @pidfile = pidfile
     @timeout = timeout
 
-    done 'No pidfile given' if !pidfile
-    done "Pidfile #{pidfile} does not exist" if !File.exist?(pidfile)
-    done 'Invalid pidfile content' if pid == 0
+    done('No pidfile given', :error) if !pidfile
+    done("Pidfile #{pidfile} does not exist", :error) if !File.exist?(pidfile)
+    done('Invalid pidfile content', :error) if pid == 0
 
     fetch_process
 
     begin
       send(stage)
     rescue NoMethodError
-      done 'Invalid control command'
+      done 'Invalid control command', :error
     end
   end
 
   def fetch_process
     Process.getpgid(pid)
   rescue Errno::ESRCH
-    done "Process doesn't exist"
+    done "Process doesn't exist", :error
   end
 
-  def done(msg)
+  def done(msg, error = nil)
     puts msg
-    exit(0)
+    exit(exit_signal(error))
+  end
+
+  def exit_signal(error)
+    (error == :error) ? 1 : 0
   end
 
   def pid
