@@ -52,9 +52,10 @@
           <section id='features' class='span12'>
       
               <div class='row names hidden-phone' id="features_bullets">
-                <div class='entry span3 offset1 selected'><h4>Batches</h4> <div class="arrow up"></div></div>
-                <div class='entry span4'><h4>Notifications</h4> <div class="arrow up"></div></div>
-                <div class='entry span3'><h4>Metrics</h4> <div class="arrow up"></div></div>
+                <div class='entry span2 offset1 selected'><h4>Batches</h4> <div class="arrow up"></div></div>
+                <div class='entry span3'><h4>Notifications</h4> <div class="arrow up"></div></div>
+                <div class='entry span2'><h4>Metrics</h4> <div class="arrow up"></div></div>
+                <div class='entry span2'><h4>Reliability</h4> <div class="arrow up"></div></div>
               </div>
       
               <div class="span10 offset1">
@@ -129,9 +130,26 @@
                         </div>
                       </div>
                     </div>
+                    <div class='content'>
+                      <h2 class='visible-phone'>Reliability</h2>
+                      <h3>100% reliable message processing.</h3>
+                      <div class="row-fluid">
+                        <div class="span8">
+                          <img alt="" src="../examples/rpoplpush.png"/>
+                        </div>
+                        <div class="span4">
+                          <p>
+                            Sidekiq Pro can withstand even the worst scenarios without losing messages.
+                            By using Redis' RPOPLPUSH command, Sidekiq Pro ensures that
+                            messages will not be lost, even if the process crashes or gets a
+                            KILL signal.
+                          </p>
+                        </div>
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
           </section>
         </div>
 
@@ -147,6 +165,7 @@
                 feature can be found in the
                 <a href="https://github.com/mperham/sidekiq/wiki/">Sidekiq
                 wiki</a>.
+                Read the <a href="https://github.com/mperham/sidekiq/wiki/Pro-FAQ">Sidekiq Pro FAQ</a> for further detail.
               </p>
 
 
