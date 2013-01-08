@@ -1,3 +1,9 @@
+2.6.3
+-----------
+
+- sidekiqctl exits with non-zero exit code upon error [jmazzi]
+- better argument validation in Sidekiq::Client [karlfreeman]
+
 2.6.2
 -----------
 
