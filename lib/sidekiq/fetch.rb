@@ -67,7 +67,8 @@ module Sidekiq
     end
 
     def retrieve_work
-      UnitOfWork.new(*Sidekiq.redis { |conn| conn.brpop(*queues_cmd) })
+      work = Sidekiq.redis { |conn| conn.brpop(*queues_cmd) }
+      UnitOfWork.new(*work) if work
     end
 
     UnitOfWork = Struct.new(:queue, :message) do
