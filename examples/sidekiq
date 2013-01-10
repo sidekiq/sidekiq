@@ -1,6 +1,6 @@
 #!/bin/bash
 # sidekiq    Init script for Sidekiq
-# chkconfig: 345 100 100
+# chkconfig: 345 100 75
 #
 # Description: Starts and Stops Sidekiq message processor for Stratus application.
 #
