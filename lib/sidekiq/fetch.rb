@@ -93,9 +93,7 @@ module Sidekiq
     # recreate the queue command each time we invoke Redis#blpop
     # to honor weights and avoid queue starvation.
     def queues_cmd
-      return @unique_queues.dup << Sidekiq::Fetcher::TIMEOUT if @strictly_ordered_queues
-      queues = @queues.sample(@unique_queues.size).uniq
-      queues.concat(@unique_queues - queues)
+      queues = @strictly_ordered_queues ? @unique_queues.dup : @queues.shuffle.uniq
       queues << Sidekiq::Fetcher::TIMEOUT
     end
   end
