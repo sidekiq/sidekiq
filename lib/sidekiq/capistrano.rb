@@ -14,7 +14,7 @@ Capistrano::Configuration.instance.load do
   namespace :sidekiq do
     def for_each_process(&block)
       fetch(:sidekiq_processes).times do |idx|
-        yield((process == 0 ? "#{fetch(:sidekiq_pid)}" : "#{fetch(:sidekiq_pid)}-#{process}"), idx)
+        yield((idx == 0 ? "#{fetch(:sidekiq_pid)}" : "#{fetch(:sidekiq_pid)}-#{idx}"), idx)
       end
     end
 
