@@ -1,3 +1,14 @@
+2.6.5
+-----------
+
+- Fix job requeueing upon termination [apinstein, #622]
+- Fix typo in capistrano recipe
+- Add `retry_queue` option so retries can be given lower priority [ryanlower, #620]
+
+```ruby
+sidekiq_options queue: 'high', retry_queue: 'low'
+```
+
 2.6.4
 -----------
 
