@@ -51,7 +51,11 @@ module Sidekiq
           raise e unless msg['retry']
           max_retry_attempts = retry_attempts_from(msg['retry'], DEFAULT_MAX_RETRY_ATTEMPTS)
 
-          msg['queue'] = queue
+          msg['queue'] = if msg['retry_queue']
+            msg['retry_queue']
+          else
+            queue
+          end
           msg['error_message'] = e.message
           msg['error_class'] = e.class.name
           count = if msg['retry_count']

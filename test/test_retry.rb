@@ -86,6 +86,24 @@ class TestRetry < MiniTest::Unit::TestCase
       @redis.verify
     end
 
+    it 'allows a retry queue' do
+      @redis.expect :zadd, 1, ['retry', String, String]
+      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true, 'retry_queue' => 'retry' }
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      assert_raises RuntimeError do
+        handler.call('', msg, 'default') do
+          raise "kerblammo!"
+        end
+      end
+      assert_equal 'retry', msg["queue"]
+      assert_equal 'kerblammo!', msg["error_message"]
+      assert_equal 'RuntimeError', msg["error_class"]
+      assert_equal 0, msg["retry_count"]
+      refute msg["error_backtrace"]
+      assert msg["failed_at"]
+      @redis.verify
+    end
+
     it 'handles a recurring failed message' do
       @redis.expect :zadd, 1, ['retry', String, String]
       now = Time.now.utc
