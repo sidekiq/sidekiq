@@ -124,8 +124,8 @@ module Sidekiq
               # that would go to the actor (since it's busy).  Instead
               # we'll use the object_id to track the worker's data here.
               processor.terminate if processor.alive?
-              msg, queue = @in_progress[processor.object_id]
-              conn.lpush("queue:#{queue}", msg)
+              unit_of_work = @in_progress[processor.object_id]
+              conn.lpush(unit_of_work.queue, unit_of_work.message)
             end
           end
           logger.info("Pushed #{@busy.size} messages back to Redis")
