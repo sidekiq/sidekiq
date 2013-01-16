@@ -115,9 +115,10 @@ module Sidekiq
           Sidekiq.redis do |conn|
             logger.debug { "Clearing workers in redis" }
             workers = conn.smembers('workers')
-            workers.each do |name|
-              conn.srem('workers', name) if name =~ /:#{process_id}-/
+            workers_to_remove = workers.select do |worker_name|
+              worker_name =~ /:#{process_id}-/
             end
+            conn.srem('workers', workers_to_remove)
 
             @busy.each do |processor|
               # processor is an actor proxy and we can't call any methods
