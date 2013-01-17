@@ -71,6 +71,22 @@ module Sidekiq
       UnitOfWork.new(*work) if work
     end
 
+    def self.bulk_requeue(inprogress)
+      logger.debug { "Re-queueing terminated jobs" }
+      jobs_to_requeue = {}
+      inprogress.each do |unit_of_work|
+        jobs_to_requeue[unit_of_work.queue] ||= []
+        jobs_to_requeue[unit_of_work.queue] << unit_of_work.message
+      end
+
+      Sidekiq.redis do |conn|
+        jobs_to_requeue.each do |queue, jobs|
+          conn.rpush(queue, jobs)
+        end
+      end
+      logger.info("Pushed #{inprogress.size} messages back to Redis")
+    end
+
     UnitOfWork = Struct.new(:queue, :message) do
       def acknowledge
         # nothing to do
