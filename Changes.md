@@ -1,7 +1,7 @@
 2.6.5
 -----------
 
-- Fix job requeueing upon termination [apinstein, #622]
+- Several reliability fixes for job requeueing upon termination [apinstein, #622, #624]
 - Fix typo in capistrano recipe
 - Add `retry_queue` option so retries can be given lower priority [ryanlower, #620]
 
