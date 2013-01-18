@@ -2,8 +2,7 @@ Capistrano::Configuration.instance.load do
   before "deploy:update_code", "sidekiq:quiet"
   after "deploy:stop",    "sidekiq:stop"
   after "deploy:start",   "sidekiq:start"
-  before "deploy:restart", "sidekiq:stop"
-  after "deploy:restart", "sidekiq:start"
+  before "deploy:restart", "sidekiq:restart"
 
   _cset(:sidekiq_cmd) { "#{fetch(:bundle_cmd, "bundle")} exec sidekiq" }
   _cset(:sidekiqctl_cmd) { "#{fetch(:bundle_cmd, "bundle")} exec sidekiqctl" }
