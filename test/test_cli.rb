@@ -191,6 +191,45 @@ class TestCli < MiniTest::Unit::TestCase
       end
     end
 
+    describe 'with env based config file' do
+      before do
+        @cli.parse(['sidekiq', '-e', 'staging', '-C', './test/env_based_config.yml'])
+      end
+
+      it 'takes a path' do
+        assert_equal './test/env_based_config.yml', Sidekiq.options[:config_file]
+      end
+
+      it 'sets verbose' do
+        refute Sidekiq.options[:verbose]
+      end
+
+      it 'sets require file' do
+        assert_equal './test/fake_env.rb', Sidekiq.options[:require]
+      end
+
+      it 'sets environment' do
+        assert_equal 'staging', Sidekiq.options[:environment]
+      end
+
+      it 'sets concurrency' do
+        assert_equal 50, Sidekiq.options[:concurrency]
+      end
+
+      it 'sets pid file' do
+        assert_equal '/tmp/sidekiq-config-test.pid', Sidekiq.options[:pidfile]
+      end
+
+      it 'sets logfile' do
+        assert_equal '/tmp/sidekiq.log', Sidekiq.options[:logfile]
+      end
+
+      it 'sets queues' do
+        assert_equal 2, Sidekiq.options[:queues].count { |q| q == 'very_often' }
+        assert_equal 1, Sidekiq.options[:queues].count { |q| q == 'seldom' }
+      end
+    end
+
     describe 'with config file and flags' do
       before do
         # We need an actual file here.
