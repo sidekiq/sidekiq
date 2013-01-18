@@ -1,8 +1,8 @@
 ---
+:pidfile:      /tmp/sidekiq-config-test.pid
 staging:
   :verbose:      false
   :require:      ./test/fake_env.rb
-  :pidfile:      /tmp/sidekiq-config-test.pid
   :logfile:      /tmp/sidekiq.log
   :concurrency:  50
   :queues:
