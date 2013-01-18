@@ -246,6 +246,9 @@ module Sidekiq
       opts = {}
       if cli[:config_file] && File.exist?(cli[:config_file])
         opts = YAML.load(ERB.new(IO.read(cli[:config_file])).result)
+        if env = cli[:environment]
+          opts = opts[env] || opts
+        end
         parse_queues opts, opts.delete(:queues) || []
       end
       opts
