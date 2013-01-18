@@ -59,7 +59,7 @@ module Sidekiq
       @code = nil
       @interrupt_mutex = Mutex.new
       @interrupted = false
-      @environment = ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
+      @environment = ENV['RAILS_ENV'] || ENV['RACK_ENV']
     end
 
     def parse(args=ARGV)
@@ -121,7 +121,7 @@ module Sidekiq
     end
 
     def boot_system
-      ENV['RACK_ENV'] = ENV['RAILS_ENV'] = @environment
+      ENV['RACK_ENV'] = ENV['RAILS_ENV'] = @environment || 'development'
 
       raise ArgumentError, "#{options[:require]} does not exist" unless File.exist?(options[:require])
 
@@ -244,7 +244,7 @@ module Sidekiq
       opts = {}
       if cli[:config_file] && File.exist?(cli[:config_file])
         opts = YAML.load(ERB.new(IO.read(cli[:config_file])).result)
-        opts = opts.merge(opts[@environment]) if opts[@environment].is_a?(Hash)
+        opts = opts.merge(opts.delete(@environment)) if @environment && opts[@environment].is_a?(Hash)
         parse_queues opts, opts.delete(:queues) || []
       end
       opts
