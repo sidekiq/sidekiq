@@ -112,7 +112,7 @@ class TestCli < MiniTest::Unit::TestCase
 
         Sidekiq.logger.info('test message')
 
-        assert_match /test message/, File.read(@tmp_log_path), "didn't include the log message"
+        assert_match(/test message/, File.read(@tmp_log_path), "didn't include the log message")
       end
 
       it 'appends messages to a logfile' do
@@ -125,8 +125,8 @@ class TestCli < MiniTest::Unit::TestCase
         Sidekiq.logger.info('test message')
 
         log_file_content = File.read(@tmp_log_path)
-        assert_match /already existant/, log_file_content, "didn't include the old message"
-        assert_match /test message/, log_file_content, "didn't include the new message"
+        assert_match(/already existant/, log_file_content, "didn't include the old message")
+        assert_match(/test message/, log_file_content, "didn't include the new message")
       end
     end
 
@@ -213,7 +213,7 @@ class TestCli < MiniTest::Unit::TestCase
       end
 
       it 'sets concurrency' do
-        assert_equal 50, Sidekiq.options[:concurrency]
+        assert_equal 5, Sidekiq.options[:concurrency]
       end
 
       it 'sets pid file' do

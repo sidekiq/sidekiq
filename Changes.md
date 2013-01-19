@@ -1,3 +1,19 @@
+HEAD
+-----------
+
+- Allow environment-specific sections within the config file which
+override the global values [dtaniwaki, #630]
+
+```
+---
+:concurrency:  50
+:verbose:      false
+staging:
+  :verbose:      true
+  :concurrency:  5
+```
+
+
 2.6.5
 -----------
 

@@ -54,22 +54,18 @@ module Sidekiq
     # Used for CLI testing
     attr_accessor :code
     attr_accessor :manager
+    attr_accessor :environment
 
     def initialize
       @code = nil
       @interrupt_mutex = Mutex.new
       @interrupted = false
-      @environment = ENV['RAILS_ENV'] || ENV['RACK_ENV']
     end
 
     def parse(args=ARGV)
       @code = nil
 
-      cli = parse_options(args)
-      @environment = cli[:environment] if cli[:environment]
-      config = parse_config(cli)
-      options.merge!(config.merge(cli))
-
+      setup_options(args)
       initialize_logger
       validate!
       write_pid
@@ -112,8 +108,22 @@ module Sidekiq
 
     private
 
+    def set_environment(cli_env)
+      @environment = cli_env || ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
+    end
+
     def die(code)
       exit(code)
+    end
+
+    def setup_options(args)
+      cli = parse_options(args)
+      set_environment cli[:environment]
+
+      cfile = cli[:config_file]
+
+      config = (cfile ? parse_config(cfile) : {})
+      options.merge!(config.merge(cli))
     end
 
     def options
@@ -121,7 +131,7 @@ module Sidekiq
     end
 
     def boot_system
-      ENV['RACK_ENV'] = ENV['RAILS_ENV'] = @environment || 'development'
+      ENV['RACK_ENV'] = ENV['RAILS_ENV'] = environment
 
       raise ArgumentError, "#{options[:require]} does not exist" unless File.exist?(options[:require])
 
@@ -240,12 +250,14 @@ module Sidekiq
       end
     end
 
-    def parse_config(cli)
+    def parse_config(cfile)
       opts = {}
-      if cli[:config_file] && File.exist?(cli[:config_file])
-        opts = YAML.load(ERB.new(IO.read(cli[:config_file])).result)
-        opts = opts.merge(opts.delete(@environment)) if @environment && opts[@environment].is_a?(Hash)
+      if File.exist?(cfile)
+        opts = YAML.load(ERB.new(IO.read(cfile)).result)
+        opts = opts.merge(opts.delete(environment) || {})
         parse_queues opts, opts.delete(:queues) || []
+      else
+        raise ArgumentError, "can't find config file #{cfile}"
       end
       opts
     end
