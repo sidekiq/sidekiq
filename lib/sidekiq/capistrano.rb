@@ -19,14 +19,14 @@ Capistrano::Configuration.instance.load do
     end
 
     desc "Quiet sidekiq (stop accepting new work)"
-    task :quiet, :roles => lambda { fetch(:sidekiq_role) }, :on_no_matching_servers => :continue do
+    task :quiet, :roles => lambda { fetch(:sidekiq_role) }, :on_no_matching_servers => :continue, :on_error => :continue do
       for_each_process do |pid_file, idx|
         run "if [ -d #{current_path} ] && [ -f #{pid_file} ]; then cd #{current_path} && #{fetch(:sidekiqctl_cmd)} quiet #{pid_file} ; fi"
       end
     end
 
     desc "Stop sidekiq"
-    task :stop, :roles => lambda { fetch(:sidekiq_role) }, :on_no_matching_servers => :continue do
+    task :stop, :roles => lambda { fetch(:sidekiq_role) }, :on_no_matching_servers => :continue, :on_error => :continue do
       for_each_process do |pid_file, idx|
         run "if [ -d #{current_path} ] && [ -f #{pid_file} ]; then cd #{current_path} && #{fetch(:sidekiqctl_cmd)} stop #{pid_file} #{fetch :sidekiq_timeout} ; fi"
       end
