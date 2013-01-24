@@ -269,6 +269,29 @@ class TestApi < MiniTest::Unit::TestCase
       assert_equal 0, r.size
     end
 
+    it 'can enumerate workers' do
+      w = Sidekiq::Workers.new
+      assert_equal 0, w.size
+      w.each do |x, y|
+        assert false
+      end
+
+      s = '12345'
+      data = Sidekiq.dump_json({ 'payload' => {}, 'queue' => 'default', 'run_at' => Time.now.to_i })
+      Sidekiq.redis do |c| 
+        c.multi do
+          c.sadd('workers', s)
+          c.set("worker:#{s}", data)
+        end
+      end
+
+      assert_equal 1, w.size
+      w.each do |x, y|
+        assert_equal s, x
+        assert_equal 'default', y['queue']
+      end
+    end
+
     def add_retry(jid = 'bob', at = Time.now.to_f)
       payload = Sidekiq.dump_json('class' => 'ApiWorker', 'args' => [1, 'mike'], 'queue' => 'default', 'jid' => jid, 'retry_count' => 2, 'failed_at' => Time.now.utc)
       Sidekiq.redis do |conn|

@@ -1,6 +1,19 @@
 HEAD
 -----------
 
+- Add Sidekiq::Workers API giving programmatic access to the current
+  set of active workers.
+
+```
+workers = Sidekiq::Workers.new
+workers.size => 2
+workers.each do |name, work|
+  # name is a unique identifier per Processor instance
+  # work is a Hash which looks like:
+  # { 'queue' => name, 'run_at' => timestamp, 'payload' => msg }
+end
+```
+
 - Allow environment-specific sections within the config file which
 override the global values [dtaniwaki, #630]
 

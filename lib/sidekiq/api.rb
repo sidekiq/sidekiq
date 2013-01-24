@@ -333,4 +333,43 @@ module Sidekiq
     end
   end
 
+
+  ##
+  # Programmatic access to the current active worker set.
+  #
+  # WARNING WARNING WARNING
+  #
+  # This is live data that can change every millisecond.
+  # If you do #size => 5 and then expect #each to be
+  # called 5 times, you're going to have a bad time.
+  #
+  #    workers = Sidekiq::Workers.new
+  #    workers.size => 2
+  #    workers.each do |name, work|
+  #      # name is a unique identifier per Processor instance
+  #      # work is a Hash which looks like:
+  #      # { 'queue' => name, 'run_at' => timestamp, 'payload' => msg }
+  #    end
+
+  class Workers
+    include Enumerable
+
+    def each(&block)
+      Sidekiq.redis do |conn|
+        workers = conn.smembers("workers")
+        workers.each do |w|
+          msg = conn.get("worker:#{w}")
+          next unless msg
+          block.call(w, Sidekiq.load_json(msg))
+        end
+      end
+    end
+
+    def size
+      Sidekiq.redis do |conn|
+        conn.scard("workers")
+      end.to_i
+    end
+  end
+
 end
