@@ -1,3 +1,5 @@
+require 'sidekiq/cli'
+
 # Trap Ctrl-c and shut down Celluloid
 trap("SIGINT") { Celluloid.shutdown }
 
