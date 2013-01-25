@@ -18,7 +18,7 @@ end
 trap 'USR2' do
   if Sidekiq.options[:logfile]
     Sidekiq.logger.info "Received USR2, reopening log file"
-    Sidekiq::Logging.initialize_logger(Sidekiq.options[:logfile])
+    Sidekiq::Logging.initialize_logger(Sidekiq.options[:logfile], Sidekiq.options[:logformat])
   end
 end
 
@@ -236,7 +236,7 @@ module Sidekiq
     end
 
     def initialize_logger
-      Sidekiq::Logging.initialize_logger(options[:logfile]) if options[:logfile]
+      Sidekiq::Logging.initialize_logger(options[:logfile], options[:logformat]) if options[:logfile]
 
       Sidekiq.logger.level = Logger::DEBUG if options[:verbose]
       Celluloid.logger = nil unless options[:verbose]

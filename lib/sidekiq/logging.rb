@@ -16,6 +16,12 @@ module Sidekiq
       end
     end
 
+    class Matrix < Logger::Formatter
+      def call(severity, time, program_name, message)
+        0.upto(Thread.list.index(Thread.current)).map { " " }.join + message[0] + "\n"
+      end
+    end
+
     def self.with_context(msg)
       begin
         Thread.current[:sidekiq_context] = msg
@@ -25,10 +31,14 @@ module Sidekiq
       end
     end
 
-    def self.initialize_logger(log_target = STDOUT)
+    def self.initialize_logger(log_target = STDOUT, log_format = 'pretty')
       @logger = Logger.new(log_target)
       @logger.level = Logger::INFO
-      @logger.formatter = Pretty.new
+      @logger.formatter = case log_format
+        when /matrix/ then Matrix.new
+        else 
+          Pretty.new
+      end
       @logger
     end
 
