@@ -17,8 +17,37 @@ module Sidekiq
     end
 
     class Matrix < Logger::Formatter
+      M = Mutex.new
+      
+      def initialize
+        @workers = []
+        @buffer = Array.new(Sidekiq.options[:concurrency]) {' '}
+        super
+      end
+      
       def call(severity, time, program_name, message)
-        0.upto(Thread.list.index(Thread.current)).map { " " }.join + message[0] + "\n"
+        msg = ""
+        add_worker if @workers.index(Thread.current) == nil
+        msg = flush_buffer unless @buffer[@workers.index(Thread.current)] == ' '
+        @buffer[@workers.index(Thread.current)] = message[0] 
+        return msg
+      end
+      
+      def add_worker
+        M.synchronize do
+          lazy_worker = @workers.detect {|i| i.stop?}
+          if lazy_worker.nil?
+            @workers.push Thread.current
+          else
+            @workers[@workers.index(lazy_worker)] = Thread.current
+          end
+        end
+      end
+      
+      def flush_buffer
+        msg = " " + @buffer.join("|") + "\n"
+        @buffer = Array.new(Sidekiq.options[:concurrency]) {' '}
+        return msg
       end
     end
 
