@@ -642,10 +642,21 @@ img.smallogo {
 .pro .hero-unit .title strong {
   color: #242222;
 }
+.pro #customers .thumbnail > img {
+  display: inline;
+  max-width: 175px;
+}
 /* line 162, ../scss/style.scss */
-.pro #customers .quoted, .pro #customers .thumbnail {
+.pro #customers .quoted {
   background-color: white;
   min-height: 100px;
+}
+.pro #customers .thumbnail {
+/*  background-color: white;
+  min-height: 100px;*/
+  border: 0;
+  box-shadow: none;
+  display: inline;
 }
 /* line 168, ../scss/style.scss */
 .pro .wepay-store-widget {

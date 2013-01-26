@@ -159,9 +159,18 @@ img.smallogo{
   }
 
   #customers{
-    .quoted, .thumbnail{
+    .quoted {
       background-color:white;
       min-height: 100px;
+    }
+    .thumbnail {
+      border: 0;
+      box-shadow: none;
+      display: inline;
+      >img {
+        display: inline;
+        max-width: 175px;
+      }
     }
   }
 
