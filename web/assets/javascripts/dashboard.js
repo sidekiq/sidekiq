@@ -69,6 +69,7 @@ var historyGraph = function() {
     width: 800,
     height: 200,
     renderer: 'line',
+    interpolation: 'linear',
     series: [
       {
         color: "#B1003E",
