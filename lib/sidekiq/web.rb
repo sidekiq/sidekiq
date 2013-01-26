@@ -50,7 +50,7 @@ module Sidekiq
       end
 
       def namespace
-        Sidekiq.redis { |conn| Sidekiq.options[:namespace] || 'default' }
+        Sidekiq.options[:namespace]
       end
 
       def root_path
