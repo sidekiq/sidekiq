@@ -11,6 +11,7 @@ h5 Real-time
 
 h5
   span.history-heading History
+  a href="#{{current_path}}?days=7" class="history-graph #{{"active" if params[:days] == "7"}}" 1 week
   a href="#{{current_path}}" class="history-graph #{{"active" if params[:days].nil? || params[:days] == "30"}}" 1 month
   a href="#{{current_path}}?days=90" class="history-graph #{{"active" if params[:days] == "90"}}" 3 month
   a href="#{{current_path}}?days=180" class="history-graph #{{"active" if params[:days] == "180"}}" 6 month
