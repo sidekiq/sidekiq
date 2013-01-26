@@ -18,19 +18,18 @@ class TestRedisConnection < MiniTest::Unit::TestCase
       end
 
       it "uses :namespace from Sidekiq.options" do
-        Sidekiq.options = {:namespace => "xxx"}
+        Sidekiq.options[:namespace] = "xxx"
         pool = Sidekiq::RedisConnection.create
         assert_equal "xxx", pool.checkout.namespace
       end
 
       it "uses given :namespace over :namespace from Sidekiq.options" do
-        Sidekiq.options = {:namespace => "xxx"}
+        Sidekiq.options[:namespace] = "xxx"
         pool = Sidekiq::RedisConnection.create(:namespace => "yyy")
         assert_equal "yyy", pool.checkout.namespace
       end
 
     end
-
   end
 
   describe ".determine_redis_provider" do
