@@ -32,7 +32,6 @@ class TestWeb < MiniTest::Unit::TestCase
       get '/'
       assert_equal 200, last_response.status
       assert_match /status-idle/, last_response.body
-      refute_match /default/, last_response.body
     end
 
     it 'can display queues' do
