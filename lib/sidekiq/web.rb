@@ -49,6 +49,10 @@ module Sidekiq
         Sidekiq.redis { |conn| conn.client.location }
       end
 
+      def namespace
+        Sidekiq.redis { |conn| conn.namespace.nil? ? 'default' : conn.namespace }
+      end
+
       def root_path
         "#{env['SCRIPT_NAME']}/"
       end
