@@ -53,7 +53,8 @@ var realtimeGraph = function(updatePath) {
       Sidekiq.processed = data.processed;
       Sidekiq.failed = data.failed;
 
-      updateStatsSummary(data);
+      updateStatsSummary(data.sidekiq);
+      updateRedisStats(data.redis);
       pulseBeacon();
     });
     i++;
@@ -114,6 +115,14 @@ var updateStatsSummary = function(data) {
   $('ul.summary li.scheduled span.count').html(data.scheduled.numberWithDelimiter())
   $('ul.summary li.retries span.count').html(data.retries.numberWithDelimiter())
   $('ul.summary li.enqueued span.count').html(data.enqueued.numberWithDelimiter())
+}
+
+var updateRedisStats = function(data) {
+  $('.stat h3.redis_version').html(data.redis_version)
+  $('.stat h3.uptime_in_days').html(data.uptime_in_days)
+  $('.stat h3.connected_clients').html(data.connected_clients)
+  $('.stat h3.used_memory_human').html(data.used_memory_human)
+  $('.stat h3.used_memory_peak_human').html(data.used_memory_peak_human)
 }
 
 var pulseBeacon = function(){
