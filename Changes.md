@@ -1,7 +1,9 @@
 HEAD
 -----------
-- Dynamically update Redis stats on dashboard [brandonhilkert]
 
+- Support profiling via `ruby-prof` with -p.  When Sidekiq is stopped
+  via Ctrl-C, it will output `profile.html`.  You must add `gem 'ruby-prof'` to your Gemfile for it to work.
+- Dynamically update Redis stats on dashboard [brandonhilkert]
 - Add Sidekiq::Workers API giving programmatic access to the current
   set of active workers.
 

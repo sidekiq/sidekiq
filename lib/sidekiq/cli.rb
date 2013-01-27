@@ -1,4 +1,11 @@
 trap 'INT' do
+  if Sidekiq.options[:profile]
+    result = RubyProf.stop
+    printer = RubyProf::GraphHtmlPrinter.new(result)
+    File.open("profile.html", 'w') do |f|
+      printer.print(f, :min_percent => 1)
+    end
+  end
   # Handle Ctrl-C in JRuby like MRI
   # http://jira.codehaus.org/browse/JRUBY-4637
   Sidekiq::CLI.instance.interrupt
@@ -83,6 +90,10 @@ module Sidekiq
       poller = Sidekiq::Scheduled::Poller.new
       begin
         logger.info 'Starting processing, hit Ctrl-C to stop'
+        if options[:profile]
+          require 'ruby-prof'
+          RubyProf.start
+        end
         @manager.async.start
         poller.async.poll(true)
         sleep
@@ -202,6 +213,10 @@ module Sidekiq
 
         o.on '-i', '--index INT', "unique process index on this machine" do |arg|
           opts[:index] = Integer(arg)
+        end
+
+        o.on '-p', '--profile', "Profile all code run by Sidekiq" do |arg|
+          opts[:profile] = arg
         end
 
         o.on '-c', '--concurrency INT', "processor threads to use" do |arg|
