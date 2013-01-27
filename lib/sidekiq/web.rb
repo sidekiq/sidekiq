@@ -99,6 +99,10 @@ module Sidekiq
         parts[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{options[:delimiter]}")
         parts.join(options[:separator])
       end
+
+      def redis_keys
+        ["redis_stats", "uptime_in_days", "connected_clients", "used_memory_human", "used_memory_peak_human"]
+      end
     end
 
     get "/" do
@@ -200,7 +204,7 @@ module Sidekiq
     end
 
     get '/dashboard' do
-      @redis_info = Sidekiq.redis { |conn| conn.info }
+      @redis_info = Sidekiq.redis { |conn| conn.info }.select{ |k, v| redis_keys.include? k }
       stats_history = Sidekiq::Stats::History.new((params[:days] || 30).to_i)
       @processed_history = stats_history.processed
       @failed_history = stats_history.failed
@@ -208,14 +212,19 @@ module Sidekiq
     end
 
     get '/dashboard/stats' do
-      stats = Sidekiq::Stats.new
+      sidekiq_stats = Sidekiq::Stats.new
+      redis_stats   = Sidekiq.redis { |conn| conn.info }.select{ |k, v| redis_keys.include? k }
+
       content_type :json
       Sidekiq.dump_json({
-        processed: stats.processed,
-        failed: stats.failed,
-        enqueued: stats.enqueued,
-        scheduled: stats.scheduled_size,
-        retries: stats.retry_size,
+        sidekiq: {
+          processed:  sidekiq_stats.processed,
+          failed:     sidekiq_stats.failed,
+          enqueued:   sidekiq_stats.enqueued,
+          scheduled:  sidekiq_stats.scheduled_size,
+          retries:    sidekiq_stats.retry_size,
+        },
+        redis: redis_stats
       })
     end
 

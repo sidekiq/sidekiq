@@ -1,5 +1,6 @@
 HEAD
 -----------
+- Dynamically update Redis stats on dashboard [brandonhilkert]
 
 - Add Sidekiq::Workers API giving programmatic access to the current
   set of active workers.
