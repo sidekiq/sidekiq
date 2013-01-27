@@ -16,6 +16,8 @@ var realtimeGraph = function(updatePath) {
     width: 800,
     height: 200,
     renderer: 'line',
+    interpolation: 'linear',
+
     series: new Rickshaw.Series.FixedDuration([{ name: 'failed', color: '#B1003E' }, { name: 'processed', color: '#006f68' }], undefined, {
         timeInterval: timeInterval,
         maxDataPoints: 100,
