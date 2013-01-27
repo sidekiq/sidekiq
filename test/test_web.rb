@@ -199,17 +199,49 @@ class TestWeb < MiniTest::Unit::TestCase
       assert_equal 200, last_response.status
     end
 
-    it 'can refresh dashboard stats' do
-      Sidekiq.redis do |conn|
-        conn.set("stat:processed", 5)
-        conn.set("stat:failed", 2)
+    describe 'stats' do
+      before do
+        Sidekiq.redis do |conn|
+          conn.set("stat:processed", 5)
+          conn.set("stat:failed", 2)
+        end
+        2.times { add_retry }
+        3.times { add_scheduled }
+        get '/dashboard/stats'
+        @response = Sidekiq.load_json(last_response.body)
       end
-      2.times { add_retry }
-      3.times { add_scheduled }
 
-      get '/dashboard/stats'
-      assert_equal 200, last_response.status
-      assert_equal "{\"processed\":5,\"failed\":2,\"enqueued\":0,\"scheduled\":3,\"retries\":2}", last_response.body
+      it 'can refresh dashboard stats' do
+        assert_equal 200, last_response.status
+      end
+
+      describe "for sidekiq" do
+        it 'are namespaced' do
+          assert_includes @response.keys, "sidekiq"
+        end
+
+        it 'reports processed' do
+          assert_equal @response["sidekiq"]["processed"], 5
+        end
+
+        it 'reports failed' do
+          assert_equal @response["sidekiq"]["failed"], 2
+        end
+
+        it 'reports retries' do
+          assert_equal @response["sidekiq"]["retries"], 2
+        end
+
+        it 'reports scheduled' do
+          assert_equal @response["sidekiq"]["scheduled"], 3
+        end
+      end
+
+      describe "for redis" do
+        it 'are namespaced' do
+          assert_includes @response.keys, "redis"
+        end
+      end
     end
 
     def add_scheduled
