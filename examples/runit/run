@@ -1,0 +1,4 @@
+#!/bin/sh
+cd /path/to/sidekiq
+exec 2>&1
+exec chpst -usidekiq bundle exec sidekiq -e production -P /var/run/sidekiq/sidekiq.pid
