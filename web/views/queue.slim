@@ -18,7 +18,7 @@ table class="queue table table-hover table-bordered table-striped"
         - if msg['args'] and msg['args'].to_s.size > 100
           = msg['args'].inspect[0..100] + "... "
           button data-toggle="collapse" data-target="#worker_#{index}" class="btn btn-mini" Show All
-          .collapse[id="worker_#{index}"]= msg['args']
+          .toggle[id="worker_#{index}" style="display: none;"]= msg['args']
         - else
           = msg['args']
       td
