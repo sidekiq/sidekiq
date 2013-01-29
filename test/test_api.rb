@@ -292,6 +292,22 @@ class TestApi < MiniTest::Unit::TestCase
       end
     end
 
+    it 'can reschedule jobs' do
+      add_retry('foo1')
+      add_retry('foo2')
+
+      retries = Sidekiq::RetrySet.new
+      assert_equal 2, retries.size
+      refute(retries.map { |r| r.score > (Time.now.to_f + 9) }.any?)
+
+      retries.each do |retri|
+        retri.reschedule(Time.now.to_f + 10) if retri.jid == 'foo2'
+      end
+
+      assert_equal 2, retries.size
+      assert(retries.map { |r| r.score > (Time.now.to_f + 9) }.any?)
+    end
+
     def add_retry(jid = 'bob', at = Time.now.to_f)
       payload = Sidekiq.dump_json('class' => 'ApiWorker', 'args' => [1, 'mike'], 'queue' => 'default', 'jid' => jid, 'retry_count' => 2, 'failed_at' => Time.now.utc)
       Sidekiq.redis do |conn|

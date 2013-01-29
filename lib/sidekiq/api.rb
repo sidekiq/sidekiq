@@ -210,6 +210,11 @@ module Sidekiq
       @parent.delete(score, jid)
     end
 
+    def reschedule(at)
+      @parent.delete(score, jid)
+      @parent.schedule(at, item)
+    end
+
     def retry
       raise "Retry not available on jobs not in the Retry queue." unless item["failed_at"]
       Sidekiq.redis do |conn|
@@ -233,6 +238,12 @@ module Sidekiq
 
     def size
       Sidekiq.redis {|c| c.zcard(@zset) }
+    end
+
+    def schedule(timestamp, message)
+      Sidekiq.redis do |conn|
+        conn.zadd(@zset, timestamp.to_s, Sidekiq.dump_json(message))
+      end
     end
 
     def each(&block)
