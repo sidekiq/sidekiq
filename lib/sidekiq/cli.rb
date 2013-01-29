@@ -18,7 +18,7 @@ end
 
 trap 'USR1' do
   Sidekiq.logger.info "Received USR1, no longer accepting new work"
-  mgr = Sidekiq::CLI.instance.manager
+  mgr = Sidekiq::CLI.instance.launcher.manager
   mgr.async.stop if mgr
 end
 
@@ -49,6 +49,7 @@ require 'erb'
 
 require 'sidekiq'
 require 'sidekiq/util'
+require 'sidekiq/launcher'
 
 module Sidekiq
   class CLI
@@ -57,7 +58,7 @@ module Sidekiq
 
     # Used for CLI testing
     attr_accessor :code
-    attr_accessor :manager
+    attr_accessor :launcher
     attr_accessor :environment
 
     def initialize
@@ -89,21 +90,18 @@ module Sidekiq
         logger.info 'Starting processing, hit Ctrl-C to stop'
       end
 
-      @manager = Sidekiq::Manager.new(options)
-      poller = Sidekiq::Scheduled::Poller.new
+      @launcher = Sidekiq::Launcher.new(options)
+
       begin
         if options[:profile]
           require 'ruby-prof'
           RubyProf.start
         end
-        @manager.async.start
-        poller.async.poll(true)
+        launcher.run
         sleep
       rescue Interrupt
         logger.info 'Shutting down'
-        poller.async.terminate if poller.alive?
-        @manager.async.stop(:shutdown => true, :timeout => options[:timeout])
-        @manager.wait(:shutdown)
+        launcher.stop
         # Explicitly exit so busy Processor threads can't block
         # process shutdown.
         exit(0)
