@@ -27,7 +27,6 @@ module Sidekiq
       @busy = []
       @fetcher = Fetcher.new(current_actor, options)
       @ready = @count.times.map { Processor.new_link(current_actor) }
-      procline(options[:tag] ? "#{options[:tag]} " : '')
     end
 
     def stop(options={})
@@ -103,6 +102,10 @@ module Sidekiq
       end
     end
 
+    def procline(tag)
+      "sidekiq #{Sidekiq::VERSION} #{tag}[#{@busy.size} of #{@count} busy]#{stopped? ? ' stopping' : ''}"
+    end
+
     private
 
     def hard_shutdown_in(delay)
@@ -155,11 +158,6 @@ module Sidekiq
 
     def stopped?
       @done
-    end
-
-    def procline(tag)
-      $0 = "sidekiq #{Sidekiq::VERSION} #{tag}[#{@busy.size} of #{@count} busy]#{stopped? ? ' stopping' : ''}"
-      after(5) { procline(tag) }
     end
   end
 end

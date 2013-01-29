@@ -91,6 +91,7 @@ module Sidekiq
       end
 
       @launcher = Sidekiq::Launcher.new(options)
+      launcher.procline(options[:tag] ? "#{options[:tag]} " : '')
 
       begin
         if options[:profile]

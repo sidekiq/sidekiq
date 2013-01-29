@@ -22,5 +22,10 @@ module Sidekiq
       manager.async.stop(:shutdown => true, :timeout => options[:timeout])
       manager.wait(:shutdown)
     end
+
+    def procline(tag)
+      $0 = manager.procline(tag)
+      manager.after(5) { procline(tag) }
+    end
   end
 end
