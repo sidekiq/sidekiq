@@ -1,6 +1,7 @@
-HEAD
+2.7.0
 -----------
 
+- Add -d daemonize flag, capistrano recipe has been updated to use it [#662]
 - Support profiling via `ruby-prof` with -p.  When Sidekiq is stopped
   via Ctrl-C, it will output `profile.html`.  You must add `gem 'ruby-prof'` to your Gemfile for it to work.
 - Dynamically update Redis stats on dashboard [brandonhilkert]
