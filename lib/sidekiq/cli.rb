@@ -45,13 +45,10 @@ $stdout.sync = true
 require 'yaml'
 require 'singleton'
 require 'optparse'
-require 'celluloid'
 require 'erb'
 
 require 'sidekiq'
 require 'sidekiq/util'
-require 'sidekiq/manager'
-require 'sidekiq/scheduled'
 
 module Sidekiq
   class CLI
@@ -75,7 +72,9 @@ module Sidekiq
       setup_options(args)
       initialize_logger
       validate!
+      daemonize
       write_pid
+      load_celluloid
       boot_system
     end
 
@@ -86,10 +85,13 @@ module Sidekiq
 
       Sidekiq::Stats::History.cleanup
 
+      if !options[:daemon]
+        logger.info 'Starting processing, hit Ctrl-C to stop'
+      end
+
       @manager = Sidekiq::Manager.new(options)
       poller = Sidekiq::Scheduled::Poller.new
       begin
-        logger.info 'Starting processing, hit Ctrl-C to stop'
         if options[:profile]
           require 'ruby-prof'
           RubyProf.start
@@ -118,6 +120,47 @@ module Sidekiq
     end
 
     private
+
+    def load_celluloid
+      # Celluloid can't be loaded until after we've daemonized
+      # because it spins up threads and creates locks which get
+      # into a very bad state if forked.
+      require 'celluloid'
+      Celluloid.logger = (options[:verbose] ? Sidekiq.logger : nil)
+
+      require 'sidekiq/manager'
+      require 'sidekiq/scheduled'
+    end
+
+    def daemonize
+      return unless options[:daemon]
+
+      raise ArgumentError, "You really should set a logfile if you're going to daemonize" unless options[:logfile]
+      files_to_reopen = []
+      ObjectSpace.each_object(File) do |file|
+        files_to_reopen << file unless file.closed?
+      end
+
+      Process.daemon(true, true)
+
+      files_to_reopen.each do |file|
+        begin
+          file.reopen file.path, "a+"
+          file.sync = true
+        rescue ::Exception
+        end
+      end
+
+      [$stdout, $stderr].each do |io|
+        File.open(options[:logfile], 'ab') do |f|
+          io.reopen(f)
+        end
+        io.sync = true
+      end
+      $stdin.reopen('/dev/null')
+
+      initialize_logger
+    end
 
     def set_environment(cli_env)
       @environment = cli_env || ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
@@ -195,6 +238,10 @@ module Sidekiq
           opts[:verbose] = arg
         end
 
+        o.on '-d', '--daemon', "Daemonize process" do |arg|
+          opts[:daemon] = arg
+        end
+
         o.on '-e', '--environment ENV', "Application environment" do |arg|
           opts[:environment] = arg
         end
@@ -254,7 +301,6 @@ module Sidekiq
       Sidekiq::Logging.initialize_logger(options[:logfile]) if options[:logfile]
 
       Sidekiq.logger.level = Logger::DEBUG if options[:verbose]
-      Celluloid.logger = nil unless options[:verbose]
     end
 
     def write_pid
