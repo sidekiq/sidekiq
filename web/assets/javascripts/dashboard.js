@@ -97,7 +97,7 @@ var historyGraph = function() {
 
   var hoverDetail = new Rickshaw.Graph.HoverDetail({
     graph: graph,
-    yFormatter: function(y) { return Math.floor(y) },
+    yFormatter: function(y) { return Math.floor(y).numberWithDelimiter() },
   });
 }
 
