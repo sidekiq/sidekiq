@@ -229,13 +229,8 @@ module Sidekiq
       opts = {}
 
       @parser = OptionParser.new do |o|
-        o.on "-q", "--queue QUEUE[,WEIGHT]...", "Queues to process with optional weights" do |arg|
-          queues_and_weights = arg.scan(/([\w\.-]+),?(\d*)/)
-          parse_queues opts, queues_and_weights
-        end
-
-        o.on "-v", "--verbose", "Print more verbose output" do |arg|
-          opts[:verbose] = arg
+        o.on '-c', '--concurrency INT', "processor threads to use" do |arg|
+          opts[:concurrency] = Integer(arg)
         end
 
         o.on '-d', '--daemon', "Daemonize process" do |arg|
@@ -246,16 +241,8 @@ module Sidekiq
           opts[:environment] = arg
         end
 
-        o.on '-t', '--timeout NUM', "Shutdown timeout" do |arg|
-          opts[:timeout] = Integer(arg)
-        end
-
         o.on '-g', '--tag TAG', "Process tag for procline" do |arg|
           opts[:tag] = arg
-        end
-
-        o.on '-r', '--require [PATH|DIR]', "Location of Rails application with workers or file to require" do |arg|
-          opts[:require] = arg
         end
 
         o.on '-i', '--index INT', "unique process index on this machine" do |arg|
@@ -266,12 +253,21 @@ module Sidekiq
           opts[:profile] = arg
         end
 
-        o.on '-c', '--concurrency INT', "processor threads to use" do |arg|
-          opts[:concurrency] = Integer(arg)
+        o.on "-q", "--queue QUEUE[,WEIGHT]...", "Queues to process with optional weights" do |arg|
+          queues_and_weights = arg.scan(/([\w\.-]+),?(\d*)/)
+          parse_queues opts, queues_and_weights
         end
 
-        o.on '-P', '--pidfile PATH', "path to pidfile" do |arg|
-          opts[:pidfile] = arg
+        o.on '-r', '--require [PATH|DIR]', "Location of Rails application with workers or file to require" do |arg|
+          opts[:require] = arg
+        end
+
+        o.on '-t', '--timeout NUM', "Shutdown timeout" do |arg|
+          opts[:timeout] = Integer(arg)
+        end
+
+        o.on "-v", "--verbose", "Print more verbose output" do |arg|
+          opts[:verbose] = arg
         end
 
         o.on '-C', '--config PATH', "path to YAML config file" do |arg|
@@ -280,6 +276,10 @@ module Sidekiq
 
         o.on '-L', '--logfile PATH', "path to writable logfile" do |arg|
           opts[:logfile] = arg
+        end
+
+        o.on '-P', '--pidfile PATH', "path to pidfile" do |arg|
+          opts[:pidfile] = arg
         end
 
         o.on '-V', '--version', "Print version and exit" do |arg|
