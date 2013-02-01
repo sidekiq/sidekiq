@@ -12,4 +12,5 @@ end
 group :development do
   gem 'pry', :platform => :mri
   gem 'shotgun'
+  gem 'rack', '~> 1.4.0'
 end
