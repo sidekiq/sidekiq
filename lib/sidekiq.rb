@@ -62,8 +62,8 @@ module Sidekiq
   end
 
   def self.redis(&block)
-    @redis ||= Sidekiq::RedisConnection.create
     raise ArgumentError, "requires a block" if !block
+    @redis ||= Sidekiq::RedisConnection.create
     @redis.with(&block)
   end
 
