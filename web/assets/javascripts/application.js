@@ -39,6 +39,20 @@ $(function() {
   });
 
   $(document).on("click", "[data-toggle]", function() {
-    $($(this).attr('data-target')).toggle();
+    var index = $(this).attr('data-index')
+    var url = $(this).attr('data-queue') + '/' + index + '.text'
+    $.get(url, function(data) {
+      $('.toggle[data-index="' + index + '"]').text(data);
+    });
+    $(this).hide();
+  });
+
+  $(document).on("click", "[data-index_toggle]", function() {
+    var index = $(this).attr('data-index')
+    var url = '/sidekiq/' + index + '.text'
+    $.get(url, function(data) {
+      $('.toggle[data-index="' + index + '"]').html(data);
+    });
+    $(this).hide();
   });
 });

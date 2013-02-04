@@ -101,6 +101,10 @@ module Sidekiq
       slim :index
     end
 
+    get "/:index.text" do
+      workers[params[:index].to_i][1]["payload"]["args"].to_s
+    end
+
     get "/queues" do
       @queues = Sidekiq::Stats.new.queues
       slim :queues
@@ -113,6 +117,15 @@ module Sidekiq
       (@current_page, @total_size, @messages) = page("queue:#{@name}", params[:page], @count)
       @messages = @messages.map {|msg| Sidekiq.load_json(msg) }
       slim :queue
+    end
+
+    get "/queues/:name/:index.text" do
+      halt 404 unless params[:name] && params[:index]
+      @count = (params[:count] || 25).to_i
+      @name = params[:name]
+      (@current_page, @total_size, @messages) = page("queue:#{@name}", params[:page], @count)
+      @messages = @messages.map {|msg| Sidekiq.load_json(msg) }
+      @messages[params[:index].to_i].try(:[], 'args').try(:to_s)
     end
 
     post "/reset" do
