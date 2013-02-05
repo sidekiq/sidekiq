@@ -118,7 +118,7 @@ module Sidekiq
           # contract says that jobs are run AT LEAST once. Process termination
           # is delayed until we're certain the jobs are back in Redis because
           # it is worse to lose a job than to run it twice.
-          Sidekiq.options[:fetch].bulk_requeue(@in_progress.values)
+          Sidekiq::Fetcher.strategy.bulk_requeue(@in_progress.values)
 
           # Clearing workers in Redis
           # NOTE: we do this before terminating worker threads because the

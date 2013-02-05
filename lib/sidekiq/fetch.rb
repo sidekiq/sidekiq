@@ -13,9 +13,8 @@ module Sidekiq
     TIMEOUT = 1
 
     def initialize(mgr, options)
-      klass = Sidekiq.options[:fetch] || BasicFetch
       @mgr = mgr
-      @strategy = klass.new(options)
+      @strategy = Fetcher.strategy.new(options)
     end
 
     # Fetching is straightforward: the Manager makes a fetch
@@ -56,6 +55,10 @@ module Sidekiq
 
     def self.done?
       @done
+    end
+
+    def self.strategy
+      Sidekiq.options[:fetch] || BasicFetch
     end
   end
 
