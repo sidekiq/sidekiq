@@ -14,7 +14,6 @@ Gem::Specification.new do |gem|
   gem.name          = "sidekiq"
   gem.require_paths = ["lib"]
   gem.version       = Sidekiq::VERSION
-  gem.signing_key   = File.expand_path('~/.ssh/gem-private_key.pem')
   gem.cert_chain    = ['.public_cert.pem']
   gem.add_dependency                  'redis', '~> 3'
   gem.add_dependency                  'redis-namespace'
