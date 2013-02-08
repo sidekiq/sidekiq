@@ -130,7 +130,7 @@ module Sidekiq
             workers_to_remove = workers.select do |worker_name|
               worker_name =~ /:#{process_id}-/
             end
-            conn.srem('workers', workers_to_remove)
+            conn.srem('workers', workers_to_remove) if !workers_to_remove.empty?
           end
 
           logger.debug { "Terminating worker threads" }
