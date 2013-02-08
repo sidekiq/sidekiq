@@ -1,3 +1,4 @@
+# encoding: utf8
 require 'sidekiq/version'
 require 'sidekiq/logging'
 require 'sidekiq/client'
@@ -25,6 +26,10 @@ module Sidekiq
     :timeout => 8,
     :profile => false,
   }
+
+  def self.(╯°□°）╯︵┻━┻
+    puts "Calm down, bro"
+  end
 
   def self.options
     @options ||= DEFAULTS.dup
