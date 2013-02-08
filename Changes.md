@@ -1,3 +1,10 @@
+2.7.2
+-----------
+
+- Remove gem signing infrastructure.  It was causing Sidekiq to break
+when used via git in Bundler.  This is why we can't have nice things. [#688]
+
+
 2.7.1
 -----------
 
