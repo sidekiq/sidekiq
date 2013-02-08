@@ -1,4 +1,4 @@
-# encoding: utf8
+# encoding: utf-8
 require 'sidekiq/version'
 require 'sidekiq/logging'
 require 'sidekiq/client'
@@ -27,7 +27,7 @@ module Sidekiq
     :profile => false,
   }
 
-  def self.(╯°□°）╯︵┻━┻
+  def self.❨╯°□°❩╯︵ ┻━┻
     puts "Calm down, bro"
   end
 
