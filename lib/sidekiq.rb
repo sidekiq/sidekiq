@@ -96,7 +96,7 @@ module Sidekiq
   end
 
   def self.load_json(string)
-    MultiJson.decode(string)
+    MultiJson.decode(string, :symbolize_keys => false)
   end
 
   def self.dump_json(object)
