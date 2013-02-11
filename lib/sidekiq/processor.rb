@@ -46,7 +46,9 @@ module Sidekiq
             end
           end
         rescue Exception => ex
-          handle_exception(ex, msg || { :message => msgstr })
+          msg = msg || { :message => msgstr }
+          retry_count = msg['retry_count'] || 0
+          handle_exception(ex, msg) if worker.should_handle_exception?(ex, retry_count)
           raise
         ensure
           work.acknowledge

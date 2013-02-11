@@ -23,29 +23,67 @@ class TestProcessor < MiniTest::Unit::TestCase
       end
     end
 
+    class SansNotificationMockWorker < MockWorker
+      def should_handle_exception?(exception, retry_count)
+        retry_count > 0
+      end
+    end
+
+
     def work(msg, queue='queue:default')
       Sidekiq::BasicFetch::UnitOfWork.new(queue, msg)
     end
 
-    it 'processes as expected' do
-      msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
-      actor = MiniTest::Mock.new
-      actor.expect(:processor_done, nil, [@processor])
-      @boss.expect(:async, actor, [])
-      @processor.process(work(msg))
-      @boss.verify
-      assert_equal 1, $invokes
-    end
-
-    it 'passes exceptions to ExceptionHandler' do
-      msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'] })
-      begin
-        @processor.process(work(msg))
-        flunk "Expected #process to raise exception"
-      rescue TestException
+    describe 'handling exceptions' do
+      before do
+        @old_logger = Sidekiq.logger
+        @str_logger = StringIO.new
+        Sidekiq.logger = Logger.new(@str_logger)
+        Sidekiq.logger.level = Logger::WARN
       end
 
-      assert_equal 0, $invokes
+      it 'passes exceptions to ExceptionHandler' do
+        msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'] })
+        begin
+          @processor.process(work(msg, 'default'))
+          flunk "Expected #process to raise exception"
+        rescue TestException
+        end
+
+        assert_equal 0, $invokes
+        @str_logger.rewind
+        log = @str_logger.read
+        assert_match /Exception/, log, "Exception wasn't handled"
+      end
+
+      it 'does not pass exceptions to ExceptionHandler when specified by worker' do
+        msg = Sidekiq.dump_json({ 'class' => SansNotificationMockWorker.to_s, 'args' => ['boom'] })
+        begin
+          @processor.process(work(msg, 'default'))
+          flunk "Expected #process to raise exception"
+        rescue TestException
+        end
+
+        assert_equal 0, $invokes
+        @str_logger.rewind
+        log = @str_logger.read
+        assert_equal 0, log.size
+      end
+
+      it 'passes the retry_count to the worker' do
+        msg = Sidekiq.dump_json({ 'class' => SansNotificationMockWorker.to_s, 'args' => ['boom'], 'retry_count' => 1 })
+        begin
+          @processor.process(work(msg, 'default'))
+          flunk "Expected #process to raise exception"
+        rescue TestException
+        end
+
+        assert_equal 0, $invokes
+        @str_logger.rewind
+        log = @str_logger.read
+        assert_match /Exception/, log, "Exception wasn't handled"
+      end
+
     end
 
     it 're-raises exceptions after handling' do
