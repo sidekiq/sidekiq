@@ -5,7 +5,12 @@ module Sidekiq
       Sidekiq.logger.warn msg
       Sidekiq.logger.warn ex
       Sidekiq.logger.warn ex.backtrace.join("\n")
+      # This list of services is getting a bit ridiculous.
+      # For future error services, please add your own
+      # middleware like BugSnag does:
+      # https://github.com/bugsnag/bugsnag-ruby/blob/master/lib/bugsnag/sidekiq.rb
       send_to_airbrake(msg, ex) if defined?(::Airbrake)
+      send_to_honeybadger(msg, ex) if defined?(::Honeybadger)
       send_to_exceptional(msg, ex) if defined?(::Exceptional)
       send_to_exception_notifier(msg, ex) if defined?(::ExceptionNotifier)
     end
@@ -14,6 +19,10 @@ module Sidekiq
 
     def send_to_airbrake(msg, ex)
       ::Airbrake.notify_or_ignore(ex, :parameters => msg)
+    end
+
+    def send_to_honeybadger(msg, ex)
+      ::Honeybadger.notify_or_ignore(ex, :parameters => msg)
     end
 
     def send_to_exceptional(msg, ex)

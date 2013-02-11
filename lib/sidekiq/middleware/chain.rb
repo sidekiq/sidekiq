@@ -23,6 +23,22 @@ module Sidekiq
   #   end
   # end
   #
+  # To insert immediately preceding another entry:
+  #
+  # Sidekiq.configure_client do |config|
+  #   config.client_middleware do |chain|
+  #     chain.insert_before ActiveRecord, MyClientHook
+  #   end
+  # end
+  #
+  # To insert immediately after another entry:
+  #
+  # Sidekiq.configure_client do |config|
+  #   config.client_middleware do |chain|
+  #     chain.insert_after ActiveRecord, MyClientHook
+  #   end
+  # end
+  #
   # This is an example of a minimal server middleware:
   #
   # class MyServerHook
@@ -58,6 +74,20 @@ module Sidekiq
 
       def add(klass, *args)
         entries << Entry.new(klass, *args) unless exists?(klass)
+      end
+
+      def insert_before(oldklass, newklass, *args)
+        i = entries.index { |entry| entry.klass == newklass }
+        new_entry = i.nil? ? Entry.new(newklass, *args) : entries.delete_at(i)
+        i = entries.find_index { |entry| entry.klass == oldklass } || 0
+        entries.insert(i, new_entry)
+      end
+
+      def insert_after(oldklass, newklass, *args)
+        i = entries.index { |entry| entry.klass == newklass }
+        new_entry = i.nil? ? Entry.new(newklass, *args) : entries.delete_at(i)
+        i = entries.find_index { |entry| entry.klass == oldklass } || entries.count - 1
+        entries.insert(i+1, new_entry)
       end
 
       def exists?(klass)

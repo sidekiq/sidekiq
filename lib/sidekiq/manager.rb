@@ -25,9 +25,9 @@ module Sidekiq
       @in_progress = {}
       @done = false
       @busy = []
-      @fetcher = Fetcher.new(current_actor, options[:queues], !!options[:strict])
+      @fetcher = Fetcher.new(current_actor, options)
       @ready = @count.times.map { Processor.new_link(current_actor) }
-      procline
+      procline(options[:tag] ? "#{options[:tag]} " : '')
     end
 
     def stop(options={})
@@ -37,19 +37,11 @@ module Sidekiq
 
         @done = true
         Sidekiq::Fetcher.done!
-        @fetcher.terminate! if @fetcher.alive?
+        @fetcher.async.terminate if @fetcher.alive?
 
         logger.info { "Shutting down #{@ready.size} quiet workers" }
         @ready.each { |x| x.terminate if x.alive? }
         @ready.clear
-
-        logger.debug { "Clearing workers in redis" }
-        Sidekiq.redis do |conn|
-          workers = conn.smembers('workers')
-          workers.each do |name|
-            conn.srem('workers', name) if name =~ /:#{process_id}-/
-          end
-        end
 
         return after(0) { signal(:shutdown) } if @busy.empty?
         logger.info { "Pausing up to #{timeout} seconds to allow workers to finish..." }
@@ -94,21 +86,19 @@ module Sidekiq
       end
     end
 
-    def assign(msg, queue)
+    def assign(work)
       watchdog("Manager#assign died") do
         if stopped?
           # Race condition between Manager#stop if Fetcher
           # is blocked on redis and gets a message after
           # all the ready Processors have been stopped.
           # Push the message back to redis.
-          Sidekiq.redis do |conn|
-            conn.lpush("queue:#{queue}", msg)
-          end
+          work.requeue
         else
           processor = @ready.pop
-          @in_progress[processor.object_id] = [msg, queue]
+          @in_progress[processor.object_id] = work
           @busy << processor
-          processor.process!(msg, queue)
+          processor.async.process(work)
         end
       end
     end
@@ -122,17 +112,31 @@ module Sidekiq
           # They must die but their messages shall live on.
           logger.info("Still waiting for #{@busy.size} busy workers")
 
+          # Re-enqueue terminated jobs
+          # NOTE: You may notice that we may push a job back to redis before
+          # the worker thread is terminated. This is ok because Sidekiq's
+          # contract says that jobs are run AT LEAST once. Process termination
+          # is delayed until we're certain the jobs are back in Redis because
+          # it is worse to lose a job than to run it twice.
+          Sidekiq::Fetcher.strategy.bulk_requeue(@in_progress.values)
+
+          # Clearing workers in Redis
+          # NOTE: we do this before terminating worker threads because the
+          # process will likely receive a hard shutdown soon anyway, which
+          # means the threads will killed.
+          logger.debug { "Clearing workers in redis" }
           Sidekiq.redis do |conn|
-            @busy.each do |processor|
-              # processor is an actor proxy and we can't call any methods
-              # that would go to the actor (since it's busy).  Instead
-              # we'll use the object_id to track the worker's data here.
-              processor.terminate if processor.alive?
-              msg, queue = @in_progress[processor.object_id]
-              conn.lpush("queue:#{queue}", msg)
+            workers = conn.smembers('workers')
+            workers_to_remove = workers.select do |worker_name|
+              worker_name =~ /:#{process_id}-/
             end
+            conn.srem('workers', workers_to_remove) if !workers_to_remove.empty?
           end
-          logger.info("Pushed #{@busy.size} messages back to Redis")
+
+          logger.debug { "Terminating worker threads" }
+          @busy.each do |processor|
+            processor.terminate if processor.alive?
+          end
 
           after(0) { signal(:shutdown) }
         end
@@ -146,16 +150,16 @@ module Sidekiq
       raise "BUG: No processors, cannot continue!" if @ready.empty? && @busy.empty?
       raise "No ready processor!?" if @ready.empty?
 
-      @fetcher.fetch!
+      @fetcher.async.fetch
     end
 
     def stopped?
       @done
     end
 
-    def procline
-      $0 = "sidekiq #{Sidekiq::VERSION} [#{@busy.size} of #{@count} busy]#{stopped? ? ' stopping' : ''}"
-      after(5) { procline }
+    def procline(tag)
+      $0 = "sidekiq #{Sidekiq::VERSION} #{tag}[#{@busy.size} of #{@count} busy]#{stopped? ? ' stopping' : ''}"
+      after(5) { procline(tag) }
     end
   end
 end

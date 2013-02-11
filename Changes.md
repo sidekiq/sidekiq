@@ -1,7 +1,162 @@
-HEAD
+2.7.2
+-----------
+
+- Remove gem signing infrastructure.  It was causing Sidekiq to break
+when used via git in Bundler.  This is why we can't have nice things. [#688]
+
+
+2.7.1
+-----------
+
+- Fix issue with hard shutdown [#680]
+
+
+2.7.0
+-----------
+
+- Add -d daemonize flag, capistrano recipe has been updated to use it [#662]
+- Support profiling via `ruby-prof` with -p.  When Sidekiq is stopped
+  via Ctrl-C, it will output `profile.html`.  You must add `gem 'ruby-prof'` to your Gemfile for it to work.
+- Dynamically update Redis stats on dashboard [brandonhilkert]
+- Add Sidekiq::Workers API giving programmatic access to the current
+  set of active workers.
+
+```
+workers = Sidekiq::Workers.new
+workers.size => 2
+workers.each do |name, work|
+  # name is a unique identifier per Processor instance
+  # work is a Hash which looks like:
+  # { 'queue' => name, 'run_at' => timestamp, 'payload' => msg }
+end
+```
+
+- Allow environment-specific sections within the config file which
+override the global values [dtaniwaki, #630]
+
+```
+---
+:concurrency:  50
+:verbose:      false
+staging:
+  :verbose:      true
+  :concurrency:  5
+```
+
+
+2.6.5
+-----------
+
+- Several reliability fixes for job requeueing upon termination [apinstein, #622, #624]
+- Fix typo in capistrano recipe
+- Add `retry_queue` option so retries can be given lower priority [ryanlower, #620]
+
+```ruby
+sidekiq_options queue: 'high', retry_queue: 'low'
+```
+
+2.6.4
+-----------
+
+- Fix crash upon empty queue [#612]
+
+2.6.3
+-----------
+
+- sidekiqctl exits with non-zero exit code upon error [jmazzi]
+- better argument validation in Sidekiq::Client [karlfreeman]
+
+2.6.2
+-----------
+
+- Add Dashboard beacon indicating when stats are updated. [brandonhilkert, #606]
+- Revert issue with capistrano restart. [#598]
+
+2.6.1
+-----------
+
+- Dashboard now live updates summary stats also. [brandonhilkert, #605]
+- Add middleware chain APIs `insert_before` and `insert_after` for fine
+  tuning the order of middleware. [jackrg, #595]
+
+2.6.0
+-----------
+
+- Web UI much more mobile friendly now [brandonhilkert, #573]
+- Enable live polling for every section in Web UI [brandonhilkert, #567]
+- Add Stats API [brandonhilkert, #565]
+- Add Stats::History API [brandonhilkert, #570]
+- Add Dashboard to Web UI with live and historical stat graphs [brandonhilkert, #580]
+- Add option to log output to a file, reopen log file on USR2 signal [mrnugget, #581]
+
+2.5.4
+-----------
+
+- `Sidekiq::Client.push` now accepts the worker class as a string so the
+  Sidekiq client does not have to load your worker classes at all.  [#524]
+- `Sidekiq::Client.push_bulk` now works with inline testing.
+- **Really** fix status icon in Web UI this time.
+- Add "Delete All" and "Retry All" buttons to Retries in Web UI
+
+
+2.5.3
+-----------
+
+- Small Web UI fixes
+- Add `delay_until` so you can delay jobs until a specific timestamp:
+
+```ruby
+Auction.delay_until(@auction.ends_at).close(@auction.id)
+```
+
+This is identical to the existing Sidekiq::Worker method, `perform_at`.
+
+2.5.2
+-----------
+
+- Remove asset pipeline from Web UI for much faster, simpler runtime.  [#499, #490, #481]
+- Add -g option so the procline better identifies a Sidekiq process, defaults to File.basename(Rails.root). [#486]
+
+    sidekiq 2.5.1 myapp [0 of 25 busy]
+
+- Add splay to retry time so groups of failed jobs don't fire all at once. [#483]
+
+2.5.1
+-----------
+
+- Fix issues with core\_ext
+
+2.5.0
+-----------
+
+- REDESIGNED WEB UI! [unity, cavneb]
+- Support Honeybadger for error delivery
+- Inline testing runs the client middleware before executing jobs [#465]
+- Web UI can now remove jobs from queue. [#466, dleung]
+- Web UI can now show the full message, not just 100 chars [#464, dleung]
+- Add APIs for manipulating the retry and job queues.  See sidekiq/api. [#457]
+
+
+2.4.0
+-----------
+
+- ActionMailer.delay.method now only tries to deliver if method returns a valid message.
+- Logging now uses "MSG-#{Job ID}", not a random msg ID
+- Allow generic Redis provider as environment variable. [#443]
+- Add ability to customize sidekiq\_options with delay calls [#450]
+
+```ruby
+Foo.delay(:retry => false).bar
+Foo.delay(:retry => 10).bar
+Foo.delay(:timeout => 10.seconds).bar
+Foo.delay_for(5.minutes, :timeout => 10.seconds).bar
+```
+
+2.3.3
 -----------
 
 - Remove option to disable Rails hooks. [#401]
+- Allow delay of any module class method
 
 2.3.2
 -----------

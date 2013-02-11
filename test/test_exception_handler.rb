@@ -8,7 +8,7 @@ ExceptionHandlerTestException = Class.new(StandardError)
 TEST_EXCEPTION = ExceptionHandlerTestException.new("Something didn't work!")
 
 class Component
-  include Sidekiq::Util
+  include Sidekiq::ExceptionHandler
 
   def invoke_exception(args)
     raise TEST_EXCEPTION
@@ -52,6 +52,22 @@ class TestExceptionHandler < MiniTest::Unit::TestCase
       ::Airbrake.expect(:notify_or_ignore,nil,[TEST_EXCEPTION,:parameters => { :a => 1 }])
       Component.new.invoke_exception(:a => 1)
       ::Airbrake.verify
+    end
+  end
+
+  describe "with fake Honeybadger" do
+    before do
+      ::Honeybadger = MiniTest::Mock.new
+    end
+
+    after do
+      Object.send(:remove_const, "Honeybadger") # HACK should probably inject Honeybadger etc into this class in the future
+    end
+
+    it "notifies Honeybadger" do
+      ::Honeybadger.expect(:notify_or_ignore,nil,[TEST_EXCEPTION,:parameters => { :a => 1 }])
+      Component.new.invoke_exception(:a => 1)
+      ::Honeybadger.verify
     end
   end
 
@@ -99,7 +115,7 @@ class TestExceptionHandler < MiniTest::Unit::TestCase
 
     it "notifies Exceptional" do
       ::Exceptional::Config.expect(:should_send_to_api?,true)
-      exception_data = MiniTest::Mock.new
+      exception_data = Object.new
       ::Exceptional::Remote.expect(:error,nil,[exception_data])
       ::Exceptional::ExceptionData.expect(:new,exception_data,[TEST_EXCEPTION])
       Component.new.invoke_exception(:c => 3)

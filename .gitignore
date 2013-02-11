@@ -1,6 +1,8 @@
+.rvmrc
 tags
 Gemfile.lock
 *.swp
 dump.rdb
 .rbx
 coverage/
+.sass-cache/

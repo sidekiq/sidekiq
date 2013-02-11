@@ -19,15 +19,18 @@ module Sidekiq
     end
 
     module Klass
-      def delay
-        Proxy.new(DelayedClass, self)
+      def delay(options={})
+        Proxy.new(DelayedClass, self, options)
       end
-      def delay_for(interval)
-        Proxy.new(DelayedClass, self, Time.now.to_f + interval.to_f)
+      def delay_for(interval, options={})
+        Proxy.new(DelayedClass, self, options.merge('at' => Time.now.to_f + interval.to_f))
+      end
+      def delay_until(timestamp, options={})
+        Proxy.new(DelayedClass, self, options.merge('at' => timestamp.to_f))
       end
     end
 
   end
 end
 
-Class.send(:include, Sidekiq::Extensions::Klass)
+Module.send(:include, Sidekiq::Extensions::Klass)

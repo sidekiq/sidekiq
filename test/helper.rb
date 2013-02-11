@@ -4,7 +4,10 @@ if ENV.has_key?("SIMPLECOV")
   SimpleCov.start
 end
 
-require 'pry'
+begin
+  require 'pry'
+rescue LoadError
+end
 
 require 'minitest/unit'
 require 'minitest/pride'

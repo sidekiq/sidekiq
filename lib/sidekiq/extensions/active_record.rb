@@ -21,11 +21,14 @@ module Sidekiq
     end
 
     module ActiveRecord
-      def delay
-        Proxy.new(DelayedModel, self)
+      def delay(options={})
+        Proxy.new(DelayedModel, self, options)
       end
-      def delay_for(interval)
-        Proxy.new(DelayedModel, self, Time.now.to_f + interval.to_f)
+      def delay_for(interval, options={})
+        Proxy.new(DelayedModel, self, options.merge('at' => Time.now.to_f + interval.to_f))
+      end
+      def delay_until(timestamp, options={})
+        Proxy.new(DelayedModel, self, options.merge('at' => timestamp.to_f))
       end
     end
 

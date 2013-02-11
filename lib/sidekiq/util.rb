@@ -1,5 +1,6 @@
 require 'socket'
 require 'sidekiq/exception_handler'
+require 'sidekiq/core_ext'
 
 module Sidekiq
   ##
@@ -9,17 +10,6 @@ module Sidekiq
     include ExceptionHandler
 
     EXPIRY = 60 * 60 * 24
-
-    def constantize(camel_cased_word)
-      names = camel_cased_word.split('::')
-      names.shift if names.empty? || names.first.empty?
-
-      constant = Object
-      names.each do |name|
-        constant = constant.const_defined?(name) ? constant.const_get(name) : constant.const_missing(name)
-      end
-      constant
-    end
 
     def watchdog(last_words)
       yield

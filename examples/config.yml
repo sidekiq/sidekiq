@@ -3,6 +3,8 @@
 #   sidekiq -C config.yml
 ---
 :verbose: false
+:pidfile: ./tmp/pids/sidekiq.pid
+:namespace: sidekiq_namespace
 :concurrency:  25
 :queues:
   - [often, 7]

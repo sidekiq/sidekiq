@@ -1,27 +1,30 @@
-h1 Scheduled Jobs
+header.row
+  .span5
+    h3 Scheduled Jobs
+  .span4
+    - if @scheduled.size > 0
+      == slim :_paging, :locals => { :url => "#{root_path}scheduled" }
 
 - if @scheduled.size > 0
-  == slim :_paging, :locals => { :url => "#{root_path}scheduled" }
 
   form action="#{root_path}scheduled" method="post"
-    table class="table table-striped table-bordered"
-      tr
-        th
+    table class="table table-striped table-bordered table-white"
+      thead
+        th width="20px"
           input type="checkbox" class="check_all"
-        th When
-        th Queue
+        th width="25%" When
+        th width="10%" Queue
         th Worker
         th Args
-      - @scheduled.each do |(msg, score)|
+      - @scheduled.each do |msg, score|
         tr
           td
-            input type='checkbox' name='score[]' value='#{score}'
+            input type='checkbox' name='key[]' value='#{job_params(msg, score)}'
           td== relative_time(Time.at(score))
           td
             a href="#{root_path}queues/#{msg['queue']}" #{msg['queue']}
           td= msg['class']
           td= display_args(msg['args'])
-    input.btn.btn-danger type="submit" name="delete" value="Delete"
+    input.btn.btn-danger.pull-right type="submit" name="delete" value="Delete"
 - else
-  p No scheduled jobs found.
-  a href="#{root_path}" Back
+  .alert.alert-success No scheduled jobs were found

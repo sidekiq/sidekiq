@@ -5,13 +5,14 @@ require 'redis/namespace'
 module Sidekiq
   class RedisConnection
     def self.create(options={})
-      url = options[:url] || ENV['REDISTOGO_URL'] || 'redis://localhost:6379/0'
+      url = options[:url] || determine_redis_provider || 'redis://localhost:6379/0'
       driver = options[:driver] || 'ruby'
       # need a connection for Fetcher and Retry
       size = options[:size] || (Sidekiq.server? ? (Sidekiq.options[:concurrency] + 2) : 5)
+      namespace = options[:namespace] || Sidekiq.options[:namespace]
 
       ConnectionPool.new(:timeout => 1, :size => size) do
-        build_client(url, options[:namespace], driver)
+        build_client(url, namespace, driver)
       end
     end
 
@@ -24,5 +25,12 @@ module Sidekiq
       end
     end
     private_class_method :build_client
+
+    # Not public
+    def self.determine_redis_provider
+      return ENV['REDISTOGO_URL'] if ENV['REDISTOGO_URL']
+      provider = ENV['REDIS_PROVIDER'] || 'REDIS_URL'
+      ENV[provider]
+    end
   end
 end

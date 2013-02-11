@@ -12,11 +12,9 @@ module Sidekiq
 
     TIMEOUT = 1
 
-    def initialize(mgr, queues, strict)
+    def initialize(mgr, options)
       @mgr = mgr
-      @strictly_ordered_queues = strict
-      @queues = queues.map { |q| "queue:#{q}" }
-      @unique_queues = @queues.uniq
+      @strategy = Fetcher.strategy.new(options)
     end
 
     # Fetching is straightforward: the Manager makes a fetch
@@ -32,12 +30,10 @@ module Sidekiq
         return if Sidekiq::Fetcher.done?
 
         begin
-          queue = nil
-          msg = nil
-          Sidekiq.redis { |conn| queue, msg = conn.blpop(*queues_cmd) }
+          work = @strategy.retrieve_work
 
-          if msg
-            @mgr.assign!(msg, queue.gsub(/.*queue:/, ''))
+          if work
+            @mgr.async.assign(work)
           else
             after(0) { fetch }
           end
@@ -61,7 +57,54 @@ module Sidekiq
       @done
     end
 
-    private
+    def self.strategy
+      Sidekiq.options[:fetch] || BasicFetch
+    end
+  end
+
+  class BasicFetch
+    def initialize(options)
+      @strictly_ordered_queues = !!options[:strict]
+      @queues = options[:queues].map { |q| "queue:#{q}" }
+      @unique_queues = @queues.uniq
+    end
+
+    def retrieve_work
+      work = Sidekiq.redis { |conn| conn.brpop(*queues_cmd) }
+      UnitOfWork.new(*work) if work
+    end
+
+    def self.bulk_requeue(inprogress)
+      Sidekiq.logger.debug { "Re-queueing terminated jobs" }
+      jobs_to_requeue = {}
+      inprogress.each do |unit_of_work|
+        jobs_to_requeue[unit_of_work.queue] ||= []
+        jobs_to_requeue[unit_of_work.queue] << unit_of_work.message
+      end
+
+      Sidekiq.redis do |conn|
+        jobs_to_requeue.each do |queue, jobs|
+          conn.rpush(queue, jobs)
+        end
+      end
+      Sidekiq.logger.info("Pushed #{inprogress.size} messages back to Redis")
+    end
+
+    UnitOfWork = Struct.new(:queue, :message) do
+      def acknowledge
+        # nothing to do
+      end
+
+      def queue_name
+        queue.gsub(/.*queue:/, '')
+      end
+
+      def requeue
+        Sidekiq.redis do |conn|
+          conn.rpush(queue, message)
+        end
+      end
+    end
 
     # Creating the Redis#blpop command takes into account any
     # configured queue weights. By default Redis#blpop returns
@@ -69,10 +112,8 @@ module Sidekiq
     # recreate the queue command each time we invoke Redis#blpop
     # to honor weights and avoid queue starvation.
     def queues_cmd
-      return @unique_queues.dup << TIMEOUT if @strictly_ordered_queues
-      queues = @queues.sample(@unique_queues.size).uniq
-      queues.concat(@unique_queues - queues)
-      queues << TIMEOUT
+      queues = @strictly_ordered_queues ? @unique_queues.dup : @queues.shuffle.uniq
+      queues << Sidekiq::Fetcher::TIMEOUT
     end
   end
 end

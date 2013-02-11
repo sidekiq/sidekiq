@@ -1,0 +1,46 @@
+script type="text/javascript" src="#{{root_path}}javascripts/dashboard.js"
+
+h3
+  | Dashboard
+  span.beacon
+    .ring
+    .dot
+
+h5 Real-time
+#realtime
+
+h5
+  span.history-heading History
+  a href="#{{current_path}}?days=7" class="history-graph #{{"active" if params[:days] == "7"}}" 1 week
+  a href="#{{current_path}}" class="history-graph #{{"active" if params[:days].nil? || params[:days] == "30"}}" 1 month
+  a href="#{{current_path}}?days=90" class="history-graph #{{"active" if params[:days] == "90"}}" 3 month
+  a href="#{{current_path}}?days=180" class="history-graph #{{"active" if params[:days] == "180"}}" 6 month
+#history data-processed="#{Sidekiq.dump_json(@processed_history)}" data-failed="#{Sidekiq.dump_json(@failed_history)}" data-update-url="#{{current_path}}/stats"
+
+br
+h5 Redis
+
+- if @redis_info.fetch("redis_version", nil)
+  .stat
+    h3.redis_version= @redis_info.fetch("redis_version")
+    p Version
+
+- if @redis_info.fetch("uptime_in_days", nil)
+  .stat
+    h3.uptime_in_days= @redis_info.fetch("uptime_in_days")
+    p Uptime (days)
+
+- if @redis_info.fetch("connected_clients", nil)
+  .stat
+    h3.connected_clients= @redis_info.fetch("connected_clients")
+    p Connections
+
+- if @redis_info.fetch("used_memory_human", nil)
+  .stat
+    h3.used_memory_human= @redis_info.fetch("used_memory_human")
+    p Memory Usage
+
+- if @redis_info.fetch("used_memory_peak_human", nil)
+  .stat
+    h3.used_memory_peak_human= @redis_info.fetch("used_memory_peak_human")
+    p Peak Memory Usage

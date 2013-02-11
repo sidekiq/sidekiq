@@ -54,7 +54,7 @@ Please see the [sidekiq wiki](https://github.com/mperham/sidekiq/wiki) for more 
 but bug reports or feature requests suggestions should still go through [issues on Github](https://github.com/mperham/sidekiq/issues).
 
 There's also a mailing list via [Librelist](http://librelist.org) that you can subscribe to by sending
-and email to <sidekiq@librelist.org> with a greeting in the body. To unsubscribe, send an email to <sidekiq-unsubscribe@librelist.org> and that's it!
+an email to <sidekiq@librelist.org> with a greeting in the body. To unsubscribe, send an email to <sidekiq-unsubscribe@librelist.org> and that's it!
 Once archiving begins, you'll be able to visit [the archives](http://librelist.com/browser/sidekiq/) to see past threads.
 
 
@@ -72,7 +72,6 @@ License
 
 Please see LICENSE for licensing details.
 
-<a href='http://www.pledgie.com/campaigns/16623'><img alt='Click here to lend your support to Open Source and make a donation at www.pledgie.com !' src='http://www.pledgie.com/campaigns/16623.png?skin_name=chrome' border='0' /></a>
 
 Author
 -----------------
