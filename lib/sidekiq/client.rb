@@ -87,6 +87,15 @@ module Sidekiq
       klass.client_push('queue' => queue, 'class' => klass, 'args' => args)
     end
 
+    # Example usage:
+    #   Sidekiq::Client.enqueue_to_in(:queue_name, 2.days.from_now, MyWorker, 'foo', 1, :bat => 'bar')
+    #
+    def self.enqueue_to_in(queue, interval, klass, *args)
+      int = interval.to_f
+      ts = (int < 1_000_000_000 ? Time.now.to_f + int : int)
+      klass.client_push('queue' => queue, 'class' => klass, 'args' => args, 'at' => ts)
+    end
+
     private
 
     def self.raw_push(normed, payload) # :nodoc:
