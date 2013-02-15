@@ -7,6 +7,7 @@ gem 'sqlite3', :platform => :mri
 
 group :test do
   gem 'simplecov', :require => false
+  gem 'minitest-emoji', :require => false
 end
 
 group :development do

@@ -10,8 +10,8 @@ rescue LoadError
 end
 
 require 'minitest/unit'
-require 'minitest/pride'
 require 'minitest/autorun'
+require 'minitest/emoji'
 
 require 'sidekiq'
 require 'sidekiq/util'
