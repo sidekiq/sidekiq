@@ -207,6 +207,8 @@ class TestWeb < MiniTest::Unit::TestCase
         end
         2.times { add_retry }
         3.times { add_scheduled }
+        4.times { add_worker }
+
         get '/dashboard/stats'
         @response = Sidekiq.load_json(last_response.body)
       end
@@ -221,19 +223,23 @@ class TestWeb < MiniTest::Unit::TestCase
         end
 
         it 'reports processed' do
-          assert_equal @response["sidekiq"]["processed"], 5
+          assert_equal 5, @response["sidekiq"]["processed"]
         end
 
         it 'reports failed' do
-          assert_equal @response["sidekiq"]["failed"], 2
+          assert_equal 2, @response["sidekiq"]["failed"]
+        end
+
+        it 'reports busy' do
+          assert_equal 4, @response["sidekiq"]["busy"]
         end
 
         it 'reports retries' do
-          assert_equal @response["sidekiq"]["retries"], 2
+          assert_equal 2, @response["sidekiq"]["retries"]
         end
 
         it 'reports scheduled' do
-          assert_equal @response["sidekiq"]["scheduled"], 3
+          assert_equal 3, @response["sidekiq"]["scheduled"]
         end
       end
 
@@ -270,6 +276,15 @@ class TestWeb < MiniTest::Unit::TestCase
         conn.zadd('retry', score, Sidekiq.dump_json(msg))
       end
       [msg, score]
+    end
+
+    def add_worker
+      process_id = rand(1000)
+      msg = "{\"queue\":\"default\",\"payload\":{\"retry\":true,\"queue\":\"default\",\"timeout\":20,\"backtrace\":5,\"class\":\"HardWorker\",\"args\":[\"bob\",10,5],\"jid\":\"2b5ad2b016f5e063a1c62872\"},\"run_at\":1361208995}"
+      Sidekiq.redis do |conn|
+        conn.sadd("workers", "mercury.home:#{process_id}-70215157189060:started")
+        conn.set("worker:mercury.home:#{process_id}-70215157189060:started", msg)
+      end
     end
   end
 end

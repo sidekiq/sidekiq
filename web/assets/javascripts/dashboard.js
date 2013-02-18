@@ -114,6 +114,7 @@ var createSeries = function(obj) {
 var updateStatsSummary = function(data) {
   $('ul.summary li.processed span.count').html(data.processed.numberWithDelimiter())
   $('ul.summary li.failed span.count').html(data.failed.numberWithDelimiter())
+  $('ul.summary li.busy span.count').html(data.busy.numberWithDelimiter())
   $('ul.summary li.scheduled span.count').html(data.scheduled.numberWithDelimiter())
   $('ul.summary li.retries span.count').html(data.retries.numberWithDelimiter())
   $('ul.summary li.enqueued span.count').html(data.enqueued.numberWithDelimiter())

@@ -220,6 +220,7 @@ module Sidekiq
         sidekiq: {
           processed:  sidekiq_stats.processed,
           failed:     sidekiq_stats.failed,
+          busy:       workers.size,
           enqueued:   sidekiq_stats.enqueued,
           scheduled:  sidekiq_stats.scheduled_size,
           retries:    sidekiq_stats.retry_size,
