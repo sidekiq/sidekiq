@@ -27,7 +27,6 @@ module Sidekiq
       @busy = []
       @fetcher = Fetcher.new(current_actor, options)
       @ready = @count.times.map { Processor.new_link(current_actor) }
-      procline(options[:tag] ? "#{options[:tag]} " : '')
     end
 
     def stop(options={})
@@ -103,6 +102,10 @@ module Sidekiq
       end
     end
 
+    def procline(tag)
+      "sidekiq #{Sidekiq::VERSION} #{tag}[#{@busy.size} of #{@count} busy]#{stopped? ? ' stopping' : ''}"
+    end
+
     private
 
     def hard_shutdown_in(delay)
@@ -118,7 +121,7 @@ module Sidekiq
           # contract says that jobs are run AT LEAST once. Process termination
           # is delayed until we're certain the jobs are back in Redis because
           # it is worse to lose a job than to run it twice.
-          Sidekiq.options[:fetch].bulk_requeue(@in_progress.values)
+          Sidekiq::Fetcher.strategy.bulk_requeue(@in_progress.values)
 
           # Clearing workers in Redis
           # NOTE: we do this before terminating worker threads because the
@@ -130,7 +133,7 @@ module Sidekiq
             workers_to_remove = workers.select do |worker_name|
               worker_name =~ /:#{process_id}-/
             end
-            conn.srem('workers', workers_to_remove)
+            conn.srem('workers', workers_to_remove) if !workers_to_remove.empty?
           end
 
           logger.debug { "Terminating worker threads" }
@@ -155,11 +158,6 @@ module Sidekiq
 
     def stopped?
       @done
-    end
-
-    def procline(tag)
-      $0 = "sidekiq #{Sidekiq::VERSION} #{tag}[#{@busy.size} of #{@count} busy]#{stopped? ? ' stopping' : ''}"
-      after(5) { procline(tag) }
     end
   end
 end

@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'sidekiq/version'
 require 'sidekiq/logging'
 require 'sidekiq/client'
@@ -23,7 +24,12 @@ module Sidekiq
     :require => '.',
     :environment => nil,
     :timeout => 8,
+    :profile => false,
   }
+
+  def self.❨╯°□°❩╯︵ ┻━┻
+    puts "Calm down, bro"
+  end
 
   def self.options
     @options ||= DEFAULTS.dup
@@ -61,14 +67,15 @@ module Sidekiq
   end
 
   def self.redis(&block)
-    @redis ||= Sidekiq::RedisConnection.create
     raise ArgumentError, "requires a block" if !block
+    @redis ||= Sidekiq::RedisConnection.create
     @redis.with(&block)
   end
 
   def self.redis=(hash)
     if hash.is_a?(Hash)
       @redis = RedisConnection.create(hash)
+      options[:namespace] ||= hash[:namespace]
     elsif hash.is_a?(ConnectionPool)
       @redis = hash
     else
@@ -89,7 +96,7 @@ module Sidekiq
   end
 
   def self.load_json(string)
-    MultiJson.decode(string)
+    MultiJson.decode(string, :symbolize_keys => false)
   end
 
   def self.dump_json(object)

@@ -1,5 +1,35 @@
-HEAD
+2.7.2
 -----------
+
+- Remove gem signing infrastructure.  It was causing Sidekiq to break
+when used via git in Bundler.  This is why we can't have nice things. [#688]
+
+
+2.7.1
+-----------
+
+- Fix issue with hard shutdown [#680]
+
+
+2.7.0
+-----------
+
+- Add -d daemonize flag, capistrano recipe has been updated to use it [#662]
+- Support profiling via `ruby-prof` with -p.  When Sidekiq is stopped
+  via Ctrl-C, it will output `profile.html`.  You must add `gem 'ruby-prof'` to your Gemfile for it to work.
+- Dynamically update Redis stats on dashboard [brandonhilkert]
+- Add Sidekiq::Workers API giving programmatic access to the current
+  set of active workers.
+
+```
+workers = Sidekiq::Workers.new
+workers.size => 2
+workers.each do |name, work|
+  # name is a unique identifier per Processor instance
+  # work is a Hash which looks like:
+  # { 'queue' => name, 'run_at' => timestamp, 'payload' => msg }
+end
+```
 
 - Allow environment-specific sections within the config file which
 override the global values [dtaniwaki, #630]

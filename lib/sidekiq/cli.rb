@@ -1,4 +1,11 @@
 trap 'INT' do
+  if Sidekiq.options[:profile]
+    result = RubyProf.stop
+    printer = RubyProf::GraphHtmlPrinter.new(result)
+    File.open("profile.html", 'w') do |f|
+      printer.print(f, :min_percent => 1)
+    end
+  end
   # Handle Ctrl-C in JRuby like MRI
   # http://jira.codehaus.org/browse/JRUBY-4637
   Sidekiq::CLI.instance.interrupt
@@ -11,7 +18,7 @@ end
 
 trap 'USR1' do
   Sidekiq.logger.info "Received USR1, no longer accepting new work"
-  mgr = Sidekiq::CLI.instance.manager
+  mgr = Sidekiq::CLI.instance.launcher.manager
   mgr.async.stop if mgr
 end
 
@@ -38,13 +45,11 @@ $stdout.sync = true
 require 'yaml'
 require 'singleton'
 require 'optparse'
-require 'celluloid'
 require 'erb'
 
 require 'sidekiq'
 require 'sidekiq/util'
-require 'sidekiq/manager'
-require 'sidekiq/scheduled'
+require 'sidekiq/launcher'
 
 module Sidekiq
   class CLI
@@ -53,7 +58,7 @@ module Sidekiq
 
     # Used for CLI testing
     attr_accessor :code
-    attr_accessor :manager
+    attr_accessor :launcher
     attr_accessor :environment
 
     def initialize
@@ -68,7 +73,9 @@ module Sidekiq
       setup_options(args)
       initialize_logger
       validate!
+      daemonize
       write_pid
+      load_celluloid
       boot_system
     end
 
@@ -79,18 +86,23 @@ module Sidekiq
 
       Sidekiq::Stats::History.cleanup
 
-      @manager = Sidekiq::Manager.new(options)
-      poller = Sidekiq::Scheduled::Poller.new
-      begin
+      if !options[:daemon]
         logger.info 'Starting processing, hit Ctrl-C to stop'
-        @manager.async.start
-        poller.async.poll(true)
+      end
+
+      @launcher = Sidekiq::Launcher.new(options)
+      launcher.procline(options[:tag] ? "#{options[:tag]} " : '')
+
+      begin
+        if options[:profile]
+          require 'ruby-prof'
+          RubyProf.start
+        end
+        launcher.run
         sleep
       rescue Interrupt
         logger.info 'Shutting down'
-        poller.async.terminate if poller.alive?
-        @manager.async.stop(:shutdown => true, :timeout => options[:timeout])
-        @manager.wait(:shutdown)
+        launcher.stop
         # Explicitly exit so busy Processor threads can't block
         # process shutdown.
         exit(0)
@@ -107,6 +119,47 @@ module Sidekiq
     end
 
     private
+
+    def load_celluloid
+      # Celluloid can't be loaded until after we've daemonized
+      # because it spins up threads and creates locks which get
+      # into a very bad state if forked.
+      require 'celluloid'
+      Celluloid.logger = (options[:verbose] ? Sidekiq.logger : nil)
+
+      require 'sidekiq/manager'
+      require 'sidekiq/scheduled'
+    end
+
+    def daemonize
+      return unless options[:daemon]
+
+      raise ArgumentError, "You really should set a logfile if you're going to daemonize" unless options[:logfile]
+      files_to_reopen = []
+      ObjectSpace.each_object(File) do |file|
+        files_to_reopen << file unless file.closed?
+      end
+
+      Process.daemon(true, true)
+
+      files_to_reopen.each do |file|
+        begin
+          file.reopen file.path, "a+"
+          file.sync = true
+        rescue ::Exception
+        end
+      end
+
+      [$stdout, $stderr].each do |io|
+        File.open(options[:logfile], 'ab') do |f|
+          io.reopen(f)
+        end
+        io.sync = true
+      end
+      $stdin.reopen('/dev/null')
+
+      initialize_logger
+    end
 
     def set_environment(cli_env)
       @environment = cli_env || ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
@@ -175,41 +228,45 @@ module Sidekiq
       opts = {}
 
       @parser = OptionParser.new do |o|
-        o.on "-q", "--queue QUEUE[,WEIGHT]...", "Queues to process with optional weights" do |arg|
-          queues_and_weights = arg.scan(/([\w\.-]+),?(\d*)/)
-          parse_queues opts, queues_and_weights
+        o.on '-c', '--concurrency INT', "processor threads to use" do |arg|
+          opts[:concurrency] = Integer(arg)
         end
 
-        o.on "-v", "--verbose", "Print more verbose output" do |arg|
-          opts[:verbose] = arg
+        o.on '-d', '--daemon', "Daemonize process" do |arg|
+          opts[:daemon] = arg
         end
 
         o.on '-e', '--environment ENV', "Application environment" do |arg|
           opts[:environment] = arg
         end
 
-        o.on '-t', '--timeout NUM', "Shutdown timeout" do |arg|
-          opts[:timeout] = Integer(arg)
-        end
-
         o.on '-g', '--tag TAG', "Process tag for procline" do |arg|
           opts[:tag] = arg
-        end
-
-        o.on '-r', '--require [PATH|DIR]', "Location of Rails application with workers or file to require" do |arg|
-          opts[:require] = arg
         end
 
         o.on '-i', '--index INT', "unique process index on this machine" do |arg|
           opts[:index] = Integer(arg)
         end
 
-        o.on '-c', '--concurrency INT', "processor threads to use" do |arg|
-          opts[:concurrency] = Integer(arg)
+        o.on '-p', '--profile', "Profile all code run by Sidekiq" do |arg|
+          opts[:profile] = arg
         end
 
-        o.on '-P', '--pidfile PATH', "path to pidfile" do |arg|
-          opts[:pidfile] = arg
+        o.on "-q", "--queue QUEUE[,WEIGHT]...", "Queues to process with optional weights" do |arg|
+          queues_and_weights = arg.scan(/([\w\.-]+),?(\d*)/)
+          parse_queues opts, queues_and_weights
+        end
+
+        o.on '-r', '--require [PATH|DIR]', "Location of Rails application with workers or file to require" do |arg|
+          opts[:require] = arg
+        end
+
+        o.on '-t', '--timeout NUM', "Shutdown timeout" do |arg|
+          opts[:timeout] = Integer(arg)
+        end
+
+        o.on "-v", "--verbose", "Print more verbose output" do |arg|
+          opts[:verbose] = arg
         end
 
         o.on '-C', '--config PATH', "path to YAML config file" do |arg|
@@ -218,6 +275,10 @@ module Sidekiq
 
         o.on '-L', '--logfile PATH', "path to writable logfile" do |arg|
           opts[:logfile] = arg
+        end
+
+        o.on '-P', '--pidfile PATH', "path to pidfile" do |arg|
+          opts[:pidfile] = arg
         end
 
         o.on '-V', '--version', "Print version and exit" do |arg|
@@ -239,7 +300,6 @@ module Sidekiq
       Sidekiq::Logging.initialize_logger(options[:logfile]) if options[:logfile]
 
       Sidekiq.logger.level = Logger::DEBUG if options[:verbose]
-      Celluloid.logger = nil unless options[:verbose]
     end
 
     def write_pid
@@ -255,7 +315,7 @@ module Sidekiq
       if File.exist?(cfile)
         opts = YAML.load(ERB.new(IO.read(cfile)).result)
         opts = opts.merge(opts.delete(environment) || {})
-        parse_queues opts, opts.delete(:queues) || []
+        parse_queues(opts, opts.delete(:queues) || [])
       else
         raise ArgumentError, "can't find config file #{cfile}"
       end

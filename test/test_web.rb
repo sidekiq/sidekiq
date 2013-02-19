@@ -32,7 +32,6 @@ class TestWeb < MiniTest::Unit::TestCase
       get '/'
       assert_equal 200, last_response.status
       assert_match /status-idle/, last_response.body
-      refute_match /default/, last_response.body
     end
 
     it 'can display queues' do
@@ -200,17 +199,55 @@ class TestWeb < MiniTest::Unit::TestCase
       assert_equal 200, last_response.status
     end
 
-    it 'can refresh dashboard stats' do
-      Sidekiq.redis do |conn|
-        conn.set("stat:processed", 5)
-        conn.set("stat:failed", 2)
-      end
-      2.times { add_retry }
-      3.times { add_scheduled }
+    describe 'stats' do
+      before do
+        Sidekiq.redis do |conn|
+          conn.set("stat:processed", 5)
+          conn.set("stat:failed", 2)
+        end
+        2.times { add_retry }
+        3.times { add_scheduled }
+        4.times { add_worker }
 
-      get '/dashboard/stats'
-      assert_equal 200, last_response.status
-      assert_equal "{\"processed\":5,\"failed\":2,\"enqueued\":0,\"scheduled\":3,\"retries\":2}", last_response.body
+        get '/dashboard/stats'
+        @response = Sidekiq.load_json(last_response.body)
+      end
+
+      it 'can refresh dashboard stats' do
+        assert_equal 200, last_response.status
+      end
+
+      describe "for sidekiq" do
+        it 'are namespaced' do
+          assert_includes @response.keys, "sidekiq"
+        end
+
+        it 'reports processed' do
+          assert_equal 5, @response["sidekiq"]["processed"]
+        end
+
+        it 'reports failed' do
+          assert_equal 2, @response["sidekiq"]["failed"]
+        end
+
+        it 'reports busy' do
+          assert_equal 4, @response["sidekiq"]["busy"]
+        end
+
+        it 'reports retries' do
+          assert_equal 2, @response["sidekiq"]["retries"]
+        end
+
+        it 'reports scheduled' do
+          assert_equal 3, @response["sidekiq"]["scheduled"]
+        end
+      end
+
+      describe "for redis" do
+        it 'are namespaced' do
+          assert_includes @response.keys, "redis"
+        end
+      end
     end
 
     def add_scheduled
@@ -239,6 +276,15 @@ class TestWeb < MiniTest::Unit::TestCase
         conn.zadd('retry', score, Sidekiq.dump_json(msg))
       end
       [msg, score]
+    end
+
+    def add_worker
+      process_id = rand(1000)
+      msg = "{\"queue\":\"default\",\"payload\":{\"retry\":true,\"queue\":\"default\",\"timeout\":20,\"backtrace\":5,\"class\":\"HardWorker\",\"args\":[\"bob\",10,5],\"jid\":\"2b5ad2b016f5e063a1c62872\"},\"run_at\":1361208995}"
+      Sidekiq.redis do |conn|
+        conn.sadd("workers", "mercury.home:#{process_id}-70215157189060:started")
+        conn.set("worker:mercury.home:#{process_id}-70215157189060:started", msg)
+      end
     end
   end
 end

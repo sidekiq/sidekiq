@@ -24,6 +24,9 @@ html
               p.navbar-text Redis: #{location}
             li
               p.navbar-text Time: #{Time.now.utc.strftime('%H:%M:%S UTC')}
+            - if namespace
+              li
+                p.navbar-text Namespace: #{namespace}
 
     #page
       .container
