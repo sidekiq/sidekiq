@@ -86,7 +86,7 @@ module Sidekiq
 
       Sidekiq::Stats::History.cleanup
 
-      if !options[:daemon] && !options[:mode] == :inline
+      if !options[:daemon] && !runs_inline?
         logger.info 'Starting processing, hit Ctrl-C to stop'
       end
 
