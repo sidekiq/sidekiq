@@ -170,14 +170,14 @@ class TestWeb < MiniTest::Unit::TestCase
 
     it 'can retry all retries' do
       msg, score = add_retry
-      add_retry
+      50.times{ add_retry }
 
       post "/retries/all/retry", 'retry' => 'Retry'
       assert_equal 302, last_response.status
       assert_equal 'http://example.org/retries', last_response.header['Location']
-      assert_equal 2, Sidekiq::Queue.new("default").size
+      assert_equal 51, Sidekiq::Queue.new("default").size
 
-      get '/queues/default'
+      get '/queues/default?count=51'
       assert_equal 200, last_response.status
       assert_match /#{msg['args'][2]}/, last_response.body
     end
