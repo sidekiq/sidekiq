@@ -317,7 +317,8 @@ module Sidekiq
         opts = opts.merge(opts.delete(environment) || {})
         parse_queues(opts, opts.delete(:queues) || [])
       else
-        raise ArgumentError, "can't find config file #{cfile}"
+        # allow a non-existent config file so Sidekiq
+        # can be deployed by cap with just the defaults.
       end
       opts
     end
