@@ -315,7 +315,7 @@ module Sidekiq
       if File.exist?(cfile)
         opts = YAML.load(ERB.new(IO.read(cfile)).result)
         opts = opts.merge(opts.delete(environment) || {})
-        parse_queues opts, opts.delete(:queues) || []
+        parse_queues(opts, opts.delete(:queues) || [])
       else
         raise ArgumentError, "can't find config file #{cfile}"
       end
