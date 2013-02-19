@@ -11,7 +11,9 @@ def cli.valid?
   !@code
 end
 
+
 class TestCli < MiniTest::Unit::TestCase
+
   describe 'with cli' do
 
     before do

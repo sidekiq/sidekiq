@@ -1,0 +1,9 @@
+---
+:verbose: true
+:namespace: sidekiq_namespace
+:concurrency:  25
+:nested: true
+:queues:
+  - [often, 7]
+  - [default, 5]
+  - [seldom, 3]
