@@ -172,7 +172,7 @@ module Sidekiq
     end
 
     post "/retries/all/retry" do
-      Sidekiq::RetrySet.new.each { |job| job.retry }
+      Sidekiq::RetrySet.new.retry_all
       redirect "#{root_path}retries"
     end
 

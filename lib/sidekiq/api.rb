@@ -342,6 +342,12 @@ module Sidekiq
     def initialize
       super 'retry'
     end
+
+    def retry_all
+      while size > 0
+        each(&:retry)
+      end
+    end
   end
 
 
