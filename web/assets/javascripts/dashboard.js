@@ -42,18 +42,18 @@ var realtimeGraph = function(updatePath) {
     $.getJSON($("#history").data("update-url"), function(data) {
 
       if (i === 0) {
-        var processed = data.processed;
-        var failed = data.failed;
+        var processed = data.sidekiq.processed;
+        var failed = data.sidekiq.failed;
       } else {
-        var processed = data.processed - Sidekiq.processed;
-        var failed = data.failed - Sidekiq.failed;
+        var processed = data.sidekiq.processed - Sidekiq.processed;
+        var failed = data.sidekiq.failed - Sidekiq.failed;
       }
 
       graph.series.addData({ failed: failed, processed: processed });
       graph.render();
 
-      Sidekiq.processed = data.processed;
-      Sidekiq.failed = data.failed;
+      Sidekiq.processed = data.sidekiq.processed;
+      Sidekiq.failed = data.sidekiq.failed;
 
       updateStatsSummary(data.sidekiq);
       updateRedisStats(data.redis);
