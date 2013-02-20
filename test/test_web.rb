@@ -28,8 +28,8 @@ class TestWeb < MiniTest::Unit::TestCase
       end
     end
 
-    it 'can display home' do
-      get '/'
+    it 'can display workers' do
+      get '/workers'
       assert_equal 200, last_response.status
       assert_match /status-idle/, last_response.body
     end
@@ -194,8 +194,8 @@ class TestWeb < MiniTest::Unit::TestCase
       end
     end
 
-    it 'can display the dashboard' do
-      get '/dashboard'
+    it 'can display home' do
+      get '/'
       assert_equal 200, last_response.status
     end
 
