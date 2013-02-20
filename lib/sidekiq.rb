@@ -25,6 +25,7 @@ module Sidekiq
     :environment => nil,
     :timeout => 8,
     :profile => false,
+    :nested => false
   }
 
   def self.❨╯°□°❩╯︵ ┻━┻
@@ -60,6 +61,10 @@ module Sidekiq
   #   end
   def self.configure_client
     yield self unless server?
+  end
+
+  def self.configure
+    yield self
   end
 
   def self.server?

@@ -86,12 +86,14 @@ module Sidekiq
 
       Sidekiq::Stats::History.cleanup
 
-      if !options[:daemon]
+      if !options[:daemon] && !runs_inline?
         logger.info 'Starting processing, hit Ctrl-C to stop'
       end
 
       @launcher = Sidekiq::Launcher.new(options)
-      launcher.procline(options[:tag] ? "#{options[:tag]} " : '')
+      if !runs_inline?
+        launcher.procline(options[:tag] ? "#{options[:tag]} " : '')
+      end
 
       begin
         if options[:profile]
@@ -99,7 +101,7 @@ module Sidekiq
           RubyProf.start
         end
         launcher.run
-        sleep
+        sleep unless runs_inline?
       rescue Interrupt
         logger.info 'Shutting down'
         launcher.stop
@@ -117,6 +119,8 @@ module Sidekiq
         end
       end
     end
+
+
 
     private
 
@@ -183,19 +187,25 @@ module Sidekiq
       Sidekiq.options
     end
 
+    def runs_inline?
+      options[:nested]
+    end
+
     def boot_system
       ENV['RACK_ENV'] = ENV['RAILS_ENV'] = environment
 
       raise ArgumentError, "#{options[:require]} does not exist" unless File.exist?(options[:require])
 
-      if File.directory?(options[:require])
-        require 'rails'
-        require 'sidekiq/rails'
-        require File.expand_path("#{options[:require]}/config/environment.rb")
-        ::Rails.application.eager_load!
-        options[:tag] ||= default_tag
-      else
-        require options[:require]
+      if !runs_inline?
+        if File.directory?(options[:require])
+          require 'rails'
+          require 'sidekiq/rails'
+          require File.expand_path("#{options[:require]}/config/environment.rb")
+          ::Rails.application.eager_load!
+          options[:tag] ||= default_tag
+        else
+          require options[:require]
+        end
       end
     end
 
@@ -212,6 +222,8 @@ module Sidekiq
 
     def validate!
       options[:queues] << 'default' if options[:queues].empty?
+
+      return if runs_inline?
 
       if !File.exist?(options[:require]) ||
          (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))
