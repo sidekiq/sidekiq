@@ -36,7 +36,7 @@ html
               span.title Status
               == slim :_status
             == slim :_summary
-            - unless current_path.include?("dashboard")
+            - unless current_path == ''
               .row
                 .span2
                   - if params[:poll]

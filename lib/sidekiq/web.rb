@@ -105,7 +105,7 @@ module Sidekiq
       end
     end
 
-    get "/" do
+    get "/workers" do
       slim :index
     end
 
@@ -203,7 +203,7 @@ module Sidekiq
       redirect "#{root_path}scheduled"
     end
 
-    get '/dashboard' do
+    get '/' do
       @redis_info = Sidekiq.redis { |conn| conn.info }.select{ |k, v| redis_keys.include? k }
       stats_history = Sidekiq::Stats::History.new((params[:days] || 30).to_i)
       @processed_history = stats_history.processed
@@ -231,11 +231,11 @@ module Sidekiq
 
     def self.tabs
       @tabs ||= {
-        "Workers"   =>'',
-        "Queues"    =>'queues',
-        "Retries"   =>'retries',
-        "Scheduled" =>'scheduled',
-        "Dashboard" =>'dashboard'
+        "Dashboard" => '',
+        "Workers"   => 'workers',
+        "Queues"    => 'queues',
+        "Retries"   => 'retries',
+        "Scheduled" => 'scheduled',
       }
     end
 
