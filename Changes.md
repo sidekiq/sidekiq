@@ -1,3 +1,10 @@
+2.7.3
+-----------
+
+- Real-time dashboard is now the default web page
+- Make config file optional for capistrano
+- Fix Retry All button in the Web UI
+
 2.7.2
 -----------
 
