@@ -1,3 +1,8 @@
+2.7.4
+-----------
+
+- Fixed daemonization, was broken by some internal refactoring in 2.7.3 [#727]
+
 2.7.3
 -----------
 
