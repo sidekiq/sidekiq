@@ -1,4 +1,3 @@
-
 require 'sidekiq/util'
 require 'sidekiq/manager'
 require 'sidekiq/scheduled'

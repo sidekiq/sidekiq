@@ -49,7 +49,6 @@ require 'erb'
 
 require 'sidekiq'
 require 'sidekiq/util'
-require 'sidekiq/launcher'
 
 module Sidekiq
   class CLI
@@ -90,6 +89,7 @@ module Sidekiq
         logger.info 'Starting processing, hit Ctrl-C to stop'
       end
 
+      require 'sidekiq/launcher'
       @launcher = Sidekiq::Launcher.new(options)
       launcher.procline(options[:tag] ? "#{options[:tag]} " : '')
 
@@ -121,6 +121,8 @@ module Sidekiq
     private
 
     def load_celluloid
+      raise "Celluloid cannot be required until here, or it will break Sidekiq's daemonization" if defined?(::Celluloid)
+
       # Celluloid can't be loaded until after we've daemonized
       # because it spins up threads and creates locks which get
       # into a very bad state if forked.
