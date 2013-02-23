@@ -2,6 +2,7 @@
 -----------
 
 - Refactor signal handling to work on Ruby 2.0 [#728, #730]
+- Fix dashboard refresh URL
 
 2.7.4
 -----------
