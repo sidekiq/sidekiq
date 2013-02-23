@@ -1,3 +1,8 @@
+2.7.5
+-----------
+
+- Refactor signal handling to work on Ruby 2.0 [#728, #730]
+
 2.7.4
 -----------
 

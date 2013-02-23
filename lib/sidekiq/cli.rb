@@ -1,42 +1,11 @@
-trap 'INT' do
-  if Sidekiq.options[:profile]
-    result = RubyProf.stop
-    printer = RubyProf::GraphHtmlPrinter.new(result)
-    File.open("profile.html", 'w') do |f|
-      printer.print(f, :min_percent => 1)
-    end
-  end
-  # Handle Ctrl-C in JRuby like MRI
-  # http://jira.codehaus.org/browse/JRUBY-4637
-  Sidekiq::CLI.instance.interrupt
-end
+$sidekiq_signals = []
 
-trap 'TERM' do
-  # Heroku sends TERM and then waits 10 seconds for process to exit.
-  Sidekiq::CLI.instance.interrupt
-end
-
-trap 'USR1' do
-  Sidekiq.logger.info "Received USR1, no longer accepting new work"
-  mgr = Sidekiq::CLI.instance.launcher.manager
-  mgr.async.stop if mgr
-end
-
-trap 'USR2' do
-  if Sidekiq.options[:logfile]
-    Sidekiq.logger.info "Received USR2, reopening log file"
-    Sidekiq::Logging.initialize_logger(Sidekiq.options[:logfile])
-  end
-end
-
-trap 'TTIN' do
-  Thread.list.each do |thread|
-    Sidekiq.logger.info "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
-    if thread.backtrace
-      Sidekiq.logger.info thread.backtrace.join("\n")
-    else
-      Sidekiq.logger.info "<no backtrace available>"
-    end
+# Signal handlers should do as little as humanly possible
+# and defer all work to a non-trap context.  We'll have
+# the main thread poll for signals and handle them there.
+%w(INT TERM USR1 USR2 TTIN).each do |sig|
+  trap sig do
+    $sidekiq_signals << sig
   end
 end
 
@@ -99,7 +68,11 @@ module Sidekiq
           RubyProf.start
         end
         launcher.run
-        sleep
+
+        while true
+          handle_signals
+          sleep 1
+        end
       rescue Interrupt
         logger.info 'Shutting down'
         launcher.stop
@@ -109,11 +82,41 @@ module Sidekiq
       end
     end
 
-    def interrupt
-      @interrupt_mutex.synchronize do
-        unless @interrupted
-          @interrupted = true
-          Thread.main.raise Interrupt
+    def handle_signals
+      while sig = $sidekiq_signals.shift
+        Sidekiq.logger.debug "Got #{sig} signal"
+        case sig
+        when 'INT'
+          if Sidekiq.options[:profile]
+            result = RubyProf.stop
+            printer = RubyProf::GraphHtmlPrinter.new(result)
+            File.open("profile.html", 'w') do |f|
+              printer.print(f, :min_percent => 1)
+            end
+          end
+          # Handle Ctrl-C in JRuby like MRI
+          # http://jira.codehaus.org/browse/JRUBY-4637
+          raise Interrupt
+        when 'TERM'
+          # Heroku sends TERM and then waits 10 seconds for process to exit.
+          raise Interrupt
+        when 'USR1'
+          Sidekiq.logger.info "Received USR1, no longer accepting new work"
+          launcher.manager.async.stop
+        when 'USR2'
+          if Sidekiq.options[:logfile]
+            Sidekiq.logger.info "Received USR2, reopening log file"
+            Sidekiq::Logging.initialize_logger(Sidekiq.options[:logfile])
+          end
+        when 'TTIN'
+          Thread.list.each do |thread|
+            Sidekiq.logger.info "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
+            if thread.backtrace
+              Sidekiq.logger.info thread.backtrace.join("\n")
+            else
+              Sidekiq.logger.info "<no backtrace available>"
+            end
+          end
         end
       end
     end
