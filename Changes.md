@@ -1,8 +1,9 @@
 2.7.5
 -----------
 
+- Capistrano no longer uses daemonization in order to work with JRuby [#719]
 - Refactor signal handling to work on Ruby 2.0 [#728, #730]
-- Fix dashboard refresh URL
+- Fix dashboard refresh URL [#732]
 
 2.7.4
 -----------
