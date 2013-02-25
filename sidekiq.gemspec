@@ -5,7 +5,7 @@ Gem::Specification.new do |gem|
   gem.authors       = ["Mike Perham"]
   gem.email         = ["mperham@gmail.com"]
   gem.description   = gem.summary = "Simple, efficient message processing for Ruby"
-  gem.homepage      = "http://mperham.github.com/sidekiq"
+  gem.homepage      = "http://sidekiq.org"
   gem.license       = "LGPL-3.0"
 
   gem.executables   = ['sidekiq', 'sidekiqctl']
@@ -14,7 +14,6 @@ Gem::Specification.new do |gem|
   gem.name          = "sidekiq"
   gem.require_paths = ["lib"]
   gem.version       = Sidekiq::VERSION
-  gem.cert_chain    = ['.public_cert.pem']
   gem.add_dependency                  'redis', '~> 3'
   gem.add_dependency                  'redis-namespace'
   gem.add_dependency                  'connection_pool', '~> 1.0'
