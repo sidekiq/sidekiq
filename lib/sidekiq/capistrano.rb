@@ -36,7 +36,7 @@ Capistrano::Configuration.instance.load do
     task :start, :roles => lambda { fetch(:sidekiq_role) }, :on_no_matching_servers => :continue do
       rails_env = fetch(:rails_env, "production")
       for_each_process do |pid_file, idx|
-        run "cd #{current_path} ; #{fetch(:sidekiq_cmd)} -d -e #{rails_env} -C #{current_path}/config/sidekiq.yml -i #{idx} -P #{pid_file} -L #{current_path}/log/sidekiq.log", :pty => false
+        run "cd #{current_path} ; nohup #{fetch(:sidekiq_cmd)} -e #{rails_env} -C #{current_path}/config/sidekiq.yml -i #{idx} -P #{pid_file} >> #{current_path}/log/sidekiq.log 2>&1 &", :pty => false
       end
     end
 
