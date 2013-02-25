@@ -167,7 +167,7 @@ module Sidekiq
     end
 
     def set_environment(cli_env)
-      @environment = cli_env || ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
+      @environment = cli_env || ENV['RAILS_ENV'] || ENV['PADRINO_ENV'] || ENV['RACK_ENV'] || 'development'
     end
 
     def die(code)
@@ -189,15 +189,25 @@ module Sidekiq
     end
 
     def boot_system
-      ENV['RACK_ENV'] = ENV['RAILS_ENV'] = environment
+      ENV['RACK_ENV'] = ENV['RAILS_ENV'] = ENV['PADRINO_ENV'] = environment
 
       raise ArgumentError, "#{options[:require]} does not exist" unless File.exist?(options[:require])
 
       if File.directory?(options[:require])
-        require 'rails'
-        require 'sidekiq/rails'
-        require File.expand_path("#{options[:require]}/config/environment.rb")
-        ::Rails.application.eager_load!
+        # FIXME Ugly hack to tell if it's a Padrino app
+        # Perhaps we could support multiple app environments? I.e., Padrino/Rails/Sinatra/etc.?
+        if File.exists?("#{options[:require]}/config/boot.rb")
+          # Padrino
+          require 'sidekiq/padrino'
+          require File.expand_path("#{options[:require]}/config/boot.rb")
+          Sidekiq.hook_padrino!
+        else
+          # Rails
+          require 'rails'
+          require 'sidekiq/rails'
+          require File.expand_path("#{options[:require]}/config/environment.rb")
+          ::Rails.application.eager_load!
+        end
         options[:tag] ||= default_tag
       else
         require options[:require]
@@ -205,7 +215,8 @@ module Sidekiq
     end
 
     def default_tag
-      dir = ::Rails.root
+      # FIXME Extract into root method?
+      dir = defined?(Rails) ? ::Rails.root : (defined?(Padrino) ? ::Padrino.root : nil)
       name = File.basename(dir)
       if name.to_i != 0 && prevdir = File.dirname(dir) # Capistrano release directory?
         if File.basename(prevdir) == 'releases'
@@ -219,9 +230,9 @@ module Sidekiq
       options[:queues] << 'default' if options[:queues].empty?
 
       if !File.exist?(options[:require]) ||
-         (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))
+         (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb") && !File.exist?("#{options[:require]}/config/boot.rb"))
         logger.info "=================================================================="
-        logger.info "  Please point sidekiq to a Rails 3 application or a Ruby file    "
+        logger.info "  Please point sidekiq to a Rails 3 or Padrino application or a Ruby file    "
         logger.info "  to load your worker classes with -r [DIR|FILE]."
         logger.info "=================================================================="
         logger.info @parser
