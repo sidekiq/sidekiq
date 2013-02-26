@@ -11,6 +11,7 @@ require 'sidekiq/extensions/class_methods'
 require 'sidekiq/extensions/action_mailer'
 require 'sidekiq/extensions/active_record'
 require 'sidekiq/frameworks/rails' if defined?(::Rails::Engine)
+require 'sidekiq/frameworks/padrino' if defined?(::Padrino)
 
 require 'multi_json'
 
