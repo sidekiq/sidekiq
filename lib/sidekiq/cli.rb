@@ -18,6 +18,7 @@ require 'erb'
 
 require 'sidekiq'
 require 'sidekiq/util'
+require 'sidekiq/framework'
 
 module Sidekiq
   class CLI
@@ -194,20 +195,7 @@ module Sidekiq
       raise ArgumentError, "#{options[:require]} does not exist" unless File.exist?(options[:require])
 
       if File.directory?(options[:require])
-        # FIXME Ugly hack to tell if it's a Padrino app
-        # Perhaps we could support multiple app environments? I.e., Padrino/Rails/Sinatra/etc.?
-        if File.exists?("#{options[:require]}/config/boot.rb")
-          # Padrino
-          require 'sidekiq/padrino'
-          require File.expand_path("#{options[:require]}/config/boot.rb")
-          Sidekiq.hook_padrino!
-        else
-          # Rails
-          require 'rails'
-          require 'sidekiq/rails'
-          require File.expand_path("#{options[:require]}/config/environment.rb")
-          ::Rails.application.eager_load!
-        end
+        Sidekiq.hook_framework!(options[:require])
         options[:tag] ||= default_tag
       else
         require options[:require]
@@ -215,8 +203,7 @@ module Sidekiq
     end
 
     def default_tag
-      # FIXME Extract into root method?
-      dir = defined?(Rails) ? ::Rails.root : (defined?(Padrino) ? ::Padrino.root : nil)
+      dir = Sidekiq.framework_root(options[:require])
       name = File.basename(dir)
       if name.to_i != 0 && prevdir = File.dirname(dir) # Capistrano release directory?
         if File.basename(prevdir) == 'releases'
@@ -230,10 +217,10 @@ module Sidekiq
       options[:queues] << 'default' if options[:queues].empty?
 
       if !File.exist?(options[:require]) ||
-         (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb") && !File.exist?("#{options[:require]}/config/boot.rb"))
+         (File.directory?(options[:require]) && !Framework.is_padrino?(options[:require]) && !Framework.is_rails?(options[:require]))
         logger.info "=================================================================="
-        logger.info "  Please point sidekiq to a Rails 3 or Padrino application or a Ruby file    "
-        logger.info "  to load your worker classes with -r [DIR|FILE]."
+        logger.info "  Please point sidekiq to a Rails 3 or Padrino application or a   "
+        logger.info "  Ruby file to load your worker classes with -r [DIR|FILE].       "
         logger.info "=================================================================="
         logger.info @parser
         die(1)
@@ -273,7 +260,7 @@ module Sidekiq
           parse_queues opts, queues_and_weights
         end
 
-        o.on '-r', '--require [PATH|DIR]', "Location of Rails application with workers or file to require" do |arg|
+        o.on '-r', '--require [PATH|DIR]', "Location of Rails or Padrino application with workers or file to require" do |arg|
           opts[:require] = arg
         end
 
