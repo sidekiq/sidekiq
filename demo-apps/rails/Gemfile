@@ -10,7 +10,7 @@ platforms :jruby do
 end
 
 gem 'rails', '3.2.11'
-gem 'sidekiq', :path => '..'
+gem 'sidekiq', :path => '../..'
 gem 'capistrano'
 
 # sidekiq-web dependencies
