@@ -84,9 +84,13 @@ module Sidekiq
 
       Sidekiq.redis do |conn|
         jobs_to_requeue.each do |queue, jobs|
+          unless Sidekiq.options[:namespace].nil?
+            queue = queue.gsub(/#{Sidekiq.options[:namespace]}:/,'') 
+          end          
           conn.rpush(queue, jobs)
         end
       end
+
       Sidekiq.logger.info("Pushed #{inprogress.size} messages back to Redis")
     end
 
@@ -99,9 +103,14 @@ module Sidekiq
         queue.gsub(/.*queue:/, '')
       end
 
+      def requeue_name
+        return queue if Sidekiq.options[:namespace].nil?
+        queue.gsub(/#{Sidekiq.options[:namespace]}:/,'') 
+      end
+
       def requeue
-        Sidekiq.redis do |conn|
-          conn.rpush(queue, message)
+        Sidekiq.redis do |conn|  
+          conn.rpush(requeue_name, message)
         end
       end
     end
