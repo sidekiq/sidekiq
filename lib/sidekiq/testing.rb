@@ -60,7 +60,7 @@ module Sidekiq
 
       def client_push(opts)
         jobs << opts
-        true
+        jobs.size-1
       end
 
       # Jobs queued for this worker
