@@ -78,13 +78,13 @@ module Sidekiq
       Sidekiq.logger.debug { "Re-queueing terminated jobs" }
       jobs_to_requeue = {}
       inprogress.each do |unit_of_work|
-        jobs_to_requeue[unit_of_work.queue] ||= []
-        jobs_to_requeue[unit_of_work.queue] << unit_of_work.message
+        jobs_to_requeue[unit_of_work.queue_name] ||= []
+        jobs_to_requeue[unit_of_work.queue_name] << unit_of_work.message
       end
 
       Sidekiq.redis do |conn|
         jobs_to_requeue.each do |queue, jobs|
-          conn.rpush(queue, jobs)
+          conn.rpush("queue:#{queue}", jobs)
         end
       end
       Sidekiq.logger.info("Pushed #{inprogress.size} messages back to Redis")
@@ -101,7 +101,7 @@ module Sidekiq
 
       def requeue
         Sidekiq.redis do |conn|
-          conn.rpush(queue, message)
+          conn.rpush("queue:#{queue_name}", message)
         end
       end
     end
