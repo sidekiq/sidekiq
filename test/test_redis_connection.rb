@@ -11,21 +11,8 @@ class TestRedisConnection < MiniTest::Unit::TestCase
     end
 
     describe "namespace" do
-      before do
-        Sidekiq.options[:namespace] = "xxx"
-      end
-
-      after do
-        Sidekiq.options[:namespace] = nil
-      end
-
       it "uses a given :namespace" do
         pool = Sidekiq::RedisConnection.create(:namespace => "xxx")
-        assert_equal "xxx", pool.checkout.namespace
-      end
-
-      it "uses :namespace from Sidekiq.options" do
-        pool = Sidekiq::RedisConnection.create
         assert_equal "xxx", pool.checkout.namespace
       end
 
@@ -34,7 +21,6 @@ class TestRedisConnection < MiniTest::Unit::TestCase
         pool = Sidekiq::RedisConnection.create(:namespace => "yyy")
         assert_equal "yyy", pool.checkout.namespace
       end
-
     end
   end
 

@@ -1,3 +1,16 @@
+2.8.0
+-----------
+
+- Refactor Redis namespace support [#747].  The redis namespace can no longer be
+  passed via the config file, the only supported way is via Ruby in your
+  initializer:
+
+```ruby
+sidekiq_redis = { :url => 'redis://localhost:3679', :namespace => 'foo' }
+Sidekiq.configure_server { |config| config.redis = sidekiq_redis }
+Sidekiq.configure_client { |config| config.redis = sidekiq_redis }
+```
+
 2.7.5
 -----------
 

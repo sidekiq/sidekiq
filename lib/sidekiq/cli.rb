@@ -325,6 +325,11 @@ module Sidekiq
         # allow a non-existent config file so Sidekiq
         # can be deployed by cap with just the defaults.
       end
+      ns = opts.delete(:namespace)
+      if ns
+        Sidekiq.logger.warn("namespace should be set in your ruby initializer, is ignored in config file")
+        Sidekiq.logger.warn("config.redis = { :url => ..., :namespace => '#{ns}' }")
+      end
       opts
     end
 
