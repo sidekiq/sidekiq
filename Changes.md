@@ -1,6 +1,8 @@
 2.8.0
 -----------
 
+- Fix bug which could lose messages when using namespaces and the message
+needs to be requeued in Redis. [#744]
 - Refactor Redis namespace support [#747].  The redis namespace can no longer be
   passed via the config file, the only supported way is via Ruby in your
   initializer:
@@ -10,6 +12,9 @@ sidekiq_redis = { :url => 'redis://localhost:3679', :namespace => 'foo' }
 Sidekiq.configure_server { |config| config.redis = sidekiq_redis }
 Sidekiq.configure_client { |config| config.redis = sidekiq_redis }
 ```
+
+A warning is printed out to the log if a namespace is found in your sidekiq.yml.
+
 
 2.7.5
 -----------
