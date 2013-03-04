@@ -1,6 +1,9 @@
 2.8.0
 -----------
 
+- I18n support!  Sidekiq can optionally save and restore the Rails locale
+  so it will be properly set when your jobs execute.  Just include
+  `require 'sidekiq/middleware/i18n'` in your sidekiq initializer. [#750]
 - Fix bug which could lose messages when using namespaces and the message
 needs to be requeued in Redis. [#744]
 - Refactor Redis namespace support [#747].  The redis namespace can no longer be

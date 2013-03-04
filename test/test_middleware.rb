@@ -99,4 +99,28 @@ class TestMiddleware < MiniTest::Unit::TestCase
       assert_equal [], recorder
     end
   end
+
+  describe 'i18n' do
+    before do
+      require 'i18n'
+      require 'sidekiq/middleware/i18n'
+    end
+
+    it 'saves and restores locale' do
+      I18n.locale = 'fr'
+      msg = {}
+      mw = Sidekiq::Middleware::I18n::Client.new
+      mw.call(nil, msg, nil) { }
+      assert_equal :fr, msg['locale']
+
+      msg['locale'] = 'jp'
+      I18n.locale = nil
+      assert_equal :en, I18n.locale
+      mw = Sidekiq::Middleware::I18n::Server.new
+      mw.call(nil, msg, nil) do
+        assert_equal :jp, I18n.locale
+      end
+      assert_equal :en, I18n.locale
+    end
+  end
 end
