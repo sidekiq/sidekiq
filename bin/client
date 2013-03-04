@@ -1,7 +1,0 @@
-#!/usr/bin/env ruby
-
-require 'sidekiq'
-
-10.times do
-  Sidekiq::Client.push('class' => 'HardWorker', 'args' => ['bob', 1])
-end
