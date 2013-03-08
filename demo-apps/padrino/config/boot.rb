@@ -34,13 +34,13 @@ Bundler.require(:default, PADRINO_ENV)
 # Add your before (RE)load hooks here
 #
 Padrino.before_load do
-  Dir[File.join(PADRINO_ROOT, 'app', 'workers', '*.rb')].each {|f| require f}
 end
 
 ##
 # Add your after (RE)load hooks here
 #
 Padrino.after_load do
+  ::ActiveRecord::Base.send(:include, Sidekiq::Extensions::ActiveRecord)
 end
 
 Padrino.load!

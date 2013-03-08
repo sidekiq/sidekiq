@@ -1,14 +1,5 @@
 module Sidekiq
   def self.hook_padrino!
-    if defined?(::ActiveRecord)
-      ::ActiveRecord::Base.send(:include, Sidekiq::Extensions::ActiveRecord)
-    end
-
-    # Do this for Padrino mailer?
-    # if defined?(::ActionMailer)
-    #   ::ActionMailer::Base.extend(Sidekiq::Extensions::ActionMailer)
-    # end
-
     # Load Sidekiq workers if any
     ::Padrino.require_dependencies Dir[::Padrino.root('app', 'workers', '**', '*.rb')] if File.exist?(::Padrino.root('app', 'workers'))
 
@@ -16,6 +7,13 @@ module Sidekiq
     ::Padrino.mounted_apps.each do |app|
       puts "=> Loading Application #{app.app_class}"
       app.app_obj.setup_application!
+    end
+
+    # FIXME For some reason this isn't making it there!..
+    # We need to tell why... :(
+    # At the moment the solution is to put it on an after_load!
+    if defined?(::ActiveRecord)
+      ::ActiveRecord::Base.send(:include, Sidekiq::Extensions::ActiveRecord)
     end
   end
 end

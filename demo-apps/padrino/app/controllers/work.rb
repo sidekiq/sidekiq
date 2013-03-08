@@ -8,7 +8,7 @@ PadrinoApp::App.controllers :work do
   end
 
   get :email do
-    UserMailer.delay_for(30.seconds).greetings(Time.now)
+    PadrinoApp::App.delay_for(30.seconds).deliver(:the_messenger, :greetings, Time.now)
     'enqueued'
   end
 
@@ -30,7 +30,7 @@ PadrinoApp::App.controllers :work do
       p = Post.create!(:title => "Title!", :body => 'Body!')
       p2 = Post.create!(:title => "Other!", :body => 'Second Body!')
     else
-      p2 = Post.second
+      p2 = Post.first(2).last
     end
     p.delay.long_method(p2)
     'enqueued'
