@@ -6,3 +6,4 @@ dump.rdb
 .rbx
 coverage/
 .sass-cache/
+demo-apps/padrino/Gemfile.lock
