@@ -168,7 +168,7 @@ module Sidekiq
     end
 
     def set_environment(cli_env)
-      @environment = cli_env || ENV['RAILS_ENV'] || ENV['PADRINO_ENV'] || ENV['RACK_ENV'] || 'development'
+      @environment = cli_env || ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
     end
 
     def die(code)
@@ -195,7 +195,7 @@ module Sidekiq
       raise ArgumentError, "#{options[:require]} does not exist" unless File.exist?(options[:require])
 
       if File.directory?(options[:require])
-        Sidekiq.hook_framework!(options[:require])
+        Sidekiq::Framework.hook!(options[:require])
         options[:tag] ||= default_tag
       else
         require options[:require]
@@ -203,7 +203,7 @@ module Sidekiq
     end
 
     def default_tag
-      dir = Sidekiq.framework_root(options[:require])
+      dir = Sidekiq::Framework.root(options[:require])
       name = File.basename(dir)
       if name.to_i != 0 && prevdir = File.dirname(dir) # Capistrano release directory?
         if File.basename(prevdir) == 'releases'
@@ -217,7 +217,7 @@ module Sidekiq
       options[:queues] << 'default' if options[:queues].empty?
 
       if !File.exist?(options[:require]) ||
-         (File.directory?(options[:require]) && !Framework.is_padrino?(options[:require]) && !Framework.is_rails?(options[:require]))
+         (File.directory?(options[:require]) && !Sidekiq::Framework.root?(options[:require]))
         logger.info "=================================================================="
         logger.info "  Please point sidekiq to a Rails 3 or Padrino application or a   "
         logger.info "  Ruby file to load your worker classes with -r [DIR|FILE].       "

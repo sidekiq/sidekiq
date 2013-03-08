@@ -10,6 +10,34 @@ module Sidekiq
       end
     end
 
+    def self.hook!(path)
+      case @framework ||= which_is_it?(path)
+      when :padrino
+        require 'sidekiq/frameworks/padrino'
+        require File.expand_path("#{path}/config/boot.rb")
+        Sidekiq::Framework::Padrino.hook!
+      when :rails
+        require 'rails'
+        require 'sidekiq/frameworks/rails'
+        require File.expand_path("#{path}/config/environment.rb")
+        ::Rails.application.eager_load!
+      # when :sinatra
+      end
+    end
+
+    def self.root(path)
+      case @framework ||= which_is_it?(path)
+      when :padrino
+        ::Padrino.root if defined?(::Padrino)
+      when :rails
+        ::Rails.root if defined?(::Rails)
+      end
+    end
+
+    def self.root?(path)
+      is_padrino?(path) || is_rails?(path)
+    end
+
     def self.is_padrino?(path='.')
       find :padrino, files(path, [File.join('config', 'boot.rb')])
     end
@@ -35,29 +63,5 @@ module Sidekiq
       def self.files(path, list)
         list.map { |f| Dir[File.join(path, f)] }.flatten
       end
-  end
-
-  def self.hook_framework!(dir)
-    case @framework ||= Framework.which_is_it?(dir)
-    when :padrino
-      require 'sidekiq/frameworks/padrino'
-      require File.expand_path("#{dir}/config/boot.rb")
-      Sidekiq.hook_padrino!
-    when :rails
-      require 'rails'
-      require 'sidekiq/frameworks/rails'
-      require File.expand_path("#{dir}/config/environment.rb")
-      ::Rails.application.eager_load!
-    # when :sinatra
-    end
-  end
-
-  def self.framework_root(dir)
-    case @framework ||= Framework.which_is_it?(dir)
-    when :padrino
-      ::Padrino.root if defined?(::Padrino)
-    when :rails
-      ::Rails.root if defined?(::Rails)
-    end
   end
 end
