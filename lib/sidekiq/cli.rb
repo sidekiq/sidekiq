@@ -20,8 +20,6 @@ module Sidekiq
 
     def initialize
       @code = nil
-      @interrupt_mutex = Mutex.new
-      @interrupted = false
     end
 
     def parse(args=ARGV)
