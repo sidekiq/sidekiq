@@ -1,14 +1,3 @@
-$sidekiq_signals = []
-
-# Signal handlers should do as little as humanly possible
-# and defer all work to a non-trap context.  We'll have
-# the main thread poll for signals and handle them there.
-%w(INT TERM USR1 USR2 TTIN).each do |sig|
-  trap sig do
-    $sidekiq_signals << sig
-  end
-end
-
 $stdout.sync = true
 
 require 'yaml'
@@ -31,8 +20,6 @@ module Sidekiq
 
     def initialize
       @code = nil
-      @interrupt_mutex = Mutex.new
-      @interrupted = false
     end
 
     def parse(args=ARGV)
@@ -48,6 +35,14 @@ module Sidekiq
     end
 
     def run
+      self_read, self_write = IO.pipe
+
+      %w(INT TERM USR1 USR2 TTIN).each do |sig|
+        trap sig do
+          self_write.puts(sig)
+        end
+      end
+
       logger.info "Booting Sidekiq #{Sidekiq::VERSION} with Redis at #{redis {|x| x.client.id}}"
       logger.info "Running in #{RUBY_DESCRIPTION}"
       logger.info Sidekiq::LICENSE
@@ -69,9 +64,9 @@ module Sidekiq
         end
         launcher.run
 
-        while true
-          handle_signals
-          sleep 1
+        while readable_io = IO.select([self_read])
+          signal = readable_io.first[0].gets.strip
+          handle_signal(signal)
         end
       rescue Interrupt
         logger.info 'Shutting down'
@@ -82,46 +77,44 @@ module Sidekiq
       end
     end
 
-    def handle_signals
-      while sig = $sidekiq_signals.shift
-        Sidekiq.logger.debug "Got #{sig} signal"
-        case sig
-        when 'INT'
-          if Sidekiq.options[:profile]
-            result = RubyProf.stop
-            printer = RubyProf::GraphHtmlPrinter.new(result)
-            File.open("profile.html", 'w') do |f|
-              printer.print(f, :min_percent => 1)
-            end
+    private
+
+    def handle_signal(sig)
+      Sidekiq.logger.debug "Got #{sig} signal"
+      case sig
+      when 'INT'
+        if Sidekiq.options[:profile]
+          result = RubyProf.stop
+          printer = RubyProf::GraphHtmlPrinter.new(result)
+          File.open("profile.html", 'w') do |f|
+            printer.print(f, :min_percent => 1)
           end
-          # Handle Ctrl-C in JRuby like MRI
-          # http://jira.codehaus.org/browse/JRUBY-4637
-          raise Interrupt
-        when 'TERM'
-          # Heroku sends TERM and then waits 10 seconds for process to exit.
-          raise Interrupt
-        when 'USR1'
-          Sidekiq.logger.info "Received USR1, no longer accepting new work"
-          launcher.manager.async.stop
-        when 'USR2'
-          if Sidekiq.options[:logfile]
-            Sidekiq.logger.info "Received USR2, reopening log file"
-            Sidekiq::Logging.initialize_logger(Sidekiq.options[:logfile])
-          end
-        when 'TTIN'
-          Thread.list.each do |thread|
-            Sidekiq.logger.info "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
-            if thread.backtrace
-              Sidekiq.logger.info thread.backtrace.join("\n")
-            else
-              Sidekiq.logger.info "<no backtrace available>"
-            end
+        end
+        # Handle Ctrl-C in JRuby like MRI
+        # http://jira.codehaus.org/browse/JRUBY-4637
+        raise Interrupt
+      when 'TERM'
+        # Heroku sends TERM and then waits 10 seconds for process to exit.
+        raise Interrupt
+      when 'USR1'
+        Sidekiq.logger.info "Received USR1, no longer accepting new work"
+        launcher.manager.async.stop
+      when 'USR2'
+        if Sidekiq.options[:logfile]
+          Sidekiq.logger.info "Received USR2, reopening log file"
+          Sidekiq::Logging.initialize_logger(Sidekiq.options[:logfile])
+        end
+      when 'TTIN'
+        Thread.list.each do |thread|
+          Sidekiq.logger.info "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
+          if thread.backtrace
+            Sidekiq.logger.info thread.backtrace.join("\n")
+          else
+            Sidekiq.logger.info "<no backtrace available>"
           end
         end
       end
     end
-
-    private
 
     def load_celluloid
       raise "Celluloid cannot be required until here, or it will break Sidekiq's daemonization" if defined?(::Celluloid) && options[:daemon]
