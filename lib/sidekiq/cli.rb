@@ -1,14 +1,3 @@
-$self_read, $self_write = IO.pipe
-
-# Signal handlers should do as little as humanly possible
-# and defer all work to a non-trap context.  We'll have
-# the main thread poll for signals and handle them there.
-%w(INT TERM USR1 USR2 TTIN).each do |sig|
-  trap sig do
-    $self_write.puts(sig)
-  end
-end
-
 $stdout.sync = true
 
 require 'yaml'
@@ -48,6 +37,14 @@ module Sidekiq
     end
 
     def run
+      self_read, self_write = IO.pipe
+
+      %w(INT TERM USR1 USR2 TTIN).each do |sig|
+        trap sig do
+          self_write.puts(sig)
+        end
+      end
+
       logger.info "Booting Sidekiq #{Sidekiq::VERSION} with Redis at #{redis {|x| x.client.id}}"
       logger.info "Running in #{RUBY_DESCRIPTION}"
       logger.info Sidekiq::LICENSE
@@ -69,7 +66,7 @@ module Sidekiq
         end
         launcher.run
 
-        while readable_io = IO.select([$self_read])
+        while readable_io = IO.select([self_read])
           signal = readable_io.first[0].gets.strip
           handle_signal(signal)
         end
@@ -81,6 +78,8 @@ module Sidekiq
         exit(0)
       end
     end
+
+    private
 
     def handle_signal(sig)
       Sidekiq.logger.debug "Got #{sig} signal"
@@ -118,8 +117,6 @@ module Sidekiq
         end
       end
     end
-
-    private
 
     def load_celluloid
       raise "Celluloid cannot be required until here, or it will break Sidekiq's daemonization" if defined?(::Celluloid) && options[:daemon]
