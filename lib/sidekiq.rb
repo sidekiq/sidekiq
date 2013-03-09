@@ -75,7 +75,6 @@ module Sidekiq
   def self.redis=(hash)
     if hash.is_a?(Hash)
       @redis = RedisConnection.create(hash)
-      options[:namespace] ||= hash[:namespace]
     elsif hash.is_a?(ConnectionPool)
       @redis = hash
     else
