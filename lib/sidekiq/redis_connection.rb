@@ -26,9 +26,14 @@ module Sidekiq
 
     # Not public
     def self.determine_redis_provider
-      return ENV['REDISTOGO_URL'] if ENV['REDISTOGO_URL']
-      provider = ENV['REDIS_PROVIDER'] || 'REDIS_URL'
-      ENV[provider]
+      if redis_to_go = ENV['REDISTOGO_URL']
+        redis_to_go
+      elsif redis_cloud = ENV['REDISCLOUD_URL']
+        redis_cloud
+      else
+        provider = ENV['REDIS_PROVIDER'] || 'REDIS_URL'
+        ENV[provider]
+      end
     end
   end
 end
