@@ -26,6 +26,7 @@ module Sidekiq
 
     # Not public
     def self.determine_redis_provider
+      # REDISTOGO_URL is only support for legacy reasons
       return ENV['REDISTOGO_URL'] if ENV['REDISTOGO_URL']
       provider = ENV['REDIS_PROVIDER'] || 'REDIS_URL'
       ENV[provider]
