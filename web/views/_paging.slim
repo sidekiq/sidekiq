@@ -12,4 +12,4 @@
         li
           a href="#{url}?page=#{@current_page + 1}" #{@current_page + 1}
       li class="#{'disabled' if @total_size <= @current_page * @count}"
-        a href="#{url}?page=#{(@total_size / @count).ceil + 1}" »
+        a href="#{url}?page=#{(@total_size.to_f / @count).ceil}" »
