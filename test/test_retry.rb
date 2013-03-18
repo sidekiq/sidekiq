@@ -167,6 +167,18 @@ class TestRetry < MiniTest::Unit::TestCase
       # MiniTest can't assert that a method call did NOT happen!?
       assert_raises(MockExpectationError) { @redis.verify }
     end
+
+    it 'calls exhausted method on worker after too many retries if available' do
+      msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>Time.now.utc, "retry"=>3, "retry_count"=>3}
+      worker = MiniTest::Mock.new
+      worker.expect :exhausted, true, [1, 2, "foo"]
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      assert_raises RuntimeError do
+        handler.call(worker, msg, 'default') do
+          raise "kerblammo!"
+        end
+      end
+    end
   end
 
   describe 'poller' do
