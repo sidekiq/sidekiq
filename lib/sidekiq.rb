@@ -27,7 +27,7 @@ module Sidekiq
     :profile => false,
   }
 
-  def self.❨╯°□°❩╯︵ ┻━┻
+  def self.❨╯°□°❩╯︵┻━┻
     puts "Calm down, bro"
   end
 

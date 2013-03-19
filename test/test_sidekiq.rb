@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'helper'
 
 class TestSidekiq < MiniTest::Unit::TestCase
@@ -24,4 +25,13 @@ class TestSidekiq < MiniTest::Unit::TestCase
   	end
   end
 
+  describe "❨╯°□°❩╯︵┻━┻" do
+    before { $stdout = StringIO.new }
+    after  { $stdout = STDOUT }
+
+    it "allows angry developers to express their emotional constitution and remedies it" do
+      Sidekiq.❨╯°□°❩╯︵┻━┻
+      assert_equal "Calm down, bro\n", $stdout.string
+    end
+  end
 end
