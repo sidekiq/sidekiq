@@ -93,7 +93,7 @@ module Sidekiq
           logger.debug { "Dropping message after hitting the retry maximum: #{msg}" }
           worker.retries_exhausted(*msg['args']) if worker.respond_to?(:retries_exhausted)
 
-        rescue Exception => e
+        rescue => e
           logger.debug { "Failure during `retries_exhausted` hook: #{e} - #{msg}" }
         end
 
