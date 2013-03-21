@@ -174,8 +174,9 @@ class TestRetry < MiniTest::Unit::TestCase
       let(:msg){ {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>Time.now.utc, "retry"=>3, "retry_count"=>3} }
 
       it 'calls worker retries_exhausted after too many retries' do
-        worker.expect(:retries_exhausted, true, [1,2,3]) 
+        worker.expect(:retries_exhausted, true, [1,2,"foo"]) 
         task_misbehaving_worker
+        worker.verify
       end
 
       it 'handles and logs retries_exhausted failures gracefully (drops them)' do
@@ -185,11 +186,12 @@ class TestRetry < MiniTest::Unit::TestCase
 
         e = task_misbehaving_worker
         assert_equal e.message, "kerblammo!"
+        worker.verify
       end
 
       def task_misbehaving_worker
         assert_raises RuntimeError do
-          handler.call('', msg, 'default') do
+          handler.call(worker, msg, 'default') do
             raise 'kerblammo!'
           end
         end
