@@ -14,8 +14,9 @@ module Sidekiq
       # 3. after a few days, a developer deploys a fix.  the message is
       #    reprocessed successfully.
       # 4. if 3 never happens, sidekiq will eventually give up and throw the
-      #    message away. If the worker defines a method called 'exhausted', this
-      #    will be called before throwing the message away.
+      #    message away. If the worker defines a method called 'retries_exhausted',
+      #    this will be called before throwing the message away. If the
+      #    'retries_exhausted' method throws an exception, it's dropped and logged.
       #
       # A message looks like:
       #
