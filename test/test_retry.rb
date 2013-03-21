@@ -168,14 +168,30 @@ class TestRetry < MiniTest::Unit::TestCase
       assert_raises(MockExpectationError) { @redis.verify }
     end
 
-    it 'calls exhausted method on worker after too many retries if available' do
-      msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>Time.now.utc, "retry"=>3, "retry_count"=>3}
-      worker = MiniTest::Mock.new
-      worker.expect :exhausted, true, [1, 2, "foo"]
-      handler = Sidekiq::Middleware::Server::RetryJobs.new
-      assert_raises RuntimeError do
-        handler.call(worker, msg, 'default') do
-          raise "kerblammo!"
+    describe "retry exhaustion" do
+      let(:worker){ MiniTest::Mock.new }
+      let(:handler){ Sidekiq::Middleware::Server::RetryJobs.new }
+      let(:msg){ {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>Time.now.utc, "retry"=>3, "retry_count"=>3} }
+
+      it 'calls worker retries_exhausted after too many retries' do
+        worker.expect(:retries_exhausted, true, [1,2,3]) 
+        task_misbehaving_worker
+      end
+
+      it 'handles and logs retries_exhausted failures gracefully (drops them)' do
+        def worker.retries_exhausted(*args)
+          raise 'bam!'
+        end
+
+        e = task_misbehaving_worker
+        assert_equal e.message, "kerblammo!"
+      end
+
+      def task_misbehaving_worker
+        assert_raises RuntimeError do
+          handler.call('', msg, 'default') do
+            raise 'kerblammo!'
+          end
         end
       end
     end

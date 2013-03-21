@@ -83,11 +83,18 @@ module Sidekiq
             end
           else
             # Goodbye dear message, you (re)tried your best I'm sure.
-            worker.exhausted(*msg['args']) if worker.respond_to?(:exhausted)
-            logger.debug { "Dropping message after hitting the retry maximum: #{msg}" }
+            retries_exhausted(msg)
           end
 
           raise e
+        end
+
+        def retries_exhausted(msg)
+          logger.debug { "Dropping message after hitting the retry maximum: #{msg}" }
+          worker.retries_exhausted(*msg['args']) if worker.respond_to?(:retries_exhausted)
+
+        rescue Exception => e
+          logger.debug { "Failure during `retries_exhausted` hook: #{e} - #{msg}" }
         end
 
         def retry_attempts_from(msg_retry, default)
