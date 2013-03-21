@@ -14,7 +14,9 @@ module Sidekiq
       # 3. after a few days, a developer deploys a fix.  the message is
       #    reprocessed successfully.
       # 4. if 3 never happens, sidekiq will eventually give up and throw the
-      #    message away.
+      #    message away. If the worker defines a method called 'retries_exhausted',
+      #    this will be called before throwing the message away. If the
+      #    'retries_exhausted' method throws an exception, it's dropped and logged.
       #
       # A message looks like:
       #
@@ -81,9 +83,18 @@ module Sidekiq
             end
           else
             # Goodbye dear message, you (re)tried your best I'm sure.
-            logger.debug { "Dropping message after hitting the retry maximum: #{msg}" }
+            retries_exhausted(msg)
           end
+
           raise e
+        end
+
+        def retries_exhausted(msg)
+          logger.debug { "Dropping message after hitting the retry maximum: #{msg}" }
+          worker.retries_exhausted(*msg['args']) if worker.respond_to?(:retries_exhausted)
+
+        rescue Exception => e
+          logger.debug { "Failure during `retries_exhausted` hook: #{e} - #{msg}" }
         end
 
         def retry_attempts_from(msg_retry, default)
