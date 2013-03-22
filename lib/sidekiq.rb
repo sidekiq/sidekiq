@@ -123,7 +123,7 @@ module Sidekiq
       conn.multi {
         queues.map { |q| conn.llen("queue:#{q}") }
       }
-    }.inject(0) { |memo, count| memo += count }
+    }.inject(0) { |memo, count| memo + count }
   end
 
 end

@@ -125,12 +125,10 @@ class TestClient < MiniTest::Unit::TestCase
       Sidekiq::Queue.new.clear
     end
     it 'can push a large set of jobs at once' do
-      a = Time.now
       count = Sidekiq::Client.push_bulk('class' => QueuedWorker, 'args' => (1..1_000).to_a.map { |x| Array(x) })
       assert_equal 1_000, count
     end
     it 'can push a large set of jobs at once using a String class' do
-      a = Time.now
       count = Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => (1..1_000).to_a.map { |x| Array(x) })
       assert_equal 1_000, count
     end
