@@ -272,7 +272,7 @@ class TestApi < MiniTest::Unit::TestCase
     it 'can enumerate workers' do
       w = Sidekiq::Workers.new
       assert_equal 0, w.size
-      w.each do |x, y|
+      w.each do
         assert false
       end
 

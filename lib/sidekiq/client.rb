@@ -6,7 +6,7 @@ module Sidekiq
   class Client
 
     def self.default_middleware
-      Middleware::Chain.new do |m|
+      Middleware::Chain.new do
       end
     end
 
@@ -64,7 +64,6 @@ module Sidekiq
         payload
       end.compact
 
-      pushed = false
       pushed = raw_push(normed, payloads)
       pushed ? payloads.size : nil
     end
