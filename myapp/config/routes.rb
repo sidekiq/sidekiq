@@ -7,4 +7,5 @@ Myapp::Application.routes.draw do
   get "work/post" => "work#delayed_post"
   get "work/long" => "work#long"
   get "work/crash" => "work#crash"
+  get "work/bulk" => "work#bulk"
 end

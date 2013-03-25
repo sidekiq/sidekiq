@@ -12,6 +12,12 @@ class WorkController < ApplicationController
     render :text => 'enqueued'
   end
 
+  def bulk
+    Sidekiq::Client.push_bulk('class' => HardWorker,
+                              'args' => [['bob', 1, 1], ['mike', 1, 2]])
+    render :text => 'enbulked'
+  end
+
   def long
     50.times do |x|
       HardWorker.perform_async('bob', 10, x)

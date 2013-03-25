@@ -81,10 +81,10 @@ class TestInline < MiniTest::Unit::TestCase
     end
 
     it 'stubs the push_bulk call when in testing mode' do
-      assert Sidekiq::Client.push_bulk({'class' => InlineWorker, 'args' => [true, true]})
+      assert Sidekiq::Client.push_bulk({'class' => InlineWorker, 'args' => [[true], [true]]})
 
       assert_raises InlineError do
-        Sidekiq::Client.push_bulk({'class' => InlineWorker, 'args' => [true, false]})
+        Sidekiq::Client.push_bulk({'class' => InlineWorker, 'args' => [[true], [false]]})
       end
     end
 

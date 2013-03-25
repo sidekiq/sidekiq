@@ -46,7 +46,7 @@ class TestClient < MiniTest::Unit::TestCase
     end
 
     it 'pushes messages to redis' do
-      @redis.expect :lpush, 1, ['queue:foo', String]
+      @redis.expect :lpush, 1, ['queue:foo', Array]
       pushed = Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1, 2])
       assert pushed
       assert_equal 24, pushed.size
@@ -54,7 +54,7 @@ class TestClient < MiniTest::Unit::TestCase
     end
 
     it 'pushes messages to redis using a String class' do
-      @redis.expect :lpush, 1, ['queue:foo', String]
+      @redis.expect :lpush, 1, ['queue:foo', Array]
       pushed = Sidekiq::Client.push('queue' => 'foo', 'class' => 'MyWorker', 'args' => [1, 2])
       assert pushed
       assert_equal 24, pushed.size
@@ -70,28 +70,28 @@ class TestClient < MiniTest::Unit::TestCase
     end
 
     it 'handles perform_async' do
-      @redis.expect :lpush, 1, ['queue:default', String]
+      @redis.expect :lpush, 1, ['queue:default', Array]
       pushed = MyWorker.perform_async(1, 2)
       assert pushed
       @redis.verify
     end
 
     it 'handles perform_async on failure' do
-      @redis.expect :lpush, nil, ['queue:default', String]
+      @redis.expect :lpush, nil, ['queue:default', Array]
       pushed = MyWorker.perform_async(1, 2)
       refute pushed
       @redis.verify
     end
 
     it 'enqueues messages to redis' do
-      @redis.expect :lpush, 1, ['queue:default', String]
+      @redis.expect :lpush, 1, ['queue:default', Array]
       pushed = Sidekiq::Client.enqueue(MyWorker, 1, 2)
       assert pushed
       @redis.verify
     end
 
     it 'enqueues messages to redis' do
-      @redis.expect :lpush, 1, ['queue:custom_queue', String]
+      @redis.expect :lpush, 1, ['queue:custom_queue', Array]
       pushed = Sidekiq::Client.enqueue_to(:custom_queue, MyWorker, 1, 2)
       assert pushed
       @redis.verify
@@ -103,7 +103,7 @@ class TestClient < MiniTest::Unit::TestCase
     end
 
     it 'enqueues to the named queue' do
-      @redis.expect :lpush, 1, ['queue:flimflam', String]
+      @redis.expect :lpush, 1, ['queue:flimflam', Array]
       pushed = QueuedWorker.perform_async(1, 2)
       assert pushed
       @redis.verify
@@ -176,11 +176,11 @@ class TestClient < MiniTest::Unit::TestCase
 
   describe 'item normalization' do
     it 'defaults retry to true' do
-      assert_equal true, Sidekiq::Client.normalize_item('class' => QueuedWorker, 'args' => [])['retry']
+      assert_equal true, Sidekiq::Client.send(:normalize_item, 'class' => QueuedWorker, 'args' => [])['retry']
     end
 
     it "does not normalize numeric retry's" do
-      assert_equal 2, Sidekiq::Client.normalize_item('class' => CWorker, 'args' => [])['retry']
+      assert_equal 2, Sidekiq::Client.send(:normalize_item, 'class' => CWorker, 'args' => [])['retry']
     end
   end
 end
