@@ -68,15 +68,15 @@ module Sidekiq
 
   def self.redis(&block)
     raise ArgumentError, "requires a block" if !block
-    @redis ||= Sidekiq::RedisConnection.create
+    @redis ||= Sidekiq::RedisConnection.create(@hash || {})
     @redis.with(&block)
   end
 
   def self.redis=(hash)
+    return @redis = hash if hash.is_a?(ConnectionPool)
+
     if hash.is_a?(Hash)
-      @redis = RedisConnection.create(hash)
-    elsif hash.is_a?(ConnectionPool)
-      @redis = hash
+      @hash = hash
     else
       raise ArgumentError, "redis= requires a Hash or ConnectionPool"
     end

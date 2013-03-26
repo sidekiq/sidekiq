@@ -1,9 +1,9 @@
 Upcoming
 -----------
 
+- Lazy load Redis connection pool, you no longer need to specify
+anything in Passenger or Unicorn's after_fork callback [#794]
 - Provides ability to hook onto failure after max retries failed. [jkassemi, #780]
-- Delay on retry moved from constant proc to method call [lulalala, #784]
-- DSM V compatible symptom definition of developer frustration [colszowka, #782]
 - Fix bug in pagination link to last page [pitr, #774]
 - Upstart scripts for multiple Sidekiq instances [dariocravero, #763]
 - Use select via pipes instead of poll to catch signals [mrnugget, #761]
