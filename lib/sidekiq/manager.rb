@@ -110,7 +110,7 @@ module Sidekiq
 
     def hard_shutdown_in(delay)
       after(delay) do
-        watchdog("Manager#watch_for_shutdown died") do
+        watchdog("Manager#hard_shutdown_in died") do
           # We've reached the timeout and we still have busy workers.
           # They must die but their messages shall live on.
           logger.info("Still waiting for #{@busy.size} busy workers")
