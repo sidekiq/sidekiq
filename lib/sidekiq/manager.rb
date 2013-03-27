@@ -138,7 +138,8 @@ module Sidekiq
 
           logger.debug { "Terminating worker threads" }
           @busy.each do |processor|
-            processor.terminate if processor.alive?
+            t = processor.bare_object.actual_work_thread
+            t.raise Shutdown if processor.alive?
           end
 
           after(0) { signal(:shutdown) }

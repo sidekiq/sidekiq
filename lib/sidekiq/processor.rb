@@ -26,6 +26,11 @@ module Sidekiq
       end
     end
 
+    # store the actual working thread so we
+    # can later kill if it necessary during
+    # hard shutdown.
+    attr_accessor :actual_work_thread
+
     def initialize(boss)
       @boss = boss
     end
@@ -34,6 +39,7 @@ module Sidekiq
       msgstr = work.message
       queue = work.queue_name
       defer do
+        @actual_work_thread = Thread.current
         begin
           msg = Sidekiq.load_json(msgstr)
           klass  = msg['class'].constantize
@@ -45,6 +51,9 @@ module Sidekiq
               worker.perform(*cloned(msg['args']))
             end
           end
+        rescue Sidekiq::Shutdown
+          # Had to force kill this job because it didn't finish
+          # within the timeout.
         rescue Exception => ex
           handle_exception(ex, msg || { :message => msgstr })
           raise
