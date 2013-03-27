@@ -48,8 +48,6 @@ module Sidekiq
 
         def call(worker, msg, queue)
           yield
-        rescue Sidekiq::Shutdown
-          raise
         rescue Exception => e
           raise e unless msg['retry']
           max_retry_attempts = retry_attempts_from(msg['retry'], DEFAULT_MAX_RETRY_ATTEMPTS)
