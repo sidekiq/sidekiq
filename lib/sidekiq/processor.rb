@@ -15,8 +15,6 @@ module Sidekiq
     include Util
     include Celluloid
 
-#    exclusive :process
-
     def self.default_middleware
       Middleware::Chain.new do |m|
         m.add Middleware::Server::Logging
