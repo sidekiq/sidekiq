@@ -1,6 +1,8 @@
-Upcoming
+2.9.0
 -----------
 
+- Raise an error within workers which don't finish within the hard
+  timeout.  This is to prevent unwanted database transaction commits. [#377]
 - Lazy load Redis connection pool, you no longer need to specify
 anything in Passenger or Unicorn's after_fork callback [#794]
 - Provides ability to hook onto failure after max retries failed. [jkassemi, #780]
