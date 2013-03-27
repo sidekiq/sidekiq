@@ -60,19 +60,19 @@ module Sidekiq
       "#<Processor #{to_s}>"
     end
 
-    def to_s
+    private
+
+    def identity
       @str ||= "#{hostname}:#{process_id}-#{Thread.current.object_id}:default"
     end
-
-    private
 
     def stats(worker, msg, queue)
       redis do |conn|
         conn.multi do
-          conn.sadd('workers', self)
-          conn.setex("worker:#{self}:started", EXPIRY, Time.now.to_s)
+          conn.sadd('workers', identity)
+          conn.setex("worker:#{identity}:started", EXPIRY, Time.now.to_s)
           hash = {:queue => queue, :payload => msg, :run_at => Time.now.to_i }
-          conn.setex("worker:#{self}", EXPIRY, Sidekiq.dump_json(hash))
+          conn.setex("worker:#{identity}", EXPIRY, Sidekiq.dump_json(hash))
         end
       end
 
@@ -89,9 +89,9 @@ module Sidekiq
       ensure
         redis do |conn|
           conn.multi do
-            conn.srem("workers", self)
-            conn.del("worker:#{self}")
-            conn.del("worker:#{self}:started")
+            conn.srem("workers", identity)
+            conn.del("worker:#{identity}")
+            conn.del("worker:#{identity}:started")
             conn.incrby("stat:processed", 1)
             conn.incrby("stat:processed:#{Time.now.utc.to_date}", 1)
           end
