@@ -1,11 +1,13 @@
 2.9.0
 -----------
 
-- Raise an error within workers which don't finish within the hard
+- Update 'sidekiq/testing' to work with any Sidekiq::Client call. It
+  also serializes the arguments as using Redis would. [#713]
+- Raise a Sidekiq::Shutdown error within workers which don't finish within the hard
   timeout.  This is to prevent unwanted database transaction commits. [#377]
 - Lazy load Redis connection pool, you no longer need to specify
-anything in Passenger or Unicorn's after_fork callback [#794]
-- Provides ability to hook onto failure after max retries failed. [jkassemi, #780]
+  anything in Passenger or Unicorn's after_fork callback [#794]
+- Add optional Worker#retries_exhausted hook after max retries failed. [jkassemi, #780]
 - Fix bug in pagination link to last page [pitr, #774]
 - Upstart scripts for multiple Sidekiq instances [dariocravero, #763]
 - Use select via pipes instead of poll to catch signals [mrnugget, #761]

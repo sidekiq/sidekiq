@@ -53,10 +53,10 @@ class TestTesting < MiniTest::Unit::TestCase
 
     after do
       # Undo override
-      Sidekiq::Worker::ClassMethods.class_eval do
-        remove_method :client_push
-        alias_method :client_push, :client_push_old
-        remove_method :client_push_old
+      (class << Sidekiq::Client; self; end).class_eval do
+        remove_method :raw_push
+        alias_method :raw_push, :raw_push_old
+        remove_method :raw_push_old
       end
     end
 
@@ -109,6 +109,14 @@ class TestTesting < MiniTest::Unit::TestCase
         StoredWorker.drain
       end
       assert_equal 0, StoredWorker.jobs.size
+
+    end
+
+    it 'round trip serializes the job arguments' do
+      assert StoredWorker.perform_async(:mike)
+      job = StoredWorker.jobs.first
+      assert_equal "mike", job['args'].first
+      StoredWorker.clear
     end
 
     class FirstWorker

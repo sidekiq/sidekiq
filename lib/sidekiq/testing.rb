@@ -1,4 +1,18 @@
 module Sidekiq
+
+  class Client
+    class << self
+      alias_method :raw_push_old, :raw_push
+
+      def raw_push(payloads)
+        payloads.each do |job|
+          job['class'].constantize.jobs << Sidekiq.load_json(Sidekiq.dump_json(job))
+        end
+        true
+      end
+    end
+  end
+
   module Worker
     ##
     # The Sidekiq testing infrastructure overrides perform_async
@@ -56,12 +70,6 @@ module Sidekiq
     #   Then I should receive a welcome email to "foo@example.com"
     #
     module ClassMethods
-      alias_method :client_push_old, :client_push
-
-      def client_push(opts)
-        jobs << opts
-        opts.object_id
-      end
 
       # Jobs queued for this worker
       def jobs
