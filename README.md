@@ -45,7 +45,7 @@ Installation
 Getting Started
 -----------------
 
-See the [sidekiq home page](http://mperham.github.com/sidekiq) for the simple 4-step process.
+See the [sidekiq home page](http://mperham.github.com/sidekiq) for the simple 3-step process.
 You can watch [Railscast #366](http://railscasts.com/episodes/366-sidekiq) to see Sidekiq in action.  If you do everything right, you should see this: 
 
 ![Web UI](https://github.com/mperham/sidekiq/raw/master/examples/web-ui.png)
