@@ -1,18 +1,28 @@
 require 'sinatra/base'
 require 'slim'
 require 'sidekiq/paginator'
+require 'i18n'
 
 module Sidekiq
   class Web < Sinatra::Base
     include Sidekiq::Paginator
 
     dir = File.expand_path(File.dirname(__FILE__) + "/../../web")
+    I18n.load_path += Dir[File.join(dir, 'locales', '*.yml').to_s]
+
     set :public_folder, "#{dir}/assets"
     set :views,  "#{dir}/views"
     set :root, "#{dir}/public"
     set :slim, :pretty => true
 
     helpers do
+      def get_locale
+        (request.env["HTTP_ACCEPT_LANGUAGE"] || 'en')[0,2]
+      end
+
+      def t(msg)
+        I18n.t(msg, :locale => get_locale)
+      end
 
       def reset_worker_list
         Sidekiq.redis do |conn|

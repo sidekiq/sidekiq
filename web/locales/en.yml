@@ -1,0 +1,16 @@
+en:
+  Dashboard: Dashboard
+  Realtime: Real-time
+  History: History
+  Busy: Busy
+  Processed: Processed
+  Failed: Failed
+  Scheduled: Scheduled
+  Retries: Retries
+  Enqueued: Enqueued
+  Worker: Worker
+  Queue: Queue
+  Class: Class
+  Arguments: Arguments
+  Started: Started
+  ShowAll: Show All
