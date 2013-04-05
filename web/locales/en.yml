@@ -47,3 +47,12 @@ en:
   ScheduledJobs: Scheduled Jobs
   idle: idle
   active: active
+  Version: Version
+  Connections: Connections
+  MemoryUsage: Memory Usage
+  PeakMemoryUsage: Peak Memory Usage
+  Uptime: Uptime (days)
+  OneWeek: 1 week
+  OneMonth: 1 month
+  ThreeMonths: 3 months
+  SixMonths: 6 months
