@@ -1,6 +1,6 @@
 header.row
   .span5
-    h3 Retries
+    h3 = t('Retries')
   .span4
     - if @retries.size > 0
       == slim :_paging, :locals => { :url => "#{root_path}retries" }
@@ -12,11 +12,11 @@ header.row
       tr
         th width="20px"
           input type="checkbox" class="check_all"
-        th width="25%" Next Retry
-        th width="11%" Retry count
-        th Queue
-        th Worker
-        th Args
+        th width="25%" = t('NextRetry')
+        th width="11%" = t('RetryCount')
+        th = t('Queue')
+        th = t('Worker')
+        th = t('Arguments')
       - @retries.each do |msg, score|
         tr
           td
@@ -28,13 +28,13 @@ header.row
             a href="#{root_path}queues/#{msg['queue']}" #{msg['queue']}
           td= msg['class']
           td= display_args(msg['args'])
-    input.btn.btn-primary.btn-small.pull-left type="submit" name="retry" value="Retry Now"
-    input.btn.btn-danger.btn-small.pull-left type="submit" name="delete" value="Delete"
+    input.btn.btn-primary.btn-small.pull-left type="submit" name="retry" value="#{t('RetryNow')}"
+    input.btn.btn-danger.btn-small.pull-left type="submit" name="delete" value="#{t('Delete')}"
 
   form action="#{root_path}retries/all/delete" method="post"
-    input.btn.btn-danger.btn-small.pull-right type="submit" name="delete" value="Delete All" data-confirm="Are you sure?"
+    input.btn.btn-danger.btn-small.pull-right type="submit" name="delete" value="#{t('DeleteAll')}" data-confirm="#{t('AreYouSure')}"
   form action="#{root_path}retries/all/retry" method="post"
-    input.btn.btn-danger.btn-small.pull-right type="submit" name="retry" value="Retry All" data-confirm="Are you sure?"
+    input.btn.btn-danger.btn-small.pull-right type="submit" name="retry" value="#{t('RetryAll')}" data-confirm="#{t('AreYouSure')}"
 
 - else
-  .alert.alert-success No retries were found
+  .alert.alert-success = t('NoRetriesFound')

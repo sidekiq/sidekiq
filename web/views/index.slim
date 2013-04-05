@@ -1,10 +1,10 @@
 .row.header
   .span7
-    h3 Workers
+    h3 = t('Workers')
 
 == slim :_workers
 - if workers.size > 0
   .row
     .span2.pull-right
       form action="#{root_path}reset" method="post"
-        button.btn.btn-primary.btn-block type="submit" title="If you kill -9 Sidekiq, this table can fill up with old data." Clear Worker List
+        button.btn.btn-primary.btn-block type="submit" title="#{t('Kill9Warning')}" = t('ClearWorkerList')
