@@ -1,0 +1,58 @@
+ru:
+  Dashboard: Панель управления
+  Status: Статус
+  Time: Время
+  Namespace: Пространство имен
+  Realtime: Сейчас
+  History: История
+  Busy: Занят
+  Processed: Обработано
+  Failed: Провалено
+  Scheduled: Запланировано
+  Retries: Попыток
+  Enqueued: В очереди
+  Worker: Обработчик
+  Workers: Обработчики
+  LivePoll: Постоянный опрос
+  StopPolling: Остановить опрос
+  Queue: Очередь
+  Class: Класс
+  Job: Задание
+  Arguments: Аргументы
+  Started: Запущено
+  ShowAll: Показать все
+  CurrentMessagesInQueue: Текущие сообщения в <span class='title'>%{queue}</span>
+  Delete: Удалить
+  AreYouSureDeleteJob: Вы уверены в том, что хотите удалить задание?
+  AreYouSureDeleteQueue: Вы уверены в том, что хотите удалить очередь %{queue}?
+  Queues: Очереди
+  Size: Размер
+  Actions: Действия
+  NextRetry: Следующая попытка
+  RetryCount: Количество попыток
+  RetryNow: Повторить немедленно
+  LastRetry: Последняя попытка
+  OriginallyFailed: Первоначально провалилось
+  AreYouSure: Вы уверены?
+  DeleteAll: Удалить все
+  RetryAll: Повторить все
+  NoRetriesFound: Не зафиксировано попыток
+  Error: Ошибка
+  ErrorClass: Класс ошибки
+  ErrorMessage: Сообщение об ошибке
+  ErrorBacktrace: Трассировка ошибок
+  GoBack: ← Назад
+  NoScheduledFound: Не обнаружено запланированных заданий
+  When: Когда
+  ScheduledJobs: Запланированные задания
+  idle: бездействует
+  active: активен
+  Version: Версия
+  Connections: Соединений
+  MemoryUsage: Расход памяти
+  PeakMemoryUsage: Максимальный расход памяти
+  Uptime: Uptime (в днях)
+  OneWeek: неделя
+  OneMonth: месяц
+  ThreeMonths: 3 месяца
+  SixMonths: пол года
