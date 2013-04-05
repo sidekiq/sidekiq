@@ -1,3 +1,4 @@
+# elements like %{queue} are variables and should not be translated
 en:
   Dashboard: Dashboard
   Status: Status
@@ -21,7 +22,7 @@ en:
   Arguments: Arguments
   Started: Started
   ShowAll: Show All
-  CurrentMessagesInQueue: "Current messages in <span class='title'>%{queue}</span>"
+  CurrentMessagesInQueue: Current messages in <span class='title'>%{queue}</span>
   Delete: Delete
   AreYouSureDeleteJob: Are you sure you want to delete this job?
   AreYouSureDeleteQueue: Are you sure you want to delete the %{queue} queue?
