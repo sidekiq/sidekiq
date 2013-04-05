@@ -1,5 +1,5 @@
 # elements like %{queue} are variables and should not be translated
-en:
+pl:
   Dashboard: Kokpit
   Status: Status
   Time: Czas
