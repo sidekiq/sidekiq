@@ -1,10 +1,10 @@
-h3 Queues
+h3 = t('Queues')
 
 table class="queues table table-hover table-bordered table-striped table-white"
   thead
-    th Queue
-    th Size
-    th Actions
+    th = t('Queue')
+    th = t('Size')
+    th = t('Actions')
   - @queues.each do |queue, size|
     tr
       td
@@ -12,4 +12,4 @@ table class="queues table table-hover table-bordered table-striped table-white"
       td= number_with_delimiter(size)
       td width="20%"
         form action="#{root_path}queues/#{queue}" method="post"
-          input.btn.btn-danger.btn-small type="submit" name="delete" value="Delete" data-confirm="Are you sure you want to delete the #{queue} queue?"
+          input.btn.btn-danger.btn-small type="submit" name="delete" value="#{t('Delete')}" data-confirm="#{t('AreYouSureDeleteQueue', :queue => queue)}"

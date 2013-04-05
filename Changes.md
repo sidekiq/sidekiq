@@ -1,3 +1,11 @@
+2.10.0
+-----------
+
+- I18n for web UI.  Please submit translations of `web/locales/en.yml` for
+your own language. [#811]
+- 'sinatra', 'slim' and 'i18n' are now gem dependencies for Sidekiq.
+
+
 2.9.0
 -----------
 
