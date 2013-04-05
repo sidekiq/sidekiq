@@ -1,0 +1,59 @@
+# elements like %{queue} are variables and should not be translated
+fr:
+  Dashboard: Tableau de Bord
+  Status: État
+  Time: Temps
+  Namespace: Namespace
+  Realtime: Temps Réel
+  History: Historique
+  Busy: Occupées
+  Processed: Traitéss
+  Failed: Échouéss
+  Scheduled: Datées
+  Retries: Réessayéss
+  Enqueued: En File
+  Worker: Travailleur
+  Workers: Travailleurs
+  LivePoll: Live Poll
+  StopPolling: Arrêt du Polling
+  Queue: File
+  Class: Classe
+  Job: Tâche
+  Arguments: Arguments
+  Started: Démarrées
+  ShowAll: Montrer Tout
+  CurrentMessagesInQueue: Messages actuellement dans <span class='title'>%{queue}</span>
+  Delete: Supprimer
+  AreYouSureDeleteJob: Êtes-vous certain de vouloir supprimer cette tâche?
+  AreYouSureDeleteQueue: Êtes-vous certain de vouloir supprimer la file %{queue}?
+  Queues: Queues
+  Size: Taille
+  Actions: Actions
+  NextRetry: Prochain Essai
+  RetryCount: Nombre d'Essais
+  RetryNow: Réessayer Maintenant
+  LastRetry: Dernier Essai
+  OriginallyFailed: Échec Original
+  AreYouSure: Êtes-vous certain?
+  DeleteAll: Supprimer Tout
+  RetryAll: Réessayer Tout
+  NoRetriesFound: Aucune tâche à réessayer n’a été trouvé
+  Error: Erreur
+  ErrorClass: Classe d’Erreur
+  ErrorMessage: Message d’Erreur
+  ErrorBacktrace: Backtrace d’Erreur
+  GoBack: ← Retour
+  NoScheduledFound: Pas de tâches datées trouvées
+  When: Quand
+  ScheduledJobs: Tâches Datées
+  idle: en attente
+  active: actives
+  Version: Version
+  Connections: Connexions
+  MemoryUsage: Mémoire Utilisée
+  PeakMemoryUsage: Mémoire Utilisée (max.)
+  Uptime: Uptime (jours)
+  OneWeek: 1 semaine
+  OneMonth: 1 mois
+  ThreeMonths: 3 mois
+  SixMonths: 6 mois
