@@ -1,59 +1,59 @@
 # elements like %{queue} are variables and should not be translated
 en:
-  Dashboard: Dashboard
-  Status: Status
-  Time: Time
-  Namespace: Namespace
-  Realtime: Real-time
-  History: History
-  Busy: Busy
-  Processed: Processed
-  Failed: Failed
-  Scheduled: Scheduled
-  Retries: Retries
-  Enqueued: Enqueued
-  Worker: Worker
-  Workers: Workers
-  LivePoll: Live Poll
-  StopPolling: Stop Polling
-  Queue: Queue
-  Class: Class
-  Job: Job
-  Arguments: Arguments
-  Started: Started
-  ShowAll: Show All
-  CurrentMessagesInQueue: Current messages in <span class='title'>%{queue}</span>
-  Delete: Delete
-  AreYouSureDeleteJob: Are you sure you want to delete this job?
-  AreYouSureDeleteQueue: Are you sure you want to delete the %{queue} queue?
-  Queues: Queues
-  Size: Size
-  Actions: Actions
-  NextRetry: Next Retry
-  RetryCount: Retry Count
-  RetryNow: Retry Now
-  LastRetry: Last Retry
-  OriginallyFailed: Originally Failed
-  AreYouSure: Are you sure?
-  DeleteAll: Delete All
-  RetryAll: Retry All
-  NoRetriesFound: No retries were found
-  Error: Error
-  ErrorClass: Error Class
-  ErrorMessage: Error Message
-  ErrorBacktrace: Error Backtrace
-  GoBack: ← Back
-  NoScheduledFound: No scheduled jobs were found
-  When: When
-  ScheduledJobs: Scheduled Jobs
-  idle: idle
-  active: active
-  Version: Version
-  Connections: Connections
-  MemoryUsage: Memory Usage
-  PeakMemoryUsage: Peak Memory Usage
-  Uptime: Uptime (days)
-  OneWeek: 1 week
-  OneMonth: 1 month
-  ThreeMonths: 3 months
-  SixMonths: 6 months
+  Dashboard: Ashboarday
+  Status: Atustay
+  Time: Imetay
+  Namespace: Amespacenay
+  Realtime: Ealray-Imetay
+  History: Istoryhay
+  Busy: Usybay
+  Processed: Ocessedpray
+  Failed: Ailedfay
+  Scheduled: Eduledschay
+  Retries: Rtriesray
+  Enqueued: neay-euedquay
+  Worker: Orkerway
+  Workers: Orkersway
+  LivePoll: Ivelay Ollpay
+  StopPolling: Opstay Ollingpay
+  Queue: Euequay
+  Class: Assclay
+  Job: Objay
+  Arguments: Rgumentsay
+  Started: Artedstay
+  ShowAll: Owshay Allay
+  CurrentMessagesInQueue: Urrentcay essagesmay inay <span class='title'>%{queue}</span>
+  Delete: Eleteday
+  AreYouSureDeleteJob: Areay ouyay ureshay ouyay antway otay eleteday isthay objay?
+  AreYouSureDeleteQueue: Areay ouyay ursshay ouyay antway otay eletaday hetay %{queue} ueequay?
+  Queues: Euesquay
+  Size: Izesay
+  Actions: Actionsay
+  NextRetry: Extnay Etryay
+  RetryCount: Etryray Ountcay
+  RetryNow: Etryray Ownay
+  LastRetry: Astlay Etryray
+  OriginallyFailed: Riginalyoay Aliedfay
+  AreYouSure: Area ouya ureshay?
+  DeleteAll: Rletedat Alla
+  RetryAll: Etryray Alla
+  NoRetriesFound: Ona etriesray ereway oundfay
+  Error: errora
+  ErrorClass: Errora Assclay
+  ErrorMessage: Errora Essagemay
+  ErrorBacktrace: Errora Acktracebay
+  GoBack: ← Ackbay
+  NoScheduledFound: Ona eduledschay obsjay ereway oundfay
+  When: Enwhay
+  ScheduledJobs: Eduledchay Obsjay
+  idle: idlea
+  active: activea
+  Version: Ersionvay
+  Connections: Onnectionscay
+  MemoryUsage: Emorymary Sageuay
+  PeakMemoryUsage: Eakpay Emorymay Usageay
+  Uptime: Uptimes (aysday)
+  OneWeek: 1 eeway
+  OneMonth: 1 onthmay
+  ThreeMonths: 3 onthmays
+  SixMonths: 6 monthmays
