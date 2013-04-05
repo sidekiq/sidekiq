@@ -43,7 +43,6 @@ module Sidekiq
         @ready.clear
 
         return after(0) { signal(:shutdown) } if @busy.empty?
-        logger.info { "Pausing up to #{timeout} seconds to allow workers to finish..." }
         hard_shutdown_in timeout if shutdown
       end
     end
@@ -109,6 +108,8 @@ module Sidekiq
     private
 
     def hard_shutdown_in(delay)
+      logger.info { "Pausing up to #{delay} seconds to allow workers to finish..." }
+
       after(delay) do
         watchdog("Manager#hard_shutdown_in died") do
           # We've reached the timeout and we still have busy workers.
