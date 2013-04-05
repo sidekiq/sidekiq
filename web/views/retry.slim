@@ -1,55 +1,55 @@
 header
-  h3 Job
+  h3 = t('Job')
 
 table class="retry table table-bordered table-striped"
   tbody
     tr
-      th Queue
+      th = t('Queue')
       td
         a href="#{root_path}queues/#{@retry['queue']}" #{@retry['queue']}
     tr
-      th Job Class
+      th = t('Class')
       td
         code= @retry['class']
     tr
-      th Job Arguments
+      th = t('Arguments')
       td
         code= display_args(@retry['args'], 1000)
     tr
-      th Job ID
+      th JID
       td
         code= @retry.jid
     - if @retry['retry_count'] > 0
       tr
-        th Retry Count
+        th = t('RetryCount')
         td= @retry['retry_count']
       tr
-        th Last Retry
+        th = t('LastRetry')
         td== relative_time(@retry['retried_at'].is_a?(Numeric) ? Time.at(@retry['retried_at']) : Time.parse(@retry['retried_at']))
     - else
       tr
-        th Originally Failed
+        th = t('OriginallyFailed')
         td== relative_time(@retry['failed_at'].is_a?(Numeric) ? Time.at(@retry['failed_at']) : Time.parse(@retry['failed_at']))
     tr
-      th Next Retry
+      th = t('NextRetry')
       td== relative_time(Time.at(@retry.score))
 
-h3 Error
+h3 = t('Error')
 table class="error table table-bordered table-striped"
   tbody
     tr
-      th Error Class
+      th = t('ErrorClass')
       td
         code= @retry['error_class']
     tr
-      th Error Message
+      th = t('ErrorMessage')
       td= @retry['error_message']
     - if !@retry['error_backtrace'].nil?
       tr
-        th Error Backtrace
+        th = t('ErrorBacktrace')
         td
           code== @retry['error_backtrace'].join("<br/>")
 form.form-horizontal action="#{root_path}retries/#{job_params(@retry, @retry.score)}" method="post"
-  a.btn href="#{root_path}retries" ← Back
-  input.btn.btn-primary type="submit" name="retry" value="Retry Now"
-  input.btn.btn-danger type="submit" name="delete" value="Delete"
+  a.btn href="#{root_path}retries" = t('GoBack')
+  input.btn.btn-primary type="submit" name="retry" value="#{t('RetryNow')}"
+  input.btn.btn-danger type="submit" name="delete" value="#{t('Delete')}"

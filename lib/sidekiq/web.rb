@@ -20,8 +20,8 @@ module Sidekiq
         (request.env["HTTP_ACCEPT_LANGUAGE"] || 'en')[0,2]
       end
 
-      def t(msg)
-        I18n.t(msg, :locale => get_locale)
+      def t(msg, options={})
+        I18n.t(msg, options.merge(:locale => get_locale))
       end
 
       def reset_worker_list

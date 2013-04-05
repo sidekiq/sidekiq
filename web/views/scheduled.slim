@@ -1,6 +1,6 @@
 header.row
   .span5
-    h3 Scheduled Jobs
+    h3 = t('ScheduledJobs')
   .span4
     - if @scheduled.size > 0
       == slim :_paging, :locals => { :url => "#{root_path}scheduled" }
@@ -12,10 +12,10 @@ header.row
       thead
         th width="20px"
           input type="checkbox" class="check_all"
-        th width="25%" When
-        th width="10%" Queue
-        th Worker
-        th Args
+        th width="25%" = t('When')
+        th width="10%" = t('Queue')
+        th = t('Worker')
+        th = t('Arguments')
       - @scheduled.each do |msg, score|
         tr
           td
@@ -25,6 +25,6 @@ header.row
             a href="#{root_path}queues/#{msg['queue']}" #{msg['queue']}
           td= msg['class']
           td= display_args(msg['args'])
-    input.btn.btn-danger.pull-right type="submit" name="delete" value="Delete"
+    input.btn.btn-danger.pull-right type="submit" name="delete" value="#{t('Delete')}"
 - else
-  .alert.alert-success No scheduled jobs were found
+  .alert.alert-success = t('NoScheduledFound')
