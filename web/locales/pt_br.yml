@@ -1,5 +1,5 @@
 # elements like %{queue} are variables and should not be translated
-en:
+"pt-br":
   Dashboard: Painel
   Status: Status
   Time: Tempo
@@ -57,4 +57,3 @@ en:
   OneMonth: 1 mês
   ThreeMonths: 3 meses
   SixMonths: 6 meses
-  
