@@ -7,21 +7,21 @@ en:
   Realtime: Tempo real
   History: Histórico
   Busy: Ocupado
-  Processed: Processado
-  Failed: Falhado
-  Scheduled: Agendado
+  Processed: Processados
+  Failed: Falhados
+  Scheduled: Agendados
   Retries: Tentativas
   Enqueued: Em espera
   Worker: Worker
   Workers: Workers
   LivePoll: Live Poll
-  StopPolling: Stop Polling
+  StopPolling: Desactivar Live Poll
   Queue: Fila
-  Class: Class
+  Class: Classe
   Job: Tarefa
   Arguments: Argumentos
-  Started: Iniciado
-  ShowAll: Mostrar tudo
+  Started: Iniciados
+  ShowAll: Mostrar todos
   CurrentMessagesInQueue: Mensagens na fila <span class='title'>%{queue}</span>
   Delete: Apagar
   AreYouSureDeleteJob: Tem a certeza que deseja eliminar esta tarefa?
@@ -36,7 +36,7 @@ en:
   OriginallyFailed: Falhou inicialmente
   AreYouSure: Tem a certeza?
   DeleteAll: Eliminar todos
-  RetryAll: Tentar todos novamente
+  RetryAll: Tentar tudo novamente
   NoRetriesFound: Não foram encontradas tentativas
   Error: Erro
   ErrorClass: Classe de Erro
@@ -51,7 +51,7 @@ en:
   Version: Versão
   Connections: Conexões
   MemoryUsage: Utilização de Memória
-  PeakMemoryUsage: Máxima memória utilizada
+  PeakMemoryUsage: Pico de utilização de memória
   Uptime: Uptime (em dias)
   OneWeek: 1 semana
   OneMonth: 1 mês
