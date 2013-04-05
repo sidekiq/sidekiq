@@ -1,0 +1,59 @@
+# elements like %{queue} are variables and should not be translated
+it:
+  Dashboard: Dashboard
+  Status: Stato
+  Time: Ora
+  Namespace: Namespace
+  Realtime: Tempo reale
+  History: Storia
+  Busy: Occupato
+  Processed: Processato
+  Failed: Fallito
+  Scheduled: Pianificato
+  Retries: Nuovi Tentativi
+  Enqueued: In Coda
+  Worker: Lavoratore
+  Workers: Lavoratori
+  LivePoll: Aggiorna Live
+  StopPolling: Ferma Aggiornamento Continuo
+  Queue: Coda
+  Class: Classe
+  Job: Lavoro
+  Arguments: Argomenti
+  Started: Iniziato
+  ShowAll: Mostra tutti
+  CurrentMessagesInQueue: Messaggi in <span class='title'>%{queue}</span>
+  Delete: Cancella
+  AreYouSureDeleteJob: Sei sicuro di voler cancellare questo lavoro?
+  AreYouSureDeleteQueue: Sei sicuro di voler cancellare la coda %{queue}?
+  Queues: Code
+  Size: Dimensione
+  Actions: Azioni
+  NextRetry: Prossimo Tentativo
+  RetryCount: Totale Tentativi
+  RetryNow: Riprova Ora
+  LastRetry: Ultimo tentativo
+  OriginallyFailed: Fallito Inizialmente
+  AreYouSure: Sei sicuro?
+  DeleteAll: Cancella Tutti
+  RetryAll: Riprova Tutti
+  NoRetriesFound: Non sono stati trovati nuovi tentativi
+  Error: Errore
+  ErrorClass: Classe dell'Errore
+  ErrorMessage: Error Message
+  ErrorBacktrace: Error Backtrace
+  GoBack: ← Indietro
+  NoScheduledFound: Non ci sono lavori pianificati
+  When: Quando
+  ScheduledJobs: Lavori Pianificati
+  idle: inattivo
+  active: attivo
+  Version: Versione
+  Connections: Connessioni
+  MemoryUsage: Uso di Memoria
+  PeakMemoryUsage: Picco Uso di Memoria
+  Uptime: Uptime (giorni)
+  OneWeek: 1 settimana
+  OneMonth: 1 mese
+  ThreeMonths: 3 mesi
+  SixMonths: 6 mesi
