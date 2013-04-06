@@ -7,10 +7,10 @@ fr:
   Realtime: Temps Réel
   History: Historique
   Busy: Occupées
-  Processed: Traitéss
-  Failed: Échouéss
+  Processed: Traités
+  Failed: Échoués
   Scheduled: Datées
-  Retries: Réessayéss
+  Retries: Réessayés
   Enqueued: En File
   Worker: Travailleur
   Workers: Travailleurs
@@ -37,7 +37,7 @@ fr:
   AreYouSure: Êtes-vous certain?
   DeleteAll: Supprimer Tout
   RetryAll: Réessayer Tout
-  NoRetriesFound: Aucune tâche à réessayer n’a été trouvé
+  NoRetriesFound: Aucune tâche à réessayer n’a été trouvée
   Error: Erreur
   ErrorClass: Classe d’Erreur
   ErrorMessage: Message d’Erreur
