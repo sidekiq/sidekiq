@@ -7,10 +7,10 @@ fr:
   Realtime: Temps Réel
   History: Historique
   Busy: Occupées
-  Processed: Traités
-  Failed: Échoués
+  Processed: Traitées
+  Failed: Échouées
   Scheduled: Datées
-  Retries: Réessayés
+  Retries: Réessayées
   Enqueued: En File
   Worker: Travailleur
   Workers: Travailleurs
