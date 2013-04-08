@@ -51,6 +51,14 @@ You can watch [Railscast #366](http://railscasts.com/episodes/366-sidekiq) to se
 ![Web UI](https://github.com/mperham/sidekiq/raw/master/examples/web-ui.png)
 
 
+Want More?
+-------------------
+
+I also sell Sidekiq Pro, an extension to Sidekiq which provides more
+features, a commercial-friendly license and allows you to support high
+quality open source development all at the same time.  Please see the
+[Sidekiq Pro](http://sidekiq.org/pro) homepage for more detail.
+
 
 More Information
 -----------------
