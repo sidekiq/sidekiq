@@ -11,6 +11,7 @@ ru:
   Scheduled: Запланировано
   Retries: Попыток
   Enqueued: В очереди
+  ClearWorkerList: Очистить список обработчиков
   Worker: Обработчик
   Workers: Обработчики
   LivePoll: Постоянный опрос
