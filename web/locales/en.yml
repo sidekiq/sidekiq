@@ -12,6 +12,7 @@ en:
   Scheduled: Scheduled
   Retries: Retries
   Enqueued: Enqueued
+  ClearWorkerList: Clear workers list
   Worker: Worker
   Workers: Workers
   LivePoll: Live Poll
