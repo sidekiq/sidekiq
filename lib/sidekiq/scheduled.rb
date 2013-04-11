@@ -28,17 +28,16 @@ module Sidekiq
             now = Time.now.to_f.to_s
             Sidekiq.redis do |conn|
               SETS.each do |sorted_set|
-                (messages, _) = conn.multi do
-                  conn.zrangebyscore(sorted_set, '-inf', now)
-                  conn.zremrangebyscore(sorted_set, '-inf', now)
-                end
-
-                messages.each do |message|
-                  logger.debug { "enqueued #{sorted_set}: #{message}" }
-                  msg = Sidekiq.load_json(message)
-                  conn.multi do
-                    conn.sadd('queues', msg['queue'])
-                    conn.rpush("queue:#{msg['queue']}", message)
+                while message = conn.zrangebyscore(sorted_set, '-inf', now, :limit => [0, 1]).first do
+                  if message
+                    msg = Sidekiq.load_json(message)
+                    if conn.zrem(sorted_set, message)
+                      conn.multi do
+                        conn.sadd('queues', msg['queue'])
+                        conn.rpush("queue:#{msg['queue']}", message)
+                      end
+                      logger.debug("enqueued #{sorted_set}: #{message}") if logger.debug?
+                    end
                   end
                 end
               end
