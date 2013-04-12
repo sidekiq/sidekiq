@@ -1,6 +1,10 @@
 2.10.0
 -----------
 
+- Refactor algorithm for putting scheduled jobs onto the queue [#843]
+- Fix scheduler thread dying due to incorrect error handling [#839]
+- Fix issue which left stale workers if Sidekiq wasn't shutdown while
+quiet. [#840]
 - I18n for web UI.  Please submit translations of `web/locales/en.yml` for
 your own language. [#811]
 - 'sinatra', 'slim' and 'i18n' are now gem dependencies for Sidekiq.
