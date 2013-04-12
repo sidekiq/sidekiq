@@ -199,26 +199,4 @@ class TestRetry < MiniTest::Unit::TestCase
     end
   end
 
-  describe 'poller' do
-    before do
-      @redis = MiniTest::Mock.new
-      Sidekiq.instance_variable_set(:@redis, @redis)
-
-      def @redis.with; yield self; end
-    end
-
-    it 'should poll like a bad mother...SHUT YO MOUTH' do
-      fake_msg = Sidekiq.dump_json({ 'class' => 'Bob', 'args' => [1,2], 'queue' => 'someq' })
-      @redis.expect :multi, [[fake_msg], 1], []
-      @redis.expect :multi, [[], nil], []
-      @redis.expect :multi, [[], nil], []
-      @redis.expect :multi, [[], nil], []
-
-      inst = Sidekiq::Scheduled::Poller.new
-      inst.poll
-
-      @redis.verify
-    end
-  end
-
 end
