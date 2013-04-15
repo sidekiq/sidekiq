@@ -78,7 +78,7 @@ The mailing list is the preferred place to ask questions on usage. If you are en
 License
 -----------------
 
-Please see LICENSE for licensing details.
+Please see [LICENSE](https://github.com/mperham/sidekiq/blob/master/LICENSE) for licensing details.
 
 
 Author
