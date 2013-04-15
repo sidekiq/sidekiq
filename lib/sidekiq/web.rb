@@ -1,27 +1,32 @@
 require 'sinatra/base'
 require 'slim'
 require 'sidekiq/paginator'
-require 'i18n'
 
 module Sidekiq
   class Web < Sinatra::Base
     include Sidekiq::Paginator
 
     dir = File.expand_path(File.dirname(__FILE__) + "/../../web")
-    I18n.load_path += Dir[File.join(dir, 'locales', '*.yml').to_s]
 
     set :public_folder, "#{dir}/assets"
     set :views,  "#{dir}/views"
     set :root, "#{dir}/public"
+    set :locales, "#{dir}/locales"
     set :slim, :pretty => true
 
     helpers do
+      def locale_translation_map
+        yaml_translation_file = File.join(settings.locales, "#{get_locale}.yml")
+        @locale_translation_map ||= YAML.load(File.read(yaml_translation_file))[get_locale]
+      end
+
       def get_locale
         (request.env["HTTP_ACCEPT_LANGUAGE"] || 'en')[0,2]
       end
 
       def t(msg, options={})
-        I18n.t(msg, options.merge(:locale => get_locale))
+        string = locale_translation_map.fetch(msg)
+        string % options
       end
 
       def reset_worker_list
@@ -94,6 +99,16 @@ module Sidekiq
       end
 
       def tabs
+        @tabs ||= {
+          "Dashboard" => '',
+          "Workers"   => 'workers',
+          "Queues"    => 'queues',
+          "Retries"   => 'retries',
+          "Scheduled" => 'scheduled',
+        }
+      end
+
+      def custom_tabs
         self.class.tabs
       end
 
@@ -240,13 +255,7 @@ module Sidekiq
     end
 
     def self.tabs
-      @tabs ||= {
-        "Dashboard" => '',
-        "Workers"   => 'workers',
-        "Queues"    => 'queues',
-        "Retries"   => 'retries',
-        "Scheduled" => 'scheduled',
-      }
+      @custom_tabs ||= {}
     end
 
   end
