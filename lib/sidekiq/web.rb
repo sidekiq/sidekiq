@@ -16,8 +16,15 @@ module Sidekiq
 
     helpers do
       def locale_translation_map
-        yaml_translation_file = File.join(settings.locales, "#{get_locale}.yml")
-        @locale_translation_map ||= YAML.load(File.read(yaml_translation_file))[get_locale]
+        @locale_translation_map ||= begin
+          locale_map = {}
+          locale_map_files = Dir["#{settings.locales}/*"]
+          locale_map_files.each do |file|
+            locale = file.scan(/.*\/(.*)\.yml$/)[0][0] # => 'en'
+            locale_map[locale] = YAML.load(File.read(file))[locale]
+          end
+          locale_map
+        end
       end
 
       def get_locale
@@ -25,7 +32,7 @@ module Sidekiq
       end
 
       def t(msg, options={})
-        string = locale_translation_map.fetch(msg)
+        string = locale_translation_map[get_locale].fetch(msg)
         string % options
       end
 
