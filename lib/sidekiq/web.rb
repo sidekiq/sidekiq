@@ -15,15 +15,11 @@ module Sidekiq
     set :slim, :pretty => true
 
     helpers do
-      def locale_translation_map
-        @locale_translation_map ||= begin
-          locale_map = {}
-          locale_map_files = Dir["#{settings.locales}/*"]
-          locale_map_files.each do |file|
-            locale = file.scan(/.*\/(.*)\.yml$/)[0][0] # => 'en'
-            locale_map[locale] = YAML.load(File.read(file))[locale]
+      def strings
+        @strings ||= begin
+          Dir["#{settings.locales}/*.yml"].inject({}) do |memo, file|
+            memo.merge(YAML.load(File.read(file)))
           end
-          locale_map
         end
       end
 
@@ -32,7 +28,7 @@ module Sidekiq
       end
 
       def t(msg, options={})
-        string = locale_translation_map[get_locale].fetch(msg)
+        string = strings[get_locale].fetch(msg) || strings['en'].fetch(msg)
         string % options
       end
 

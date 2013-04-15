@@ -1,3 +1,9 @@
+2.10.1
+-----------
+
+- Remove need for the i18n gem. (brandonhilkert)
+
+
 2.10.0
 -----------
 
