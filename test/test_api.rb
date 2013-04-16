@@ -179,6 +179,13 @@ class TestApi < MiniTest::Unit::TestCase
       assert_equal 0, q.size
     end
 
+    it 'can find job by id' do
+      q      = Sidekiq::Queue.new
+      job_id = ApiWorker.perform_in(100, 1, 'jason')
+      job    = Sidekiq::ScheduledSet.new.find_job(job_id)
+      assert job
+    end
+
     it 'can clear a queue' do
       q = Sidekiq::Queue.new
       2.times { ApiWorker.perform_async(1, 'mike') }
