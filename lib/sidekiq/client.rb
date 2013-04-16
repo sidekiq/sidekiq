@@ -20,6 +20,17 @@ module Sidekiq
       end
 
       ##
+      # Return details of a scheduled job given a job id
+      #
+      # Example Usage: 
+      #   Sidekiq::Client.get_scheduled_job('1ae396f79e1507541bfe953asdc') 
+      #
+      def get_scheduled_job(job_id)
+        job = Sidekiq.redis { |x| x.zrange('schedule', 0, -1).select{|job| job.include? "\"jid\":\"#{job_id}\""}[0] }
+        job ? Sidekiq.load_json(job) : nil
+      end
+
+      ##
       # The main method used to push a job to Redis.  Accepts a number of options:
       #
       #   queue - the named queue to use, default 'default'
