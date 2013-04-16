@@ -69,6 +69,13 @@ class TestClient < MiniTest::Unit::TestCase
       assert_equal Sidekiq::Worker::ClassMethods::DEFAULT_OPTIONS, MyWorker.get_sidekiq_options
     end
 
+    it 'returns details of a scheduled job' do
+      pushed = Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1, 2])
+      job_id = MyWorker.perform_in(100)
+      job    = Sidekiq::Client.get_scheduled_job(job_id)
+      assert job
+    end
+
     it 'handles perform_async' do
       @redis.expect :lpush, 1, ['queue:default', Array]
       pushed = MyWorker.perform_async(1, 2)
