@@ -137,6 +137,10 @@ module Sidekiq
       end
     end
 
+    def find_job(jid)
+      self.detect { |j| j.jid == jid }
+    end
+
     def clear
       Sidekiq.redis do |conn|
         conn.multi do
@@ -280,7 +284,7 @@ module Sidekiq
     end
 
     def find_job(jid)
-      self.find{ |j| j.jid == jid }
+      self.detect { |j| j.jid == jid }
     end
 
     def delete(score, jid = nil)

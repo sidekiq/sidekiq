@@ -179,11 +179,20 @@ class TestApi < MiniTest::Unit::TestCase
       assert_equal 0, q.size
     end
 
-    it 'can find job by id' do
-      q      = Sidekiq::Queue.new
+    it 'can find job by id in sorted sets' do
+      q = Sidekiq::Queue.new
       job_id = ApiWorker.perform_in(100, 1, 'jason')
-      job    = Sidekiq::ScheduledSet.new.find_job(job_id)
-      assert job
+      job = Sidekiq::ScheduledSet.new.find_job(job_id)
+      refute_nil job
+      assert_equal job_id, job.jid
+    end
+
+    it 'can find job by id in queues' do
+      q = Sidekiq::Queue.new
+      job_id = ApiWorker.perform_async(1, 'jason')
+      job = q.find_job(job_id)
+      refute_nil job
+      assert_equal job_id, job.jid
     end
 
     it 'can clear a queue' do
@@ -285,7 +294,7 @@ class TestApi < MiniTest::Unit::TestCase
 
       s = '12345'
       data = Sidekiq.dump_json({ 'payload' => {}, 'queue' => 'default', 'run_at' => Time.now.to_i })
-      Sidekiq.redis do |c| 
+      Sidekiq.redis do |c|
         c.multi do
           c.sadd('workers', s)
           c.set("worker:#{s}", data)
