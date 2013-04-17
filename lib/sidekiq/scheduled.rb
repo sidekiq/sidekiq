@@ -40,7 +40,7 @@ module Sidekiq
                   if conn.zrem(sorted_set, message)
                     conn.multi do
                       conn.sadd('queues', msg['queue'])
-                      conn.rpush("queue:#{msg['queue']}", message)
+                      conn.lpush("queue:#{msg['queue']}", message)
                     end
                     logger.debug("enqueued #{sorted_set}: #{message}") if logger.debug?
                   end
