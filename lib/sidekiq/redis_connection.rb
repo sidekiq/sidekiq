@@ -8,6 +8,12 @@ module Sidekiq
       # need a connection for Fetcher and Retry
       size = options[:size] || (Sidekiq.server? ? (Sidekiq.options[:concurrency] + 2) : 5)
 
+      if !Sidekiq.server?
+        opts = options.dup
+        opts.delete(:url)
+        Sidekiq.logger.info("#{Sidekiq::NAME} client using #{url} with options #{opts}")
+      end
+
       ConnectionPool.new(:timeout => 1, :size => size) do
         build_client(url, options[:namespace], options[:driver] || 'ruby')
       end
