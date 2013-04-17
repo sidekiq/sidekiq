@@ -48,7 +48,7 @@ module Sidekiq
         end
       end
 
-      logger.info "Booting Sidekiq #{Sidekiq::VERSION} with Redis at #{redis {|x| x.client.id}}"
+      redis {} # noop to connect redis and print info
       logger.info "Running in #{RUBY_DESCRIPTION}"
       logger.info Sidekiq::LICENSE
 
