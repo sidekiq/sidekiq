@@ -279,6 +279,10 @@ module Sidekiq
       end
     end
 
+    def find_job(jid)
+      self.find{ |j| j.jid == jid }
+    end
+
     def delete(score, jid = nil)
       if jid
         elements = Sidekiq.redis do |conn|
