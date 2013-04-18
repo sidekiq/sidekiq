@@ -11,9 +11,6 @@ module Sidekiq
     #    UserMailer.delay_until(5.days.from_now).send_welcome_email(new_user)
     class DelayedMailer
       include Sidekiq::Worker
-      # I think it's reasonable to assume that emails should take less
-      # than 30 seconds to send.
-      sidekiq_options :timeout => 30
 
       def perform(yml)
         (target, method_name, args) = YAML.load(yml)

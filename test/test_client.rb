@@ -99,7 +99,7 @@ class TestClient < MiniTest::Unit::TestCase
 
     class QueuedWorker
       include Sidekiq::Worker
-      sidekiq_options :queue => :flimflam, :timeout => 1
+      sidekiq_options :queue => :flimflam
     end
 
     it 'enqueues to the named queue' do

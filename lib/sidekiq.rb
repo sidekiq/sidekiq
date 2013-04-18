@@ -7,11 +7,6 @@ require 'sidekiq/redis_connection'
 require 'sidekiq/util'
 require 'sidekiq/api'
 
-require 'sidekiq/extensions/class_methods'
-require 'sidekiq/extensions/action_mailer'
-require 'sidekiq/extensions/active_record'
-require 'sidekiq/rails' if defined?(::Rails::Engine)
-
 require 'multi_json'
 
 module Sidekiq
@@ -43,7 +38,7 @@ module Sidekiq
   # Configuration for Sidekiq server, use like:
   #
   #   Sidekiq.configure_server do |config|
-  #     config.redis = { :namespace => 'myapp', :size => 25, :url => 'redis://myhost:8877/mydb' }
+  #     config.redis = { :namespace => 'myapp', :size => 25, :url => 'redis://myhost:8877/0' }
   #     config.server_middleware do |chain|
   #       chain.add MyServerHook
   #     end
@@ -56,7 +51,7 @@ module Sidekiq
   # Configuration for Sidekiq client, use like:
   #
   #   Sidekiq.configure_client do |config|
-  #     config.redis = { :namespace => 'myapp', :size => 1, :url => 'redis://myhost:8877/mydb' }
+  #     config.redis = { :namespace => 'myapp', :size => 1, :url => 'redis://myhost:8877/0' }
   #   end
   def self.configure_client
     yield self unless server?
@@ -115,3 +110,9 @@ module Sidekiq
   end
 
 end
+
+require 'sidekiq/extensions/class_methods'
+require 'sidekiq/extensions/action_mailer'
+require 'sidekiq/extensions/active_record'
+require 'sidekiq/rails' if defined?(::Rails::Engine)
+

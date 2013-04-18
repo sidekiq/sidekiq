@@ -1,3 +1,10 @@
+2.11.0
+-----------
+
+- Remove **timeout** support from `sidekiq_options`.  Ruby's timeout
+  is inherently unsafe in a multi-threaded application and was causing
+  stability problems for many.  See http://bit.ly/OtYpK
+
 2.10.1
 -----------
 
