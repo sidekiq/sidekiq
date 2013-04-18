@@ -2,6 +2,10 @@
 -----------
 
 - Remove need for the i18n gem. (brandonhilkert)
+- Improve redis connection info logging on startup for debugging
+purposes [#858]
+- Revert sinatra/slim as runtime dependencies
+- Add `find_job` method to sidekiq/api
 
 
 2.10.0
