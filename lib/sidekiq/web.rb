@@ -28,7 +28,7 @@ module Sidekiq
       end
 
       def t(msg, options={})
-        string = strings[get_locale].fetch(msg) || strings['en'].fetch(msg)
+        string = strings[get_locale] ? strings[get_locale].fetch(msg) : strings['en'].fetch(msg)
         string % options
       end
 
