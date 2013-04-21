@@ -62,7 +62,7 @@ module Sidekiq
         normed = normalize_item(items)
         payloads = items['args'].map do |args|
           raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" if !args.is_a?(Array)
-          process_single(items['class'], normed.merge('args' => args, 'jid' => SecureRandom.hex(12)))
+          process_single(items['class'], normed.merge('args' => args, 'jid' => SecureRandom.uuid()))
         end.compact
 
         pushed = false
@@ -129,7 +129,7 @@ module Sidekiq
           normalized_item = Sidekiq::Worker::ClassMethods::DEFAULT_OPTIONS.merge(item)
         end
 
-        normalized_item['jid'] = SecureRandom.hex(12)
+        normalized_item['jid'] = SecureRandom.uuid()
         normalized_item
       end
 
