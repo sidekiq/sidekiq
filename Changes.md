@@ -1,6 +1,7 @@
 2.11.0
 -----------
 
+- Upgrade to Celluloid 0.13. [#834]
 - Remove **timeout** support from `sidekiq_options`.  Ruby's timeout
   is inherently unsafe in a multi-threaded application and was causing
   stability problems for many.  See http://bit.ly/OtYpK
