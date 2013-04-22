@@ -29,9 +29,19 @@ class TestWeb < MiniTest::Unit::TestCase
     end
 
     it 'can display workers' do
+      Sidekiq.redis do |conn|
+        identity = 'foo:1234-123abc:default'
+        conn.sadd('workers', identity)
+        conn.setex("worker:#{identity}:started", 10, Time.now.to_s)
+        hash = {:queue => 'critical', :payload => { 'class' => WebWorker.name, 'args' => [1,'abc'] }, :run_at => Time.now.to_i }
+        conn.setex("worker:#{identity}", 10, Sidekiq.dump_json(hash))
+      end
+
       get '/workers'
       assert_equal 200, last_response.status
-      assert_match /status-idle/, last_response.body
+      assert_match /status-active/, last_response.body
+      assert_match /critical/, last_response.body
+      assert_match /WebWorker/, last_response.body
     end
 
     it 'can display queues' do
