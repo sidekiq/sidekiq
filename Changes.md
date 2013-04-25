@@ -1,3 +1,9 @@
+2.11.1
+-----------
+
+- Fix timeout warning.
+- Add Dutch web UI locale.
+
 2.11.0
 -----------
 
