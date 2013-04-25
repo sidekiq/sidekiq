@@ -248,7 +248,7 @@ module Sidekiq
         end
 
         o.on '-i', '--index INT', "unique process index on this machine" do |arg|
-          opts[:index] = Integer(arg)
+          opts[:index] = Integer(arg.match(/\d+/)[0])
         end
 
         o.on '-p', '--profile', "Profile all code run by Sidekiq" do |arg|
