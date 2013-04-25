@@ -23,10 +23,10 @@ ja:
   Arguments: 引数
   Started: 開始
   ShowAll: 全て見せる
-  CurrentMessagesInQueue: メッセージがあります <span class='title'>%{queue}</span>
+  CurrentMessagesInQueue: <span class='title'>%{queue}</span>に メッセージがあります
   Delete: 削除
   AreYouSureDeleteJob: 本当にこの作業を削除しますか？
-  AreYouSureDeleteQueue: 本当に削除しますか %{queue} queue?
+  AreYouSureDeleteQueue: 本当に削除しますか %{queue} キュー?
   Queues: キュー
   Size: サイズ
   Actions: アクション
