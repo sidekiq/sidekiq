@@ -55,7 +55,7 @@ module Sidekiq
       #      can be true, false or an integer number of lines to save, default *false*
       def sidekiq_options(opts={})
         self.sidekiq_options_hash = get_sidekiq_options.merge((opts || {}).stringify_keys)
-        ::Sidekiq.logger.warn("#{self.name} - :timeout is unsafe and support has been removed from Sidekiq, see http://bit.ly/OtYpK for details")
+        ::Sidekiq.logger.warn("#{self.name} - :timeout is unsafe and support has been removed from Sidekiq, see http://bit.ly/OtYpK for details") if opts.include? :timeout
       end
 
       DEFAULT_OPTIONS = { 'retry' => true, 'queue' => 'default' }
