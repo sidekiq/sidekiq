@@ -24,11 +24,11 @@ module Sidekiq
       end
 
       def get_locale
-        (request.env["HTTP_ACCEPT_LANGUAGE"] || 'en')[0,2]
+        strings[(request.env["HTTP_ACCEPT_LANGUAGE"] || 'en')[0,2]] || strings['en']
       end
 
       def t(msg, options={})
-        string = strings[get_locale] ? strings[get_locale].fetch(msg) : strings['en'].fetch(msg)
+        string = get_locale[msg] || msg
         string % options
       end
 
