@@ -5,6 +5,7 @@
 - Remove **timeout** support from `sidekiq_options`.  Ruby's timeout
   is inherently unsafe in a multi-threaded application and was causing
   stability problems for many.  See http://bit.ly/OtYpK
+- Add Japanese locale for Web UI [#868]
 - Fix a few issues with Web UI i18n.
 
 2.10.1
