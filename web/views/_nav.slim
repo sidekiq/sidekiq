@@ -13,4 +13,5 @@
 
       - custom_tabs.each do |title, url|
           li class="#{(current_path =~ Regexp.new(url)) ? 'active':''}"
-            a href='#{{root_path}}#{{url}}' = title
+            a href='#{{root_path}}#{{url}}' = t(title)
+
