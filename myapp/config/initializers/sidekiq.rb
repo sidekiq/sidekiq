@@ -4,3 +4,10 @@ end
 Sidekiq.configure_server do |config|
   config.redis = { :size => 25, :namespace => 'foo' }
 end
+
+class EmptyWorker
+  include Sidekiq::Worker
+
+  def perform
+  end
+end

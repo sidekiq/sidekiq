@@ -5,3 +5,12 @@
 require File.expand_path('../config/application', __FILE__)
 
 Myapp::Application.load_tasks
+
+task :load_jobs => :environment do
+  require 'sidekiq/api'
+  Sidekiq::Queue.new.clear
+
+  50_000.times do |x|
+    EmptyWorker.perform_async
+  end
+end
