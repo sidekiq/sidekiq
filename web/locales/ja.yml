@@ -1,7 +1,7 @@
 # elements like %{queue} are variables and should not be translated
 ja:
   Dashboard: ダッシュボード
-  Status: ステータス
+  Status: 状態
   Time: 時間
   Namespace: ネームスペース
   Realtime: リアルタイム
@@ -15,8 +15,8 @@ ja:
   ClearWorkerList: 動作中の作業を停止
   Worker: 動作中の作業
   Workers: 動作中の作業
-  LivePoll: 転送中
-  StopPolling: 転送停止
+  LivePoll: ポーリング開始
+  StopPolling: ポーリング停止
   Queue: キュー
   Class: クラス
   Job: ジョブ
@@ -25,8 +25,8 @@ ja:
   ShowAll: 全て見せる
   CurrentMessagesInQueue: <span class='title'>%{queue}</span>に メッセージがあります
   Delete: 削除
-  AreYouSureDeleteJob: 本当にこの作業を削除しますか？
-  AreYouSureDeleteQueue: 本当に %{queue} キュー 削除しますか?
+  AreYouSureDeleteJob: このジョブを削除しますか？
+  AreYouSureDeleteQueue: この %{queue} キューを削除しますか?
   Queues: キュー
   Size: サイズ
   Actions: アクション
@@ -35,7 +35,7 @@ ja:
   RetryNow: 今すぐ再試行
   LastRetry: 再試行履歴
   OriginallyFailed: 失敗
-  AreYouSure: 本当にいいですか？
+  AreYouSure: いいですか？
   DeleteAll: 全て削除
   RetryAll: 全て再試行
   NoRetriesFound: 再試行できません
@@ -47,16 +47,16 @@ ja:
   NoScheduledFound: 予定された作業はありません
   When: いつ
   ScheduledJobs: 予定された作業
-  idle: アイドル状態
+  idle: アイドル
   active: アクティブ
   Version: バージョン
   Connections: 接続
   MemoryUsage: メモリー容量
   PeakMemoryUsage: 最大メモリー容量
   Uptime: Uptime (days)
-  OneWeek: １週
+  OneWeek: 1 週
   OneMonth: 1 ヶ月
   ThreeMonths: 3 ヶ月
   SixMonths: 6 ヶ月
-  Batches: Batches
+  Batches: バッチ
   Failures: 失敗
