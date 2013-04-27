@@ -1,3 +1,9 @@
+2.11.2
+-----------
+
+- Add Norwegian locale.
+- Updates for the JA locale.
+
 2.11.1
 -----------
 
