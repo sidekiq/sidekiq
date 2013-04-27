@@ -1,0 +1,62 @@
+# elements like %{queue} are variables and should not be translated
+no:
+  Dashboard: Oversikt
+  Status: Status
+  Time: Tid
+  Namespace: Navnerom
+  Realtime: Sanntid
+  History: Historikk
+  Busy: Opptatt
+  Processed: Prosessert
+  Failed: Mislykket
+  Scheduled: Planlagt
+  Retries: Forsøk
+  Enqueued: I kø
+  ClearWorkerList: Nullstill jobbliste
+  Worker: Arbeider
+  Workers: Arbeidere
+  LivePoll: Automatisk oppdatering
+  StopPolling: Stopp automatisk oppdatering
+  Queue: Kø
+  Class: Klasse
+  Job: Jobb
+  Arguments: Argumenter
+  Started: Startet
+  ShowAll: Vis alle
+  CurrentMessagesInQueue: Nåværende melding i <span class='title'>%{queue}</span>
+  Delete: Slett
+  AreYouSureDeleteJob: Er du sikker på at du vil slette denne jobben?
+  AreYouSureDeleteQueue: Er du sikker på at du vil slette køen %{queue}?
+  Queues: Køer
+  Size: Størrelse
+  Actions: Handlinger
+  NextRetry: Neste forsøk
+  RetryCount: Antall forsøk
+  RetryNow: Forsøk igjen nå
+  LastRetry: Forrige forsøk
+  OriginallyFailed: Feilet opprinnelig
+  AreYouSure: Er du sikker?
+  DeleteAll: Slett alle
+  RetryAll: Forsøk alle på nytt
+  NoRetriesFound: Ingen forsøk funnet
+  Error: Feil
+  ErrorClass: Feilklasse
+  ErrorMessage: Feilmelding
+  ErrorBacktrace: Feilbakgrunn
+  GoBack: ← Tilbake
+  NoScheduledFound: Ingen planlagte jobber funnet
+  When: Når
+  ScheduledJobs: Planlagte jobber
+  idle: uvirksom
+  active: aktiv
+  Version: Versjon
+  Connections: Tilkoblinger
+  MemoryUsage: Minneforbruk
+  PeakMemoryUsage: Høyeste minneforbruk
+  Uptime: Oppetid (dager)
+  OneWeek: 1 uke
+  OneMonth: 1 måned
+  ThreeMonths: 3 måneder
+  SixMonths: 6 måneder
+  Batches: Samlinger
+  Failures: Mislykkeser
