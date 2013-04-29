@@ -20,6 +20,7 @@ module Sidekiq
 
     helpers do
       def strings
+        require 'json'
         @strings ||= begin
           Dir["#{settings.locales}/*.yml"].inject({}) do |memo, file|
             memo.merge(YAML.load(File.read(file)))
