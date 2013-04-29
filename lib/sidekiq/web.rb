@@ -1,5 +1,9 @@
+require 'yaml'
 require 'sinatra/base'
 require 'slim'
+
+require 'sidekiq'
+require 'sidekiq/api'
 require 'sidekiq/paginator'
 
 module Sidekiq
