@@ -32,6 +32,18 @@ class TestApi < MiniTest::Unit::TestCase
       end
     end
 
+    describe "reset" do
+      it 'can reset stats' do
+        Sidekiq.redis do |conn|
+          conn.set('stat:processed', 5)
+          conn.set('stat:failed', 10)
+          Sidekiq::Stats.new.reset
+          assert_equal '0', conn.get('stat:processed')
+          assert_equal '0', conn.get('stat:failed')
+        end
+      end
+    end
+
     describe "queues" do
       it "is initially empty" do
         s = Sidekiq::Stats.new

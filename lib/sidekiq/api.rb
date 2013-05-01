@@ -16,6 +16,13 @@ module Sidekiq
       count.nil? ? 0 : count.to_i
     end
 
+    def reset
+      Sidekiq.redis do |conn|
+        conn.set("stat:failed", 0)
+        conn.set("stat:processed", 0)
+      end
+    end
+
     def queues
       Sidekiq.redis do |conn|
         queues = conn.smembers('queues')
