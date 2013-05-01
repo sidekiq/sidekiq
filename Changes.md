@@ -1,6 +1,8 @@
 2.11.2
 -----------
 
+- Fix Web UI when used without Rails [#886]
+- Add Sidekiq::Stats#reset [#349]
 - Add Norwegian locale.
 - Updates for the JA locale.
 
