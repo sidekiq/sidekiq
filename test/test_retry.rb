@@ -197,6 +197,24 @@ class TestRetry < MiniTest::Unit::TestCase
         end
       end
     end
+
+    describe 'delay calculation' do
+      let(:worker){ MiniTest::Mock.new }
+      let(:handler){ Sidekiq::Middleware::Server::RetryJobs.new }
+      let(:msg){ {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>Time.now.utc, "retry"=>10, "retry_count"=>1} }
+
+      it 'is delegated to the worker if it overrides seconds_to_delay' do
+        @redis.expect :zadd, 1, ['retry', String, String]
+        # worker will respond to seconds_to_delay by expecting the method call
+        worker.expect(:seconds_to_delay, 9, [2])
+        assert_raises RuntimeError do
+          handler.call(worker, msg, 'default') do
+            raise 'kerblammo!'
+          end
+        end
+        worker.verify
+      end
+    end
   end
 
 end
