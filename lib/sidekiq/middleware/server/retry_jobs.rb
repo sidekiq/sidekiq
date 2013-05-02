@@ -76,7 +76,7 @@ module Sidekiq
           end
 
           if count < max_retry_attempts
-            delay = seconds_to_delay(count)
+            delay = seconds_to_delay(worker, count)
             logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
             retry_at = Time.now.to_f + delay
             payload = Sidekiq.dump_json(msg)
@@ -107,8 +107,12 @@ module Sidekiq
           end
         end
 
-        def seconds_to_delay(count)
-          (count ** 4) + 15 + (rand(30)*(count+1))
+        def seconds_to_delay(worker, count)
+          if worker.respond_to?(:seconds_to_delay)
+            worker.seconds_to_delay(count)
+          else
+            (count ** 4) + 15 + (rand(30)*(count+1))
+          end
         end
 
       end
