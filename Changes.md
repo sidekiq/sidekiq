@@ -1,6 +1,7 @@
 2.11.3
 -----------
 
+- Fix unclean shutdown leading to duplicate jobs [#897]
 - Add Korean locale [#890]
 
 2.11.2
