@@ -1,3 +1,5 @@
+require 'yaml'
+
 module Sidekiq
   module Extensions
     class Proxy < BasicObject
