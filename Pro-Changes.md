@@ -1,6 +1,8 @@
 Sidekiq Pro Changelog
 =======================
 
+Please see http://sidekiq.org/pro for more details and how to buy.
+
 
 1.0.0
 -----------
