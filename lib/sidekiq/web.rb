@@ -111,7 +111,7 @@ module Sidekiq
           "Workers"   => 'workers',
           "Queues"    => 'queues',
           "Retries"   => 'retries',
-          "Scheduled" => 'scheduled',
+          "Scheduled" => 'scheduled'
         }
       end
 
