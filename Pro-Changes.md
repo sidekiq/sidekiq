@@ -3,6 +3,13 @@ Sidekiq Pro Changelog
 
 Please see http://sidekiq.org/pro for more details and how to buy.
 
+HEAD
+-----------
+
+- New `sidekiq/pro/reliable_push` which makes Sidekiq::Client resiliant
+  to Redis network failures. [#793]
+- Move `sidekiq/reliable_fetch` to `sidekiq/pro/reliable_fetch`
+
 
 1.0.0
 -----------
