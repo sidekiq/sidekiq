@@ -26,6 +26,8 @@ module Sidekiq
     #   ExternalWorker.perform_async
     #   assert_equal 1, $external_variable
     #
+    
+    
     singleton_class.class_eval do
       alias_method :raw_push_old, :raw_push
       def raw_push(payload)
@@ -36,6 +38,18 @@ module Sidekiq
 
         true
       end
+
+      alias_method :raw_push_synchronous, :raw_push
+      alias_method :raw_push_asynchronous, :raw_push_old
+  
+      def process_synchronously
+        singleton_class.class_eval {alias_method :raw_push, :raw_push_synchronous}
+      end
+
+      def process_asynchronously
+        singleton_class.class_eval {alias_method :raw_push, :raw_push_asynchronous}
+      end
+
     end
   end
 end
