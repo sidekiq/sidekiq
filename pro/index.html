@@ -55,8 +55,8 @@
               <div class='row names hidden-phone' id="features_bullets">
                 <div class='entry span2 offset1 selected'><h4>Batches</h4> <div class="arrow up"></div></div>
                 <div class='entry span3'><h4>Notifications</h4> <div class="arrow up"></div></div>
-                <div class='entry span2'><h4>Metrics</h4> <div class="arrow up"></div></div>
                 <div class='entry span2'><h4>Reliability</h4> <div class="arrow up"></div></div>
+                <div class='entry span2'><h4>Metrics</h4> <div class="arrow up"></div></div>
               </div>
       
               <div class="span10 offset1">
@@ -114,6 +114,33 @@
                       </div>
                     </div>
                     <div class='content'>
+                      <h2 class='visible-phone'>Reliability</h2>
+                      <h3>100% reliable message processing.</h3>
+                      <div class="row-fluid">
+                        <div class="span8">
+                          <img alt="" src="../examples/rpoplpush.png"/>
+                        </div>
+                        <div class="span4">
+                          <p>
+                            If a Sidekiq process crashes while processing a job, that job is lost.
+                          </p>
+                          <p>
+                            Sidekiq Pro uses Redis's RPOPLPUSH command to ensure that
+                            jobs will not be lost if the process crashes or gets a
+                            KILL signal.
+                          </p>
+                          <p>
+                            If the Sidekiq client gets a networking error while pushing a job to Redis,
+                            an exception is raised.
+                          </p>
+                          <p>
+                            The Sidekiq Pro client can withstand transient Redis outages.  It will enqueue jobs
+                            locally upon error and attempt to deliver those jobs once connectivity is restored.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class='content'>
                       <h2 class='visible-phone'>Metrics</h2>
                       <h3>Send runtime data to Statsd for distribution to your favorite metrics service.</h3>
                       <div class="row-fluid">
@@ -131,23 +158,6 @@
                         </div>
                       </div>
                     </div>
-                    <div class='content'>
-                      <h2 class='visible-phone'>Reliability</h2>
-                      <h3>100% reliable message processing.</h3>
-                      <div class="row-fluid">
-                        <div class="span8">
-                          <img alt="" src="../examples/rpoplpush.png"/>
-                        </div>
-                        <div class="span4">
-                          <p>
-                            Sidekiq Pro can withstand even the worst scenarios without losing messages.
-                            By using Redis' RPOPLPUSH command, Sidekiq Pro ensures that
-                            messages will not be lost, even if the process crashes or gets a
-                            KILL signal.
-                          </p>
-                        </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -175,15 +185,14 @@
               </div>
               <p>
                 Sidekiq is available under the terms of
-                the <a href="http://www.gnu.org/copyleft/lesser.html">LGPLv3</a>
+                the GNU <a href="http://www.gnu.org/copyleft/lesser.html">LGPLv3</a>
                 license.
               </p>
               <p>
                 In addition to its useful functionality, buying Sidekiq Pro
                 grants your organization a Sidekiq commercial license
-                instead of the LGPL, avoiding any legal issues with code
-                linking, private forks/modifications, etc.  Please see the
-                wiki for further detail on licensing.
+                instead of the GNU LGPL, avoiding any legal issues your lawyers
+                might raise.  Please see the wiki for further detail on licensing.
               </p>
 
 
@@ -214,7 +223,7 @@
               <p>
                 Sales of Sidekiq Pro ensure that Sidekiq will remain
                 well-supported for the foreseeable future. If you have an
-                issue or question with Sidekiq Pro, just enter an issue in
+                problem or question with Sidekiq Pro, just enter an issue in
                 the <a href="https://github.com/mperham/sidekiq/issues">Sidekiq
                 issue tracker</a> or send an email to
                 the <a href="https://github.com/mperham/sidekiq#more-information">Sidekiq
@@ -273,12 +282,12 @@
                 </span>
               </li>
               <li class='span4'>
-                <h6>
+                <p>
                   If you are a Pro customer and want your logo here, email it to me!
                   Make sure it has a transparent background.
-                </h6>
+                </p>
               </li>
-                
+
             </ul>
           </section>
         </div>
@@ -290,7 +299,7 @@
                 Modified <a href='http://twitter.github.com/bootstrap/'>Twitter Bootstrap</a>
                 design by <a href='http://hull.io'>hull.io</a>
               </span>
-                &copy; 2012 Mike Perham, Thank you for supporting Open Source software!
+                &copy; 2013 Mike Perham, Thank you for supporting Open Source software!
                 <a href="http://www.twitter.com/mperham">@mperham</a> /
                 <a href="http://www.mikeperham.com">mikeperham.com</a>
             </div>
