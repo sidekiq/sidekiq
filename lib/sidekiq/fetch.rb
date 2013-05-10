@@ -13,6 +13,7 @@ module Sidekiq
     TIMEOUT = 1
 
     def initialize(mgr, options)
+      @down = nil
       @mgr = mgr
       @strategy = Fetcher.strategy.new(options)
     end
@@ -31,6 +32,8 @@ module Sidekiq
 
         begin
           work = @strategy.retrieve_work
+          ::Sidekiq.logger.info("Redis is online, #{Time.now.to_f - @down.to_f} sec downtime") if @down
+          @down = nil
 
           if work
             @mgr.async.assign(work)
@@ -38,8 +41,13 @@ module Sidekiq
             after(0) { fetch }
           end
         rescue => ex
-          logger.error("Error fetching message: #{ex}")
-          logger.error(ex.backtrace.first)
+          if !@down
+            logger.error("Error fetching message: #{ex}")
+            ex.backtrace.each do |bt|
+              logger.error(bt)
+            end
+          end
+          @down ||= Time.now
           sleep(TIMEOUT)
           after(0) { fetch }
         end
