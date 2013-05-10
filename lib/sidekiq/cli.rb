@@ -272,6 +272,10 @@ module Sidekiq
           opts[:verbose] = arg
         end
 
+        o.on "--log-level LEVEL", "Log level [debug|info|warn|error|fatal]" do |arg|
+          options[:log_level] = arg.to_sym
+        end
+
         o.on '-C', '--config PATH', "path to YAML config file" do |arg|
           opts[:config_file] = arg
         end
@@ -302,7 +306,20 @@ module Sidekiq
     def initialize_logger
       Sidekiq::Logging.initialize_logger(options[:logfile]) if options[:logfile]
 
-      Sidekiq.logger.level = Logger::DEBUG if options[:verbose]
+      log_level_map = {:debug => Logger::DEBUG,
+                       :info => Logger::INFO,
+                       :warn => Logger::WARN,
+                       :error => Logger::ERROR,
+                       :fatal => Logger::FATAL}
+
+      Sidekiq.logger.level =
+        if [:debug, :info, :warn, :error, :fatal].include?(options[:log_level])
+          log_level_map[options[:log_level]]
+        elsif options[:verbose]
+          Logger::DEBUG
+        else
+          Logger::INFO
+        end
     end
 
     def write_pid
