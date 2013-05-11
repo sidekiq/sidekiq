@@ -1,8 +1,9 @@
 2.11.3
 -----------
 
-- Better handling for Redis downtime when fetching jobs, don't print
-  exceptions every second and print success message when Redis is back.
+- Better handling for Redis downtime when fetching jobs and shutting
+  down, don't print exceptions every second and print success message
+  when Redis is back.
 - Fix unclean shutdown leading to duplicate jobs [#897]
 - Add Korean locale [#890]
 

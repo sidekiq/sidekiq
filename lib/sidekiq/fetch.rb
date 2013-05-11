@@ -41,17 +41,25 @@ module Sidekiq
             after(0) { fetch }
           end
         rescue => ex
-          if !@down
-            logger.error("Error fetching message: #{ex}")
-            ex.backtrace.each do |bt|
-              logger.error(bt)
-            end
-          end
-          @down ||= Time.now
-          sleep(TIMEOUT)
-          after(0) { fetch }
+          handle_exception(ex)
+        end
+
+      end
+    end
+
+    def handle_exception(ex)
+      if !@down
+        logger.error("Error fetching message: #{ex}")
+        ex.backtrace.each do |bt|
+          logger.error(bt)
         end
       end
+      @down ||= Time.now
+      sleep(TIMEOUT)
+      after(0) { fetch }
+    rescue Task::TerminatedError
+      # If redis is down when we try to shut down, all the fetch backlog
+      # raises these errors.  Haven't been able to figure out what I'm doing wrong.
     end
 
     # Ugh.  Say hello to a bloody hack.
@@ -96,6 +104,8 @@ module Sidekiq
         end
       end
       Sidekiq.logger.info("Pushed #{inprogress.size} messages back to Redis")
+    rescue => ex
+      Sidekiq.logger.warn("Failed to requeue #{inprogress.size} jobs: #{ex.message}")
     end
 
     UnitOfWork = Struct.new(:queue, :message) do

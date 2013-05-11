@@ -122,6 +122,8 @@ module Sidekiq
         end
         conn.srem('workers', workers_to_remove) if !workers_to_remove.empty?
       end
+    rescue => ex
+      Sidekiq.logger.warn("Unable to clear worker set while shutting down: #{ex.message}")
     end
 
     def hard_shutdown_in(delay)
