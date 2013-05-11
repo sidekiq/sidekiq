@@ -34,29 +34,29 @@ module Sidekiq
     def process(work)
       msgstr = work.message
       queue = work.queue_name
-      defer do
-        @actual_work_thread = Thread.current
-        begin
-          msg = Sidekiq.load_json(msgstr)
-          klass  = msg['class'].constantize
-          worker = klass.new
-          worker.jid = msg['jid']
 
-          stats(worker, msg, queue) do
-            Sidekiq.server_middleware.invoke(worker, msg, queue) do
-              worker.perform(*cloned(msg['args']))
-            end
+      @actual_work_thread = Thread.current
+      begin
+        msg = Sidekiq.load_json(msgstr)
+        klass  = msg['class'].constantize
+        worker = klass.new
+        worker.jid = msg['jid']
+
+        stats(worker, msg, queue) do
+          Sidekiq.server_middleware.invoke(worker, msg, queue) do
+            worker.perform(*cloned(msg['args']))
           end
-        rescue Sidekiq::Shutdown
-          # Had to force kill this job because it didn't finish
-          # within the timeout.
-        rescue Exception => ex
-          handle_exception(ex, msg || { :message => msgstr })
-          raise
-        ensure
-          work.acknowledge
         end
+      rescue Sidekiq::Shutdown
+        # Had to force kill this job because it didn't finish
+        # within the timeout.
+      rescue Exception => ex
+        handle_exception(ex, msg || { :message => msgstr })
+        raise
+      ensure
+        work.acknowledge
       end
+
       @boss.async.processor_done(current_actor)
     end
 
