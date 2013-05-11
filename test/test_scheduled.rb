@@ -7,7 +7,7 @@ class TestScheduled < MiniTest::Unit::TestCase
     def perform(x)
     end
   end
-  
+
   describe 'poller' do
     before do
       Sidekiq.redis = REDIS
@@ -34,8 +34,7 @@ class TestScheduled < MiniTest::Unit::TestCase
 
         poller = Sidekiq::Scheduled::Poller.new
         poller.poll
-        poller.terminate
-        
+
         assert_equal [error_1], conn.lrange("queue:queue_1", 0, -1)
         assert_equal [error_2], conn.lrange("queue:queue_2", 0, -1)
         assert_equal [error_3], conn.zrange("retry", 0, -1)

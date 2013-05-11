@@ -1,6 +1,6 @@
 require 'sidekiq'
 require 'sidekiq/util'
-require 'celluloid'
+require 'sidekiq/actor'
 
 module Sidekiq
   module Scheduled
@@ -13,8 +13,8 @@ module Sidekiq
     # just pops the message back onto its original queue so the
     # workers can pick it up like any other message.
     class Poller
-      include Celluloid
-      include Sidekiq::Util
+      include Util
+      include Actor
 
       SETS = %w(retry schedule)
 
@@ -42,7 +42,7 @@ module Sidekiq
                       conn.sadd('queues', msg['queue'])
                       conn.lpush("queue:#{msg['queue']}", message)
                     end
-                    logger.debug("enqueued #{sorted_set}: #{message}") if logger.debug?
+                    logger.debug { "enqueued #{sorted_set}: #{message}" }
                   end
                 end
               end
@@ -51,7 +51,7 @@ module Sidekiq
             # Most likely a problem with redis networking.
             # Punt and try again at the next interval
             logger.error ex.message
-            logger.error(ex.backtrace.first)
+            logger.error ex.backtrace.first
           end
 
           after(poll_interval) { poll }

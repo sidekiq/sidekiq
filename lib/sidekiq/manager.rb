@@ -1,6 +1,5 @@
-require 'celluloid'
-
 require 'sidekiq/util'
+require 'sidekiq/actor'
 require 'sidekiq/processor'
 require 'sidekiq/fetch'
 
@@ -13,9 +12,12 @@ module Sidekiq
   #
   class Manager
     include Util
-    include Celluloid
-
+    include Actor
     trap_exit :processor_died
+
+    attr_reader :ready
+    attr_reader :busy
+    attr_accessor :fetcher
 
     def initialize(options={})
       logger.debug { options.inspect }

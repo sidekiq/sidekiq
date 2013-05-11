@@ -115,4 +115,3 @@ require 'sidekiq/extensions/class_methods'
 require 'sidekiq/extensions/action_mailer'
 require 'sidekiq/extensions/active_record'
 require 'sidekiq/rails' if defined?(::Rails::Engine)
-

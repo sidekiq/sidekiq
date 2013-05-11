@@ -1,6 +1,7 @@
 2.11.3
 -----------
 
+- Abstract Celluloid usage to Sidekiq::Actor for testing purposes.
 - Better handling for Redis downtime when fetching jobs and shutting
   down, don't print exceptions every second and print success message
   when Redis is back.

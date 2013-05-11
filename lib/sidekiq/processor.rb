@@ -1,5 +1,5 @@
-require 'celluloid'
 require 'sidekiq/util'
+require 'sidekiq/actor'
 
 require 'sidekiq/middleware/server/active_record'
 require 'sidekiq/middleware/server/retry_jobs'
@@ -12,7 +12,7 @@ module Sidekiq
   # chain and then calls Sidekiq::Worker#perform.
   class Processor
     include Util
-    include Celluloid
+    include Actor
 
     def self.default_middleware
       Middleware::Chain.new do |m|

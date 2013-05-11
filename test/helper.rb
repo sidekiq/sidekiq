@@ -1,3 +1,4 @@
+$TESTING = true
 require 'coveralls'
 Coveralls.wear! do
   add_filter "/test/"
