@@ -2,7 +2,7 @@ require 'helper'
 require 'sidekiq/middleware/chain'
 require 'sidekiq/processor'
 
-class TestMiddleware < MiniTest::Unit::TestCase
+class TestMiddleware < Minitest::Test
   describe 'middleware chain' do
     before do
       $errors = []
@@ -78,9 +78,9 @@ class TestMiddleware < MiniTest::Unit::TestCase
         chain.insert_after AnotherCustomMiddleware, YetAnotherCustomMiddleware, '3', $recorder
       end
 
-      boss = MiniTest::Mock.new
+      boss = Minitest::Mock.new
       processor = Sidekiq::Processor.new(boss)
-      actor = MiniTest::Mock.new
+      actor = Minitest::Mock.new
       actor.expect(:processor_done, nil, [processor])
       boss.expect(:async, actor, [])
       processor.process(Sidekiq::BasicFetch::UnitOfWork.new('queue:default', msg))

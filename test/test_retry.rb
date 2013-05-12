@@ -2,10 +2,10 @@ require 'helper'
 require 'sidekiq/scheduled'
 require 'sidekiq/middleware/server/retry_jobs'
 
-class TestRetry < MiniTest::Unit::TestCase
+class TestRetry < Minitest::Test
   describe 'middleware' do
     before do
-      @redis = MiniTest::Mock.new
+      @redis = Minitest::Mock.new
       # Ugh, this is terrible.
       Sidekiq.instance_variable_set(:@redis, @redis)
 
@@ -150,7 +150,7 @@ class TestRetry < MiniTest::Unit::TestCase
           raise "kerblammo!"
         end
       end
-      # MiniTest can't assert that a method call did NOT happen!?
+      # Minitest can't assert that a method call did NOT happen!?
       assert_raises(MockExpectationError) { @redis.verify }
     end
 
@@ -164,12 +164,12 @@ class TestRetry < MiniTest::Unit::TestCase
           raise "kerblammo!"
         end
       end
-      # MiniTest can't assert that a method call did NOT happen!?
+      # Minitest can't assert that a method call did NOT happen!?
       assert_raises(MockExpectationError) { @redis.verify }
     end
 
     describe "retry exhaustion" do
-      let(:worker){ MiniTest::Mock.new }
+      let(:worker){ Minitest::Mock.new }
       let(:handler){ Sidekiq::Middleware::Server::RetryJobs.new }
       let(:msg){ {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>Time.now.utc, "retry"=>3, "retry_count"=>3} }
 

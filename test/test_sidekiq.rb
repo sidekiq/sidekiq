@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'helper'
 
-class TestSidekiq < MiniTest::Unit::TestCase
+class TestSidekiq < Minitest::Test
   describe 'json processing' do
     it 'loads json' do
       assert_equal ({"foo" => "bar"}), Sidekiq.load_json("{\"foo\":\"bar\"}")
@@ -14,7 +14,7 @@ class TestSidekiq < MiniTest::Unit::TestCase
 
   describe "redis connection" do
   	it "returns error without creating a connection if block is not given" do
-      mock = MiniTest::Mock.new
+      mock = Minitest::Mock.new
       mock.expect :create, nil #Sidekiq::RedisConnection, create
   		assert_raises(ArgumentError) {
   			Sidekiq.redis

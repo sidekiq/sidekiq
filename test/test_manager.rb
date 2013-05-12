@@ -1,7 +1,7 @@
 require 'helper'
 require 'sidekiq/manager'
 
-class TestManager < MiniTest::Unit::TestCase
+class TestManager < Minitest::Test
 
   describe 'manager' do
     it 'creates N processor instances' do
@@ -15,9 +15,9 @@ class TestManager < MiniTest::Unit::TestCase
       mgr = Sidekiq::Manager.new(options)
       count = options[:concurrency]
 
-      fetch_mock = MiniTest::Mock.new
+      fetch_mock = Minitest::Mock.new
       count.times { fetch_mock.expect(:fetch, nil, []) }
-      async_mock = MiniTest::Mock.new
+      async_mock = Minitest::Mock.new
       count.times { async_mock.expect(:async, fetch_mock, []) }
       mgr.fetcher = async_mock
       mgr.start
@@ -27,8 +27,8 @@ class TestManager < MiniTest::Unit::TestCase
     end
 
     it 'assigns work to a processor' do
-      uow = MiniTest::Mock.new
-      processor = MiniTest::Mock.new
+      uow = Minitest::Mock.new
+      processor = Minitest::Mock.new
       processor.expect(:async, processor, [])
       processor.expect(:process, nil, [uow])
 
@@ -41,7 +41,7 @@ class TestManager < MiniTest::Unit::TestCase
     end
 
     it 'requeues work if stopping' do
-      uow = MiniTest::Mock.new
+      uow = Minitest::Mock.new
       uow.expect(:requeue, nil, [])
 
       mgr = Sidekiq::Manager.new(options)

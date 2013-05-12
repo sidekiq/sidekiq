@@ -1,7 +1,7 @@
 require 'helper'
 require 'sidekiq/redis_connection'
 
-class TestRedisConnection < MiniTest::Unit::TestCase
+class TestRedisConnection < Minitest::Test
 
   describe ".create" do
 

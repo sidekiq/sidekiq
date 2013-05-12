@@ -1,14 +1,14 @@
 require 'helper'
 require 'sidekiq/processor'
 
-class TestProcessor < MiniTest::Unit::TestCase
+class TestProcessor < Minitest::Test
   TestException = Class.new(StandardError)
   TEST_EXCEPTION = TestException.new("kerboom!")
 
   describe 'with mock setup' do
     before do
       $invokes = 0
-      @boss = MiniTest::Mock.new
+      @boss = Minitest::Mock.new
       @processor = ::Sidekiq::Processor.new(@boss)
       Celluloid.logger = nil
       Sidekiq.redis = REDIS
@@ -29,7 +29,7 @@ class TestProcessor < MiniTest::Unit::TestCase
 
     it 'processes as expected' do
       msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
-      actor = MiniTest::Mock.new
+      actor = Minitest::Mock.new
       actor.expect(:processor_done, nil, [@processor])
       @boss.expect(:async, actor, [])
       @processor.process(work(msg))
@@ -65,7 +65,7 @@ class TestProcessor < MiniTest::Unit::TestCase
       msg = { 'class' => MockWorker.to_s, 'args' => [['myarg']] }
       msgstr = Sidekiq.dump_json(msg)
       processor = ::Sidekiq::Processor.new(@boss)
-      actor = MiniTest::Mock.new
+      actor = Minitest::Mock.new
       actor.expect(:processor_done, nil, [processor])
       @boss.expect(:async, actor, [])
       processor.process(work(msgstr))
@@ -80,7 +80,7 @@ class TestProcessor < MiniTest::Unit::TestCase
       describe 'when successful' do
         def successful_job
           msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
-          actor = MiniTest::Mock.new
+          actor = Minitest::Mock.new
           actor.expect(:processor_done, nil, [@processor])
           @boss.expect(:async, actor, [])
           @processor.process(work(msg))

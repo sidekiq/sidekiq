@@ -9,7 +9,7 @@ require 'sidekiq/extensions/active_record'
 
 Sidekiq.hook_rails!
 
-class TestInline < MiniTest::Unit::TestCase
+class TestInline < Minitest::Test
   describe 'sidekiq inline testing' do
     class InlineError < RuntimeError; end
     class ParameterIsNotString < RuntimeError; end

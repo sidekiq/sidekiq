@@ -1,10 +1,10 @@
 require 'helper'
 require 'sidekiq/scheduled'
 
-class TestScheduling < MiniTest::Unit::TestCase
+class TestScheduling < Minitest::Test
   describe 'middleware' do
     before do
-      @redis = MiniTest::Mock.new
+      @redis = Minitest::Mock.new
       # Ugh, this is terrible.
       Sidekiq.instance_variable_set(:@redis, @redis)
 

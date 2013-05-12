@@ -1,7 +1,7 @@
 require 'helper'
 require 'sidekiq/fetch'
 
-class TestFetcher < MiniTest::Unit::TestCase
+class TestFetcher < Minitest::Test
   describe 'fetcher' do
     before do
       Sidekiq.redis = { :namespace => 'fuzzy' }

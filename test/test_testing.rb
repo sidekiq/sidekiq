@@ -9,7 +9,7 @@ require 'sidekiq/extensions/active_record'
 
 Sidekiq.hook_rails!
 
-class TestTesting < MiniTest::Unit::TestCase
+class TestTesting < Minitest::Test
   describe 'sidekiq testing' do
     class PerformError < RuntimeError; end
 

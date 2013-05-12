@@ -2,10 +2,10 @@ require 'helper'
 require 'sidekiq/client'
 require 'sidekiq/worker'
 
-class TestClient < MiniTest::Unit::TestCase
+class TestClient < Minitest::Test
   describe 'with mock redis' do
     before do
-      @redis = MiniTest::Mock.new
+      @redis = Minitest::Mock.new
       def @redis.multi; [yield] * 2 if block_given?; end
       def @redis.set(*); true; end
       def @redis.sadd(*); true; end
@@ -20,6 +20,10 @@ class TestClient < MiniTest::Unit::TestCase
       def @redis.with; yield self; end
       def @redis.exec; true; end
       Sidekiq.instance_variable_set(:@redis, @redis)
+    end
+
+    after do
+      Sidekiq.instance_variable_set(:@redis, REDIS)
     end
 
     it 'raises ArgumentError with invalid params' do

@@ -3,7 +3,7 @@ require 'sidekiq'
 require 'sidekiq/web'
 require 'rack/test'
 
-class TestWeb < MiniTest::Unit::TestCase
+class TestWeb < Minitest::Test
   describe 'sidekiq web' do
     include Rack::Test::Methods
 
