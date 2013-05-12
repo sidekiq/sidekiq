@@ -7,7 +7,7 @@ require 'sidekiq/redis_connection'
 require 'sidekiq/util'
 require 'sidekiq/api'
 
-require 'multi_json'
+require 'json'
 
 module Sidekiq
   NAME = "Sidekiq"
@@ -90,11 +90,11 @@ module Sidekiq
   end
 
   def self.load_json(string)
-    MultiJson.decode(string, :symbolize_keys => false)
+    JSON.parse(string)
   end
 
   def self.dump_json(object)
-    MultiJson.encode(object)
+    JSON.generate(object)
   end
 
   def self.logger

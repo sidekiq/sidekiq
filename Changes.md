@@ -10,6 +10,8 @@
   when Redis is back.
 - Fix unclean shutdown leading to duplicate jobs [#897]
 - Add Korean locale [#890]
+- Upgrade test suite to Minitest 5
+- Remove usage of `multi_json` as `json` is now robust on all platforms.
 
 2.11.2
 -----------
