@@ -14,6 +14,8 @@ module Sidekiq
     include Util
     include Actor
 
+    task_class TaskThread
+
     def self.default_middleware
       Middleware::Chain.new do |m|
         m.add Middleware::Server::Logging

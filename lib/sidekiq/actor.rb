@@ -12,6 +12,8 @@ module Sidekiq
   module Actor
     if $TESTING
 
+      TaskThread = 0
+
       def sleep(amount=0)
       end
 
@@ -50,6 +52,8 @@ module Sidekiq
         class << klass
           alias_method :new_link, :new
           def trap_exit(meth)
+          end
+          def task_class(konstant)
           end
         end
       end
