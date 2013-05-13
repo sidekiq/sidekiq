@@ -8,9 +8,9 @@
           li class="#{current_path == url ? 'active' : ''}"
             a href="#{{root_path}}#{{url}}" = t(title)
         - else
-          li class="#{current_path.starts_with?(url) ? 'active' : ''}"
+          li class="#{current_path.start_with?(url) ? 'active' : ''}"
             a href="#{{root_path}}#{{url}}" = t(title)
 
       - custom_tabs.each do |title, url|
-          li class="#{current_path.starts_with?(url) ? 'active' : ''}"
+          li class="#{current_path.start_with?(url) ? 'active' : ''}"
             a href="#{{root_path}}#{{url}}" = t(title)
