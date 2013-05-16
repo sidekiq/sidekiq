@@ -2,6 +2,8 @@ require 'yaml'
 require 'sinatra/base'
 require 'slim'
 
+raise "The Sidekiq Web UI requires slim 1.3 or greater.  You have slim v#{Slim::VERSION}" if Slim::VERSION < '1.3.0'
+
 require 'sidekiq'
 require 'sidekiq/api'
 require 'sidekiq/paginator'
