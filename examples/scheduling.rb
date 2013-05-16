@@ -35,3 +35,13 @@ end
 every :hour do # Many shortcuts available: :hour, :day, :month, :year, :reboot
   runner "HourlyWorker.perform_async"
 end
+
+# Using the runner command loads an extra rails instance
+# If you want to avoid this you can use the sidekiq-client-cli gem which is a commmand line sidekiq client
+# Define a new job_type
+job_type :sidekiq,  "cd :path && RAILS_ENV=:environment bundle exec sidekiq-client :task :output"
+
+# Add the worker to the queue directly
+every :hour do
+  sidekiq "push HourlyWorker"
+end
