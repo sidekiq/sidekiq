@@ -2,7 +2,7 @@ require 'yaml'
 require 'sinatra/base'
 require 'slim'
 
-raise "The Sidekiq Web UI requires slim 1.3.8 or greater.  You have slim v#{Slim::VERSION}" if Slim::VERSION < '1.3.8'
+raise "The Sidekiq Web UI requires slim 1.3.8 or greater.  You have slim v#{Slim::VERSION}" if Gem::Version.new(Slim::VERSION) < Gem::Version.new('1.3.8')
 
 require 'sidekiq'
 require 'sidekiq/api'
