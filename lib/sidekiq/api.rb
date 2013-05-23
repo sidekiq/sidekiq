@@ -372,15 +372,16 @@ module Sidekiq
   # WARNING WARNING WARNING
   #
   # This is live data that can change every millisecond.
-  # If you do #size => 5 and then expect #each to be
+  # If you call #size => 5 and then expect #each to be
   # called 5 times, you're going to have a bad time.
   #
   #    workers = Sidekiq::Workers.new
   #    workers.size => 2
-  #    workers.each do |name, work|
-  #      # name is a unique identifier per Processor instance
+  #    workers.each do |name, work, started_at|
+  #      # name is a unique identifier per worker
   #      # work is a Hash which looks like:
   #      # { 'queue' => name, 'run_at' => timestamp, 'payload' => msg }
+  #      # started_at is a String rep of the time when the worker started working on the job
   #    end
 
   class Workers
@@ -390,9 +391,12 @@ module Sidekiq
       Sidekiq.redis do |conn|
         workers = conn.smembers("workers")
         workers.each do |w|
-          msg = conn.get("worker:#{w}")
+          msg, time = conn.multi do
+            conn.get("worker:#{w}")
+            conn.get("worker:#{w}:started")
+          end
           next unless msg
-          block.call(w, Sidekiq.load_json(msg))
+          block.call(w, Sidekiq.load_json(msg), time)
         end
       end
     end
