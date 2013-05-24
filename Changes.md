@@ -1,3 +1,9 @@
+HEAD
+-----------
+
+- Record the timestamp when jobs are enqueued. Add
+  Sidekiq::Stats::Job#enqueued_at to query the time. [mariovisic, #944]
+
 2.12.0
 -----------
 
