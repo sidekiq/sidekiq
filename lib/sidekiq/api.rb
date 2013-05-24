@@ -128,6 +128,14 @@ module Sidekiq
       Sidekiq.redis { |con| con.llen(@rname) }
     end
 
+    def latency
+      entry = Sidekiq.redis do |conn|
+        conn.lrange(@rname, -1, -1)
+      end.first
+      return 0 unless entry
+      Time.now.to_f - Sidekiq.load_json(entry)['enqueued_at']
+    end
+
     def each(&block)
       page = 0
       page_size = 50

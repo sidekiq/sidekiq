@@ -164,6 +164,7 @@ class TestApi < Minitest::Test
     it 'shows queue as empty' do
       q = Sidekiq::Queue.new
       assert_equal 0, q.size
+      assert_equal 0, q.latency
     end
 
     class ApiWorker
@@ -171,8 +172,8 @@ class TestApi < Minitest::Test
     end
 
     it 'can enumerate jobs' do
+      q = Sidekiq::Queue.new
       Time.stub(:now, Time.new(2012, 12, 26)) do
-        q = Sidekiq::Queue.new
         ApiWorker.perform_async(1, 'mike')
         assert_equal ['TestApi::ApiWorker'], q.map(&:klass)
 
@@ -181,9 +182,12 @@ class TestApi < Minitest::Test
         assert_equal [1, 'mike'], job.args
         assert_equal Time.new(2012, 12, 26), job.enqueued_at
 
-        q = Sidekiq::Queue.new('other')
-        assert_equal 0, q.size
       end
+
+      assert q.latency > 10_000_000
+
+      q = Sidekiq::Queue.new('other')
+      assert_equal 0, q.size
     end
 
     it 'can delete jobs' do

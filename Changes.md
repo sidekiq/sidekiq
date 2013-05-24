@@ -2,7 +2,9 @@ HEAD
 -----------
 
 - Record the timestamp when jobs are enqueued. Add
-  Sidekiq::Stats::Job#enqueued_at to query the time. [mariovisic, #944]
+  Sidekiq::Job#enqueued\_at to query the time. [mariovisic, #944]
+- Add Sidekiq::Queue#latency - calculates diff between now and
+  enqueued\_at for the oldest job in the queue.
 
 2.12.0
 -----------
