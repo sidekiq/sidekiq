@@ -62,7 +62,7 @@ module Sidekiq
         normed = normalize_item(items)
         payloads = items['args'].map do |args|
           raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" if !args.is_a?(Array)
-          process_single(items['class'], normed.merge('args' => args, 'jid' => SecureRandom.hex(12)))
+          process_single(items['class'], normed.merge('args' => args, 'jid' => SecureRandom.hex(12), 'enqueued_at' => Time.now.to_f))
         end.compact
 
         pushed = false
@@ -130,6 +130,7 @@ module Sidekiq
         end
 
         normalized_item['jid'] = SecureRandom.hex(12)
+        normalized_item['enqueued_at'] = Time.now.to_f
         normalized_item
       end
 
