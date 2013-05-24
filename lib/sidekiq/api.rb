@@ -246,7 +246,7 @@ module Sidekiq
         results.map do |message|
           msg = Sidekiq.load_json(message)
           msg['retry_count'] = msg['retry_count'] - 1
-          conn.lpush("queue:#{msg['queue']}", Sidekiq.dump_json(msg))
+          Sidekiq::Client.push(msg)
         end
       end
     end
