@@ -186,6 +186,10 @@ module Sidekiq
       @item['jid']
     end
 
+    def enqueued_at
+      Time.at(@item['enqueued_at'])
+    end
+
     def queue
       @queue
     end

@@ -171,16 +171,19 @@ class TestApi < Minitest::Test
     end
 
     it 'can enumerate jobs' do
-      q = Sidekiq::Queue.new
-      ApiWorker.perform_async(1, 'mike')
-      assert_equal ['TestApi::ApiWorker'], q.map(&:klass)
+      Time.stub(:now, Time.new(2012, 12, 26)) do
+        q = Sidekiq::Queue.new
+        ApiWorker.perform_async(1, 'mike')
+        assert_equal ['TestApi::ApiWorker'], q.map(&:klass)
 
-      job = q.first
-      assert_equal 24, job.jid.size
-      assert_equal [1, 'mike'], job.args
+        job = q.first
+        assert_equal 24, job.jid.size
+        assert_equal [1, 'mike'], job.args
+        assert_equal Time.new(2012, 12, 26), job.enqueued_at
 
-      q = Sidekiq::Queue.new('other')
-      assert_equal 0, q.size
+        q = Sidekiq::Queue.new('other')
+        assert_equal 0, q.size
+      end
     end
 
     it 'can delete jobs' do
