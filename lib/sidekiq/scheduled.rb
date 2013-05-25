@@ -39,10 +39,7 @@ module Sidekiq
                   # the queue, it's because another process already popped it so we can move on to the
                   # next one.
                   if conn.zrem(sorted_set, message)
-                    conn.multi do
-                      conn.sadd('queues', msg['queue'])
-                      conn.lpush("queue:#{msg['queue']}", Sidekiq.dump_json(msg))
-                    end
+                    Sidekiq::Client.push(msg)
                     logger.debug { "enqueued #{sorted_set}: #{message}" }
                   end
                 end
