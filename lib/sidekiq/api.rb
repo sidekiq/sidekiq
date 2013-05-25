@@ -202,6 +202,10 @@ module Sidekiq
       @queue
     end
 
+    def latency
+      Time.now.to_f - @item['enqueued_at']
+    end
+
     ##
     # Remove this job from the queue.
     def delete

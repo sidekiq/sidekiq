@@ -199,11 +199,11 @@ class TestApi < Minitest::Test
     end
 
     it 'can find job by id in sorted sets' do
-      q = Sidekiq::Queue.new
       job_id = ApiWorker.perform_in(100, 1, 'jason')
       job = Sidekiq::ScheduledSet.new.find_job(job_id)
       refute_nil job
       assert_equal job_id, job.jid
+      assert_in_delta job.latency, 0.0, 0.01
     end
 
     it 'can find job by id in queues' do
