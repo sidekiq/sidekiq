@@ -1,6 +1,8 @@
 HEAD
 -----------
 
+- Scheduled and Retry jobs now use Sidekiq::Client to push
+  jobs onto the queue, so they use client middleware. [dimko, #948]
 - Record the timestamp when jobs are enqueued. Add
   Sidekiq::Job#enqueued\_at to query the time. [mariovisic, #944]
 - Add Sidekiq::Queue#latency - calculates diff between now and

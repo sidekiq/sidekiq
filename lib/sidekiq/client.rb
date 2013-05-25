@@ -94,7 +94,10 @@ module Sidekiq
         pushed = false
         Sidekiq.redis do |conn|
           if payloads.first['at']
-            pushed = conn.zadd('schedule', payloads.map {|hash| [hash['at'].to_s, Sidekiq.dump_json(hash)]})
+            pushed = conn.zadd('schedule', payloads.map do |hash|
+              at = hash.delete('at').to_s
+              [at, Sidekiq.dump_json(hash)]
+            end)
           else
             q = payloads.first['queue']
             to_push = payloads.map { |entry| Sidekiq.dump_json(entry) }

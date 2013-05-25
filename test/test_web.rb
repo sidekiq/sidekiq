@@ -264,7 +264,6 @@ class TestWeb < Minitest::Test
       score = Time.now.to_f
       msg = { 'class' => 'HardWorker',
               'args' => ['bob', 1, Time.now.to_f],
-              'at' => score,
               'jid' => 'f39af2a05e8f4b24dbc0f1e4' }
       Sidekiq.redis do |conn|
         conn.zadd('schedule', score, Sidekiq.dump_json(msg))
