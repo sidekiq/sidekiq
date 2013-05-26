@@ -3,7 +3,7 @@ Sidekiq Pro Changelog
 
 Please see http://sidekiq.org/pro for more details and how to buy.
 
-HEAD
+1.1.0
 -----------
 
 - New `sidekiq/pro/reliable_push` which makes Sidekiq::Client resiliant
