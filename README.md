@@ -27,7 +27,7 @@ Requirements
 I test on Ruby 1.9.3 and JRuby 1.7.x.  Other versions/VMs are
 untested but I will do my best to support them.  Ruby 1.8 is not supported.
 
-Redis 2.0 or greater is required.
+Redis 2.4 or greater is required.
 
 
 Installation
