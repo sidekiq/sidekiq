@@ -123,7 +123,7 @@ var updateStatsSummary = function(data) {
   for (var i = Sidekiq.enqueued_series.length - 1; i > 0; i--) {
     enqueued_growths += (Sidekiq.enqueued_series[i] - Sidekiq.enqueued_series[i - 1]);
   }
-  var average_queue_growth = Math.round((enqueued_growths / Sidekiq.enqueued_series.length) * 100) / 100;
+  var average_queue_growth = Math.round(enqueued_growths / Sidekiq.enqueued_series.length);
 
   $('ul.summary li.processed span.count').html(data.processed.numberWithDelimiter());
   $('ul.summary li.failed span.count').html(data.failed.numberWithDelimiter());
