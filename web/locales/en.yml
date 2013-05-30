@@ -21,6 +21,7 @@ en: # <---- change this to your locale code
   Class: Class
   Job: Job
   Arguments: Arguments
+  Extras: Extras
   Started: Started
   ShowAll: Show All
   CurrentMessagesInQueue: Current messages in <span class='title'>%{queue}</span>
