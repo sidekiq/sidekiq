@@ -119,12 +119,12 @@ class TestTesting < Minitest::Test
       StoredWorker.clear
     end
 
-    it 'shift_and_perform runs only one job' do
+    it 'perform_one runs only one job' do
       DirectWorker.perform_async(1, 2)
       DirectWorker.perform_async(3, 4)
       assert_equal 2, DirectWorker.jobs.size
 
-      DirectWorker.shift_and_perform
+      DirectWorker.perform_one
       assert_equal 1, DirectWorker.jobs.size
 
       DirectWorker.clear

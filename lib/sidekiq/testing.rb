@@ -89,7 +89,7 @@ module Sidekiq
       end
 
       # Pop out a single job and perform it
-      def shift_and_perform
+      def perform_one
         job = jobs.shift
         new.perform(*job['args'])
       end

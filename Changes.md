@@ -7,6 +7,8 @@ HEAD
   Sidekiq::Job#enqueued\_at to query the time. [mariovisic, #944]
 - Add Sidekiq::Queue#latency - calculates diff between now and
   enqueued\_at for the oldest job in the queue.
+- Add testing method `perform_one` that dequeues and performs a single job.
+  This is mainly to aid testing jobs that spawn other jobs. [fumin, #963]
 
 2.12.0
 -----------
