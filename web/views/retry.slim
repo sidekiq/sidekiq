@@ -20,7 +20,7 @@ table class="retry table table-bordered table-striped"
       td
         code= @retry.jid
     tr
-      th Extras
+      th = t('Extras')
       td
         code= display_args(display_extra_items(@retry), 1000)
     - if @retry['retry_count'] > 0
