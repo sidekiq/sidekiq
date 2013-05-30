@@ -120,8 +120,8 @@ class TestTesting < Minitest::Test
     end
 
     it 'shift_and_perform runs only one job' do
-      assert StoredWorker.perform_async(:first)
-      assert StoredWorker.perform_async(:second)
+      StoredWorker.perform_async(:first)
+      StoredWorker.perform_async(:second)
       assert_equal 2, StoredWorker.jobs.size
 
       StoredWorker.shift_and_perform
