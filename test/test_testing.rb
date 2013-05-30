@@ -130,6 +130,12 @@ class TestTesting < Minitest::Test
       DirectWorker.clear
     end
 
+    it 'perform_one raise error upon empty queue' do
+      assert_raises Sidekiq::EmptyQueueError do
+        DirectWorker.perform_one
+      end
+    end
+
     class FirstWorker
       include Sidekiq::Worker
       class_attribute :count

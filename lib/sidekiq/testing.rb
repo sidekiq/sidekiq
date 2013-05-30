@@ -1,5 +1,7 @@
 module Sidekiq
 
+  class EmptyQueueError < RuntimeError; end
+
   class Client
     class << self
       alias_method :raw_push_old, :raw_push
@@ -90,6 +92,8 @@ module Sidekiq
 
       # Pop out a single job and perform it
       def perform_one
+        raise(EmptyQueueError,
+              "perform_one called with empty job queue") unless jobs.size > 0
         job = jobs.shift
         new.perform(*job['args'])
       end
