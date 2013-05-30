@@ -119,6 +119,23 @@ class TestTesting < Minitest::Test
       StoredWorker.clear
     end
 
+    it 'perform_one runs only one job' do
+      DirectWorker.perform_async(1, 2)
+      DirectWorker.perform_async(3, 4)
+      assert_equal 2, DirectWorker.jobs.size
+
+      DirectWorker.perform_one
+      assert_equal 1, DirectWorker.jobs.size
+
+      DirectWorker.clear
+    end
+
+    it 'perform_one raise error upon empty queue' do
+      assert_raises Sidekiq::EmptyQueueError do
+        DirectWorker.perform_one
+      end
+    end
+
     class FirstWorker
       include Sidekiq::Worker
       class_attribute :count
