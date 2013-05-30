@@ -19,10 +19,11 @@ table class="retry table table-bordered table-striped"
       th JID
       td
         code= @retry.jid
-    tr
-      th = t('Extras')
-      td
-        code= display_args(display_extra_items(@retry), 1000)
+    - unless retry_extra_items(@retry).empty?
+      tr
+        th = t('Extras')
+        td
+          code= display_args(retry_extra_items(@retry), 1000)
     - if @retry['retry_count'] > 0
       tr
         th = t('RetryCount')

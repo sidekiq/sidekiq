@@ -107,15 +107,16 @@ module Sidekiq
         args.map { |arg| a = arg.inspect; a.size > count ? "#{a[0..count]}..." : a }.join(", ")
       end
 
-      def display_extra_items(retry_job)
-        regular_keys = [
-          "queue", "class", "args", "retry_count", "retried_at", "failed_at",
-          "retry", "jid", "error_message", "error_class", "backtrace", "error_backtrace"
-        ]
+      RETRY_JOB_KEYS = [
+        "queue", "class", "args", "retry_count", "retried_at", "failed_at",
+        "retry", "jid", "error_message", "error_class", "backtrace",
+        "error_backtrace", "unique", "enqueued_at"
+      ]
 
-        {}.tap do |extra|
+      def retry_extra_items(retry_job)
+        @retry_extra_items ||= {}.tap do |extra|
           retry_job.item.each do |key, value|
-            extra[key] = value unless regular_keys.include?(key)
+            extra[key] = value unless RETRY_JOB_KEYS.include?(key)
           end
         end
       end
