@@ -1,6 +1,7 @@
-HEAD
+2.12.1
 -----------
 
+- Force Celluloid 0.14.1 as 0.14.0 has a serious bug. [#954]
 - Scheduled and Retry jobs now use Sidekiq::Client to push
   jobs onto the queue, so they use client middleware. [dimko, #948]
 - Record the timestamp when jobs are enqueued. Add
