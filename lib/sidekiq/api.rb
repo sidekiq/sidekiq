@@ -3,17 +3,11 @@ require 'sidekiq'
 module Sidekiq
   class Stats
     def processed
-      count = Sidekiq.redis do |conn|
-                conn.get("stat:processed")
-              end
-      count.nil? ? 0 : count.to_i
+      Sidekiq.redis { |conn| conn.get("stat:processed") }.to_i
     end
 
     def failed
-      count = Sidekiq.redis do |conn|
-                conn.get("stat:failed")
-              end
-      count.nil? ? 0 : count.to_i
+      Sidekiq.redis { |conn| conn.get("stat:failed") }.to_i
     end
 
     def reset
@@ -60,24 +54,6 @@ module Sidekiq
 
       def failed
         date_stat_hash("failed")
-      end
-
-      def self.cleanup
-        days_of_stats_to_keep = 180
-        today = Time.now.utc.to_date
-        delete_before_date = Time.now.utc.to_date - days_of_stats_to_keep
-
-        Sidekiq.redis do |conn|
-          processed_keys = conn.keys("stat:processed:*")
-          earliest = "stat:processed:#{delete_before_date.to_s}"
-          pkeys = processed_keys.select { |key| key < earliest }
-          conn.del(pkeys) if pkeys.size > 0
-
-          failed_keys = conn.keys("stat:failed:*")
-          earliest = "stat:failed:#{delete_before_date.to_s}"
-          fkeys = failed_keys.select { |key| key < earliest }
-          conn.del(fkeys) if fkeys.size > 0
-        end
       end
 
       private
