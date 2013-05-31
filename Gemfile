@@ -1,7 +1,6 @@
 source 'http://rubygems.org'
 gemspec
 
-gem 'slim'
 gem 'sqlite3', :platform => :mri
 
 group :test do
