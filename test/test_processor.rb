@@ -77,7 +77,19 @@ class TestProcessor < Minitest::Test
         Sidekiq.redis {|c| c.flushdb }
       end
 
+      def with_expire(time)
+        begin
+          old = Sidekiq::Processor::STATS_TIMEOUT
+          silence_warnings { Sidekiq::Processor.const_set(:STATS_TIMEOUT, time) }
+          yield
+        ensure
+          silence_warnings { Sidekiq::Processor.const_set(:STATS_TIMEOUT, old) }
+        end
+      end
+
       describe 'when successful' do
+        let(:processed_today_key) { "stat:processed:#{Time.now.utc.to_date}" }
+
         def successful_job
           msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
           actor = Minitest::Mock.new
@@ -91,16 +103,20 @@ class TestProcessor < Minitest::Test
           assert_equal 1, Sidekiq::Stats.new.processed
         end
 
+        it 'expires processed stat' do
+          successful_job
+          assert_equal Sidekiq::Processor::STATS_TIMEOUT, Sidekiq.redis { |conn| conn.ttl(processed_today_key) }
+        end
+
         it 'increments date processed stat' do
-          Time.stub(:now, Time.parse("2012-12-25 1:00:00 -0500")) do
-            successful_job
-            date_processed = Sidekiq.redis { |conn| conn.get("stat:processed:2012-12-25") }.to_i
-            assert_equal 1, date_processed
-          end
+          successful_job
+          assert_equal 1, Sidekiq.redis { |conn| conn.get(processed_today_key) }.to_i
         end
       end
 
       describe 'when failed' do
+        let(:failed_today_key) { "stat:failed:#{Time.now.utc.to_date}" }
+
         def failed_job
           msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'] })
           begin
@@ -115,14 +131,15 @@ class TestProcessor < Minitest::Test
         end
 
         it 'increments date failed stat' do
-          Time.stub(:now, Time.parse("2012-12-25 1:00:00 -0500")) do
-            failed_job
-            date_failed = Sidekiq.redis { |conn| conn.get("stat:failed:2012-12-25") }.to_i
-            assert_equal 1, date_failed
-          end
+          failed_job
+          assert_equal 1, Sidekiq.redis { |conn| conn.get(failed_today_key) }.to_i
+        end
+
+        it 'expires failed stat' do
+          failed_job
+          assert_equal Sidekiq::Processor::STATS_TIMEOUT, Sidekiq.redis { |conn| conn.ttl(failed_today_key) }
         end
       end
-
     end
   end
 end

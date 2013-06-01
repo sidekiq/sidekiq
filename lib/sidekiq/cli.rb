@@ -52,8 +52,6 @@ module Sidekiq
       logger.info "Running in #{RUBY_DESCRIPTION}"
       logger.info Sidekiq::LICENSE
 
-      Sidekiq::Stats::History.cleanup
-
       if !options[:daemon]
         logger.info 'Starting processing, hit Ctrl-C to stop'
       end
