@@ -3,7 +3,7 @@ require 'sidekiq/extensions/generic_proxy'
 module Sidekiq
   module Extensions
     ##
-    # Adds 'delay' and 'delay_for' to ActionMailer to offload arbitrary email
+    # Adds 'delay', 'delay_for' and `delay_until` methods to ActionMailer to offload arbitrary email
     # delivery to Sidekiq.  Example:
     #
     #    UserMailer.delay.send_welcome_email(new_user)
