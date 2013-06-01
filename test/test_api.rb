@@ -127,32 +127,6 @@ class TestApi < Minitest::Test
           end
         end
       end
-
-      describe "cleanup" do
-        it 'removes processed stats outside of keep window' do
-          Sidekiq.redis do |c|
-            c.incrby("stat:processed:2012-05-03", 4)
-            c.incrby("stat:processed:2012-06-03", 4)
-            c.incrby("stat:processed:2012-07-03", 1)
-          end
-          Time.stub(:now, Time.parse("2012-12-01 1:00:00 -0500")) do
-            Sidekiq::Stats::History.cleanup
-            assert_equal false, Sidekiq.redis { |c| c.exists("stat:processed:2012-05-03") }
-          end
-        end
-
-        it 'removes failed stats outside of keep window' do
-          Sidekiq.redis do |c|
-            c.incrby("stat:failed:2012-05-03", 4)
-            c.incrby("stat:failed:2012-06-03", 4)
-            c.incrby("stat:failed:2012-07-03", 1)
-          end
-          Time.stub(:now, Time.parse("2012-12-01 1:00:00 -0500")) do
-            Sidekiq::Stats::History.cleanup
-            assert_equal false, Sidekiq.redis { |c| c.exists("stat:failed:2012-05-03") }
-          end
-        end
-      end
     end
   end
 
