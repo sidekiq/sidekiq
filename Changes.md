@@ -1,6 +1,7 @@
-HEAD
+2.12.2
 -----------
 
+- Relax slim version requirement to >= 1.1.0
 - Refactor historical stats to use TTL, not explicit cleanup. [grosser, #971]
 
 2.12.1

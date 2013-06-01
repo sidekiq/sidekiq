@@ -20,7 +20,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency                  'celluloid', '>= 0.14.1'
   gem.add_dependency                  'json'
   gem.add_development_dependency      'sinatra'
-  gem.add_development_dependency      'slim', '>= 1.3.8'
+  gem.add_development_dependency      'slim', '>= 1.1.0'
   gem.add_development_dependency      'minitest', '~> 5'
   gem.add_development_dependency      'rake'
   gem.add_development_dependency      'actionmailer'
