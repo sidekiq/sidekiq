@@ -64,7 +64,6 @@ module Sidekiq
 
       def self.cleanup
         days_of_stats_to_keep = 180
-        today = Time.now.utc.to_date
         delete_before_date = Time.now.utc.to_date - days_of_stats_to_keep
 
         Sidekiq.redis do |conn|
