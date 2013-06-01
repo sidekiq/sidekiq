@@ -1,3 +1,8 @@
+HEAD
+-----------
+
+- Refactor historical stats to use TTL, not explicit cleanup. [grosser, #971]
+
 2.12.1
 -----------
 
