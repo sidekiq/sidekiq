@@ -3,7 +3,7 @@ require 'sidekiq/extensions/generic_proxy'
 module Sidekiq
   module Extensions
     ##
-    # Adds a 'delay' method to all Classes to offload class method
+    # Adds 'delay', 'delay_for' and `delay_until` methods to all Classes to offload class method
     # execution to Sidekiq.  Examples:
     #
     # User.delay.delete_inactive
