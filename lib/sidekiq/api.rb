@@ -93,6 +93,10 @@ module Sidekiq
   class Queue
     include Enumerable
 
+    def self.all
+      Sidekiq.redis {|c| c.smembers('queues') }.map {|q| Sidekiq::Queue.new(q) }
+    end
+
     attr_reader :name
 
     def initialize(name="default")
@@ -171,7 +175,7 @@ module Sidekiq
     end
 
     def enqueued_at
-      Time.at(@item['enqueued_at'])
+      Time.at(@item['enqueued_at'] || 0)
     end
 
     def queue

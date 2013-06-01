@@ -19,11 +19,15 @@ table class="retry table table-bordered table-striped"
       th JID
       td
         code= @retry.jid
+    tr
+      th = t('Enqueued')
+      td== relative_time(@retry.enqueued_at)
     - unless retry_extra_items(@retry).empty?
       tr
         th = t('Extras')
         td
-          code= display_args(retry_extra_items(@retry), 1000)
+          code
+            = retry_extra_items(@retry).inspect
     - if @retry['retry_count'] > 0
       tr
         th = t('RetryCount')
@@ -37,7 +41,7 @@ table class="retry table table-bordered table-striped"
         td== relative_time(@retry['failed_at'].is_a?(Numeric) ? Time.at(@retry['failed_at']) : Time.parse(@retry['failed_at']))
     tr
       th = t('NextRetry')
-      td== relative_time(Time.at(@retry.score))
+      td== relative_time(@retry.at)
 
 h3 = t('Error')
 table class="error table table-bordered table-striped"
