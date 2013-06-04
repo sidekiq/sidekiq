@@ -11,9 +11,9 @@ this.seriesPathFactory()).attr("class","area"),this.stroke&&b.append("svg:path")
 var realtimeGraph = function(updatePath) {
   var timeInterval = 2000;
 
-  var graph = new Rickshaw.Graph( {
+  var lineGraph = new Rickshaw.Graph( {
     element: document.getElementById("realtime"),
-    width: 800,
+    width: 580,
     height: 200,
     renderer: 'line',
     interpolation: 'linear',
@@ -24,18 +24,33 @@ var realtimeGraph = function(updatePath) {
     })
   });
 
-  var y_axis = new Rickshaw.Graph.Axis.Y( {
-    graph: graph,
+  var lineGraphYAxis = new Rickshaw.Graph.Axis.Y({
+    graph: lineGraph,
     tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
     ticksTreatment: 'glow'
   });
 
-  graph.render();
+  lineGraph.render();
 
-  var hoverDetail = new Rickshaw.Graph.HoverDetail({
-    graph: graph,
+  var lineGraphHoverDetail = new Rickshaw.Graph.HoverDetail({
+    graph: lineGraph,
     yFormatter: function(y) { return Math.floor(y) }
   });
+
+  window.barGraph = new Rickshaw.Graph({
+    element: document.getElementById("backpressure"),
+    width: 200,
+    height: 200,
+    renderer: 'bar',
+
+    series: [{
+      data: [{ x: 1, y: 40 }, {x: 1, y: 20}],
+      color: '#B1003E'
+    }]
+  });
+
+  barGraph.render();
+
 
   var i = 0;
   setInterval(function() {
@@ -44,16 +59,21 @@ var realtimeGraph = function(updatePath) {
       if (i === 0) {
         var processed = data.sidekiq.processed;
         var failed = data.sidekiq.failed;
+        var enqueued = data.sidekiq.enqueued;
+        var backpressure = 0;
       } else {
         var processed = data.sidekiq.processed - Sidekiq.processed;
         var failed = data.sidekiq.failed - Sidekiq.failed;
+        var enqueued = data.sidekiq.enqueued - Sidekiq.enqueued;
+        var backpressure = enqueued - processed;
       }
 
-      graph.series.addData({ failed: failed, processed: processed });
-      graph.render();
+      lineGraph.series.addData({ failed: failed, processed: processed });
+      lineGraph.render();
 
       Sidekiq.processed = data.sidekiq.processed;
       Sidekiq.failed = data.sidekiq.failed;
+      Sidekiq.enqueued = data.sidekiq.enqueued;
 
       updateStatsSummary(data.sidekiq);
       updateRedisStats(data.redis);
