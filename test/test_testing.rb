@@ -131,6 +131,7 @@ class TestTesting < Minitest::Test
     end
 
     it 'perform_one raise error upon empty queue' do
+      DirectWorker.clear
       assert_raises Sidekiq::EmptyQueueError do
         DirectWorker.perform_one
       end
