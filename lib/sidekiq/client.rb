@@ -111,6 +111,7 @@ module Sidekiq
       end
 
       def process_single(worker_class, item)
+        worker_class = worker_class.constantize if worker_class.is_a?(String)
         queue = item['queue']
 
         Sidekiq.client_middleware.invoke(worker_class, item, queue) do
