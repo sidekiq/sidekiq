@@ -64,6 +64,10 @@ module Sidekiq
       @boss.async.processor_done(current_actor)
     end
 
+    def inspect
+      "<Processor##{object_id.to_s(16)}>"
+    end
+
     private
 
     # We use Celluloid's defer to workaround tiny little
