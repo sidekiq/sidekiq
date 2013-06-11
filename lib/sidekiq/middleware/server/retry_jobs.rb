@@ -43,13 +43,12 @@ module Sidekiq
       class RetryJobs
         include Sidekiq::Util
 
-        # delayed_job uses the same basic formula
         DEFAULT_MAX_RETRY_ATTEMPTS = 25
 
         def call(worker, msg, queue)
           yield
         rescue Sidekiq::Shutdown
-          # ignore, will be pushed back onto queue
+          # ignore, will be pushed back onto queue during hard_shutdown
           raise
         rescue Exception => e
           raise e unless msg['retry']
@@ -110,6 +109,7 @@ module Sidekiq
           end
         end
 
+        # delayed_job uses the same basic formula
         def seconds_to_delay(count)
           (count ** 4) + 15 + (rand(30)*(count+1))
         end

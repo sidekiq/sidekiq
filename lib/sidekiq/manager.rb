@@ -25,10 +25,11 @@ module Sidekiq
       @done_callback = nil
 
       @in_progress = {}
+      @threads = {}
       @done = false
       @busy = []
       @fetcher = Fetcher.new(current_actor, options)
-      @ready = @count.times.map { Processor.new_link(current_actor) }
+      @ready = @count.times.map { Processor.new_link(current_actor).tap {|p| p.proxy_id = p.object_id} }
     end
 
     def stop(options={})
@@ -63,6 +64,7 @@ module Sidekiq
       watchdog('Manager#processor_done died') do
         @done_callback.call(processor) if @done_callback
         @in_progress.delete(processor.object_id)
+        @threads.delete(processor.object_id)
         @busy.delete(processor)
         if stopped?
           processor.terminate if processor.alive?
@@ -77,10 +79,13 @@ module Sidekiq
     def processor_died(processor, reason)
       watchdog("Manager#processor_died died") do
         @in_progress.delete(processor.object_id)
+        @threads.delete(processor.object_id)
         @busy.delete(processor)
 
         unless stopped?
-          @ready << Processor.new_link(current_actor)
+          @ready << Processor.new_link(current_actor).tap do |p|
+            p.proxy_id = p.object_id
+          end
           dispatch
         else
           signal(:shutdown) if @busy.empty?
@@ -103,6 +108,14 @@ module Sidekiq
           processor.async.process(work)
         end
       end
+    end
+
+    # A hack worthy of Rube Goldberg.  We need to be able
+    # to hard stop a working thread.  But there's no way for us to
+    # get handle to the underlying thread performing work for a processor
+    # so we have it call us and tell us.
+    def real_thread(proxy_id, thr)
+      @threads[proxy_id] = thr
     end
 
     def procline(tag)
@@ -145,10 +158,9 @@ module Sidekiq
           # it is worse to lose a job than to run it twice.
           Sidekiq::Fetcher.strategy.bulk_requeue(@in_progress.values)
 
-          logger.debug { "Terminating worker threads" }
+          logger.debug { "Terminating #{@busy.size} busy worker threads" }
           @busy.each do |processor|
-            if processor.alive?
-              t = processor.bare_object.actual_work_thread
+            if processor.alive? && t = @threads.delete(processor.object_id)
               t.raise Shutdown
             end
           end

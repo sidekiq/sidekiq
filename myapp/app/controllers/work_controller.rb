@@ -20,7 +20,7 @@ class WorkController < ApplicationController
 
   def long
     50.times do |x|
-      HardWorker.perform_async('bob', 10, x)
+      HardWorker.perform_async('bob', 15, x)
     end
     render :text => 'enqueued'
   end

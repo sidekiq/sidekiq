@@ -24,10 +24,7 @@ module Sidekiq
       end
     end
 
-    # store the actual working thread so we
-    # can later kill if it necessary during
-    # hard shutdown.
-    attr_accessor :actual_work_thread
+    attr_accessor :proxy_id
 
     def initialize(boss)
       @boss = boss
@@ -37,8 +34,9 @@ module Sidekiq
       msgstr = work.message
       queue = work.queue_name
 
-      @actual_work_thread = Thread.current
       do_defer do
+        @boss.async.real_thread(proxy_id, Thread.current)
+
         begin
           msg = Sidekiq.load_json(msgstr)
           klass  = msg['class'].constantize
