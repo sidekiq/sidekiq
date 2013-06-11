@@ -1,3 +1,12 @@
+2.12.3
+-----------
+
+- Revert back to Celluloid's TaskFiber for job processing which has proven to be more
+  stable than TaskThread. [#985]
+
+At this point, if you are experiencing stability issues with Sidekiq in
+Ruby 1.9, please try Ruby 2.0.  It seems to be more stable.
+
 2.12.2
 -----------
 

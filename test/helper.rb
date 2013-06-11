@@ -20,6 +20,7 @@ end
 require 'minitest/autorun'
 require 'minitest/pride'
 
+require 'celluloid/autostart'
 require 'sidekiq'
 require 'sidekiq/util'
 Sidekiq.logger.level = Logger::ERROR
