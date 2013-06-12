@@ -29,7 +29,11 @@ module Sidekiq
       @done = false
       @busy = []
       @fetcher = Fetcher.new(current_actor, options)
-      @ready = @count.times.map { Processor.new_link(current_actor).tap {|p| p.proxy_id = p.object_id} }
+      @ready = @count.times.map do
+        p = Processor.new_link(current_actor)
+        p.proxy_id = p.object_id
+        p
+      end
     end
 
     def stop(options={})
@@ -83,9 +87,9 @@ module Sidekiq
         @busy.delete(processor)
 
         unless stopped?
-          @ready << Processor.new_link(current_actor).tap do |p|
-            p.proxy_id = p.object_id
-          end
+          p = Processor.new_link(current_actor)
+          p.proxy_id = p.object_id
+          @ready << p
           dispatch
         else
           signal(:shutdown) if @busy.empty?
