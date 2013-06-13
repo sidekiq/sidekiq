@@ -1,3 +1,9 @@
+2.12.4
+-----------
+
+- Fix error in previous release which crashed the Manager when a
+  Processor died.
+
 2.12.3
 -----------
 
