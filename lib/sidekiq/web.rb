@@ -45,6 +45,12 @@ module Sidekiq
         end
       end
 
+      def workers_size
+        Sidekiq.redis do |conn|
+          conn.scard('workers')
+        end
+      end
+
       def workers
         @workers ||= begin
           Sidekiq.redis do |conn|
@@ -84,7 +90,7 @@ module Sidekiq
       end
 
       def current_status
-        return 'idle' if workers.size == 0
+        return 'idle' if workers_size == 0
         return 'active'
       end
 
@@ -269,7 +275,7 @@ module Sidekiq
         sidekiq: {
           processed:  sidekiq_stats.processed,
           failed:     sidekiq_stats.failed,
-          busy:       workers.size,
+          busy:       workers_size,
           enqueued:   sidekiq_stats.enqueued,
           scheduled:  sidekiq_stats.scheduled_size,
           retries:    sidekiq_stats.retry_size,
