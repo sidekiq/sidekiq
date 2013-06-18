@@ -1,3 +1,8 @@
+HEAD
+-----------
+
+- log rotation via USR2 didn't close the old logger [#1008]
+
 2.12.4
 -----------
 

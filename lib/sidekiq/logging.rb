@@ -26,9 +26,11 @@ module Sidekiq
     end
 
     def self.initialize_logger(log_target = STDOUT)
+      oldlogger = @logger
       @logger = Logger.new(log_target)
       @logger.level = Logger::INFO
       @logger.formatter = Pretty.new
+      oldlogger.close if oldlogger && !$TESTING # don't want to close testing's STDOUT logging
       @logger
     end
 
