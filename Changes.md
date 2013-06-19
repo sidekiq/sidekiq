@@ -1,7 +1,8 @@
 HEAD
 -----------
 
-- log rotation via USR2 didn't close the old logger [#1008]
+- fix i18n support resetting saved locale when job is retried [#1011]
+- log rotation via USR2 now closes the old logger [#1008]
 
 2.12.4
 -----------

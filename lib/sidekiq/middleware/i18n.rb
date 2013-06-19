@@ -3,7 +3,7 @@ module Sidekiq::Middleware::I18n
   # to be sent to Sidekiq.
   class Client
     def call(worker_class, msg, queue)
-      msg['locale'] = I18n.locale
+      msg['locale'] ||= I18n.locale
       yield
     end
   end
