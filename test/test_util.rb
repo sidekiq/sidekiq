@@ -12,7 +12,7 @@ class TestUtil < Minitest::Test
         include Sidekiq::Util
       end
 
-      assert_equal One.new.process_id, One.new.process_id
+      assert_equal One.new.process_id, Two.new.process_id
     end
   end
 end
