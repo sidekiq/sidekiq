@@ -26,7 +26,7 @@ module Sidekiq
     end
 
     def process_id
-      Process.pid
+      @@process_id ||= SecureRandom.hex
     end
 
     def hostname
