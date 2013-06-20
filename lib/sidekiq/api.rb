@@ -139,7 +139,7 @@ module Sidekiq
     def clear
       Sidekiq.redis do |conn|
         conn.multi do
-          conn.del("queue:#{name}")
+          conn.del(@rname)
           conn.srem("queues", name)
         end
       end
