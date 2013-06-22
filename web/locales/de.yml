@@ -24,6 +24,7 @@ de:
   ShowAll: Alle anzeigen
   CurrentMessagesInQueue: Aktuelle Nachrichten in <span class='title'>%{queue}</span>
   Delete: Löschen
+  AddToQueue: Add to queue
   AreYouSureDeleteJob: Möchtest du diesen Job wirklich löschen?
   AreYouSureDeleteQueue: Möchtest du %{queue} wirklich löschen?
   Queues: Warteschlangen

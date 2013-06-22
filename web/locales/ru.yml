@@ -24,6 +24,7 @@ ru:
   ShowAll: Показать все
   CurrentMessagesInQueue: Текущие сообщения в <span class='title'>%{queue}</span>
   Delete: Удалить
+  AddToQueue: Добавить в очередь
   AreYouSureDeleteJob: Вы уверены в том, что хотите удалить задание?
   AreYouSureDeleteQueue: Вы уверены в том, что хотите удалить очередь %{queue}?
   Queues: Очереди

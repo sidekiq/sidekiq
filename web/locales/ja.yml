@@ -25,6 +25,7 @@ ja:
   ShowAll: 全て見せる
   CurrentMessagesInQueue: <span class='title'>%{queue}</span>に メッセージがあります
   Delete: 削除
+  AddToQueue: キューに追加
   AreYouSureDeleteJob: このジョブを削除しますか？
   AreYouSureDeleteQueue: この %{queue} キューを削除しますか?
   Queues: キュー

@@ -251,9 +251,14 @@ module Sidekiq
 
     post '/scheduled' do
       halt 404 unless params['key']
-      halt 404 unless params['delete']
+
       params['key'].each do |key|
-        Sidekiq::ScheduledSet.new.fetch(*parse_params(key)).first.delete
+        job = Sidekiq::ScheduledSet.new.fetch(*parse_params(key)).first
+        if params['delete']
+          job.delete
+        elsif params['add_to_queue']
+          job.add_to_queue
+        end
       end
       redirect "#{root_path}scheduled"
     end

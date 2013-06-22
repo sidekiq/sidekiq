@@ -24,6 +24,7 @@ it:
   ShowAll: Mostra tutti
   CurrentMessagesInQueue: Messaggi in <span class='title'>%{queue}</span>
   Delete: Cancella
+  AddToQueue: Aggiungi a coda
   AreYouSureDeleteJob: Sei sicuro di voler cancellare questo lavoro?
   AreYouSureDeleteQueue: Sei sicuro di voler cancellare la coda %{queue}?
   Queues: Code

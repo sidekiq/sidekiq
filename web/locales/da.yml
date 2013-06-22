@@ -24,6 +24,7 @@ da:
   ShowAll: Vis alle
   CurrentMessagesInQueue: Nuværende beskeder i <span class='title'>%{queue}</span>
   Delete: Slet
+  AddToQueue: Tilføj til kø
   AreYouSureDeleteJob: Er du sikker på at du vil slette dette job?
   AreYouSureDeleteQueue: Er du sikker på at du vil slette %{queue} køen?
   Queues: Køer
