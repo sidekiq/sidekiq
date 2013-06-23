@@ -178,6 +178,22 @@ class TestWeb < Minitest::Test
       end
     end
 
+    it "can move scheduled to default queue" do
+      params = add_scheduled
+      Sidekiq.redis do |conn|
+        assert_equal 1, conn.zcard('schedule')
+        assert_equal 0, conn.zcard('default')
+        post '/scheduled', 'key' => [job_params(*params)], 'add_to_queue' => 'AddToQueue'
+        assert_equal 302, last_response.status
+        assert_equal 'http://example.org/scheduled', last_response.header['Location']
+        assert_equal 0, conn.zcard('schedule')
+        get '/queues/default'
+        assert_equal 200, last_response.status
+        assert_match /#{params[0]['args'][2]}/, last_response.body
+      end
+
+    end
+
     it 'can retry all retries' do
       msg, score = add_retry
       add_retry
