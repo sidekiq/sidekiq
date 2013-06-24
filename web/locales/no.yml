@@ -25,6 +25,7 @@ no:
   ShowAll: Vis alle
   CurrentMessagesInQueue: Nåværende melding i <span class='title'>%{queue}</span>
   Delete: Slett
+  AddToQueue: Legg til i kø
   AreYouSureDeleteJob: Er du sikker på at du vil slette denne jobben?
   AreYouSureDeleteQueue: Er du sikker på at du vil slette køen %{queue}?
   Queues: Køer

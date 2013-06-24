@@ -25,6 +25,7 @@ ko:
   ShowAll: 모두 보기
   CurrentMessagesInQueue: <span class='title'>%{queue}</span>에 대기 중인 메시지
   Delete: 삭제
+  AddToQueue: 큐 추가
   AreYouSureDeleteJob: 이 작업을 삭제하시겠습니까?
   AreYouSureDeleteQueue: 이 %{queue} 큐를 삭제하시겠습니까?
   Queues: 큐

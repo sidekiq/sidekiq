@@ -222,6 +222,17 @@ module Sidekiq
       @parent.schedule(at, item)
     end
 
+    def add_to_queue
+      Sidekiq.redis do |conn|
+        results = conn.zrangebyscore('schedule', score, score)
+        conn.zremrangebyscore('schedule', score, score)
+        results.map do |message|
+          msg = Sidekiq.load_json(message)
+          Sidekiq::Client.push(msg)
+        end
+      end
+    end
+
     def retry
       raise "Retry not available on jobs not in the Retry queue." unless item["failed_at"]
       Sidekiq.redis do |conn|

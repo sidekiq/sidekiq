@@ -172,6 +172,18 @@ class TestApi < Minitest::Test
       assert_equal 0, q.size
     end
 
+    it "can move scheduled job to queue" do
+      job_id = ApiWorker.perform_in(100, 1, 'jason')
+      job = Sidekiq::ScheduledSet.new.find_job(job_id)
+      q = Sidekiq::Queue.new
+      job.add_to_queue
+      queued_job = q.find_job(job_id)
+      refute_nil queued_job
+      assert_equal queued_job.jid, job_id
+      job = Sidekiq::ScheduledSet.new.find_job(job_id)
+      assert_nil job
+    end
+
     it 'can find job by id in sorted sets' do
       job_id = ApiWorker.perform_in(100, 1, 'jason')
       job = Sidekiq::ScheduledSet.new.find_job(job_id)

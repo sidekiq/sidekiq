@@ -24,6 +24,7 @@ pl:
   ShowAll: Pokaż wszystko
   CurrentMessagesInQueue: Aktualne wiadomości w kolejce <span class='title'>%{queue}</span>
   Delete: Usuń
+  AddToQueue: dodaj do kolejki
   AreYouSureDeleteJob: Czy na pewno usunąć to zadanie?
   AreYouSureDeleteQueue: Czy na pewno usunąć kolejkę %{queue}?
   Queues: Kolejki
