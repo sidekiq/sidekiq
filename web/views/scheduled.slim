@@ -26,5 +26,6 @@ header.row
           td= msg['class']
           td= display_args(msg['args'])
     input.btn.btn-danger.pull-right type="submit" name="delete" value="#{t('Delete')}"
+    input.btn.btn-danger.pull-right type="submit" name="add_to_queue" value="#{t('AddToQueue')}"
 - else
   .alert.alert-success = t('NoScheduledFound')

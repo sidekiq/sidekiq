@@ -25,6 +25,7 @@
   ShowAll: Mostrar todos
   CurrentMessagesInQueue: Mensagens atualmenta na <span class='title'>%{queue}</span>
   Delete: Apagar
+  AddToQueue: Adicionar à fila
   AreYouSureDeleteJob: Deseja deletar esta tarefa?
   AreYouSureDeleteQueue: Deseja deletar a %{queue} fila?
   Queues: Filas
