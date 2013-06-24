@@ -41,7 +41,7 @@ module Sidekiq
       def reset_worker_list
         Sidekiq.redis do |conn|
           workers = conn.smembers('workers')
-          conn.srem('workers', workers) if workers.any?
+          conn.srem('workers', workers) if !workers.empty?
         end
       end
 
