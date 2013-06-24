@@ -76,6 +76,11 @@ class TestWeb < Minitest::Test
       end
     end
 
+    it 'can clear the worker list' do
+      post '/reset'
+      assert_equal 302, last_response.status
+    end
+
     it 'can delete a job' do
       Sidekiq.redis do |conn|
         conn.rpush('queue:foo', "{}")
@@ -191,7 +196,6 @@ class TestWeb < Minitest::Test
         assert_equal 200, last_response.status
         assert_match /#{params[0]['args'][2]}/, last_response.body
       end
-
     end
 
     it 'can retry all retries' do
