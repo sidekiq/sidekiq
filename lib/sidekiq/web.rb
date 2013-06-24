@@ -41,9 +41,7 @@ module Sidekiq
       def reset_worker_list
         Sidekiq.redis do |conn|
           workers = conn.smembers('workers')
-          workers.each do |name|
-            conn.srem('workers', name)
-          end
+          conn.srem('workers', workers) if workers.any?
         end
       end
 
@@ -298,4 +296,3 @@ module Sidekiq
   end
 
 end
-
