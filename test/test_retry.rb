@@ -237,7 +237,7 @@ class TestRetry < Minitest::Test
         end
       end
 
-      let(:handler){ Sidekiq::Middleware::Server::RetryJobs.new }
+      let(:handler) { Sidekiq::Middleware::Server::RetryJobs.new }
 
       it "retries with a default delay" do
         refute_equal 4, handler.seconds_to_delay(worker, 2)
