@@ -12,12 +12,18 @@ class TestRetry < Minitest::Test
       def @redis.with; yield self; end
     end
 
+    let(:worker) do
+      Class.new do
+        include ::Sidekiq::Worker
+      end
+    end
+
     it 'allows disabling retry' do
       msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => false }
       msg2 = msg.dup
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
-        handler.call('', msg2, 'default') do
+        handler.call(worker, msg2, 'default') do
           raise "kerblammo!"
         end
       end
@@ -30,7 +36,7 @@ class TestRetry < Minitest::Test
       msg2 = msg.dup
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
-        handler.call('', msg2, 'default') do
+        handler.call(worker, msg2, 'default') do
           raise "kerblammo!"
         end
       end
@@ -45,7 +51,7 @@ class TestRetry < Minitest::Test
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       c = nil
       assert_raises RuntimeError do
-        handler.call('', msg, 'default') do
+        handler.call(worker, msg, 'default') do
           c = caller(0); raise "kerblammo!"
         end
       end
@@ -60,7 +66,7 @@ class TestRetry < Minitest::Test
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       c = nil
       assert_raises RuntimeError do
-        handler.call('', msg, 'default') do
+        handler.call(worker, msg, 'default') do
           c = caller(0)[0..3]; raise "kerblammo!"
         end
       end
@@ -73,7 +79,7 @@ class TestRetry < Minitest::Test
       msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
-        handler.call('', msg, 'default') do
+        handler.call(worker, msg, 'default') do
           raise "kerblammo!"
         end
       end
@@ -91,7 +97,7 @@ class TestRetry < Minitest::Test
       msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true, 'retry_queue' => 'retry' }
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
-        handler.call('', msg, 'default') do
+        handler.call(worker, msg, 'default') do
           raise "kerblammo!"
         end
       end
@@ -110,7 +116,7 @@ class TestRetry < Minitest::Test
       msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], 'retry' => true, "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>10}
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
-        handler.call('', msg, 'default') do
+        handler.call(worker, msg, 'default') do
           raise "kerblammo!"
         end
       end
@@ -128,7 +134,7 @@ class TestRetry < Minitest::Test
       msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], 'retry' => 10, "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>8}
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
-        handler.call('', msg, 'default') do
+        handler.call(worker, msg, 'default') do
           raise "kerblammo!"
         end
       end
@@ -146,7 +152,7 @@ class TestRetry < Minitest::Test
       @redis.expect :zadd, 1, [ 'retry', String, String ]
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
-        handler.call('', msg, 'default') do
+        handler.call(worker, msg, 'default') do
           raise "kerblammo!"
         end
       end
@@ -160,7 +166,7 @@ class TestRetry < Minitest::Test
       @redis.expect :zadd, 1, [ 'retry', String, String ]
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
-        handler.call('', msg, 'default') do
+        handler.call(worker, msg, 'default') do
           raise "kerblammo!"
         end
       end
@@ -169,12 +175,12 @@ class TestRetry < Minitest::Test
     end
 
     describe "retry exhaustion" do
-      let(:worker){ Minitest::Mock.new }
       let(:handler){ Sidekiq::Middleware::Server::RetryJobs.new }
+      let(:worker) { Minitest::Mock.new }
       let(:msg){ {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>Time.now.utc, "retry"=>3, "retry_count"=>3} }
 
       it 'calls worker retries_exhausted after too many retries' do
-        worker.expect(:retries_exhausted, true, [1,2,"foo"]) 
+        worker.expect(:retries_exhausted, true, [1,2,"foo"])
         task_misbehaving_worker
         worker.verify
       end
@@ -195,6 +201,29 @@ class TestRetry < Minitest::Test
             raise 'kerblammo!'
           end
         end
+      end
+    end
+
+    describe "custom retry delay" do
+
+      let(:custom_worker) do
+        Class.new do
+          include ::Sidekiq::Worker
+
+          sidekiq_retry_in do |count|
+            count * 2
+          end
+        end
+      end
+
+      let(:handler){ Sidekiq::Middleware::Server::RetryJobs.new }
+
+      it "retries with a default delay" do
+        refute_equal 4, handler.seconds_to_delay(worker, 2)
+      end
+
+      it "retries with a custom delay" do
+        assert_equal 4, handler.seconds_to_delay(custom_worker, 2)
       end
     end
   end
