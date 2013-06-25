@@ -205,6 +205,17 @@ class TestRetry < Minitest::Test
     end
 
     describe "custom retry delay" do
+      before do
+        @old_logger    = Sidekiq.logger
+        @tmp_log_path  = '/tmp/sidekiq-retries.log'
+        Sidekiq.logger = Logger.new(@tmp_log_path)
+      end
+
+      after do
+        Sidekiq.logger = @old_logger
+        Sidekiq.options.delete(:logfile)
+        File.unlink @tmp_log_path if File.exists?(@tmp_log_path)
+      end
 
       let(:custom_worker) do
         Class.new do
@@ -212,6 +223,16 @@ class TestRetry < Minitest::Test
 
           sidekiq_retry_in do |count|
             count * 2
+          end
+        end
+      end
+
+      let(:error_worker) do
+        Class.new do
+          include ::Sidekiq::Worker
+
+          sidekiq_retry_in do |count|
+            count / 0
           end
         end
       end
@@ -224,6 +245,12 @@ class TestRetry < Minitest::Test
 
       it "retries with a custom delay" do
         assert_equal 4, handler.seconds_to_delay(custom_worker, 2)
+      end
+
+      it "falls back to the default retry on exception" do
+        refute_equal 4, handler.seconds_to_delay(error_worker, 2)
+        assert_match(/Failure scheduling retry using the defined `sidekiq_retry_in`/,
+                     File.read(@tmp_log_path), 'Log entry missing for sidekiq_retry_in')
       end
     end
   end

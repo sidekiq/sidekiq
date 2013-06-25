@@ -111,13 +111,19 @@ module Sidekiq
 
         # delayed_job uses the same basic formula
         def seconds_to_delay(worker, count)
+          default_retry_in = (count ** 4) + 15 + (rand(30)*(count+1))
+
           if worker.sidekiq_retry_with?
-            worker.sidekiq_retry_with.call(count)
+            begin
+              worker.sidekiq_retry_with.call(count)
+            rescue Exception => e
+              logger.error { "Failure scheduling retry using the defined `sidekiq_retry_in`! #{e.message} "}
+              default_retry_in
+            end
           else
-            (count ** 4) + 15 + (rand(30)*(count+1))
+            default_retry_in
           end
         end
-
       end
     end
   end
