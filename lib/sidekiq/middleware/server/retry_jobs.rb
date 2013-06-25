@@ -117,7 +117,7 @@ module Sidekiq
             begin
               worker.sidekiq_retry_with.call(count)
             rescue Exception => e
-              logger.error do "Failure scheduling retry using the defined `sidekiq_retry_in`, falling back to the default! #{e.message}"}
+              logger.error { "Failure scheduling retry using the defined `sidekiq_retry_in`, falling back to the default! #{e.message}"}
               default_retry_in
             end
           else
