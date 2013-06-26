@@ -4,16 +4,16 @@ Sidekiq
 [![Gem Version](https://badge.fury.io/rb/sidekiq.png)](https://rubygems.org/gems/sidekiq) [![Code Climate](https://codeclimate.com/github/mperham/sidekiq.png)](https://codeclimate.com/github/mperham/sidekiq) [![Build Status](https://travis-ci.org/mperham/sidekiq.png)](https://travis-ci.org/mperham/sidekiq) [![Coverage Status](https://coveralls.io/repos/mperham/sidekiq/badge.png?branch=master)](https://coveralls.io/r/mperham/sidekiq)
 
 
-Simple, efficient message processing for Ruby.
+Simple, efficient background processing for Ruby.
 
-Sidekiq uses threads to handle many messages at the same time in the
+Sidekiq uses threads to handle many jobs at the same time in the
 same process.  It does not require Rails but will integrate tightly with
-Rails 3 to make background message processing dead simple.
+Rails 3 to make background processing dead simple.
 
 Sidekiq is compatible with Resque.  It uses the exact same
 message format as Resque so it can integrate into an existing Resque processing farm.
 You can have Sidekiq and Resque run side-by-side at the same time and
-use the Resque client to enqueue messages in Redis to be processed by Sidekiq.
+use the Resque client to enqueue jobs in Redis to be processed by Sidekiq.
 
 At the same time, Sidekiq uses multithreading so it is much more memory efficient than
 Resque (which forks a new process for every job).  You'll find that you might need

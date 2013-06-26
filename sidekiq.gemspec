@@ -4,7 +4,7 @@ require File.expand_path('../lib/sidekiq/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["Mike Perham"]
   gem.email         = ["mperham@gmail.com"]
-  gem.description   = gem.summary = "Simple, efficient message processing for Ruby"
+  gem.description   = gem.summary = "Simple, efficient background processing for Ruby"
   gem.homepage      = "http://sidekiq.org"
   gem.license       = "LGPL-3.0"
 
