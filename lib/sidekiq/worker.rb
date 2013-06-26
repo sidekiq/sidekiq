@@ -26,6 +26,7 @@ module Sidekiq
     def self.included(base)
       base.extend(ClassMethods)
       base.class_attribute :sidekiq_options_hash
+      base.class_attribute :sidekiq_retry_with
     end
 
     def logger
@@ -56,6 +57,10 @@ module Sidekiq
       def sidekiq_options(opts={})
         self.sidekiq_options_hash = get_sidekiq_options.merge((opts || {}).stringify_keys)
         ::Sidekiq.logger.warn("#{self.name} - :timeout is unsafe and support has been removed from Sidekiq, see http://bit.ly/OtYpK for details") if opts.include? :timeout
+      end
+
+      def sidekiq_retry_in(&block)
+        self.sidekiq_retry_with = block
       end
 
       DEFAULT_OPTIONS = { 'retry' => true, 'queue' => 'default' }
