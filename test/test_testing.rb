@@ -49,6 +49,7 @@ class TestTesting < Minitest::Test
     before do
       load 'sidekiq/testing.rb'
       EnqueuedWorker.jobs.clear
+      DirectWorker.jobs.clear
     end
 
     after do
