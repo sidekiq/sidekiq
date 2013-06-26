@@ -179,10 +179,26 @@ class TestRetry < Minitest::Test
       let(:worker) { Minitest::Mock.new }
       let(:msg){ {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>Time.now.utc, "retry"=>3, "retry_count"=>3} }
 
-      it 'calls worker retries_exhausted after too many retries' do
-        worker.expect(:retries_exhausted, true, [1,2,"foo"])
-        task_misbehaving_worker
-        worker.verify
+      describe "worker method" do
+        it 'calls worker.retries_exhausted after too many retries' do
+          worker.expect(:retries_exhausted, true, [1,2,"foo"])
+          task_misbehaving_worker
+          worker.verify
+        end
+      end
+
+      describe "worker block" do
+        let(:worker) do
+          Class.new do
+            include Sidekiq::Worker
+
+            sidekiq_retries_exhausted { |*args| args << "retried" }
+          end
+        end
+
+        it 'calls worker sidekiq_retries_exhausted_block after too many retries' do
+          assert_equal [1,2, "foo", "retried"], handler.retries_exhausted(worker, msg)
+        end
       end
 
       it 'handles and logs retries_exhausted failures gracefully (drops them)' do
