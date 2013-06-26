@@ -26,7 +26,7 @@ module Sidekiq
     def self.included(base)
       base.extend(ClassMethods)
       base.class_attribute :sidekiq_options_hash
-      base.class_attribute :sidekiq_retry_with
+      base.class_attribute :sidekiq_retry_in_block
     end
 
     def logger
@@ -60,7 +60,7 @@ module Sidekiq
       end
 
       def sidekiq_retry_in(&block)
-        self.sidekiq_retry_with = block
+        self.sidekiq_retry_in_block = block
       end
 
       DEFAULT_OPTIONS = { 'retry' => true, 'queue' => 'default' }

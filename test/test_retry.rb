@@ -240,15 +240,15 @@ class TestRetry < Minitest::Test
       let(:handler) { Sidekiq::Middleware::Server::RetryJobs.new }
 
       it "retries with a default delay" do
-        refute_equal 4, handler.seconds_to_delay(worker, 2)
+        refute_equal 4, handler.delay_for(worker, 2)
       end
 
       it "retries with a custom delay" do
-        assert_equal 4, handler.seconds_to_delay(custom_worker, 2)
+        assert_equal 4, handler.delay_for(custom_worker, 2)
       end
 
       it "falls back to the default retry on exception" do
-        refute_equal 4, handler.seconds_to_delay(error_worker, 2)
+        refute_equal 4, handler.delay_for(error_worker, 2)
         assert_match(/Failure scheduling retry using the defined `sidekiq_retry_in`/,
                      File.read(@tmp_log_path), 'Log entry missing for sidekiq_retry_in')
       end

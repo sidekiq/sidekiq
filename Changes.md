@@ -3,6 +3,14 @@ HEAD
 - Adding button to move scheduled job to main queue [guiceolin, #1020]
 - fix i18n support resetting saved locale when job is retried [#1011]
 - log rotation via USR2 now closes the old logger [#1008]
+- Add ability to customize retry schedule, like so [jmazzi, #1027]
+
+```ruby
+class MyWorker
+  include Sidekiq::Worker
+  sidekiq_retry_in { |count| count * 2 }
+end
+```
 
 2.12.4
 -----------
