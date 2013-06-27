@@ -180,10 +180,20 @@ class TestRetry < Minitest::Test
       let(:msg){ {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>Time.now.utc, "retry"=>3, "retry_count"=>3} }
 
       describe "worker method" do
+        let(:worker) do
+          klass = Class.new do
+            include Sidekiq::Worker
+
+            def self.name; "Worker"; end
+
+            def retries_exhausted(*args)
+              args << "retried_method"
+            end
+          end
+        end
+
         it 'calls worker.retries_exhausted after too many retries' do
-          worker.expect(:retries_exhausted, true, [1,2,"foo"])
-          task_misbehaving_worker
-          worker.verify
+          assert_equal [1,2, "foo", "retried_method"], handler.retries_exhausted(worker.new, msg)
         end
       end
 
@@ -197,7 +207,7 @@ class TestRetry < Minitest::Test
         end
 
         it 'calls worker sidekiq_retries_exhausted_block after too many retries' do
-          assert_equal [1,2, "foo", "retried"], handler.retries_exhausted(worker, msg)
+          assert_equal [1,2, "foo", "retried"], handler.retries_exhausted(worker.new, msg)
         end
       end
 
