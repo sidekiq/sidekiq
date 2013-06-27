@@ -96,6 +96,7 @@ module Sidekiq
         def retries_exhausted(worker, msg)
           logger.debug { "Dropping message after hitting the retry maximum: #{msg}" }
           if worker.respond_to?(:retries_exhausted)
+            logger.warn { "Defining `retries_exhausted` as a method is deprecated, use the `sidekiq_retries_exhausted` callback instead" }
             worker.retries_exhausted(*msg['args'])
           elsif worker.sidekiq_retries_exhausted_block?
             worker.sidekiq_retries_exhausted_block.call(*msg['args'])
