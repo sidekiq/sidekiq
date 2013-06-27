@@ -99,7 +99,7 @@ module Sidekiq
             logger.warn { "Defining #{worker.class.name}#retries_exhausted as a method is deprecated, use `sidekiq_retries_exhausted` callback instead http://git.io/Ijju8g" }
             worker.retries_exhausted(*msg['args'])
           elsif worker.sidekiq_retries_exhausted_block?
-            worker.sidekiq_retries_exhausted_block.call(*msg['args'])
+            worker.sidekiq_retries_exhausted_block.call(msg)
           end
 
         rescue Exception => e

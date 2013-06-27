@@ -202,12 +202,17 @@ class TestRetry < Minitest::Test
           Class.new do
             include Sidekiq::Worker
 
-            sidekiq_retries_exhausted { |*args| args << "retried" }
+            sidekiq_retries_exhausted do |msg|
+              msg.tap {|m| m['called_by_callback'] = true }
+            end
           end
         end
 
         it 'calls worker sidekiq_retries_exhausted_block after too many retries' do
-          assert_equal [1,2, "foo", "retried"], handler.retries_exhausted(worker.new, msg)
+          new_msg      = handler.retries_exhausted(worker.new, msg)
+          expected_msg = msg.merge('called_by_callback' => true)
+
+          assert_equal expected_msg, new_msg, "sidekiq_retries_exhausted block not called"
         end
       end
 
