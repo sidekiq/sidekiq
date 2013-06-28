@@ -22,25 +22,45 @@ Capistrano::Configuration.instance.load do
       end
     end
 
+    def verify_if_is_running(pid_file, idx, &block)
+      "if [ -d #{current_path} ] && [ -f #{pid_file} ] && kill -0 `cat #{pid_file}`> /dev/null 2>&1; then cd #{current_path} && #{yield} ; else echo 'Sidekiq is not running'; fi"
+    end
+
+    def quiet_command(pid_file, idx)
+      verify_if_is_running(pid_file, idx) do
+        "#{fetch(:sidekiqctl_cmd)} quiet #{pid_file}"
+      end
+    end
+
+    def stop_command(pid_file, idx)
+      verify_if_is_running(pid_file, idx) do
+        "#{fetch(:sidekiqctl_cmd)} stop #{pid_file} #{fetch :sidekiq_timeout}"
+      end
+    end
+
+    def start_command(pid_file, idx)
+      rails_env = fetch(:rails_env, "production")
+      "cd #{current_path} ; nohup #{fetch(:sidekiq_cmd)} -e #{rails_env} -C #{current_path}/config/sidekiq.yml -i #{idx} -P #{pid_file} >> #{current_path}/log/sidekiq.log 2>&1 &"
+    end
+
     desc "Quiet sidekiq (stop accepting new work)"
     task :quiet, :roles => lambda { fetch(:sidekiq_role) }, :on_no_matching_servers => :continue do
       for_each_process do |pid_file, idx|
-        run "if [ -d #{current_path} ] && [ -f #{pid_file} ] && kill -0 `cat #{pid_file}`> /dev/null 2>&1; then cd #{current_path} && #{fetch(:sidekiqctl_cmd)} quiet #{pid_file} ; else echo 'Sidekiq is not running'; fi"
+        run quiet_command(pid_file, idx)
       end
     end
 
     desc "Stop sidekiq"
     task :stop, :roles => lambda { fetch(:sidekiq_role) }, :on_no_matching_servers => :continue do
       for_each_process do |pid_file, idx|
-        run "if [ -d #{current_path} ] && [ -f #{pid_file} ] && kill -0 `cat #{pid_file}`> /dev/null 2>&1; then cd #{current_path} && #{fetch(:sidekiqctl_cmd)} stop #{pid_file} #{fetch :sidekiq_timeout} ; else echo 'Sidekiq is not running'; fi"
+        run stop_command(pid_file, idx)
       end
     end
 
     desc "Start sidekiq"
     task :start, :roles => lambda { fetch(:sidekiq_role) }, :on_no_matching_servers => :continue do
-      rails_env = fetch(:rails_env, "production")
       for_each_process do |pid_file, idx|
-        run "cd #{current_path} ; nohup #{fetch(:sidekiq_cmd)} -e #{rails_env} -C #{current_path}/config/sidekiq.yml -i #{idx} -P #{pid_file} >> #{current_path}/log/sidekiq.log 2>&1 &", :pty => false
+        run start_command(pid_file, idx), :pty => false
       end
     end
 
