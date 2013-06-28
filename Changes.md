@@ -1,4 +1,4 @@
-HEAD
+2.13.0
 -----------
 - Adding button to move scheduled job to main queue [guiceolin, #1020]
 - fix i18n support resetting saved locale when job is retried [#1011]
@@ -9,6 +9,16 @@ HEAD
 class MyWorker
   include Sidekiq::Worker
   sidekiq_retry_in { |count| count * 2 }
+end
+```
+- Redesign Worker#retries\_exhausted callback to use same form as above [jmazzi, #1030]
+
+```ruby
+class MyWorker
+  include Sidekiq::Worker
+  sidekiq_retries_exhausted do |msg|
+    Rails.logger.error "Failed to process #{msg['class']} with args: #{msg['args']}"
+  end
 end
 ```
 
