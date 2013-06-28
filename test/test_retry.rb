@@ -179,10 +179,41 @@ class TestRetry < Minitest::Test
       let(:worker) { Minitest::Mock.new }
       let(:msg){ {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>Time.now.utc, "retry"=>3, "retry_count"=>3} }
 
-      it 'calls worker retries_exhausted after too many retries' do
-        worker.expect(:retries_exhausted, true, [1,2,"foo"])
-        task_misbehaving_worker
-        worker.verify
+      describe "worker method" do
+        let(:worker) do
+          klass = Class.new do
+            include Sidekiq::Worker
+
+            def self.name; "Worker"; end
+
+            def retries_exhausted(*args)
+              args << "retried_method"
+            end
+          end
+        end
+
+        it 'calls worker.retries_exhausted after too many retries' do
+          assert_equal [1,2, "foo", "retried_method"], handler.retries_exhausted(worker.new, msg)
+        end
+      end
+
+      describe "worker block" do
+        let(:worker) do
+          Class.new do
+            include Sidekiq::Worker
+
+            sidekiq_retries_exhausted do |msg|
+              msg.tap {|m| m['called_by_callback'] = true }
+            end
+          end
+        end
+
+        it 'calls worker sidekiq_retries_exhausted_block after too many retries' do
+          new_msg      = handler.retries_exhausted(worker.new, msg)
+          expected_msg = msg.merge('called_by_callback' => true)
+
+          assert_equal expected_msg, new_msg, "sidekiq_retries_exhausted block not called"
+        end
       end
 
       it 'handles and logs retries_exhausted failures gracefully (drops them)' do
