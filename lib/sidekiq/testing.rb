@@ -86,7 +86,9 @@ module Sidekiq
       # Drain and run all jobs for this worker
       def drain
         while job = jobs.shift do
-          new.perform(*job['args'])
+          worker = new
+          worker.jid = job['jid']
+          worker.perform(*job['args'])
         end
       end
 
@@ -94,7 +96,9 @@ module Sidekiq
       def perform_one
         raise(EmptyQueueError, "perform_one called with empty job queue") if jobs.empty?
         job = jobs.shift
-        new.perform(*job['args'])
+        worker = new
+        worker.jid = job['jid']
+        worker.perform(*job['args'])
       end
     end
 
