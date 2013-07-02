@@ -48,6 +48,7 @@ module Sidekiq
           desc "Quiet sidekiq (stop accepting new work)"
           task :quiet, :roles => lambda { fetch(:sidekiq_role) }, :on_no_matching_servers => :continue do
             for_each_process do |pid_file, idx|
+              on_rollback { run start_command(pid_file, idx) }
               run quiet_command(pid_file, idx)
             end
           end
@@ -55,6 +56,7 @@ module Sidekiq
           desc "Stop sidekiq"
           task :stop, :roles => lambda { fetch(:sidekiq_role) }, :on_no_matching_servers => :continue do
             for_each_process do |pid_file, idx|
+              on_rollback { run start_command(pid_file, idx) }
               run stop_command(pid_file, idx)
             end
           end
@@ -62,6 +64,7 @@ module Sidekiq
           desc "Start sidekiq"
           task :start, :roles => lambda { fetch(:sidekiq_role) }, :on_no_matching_servers => :continue do
             for_each_process do |pid_file, idx|
+              on_rollback { run start_command(pid_file, idx)}
               run start_command(pid_file, idx), :pty => false
             end
           end
