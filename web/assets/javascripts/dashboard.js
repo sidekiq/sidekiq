@@ -13,7 +13,7 @@ var realtimeGraph = function(updatePath) {
 
   var graph = new Rickshaw.Graph( {
     element: document.getElementById("realtime"),
-    width: 800,
+    width: 940,
     height: 200,
     renderer: 'line',
     interpolation: 'linear',
@@ -69,7 +69,7 @@ var historyGraph = function() {
 
   var graph = new Rickshaw.Graph( {
     element: document.getElementById("history"),
-    width: 800,
+    width: 940,
     height: 200,
     renderer: 'line',
     interpolation: 'linear',

@@ -31,18 +31,18 @@ html
     #page
       .container
         .row
-          .span2.summary_bar
-            h4
-              span.title = t('Status')
-              == slim :_status
-            == slim :_summary
-            - unless current_path == ''
-              .row
-                .span2
+          .span12.summary_bar
+            .row
+              h4.span10
+                span.title = t('Status')
+                == slim :_status
+              - unless current_path == ''
+                .span2.pull-right.actions
                   - if params[:poll]
                     a#live-poll.btn.btn-block.btn-primary.active href='#{{root_path}}#{{current_path}}' = t('StopPolling')
                   - else
                     a#live-poll.btn.btn-block.btn-primary href='#{{root_path}}#{{current_path}}?poll=true' = t('LivePoll')
+            == slim :_summary
 
-          .span10
+          .span12
             == yield
