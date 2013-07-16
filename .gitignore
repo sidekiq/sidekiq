@@ -6,4 +6,6 @@ Gemfile.lock
 dump.rdb
 .rbx
 coverage/
+vendor/
+.bundle/
 .sass-cache/

@@ -22,6 +22,20 @@ class TestRedisConnection < Minitest::Test
         assert_equal "yyy", pool.checkout.namespace
       end
     end
+
+    describe "timeout" do
+      it "uses a given :timeout over the default of 1" do
+        pool = Sidekiq::RedisConnection.create(:timeout => 5)
+        
+        assert_equal 5, pool.instance_eval{ @timeout }
+      end
+
+      it "uses the default timeout of 1 if no override" do
+        pool = Sidekiq::RedisConnection.create
+
+        assert_equal 1, pool.instance_eval{ @timeout }
+      end
+    end
   end
 
   describe ".determine_redis_provider" do

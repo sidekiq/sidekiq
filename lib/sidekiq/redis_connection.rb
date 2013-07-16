@@ -9,10 +9,11 @@ module Sidekiq
         url = options[:url] || determine_redis_provider || 'redis://localhost:6379/0'
         # need a connection for Fetcher and Retry
         size = options[:size] || (Sidekiq.server? ? (Sidekiq.options[:concurrency] + 2) : 5)
+        timeout = options[:timeout] || 1
 
         log_info(url, options)
 
-        ConnectionPool.new(:timeout => 1, :size => size) do
+        ConnectionPool.new(:timeout => timeout, :size => size) do
           build_client(url, options[:namespace], options[:driver] || 'ruby')
         end
       end
