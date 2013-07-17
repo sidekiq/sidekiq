@@ -10,6 +10,22 @@ class TestRedisConnection < Minitest::Test
       assert_equal Redis, pool.checkout.class
     end
 
+    describe "network_timeout" do
+      it "sets a custom network_timeout if specified" do
+        pool = Sidekiq::RedisConnection.create(:network_timeout => 8)
+        redis = pool.checkout
+        
+        assert_equal 8, redis.client.timeout
+      end
+
+      it "uses the default network_timeout if none specified" do
+        pool = Sidekiq::RedisConnection.create
+        redis = pool.checkout
+
+        assert_equal 5, redis.client.timeout
+      end
+    end
+
     describe "namespace" do
       it "uses a given :namespace" do
         pool = Sidekiq::RedisConnection.create(:namespace => "xxx")
@@ -20,6 +36,20 @@ class TestRedisConnection < Minitest::Test
         Sidekiq.options[:namespace] = "xxx"
         pool = Sidekiq::RedisConnection.create(:namespace => "yyy")
         assert_equal "yyy", pool.checkout.namespace
+      end
+    end
+
+    describe "pool_timeout" do
+      it "uses a given :timeout over the default of 1" do
+        pool = Sidekiq::RedisConnection.create(:pool_timeout => 5)
+        
+        assert_equal 5, pool.instance_eval{ @timeout }
+      end
+
+      it "uses the default timeout of 1 if no override" do
+        pool = Sidekiq::RedisConnection.create
+
+        assert_equal 1, pool.instance_eval{ @timeout }
       end
     end
   end
