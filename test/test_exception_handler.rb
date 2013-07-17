@@ -73,8 +73,7 @@ class TestExceptionHandler < Minitest::Test
 
   describe "with fake ExceptionNotifier" do
     before do
-      ::ExceptionNotifier = Module.new
-      ::ExceptionNotifier::Notifier = MiniTest::Mock.new
+      ::ExceptionNotifier = MiniTest::Mock.new
     end
 
     after do
@@ -82,12 +81,9 @@ class TestExceptionHandler < Minitest::Test
     end
 
     it "notifies ExceptionNotifier" do
-      mail = MiniTest::Mock.new
-      mail.expect(:deliver,nil)
-      ::ExceptionNotifier::Notifier.expect(:background_exception_notification,mail,[TEST_EXCEPTION, :data => { :message => { :b => 2 } }])
+      ::ExceptionNotifier.expect(:notify_exception,true,[TEST_EXCEPTION, :data => { :message => { :b => 2 } }])
       Component.new.invoke_exception(:b => 2)
-      ::ExceptionNotifier::Notifier.verify
-      mail.verify
+      ::ExceptionNotifier.verify
     end
   end
 
