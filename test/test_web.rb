@@ -199,14 +199,16 @@ class TestWeb < Minitest::Test
     end
 
     it "can move scheduled to default queue" do
+      q = Sidekiq::Queue.new
       params = add_scheduled
       Sidekiq.redis do |conn|
         assert_equal 1, conn.zcard('schedule')
-        assert_equal 0, conn.zcard('default')
+        assert_equal 0, q.size
         post '/scheduled', 'key' => [job_params(*params)], 'add_to_queue' => 'AddToQueue'
         assert_equal 302, last_response.status
         assert_equal 'http://example.org/scheduled', last_response.header['Location']
         assert_equal 0, conn.zcard('schedule')
+        assert_equal 1, q.size
         get '/queues/default'
         assert_equal 200, last_response.status
         assert_match /#{params[0]['args'][2]}/, last_response.body
