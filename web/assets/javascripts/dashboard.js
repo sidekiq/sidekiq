@@ -55,6 +55,13 @@ var realtimeGraph = function(updatePath) {
       Sidekiq.processed = data.sidekiq.processed;
       Sidekiq.failed = data.sidekiq.failed;
 
+      if (typeof Sidekiq.enqueued_series === 'undefined') {
+        Sidekiq.enqueued_series = [];
+      } else if (Sidekiq.enqueued_series.length >= 30) {
+        Sidekiq.enqueued_series.shift();
+      }
+      Sidekiq.enqueued_series.push(data.sidekiq.enqueued);
+
       updateStatsSummary(data.sidekiq);
       updateRedisStats(data.redis);
       pulseBeacon();
@@ -112,12 +119,19 @@ var createSeries = function(obj) {
 };
 
 var updateStatsSummary = function(data) {
-  $('ul.summary li.processed span.count').html(data.processed.numberWithDelimiter())
-  $('ul.summary li.failed span.count').html(data.failed.numberWithDelimiter())
-  $('ul.summary li.busy span.count').html(data.busy.numberWithDelimiter())
-  $('ul.summary li.scheduled span.count').html(data.scheduled.numberWithDelimiter())
-  $('ul.summary li.retries span.count').html(data.retries.numberWithDelimiter())
-  $('ul.summary li.enqueued span.count').html(data.enqueued.numberWithDelimiter())
+  var enqueued_growths = 0;
+  for (var i = Sidekiq.enqueued_series.length - 1; i > 0; i--) {
+    enqueued_growths += (Sidekiq.enqueued_series[i] - Sidekiq.enqueued_series[i - 1]);
+  }
+  var average_queue_growth = Math.round(enqueued_growths / Sidekiq.enqueued_series.length);
+
+  $('ul.summary li.processed span.count').html(data.processed.numberWithDelimiter());
+  $('ul.summary li.failed span.count').html(data.failed.numberWithDelimiter());
+  $('ul.summary li.busy span.count').html(data.busy.numberWithDelimiter());
+  $('ul.summary li.scheduled span.count').html(data.scheduled.numberWithDelimiter());
+  $('ul.summary li.retries span.count').html(data.retries.numberWithDelimiter());
+  $('ul.summary li.enqueued span.count').html(data.enqueued.numberWithDelimiter());
+  $('ul.summary li.enqueued_growth span.count').html(average_queue_growth.numberWithDelimiter());
 }
 
 var updateRedisStats = function(data) {
