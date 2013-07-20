@@ -132,6 +132,17 @@ header.row .pagination {
   padding: 4px 0 2px 0;
   text-align: center;
 }
+@media (max-width: 767px) and (min-width: 400px) {
+  .summary_bar ul li span {
+    width: 50% !important;
+  }
+  .summary_bar ul .desc {
+    text-align: left;
+  }
+  .summary_bar ul .count {
+    text-align: right;
+  }
+}
 @media (max-width: 1199px) and (min-width: 980px) {
   .summary_bar ul li.span2 {
     width: 130px !important;
@@ -155,7 +166,6 @@ header.row .pagination {
   font-weight: bold;
   float: right;
   padding: 0px 0px 2px 0px;
-  text-align: center;
   width: 100%;
 }
 
