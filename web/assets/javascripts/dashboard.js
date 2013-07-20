@@ -11,49 +11,78 @@ this.seriesPathFactory()).attr("class","area"),this.stroke&&b.append("svg:path")
 var realtimeGraph = function(updatePath) {
   var timeInterval = 2000;
 
-  var graph = new Rickshaw.Graph( {
+  var lineGraph = new Rickshaw.Graph( {
     element: document.getElementById("realtime"),
-    width: 800,
+    width: 680,
     height: 200,
     renderer: 'line',
     interpolation: 'linear',
 
     series: new Rickshaw.Series.FixedDuration([{ name: 'failed', color: '#B1003E' }, { name: 'processed', color: '#006f68' }], undefined, {
-        timeInterval: timeInterval,
-        maxDataPoints: 100,
+      timeInterval: timeInterval,
+      maxDataPoints: 100,
     })
   });
 
-  var y_axis = new Rickshaw.Graph.Axis.Y( {
-    graph: graph,
+  var lineGraphYAxis = new Rickshaw.Graph.Axis.Y({
+    graph: lineGraph,
     tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
     ticksTreatment: 'glow'
   });
 
-  graph.render();
+  lineGraph.render();
 
-  var hoverDetail = new Rickshaw.Graph.HoverDetail({
-    graph: graph,
+  var lineGraphHoverDetail = new Rickshaw.Graph.HoverDetail({
+    graph: lineGraph,
     yFormatter: function(y) { return Math.floor(y) }
+  });
+
+  window.barGraph = new Rickshaw.Graph({
+    element: document.getElementById("backpressure"),
+    width: 100,
+    height: 200,
+    renderer: 'bar',
+
+    series: [{
+      data: [{ x: 0, y: 0 }, {x: 1, y: 0}],
+      color: '#B1003E'
+    }]
+  });
+
+  var barYAxis = new Rickshaw.Graph.Axis.Y({
+    graph: barGraph,
+    tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+    ticksTreatment: 'glow'
   });
 
   var i = 0;
   setInterval(function() {
     $.getJSON($("#history").data("update-url"), function(data) {
 
-      if (i === 0) {
-        var processed = data.sidekiq.processed;
-        var failed = data.sidekiq.failed;
-      } else {
+      if (i > 1) {
         var processed = data.sidekiq.processed - Sidekiq.processed;
         var failed = data.sidekiq.failed - Sidekiq.failed;
-      }
+        var enqueued = data.sidekiq.enqueued - Sidekiq.enqueued;
 
-      graph.series.addData({ failed: failed, processed: processed });
-      graph.render();
+        lineGraph.series.addData({ failed: failed, processed: processed });
+        lineGraph.render();
+
+        var backpressure = enqueued - processed;
+        backpressure = backpressure < 0 ? 0 : backpressure;
+
+        barGraph.series[0].data[0].y = backpressure;
+        barGraph.render();
+      } else {
+        // Don't know why the bar graphs won't let you render
+        // initially with one bar, so we start with 2 and delete
+        // one right after render
+        barGraph.series[0].data.splice(1,1);
+        barGraph.render();
+      }
 
       Sidekiq.processed = data.sidekiq.processed;
       Sidekiq.failed = data.sidekiq.failed;
+      Sidekiq.enqueued = data.sidekiq.enqueued;
 
       updateStatsSummary(data.sidekiq);
       updateRedisStats(data.redis);

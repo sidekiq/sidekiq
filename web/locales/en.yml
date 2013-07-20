@@ -62,3 +62,4 @@ en: # <---- change this to your locale code
   SixMonths: 6 months
   Batches: Batches
   Failures: Failures
+  Backpressure: Backpressure

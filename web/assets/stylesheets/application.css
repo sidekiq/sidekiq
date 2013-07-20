@@ -32,6 +32,10 @@ h1, h2, h3, h4, h5, h6, strong {
   font-weight: 700;
 }
 
+.clear {
+  clear: both;
+}
+
 .brand, .navbar .brand, h5, h4, h3, h2, h1 {
   font-family: Armata;
   font-weight: 400;
@@ -424,6 +428,17 @@ img.smallogo {
       left: 5px;
       transform: scale(1.5);
   }
+}
+
+.realtime-graph {
+  width: 680px;
+  float: left;
+  margin-right: 20px;
+}
+
+.backpressure-graph {
+  width: 100px;
+  float: left;
 }
 
 .history-heading {
