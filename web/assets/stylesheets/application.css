@@ -143,6 +143,12 @@ header.row .pagination {
     text-align: right;
   }
 }
+@media (max-width: 979px) and (min-width: 768px) {
+  .summary_bar ul li.span2 {
+    margin: 0px 10px;
+    width: 96px !important;
+  }
+}
 @media (max-width: 1199px) and (min-width: 980px) {
   .summary_bar ul li.span2 {
     width: 130px !important;
