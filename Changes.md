@@ -1,3 +1,7 @@
+2.13.1
+-----------
+- Make summary bar and graphs responsive [manishval] [#1025]
+
 2.13.0
 -----------
 - Adding button to move scheduled job to main queue [guiceolin, #1020]
