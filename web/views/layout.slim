@@ -14,19 +14,6 @@ html
   body.admin
     .navbar.navbar-fixed-top
       ==slim :_nav
-    .navbar.navbar-fixed-bottom.navbar-inverse
-      .navbar-inner
-        .container
-          ul.nav
-            li
-              p.navbar-text style="color:white;" Sidekiq v#{Sidekiq::VERSION}
-            li
-              p.navbar-text Redis: #{location}
-            li
-              p.navbar-text #{t('Time')}: #{Time.now.utc.strftime('%H:%M:%S UTC')}
-            - if namespace
-              li
-                p.navbar-text #{t('Namespace')}: #{namespace}
 
     #page
       .container
@@ -46,3 +33,17 @@ html
 
           .span12
             == yield
+
+  .navbar.navbar-fixed-bottom.navbar-inverse
+    .navbar-inner
+      .container
+        ul.nav
+          li
+            p.navbar-text style="color:white;" Sidekiq v#{Sidekiq::VERSION}
+          li
+            p.navbar-text Redis: #{location}
+          li
+            p.navbar-text #{t('Time')}: #{Time.now.utc.strftime('%H:%M:%S UTC')}
+          - if namespace
+            li
+              p.navbar-text #{t('Namespace')}: #{namespace}
