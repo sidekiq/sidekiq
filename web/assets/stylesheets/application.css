@@ -90,6 +90,10 @@ header.row .pagination {
   margin: 12px 0;
 }
 
+.summary_bar .actions {
+  padding: 10px 0px;
+}
+
 .summary_bar .status {
   margin-left: 10px;
 }
@@ -126,16 +130,49 @@ header.row .pagination {
 }
 .summary_bar ul li {
   padding: 4px 0 2px 0;
+  text-align: center;
+}
+@media (max-width: 767px) and (min-width: 400px) {
+  .summary_bar ul li span {
+    width: 50% !important;
+  }
+  .summary_bar ul .desc {
+    text-align: left;
+  }
+  .summary_bar ul .count {
+    text-align: right;
+  }
+}
+@media (max-width: 979px) and (min-width: 768px) {
+  .summary_bar ul li.span2 {
+    margin: 0px 10px;
+    width: 96px !important;
+  }
+}
+@media (max-width: 1199px) and (min-width: 980px) {
+  .summary_bar ul li.span2 {
+    width: 130px !important;
+  }
+}
+@media (min-width: 1200px) {
+  .summary_bar ul li.span2 {
+    width: 154px !important;
+  }
 }
 .summary_bar ul .desc {
+  display: block;
   font-size: 1em;
   font-weight: normal;
+  width: 100%;
 }
 .summary_bar ul .count {
   color: #b1003e;
+  display: block;
   font-size: 1em;
   font-weight: bold;
   float: right;
+  padding: 0px 0px 2px 0px;
+  width: 100%;
 }
 
 table.table-white {
