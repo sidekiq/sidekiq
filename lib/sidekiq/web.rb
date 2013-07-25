@@ -107,10 +107,9 @@ module Sidekiq
         [score.to_f, jid]
       end
 
-      def display_args(args, count=100)
+      def display_args(args)
         args.map do |arg|
-          a = arg.inspect
-          a.size > count ? "#{a[0..count]}..." : a
+          arg.inspect
         end.join(", ")
       end
 
