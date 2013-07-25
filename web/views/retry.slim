@@ -14,7 +14,8 @@ table class="retry table table-bordered table-striped"
     tr
       th = t('Arguments')
       td
-        code= display_args(@retry['args'], 1000)
+        code
+          div.args=display_args(@retry['args'])
     tr
       th JID
       td

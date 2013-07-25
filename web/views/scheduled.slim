@@ -24,7 +24,8 @@ header.row
           td
             a href="#{root_path}queues/#{msg['queue']}" #{msg['queue']}
           td= msg['class']
-          td= display_args(msg['args'])
+          td
+             div.args=display_args(msg['args'])
     input.btn.btn-danger.pull-right type="submit" name="delete" value="#{t('Delete')}"
     input.btn.btn-danger.pull-right type="submit" name="add_to_queue" value="#{t('AddToQueue')}"
 - else
