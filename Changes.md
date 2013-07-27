@@ -1,7 +1,7 @@
 2.13.1
 -----------
 - Make summary bar and graphs responsive [manishval] [#1025]
-- No longer truncates args in sidekiq-web, instead sets `overflow: scroll` [jonhyman]
+- Adds a job status page for scheduled jobs [jonhyman]
 
 2.13.0
 -----------

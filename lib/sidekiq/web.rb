@@ -107,9 +107,10 @@ module Sidekiq
         [score.to_f, jid]
       end
 
-      def display_args(args)
+      def display_args(args, truncate_after_chars = 2000)
         args.map do |arg|
-          arg.inspect
+          a = arg.inspect
+          truncate_after_chars && a.size > truncate_after_chars ? "#{a[0..truncate_after_chars]}..." : a
         end.join(", ")
       end
 
@@ -248,6 +249,13 @@ module Sidekiq
       slim :scheduled
     end
 
+    get "/scheduled/:key" do
+      halt 404 unless params['key']
+      @job = Sidekiq::ScheduledSet.new.fetch(*parse_params(params['key'])).first
+      redirect "#{root_path}scheduled" if @job.nil?
+      slim :scheduled_job_info
+    end
+
     post '/scheduled' do
       halt 404 unless params['key']
 
@@ -258,6 +266,17 @@ module Sidekiq
         elsif params['add_to_queue']
           job.add_to_queue
         end
+      end
+      redirect "#{root_path}scheduled"
+    end
+
+    post "/scheduled/:key" do
+      halt 404 unless params['key']
+      job = Sidekiq::ScheduledSet.new.fetch(*parse_params(params['key'])).first
+      if params['add_to_queue']
+        job.add_to_queue
+      elsif params['delete']
+        job.delete
       end
       redirect "#{root_path}scheduled"
     end

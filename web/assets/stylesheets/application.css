@@ -849,3 +849,7 @@ img.smallogo {
   overflow: scroll;
   max-height: 100px;
 }
+.args-extended {
+  overflow: scroll;
+  max-height: 500px;
+}
