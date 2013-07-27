@@ -1,9 +1,12 @@
 2.13.1
 -----------
+
+- Make Sidekiq::Middleware::Chain Enumerable
 - Make summary bar and graphs responsive [manishval] [#1025]
 
 2.13.0
 -----------
+
 - Adding button to move scheduled job to main queue [guiceolin, #1020]
 - fix i18n support resetting saved locale when job is retried [#1011]
 - log rotation via USR2 now closes the old logger [#1008]

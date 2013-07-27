@@ -61,7 +61,12 @@ module Sidekiq
   #
   module Middleware
     class Chain
+      include Enumerable
       attr_reader :entries
+
+      def each(&block)
+        entries.each(&block)
+      end
 
       def initialize
         @entries = []
