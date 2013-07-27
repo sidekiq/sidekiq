@@ -187,6 +187,37 @@ class TestWeb < Minitest::Test
       assert_match /HardWorker/, last_response.body
     end
 
+    it 'can display a single scheduled job' do
+      params = add_scheduled
+      get '/scheduled/2c4c17969825a384a92f023b'
+      assert_equal 302, last_response.status
+      get "/scheduled/#{job_params(*params)}"
+      assert_equal 200, last_response.status
+      assert_match /HardWorker/, last_response.body
+    end
+
+    it 'can add to queue a single scheduled job' do
+      params = add_scheduled
+      post "/scheduled/#{job_params(*params)}", 'add_to_queue' => true
+      assert_equal 302, last_response.status
+      assert_equal 'http://example.org/scheduled', last_response.header['Location']
+
+      get '/queues/default'
+      assert_equal 200, last_response.status
+      assert_match /#{params.first['args'][2]}/, last_response.body
+    end
+
+    it 'can delete a single scheduled job' do
+      params = add_scheduled
+      post "/scheduled/#{job_params(*params)}", 'delete' => 'Delete'
+      assert_equal 302, last_response.status
+      assert_equal 'http://example.org/scheduled', last_response.header['Location']
+
+      get "/scheduled"
+      assert_equal 200, last_response.status
+      refute_match /#{params.first['args'][2]}/, last_response.body
+    end
+
     it 'can delete scheduled' do
       params = add_scheduled
       Sidekiq.redis do |conn|
