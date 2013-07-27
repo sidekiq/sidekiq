@@ -3,6 +3,15 @@ Sidekiq Pro Changelog
 
 Please see http://sidekiq.org/pro for more details and how to buy.
 
+HEAD
+-----------
+
+- Fix issue with reliable\_push where it didn't return the JID for a pushed
+  job when sending previously cached jobs to Redis.
+- Add fast Sidekiq::Queue#delete(jid) API which leverages Lua so job lookup is
+  100% server-side.
+
+
 1.1.0
 -----------
 
