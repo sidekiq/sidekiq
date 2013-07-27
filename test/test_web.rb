@@ -130,7 +130,7 @@ class TestWeb < Minitest::Test
 
     it 'can display a single retry' do
       params = add_retry
-      get '/retries/2c4c17969825a384a92f023b'
+      get '/retries/0-shouldntexist'
       assert_equal 302, last_response.status
       get "/retries/#{job_params(*params)}"
       assert_equal 200, last_response.status
@@ -138,7 +138,7 @@ class TestWeb < Minitest::Test
     end
 
     it 'handles missing retry' do
-      get "/retries/2c4c17969825a384a92f023b"
+      get "/retries/0-shouldntexist"
       assert_equal 302, last_response.status
     end
 
@@ -189,11 +189,16 @@ class TestWeb < Minitest::Test
 
     it 'can display a single scheduled job' do
       params = add_scheduled
-      get '/scheduled/2c4c17969825a384a92f023b'
+      get '/scheduled/0-shouldntexist'
       assert_equal 302, last_response.status
       get "/scheduled/#{job_params(*params)}"
       assert_equal 200, last_response.status
       assert_match /HardWorker/, last_response.body
+    end
+
+    it 'handles missing scheduled job' do
+      get "/scheduled/0-shouldntexist"
+      assert_equal 302, last_response.status
     end
 
     it 'can add to queue a single scheduled job' do
