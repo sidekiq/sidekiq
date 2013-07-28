@@ -9,7 +9,14 @@ HEAD
 - Fix issue with reliable\_push where it didn't return the JID for a pushed
   job when sending previously cached jobs to Redis.
 - Add fast Sidekiq::Queue#delete(jid) API which leverages Lua so job lookup is
-  100% server-side.
+  100% server-side.  Benchmark vs Sidekiq's Job#delete API:
+
+```
+Sidekiq Pro API
+  0.030000   0.020000   0.050000 (  1.640659)
+Sidekiq API
+ 17.250000   2.220000  19.470000 ( 22.193300)
+```
 
 
 1.1.0
