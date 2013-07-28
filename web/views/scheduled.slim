@@ -20,11 +20,13 @@ header.row
         tr
           td
             input type='checkbox' name='key[]' value='#{job_params(msg, score)}'
-          td== relative_time(Time.at(score))
+          td
+             a href="#{root_path}scheduled/#{job_params(msg, score)}"== relative_time(Time.at(score))
           td
             a href="#{root_path}queues/#{msg['queue']}" #{msg['queue']}
           td= msg['class']
-          td= display_args(msg['args'])
+          td
+             div.args=display_args(msg['args'])
     input.btn.btn-danger.pull-right type="submit" name="delete" value="#{t('Delete')}"
     input.btn.btn-danger.pull-right type="submit" name="add_to_queue" value="#{t('AddToQueue')}"
 - else

@@ -845,3 +845,11 @@ img.smallogo {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 3px;
 }
+.args {
+  overflow: scroll;
+  max-height: 100px;
+}
+.args-extended {
+  overflow: scroll;
+  max-height: 500px;
+}
