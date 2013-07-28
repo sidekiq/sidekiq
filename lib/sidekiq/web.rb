@@ -12,12 +12,10 @@ module Sidekiq
   class Web < Sinatra::Base
     include Sidekiq::Paginator
 
-    dir = File.expand_path(File.dirname(__FILE__) + "/../../web")
-
-    set :public_folder, "#{dir}/assets"
-    set :views,  "#{dir}/views"
-    set :root, "#{dir}/public"
-    set :locales, "#{dir}/locales"
+    set :root, File.expand_path(File.dirname(__FILE__) + "/../../web")
+    set :public_folder, Proc.new { "#{root}/assets" }
+    set :views, Proc.new { "#{root}/views" }
+    set :locales, Proc.new { "#{root}/locales" }
     set :slim, :pretty => true
 
     helpers do

@@ -2,7 +2,7 @@ header.row
   .span5
     h3
       == t('CurrentMessagesInQueue', :queue => @name)
-  .span4
+  .span4.pull-right
     == slim :_paging, :locals => { :url => "#{root_path}queues/#{@name}" }
 
 table class="queue table table-hover table-bordered table-striped"
