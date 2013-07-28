@@ -6,7 +6,7 @@ ul.unstyled.summary.row
     span.count #{number_with_delimiter(stats.failed)}
     span.desc = t('Failed')
   li.busy.span2
-    span.count #{number_with_delimiter(workers.size)}
+    span.count #{number_with_delimiter(workers_size)}
     span.desc = t('Busy')
   li.scheduled.span2
     span.count #{number_with_delimiter(stats.scheduled_size)}
