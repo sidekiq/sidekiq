@@ -46,7 +46,7 @@ module Sidekiq
       end
 
       def workers_size
-        Sidekiq.redis do |conn|
+        @workers_size ||= Sidekiq.redis do |conn|
           conn.scard('workers')
         end
       end
