@@ -123,34 +123,30 @@ module Sidekiq
 
       def invoke_bulk(*args_array, &final_action)
         succeeded = []
-
         value = nil
-        chainno = 0
 
         # Go down each chain before the yield
-        next_chain = lambda do |args|
-          chainno += 1
+        next_chain = lambda do |args, chain|
+          myargs = args
 
-          if not args.nil?
-            chain = retrieve
-
+          if not myargs.nil?
             success = false
-            traverse_chain = lambda do
-              if chain.empty?
-                success = true
-                succeeded << args
 
-                # Call the start of the next chain
-                next_chain.call(args_array.shift)
-              else
-                chain.shift.call(*args, &traverse_chain)
+            if chain.empty?
+              success = true
+              succeeded << args
+
+              # Call the start of the next chain
+              next_chain.call(args_array.shift, retrieve)
+            else
+              chain.shift.call(*args) do
+                next_chain.call(args, chain)
               end
             end
-            traverse_chain.call
 
             # Even if something in the chain failed to yield, just go to the next chain
-            if not success
-              next_chain.call(args_array.shift)
+            if chain.empty? and not success
+              next_chain.call(args_array.shift, retrieve)
             end
           else
             # Run the final action on all items that succeeded
@@ -160,7 +156,7 @@ module Sidekiq
           # On return, we will fall to all the after yield actions
         end
 
-        next_chain.call(args_array.shift)
+        next_chain.call(args_array.shift, retrieve)
         value
       end
     end
