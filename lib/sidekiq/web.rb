@@ -27,8 +27,13 @@ module Sidekiq
         end
       end
 
+      def locale
+        lang = (request.env["HTTP_ACCEPT_LANGUAGE"] || 'en')[0,2]
+        strings[lang] ? lang : 'en'
+      end
+
       def get_locale
-        strings[(request.env["HTTP_ACCEPT_LANGUAGE"] || 'en')[0,2]] || strings['en']
+        strings[locale]
       end
 
       def t(msg, options={})
