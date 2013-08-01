@@ -215,6 +215,7 @@ module Sidekiq
 
       params['key'].each do |key|
         job = Sidekiq::RetrySet.new.fetch(*parse_params(key)).first
+        next unless job
         if params['retry']
           job.retry
         elsif params['delete']
