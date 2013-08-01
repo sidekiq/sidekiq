@@ -45,6 +45,23 @@ class TestRetry < Minitest::Test
       @redis.verify
     end
 
+    it 'allows a max_retries option in initializer' do
+      max_retries = 7
+      1.upto(max_retries) do
+        @redis.expect :zadd, 1, ['retry', String, String]
+      end
+      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }
+      handler = Sidekiq::Middleware::Server::RetryJobs.new({:max_retries => max_retries})
+      1.upto(max_retries + 1) do
+        assert_raises RuntimeError do
+          handler.call(worker, msg, 'default') do
+            raise "kerblammo!"
+          end
+        end
+      end
+      @redis.verify
+    end
+
     it 'saves backtraces' do
       @redis.expect :zadd, 1, ['retry', String, String]
       msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true, 'backtrace' => true }
