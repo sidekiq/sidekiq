@@ -40,10 +40,23 @@ module Sidekiq
       #
       # We don't store the backtrace as that can add a lot of overhead
       # to the message and everyone is using Airbrake, right?
+      #
+      # The default number of retry attempts is 25. You can pass a value for the
+      # number of retry attempts when adding the middleware using the options hash:
+      #
+      #   Sidekiq.configure_server do |config|
+      #     config.server_middleware do |chain|
+      #       chain.add Middleware::Server::RetryJobs, {:max_retries => 7}
+      #     end
+      #   end
       class RetryJobs
         include Sidekiq::Util
 
         DEFAULT_MAX_RETRY_ATTEMPTS = 25
+
+        def initialize(options = {})
+          @max_retries = options.fetch(:max_retries, DEFAULT_MAX_RETRY_ATTEMPTS)
+        end
 
         def call(worker, msg, queue)
           yield
@@ -52,7 +65,7 @@ module Sidekiq
           raise
         rescue Exception => e
           raise e unless msg['retry']
-          max_retry_attempts = retry_attempts_from(msg['retry'], DEFAULT_MAX_RETRY_ATTEMPTS)
+          max_retry_attempts = retry_attempts_from(msg['retry'], @max_retries)
 
           msg['queue'] = if msg['retry_queue']
             msg['retry_queue']

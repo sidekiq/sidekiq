@@ -78,7 +78,8 @@ module Sidekiq
       end
 
       def add(klass, *args)
-        entries << Entry.new(klass, *args) unless exists?(klass)
+        remove(klass) if exists?(klass)
+        entries << Entry.new(klass, *args)
       end
 
       def insert_before(oldklass, newklass, *args)
@@ -122,6 +123,7 @@ module Sidekiq
 
     class Entry
       attr_reader :klass
+
       def initialize(klass, *args)
         @klass = klass
         @args  = args
