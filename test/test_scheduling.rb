@@ -25,7 +25,7 @@ class TestScheduling < Minitest::Test
 
     it 'schedules a job via timestamp' do
       @redis.expect :zadd, true, ['schedule', Array]
-      assert ScheduledWorker.perform_in(5.days.from_now, 'mike')
+      assert ScheduledWorker.perform_in(Time.now + 5*86400, 'mike')
       @redis.verify
     end
 

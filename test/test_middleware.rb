@@ -1,6 +1,7 @@
 require 'helper'
 require 'sidekiq/middleware/chain'
 require 'sidekiq/processor'
+require 'sidekiq/fetch'
 
 class TestMiddleware < Minitest::Test
   describe 'middleware chain' do

@@ -38,11 +38,10 @@ module Sidekiq
       #
       def push(item)
         normed = normalize_item(item)
-        payload = process_single(item['class'], normed)
 
-        pushed = false
-        pushed = raw_push([payload]) if payload
-        pushed ? payload['jid'] : nil
+        Sidekiq.client_middleware.invoke(item['class'], normed, normed['queue']) do |worker_class, payload, queue|
+          raw_push([payload]) ? payload['jid'] : nil
+        end
       end
 
       ##
@@ -59,15 +58,17 @@ module Sidekiq
       # pushed can be less than the number given if the middleware stopped processing for one
       # or more jobs.
       def push_bulk(items)
-        normed = normalize_item(items)
-        payloads = items['args'].map do |args|
-          raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" if !args.is_a?(Array)
-          process_single(items['class'], normed.merge('args' => args, 'jid' => SecureRandom.hex(12), 'enqueued_at' => Time.now.to_f))
-        end.compact
+        normed = normalize_item(items, true)
+        args_array = normed.map {|item| [items['class'], item, item['queue']]}
 
-        pushed = false
-        pushed = raw_push(payloads) if !payloads.empty?
-        pushed ? payloads.size : nil
+        # Bulk run!
+        Sidekiq.client_middleware.invoke_bulk(*args_array) do |*args_array|
+          payloads = args_array.map {|args| args[1]}
+
+          if not payloads.empty?
+            raw_push(payloads) ? payloads.size : nil
+          end
+        end
       end
 
       # Resque compatibility helpers.
@@ -110,15 +111,13 @@ module Sidekiq
         pushed
       end
 
-      def process_single(worker_class, item)
-        queue = item['queue']
-
-        Sidekiq.client_middleware.invoke(worker_class, item, queue) do
-          item
-        end
+      def set_job_attrs(item)
+        item['jid'] ||= SecureRandom.hex(12)
+        item['enqueued_at'] = Time.now.to_f
+        item
       end
 
-      def normalize_item(item)
+      def normalize_item(item, bulk=false)
         raise(ArgumentError, "Message must be a Hash of the form: { 'class' => SomeWorker, 'args' => ['bob', 1, :foo => 'bar'] }") unless item.is_a?(Hash)
         raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") if !item['class'] || !item['args']
         raise(ArgumentError, "Message args must be an Array") unless item['args'].is_a?(Array)
@@ -132,9 +131,15 @@ module Sidekiq
           normalized_item = Sidekiq::Worker::ClassMethods::DEFAULT_OPTIONS.merge(item)
         end
 
-        normalized_item['jid'] ||= SecureRandom.hex(12)
-        normalized_item['enqueued_at'] = Time.now.to_f
-        normalized_item
+        if not bulk
+          set_job_attrs(normalized_item)
+        else
+          normalized_item['args'].map do |args|
+            raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" if !args.is_a?(Array)
+
+            set_job_attrs(normalized_item.merge('args' => args))
+          end
+        end
       end
 
     end

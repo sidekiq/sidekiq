@@ -169,6 +169,45 @@ class TestClient < Minitest::Test
         Sidekiq.client_middleware.remove Stopper
       end
     end
+
+    class Counter
+      @after_counter = 0
+
+      def self.after_counter
+        @after_counter
+      end
+
+      def self.incr_counter
+        @after_counter += 1
+      end
+
+      def self.reset_counter
+        @after_counter = 0
+      end
+
+      def call(worker_class, message, queue)
+        yield if message['args'].first.odd?
+        self.class.incr_counter
+      end
+    end
+
+    it 'runs after yield actions in single and bulk mode' do
+      Sidekiq.client_middleware.add Counter
+      begin
+        assert_equal nil, Sidekiq::Client.push('class' => MyWorker, 'args' => [0])
+        assert_equal 1, Counter.after_counter
+        Counter.reset_counter
+
+        assert_match /[0-9a-f]{12}/, Sidekiq::Client.push('class' => MyWorker, 'args' => [1])
+        assert_equal 1, Counter.after_counter
+        Counter.reset_counter
+
+        assert_equal 1, Sidekiq::Client.push_bulk('class' => MyWorker, 'args' => [[0], [1]])
+        assert_equal 2, Counter.after_counter
+      ensure
+        Sidekiq.client_middleware.remove Counter
+      end
+    end
   end
 
   describe 'inheritance' do
