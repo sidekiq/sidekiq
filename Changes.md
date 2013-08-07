@@ -2,7 +2,7 @@
 -----------
 
 - Make Sidekiq::Middleware::Chain Enumerable
-- Make summary bar and graphs responsive [manishval] [#1025]
+- Make summary bar and graphs responsive [manishval, #1025]
 - Adds a job status page for scheduled jobs [jonhyman]
 
 2.13.0
