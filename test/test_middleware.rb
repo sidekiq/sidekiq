@@ -72,7 +72,7 @@ class TestMiddleware < Minitest::Test
       msg = Sidekiq.dump_json({ 'class' => CustomWorker.to_s, 'args' => [$recorder] })
 
       Sidekiq.server_middleware do |chain|
-        # should only add once, second should be ignored
+        # should only add once, second should replace the first
         2.times { |i| chain.add CustomMiddleware, i.to_s, $recorder }
         chain.insert_before CustomMiddleware, AnotherCustomMiddleware, '2', $recorder
         chain.insert_after AnotherCustomMiddleware, YetAnotherCustomMiddleware, '3', $recorder
@@ -86,7 +86,14 @@ class TestMiddleware < Minitest::Test
       boss.expect(:async, actor, [])
       boss.expect(:async, actor, [])
       processor.process(Sidekiq::BasicFetch::UnitOfWork.new('queue:default', msg))
-      assert_equal %w(2 before 3 before 0 before work_performed 0 after 3 after 2 after), $recorder.flatten
+      assert_equal %w(2 before 3 before 1 before work_performed 1 after 3 after 2 after), $recorder.flatten
+    end
+
+    it 'correctly replaces middleware when using middleware with options in the initializer' do
+      chain = Sidekiq::Middleware::Chain.new
+      chain.add Sidekiq::Middleware::Server::RetryJobs
+      chain.add Sidekiq::Middleware::Server::RetryJobs, {:max_retries => 5}
+      assert_equal 1, chain.count
     end
 
     it 'allows middleware to abruptly stop processing rest of chain' do

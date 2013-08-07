@@ -4,6 +4,9 @@
 - Make Sidekiq::Middleware::Chain Enumerable
 - Make summary bar and graphs responsive [manishval, #1025]
 - Adds a job status page for scheduled jobs [jonhyman]
+- Allow for default number of retry attempts to be set for
+  `Sidekiq::Middleware::Server::RetryJobs` middleware. [czarneckid] [#1091]
+
 
 2.13.0
 -----------
