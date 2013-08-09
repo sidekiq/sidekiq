@@ -21,7 +21,7 @@ module Sidekiq
       private
 
       def build_client(url, namespace, driver, network_timeout)
-        client = Redis.connect client_opts(url, driver, network_timeout)
+        client = Redis.new client_opts(url, driver, network_timeout)
         if namespace
           require 'redis/namespace'
           Redis::Namespace.new(namespace, :redis => client)
