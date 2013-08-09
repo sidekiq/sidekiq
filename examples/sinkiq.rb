@@ -8,7 +8,7 @@ require 'sinatra'
 require 'sidekiq'
 require 'redis'
 
-$redis = Redis.connect
+$redis = Redis.new
 
 class SinatraWorker
   include Sidekiq::Worker
