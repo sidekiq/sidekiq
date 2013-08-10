@@ -42,7 +42,7 @@ module Sidekiq
         opts = options.dup
         opts.delete(:url)
         if Sidekiq.server?
-          Sidekiq.logger.info("Booting #{Sidekiq::NAME} #{Sidekiq::VERSION} using #{url} with options #{opts}")
+          Sidekiq.logger.info("Booting Sidekiq #{Sidekiq::VERSION} using #{url} with options #{opts}")
         else
           Sidekiq.logger.info("#{Sidekiq::NAME} client using #{url} with options #{opts}")
         end
