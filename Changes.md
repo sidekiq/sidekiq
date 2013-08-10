@@ -4,8 +4,18 @@
 - Make Sidekiq::Middleware::Chain Enumerable
 - Make summary bar and graphs responsive [manishval, #1025]
 - Adds a job status page for scheduled jobs [jonhyman]
+- Handle race condition in retrying and deleting jobs in the Web UI
+- The Web UI relative times are now i18n. [MadRabbit, #1088]
 - Allow for default number of retry attempts to be set for
   `Sidekiq::Middleware::Server::RetryJobs` middleware. [czarneckid] [#1091]
+
+```ruby
+Sidekiq.configure_server do |config|
+  config.server_middleware do |chain|
+    chain.add Sidekiq::Middleare::Server::RetryJobs, :max_retries => 10
+  end
+end
+```
 
 
 2.13.0

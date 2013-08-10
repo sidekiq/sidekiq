@@ -3,14 +3,16 @@ Sidekiq Pro Changelog
 
 Please see http://sidekiq.org/pro for more details and how to buy.
 
-HEAD
+1.2.0
 -----------
 
-- LEAK: Fix batch key which didn't expire in Redis.  Keys match
+- **LEAK** Fix batch key which didn't expire in Redis.  Keys match
   /b-[a-f0-9]{16}-pending/, e.g. "b-4f55163ddba10aa0-pending" [#1057]
+- **Reliable fetch now supports multiple queues**, using the algorithm spec'd
+  by @jackrg [#1102]
 - Fix issue with reliable\_push where it didn't return the JID for a pushed
   job when sending previously cached jobs to Redis.
-- Add fast Sidekiq::Queue#delete(jid) API which leverages Lua so job lookup is
+- Add fast Sidekiq::Queue#delete\_job(jid) API which leverages Lua so job lookup is
   100% server-side.  Benchmark vs Sidekiq's Job#delete API:
 
 ```
