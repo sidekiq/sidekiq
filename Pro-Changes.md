@@ -3,6 +3,11 @@ Sidekiq Pro Changelog
 
 Please see http://sidekiq.org/pro for more details and how to buy.
 
+1.2.1
+-----------
+
+- Forgot to push paging code necessary for `delete_job` performance.
+
 1.2.0
 -----------
 
