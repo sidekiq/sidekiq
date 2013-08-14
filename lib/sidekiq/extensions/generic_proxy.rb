@@ -15,7 +15,11 @@ module Sidekiq
         # serialize the objects to a String.  The YAML will be converted
         # to JSON and then deserialized on the other side back into a
         # Ruby object.
-        obj = [@target, name, args]
+        if @performable == DelayedModel
+          obj = [@target.class.name, @target.id, name, args]
+        else
+          obj = [@target, name, args]
+        end
         @performable.client_push({ 'class' => @performable, 'args' => [::YAML.dump(obj)] }.merge(@opts))
       end
     end
