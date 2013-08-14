@@ -16,7 +16,8 @@ module Sidekiq
         # to JSON and then deserialized on the other side back into a
         # Ruby object.
         if @performable == DelayedModel
-          obj = [@target.class.name, @target.id, name, args]
+          primary_key = @target.class.primary_key
+          obj = [@target.class.name, @target.attributes[primary_key], name, args]
         else
           obj = [@target, name, args]
         end

@@ -15,9 +15,9 @@ module Sidekiq
       include Sidekiq::Worker
 
       def perform(yml)
-        (class_name, id, method_name, args) = YAML.load(yml)
+        (class_name, primary_key, method_name, args) = YAML.load(yml)
         klass = class_name.constantize
-        target = klass.find(id)
+        target = klass.find(primary_key)
         target.send(method_name, *args)
       end
     end
