@@ -133,7 +133,7 @@ module Sidekiq
         end
 
         normalized_item['jid'] ||= SecureRandom.hex(12)
-        normalized_item['enqueued_at'] = Time.now.to_f
+        normalized_item['enqueued_at'] ||= Time.now.to_f
         normalized_item
       end
 
