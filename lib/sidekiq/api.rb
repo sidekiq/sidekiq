@@ -175,7 +175,7 @@ module Sidekiq
     end
 
     def enqueued_at
-      Time.at(@item['enqueued_at'] || 0)
+      Time.at(@item['enqueued_at'] || 0).utc
     end
 
     def queue
@@ -210,7 +210,7 @@ module Sidekiq
     end
 
     def at
-      Time.at(score)
+      Time.at(score).utc
     end
 
     def delete
