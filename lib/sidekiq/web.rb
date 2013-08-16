@@ -238,10 +238,12 @@ module Sidekiq
     post "/retries/:key" do
       halt 404 unless params['key']
       job = Sidekiq::RetrySet.new.fetch(*parse_params(params['key'])).first
-      if params['retry']
-        job.retry
-      elsif params['delete']
-        job.delete
+      if job
+        if params['retry']
+          job.retry
+        elsif params['delete']
+          job.delete
+        end
       end
       redirect "#{root_path}retries"
     end
@@ -265,10 +267,12 @@ module Sidekiq
 
       params['key'].each do |key|
         job = Sidekiq::ScheduledSet.new.fetch(*parse_params(key)).first
-        if params['delete']
-          job.delete
-        elsif params['add_to_queue']
-          job.add_to_queue
+        if job
+          if params['delete']
+            job.delete
+          elsif params['add_to_queue']
+            job.add_to_queue
+          end
         end
       end
       redirect "#{root_path}scheduled"
@@ -277,10 +281,12 @@ module Sidekiq
     post "/scheduled/:key" do
       halt 404 unless params['key']
       job = Sidekiq::ScheduledSet.new.fetch(*parse_params(params['key'])).first
-      if params['add_to_queue']
-        job.add_to_queue
-      elsif params['delete']
-        job.delete
+      if job
+        if params['add_to_queue']
+          job.add_to_queue
+        elsif params['delete']
+          job.delete
+        end
       end
       redirect "#{root_path}scheduled"
     end

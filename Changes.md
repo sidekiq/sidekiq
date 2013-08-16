@@ -1,3 +1,9 @@
+2.13.2
+-----------
+
+- Fix more race conditions in Web UI actions
+
+
 2.13.1
 -----------
 
