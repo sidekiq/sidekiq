@@ -3,6 +3,12 @@ Sidekiq Pro Changelog
 
 Please see http://sidekiq.org/pro for more details and how to buy.
 
+1.2.2
+-----------
+
+- Problem with reliable fetch which could lead to lost jobs when Sidekiq
+  is shut down normally.  Thanks to MikaelAmborn for the report. [#1109]
+
 1.2.1
 -----------
 
