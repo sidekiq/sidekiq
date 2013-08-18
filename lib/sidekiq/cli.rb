@@ -9,10 +9,13 @@ require 'sidekiq'
 require 'sidekiq/util'
 
 module Sidekiq
-  # Used to raise in workers that have not finished within the
-  # hard timeout limit.  This is needed to rollback db transactions,
+  # We are shutting down Sidekiq but what about workers that
+  # are working on some long job?  This error is
+  # raised in workers that have not finished within the hard
+  # timeout limit.  This is needed to rollback db transactions,
   # otherwise Ruby's Thread#kill will commit.  See #377.
-  class Shutdown < RuntimeError; end
+  # DO NOT RESCUE THIS ERROR.
+  class Shutdown < Interrupt; end
 
   class CLI
     include Util
