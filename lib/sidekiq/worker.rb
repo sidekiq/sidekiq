@@ -59,7 +59,9 @@ module Sidekiq
       # Legal options:
       #
       #   :queue - use a named queue for this Worker, default 'default'
-      #   :retry - enable the RetryJobs middleware for this Worker, default *true*
+      #   :retry - enable the RetryJobs middleware for this Worker, default *true*,
+      #   :log_exceptions_after - only log exceptions after a specific number of retries, default 0
+      #   :skip_log_exceptions - list of exceptions to skip logging using log_exceptions_after option, default []
       #   :backtrace - whether to save any error backtrace in the retry payload to display in web UI,
       #      can be true, false or an integer number of lines to save, default *false*
       def sidekiq_options(opts={})
