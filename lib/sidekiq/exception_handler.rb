@@ -9,10 +9,13 @@ module Sidekiq
       # For future error services, please add your own
       # middleware like BugSnag does:
       # https://github.com/bugsnag/bugsnag-ruby/blob/master/lib/bugsnag/sidekiq.rb
-      send_to_airbrake(msg, ex) if defined?(::Airbrake)
-      send_to_honeybadger(msg, ex) if defined?(::Honeybadger)
-      send_to_exceptional(msg, ex) if defined?(::Exceptional)
-      send_to_exception_notifier(msg, ex) if defined?(::ExceptionNotifier)
+      if msg['retry_count'].to_i >= msg['log_exceptions_after'].to_i &&
+          (msg['skip_log_exceptions'].nil? || msg['skip_log_exceptions'].size == 0 || msg['skip_log_exceptions'].include?(ex.class))
+        send_to_airbrake(msg, ex) if defined?(::Airbrake)
+        send_to_honeybadger(msg, ex) if defined?(::Honeybadger)
+        send_to_exceptional(msg, ex) if defined?(::Exceptional)
+        send_to_exception_notifier(msg, ex) if defined?(::ExceptionNotifier)
+      end
     end
 
     private
