@@ -15,4 +15,5 @@ end
   #'failed_at' => Time.now.utc, 'retry_count' => 0 })) }
 
 require 'sidekiq/web'
+require 'sidekiq/cron_web'
 run Sidekiq::Web
