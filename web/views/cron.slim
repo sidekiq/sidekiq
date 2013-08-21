@@ -1,0 +1,32 @@
+header.row
+  .span5
+    h3 = t('CronJobs')
+
+table class="queue table table-hover table-bordered table-striped"
+  thead
+    th = t('Name')
+    th = t('Cron')
+    th = t('Last enque')
+    th = t('Arguments')
+    th width="183px" 
+      = t('Actions')
+
+  - @cron_jobs.sort{|a,b| a['name'].downcase <=> b['name'].downcase }.each_with_index do |job, index|
+    tr
+      td= job['name']
+      td
+        b == job['cron'].gsub(" ", "&nbsp;")
+      td== relative_time(Time.parse(job['last_run_time']))
+      td
+        - if job['message'] and job['message'].to_s.size > 100
+          button data-toggle="collapse" data-target=".worker_#{index}" class="btn btn-mini" = t('ShowAll')
+          .toggle[class="worker_#{index}" style="display: inline;"]= job['message'][0..100] + "... "
+          .toggle[class="worker_#{index}" style="display: none;"]= job['message']
+        - else
+          = job['message']
+      td
+        form action="#{root_path}cron/#{job['name']}/enque" method="post"
+          input.btn.btn-small.pull-left type="submit" name="delete" value="#{t('EnqueueNow')}"
+        form action="#{root_path}cron/#{job['name']}/delete" method="post"
+          input.btn.btn-danger.btn-small type="submit" name="delete" value="#{t('Delete')}" data-confirm="#{t('AreYouSureDeleteCronJob', :job => job['name'])}"
+
