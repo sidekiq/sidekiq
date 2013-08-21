@@ -1,8 +1,5 @@
 require 'yaml'
 require 'sinatra/base'
-require 'slim'
-
-raise "The Sidekiq Web UI requires slim 1.1.0 or greater.  You have slim v#{Slim::VERSION}" if Gem::Version.new(Slim::VERSION) < Gem::Version.new('1.1.0')
 
 require 'sidekiq'
 require 'sidekiq/api'
@@ -16,7 +13,6 @@ module Sidekiq
     set :public_folder, Proc.new { "#{root}/assets" }
     set :views, Proc.new { "#{root}/views" }
     set :locales, Proc.new { "#{root}/locales" }
-    set :slim, :pretty => true
 
     helpers do
       def strings
@@ -164,12 +160,12 @@ module Sidekiq
     end
 
     get "/workers" do
-      slim :index
+      erb :index
     end
 
     get "/queues" do
       @queues = Sidekiq::Queue.all
-      slim :queues
+      erb :queues
     end
 
     get "/queues/:name" do
@@ -178,7 +174,7 @@ module Sidekiq
       @name = params[:name]
       (@current_page, @total_size, @messages) = page("queue:#{@name}", params[:page], @count)
       @messages = @messages.map {|msg| Sidekiq.load_json(msg) }
-      slim :queue
+      erb :queue
     end
 
     post "/reset" do
@@ -200,14 +196,14 @@ module Sidekiq
       @count = (params[:count] || 25).to_i
       (@current_page, @total_size, @retries) = page("retry", params[:page], @count)
       @retries = @retries.map {|msg, score| [Sidekiq.load_json(msg), score] }
-      slim :retries
+      erb :retries
     end
 
     get "/retries/:key" do
       halt 404 unless params['key']
       @retry = Sidekiq::RetrySet.new.fetch(*parse_params(params['key'])).first
       redirect "#{root_path}retries" if @retry.nil?
-      slim :retry
+      erb :retry
     end
 
     post '/retries' do
@@ -252,14 +248,14 @@ module Sidekiq
       @count = (params[:count] || 25).to_i
       (@current_page, @total_size, @scheduled) = page("schedule", params[:page], @count)
       @scheduled = @scheduled.map {|msg, score| [Sidekiq.load_json(msg), score] }
-      slim :scheduled
+      erb :scheduled
     end
 
     get "/scheduled/:key" do
       halt 404 unless params['key']
       @job = Sidekiq::ScheduledSet.new.fetch(*parse_params(params['key'])).first
       redirect "#{root_path}scheduled" if @job.nil?
-      slim :scheduled_job_info
+      erb :scheduled_job_info
     end
 
     post '/scheduled' do
@@ -296,7 +292,7 @@ module Sidekiq
       stats_history = Sidekiq::Stats::History.new((params[:days] || 30).to_i)
       @processed_history = stats_history.processed
       @failed_history = stats_history.failed
-      slim :dashboard
+      erb :dashboard
     end
 
     get '/dashboard/stats' do

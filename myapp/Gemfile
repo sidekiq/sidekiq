@@ -14,7 +14,6 @@ gem 'sidekiq', :path => '..'
 gem 'capistrano'
 
 # sidekiq-web dependencies
-gem 'slim', '1.1.0'
 gem 'sinatra'
 
 gem 'shotgun'
