@@ -13,12 +13,15 @@ class MyClass
 end
 
 
-Sidekiq::Cron::Scheduler.add_job 'cron' => '* * * * *', 'name' => "Jahoj", 'class' => "MyClass", "queue" => "huste", "args" => ["Ahoj", "jak", "se"]
-Sidekiq::Cron::Scheduler.add_job 'cron' => '* * * * *', 'name' => "huste_ja", 'class' => "MyClass", "queue" => "huste", "args" => ["Ahoj", "jak", "se"]
+#remove all jobs from previous runs!
+Sidekiq::Cron::Scheduler.remove_all_jobs!
 
-Sidekiq::Cron::Scheduler.add_job 'cron' => '*/2 * * * *', 'name' => "Test_my_class", 'class' => "MyClass", "queue" => "test", "args" => {foo: 'bar'}
-Sidekiq::Cron::Scheduler.add_job 'cron' => '*/2 * * * *', 'name' => "test_my_class", 'class' => "MyClass", "queue" => "test", "args" => {foo: 'bar'}
 
-Sidekiq::Cron::Scheduler.add_job 'cron' => '* * * * *', 'name' => "Klokočka", 'class' => "MyClass", "queue" => "huste", "args" => ["Ahoj", "jak", "se"]
 
-Sidekiq::Cron::Scheduler.add_job 'cron' => '* * * * *', 'name' => "zato", 'class' => "MyClass", "queue" => "huste", "args" => ["Ahoj", "jak", "se"]
+Sidekiq::Cron::Scheduler.add_job 'cron' => '* * * * *', 'name' => "My first recuring job", 
+  'class' => "MyClass", "queue" => "test_queue", "args" => ["foo", "bar"]
+
+Sidekiq::Cron::Scheduler.add_job 'cron' => '* */2 * * *', 'name' => "Job every minute of odd hours", 
+  'class' => "MyClass", "args" => {foo: "bar"}
+
+Sidekiq::Cron::Scheduler.add_job 'cron' => '10 2 * * *', 'name' => "Every day at 2:10 am", 'class' => "MyClass"
