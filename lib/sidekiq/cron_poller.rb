@@ -62,7 +62,7 @@ module Sidekiq
                     message = conn.hget(cron_job_key, "message")
                                         
                     Sidekiq::Client.push(Sidekiq.load_json(message))
-                    logger.debug { "enqueued #{cron_job_key.split(":").last}: #{message}" }
+                    logger.debug { "enqueued #{cron_job_key.split(":", 2).last}: #{message}" }
                   end
                 end
               end

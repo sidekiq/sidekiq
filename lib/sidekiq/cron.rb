@@ -103,6 +103,7 @@ module Sidekiq
           #add information about last time! - don't enque right after scheduler poller starts!
           conn.zadd(cron_job_runs_key(job['name']), Time.now.to_i, last_time.to_s)
         end
+        logger.info { "Cron Jobs - add job with name: #{job['name']}" }
       end
 
       # get all cron jobs
@@ -132,6 +133,7 @@ module Sidekiq
           #delete main job
           conn.del key
         end
+        logger.info { "Cron Jobs - deleted job with name: #{name.split(":", 2).last}" }
       end
 
       # remove all job from cron
