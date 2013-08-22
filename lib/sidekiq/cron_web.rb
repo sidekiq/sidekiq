@@ -20,7 +20,7 @@ module Sidekiq
         klass.instance_eval("
           post '/cron/:name/enque' do |name|
             Sidekiq::Cron::Scheduler.enque_job_by_name name
-            redirect '/cron'
+            redirect root_path.to_s + 'cron'
           end
         ")
 
@@ -28,7 +28,7 @@ module Sidekiq
         klass.instance_eval("
           post '/cron/:name/delete' do |name|
             Sidekiq::Cron::Scheduler.remove_job name
-            redirect '/cron'
+            redirect root_path.to_s + 'cron'
           end
         ")
 
