@@ -15,5 +15,3 @@ gem 'capistrano'
 
 # sidekiq-web dependencies
 gem 'sinatra'
-
-gem 'shotgun'

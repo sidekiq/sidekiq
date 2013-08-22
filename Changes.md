@@ -1,10 +1,10 @@
-2.13.2
+2.14.0
 -----------
 
+- Removed slim gem dependency, Web UI now uses ERB [Locke23rus, #1120]
 - Fix more race conditions in Web UI actions
 - Don't reset Job enqueued\_at when retrying
 - Timestamp tooltips in the Web UI should use UTC
-- Removed slim dependency [Locke23rus, #1120]
 
 
 2.13.1
