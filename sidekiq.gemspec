@@ -19,6 +19,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency                  'connection_pool', '>= 1.0.0'
   gem.add_dependency                  'celluloid', '>= 0.14.1'
   gem.add_dependency                  'json'
+  gem.add_dependency                  'parse-cron'
   gem.add_development_dependency      'sinatra'
   gem.add_development_dependency      'slim', '>= 1.1.0'
   gem.add_development_dependency      'minitest', '~> 5'

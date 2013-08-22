@@ -20,6 +20,10 @@ en: # <---- change this to your locale code
   Queue: Queue
   Class: Class
   Job: Job
+  Cron: Cron
+  CronJobs: Cron Jobs
+  EnqueueNow: Enqueue Now
+  AreYouSureDeleteCronJob: Are you sure you want to delete the %{job} cron job?
   Arguments: Arguments
   Extras: Extras
   Started: Started
