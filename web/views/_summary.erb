@@ -1,0 +1,26 @@
+<ul class="unstyled summary row">
+  <li class="processed span2">
+    <span class="count"><%= number_with_delimiter(stats.processed) %></span>
+    <span class="desc"><%= t('Processed') %></span>
+  </li>
+  <li class="failed span2">
+    <span class="count"><%= number_with_delimiter(stats.failed) %></span>
+    <span class="desc"><%= t('Failed') %></span>
+  </li>
+  <li class="busy span2">
+    <span class="count"><%= number_with_delimiter(workers_size) %></span>
+    <span class="desc"><%= t('Busy') %></span>
+  </li>
+  <li class="scheduled span2">
+    <span class="count"><%= number_with_delimiter(stats.scheduled_size) %></span>
+    <span class="desc"><%= t('Scheduled') %></span>
+  </li>
+  <li class="retries span2">
+    <span class="count"><%= number_with_delimiter(stats.retry_size) %></span>
+    <span class="desc"><%= t('Retries') %></span>
+  </li>
+  <li class="enqueued span2">
+    <span class="count"><%= number_with_delimiter(stats.enqueued) %></span>
+    <span class="desc"><%= t('Enqueued') %></span>
+  </li>
+</ul>

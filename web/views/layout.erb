@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+  <head>
+    <title><%= Sidekiq::NAME %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link href="<%= root_path %>stylesheets/bootstrap.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="<%= root_path %>stylesheets/application.css" media="screen" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="<%= root_path %>javascripts/application.js"></script>
+    <script type="text/javascript" src="<%= root_path %>javascripts/locales/jquery.timeago.<%= locale %>.js"></script>
+    <% if params[:poll] %>
+      <script>
+        setInterval("window.location.reload(true)", 2000);
+      </script>
+    <% end %>
+  </head>
+  <body class="admin">
+    <div class="navbar navbar-fixed-top">
+      <%= erb :_nav %>
+    </div>
+
+    <div id="page">
+      <div class="container">
+        <div class="row">
+          <div class="span12 summary_bar">
+            <div class="row">
+              <h4 class="span10">
+                <span class="title"><%= t('Status') %></span>
+                <%= erb :_status %>
+              </h4>
+              <% unless current_path == '' %>
+                <div class="span2 pull-right actions">
+                  <% if params[:poll] %>
+                    <a id="live-poll" class="btn btn-block btn-primary active" href="<%= root_path %><%= current_path %>"><%= t('StopPolling') %></a>
+                  <% else %>
+                    <a id="live-poll" class="btn btn-block btn-primary" href="<%= root_path %><%= current_path %>?poll=true"><%= t('LivePoll') %></a>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+            <%= erb :_summary %>
+          </div>
+
+          <div class="span12">
+            <%= yield %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="navbar navbar-fixed-bottom navbar-inverse">
+      <div class="navbar-inner">
+        <div class="container">
+          <ul class="nav">
+            <li>
+              <p class="navbar-text" style="color:white;">Sidekiq v<%= Sidekiq::VERSION %></p>
+            </li>
+            <li>
+              <p class="navbar-text">Redis: <%= location %></p>
+            </li>
+            <li>
+              <p class="navbar-text"><%= t('Time') %>: <%= Time.now.utc.strftime('%H:%M:%S UTC') %></p>
+            </li>
+            <% if namespace %>
+              <li>
+                <p class="navbar-text"><%= t('Namespace') %>: <%= namespace %></p>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
