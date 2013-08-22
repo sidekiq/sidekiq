@@ -20,7 +20,7 @@
 ```ruby
 Sidekiq.configure_server do |config|
   config.server_middleware do |chain|
-    chain.add Sidekiq::Middleare::Server::RetryJobs, :max_retries => 10
+    chain.add Sidekiq::Middleware::Server::RetryJobs, :max_retries => 10
   end
 end
 ```
