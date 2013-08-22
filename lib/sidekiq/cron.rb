@@ -76,7 +76,7 @@ module Sidekiq
 
         message = {
           "class" => job['class'],
-          "args"  => job["args"].is_a?(Array) ? job["args"] : [job["args"]],
+          "args"  => job["args"].nil? ? [] : (job["args"].is_a?(Array) ? job["args"] : [ job["args"] ]),
         }
         #get right data for message
         job_bag["message"] = case job['class']
