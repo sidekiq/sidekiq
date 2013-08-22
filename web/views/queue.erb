@@ -28,7 +28,7 @@
       </td>
       <td>
         <form action="<%= root_path %>queues/<%= @name %>/delete" method="post">
-          <input name="key_val" value="<%= Sidekiq.dump_json(msg) %>" type="hidden" />
+          <input name="key_val" value="<%= h Sidekiq.dump_json(msg) %>" type="hidden" />
           <input class="btn btn-danger btn-mini" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSure') %>" />
         </form>
       </td>
