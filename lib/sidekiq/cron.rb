@@ -24,10 +24,11 @@ module Sidekiq
       # }
       #
       def self.load_jobs_from_hash hash
-        load_jobs_from_hash hash.inject([]) do |out,(key, job)|
+        array = hash.inject([]) do |out,(key, job)|
           job['name'] = key
           out << job
         end
+        load_jobs_from_array array
       end
 
 
@@ -47,7 +48,7 @@ module Sidekiq
       #   }
       # ]
       #
-      def self.load_jobs_from_hash array
+      def self.load_jobs_from_array array
         array.each do |job|
           add_job(job)
         end
