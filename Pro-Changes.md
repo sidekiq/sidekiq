@@ -3,6 +3,13 @@ Sidekiq Pro Changelog
 
 Please see http://sidekiq.org/pro for more details and how to buy.
 
+1.2.3
+-----------
+
+- Pro now requires Sidekiq 2.14.0
+- Fix bad exception handling in batch callbacks [#1134]
+- Convert Batch UI to ERB
+
 1.2.2
 -----------
 
