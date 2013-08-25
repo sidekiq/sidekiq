@@ -3,6 +3,9 @@
 First of all, thank you for even opening this file up!  I hope you find
 it worthwhile to help out with Sidekiq.
 
+## Issues
+
+When opening an issue, please include a **backtrace** with your error.
 
 ## Code
 
