@@ -5,6 +5,8 @@
 - Fix more race conditions in Web UI actions
 - Don't reset Job enqueued\_at when retrying
 - Timestamp tooltips in the Web UI should use UTC
+- Fix invalid usage of handle\_exception causing issues in Airbrake
+  [#1134]
 
 
 2.13.1

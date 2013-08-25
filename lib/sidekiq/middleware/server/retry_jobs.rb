@@ -116,7 +116,7 @@ module Sidekiq
           end
 
         rescue Exception => e
-          handle_exception(e, "Error calling retries_exhausted")
+          handle_exception(e, { :context => "Error calling retries_exhausted" })
         end
 
         def retry_attempts_from(msg_retry, default)
