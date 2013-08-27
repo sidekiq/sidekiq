@@ -54,6 +54,6 @@
 <%  if @redis_info.fetch("used_memory_peak_human", nil) %>
   <div class="stat">
     <h3 class="used_memory_peak_human"><%= @redis_info.fetch("used_memory_peak_human") %></h3>
-    <p><%= @redis_info.fetch("used_memory_peak_human") %></p>
+    <p><%= t('PeakMemoryUsage') %></p>
   </div>
 <% end %>
