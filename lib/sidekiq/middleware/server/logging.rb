@@ -7,9 +7,15 @@ module Sidekiq
           Sidekiq::Logging.with_context("#{worker.class.to_s} JID-#{item['jid']}") do
             begin
               start = Time.now
-              logger.info { "start" }
+              logger.info { "start" } if log_level(worker) <= Logger::INFO
               yield
-              logger.info { "done: #{elapsed(start)} sec" }
+
+              # only output the finish if we're in INFO or lower, or there is a threshold and this is a long job
+              t = elapsed(start)
+
+              if t > log_threshold(worker) || log_level(worker) <= Logger::INFO
+                logger.info { "done: #{t} sec" }
+              end
             rescue Exception
               logger.info { "fail: #{elapsed(start)} sec" }
               raise
@@ -23,6 +29,14 @@ module Sidekiq
 
         def logger
           Sidekiq.logger
+        end
+
+        def log_level(worker)
+          worker.class.get_sidekiq_options['log_level'] || Logger::INFO
+        end
+
+        def log_threshold(worker)
+          worker.class.get_sidekiq_options['log_threshold'] || 0
         end
       end
     end

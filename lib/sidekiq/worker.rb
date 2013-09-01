@@ -75,7 +75,7 @@ module Sidekiq
         self.sidekiq_retries_exhausted_block = block
       end
 
-      DEFAULT_OPTIONS = { 'retry' => true, 'queue' => 'default' }
+      DEFAULT_OPTIONS = { 'retry' => true, 'queue' => 'default', 'log_level' => nil, 'log_threshold' => nil }
 
       def get_sidekiq_options # :nodoc:
         self.sidekiq_options_hash ||= DEFAULT_OPTIONS
