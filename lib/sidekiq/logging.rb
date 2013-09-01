@@ -1,6 +1,11 @@
 require 'time'
 require 'logger'
 
+# open up a new attribute for logger
+class Logger
+  attr_accessor :threshold
+end
+
 module Sidekiq
   module Logging
 
@@ -30,6 +35,7 @@ module Sidekiq
       @logger = Logger.new(log_target)
       @logger.level = Logger::INFO
       @logger.formatter = Pretty.new
+      @logger.threshold = 0
       oldlogger.close if oldlogger && !$TESTING # don't want to close testing's STDOUT logging
       @logger
     end
