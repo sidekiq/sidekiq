@@ -7,6 +7,7 @@ module Sidekiq
           Sidekiq::Logging.with_context("#{worker.class.to_s} JID-#{item['jid']}") do
             begin
               start = Time.now
+              logger.info { "args: #{item['args']}" }
               logger.info { "start" }
               yield
               logger.info { "done: #{elapsed(start)} sec" }
