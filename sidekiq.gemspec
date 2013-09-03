@@ -22,7 +22,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency      'sinatra'
   gem.add_development_dependency      'minitest', '~> 5'
   gem.add_development_dependency      'rake'
-  gem.add_development_dependency      'actionmailer'
-  gem.add_development_dependency      'activerecord'
+  gem.add_development_dependency      'actionmailer', '>= 3.0.0'
+  gem.add_development_dependency      'activerecord', '>= 3.0.0'
   gem.add_development_dependency      'coveralls'
 end
