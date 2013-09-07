@@ -89,6 +89,14 @@ module Sidekiq
     @server_chain
   end
 
+  def self.default_worker_options=(hash)
+    @default_worker_options = default_worker_options.merge(hash)
+  end
+
+  def self.default_worker_options
+    @default_worker_options || { 'retry' => true, 'queue' => 'default' }
+  end
+
   def self.load_json(string)
     JSON.parse(string)
   end

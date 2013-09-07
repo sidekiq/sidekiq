@@ -75,10 +75,8 @@ module Sidekiq
         self.sidekiq_retries_exhausted_block = block
       end
 
-      DEFAULT_OPTIONS = { 'retry' => true, 'queue' => 'default' }
-
       def get_sidekiq_options # :nodoc:
-        self.sidekiq_options_hash ||= DEFAULT_OPTIONS
+        self.sidekiq_options_hash ||= Sidekiq.default_worker_options
       end
 
       def client_push(item) # :nodoc:
