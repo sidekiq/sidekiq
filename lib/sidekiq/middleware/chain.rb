@@ -83,16 +83,16 @@ module Sidekiq
       end
 
       def insert_before(oldklass, newklass, *args)
-        i = entries.index { |entry| entry.klass == newklass }
+        i = get_index(newklass)
         new_entry = i.nil? ? Entry.new(newklass, *args) : entries.delete_at(i)
-        i = entries.find_index { |entry| entry.klass == oldklass } || 0
+        i = get_index(oldklass) || 0
         entries.insert(i, new_entry)
       end
 
       def insert_after(oldklass, newklass, *args)
-        i = entries.index { |entry| entry.klass == newklass }
+        i = get_index(newklass)
         new_entry = i.nil? ? Entry.new(newklass, *args) : entries.delete_at(i)
-        i = entries.find_index { |entry| entry.klass == oldklass } || entries.count - 1
+        i = get_index(oldklass) || entries.count - 1
         entries.insert(i+1, new_entry)
       end
 
@@ -118,6 +118,10 @@ module Sidekiq
           end
         end
         traverse_chain.call
+      end
+    private
+      def get_index(klass)
+        entries.find_index {|entry| entry.klass == klass }
       end
     end
 
