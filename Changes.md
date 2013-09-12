@@ -1,3 +1,9 @@
+2.14.1
+-----------
+
+- Fix misc Web UI issues due to ERB conversion.
+- Bump redis-namespace version due to security issue.
+
 2.14.0
 -----------
 
