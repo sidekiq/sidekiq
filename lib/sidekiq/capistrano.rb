@@ -9,7 +9,7 @@ Capistrano::Configuration.instance.load do
   _cset(:sidekiq_processes) { 1 }
 
   if fetch(:sidekiq_default_hooks)
-    before "deploy:update_code", "sidekiq:quiet"
+    before "deploy:finalize_update", "sidekiq:quiet"
     after "deploy:stop",    "sidekiq:stop"
     after "deploy:start",   "sidekiq:start"
     before "deploy:restart", "sidekiq:restart"
