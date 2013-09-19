@@ -21,6 +21,7 @@ en: # <---- change this to your locale code
   Class: Class
   Job: Job
   Arguments: Arguments
+  Error: Error
   Extras: Extras
   Started: Started
   ShowAll: Show All
