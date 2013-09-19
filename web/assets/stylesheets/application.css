@@ -846,10 +846,10 @@ img.smallogo {
   border-radius: 3px;
 }
 .args {
-  overflow: scroll;
+  overflow-y: scroll;
   max-height: 100px;
 }
 .args-extended {
-  overflow: scroll;
+  overflow-y: scroll;
   max-height: 500px;
 }
