@@ -11,6 +11,7 @@ en: # <---- change this to your locale code
   Failed: Failed
   Scheduled: Scheduled
   Retries: Retries
+  RetriesInQueue: Retries in <span class='title'>%{queue}</span>
   Enqueued: Enqueued
   ClearWorkerList: Clear workers list
   Worker: Worker

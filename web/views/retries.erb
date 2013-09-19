@@ -1,10 +1,14 @@
 <header class="row">
   <div class="span5">
-    <h3><%= t('Retries') %></h3>
+    <% if @name %>
+      <h3><%= t('RetriesInQueue', :queue => @name) %></h3>
+    <% else %>
+      <h3><%= t('Retries') %></h3>
+    <% end %>
   </div>
   <div class="span4">
     <% if @retries.size > 0 %>
-      <%= erb :_paging, :locals => { :url => "#{root_path}retries" } %>
+      <%= erb :_paging, :locals => { :url => @paging_path} %>
     <% end %>
   </div>
 </header>
@@ -32,7 +36,7 @@
           </td>
           <td><%= msg['retry_count'] %></td>
           <td>
-            <a href="<%= root_path %>queues/<%= msg['queue'] %>"><%= msg['queue'] %></a>
+            <a href="<%= root_path %>retries/in/<%= msg['queue'] %>"><%= msg['queue'] %></a>
           </td>
           <td><%= msg['class'] %></td>
           <td>

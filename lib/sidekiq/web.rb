@@ -201,6 +201,7 @@ module Sidekiq
       @count = (params[:count] || 25).to_i
       (@current_page, @total_size, @retries) = page("retry", params[:page], @count)
       @retries = @retries.map {|msg, score| [Sidekiq.load_json(msg), score] }
+      @paging_path = "#{root_path}retries"
       erb :retries
     end
 
@@ -209,6 +210,17 @@ module Sidekiq
       @retry = Sidekiq::RetrySet.new.fetch(*parse_params(params['key'])).first
       redirect "#{root_path}retries" if @retry.nil?
       erb :retry
+    end
+
+    get "/retries/in/:name" do
+      halt 404 unless params[:name]
+      @name = params[:name]
+      @count = (params[:count] || 25).to_i
+      @paging_path = "#{root_path}retries/in/#{params[:name]}"
+      jobs = Sidekiq::RetrySet.new.select { |job| job.queue == params[:name] }
+      @retries = jobs.map {|job| [Sidekiq.load_json(job.message), job.score] }
+      (@current_page, @total_size, @retries) = page(@retries, params[:page], @count)
+      erb :retries
     end
 
     post '/retries' do

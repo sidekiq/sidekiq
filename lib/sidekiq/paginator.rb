@@ -1,6 +1,14 @@
 module Sidekiq
   module Paginator
     def page(key, pageidx=1, page_size=25)
+      if key.respond_to? :each
+        page_enumerable(key, pageidx, page_size)
+      else
+        page_redis(key, pageidx, page_size)
+      end
+    end
+
+    def page_redis(key, pageidx, page_size)
       current_page = pageidx.to_i < 1 ? 1 : pageidx.to_i
       pageidx = current_page - 1
       total_size = 0
@@ -24,6 +32,14 @@ module Sidekiq
           raise "can't page a #{type}"
         end
       end
+
+      [current_page, total_size, items]
+    end
+
+    def page_enumerable(array, pageidx, page_size)
+      current_page = pageidx.to_i < 1 ? 1 : pageidx.to_i
+      total_size = array.size
+      items = array.slice((current_page - 1) * page_size, page_size)
 
       [current_page, total_size, items]
     end
