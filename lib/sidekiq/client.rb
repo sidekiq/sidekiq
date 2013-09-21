@@ -129,7 +129,7 @@ module Sidekiq
           normalized_item = item['class'].get_sidekiq_options.merge(item)
           normalized_item['class'] = normalized_item['class'].to_s
         else
-          normalized_item = Sidekiq::Worker::ClassMethods::DEFAULT_OPTIONS.merge(item)
+          normalized_item = Sidekiq.default_worker_options.merge(item)
         end
 
         normalized_item['jid'] ||= SecureRandom.hex(12)
