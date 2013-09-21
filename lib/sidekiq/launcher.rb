@@ -7,7 +7,10 @@ module Sidekiq
     attr_reader :manager, :poller, :options
     def initialize(options)
       @options = options
-      @manager = Sidekiq::Manager.new(options)
+
+      Sidekiq::Manager.supervise_as :manager, options
+      @manager = Celluloid::Actor[:manager]
+
       @poller  = Sidekiq::Scheduled::Poller.new
     end
 
