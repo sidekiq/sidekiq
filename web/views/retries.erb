@@ -21,6 +21,7 @@
         <th><%= t('Queue') %></th>
         <th><%= t('Worker') %></th>
         <th><%= t('Arguments') %></th>
+        <th><%= t('Error') %></th>
       </tr>
       <% @retries.each do |msg, score| %>
         <tr>
@@ -37,6 +38,9 @@
           <td><%= msg['class'] %></td>
           <td>
             <div class="args"><%= display_args(msg['args']) %></div>
+          </td>
+          <td>
+            <div><%= truncate("#{msg['error_class']}: #{msg['error_message']}") %></div>
           </td>
         </tr>
       <% end %>

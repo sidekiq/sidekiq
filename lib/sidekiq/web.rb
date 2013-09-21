@@ -107,10 +107,14 @@ module Sidekiq
         [score.to_f, jid]
       end
 
+      def truncate(text, truncate_after_chars = 2000)
+        truncate_after_chars && text.size > truncate_after_chars ? "#{text[0..truncate_after_chars]}..." : text
+      end
+
       def display_args(args, truncate_after_chars = 2000)
         args.map do |arg|
           a = arg.inspect
-          truncate_after_chars && a.size > truncate_after_chars ? "#{a[0..truncate_after_chars]}..." : a
+          truncate(a)
         end.join(", ")
       end
 
