@@ -23,6 +23,7 @@ module Sidekiq
   }
 
   def self.❨╯°□°❩╯︵┻━┻
+    puts "┬──┬ノ❨°_°ノ❩"
     puts "Calm down, bro"
   end
 
