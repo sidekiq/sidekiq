@@ -209,6 +209,10 @@ module Sidekiq
       @parent = parent
     end
 
+    def message
+      @value
+    end
+
     def at
       Time.at(score).utc
     end
