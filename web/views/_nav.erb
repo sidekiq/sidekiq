@@ -1,6 +1,9 @@
 <div class="navbar-inner">
   <div class="container">
-    <a class="brand" href="<%= root_path %>"><%= Sidekiq::NAME %></a>
+    <a class="brand" href="<%= root_path %>">
+      <%= Sidekiq::NAME %>
+      <%= erb :_status %>
+    </a>
     <ul class="nav">
       <% tabs.each do |title, url| %>
         <% if url == '' %>
