@@ -23,10 +23,6 @@
         <div class="row">
           <div class="span12 summary_bar">
             <div class="row">
-              <h4 class="span10">
-                <span class="title"><%= t('Status') %></span>
-                <%= erb :_status %>
-              </h4>
               <% unless current_path == '' %>
                 <div class="span2 pull-right actions">
                   <% if params[:poll] %>
