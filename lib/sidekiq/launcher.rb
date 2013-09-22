@@ -1,4 +1,6 @@
+require 'sidekiq/actor'
 require 'sidekiq/manager'
+require 'sidekiq/fetch'
 require 'sidekiq/scheduled'
 
 module Sidekiq
@@ -7,7 +9,7 @@ module Sidekiq
   # If any of these actors die, the Sidekiq process exits
   # immediately.
   class Launcher
-    include Celluloid
+    include Actor
 
     trap_exit :actor_died
 
