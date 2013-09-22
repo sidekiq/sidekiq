@@ -232,8 +232,8 @@ img.smallogo {
 
 .status-sprite {
   background-image: url(../images/status-sd8051fd480.png);
-  height: 30px;
-  width: 30px;
+  height: 20px;
+  width: 18px;
   display: inline-block;
 }
 .status-active {
@@ -241,7 +241,7 @@ img.smallogo {
 }
 
 .status-idle {
-  background-position: 0 -80px;
+  background-position: 0 -90px;
 }
 
 .btn {
