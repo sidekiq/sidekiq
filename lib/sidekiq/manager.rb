@@ -17,6 +17,7 @@ module Sidekiq
 
     attr_reader :ready
     attr_reader :busy
+    attr_accessor :fetcher
 
     def initialize(options={})
       logger.debug { options.inspect }
@@ -52,8 +53,7 @@ module Sidekiq
       end
     end
 
-    def start(fetcher)
-      @fetcher = fetcher
+    def start
       @ready.each { dispatch }
     end
 

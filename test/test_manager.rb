@@ -43,7 +43,11 @@ class TestManager < Minitest::Test
     end
 
     it 'returns finished processors to the ready pool' do
+      fetcher = MiniTest::Mock.new
+      fetcher.expect :async, fetcher, []
+      fetcher.expect :fetch, nil, []
       mgr = Sidekiq::Manager.new(options)
+      mgr.fetcher = fetcher
       init_size = mgr.ready.size
       processor = mgr.ready.pop
       mgr.busy << processor
@@ -51,10 +55,15 @@ class TestManager < Minitest::Test
 
       assert_equal 0, mgr.busy.size
       assert_equal init_size, mgr.ready.size
+      fetcher.verify
     end
 
     it 'throws away dead processors' do
+      fetcher = MiniTest::Mock.new
+      fetcher.expect :async, fetcher, []
+      fetcher.expect :fetch, nil, []
       mgr = Sidekiq::Manager.new(options)
+      mgr.fetcher = fetcher
       init_size = mgr.ready.size
       processor = mgr.ready.pop
       mgr.busy << processor
@@ -63,6 +72,7 @@ class TestManager < Minitest::Test
       assert_equal 0, mgr.busy.size
       assert_equal init_size, mgr.ready.size
       refute mgr.ready.include?(processor)
+      fetcher.verify
     end
 
     def options

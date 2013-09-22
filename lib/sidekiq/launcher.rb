@@ -10,6 +10,7 @@ module Sidekiq
   # immediately.
   class Launcher
     include Actor
+    include Util
 
     trap_exit :actor_died
 
@@ -19,6 +20,7 @@ module Sidekiq
       @manager = Sidekiq::Manager.new_link options
       @poller = Sidekiq::Scheduled::Poller.new_link
       @fetcher = Sidekiq::Fetcher.new_link @manager, options
+      @manager.fetcher = @fetcher
       @done = false
       @options = options
     end
@@ -31,18 +33,22 @@ module Sidekiq
     end
 
     def run
-      manager.async.start(fetcher)
-      poller.async.poll(true)
+      watchdog('Launcher#stop') do
+        manager.async.start
+        poller.async.poll(true)
+      end
     end
 
     def stop
-      @done = true
-      Sidekiq::Fetcher.done!
-      fetcher.async.terminate if fetcher.alive?
-      poller.async.terminate if poller.alive?
+      watchdog('Launcher#stop') do
+        @done = true
+        Sidekiq::Fetcher.done!
+        fetcher.async.terminate if fetcher.alive?
+        poller.async.terminate if poller.alive?
 
-      manager.async.stop(:shutdown => true, :timeout => @options[:timeout])
-      manager.wait(:shutdown)
+        manager.async.stop(:shutdown => true, :timeout => @options[:timeout])
+        manager.wait(:shutdown)
+      end
     end
 
     def procline(tag)
