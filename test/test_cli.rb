@@ -11,7 +11,7 @@ def cli.valid?
   !@code
 end
 
-class TestCli < Minitest::Test
+class TestCli < Sidekiq::Test
   describe 'with cli' do
 
     before do

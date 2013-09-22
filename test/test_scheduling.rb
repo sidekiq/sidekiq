@@ -1,7 +1,7 @@
 require 'helper'
 require 'sidekiq/scheduled'
 
-class TestScheduling < Minitest::Test
+class TestScheduling < Sidekiq::Test
   describe 'middleware' do
     before do
       @redis = Minitest::Mock.new

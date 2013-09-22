@@ -25,6 +25,8 @@ require 'sidekiq'
 require 'sidekiq/util'
 Sidekiq.logger.level = Logger::ERROR
 
+Sidekiq::Test = MiniTest::Unit::TestCase
+
 require 'sidekiq/redis_connection'
 redis_url = ENV['REDIS_URL'] || 'redis://localhost/15'
 REDIS = Sidekiq::RedisConnection.create(:url => redis_url, :namespace => 'testy')

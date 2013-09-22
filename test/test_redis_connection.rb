@@ -1,7 +1,7 @@
 require 'helper'
 require 'sidekiq/redis_connection'
 
-class TestRedisConnection < Minitest::Test
+class TestRedisConnection < Sidekiq::Test
 
   describe ".create" do
 
@@ -14,7 +14,7 @@ class TestRedisConnection < Minitest::Test
       it "sets a custom network_timeout if specified" do
         pool = Sidekiq::RedisConnection.create(:network_timeout => 8)
         redis = pool.checkout
-        
+
         assert_equal 8, redis.client.timeout
       end
 
@@ -42,7 +42,7 @@ class TestRedisConnection < Minitest::Test
     describe "pool_timeout" do
       it "uses a given :timeout over the default of 1" do
         pool = Sidekiq::RedisConnection.create(:pool_timeout => 5)
-        
+
         assert_equal 5, pool.instance_eval{ @timeout }
       end
 

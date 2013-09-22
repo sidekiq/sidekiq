@@ -8,7 +8,7 @@ require 'sidekiq/rails'
 
 Sidekiq.hook_rails!
 
-class TestExtensions < Minitest::Test
+class TestExtensions < Sidekiq::Test
   describe 'sidekiq extensions' do
     before do
       Sidekiq.redis = REDIS

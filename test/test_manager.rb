@@ -1,7 +1,7 @@
 require 'helper'
 require 'sidekiq/manager'
 
-class TestManager < Minitest::Test
+class TestManager < Sidekiq::Test
 
   describe 'manager' do
     it 'creates N processor instances' do

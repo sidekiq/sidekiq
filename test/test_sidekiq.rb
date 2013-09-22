@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'helper'
 
-class TestSidekiq < Minitest::Test
+class TestSidekiq < Sidekiq::Test
   describe 'json processing' do
     it 'loads json' do
       assert_equal ({"foo" => "bar"}), Sidekiq.load_json("{\"foo\":\"bar\"}")

@@ -2,7 +2,7 @@ require 'helper'
 require 'sidekiq/client'
 require 'sidekiq/worker'
 
-class TestClient < Minitest::Test
+class TestClient < Sidekiq::Test
   describe 'with mock redis' do
     before do
       @redis = Minitest::Mock.new

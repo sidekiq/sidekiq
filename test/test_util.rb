@@ -1,7 +1,7 @@
 require 'helper'
 require 'sidekiq/util'
 
-class TestUtil < Minitest::Test
+class TestUtil < Sidekiq::Test
   describe 'util' do
     it 'generates the same process id when included in two or more classes' do
       class One

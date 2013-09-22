@@ -1,7 +1,7 @@
 require 'helper'
 require 'sidekiq/processor'
 
-class TestProcessor < Minitest::Test
+class TestProcessor < Sidekiq::Test
   TestException = Class.new(StandardError)
   TEST_EXCEPTION = TestException.new("kerboom!")
 

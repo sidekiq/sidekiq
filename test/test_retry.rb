@@ -2,7 +2,7 @@ require 'helper'
 require 'sidekiq/scheduled'
 require 'sidekiq/middleware/server/retry_jobs'
 
-class TestRetry < Minitest::Test
+class TestRetry < Sidekiq::Test
   describe 'middleware' do
     before do
       @redis = Minitest::Mock.new

@@ -1,6 +1,6 @@
 require 'helper'
 
-class TestApi < Minitest::Test
+class TestApi < Sidekiq::Test
   describe "stats" do
     before do
       Sidekiq.redis {|c| c.flushdb }

@@ -2,7 +2,7 @@ require 'helper'
 require 'sidekiq/middleware/chain'
 require 'sidekiq/processor'
 
-class TestMiddleware < Minitest::Test
+class TestMiddleware < Sidekiq::Test
   describe 'middleware chain' do
     before do
       $errors = []
