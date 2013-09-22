@@ -17,7 +17,6 @@ module Sidekiq
 
     attr_reader :ready
     attr_reader :busy
-    attr_accessor :fetcher
 
     def initialize(options={})
       logger.debug { options.inspect }
@@ -28,7 +27,6 @@ module Sidekiq
       @threads = {}
       @done = false
       @busy = []
-      @fetcher = Fetcher.new(current_actor, options)
       @ready = @count.times.map do
         p = Processor.new_link(current_actor)
         p.proxy_id = p.object_id
@@ -42,8 +40,6 @@ module Sidekiq
         timeout = options[:timeout]
 
         @done = true
-        Sidekiq::Fetcher.done!
-        @fetcher.async.terminate if @fetcher.alive?
 
         logger.info { "Shutting down #{@ready.size} quiet workers" }
         @ready.each { |x| x.terminate if x.alive? }
@@ -56,7 +52,8 @@ module Sidekiq
       end
     end
 
-    def start
+    def start(fetcher)
+      @fetcher = fetcher
       @ready.each { dispatch }
     end
 

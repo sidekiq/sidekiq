@@ -8,22 +8,6 @@ class TestManager < Minitest::Test
       mgr = Sidekiq::Manager.new(options)
       assert_equal options[:concurrency], mgr.ready.size
       assert_equal [], mgr.busy
-      assert mgr.fetcher
-    end
-
-    it 'fetches upon start' do
-      mgr = Sidekiq::Manager.new(options)
-      count = options[:concurrency]
-
-      fetch_mock = Minitest::Mock.new
-      count.times { fetch_mock.expect(:fetch, nil, []) }
-      async_mock = Minitest::Mock.new
-      count.times { async_mock.expect(:async, fetch_mock, []) }
-      mgr.fetcher = async_mock
-      mgr.start
-
-      fetch_mock.verify
-      async_mock.verify
     end
 
     it 'assigns work to a processor' do
@@ -56,7 +40,6 @@ class TestManager < Minitest::Test
 
       assert mgr.busy.empty?
       assert mgr.ready.empty?
-      refute mgr.fetcher.alive?
     end
 
     it 'returns finished processors to the ready pool' do
