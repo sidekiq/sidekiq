@@ -32,3 +32,9 @@ REDIS = Sidekiq::RedisConnection.create(:url => redis_url, :namespace => 'testy'
 Sidekiq.configure_client do |config|
   config.redis = { :url => redis_url, :namespace => 'testy' }
 end
+
+Celluloid.class_eval do
+  def self.shutdown
+    $stderr.puts "Celluloid shutdown disabled"
+  end
+end
