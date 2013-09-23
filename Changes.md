@@ -5,7 +5,7 @@
   Sidekiq process will exit immediately.  This is to help prevent
   "stuck" Sidekiq processes which are running but don't appear to
   be doing any work. [#1194]
-- Sidekiq's testing framework is now dynamic.  You can choose between
+- Sidekiq's testing behavior is now dynamic.  You can choose between
   `inline` and `fake` behavior in your tests. [#1193]
 - The Retries table has a new column for the error message.
 - Sidekiq.default\_worker\_options allows you to configure default

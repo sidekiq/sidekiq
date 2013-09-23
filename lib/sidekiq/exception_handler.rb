@@ -1,8 +1,8 @@
 module Sidekiq
   module ExceptionHandler
 
-    def handle_exception(ex, ctxHash)
-      Sidekiq.logger.warn ctxHash
+    def handle_exception(ex, ctxHash={})
+      Sidekiq.logger.warn(ctxHash) if !ctxHash.empty?
       Sidekiq.logger.warn ex
       Sidekiq.logger.warn ex.backtrace.join("\n")
       # This list of services is getting a bit ridiculous.

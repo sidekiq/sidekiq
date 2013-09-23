@@ -27,13 +27,13 @@ module Sidekiq
 
     def actor_died(actor, reason)
       return if @done
-      Sidekiq.logger.warn("Sidekiq died: #{reason}")
-      Sidekiq.logger.warn("Cannot recover, process exiting")
+      Sidekiq.logger.warn("Sidekiq died due to the following error, cannot recover, process exiting")
+      handle_exception(reason)
       exit(1)
     end
 
     def run
-      watchdog('Launcher#stop') do
+      watchdog('Launcher#run') do
         manager.async.start
         poller.async.poll(true)
       end
