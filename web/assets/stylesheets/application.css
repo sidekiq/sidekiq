@@ -116,7 +116,7 @@ header.row .pagination {
 .summary_bar #live-poll {
   line-height: 28px;
 }
-.summary_bar #live-poll.active {
+#live-poll.active {
   background-color: #009300;
 }
 .summary_bar ul {
