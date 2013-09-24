@@ -113,10 +113,10 @@ header.row .pagination {
   margin-bottom: 10px;
   border-width: 0px;
 }
-.summary_bar #live-poll {
-  line-height: 28px;
+.nav #live-poll {
+  line-height: 25px;
 }
-.summary_bar #live-poll.active {
+#live-poll.active {
   background-color: #009300;
 }
 .summary_bar ul {
