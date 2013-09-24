@@ -260,7 +260,7 @@ module Sidekiq
 
     def schedule(timestamp, message)
       Sidekiq.redis do |conn|
-        conn.zadd(@zset, timestamp.to_s, Sidekiq.dump_json(message))
+        conn.zadd(@zset, timestamp.to_f.to_s, Sidekiq.dump_json(message))
       end
     end
 
