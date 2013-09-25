@@ -54,6 +54,22 @@ module Sidekiq
       end
       alias_method :perform_at, :perform_in
 
+      def perform_once_in(interval, *args)
+        scheduled = Sidekiq::ScheduledSet.new
+        int = interval.to_f
+        ts = (int < 1_000_000_000 ? now + int : int)
+        dup = scheduled.detect do |job|
+          job.klass == name &&
+          job.score == ts.to_f &&
+          job.args == args
+        end
+
+        return if dup
+
+        perform_in(ts, *args)
+      end
+      alias_method :perform_once_at, :perform_once_in
+
       ##
       # Allows customization for this type of Worker.
       # Legal options:
