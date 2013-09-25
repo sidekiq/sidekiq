@@ -41,15 +41,12 @@ class TestInline < Sidekiq::Test
     end
 
     before do
-      load 'sidekiq/testing/inline.rb'
+      require 'sidekiq/testing/inline.rb'
+      Sidekiq::Testing.inline!
     end
 
     after do
-      Sidekiq::Client.singleton_class.class_eval do
-        remove_method :raw_push
-        alias_method :raw_push, :raw_push_old
-        remove_method :raw_push_old
-      end
+      Sidekiq::Testing.disable!
     end
 
     it 'stubs the async call when in testing mode' do

@@ -1,16 +1,77 @@
 module Sidekiq
 
+  class Testing
+    class << self
+      attr_accessor :__test_mode
+
+      def __set_test_mode(mode, &block)
+        if block
+          current_mode = self.__test_mode
+          begin
+            self.__test_mode = mode
+            block.call
+          ensure
+            self.__test_mode = current_mode
+          end
+        else
+          self.__test_mode = mode
+        end
+      end
+
+      def disable!(&block)
+        __set_test_mode(:disable, &block)
+      end
+
+      def fake!(&block)
+        __set_test_mode(:fake, &block)
+      end
+
+      def inline!(&block)
+        __set_test_mode(:inline, &block)
+      end
+
+      def enabled?
+        self.__test_mode != :disable
+      end
+
+      def disabled?
+        self.__test_mode == :disable
+      end
+
+      def fake?
+        self.__test_mode == :fake
+      end
+
+      def inline?
+        self.__test_mode == :inline
+      end
+    end
+  end
+
+  # Default to fake testing to keep old behavior
+  Sidekiq::Testing.fake!
+
   class EmptyQueueError < RuntimeError; end
 
   class Client
     class << self
-      alias_method :raw_push_old, :raw_push
+      alias_method :raw_push_real, :raw_push
 
       def raw_push(payloads)
-        payloads.each do |job|
-          job['class'].constantize.jobs << Sidekiq.load_json(Sidekiq.dump_json(job))
+        if Sidekiq::Testing.fake?
+          payloads.each do |job|
+            job['class'].constantize.jobs << Sidekiq.load_json(Sidekiq.dump_json(job))
+          end
+          true
+        elsif Sidekiq::Testing.inline?
+          payloads.each do |item|
+            marshalled = Sidekiq.load_json(Sidekiq.dump_json(item))
+            marshalled['class'].constantize.new.perform(*marshalled['args'])
+          end
+          true
+        else
+          raw_push_real(payloads)
         end
-        true
       end
     end
   end
