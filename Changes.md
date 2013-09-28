@@ -2,12 +2,16 @@
 -----------
 
 - The Core Sidekiq actors are now monitored.  If any crash, the
-  Sidekiq process will exit immediately.  This is to help prevent
-  "stuck" Sidekiq processes which are running but don't appear to
-  be doing any work. [#1194]
+  Sidekiq process logs the error and exits immediately.  This is to
+  help prevent "stuck" Sidekiq processes which are running but don't
+  appear to be doing any work. [#1194]
 - Sidekiq's testing behavior is now dynamic.  You can choose between
-  `inline` and `fake` behavior in your tests. [#1193]
+  `inline` and `fake` behavior in your tests. See
+[Testing](wiki/Testing) for detail. [#1193]
 - The Retries table has a new column for the error message.
+- The Web UI topbar now contains the status and live poll button.
+- Orphaned worker records are now auto-vacuumed when you vist the
+  Workers page in the Web UI.
 - Sidekiq.default\_worker\_options allows you to configure default
   options for all Sidekiq worker types.
 
