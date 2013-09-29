@@ -70,7 +70,8 @@ module Sidekiq
         pushed ? payloads.size : nil
       end
 
-      # Resque compatibility helpers.
+      # Resque compatibility helpers.  Note all helpers
+      # should go through Worker#client_push.
       #
       # Example usage:
       #   Sidekiq::Client.enqueue(MyWorker, 'foo', 1, :bat => 'bar')
@@ -96,9 +97,7 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        item = { 'queue' => queue, 'class' => klass, 'args' => args, 'at' => ts }
-
-        # Optimization to enqueue something now that is scheduled to go out now or in the past
+        item = { 'class' => klass, 'args' => args, 'at' => ts, 'queue' => queue }
         item.delete('at') if ts <= now
 
         klass.client_push(item)
@@ -108,7 +107,7 @@ module Sidekiq
       #   Sidekiq::Client.enqueue_in(3.minutes, MyWorker, 'foo', 1, :bat => 'bar')
       #
       def enqueue_in(interval, klass, *args)
-        enqueue_to_in klass.get_sidekiq_options['queue'], interval, klass, args
+        klass.perform_in(interval, *args)
       end
 
       private

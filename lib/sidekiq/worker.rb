@@ -41,7 +41,16 @@ module Sidekiq
       end
 
       def perform_in(interval, *args)
-        Sidekiq::Client.enqueue_in(interval, self, args)
+        int = interval.to_f
+        now = Time.now.to_f
+        ts = (int < 1_000_000_000 ? now + int : int)
+
+        item = { 'class' => self, 'args' => args, 'at' => ts }
+
+        # Optimization to enqueue something now that is scheduled to go out now or in the past
+        item.delete('at') if ts <= now
+
+        client_push(item)
       end
       alias_method :perform_at, :perform_in
 

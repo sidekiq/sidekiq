@@ -18,7 +18,7 @@
 ```ruby
 Sidekiq.default_worker_options = { 'queue' => 'default', 'backtrace' => true }
 ```
-- Added two handy Sidekiq::Client class methods for scheduled jobs:
+- Added two Sidekiq::Client class methods for compatibility with resque-scheduler:
   `enqueue_to_in` and `enqueue_in` [#1212]
 
 2.14.1
