@@ -8,19 +8,27 @@
     <span class="desc"><%= t('Failed') %></span>
   </li>
   <li class="busy span2">
-    <span class="count"><%= number_with_delimiter(workers_size) %></span>
-    <span class="desc"><%= t('Busy') %></span>
+    <a href="<%= root_path %>workers">
+      <span class="count"><%= number_with_delimiter(workers_size) %></span>
+      <span class="desc"><%= t('Busy') %></span>
+    </a>
   </li>
   <li class="scheduled span2">
-    <span class="count"><%= number_with_delimiter(stats.scheduled_size) %></span>
-    <span class="desc"><%= t('Scheduled') %></span>
+    <a href="<%= root_path %>scheduled">
+      <span class="count"><%= number_with_delimiter(stats.scheduled_size) %></span>
+      <span class="desc"><%= t('Scheduled') %></span>
+    </a>
   </li>
   <li class="retries span2">
-    <span class="count"><%= number_with_delimiter(stats.retry_size) %></span>
-    <span class="desc"><%= t('Retries') %></span>
+    <a href="<%= root_path %>retries">
+      <span class="count"><%= number_with_delimiter(stats.retry_size) %></span>
+      <span class="desc"><%= t('Retries') %></span>
+    </a>
   </li>
   <li class="enqueued span2">
-    <span class="count"><%= number_with_delimiter(stats.enqueued) %></span>
-    <span class="desc"><%= t('Enqueued') %></span>
+    <a href="<%= root_path %>queues">
+      <span class="count"><%= number_with_delimiter(stats.enqueued) %></span>
+      <span class="desc"><%= t('Enqueued') %></span>
+    </a>
   </li>
 </ul>

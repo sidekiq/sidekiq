@@ -294,6 +294,16 @@ img.smallogo {
 .poll-status {
   padding: 10px 0;
 }
+
+.redis-wrapper {
+  width: 100%;
+  text-align: center;
+}
+
+.stats-container {
+  display: inline-block;
+}
+
 .stat {
   float: left;
   text-align: center;
@@ -302,6 +312,10 @@ img.smallogo {
   padding: 5px;
   width: 150px;
   margin-bottom: 20px;
+}
+
+.stat:last-child {
+  margin-right: 0;
 }
 
 .stat p {
