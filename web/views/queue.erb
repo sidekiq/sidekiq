@@ -1,10 +1,10 @@
 <header class="row">
-  <div class="span5">
+  <div class="col-lg-5">
     <h3>
       <%= t('CurrentMessagesInQueue', :queue => @name) %>
     </h3>
   </div>
-  <div class="span4 pull-right">
+  <div class="col-lg-4 pull-right">
     <%= erb :_paging, :locals => { :url => "#{root_path}queues/#{@name}" } %>
   </div>
 </header>
