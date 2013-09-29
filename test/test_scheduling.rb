@@ -7,12 +7,13 @@ class TestScheduling < Sidekiq::Test
       @redis = Minitest::Mock.new
       # Ugh, this is terrible.
       Sidekiq.instance_variable_set(:@redis, @redis)
-
+      def @redis.multi; [yield] * 2 if block_given?; end
       def @redis.with; yield self; end
     end
 
     class ScheduledWorker
       include Sidekiq::Worker
+      sidekiq_options :queue => :custom_queue
       def perform(x)
       end
     end
@@ -26,6 +27,13 @@ class TestScheduling < Sidekiq::Test
     it 'schedules a job via timestamp' do
       @redis.expect :zadd, true, ['schedule', Array]
       assert ScheduledWorker.perform_in(5.days.from_now, 'mike')
+      @redis.verify
+    end
+
+    it 'schedules job right away on negative timestamp/interval' do
+      @redis.expect :sadd,  true, ['queues', :custom_queue]
+      @redis.expect :lpush, true, ['queue:custom_queue', Array]
+      assert ScheduledWorker.perform_in(-300, 'mike')
       @redis.verify
     end
 
