@@ -113,10 +113,10 @@ header.row .pagination {
   margin-bottom: 10px;
   border-width: 0px;
 }
-.summary_bar #live-poll {
-  line-height: 28px;
+.nav #live-poll {
+  line-height: 25px;
 }
-.summary_bar #live-poll.active {
+#live-poll.active {
   background-color: #009300;
 }
 .summary_bar ul {
@@ -196,6 +196,10 @@ td form {
   text-shadow: none;
 }
 
+.navbar .brand .status {
+  color: #585454;
+}
+
 .navbar-footer .navbar ul.nav {
   text-align: center;
   float: none;
@@ -232,8 +236,8 @@ img.smallogo {
 
 .status-sprite {
   background-image: url(../images/status-sd8051fd480.png);
-  height: 30px;
-  width: 30px;
+  height: 20px;
+  width: 18px;
   display: inline-block;
 }
 .status-active {
@@ -241,7 +245,7 @@ img.smallogo {
 }
 
 .status-idle {
-  background-position: 0 -80px;
+  background-position: 0 -90px;
 }
 
 .btn {
@@ -317,7 +321,23 @@ img.smallogo {
 .stat p {
   font-size: 0.9em;
 }
-
+@media (max-width: 767px) {
+  .stat {
+    float: none;
+    margin-right: 10px;
+    width: 100%;
+    text-align: left;
+    line-height: 45px;
+  }
+  .stat h3{
+    float: right;
+    margin: 5px 10px 5px 5px;
+  }
+  .stat p{
+    font-size: normal;
+    margin: 5px 5px 5px 10px;
+  }
+}
 .beacon {
   position: relative;
   height: 20px;

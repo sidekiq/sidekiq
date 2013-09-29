@@ -7,11 +7,6 @@
     <link href="<%= root_path %>stylesheets/application.css" media="screen" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="<%= root_path %>javascripts/application.js"></script>
     <script type="text/javascript" src="<%= root_path %>javascripts/locales/jquery.timeago.<%= locale %>.js"></script>
-    <% if params[:poll] %>
-      <script>
-        setInterval("window.location.reload(true)", 2000);
-      </script>
-    <% end %>
   </head>
   <body class="admin">
     <div class="navbar navbar-fixed-top">
@@ -22,21 +17,6 @@
       <div class="container">
         <div class="row">
           <div class="span12 summary_bar">
-            <div class="row">
-              <h4 class="span10">
-                <span class="title"><%= t('Status') %></span>
-                <%= erb :_status %>
-              </h4>
-              <% unless current_path == '' %>
-                <div class="span2 pull-right actions">
-                  <% if params[:poll] %>
-                    <a id="live-poll" class="btn btn-block btn-primary active" href="<%= root_path %><%= current_path %>"><%= t('StopPolling') %></a>
-                  <% else %>
-                    <a id="live-poll" class="btn btn-block btn-primary" href="<%= root_path %><%= current_path %>?poll=true"><%= t('LivePoll') %></a>
-                  <% end %>
-                </div>
-              <% end %>
-            </div>
             <%= erb :_summary %>
           </div>
 
