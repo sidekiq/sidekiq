@@ -17,7 +17,7 @@
       <td>
         <% if msg['payload']['args'].to_s.size > 100 %>
           <%= msg['payload']['args'].inspect[0..100] + "... " %>
-          <button data-toggle="collapse" data-target="#worker_<%= index %>" class="btn btn-mini"><%= t('ShowAll') %></button>
+          <button data-toggle="collapse" data-target="#worker_<%= index %>" class="btn btn-default btn-xs"><%= t('ShowAll') %></button>
           <div class="toggle" id="worker_<%= index %>" style="display: none;max-width: 750px;"><%= msg['payload']['args'] %></div>
         <% else %>
           <%= msg['payload']['args'] %>
