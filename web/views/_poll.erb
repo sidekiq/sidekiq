@@ -1,0 +1,14 @@
+<% if params[:poll] %>
+  <script>
+    setInterval("window.location.reload(true)", 2000);
+  </script>
+<% end %>
+<% unless current_path == '' %>
+  <div class="span2 pull-right actions">
+    <% if params[:poll] %>
+      <a id="live-poll" class="btn btn-block btn-primary active" href="<%= root_path %><%= current_path %>"><%= t('StopPolling') %></a>
+    <% else %>
+      <a id="live-poll" class="btn btn-block btn-primary" href="<%= root_path %><%= current_path %>?poll=true"><%= t('LivePoll') %></a>
+    <% end %>
+  </div>
+<% end %>

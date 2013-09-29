@@ -53,12 +53,21 @@ module Sidekiq
 
       def workers
         @workers ||= begin
-          Sidekiq.redis do |conn|
+          to_rem = []
+          workers = Sidekiq.redis do |conn|
             conn.smembers('workers').map do |w|
               msg = conn.get("worker:#{w}")
-              msg ? [w, Sidekiq.load_json(msg)] : nil
+              msg ? [w, Sidekiq.load_json(msg)] : (to_rem << w; nil)
             end.compact.sort { |x| x[1] ? -1 : 1 }
           end
+
+          # Detect and clear out any orphaned worker records.
+          # These can be left in Redis if Sidekiq crashes hard
+          # while processing jobs.
+          if to_rem.size > 0
+            Sidekiq.redis { |conn| conn.srem('workers', to_rem) }
+          end
+          workers
         end
       end
 
