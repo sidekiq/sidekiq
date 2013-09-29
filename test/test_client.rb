@@ -101,6 +101,27 @@ class TestClient < Sidekiq::Test
       @redis.verify
     end
 
+    it 'enqueues messages to redis (delayed, custom queue)' do
+      @redis.expect :zadd, 1, ['schedule', Array]
+      pushed = Sidekiq::Client.enqueue_to_in(:custom_queue, 3.minutes, MyWorker, 1, 2)
+      assert pushed
+      @redis.verify
+    end
+
+    it 'enqueues messages to redis (delayed into past, custom queue)' do
+      @redis.expect :lpush, 1, ['queue:custom_queue', Array]
+      pushed = Sidekiq::Client.enqueue_to_in(:custom_queue, -3.minutes, MyWorker, 1, 2)
+      assert pushed
+      @redis.verify
+    end
+
+    it 'enqueues messages to redis (delayed)' do
+      @redis.expect :zadd, 1, ['schedule', Array]
+      pushed = Sidekiq::Client.enqueue_in(3.minutes, MyWorker, 1, 2)
+      assert pushed
+      @redis.verify
+    end
+
     class QueuedWorker
       include Sidekiq::Worker
       sidekiq_options :queue => :flimflam

@@ -88,6 +88,29 @@ module Sidekiq
         klass.client_push('queue' => queue, 'class' => klass, 'args' => args)
       end
 
+      # Example usage:
+      #   Sidekiq::Client.enqueue_to_in(:queue_name, 3.minutes, MyWorker, 'foo', 1, :bat => 'bar')
+      #
+      def enqueue_to_in(queue, interval, klass, *args)
+        int = interval.to_f
+        now = Time.now.to_f
+        ts = (int < 1_000_000_000 ? now + int : int)
+
+        item = { 'queue' => queue, 'class' => klass, 'args' => args, 'at' => ts }
+
+        # Optimization to enqueue something now that is scheduled to go out now or in the past
+        item.delete('at') if ts <= now
+
+        klass.client_push(item)
+      end
+
+      # Example usage:
+      #   Sidekiq::Client.enqueue_in(3.minutes, MyWorker, 'foo', 1, :bat => 'bar')
+      #
+      def enqueue_in(interval, klass, *args)
+        enqueue_to_in klass.get_sidekiq_options['queue'], interval, klass, args
+      end
+
       private
 
       def raw_push(payloads)
