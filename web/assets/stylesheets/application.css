@@ -32,7 +32,7 @@ h1, h2, h3, h4, h5, h6, strong {
   font-weight: 700;
 }
 
-.navbar-brand, .navbar .brand, h5, h4, h3, h2, h1 {
+.navbar-brand, .navbar .navbar-brand, h5, h4, h3, h2, h1 {
   font-family: Armata;
   font-weight: 400;
 }
@@ -144,21 +144,21 @@ header.row .pagination {
   }
 }
 @media (max-width: 979px) and (min-width: 768px) {
-  .summary_bar ul li.col-lg-2 {
+  .summary_bar ul li.col-sm-2 {
     margin: 0px 10px;
     width: 96px !important;
   }
 }
-@media (max-width: 1199px) and (min-width: 980px) {
-  .summary_bar ul li.col-lg-2 {
+/*@media (max-width: 1199px) and (min-width: 980px) {
+  .summary_bar ul li.col-sm-2 {
     width: 130px !important;
   }
 }
 @media (min-width: 1200px) {
-  .summary_bar ul li.col-lg-2 {
+  .summary_bar ul li.col-sm-2 {
     width: 154px !important;
   }
-}
+}*/
 .summary_bar ul .desc {
   display: block;
   font-size: 1em;
@@ -211,7 +211,7 @@ td form {
   padding: 15px;
 }
 
-.navbar-footer .navbar ul.nav a.brand {
+.navbar-footer .navbar ul.nav a.navbar-brand {
   font-weight: 400;
   padding: 0 15px 0 0;
 }
@@ -517,12 +517,12 @@ img.smallogo {
   text-decoration: none;
 }
 
-@media (max-width: 550px) {
+@media (max-width: 768px) {
   .navbar .container {
     text-align: center
   }
 
-  .navbar .brand {
+  .navbar .navbar-brand {
     float: none;
   }
 
@@ -567,7 +567,7 @@ img.smallogo {
 }
 
 @media (max-width: 500px) {
-  .navbar-footer .navbar ul.nav a.brand {
+  .navbar-footer .navbar ul.nav a.navbar-brand {
     padding-right: 5px;
   }
 }
@@ -887,4 +887,17 @@ img.smallogo {
 .args-extended {
   overflow-y: scroll;
   max-height: 500px;
+}
+
+
+/* BOOTSTRAP 3 FIXES */
+/* @grid-float-breakpoint -1 */
+.container {
+  padding: 0;
+}
+@media (max-width: 979px) {
+    .navbar-fixed-top, .navbar-fixed-bottom {
+      position: relative;
+      top: auto;
+    }
 }
