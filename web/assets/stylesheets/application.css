@@ -509,6 +509,7 @@ img.smallogo {
 
   .navbar .navbar-brand {
     float: none;
+    display: block;
   }
 
   .navbar ul.nav li a {
