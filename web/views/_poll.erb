@@ -3,7 +3,7 @@
     setInterval("window.location.reload(true)", 2000);
   </script>
 <% end %>
-<% unless false %>
+<% unless current_path == '' %>
   <div class="actions">
     <% if params[:poll] %>
       <a id="live-poll" class="btn btn-block btn-primary active" href="<%= root_path %><%= current_path %>"><%= t('StopPolling') %></a>
