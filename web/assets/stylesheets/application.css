@@ -32,7 +32,7 @@ h1, h2, h3, h4, h5, h6, strong {
   font-weight: 700;
 }
 
-.brand, .navbar .brand, h5, h4, h3, h2, h1 {
+.navbar-brand, .navbar .navbar-brand, h5, h4, h3, h2, h1 {
   font-family: Armata;
   font-weight: 400;
 }
@@ -113,8 +113,13 @@ header.row .pagination {
   margin-bottom: 10px;
   border-width: 0px;
 }
+.poll-wrapper {
+  padding: 9px 0 0 0;
+}
 .nav #live-poll {
+  height: 25px;
   line-height: 25px;
+  width: 195px;
 }
 #live-poll.active {
   background-color: #009300;
@@ -144,21 +149,21 @@ header.row .pagination {
   }
 }
 @media (max-width: 979px) and (min-width: 768px) {
-  .summary_bar ul li.span2 {
+  .summary_bar ul li.col-sm-2 {
     margin: 0px 10px;
     width: 96px !important;
   }
 }
-@media (max-width: 1199px) and (min-width: 980px) {
-  .summary_bar ul li.span2 {
+/*@media (max-width: 1199px) and (min-width: 980px) {
+  .summary_bar ul li.col-sm-2 {
     width: 130px !important;
   }
 }
 @media (min-width: 1200px) {
-  .summary_bar ul li.span2 {
+  .summary_bar ul li.col-sm-2 {
     width: 154px !important;
   }
-}
+}*/
 .summary_bar ul .desc {
   display: block;
   font-size: 1em;
@@ -191,12 +196,13 @@ td form {
   margin-bottom: 0;
 }
 
-.navbar .brand {
+.navbar .navbar-brand {
   color: #b1003e;
+  padding: 13px;
   text-shadow: none;
 }
 
-.navbar .brand .status {
+.navbar .navbar-brand .status {
   color: #585454;
 }
 
@@ -210,7 +216,7 @@ td form {
   padding: 15px;
 }
 
-.navbar-footer .navbar ul.nav a.brand {
+.navbar-footer .navbar ul.nav a.navbar-brand {
   font-weight: 400;
   padding: 0 15px 0 0;
 }
@@ -323,8 +329,11 @@ img.smallogo {
   font-size: 0.9em;
 }
 @media (max-width: 767px) {
+  .stats-container {
+    display: block;
+  }
   .stat {
-    float: none;
+    float: left;
     margin-right: 10px;
     width: 100%;
     text-align: left;
@@ -516,13 +525,14 @@ img.smallogo {
   text-decoration: none;
 }
 
-@media (max-width: 550px) {
+@media (max-width: 768px) {
   .navbar .container {
     text-align: center
   }
 
-  .navbar .brand {
+  .navbar .navbar-brand {
     float: none;
+    display: block;
   }
 
   .navbar ul.nav li a {
@@ -540,6 +550,11 @@ img.smallogo {
     margin-right: 0;
   }
 
+  .poll-wrapper {
+    padding: 0px 20px 5px 0px;
+    width: 20%;
+  }
+
   .navbar.navbar-fixed-bottom ul {
     float: none;
     margin-right: 0;
@@ -551,6 +566,7 @@ img.smallogo {
   }
 
   .navbar-text {
+    float:none;
     line-height: 30px;
   }
 }
@@ -566,7 +582,7 @@ img.smallogo {
 }
 
 @media (max-width: 500px) {
-  .navbar-footer .navbar ul.nav a.brand {
+  .navbar-footer .navbar ul.nav a.navbar-brand {
     padding-right: 5px;
   }
 }
@@ -886,4 +902,22 @@ img.smallogo {
 .args-extended {
   overflow-y: scroll;
   max-height: 500px;
+}
+
+
+/* BOOTSTRAP 3 FIXES */
+/* @grid-float-breakpoint -1 */
+.container {
+  padding: 0;
+}
+@media (min-width: 979px) {
+    body {
+      padding-bottom: 50px;
+    }
+}
+@media (max-width: 979px) {
+    .navbar-fixed-top, .navbar-fixed-bottom {
+      position: relative;
+      top: auto;
+    }
 }
