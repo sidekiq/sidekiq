@@ -6,7 +6,9 @@ n){return arguments.length?(t=+n,e):t},e.translate=function(t){return arguments.
 
 // Match width of graphs with summary bar
 var responsiveWidth = function() {
-  return document.getElementsByClassName('summary_bar')[0].clientWidth;
+  //Bootstrap now uses padding instead of margin for gutters. 30px (15 on each side)
+  //http://getbootstrap.com/css/#grid
+  return document.getElementsByClassName('summary_bar')[0].clientWidth - 30;
 };
 
 // Richshaw
