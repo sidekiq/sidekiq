@@ -79,7 +79,7 @@ h3 {
 }
 
 .admin #page {
-  padding: 60px 0 40px 0;
+  padding: 60px 0;
 }
 
 .row.header .actions {
@@ -909,11 +909,6 @@ img.smallogo {
 /* @grid-float-breakpoint -1 */
 .container {
   padding: 0;
-}
-@media (min-width: 979px) {
-    body {
-      padding-bottom: 50px;
-    }
 }
 @media (max-width: 979px) {
     .navbar-fixed-top, .navbar-fixed-bottom {
