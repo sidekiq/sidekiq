@@ -4,7 +4,7 @@
   </script>
 <% end %>
 <% unless current_path == '' %>
-  <div class="span2 pull-right actions">
+  <div class="actions">
     <% if params[:poll] %>
       <a id="live-poll" class="btn btn-block btn-primary active" href="<%= root_path %><%= current_path %>"><%= t('StopPolling') %></a>
     <% else %>

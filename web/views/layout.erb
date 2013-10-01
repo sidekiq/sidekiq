@@ -9,18 +9,18 @@
     <script type="text/javascript" src="<%= root_path %>javascripts/locales/jquery.timeago.<%= locale %>.js"></script>
   </head>
   <body class="admin">
-    <div class="navbar navbar-fixed-top">
+    <div class="navbar navbar-default navbar-fixed-top">
       <%= erb :_nav %>
     </div>
 
     <div id="page">
       <div class="container">
         <div class="row">
-          <div class="span12 summary_bar">
+          <div class="col-sm-12 summary_bar">
             <%= erb :_summary %>
           </div>
 
-          <div class="span12">
+          <div class="col-sm-12">
             <%= yield %>
           </div>
         </div>
