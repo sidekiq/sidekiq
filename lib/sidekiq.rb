@@ -1,15 +1,16 @@
 # encoding: utf-8
 require 'sidekiq/version'
-require 'sidekiq/logging'
-require 'sidekiq/client'
-require 'sidekiq/worker'
-require 'sidekiq/redis_connection'
-require 'sidekiq/util'
-require 'sidekiq/api'
 
 require 'json'
 
 module Sidekiq
+  autoload :Logging, 'sidekiq/logging'
+  autoload :Client, 'sidekiq/client'
+  autoload :Worker, 'sidekiq/worker'
+  autoload :RedisConnection, 'sidekiq/redis_connection'
+  autoload :Util, 'sidekiq/util'
+  autoload :Api, 'sidekiq/api'
+
   NAME = "Sidekiq"
   LICENSE = 'See LICENSE and the LGPL-3.0 for licensing details.'
 
