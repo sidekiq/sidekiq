@@ -16,7 +16,11 @@ module Sidekiq
         # to JSON and then deserialized on the other side back into a
         # Ruby object.
         obj = [@target, name, args]
-        @performable.client_push({ 'class' => @performable, 'args' => [::YAML.dump(obj)] }.merge(@opts))
+        @performable.client_push({ 'class' => @performable, 'args' => [serialize(obj)] }.merge(@opts))
+      end
+
+      def serialize(obj)
+        ::YAML.dump(obj)
       end
     end
 

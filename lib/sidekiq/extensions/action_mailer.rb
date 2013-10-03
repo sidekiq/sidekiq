@@ -1,4 +1,4 @@
-require 'sidekiq/extensions/generic_proxy'
+require 'sidekiq/extensions/marshal_proxy'
 
 module Sidekiq
   module Extensions
@@ -12,8 +12,8 @@ module Sidekiq
     class DelayedMailer
       include Sidekiq::Worker
 
-      def perform(yml)
-        (target, method_name, args) = YAML.load(yml)
+      def perform(binary_string)
+        (target, method_name, args) = Marshal.load(binary_string)
         msg = target.send(method_name, *args)
         # The email method can return nil, which causes ActionMailer to return
         # an undeliverable empty message.
@@ -23,13 +23,13 @@ module Sidekiq
 
     module ActionMailer
       def delay(options={})
-        Proxy.new(DelayedMailer, self, options)
+        MarshalProxy.new(DelayedMailer, self, options)
       end
       def delay_for(interval, options={})
-        Proxy.new(DelayedMailer, self, options.merge('at' => Time.now.to_f + interval.to_f))
+        MarshalProxy.new(DelayedMailer, self, options.merge('at' => Time.now.to_f + interval.to_f))
       end
       def delay_until(timestamp, options={})
-        Proxy.new(DelayedMailer, self, options.merge('at' => timestamp.to_f))
+        MarshalProxy.new(DelayedMailer, self, options.merge('at' => timestamp.to_f))
       end
     end
 
