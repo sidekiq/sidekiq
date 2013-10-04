@@ -326,7 +326,7 @@ class TestWeb < Sidekiq::Test
         end
 
         it 'reports latency' do
-          assert_equal 0, @response["sidekiq"]["latency"]
+          assert_equal 0, @response["sidekiq"]["default_latency"]
         end
       end
 
