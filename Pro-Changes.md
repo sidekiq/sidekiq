@@ -3,6 +3,13 @@ Sidekiq Pro Changelog
 
 Please see http://sidekiq.org/pro for more details and how to buy.
 
+1.2.4
+-----------
+
+- Convert Batch UI to Bootstrap 3
+- Pro now requires Sidekiq 2.15.0
+- Add Sidekiq::Batch::Status#delete [#1205]
+
 1.2.3
 -----------
 
