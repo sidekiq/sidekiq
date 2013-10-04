@@ -12,8 +12,8 @@ module Sidekiq
     class DelayedMailer
       include Sidekiq::Worker
 
-      def perform(binary_string)
-        (target, method_name, args) = Marshal.load(binary_string)
+      def perform(bytes)
+        (target, method_name, args) = Marshal.load(bytes.pack('c*'))
         msg = target.send(method_name, *args)
         # The email method can return nil, which causes ActionMailer to return
         # an undeliverable empty message.
