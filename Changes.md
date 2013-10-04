@@ -1,3 +1,8 @@
+2.15.1
+-----------
+
+- Fix several Web UI issues with the Bootstrap 3 upgrade.
+
 2.15.0
 -----------
 
