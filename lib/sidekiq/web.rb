@@ -315,6 +315,7 @@ module Sidekiq
 
     get '/dashboard/stats' do
       sidekiq_stats = Sidekiq::Stats.new
+      queue         = Sidekiq::Queue.new
       redis_stats   = Sidekiq.redis { |conn| conn.info }.select{ |k, v| redis_keys.include? k }
 
       content_type :json
@@ -326,6 +327,7 @@ module Sidekiq
           enqueued:   sidekiq_stats.enqueued,
           scheduled:  sidekiq_stats.scheduled_size,
           retries:    sidekiq_stats.retry_size,
+          default_latency: queue.latency,
         },
         redis: redis_stats
       })
