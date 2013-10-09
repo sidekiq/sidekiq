@@ -17,7 +17,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency                  'redis', '>= 3.0.4'
   gem.add_dependency                  'redis-namespace', '>= 1.3.1'
   gem.add_dependency                  'connection_pool', '>= 1.0.0'
-  gem.add_dependency                  'celluloid', '>= 0.15.1'
+  gem.add_dependency                  'celluloid', '>= 0.15.2'
   gem.add_dependency                  'json'
   gem.add_development_dependency      'sinatra'
   gem.add_development_dependency      'minitest', '~> 4.2'

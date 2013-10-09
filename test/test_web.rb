@@ -324,6 +324,10 @@ class TestWeb < Sidekiq::Test
         it 'reports scheduled' do
           assert_equal 3, @response["sidekiq"]["scheduled"]
         end
+
+        it 'reports latency' do
+          assert_equal 0, @response["sidekiq"]["default_latency"]
+        end
       end
 
       describe "for redis" do

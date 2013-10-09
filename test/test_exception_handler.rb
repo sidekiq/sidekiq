@@ -37,6 +37,20 @@ class TestExceptionHandler < Sidekiq::Test
       assert_match /Something didn't work!/, log[1], "didn't include the exception message"
       assert_match /test\/test_exception_handler.rb/, log[2], "didn't include the backtrace"
     end
+
+    describe "when the exception does not have a backtrace" do
+      it "does not fail" do
+        exception = ExceptionHandlerTestException.new
+        assert_nil exception.backtrace
+
+        begin
+          Component.new.handle_exception exception
+          pass
+        rescue => e
+          flunk "failed handling a nil backtrace"
+        end
+      end
+    end
   end
 
   describe "with fake Airbrake" do

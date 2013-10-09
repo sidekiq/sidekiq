@@ -4,7 +4,7 @@ module Sidekiq
     def handle_exception(ex, ctxHash={})
       Sidekiq.logger.warn(ctxHash) if !ctxHash.empty?
       Sidekiq.logger.warn ex
-      Sidekiq.logger.warn ex.backtrace.join("\n")
+      Sidekiq.logger.warn ex.backtrace.join("\n") unless ex.backtrace.nil?
       # This list of services is getting a bit ridiculous.
       # For future error services, please add your own
       # middleware like BugSnag does:
