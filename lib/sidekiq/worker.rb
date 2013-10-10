@@ -25,13 +25,17 @@ module Sidekiq
 
     def self.included(base)
       base.extend(ClassMethods)
+      base.extend(Logging)
+      base.send :include, Logging
       base.class_attribute :sidekiq_options_hash
       base.class_attribute :sidekiq_retry_in_block
       base.class_attribute :sidekiq_retries_exhausted_block
     end
 
-    def logger
-      Sidekiq.logger
+    module Logging
+      def logger
+        Sidekiq.logger
+      end
     end
 
     module ClassMethods
