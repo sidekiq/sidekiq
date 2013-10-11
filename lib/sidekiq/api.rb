@@ -265,19 +265,23 @@ module Sidekiq
     end
 
     def each(&block)
-      # page thru the sorted set backwards so deleting entries doesn't screw up indexing
+      initial_size = size
+      deleted_size = 0
       page = -1
       page_size = 50
 
       loop do
+        range_start = page * page_size + deleted_size
+        range_end   = page * page_size + deleted_size + (page_size - 1)
         elements = Sidekiq.redis do |conn|
-          conn.zrange @zset, page * page_size, (page * page_size) + (page_size - 1), :with_scores => true
+          conn.zrange @zset, range_start, range_end, :with_scores => true
         end
         break if elements.empty?
         page -= 1
         elements.each do |element, score|
           block.call SortedEntry.new(self, score, element)
         end
+        deleted_size = initial_size - size
       end
     end
 
