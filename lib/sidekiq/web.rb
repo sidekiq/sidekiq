@@ -123,7 +123,7 @@ module Sidekiq
       def display_args(klass, args, truncate_after_chars = 2000)
         if klass == 'Sidekiq::Extensions::DelayedMailer'
           begin
-            Sidekiq::Extensions::DelayedMailer.load(args).inspect
+            Sidekiq::Extensions::DelayedMailer.load(args.first).inspect
           rescue Exception => e
             [e, args.inspect]
           end
