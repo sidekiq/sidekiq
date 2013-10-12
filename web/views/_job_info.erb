@@ -21,7 +21,7 @@
       <td>
         <code>
           <!-- We don't want to truncate any job arguments when viewing a single job's status page -->
-          <div class="args-extended"><%= display_args(job['args'], nil) %></div>
+          <div class="args-extended"><%= display_args(job['class'], job['args'], nil) %></div>
         </code>
       </td>
     </tr>

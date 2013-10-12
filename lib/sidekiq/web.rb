@@ -120,7 +120,9 @@ module Sidekiq
         truncate_after_chars && text.size > truncate_after_chars ? "#{text[0..truncate_after_chars]}..." : text
       end
 
-      def display_args(args, truncate_after_chars = 2000)
+      def display_args(klass, args, truncate_after_chars = 2000)
+        args = Sidekiq::Extensions::DelayedMailer.load(args.first) if klass == 'Sidekiq::Extensions::DelayedMailer'
+
         args.map do |arg|
           a = arg.inspect
           truncate(a)
