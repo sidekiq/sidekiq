@@ -117,18 +117,23 @@ module Sidekiq
     end
 
     def each(&block)
+      initial_size = size
+      deleted_size = 0
       page = 0
       page_size = 50
 
       loop do
+        range_start = page * page_size - deleted_size
+        range_end   = page * page_size - deleted_size + (page_size - 1)
         entries = Sidekiq.redis do |conn|
-          conn.lrange @rname, page * page_size, (page * page_size) + page_size - 1
+          conn.lrange @rname, range_start, range_end
         end
         break if entries.empty?
         page += 1
         entries.each do |entry|
           block.call Job.new(entry, @name)
         end
+        deleted_size = initial_size - size
       end
     end
 
