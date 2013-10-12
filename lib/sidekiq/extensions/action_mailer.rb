@@ -13,11 +13,15 @@ module Sidekiq
       include Sidekiq::Worker
 
       def perform(bytes)
-        (target, method_name, args) = Marshal.load(bytes.pack('c*'))
+        (target, method_name, args) = self.class.load(bytes)
         msg = target.send(method_name, *args)
         # The email method can return nil, which causes ActionMailer to return
         # an undeliverable empty message.
         msg.deliver if msg && (msg.to || msg.cc || msg.bcc) && msg.from
+      end
+
+      def self.load(bytes)
+        Marshal.load(bytes.pack('c*'))
       end
     end
 
