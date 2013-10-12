@@ -121,18 +121,12 @@ module Sidekiq
       end
 
       def display_args(klass, args, truncate_after_chars = 2000)
-        if klass == 'Sidekiq::Extensions::DelayedMailer'
-          begin
-            Sidekiq::Extensions::DelayedMailer.load(args.first).inspect
-          rescue Exception => e
-            [e, args.inspect]
-          end
-        else
-          args.map do |arg|
-            a = arg.inspect
-            truncate(a)
-          end.join(", ")
-        end
+        args = Sidekiq::Extensions::DelayedMailer.load(args.first) if klass == 'Sidekiq::Extensions::DelayedMailer'
+
+        args.map do |arg|
+          a = arg.inspect
+          truncate(a)
+        end.join(", ")
       end
 
       RETRY_JOB_KEYS = Set.new(%w(
