@@ -2,6 +2,7 @@
 -----------
 
 - Fix several Web UI issues with the Bootstrap 3 upgrade.
+- Iterating over Sidekiq::Queue and Sidekiq::SortedSet will now work as intended when jobs are deleted [#866, aackerman]
 
 2.15.0
 -----------
