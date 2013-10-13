@@ -5,7 +5,7 @@
       <%= erb :_status %>
     </a>
     <ul class="nav navbar-nav">
-      <% tabs.each do |title, url| %>
+      <% Sidekiq::Web.default_tabs.each do |title, url| %>
         <% if url == '' %>
           <li class="<%= current_path == url ? 'active' : '' %>">
             <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
@@ -16,14 +16,11 @@
           </li>
         <% end %>
       <% end %>
-      <% custom_tabs.each do |title, url| %>
+      <% Sidekiq::Web.custom_tabs.each do |title, url| %>
         <li class="<%= current_path.start_with?(url) ? 'active' : '' %>">
           <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
         </li>
       <% end %>
-
-
-
     </ul>
 
     <div class="col-sm-2 pull-right poll-wrapper">

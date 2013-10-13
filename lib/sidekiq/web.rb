@@ -5,6 +5,7 @@ require 'sinatra/base'
 require 'sidekiq'
 require 'sidekiq/api'
 require 'sidekiq/paginator'
+require 'sidekiq/web_helpers'
 
 module Sidekiq
   class Web < Sinatra::Base
@@ -15,166 +16,25 @@ module Sidekiq
     set :views, Proc.new { "#{root}/views" }
     set :locales, Proc.new { "#{root}/locales" }
 
-    helpers do
-      def strings
-        @strings ||= begin
-          Dir["#{settings.locales}/*.yml"].inject({}) do |memo, file|
-            memo.merge(YAML.load(File.open(file)))
-          end
-        end
-      end
+    helpers WebHelpers
 
-      def locale
-        lang = (request.env["HTTP_ACCEPT_LANGUAGE"] || 'en')[0,2]
-        strings[lang] ? lang : 'en'
-      end
+    DEFAULT_TABS = {
+      "Dashboard" => '',
+      "Workers"   => 'workers',
+      "Queues"    => 'queues',
+      "Retries"   => 'retries',
+      "Scheduled" => 'scheduled',
+    }
 
-      def get_locale
-        strings[locale]
-      end
-
-      def t(msg, options={})
-        string = get_locale[msg] || msg
-        string % options
-      end
-
-      def reset_worker_list
-        Sidekiq.redis do |conn|
-          workers = conn.smembers('workers')
-          conn.srem('workers', workers) if !workers.empty?
-        end
-      end
-
-      def workers_size
-        @workers_size ||= Sidekiq.redis do |conn|
-          conn.scard('workers')
-        end
-      end
-
-      def workers
-        @workers ||= begin
-          to_rem = []
-          workers = Sidekiq.redis do |conn|
-            conn.smembers('workers').map do |w|
-              msg = conn.get("worker:#{w}")
-              msg ? [w, Sidekiq.load_json(msg)] : (to_rem << w; nil)
-            end.compact.sort { |x| x[1] ? -1 : 1 }
-          end
-
-          # Detect and clear out any orphaned worker records.
-          # These can be left in Redis if Sidekiq crashes hard
-          # while processing jobs.
-          if to_rem.size > 0
-            Sidekiq.redis { |conn| conn.srem('workers', to_rem) }
-          end
-          workers
-        end
-      end
-
-      def stats
-        @stats ||= Sidekiq::Stats.new
-      end
-
-      def retries_with_score(score)
-        Sidekiq.redis do |conn|
-          results = conn.zrangebyscore('retry', score, score)
-          results.map { |msg| Sidekiq.load_json(msg) }
-        end
-      end
-
-      def location
-        Sidekiq.redis { |conn| conn.client.location }
-      end
-
-      def namespace
-        @@ns ||= Sidekiq.redis {|conn| conn.respond_to?(:namespace) ? conn.namespace : nil }
-      end
-
-      def root_path
-        "#{env['SCRIPT_NAME']}/"
-      end
-
-      def current_path
-        @current_path ||= request.path_info.gsub(/^\//,'')
-      end
-
-      def current_status
-        return 'idle' if workers_size == 0
-        return 'active'
-      end
-
-      def relative_time(time)
-        %{<time datetime="#{time.getutc.iso8601}">#{time}</time>}
-      end
-
-      def job_params(job, score)
-        "#{score}-#{job['jid']}"
-      end
-
-      def parse_params(params)
-        score, jid = params.split("-")
-        [score.to_f, jid]
-      end
-
-      def truncate(text, truncate_after_chars = 2000)
-        truncate_after_chars && text.size > truncate_after_chars ? "#{text[0..truncate_after_chars]}..." : text
-      end
-
-      def display_args(args, truncate_after_chars = 2000)
-        args.map do |arg|
-          a = arg.inspect
-          truncate(a)
-        end.join(", ")
-      end
-
-      RETRY_JOB_KEYS = Set.new(%w(
-        queue class args retry_count retried_at failed_at
-        jid error_message error_class backtrace
-        error_backtrace enqueued_at retry
-      ))
-
-      def retry_extra_items(retry_job)
-        @retry_extra_items ||= {}.tap do |extra|
-          retry_job.item.each do |key, value|
-            extra[key] = value unless RETRY_JOB_KEYS.include?(key)
-          end
-        end
-      end
-
-      def tabs
-        @tabs ||= {
-          "Dashboard" => '',
-          "Workers"   => 'workers',
-          "Queues"    => 'queues',
-          "Retries"   => 'retries',
-          "Scheduled" => 'scheduled',
-        }
+    class << self
+      def default_tabs
+        DEFAULT_TABS
       end
 
       def custom_tabs
-        self.class.tabs
+        @custom_tabs ||= {}
       end
-
-      def number_with_delimiter(number)
-        begin
-          Float(number)
-        rescue ArgumentError, TypeError
-          return number
-        end
-
-        options = {:delimiter => ',', :separator => '.'}
-        parts = number.to_s.to_str.split('.')
-        parts[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{options[:delimiter]}")
-        parts.join(options[:separator])
-      end
-
-      def redis_keys
-        ["redis_stats", "uptime_in_days", "connected_clients", "used_memory_human", "used_memory_peak_human"]
-      end
-
-      def h(text)
-        ERB::Util.h(text)
-      end
+      alias_method :tabs, :custom_tabs
     end
 
     get "/workers" do
@@ -207,7 +67,7 @@ module Sidekiq
 
     post "/queues/:name/delete" do
       Sidekiq::Job.new(params[:key_val], params[:name]).delete
-      redirect "#{root_path}queues/#{params[:name]}"
+      redirect_with_query("#{root_path}queues/#{params[:name]}")
     end
 
     get '/retries' do
@@ -236,7 +96,7 @@ module Sidekiq
           job.delete
         end
       end
-      redirect "#{root_path}retries"
+      redirect_with_query("#{root_path}retries")
     end
 
     post "/retries/all/delete" do
@@ -259,7 +119,7 @@ module Sidekiq
           job.delete
         end
       end
-      redirect "#{root_path}retries"
+      redirect_with_query("#{root_path}retries")
     end
 
     get '/scheduled' do
@@ -289,7 +149,7 @@ module Sidekiq
           end
         end
       end
-      redirect "#{root_path}scheduled"
+      redirect_with_query("#{root_path}scheduled")
     end
 
     post "/scheduled/:key" do
@@ -302,21 +162,23 @@ module Sidekiq
           job.delete
         end
       end
-      redirect "#{root_path}scheduled"
+      redirect_with_query("#{root_path}scheduled")
     end
 
     get '/' do
-      @redis_info = Sidekiq.redis { |conn| conn.info }.select{ |k, v| redis_keys.include? k }
+      @redis_info = Sidekiq.redis { |conn| conn.info }.select{ |k, v| REDIS_KEYS.include? k }
       stats_history = Sidekiq::Stats::History.new((params[:days] || 30).to_i)
       @processed_history = stats_history.processed
       @failed_history = stats_history.failed
       erb :dashboard
     end
 
+    REDIS_KEYS = %w(redis_stats uptime_in_days connected_clients used_memory_human used_memory_peak_human)
+
     get '/dashboard/stats' do
       sidekiq_stats = Sidekiq::Stats.new
       queue         = Sidekiq::Queue.new
-      redis_stats   = Sidekiq.redis { |conn| conn.info }.select{ |k, v| redis_keys.include? k }
+      redis_stats   = Sidekiq.redis { |conn| conn.info }.select{ |k, v| REDIS_KEYS.include? k }
 
       content_type :json
       Sidekiq.dump_json({
@@ -333,10 +195,5 @@ module Sidekiq
       })
     end
 
-    def self.tabs
-      @custom_tabs ||= {}
-    end
-
   end
-
 end
