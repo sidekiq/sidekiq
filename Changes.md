@@ -1,8 +1,14 @@
+2.15.2
+-----------
+
+- Iterating over Sidekiq::Queue and Sidekiq::SortedSet will now work as
+  intended when jobs are deleted [#866, aackerman]
+- A few more minor Web UI fixes [#1247]
+
 2.15.1
 -----------
 
 - Fix several Web UI issues with the Bootstrap 3 upgrade.
-- Iterating over Sidekiq::Queue and Sidekiq::SortedSet will now work as intended when jobs are deleted [#866, aackerman]
 
 2.15.0
 -----------
