@@ -181,4 +181,29 @@ module Sidekiq
       end
     end
   end
+
+  module SpecHelpers
+    def self.delayed_a_job_for(method, delay_time = nil)
+      matched_job = Sidekiq::Extensions::DelayedMailer.jobs.find do |job|
+        delayed_method_string = job['args'][0]
+        !delayed_method_string.match(":" + method + '\n').nil?
+      end
+
+      unless matched_job
+        return false
+      end
+
+      time_matched = true
+      if matched_job && delay_time
+        planned_run_time = matched_job['at']
+        enqueued_at = matched_job['enqueued_at']
+
+        return false if planned_run_time.nil? || enqueued_at.nil?
+
+        time_matched = Time.at(planned_run_time).to_i == (Time.at(enqueued_at) + delay_time).to_i
+      end
+      
+      return time_matched
+    end
+  end
 end
