@@ -81,10 +81,6 @@ class TestTesting < Sidekiq::Test
       end
 
       describe '.delayed_a_job_for' do
-        before do
-          #Sidekiq::Extensions::DelayedClass.jobs.clear
-        end
-
         it 'returns true if the method given has been delayed' do
           FooMailer.delay.bar('hello!')
           assert_equal true, Sidekiq::SpecHelpers.delayed_a_job_for('bar')
@@ -99,7 +95,7 @@ class TestTesting < Sidekiq::Test
 
           assert_equal true, Sidekiq::SpecHelpers.delayed_a_job_for('foo', 1.hour)
           assert_equal true, Sidekiq::SpecHelpers.delayed_a_job_for('foo')
-          #
+
           assert_equal false, Sidekiq::SpecHelpers.delayed_a_job_for('foo', 2.hours)
         end
       end
