@@ -1,3 +1,27 @@
+namespace :load do
+  task :defaults do
+                                  # An issue with sshkit requires that the following two lines 
+                                  # be added to your config/deploy.rb file.  This is necessary 
+                                  # for sshkit to cd to the correct directory and then run the command.
+                                  #
+                                  # SSHKit.config.command_map[:sidekiq] = "bundle exec sidekiq"
+                                  # SSHKit.config.command_map[:sidekiqctl] = "bundle exec sidekiqctl"
+    set :sidekiq_cmd,           ->{ :sidekiq }
+    set :sidekiqctl_cmd,        ->{ :sidekiqctl }
+
+                                  # must be relative to Rails.root. If this changes, you'll need to manually
+                                  # stop the existing sidekiq process.
+    set :sidekiq_pid,           ->{ "tmp/sidekiq.pid" }
+
+                                  # "-d -i INT -P PATH" are added automatically.
+    set :sidekiq_options,       ->{ "-e #{fetch(:rails_env, 'production')} -L #{current_path}/log/sidekiq.log" }
+
+    set :sidekiq_timeout,       ->{ 10 }
+    set :sidekiq_role,          ->{ :app }
+    set :sidekiq_processes,     ->{ 1 }
+  end
+end
+
 namespace :sidekiq do
   def for_each_process(&block)
     fetch(:sidekiq_processes).times do |idx|
@@ -8,18 +32,25 @@ namespace :sidekiq do
   desc "Quiet sidekiq (stop accepting new work)"
   task :quiet do
     on roles fetch(:sidekiq_role) do
-      for_each_process do |pid_file, idx|
-        execute "if [ -f #{pid_file} ] && kill -0 `cat #{pid_file}`> /dev/null 2>&1; then cd #{fetch(:current_path)} && #{fetch(:sidekiqctl_cmd)} quiet #{pid_file} ; else echo 'Sidekiq is not running'; fi"
+      within current_path do
+        for_each_process do |pid_file, idx|
+          if test "[ -f #{current_path}/#{pid_file} ]"
+            execute fetch(:sidekiqctl_cmd), 'quiet', pid_file
+          end
+        end
       end
     end
   end
 
-
   desc "Stop sidekiq"
   task :stop do
     on roles fetch(:sidekiq_role) do
-      for_each_process do |pid_file, idx|
-        execute "if [ -f #{pid_file} ] && kill -0 `cat #{pid_file}`> /dev/null 2>&1; then cd #{fetch(:current_path)} #{fetch(:sidekiqctl_cmd)} stop #{pid_file} #{fetch :sidekiq_timeout} ; else echo 'Sidekiq is not running'; fi"
+      within current_path do
+        for_each_process do |pid_file, idx|
+          if test "[ -f #{current_path}/#{pid_file} ]"
+            execute fetch(:sidekiqctl_cmd), 'stop', pid_file, fetch(:sidekiq_timeout)
+          end
+        end
       end
     end
   end
@@ -28,8 +59,10 @@ namespace :sidekiq do
   task :start do
     on roles fetch(:sidekiq_role) do
       rails_env = fetch(:rails_env, "production")
-      for_each_process do |pid_file, idx|
-        execute "cd #{current_path} ; nohup #{fetch(:sidekiq_cmd)} -e #{rails_env} -C #{current_path}/config/sidekiq.yml -i #{idx} -P #{pid_file} >> #{current_path}/log/sidekiq.log 2>&1 &"
+      within current_path do
+        for_each_process do |pid_file, idx|
+          execute fetch(:sidekiq_cmd), "-d -i #{idx} -P #{pid_file} #{fetch(:sidekiq_options)}" 
+        end
       end
     end
   end
@@ -37,44 +70,14 @@ namespace :sidekiq do
   desc "Restart sidekiq"
   task :restart do
     on roles fetch(:sidekiq_role) do
-      stop
-      start
+      invoke 'sidekiq:stop'
+      invoke 'sidekiq:start'
     end
   end
 
-  before 'deploy:updating', 'sidekiq:quiet'
-  after 'deploy:published', 'sidekiq:restart'
+  after 'deploy:starting',  'sidekiq:quiet'
+  after 'deploy:updated',   'sidekiq:stop'
+  after 'deploy:reverted',  'sidekiq:stop'
+  after 'deploy:published', 'sidekiq:start'
   
 end
-
-namespace :load do
-  task :defaults do
-    set :sidekiq_default_hooks, ->{ true }
-    set :sidekiq_cmd,           ->{ :sidekiq }
-    set :sidekiqctl_cmd,        ->{ :sidekiqctl }
-    set :sidekiq_timeout,       ->{ 10 }
-    set :sidekiq_role,          ->{ :app }
-    set :sidekiq_pid,           ->{ "#{fetch :shared_path}/tmp/pids/sidekiq.pid" }
-    set :sidekiq_processes,     ->{ 1 }
-  end
-end
-
-
-__END__
-  desc "Update application's crontab entries using Whenever"
-  task :update_crontab do
-    on roles fetch(:whenever_roles) do
-      within release_path do
-        execute fetch(:whenever_command), fetch(:whenever_update_flags)
-      end
-    end
-  end
-
-  desc "Clear application's crontab entries using Whenever"
-  task :clear_crontab do
-    on roles fetch(:whenever_roles) do
-      within release_path do
-        execute %{#{fetch(:whenever_command)} #{fetch(:whenever_clear_flags)}}
-      end
-    end
-  end
