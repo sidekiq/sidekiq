@@ -8,10 +8,8 @@ namespace :sidekiq do
   desc "Quiet sidekiq (stop accepting new work)"
   task :quiet do
     on roles fetch(:sidekiq_role) do
-      within shared_path do
-        for_each_process do |pid_file, idx|
-          execute "if [ -f #{pid_file} ] && kill -0 `cat #{pid_file}`> /dev/null 2>&1; #{fetch(:sidekiqctl_cmd)} quiet #{pid_file} ; else echo 'Sidekiq is not running'; fi"
-        end
+      for_each_process do |pid_file, idx|
+        execute "if [ -f #{pid_file} ] && kill -0 `cat #{pid_file}`> /dev/null 2>&1; then cd #{fetch(:current_path)} && #{fetch(:sidekiqctl_cmd)} quiet #{pid_file} ; else echo 'Sidekiq is not running'; fi"
       end
     end
   end
@@ -20,10 +18,8 @@ namespace :sidekiq do
   desc "Stop sidekiq"
   task :stop do
     on roles fetch(:sidekiq_role) do
-      within shared_path do
-        for_each_process do |pid_file, idx|
-          execute "if [ -f #{pid_file} ] && kill -0 `cat #{pid_file}`> /dev/null 2>&1; then #{fetch(:sidekiqctl_cmd)} stop #{pid_file} #{fetch :sidekiq_timeout} ; else echo 'Sidekiq is not running'; fi"
-        end
+      for_each_process do |pid_file, idx|
+        execute "if [ -f #{pid_file} ] && kill -0 `cat #{pid_file}`> /dev/null 2>&1; then cd #{fetch(:current_path)} #{fetch(:sidekiqctl_cmd)} stop #{pid_file} #{fetch :sidekiq_timeout} ; else echo 'Sidekiq is not running'; fi"
       end
     end
   end
@@ -31,11 +27,9 @@ namespace :sidekiq do
   desc "Start sidekiq"
   task :start do
     on roles fetch(:sidekiq_role) do
-      within shared_path do
-        rails_env = fetch(:rails_env, "production")
-        for_each_process do |pid_file, idx|
-          execute "nohup #{fetch(:sidekiq_cmd)} -e #{rails_env} -C #{current_path}/config/sidekiq.yml -i #{idx} -P #{pid_file} >> #{current_path}/log/sidekiq.log 2>&1 &"
-        end
+      rails_env = fetch(:rails_env, "production")
+      for_each_process do |pid_file, idx|
+        execute "cd #{current_path} ; nohup #{fetch(:sidekiq_cmd)} -e #{rails_env} -C #{current_path}/config/sidekiq.yml -i #{idx} -P #{pid_file} >> #{current_path}/log/sidekiq.log 2>&1 &"
       end
     end
   end
@@ -60,7 +54,7 @@ namespace :load do
     set :sidekiqctl_cmd,        ->{ :sidekiqctl }
     set :sidekiq_timeout,       ->{ 10 }
     set :sidekiq_role,          ->{ :app }
-    set :sidekiq_pid,           ->{ "tmp/pids/sidekiq.pid" }
+    set :sidekiq_pid,           ->{ "#{fetch :shared_path}/tmp/pids/sidekiq.pid" }
     set :sidekiq_processes,     ->{ 1 }
   end
 end
