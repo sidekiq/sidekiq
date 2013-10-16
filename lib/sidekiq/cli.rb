@@ -165,8 +165,8 @@ module Sidekiq
       initialize_logger
     end
 
-    def set_environment(cli_env)
-      @environment = cli_env || ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
+    def set_environment(env)
+      @environment = env || ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
     end
 
     def die(code)
@@ -175,11 +175,10 @@ module Sidekiq
 
     def setup_options(args)
       cli = parse_options(args)
-      set_environment cli[:environment]
 
       cfile = cli[:config_file]
 
-      config = (cfile ? parse_config(cfile) : {})
+      config = (cfile ? parse_config(cfile, cli[:environment]) : {})
       options.merge!(config.merge(cli))
     end
 
@@ -314,10 +313,11 @@ module Sidekiq
       end
     end
 
-    def parse_config(cfile)
+    def parse_config(cfile, cli_env)
       opts = {}
       if File.exist?(cfile)
         opts = YAML.load(ERB.new(IO.read(cfile)).result)
+        set_environment(cli_env || opts[:environment])
         opts = opts.merge(opts.delete(environment) || {})
         parse_queues(opts, opts.delete(:queues) || [])
       else
