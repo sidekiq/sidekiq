@@ -174,8 +174,8 @@ class TestCli < Sidekiq::Test
         assert_equal './test/fake_env.rb', Sidekiq.options[:require]
       end
 
-      it 'sets environment' do
-        assert_equal 'xzibit', Sidekiq.options[:environment]
+      it 'does not set environment' do
+        assert_equal nil, Sidekiq.options[:environment]
       end
 
       it 'sets concurrency' do

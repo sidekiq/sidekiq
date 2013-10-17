@@ -1,6 +1,5 @@
 ---
 :verbose:      false
-:environment:  xzibit
 :require:      ./test/fake_env.rb
 :pidfile:      /tmp/sidekiq-config-test.pid
 :logfile:      /tmp/sidekiq.log
