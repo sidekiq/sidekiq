@@ -1,3 +1,11 @@
+2.16.0
+-----------
+
+- Use Ruby's `resolv-replace` to enable pure Ruby DNS lookups.
+  This ensures that any DNS resolution that takes place in worker
+  threads won't lock up the entire VM on MRI.
+  See this [blog post](http://coderrr.wordpress.com/2007/12/06/backgrounding-tasks-in-rails-with-threads-and-using-resolv-replace-to-make-them-faster/) for more info.
+
 2.15.2
 -----------
 
