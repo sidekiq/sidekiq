@@ -277,6 +277,22 @@ class TestWeb < Sidekiq::Test
       end
     end
 
+    it 'can show user defined tab with custom locales' do
+      begin
+        Sidekiq::Web.tabs['Custom Tab'] = '/custom'
+        Sidekiq::Web.get('/custom') do
+          t('translated_text')
+        end
+        Sidekiq::Web.settings.locales << File.join(File.dirname(__FILE__), "fixtures")
+
+        get '/custom'
+        assert_match 'Changed text from add locals', last_response.body, "after adding locals"
+
+      ensure
+        Sidekiq::Web.tabs.delete 'Custom Tab'
+      end
+    end
+
     it 'can display home' do
       get '/'
       assert_equal 200, last_response.status
