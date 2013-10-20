@@ -1,3 +1,9 @@
+HEAD
+-----------
+- Capistrano version 3 support [#1254, phallstrom]
+
+
+
 2.16.0
 -----------
 
