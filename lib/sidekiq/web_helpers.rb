@@ -4,12 +4,12 @@ module Sidekiq
   # This is not a public API
   module WebHelpers
     def strings
-      @@loaded_locales ||= 0
+      @loaded_locales ||= 0
       #revalidate strings if size of locales path changed
-      @@strings = nil if settings.locales.size != @@loaded_locales
-      @@loaded_locales = settings.locales.size
+      @strings = nil if settings.locales.size != @loaded_locales
+      @loaded_locales = settings.locales.size
 
-      @@strings ||= begin
+      @strings ||= begin
         settings.locales.map{|path| Dir["#{path}/*.yml"]}.flatten.inject({}) do |memo, file|
           memo.deep_merge(YAML.load(File.open(file)))
         end
