@@ -39,6 +39,20 @@ class TestRedisConnection < Sidekiq::Test
       end
     end
 
+    describe "socket path" do
+      it "uses a given :path" do
+        pool = Sidekiq::RedisConnection.create(:path => "/var/run/redis.sock")
+        assert_equal "unix", pool.checkout.client.scheme
+        assert_equal "redis:///var/run/redis.sock/0", pool.checkout.client.id
+      end
+
+      it "uses a given :path and :db" do
+        pool = Sidekiq::RedisConnection.create(:path => "/var/run/redis.sock", :db => 8)
+        assert_equal "unix", pool.checkout.client.scheme
+        assert_equal "redis:///var/run/redis.sock/8", pool.checkout.client.id
+      end
+    end
+
     describe "pool_timeout" do
       it "uses a given :timeout over the default of 1" do
         pool = Sidekiq::RedisConnection.create(:pool_timeout => 5)
