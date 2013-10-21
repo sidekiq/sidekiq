@@ -197,7 +197,7 @@ module Sidekiq
         require 'rails'
         require 'sidekiq/rails'
         require File.expand_path("#{options[:require]}/config/environment.rb")
-        ::Rails.application.eager_load!
+        ::Rails.application.eager_load! if ::Rails.application.config.eager_load
         options[:tag] ||= default_tag
       else
         require options[:require]
