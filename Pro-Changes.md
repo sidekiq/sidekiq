@@ -3,6 +3,13 @@ Sidekiq Pro Changelog
 
 Please see http://sidekiq.org/pro for more details and how to buy.
 
+1.2.5
+-----------
+
+- Convert Batch UI to use Sidekiq 2.16's support for extension
+  localization.
+- Pro now requires Sidekiq 2.16.0
+
 1.2.4
 -----------
 

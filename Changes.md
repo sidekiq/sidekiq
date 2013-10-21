@@ -1,6 +1,8 @@
 2.16.0
 -----------
 
+- Pass all Redis options to the Redis driver so Unix sockets
+  can be fully configured. [#1270, salimane]
 - Allow sidekiq-web extensions to add locale paths so extensions
   can be localized. [#1261, ondrejbartas]
 - Capistrano 3 support [#1254, phallstrom]
