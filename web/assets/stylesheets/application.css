@@ -82,16 +82,8 @@ h3 {
   padding: 60px 0;
 }
 
-.row.header .actions {
-  padding-top: 0.9em;
-}
-
 header.row .pagination {
   margin: 12px 0;
-}
-
-.summary_bar .actions {
-  padding: 10px 0px;
 }
 
 .summary_bar .status {
@@ -114,7 +106,7 @@ header.row .pagination {
   border-width: 0px;
 }
 .poll-wrapper {
-  padding: 9px 0 0 0;
+  margin: 9px 0px;
 }
 .nav #live-poll {
   height: 25px;
@@ -551,8 +543,7 @@ img.smallogo {
   }
 
   .poll-wrapper {
-    padding: 0px 20px 5px 0px;
-    width: 20%;
+    margin: 0px 9px 9px;
   }
 
   .navbar.navbar-fixed-bottom ul {
