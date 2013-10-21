@@ -37,18 +37,19 @@ module Sidekiq
       end
 
       def client_opts(options)
-        if options[:namespace]
-          options.delete(:namespace)
+        opts = options.dup
+        if opts[:namespace]
+          opts.delete(:namespace)
         end
 
-        if options[:network_timeout]
-          options[:timeout] = options[:network_timeout]
-          options.delete(:network_timeout)
+        if opts[:network_timeout]
+          opts[:timeout] = opts[:network_timeout]
+          opts.delete(:network_timeout)
         end
 
-        options[:driver] = options[:driver] || 'ruby'
+        opts[:driver] = opts[:driver] || 'ruby'
 
-        options
+        opts
       end
 
       def log_info(options)
