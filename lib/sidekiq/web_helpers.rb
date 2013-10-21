@@ -5,8 +5,13 @@ module Sidekiq
   module WebHelpers
     def strings
       @@strings ||= begin
-        Dir["#{settings.locales}/*.yml"].inject({}) do |memo, file|
-          memo.merge(YAML.load(File.open(file)))
+        # Allow sidekiq-web extensions to add locale paths
+        # so extensions can be localized
+        settings.locales.each_with_object({}) do |path,global|
+          Dir["#{path}/*.yml"].each_with_object(global) do |file,hash|
+            strs = YAML.load(File.open(file))
+            hash.deep_merge!(strs)
+          end
         end
       end
     end

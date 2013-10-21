@@ -1,10 +1,9 @@
-HEAD
------------
-- Capistrano version 3 support [#1254, phallstrom]
-
 2.16.0
 -----------
 
+- Allow sidekiq-web extensions to add locale paths so extensions
+  can be localized. [#1261, ondrejbartas]
+- Capistrano 3 support [#1254, phallstrom]
 - Use Ruby's `resolv-replace` to enable pure Ruby DNS lookups.
   This ensures that any DNS resolution that takes place in worker
   threads won't lock up the entire VM on MRI. [#1258]

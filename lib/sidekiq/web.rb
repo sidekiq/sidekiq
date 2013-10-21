@@ -14,7 +14,7 @@ module Sidekiq
     set :root, File.expand_path(File.dirname(__FILE__) + "/../../web")
     set :public_folder, Proc.new { "#{root}/assets" }
     set :views, Proc.new { "#{root}/views" }
-    set :locales, Proc.new { "#{root}/locales" }
+    set :locales, ["#{root}/locales"]
 
     helpers WebHelpers
 

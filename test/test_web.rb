@@ -282,6 +282,22 @@ class TestWeb < Sidekiq::Test
       assert_equal 200, last_response.status
     end
 
+    Sidekiq::Web.settings.locales << File.join(File.dirname(__FILE__), "fixtures")
+    it 'can show user defined tab with custom locales' do
+      begin
+        Sidekiq::Web.tabs['Custom Tab'] = '/custom'
+        Sidekiq::Web.get('/custom') do
+          t('translated_text')
+        end
+
+        get '/custom'
+        assert_match /Changed text/, last_response.body
+
+      ensure
+        Sidekiq::Web.tabs.delete 'Custom Tab'
+      end
+    end
+
     describe 'stats' do
       before do
         Sidekiq.redis do |conn|
