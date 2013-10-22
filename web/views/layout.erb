@@ -35,7 +35,7 @@
               <p class="navbar-text" style="color:white;">Sidekiq v<%= Sidekiq::VERSION %></p>
             </li>
             <li>
-              <p class="navbar-text">Redis: <%= location %></p>
+              <p class="navbar-text">Redis: <%= redis_connection %></p>
             </li>
             <li>
               <p class="navbar-text"><%= t('Time') %>: <%= Time.now.utc.strftime('%H:%M:%S UTC') %></p>

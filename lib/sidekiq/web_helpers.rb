@@ -76,6 +76,10 @@ module Sidekiq
     def location
       Sidekiq.redis { |conn| conn.client.location }
     end
+    
+    def redis_connection
+      Sidekiq.redis { |conn| conn.client.id }
+    end
 
     def namespace
       @@ns ||= Sidekiq.redis {|conn| conn.respond_to?(:namespace) ? conn.namespace : nil }
