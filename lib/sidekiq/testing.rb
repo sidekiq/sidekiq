@@ -54,24 +54,22 @@ module Sidekiq
   class EmptyQueueError < RuntimeError; end
 
   class Client
-    class << self
-      alias_method :raw_push_real, :raw_push
+    alias_method :raw_push_real, :raw_push
 
-      def raw_push(payloads)
-        if Sidekiq::Testing.fake?
-          payloads.each do |job|
-            job['class'].constantize.jobs << Sidekiq.load_json(Sidekiq.dump_json(job))
-          end
-          true
-        elsif Sidekiq::Testing.inline?
-          payloads.each do |item|
-            marshalled = Sidekiq.load_json(Sidekiq.dump_json(item))
-            marshalled['class'].constantize.new.perform(*marshalled['args'])
-          end
-          true
-        else
-          raw_push_real(payloads)
+    def raw_push(payloads)
+      if Sidekiq::Testing.fake?
+        payloads.each do |job|
+          job['class'].constantize.jobs << Sidekiq.load_json(Sidekiq.dump_json(job))
         end
+        true
+      elsif Sidekiq::Testing.inline?
+        payloads.each do |item|
+          marshalled = Sidekiq.load_json(Sidekiq.dump_json(item))
+          marshalled['class'].constantize.new.perform(*marshalled['args'])
+        end
+        true
+      else
+        raw_push_real(payloads)
       end
     end
   end
