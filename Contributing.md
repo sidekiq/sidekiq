@@ -13,6 +13,7 @@ If you're interested in helping or contributing to Sidekiq, here's
 some known areas which need improvement:
 
 * The Web UI and sidekiq.org website could always use more polish.  If you have an eye for design and an idea for improvement, please open an issue and let us know.
+* The [Sidekiq issue tracker](https://github.com/mperham/sidekiq/issues) usually has a few ideas
 * Your brilliant idea which I haven't listed!
 
 It's always best to open an issue before investing a lot of time into a
