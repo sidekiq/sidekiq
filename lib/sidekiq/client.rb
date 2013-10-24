@@ -1,5 +1,4 @@
 require 'securerandom'
-
 require 'sidekiq/middleware/chain'
 
 module Sidekiq
@@ -41,7 +40,7 @@ module Sidekiq
     # Returns nil if not pushed to Redis or a unique Job ID if pushed.
     #
     # Example:
-    #   Sidekiq::Client.push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
+    #   push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
     #
     def push(item)
       normed = normalize_item(item)
@@ -57,7 +56,7 @@ module Sidekiq
     # useful if you are pushing tens of thousands of jobs or more.  This method
     # basically cuts down on the redis round trip latency.
     #
-    # Takes the same arguments as Client.push except that args is expected to be
+    # Takes the same arguments as #push except that args is expected to be
     # an Array of Arrays.  All other keys are duplicated for each job.  Each job
     # is run through the client middleware pipeline and each job gets its own Job ID
     # as normal.
@@ -84,14 +83,14 @@ module Sidekiq
 
       # deprecated
       def registered_workers
-        puts "Deprecated, please use Sidekiq::Workers.new"
+        puts "registered_workers is deprecated, please use Sidekiq::Workers.new"
         Sidekiq.redis { |x| x.smembers('workers') }
       end
 
       # deprecated
       def registered_queues
-        puts "Deprecated, please use Sidekiq::Queue.all"
-        Sidekiq.redis { |x| x.smembers('queues') }
+        puts "registered_queues is deprecated, please use Sidekiq::Queue.all"
+        Sidekiq::Queue.all.map(&:name)
       end
 
       def push(item)

@@ -77,7 +77,7 @@ module Sidekiq
     end
   end
 
-  def self.client_middleware(&block)
+  def self.client_middleware
     @client_chain ||= Middleware::Chain.new
     yield @client_chain if block_given?
     @client_chain

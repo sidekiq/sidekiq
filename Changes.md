@@ -1,6 +1,7 @@
 2.16.0
 -----------
 
+- Deprecate `Sidekiq::Client.registered_workers` and `Sidekiq::Client.registered_queues`
 - Refactor Sidekiq::Client to be instance-based [#1279]
 - Pass all Redis options to the Redis driver so Unix sockets
   can be fully configured. [#1270, salimane]
