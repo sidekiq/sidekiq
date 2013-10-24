@@ -65,6 +65,11 @@ module Sidekiq
           raise
         rescue Exception => e
           raise e unless msg['retry']
+          process_retry_exception(worker, msg, queue, e)
+          raise e
+        end
+
+        def process_retry_exception(worker, msg, queue, e)
           max_retry_attempts = retry_attempts_from(msg['retry'], @max_retries)
 
           msg['queue'] = if msg['retry_queue']
@@ -102,8 +107,6 @@ module Sidekiq
             # Goodbye dear message, you (re)tried your best I'm sure.
             retries_exhausted(worker, msg)
           end
-
-          raise e
         end
 
         def retries_exhausted(worker, msg)
