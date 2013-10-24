@@ -257,6 +257,7 @@ module Sidekiq
 
     def initialize(name)
       @zset = name
+      @_size = size
     end
 
     def size
@@ -270,7 +271,7 @@ module Sidekiq
     end
 
     def each(&block)
-      initial_size = size
+      initial_size = @_size
       deleted_size = 0
       page = -1
       page_size = 50
@@ -286,7 +287,7 @@ module Sidekiq
         elements.each do |element, score|
           block.call SortedEntry.new(self, score, element)
         end
-        deleted_size = initial_size - size
+        deleted_size = initial_size - @_size
       end
     end
 
@@ -323,12 +324,12 @@ module Sidekiq
             Sidekiq.redis { |conn| conn.zrem(@zset, element) }
           end
         end
-        elements_with_jid.count != 0
+        elements_with_jid.count != 0 and @_size -= 1
       else
         count = Sidekiq.redis do |conn|
           conn.zremrangebyscore(@zset, score, score)
         end
-        count != 0
+        count != 0 and @_size -= 1
       end
     end
 
