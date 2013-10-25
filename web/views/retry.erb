@@ -11,7 +11,7 @@
     </tr>
     <tr>
       <th><%= t('ErrorMessage') %></th>
-      <td><%= @retry['error_message'] %></td>
+      <td><%= h(@retry['error_message']) %></td>
     </tr>
     <% if !@retry['error_backtrace'].nil? %>
       <tr>
