@@ -42,7 +42,7 @@
             <div class="args"><%= display_args(msg['args']) %></div>
           </td>
           <td>
-            <div><%= truncate("#{msg['error_class']}: #{msg['error_message']}", 200) %></div>
+            <div><%= h truncate("#{msg['error_class']}: #{msg['error_message']}", 200) %></div>
           </td>
         </tr>
       <% end %>
