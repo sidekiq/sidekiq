@@ -64,6 +64,10 @@ module Sidekiq
       include Enumerable
       attr_reader :entries
 
+      def initialize_copy(copy)
+        copy.instance_variable_set(:@entries, entries.dup)
+      end
+
       def each(&block)
         entries.each(&block)
       end
