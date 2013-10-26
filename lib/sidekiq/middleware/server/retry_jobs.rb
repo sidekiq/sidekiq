@@ -46,7 +46,7 @@ module Sidekiq
       #
       #   Sidekiq.configure_server do |config|
       #     config.server_middleware do |chain|
-      #       chain.add Middleware::Server::RetryJobs, {:max_retries => 7}
+      #       chain.add Middleware::Server::RetryJobs, :max_retries => 7
       #     end
       #   end
       class RetryJobs
@@ -106,6 +106,8 @@ module Sidekiq
           raise e
         end
 
+        private
+
         def retries_exhausted(worker, msg)
           logger.debug { "Dropping message after hitting the retry maximum: #{msg}" }
           if worker.respond_to?(:retries_exhausted)
@@ -140,7 +142,7 @@ module Sidekiq
           begin
             worker.sidekiq_retry_in_block.call(count)
           rescue Exception => e
-            logger.error { "Failure scheduling retry using the defined `sidekiq_retry_in` in #{worker.class.name}, falling back to default: #{e.message}"}
+            handle_exception(e, { :context => "Failure scheduling retry using the defined `sidekiq_retry_in` in #{worker.class.name}, falling back to default" })
             nil
           end
         end
