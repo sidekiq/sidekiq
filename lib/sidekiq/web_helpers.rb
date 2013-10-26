@@ -76,7 +76,7 @@ module Sidekiq
     def location
       Sidekiq.redis { |conn| conn.client.location }
     end
-    
+
     def redis_connection
       Sidekiq.redis { |conn| conn.client.id }
     end
@@ -108,6 +108,16 @@ module Sidekiq
     def parse_params(params)
       score, jid = params.split("-")
       [score.to_f, jid]
+    end
+
+    SAFE_QPARAMS = %w(page poll)
+
+    # Merge options with current params, filter safe params, and stringify to query string
+    def qparams(options)
+      options = options.stringify_keys
+      params.merge(options).map { |key, value|
+        SAFE_QPARAMS.include?(key) ? "#{key}=#{value}" : next
+      }.join("&")
     end
 
     def truncate(text, truncate_after_chars = 2000)
