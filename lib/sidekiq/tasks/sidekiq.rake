@@ -1,6 +1,8 @@
 namespace :load do
   task :defaults do
 
+    set :sidekiq_default_hooks, ->{ true }
+
     # If you need a special boot commands
     #
     # set :sidekiq_cmd,           ->{ "bundle exec sidekiq"  }
@@ -84,9 +86,11 @@ namespace :sidekiq do
     invoke 'sidekiq:start'
   end
 
-  after 'deploy:starting',  'sidekiq:quiet'
-  after 'deploy:updated',   'sidekiq:stop'
-  after 'deploy:reverted',  'sidekiq:stop'
-  after 'deploy:published', 'sidekiq:start'
+  if fetch(:sidekiq_default_hooks)
+    after 'deploy:starting',  'sidekiq:quiet'
+    after 'deploy:updated',   'sidekiq:stop'
+    after 'deploy:reverted',  'sidekiq:stop'
+    after 'deploy:published', 'sidekiq:start'
+  end
 
 end
