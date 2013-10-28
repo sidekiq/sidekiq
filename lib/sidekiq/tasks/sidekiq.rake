@@ -2,7 +2,7 @@ namespace :load do
   task :defaults do
 
     # If you need a special boot commands
-    # 
+    #
     # set :sidekiq_cmd,           ->{ "bundle exec sidekiq"  }
     # set :sidekiqctl_cmd,        ->{ "bundle exec sidekiqctl" }
     set :sidekiq_cmd,           ->{  }
@@ -69,9 +69,9 @@ namespace :sidekiq do
       within current_path do
         for_each_process do |pid_file, idx|
           if fetch(:sidekiq_cmd)
-            execute fetch(:sidekiq_cmd), "-d -i #{idx} -P #{pid_file} #{fetch(:sidekiq_options)}" 
+            execute fetch(:sidekiq_cmd), "-d -i #{idx} -P #{pid_file} #{fetch(:sidekiq_options)}"
           else
-            execute :bundle, :exec, :sidekiq, "-d -i #{idx} -P #{pid_file} #{fetch(:sidekiq_options)}" 
+            execute :bundle, :exec, :sidekiq, "-d -i #{idx} -P #{pid_file} #{fetch(:sidekiq_options)}"
           end
         end
       end
@@ -88,5 +88,5 @@ namespace :sidekiq do
   after 'deploy:updated',   'sidekiq:stop'
   after 'deploy:reverted',  'sidekiq:stop'
   after 'deploy:published', 'sidekiq:start'
-  
+
 end
