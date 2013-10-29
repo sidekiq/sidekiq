@@ -33,9 +33,9 @@ namespace :sidekiq do
   desc "Quiet sidekiq (stop accepting new work)"
   task :quiet do
     on roles fetch(:sidekiq_role) do
-      within current_path do
-        for_each_process do |pid_file, idx|
-          if test "[ -f #{current_path}/#{pid_file} ]"
+      for_each_process do |pid_file, idx|
+        if test "[ -f #{current_path}/#{pid_file} ]"
+          within current_path do
             if fetch(:sidekiqctl_cmd)
               execute fetch(:sidekiqctl_cmd), 'quiet', "#{current_path}/#{pid_file}"
             else
@@ -50,9 +50,9 @@ namespace :sidekiq do
   desc "Stop sidekiq"
   task :stop do
     on roles fetch(:sidekiq_role) do
-      within current_path do
-        for_each_process do |pid_file, idx|
-          if test "[ -f #{current_path}/#{pid_file} ]"
+      for_each_process do |pid_file, idx|
+        if test "[ -f #{current_path}/#{pid_file} ]"
+          within current_path do
             if fetch(:sidekiqctl_cmd)
               execute fetch(:sidekiqctl_cmd), 'stop', "#{current_path}/#{pid_file}", fetch(:sidekiq_timeout)
             else
