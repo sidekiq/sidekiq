@@ -19,11 +19,11 @@
       <td><%= msg['class'] %></td>
       <td>
         <% if msg['args'] and msg['args'].to_s.size > 100 %>
-          <%= msg['args'].inspect[0..100] + "... " %>
+          <%= h(msg['args'].inspect[0..100]) + "... " %>
           <button data-toggle="collapse" data-target="#worker_<%= index %>" class="btn btn-default btn-xs"><%= t('ShowAll') %></button>
-          <div class="toggle" id="worker_<%= index %>" style="display: none;"><%= msg['args'] %></div>
+          <div class="toggle" id="worker_<%= index %>" style="display: none;"><%= h(msg['args']) %></div>
         <% else %>
-          <%= msg['args'] %>
+          <%= h(msg['args']) %>
         <% end %>
       </td>
       <td>
