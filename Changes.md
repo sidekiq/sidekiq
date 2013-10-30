@@ -1,3 +1,7 @@
+HEAD
+-----------
+- Sidekiq::Web add tests for escaping job args and error messages. [#1299, lian]
+
 2.16.0
 -----------
 
