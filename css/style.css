@@ -815,3 +815,9 @@ img.smallogo {
   border-bottom: 20px solid transparent;
   border-left: 20px solid white;
 }
+
+.oss-rookie-link {
+  margin-top: 20px;
+  display: block;
+  text-align: center;
+}

@@ -63,7 +63,7 @@
 
       <div class="row">
 
-        <section class='span3' id="install">
+        <section class='span9' id="install">
           <div class="page-header">
             <h4>Install It</h4>
           </div>
@@ -79,9 +79,6 @@
           </p>
 
           <pre class='prettyprint'>bundle install</pre>
-        </section>
-
-        <section class='span4 offset1' id="call">
           <div class="page-header">
             <h4>Call It</h4>
           </div>
@@ -106,9 +103,6 @@ end</pre>
 
           <pre class='prettyprint'>HardWorker.perform_async('bob', 5)</pre>
 
-        </section>
-
-        <section class='span3 offset1' id="start">
           <div class="page-header">
             <h4>Start It</h4>
           </div>
@@ -118,9 +112,12 @@ end</pre>
           </p>
 
           <pre class='prettyprint'>bundle exec sidekiq</pre>
-
         </section>
-        <a href="http://www.blackducksoftware.com/open-source-rookies#4035"><img src="img/rookie.png" width="118" height="125" style="position: relative; top: 50px; left: 100px;"/></a>
+
+        <section class='span3' id="start">
+          <a class="twitter-timeline" href="https://twitter.com/sidekiq" data-widget-id="394602923956502528">Tweets by @sidekiq</a>
+          <a href="http://www.blackducksoftware.com/open-source-rookies#4035" class="oss-rookie-link"><img src="img/rookie.png" width="118" height="125"/></a>
+        </section>
       </div>
 
     </div>
@@ -169,5 +166,6 @@ end</pre>
   <script src='js/modernizr.js'></script>
   <script src='js/google-code-prettify.js'></script>
   <script src='js/app.js'></script>
+  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 </body>
 </html>
