@@ -127,7 +127,7 @@ module Sidekiq
     def display_args(args, truncate_after_chars = 2000)
       args.map do |arg|
         a = arg.inspect
-        truncate(a)
+        h(truncate(a))
       end.join(", ")
     end
 
