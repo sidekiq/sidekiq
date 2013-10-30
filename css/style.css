@@ -163,6 +163,11 @@ footer .edits {
 .page-header {
   margin-bottom: 10px;
 }
+
+.page-header:first-of-type {
+  margin-top: 0px;
+}
+
 /* line 31, ../scss/partials/_layout.scss */
 .page-header h1, .page-header h2, .page-header h3, .page-header h4, .page-header h5, .page-header h6 {
   margin: 0;
