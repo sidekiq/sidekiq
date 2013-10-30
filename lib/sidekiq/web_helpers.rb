@@ -127,7 +127,7 @@ module Sidekiq
     def display_args(args, truncate_after_chars = 2000)
       args.map do |arg|
         a = arg.inspect
-        truncate(a)
+        h(truncate(a))
       end.join(", ")
     end
 
@@ -159,7 +159,7 @@ module Sidekiq
     end
 
     def h(text)
-      ERB::Util.h(text)
+      Rack::Utils.escape_html(text)
     end
 
     # Any paginated list that performs an action needs to redirect
