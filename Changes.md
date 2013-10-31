@@ -1,7 +1,8 @@
-HEAD
+2.16.1
 -----------
 
 - Revert usage of `resolv-replace`.  MRI's native DNS lookup releases the GIL.
+- Fix several Capistrano 3 issues
 - Escaping dynamic data like job args and error messages in Sidekiq Web UI. [#1299, lian]
 
 2.16.0
