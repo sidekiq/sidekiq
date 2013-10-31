@@ -24,14 +24,4 @@ class TestSidekiq < Sidekiq::Test
       end
   	end
   end
-
-  describe "❨╯°□°❩╯︵┻━┻" do
-    before { $stdout = StringIO.new }
-    after  { $stdout = STDOUT }
-
-    it "allows angry developers to express their emotional constitution and remedies it" do
-      Sidekiq.❨╯°□°❩╯︵┻━┻
-      assert_equal "Calm down, bro\n", $stdout.string
-    end
-  end
 end

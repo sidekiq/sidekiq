@@ -22,10 +22,6 @@ module Sidekiq
     :profile => false,
   }
 
-  def self.❨╯°□°❩╯︵┻━┻
-    puts "Calm down, bro"
-  end
-
   def self.options
     @options ||= DEFAULTS.dup
   end
