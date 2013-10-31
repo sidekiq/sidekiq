@@ -1,6 +1,5 @@
 $stdout.sync = true
 
-require 'resolv-replace'
 require 'yaml'
 require 'singleton'
 require 'optparse'
