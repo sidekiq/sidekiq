@@ -160,6 +160,10 @@ module Sidekiq
 
     def h(text)
       ::Rack::Utils.escape_html(text)
+    rescue ArgumentError => e
+      raise unless e.message.eql?('invalid byte sequence in UTF-8')
+      text.encode!('UTF-16', 'UTF-8', invalid: :replace, replace: '').encode!('UTF-8', 'UTF-16')
+      retry
     end
 
     # Any paginated list that performs an action needs to redirect
