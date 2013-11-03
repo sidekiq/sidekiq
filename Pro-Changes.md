@@ -6,8 +6,8 @@ Please see http://sidekiq.org/pro for more details and how to buy.
 1.2.5
 -----------
 
-- Convert Batch UI to use Sidekiq 2.16's support for extension
-  localization.
+- Convert Batch UI to use Sidekiq 2.16's support for extension localization.
+- Update reliable\_push to work with Sidekiq::Client refactoring in 2.16
 - Pro now requires Sidekiq 2.16.0
 
 1.2.4
