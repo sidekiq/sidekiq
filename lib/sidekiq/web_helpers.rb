@@ -159,7 +159,7 @@ module Sidekiq
     end
 
     def h(text)
-      Rack::Utils.escape_html(text)
+      ::Rack::Utils.escape_html(text)
     end
 
     # Any paginated list that performs an action needs to redirect
