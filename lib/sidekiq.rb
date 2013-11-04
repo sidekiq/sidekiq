@@ -68,6 +68,7 @@ module Sidekiq
   end
 
   def self.redis=(hash)
+    @redis = nil
     return @redis = hash if hash.is_a?(ConnectionPool)
 
     if hash.is_a?(Hash)
