@@ -53,7 +53,8 @@ module Sidekiq
 
     ##
     # Push a large number of jobs to Redis.  In practice this method is only
-    # useful if you are pushing tens of thousands of jobs or more.  This method
+    # useful if you are pushing tens of thousands of jobs or more, or if you need
+    # to ensure that a batch doesn't complete prematurely.  This method
     # basically cuts down on the redis round trip latency.
     #
     # Takes the same arguments as #push except that args is expected to be
@@ -61,7 +62,7 @@ module Sidekiq
     # is run through the client middleware pipeline and each job gets its own Job ID
     # as normal.
     #
-    # Returns the number of jobs pushed or nil if the pushed failed.  The number of jobs
+    # Returns an array of the of pushed jobs' jids or nil if the pushed failed.  The number of jobs
     # pushed can be less than the number given if the middleware stopped processing for one
     # or more jobs.
     def push_bulk(items)
@@ -73,7 +74,7 @@ module Sidekiq
 
       pushed = false
       pushed = raw_push(payloads) if !payloads.empty?
-      pushed ? payloads.size : nil
+      pushed ? payloads.collect { |payload| payload['jid'] } : nil
     end
 
     class << self
