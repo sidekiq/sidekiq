@@ -111,7 +111,7 @@ module Sidekiq
     def latency
       entry = oldest_entry
       return 0 unless entry
-      Time.now.to_f - Sidekiq.load_json(entry)['enqueued_at']
+      Time.now.to_f - (Sidekiq.load_json(entry)['enqueued_at'] || 0)
     end
 
     def each(&block)
