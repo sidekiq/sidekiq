@@ -168,12 +168,17 @@ class TestClient < Sidekiq::Test
       Sidekiq::Queue.new.clear
     end
     it 'can push a large set of jobs at once' do
-      count = Sidekiq::Client.push_bulk('class' => QueuedWorker, 'args' => (1..1_000).to_a.map { |x| Array(x) })
-      assert_equal 1_000, count
+      jids = Sidekiq::Client.push_bulk('class' => QueuedWorker, 'args' => (1..1_000).to_a.map { |x| Array(x) })
+      assert_equal 1_000, jids.size
     end
     it 'can push a large set of jobs at once using a String class' do
-      count = Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => (1..1_000).to_a.map { |x| Array(x) })
-      assert_equal 1_000, count
+      jids = Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => (1..1_000).to_a.map { |x| Array(x) })
+      assert_equal 1_000, jids.size
+    end
+    it 'returns the jids for the jobs' do
+      Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => (1..2).to_a.map { |x| Array(x) }).each do |jid|
+        assert_match /[0-9a-f]{12}/, jid
+      end
     end
   end
 
@@ -203,7 +208,9 @@ class TestClient < Sidekiq::Test
       begin
         assert_equal nil, Sidekiq::Client.push('class' => MyWorker, 'args' => [0])
         assert_match /[0-9a-f]{12}/, Sidekiq::Client.push('class' => MyWorker, 'args' => [1])
-        assert_equal 1, Sidekiq::Client.push_bulk('class' => MyWorker, 'args' => [[0], [1]])
+        Sidekiq::Client.push_bulk('class' => MyWorker, 'args' => [[0], [1]]).each do |jid|
+          assert_match /[0-9a-f]{12}/, jid
+        end
       ensure
         Sidekiq.client_middleware.remove Stopper
       end
