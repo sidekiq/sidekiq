@@ -1,3 +1,8 @@
+2.17.0
+-----------
+
+- Change `Sidekiq::Client.push_bulk` to return array of pushed `jid`s.
+
 2.16.1
 -----------
 
