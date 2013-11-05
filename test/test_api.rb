@@ -358,4 +358,16 @@ class TestApi < Sidekiq::Test
       end
     end
   end
+
+  describe 'when jobs have no `enqueued_at` property' do
+    before do
+      @queue = Sidekiq::Queue.new('default')
+    end
+
+    it "doesn\'t explode" do
+      @queue.stub :oldest_entry, "{}" do
+        assert @queue.latency
+      end
+    end
+  end
 end
