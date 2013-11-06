@@ -1,7 +1,7 @@
 2.17.0
 -----------
 
-- Change `Sidekiq::Client.push_bulk` to return array of pushed `jid`s.
+- Change `Sidekiq::Client#push_bulk` to return an array of pushed `jid`s. [#1315, barelyknown]
 
 2.16.1
 -----------
