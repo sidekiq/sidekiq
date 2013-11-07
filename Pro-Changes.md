@@ -3,6 +3,12 @@ Sidekiq Pro Changelog
 
 Please see http://sidekiq.org/pro for more details and how to buy.
 
+HEAD
+-----------
+
+- Sidekiq::Batch#jobs now returns the set of JIDs added to the batch.
+- Sidekiq::Batch#jids returns the complete set of JIDs associated with the batch.
+
 1.2.5
 -----------
 
