@@ -349,6 +349,9 @@
       } else if (WePay.load_widgets) {
         WePay.load_widgets();
       }
+      $('#wepay_widget_anchor_504cfd38b30db').on('click', function() {
+        _gaq.push(['_trackEvent', 'Checkout', 'Click', 'Sidekiq Pro']);
+      });
     </script>
   </body>
 </html>
