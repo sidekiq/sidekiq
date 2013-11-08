@@ -89,12 +89,26 @@ module Sidekiq
     end
 
     def stats(worker, msg, queue)
-      redis do |conn|
-        conn.multi do
-          conn.sadd('workers', identity)
-          conn.setex("worker:#{identity}:started", EXPIRY, Time.now.to_s)
-          hash = {:queue => queue, :payload => msg, :run_at => Time.now.to_i }
-          conn.setex("worker:#{identity}", EXPIRY, Sidekiq.dump_json(hash))
+      update_stats = lambda do
+        redis do |conn|
+          conn.multi do
+            conn.sadd('workers', identity)
+            conn.setex("worker:#{identity}:started", EXPIRY, Time.now.to_s)
+            hash = {:queue => queue, :payload => msg, :run_at => Time.now.to_i }
+            conn.setex("worker:#{identity}", EXPIRY, Sidekiq.dump_json(hash))
+          end
+        end
+      end
+      
+      has_updated_stats = false
+      until has_updated_stats
+        begin
+          update_stats
+          has_updated_stats = true
+        rescue => ex
+          Sidekiq.logger.warn "Error updating stats: #{ex}"
+          Sidekiq.logger.warn ex.backtrace.join("\n") unless ex.backtrace.nil?
+          sleep(Sidekiq::Fetcher::TIMEOUT)
         end
       end
 
