@@ -99,11 +99,11 @@ module Sidekiq
           end
         end
       end
-      
+
       has_updated_stats = false
       until has_updated_stats
         begin
-          update_stats
+          update_stats.call
           has_updated_stats = true
         rescue => ex
           Sidekiq.logger.warn "Error updating stats: #{ex}"
