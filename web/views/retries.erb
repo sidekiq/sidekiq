@@ -25,24 +25,24 @@
           <th><%= t('Error') %></th>
         </tr>
       </thead>
-      <% @retries.each do |msg, score| %>
+      <% @retries.each do |entry| %>
         <tr>
           <td>
-            <input type='checkbox' name='key[]' value='<%= job_params(msg, score) %>' />
+            <input type='checkbox' name='key[]' value='<%= job_params(entry.item, entry.score) %>' />
           </td>
           <td>
-            <a href="<%= root_path %>retries/<%= job_params(msg, score) %>"><%= relative_time(Time.at(score)) %></a>
+            <a href="<%= root_path %>retries/<%= job_params(entry.item, entry.score) %>"><%= relative_time(entry.at) %></a>
           </td>
-          <td><%= msg['retry_count'] %></td>
+          <td><%= entry['retry_count'] %></td>
           <td>
-            <a href="<%= root_path %>queues/<%= msg['queue'] %>"><%= msg['queue'] %></a>
+            <a href="<%= root_path %>queues/<%= entry.queue %>"><%= entry.queue %></a>
           </td>
-          <td><%= msg['class'] %></td>
+          <td><%= entry.klass %></td>
           <td>
-            <div class="args"><%= display_args(msg['args']) %></div>
+            <div class="args"><%= display_args(entry.args) %></div>
           </td>
           <td>
-            <div><%= h truncate("#{msg['error_class']}: #{msg['error_message']}", 200) %></div>
+            <div><%= h truncate("#{entry['error_class']}: #{entry['error_message']}", 200) %></div>
           </td>
         </tr>
       <% end %>

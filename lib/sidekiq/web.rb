@@ -73,7 +73,7 @@ module Sidekiq
     get '/retries' do
       @count = (params[:count] || 25).to_i
       (@current_page, @total_size, @retries) = page("retry", params[:page], @count)
-      @retries = @retries.map {|msg, score| [Sidekiq.load_json(msg), score] }
+      @retries = @retries.map {|msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
       erb :retries
     end
 
@@ -125,7 +125,7 @@ module Sidekiq
     get '/scheduled' do
       @count = (params[:count] || 25).to_i
       (@current_page, @total_size, @scheduled) = page("schedule", params[:page], @count)
-      @scheduled = @scheduled.map {|msg, score| [Sidekiq.load_json(msg), score] }
+      @scheduled = @scheduled.map {|msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
       erb :scheduled
     end
 
