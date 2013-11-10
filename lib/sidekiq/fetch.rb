@@ -41,13 +41,13 @@ module Sidekiq
             after(0) { fetch }
           end
         rescue => ex
-          handle_exception(ex)
+          handle_fetch_exception(ex)
         end
 
       end
     end
 
-    def handle_exception(ex)
+    def handle_fetch_exception(ex)
       if !@down
         logger.error("Error fetching message: #{ex}")
         ex.backtrace.each do |bt|
