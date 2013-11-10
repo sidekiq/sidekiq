@@ -16,6 +16,10 @@ module Sidekiq
       end
     end
 
+    # This is a hook for a Sidekiq Pro feature.  Please don't touch.
+    def filtering(*)
+    end
+
     def locale
       lang = (request.env["HTTP_ACCEPT_LANGUAGE"] || 'en')[0,2]
       strings[lang] ? lang : 'en'

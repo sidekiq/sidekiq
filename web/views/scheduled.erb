@@ -2,11 +2,12 @@
   <div class="col-sm-5">
     <h3><%= t('ScheduledJobs') %></h3>
   </div>
-  <div class="col-sm-4">
-    <% if @scheduled.size > 0 %>
+  <% if @scheduled.size > 0 && @total_size > @count %>
+    <div class="col-sm-4">
       <%= erb :_paging, :locals => { :url => "#{root_path}scheduled" } %>
-    <% end %>
-  </div>
+    </div>
+  <% end %>
+  <%= filtering('scheduled') %>
 </header>
 
 <% if @scheduled.size > 0 %>

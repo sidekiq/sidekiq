@@ -6,8 +6,26 @@ Please see http://sidekiq.org/pro for more details and how to buy.
 HEAD
 -----------
 
+This release offers new functionality based on the SCAN command newly
+added to Redis 2.8.
+
+- Job Filtering in the Web UI!
+  You can now filter retries and scheduled jobs in the Web UI so you
+  only see the jobs relevant to your needs.  Queues cannot be filtered;
+  Redis does not provide the same SCAN operation on the LIST type.
+- SCAN support in the Sidekiq::SortedSet API.  Here's an example that
+  finds all jobs which contain the substring "Warehouse::OrderShip"
+  and deletes all matching retries.  If the set is large, this API
+  will be much faster than standard iteration using each.
+```ruby
+  Sidekiq::RetrySet.new.scan("Warehouse::OrderShip") do |entry|
+    entry.delete
+  end
+```
+
 - Sidekiq::Batch#jobs now returns the set of JIDs added to the batch.
 - Sidekiq::Batch#jids returns the complete set of JIDs associated with the batch.
+- Pro now requires 2.17.0
 
 1.2.5
 -----------
