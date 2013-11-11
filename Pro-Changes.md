@@ -16,7 +16,7 @@ added to Redis 2.8.
 - SCAN support in the Sidekiq::SortedSet API.  Here's an example that
   finds all jobs which contain the substring "Warehouse::OrderShip"
   and deletes all matching retries.  If the set is large, this API
-  will be much faster than standard iteration using each.
+  will be **MUCH** faster than standard iteration using each.
 ```ruby
   Sidekiq::RetrySet.new.scan("Warehouse::OrderShip") do |entry|
     entry.delete
@@ -25,6 +25,9 @@ added to Redis 2.8.
 
 - Sidekiq::Batch#jobs now returns the set of JIDs added to the batch.
 - Sidekiq::Batch#jids returns the complete set of JIDs associated with the batch.
+- Sidekiq::Batch#remove\_jobs(jid, jid, ...) removes JIDs from the set, allowing early termination of jobs if they become irrelevant according to application logic.
+- Sidekiq::Batch#include?(jid) allows jobs to check if they are still
+  relevant to a Batch and exit early if not.
 - Pro now requires 2.17.0
 
 1.2.5
