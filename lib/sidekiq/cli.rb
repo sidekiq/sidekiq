@@ -180,6 +180,10 @@ module Sidekiq
       cfile = cli[:config_file]
 
       config = (cfile ? parse_config(cfile) : {})
+      if config[:queues] && cli[:queues]
+        config[:queues] += cli.delete(:queues)
+      end
+
       options.merge!(config.merge(cli))
     end
 
