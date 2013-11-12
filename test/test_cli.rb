@@ -280,7 +280,7 @@ class TestCli < Sidekiq::Test
 
       it 'sets queues' do
         assert_equal 7, Sidekiq.options[:queues].count { |q| q == 'often' }
-        assert_equal 3, Sidekiq.options[:queues].count { |q| q == 'seldom' }
+        assert_equal 4, Sidekiq.options[:queues].count { |q| q == 'seldom' }
       end
     end
 
@@ -321,6 +321,12 @@ class TestCli < Sidekiq::Test
         end
       end
     end
-  end
 
+    describe 'when queues are passed on the CLI and present in config' do
+      it 'retains queues set in both locations' do
+        @cli.parse(['sidekiq', '-q', 'foo', '-C', './test/config.yml', '-q', 'bar'])
+        assert_equal %w(very_often very_often seldom foo bar), Sidekiq.options[:queues]
+      end
+    end
+  end
 end
