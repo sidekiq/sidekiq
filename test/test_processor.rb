@@ -31,7 +31,7 @@ class TestProcessor < Sidekiq::Test
       msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
       actor = Minitest::Mock.new
       actor.expect(:processor_done, nil, [@processor])
-      actor.expect(:real_thread, nil, [nil, Celluloid::Thread])
+      actor.expect(:real_thread, nil, [nil, Thread])
       @boss.expect(:async, actor, [])
       @boss.expect(:async, actor, [])
       @processor.process(work(msg))
@@ -41,7 +41,7 @@ class TestProcessor < Sidekiq::Test
 
     it 'passes exceptions to ExceptionHandler' do
       actor = Minitest::Mock.new
-      actor.expect(:real_thread, nil, [nil, Celluloid::Thread])
+      actor.expect(:real_thread, nil, [nil, Thread])
       @boss.expect(:async, actor, [])
       msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'] })
       begin
@@ -57,7 +57,7 @@ class TestProcessor < Sidekiq::Test
       msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'] })
       re_raise = false
       actor = Minitest::Mock.new
-      actor.expect(:real_thread, nil, [nil, Celluloid::Thread])
+      actor.expect(:real_thread, nil, [nil, Thread])
       @boss.expect(:async, actor, [])
 
       begin
@@ -75,7 +75,7 @@ class TestProcessor < Sidekiq::Test
       processor = ::Sidekiq::Processor.new(@boss)
       actor = Minitest::Mock.new
       actor.expect(:processor_done, nil, [processor])
-      actor.expect(:real_thread, nil, [nil, Celluloid::Thread])
+      actor.expect(:real_thread, nil, [nil, Thread])
       @boss.expect(:async, actor, [])
       @boss.expect(:async, actor, [])
       processor.process(work(msgstr))
@@ -103,7 +103,7 @@ class TestProcessor < Sidekiq::Test
         def successful_job
           msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
           actor = Minitest::Mock.new
-          actor.expect(:real_thread, nil, [nil, Celluloid::Thread])
+          actor.expect(:real_thread, nil, [nil, Thread])
           actor.expect(:processor_done, nil, [@processor])
           @boss.expect(:async, actor, [])
           @boss.expect(:async, actor, [])
@@ -131,7 +131,7 @@ class TestProcessor < Sidekiq::Test
 
         def failed_job
           actor = Minitest::Mock.new
-          actor.expect(:real_thread, nil, [nil, Celluloid::Thread])
+          actor.expect(:real_thread, nil, [nil, Thread])
           @boss.expect(:async, actor, [])
           msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'] })
           begin
