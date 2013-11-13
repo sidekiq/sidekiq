@@ -90,7 +90,7 @@ end
 
 begin
   require 'active_support/core_ext/string/inflections'
-rescue LoadError
+rescue LoadError, NameError
   class String
     def constantize
       names = self.split('::')
