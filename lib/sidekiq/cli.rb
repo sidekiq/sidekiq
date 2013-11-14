@@ -326,8 +326,9 @@ module Sidekiq
       end
       ns = opts.delete(:namespace)
       if ns
-        Sidekiq.logger.warn("namespace should be set in your ruby initializer, is ignored in config file")
-        Sidekiq.logger.warn("config.redis = { :url => ..., :namespace => '#{ns}' }")
+        # logger hasn't been initialized yet, puts is all we have.
+        puts("namespace should be set in your ruby initializer, is ignored in config file")
+        puts("config.redis = { :url => ..., :namespace => '#{ns}' }")
       end
       opts
     end
