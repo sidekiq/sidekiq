@@ -90,7 +90,7 @@ end
 
 begin
   require 'active_support/core_ext/string/inflections'
-rescue LoadError, NameError # NameError is necessary to run Sidekiq unofficially on Rails 2.3
+rescue LoadError
   class String
     def constantize
       names = self.split('::')
