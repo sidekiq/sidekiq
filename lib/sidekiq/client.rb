@@ -187,6 +187,7 @@ module Sidekiq
         normalized_item = Sidekiq.default_worker_options.merge(item)
       end
 
+      normalized_item['queue'] = normalized_item['queue'].to_s
       normalized_item['jid'] ||= SecureRandom.hex(12)
       normalized_item['enqueued_at'] ||= Time.now.to_f
       normalized_item
