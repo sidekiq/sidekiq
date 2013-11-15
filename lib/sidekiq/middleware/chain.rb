@@ -49,13 +49,16 @@ module Sidekiq
   #   end
   # end
   #
-  # This is an example of a minimal client middleware:
+  # This is an example of a minimal client middleware, note
+  # the method must return the result or the job will not push
+  # to Redis:
   #
   # class MyClientHook
   #   def call(worker_class, msg, queue)
   #     puts "Before push"
-  #     yield
+  #     result = yield
   #     puts "After push"
+  #     result
   #   end
   # end
   #
