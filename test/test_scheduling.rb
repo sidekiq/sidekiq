@@ -31,7 +31,7 @@ class TestScheduling < Sidekiq::Test
     end
 
     it 'schedules job right away on negative timestamp/interval' do
-      @redis.expect :sadd,  true, ['queues', :custom_queue]
+      @redis.expect :sadd,  true, ['queues', 'custom_queue']
       @redis.expect :lpush, true, ['queue:custom_queue', Array]
       assert ScheduledWorker.perform_in(-300, 'mike')
       @redis.verify
