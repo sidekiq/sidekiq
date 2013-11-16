@@ -23,11 +23,24 @@ namespace :load do
   end
 end
 
+namespace :deploy do
+  before :starting, :check_sidekiq_hooks do
+    invoke 'sidekiq:add_default_hooks' if fetch(:sidekiq_default_hooks)
+  end
+end
+
 namespace :sidekiq do
   def for_each_process(&block)
     fetch(:sidekiq_processes).times do |idx|
       yield((idx == 0 ? "#{fetch(:sidekiq_pid)}" : "#{fetch(:sidekiq_pid)}-#{idx}"), idx)
     end
+  end
+
+  task :add_default_hooks do
+    after 'deploy:starting',  'sidekiq:quiet'
+    after 'deploy:updated',   'sidekiq:stop'
+    after 'deploy:reverted',  'sidekiq:stop'
+    after 'deploy:published', 'sidekiq:start'
   end
 
   desc "Quiet sidekiq (stop accepting new work)"
@@ -84,13 +97,6 @@ namespace :sidekiq do
   task :restart do
     invoke 'sidekiq:stop'
     invoke 'sidekiq:start'
-  end
-
-  if fetch(:sidekiq_default_hooks)
-    after 'deploy:starting',  'sidekiq:quiet'
-    after 'deploy:updated',   'sidekiq:stop'
-    after 'deploy:reverted',  'sidekiq:stop'
-    after 'deploy:published', 'sidekiq:start'
   end
 
 end
