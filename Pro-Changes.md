@@ -6,6 +6,8 @@ Please see http://sidekiq.org/pro for more details and how to buy.
 HEAD
 -----------
 
+Thanks to Jon Hyman for his contributions to this Sidekiq Pro release.
+
 This release offers new functionality based on the SCAN command newly
 added to Redis 2.8.
 
@@ -28,6 +30,8 @@ added to Redis 2.8.
 - Sidekiq::Batch#remove\_jobs(jid, jid, ...) removes JIDs from the set, allowing early termination of jobs if they become irrelevant according to application logic.
 - Sidekiq::Batch#include?(jid) allows jobs to check if they are still
   relevant to a Batch and exit early if not.
+- Change shutdown logic to minimize Redis round-trips with Reliable Fetch.
+- Sidekiq::SortedSet#find\_job(jid) now uses server-side Lua if running Redis 2.6. [jonhyman]
 - Pro now requires 2.17.0
 
 1.2.5

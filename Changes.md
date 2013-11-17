@@ -3,6 +3,8 @@
 
 - Change `Sidekiq::Client#push_bulk` to return an array of pushed `jid`s. [#1315, barelyknown]
 - Web UI refactoring to use more API internally (yummy dogfood!)
+- Further capistrano 3 fixes
+- Misc minor fixes
 
 2.16.1
 -----------
