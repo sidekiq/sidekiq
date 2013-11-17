@@ -37,6 +37,7 @@ module Sidekiq
       do_defer do
         @boss.async.real_thread(proxy_id, Thread.current)
 
+        ack = true
         begin
           msg = Sidekiq.load_json(msgstr)
           klass  = msg['class'].constantize
@@ -50,12 +51,14 @@ module Sidekiq
           end
         rescue Sidekiq::Shutdown
           # Had to force kill this job because it didn't finish
-          # within the timeout.
+          # within the timeout.  Don't acknowledge the work since
+          # we didn't properly finish it.
+          ack = false
         rescue Exception => ex
           handle_exception(ex, msg || { :message => msgstr })
           raise
         ensure
-          work.acknowledge
+          work.acknowledge if ack
         end
       end
 
