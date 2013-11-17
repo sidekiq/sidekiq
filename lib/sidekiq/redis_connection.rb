@@ -1,5 +1,6 @@
 require 'connection_pool'
 require 'redis'
+require 'uri'
 
 module Sidekiq
   class RedisConnection
@@ -53,10 +54,16 @@ module Sidekiq
       end
 
       def log_info(options)
+        # Don't log Redis AUTH password
+        scrubbed_options = options.dup
+        if scrubbed_options[:url] && (uri = URI.parse(scrubbed_options[:url])) && uri.password
+          uri.password = "REDACTED"
+          scrubbed_options[:url] = uri.to_s
+        end
         if Sidekiq.server?
-          Sidekiq.logger.info("Booting Sidekiq #{Sidekiq::VERSION} with redis options #{options}")
+          Sidekiq.logger.info("Booting Sidekiq #{Sidekiq::VERSION} with redis options #{scrubbed_options}")
         else
-          Sidekiq.logger.info("#{Sidekiq::NAME} client with redis options #{options}")
+          Sidekiq.logger.info("#{Sidekiq::NAME} client with redis options #{scrubbed_options}")
         end
       end
 
