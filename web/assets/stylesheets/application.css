@@ -188,6 +188,17 @@ td form {
   margin-bottom: 0;
 }
 
+td.table-checkbox {
+  padding: 0px;
+}
+
+td.table-checkbox label {
+  height: 100%;
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 0;
+}
+
 .navbar .navbar-brand {
   color: #b1003e;
   padding: 13px;
