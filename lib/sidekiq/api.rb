@@ -195,7 +195,7 @@ module Sidekiq
     # Remove this job from the queue.
     def delete
       count = Sidekiq.redis do |conn|
-        conn.lrem("queue:#{@queue}", 0, @value)
+        conn.lrem("queue:#{@queue}", 1, @value)
       end
       count != 0
     end
