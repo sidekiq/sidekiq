@@ -28,8 +28,10 @@
       </thead>
       <% @retries.each do |entry| %>
         <tr>
-          <td>
-            <input type='checkbox' name='key[]' value='<%= job_params(entry.item, entry.score) %>' />
+          <td class="table-checkbox">
+            <label>
+              <input type='checkbox' name='key[]' value='<%= job_params(entry.item, entry.score) %>' />
+            </label>
           </td>
           <td>
             <a href="<%= root_path %>retries/<%= job_params(entry.item, entry.score) %>"><%= relative_time(entry.at) %></a>
