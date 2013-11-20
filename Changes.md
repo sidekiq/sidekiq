@@ -3,6 +3,7 @@
 
 - Change `Sidekiq::Client#push_bulk` to return an array of pushed `jid`s. [#1315, barelyknown]
 - Web UI refactoring to use more API internally (yummy dogfood!)
+- Much faster Sidekiq::Job#delete performance for larger queue sizes
 - Further capistrano 3 fixes
 - Misc minor fixes
 
