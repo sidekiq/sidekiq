@@ -49,7 +49,7 @@ module Sidekiq
         @ready.clear
 
         clear_worker_set
-        clean_up_for_graceful_shutdown
+        return if clean_up_for_graceful_shutdown
 
         hard_shutdown_in timeout if shutdown
       end
@@ -58,10 +58,12 @@ module Sidekiq
     def clean_up_for_graceful_shutdown
       if @busy.empty?
         @fetcher.clean_up
-        return after(0) { signal(:shutdown) }
+        after(0) { signal(:shutdown) }
+        return true
       end
 
       after(SPIN_TIME_FOR_GRACEFUL_SHUTDOWN) { clean_up_for_graceful_shutdown }
+      false
     end
 
     def start
