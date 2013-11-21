@@ -19,6 +19,8 @@ module Sidekiq
     attr_reader :busy
     attr_accessor :fetcher
 
+    SPIN_TIME_FOR_GRACEFUL_SHUTDOWN = 3
+
     def initialize(options={})
       logger.debug { options.inspect }
       @count = options[:concurrency] || 25
@@ -47,10 +49,19 @@ module Sidekiq
         @ready.clear
 
         clear_worker_set
+        clean_up_for_graceful_shutdown
 
-        return after(0) { signal(:shutdown) } if @busy.empty?
         hard_shutdown_in timeout if shutdown
       end
+    end
+
+    def clean_up_for_graceful_shutdown
+      if @busy.empty?
+        @fetcher.clean_up
+        return after(0) { signal(:shutdown) }
+      end
+
+      after(SPIN_TIME_FOR_GRACEFUL_SHUTDOWN) { clean_up_for_graceful_shutdown }
     end
 
     def start
@@ -159,7 +170,7 @@ module Sidekiq
           # it is worse to lose a job than to run it twice.
           Sidekiq::Fetcher.strategy.bulk_requeue(@in_progress.values)
 
-          logger.debug { "Terminating #{@busy.size} busy worker threads" }
+          logger.warn { "Terminating #{@busy.size} busy worker threads" }
           @busy.each do |processor|
             if processor.alive? && t = @threads.delete(processor.object_id)
               t.raise Shutdown

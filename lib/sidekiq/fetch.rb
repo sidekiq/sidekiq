@@ -47,6 +47,10 @@ module Sidekiq
       end
     end
 
+    def clean_up
+      @strategy.clean_up
+    end
+
     def handle_fetch_exception(ex)
       if !@down
         logger.error("Error fetching message: #{ex}")
@@ -88,6 +92,9 @@ module Sidekiq
     def retrieve_work
       work = Sidekiq.redis { |conn| conn.brpop(*queues_cmd) }
       UnitOfWork.new(*work) if work
+    end
+
+    def clean_up
     end
 
     def self.bulk_requeue(inprogress)
