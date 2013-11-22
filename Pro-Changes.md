@@ -32,6 +32,11 @@ added to Redis 2.8.
   relevant to a Batch and exit early if not.
 - Change shutdown logic to minimize Redis round-trips with Reliable Fetch.
 - Sidekiq::SortedSet#find\_job(jid) now uses server-side Lua if running Redis 2.6. [jonhyman]
+- The statsd integration now sets global job counts:
+  jobs.count
+  jobs.success
+  jobs.failure
+
 - Pro now requires 2.17.0
 
 1.2.5
