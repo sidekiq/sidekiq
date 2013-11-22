@@ -19,7 +19,7 @@ module Sidekiq
     attr_reader :busy
     attr_accessor :fetcher
 
-    SPIN_TIME_FOR_GRACEFUL_SHUTDOWN = 3
+    SPIN_TIME_FOR_GRACEFUL_SHUTDOWN = 1
 
     def initialize(options={})
       logger.debug { options.inspect }
@@ -39,7 +39,7 @@ module Sidekiq
 
     def stop(options={})
       watchdog('Manager#stop died') do
-        shutdown = options[:shutdown]
+        should_shutdown = options[:shutdown]
         timeout = options[:timeout]
 
         @done = true
@@ -51,13 +51,13 @@ module Sidekiq
         clear_worker_set
         return if clean_up_for_graceful_shutdown
 
-        hard_shutdown_in timeout if shutdown
+        hard_shutdown_in timeout if should_shutdown
       end
     end
 
     def clean_up_for_graceful_shutdown
       if @busy.empty?
-        terminate
+        shutdown
         return true
       end
 
@@ -81,7 +81,7 @@ module Sidekiq
         @busy.delete(processor)
         if stopped?
           processor.terminate if processor.alive?
-          terminate if @busy.empty?
+          shutdown if @busy.empty?
         else
           @ready << processor if processor.alive?
         end
@@ -101,7 +101,7 @@ module Sidekiq
           @ready << p
           dispatch
         else
-          terminate if @busy.empty?
+          shutdown if @busy.empty?
         end
       end
     end
@@ -172,7 +172,7 @@ module Sidekiq
             end
           end
 
-          shutdown
+          signal_shutdown
         end
       end
     end
@@ -191,12 +191,12 @@ module Sidekiq
       @done
     end
 
-    def terminate
+    def shutdown
       requeue
-      shutdown
+      signal_shutdown
     end
 
-    def shutdown
+    def signal_shutdown
       after(0) { signal(:shutdown) }
     end
 
