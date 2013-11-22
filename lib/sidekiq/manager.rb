@@ -57,8 +57,7 @@ module Sidekiq
 
     def clean_up_for_graceful_shutdown
       if @busy.empty?
-        @fetcher.clean_up
-        after(0) { signal(:shutdown) }
+        terminate
         return true
       end
 
@@ -82,7 +81,7 @@ module Sidekiq
         @busy.delete(processor)
         if stopped?
           processor.terminate if processor.alive?
-          signal(:shutdown) if @busy.empty?
+          terminate if @busy.empty?
         else
           @ready << processor if processor.alive?
         end
@@ -102,7 +101,7 @@ module Sidekiq
           @ready << p
           dispatch
         else
-          signal(:shutdown) if @busy.empty?
+          terminate if @busy.empty?
         end
       end
     end
@@ -164,14 +163,6 @@ module Sidekiq
           # They must die but their messages shall live on.
           logger.info("Still waiting for #{@busy.size} busy workers")
 
-          # Re-enqueue terminated jobs
-          # NOTE: You may notice that we may push a job back to redis before
-          # the worker thread is terminated. This is ok because Sidekiq's
-          # contract says that jobs are run AT LEAST once. Process termination
-          # is delayed until we're certain the jobs are back in Redis because
-          # it is worse to lose a job than to run it twice.
-          Sidekiq::Fetcher.strategy.bulk_requeue(@in_progress.values)
-
           logger.warn { "Terminating #{@busy.size} busy worker threads" }
           @busy.each do |processor|
             if processor.alive? && t = @threads.delete(processor.object_id)
@@ -179,7 +170,7 @@ module Sidekiq
             end
           end
 
-          after(0) { signal(:shutdown) }
+          terminate
         end
       end
     end
@@ -196,6 +187,18 @@ module Sidekiq
 
     def stopped?
       @done
+    end
+
+    def terminate
+      # Re-enqueue terminated jobs
+      # NOTE: You may notice that we may push a job back to redis before
+      # the worker thread is terminated. This is ok because Sidekiq's
+      # contract says that jobs are run AT LEAST once. Process termination
+      # is delayed until we're certain the jobs are back in Redis because
+      # it is worse to lose a job than to run it twice.
+      @fetcher.bulk_requeue(@in_progress.values)
+      @in_progress.clear
+      after(0) { signal(:shutdown) }
     end
   end
 end

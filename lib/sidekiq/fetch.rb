@@ -47,8 +47,8 @@ module Sidekiq
       end
     end
 
-    def clean_up
-      @strategy.clean_up
+    def bulk_requeue(in_progress)
+      @strategy.bulk_requeue(in_progress.values)
     end
 
     def handle_fetch_exception(ex)
@@ -94,10 +94,7 @@ module Sidekiq
       UnitOfWork.new(*work) if work
     end
 
-    def clean_up
-    end
-
-    def self.bulk_requeue(inprogress)
+    def bulk_requeue(inprogress)
       Sidekiq.logger.debug { "Re-queueing terminated jobs" }
       jobs_to_requeue = {}
       inprogress.each do |unit_of_work|
