@@ -163,6 +163,8 @@ module Sidekiq
           # They must die but their messages shall live on.
           logger.info("Still waiting for #{@busy.size} busy workers")
 
+          requeue
+
           logger.warn { "Terminating #{@busy.size} busy worker threads" }
           @busy.each do |processor|
             if processor.alive? && t = @threads.delete(processor.object_id)
@@ -170,7 +172,7 @@ module Sidekiq
             end
           end
 
-          terminate
+          shutdown
         end
       end
     end
@@ -190,6 +192,15 @@ module Sidekiq
     end
 
     def terminate
+      requeue
+      shutdown
+    end
+
+    def shutdown
+      after(0) { signal(:shutdown) }
+    end
+
+    def requeue
       # Re-enqueue terminated jobs
       # NOTE: You may notice that we may push a job back to redis before
       # the worker thread is terminated. This is ok because Sidekiq's
@@ -198,7 +209,6 @@ module Sidekiq
       # it is worse to lose a job than to run it twice.
       @fetcher.bulk_requeue(@in_progress.values)
       @in_progress.clear
-      after(0) { signal(:shutdown) }
     end
   end
 end
