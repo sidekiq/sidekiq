@@ -14,6 +14,7 @@ Gem::Specification.new do |gem|
   gem.name          = "sidekiq"
   gem.require_paths = ["lib"]
   gem.version       = Sidekiq::VERSION
+  gem.add_dependency                  'sys-proctable', '>= 0.9.3'
   gem.add_dependency                  'redis', '>= 3.0.4'
   gem.add_dependency                  'redis-namespace', '>= 1.3.1'
   gem.add_dependency                  'connection_pool', '>= 1.0.0'

@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'fileutils'
+require 'sys/proctable'
 
 class Sidekiqctl
 
@@ -46,6 +47,24 @@ class Sidekiqctl
   def quiet
     `kill -USR1 #{pid}`
   end
+
+  def quiet_stop
+    quiet
+    timeout.times do
+      if process = Sys::ProcTable.ps(pid)
+        if process.cmdline =~ /0 of / && process.cmdline =~ /stopping/
+          # sidekiq has finished processing and is waiting to be stopped
+          # exit loop
+          break
+        end
+      else
+        FileUtils.rm_f pidfile
+        done 'Sidekiq shut down gracefully.'
+      end
+      sleep 1
+    end
+    stop # stop sidekiq
+  end  
 
   def stop
     `kill -TERM #{pid}`
