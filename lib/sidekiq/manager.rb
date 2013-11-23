@@ -19,8 +19,11 @@ module Sidekiq
     attr_reader :busy
     attr_accessor :fetcher
 
+    SPIN_TIME_FOR_GRACEFUL_SHUTDOWN = 1
+
     def initialize(options={})
       logger.debug { options.inspect }
+      @options = options
       @count = options[:concurrency] || 25
       @done_callback = nil
 
@@ -37,7 +40,7 @@ module Sidekiq
 
     def stop(options={})
       watchdog('Manager#stop died') do
-        shutdown = options[:shutdown]
+        should_shutdown = options[:shutdown]
         timeout = options[:timeout]
 
         @done = true
@@ -47,10 +50,20 @@ module Sidekiq
         @ready.clear
 
         clear_worker_set
+        return if clean_up_for_graceful_shutdown
 
-        return after(0) { signal(:shutdown) } if @busy.empty?
-        hard_shutdown_in timeout if shutdown
+        hard_shutdown_in timeout if should_shutdown
       end
+    end
+
+    def clean_up_for_graceful_shutdown
+      if @busy.empty?
+        shutdown
+        return true
+      end
+
+      after(SPIN_TIME_FOR_GRACEFUL_SHUTDOWN) { clean_up_for_graceful_shutdown }
+      false
     end
 
     def start
@@ -69,7 +82,7 @@ module Sidekiq
         @busy.delete(processor)
         if stopped?
           processor.terminate if processor.alive?
-          signal(:shutdown) if @busy.empty?
+          shutdown if @busy.empty?
         else
           @ready << processor if processor.alive?
         end
@@ -89,7 +102,7 @@ module Sidekiq
           @ready << p
           dispatch
         else
-          signal(:shutdown) if @busy.empty?
+          shutdown if @busy.empty?
         end
       end
     end
@@ -151,22 +164,16 @@ module Sidekiq
           # They must die but their messages shall live on.
           logger.info("Still waiting for #{@busy.size} busy workers")
 
-          # Re-enqueue terminated jobs
-          # NOTE: You may notice that we may push a job back to redis before
-          # the worker thread is terminated. This is ok because Sidekiq's
-          # contract says that jobs are run AT LEAST once. Process termination
-          # is delayed until we're certain the jobs are back in Redis because
-          # it is worse to lose a job than to run it twice.
-          Sidekiq::Fetcher.strategy.bulk_requeue(@in_progress.values)
+          requeue
 
-          logger.debug { "Terminating #{@busy.size} busy worker threads" }
+          logger.warn { "Terminating #{@busy.size} busy worker threads" }
           @busy.each do |processor|
             if processor.alive? && t = @threads.delete(processor.object_id)
               t.raise Shutdown
             end
           end
 
-          after(0) { signal(:shutdown) }
+          signal_shutdown
         end
       end
     end
@@ -183,6 +190,26 @@ module Sidekiq
 
     def stopped?
       @done
+    end
+
+    def shutdown
+      requeue
+      signal_shutdown
+    end
+
+    def signal_shutdown
+      after(0) { signal(:shutdown) }
+    end
+
+    def requeue
+      # Re-enqueue terminated jobs
+      # NOTE: You may notice that we may push a job back to redis before
+      # the worker thread is terminated. This is ok because Sidekiq's
+      # contract says that jobs are run AT LEAST once. Process termination
+      # is delayed until we're certain the jobs are back in Redis because
+      # it is worse to lose a job than to run it twice.
+      Sidekiq::Fetcher.strategy.bulk_requeue(@in_progress.values, @options)
+      @in_progress.clear
     end
   end
 end

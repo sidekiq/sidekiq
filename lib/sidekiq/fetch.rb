@@ -90,7 +90,9 @@ module Sidekiq
       UnitOfWork.new(*work) if work
     end
 
-    def self.bulk_requeue(inprogress)
+    # By leaving this as a class method, it can be pluggable and used by the Manager actor. Making it
+    # an instance method will make it async to the Fetcher actor
+    def self.bulk_requeue(inprogress, options)
       Sidekiq.logger.debug { "Re-queueing terminated jobs" }
       jobs_to_requeue = {}
       inprogress.each do |unit_of_work|
