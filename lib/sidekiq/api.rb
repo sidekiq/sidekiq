@@ -109,11 +109,9 @@ module Sidekiq
     end
 
     def latency
-      entry = Sidekiq.redis do |conn|
-        conn.lrange(@rname, -1, -1)
-      end.first
+      entry = oldest_entry
       return 0 unless entry
-      Time.now.to_f - Sidekiq.load_json(entry)['enqueued_at']
+      Time.now.to_f - (Sidekiq.load_json(entry)['enqueued_at'] || 0)
     end
 
     def each(&block)
@@ -148,6 +146,14 @@ module Sidekiq
           conn.srem("queues", name)
         end
       end
+    end
+
+    private
+
+    def oldest_entry
+      Sidekiq.redis do |conn|
+        conn.lrange(@rname, -1, -1)
+      end.first
     end
   end
 
