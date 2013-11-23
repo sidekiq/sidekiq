@@ -24,6 +24,7 @@ added to Redis 2.8.
     job.delete
   end
 ```
+
 - Sidekiq::Batch#jobs now returns the set of JIDs added to the batch.
 - Sidekiq::Batch#jids returns the complete set of JIDs associated with the batch.
 - Sidekiq::Batch#remove\_jobs(jid, jid, ...) removes JIDs from the set, allowing early termination of jobs if they become irrelevant according to application logic.
@@ -36,6 +37,7 @@ added to Redis 2.8.
   jobs.success
   jobs.failure
 ```
+
 - Change shutdown logic to push leftover jobs in the private queue back
   into the public queue when shutting down with Reliable Fetch.  This
   allows the safe decommission of a Sidekiq Pro process when autoscaling.
