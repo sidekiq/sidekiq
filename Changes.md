@@ -5,7 +5,7 @@
 - Web UI refactoring to use more API internally (yummy dogfood!)
 - Much faster Sidekiq::Job#delete performance for larger queue sizes
 - Further capistrano 3 fixes
-- Misc minor fixes
+- Many misc minor fixes
 
 2.16.1
 -----------

@@ -1,12 +1,12 @@
 Sidekiq Pro Changelog
 =======================
 
-Please see http://sidekiq.org/pro for more details and how to buy.
+Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
 HEAD
 -----------
 
-Thanks to Jon Hyman for his contributions to this Sidekiq Pro release.
+Thanks to @jonhyman for his contributions to this Sidekiq Pro release.
 
 This release offers new functionality based on the SCAN command newly
 added to Redis 2.8.
@@ -20,24 +20,26 @@ added to Redis 2.8.
   and deletes all matching retries.  If the set is large, this API
   will be **MUCH** faster than standard iteration using each.
 ```ruby
-  Sidekiq::RetrySet.new.scan("Warehouse::OrderShip") do |entry|
-    entry.delete
+  Sidekiq::RetrySet.new.scan("Warehouse::OrderShip") do |job|
+    job.delete
   end
 ```
-
 - Sidekiq::Batch#jobs now returns the set of JIDs added to the batch.
 - Sidekiq::Batch#jids returns the complete set of JIDs associated with the batch.
 - Sidekiq::Batch#remove\_jobs(jid, jid, ...) removes JIDs from the set, allowing early termination of jobs if they become irrelevant according to application logic.
 - Sidekiq::Batch#include?(jid) allows jobs to check if they are still
   relevant to a Batch and exit early if not.
-- Change shutdown logic to minimize Redis round-trips with Reliable Fetch.
 - Sidekiq::SortedSet#find\_job(jid) now uses server-side Lua if running Redis 2.6. [jonhyman]
 - The statsd integration now sets global job counts:
+```ruby
   jobs.count
   jobs.success
   jobs.failure
-
-- Pro now requires 2.17.0
+```
+- Change shutdown logic to push leftover jobs in the private queue back
+  into the public queue when shutting down with Reliable Fetch.  This
+  allows the safe decommission of a Sidekiq Pro process when autoscaling.
+- Pro now requires Sidekiq 2.17.0
 
 1.2.5
 -----------
