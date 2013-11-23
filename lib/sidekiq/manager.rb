@@ -23,6 +23,7 @@ module Sidekiq
 
     def initialize(options={})
       logger.debug { options.inspect }
+      @options = options
       @count = options[:concurrency] || 25
       @done_callback = nil
 
@@ -207,7 +208,7 @@ module Sidekiq
       # contract says that jobs are run AT LEAST once. Process termination
       # is delayed until we're certain the jobs are back in Redis because
       # it is worse to lose a job than to run it twice.
-      @fetcher.bulk_requeue(@in_progress.values)
+      Sidekiq::Fetcher.strategy.bulk_requeue(@in_progress.values, @options)
       @in_progress.clear
     end
   end
