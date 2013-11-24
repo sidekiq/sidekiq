@@ -64,6 +64,9 @@ module Sidekiq
           # ignore, will be pushed back onto queue during hard_shutdown
           raise
         rescue Exception => e
+          if defined?(::ActiveRecord) && e.class == ::ActiveRecord::StatementInvalid && e.message.match("Sidekiq::Shutdown")
+            raise Sidekiq::Shutdown
+          end
           raise e unless msg['retry']
           max_retry_attempts = retry_attempts_from(msg['retry'], @max_retries)
 
