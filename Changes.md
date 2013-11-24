@@ -4,6 +4,7 @@
 - Change `Sidekiq::Client#push_bulk` to return an array of pushed `jid`s. [#1315, barelyknown]
 - Web UI refactoring to use more API internally (yummy dogfood!)
 - Much faster Sidekiq::Job#delete performance for larger queue sizes
+- Change USR1 signal semantic to exit process as soon as all workers are quiet.
 - Further capistrano 3 fixes
 - Many misc minor fixes
 
