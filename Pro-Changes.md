@@ -3,7 +3,7 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
-HEAD
+1.3.0
 -----------
 
 Thanks to @jonhyman for his contributions to this Sidekiq Pro release.
@@ -16,12 +16,12 @@ functionality will be unavailable.
   You can now filter retries and scheduled jobs in the Web UI so you
   only see the jobs relevant to your needs.  Queues cannot be filtered;
   Redis does not provide the same SCAN operation on the LIST type.
-  **Redis 2.8 only**
+  **Redis 2.8**
 - SCAN support in the Sidekiq::SortedSet API.  Here's an example that
   finds all jobs which contain the substring "Warehouse::OrderShip"
   and deletes all matching retries.  If the set is large, this API
   will be **MUCH** faster than standard iteration using each.
-  **Redis 2.8 only**
+  **Redis 2.8**
 ```ruby
   Sidekiq::RetrySet.new.scan("Warehouse::OrderShip") do |job|
     job.delete
@@ -33,7 +33,7 @@ functionality will be unavailable.
 - Sidekiq::Batch#remove\_jobs(jid, jid, ...) removes JIDs from the set, allowing early termination of jobs if they become irrelevant according to application logic.
 - Sidekiq::Batch#include?(jid) allows jobs to check if they are still
   relevant to a Batch and exit early if not.
-- Sidekiq::SortedSet#find\_job(jid) now uses server-side Lua **Redis 2.6 only** [jonhyman]
+- Sidekiq::SortedSet#find\_job(jid) now uses server-side Lua **Redis 2.6** [jonhyman]
 - The statsd integration now sets global job counts:
 ```ruby
   jobs.count
@@ -88,7 +88,7 @@ functionality will be unavailable.
 - Fix issue with reliable\_push where it didn't return the JID for a pushed
   job when sending previously cached jobs to Redis.
 - Add fast Sidekiq::Queue#delete\_job(jid) API which leverages Lua so job lookup is
-  100% server-side.  Benchmark vs Sidekiq's Job#delete API:
+  100% server-side.  Benchmark vs Sidekiq's Job#delete API. **Redis 2.6**
 
 ```
 Sidekiq Pro API
@@ -98,7 +98,7 @@ Sidekiq API
 ```
 
 - Add fast Sidekiq::Queue#delete\_by\_class(klass) API to remove all
-  jobs of a given type.  Uses server-side Lua for performance.
+  jobs of a given type.  Uses server-side Lua for performance. **Redis 2.6**
 
 1.1.0
 -----------
