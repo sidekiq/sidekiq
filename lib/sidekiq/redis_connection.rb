@@ -11,7 +11,7 @@ module Sidekiq
         if url
           options[:url] = url
         end
-        
+
         # need a connection for Fetcher and Retry
         size = options[:size] || (Sidekiq.server? ? (Sidekiq.options[:concurrency] + 2) : 5)
         pool_timeout = options[:pool_timeout] || 1
@@ -69,9 +69,8 @@ module Sidekiq
 
       def determine_redis_provider
         # REDISTOGO_URL is only support for legacy reasons
-        return ENV['REDISTOGO_URL'] if ENV['REDISTOGO_URL']
         provider = ENV['REDIS_PROVIDER'] || 'REDIS_URL'
-        ENV[provider]
+        ENV[provider] || ENV['REDISTOGO_URL']
       end
 
     end
