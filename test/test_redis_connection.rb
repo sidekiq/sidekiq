@@ -87,6 +87,20 @@ class TestRedisConnection < Sidekiq::Test
       end
     end
 
+    describe "with REDISTOGO_URL and a parallel REDIS_PROVIDER set" do
+      it "sets connection URI to the provider" do
+        uri = 'redis://sidekiq-redis-provider:6379/0'
+        provider = 'SIDEKIQ_REDIS_PROVIDER'
+
+        ENV['REDIS_PROVIDER'] = provider
+        ENV[provider] = uri
+        ENV['REDISTOGO_URL'] = 'redis://redis-to-go:6379/0'
+        with_env_var provider, uri, true
+
+        ENV[provider] = nil
+      end
+    end
+
     describe "with REDIS_PROVIDER set" do
       it "sets connection URI to the provider" do
         uri = 'redis://sidekiq-redis-provider:6379/0'
