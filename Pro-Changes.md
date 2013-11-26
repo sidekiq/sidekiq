@@ -17,6 +17,7 @@ functionality will be unavailable.
   only see the jobs relevant to your needs.  Queues cannot be filtered;
   Redis does not provide the same SCAN operation on the LIST type.
   **Redis 2.8**
+  ![Filtering](https://f.cloud.github.com/assets/2911/1619465/f47529f2-5657-11e3-8cd1-33899eb72aad.png)
 - SCAN support in the Sidekiq::SortedSet API.  Here's an example that
   finds all jobs which contain the substring "Warehouse::OrderShip"
   and deletes all matching retries.  If the set is large, this API
