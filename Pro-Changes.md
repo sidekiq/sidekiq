@@ -39,7 +39,7 @@ functionality will be unavailable.
 - Sidekiq::Batch#remove\_jobs(jid, jid, ...) removes JIDs from the set, allowing early termination of jobs if they become irrelevant according to application logic.
 - Sidekiq::Batch#include?(jid) allows jobs to check if they are still
   relevant to a Batch and exit early if not.
-- Sidekiq::SortedSet#find\_job(jid) now uses server-side Lua **Redis 2.6** [jonhyman]
+- Sidekiq::SortedSet#find\_job(jid) now uses server-side Lua if possible **Redis 2.6** [jonhyman]
 - The statsd integration now sets global job counts:
 ```ruby
   jobs.count
@@ -50,6 +50,7 @@ functionality will be unavailable.
 - Change shutdown logic to push leftover jobs in the private queue back
   into the public queue when shutting down with Reliable Fetch.  This
   allows the safe decommission of a Sidekiq Pro process when autoscaling. [jonhyman]
+- Add support for weighted random fetching with Reliable Fetch [jonhyman]
 - Pro now requires Sidekiq 2.17.0
 
 1.2.5
