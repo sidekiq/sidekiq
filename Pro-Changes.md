@@ -3,6 +3,11 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+1.3.1
+-----------
+
+- Fix a gemspec packaging issue which broke the Batch UI.
+
 1.3.0
 -----------
 
