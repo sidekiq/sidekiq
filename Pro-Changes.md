@@ -3,6 +3,11 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+1.3.2
+-----------
+
+- Lazy load Lua scripts so a Redis connection is not required on bootup.
+
 1.3.1
 -----------
 
