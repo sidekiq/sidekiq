@@ -60,9 +60,9 @@ quality open source development all at the same time.  Please see the
 More Information
 -----------------
 
-Please see the [sidekiq wiki](https://github.com/mperham/sidekiq/wiki) for more information.
+Please see the [sidekiq wiki](https://github.com/mperham/sidekiq/wiki) for the official documentation.
 [#sidekiq on irc.freenode.net](irc://irc.freenode.net/#sidekiq) is dedicated to this project,
-but bug reports or feature requests suggestions should still go through [issues on Github](https://github.com/mperham/sidekiq/issues).
+but bug reports or feature requests suggestions should still go through [issues on Github](https://github.com/mperham/sidekiq/issues).  Release announcements are made to [@sidekiq](https://twitter.com/sidekiq)
 
 There's also a mailing list via [Librelist](http://librelist.org) that you can subscribe to by sending
 an email to <sidekiq@librelist.org> with a greeting in the body. To unsubscribe, send an email to <sidekiq-unsubscribe@librelist.org> and that's it!
@@ -87,4 +87,4 @@ Please see [LICENSE](https://github.com/mperham/sidekiq/blob/master/LICENSE) for
 Author
 -----------------
 
-Mike Perham, [@mperham](https://twitter.com/mperham), [http://mikeperham.com](http://mikeperham.com)
+Mike Perham, [@mperham](https://twitter.com/mperham) / [@sidekiq](https://twitter.com/sidekiq), [http://mikeperham.com](http://mikeperham.com)
