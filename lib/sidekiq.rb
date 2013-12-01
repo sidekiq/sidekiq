@@ -69,12 +69,8 @@ module Sidekiq
 
   def self.redis=(hash)
     return @redis = hash if hash.is_a?(ConnectionPool)
-
-    if hash.is_a?(Hash)
-      @hash = hash
-    else
-      raise ArgumentError, "redis= requires a Hash or ConnectionPool"
-    end
+    return @redis = Sidekiq::RedisConnection.create(@hash = hash) if hash.is_a?(Hash)
+    raise ArgumentError, "redis= requires a Hash or ConnectionPool"
   end
 
   def self.client_middleware
