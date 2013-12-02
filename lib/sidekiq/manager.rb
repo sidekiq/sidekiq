@@ -166,7 +166,7 @@ module Sidekiq
 
           requeue
 
-          logger.warn { "Terminating #{@busy.size} busy worker threads" }
+          logger.warn { "Terminating #{@busy.size} busy worker threads, work still in progress #{@in_progress.values.inspect}" }
           @busy.each do |processor|
             if processor.alive? && t = @threads.delete(processor.object_id)
               t.raise Shutdown
