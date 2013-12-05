@@ -6,14 +6,6 @@ rvm:
   - jruby-19mode
   - rbx
   - 2.0.0
-branches:
-  only:
-    - master
-notifications:
-  irc: "irc.freenode.org#sidekiq"
-  email:
-    recipients:
-      - sidekiq@librelist.org
 matrix:
   allow_failures:
     - rvm: jruby-19mode
