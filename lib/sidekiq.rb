@@ -68,7 +68,6 @@ module Sidekiq
   end
 
   def self.redis=(hash)
-    raise "Sidekiq's redis pool has already been established, cannot configure" if @redis && !$TESTING
     return @redis = hash if hash.is_a?(ConnectionPool)
 
     if hash.is_a?(Hash)

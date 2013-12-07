@@ -1,10 +1,3 @@
-HEAD
------------
-
-- Raise error if application tries to configure Redis after the pool has been
-  established.  Sidekiq's redis connection cannot be dynamically changed
-  at runtime. [#1309]
-
 2.17.0
 -----------
 
