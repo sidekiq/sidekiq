@@ -13,6 +13,7 @@ module Sidekiq
       send_to_honeybadger(ctxHash, ex) if defined?(::Honeybadger)
       send_to_exceptional(ctxHash, ex) if defined?(::Exceptional)
       send_to_exception_notifier(ctxHash, ex) if defined?(::ExceptionNotifier)
+      send_to_rollbar(ctxHash, ex) if defined?(::Rollbar)
     end
 
     private
@@ -34,6 +35,10 @@ module Sidekiq
 
     def send_to_exception_notifier(hash, ex)
       ::ExceptionNotifier.notify_exception(ex, :data => {:message => hash})
+    end
+
+    def send_to_rollbar(hash, ex)
+      ::Rollbar.report_exception(ex, hash)
     end
   end
 end
