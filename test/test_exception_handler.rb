@@ -135,4 +135,20 @@ class TestExceptionHandler < Sidekiq::Test
       ::Exceptional::ExceptionData.verify
     end
   end
+
+  describe "with fake Rollbar" do
+    before do
+      ::Rollbar = Minitest::Mock.new
+    end
+
+    after do
+      Object.send(:remove_const, "Rollbar")
+    end
+
+    it "notifies Rollbar" do
+      ::Rollbar.expect(:report_exception,nil,[TEST_EXCEPTION, :a => 1])
+      Component.new.invoke_exception(:a => 1)
+      ::Rollbar.verify
+    end
+  end
 end
