@@ -7,15 +7,15 @@ HEAD
 -----------
 
 - Default batch expiration has been extended to 3 days, from 1 day previously.
+- Batches now sort in the Web UI according to expiry time, not creation time.
 - Add user-configurable batch expiry.  If your batches might take longer
   than 72 hours to process, you can extend the expiration date.
+
 ```ruby
 b = Sidekiq::Batch.new
 b.expires_in 5.days
 ...
 ```
-- Batches now sort in the Web UI according to expiry time, not creation
-  time.
 
 1.3.2
 -----------
