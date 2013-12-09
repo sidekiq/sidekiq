@@ -74,16 +74,23 @@ module Sidekiq
           signal = readable_io.first[0].gets.strip
           handle_signal(signal)
         end
+      rescue USR1Interrupt
+        logger.info 'Stopping work, will shut down when workers finish'
+        stop(false)
       rescue Interrupt
         logger.info 'Shutting down'
-        launcher.stop
-        # Explicitly exit so busy Processor threads can't block
-        # process shutdown.
-        exit(0)
+        stop
       end
     end
 
     private
+
+    def stop(force_shutdown_after_timeout = true)
+      launcher.stop(force_shutdown_after_timeout)
+      # Explicitly exit so busy Processor threads can't block
+      # process shutdown.
+      exit(0)
+    end
 
     def handle_signal(sig)
       Sidekiq.logger.debug "Got #{sig} signal"
@@ -104,7 +111,7 @@ module Sidekiq
         raise Interrupt
       when 'USR1'
         Sidekiq.logger.info "Received USR1, no longer accepting new work"
-        launcher.manager.async.stop
+        raise USR1Interrupt
       when 'USR2'
         if Sidekiq.options[:logfile]
           Sidekiq.logger.info "Received USR2, reopening log file"

@@ -39,14 +39,15 @@ module Sidekiq
       end
     end
 
-    def stop
+    def stop(force_shutdown_after_timeout = true)
       watchdog('Launcher#stop') do
         @done = true
         Sidekiq::Fetcher.done!
         fetcher.async.terminate if fetcher.alive?
         poller.async.terminate if poller.alive?
 
-        manager.async.stop(:shutdown => true, :timeout => @options[:timeout])
+        opts = force_shutdown_after_timeout ? {:shutdown => true, :timeout => @options[:timeout]} : {}
+        manager.async.stop(opts)
         manager.wait(:shutdown)
       end
     end
