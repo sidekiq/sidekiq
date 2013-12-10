@@ -898,7 +898,7 @@ img.smallogo {
   border-radius: 3px;
 }
 .args {
-  overflow-y: scroll;
+  overflow-y: auto;
   max-height: 100px;
 }
 .args-extended {
