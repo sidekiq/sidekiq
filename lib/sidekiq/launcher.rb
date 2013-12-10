@@ -50,6 +50,8 @@ module Sidekiq
         manager.async.stop(opts)
         manager.wait(:shutdown)
       end
+
+      exit(0)
     end
 
     def procline(tag)

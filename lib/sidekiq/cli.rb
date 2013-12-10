@@ -17,6 +17,8 @@ module Sidekiq
   # DO NOT RESCUE THIS ERROR.
   class Shutdown < Interrupt; end
 
+  class USR1Interrupt < Interrupt; end
+
   class CLI
     include Util
     include Singleton
@@ -76,22 +78,14 @@ module Sidekiq
         end
       rescue USR1Interrupt
         logger.info 'Stopping work, will shut down when workers finish'
-        stop(false)
+        launcher.async.stop(false)
       rescue Interrupt
         logger.info 'Shutting down'
-        stop
+        launcher.async.stop
       end
     end
 
     private
-
-    def stop(force_shutdown_after_timeout = true)
-      launcher.stop(force_shutdown_after_timeout)
-      # Explicitly exit so busy Processor threads can't block
-      # process shutdown.
-      exit(0)
-    end
-
     def handle_signal(sig)
       Sidekiq.logger.debug "Got #{sig} signal"
       case sig
