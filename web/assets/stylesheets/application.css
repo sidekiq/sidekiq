@@ -897,6 +897,9 @@ img.smallogo {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 3px;
 }
+.code-wrap {
+  white-space: normal;
+}
 .args {
   overflow-y: auto;
   max-height: 100px;
