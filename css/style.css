@@ -650,6 +650,7 @@ img.smallogo {
 .pro #customers .thumbnail > img {
   display: inline;
   max-width: 175px;
+  padding: 2px 0;
 }
 /* line 162, ../scss/style.scss */
 .pro #customers .quoted {
