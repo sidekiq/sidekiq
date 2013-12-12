@@ -17,6 +17,8 @@ module Sidekiq
   # DO NOT RESCUE THIS ERROR.
   class Shutdown < Interrupt; end
 
+  class USR1Interrupt < Interrupt; end
+
   class CLI
     include Util
     include Singleton
@@ -74,17 +76,16 @@ module Sidekiq
           signal = readable_io.first[0].gets.strip
           handle_signal(signal)
         end
+      rescue USR1Interrupt
+        logger.info 'Stopping work, will shut down when workers finish'
+        launcher.async.stop(false)
       rescue Interrupt
         logger.info 'Shutting down'
-        launcher.stop
-        # Explicitly exit so busy Processor threads can't block
-        # process shutdown.
-        exit(0)
+        launcher.async.stop
       end
     end
 
     private
-
     def handle_signal(sig)
       Sidekiq.logger.debug "Got #{sig} signal"
       case sig
@@ -104,7 +105,7 @@ module Sidekiq
         raise Interrupt
       when 'USR1'
         Sidekiq.logger.info "Received USR1, no longer accepting new work"
-        launcher.manager.async.stop
+        raise USR1Interrupt
       when 'USR2'
         if Sidekiq.options[:logfile]
           Sidekiq.logger.info "Received USR2, reopening log file"
