@@ -1,7 +1,6 @@
 2.17.0
 -----------
 
-- Change USR1 signal handling to exit process as soon as all workers are quiet. [#1358]
 - Change `Sidekiq::Client#push_bulk` to return an array of pushed `jid`s. [#1315, barelyknown]
 - Web UI refactoring to use more API internally (yummy dogfood!)
 - Much faster Sidekiq::Job#delete performance for larger queue sizes
