@@ -188,15 +188,16 @@ td form {
   margin-bottom: 0;
 }
 
-td.table-checkbox {
+.table tr > td.table-checkbox, .table tr > th.table-checkbox {
   padding: 0px;
 }
 
-td.table-checkbox label {
+table .table-checkbox label {
   height: 100%;
   width: 100%;
-  padding: 8px;
+  padding: 0px 16px;
   margin-bottom: 0;
+  line-height: 32px;
 }
 
 .navbar .navbar-brand {
