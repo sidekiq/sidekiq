@@ -162,10 +162,24 @@ class TestExtensions < Sidekiq::Test
         assert_equal 1, queue_size
       end
 
+      it 'reponds to scheduling on generic classes' do
+        assert_equal 0, Sidekiq.redis {|c| c.zcard('schedule') }
+        SomeClass.async_for(5.days).doit(Date.today)
+        SomeClass.async_until(1.day.from_now).doit(Date.today)
+        assert_equal 2, Sidekiq.redis {|c| c.zcard('schedule') }
+      end
+
       it 'responds to the method on module class methods' do
         assert_equal 0, queue_size
         SomeModule.async.doit(Date.today)
         assert_equal 1, queue_size
+      end
+
+      it 'responds to scheduling on module class methods' do
+        assert_equal 0, Sidekiq.redis {|c| c.zcard('schedule') }
+        SomeModule.async_for(5.days).doit(Date.today)
+        SomeModule.async_until(1.day.from_now).doit(Date.today)
+        assert_equal 2, Sidekiq.redis {|c| c.zcard('schedule') }
       end
 
       it 'responds to the method on ActiveRecord models' do
@@ -174,10 +188,24 @@ class TestExtensions < Sidekiq::Test
         assert_equal 1, queue_size
       end
 
+      it 'responds to scheduling on ActiveRecord models' do
+        assert_equal 0, Sidekiq.redis {|c| c.zcard('schedule') }
+        MyModel.async_for(5.days).long_class_method
+        MyModel.async_until(1.day.from_now).long_class_method
+        assert_equal 2, Sidekiq.redis {|c| c.zcard('schedule') }
+      end
+
       it 'responds to the method on ActiveModel mailers' do
         assert_equal 0, queue_size
         UserMailer.async.greetings(1, 2)
         assert_equal 1, queue_size
+      end
+
+      it 'responds to scheduling on ActiveModel mailers' do
+        assert_equal 0, Sidekiq.redis {|c| c.zcard('schedule') }
+        UserMailer.async_for(5.days).greetings(1, 2)
+        UserMailer.async_until(1.day.from_now).greetings(1, 2)
+        assert_equal 2, Sidekiq.redis {|c| c.zcard('schedule') }
       end
     end
   end
