@@ -100,6 +100,40 @@ class TestExtensions < Sidekiq::Test
     def queue_size(name='default')
       Sidekiq::Queue.new(name).size
     end
+
+    describe 'when disbaled' do
+      before do
+        Sidekiq.delayed_extension_options = { 'enabled' => false }
+      end
+
+      after do
+        Sidekiq.delayed_extension_options = { 'enabled' => true }
+      end
+
+      it 'does not delay when disabled on class methods' do
+        lambda {
+          SomeClass.delay.doit(Date.today)
+        }.must_raise(NoMethodError)
+      end
+
+      it 'does not allow delayed scheduling' do
+        lambda {
+          SomeClass.delay_for(5.days).long_class_method
+        }.must_raise(NoMethodError)
+      end
+
+      it 'does not allow until delayed scheduling' do
+        lambda {
+          SomeClass.delay_until(1.day.from_now).long_class_method
+        }.must_raise(NoMethodError)
+      end
+
+      it 'does not delay when disabled on ActiveRecord models' do
+        lambda {
+          MyModel.delay.long_class_method
+        }.must_raise(NoMethodError)
+      end
+    end
   end
 
 end
