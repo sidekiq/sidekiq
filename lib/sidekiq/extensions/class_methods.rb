@@ -19,13 +19,30 @@ module Sidekiq
     end
 
     module Klass
-      def delay(options={})
+      def method_missing(method, *args, &block)
+        return super if Sidekiq.delayed_extension_options['enabled'] == false
+        
+        method_name = method.to_s
+        if method_name == Sidekiq.delayed_extension_options['base']
+          sidekiq_delay(*args)
+        elsif method_name == Sidekiq.delayed_extension_options['base'] + '_for'
+          sidekiq_delay_for(*args)
+        elsif method_name == Sidekiq.delayed_extension_options['base'] + '_until'
+          sidekiq_delay_until(*args)
+        else
+          super
+        end
+      end
+
+      private
+
+      def sidekiq_delay(options={})
         Proxy.new(DelayedClass, self, options)
       end
-      def delay_for(interval, options={})
+      def sidekiq_delay_for(interval, options={})
         Proxy.new(DelayedClass, self, options.merge('at' => Time.now.to_f + interval.to_f))
       end
-      def delay_until(timestamp, options={})
+      def sidekiq_delay_until(timestamp, options={})
         Proxy.new(DelayedClass, self, options.merge('at' => timestamp.to_f))
       end
     end
