@@ -20,6 +20,7 @@ module Sidekiq
     :environment => nil,
     :timeout => 8,
     :profile => false,
+
   }
 
   def self.❨╯°□°❩╯︵┻━┻
@@ -95,6 +96,14 @@ module Sidekiq
 
   def self.default_worker_options
     @default_worker_options || { 'retry' => true, 'queue' => 'default' }
+  end
+
+  def self.delayed_extension_options=(hash)
+    @delayed_extension_options = delayed_extension_options.merge(hash)
+  end
+
+  def self.delayed_extension_options
+    @delayed_extension_options || { 'base' => 'delay', 'enabled' => true }
   end
 
   def self.load_json(string)
