@@ -5,7 +5,7 @@ module Sidekiq
   module Extensions
     ##
     # Adds 'delay', 'delay_for' and `delay_until` methods to ActiveRecord to offload instance method
-    # execution to Sidekiq.  Examples:
+    # execution to Sidekiq. The base of these methods can also be customized. Examples:
     #
     # User.recent_signups.each { |user| user.delay.mark_as_awesome }
     #

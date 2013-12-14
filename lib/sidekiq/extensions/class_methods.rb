@@ -5,7 +5,7 @@ module Sidekiq
   module Extensions
     ##
     # Adds 'delay', 'delay_for' and `delay_until` methods to all Classes to offload class method
-    # execution to Sidekiq.  Examples:
+    # execution to Sidekiq. The base of these methods can also be customized. Examples:
     #
     # User.delay.delete_inactive
     # Wikipedia.delay.download_changes_for(Date.today)
