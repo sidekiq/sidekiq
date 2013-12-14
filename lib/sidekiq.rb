@@ -19,8 +19,7 @@ module Sidekiq
     :require => '.',
     :environment => nil,
     :timeout => 8,
-    :profile => false,
-
+    :profile => false
   }
 
   def self.❨╯°□°❩╯︵┻━┻
