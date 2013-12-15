@@ -1,3 +1,9 @@
+2.17.1
+-----------
+
+- Bump redis client required version to 3.0.6
+- Minor CSS fixes for Web UI
+
 2.17.0
 -----------
 
