@@ -1,10 +1,11 @@
 require 'sidekiq/extensions/generic_proxy'
+require 'sidekiq/extensions/extension_handler'
 
 module Sidekiq
   module Extensions
     ##
     # Adds 'delay', 'delay_for' and `delay_until` methods to all Classes to offload class method
-    # execution to Sidekiq.  Examples:
+    # execution to Sidekiq. The base of these methods can also be customized. Examples:
     #
     # User.delay.delete_inactive
     # Wikipedia.delay.download_changes_for(Date.today)
@@ -19,13 +20,17 @@ module Sidekiq
     end
 
     module Klass
-      def delay(options={})
+      include ExtensionHandler
+
+      private
+
+      def sidekiq_delay(options={})
         Proxy.new(DelayedClass, self, options)
       end
-      def delay_for(interval, options={})
+      def sidekiq_delay_for(interval, options={})
         Proxy.new(DelayedClass, self, options.merge('at' => Time.now.to_f + interval.to_f))
       end
-      def delay_until(timestamp, options={})
+      def sidekiq_delay_until(timestamp, options={})
         Proxy.new(DelayedClass, self, options.merge('at' => timestamp.to_f))
       end
     end
