@@ -3,7 +3,7 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
-HEAD
+1.4.0
 -----------
 
 - Default batch expiration has been extended to 3 days, from 1 day previously.
