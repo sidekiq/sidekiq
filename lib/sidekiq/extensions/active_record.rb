@@ -21,15 +21,18 @@ module Sidekiq
     end
 
     module ActiveRecord
-      def delay(options={})
+      def sidekiq_delay(options={})
         Proxy.new(DelayedModel, self, options)
       end
-      def delay_for(interval, options={})
+      def sidekiq_delay_for(interval, options={})
         Proxy.new(DelayedModel, self, options.merge('at' => Time.now.to_f + interval.to_f))
       end
-      def delay_until(timestamp, options={})
+      def sidekiq_delay_until(timestamp, options={})
         Proxy.new(DelayedModel, self, options.merge('at' => timestamp.to_f))
       end
+      alias_method :delay, :sidekiq_delay
+      alias_method :delay_for, :sidekiq_delay_for
+      alias_method :delay_until, :sidekiq_delay_until
     end
 
   end
