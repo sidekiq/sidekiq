@@ -1,3 +1,12 @@
+HEAD
+-----------
+- Sidekiq.default\_action\_mailer\_options allows you to configure default
+  options for active mailer extensions.
+
+```ruby
+Sidekiq.default_action_mailer_options = { 'queue' => 'mailer'}
+```
+
 2.17.1
 -----------
 

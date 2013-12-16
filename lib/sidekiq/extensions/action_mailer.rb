@@ -23,17 +23,23 @@ module Sidekiq
 
     module ActionMailer
       def sidekiq_delay(options={})
-        Proxy.new(DelayedMailer, self, options)
+        Proxy.new(DelayedMailer, self, sidekiq_options(options))
       end
       def sidekiq_delay_for(interval, options={})
-        Proxy.new(DelayedMailer, self, options.merge('at' => Time.now.to_f + interval.to_f))
+        Proxy.new(DelayedMailer, self, sidekiq_options(options).merge('at' => Time.now.to_f + interval.to_f))
       end
       def sidekiq_delay_until(timestamp, options={})
-        Proxy.new(DelayedMailer, self, options.merge('at' => timestamp.to_f))
+        Proxy.new(DelayedMailer, self, sidekiq_options(options).merge('at' => timestamp.to_f))
       end
       alias_method :delay, :sidekiq_delay
       alias_method :delay_for, :sidekiq_delay_for
       alias_method :delay_until, :sidekiq_delay_until
+
+      private
+
+      def sidekiq_options(opts={})
+        Sidekiq.default_action_mailer_options.merge(opts)
+      end
     end
 
   end
