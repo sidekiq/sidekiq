@@ -75,6 +75,17 @@ class TestExtensions < Sidekiq::Test
       assert_equal 1, Sidekiq.redis {|c| c.zcard('schedule') }
     end
 
+    describe 'default_action_mailer_options' do
+      before { Sidekiq.default_action_mailer_options = {queue: :mailer} }
+      after { Sidekiq.default_action_mailer_options = {} }
+
+      it 'allows delayed delivery of ActionMailer mails' do
+        assert_equal [], Sidekiq::Queue.all.map(&:name)
+        UserMailer.delay.greetings(1, 2)
+        assert_equal ['mailer'], Sidekiq::Queue.all.map(&:name)
+      end
+    end
+
     class SomeClass
       def self.doit(arg)
       end

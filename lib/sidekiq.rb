@@ -97,6 +97,14 @@ module Sidekiq
     @default_worker_options || { 'retry' => true, 'queue' => 'default' }
   end
 
+  def self.default_action_mailer_options=(hash)
+    @default_action_mailer_options = default_action_mailer_options.merge(hash)
+  end
+
+  def self.default_action_mailer_options
+    @default_action_mailer_options || {}
+  end
+
   def self.load_json(string)
     JSON.parse(string)
   end
