@@ -59,18 +59,28 @@ module Sidekiq
     def raw_push(payloads)
       if Sidekiq::Testing.fake?
         payloads.each do |job|
-          job['class'].constantize.jobs << Sidekiq.load_json(Sidekiq.dump_json(job))
+          add_to_queue(job)
         end
         true
       elsif Sidekiq::Testing.inline?
         payloads.each do |item|
-          marshalled = Sidekiq.load_json(Sidekiq.dump_json(item))
-          marshalled['class'].constantize.new.perform(*marshalled['args'])
+          perform_now(item)
         end
         true
       else
         raw_push_real(payloads)
       end
+    end
+
+    private
+
+    def add_to_queue(job)
+      job['class'].constantize.jobs << Sidekiq.load_json(Sidekiq.dump_json(job))
+    end
+
+    def perform_now(item)
+      marshalled = Sidekiq.load_json(Sidekiq.dump_json(item))
+      marshalled['class'].constantize.new.perform(*marshalled['args'])
     end
   end
 
