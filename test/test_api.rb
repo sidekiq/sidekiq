@@ -33,12 +33,41 @@ class TestApi < Sidekiq::Test
     end
 
     describe "reset" do
-      it 'can reset stats' do
+      before do
         Sidekiq.redis do |conn|
           conn.set('stat:processed', 5)
           conn.set('stat:failed', 10)
-          Sidekiq::Stats.new.reset
+        end
+      end
+
+      it 'will reset all stats by default' do
+        Sidekiq::Stats.new.reset
+        Sidekiq.redis do |conn|
           assert_equal '0', conn.get('stat:processed')
+          assert_equal '0', conn.get('stat:failed')
+        end
+      end
+
+      it 'can reset individual stats' do
+        Sidekiq::Stats.new.reset('failed')
+        Sidekiq.redis do |conn|
+          assert_equal '5', conn.get('stat:processed')
+          assert_equal '0', conn.get('stat:failed')
+        end
+      end
+
+      it 'can accept anything that responds to #to_s' do
+        Sidekiq::Stats.new.reset(:failed)
+        Sidekiq.redis do |conn|
+          assert_equal '5', conn.get('stat:processed')
+          assert_equal '0', conn.get('stat:failed')
+        end
+      end
+
+      it 'ignores anything other than "failed" or "processed"' do
+        Sidekiq::Stats.new.reset((1..10).to_a, ['failed'])
+        Sidekiq.redis do |conn|
+          assert_equal '5', conn.get('stat:processed')
           assert_equal '0', conn.get('stat:failed')
         end
       end

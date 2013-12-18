@@ -10,10 +10,12 @@ module Sidekiq
       Sidekiq.redis { |conn| conn.get("stat:failed") }.to_i
     end
 
-    def reset
+    def reset(*stats)
+      all   = %w(failed processed)
+      stats = stats.empty? ? all : all & stats.flatten.compact.map(&:to_s)
+
       Sidekiq.redis do |conn|
-        conn.set("stat:failed", 0)
-        conn.set("stat:processed", 0)
+        stats.each { |stat| conn.set("stat:#{stat}", 0) }
       end
     end
 
