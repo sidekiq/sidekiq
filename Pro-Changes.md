@@ -3,6 +3,12 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+HEAD
+-----------
+
+- Add batch progress bar to batch detail page. [#1398]
+
+
 1.4.0
 -----------
 
