@@ -162,12 +162,11 @@ module Sidekiq
         watchdog("Manager#hard_shutdown_in died") do
           # We've reached the timeout and we still have busy workers.
           # They must die but their messages shall live on.
-          logger.info("Still waiting for #{@busy.size} busy workers")
+          logger.warn { "Terminating #{@busy.size} busy worker threads" }
+          logger.warn { "Work still in progress #{@in_progress.values.inspect}" }
 
           requeue
 
-          logger.warn { "Terminating #{@busy.size} busy worker threads" }
-          logger.warn { "Work still in progress #{@in_progress.values.inspect}" }
           @busy.each do |processor|
             if processor.alive? && t = @threads.delete(processor.object_id)
               t.raise Shutdown
