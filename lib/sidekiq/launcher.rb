@@ -48,6 +48,9 @@ module Sidekiq
 
         manager.async.stop(:shutdown => true, :timeout => @options[:timeout])
         manager.wait(:shutdown)
+
+        # Requeue everything in case there was a worker who grabbed work while stopped
+        Sidekiq::Fetcher.strategy.bulk_requeue([], @options)
       end
     end
 
