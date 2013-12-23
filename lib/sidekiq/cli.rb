@@ -174,13 +174,15 @@ module Sidekiq
     end
 
     def setup_options(args)
-      cli = parse_options(args)
-      set_environment cli[:environment]
+      opts = parse_options(args)
+      set_environment opts[:environment]
 
-      cfile = cli[:config_file]
+      cfile = opts[:config_file]
+      opts = parse_config(cfile).merge(opts) if cfile
+      
+      opts[:strict] = true if opts[:strict].nil?
 
-      config = (cfile ? parse_config(cfile) : {})
-      options.merge!(config.merge(cli))
+      options.merge!(opts)
     end
 
     def options
@@ -335,13 +337,13 @@ module Sidekiq
 
     def parse_queues(opts, queues_and_weights)
       queues_and_weights.each {|queue_and_weight| parse_queue(opts, *queue_and_weight)}
-      opts[:strict] = queues_and_weights.all? {|_, weight| weight.to_s.empty? }
     end
 
     def parse_queue(opts, q, weight=nil)
       [weight.to_i, 1].max.times do
        (opts[:queues] ||= []) << q
       end
+      opts[:strict] = false if weight.to_i > 0
     end
   end
 end

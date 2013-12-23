@@ -55,8 +55,23 @@ class TestCli < Sidekiq::Test
       assert_equal true, !!Sidekiq.options[:strict]
     end
 
+    it 'sets strictly ordered queues if weights are not present multiple queue options' do
+      @cli.parse(['sidekiq', '-q', 'foo', '-q', 'bar', '-r', './test/fake_env.rb'])
+      assert_equal true, !!Sidekiq.options[:strict]
+    end
+
     it 'does not set strictly ordered queues if weights are present' do
       @cli.parse(['sidekiq', '-q', 'foo,3', '-r', './test/fake_env.rb'])
+      assert_equal false, !!Sidekiq.options[:strict]
+    end
+
+    it 'does not set strictly ordered queues if weights are present with multiple queues' do
+      @cli.parse(['sidekiq', '-q', 'foo,3,bar', '-r', './test/fake_env.rb'])
+      assert_equal false, !!Sidekiq.options[:strict]
+    end
+
+    it 'does not set strictly ordered queues if weights are present with multiple queue options' do
+      @cli.parse(['sidekiq', '-q', 'foo,3', '-q', 'bar', '-r', './test/fake_env.rb'])
       assert_equal false, !!Sidekiq.options[:strict]
     end
 
@@ -287,18 +302,20 @@ class TestCli < Sidekiq::Test
     describe 'Sidekiq::CLI#parse_queues' do
       describe 'when weight is present' do
         it 'concatenates queues by factor of weight and sets strict to false' do
-          opts = {}
-          @cli.send :parse_queues, opts, [['often', 7]]
-          assert_equal %w[often] * 7, opts[:queues]
+          opts = { strict: true }
+          @cli.send :parse_queues, opts, [['often', 7], ['repeatedly', 3]]
+          @cli.send :parse_queues, opts, [['once']]
+          assert_equal (%w[often] * 7 + %w[repeatedly] * 3 + %w[once]), opts[:queues]
           assert !opts[:strict]
         end
       end
 
       describe 'when weight is not present' do
         it 'returns queues and sets strict' do
-          opts = {}
-          @cli.send :parse_queues, opts, [['once']]
-          assert_equal %w[once], opts[:queues]
+          opts = { strict: true }
+          @cli.send :parse_queues, opts, [['once'], ['one_time']]
+          @cli.send :parse_queues, opts, [['einmal']]
+          assert_equal %w[once one_time einmal], opts[:queues]
           assert opts[:strict]
         end
       end
@@ -306,18 +323,20 @@ class TestCli < Sidekiq::Test
 
     describe 'Sidekiq::CLI#parse_queue' do
       describe 'when weight is present' do
-        it 'concatenates queue to opts[:queues] weight number of times' do
-          opts = {}
+        it 'concatenates queue to opts[:queues] weight number of times and sets strict to false' do
+          opts = { strict: true }
           @cli.send :parse_queue, opts, 'often', 7
           assert_equal %w[often] * 7, opts[:queues]
+          assert !opts[:strict]
         end
       end
 
       describe 'when weight is not present' do
-        it 'concatenates queue to opts[:queues] once' do
-          opts = {}
+        it 'concatenates queue to opts[:queues] once and leaves strict true' do
+          opts = { strict: true }
           @cli.send :parse_queue, opts, 'once', nil
           assert_equal %w[once], opts[:queues]
+          assert opts[:strict]
         end
       end
     end
