@@ -51,11 +51,6 @@ class TestCli < Sidekiq::Test
     end
 
     it 'sets strictly ordered queues if weights are not present' do
-      @cli.parse(['sidekiq', '-q', 'foo,bar', '-r', './test/fake_env.rb'])
-      assert_equal true, !!Sidekiq.options[:strict]
-    end
-
-    it 'sets strictly ordered queues if weights are not present multiple queue options' do
       @cli.parse(['sidekiq', '-q', 'foo', '-q', 'bar', '-r', './test/fake_env.rb'])
       assert_equal true, !!Sidekiq.options[:strict]
     end
@@ -66,11 +61,6 @@ class TestCli < Sidekiq::Test
     end
 
     it 'does not set strictly ordered queues if weights are present with multiple queues' do
-      @cli.parse(['sidekiq', '-q', 'foo,3,bar', '-r', './test/fake_env.rb'])
-      assert_equal false, !!Sidekiq.options[:strict]
-    end
-
-    it 'does not set strictly ordered queues if weights are present with multiple queue options' do
       @cli.parse(['sidekiq', '-q', 'foo,3', '-q', 'bar', '-r', './test/fake_env.rb'])
       assert_equal false, !!Sidekiq.options[:strict]
     end
@@ -80,18 +70,13 @@ class TestCli < Sidekiq::Test
       assert_equal 30, Sidekiq.options[:timeout]
     end
 
-    it 'handles multiple queues with weights with multiple switches' do
+    it 'handles multiple queues with weights' do
       @cli.parse(['sidekiq', '-q', 'foo,3', '-q', 'bar', '-r', './test/fake_env.rb'])
       assert_equal %w(foo foo foo bar), Sidekiq.options[:queues]
     end
 
-    it 'handles multiple queues with weights with a single switch' do
-      @cli.parse(['sidekiq', '-q', 'bar,foo,3', '-r', './test/fake_env.rb'])
-      assert_equal %w(bar foo foo foo), Sidekiq.options[:queues]
-    end
-
     it 'handles queues with multi-word names' do
-      @cli.parse(['sidekiq', '-q', 'queue_one,queue-two', '-r', './test/fake_env.rb'])
+      @cli.parse(['sidekiq', '-q', 'queue_one', '-q', 'queue-two', '-r', './test/fake_env.rb'])
       assert_equal %w(queue_one queue-two), Sidekiq.options[:queues]
     end
 

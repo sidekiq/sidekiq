@@ -258,9 +258,9 @@ module Sidekiq
           opts[:profile] = arg
         end
 
-        o.on "-q", "--queue QUEUE[,WEIGHT]...", "Queues to process with optional weights" do |arg|
-          queues_and_weights = arg.scan(/([\w\.-]+),?(\d*)/)
-          parse_queues opts, queues_and_weights
+        o.on "-q", "--queue QUEUE[,WEIGHT]", "Queues to process with optional weights" do |arg|
+          queue, weight = arg.split(",")
+          parse_queue opts, queue, weight
         end
 
         o.on '-r', '--require [PATH|DIR]', "Location of Rails application with workers or file to require" do |arg|
@@ -336,7 +336,7 @@ module Sidekiq
     end
 
     def parse_queues(opts, queues_and_weights)
-      queues_and_weights.each {|queue_and_weight| parse_queue(opts, *queue_and_weight)}
+      queues_and_weights.each { |queue_and_weight| parse_queue(opts, *queue_and_weight) }
     end
 
     def parse_queue(opts, q, weight=nil)
