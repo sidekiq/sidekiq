@@ -96,8 +96,22 @@ fi
 
 #Baisc Setup of default values
 APP=$1 ; ACTION=$2; RACK_ENV=$3; CONF_FILE=$4;
+APP_HOME="/data"
+SIDEKIQ="sidekiq"
 
-APP_DIR="/data/${APP}"
+WORKER_REF=`echo $CONF_FILE | sed s/.yml//`
+
+LOCK_FILE="/tmp/$WORKER_REF.monit-lock"
+PID_FILE="/var/run/engineyard/sidekiq/$APP/$WORKER_REF.pid"
+
+# Read other defaults from a file
+if [ -r /etc/default/$WORKER_REF ]; then
+  . /etc/default/$WORKER_REF
+elif [ -r /etc/sysconfig/$WORKER_REF ]; then
+  . /etc/sysconfig/$WORKER_REF
+fi
+
+APP_DIR="${APP_HOME}/${APP}"
 APP_ROOT="${APP_DIR}/current"
 APP_SHARED="${APP_DIR}/shared"
 APP_CONFIG="${APP_SHARED}/config"
@@ -109,15 +123,7 @@ else
   exit 1
 fi
 
-WORKER_REF=`echo $CONF_FILE | sed s/.yml//`
 LOG_FILE="$APP_ROOT/log/$WORKER_REF.log"
-LOCK_FILE="/tmp/$WORKER_REF.monit-lock"
-PID_FILE="/var/run/engineyard/sidekiq/$APP/$WORKER_REF.pid"
-GEMFILE="$APP_ROOT/Gemfile"
-SIDEKIQ="sidekiq"
-if [ -f $GEMFILE ];then
-  SIDEKIQ="$APP_ROOT/ey_bundler_binstubs/sidekiq"
-fi
 
 if [ -d $APP_ROOT ]; then
   USER=$(stat -L -c"%U" $APP_ROOT)
