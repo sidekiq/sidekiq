@@ -174,13 +174,15 @@ module Sidekiq
     end
 
     def setup_options(args)
-      cli = parse_options(args)
-      set_environment cli[:environment]
+      opts = parse_options(args)
+      set_environment opts[:environment]
 
-      cfile = cli[:config_file]
+      cfile = opts[:config_file]
+      opts = parse_config(cfile).merge(opts) if cfile
+      
+      opts[:strict] = true if opts[:strict].nil?
 
-      config = (cfile ? parse_config(cfile) : {})
-      options.merge!(config.merge(cli))
+      options.merge!(opts)
     end
 
     def options
@@ -256,9 +258,9 @@ module Sidekiq
           opts[:profile] = arg
         end
 
-        o.on "-q", "--queue QUEUE[,WEIGHT]...", "Queues to process with optional weights" do |arg|
-          queues_and_weights = arg.scan(/([\w\.-]+),?(\d*)/)
-          parse_queues opts, queues_and_weights
+        o.on "-q", "--queue QUEUE[,WEIGHT]", "Queues to process with optional weights" do |arg|
+          queue, weight = arg.split(",")
+          parse_queue opts, queue, weight
         end
 
         o.on '-r', '--require [PATH|DIR]', "Location of Rails application with workers or file to require" do |arg|
@@ -334,14 +336,14 @@ module Sidekiq
     end
 
     def parse_queues(opts, queues_and_weights)
-      queues_and_weights.each {|queue_and_weight| parse_queue(opts, *queue_and_weight)}
-      opts[:strict] = queues_and_weights.all? {|_, weight| weight.to_s.empty? }
+      queues_and_weights.each { |queue_and_weight| parse_queue(opts, *queue_and_weight) }
     end
 
     def parse_queue(opts, q, weight=nil)
       [weight.to_i, 1].max.times do
        (opts[:queues] ||= []) << q
       end
+      opts[:strict] = false if weight.to_i > 0
     end
   end
 end
