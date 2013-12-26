@@ -158,7 +158,7 @@ if [ -d $APP_ROOT ]; then
         fi
       fi
       if [ ! -f $PID_FILE ]; then
-        sudo -u $USER -H $COMMAND  >> $LOG_FILE 2>&1 &
+        sudo -u $USER -H -i sh -c "cd $APP_ROOT; $COMMAND"  >> $LOG_FILE 2>&1 &
         RESULT=$?
         logger -t "monit-sidekiq[$$]" "Started with pid $! and exit $RESULT"
         echo $! > $PID_FILE
