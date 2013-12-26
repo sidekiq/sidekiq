@@ -105,7 +105,7 @@ APP_CONFIG="${APP_SHARED}/config"
 if [ -e "${APP_CONFIG}/${CONF_FILE}" ]; then
   logger -t "sidekiq_${APP}" -s "Good, found a conf file. Proceeding..."
 else
-  logger -t "sidekiq_${APP}" -s "/data/${APP}/shared/config/${CONF_FILE} not found for app: ${APP}"
+  logger -t "sidekiq_${APP}" -s "${APP_CONFIG}/${CONF_FILE} not found for app: ${APP}"
   exit 1
 fi
 
@@ -130,8 +130,8 @@ if [ -d $APP_ROOT ]; then
   # Older versions of sudo need us to call env for the env vars to be set correctly
   COMMAND="/usr/bin/env $V $VV APP_ROOT=${APP_ROOT} RACK_ENV=${RACK_ENV} RAILS_ENV=${RACK_ENV} $SIDEKIQ -e ${RACK_ENV} -C ${APP_CONFIG}/${CONF_FILE}"
   
-  if [ ! -d /var/run/engineyard/sidekiq/$APP ]; then
-    mkdir -p /var/run/engineyard/sidekiq/$APP
+  if [ ! -d `dirname $PID_FILE` ]; then
+    mkdir -p `dirname $PID_FILE`
   fi
 
   # handle the second param, don't start if already existing
@@ -174,7 +174,7 @@ if [ -d $APP_ROOT ]; then
       ;;
   esac
 else
-  echo "/data/$APP/current doesn't exist."
+  echo "${$APP_ROOT} doesn't exist."
   usage
 fi
 
