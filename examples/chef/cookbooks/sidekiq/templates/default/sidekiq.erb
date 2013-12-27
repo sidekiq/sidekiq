@@ -10,7 +10,7 @@ CURDIR=`pwd`
 usage() {
   echo "Usage: $0 <appname> {start|stop|quit} <environment> <conf_file>"
   echo -e "\nstop)     is a synonym for quit"
-  echo "quit)     issues -INT to request the worker to stop"
+  echo "quit)     issues -$SIG to request the worker to stop"
   echo -e "\nSee http://mperham.github.com/sidekiq/ for more details"
   exit 1
 }
@@ -98,6 +98,7 @@ fi
 APP=$1 ; ACTION=$2; RACK_ENV=$3; CONF_FILE=$4;
 APP_HOME="/data"
 SIDEKIQ="sidekiq"
+SIG="INT"
 
 WORKER_REF=`echo $CONF_FILE | sed s/.yml//`
 
@@ -169,7 +170,6 @@ if [ -d $APP_ROOT ]; then
     stop|quit)
       legacy_fix
       lock
-      SIG="INT"
       signal_worker
       [ -e "$LOCK_FILE" ] && rm $LOCK_FILE
       unlock_and_exit_cleanly  
