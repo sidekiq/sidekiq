@@ -163,6 +163,8 @@ if [ -d $APP_ROOT ]; then
         RESULT=$?
         logger -t "monit-sidekiq[$$]" "Started with pid $! and exit $RESULT"
         echo $! > $PID_FILE
+        chown root:$USER $PID_FILE
+        chmod g+w        $PID_FILE
         sleep .1
       fi
       unlock_and_exit_cleanly 
