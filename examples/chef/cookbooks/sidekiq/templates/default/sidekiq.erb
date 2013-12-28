@@ -10,7 +10,7 @@ CURDIR=`pwd`
 usage() {
   echo "Usage: $0 <appname> {start|stop|quit} <environment> <conf_file>"
   echo -e "\nstop)     is a synonym for quit"
-  echo "quit)     issues -INT to request the worker to stop"
+  echo "quit)     issues -$SIG to request the worker to stop"
   echo -e "\nSee http://mperham.github.com/sidekiq/ for more details"
   exit 1
 }
@@ -96,8 +96,23 @@ fi
 
 #Baisc Setup of default values
 APP=$1 ; ACTION=$2; RACK_ENV=$3; CONF_FILE=$4;
+APP_HOME="/data"
+SIDEKIQ="sidekiq"
+SIG="INT"
 
-APP_DIR="/data/${APP}"
+WORKER_REF=`echo $CONF_FILE | sed s/.yml//`
+
+LOCK_FILE="/tmp/$WORKER_REF.monit-lock"
+PID_FILE="/var/run/engineyard/sidekiq/$APP/$WORKER_REF.pid"
+
+# Read other defaults from a file
+if [ -r /etc/default/$WORKER_REF ]; then
+  . /etc/default/$WORKER_REF
+elif [ -r /etc/sysconfig/$WORKER_REF ]; then
+  . /etc/sysconfig/$WORKER_REF
+fi
+
+APP_DIR="${APP_HOME}/${APP}"
 APP_ROOT="${APP_DIR}/current"
 APP_SHARED="${APP_DIR}/shared"
 APP_CONFIG="${APP_SHARED}/config"
@@ -105,19 +120,11 @@ APP_CONFIG="${APP_SHARED}/config"
 if [ -e "${APP_CONFIG}/${CONF_FILE}" ]; then
   logger -t "sidekiq_${APP}" -s "Good, found a conf file. Proceeding..."
 else
-  logger -t "sidekiq_${APP}" -s "/data/${APP}/shared/config/${CONF_FILE} not found for app: ${APP}"
+  logger -t "sidekiq_${APP}" -s "${APP_CONFIG}/${CONF_FILE} not found for app: ${APP}"
   exit 1
 fi
 
-WORKER_REF=`echo $CONF_FILE | sed s/.yml//`
 LOG_FILE="$APP_ROOT/log/$WORKER_REF.log"
-LOCK_FILE="/tmp/$WORKER_REF.monit-lock"
-PID_FILE="/var/run/engineyard/sidekiq/$APP/$WORKER_REF.pid"
-GEMFILE="$APP_ROOT/Gemfile"
-SIDEKIQ="sidekiq"
-if [ -f $GEMFILE ];then
-  SIDEKIQ="$APP_ROOT/ey_bundler_binstubs/sidekiq"
-fi
 
 if [ -d $APP_ROOT ]; then
   USER=$(stat -L -c"%U" $APP_ROOT)
@@ -130,8 +137,8 @@ if [ -d $APP_ROOT ]; then
   # Older versions of sudo need us to call env for the env vars to be set correctly
   COMMAND="/usr/bin/env $V $VV APP_ROOT=${APP_ROOT} RACK_ENV=${RACK_ENV} RAILS_ENV=${RACK_ENV} $SIDEKIQ -e ${RACK_ENV} -C ${APP_CONFIG}/${CONF_FILE}"
   
-  if [ ! -d /var/run/engineyard/sidekiq/$APP ]; then
-    mkdir -p /var/run/engineyard/sidekiq/$APP
+  if [ ! -d `dirname $PID_FILE` ]; then
+    mkdir -p `dirname $PID_FILE`
   fi
 
   # handle the second param, don't start if already existing
@@ -152,10 +159,12 @@ if [ -d $APP_ROOT ]; then
         fi
       fi
       if [ ! -f $PID_FILE ]; then
-        sudo -u $USER -H $COMMAND  >> $LOG_FILE 2>&1 &
+        sudo -u $USER -H -i sh -c "cd $APP_ROOT; $COMMAND"  >> $LOG_FILE 2>&1 &
         RESULT=$?
         logger -t "monit-sidekiq[$$]" "Started with pid $! and exit $RESULT"
         echo $! > $PID_FILE
+        chown root:$USER $PID_FILE
+        chmod g+w        $PID_FILE
         sleep .1
       fi
       unlock_and_exit_cleanly 
@@ -163,7 +172,6 @@ if [ -d $APP_ROOT ]; then
     stop|quit)
       legacy_fix
       lock
-      SIG="INT"
       signal_worker
       [ -e "$LOCK_FILE" ] && rm $LOCK_FILE
       unlock_and_exit_cleanly  
@@ -174,7 +182,7 @@ if [ -d $APP_ROOT ]; then
       ;;
   esac
 else
-  echo "/data/$APP/current doesn't exist."
+  echo "${$APP_ROOT} doesn't exist."
   usage
 fi
 
