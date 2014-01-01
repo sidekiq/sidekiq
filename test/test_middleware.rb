@@ -134,7 +134,7 @@ class TestMiddleware < Sidekiq::Test
 
     it 'supports I18n.enforce_available_locales = true' do
       I18n.enforce_available_locales = true
-      I18n.available_locales = %i(en jp)
+      I18n.available_locales = [:en, :jp]
 
       msg = { 'locale' => 'jp' }
       mw = Sidekiq::Middleware::I18n::Server.new
