@@ -1,3 +1,10 @@
+2.17.2
+-----------
+
+- Fix race condition in bulk requeue during shutdown [#1406]
+- Fix bug where strictly prioritized queues might be processed out of
+  order [#1408]
+
 2.17.1
 -----------
 

@@ -14,7 +14,7 @@ module Sidekiq::Middleware::I18n
       I18n.locale = msg['locale'] || I18n.default_locale
       yield
     ensure
-      I18n.locale = nil
+      I18n.locale = I18n.default_locale
     end
   end
 end

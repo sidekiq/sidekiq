@@ -123,13 +123,27 @@ class TestMiddleware < Sidekiq::Test
       assert_equal :fr, msg['locale']
 
       msg['locale'] = 'jp'
-      I18n.locale = nil
+      I18n.locale = I18n.default_locale
       assert_equal :en, I18n.locale
       mw = Sidekiq::Middleware::I18n::Server.new
       mw.call(nil, msg, nil) do
         assert_equal :jp, I18n.locale
       end
       assert_equal :en, I18n.locale
+    end
+
+    it 'supports I18n.enforce_available_locales = true' do
+      I18n.enforce_available_locales = true
+      I18n.available_locales = [:en, :jp]
+
+      msg = { 'locale' => 'jp' }
+      mw = Sidekiq::Middleware::I18n::Server.new
+      mw.call(nil, msg, nil) do
+        assert_equal :jp, I18n.locale
+      end
+
+      I18n.enforce_available_locales = nil
+      I18n.available_locales = nil
     end
   end
 end
