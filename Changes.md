@@ -3,7 +3,12 @@
 
 - Fix race condition in bulk requeue during shutdown [#1406]
 - Fix bug where strictly prioritized queues might be processed out of
-  order [#1408]
+  order [#1408]. A side effect of this change is that it breaks a queue
+  declaration syntax that worked, although only because of a bug—it was
+  never intended to work and never supported. If you were declaring your
+  queues as a  comma-separated list, e.g. `sidekiq -q critical,default,low`,
+  you must now use the `-q` flag before each queue, e.g.
+  `sidekiq -q critical -q default -q low`.
 
 2.17.1
 -----------
