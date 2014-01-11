@@ -10,7 +10,7 @@ namespace :load do
     set :sidekiq_cmd,           ->{  }
     set :sidekiqctl_cmd,        ->{  }
 
-    # must be relative to Rails.root. If this changes, you'll need to manually
+    # If this changes, you'll need to manually
     # stop the existing sidekiq process.
     set :sidekiq_pid,             ->{ "tmp/sidekiq.pid" }
 
@@ -36,6 +36,14 @@ namespace :sidekiq do
     end
   end
 
+  def pid_full_path(pid_path)
+    if pid_path.start_with?("/")
+      pid_path
+    else
+      "#{current_path}/#{pid_path}"
+    end
+  end
+
   task :add_default_hooks do
     after 'deploy:starting',  'sidekiq:quiet'
     after 'deploy:updated',   'sidekiq:stop'
@@ -47,12 +55,12 @@ namespace :sidekiq do
   task :quiet do
     on roles fetch(:sidekiq_role) do
       for_each_process do |pid_file, idx|
-        if test "[ -f #{current_path}/#{pid_file} ]"
+        if test "[ -f #{pid_full_path(pid_file)} ]"
           within current_path do
             if fetch(:sidekiqctl_cmd)
-              execute fetch(:sidekiqctl_cmd), 'quiet', "#{current_path}/#{pid_file}"
+              execute fetch(:sidekiqctl_cmd), 'quiet', "#{pid_full_path(pid_file)}"
             else
-              execute :bundle, :exec, :sidekiqctl, 'quiet', "#{current_path}/#{pid_file}"
+              execute :bundle, :exec, :sidekiqctl, 'quiet', "#{pid_full_path(pid_file)}"
             end
           end
         end
@@ -64,12 +72,12 @@ namespace :sidekiq do
   task :stop do
     on roles fetch(:sidekiq_role) do
       for_each_process do |pid_file, idx|
-        if test "[ -f #{current_path}/#{pid_file} ]"
+        if test "[ -f #{pid_full_path(pid_file)} ]"
           within current_path do
             if fetch(:sidekiqctl_cmd)
-              execute fetch(:sidekiqctl_cmd), 'stop', "#{current_path}/#{pid_file}", fetch(:sidekiq_timeout)
+              execute fetch(:sidekiqctl_cmd), 'stop', "#{pid_full_path(pid_file)}", fetch(:sidekiq_timeout)
             else
-              execute :bundle, :exec, :sidekiqctl, 'stop', "#{current_path}/#{pid_file}", fetch(:sidekiq_timeout)
+              execute :bundle, :exec, :sidekiqctl, 'stop', "#{pid_full_path(pid_file)}", fetch(:sidekiq_timeout)
             end
           end
         end
@@ -84,9 +92,9 @@ namespace :sidekiq do
       within current_path do
         for_each_process do |pid_file, idx|
           if fetch(:sidekiq_cmd)
-            execute fetch(:sidekiq_cmd), "-d -i #{idx} -P #{pid_file} #{fetch(:sidekiq_options)}"
+            execute fetch(:sidekiq_cmd), "-d -i #{idx} -P #{pid_full_path(pid_file)} #{fetch(:sidekiq_options)}"
           else
-            execute :bundle, :exec, :sidekiq, "-d -i #{idx} -P #{pid_file} #{fetch(:sidekiq_options)}"
+            execute :bundle, :exec, :sidekiq, "-d -i #{idx} -P #{pid_full_path(pid_file)} #{fetch(:sidekiq_options)}"
           end
         end
       end

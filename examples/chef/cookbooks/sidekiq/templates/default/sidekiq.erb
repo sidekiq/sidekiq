@@ -159,7 +159,8 @@ if [ -d $APP_ROOT ]; then
         fi
       fi
       if [ ! -f $PID_FILE ]; then
-        sudo -u $USER -H -i sh -c "cd $APP_ROOT; $COMMAND"  >> $LOG_FILE 2>&1 &
+        # http://maymay.net/blog/2010/03/17/how-to-work-around-sorry-you-must-have-a-tty-to-run-sudo-without-sacrificing-security/
+        nohup su - --session-command="cd $APP_ROOT; $COMMAND" $USER >> $LOG_FILE 2>&1 &
         RESULT=$?
         logger -t "monit-sidekiq[$$]" "Started with pid $! and exit $RESULT"
         echo $! > $PID_FILE
