@@ -30,6 +30,13 @@ class TestCli < Sidekiq::Test
       assert @cli.valid?
     end
 
+    it 'adds new directories onto the load path' do
+      old_path = $LOAD_PATH
+      @cli.parse(['sidekiq', '-I', './test'])
+      assert($LOAD_PATH.include? File.expand_path('../', __FILE__))
+      $LOAD_PATH.delete(File.expand_path('../', __FILE__))
+    end
+
     it 'changes concurrency' do
       @cli.parse(['sidekiq', '-c', '60', '-r', './test/fake_env.rb'])
       assert_equal 60, Sidekiq.options[:concurrency]
