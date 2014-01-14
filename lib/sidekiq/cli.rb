@@ -179,7 +179,7 @@ module Sidekiq
 
       cfile = opts[:config_file]
       opts = parse_config(cfile).merge(opts) if cfile
-      
+
       opts[:strict] = true if opts[:strict].nil?
 
       options.merge!(opts)
@@ -277,6 +277,10 @@ module Sidekiq
 
         o.on '-C', '--config PATH', "path to YAML config file" do |arg|
           opts[:config_file] = arg
+        end
+
+        o.on '-I', '--include', "Add a path to Sidekiq's load directory" do |path|
+          $LOAD_PATH.unshift File.expand_path("../../../#{path}", __FILE__)
         end
 
         o.on '-L', '--logfile PATH', "path to writable logfile" do |arg|
