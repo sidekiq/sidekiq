@@ -88,3 +88,4 @@ Author
 -----------------
 
 Mike Perham, [@mperham](https://twitter.com/mperham) / [@sidekiq](https://twitter.com/sidekiq), [http://mikeperham.com](http://mikeperham.com)
+
