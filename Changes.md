@@ -1,7 +1,11 @@
+2.17.3
+-----------
+
+- Synchronously terminates the poller and fetcher to fix a race condition in bulk requeue during shutdown [#1406]
+
 2.17.2
 -----------
 
-- Fix race condition in bulk requeue during shutdown [#1406]
 - Fix bug where strictly prioritized queues might be processed out of
   order [#1408]. A side effect of this change is that it breaks a queue
   declaration syntax that worked, although only because of a bug—it was
