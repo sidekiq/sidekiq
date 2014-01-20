@@ -38,7 +38,12 @@
         </div>
       </div>
       <div class="span3 highlighted well" id="call_to_action">
-        <a class="wepay-widget-button wepay-green" id="wepay_widget_anchor_504cfd38b30db" href="https://www.wepay.com/stores/sidekiq/item/sidekiq-pro-207264">Buy Now</a>
+        <div class="payment-widget">
+          <div class="item-price-box">
+            <span class="item-price-currency">$</span><span class="item-price">750.00</span>
+          </div>
+          <a class="payment-button" id="buy_now" href="https://spacebox.io/s/FEd2qZEPHh">Buy Now</a>
+        </div>
       </div>
     </div>
 
@@ -290,7 +295,7 @@
               </li>
               <li class='span4'>
                 <p>
-                  ...and over 150 other companies!
+                  ...and over <strong>150</strong> other companies!
                 </p>
                 <p>
                   If you are a Pro customer and want your logo here, email it to me!
@@ -316,7 +321,7 @@
           </div>
         </footer>
 
-      </div>  
+      </div>
     </div>
 
     <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js'></script>
@@ -327,30 +332,7 @@
     <script src='../js/app.js'></script>
     <script src='../js/ready.js'></script>
     <script type="text/javascript">
-      var WePay = WePay || {};
-      WePay.load_widgets = WePay.load_widgets || function() { };
-      WePay.widgets = WePay.widgets || [];
-      WePay.widgets.push( {
-        object_id: 207264,
-        widget_type: "store_item_buy_now",
-        anchor_id: "wepay_widget_anchor_504cfd38b30db",
-        widget_options: {
-          store_id: 989219,
-          show_item_custom_options: true,
-          show_item_images: false,
-          show_item_price: true,
-          button_text_sold_out: "Sold Out",
-          button_text: "Buy Now"
-        }
-      });
-      if (!WePay.script) {
-        WePay.script = document.createElement('script');WePay.script.type = 'text/javascript';WePay.script.async = true;
-        WePay.script.src = 'https://static.wepay.com/min/js/widgets.v2.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(WePay.script, s);
-      } else if (WePay.load_widgets) {
-        WePay.load_widgets();
-      }
-      $('#wepay_widget_anchor_504cfd38b30db').on('click', function() {
+      $('#buy_now').on('click', function() {
         ga('send', 'event', 'Checkout', 'Click', 'Sidekiq Pro');
       });
     </script>

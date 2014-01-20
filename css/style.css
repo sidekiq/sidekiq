@@ -665,29 +665,30 @@ img.smallogo {
   display: inline;
 }
 /* line 168, ../scss/style.scss */
-.pro .wepay-store-widget {
-  position: relative;
+.pro .payment-widget {
+  text-align: center;
   min-width: 0;
   background: transparent;
   padding: 0;
   margin: 0;
   width: 100%;
+  font-size: 20px;
+  line-height: 35px;
+  font-weight: bold;
 }
 /* line 171, ../scss/style.scss */
-.pro .wepay-store-widget .item-price-box {
+.pro .payment-widget .item-price-box {
   color: #242222;
   text-align: center;
-  font-weight: bold;
-  line-height: 35px;
 }
 /* line 176, ../scss/style.scss */
-.pro .wepay-store-widget .item-price-box .item-price-currency {
+.pro .payment-widget .item-price-box .item-price-currency {
   color: #242222;
 }
 /* line 180, ../scss/style.scss */
-.pro .wepay-store-widget .wepay-widget-button {
+.pro .payment-widget .payment-button {
   min-width: 0;
-  font-weight: 700;
+  color: white;
   border: none;
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
@@ -714,32 +715,18 @@ img.smallogo {
   width: 100%;
 }
 /* line 8, ../scss/partials/_mixins.scss */
-.pro .wepay-store-widget .wepay-widget-button:hover {
+.pro .payment-button:hover {
   -webkit-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.4), inset 0 0 3px rgba(255, 255, 255, 0.5);
   -moz-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.4), inset 0 0 3px rgba(255, 255, 255, 0.5);
   box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.4), inset 0 0 3px rgba(255, 255, 255, 0.5);
-  background-color: #ededed;
-}
-/* line 16, ../scss/partials/_mixins.scss */
-.pro .wepay-store-widget .wepay-widget-button:hover {
   background-color: #980035;
-}
-/* line 187, ../scss/style.scss */
-.pro .wepay-store-widget .wepay-widget-button:hover {
   background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #242222), color-stop(100%, #3e3b3b));
   background-image: -webkit-linear-gradient(#242222, #3e3b3b);
   background-image: -moz-linear-gradient(#242222, #3e3b3b);
   background-image: -o-linear-gradient(#242222, #3e3b3b);
   background-image: linear-gradient(#242222, #3e3b3b);
   color: white;
-}
-/* line 24, ../scss/partials/_mixins.scss */
-.pro .wepay-store-widget .wepay-widget-button:hover:hover {
-  background-color: #3e3b3b;
-}
-/* line 27, ../scss/partials/_mixins.scss */
-.pro .wepay-store-widget .wepay-widget-button:hover strong {
-  color: #b1003e;
+  text-decoration: none;
 }
 /* line 196, ../scss/style.scss */
 .pro .title .text {
