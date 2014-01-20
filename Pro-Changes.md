@@ -3,6 +3,12 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+HEAD
+-----------
+
+- Tolerate expired Batches in the web UI.
+- Fix 100% CPU usage when using weighted queues and reliable fetch.
+
 1.4.1
 -----------
 
