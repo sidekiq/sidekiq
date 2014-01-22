@@ -12,7 +12,7 @@ namespace :load do
 
     # If this changes, you'll need to manually
     # stop the existing sidekiq process.
-    set :sidekiq_pid,             ->{ "tmp/sidekiq.pid" }
+    set :sidekiq_pid,             ->{ "tmp/pids/sidekiq.pid" }
 
     # "-d -i INT -P PATH" are added automatically.
     set :sidekiq_options,       ->{ "-e #{fetch(:rails_env, 'production')} -C #{current_path}/config/sidekiq.yml -L #{current_path}/log/sidekiq.log" }
