@@ -653,6 +653,9 @@ img.smallogo {
   padding: 2px 0;
 }
 /* line 162, ../scss/style.scss */
+.pro #customers .quoted img {
+  padding-bottom: 5px;
+}
 .pro #customers .quoted {
   background-color: white;
   min-height: 100px;
