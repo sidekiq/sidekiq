@@ -13,7 +13,8 @@ module Sidekiq
       include Sidekiq::Worker
 
       def perform(yml)
-        (target, method_name, args) = YAML.load(yml)
+        args = [yml, *(defined?(SafeYAML) && [{ :safe => false }])]
+        (target, method_name, args) = YAML.load(*args)
         target.send(method_name, *args)
       end
     end
