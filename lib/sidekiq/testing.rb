@@ -30,6 +30,10 @@ module Sidekiq
         __set_test_mode(:inline, &block)
       end
 
+      def inline_with_fake_delay!(&block)
+        __set_test_mode(:inline_with_fake_delay, &block)
+      end
+
       def enabled?
         self.__test_mode != :disable
       end
@@ -45,6 +49,10 @@ module Sidekiq
       def inline?
         self.__test_mode == :inline
       end
+
+      def inline_with_fake_delay?
+        self.__test_mode == :inline_with_fake_delay
+      end
     end
   end
 
@@ -59,18 +67,36 @@ module Sidekiq
     def raw_push(payloads)
       if Sidekiq::Testing.fake?
         payloads.each do |job|
-          job['class'].constantize.jobs << Sidekiq.load_json(Sidekiq.dump_json(job))
+          add_to_queue(job)
         end
         true
       elsif Sidekiq::Testing.inline?
         payloads.each do |item|
-          marshalled = Sidekiq.load_json(Sidekiq.dump_json(item))
-          marshalled['class'].constantize.new.perform(*marshalled['args'])
+          perform_now(item)
         end
         true
+      elsif Sidekiq::Testing.inline_with_fake_delay?
+        payloads.each do |job|
+          if job.has_key? 'at'
+            add_to_queue(job)
+          else
+            perform_now(job)
+          end
+        end
       else
         raw_push_real(payloads)
       end
+    end
+
+    private
+
+    def add_to_queue(job)
+      job['class'].constantize.jobs << Sidekiq.load_json(Sidekiq.dump_json(job))
+    end
+
+    def perform_now(item)
+      marshalled = Sidekiq.load_json(Sidekiq.dump_json(item))
+      marshalled['class'].constantize.new.perform(*marshalled['args'])
     end
   end
 
