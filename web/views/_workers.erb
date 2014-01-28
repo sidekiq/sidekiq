@@ -12,16 +12,9 @@
       <td>
         <a href="<%= root_path %>queues/<%= msg['queue'] %>"><%= msg['queue'] %></a>
       </td>
-
       <td><%= msg['payload']['class'] %></td>
       <td>
-        <% if msg['payload']['args'].to_s.size > 100 %>
-          <%= h(msg['payload']['args'].inspect[0..100]) + "... " %>
-          <button data-toggle="collapse" data-target="#worker_<%= index %>" class="btn btn-default btn-xs"><%= t('ShowAll') %></button>
-          <div class="toggle" id="worker_<%= index %>" style="display: none;max-width: 750px;"><%= h(msg['payload']['args']) %></div>
-        <% else %>
-          <%= h(msg['payload']['args']) %>
-        <% end %>
+        <div class="args"><%= display_args(msg['payload']['args']) %></div>
       </td>
       <td><%= relative_time(msg['run_at'].is_a?(Numeric) ? Time.at(msg['run_at']) : Time.parse(msg['run_at'])) %></td>
     </tr>
