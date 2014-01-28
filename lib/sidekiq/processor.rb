@@ -131,13 +131,11 @@ module Sidekiq
     # Singleton classes are not clonable.
     SINGLETON_CLASSES = [ NilClass, TrueClass, FalseClass, Symbol, Fixnum, Float, Bignum ].freeze
 
-    # Clone the arguments passed to the worker so that if
+    # Deep clone the arguments passed to the worker so that if
     # the message fails, what is pushed back onto Redis hasn't
     # been mutated by the worker.
     def cloned(ary)
-      ary.map do |val|
-        SINGLETON_CLASSES.include?(val.class) ? val : val.clone
-      end
+      Marshal.load(Marshal.dump(ary))
     end
   end
 end
