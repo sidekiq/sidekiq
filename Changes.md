@@ -1,3 +1,11 @@
+HEAD
+-----------
+
+- Fix JID support in inline testing, #1454
+- Polish worker arguments display in UI, #1453
+- Marshal arguments fully to avoid worker mutation, #1452
+
+
 2.17.3
 -----------
 

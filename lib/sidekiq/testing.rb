@@ -1,3 +1,5 @@
+require 'securerandom'
+
 module Sidekiq
 
   class Testing
@@ -64,8 +66,11 @@ module Sidekiq
         true
       elsif Sidekiq::Testing.inline?
         payloads.each do |item|
+          jid = item['jid'] || SecureRandom.hex(12)
           marshalled = Sidekiq.load_json(Sidekiq.dump_json(item))
-          marshalled['class'].constantize.new.perform(*marshalled['args'])
+          worker = marshalled['class'].constantize.new
+          worker.jid = jid
+          worker.perform(*marshalled['args'])
         end
         true
       else

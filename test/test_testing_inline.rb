@@ -17,6 +17,7 @@ class TestInline < Sidekiq::Test
     class InlineWorker
       include Sidekiq::Worker
       def perform(pass)
+        raise ArgumentError, "no jid" unless jid
         raise InlineError unless pass
       end
     end
