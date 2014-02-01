@@ -21,6 +21,9 @@ module Sidekiq
       def terminate
         @dead = true
       end
+      def defer
+        yield
+      end
     end
 
     def self.included(klass)
