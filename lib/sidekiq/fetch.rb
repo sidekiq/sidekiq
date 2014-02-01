@@ -12,6 +12,8 @@ module Sidekiq
 
     TIMEOUT = 1
 
+    attr_reader :down
+
     def initialize(mgr, options)
       @down = nil
       @mgr = mgr
@@ -47,6 +49,12 @@ module Sidekiq
       end
     end
 
+    private
+
+    def pause
+      sleep(TIMEOUT)
+    end
+
     def handle_fetch_exception(ex)
       if !@down
         logger.error("Error fetching message: #{ex}")
@@ -55,7 +63,7 @@ module Sidekiq
         end
       end
       @down ||= Time.now
-      sleep(TIMEOUT)
+      pause
       after(0) { fetch }
     rescue Task::TerminatedError
       # If redis is down when we try to shut down, all the fetch backlog
@@ -67,6 +75,10 @@ module Sidekiq
     # its mailbox when shutdown starts.
     def self.done!
       @done = true
+    end
+
+    def self.reset # testing only
+      @done = nil
     end
 
     def self.done?

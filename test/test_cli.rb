@@ -30,6 +30,12 @@ class TestCli < Sidekiq::Test
       assert @cli.valid?
     end
 
+    it 'boots rails' do
+      refute defined?(::Rails)
+      @cli.parse(['sidekiq', '-r', './myapp'])
+      assert defined?(::Rails)
+    end
+
     it 'changes concurrency' do
       @cli.parse(['sidekiq', '-c', '60', '-r', './test/fake_env.rb'])
       assert_equal 60, Sidekiq.options[:concurrency]

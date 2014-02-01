@@ -7,3 +7,5 @@ platforms :rbx do
   gem 'minitest'                 # if using minitest
   gem 'rubinius-developer_tools' # if using any of coverage, debugger, profiler
 end
+
+gem 'sqlite3'

@@ -2,6 +2,7 @@ $TESTING = true
 require 'coveralls'
 Coveralls.wear! do
   add_filter "/test/"
+  add_filter "/myapp/"
 end
 
 ENV['RACK_ENV'] = ENV['RAILS_ENV'] = 'test'
@@ -9,6 +10,7 @@ if ENV.has_key?("SIMPLECOV")
   require 'simplecov'
   SimpleCov.start do
     add_filter "/test/"
+    add_filter "/myapp/"
   end
 end
 
