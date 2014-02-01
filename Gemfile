@@ -8,4 +8,11 @@ platforms :rbx do
   gem 'rubinius-developer_tools' # if using any of coverage, debugger, profiler
 end
 
-gem 'sqlite3'
+platforms :ruby do
+  gem 'sqlite3'
+end
+
+platforms :jruby do
+  gem 'jruby-openssl'
+  gem 'activerecord-jdbcsqlite3-adapter'
+end
