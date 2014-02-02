@@ -34,32 +34,30 @@ module Sidekiq
       msgstr = work.message
       queue = work.queue_name
 
-      do_defer do
-        @boss.async.real_thread(proxy_id, Thread.current)
+      @boss.async.real_thread(proxy_id, Thread.current)
 
-        ack = true
-        begin
-          msg = Sidekiq.load_json(msgstr)
-          klass  = msg['class'].constantize
-          worker = klass.new
-          worker.jid = msg['jid']
+      ack = true
+      begin
+        msg = Sidekiq.load_json(msgstr)
+        klass  = msg['class'].constantize
+        worker = klass.new
+        worker.jid = msg['jid']
 
-          stats(worker, msg, queue) do
-            Sidekiq.server_middleware.invoke(worker, msg, queue) do
-              worker.perform(*cloned(msg['args']))
-            end
+        stats(worker, msg, queue) do
+          Sidekiq.server_middleware.invoke(worker, msg, queue) do
+            worker.perform(*cloned(msg['args']))
           end
-        rescue Sidekiq::Shutdown
-          # Had to force kill this job because it didn't finish
-          # within the timeout.  Don't acknowledge the work since
-          # we didn't properly finish it.
-          ack = false
-        rescue Exception => ex
-          handle_exception(ex, msg || { :message => msgstr })
-          raise
-        ensure
-          work.acknowledge if ack
         end
+      rescue Sidekiq::Shutdown
+        # Had to force kill this job because it didn't finish
+        # within the timeout.  Don't acknowledge the work since
+        # we didn't properly finish it.
+        ack = false
+      rescue Exception => ex
+        handle_exception(ex, msg || { :message => msgstr })
+        raise
+      ensure
+        work.acknowledge if ack
       end
 
       @boss.async.processor_done(current_actor)
@@ -70,22 +68,6 @@ module Sidekiq
     end
 
     private
-
-    # We use Celluloid's defer to workaround tiny little
-    # Fiber stacks (4kb!) in MRI 1.9.
-    #
-    # For some reason, Celluloid's thread dispatch, TaskThread,
-    # is unstable under heavy concurrency but TaskFiber has proven
-    # itself stable.
-    NEED_DEFER = (RUBY_ENGINE == 'ruby' && RUBY_VERSION < '2.0.0')
-
-    def do_defer(&block)
-      if NEED_DEFER
-        defer(&block)
-      else
-        yield
-      end
-    end
 
     def identity
       @str ||= "#{hostname}:#{process_id}-#{Thread.current.object_id}:default"
