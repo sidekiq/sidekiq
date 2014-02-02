@@ -32,7 +32,6 @@ class TestWeb < Sidekiq::Test
       Sidekiq.redis do |conn|
         identity = 'foo:1234-123abc:default'
         conn.sadd('workers', identity)
-        conn.setex("worker:#{identity}:started", 10, Time.now.to_s)
         hash = {:queue => 'critical', :payload => { 'class' => WebWorker.name, 'args' => [1,'abc'] }, :run_at => Time.now.to_i }
         conn.setex("worker:#{identity}", 10, Sidekiq.dump_json(hash))
       end
@@ -283,7 +282,6 @@ class TestWeb < Sidekiq::Test
       Sidekiq.redis do |conn|
         identity = 'foo:1234-123abc:default'
         conn.sadd('workers', identity)
-        conn.setex("worker:#{identity}:started", 10, Time.now.to_s)
         hash = {:queue => 'critical', :payload => { 'class' => "FailWorker", 'args' => ["<a>hello</a>"] }, :run_at => Time.now.to_i }
         conn.setex("worker:#{identity}", 10, Sidekiq.dump_json(hash))
       end
@@ -441,8 +439,8 @@ class TestWeb < Sidekiq::Test
       process_id = rand(1000)
       msg = "{\"queue\":\"default\",\"payload\":{\"retry\":true,\"queue\":\"default\",\"timeout\":20,\"backtrace\":5,\"class\":\"HardWorker\",\"args\":[\"bob\",10,5],\"jid\":\"2b5ad2b016f5e063a1c62872\"},\"run_at\":1361208995}"
       Sidekiq.redis do |conn|
-        conn.sadd("workers", "mercury.home:#{process_id}-70215157189060:started")
-        conn.set("worker:mercury.home:#{process_id}-70215157189060:started", msg)
+        conn.sadd("workers", "mercury.home:#{process_id}-70215157189060:default")
+        conn.set("worker:mercury.home:#{process_id}-70215157189060:default", msg)
       end
     end
   end

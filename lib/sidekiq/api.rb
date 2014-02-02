@@ -404,11 +404,11 @@ module Sidekiq
   #
   #    workers = Sidekiq::Workers.new
   #    workers.size => 2
-  #    workers.each do |name, work, started_at|
+  #    workers.each do |name, work|
   #      # name is a unique identifier per worker
   #      # work is a Hash which looks like:
   #      # { 'queue' => name, 'run_at' => timestamp, 'payload' => msg }
-  #      # started_at is a String rep of the time when the worker started working on the job
+  #      # run_at is an epoch Integer.
   #    end
 
   class Workers
@@ -418,12 +418,9 @@ module Sidekiq
       Sidekiq.redis do |conn|
         workers = conn.smembers("workers")
         workers.each do |w|
-          msg, time = conn.multi do
-            conn.get("worker:#{w}")
-            conn.get("worker:#{w}:started")
-          end
+          msg = conn.get("worker:#{w}")
           next unless msg
-          block.call(w, Sidekiq.load_json(msg), time)
+          block.call(w, Sidekiq.load_json(msg))
         end
       end
     end

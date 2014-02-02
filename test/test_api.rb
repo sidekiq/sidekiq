@@ -352,15 +352,14 @@ class TestApi < Sidekiq::Test
         c.multi do
           c.sadd('workers', s)
           c.set("worker:#{s}", data)
-          c.set("worker:#{s}:started", Time.now.to_s)
         end
       end
 
       assert_equal 1, w.size
-      w.each do |x, y, z|
+      w.each do |x, y|
         assert_equal s, x
         assert_equal 'default', y['queue']
-        assert_equal Time.now.year, DateTime.parse(z).year
+        assert_equal Time.now.year, Time.at(y['run_at']).year
       end
     end
 
