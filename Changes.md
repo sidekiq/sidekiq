@@ -9,8 +9,8 @@
 - Removed the 'started' worker data, it originally provided compatibility with resque-web
   but overlaps the 'run_at' worker data.
 - Remove built-in error integration for Airbrake, Honeybadger, ExceptionNotifier and Exceptional
-- Remove Sidekiq::Client.registered\_\* APIs
-
+- Remove deprecated Sidekiq::Client.registered\_\* APIs
+- Remove deprecated support for the old Sidekiq::Worker#retries\_exhausted method.
 
 
 2.17.4
