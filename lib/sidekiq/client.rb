@@ -82,18 +82,6 @@ module Sidekiq
         @default ||= new
       end
 
-      # deprecated
-      def registered_workers
-        puts "registered_workers is deprecated, please use Sidekiq::Workers.new"
-        Sidekiq.redis { |x| x.smembers('workers') }
-      end
-
-      # deprecated
-      def registered_queues
-        puts "registered_queues is deprecated, please use Sidekiq::Queue.all"
-        Sidekiq::Queue.all.map(&:name)
-      end
-
       def push(item)
         default.push(item)
       end
