@@ -4,11 +4,12 @@
 - **Remove official support for Ruby 1.9**  Things still might work but
   I no longer actively test on it.
 - Remove built-in support for Redis-to-Go.
-  Heroku users: `heroku config:set REDIS\_PROVIDER=REDISTOGO\_URL`
-- Removed 'sidekiq/yaml\_patch'
+  Heroku users: `heroku config:set REDIS_PROVIDER=REDISTOGO_URL`
+- Removed 'sidekiq/yaml\_patch', this was never documented or recommended.
 - Removed the 'started' worker data, it originally provided compatibility with resque-web
   but overlaps the 'run_at' worker data.
-- Remove built-in error integration for Airbrake, Honeybadger, ExceptionNotifier and Exceptional
+- Remove built-in error integration for Airbrake, Honeybadger, ExceptionNotifier and Exceptional.
+  Just update your error gem to the latest version to pick up Sidekiq support.
 - Remove deprecated Sidekiq::Client.registered\_\* APIs
 - Remove deprecated support for the old Sidekiq::Worker#retries\_exhausted method.
 
