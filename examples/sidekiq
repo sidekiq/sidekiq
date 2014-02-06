@@ -73,6 +73,14 @@ case "$1" in
     stop)
         stop
         ;;
+    restart)
+        stop
+        while status > /dev/null
+        do
+             sleep 0.5
+        done
+        start
+        ;;
     status)
         status
 
