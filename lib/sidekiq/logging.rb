@@ -51,9 +51,18 @@ module Sidekiq
     # Returns the number of files reopened
     def self.reopen_logs
       to_reopen = []
-      nr = 0
-      ObjectSpace.each_object(File) { |fp| is_log?(fp) and to_reopen << fp }
+      append_flags = File::WRONLY | File::APPEND
 
+      ObjectSpace.each_object(File) do |fp|
+        begin
+          if !fp.closed? && fp.stat.file? && fp.sync && (fp.fcntl(Fcntl::F_GETFL) & append_flags) == append_flags
+            to_reopen << fp
+          end
+        rescue IOError, Errno::EBADF
+        end
+      end
+
+      nr = 0
       to_reopen.each do |fp|
         orig_st = begin
           fp.stat
@@ -70,24 +79,12 @@ module Sidekiq
         begin
           File.open(fp.path, 'a') { |tmpfp| fp.reopen(tmpfp) }
           fp.sync = true
-
           nr += 1
         rescue IOError, Errno::EBADF
           # not much we can do...
         end
       end
       nr
-    end
-
-    def self.is_log?(fp)
-      append_flags = File::WRONLY | File::APPEND
-
-      ! fp.closed? &&
-        fp.stat.file? &&
-        fp.sync &&
-        (fp.fcntl(Fcntl::F_GETFL) & append_flags) == append_flags
-    rescue IOError, Errno::EBADF
-      false
     end
 
     def logger

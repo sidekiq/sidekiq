@@ -1,12 +1,8 @@
-2.17.5
+HEAD
 -----------
 
 - A `USR2` signal will now reopen _all_ logs, using IO#reopen. Thus, instead of creating a new Logger object, 
   Sidekiq will now just update the existing Logger's file descriptor [#1163].
-  Like Unicorn, a File object is considered a log file if:
-    - opened with the `O_APPEND` and `O_WRONLY` flags
-    - the current open file handle does not match its original open path
-    - unbuffered (as far as userspace buffering goes, not `O_SYNC`)
 
 2.17.4
 -----------
