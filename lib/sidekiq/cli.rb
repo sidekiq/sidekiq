@@ -108,7 +108,7 @@ module Sidekiq
       when 'USR2'
         if Sidekiq.options[:logfile]
           Sidekiq.logger.info "Received USR2, reopening log file"
-          initialize_logger
+          Sidekiq::Logging.reopen_logs
         end
       when 'TTIN'
         Thread.list.each do |thread|
