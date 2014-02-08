@@ -3,6 +3,7 @@ HEAD
 
 - A `USR2` signal will now reopen _all_ logs, using IO#reopen. Thus, instead of creating a new Logger object, 
   Sidekiq will now just update the existing Logger's file descriptor [#1163].
+- Remove pidfile when shutting down if started with `-P` [#1470]
 
 2.17.4
 -----------

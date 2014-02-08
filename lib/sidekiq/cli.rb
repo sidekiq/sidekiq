@@ -179,7 +179,7 @@ module Sidekiq
 
       cfile = opts[:config_file]
       opts = parse_config(cfile).merge(opts) if cfile
-      
+
       opts[:strict] = true if opts[:strict].nil?
 
       options.merge!(opts)
@@ -313,6 +313,9 @@ module Sidekiq
         File.open(path, 'w') do |f|
           f.puts Process.pid
         end
+      end
+      at_exit do
+        FileUtils.rm_f path
       end
     end
 
