@@ -313,9 +313,9 @@ module Sidekiq
         File.open(path, 'w') do |f|
           f.puts Process.pid
         end
-      end
-      at_exit do
-        FileUtils.rm_f path
+        at_exit do
+          FileUtils.rm_f path
+        end
       end
     end
 
