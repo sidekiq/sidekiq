@@ -412,7 +412,7 @@ class TestWeb < Sidekiq::Test
               'error_message' => 'Some fake message',
               'error_class' => 'RuntimeError',
               'retry_count' => 0,
-              'failed_at' => Time.now.utc,
+              'failed_at' => Time.now.to_f,
               'jid' => SecureRandom.hex(12) }
       score = Time.now.to_f
       Sidekiq.redis do |conn|
@@ -428,7 +428,7 @@ class TestWeb < Sidekiq::Test
               'error_message' => 'fail message: <a>hello</a>',
               'error_class' => 'RuntimeError',
               'retry_count' => 0,
-              'failed_at' => Time.now.utc,
+              'failed_at' => Time.now.to_f,
               'jid' => SecureRandom.hex(12) }
       score = Time.now.to_f
       Sidekiq.redis do |conn|

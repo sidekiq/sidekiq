@@ -1,6 +1,7 @@
 HEAD
 -----------
 
+- Store 'retried\_at' and 'failed\_at' timestamps as Floats, not Strings. [#1473]
 - A `USR2` signal will now reopen _all_ logs, using IO#reopen. Thus, instead of creating a new Logger object, 
   Sidekiq will now just update the existing Logger's file descriptor [#1163].
 - Remove pidfile when shutting down if started with `-P` [#1470]
