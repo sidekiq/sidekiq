@@ -75,10 +75,10 @@ module Sidekiq
           msg['error_message'] = e.message
           msg['error_class'] = e.class.name
           count = if msg['retry_count']
-            msg['retried_at'] = Time.now.utc
+            msg['retried_at'] = Time.now.to_f
             msg['retry_count'] += 1
           else
-            msg['failed_at'] = Time.now.utc
+            msg['failed_at'] = Time.now.to_f
             msg['retry_count'] = 0
           end
 

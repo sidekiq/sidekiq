@@ -380,7 +380,7 @@ class TestApi < Sidekiq::Test
     end
 
     def add_retry(jid = 'bob', at = Time.now.to_f)
-      payload = Sidekiq.dump_json('class' => 'ApiWorker', 'args' => [1, 'mike'], 'queue' => 'default', 'jid' => jid, 'retry_count' => 2, 'failed_at' => Time.now.utc)
+      payload = Sidekiq.dump_json('class' => 'ApiWorker', 'args' => [1, 'mike'], 'queue' => 'default', 'jid' => jid, 'retry_count' => 2, 'failed_at' => Time.now.to_f)
       Sidekiq.redis do |conn|
         conn.zadd('retry', at.to_s, payload)
       end

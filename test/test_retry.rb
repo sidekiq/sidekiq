@@ -129,7 +129,7 @@ class TestRetry < Sidekiq::Test
 
     it 'handles a recurring failed message' do
       @redis.expect :zadd, 1, ['retry', String, String]
-      now = Time.now.utc
+      now = Time.now.to_f
       msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], 'retry' => true, "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>10}
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
@@ -147,7 +147,7 @@ class TestRetry < Sidekiq::Test
 
     it 'handles a recurring failed message before reaching user-specifed max' do
       @redis.expect :zadd, 1, ['retry', String, String]
-      now = Time.now.utc
+      now = Time.now.to_f
       msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], 'retry' => 10, "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>8}
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
@@ -164,7 +164,7 @@ class TestRetry < Sidekiq::Test
     end
 
     it 'throws away old messages after too many retries (using the default)' do
-      now = Time.now.utc
+      now = Time.now.to_f
       msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry"=>true, "retry_count"=>25}
       @redis.expect :zadd, 1, [ 'retry', String, String ]
       handler = Sidekiq::Middleware::Server::RetryJobs.new
@@ -178,7 +178,7 @@ class TestRetry < Sidekiq::Test
     end
 
     it 'throws away old messages after too many retries (using user-specified max)' do
-      now = Time.now.utc
+      now = Time.now.to_f
       msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry"=>3, "retry_count"=>3}
       @redis.expect :zadd, 1, [ 'retry', String, String ]
       handler = Sidekiq::Middleware::Server::RetryJobs.new
@@ -194,7 +194,7 @@ class TestRetry < Sidekiq::Test
     describe "retry exhaustion" do
       let(:handler){ Sidekiq::Middleware::Server::RetryJobs.new }
       let(:worker) { Minitest::Mock.new }
-      let(:msg){ {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>Time.now.utc, "retry"=>3, "retry_count"=>3} }
+      let(:msg){ {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>Time.now.to_f, "retry"=>3, "retry_count"=>3} }
 
       describe "worker block" do
         let(:worker) do
