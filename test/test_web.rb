@@ -392,6 +392,19 @@ class TestWeb < Sidekiq::Test
       end
     end
 
+    describe 'dead jobs' do
+      it 'shows empty index' do
+        get 'morgue'
+        assert_equal 200, last_response.status
+      end
+      it 'shows index with jobs' do
+        (_, score) = add_dead
+        get 'morgue'
+        assert_equal 200, last_response.status
+        assert_match /#{score}/, last_response.body
+      end
+    end
+
     def add_scheduled
       score = Time.now.to_f
       msg = { 'class' => 'HardWorker',
@@ -415,6 +428,22 @@ class TestWeb < Sidekiq::Test
       score = Time.now.to_f
       Sidekiq.redis do |conn|
         conn.zadd('retry', score, Sidekiq.dump_json(msg))
+      end
+      [msg, score]
+    end
+
+    def add_dead
+      msg = { 'class' => 'HardWorker',
+              'args' => ['bob', 1, Time.now.to_f],
+              'queue' => 'default',
+              'error_message' => 'Some fake message',
+              'error_class' => 'RuntimeError',
+              'retry_count' => 0,
+              'failed_at' => Time.now.utc,
+              'jid' => SecureRandom.hex(12) }
+      score = Time.now.to_f
+      Sidekiq.redis do |conn|
+        conn.zadd('dead', score, Sidekiq.dump_json(msg))
       end
       [msg, score]
     end

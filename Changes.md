@@ -1,6 +1,9 @@
 3.0.0
 -----------
 
+- Dead Job Queue - jobs which run out of retries are now moved to a dead
+  job queue.  These jobs must be retried manually or they will expire
+  after 6 months or 10,000 jobs.
 - **Remove official support for Ruby 1.9**  Things still might work but
   I no longer actively test on it.
 - Remove built-in support for Redis-to-Go.

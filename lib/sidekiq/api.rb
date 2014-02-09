@@ -44,6 +44,10 @@ module Sidekiq
       Sidekiq.redis {|c| c.zcard('retry') }
     end
 
+    def dead_size
+      Sidekiq.redis {|c| c.zcard('dead') }
+    end
+
     class History
       def initialize(days_previous, start_date = nil)
         @days_previous = days_previous
@@ -383,6 +387,18 @@ module Sidekiq
   class RetrySet < SortedSet
     def initialize
       super 'retry'
+    end
+
+    def retry_all
+      while size > 0
+        each(&:retry)
+      end
+    end
+  end
+
+  class DeadSet < SortedSet
+    def initialize
+      super 'dead'
     end
 
     def retry_all

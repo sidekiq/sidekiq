@@ -1,0 +1,66 @@
+<header class="row">
+  <div class="col-sm-5">
+    <h3><%= t('DeadJobs') %></h3>
+  </div>
+  <% if @dead.size > 0 && @total_size > @count %>
+    <div class="col-sm-4">
+      <%= erb :_paging, :locals => { :url => "#{root_path}morgue" } %>
+    </div>
+  <% end %>
+  <%= filtering('dead') %>
+</header>
+
+<% if @dead.size > 0 %>
+  <form action="<%= root_path %>morgue" method="post">
+    <table class="table table-striped table-bordered table-white">
+      <thead>
+        <tr>
+          <th width="20px" class="table-checkbox">
+            <label>
+              <input type="checkbox" class="check_all" />
+            </label>
+          </th>
+          <th width="25%"><%= t('LastRetry') %></th>
+          <th><%= t('Queue') %></th>
+          <th><%= t('Worker') %></th>
+          <th><%= t('Arguments') %></th>
+          <th><%= t('Error') %></th>
+        </tr>
+      </thead>
+      <% @dead.each do |entry| %>
+        <tr>
+          <td class="table-checkbox">
+            <label>
+              <input type='checkbox' name='key[]' value='<%= job_params(entry.item, entry.score) %>' />
+            </label>
+          </td>
+          <td>
+            <a href="<%= root_path %>morgue/<%= job_params(entry.item, entry.score) %>"><%= relative_time(entry.at) %></a>
+          </td>
+          <td>
+            <a href="<%= root_path %>queues/<%= entry.queue %>"><%= entry.queue %></a>
+          </td>
+          <td><%= entry.klass %></td>
+          <td>
+            <div class="args"><%= display_args(entry.args) %></div>
+          </td>
+          <td>
+            <div><%= h truncate("#{entry['error_class']}: #{entry['error_message']}", 200) %></div>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+    <input class="btn btn-primary btn-xs pull-left" type="submit" name="retry" value="<%= t('RetryNow') %>" />
+    <input class="btn btn-danger btn-xs pull-left" type="submit" name="delete" value="<%= t('Delete') %>" />
+  </form>
+
+  <form action="<%= root_path %>morgue/all/delete" method="post">
+    <input class="btn btn-danger btn-xs pull-right" type="submit" name="delete" value="<%= t('DeleteAll') %>" data-confirm="<%= t('AreYouSure') %>" />
+  </form>
+  <form action="<%= root_path %>morgue/all/retry" method="post">
+    <input class="btn btn-danger btn-xs pull-right" type="submit" name="retry" value="<%= t('RetryAll') %>" data-confirm="<%= t('AreYouSure') %>" />
+  </form>
+
+<% else %>
+  <div class="alert alert-success"><%= t('NoDeadJobsFound') %></div>
+<% end %>
