@@ -108,7 +108,7 @@ module Sidekiq
       when 'USR2'
         if Sidekiq.options[:logfile]
           Sidekiq.logger.info "Received USR2, reopening log file"
-          initialize_logger
+          Sidekiq::Logging.reopen_logs
         end
       when 'TTIN'
         Thread.list.each do |thread|
@@ -179,7 +179,7 @@ module Sidekiq
 
       cfile = opts[:config_file]
       opts = parse_config(cfile).merge(opts) if cfile
-      
+
       opts[:strict] = true if opts[:strict].nil?
 
       options.merge!(opts)
@@ -312,6 +312,9 @@ module Sidekiq
       if path = options[:pidfile]
         File.open(path, 'w') do |f|
           f.puts Process.pid
+        end
+        at_exit do
+          FileUtils.rm_f path
         end
       end
     end
