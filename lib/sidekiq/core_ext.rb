@@ -1,4 +1,10 @@
 begin
+  require 'active_support/core_ext/object'
+rescue LoadError
+  # Shouldn't sidekiq depend on active_support?
+end
+
+begin
   require 'active_support/core_ext/class/attribute'
 rescue LoadError
 
