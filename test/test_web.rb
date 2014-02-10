@@ -397,11 +397,33 @@ class TestWeb < Sidekiq::Test
         get 'morgue'
         assert_equal 200, last_response.status
       end
+
       it 'shows index with jobs' do
         (_, score) = add_dead
         get 'morgue'
         assert_equal 200, last_response.status
         assert_match /#{score}/, last_response.body
+      end
+
+      it 'can delete all dead' do
+        3.times { add_dead }
+
+        assert_equal 3, Sidekiq::DeadSet.new.size
+        post "/morgue/all/delete", 'delete' => 'Delete'
+        assert_equal 0, Sidekiq::DeadSet.new.size
+        assert_equal 302, last_response.status
+        assert_equal 'http://example.org/morgue', last_response.header['Location']
+      end
+
+      it 'can retry a dead job' do
+        params = add_dead
+        post "/morgue/#{job_params(*params)}", 'retry' => 'Retry'
+        assert_equal 302, last_response.status
+        assert_equal 'http://example.org/morgue', last_response.header['Location']
+
+        get '/queues/foo'
+        assert_equal 200, last_response.status
+        assert_match /#{params.first['args'][2]}/, last_response.body
       end
     end
 
@@ -435,7 +457,7 @@ class TestWeb < Sidekiq::Test
     def add_dead
       msg = { 'class' => 'HardWorker',
               'args' => ['bob', 1, Time.now.to_f],
-              'queue' => 'default',
+              'queue' => 'foo',
               'error_message' => 'Some fake message',
               'error_class' => 'RuntimeError',
               'retry_count' => 0,
