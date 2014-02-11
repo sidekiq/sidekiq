@@ -98,6 +98,7 @@ namespace :sidekiq do
               execute :bundle, :exec, :sidekiq, "-d -i #{idx} -P #{pid_full_path(pid_file)} #{fetch(:sidekiq_options)}"
             end
           else
+            execute "echo 'Since JRuby doesn't support Process.daemon, Sidekiq will be running without the -d flag."
             if fetch(:sidekiq_cmd)
               execute fetch(:sidekiq_cmd), "-i #{idx} -P #{pid_full_path(pid_file)} #{fetch(:sidekiq_options)} >/dev/null 2>&1 &"
             else
