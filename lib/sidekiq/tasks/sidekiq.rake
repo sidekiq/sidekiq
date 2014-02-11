@@ -99,9 +99,9 @@ namespace :sidekiq do
             end
           else
             if fetch(:sidekiq_cmd)
-              execute fetch(:sidekiq_cmd), "-i #{idx} -P #{pid_full_path(pid_file)} #{fetch(:sidekiq_options)}"
+              execute fetch(:sidekiq_cmd), "-i #{idx} -P #{pid_full_path(pid_file)} #{fetch(:sidekiq_options)} >/dev/null 2>&1 &"
             else
-              execute :bundle, :exec, :sidekiq, "-i #{idx} -P #{pid_full_path(pid_file)} #{fetch(:sidekiq_options)}"
+              execute :bundle, :exec, :sidekiq, "-i #{idx} -P #{pid_full_path(pid_file)} #{fetch(:sidekiq_options)} >/dev/null 2>&1 &"
             end
           end
         end
