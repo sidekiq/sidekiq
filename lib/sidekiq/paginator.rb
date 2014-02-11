@@ -1,6 +1,6 @@
 module Sidekiq
   module Paginator
-    def page(key, pageidx=1, page_size=25, opts=nil)
+    def page(key, pageidx=1, page_size=25, opts={})
       current_page = pageidx.to_i < 1 ? 1 : pageidx.to_i
       pageidx = current_page - 1
       total_size = 0
@@ -13,7 +13,7 @@ module Sidekiq
 
         case type
         when 'zset'
-          rev = opts.try(:[], :reverse)
+          rev = opts[:reverse]
           total_size, items = conn.multi do
             conn.zcard(key)
             if rev
