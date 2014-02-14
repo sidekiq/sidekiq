@@ -28,10 +28,10 @@ module Sidekiq
 
     def self.included(klass)
       if $TESTING
-        klass.send(:include, InstanceMethods)
-        klass.send(:extend, ClassMethods)
+        klass.__send__(:include, InstanceMethods)
+        klass.__send__(:extend, ClassMethods)
       else
-        klass.send(:include, Celluloid)
+        klass.__send__(:include, Celluloid)
       end
     end
   end

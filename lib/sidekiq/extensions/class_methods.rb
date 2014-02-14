@@ -14,7 +14,7 @@ module Sidekiq
 
       def perform(yml)
         (target, method_name, args) = YAML.load(yml)
-        target.send(method_name, *args)
+        target.__send__(method_name, *args)
       end
     end
 
@@ -36,4 +36,4 @@ module Sidekiq
   end
 end
 
-Module.send(:include, Sidekiq::Extensions::Klass)
+Module.__send__(:include, Sidekiq::Extensions::Klass)
