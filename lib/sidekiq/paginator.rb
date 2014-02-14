@@ -13,7 +13,7 @@ module Sidekiq
 
         case type
         when 'zset'
-          rev = opts && opt[:reverse]
+          rev = opts && opts[:reverse]
           total_size, items = conn.multi do
             conn.zcard(key)
             if rev
