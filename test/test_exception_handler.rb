@@ -59,7 +59,7 @@ class TestExceptionHandler < Sidekiq::Test
     end
 
     after do
-      Object.send(:remove_const, "Airbrake") # HACK should probably inject Airbrake etc into this class in the future
+      Object.__send__(:remove_const, "Airbrake") # HACK should probably inject Airbrake etc into this class in the future
     end
 
     it "notifies Airbrake" do
@@ -75,7 +75,7 @@ class TestExceptionHandler < Sidekiq::Test
     end
 
     after do
-      Object.send(:remove_const, "Honeybadger") # HACK should probably inject Honeybadger etc into this class in the future
+      Object.__send__(:remove_const, "Honeybadger") # HACK should probably inject Honeybadger etc into this class in the future
     end
 
     it "notifies Honeybadger" do
@@ -91,7 +91,7 @@ class TestExceptionHandler < Sidekiq::Test
     end
 
     after do
-      Object.send(:remove_const, "ExceptionNotifier")
+      Object.__send__(:remove_const, "ExceptionNotifier")
     end
 
     it "notifies ExceptionNotifier" do
@@ -120,7 +120,7 @@ class TestExceptionHandler < Sidekiq::Test
     end
 
     after do
-      Object.send(:remove_const, "Exceptional")
+      Object.__send__(:remove_const, "Exceptional")
     end
 
     it "notifies Exceptional" do

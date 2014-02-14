@@ -77,7 +77,7 @@ class TestRedisConnection < Sidekiq::Test
         ENV[v] = nil
       end
       ENV[var] = uri
-      assert_equal uri, Sidekiq::RedisConnection.send(:determine_redis_provider)
+      assert_equal uri, Sidekiq::RedisConnection.__send__(:determine_redis_provider)
       ENV[var] = nil
     end
 
