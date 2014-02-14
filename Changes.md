@@ -1,7 +1,7 @@
 3.0.0
 -----------
 
-## Please see [Upgrading.md] for upgrade notes.
+Please see [[Upgrading.md]] for upgrade notes.
 
 - **Dead Job Queue** - jobs which run out of retries are now moved to a dead
   job queue.  These jobs must be retried manually or they will expire
