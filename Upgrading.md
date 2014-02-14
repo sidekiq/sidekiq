@@ -7,7 +7,7 @@ changes a few data elements in Redis.  To upgrade cleanly:
   `gem 'sidekiq', '< 3'`
   This is only needed if you have retries pending.
 * Remove any usage of the following APIs:
-  - `Sidekiq::Client.registered\_workers` replaced by `Sidekiq::Workers.new`
+  - `Sidekiq::Client.registered_workers` replaced by `Sidekiq::Workers.new`
   - `Sidekiq::Client.registered_queues` replaced by `Sidekiq::Queue.all`
   - `Sidekiq::Worker#retries_exhausted` replaced by `Sidekiq::Worker.sidekiq_retries_exhausted`
 * Redis-to-Go is no longer transparently activated on Heroku so as to not play
