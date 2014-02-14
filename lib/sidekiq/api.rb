@@ -257,18 +257,20 @@ module Sidekiq
   class SortedSet
     include Enumerable
 
+    attr_reader :name
+
     def initialize(name)
-      @zset = name
+      @name = name
       @_size = size
     end
 
     def size
-      Sidekiq.redis {|c| c.zcard(@zset) }
+      Sidekiq.redis {|c| c.zcard(name) }
     end
 
     def schedule(timestamp, message)
       Sidekiq.redis do |conn|
-        conn.zadd(@zset, timestamp.to_f.to_s, Sidekiq.dump_json(message))
+        conn.zadd(name, timestamp.to_f.to_s, Sidekiq.dump_json(message))
       end
     end
 
@@ -282,7 +284,7 @@ module Sidekiq
         range_start = page * page_size + offset_size
         range_end   = page * page_size + offset_size + (page_size - 1)
         elements = Sidekiq.redis do |conn|
-          conn.zrange @zset, range_start, range_end, :with_scores => true
+          conn.zrange name, range_start, range_end, :with_scores => true
         end
         break if elements.empty?
         page -= 1
@@ -295,7 +297,7 @@ module Sidekiq
 
     def fetch(score, jid = nil)
       elements = Sidekiq.redis do |conn|
-        conn.zrangebyscore(@zset, score, score)
+        conn.zrangebyscore(name, score, score)
       end
 
       elements.inject([]) do |result, element|
@@ -316,7 +318,7 @@ module Sidekiq
     def delete(score, jid = nil)
       if jid
         elements = Sidekiq.redis do |conn|
-          conn.zrangebyscore(@zset, score, score)
+          conn.zrangebyscore(name, score, score)
         end
 
         elements_with_jid = elements.map do |element|
@@ -325,8 +327,8 @@ module Sidekiq
           if message["jid"] == jid
             _, @_size = Sidekiq.redis do |conn|
               conn.multi do
-                conn.zrem(@zset, element)
-                conn.zcard @zset
+                conn.zrem(name, element)
+                conn.zcard name
               end
             end
           end
@@ -335,8 +337,8 @@ module Sidekiq
       else
         count, @_size = Sidekiq.redis do |conn|
           conn.multi do
-            conn.zremrangebyscore(@zset, score, score)
-            conn.zcard @zset
+            conn.zremrangebyscore(name, score, score)
+            conn.zcard name
           end
         end
         count != 0
@@ -345,7 +347,7 @@ module Sidekiq
 
     def clear
       Sidekiq.redis do |conn|
-        conn.del(@zset)
+        conn.del(name)
       end
     end
   end
