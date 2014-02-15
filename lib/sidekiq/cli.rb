@@ -83,7 +83,17 @@ module Sidekiq
       end
     end
 
+    def default_config_file_path
+      'config/sidekiq.yml'
+    end
+
     private
+
+    def set_defaults(options)
+      unless options[:config_file]
+        options[:config_file] = default_config_file_path if File.exist?(default_config_file_path)
+      end
+    end
 
     def handle_signal(sig)
       Sidekiq.logger.debug "Got #{sig} signal"
@@ -299,6 +309,7 @@ module Sidekiq
         die 1
       end
       @parser.parse!(argv)
+      set_defaults opts
       opts
     end
 

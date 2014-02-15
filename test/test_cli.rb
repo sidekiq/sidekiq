@@ -163,6 +163,18 @@ class TestCli < Sidekiq::Test
       end
     end
 
+    describe 'with config file present at the default location and no -C switch given' do
+      before do
+        @cli.stub :default_config_file_path, './test/config.yml' do
+          @cli.parse(['sidekiq'])
+        end
+      end
+
+      it 'uses this configuration file' do
+        assert_equal './test/config.yml', Sidekiq.options[:config_file]
+      end
+    end
+
     describe 'with config file' do
       before do
         @cli.parse(['sidekiq', '-C', './test/config.yml'])
