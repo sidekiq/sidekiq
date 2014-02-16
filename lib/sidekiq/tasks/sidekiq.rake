@@ -15,7 +15,7 @@ namespace :load do
     set :sidekiq_pid,             ->{ "tmp/sidekiq.pid" }
 
     # "-d -i INT -P PATH" are added automatically.
-    set :sidekiq_options,       ->{ "-e #{fetch(:rails_env, 'production')} -C #{current_path}/config/sidekiq.yml -L #{current_path}/log/sidekiq.log" }
+    set :sidekiq_options,       ->{ "-e #{fetch(:rails_env, 'production')} -L #{current_path}/log/sidekiq.log" }
 
     set :sidekiq_timeout,       ->{ 10 }
     set :sidekiq_role,            ->{ :app }

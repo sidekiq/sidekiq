@@ -208,7 +208,7 @@ class TestRetry < Sidekiq::Test
         end
 
         it 'calls worker sidekiq_retries_exhausted_block after too many retries' do
-          new_msg      = handler.send(:retries_exhausted, worker.new, msg)
+          new_msg      = handler.__send__(:retries_exhausted, worker.new, msg)
           expected_msg = msg.merge('called_by_callback' => true)
 
           assert_equal expected_msg, new_msg, "sidekiq_retries_exhausted block not called"
@@ -270,15 +270,15 @@ class TestRetry < Sidekiq::Test
       let(:handler) { Sidekiq::Middleware::Server::RetryJobs.new }
 
       it "retries with a default delay" do
-        refute_equal 4, handler.send(:delay_for, worker, 2)
+        refute_equal 4, handler.__send__(:delay_for, worker, 2)
       end
 
       it "retries with a custom delay" do
-        assert_equal 4, handler.send(:delay_for, custom_worker, 2)
+        assert_equal 4, handler.__send__(:delay_for, custom_worker, 2)
       end
 
       it "falls back to the default retry on exception" do
-        refute_equal 4, handler.send(:delay_for, error_worker, 2)
+        refute_equal 4, handler.__send__(:delay_for, error_worker, 2)
         assert_match(/Failure scheduling retry using the defined `sidekiq_retry_in`/,
                      File.read(@tmp_log_path), 'Log entry missing for sidekiq_retry_in')
       end

@@ -1,7 +1,7 @@
 module Sidekiq
   def self.hook_rails!
     if defined?(::ActiveRecord)
-      ::ActiveRecord::Base.send(:include, Sidekiq::Extensions::ActiveRecord)
+      ::ActiveRecord::Base.__send__(:include, Sidekiq::Extensions::ActiveRecord)
     end
 
     if defined?(::ActionMailer)

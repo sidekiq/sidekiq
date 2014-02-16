@@ -3,10 +3,11 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
-HEAD
+1.4.3
 -----------
 
 - Reverse sorting of Batches in Web UI [#1098]
+- Refactoring for Sidekiq 3.0, Pro now requires Sidekiq 2.17.5
 
 1.4.2
 -----------

@@ -207,7 +207,7 @@ module Sidekiq
     end
 
     def [](name)
-      @item.send(:[], name)
+      @item.__send__(:[], name)
     end
   end
 

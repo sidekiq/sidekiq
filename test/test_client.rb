@@ -226,11 +226,11 @@ class TestClient < Sidekiq::Test
 
   describe 'item normalization' do
     it 'defaults retry to true' do
-      assert_equal true, Sidekiq::Client.new.send(:normalize_item, 'class' => QueuedWorker, 'args' => [])['retry']
+      assert_equal true, Sidekiq::Client.new.__send__(:normalize_item, 'class' => QueuedWorker, 'args' => [])['retry']
     end
 
     it "does not normalize numeric retry's" do
-      assert_equal 2, Sidekiq::Client.new.send(:normalize_item, 'class' => CWorker, 'args' => [])['retry']
+      assert_equal 2, Sidekiq::Client.new.__send__(:normalize_item, 'class' => CWorker, 'args' => [])['retry']
     end
   end
 end
