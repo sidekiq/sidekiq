@@ -340,7 +340,13 @@ module Sidekiq
     end
 
     def parse_queues(opts, queues_and_weights)
-      queues_and_weights.each { |queue_and_weight| parse_queue(opts, *queue_and_weight) }
+      queues_and_weights.each do |queue_and_weight|
+        if !queue_and_weight.is_a?(Array) || queue_and_weigth[1].is_a?(Integer)
+          parse_queue(opts, *queue_and_weight)
+        else
+          parse_queues(opts, queue_and_weight)
+        end
+      end
     end
 
     def parse_queue(opts, q, weight=nil)
