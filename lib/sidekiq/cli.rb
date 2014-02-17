@@ -190,7 +190,7 @@ module Sidekiq
     end
 
     def boot_system
-      ENV['RACK_ENV'] = ENV['RAILS_ENV'] = environment
+      ENV['RACK_ENV'] = ENV['RAILS_ENV'] ||= environment
 
       raise ArgumentError, "#{options[:require]} does not exist" unless File.exist?(options[:require])
 
