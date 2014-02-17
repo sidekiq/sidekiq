@@ -75,9 +75,9 @@ namespace :sidekiq do
         if test "[ -f #{pid_full_path(pid_file)} ]"
           within current_path do
             if fetch(:sidekiqctl_cmd)
-              execute fetch(:sidekiqctl_cmd), 'stop', "#{pid_full_path(pid_file)}", fetch(:sidekiq_timeout)
+              execute fetch(:sidekiqctl_cmd), 'stop', "#{pid_full_path(pid_file)}", fetch(:sidekiq_timeout), raise_on_non_zero_exit: false
             else
-              execute :bundle, :exec, :sidekiqctl, 'stop', "#{pid_full_path(pid_file)}", fetch(:sidekiq_timeout)
+              execute :bundle, :exec, :sidekiqctl, 'stop', "#{pid_full_path(pid_file)}", fetch(:sidekiq_timeout), raise_on_non_zero_exit: false
             end
           end
         end

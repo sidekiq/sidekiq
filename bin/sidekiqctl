@@ -40,7 +40,11 @@ class Sidekiqctl
   end
 
   def pid
-    File.read(pidfile).to_i
+    begin
+      File.read(pidfile).to_i
+    rescue Errno::ENOENT
+      done("Pidfile #{pidfile} does not exist", :error)
+    end
   end
 
   def quiet
