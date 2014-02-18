@@ -420,10 +420,7 @@ module Sidekiq
       Sidekiq.redis do |conn|
         workers = conn.smembers("workers")
         workers.each do |w|
-          msg, time = conn.multi do
-            conn.get("worker:#{w}")
-            conn.get("worker:#{w}:started")
-          end
+          msg, time = conn.mget("worker:#{w}", "worker:#{w}:started")
           next unless msg
           block.call(w, Sidekiq.load_json(msg), time)
         end
