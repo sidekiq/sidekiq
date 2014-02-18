@@ -12,7 +12,7 @@ class Sidekiqctl
     @timeout = timeout
 
     done('No pidfile given', :error) if !pidfile
-    done("Pidfile #{pidfile} does not exist", :error) if !File.exist?(pidfile)
+    done("Pidfile #{pidfile} does not exist", :warn) if !File.exist?(pidfile)
     done('Invalid pidfile content', :error) if pid == 0
 
     fetch_process
@@ -40,11 +40,7 @@ class Sidekiqctl
   end
 
   def pid
-    begin
-      File.read(pidfile).to_i
-    rescue Errno::ENOENT
-      done("Pidfile #{pidfile} does not exist", :error)
-    end
+    @pid ||= File.read(pidfile).to_i
   end
 
   def quiet
