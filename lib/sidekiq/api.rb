@@ -231,8 +231,10 @@ module Sidekiq
 
     def add_to_queue
       Sidekiq.redis do |conn|
-        results = conn.zrangebyscore('schedule', score, score)
-        conn.zremrangebyscore('schedule', score, score)
+        results = conn.multi do
+          conn.zrangebyscore('schedule', score, score)
+          conn.zremrangebyscore('schedule', score, score)
+        end.first
         results.map do |message|
           msg = Sidekiq.load_json(message)
           Sidekiq::Client.push(msg)
@@ -243,8 +245,10 @@ module Sidekiq
     def retry
       raise "Retry not available on jobs not in the Retry queue." unless item["failed_at"]
       Sidekiq.redis do |conn|
-        results = conn.zrangebyscore('retry', score, score)
-        conn.zremrangebyscore('retry', score, score)
+        results = conn.multi do
+          conn.zrangebyscore('retry', score, score)
+          conn.zremrangebyscore('retry', score, score)
+        end.first
         results.map do |message|
           msg = Sidekiq.load_json(message)
           msg['retry_count'] = msg['retry_count'] - 1
