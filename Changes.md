@@ -1,3 +1,8 @@
+2.17.6
+-----------
+
+- Fix capistrano integration due to missing pidfile. [#1490]
+
 2.17.5
 -----------
 
