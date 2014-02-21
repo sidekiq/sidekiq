@@ -9,12 +9,9 @@ platforms :jruby do
   gem 'activerecord-jdbcsqlite3-adapter'
 end
 
-gem 'rails', '3.2.12'
+gem 'rails', '4.0.0'
 gem 'sidekiq', :path => '..'
 gem 'capistrano'
 
 # sidekiq-web dependencies
-gem 'slim', '1.1.0'
 gem 'sinatra'
-
-gem 'shotgun'

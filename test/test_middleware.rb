@@ -2,7 +2,7 @@ require 'helper'
 require 'sidekiq/middleware/chain'
 require 'sidekiq/processor'
 
-class TestMiddleware < Minitest::Test
+class TestMiddleware < Sidekiq::Test
   describe 'middleware chain' do
     before do
       $errors = []
@@ -82,7 +82,7 @@ class TestMiddleware < Minitest::Test
       processor = Sidekiq::Processor.new(boss)
       actor = Minitest::Mock.new
       actor.expect(:processor_done, nil, [processor])
-      actor.expect(:real_thread, nil, [nil, Celluloid::Thread])
+      actor.expect(:real_thread, nil, [nil, Thread])
       boss.expect(:async, actor, [])
       boss.expect(:async, actor, [])
       processor.process(Sidekiq::BasicFetch::UnitOfWork.new('queue:default', msg))
@@ -123,13 +123,27 @@ class TestMiddleware < Minitest::Test
       assert_equal :fr, msg['locale']
 
       msg['locale'] = 'jp'
-      I18n.locale = nil
+      I18n.locale = I18n.default_locale
       assert_equal :en, I18n.locale
       mw = Sidekiq::Middleware::I18n::Server.new
       mw.call(nil, msg, nil) do
         assert_equal :jp, I18n.locale
       end
       assert_equal :en, I18n.locale
+    end
+
+    it 'supports I18n.enforce_available_locales = true' do
+      I18n.enforce_available_locales = true
+      I18n.available_locales = [:en, :jp]
+
+      msg = { 'locale' => 'jp' }
+      mw = Sidekiq::Middleware::I18n::Server.new
+      mw.call(nil, msg, nil) do
+        assert_equal :jp, I18n.locale
+      end
+
+      I18n.enforce_available_locales = nil
+      I18n.available_locales = nil
     end
   end
 end

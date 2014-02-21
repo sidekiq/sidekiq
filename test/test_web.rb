@@ -3,7 +3,7 @@ require 'sidekiq'
 require 'sidekiq/web'
 require 'rack/test'
 
-class TestWeb < Minitest::Test
+class TestWeb < Sidekiq::Test
   describe 'sidekiq web' do
     include Rack::Test::Methods
 
@@ -265,6 +265,47 @@ class TestWeb < Minitest::Test
       assert_match /#{msg['args'][2]}/, last_response.body
     end
 
+    it 'escape job args and error messages' do
+      # on /retries page
+      params = add_xss_retry
+      get '/retries'
+      assert_equal 200, last_response.status
+      assert_match /FailWorker/, last_response.body
+
+      assert last_response.body.include?( "fail message: &lt;a&gt;hello&lt;&#x2F;a&gt;" )
+      assert !last_response.body.include?( "fail message: <a>hello</a>" )
+
+      assert last_response.body.include?( "args\">&quot;&lt;a&gt;hello&lt;&#x2F;a&gt;&quot;<" )
+      assert !last_response.body.include?( "args\"><a>hello</a><" )
+
+
+      # on /workers page
+      Sidekiq.redis do |conn|
+        identity = 'foo:1234-123abc:default'
+        conn.sadd('workers', identity)
+        conn.setex("worker:#{identity}:started", 10, Time.now.to_s)
+        hash = {:queue => 'critical', :payload => { 'class' => "FailWorker", 'args' => ["<a>hello</a>"] }, :run_at => Time.now.to_i }
+        conn.setex("worker:#{identity}", 10, Sidekiq.dump_json(hash))
+      end
+
+      get '/workers'
+      assert_equal 200, last_response.status
+      assert_match /FailWorker/, last_response.body
+      assert last_response.body.include?( "&lt;a&gt;hello&lt;&#x2F;a&gt;" )
+      assert !last_response.body.include?( "<a>hello</a>" )
+
+
+      # on /queues page
+      params = add_xss_retry # sorry, don't know how to easily make this show up on queues page otherwise.
+      post "/retries/#{job_params(*params)}", 'retry' => 'Retry'
+      assert_equal 302, last_response.status
+
+      get '/queues/foo'
+      assert_equal 200, last_response.status
+      assert last_response.body.include?( "&lt;a&gt;hello&lt;&#x2F;a&gt;" )
+      assert !last_response.body.include?( "<a>hello</a>" )
+    end
+
     it 'can show user defined tab' do
       begin
         Sidekiq::Web.tabs['Custom Tab'] = '/custom'
@@ -280,6 +321,22 @@ class TestWeb < Minitest::Test
     it 'can display home' do
       get '/'
       assert_equal 200, last_response.status
+    end
+
+    Sidekiq::Web.settings.locales << File.join(File.dirname(__FILE__), "fixtures")
+    it 'can show user defined tab with custom locales' do
+      begin
+        Sidekiq::Web.tabs['Custom Tab'] = '/custom'
+        Sidekiq::Web.get('/custom') do
+          t('translated_text')
+        end
+
+        get '/custom'
+        assert_match /Changed text/, last_response.body
+
+      ensure
+        Sidekiq::Web.tabs.delete 'Custom Tab'
+      end
     end
 
     describe 'stats' do
@@ -324,6 +381,10 @@ class TestWeb < Minitest::Test
         it 'reports scheduled' do
           assert_equal 3, @response["sidekiq"]["scheduled"]
         end
+
+        it 'reports latency' do
+          assert_equal 0, @response["sidekiq"]["default_latency"]
+        end
       end
 
       describe "for redis" do
@@ -337,7 +398,7 @@ class TestWeb < Minitest::Test
       score = Time.now.to_f
       msg = { 'class' => 'HardWorker',
               'args' => ['bob', 1, Time.now.to_f],
-              'jid' => 'f39af2a05e8f4b24dbc0f1e4' }
+              'jid' => SecureRandom.hex(12) }
       Sidekiq.redis do |conn|
         conn.zadd('schedule', score, Sidekiq.dump_json(msg))
       end
@@ -352,7 +413,23 @@ class TestWeb < Minitest::Test
               'error_class' => 'RuntimeError',
               'retry_count' => 0,
               'failed_at' => Time.now.utc,
-              'jid' => 'f39af2a05e8f4b24dbc0f1e4'}
+              'jid' => SecureRandom.hex(12) }
+      score = Time.now.to_f
+      Sidekiq.redis do |conn|
+        conn.zadd('retry', score, Sidekiq.dump_json(msg))
+      end
+      [msg, score]
+    end
+
+    def add_xss_retry
+      msg = { 'class' => 'FailWorker',
+              'args' => ['<a>hello</a>'],
+              'queue' => 'foo',
+              'error_message' => 'fail message: <a>hello</a>',
+              'error_class' => 'RuntimeError',
+              'retry_count' => 0,
+              'failed_at' => Time.now.utc,
+              'jid' => SecureRandom.hex(12) }
       score = Time.now.to_f
       Sidekiq.redis do |conn|
         conn.zadd('retry', score, Sidekiq.dump_json(msg))

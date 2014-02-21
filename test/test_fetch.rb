@@ -1,7 +1,7 @@
 require 'helper'
 require 'sidekiq/fetch'
 
-class TestFetcher < Minitest::Test
+class TestFetcher < Sidekiq::Test
   describe 'fetcher' do
     before do
       Sidekiq.redis = { :namespace => 'fuzzy' }
@@ -36,7 +36,7 @@ class TestFetcher < Minitest::Test
       assert_equal 0, q1.size
       assert_equal 0, q2.size
       uow = Sidekiq::BasicFetch::UnitOfWork
-      Sidekiq::BasicFetch.bulk_requeue([uow.new('fuzzy:queue:foo', 'bob'), uow.new('fuzzy:queue:foo', 'bar'), uow.new('fuzzy:queue:bar', 'widget')])
+      Sidekiq::BasicFetch.bulk_requeue([uow.new('fuzzy:queue:foo', 'bob'), uow.new('fuzzy:queue:foo', 'bar'), uow.new('fuzzy:queue:bar', 'widget')], {:queues => []})
       assert_equal 2, q1.size
       assert_equal 1, q2.size
     end

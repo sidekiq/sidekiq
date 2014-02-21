@@ -1,0 +1,38 @@
+<header class="row">
+  <div class="col-sm-5">
+    <h3>
+      <%= t('CurrentMessagesInQueue', :queue => @name) %>
+    </h3>
+  </div>
+  <div class="col-sm-4 pull-right">
+    <%= erb :_paging, :locals => { :url => "#{root_path}queues/#{@name}" } %>
+  </div>
+</header>
+<table class="queue table table-hover table-bordered table-striped">
+  <thead>
+    <th><%= t('Class') %></th>
+    <th><%= t('Arguments') %></th>
+    <th></th>
+  </thead>
+  <% @messages.each_with_index do |msg, index| %>
+    <tr>
+      <td><%= msg['class'] %></td>
+      <td>
+        <% if msg['args'] and msg['args'].to_s.size > 100 %>
+          <%= h(msg['args'].inspect[0..100]) + "... " %>
+          <button data-toggle="collapse" data-target="#worker_<%= index %>" class="btn btn-default btn-xs"><%= t('ShowAll') %></button>
+          <div class="toggle" id="worker_<%= index %>" style="display: none;"><%= h(msg['args']) %></div>
+        <% else %>
+          <%= h(msg['args']) %>
+        <% end %>
+      </td>
+      <td>
+        <form action="<%= root_path %>queues/<%= @name %>/delete" method="post">
+          <input name="key_val" value="<%= h Sidekiq.dump_json(msg) %>" type="hidden" />
+          <input class="btn btn-danger btn-xs" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSure') %>" />
+        </form>
+      </td>
+    </tr>
+  <% end %>
+</table>
+<%= erb :_paging, :locals => { :url => "#{root_path}queues/#{@name}" } %>

@@ -1,19 +1,13 @@
 language: ruby
+services:
+  - redis-server
 rvm:
   - 1.9.3
   - jruby-19mode
-  - rbx-19mode
+  - rbx
   - 2.0.0
-branches:
-  only:
-    - master
-notifications:
-  irc: "irc.freenode.org#sidekiq"
-  email:
-    recipients:
-      - sidekiq@librelist.org
+  - 2.1.0
 matrix:
   allow_failures:
     - rvm: jruby-19mode
-    - rvm: rbx-19mode
-    - rvm: 2.0.0
+    - rvm: rbx

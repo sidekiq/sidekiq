@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+  <head>
+    <title><%= Sidekiq::NAME %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link href="<%= root_path %>stylesheets/bootstrap.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="<%= root_path %>stylesheets/application.css" media="screen" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="<%= root_path %>javascripts/application.js"></script>
+    <script type="text/javascript" src="<%= root_path %>javascripts/locales/jquery.timeago.<%= locale %>.js"></script>
+  </head>
+  <body class="admin">
+    <div class="navbar navbar-default navbar-fixed-top">
+      <%= erb :_nav %>
+    </div>
+
+    <div id="page">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-12 summary_bar">
+            <%= erb :_summary %>
+          </div>
+
+          <div class="col-sm-12">
+            <%= yield %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="navbar navbar-fixed-bottom navbar-inverse">
+      <div class="navbar-inner">
+        <div class="container">
+          <ul class="nav">
+            <li>
+              <p class="navbar-text" style="color:white;">Sidekiq v<%= Sidekiq::VERSION %></p>
+            </li>
+            <li>
+              <p class="navbar-text">Redis: <%= redis_connection %></p>
+            </li>
+            <li>
+              <p class="navbar-text"><%= t('Time') %>: <%= Time.now.utc.strftime('%H:%M:%S UTC') %></p>
+            </li>
+            <% if namespace %>
+              <li>
+                <p class="navbar-text"><%= t('Namespace') %>: <%= namespace %></p>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

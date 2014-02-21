@@ -37,6 +37,7 @@ module Sidekiq
       do_defer do
         @boss.async.real_thread(proxy_id, Thread.current)
 
+        ack = true
         begin
           msg = Sidekiq.load_json(msgstr)
           klass  = msg['class'].constantize
@@ -50,12 +51,14 @@ module Sidekiq
           end
         rescue Sidekiq::Shutdown
           # Had to force kill this job because it didn't finish
-          # within the timeout.
+          # within the timeout.  Don't acknowledge the work since
+          # we didn't properly finish it.
+          ack = false
         rescue Exception => ex
           handle_exception(ex, msg || { :message => msgstr })
           raise
         ensure
-          work.acknowledge
+          work.acknowledge if ack
         end
       end
 
@@ -128,13 +131,11 @@ module Sidekiq
     # Singleton classes are not clonable.
     SINGLETON_CLASSES = [ NilClass, TrueClass, FalseClass, Symbol, Fixnum, Float, Bignum ].freeze
 
-    # Clone the arguments passed to the worker so that if
+    # Deep clone the arguments passed to the worker so that if
     # the message fails, what is pushed back onto Redis hasn't
     # been mutated by the worker.
     def cloned(ary)
-      ary.map do |val|
-        SINGLETON_CLASSES.include?(val.class) ? val : val.clone
-      end
+      Marshal.load(Marshal.dump(ary))
     end
   end
 end

@@ -41,13 +41,13 @@ module Sidekiq
             after(0) { fetch }
           end
         rescue => ex
-          handle_exception(ex)
+          handle_fetch_exception(ex)
         end
 
       end
     end
 
-    def handle_exception(ex)
+    def handle_fetch_exception(ex)
       if !@down
         logger.error("Error fetching message: #{ex}")
         ex.backtrace.each do |bt|
@@ -90,7 +90,11 @@ module Sidekiq
       UnitOfWork.new(*work) if work
     end
 
-    def self.bulk_requeue(inprogress)
+    # By leaving this as a class method, it can be pluggable and used by the Manager actor. Making it
+    # an instance method will make it async to the Fetcher actor
+    def self.bulk_requeue(inprogress, options)
+      return if inprogress.empty?
+
       Sidekiq.logger.debug { "Re-queueing terminated jobs" }
       jobs_to_requeue = {}
       inprogress.each do |unit_of_work|

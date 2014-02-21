@@ -20,10 +20,13 @@ end
 require 'minitest/autorun'
 require 'minitest/pride'
 
-require 'celluloid/autostart'
+require 'celluloid/test'
+Celluloid.boot
 require 'sidekiq'
 require 'sidekiq/util'
 Sidekiq.logger.level = Logger::ERROR
+
+Sidekiq::Test = MiniTest::Unit::TestCase
 
 require 'sidekiq/redis_connection'
 redis_url = ENV['REDIS_URL'] || 'redis://localhost/15'

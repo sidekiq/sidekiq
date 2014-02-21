@@ -45,12 +45,12 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
+        item = { 'class' => self, 'args' => args, 'at' => ts }
+
         # Optimization to enqueue something now that is scheduled to go out now or in the past
-        if ts <= now
-          perform_async(*args)
-        else
-          client_push('class' => self, 'args' => args, 'at' => ts)
-        end
+        item.delete('at') if ts <= now
+
+        client_push(item)
       end
       alias_method :perform_at, :perform_in
 
@@ -75,10 +75,8 @@ module Sidekiq
         self.sidekiq_retries_exhausted_block = block
       end
 
-      DEFAULT_OPTIONS = { 'retry' => true, 'queue' => 'default' }
-
       def get_sidekiq_options # :nodoc:
-        self.sidekiq_options_hash ||= DEFAULT_OPTIONS
+        self.sidekiq_options_hash ||= Sidekiq.default_worker_options
       end
 
       def client_push(item) # :nodoc:

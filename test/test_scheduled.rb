@@ -1,7 +1,7 @@
 require 'helper'
 require 'sidekiq/scheduled'
 
-class TestScheduled < Minitest::Test
+class TestScheduled < Sidekiq::Test
   class ScheduledWorker
     include Sidekiq::Worker
     def perform(x)

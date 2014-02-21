@@ -8,7 +8,7 @@ Simple, efficient background processing for Ruby.
 
 Sidekiq uses threads to handle many jobs at the same time in the
 same process.  It does not require Rails but will integrate tightly with
-Rails 3 to make background processing dead simple.
+Rails 3/4 to make background processing dead simple.
 
 Sidekiq is compatible with Resque.  It uses the exact same
 message format as Resque so it can integrate into an existing Resque processing farm.
@@ -24,8 +24,11 @@ the same CPU and perform the same amount of work.
 Requirements
 -----------------
 
-I test on Ruby 1.9.3 and JRuby 1.7.x.  Other versions/VMs are
-untested but I will do my best to support them.  Ruby 1.8 is not supported.
+I test with the latest Ruby (2.0) and JRuby versions (1.7).  Other versions/VMs
+are untested but might work fine.
+
+The last two major Rails releases (3.2 and 4.0) are officially supported, other
+versions might work fine.
 
 Redis 2.4 or greater is required.
 
@@ -57,9 +60,9 @@ quality open source development all at the same time.  Please see the
 More Information
 -----------------
 
-Please see the [sidekiq wiki](https://github.com/mperham/sidekiq/wiki) for more information.
+Please see the [sidekiq wiki](https://github.com/mperham/sidekiq/wiki) for the official documentation.
 [#sidekiq on irc.freenode.net](irc://irc.freenode.net/#sidekiq) is dedicated to this project,
-but bug reports or feature requests suggestions should still go through [issues on Github](https://github.com/mperham/sidekiq/issues).
+but bug reports or feature requests suggestions should still go through [issues on Github](https://github.com/mperham/sidekiq/issues).  Release announcements are made to [@sidekiq](https://twitter.com/sidekiq)
 
 There's also a mailing list via [Librelist](http://librelist.org) that you can subscribe to by sending
 an email to <sidekiq@librelist.org> with a greeting in the body. To unsubscribe, send an email to <sidekiq-unsubscribe@librelist.org> and that's it!
@@ -84,4 +87,4 @@ Please see [LICENSE](https://github.com/mperham/sidekiq/blob/master/LICENSE) for
 Author
 -----------------
 
-Mike Perham, [@mperham](https://twitter.com/mperham), [http://mikeperham.com](http://mikeperham.com)
+Mike Perham, [@mperham](https://twitter.com/mperham) / [@sidekiq](https://twitter.com/sidekiq), [http://mikeperham.com](http://mikeperham.com)

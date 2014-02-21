@@ -78,7 +78,7 @@ module Sidekiq
   end
 
   def self.client_middleware
-    @client_chain ||= Client.default_middleware
+    @client_chain ||= Middleware::Chain.new
     yield @client_chain if block_given?
     @client_chain
   end
@@ -87,6 +87,14 @@ module Sidekiq
     @server_chain ||= Processor.default_middleware
     yield @server_chain if block_given?
     @server_chain
+  end
+
+  def self.default_worker_options=(hash)
+    @default_worker_options = default_worker_options.merge(hash)
+  end
+
+  def self.default_worker_options
+    @default_worker_options || { 'retry' => true, 'queue' => 'default' }
   end
 
   def self.load_json(string)

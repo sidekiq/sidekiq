@@ -1,17 +1,9 @@
-source 'http://rubygems.org'
+source 'https://rubygems.org'
 gemspec
 
-gem 'slim', '1.1.0' # earliest verson supported
-
-gem 'sqlite3', :platform => :mri
-
-group :test do
-  gem 'simplecov', :require => false
-  gem 'minitest-emoji', :require => false
-end
-
-group :development do
-  gem 'pry', :platform => :mri
-  gem 'shotgun'
-  gem 'rack', '~> 1.4.0'
+platforms :rbx do
+  gem 'rubysl', '~> 2.0'         # if using anything in the ruby standard library
+  gem 'psych'                    # if using yaml
+  gem 'minitest'                 # if using minitest
+  gem 'rubinius-developer_tools' # if using any of coverage, debugger, profiler
 end

@@ -1,0 +1,22 @@
+<h3><%= t('Queues') %></h3>
+
+<table class="queues table table-hover table-bordered table-striped table-white">
+  <thead>
+    <th><%= t('Queue') %></th>
+    <th><%= t('Size') %></th>
+    <th><%= t('Actions') %></th>
+  </thead>
+  <% @queues.each do |queue| %>
+    <tr>
+      <td>
+        <a href="<%= root_path %>queues/<%= queue.name %>"><%= queue.name %></a>
+      </td>
+      <td><%= number_with_delimiter(queue.size) %> </td>
+      <td width="20%">
+        <form action="<%=root_path %>queues/<%= queue.name %>" method="post">
+          <input class="btn btn-danger btn-xs" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSureDeleteQueue', :queue => queue.name) %>" />
+        </form>
+      </td>
+    </tr>
+  <% end %>
+</table>

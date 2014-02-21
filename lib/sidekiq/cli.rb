@@ -9,10 +9,13 @@ require 'sidekiq'
 require 'sidekiq/util'
 
 module Sidekiq
-  # Used to raise in workers that have not finished within the
-  # hard timeout limit.  This is needed to rollback db transactions,
+  # We are shutting down Sidekiq but what about workers that
+  # are working on some long job?  This error is
+  # raised in workers that have not finished within the hard
+  # timeout limit.  This is needed to rollback db transactions,
   # otherwise Ruby's Thread#kill will commit.  See #377.
-  class Shutdown < RuntimeError; end
+  # DO NOT RESCUE THIS ERROR.
+  class Shutdown < Interrupt; end
 
   class CLI
     include Util
@@ -105,7 +108,7 @@ module Sidekiq
       when 'USR2'
         if Sidekiq.options[:logfile]
           Sidekiq.logger.info "Received USR2, reopening log file"
-          Sidekiq::Logging.initialize_logger(Sidekiq.options[:logfile])
+          initialize_logger
         end
       when 'TTIN'
         Thread.list.each do |thread|
@@ -171,13 +174,15 @@ module Sidekiq
     end
 
     def setup_options(args)
-      cli = parse_options(args)
-      set_environment cli[:environment]
+      opts = parse_options(args)
+      set_environment opts[:environment]
 
-      cfile = cli[:config_file]
+      cfile = opts[:config_file]
+      opts = parse_config(cfile).merge(opts) if cfile
+      
+      opts[:strict] = true if opts[:strict].nil?
 
-      config = (cfile ? parse_config(cfile) : {})
-      options.merge!(config.merge(cli))
+      options.merge!(opts)
     end
 
     def options
@@ -217,7 +222,7 @@ module Sidekiq
       if !File.exist?(options[:require]) ||
          (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))
         logger.info "=================================================================="
-        logger.info "  Please point sidekiq to a Rails 3 application or a Ruby file    "
+        logger.info "  Please point sidekiq to a Rails 3/4 application or a Ruby file  "
         logger.info "  to load your worker classes with -r [DIR|FILE]."
         logger.info "=================================================================="
         logger.info @parser
@@ -253,9 +258,9 @@ module Sidekiq
           opts[:profile] = arg
         end
 
-        o.on "-q", "--queue QUEUE[,WEIGHT]...", "Queues to process with optional weights" do |arg|
-          queues_and_weights = arg.scan(/([\w\.-]+),?(\d*)/)
-          parse_queues opts, queues_and_weights
+        o.on "-q", "--queue QUEUE[,WEIGHT]", "Queues to process with optional weights" do |arg|
+          queue, weight = arg.split(",")
+          parse_queue opts, queue, weight
         end
 
         o.on '-r', '--require [PATH|DIR]', "Location of Rails application with workers or file to require" do |arg|
@@ -323,21 +328,22 @@ module Sidekiq
       end
       ns = opts.delete(:namespace)
       if ns
-        Sidekiq.logger.warn("namespace should be set in your ruby initializer, is ignored in config file")
-        Sidekiq.logger.warn("config.redis = { :url => ..., :namespace => '#{ns}' }")
+        # logger hasn't been initialized yet, puts is all we have.
+        puts("namespace should be set in your ruby initializer, is ignored in config file")
+        puts("config.redis = { :url => ..., :namespace => '#{ns}' }")
       end
       opts
     end
 
     def parse_queues(opts, queues_and_weights)
-      queues_and_weights.each {|queue_and_weight| parse_queue(opts, *queue_and_weight)}
-      opts[:strict] = queues_and_weights.all? {|_, weight| weight.to_s.empty? }
+      queues_and_weights.each { |queue_and_weight| parse_queue(opts, *queue_and_weight) }
     end
 
     def parse_queue(opts, q, weight=nil)
       [weight.to_i, 1].max.times do
        (opts[:queues] ||= []) << q
       end
+      opts[:strict] = false if weight.to_i > 0
     end
   end
 end

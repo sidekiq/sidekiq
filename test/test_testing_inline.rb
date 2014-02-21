@@ -9,7 +9,7 @@ require 'sidekiq/extensions/active_record'
 
 Sidekiq.hook_rails!
 
-class TestInline < Minitest::Test
+class TestInline < Sidekiq::Test
   describe 'sidekiq inline testing' do
     class InlineError < RuntimeError; end
     class ParameterIsNotString < RuntimeError; end
@@ -17,6 +17,7 @@ class TestInline < Minitest::Test
     class InlineWorker
       include Sidekiq::Worker
       def perform(pass)
+        raise ArgumentError, "no jid" unless jid
         raise InlineError unless pass
       end
     end
@@ -41,15 +42,12 @@ class TestInline < Minitest::Test
     end
 
     before do
-      load 'sidekiq/testing/inline.rb'
+      require 'sidekiq/testing/inline.rb'
+      Sidekiq::Testing.inline!
     end
 
     after do
-      Sidekiq::Client.singleton_class.class_eval do
-        remove_method :raw_push
-        alias_method :raw_push, :raw_push_old
-        remove_method :raw_push_old
-      end
+      Sidekiq::Testing.disable!
     end
 
     it 'stubs the async call when in testing mode' do

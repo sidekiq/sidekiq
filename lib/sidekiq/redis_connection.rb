@@ -1,27 +1,34 @@
 require 'connection_pool'
 require 'redis'
+require 'uri'
 
 module Sidekiq
   class RedisConnection
     class << self
 
       def create(options={})
-        url = options[:url] || determine_redis_provider || 'redis://localhost:6379/0'
+        url = options[:url] || determine_redis_provider
+        if url
+          options[:url] = url
+        end
+
         # need a connection for Fetcher and Retry
         size = options[:size] || (Sidekiq.server? ? (Sidekiq.options[:concurrency] + 2) : 5)
         pool_timeout = options[:pool_timeout] || 1
 
-        log_info(url, options)
+        log_info(options)
 
         ConnectionPool.new(:timeout => pool_timeout, :size => size) do
-          build_client(url, options[:namespace], options[:driver] || 'ruby', options[:network_timeout])
+          build_client(options)
         end
       end
 
       private
 
-      def build_client(url, namespace, driver, network_timeout)
-        client = Redis.new client_opts(url, driver, network_timeout)
+      def build_client(options)
+        namespace = options[:namespace]
+
+        client = Redis.new client_opts(options)
         if namespace
           require 'redis/namespace'
           Redis::Namespace.new(namespace, :redis => client)
@@ -30,29 +37,40 @@ module Sidekiq
         end
       end
 
-      def client_opts(url, driver, timeout)
-        if timeout
-          { :url => url, :driver => driver, :timeout => timeout }
-        else
-          { :url => url, :driver => driver }
+      def client_opts(options)
+        opts = options.dup
+        if opts[:namespace]
+          opts.delete(:namespace)
         end
+
+        if opts[:network_timeout]
+          opts[:timeout] = opts[:network_timeout]
+          opts.delete(:network_timeout)
+        end
+
+        opts[:driver] = opts[:driver] || 'ruby'
+
+        opts
       end
 
-      def log_info(url, options)
-        opts = options.dup
-        opts.delete(:url)
+      def log_info(options)
+        # Don't log Redis AUTH password
+        scrubbed_options = options.dup
+        if scrubbed_options[:url] && (uri = URI.parse(scrubbed_options[:url])) && uri.password
+          uri.password = "REDACTED"
+          scrubbed_options[:url] = uri.to_s
+        end
         if Sidekiq.server?
-          Sidekiq.logger.info("Booting Sidekiq #{Sidekiq::VERSION} using #{url} with options #{opts}")
+          Sidekiq.logger.info("Booting Sidekiq #{Sidekiq::VERSION} with redis options #{scrubbed_options}")
         else
-          Sidekiq.logger.info("#{Sidekiq::NAME} client using #{url} with options #{opts}")
+          Sidekiq.logger.info("#{Sidekiq::NAME} client with redis options #{scrubbed_options}")
         end
       end
 
       def determine_redis_provider
         # REDISTOGO_URL is only support for legacy reasons
-        return ENV['REDISTOGO_URL'] if ENV['REDISTOGO_URL']
         provider = ENV['REDIS_PROVIDER'] || 'REDIS_URL'
-        ENV[provider]
+        ENV[provider] || ENV['REDISTOGO_URL']
       end
 
     end

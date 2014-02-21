@@ -32,7 +32,7 @@ h1, h2, h3, h4, h5, h6, strong {
   font-weight: 700;
 }
 
-.brand, .navbar .brand, h5, h4, h3, h2, h1 {
+.navbar-brand, .navbar .navbar-brand, h5, h4, h3, h2, h1 {
   font-family: Armata;
   font-weight: 400;
 }
@@ -79,19 +79,11 @@ h3 {
 }
 
 .admin #page {
-  padding: 60px 0 40px 0;
-}
-
-.row.header .actions {
-  padding-top: 0.9em;
+  padding: 60px 0;
 }
 
 header.row .pagination {
   margin: 12px 0;
-}
-
-.summary_bar .actions {
-  padding: 10px 0px;
 }
 
 .summary_bar .status {
@@ -113,10 +105,15 @@ header.row .pagination {
   margin-bottom: 10px;
   border-width: 0px;
 }
-.summary_bar #live-poll {
-  line-height: 28px;
+.poll-wrapper {
+  margin: 9px 0px;
 }
-.summary_bar #live-poll.active {
+.nav #live-poll {
+  height: 25px;
+  line-height: 25px;
+  width: 195px;
+}
+#live-poll.active {
   background-color: #009300;
 }
 .summary_bar ul {
@@ -144,21 +141,21 @@ header.row .pagination {
   }
 }
 @media (max-width: 979px) and (min-width: 768px) {
-  .summary_bar ul li.span2 {
+  .summary_bar ul li.col-sm-2 {
     margin: 0px 10px;
     width: 96px !important;
   }
 }
-@media (max-width: 1199px) and (min-width: 980px) {
-  .summary_bar ul li.span2 {
+/*@media (max-width: 1199px) and (min-width: 980px) {
+  .summary_bar ul li.col-sm-2 {
     width: 130px !important;
   }
 }
 @media (min-width: 1200px) {
-  .summary_bar ul li.span2 {
+  .summary_bar ul li.col-sm-2 {
     width: 154px !important;
   }
-}
+}*/
 .summary_bar ul .desc {
   display: block;
   font-size: 1em;
@@ -191,9 +188,26 @@ td form {
   margin-bottom: 0;
 }
 
-.navbar .brand {
+.table tr > td.table-checkbox, .table tr > th.table-checkbox {
+  padding: 0px;
+}
+
+table .table-checkbox label {
+  height: 100%;
+  width: 100%;
+  padding: 0px 16px;
+  margin-bottom: 0;
+  line-height: 32px;
+}
+
+.navbar .navbar-brand {
   color: #b1003e;
+  padding: 13px;
   text-shadow: none;
+}
+
+.navbar .navbar-brand .status {
+  color: #585454;
 }
 
 .navbar-footer .navbar ul.nav {
@@ -206,7 +220,7 @@ td form {
   padding: 15px;
 }
 
-.navbar-footer .navbar ul.nav a.brand {
+.navbar-footer .navbar ul.nav a.navbar-brand {
   font-weight: 400;
   padding: 0 15px 0 0;
 }
@@ -232,16 +246,17 @@ img.smallogo {
 
 .status-sprite {
   background-image: url(../images/status-sd8051fd480.png);
-  height: 30px;
-  width: 30px;
+  height: 19px;
+  width: 20px;
   display: inline-block;
+  background-size: 20px;
 }
 .status-active {
   background-position: 0 0;
 }
 
 .status-idle {
-  background-position: 0 -80px;
+  background-position: 0 -54px;
 }
 
 .btn {
@@ -291,6 +306,15 @@ img.smallogo {
   padding: 10px 0;
 }
 
+.redis-wrapper {
+  width: 100%;
+  text-align: center;
+}
+
+.stats-container {
+  display: inline-block;
+}
+
 .stat {
   float: left;
   text-align: center;
@@ -301,10 +325,33 @@ img.smallogo {
   margin-bottom: 20px;
 }
 
+.stat:last-child {
+  margin-right: 0;
+}
+
 .stat p {
   font-size: 0.9em;
 }
-
+@media (max-width: 767px) {
+  .stats-container {
+    display: block;
+  }
+  .stat {
+    float: left;
+    margin-right: 10px;
+    width: 100%;
+    text-align: left;
+    line-height: 45px;
+  }
+  .stat h3{
+    float: right;
+    margin: 5px 10px 5px 5px;
+  }
+  .stat p{
+    font-size: normal;
+    margin: 5px 5px 5px 10px;
+  }
+}
 .beacon {
   position: relative;
   height: 20px;
@@ -482,13 +529,14 @@ img.smallogo {
   text-decoration: none;
 }
 
-@media (max-width: 550px) {
+@media (max-width: 768px) {
   .navbar .container {
     text-align: center
   }
 
-  .navbar .brand {
+  .navbar .navbar-brand {
     float: none;
+    display: block;
   }
 
   .navbar ul.nav li a {
@@ -506,6 +554,10 @@ img.smallogo {
     margin-right: 0;
   }
 
+  .poll-wrapper {
+    margin: 0px 9px 9px;
+  }
+
   .navbar.navbar-fixed-bottom ul {
     float: none;
     margin-right: 0;
@@ -517,6 +569,7 @@ img.smallogo {
   }
 
   .navbar-text {
+    float:none;
     line-height: 30px;
   }
 }
@@ -532,7 +585,7 @@ img.smallogo {
 }
 
 @media (max-width: 500px) {
-  .navbar-footer .navbar ul.nav a.brand {
+  .navbar-footer .navbar ul.nav a.navbar-brand {
     padding-right: 5px;
   }
 }
@@ -845,11 +898,27 @@ img.smallogo {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 3px;
 }
+.code-wrap {
+  white-space: normal;
+}
 .args {
-  overflow: scroll;
+  overflow-y: auto;
   max-height: 100px;
 }
 .args-extended {
-  overflow: scroll;
+  overflow-y: scroll;
   max-height: 500px;
+}
+
+
+/* BOOTSTRAP 3 FIXES */
+/* @grid-float-breakpoint -1 */
+.container {
+  padding: 0;
+}
+@media (max-width: 979px) {
+    .navbar-fixed-top, .navbar-fixed-bottom {
+      position: relative;
+      top: auto;
+    }
 }
