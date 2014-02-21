@@ -82,5 +82,15 @@ class TestScheduled < Sidekiq::Test
         assert_equal 1, @scheduled.size
       end
     end
+
+    it 'should put the job back if parsing it raises an exception' do
+      @retry.schedule (Time.now - 60).to_f, @error_1
+
+      Sidekiq.stub(:load_json, proc { assert_equal(0, @retry.size); 0/0 }) do
+        assert_equal 1, @retry.size
+        @poller.poll
+        assert_equal 1, @retry.size
+      end
+    end
   end
 end

@@ -25,22 +25,18 @@ module Sidekiq
           begin
             # A message's "score" in Redis is the time at which it should be processed.
             # Just check Redis for the set of messages with a timestamp before now.
-            now = Time.now.to_f.to_s
+            now = Time.now.to_f
             Sidekiq.redis do |conn|
               SETS.each do |sorted_set|
+                next unless any_eligible_messages?(conn, sorted_set, now)
+
                 # Get the next item in the queue if it's score (time to execute) is <= now.
                 # We need to go through the list one at a time to reduce the risk of something
                 # going wrong between the time jobs are popped from the scheduled queue and when
                 # they are pushed onto a work queue and losing the jobs.
-                while message = conn.zrangebyscore(sorted_set, '-inf', now, :limit => [0, 1]).first do
-
-                  # Pop item off the queue and add it to the work queue. If the job can't be popped from
-                  # the queue, it's because another process already popped it so we can move on to the
-                  # next one.
-                  if conn.zrem(sorted_set, message)
-                    Sidekiq::Client.push(Sidekiq.load_json(message))
-                    logger.debug { "enqueued #{sorted_set}: #{message}" }
-                  end
+                while message = get_next_message(conn, sorted_set, now)
+                  Sidekiq::Client.push(message)
+                  logger.debug { "enqueued #{sorted_set}: #{message}" }
                 end
               end
             end
@@ -55,7 +51,45 @@ module Sidekiq
         end
       end
 
+      # Retrieve and delete the first eligible message in the set. If there
+      # are no such messages, return nil.
+      def get_next_message(conn, sorted_set, end_time)
+        message, score = grab_first_message_with_score(conn, sorted_set)
+
+        if message
+          if score <= end_time
+            Sidekiq.load_json(message)
+          else
+            conn.zadd(sorted_set, score.to_s, message)
+            nil
+          end
+        end
+      rescue => e
+        # If something goes wrong after we grab the message, try to put it back
+        # before re-raising.
+        if message
+          conn.zadd(sorted_set, score.to_s, message)
+        end
+        raise
+      end
+
       private
+
+      # Are there any messages in this set that are ready to be enqueued?
+      def any_eligible_messages?(conn, sorted_set, end_time)
+        conn.zcount(sorted_set, '-inf', end_time.to_s) > 0
+      end
+
+      # Atomically retrieve and delete the first message in the set, regardless
+      # of eligibility.
+      def grab_first_message_with_score(conn, sorted_set)
+        messages = nil
+        conn.multi do
+          messages = conn.zrange(sorted_set, 0, 0, :withscores => true)
+          conn.zremrangebyrank(sorted_set, 0, 0)
+        end
+        messages.value.first
+      end
 
       def poll_interval
         Sidekiq.options[:poll_interval] || POLL_INTERVAL
@@ -69,7 +103,6 @@ module Sidekiq
           # to get here.
         end
       end
-
     end
   end
 end
