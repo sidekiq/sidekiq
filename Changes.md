@@ -20,6 +20,16 @@ Please see [Upgrading.md](Upgrading.md) for upgrade notes.
 - Remove deprecated Sidekiq::Client.registered\_\* APIs
 - Remove deprecated support for the old Sidekiq::Worker#retries\_exhausted method.
 
+2.17.7
+-----------
+
+- Auto-prune jobs older than one hour from the Workers page [#1508]
+
+2.17.6
+-----------
+
+- Fix capistrano integration due to missing pidfile. [#1490]
+
 2.17.5
 -----------
 

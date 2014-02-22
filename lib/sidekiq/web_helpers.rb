@@ -47,13 +47,28 @@ module Sidekiq
       end
     end
 
+    MAX_JOB_DURATION = 60*60
+
     def workers
       @workers ||= begin
         to_rem = []
         workers = Sidekiq.redis do |conn|
           conn.smembers('workers').map do |w|
             msg = conn.get("worker:#{w}")
-            msg ? [w, Sidekiq.load_json(msg)] : (to_rem << w; nil)
+            if !msg
+              to_rem << w
+              nil
+            else
+              m = Sidekiq.load_json(msg)
+              run_at = Time.at(m['run_at'])
+              # prune jobs older than one hour
+              if run_at < (Time.now - MAX_JOB_DURATION)
+                to_rem << w
+                nil
+              else
+                [w, m, run_at]
+              end
+            end
           end.compact.sort { |x| x[1] ? -1 : 1 }
         end
 
