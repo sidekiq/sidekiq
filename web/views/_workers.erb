@@ -6,7 +6,7 @@
     <th><%= t('Arguments') %></th>
     <th><%= t('Started') %></th>
   </thead>
-  <% workers.each_with_index do |(worker, msg), index| %>
+  <% workers.each_with_index do |(worker, msg, run_at), index| %>
     <tr>
       <td><%= worker %></td>
       <td>
@@ -16,7 +16,7 @@
       <td>
         <div class="args"><%= display_args(msg['payload']['args']) %></div>
       </td>
-      <td><%= relative_time(msg['run_at'].is_a?(Numeric) ? Time.at(msg['run_at']) : Time.parse(msg['run_at'])) %></td>
+      <td><%= relative_time(run_at) %></td>
     </tr>
   <% end %>
 </table>

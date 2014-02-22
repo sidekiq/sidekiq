@@ -1,3 +1,8 @@
+2.17.7
+-----------
+
+- Auto-prune jobs older than one hour from the Workers page [#1508]
+
 2.17.6
 -----------
 

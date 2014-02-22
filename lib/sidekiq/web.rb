@@ -38,7 +38,7 @@ module Sidekiq
     end
 
     get "/workers" do
-      erb :index
+      erb :workers
     end
 
     get "/queues" do
