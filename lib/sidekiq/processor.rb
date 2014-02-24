@@ -145,7 +145,7 @@ module Sidekiq
       Marshal.load(Marshal.dump(ary))
     end
 
-    # If there is a Redis::TimeoutError, the block passed to this method will be retried up to max_retries times.
+    # If an exception, the block passed to this method will be retried up to max_retries times.
     # All exceptions will be swallowed and logged.
     def retry_and_suppress_exceptions(max_retries = 2)
       retry_count = 0
