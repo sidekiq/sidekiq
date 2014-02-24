@@ -93,7 +93,7 @@ module Sidekiq
 
     def stats(worker, msg, queue)
       # Do not conflate errors from the job with errors caused by updating stats so calling code can react appropriately
-      retry_and_suppress_redis_timeouts do
+      retry_and_suppress_exceptions do
         redis do |conn|
           conn.multi do
             conn.sadd('workers', identity)
@@ -107,7 +107,7 @@ module Sidekiq
       begin
         yield
       rescue Exception
-        retry_and_suppress_redis_timeouts do
+        retry_and_suppress_exceptions do
           redis do |conn|
             failed = "stat:failed:#{Time.now.utc.to_date}"
             result = conn.multi do
@@ -119,7 +119,7 @@ module Sidekiq
         end
         raise
       ensure
-        retry_and_suppress_redis_timeouts do
+        retry_and_suppress_exceptions do
           redis do |conn|
             processed = "stat:processed:#{Time.now.utc.to_date}"
             result = conn.multi do
@@ -147,19 +147,18 @@ module Sidekiq
 
     # If there is a Redis::TimeoutError, the block passed to this method will be retried up to max_retries times.
     # All exceptions will be swallowed and logged.
-    def retry_and_suppress_redis_timeouts(max_retries = 2)
+    def retry_and_suppress_exceptions(max_retries = 2)
       retry_count = 0
       begin
         yield
-      rescue Redis::TimeoutError
+      rescue StandardError
         retry_count += 1
         if retry_count <= max_retries
+          Sidekiq.logger.debug {"Suppressing and retrying error: #{e.inspect}"}
           retry
         else
           Sidekiq.logger.info {"Exhausted #{max_retries} retries due to Redis timeouts: #{e.inspect}"}
         end
-      rescue StandardError => e
-        Sidekiq.logger.info {"Suppressing error #{e.inspect}"}
       end
     end
   end
