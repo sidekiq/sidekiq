@@ -56,6 +56,8 @@ module Sidekiq
           ack = false
         rescue Exception => ex
           handle_exception(ex, msg || { :message => msgstr })
+          # Don't acknowledge the work since we didn't properly finish it
+          ack = false
           raise
         ensure
           work.acknowledge if ack
