@@ -92,38 +92,45 @@ module Sidekiq
     end
 
     def stats(worker, msg, queue)
-      redis do |conn|
-        conn.multi do
-          conn.sadd('workers', identity)
-          conn.setex("worker:#{identity}:started", EXPIRY, Time.now.to_s)
-          hash = {:queue => queue, :payload => msg, :run_at => Time.now.to_i }
-          conn.setex("worker:#{identity}", EXPIRY, Sidekiq.dump_json(hash))
+      # Do not conflate errors from the job with errors caused by updating stats so calling code can react appropriately
+      retry_and_suppress_redis_timeouts do
+        redis do |conn|
+          conn.multi do
+            conn.sadd('workers', identity)
+            conn.setex("worker:#{identity}:started", EXPIRY, Time.now.to_s)
+            hash = {:queue => queue, :payload => msg, :run_at => Time.now.to_i }
+            conn.setex("worker:#{identity}", EXPIRY, Sidekiq.dump_json(hash))
+          end
         end
       end
 
       begin
         yield
       rescue Exception
-        redis do |conn|
-          failed = "stat:failed:#{Time.now.utc.to_date}"
-          result = conn.multi do
-            conn.incrby("stat:failed", 1)
-            conn.incrby(failed, 1)
+        retry_and_suppress_redis_timeouts do
+          redis do |conn|
+            failed = "stat:failed:#{Time.now.utc.to_date}"
+            result = conn.multi do
+              conn.incrby("stat:failed", 1)
+              conn.incrby(failed, 1)
+            end
+            conn.expire(failed, STATS_TIMEOUT) if result.last == 1
           end
-          conn.expire(failed, STATS_TIMEOUT) if result.last == 1
         end
         raise
       ensure
-        redis do |conn|
-          processed = "stat:processed:#{Time.now.utc.to_date}"
-          result = conn.multi do
-            conn.srem("workers", identity)
-            conn.del("worker:#{identity}")
-            conn.del("worker:#{identity}:started")
-            conn.incrby("stat:processed", 1)
-            conn.incrby(processed, 1)
+        retry_and_suppress_redis_timeouts do
+          redis do |conn|
+            processed = "stat:processed:#{Time.now.utc.to_date}"
+            result = conn.multi do
+              conn.srem("workers", identity)
+              conn.del("worker:#{identity}")
+              conn.del("worker:#{identity}:started")
+              conn.incrby("stat:processed", 1)
+              conn.incrby(processed, 1)
+            end
+            conn.expire(processed, STATS_TIMEOUT) if result.last == 1
           end
-          conn.expire(processed, STATS_TIMEOUT) if result.last == 1
         end
       end
     end
@@ -136,6 +143,24 @@ module Sidekiq
     # been mutated by the worker.
     def cloned(ary)
       Marshal.load(Marshal.dump(ary))
+    end
+
+    # If there is a Redis::TimeoutError, the block passed to this method will be retried up to max_retries times.
+    # All exceptions will be swallowed and logged.
+    def retry_and_suppress_redis_timeouts(max_retries = 2)
+      retry_count = 0
+      begin
+        yield
+      rescue Redis::TimeoutError
+        retry_count += 1
+        if retry_count <= max_retries
+          retry
+        else
+          Sidekiq.logger.info {"Exhausted #{max_retries} retries due to Redis timeouts: #{e.inspect}"}
+        end
+      rescue StandardError => e
+        Sidekiq.logger.info {"Suppressing error #{e.inspect}"}
+      end
     end
   end
 end
