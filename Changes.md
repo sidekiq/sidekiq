@@ -2,7 +2,8 @@
 -----------
 
 - Auto-prune jobs older than one hour from the Workers page [#1508]
-- Fix ReliableFetch issue where a job could be lost when an exception occurs updating Redis stats before the job executes [#1511]
+- Fix issue where a job could be lost when an exception occurs updating
+  Redis stats before the job executes [#1511]
 
 2.17.6
 -----------
