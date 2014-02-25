@@ -4,7 +4,6 @@ require 'sidekiq/logging'
 require 'sidekiq/client'
 require 'sidekiq/worker'
 require 'sidekiq/redis_connection'
-require 'sidekiq/util'
 require 'sidekiq/api'
 
 require 'json'
@@ -20,6 +19,7 @@ module Sidekiq
     :environment => nil,
     :timeout => 8,
     :profile => false,
+    :error_handlers => [],
   }
 
   def self.❨╯°□°❩╯︵┻━┻
@@ -115,6 +115,10 @@ module Sidekiq
 
   def self.poll_interval=(interval)
     self.options[:poll_interval] = interval
+  end
+
+  def self.error_handlers
+    self.options[:error_handlers]
   end
 
 end

@@ -310,7 +310,7 @@ module Sidekiq
     def initialize_logger
       Sidekiq::Logging.initialize_logger(options[:logfile]) if options[:logfile]
 
-      Sidekiq.logger.level = Logger::DEBUG if options[:verbose]
+      Sidekiq.logger.level = ::Logger::DEBUG if options[:verbose]
     end
 
     def write_pid

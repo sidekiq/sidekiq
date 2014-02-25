@@ -139,7 +139,7 @@ module Sidekiq
           sleep(1)
           retry
         else
-          Sidekiq.logger.info {"Exhausted #{max_retries} retries due to Redis timeouts: #{e.inspect}"}
+          handle_exception(e, { :message => "Exhausted #{max_retries} retries"})
         end
       end
     end

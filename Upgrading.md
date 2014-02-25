@@ -22,3 +22,22 @@ changes a few data elements in Redis.  To upgrade cleanly:
   support policy is to support the current and previous major releases
   of Ruby and Rails.  As of February 2014, that's Ruby 2.1, Ruby 2.0, Rails 4.0
   and Rails 3.2.  I will accept PRs to fix issues found by users.
+
+## Error Service Providers
+
+If you previously provided a middleware to capture job errors, you
+should instead provide a global error handler with Sidekiq 3.0.  This
+ensures **any** error within Sidekiq will be logged appropriately, not
+just during job execution.
+
+```ruby
+if Sidekiq::VERSION < '3'
+  # old behavior
+else
+  Sidekiq.configure_server do |config|
+    config.error_handlers << Proc.new {|ex,context| ... }
+  end
+end
+```
+
+Your error handler must respond to `call(exception, context_hash)`.

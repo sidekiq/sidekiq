@@ -1,5 +1,4 @@
 require 'helper'
-require 'sidekiq'
 require 'sidekiq/exception_handler'
 require 'stringio'
 require 'logger'

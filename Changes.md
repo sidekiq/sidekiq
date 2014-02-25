@@ -1,11 +1,13 @@
 3.0.0
 -----------
 
-Please see [Upgrading.md](Upgrading.md) for upgrade notes.
+Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
 
+- **Global Error Handlers** - blocks of code which process errors which
+  occur anywhere within Sidekiq, not just within middleware.
 - **Dead Job Queue** - jobs which run out of retries are now moved to a dead
   job queue.  These jobs must be retried manually or they will expire
-  after 6 months or 10,000 jobs.  The Web UI contains a Dead tab
+  after 6 months or 10,000 jobs.  The Web UI contains a "Dead" tab
   exposing these jobs.
 - **Remove official support for Ruby 1.9**  Things still might work but
   I no longer actively test on it.
