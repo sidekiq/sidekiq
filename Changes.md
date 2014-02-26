@@ -3,7 +3,7 @@
 
 Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
 
-- **Global Error Handlers** - blocks of code which process errors which
+- **Global Error Handlers** - blocks of code which handle errors that
   occur anywhere within Sidekiq, not just within middleware.
 - **Dead Job Queue** - jobs which run out of retries are now moved to a dead
   job queue.  These jobs must be retried manually or they will expire

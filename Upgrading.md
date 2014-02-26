@@ -21,7 +21,7 @@ changes a few data elements in Redis.  To upgrade cleanly:
 * Ruby 1.9 is no longer officially supported.  Sidekiq's official
   support policy is to support the current and previous major releases
   of Ruby and Rails.  As of February 2014, that's Ruby 2.1, Ruby 2.0, Rails 4.0
-  and Rails 3.2.  I will accept PRs to fix issues found by users.
+  and Rails 3.2.  I will consider PRs to fix issues found by users.
 
 ## Error Service Providers
 
@@ -33,9 +33,14 @@ just during job execution.
 ```ruby
 if Sidekiq::VERSION < '3'
   # old behavior
+  Sidekiq.configure_server do |config|
+    config.server_middleware do |chain|
+      chain.add MyErrorService::Middleware
+    end
+  end
 else
   Sidekiq.configure_server do |config|
-    config.error_handlers << Proc.new {|ex,context| ... }
+    config.error_handlers << Proc.new {|ex,context| MyErrorService.notify(ex, context) }
   end
 end
 ```
