@@ -453,6 +453,36 @@ module Sidekiq
         conn.scard("workers")
       end.to_i
     end
+
+    # Prune old worker entries from the Busy set.  Worker entries
+    # can be orphaned if Sidekiq hard crashes while processing jobs.
+    # Default is to delete worker entries older than one hour.
+    #
+    # Returns the number of records removed.
+    def prune(older_than=60*60)
+      to_rem = []
+      Sidekiq.redis do |conn|
+        conn.smembers('workers').each do |w|
+          msg = conn.get("worker:#{w}")
+          if !msg
+            to_rem << w
+          else
+            m = Sidekiq.load_json(msg)
+            run_at = Time.at(m['run_at'])
+            # prune jobs older than one hour
+            if run_at < (Time.now - older_than)
+              to_rem << w
+            else
+            end
+          end
+        end
+      end
+
+      if to_rem.size > 0
+        Sidekiq.redis { |conn| conn.srem('workers', to_rem) }
+      end
+      to_rem.size
+    end
   end
 
 end

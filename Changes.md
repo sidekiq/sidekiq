@@ -26,6 +26,7 @@ Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
 -----------
 
 - Auto-prune jobs older than one hour from the Workers page [#1508]
+- Add Sidekiq::Workers#prune which can perform the auto-pruning.
 - Fix issue where a job could be lost when an exception occurs updating
   Redis stats before the job executes [#1511]
 
