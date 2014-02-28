@@ -362,6 +362,22 @@ class TestApi < Sidekiq::Test
         assert_equal 'default', y['queue']
         assert_equal Time.now.year, DateTime.parse(z).year
       end
+
+      s = '12346'
+      data = Sidekiq.dump_json({ 'payload' => {}, 'queue' => 'default', 'run_at' => (Time.now.to_i - 2*60*60) })
+      Sidekiq.redis do |c|
+        c.multi do
+          c.sadd('workers', s)
+          c.set("worker:#{s}", data)
+          c.set("worker:#{s}:started", Time.now.to_s)
+          c.sadd('workers', '123457')
+        end
+      end
+
+      assert_equal 3, w.size
+      count = w.prune
+      assert_equal 1, w.size
+      assert_equal 2, count
     end
 
     it 'can reschedule jobs' do

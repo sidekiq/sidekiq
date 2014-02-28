@@ -16,7 +16,7 @@
       <td>
         <div class="args"><%= display_args(msg['payload']['args']) %></div>
       </td>
-      <td><%= relative_time(run_at) %></td>
+      <td><%= relative_time(run_at.is_a?(String) ? DateTime.parse(run_at) : run_at) %></td>
     </tr>
   <% end %>
 </table>

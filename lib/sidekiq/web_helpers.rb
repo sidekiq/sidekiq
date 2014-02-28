@@ -47,38 +47,11 @@ module Sidekiq
       end
     end
 
-    MAX_JOB_DURATION = 60*60
-
     def workers
       @workers ||= begin
-        to_rem = []
-        workers = Sidekiq.redis do |conn|
-          conn.smembers('workers').map do |w|
-            msg = conn.get("worker:#{w}")
-            if !msg
-              to_rem << w
-              nil
-            else
-              m = Sidekiq.load_json(msg)
-              run_at = Time.at(m['run_at'])
-              # prune jobs older than one hour
-              if run_at < (Time.now - MAX_JOB_DURATION)
-                to_rem << w
-                nil
-              else
-                [w, m, run_at]
-              end
-            end
-          end.compact.sort { |x| x[1] ? -1 : 1 }
+        Sidekiq::Workers.new.tap do |w|
+          w.prune
         end
-
-        # Detect and clear out any orphaned worker records.
-        # These can be left in Redis if Sidekiq crashes hard
-        # while processing jobs.
-        if to_rem.size > 0
-          Sidekiq.redis { |conn| conn.srem('workers', to_rem) }
-        end
-        workers
       end
     end
 
