@@ -6,10 +6,12 @@ changes a few data elements in Redis.  To upgrade cleanly:
 * Upgrade to the latest Sidekiq 2.x and run it for a few weeks.
   `gem 'sidekiq', '< 3'`
   This is only needed if you have retries pending.
-* Remove any usage of the following APIs:
+* API changes:
   - `Sidekiq::Client.registered_workers` replaced by `Sidekiq::Workers.new`
   - `Sidekiq::Client.registered_queues` replaced by `Sidekiq::Queue.all`
   - `Sidekiq::Worker#retries_exhausted` replaced by `Sidekiq::Worker.sidekiq_retries_exhausted`
+  - `Sidekiq::Workers#each` has removed the third block argument `worker, msg, started_at`
+    since it was redundant with `msg['run_at']`
 * Redis-to-Go is no longer transparently activated on Heroku so as to not play
   favorites with any particular Redis service. You need to set a config option
   for your app:
