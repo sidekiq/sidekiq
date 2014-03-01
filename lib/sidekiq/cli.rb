@@ -6,6 +6,7 @@ require 'optparse'
 require 'erb'
 
 require 'sidekiq'
+require 'sidekiq/banner'
 require 'sidekiq/util'
 
 module Sidekiq
@@ -18,6 +19,7 @@ module Sidekiq
   class Shutdown < Interrupt; end
 
   class CLI
+    include Banner
     include Util
     include Singleton
 
@@ -52,6 +54,19 @@ module Sidekiq
           end
         rescue ArgumentError
           puts "Signal #{sig} not supported"
+        end
+      end
+
+      # Print logo and banner for development
+      if options[:environment] == 'development'
+        if Sidekiq::NAME == 'Sidekiq Pro'
+          puts "\e[#{31}m"
+          print_pro_banner
+          puts "\e[0m"
+        else
+          puts "\e[#{31}m"
+          print_oss_banner
+          puts "\e[0m"
         end
       end
 
