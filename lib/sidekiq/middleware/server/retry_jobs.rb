@@ -108,15 +108,24 @@ module Sidekiq
 
         private
 
+        DEAD_JOB_TIMEOUT = 180 * 24 * 60 * 60 # 6 months
+        MAX_JOBS = 10_000
+
         def retries_exhausted(worker, msg)
           logger.debug { "Dropping message after hitting the retry maximum: #{msg}" }
-          if worker.respond_to?(:retries_exhausted)
-            logger.warn { "Defining #{worker.class.name}#retries_exhausted as a method is deprecated, use `sidekiq_retries_exhausted` callback instead http://git.io/Ijju8g" }
-            worker.retries_exhausted(*msg['args'])
-          elsif worker.sidekiq_retries_exhausted_block?
+          if worker.sidekiq_retries_exhausted_block?
             worker.sidekiq_retries_exhausted_block.call(msg)
+          else
+            Sidekiq.logger.info { "Adding a dead #{msg['class']} job" }
+            payload = Sidekiq.dump_json(msg)
+            Sidekiq.redis do |conn|
+              conn.multi do
+                conn.zadd('dead', Time.now.to_f, payload)
+                conn.zremrangebyscore('dead', '-inf', (Time.now.to_i - DEAD_JOB_TIMEOUT).to_f)
+                conn.zremrangebyrank('dead', 0, -MAX_JOBS)
+              end
+            end
           end
-
         rescue Exception => e
           handle_exception(e, { :context => "Error calling retries_exhausted" })
         end

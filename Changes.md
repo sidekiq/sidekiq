@@ -1,3 +1,27 @@
+3.0.0
+-----------
+
+Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
+
+- **Global Error Handlers** - blocks of code which handle errors that
+  occur anywhere within Sidekiq, not just within middleware.
+- **Dead Job Queue** - jobs which run out of retries are now moved to a dead
+  job queue.  These jobs must be retried manually or they will expire
+  after 6 months or 10,000 jobs.  The Web UI contains a "Dead" tab
+  exposing these jobs.
+- **Remove official support for Ruby 1.9**  Things still might work but
+  I no longer actively test on it.
+- **Remove built-in support for Redis-to-Go**.
+  Heroku users: `heroku config:set REDIS_PROVIDER=REDISTOGO_URL`
+- Removed 'sidekiq/yaml\_patch', this was never documented or recommended.
+- Removed the 'started' worker data, it originally provided compatibility with resque-web
+  but overlaps the 'run\_at' worker data.
+- **Remove built-in error integration for Airbrake, Honeybadger, ExceptionNotifier and Exceptional**.
+  Each error gem should provide its own Sidekiq integration.  Update your error gem to the latest
+  version to pick up Sidekiq support.
+- Remove deprecated Sidekiq::Client.registered\_\* APIs
+- Remove deprecated support for the old Sidekiq::Worker#retries\_exhausted method.
+
 2.17.7
 -----------
 

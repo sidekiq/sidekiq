@@ -196,24 +196,6 @@ class TestRetry < Sidekiq::Test
       let(:worker) { Minitest::Mock.new }
       let(:msg){ {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>Time.now.to_f, "retry"=>3, "retry_count"=>3} }
 
-      describe "worker method" do
-        let(:worker) do
-          klass = Class.new do
-            include Sidekiq::Worker
-
-            def self.name; "Worker"; end
-
-            def retries_exhausted(*args)
-              args << "retried_method"
-            end
-          end
-        end
-
-        it 'calls worker.retries_exhausted after too many retries' do
-          assert_equal [1,2, "foo", "retried_method"], handler.__send__(:retries_exhausted, worker.new, msg)
-        end
-      end
-
       describe "worker block" do
         let(:worker) do
           Class.new do

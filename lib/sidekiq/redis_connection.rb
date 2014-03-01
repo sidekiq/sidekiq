@@ -68,9 +68,7 @@ module Sidekiq
       end
 
       def determine_redis_provider
-        # REDISTOGO_URL is only support for legacy reasons
-        provider = ENV['REDIS_PROVIDER'] || 'REDIS_URL'
-        ENV[provider] || ENV['REDISTOGO_URL']
+        ENV[ENV['REDIS_PROVIDER'] || 'REDIS_URL']
       end
 
     end

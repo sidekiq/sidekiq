@@ -24,6 +24,7 @@ module Sidekiq
       "Queues"    => 'queues',
       "Retries"   => 'retries',
       "Scheduled" => 'scheduled',
+      "Dead"      => 'morgue',
     }
 
     class << self
@@ -69,6 +70,59 @@ module Sidekiq
       Sidekiq::Job.new(params[:key_val], params[:name]).delete
       redirect_with_query("#{root_path}queues/#{params[:name]}")
     end
+
+    get '/morgue' do
+      @count = (params[:count] || 25).to_i
+      (@current_page, @total_size, @dead) = page("dead", params[:page], @count)
+      @dead = @dead.map {|msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+      erb :morgue
+    end
+
+    get "/morgue/:key" do
+      halt 404 unless params['key']
+      @dead = Sidekiq::DeadSet.new.fetch(*parse_params(params['key'])).first
+      redirect "#{root_path}morgue" if @dead.nil?
+      erb :dead
+    end
+
+    post '/morgue' do
+      halt 404 unless params['key']
+
+      params['key'].each do |key|
+        job = Sidekiq::DeadSet.new.fetch(*parse_params(key)).first
+        next unless job
+        if params['retry']
+          job.retry
+        elsif params['delete']
+          job.delete
+        end
+      end
+      redirect_with_query("#{root_path}morgue")
+    end
+
+    post "/morgue/all/delete" do
+      Sidekiq::DeadSet.new.clear
+      redirect "#{root_path}morgue"
+    end
+
+    post "/morgue/all/retry" do
+      Sidekiq::DeadSet.new.retry_all
+      redirect "#{root_path}morgue"
+    end
+
+    post "/morgue/:key" do
+      halt 404 unless params['key']
+      job = Sidekiq::DeadSet.new.fetch(*parse_params(params['key'])).first
+      if job
+        if params['retry']
+          job.retry
+        elsif params['delete']
+          job.delete
+        end
+      end
+      redirect_with_query("#{root_path}morgue")
+    end
+
 
     get '/retries' do
       @count = (params[:count] || 25).to_i

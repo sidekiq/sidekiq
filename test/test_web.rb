@@ -32,7 +32,6 @@ class TestWeb < Sidekiq::Test
       Sidekiq.redis do |conn|
         identity = 'foo:1234-123abc:default'
         conn.sadd('workers', identity)
-        conn.setex("worker:#{identity}:started", 10, Time.now.to_s)
         hash = {:queue => 'critical', :payload => { 'class' => WebWorker.name, 'args' => [1,'abc'] }, :run_at => Time.now.to_i }
         conn.setex("worker:#{identity}", 10, Sidekiq.dump_json(hash))
       end
@@ -283,7 +282,6 @@ class TestWeb < Sidekiq::Test
       Sidekiq.redis do |conn|
         identity = 'foo:1234-123abc:default'
         conn.sadd('workers', identity)
-        conn.setex("worker:#{identity}:started", 10, Time.now.to_s)
         hash = {:queue => 'critical', :payload => { 'class' => "FailWorker", 'args' => ["<a>hello</a>"] }, :run_at => Time.now.to_i }
         conn.setex("worker:#{identity}", 10, Sidekiq.dump_json(hash))
       end
@@ -394,6 +392,41 @@ class TestWeb < Sidekiq::Test
       end
     end
 
+    describe 'dead jobs' do
+      it 'shows empty index' do
+        get 'morgue'
+        assert_equal 200, last_response.status
+      end
+
+      it 'shows index with jobs' do
+        (_, score) = add_dead
+        get 'morgue'
+        assert_equal 200, last_response.status
+        assert_match /#{score}/, last_response.body
+      end
+
+      it 'can delete all dead' do
+        3.times { add_dead }
+
+        assert_equal 3, Sidekiq::DeadSet.new.size
+        post "/morgue/all/delete", 'delete' => 'Delete'
+        assert_equal 0, Sidekiq::DeadSet.new.size
+        assert_equal 302, last_response.status
+        assert_equal 'http://example.org/morgue', last_response.header['Location']
+      end
+
+      it 'can retry a dead job' do
+        params = add_dead
+        post "/morgue/#{job_params(*params)}", 'retry' => 'Retry'
+        assert_equal 302, last_response.status
+        assert_equal 'http://example.org/morgue', last_response.header['Location']
+
+        get '/queues/foo'
+        assert_equal 200, last_response.status
+        assert_match /#{params.first['args'][2]}/, last_response.body
+      end
+    end
+
     def add_scheduled
       score = Time.now.to_f
       msg = { 'class' => 'HardWorker',
@@ -421,6 +454,22 @@ class TestWeb < Sidekiq::Test
       [msg, score]
     end
 
+    def add_dead
+      msg = { 'class' => 'HardWorker',
+              'args' => ['bob', 1, Time.now.to_f],
+              'queue' => 'foo',
+              'error_message' => 'Some fake message',
+              'error_class' => 'RuntimeError',
+              'retry_count' => 0,
+              'failed_at' => Time.now.utc,
+              'jid' => SecureRandom.hex(12) }
+      score = Time.now.to_f
+      Sidekiq.redis do |conn|
+        conn.zadd('dead', score, Sidekiq.dump_json(msg))
+      end
+      [msg, score]
+    end
+
     def add_xss_retry
       msg = { 'class' => 'FailWorker',
               'args' => ['<a>hello</a>'],
@@ -441,8 +490,8 @@ class TestWeb < Sidekiq::Test
       process_id = rand(1000)
       msg = "{\"queue\":\"default\",\"payload\":{\"retry\":true,\"queue\":\"default\",\"timeout\":20,\"backtrace\":5,\"class\":\"HardWorker\",\"args\":[\"bob\",10,5],\"jid\":\"2b5ad2b016f5e063a1c62872\"},\"run_at\":1361208995}"
       Sidekiq.redis do |conn|
-        conn.sadd("workers", "mercury.home:#{process_id}-70215157189060:started")
-        conn.set("worker:mercury.home:#{process_id}-70215157189060:started", msg)
+        conn.sadd("workers", "mercury.home:#{process_id}-70215157189060:default")
+        conn.set("worker:mercury.home:#{process_id}-70215157189060:default", msg)
       end
     end
   end

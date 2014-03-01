@@ -44,6 +44,10 @@ module Sidekiq
       Sidekiq.redis {|c| c.zcard('retry') }
     end
 
+    def dead_size
+      Sidekiq.redis {|c| c.zcard('dead') }
+    end
+
     class History
       def initialize(days_previous, start_date = nil)
         @days_previous = days_previous
@@ -209,6 +213,7 @@ module Sidekiq
 
   class SortedEntry < Job
     attr_reader :score
+    attr_reader :parent
 
     def initialize(parent, score, item)
       super(item)
@@ -243,11 +248,11 @@ module Sidekiq
     end
 
     def retry
-      raise "Retry not available on jobs not in the Retry queue." unless item["failed_at"]
+      raise "Retry not available on jobs which have not failed" unless item["failed_at"]
       Sidekiq.redis do |conn|
         results = conn.multi do
-          conn.zrangebyscore('retry', score, score)
-          conn.zremrangebyscore('retry', score, score)
+          conn.zrangebyscore(parent.name, score, score)
+          conn.zremrangebyscore(parent.name, score, score)
         end.first
         results.map do |message|
           msg = Sidekiq.load_json(message)
@@ -398,6 +403,18 @@ module Sidekiq
     end
   end
 
+  class DeadSet < SortedSet
+    def initialize
+      super 'dead'
+    end
+
+    def retry_all
+      while size > 0
+        each(&:retry)
+      end
+    end
+  end
+
 
   ##
   # Programmatic access to the current active worker set.
@@ -410,11 +427,11 @@ module Sidekiq
   #
   #    workers = Sidekiq::Workers.new
   #    workers.size => 2
-  #    workers.each do |name, work, started_at|
+  #    workers.each do |name, work|
   #      # name is a unique identifier per worker
   #      # work is a Hash which looks like:
   #      # { 'queue' => name, 'run_at' => timestamp, 'payload' => msg }
-  #      # started_at is a String rep of the time when the worker started working on the job
+  #      # run_at is an epoch Integer.
   #    end
 
   class Workers
@@ -424,10 +441,9 @@ module Sidekiq
       Sidekiq.redis do |conn|
         workers = conn.smembers("workers")
         workers.each do |w|
-          json = conn.get("worker:#{w}")
-          next unless json
-          msg = Sidekiq.load_json(json)
-          block.call(w, msg, Time.at(msg['run_at']).to_s)
+          msg = conn.get("worker:#{w}")
+          next unless msg
+          block.call(w, Sidekiq.load_json(msg))
         end
       end
     end
