@@ -58,7 +58,7 @@ module Sidekiq
       end
 
       # Print logo and banner for development
-      if options[:environment] == 'development'
+      if environment == 'development'
         if Sidekiq::NAME == 'Sidekiq Pro'
           puts "\e[#{31}m"
           print_pro_banner
