@@ -48,11 +48,7 @@ module Sidekiq
     end
 
     def workers
-      @workers ||= begin
-        Sidekiq::Workers.new.tap do |w|
-          w.prune
-        end
-      end
+      @workers ||= Sidekiq::Workers.new
     end
 
     def stats

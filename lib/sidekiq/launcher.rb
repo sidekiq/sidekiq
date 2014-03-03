@@ -54,9 +54,15 @@ module Sidekiq
       end
     end
 
-    def procline(tag)
-      $0 = manager.procline(tag)
-      manager.after(5) { procline(tag) }
+    def start_heartbeat(tag)
+      manager.heartbeat({
+        'hostname' => hostname,
+        'pid' => $$,
+        'process_id' => process_id,
+        'tag' => tag,
+        'concurrency' => @options[:concurrency],
+        'queues' => @options[:queues].uniq,
+      })
     end
   end
 end

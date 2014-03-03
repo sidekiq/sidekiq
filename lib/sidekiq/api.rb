@@ -277,6 +277,15 @@ module Sidekiq
       Sidekiq.redis {|c| c.zcard(name) }
     end
 
+    def clear
+      Sidekiq.redis do |conn|
+        conn.del(name)
+      end
+    end
+  end
+
+  class JobSet < SortedSet
+
     def schedule(timestamp, message)
       Sidekiq.redis do |conn|
         conn.zadd(name, timestamp.to_f.to_s, Sidekiq.dump_json(message))
@@ -354,11 +363,6 @@ module Sidekiq
       end
     end
 
-    def clear
-      Sidekiq.redis do |conn|
-        conn.del(name)
-      end
-    end
   end
 
   ##
@@ -373,7 +377,7 @@ module Sidekiq
   #     retri.args[0] == 'User' &&
   #     retri.args[1] == 'setup_new_subscriber'
   #   end.map(&:delete)
-  class ScheduledSet < SortedSet
+  class ScheduledSet < JobSet
     def initialize
       super 'schedule'
     end
@@ -391,7 +395,7 @@ module Sidekiq
   #     retri.args[0] == 'User' &&
   #     retri.args[1] == 'setup_new_subscriber'
   #   end.map(&:delete)
-  class RetrySet < SortedSet
+  class RetrySet < JobSet
     def initialize
       super 'retry'
     end
@@ -403,7 +407,7 @@ module Sidekiq
     end
   end
 
-  class DeadSet < SortedSet
+  class DeadSet < JobSet
     def initialize
       super 'dead'
     end
@@ -415,6 +419,24 @@ module Sidekiq
     end
   end
 
+  class ProcessSet < SortedSet
+    def initialize
+      super 'processes'
+    end
+
+    def each(&block)
+      now = Time.now.to_f
+      _, procs = Sidekiq.redis do |conn|
+        conn.multi do
+          conn.zremrangebyscore('processes', '-inf', now - 5.1)
+          conn.zrange name, 0, -1
+        end
+      end
+      procs.each do |proc_data|
+        yield Sidekiq.load_json(proc_data)
+      end
+    end
+  end
 
   ##
   # Programmatic access to the current active worker set.
@@ -433,18 +455,24 @@ module Sidekiq
   #      # { 'queue' => name, 'run_at' => timestamp, 'payload' => msg }
   #      # run_at is an epoch Integer.
   #    end
-
   class Workers
     include Enumerable
 
     def each(&block)
-      Sidekiq.redis do |conn|
+      live = ProcessSet.new.map {|x| "#{x['hostname']}:#{x['process_id']}-" }
+      p live
+      msgs = Sidekiq.redis do |conn|
         workers = conn.smembers("workers")
-        workers.each do |w|
-          msg = conn.get("worker:#{w}")
-          next unless msg
-          block.call(w, Sidekiq.load_json(msg))
-        end
+        p workers
+        to_rem = workers.delete_if {|w| !live.any? {|identity| w =~ /\A#{identity}/ } }
+        conn.srem('workers', *to_rem) unless to_rem.empty?
+
+        workers.empty? ? {} : conn.mapped_mget(*workers.map {|w| "worker:#{w}" })
+      end
+
+      msgs.each do |w, msg|
+        next unless msg
+        block.call(w, Sidekiq.load_json(msg))
       end
     end
 
@@ -452,36 +480,6 @@ module Sidekiq
       Sidekiq.redis do |conn|
         conn.scard("workers")
       end.to_i
-    end
-
-    # Prune old worker entries from the Busy set.  Worker entries
-    # can be orphaned if Sidekiq hard crashes while processing jobs.
-    # Default is to delete worker entries older than one hour.
-    #
-    # Returns the number of records removed.
-    def prune(older_than=60*60)
-      to_rem = []
-      Sidekiq.redis do |conn|
-        conn.smembers('workers').each do |w|
-          msg = conn.get("worker:#{w}")
-          if !msg
-            to_rem << w
-          else
-            m = Sidekiq.load_json(msg)
-            run_at = Time.at(m['run_at'])
-            # prune jobs older than one hour
-            if run_at < (Time.now - older_than)
-              to_rem << w
-            else
-            end
-          end
-        end
-      end
-
-      if to_rem.size > 0
-        Sidekiq.redis { |conn| conn.srem('workers', to_rem) }
-      end
-      to_rem.size
     end
   end
 

@@ -69,8 +69,8 @@ module Sidekiq
 
     private
 
-    def identity
-      @str ||= "#{hostname}:#{process_id}-#{Thread.current.object_id}:default"
+    def thread_identity
+      @str ||= "#{identity}-#{Thread.current.object_id}"
     end
 
     def stats(worker, msg, queue)
@@ -80,8 +80,8 @@ module Sidekiq
         hash = Sidekiq.dump_json({:queue => queue, :payload => msg, :run_at => Time.now.to_i })
         redis do |conn|
           conn.multi do
-            conn.sadd('workers', identity)
-            conn.setex("worker:#{identity}", EXPIRY, hash)
+            conn.sadd('workers', thread_identity)
+            conn.setex("worker:#{thread_identity}", EXPIRY, hash)
           end
         end
       end
@@ -105,8 +105,8 @@ module Sidekiq
           redis do |conn|
             processed = "stat:processed:#{Time.now.utc.to_date}"
             result = conn.multi do
-              conn.srem("workers", identity)
-              conn.del("worker:#{identity}")
+              conn.srem("workers", thread_identity)
+              conn.del("worker:#{thread_identity}")
               conn.incrby("stat:processed", 1)
               conn.incrby(processed, 1)
             end

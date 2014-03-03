@@ -33,5 +33,9 @@ module Sidekiq
     def hostname
       Socket.gethostname
     end
+
+    def identity
+      @@identity ||= "#{hostname}:#{process_id}"
+    end
   end
 end

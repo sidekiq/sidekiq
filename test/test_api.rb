@@ -1,6 +1,7 @@
 require 'helper'
 
 class TestApi < Sidekiq::Test
+
   describe "stats" do
     before do
       Sidekiq.redis {|c| c.flushdb }
@@ -160,6 +161,8 @@ class TestApi < Sidekiq::Test
   end
 
   describe 'with an empty database' do
+    include Sidekiq::Util
+
     before do
       Sidekiq.redis {|c| c.flushdb }
     end
@@ -346,7 +349,10 @@ class TestApi < Sidekiq::Test
         assert false
       end
 
-      s = '12345'
+      Sidekiq.redis do |conn|
+        conn.zadd('processes', Time.now.to_f, Sidekiq.dump_json({ 'pid' => $$, 'hostname' => hostname, 'process_id' => process_id }))
+      end
+      s = "worker:#{hostname}:#{process_id}-12345"
       data = Sidekiq.dump_json({ 'payload' => {}, 'queue' => 'default', 'run_at' => Time.now.to_i })
       Sidekiq.redis do |c|
         c.multi do
@@ -357,26 +363,24 @@ class TestApi < Sidekiq::Test
 
       assert_equal 1, w.size
       w.each do |x, y|
-        assert_equal s, x
+        assert_equal "worker:#{s}", x
         assert_equal 'default', y['queue']
         assert_equal Time.now.year, Time.at(y['run_at']).year
       end
 
-      s = '12346'
+      s = "#{hostname}:#{process_id}-12346"
       data = Sidekiq.dump_json({ 'payload' => {}, 'queue' => 'default', 'run_at' => (Time.now.to_i - 2*60*60) })
       Sidekiq.redis do |c|
         c.multi do
           c.sadd('workers', s)
           c.set("worker:#{s}", data)
-          c.set("worker:#{s}:started", Time.now.to_s)
-          c.sadd('workers', '123457')
+          c.sadd('workers', "#{hostname}:#{process_id}2-12347")
         end
       end
 
       assert_equal 3, w.size
-      count = w.prune
-      assert_equal 1, w.size
-      assert_equal 2, count
+      w.each { }
+      assert_equal 2, w.size
     end
 
     it 'can reschedule jobs' do

@@ -132,11 +132,26 @@ module Sidekiq
       @threads[proxy_id] = thr
     end
 
-    def procline(tag)
-      "sidekiq #{Sidekiq::VERSION} #{tag}[#{@busy.size} of #{@count} busy]#{stopped? ? ' stopping' : ''}"
+    def heartbeat(data)
+      $0 = "sidekiq #{Sidekiq::VERSION} #{data['tag']}[#{@busy.size} of #{data['concurrency']} busy]#{stopped? ? ' stopping' : ''}"
+      ❤(data)
+      after(5) do
+        heartbeat(data)
+      end
     end
 
     private
+
+    def ❤(data)
+      now = Time.now.to_f
+      proc_data = Sidekiq.dump_json(data.merge('busy' => @busy.size, 'at' => now))
+      Sidekiq.redis do |conn|
+        conn.multi do
+          conn.zadd("processes", proc_data, now)
+          conn.zremrangebyscore('processes', '-inf', now - 5.1)
+        end
+      end
+    end
 
     def clear_worker_set
       # Clearing workers in Redis
