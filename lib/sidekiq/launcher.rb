@@ -56,10 +56,11 @@ module Sidekiq
 
     def start_heartbeat(tag)
       manager.heartbeat({
+        'key' => "#{hostname}:#{$$}",
         'hostname' => hostname,
         'pid' => $$,
         'process_id' => process_id,
-        'tag' => tag,
+        'tag' => tag.strip,
         'concurrency' => @options[:concurrency],
         'queues' => @options[:queues].uniq,
       })

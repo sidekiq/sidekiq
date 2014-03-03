@@ -419,22 +419,30 @@ module Sidekiq
     end
   end
 
-  class ProcessSet < SortedSet
-    def initialize
-      super 'processes'
-    end
+  ##
+  # Enumerates the set of Sidekiq processes which are actively working
+  # right now.  Each process send a heartbeat to Redis every 5 seconds
+  # so this set should be relatively accurate, barring network partitions.
+  class ProcessSet
+    include Enumerable
 
     def each(&block)
-      now = Time.now.to_f
-      _, procs = Sidekiq.redis do |conn|
-        conn.multi do
-          conn.zremrangebyscore('processes', '-inf', now - 5.1)
-          conn.zrange name, 0, -1
+      procs = Sidekiq.redis { |conn| conn.hgetall('processes') }
+      cutoff = Time.now.to_f - 5
+
+      to_prune = []
+      procs.map {|name, data| Sidekiq.load_json(data) }.
+            sort_by {|x| x['key'] }.
+            each do |pdata|
+        if pdata['at'] < cutoff
+          to_prune << pdata['key']; next
+        else
+          yield pdata
         end
       end
-      procs.each do |proc_data|
-        yield Sidekiq.load_json(proc_data)
-      end
+
+      Sidekiq.redis {|conn| conn.hdel('processes', *to_prune) } unless to_prune.empty?
+      nil
     end
   end
 
@@ -459,12 +467,10 @@ module Sidekiq
     include Enumerable
 
     def each(&block)
-      live = ProcessSet.new.map {|x| "#{x['hostname']}:#{x['process_id']}-" }
-      p live
+      live = ProcessSet.new.map {|x| /\A#{x['hostname']}:#{x['process_id']}-/ }
       msgs = Sidekiq.redis do |conn|
         workers = conn.smembers("workers")
-        p workers
-        to_rem = workers.delete_if {|w| !live.any? {|identity| w =~ /\A#{identity}/ } }
+        to_rem = workers.delete_if {|w| !live.any? {|identity| w =~ identity } }
         conn.srem('workers', *to_rem) unless to_rem.empty?
 
         workers.empty? ? {} : conn.mapped_mget(*workers.map {|w| "worker:#{w}" })

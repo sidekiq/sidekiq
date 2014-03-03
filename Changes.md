@@ -9,6 +9,8 @@ Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
   job queue.  These jobs must be retried manually or they will expire
   after 6 months or 10,000 jobs.  The Web UI contains a "Dead" tab
   exposing these jobs.
+- **Process Heartbeat** - each Sidekiq process will ping Redis every 5
+  seconds to give an accurate summary of the Sidekiq population at work.
 - **Remove official support for Ruby 1.9**  Things still might work but
   I no longer actively test on it.
 - **Remove built-in support for Redis-to-Go**.

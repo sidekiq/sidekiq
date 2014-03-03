@@ -143,12 +143,11 @@ module Sidekiq
     private
 
     def ❤(data)
-      now = Time.now.to_f
-      proc_data = Sidekiq.dump_json(data.merge('busy' => @busy.size, 'at' => now))
-      Sidekiq.redis do |conn|
-        conn.multi do
-          conn.zadd("processes", proc_data, now)
-          conn.zremrangebyscore('processes', '-inf', now - 5.1)
+      watchdog('heartbeat') do
+        now = Time.now.to_f
+        proc_data = Sidekiq.dump_json(data.merge('busy' => @busy.size, 'at' => now))
+        Sidekiq.redis do |conn|
+          conn.hset("processes", data['key'], proc_data)
         end
       end
     end

@@ -342,6 +342,20 @@ class TestApi < Sidekiq::Test
       assert_equal 0, r.size
     end
 
+    it 'can enumerate processes' do
+      odata = { 'pid' => 123, 'hostname' => hostname, 'process_id' => process_id, 'key' => "#{hostname}:123", 'at' => Time.now.to_f - 5 }
+      pdata = { 'pid' => $$, 'hostname' => hostname, 'process_id' => process_id, 'key' => "#{hostname}:#{$$}", 'at' => Time.now.to_f }
+      Sidekiq.redis do |conn|
+        conn.hset('processes', odata['key'], Sidekiq.dump_json(odata))
+        conn.hset('processes', pdata['key'], Sidekiq.dump_json(pdata))
+      end
+
+      ps = Sidekiq::ProcessSet.new.to_a
+      assert_equal 1, ps.size
+      data = ps.first
+      assert_equal pdata, data
+    end
+
     it 'can enumerate workers' do
       w = Sidekiq::Workers.new
       assert_equal 0, w.size
@@ -349,9 +363,11 @@ class TestApi < Sidekiq::Test
         assert false
       end
 
+      pdata = { 'pid' => $$, 'hostname' => hostname, 'process_id' => process_id, 'key' => "#{hostname}:#{$$}", 'at' => Time.now.to_f }
       Sidekiq.redis do |conn|
-        conn.zadd('processes', Time.now.to_f, Sidekiq.dump_json({ 'pid' => $$, 'hostname' => hostname, 'process_id' => process_id }))
+        conn.hset('processes', pdata['key'], Sidekiq.dump_json(pdata))
       end
+
       s = "worker:#{hostname}:#{process_id}-12345"
       data = Sidekiq.dump_json({ 'payload' => {}, 'queue' => 'default', 'run_at' => Time.now.to_i })
       Sidekiq.redis do |c|
