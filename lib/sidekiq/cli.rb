@@ -87,6 +87,9 @@ module Sidekiq
           require 'ruby-prof'
           RubyProf.start
         end
+        if cb = Sidekiq.options[:process_lifecycle][:start]
+          cb.call
+        end
         launcher.run
 
         while readable_io = IO.select([self_read])
@@ -96,6 +99,9 @@ module Sidekiq
       rescue Interrupt
         logger.info 'Shutting down'
         launcher.stop
+        if cb = Sidekiq.options[:process_lifecycle][:shutdown]
+          cb.call
+        end
         # Explicitly exit so busy Processor threads can't block
         # process shutdown.
         exit(0)
@@ -124,6 +130,9 @@ module Sidekiq
       when 'USR1'
         Sidekiq.logger.info "Received USR1, no longer accepting new work"
         launcher.manager.async.stop
+        if cb = Sidekiq.options[:process_lifecycle][:quiet]
+          cb.call
+        end
       when 'USR2'
         if Sidekiq.options[:logfile]
           Sidekiq.logger.info "Received USR2, reopening log file"
