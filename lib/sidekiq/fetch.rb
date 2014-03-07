@@ -140,10 +140,10 @@ module Sidekiq
       end
     end
 
-    # Creating the Redis#blpop command takes into account any
-    # configured queue weights. By default Redis#blpop returns
+    # Creating the Redis#brpop command takes into account any
+    # configured queue weights. By default Redis#brpop returns
     # data from the first queue that has pending elements. We
-    # recreate the queue command each time we invoke Redis#blpop
+    # recreate the queue command each time we invoke Redis#brpop
     # to honor weights and avoid queue starvation.
     def queues_cmd
       queues = @strictly_ordered_queues ? @unique_queues.dup : @queues.shuffle.uniq
