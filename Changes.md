@@ -27,6 +27,7 @@ Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
 - Remove deprecated support for the old Sidekiq::Worker#retries\_exhausted method.
 - Remove usage of the term 'Worker' in the UI for clarity.  Users would call both threads and
   processes 'workers'.  Instead, use "Thread", "Process" or "Job".
+- Add new 💣 alias for #clear in API.
 
 2.17.7
 -----------
