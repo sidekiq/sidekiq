@@ -49,12 +49,3 @@
     </tr>
   <% end %>
 </table>
-<% if workers_size > 0 %>
-  <div class="row">
-    <div class="col-sm-2 pull-right">
-      <form action="<%= root_path %>reset" method="post">
-        <button class="btn btn-primary btn-block" type="submit"><%= t('ClearWorkerList') %></button>
-      </form>
-    </div>
-  </div>
-<% end %>

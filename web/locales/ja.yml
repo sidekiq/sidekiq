@@ -12,7 +12,6 @@ ja:
   Scheduled: 予定
   Retries: 再試行
   Enqueued: 待機状態
-  ClearWorkerList: 動作中の作業を停止
   Worker: 動作中の作業
   Workers: 動作中の作業
   LivePoll: ポーリング開始

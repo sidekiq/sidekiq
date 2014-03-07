@@ -76,26 +76,6 @@ class TestWeb < Sidekiq::Test
       end
     end
 
-    it 'can clear an empty worker list' do
-      post '/reset'
-      assert_equal 302, last_response.status
-    end
-
-    it 'can clear a non-empty worker list' do
-      Sidekiq.redis do |conn|
-        identity = 'foo'
-        conn.sadd('workers', identity)
-      end
-
-      post '/reset'
-
-      assert_equal 302, last_response.status
-
-      Sidekiq.redis do |conn|
-        refute conn.smembers('workers').any?
-      end
-    end
-
     it 'can delete a job' do
       Sidekiq.redis do |conn|
         conn.rpush('queue:foo', "{}")

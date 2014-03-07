@@ -56,11 +56,6 @@ module Sidekiq
       erb :queue
     end
 
-    post "/reset" do
-      reset_worker_list
-      redirect root_path
-    end
-
     post "/queues/:name" do
       Sidekiq::Queue.new(params[:name]).clear
       redirect "#{root_path}queues"
