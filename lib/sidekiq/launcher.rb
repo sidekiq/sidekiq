@@ -58,6 +58,7 @@ module Sidekiq
       manager.heartbeat({
         'key' => "#{hostname}:#{$$}",
         'hostname' => hostname,
+        'started_at' => Time.now.to_f,
         'pid' => $$,
         'process_id' => process_id,
         'tag' => tag.strip,

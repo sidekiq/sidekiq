@@ -20,7 +20,7 @@ module Sidekiq
 
     DEFAULT_TABS = {
       "Dashboard" => '',
-      "Workers"   => 'workers',
+      "Busy"      => 'busy',
       "Queues"    => 'queues',
       "Retries"   => 'retries',
       "Scheduled" => 'scheduled',
@@ -38,8 +38,8 @@ module Sidekiq
       alias_method :tabs, :custom_tabs
     end
 
-    get "/workers" do
-      erb :workers
+    get "/busy" do
+      erb :busy
     end
 
     get "/queues" do

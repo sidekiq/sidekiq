@@ -363,12 +363,12 @@ class TestApi < Sidekiq::Test
         assert false
       end
 
-      pdata = { 'pid' => $$, 'hostname' => hostname, 'process_id' => process_id, 'key' => "#{hostname}:#{$$}", 'at' => Time.now.to_f }
+      pdata = { 'pid' => $$, 'hostname' => hostname, 'process_id' => process_id, 'key' => "#{hostname}:#{$$}", 'at' => Time.now.to_f, 'started_at' => Time.now.to_i }
       Sidekiq.redis do |conn|
         conn.hset('processes', pdata['key'], Sidekiq.dump_json(pdata))
       end
 
-      s = "worker:#{hostname}:#{process_id}-12345"
+      s = "#{hostname}:#{process_id}-12345"
       data = Sidekiq.dump_json({ 'payload' => {}, 'queue' => 'default', 'run_at' => Time.now.to_i })
       Sidekiq.redis do |c|
         c.multi do
@@ -384,6 +384,7 @@ class TestApi < Sidekiq::Test
         assert_equal Time.now.year, Time.at(y['run_at']).year
       end
 
+      assert_equal 1, w.size
       s = "#{hostname}:#{process_id}-12346"
       data = Sidekiq.dump_json({ 'payload' => {}, 'queue' => 'default', 'run_at' => (Time.now.to_i - 2*60*60) })
       Sidekiq.redis do |c|

@@ -11,6 +11,8 @@ Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
   exposing these jobs.
 - **Process Heartbeat** - each Sidekiq process will ping Redis every 5
   seconds to give an accurate summary of the Sidekiq population at work.
+- The Workers tab is now renamed to Busy and contains a list of live
+  Sidekiq processes with a heartbeat.
 - **Remove official support for Ruby 1.9**  Things still might work but
   I no longer actively test on it.
 - **Remove built-in support for Redis-to-Go**.
@@ -23,6 +25,8 @@ Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
   version to pick up Sidekiq support.
 - Remove deprecated Sidekiq::Client.registered\_\* APIs
 - Remove deprecated support for the old Sidekiq::Worker#retries\_exhausted method.
+- Remove usage of the term 'Worker' in the UI for clarity.  Users would call both threads and
+  processes 'workers'.  Instead, use "Thread", "Process" or "Job".
 
 2.17.7
 -----------

@@ -30,13 +30,14 @@ class TestWeb < Sidekiq::Test
 
     it 'can display workers' do
       Sidekiq.redis do |conn|
+        conn.hset('processes', 'foo:1234', Sidekiq.dump_json('key' => 'foo:1234', 'hostname' => 'foo', 'process_id' => '1234', 'started_at' => Time.now.to_f, 'at' => Time.now.to_f))
         identity = 'foo:1234-123abc:default'
         conn.sadd('workers', identity)
         hash = {:queue => 'critical', :payload => { 'class' => WebWorker.name, 'args' => [1,'abc'] }, :run_at => Time.now.to_i }
         conn.setex("worker:#{identity}", 10, Sidekiq.dump_json(hash))
       end
 
-      get '/workers'
+      get '/busy'
       assert_equal 200, last_response.status
       assert_match /status-active/, last_response.body
       assert_match /critical/, last_response.body
@@ -286,7 +287,7 @@ class TestWeb < Sidekiq::Test
         conn.setex("worker:#{identity}", 10, Sidekiq.dump_json(hash))
       end
 
-      get '/workers'
+      get '/busy'
       assert_equal 200, last_response.status
       assert_match /FailWorker/, last_response.body
       assert last_response.body.include?( "&lt;a&gt;hello&lt;&#x2F;a&gt;" )

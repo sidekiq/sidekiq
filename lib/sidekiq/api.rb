@@ -470,8 +470,8 @@ module Sidekiq
       live = ProcessSet.new.map {|x| /\A#{x['hostname']}:#{x['process_id']}-/ }
       msgs = Sidekiq.redis do |conn|
         workers = conn.smembers("workers")
-        to_rem = workers.delete_if {|w| !live.any? {|identity| w =~ identity } }
-        conn.srem('workers', *to_rem) unless to_rem.empty?
+        to_rem = workers.reject {|w| live.any? {|identity| w =~ identity } }
+        conn.srem('workers', to_rem) unless to_rem.empty?
 
         workers.empty? ? {} : conn.mapped_mget(*workers.map {|w| "worker:#{w}" })
       end
