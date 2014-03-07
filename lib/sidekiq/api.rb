@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'sidekiq'
 
 module Sidekiq
@@ -155,6 +156,7 @@ module Sidekiq
         end
       end
     end
+    alias_method :💣, :clear
   end
 
   ##
@@ -359,6 +361,7 @@ module Sidekiq
         conn.del(name)
       end
     end
+    alias_method :💣, :clear
   end
 
   ##

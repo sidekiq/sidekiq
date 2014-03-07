@@ -21,6 +21,7 @@ Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
   version to pick up Sidekiq support.
 - Remove deprecated Sidekiq::Client.registered\_\* APIs
 - Remove deprecated support for the old Sidekiq::Worker#retries\_exhausted method.
+- Add new 💣 alias for #clear in API.
 
 2.17.7
 -----------
