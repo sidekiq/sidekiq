@@ -13,7 +13,7 @@
   </thead>
   <% Sidekiq::ProcessSet.new.each_with_index do |process, index| %>
     <tr>
-      <td><%= process['key'] %></td>
+      <td><%= process['hostname'] %>:<%= process['pid'] %></td>
       <td><%= relative_time(Time.at(process['started_at'])) %></td>
       <td><%= process['concurrency'] %></td>
       <td><%= process['busy'] %></td>
@@ -29,14 +29,16 @@
 
 <table class="workers table table-hover table-bordered table-striped table-white">
   <thead>
+    <th><%= t('Process') %></th>
     <th><%= t('Thread') %></th>
     <th><%= t('Queue') %></th>
     <th><%= t('Class') %></th>
     <th><%= t('Arguments') %></th>
     <th><%= t('Started') %></th>
   </thead>
-  <% workers.each_with_index do |(thread, msg), index| %>
+  <% workers.each_with_index do |(process, thread, msg), index| %>
     <tr>
+      <td><%= process %></td>
       <td><%= thread %></td>
       <td>
         <a href="<%= root_path %>queues/<%= msg['queue'] %>"><%= msg['queue'] %></a>

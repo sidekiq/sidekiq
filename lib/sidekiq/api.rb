@@ -472,12 +472,14 @@ module Sidekiq
   #
   #    workers = Sidekiq::Workers.new
   #    workers.size => 2
-  #    workers.each do |name, work|
-  #      # name is a unique identifier per worker
+  #    workers.each do |process_id, thread_id, work|
+  #      # process_id is a unique identifier per Sidekiq process
+  #      # thread_id is a unique identifier per thread
   #      # work is a Hash which looks like:
   #      # { 'queue' => name, 'run_at' => timestamp, 'payload' => msg }
   #      # run_at is an epoch Integer.
   #    end
+  #
   class Workers
     include Enumerable
 
@@ -491,12 +493,15 @@ module Sidekiq
           end
           next unless valid
           workers.each_pair do |tid, json|
-            yield tid, Sidekiq.load_json(json)
+            yield key, tid, Sidekiq.load_json(json)
           end
         end
       end
     end
 
+    # Note that #size is only as accurate as Sidekiq's heartbeat,
+    # which happens every 5 seconds.  It is NOT real-time.
+    #
     # Not very efficient if you have lots of Sidekiq
     # processes but the alternative is a global counter
     # which can easily get out of sync with crashy processes.
