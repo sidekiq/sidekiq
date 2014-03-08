@@ -50,7 +50,6 @@ module Sidekiq
         @ready.each { |x| x.terminate if x.alive? }
         @ready.clear
 
-        clear_worker_set
         return if clean_up_for_graceful_shutdown
 
         hard_shutdown_in timeout if should_shutdown
@@ -133,41 +132,27 @@ module Sidekiq
       @threads[proxy_id] = thr
     end
 
-    def heartbeat(data)
+    def heartbeat(key, data)
+      return if stopped?
+
       $0 = "sidekiq #{Sidekiq::VERSION} #{data['tag']}[#{@busy.size} of #{data['concurrency']} busy]#{stopped? ? ' stopping' : ''}"
-      ❤(data)
+      ❤(key, data)
       after(5) do
-        heartbeat(data)
+        heartbeat(key, data)
       end
     end
 
     private
 
-    def ❤(data)
+    def ❤(key, data)
       watchdog('heartbeat') do
-        now = Time.now.to_f
-        proc_data = Sidekiq.dump_json(data.merge('busy' => @busy.size, 'at' => now))
         Sidekiq.redis do |conn|
-          conn.hset("processes", data['key'], proc_data)
+          conn.multi do
+            conn.hmset(key, 'busy', @busy.size, 'at', Time.now.to_f)
+            conn.expire(key, 60)
+          end
         end
       end
-    end
-
-    def clear_worker_set
-      # Clearing workers in Redis
-      # NOTE: we do this before terminating worker threads because the
-      # process will likely receive a hard shutdown soon anyway, which
-      # means the threads will killed.
-      logger.debug { "Clearing workers in redis" }
-      Sidekiq.redis do |conn|
-        workers = conn.smembers('workers')
-        workers_to_remove = workers.select do |worker_name|
-          worker_name =~ /:#{process_id}-/
-        end
-        conn.srem('workers', workers_to_remove) if !workers_to_remove.empty?
-      end
-    rescue => ex
-      Sidekiq.logger.warn("Unable to clear worker set while shutting down: #{ex.message}")
     end
 
     def hard_shutdown_in(delay)

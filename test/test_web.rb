@@ -4,6 +4,7 @@ require 'sidekiq/web'
 require 'rack/test'
 
 class TestWeb < Sidekiq::Test
+
   describe 'sidekiq web' do
     include Rack::Test::Methods
 
@@ -30,12 +31,14 @@ class TestWeb < Sidekiq::Test
 
     it 'can display workers' do
       Sidekiq.redis do |conn|
-        conn.hset('processes', 'foo:1234', Sidekiq.dump_json('key' => 'foo:1234', 'hostname' => 'foo', 'process_id' => '1234', 'started_at' => Time.now.to_f, 'at' => Time.now.to_f))
-        identity = 'foo:1234-123abc:default'
-        conn.sadd('workers', identity)
+        conn.incr('busy')
+        conn.sadd('processes', 'foo:1234')
+        conn.hmset('foo:1234', 'info', Sidekiq.dump_json('hostname' => 'foo', 'started_at' => Time.now.to_f), 'at', Time.now.to_f, 'busy', 4)
+        identity = 'foo:1234:workers'
         hash = {:queue => 'critical', :payload => { 'class' => WebWorker.name, 'args' => [1,'abc'] }, :run_at => Time.now.to_i }
-        conn.setex("worker:#{identity}", 10, Sidekiq.dump_json(hash))
+        conn.hmset(identity, 1001, Sidekiq.dump_json(hash))
       end
+      assert_equal ['1001'], Sidekiq::Workers.new.map { |tid, data| tid }
 
       get '/busy'
       assert_equal 200, last_response.status
@@ -261,10 +264,11 @@ class TestWeb < Sidekiq::Test
 
       # on /workers page
       Sidekiq.redis do |conn|
-        identity = 'foo:1234-123abc:default'
-        conn.sadd('workers', identity)
+        conn.sadd('processes', 'foo:1234')
+        identity = 'foo:1234:workers'
         hash = {:queue => 'critical', :payload => { 'class' => "FailWorker", 'args' => ["<a>hello</a>"] }, :run_at => Time.now.to_i }
-        conn.setex("worker:#{identity}", 10, Sidekiq.dump_json(hash))
+        conn.hmset(identity, 100001, Sidekiq.dump_json(hash))
+        conn.incr('busy')
       end
 
       get '/busy'
@@ -319,6 +323,8 @@ class TestWeb < Sidekiq::Test
     end
 
     describe 'stats' do
+      include Sidekiq::Util
+
       before do
         Sidekiq.redis do |conn|
           conn.set("stat:processed", 5)
@@ -468,11 +474,14 @@ class TestWeb < Sidekiq::Test
     end
 
     def add_worker
-      process_id = rand(1000)
+      key = "#{hostname}:#{$$}"
       msg = "{\"queue\":\"default\",\"payload\":{\"retry\":true,\"queue\":\"default\",\"timeout\":20,\"backtrace\":5,\"class\":\"HardWorker\",\"args\":[\"bob\",10,5],\"jid\":\"2b5ad2b016f5e063a1c62872\"},\"run_at\":1361208995}"
       Sidekiq.redis do |conn|
-        conn.sadd("workers", "mercury.home:#{process_id}-70215157189060:default")
-        conn.set("worker:mercury.home:#{process_id}-70215157189060:default", msg)
+        conn.multi do
+          conn.incr("busy")
+          conn.sadd("processes", key)
+          conn.hmset("#{key}:workers", Time.now.to_f, msg)
+        end
       end
     end
   end

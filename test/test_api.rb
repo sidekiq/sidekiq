@@ -343,17 +343,20 @@ class TestApi < Sidekiq::Test
     end
 
     it 'can enumerate processes' do
-      odata = { 'pid' => 123, 'hostname' => hostname, 'process_id' => process_id, 'key' => "#{hostname}:123", 'at' => Time.now.to_f - 5 }
-      pdata = { 'pid' => $$, 'hostname' => hostname, 'process_id' => process_id, 'key' => "#{hostname}:#{$$}", 'at' => Time.now.to_f }
+      odata = { 'pid' => 123, 'hostname' => hostname, 'key' => "#{hostname}:123", 'started_at' => Time.now.to_f - 15 }
+      time = Time.now.to_f
       Sidekiq.redis do |conn|
-        conn.hset('processes', odata['key'], Sidekiq.dump_json(odata))
-        conn.hset('processes', pdata['key'], Sidekiq.dump_json(pdata))
+        conn.multi do
+          conn.sadd('processes', odata['key'])
+          conn.hmset(odata['key'], 'info', Sidekiq.dump_json(odata), 'busy', 10, 'at', time)
+          conn.sadd('processes', 'fake:pid')
+        end
       end
 
       ps = Sidekiq::ProcessSet.new.to_a
       assert_equal 1, ps.size
       data = ps.first
-      assert_equal pdata, data
+      assert_equal odata.merge('busy' => 10, 'at' => time), data
     end
 
     it 'can enumerate workers' do
@@ -363,41 +366,42 @@ class TestApi < Sidekiq::Test
         assert false
       end
 
-      pdata = { 'pid' => $$, 'hostname' => hostname, 'process_id' => process_id, 'key' => "#{hostname}:#{$$}", 'at' => Time.now.to_f, 'started_at' => Time.now.to_i }
+      pdata = { 'pid' => $$, 'hostname' => hostname, 'key' => "#{hostname}:#{$$}", 'at' => Time.now.to_f, 'started_at' => Time.now.to_i }
       Sidekiq.redis do |conn|
-        conn.hset('processes', pdata['key'], Sidekiq.dump_json(pdata))
+        conn.sadd('processes', pdata['key'])
+        conn.hmset(pdata['key'], 'info', Sidekiq.dump_json(pdata))
       end
 
-      s = "#{hostname}:#{process_id}-12345"
+      s = "#{hostname}:#{$$}:workers"
       data = Sidekiq.dump_json({ 'payload' => {}, 'queue' => 'default', 'run_at' => Time.now.to_i })
       Sidekiq.redis do |c|
-        c.multi do
-          c.sadd('workers', s)
-          c.set("worker:#{s}", data)
-        end
+        c.hmset(s, '1234', data)
       end
 
-      assert_equal 1, w.size
+      Sidekiq.redis do |c|
+        assert_equal 0, w.size
+        c.incr("busy")
+        assert_equal 1, w.size
+        c.decr("busy")
+        assert_equal 0, w.size
+      end
+
       w.each do |x, y|
-        assert_equal "worker:#{s}", x
+        assert_equal "1234", x
         assert_equal 'default', y['queue']
         assert_equal Time.now.year, Time.at(y['run_at']).year
       end
 
-      assert_equal 1, w.size
-      s = "#{hostname}:#{process_id}-12346"
+      s = "#{hostname}:#{$$}:workers"
       data = Sidekiq.dump_json({ 'payload' => {}, 'queue' => 'default', 'run_at' => (Time.now.to_i - 2*60*60) })
       Sidekiq.redis do |c|
         c.multi do
-          c.sadd('workers', s)
-          c.set("worker:#{s}", data)
-          c.sadd('workers', "#{hostname}:#{process_id}2-12347")
+          c.hmset(s, '5678', data)
+          c.hmset("b#{s}", '5678', data)
         end
       end
 
-      assert_equal 3, w.size
-      w.each { }
-      assert_equal 2, w.size
+      assert_equal ['1234', '5678'], w.map { |tid, data| tid }
     end
 
     it 'can reschedule jobs' do

@@ -426,25 +426,37 @@ module Sidekiq
   # Enumerates the set of Sidekiq processes which are actively working
   # right now.  Each process send a heartbeat to Redis every 5 seconds
   # so this set should be relatively accurate, barring network partitions.
+  #
+  # Yields a hash of data which looks something like this:
+  #
+  # {
+  #   'hostname' => 'app-1.example.com',
+  #   'started_at' => <process start time>,
+  #   'pid' => 12345,
+  #   'tag' => 'myapp'
+  #   'concurrency' => 25,
+  #   'queues' => ['default', 'low'],
+  #   'busy' => 10,
+  #   'at' => <last heartbeat>,
+  # }
+
   class ProcessSet
     include Enumerable
 
     def each(&block)
-      procs = Sidekiq.redis { |conn| conn.hgetall('processes') }
-      cutoff = Time.now.to_f - 5
+      procs = Sidekiq.redis { |conn| conn.smembers('processes') }
 
       to_prune = []
-      procs.map {|name, data| Sidekiq.load_json(data) }.
-            sort_by {|x| x['key'] }.
-            each do |pdata|
-        if pdata['at'] < cutoff
-          to_prune << pdata['key']; next
-        else
-          yield pdata
+      Sidekiq.redis do |conn|
+        procs.sort.each do |key|
+          info, busy, at_s = conn.hmget(key, 'info', 'busy', 'at')
+          (to_prune << key; next) if info.nil?
+          hash = Sidekiq.load_json(info)
+          yield hash.merge('busy' => busy.to_i, 'at' => at_s.to_f)
         end
       end
 
-      Sidekiq.redis {|conn| conn.hdel('processes', *to_prune) } unless to_prune.empty?
+      Sidekiq.redis {|conn| conn.srem('processes', *to_prune) } unless to_prune.empty?
       nil
     end
   end
@@ -470,25 +482,23 @@ module Sidekiq
     include Enumerable
 
     def each(&block)
-      live = ProcessSet.new.map {|x| /\A#{x['hostname']}:#{x['process_id']}-/ }
-      msgs = Sidekiq.redis do |conn|
-        workers = conn.smembers("workers")
-        to_rem = workers.reject {|w| live.any? {|identity| w =~ identity } }
-        conn.srem('workers', to_rem) unless to_rem.empty?
-
-        workers.empty? ? {} : conn.mapped_mget(*workers.map {|w| "worker:#{w}" })
-      end
-
-      msgs.each do |w, msg|
-        next unless msg
-        block.call(w, Sidekiq.load_json(msg))
+      Sidekiq.redis do |conn|
+        procs = conn.smembers('processes')
+        procs.sort.each do |key|
+          valid, workers = conn.multi do
+            conn.exists(key)
+            conn.hgetall("#{key}:workers")
+          end
+          next unless valid
+          workers.each_pair do |tid, json|
+            yield tid, Sidekiq.load_json(json)
+          end
+        end
       end
     end
 
     def size
-      Sidekiq.redis do |conn|
-        conn.scard("workers")
-      end.to_i
+      Sidekiq.redis { |conn| conn.get('busy') }.to_i
     end
   end
 
