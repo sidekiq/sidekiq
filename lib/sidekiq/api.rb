@@ -497,8 +497,20 @@ module Sidekiq
       end
     end
 
+    # Not very efficient if you have lots of Sidekiq
+    # processes but the alternative is a global counter
+    # which can easily get out of sync with crashy processes.
     def size
-      Sidekiq.redis { |conn| conn.get('busy') }.to_i
+      Sidekiq.redis do |conn|
+        procs = conn.smembers('processes')
+        return 0 if procs.empty?
+
+        conn.multi do
+          procs.each do |key|
+            conn.hget(key, 'busy')
+          end
+        end.map(&:to_i).inject(:+)
+      end
     end
   end
 

@@ -378,14 +378,6 @@ class TestApi < Sidekiq::Test
         c.hmset(s, '1234', data)
       end
 
-      Sidekiq.redis do |c|
-        assert_equal 0, w.size
-        c.incr("busy")
-        assert_equal 1, w.size
-        c.decr("busy")
-        assert_equal 0, w.size
-      end
-
       w.each do |x, y|
         assert_equal "1234", x
         assert_equal 'default', y['queue']

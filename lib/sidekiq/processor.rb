@@ -80,7 +80,6 @@ module Sidekiq
         hash = Sidekiq.dump_json({:queue => queue, :payload => msg, :run_at => Time.now.to_i })
         Sidekiq.redis do |conn|
           conn.multi do
-            conn.incr('busy')
             conn.hmset("#{identity}:workers", Thread.current.object_id, hash)
             conn.expire("#{identity}:workers", 60*60)
           end
@@ -106,7 +105,6 @@ module Sidekiq
           Sidekiq.redis do |conn|
             processed = "stat:processed:#{Time.now.utc.to_date}"
             result = conn.multi do
-              conn.decr('busy')
               conn.hdel("#{identity}:workers", Thread.current.object_id)
               conn.incrby("stat:processed", 1)
               conn.incrby(processed, 1)
