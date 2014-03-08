@@ -437,7 +437,7 @@ module Sidekiq
   #   'concurrency' => 25,
   #   'queues' => ['default', 'low'],
   #   'busy' => 10,
-  #   'at' => <last heartbeat>,
+  #   'beat' => <last heartbeat>,
   # }
 
   class ProcessSet
@@ -449,10 +449,10 @@ module Sidekiq
       to_prune = []
       Sidekiq.redis do |conn|
         procs.sort.each do |key|
-          info, busy, at_s = conn.hmget(key, 'info', 'busy', 'at')
+          info, busy, at_s = conn.hmget(key, 'info', 'busy', 'beat')
           (to_prune << key; next) if info.nil?
           hash = Sidekiq.load_json(info)
-          yield hash.merge('busy' => busy.to_i, 'at' => at_s.to_f)
+          yield hash.merge('busy' => busy.to_i, 'beat' => at_s.to_f)
         end
       end
 

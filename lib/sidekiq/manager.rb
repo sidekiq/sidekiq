@@ -148,7 +148,7 @@ module Sidekiq
       watchdog('heartbeat') do
         Sidekiq.redis do |conn|
           conn.multi do
-            conn.hmset(key, 'busy', @busy.size, 'at', Time.now.to_f)
+            conn.hmset(key, 'busy', @busy.size, 'beat', Time.now.to_f)
             conn.expire(key, 60)
           end
         end

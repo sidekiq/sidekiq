@@ -348,7 +348,7 @@ class TestApi < Sidekiq::Test
       Sidekiq.redis do |conn|
         conn.multi do
           conn.sadd('processes', odata['key'])
-          conn.hmset(odata['key'], 'info', Sidekiq.dump_json(odata), 'busy', 10, 'at', time)
+          conn.hmset(odata['key'], 'info', Sidekiq.dump_json(odata), 'busy', 10, 'beat', time)
           conn.sadd('processes', 'fake:pid')
         end
       end
@@ -356,7 +356,7 @@ class TestApi < Sidekiq::Test
       ps = Sidekiq::ProcessSet.new.to_a
       assert_equal 1, ps.size
       data = ps.first
-      assert_equal odata.merge('busy' => 10, 'at' => time), data
+      assert_equal odata.merge('busy' => 10, 'beat' => time), data
     end
 
     it 'can enumerate workers' do

@@ -261,11 +261,12 @@ class TestWeb < Sidekiq::Test
       assert last_response.body.include?( "args\">&quot;&lt;a&gt;hello&lt;&#x2F;a&gt;&quot;<" )
       assert !last_response.body.include?( "args\"><a>hello</a><" )
 
-
       # on /workers page
       Sidekiq.redis do |conn|
-        conn.sadd('processes', 'foo:1234')
-        identity = 'foo:1234:workers'
+        pro = 'foo:1234'
+        conn.sadd('processes', pro)
+        conn.hmset(pro, 'info', Sidekiq.dump_json('started_at' => Time.now.to_f), 'busy', 1, 'beat', Time.now.to_f)
+        identity = "#{pro}:workers"
         hash = {:queue => 'critical', :payload => { 'class' => "FailWorker", 'args' => ["<a>hello</a>"] }, :run_at => Time.now.to_i }
         conn.hmset(identity, 100001, Sidekiq.dump_json(hash))
         conn.incr('busy')
