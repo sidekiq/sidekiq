@@ -10,16 +10,14 @@ Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
   after 6 months or 10,000 jobs.  The Web UI contains a "Dead" tab
   exposing these jobs.
 - **Process Heartbeat** - each Sidekiq process will ping Redis every 5
-  seconds to give an accurate summary of the Sidekiq population at work.
+  seconds to give a summary of the Sidekiq population at work.
 - The Workers tab is now renamed to Busy and contains a list of live
-  Sidekiq processes with a heartbeat.
+  Sidekiq processes and jobs in progress.
 - **Remove official support for Ruby 1.9**  Things still might work but
   I no longer actively test on it.
 - **Remove built-in support for Redis-to-Go**.
   Heroku users: `heroku config:set REDIS_PROVIDER=REDISTOGO_URL`
 - Removed 'sidekiq/yaml\_patch', this was never documented or recommended.
-- Removed the 'started' worker data, it originally provided compatibility with resque-web
-  but overlaps the 'run\_at' worker data.
 - **Remove built-in error integration for Airbrake, Honeybadger, ExceptionNotifier and Exceptional**.
   Each error gem should provide its own Sidekiq integration.  Update your error gem to the latest
   version to pick up Sidekiq support.
@@ -27,7 +25,6 @@ Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
 - Remove deprecated support for the old Sidekiq::Worker#retries\_exhausted method.
 - Remove usage of the term 'Worker' in the UI for clarity.  Users would call both threads and
   processes 'workers'.  Instead, use "Thread", "Process" or "Job".
-- Add new 💣 alias for #clear in API.
 
 2.17.7
 -----------

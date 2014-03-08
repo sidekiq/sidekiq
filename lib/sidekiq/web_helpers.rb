@@ -35,7 +35,7 @@ module Sidekiq
     end
 
     def workers_size
-      @workers_size ||= Sidekiq.redis { |conn| conn.get('busy') }.to_i
+      @workers_size ||= workers.size
     end
 
     def workers
