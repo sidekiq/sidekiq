@@ -366,25 +366,27 @@ class TestApi < Sidekiq::Test
         assert false
       end
 
-      pdata = { 'pid' => $$, 'hostname' => hostname, 'key' => "#{hostname}:#{$$}", 'at' => Time.now.to_f, 'started_at' => Time.now.to_i }
+      key = "#{hostname}:#{$$}"
+      pdata = { 'pid' => $$, 'hostname' => hostname, 'started_at' => Time.now.to_i }
       Sidekiq.redis do |conn|
-        conn.sadd('processes', pdata['key'])
-        conn.hmset(pdata['key'], 'info', Sidekiq.dump_json(pdata))
+        conn.sadd('processes', key)
+        conn.hmset(key, 'info', Sidekiq.dump_json(pdata), 'busy', 0, 'beat', Time.now.to_f)
       end
 
-      s = "#{hostname}:#{$$}:workers"
+      s = "#{key}:workers"
       data = Sidekiq.dump_json({ 'payload' => {}, 'queue' => 'default', 'run_at' => Time.now.to_i })
       Sidekiq.redis do |c|
         c.hmset(s, '1234', data)
       end
 
-      w.each do |x, y|
+      w.each do |p, x, y|
+        assert_equal key, p
         assert_equal "1234", x
         assert_equal 'default', y['queue']
         assert_equal Time.now.year, Time.at(y['run_at']).year
       end
 
-      s = "#{hostname}:#{$$}:workers"
+      s = "#{key}:workers"
       data = Sidekiq.dump_json({ 'payload' => {}, 'queue' => 'default', 'run_at' => (Time.now.to_i - 2*60*60) })
       Sidekiq.redis do |c|
         c.multi do
@@ -393,7 +395,7 @@ class TestApi < Sidekiq::Test
         end
       end
 
-      assert_equal ['1234', '5678'], w.map { |tid, data| tid }
+      assert_equal ['1234', '5678'], w.map { |pid, tid, data| tid }
     end
 
     it 'can reschedule jobs' do

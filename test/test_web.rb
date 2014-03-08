@@ -38,7 +38,7 @@ class TestWeb < Sidekiq::Test
         hash = {:queue => 'critical', :payload => { 'class' => WebWorker.name, 'args' => [1,'abc'] }, :run_at => Time.now.to_i }
         conn.hmset(identity, 1001, Sidekiq.dump_json(hash))
       end
-      assert_equal ['1001'], Sidekiq::Workers.new.map { |tid, data| tid }
+      assert_equal ['1001'], Sidekiq::Workers.new.map { |pid, tid, data| tid }
 
       get '/busy'
       assert_equal 200, last_response.status
@@ -479,8 +479,8 @@ class TestWeb < Sidekiq::Test
       msg = "{\"queue\":\"default\",\"payload\":{\"retry\":true,\"queue\":\"default\",\"timeout\":20,\"backtrace\":5,\"class\":\"HardWorker\",\"args\":[\"bob\",10,5],\"jid\":\"2b5ad2b016f5e063a1c62872\"},\"run_at\":1361208995}"
       Sidekiq.redis do |conn|
         conn.multi do
-          conn.incr("busy")
           conn.sadd("processes", key)
+          conn.hmset(key, 'busy', 4)
           conn.hmset("#{key}:workers", Time.now.to_f, msg)
         end
       end
