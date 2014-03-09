@@ -279,6 +279,16 @@ module Sidekiq
       Sidekiq.redis {|c| c.zcard(name) }
     end
 
+    def clear
+      Sidekiq.redis do |conn|
+        conn.del(name)
+      end
+    end
+    alias_method :💣, :clear
+  end
+
+  class JobSet < SortedSet
+
     def schedule(timestamp, message)
       Sidekiq.redis do |conn|
         conn.zadd(name, timestamp.to_f.to_s, Sidekiq.dump_json(message))
@@ -356,12 +366,6 @@ module Sidekiq
       end
     end
 
-    def clear
-      Sidekiq.redis do |conn|
-        conn.del(name)
-      end
-    end
-    alias_method :💣, :clear
   end
 
   ##
@@ -376,7 +380,7 @@ module Sidekiq
   #     retri.args[0] == 'User' &&
   #     retri.args[1] == 'setup_new_subscriber'
   #   end.map(&:delete)
-  class ScheduledSet < SortedSet
+  class ScheduledSet < JobSet
     def initialize
       super 'schedule'
     end
@@ -394,7 +398,7 @@ module Sidekiq
   #     retri.args[0] == 'User' &&
   #     retri.args[1] == 'setup_new_subscriber'
   #   end.map(&:delete)
-  class RetrySet < SortedSet
+  class RetrySet < JobSet
     def initialize
       super 'retry'
     end
@@ -406,7 +410,7 @@ module Sidekiq
     end
   end
 
-  class DeadSet < SortedSet
+  class DeadSet < JobSet
     def initialize
       super 'dead'
     end
@@ -418,6 +422,44 @@ module Sidekiq
     end
   end
 
+  ##
+  # Enumerates the set of Sidekiq processes which are actively working
+  # right now.  Each process send a heartbeat to Redis every 5 seconds
+  # so this set should be relatively accurate, barring network partitions.
+  #
+  # Yields a hash of data which looks something like this:
+  #
+  # {
+  #   'hostname' => 'app-1.example.com',
+  #   'started_at' => <process start time>,
+  #   'pid' => 12345,
+  #   'tag' => 'myapp'
+  #   'concurrency' => 25,
+  #   'queues' => ['default', 'low'],
+  #   'busy' => 10,
+  #   'beat' => <last heartbeat>,
+  # }
+
+  class ProcessSet
+    include Enumerable
+
+    def each(&block)
+      procs = Sidekiq.redis { |conn| conn.smembers('processes') }
+
+      to_prune = []
+      Sidekiq.redis do |conn|
+        procs.sort.each do |key|
+          info, busy, at_s = conn.hmget(key, 'info', 'busy', 'beat')
+          (to_prune << key; next) if info.nil?
+          hash = Sidekiq.load_json(info)
+          yield hash.merge('busy' => busy.to_i, 'beat' => at_s.to_f)
+        end
+      end
+
+      Sidekiq.redis {|conn| conn.srem('processes', *to_prune) } unless to_prune.empty?
+      nil
+    end
+  end
 
   ##
   # Programmatic access to the current active worker set.
@@ -430,61 +472,50 @@ module Sidekiq
   #
   #    workers = Sidekiq::Workers.new
   #    workers.size => 2
-  #    workers.each do |name, work|
-  #      # name is a unique identifier per worker
+  #    workers.each do |process_id, thread_id, work|
+  #      # process_id is a unique identifier per Sidekiq process
+  #      # thread_id is a unique identifier per thread
   #      # work is a Hash which looks like:
   #      # { 'queue' => name, 'run_at' => timestamp, 'payload' => msg }
   #      # run_at is an epoch Integer.
   #    end
-
+  #
   class Workers
     include Enumerable
 
     def each(&block)
       Sidekiq.redis do |conn|
-        workers = conn.smembers("workers")
-        workers.each do |w|
-          msg = conn.get("worker:#{w}")
-          next unless msg
-          block.call(w, Sidekiq.load_json(msg))
-        end
-      end
-    end
-
-    def size
-      Sidekiq.redis do |conn|
-        conn.scard("workers")
-      end.to_i
-    end
-
-    # Prune old worker entries from the Busy set.  Worker entries
-    # can be orphaned if Sidekiq hard crashes while processing jobs.
-    # Default is to delete worker entries older than one hour.
-    #
-    # Returns the number of records removed.
-    def prune(older_than=60*60)
-      to_rem = []
-      Sidekiq.redis do |conn|
-        conn.smembers('workers').each do |w|
-          msg = conn.get("worker:#{w}")
-          if !msg
-            to_rem << w
-          else
-            m = Sidekiq.load_json(msg)
-            run_at = Time.at(m['run_at'])
-            # prune jobs older than one hour
-            if run_at < (Time.now - older_than)
-              to_rem << w
-            else
-            end
+        procs = conn.smembers('processes')
+        procs.sort.each do |key|
+          valid, workers = conn.multi do
+            conn.exists(key)
+            conn.hgetall("#{key}:workers")
+          end
+          next unless valid
+          workers.each_pair do |tid, json|
+            yield key, tid, Sidekiq.load_json(json)
           end
         end
       end
+    end
 
-      if to_rem.size > 0
-        Sidekiq.redis { |conn| conn.srem('workers', to_rem) }
+    # Note that #size is only as accurate as Sidekiq's heartbeat,
+    # which happens every 5 seconds.  It is NOT real-time.
+    #
+    # Not very efficient if you have lots of Sidekiq
+    # processes but the alternative is a global counter
+    # which can easily get out of sync with crashy processes.
+    def size
+      Sidekiq.redis do |conn|
+        procs = conn.smembers('processes')
+        return 0 if procs.empty?
+
+        conn.multi do
+          procs.each do |key|
+            conn.hget(key, 'busy')
+          end
+        end.map(&:to_i).inject(:+)
       end
-      to_rem.size
     end
   end
 

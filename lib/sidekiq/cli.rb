@@ -80,7 +80,7 @@ module Sidekiq
 
       require 'sidekiq/launcher'
       @launcher = Sidekiq::Launcher.new(options)
-      launcher.procline(options[:tag] ? "#{options[:tag]} " : '')
+      launcher.start_heartbeat(options[:tag] ? "#{options[:tag]} " : '')
 
       begin
         if options[:profile]

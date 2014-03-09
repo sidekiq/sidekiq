@@ -12,7 +12,6 @@ nl:
   Scheduled: Gepland
   Retries: Opnieuw proberen
   Enqueued: In de wachtrij
-  ClearWorkerList: Werkerlijst legen
   Worker: Werker
   Workers: Werkers
   LivePoll: Live bijwerken

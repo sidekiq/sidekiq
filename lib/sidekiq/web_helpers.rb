@@ -34,25 +34,12 @@ module Sidekiq
       string % options
     end
 
-    def reset_worker_list
-      Sidekiq.redis do |conn|
-        workers = conn.smembers('workers')
-        conn.srem('workers', workers) if !workers.empty?
-      end
-    end
-
     def workers_size
-      @workers_size ||= Sidekiq.redis do |conn|
-        conn.scard('workers')
-      end
+      @workers_size ||= workers.size
     end
 
     def workers
-      @workers ||= begin
-        Sidekiq::Workers.new.tap do |w|
-          w.prune
-        end
-      end
+      @workers ||= Sidekiq::Workers.new
     end
 
     def stats

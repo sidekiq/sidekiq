@@ -12,7 +12,6 @@ ko:
   Scheduled: 예약
   Retries: 재시도
   Enqueued: 대기 중
-  ClearWorkerList: 워커 목록 비우기
   Worker: 워커
   Workers: 워커
   LivePoll: 폴링 시작

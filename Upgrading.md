@@ -10,8 +10,8 @@ changes a few data elements in Redis.  To upgrade cleanly:
   - `Sidekiq::Client.registered_workers` replaced by `Sidekiq::Workers.new`
   - `Sidekiq::Client.registered_queues` replaced by `Sidekiq::Queue.all`
   - `Sidekiq::Worker#retries_exhausted` replaced by `Sidekiq::Worker.sidekiq_retries_exhausted`
-  - `Sidekiq::Workers#each` has removed the third block argument `worker, msg, started_at`
-    since it was redundant with `msg['run_at']`
+  - `Sidekiq::Workers#each` has changed significantly with a reworking
+    of Sidekiq's internal process/thread data model.
 * Redis-to-Go is no longer transparently activated on Heroku so as to not play
   favorites with any particular Redis service. You need to set a config option
   for your app:

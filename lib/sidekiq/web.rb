@@ -20,7 +20,7 @@ module Sidekiq
 
     DEFAULT_TABS = {
       "Dashboard" => '',
-      "Workers"   => 'workers',
+      "Busy"      => 'busy',
       "Queues"    => 'queues',
       "Retries"   => 'retries',
       "Scheduled" => 'scheduled',
@@ -38,8 +38,8 @@ module Sidekiq
       alias_method :tabs, :custom_tabs
     end
 
-    get "/workers" do
-      erb :workers
+    get "/busy" do
+      erb :busy
     end
 
     get "/queues" do
@@ -54,11 +54,6 @@ module Sidekiq
       (@current_page, @total_size, @messages) = page("queue:#{@name}", params[:page], @count)
       @messages = @messages.map {|msg| Sidekiq.load_json(msg) }
       erb :queue
-    end
-
-    post "/reset" do
-      reset_worker_list
-      redirect root_path
     end
 
     post "/queues/:name" do

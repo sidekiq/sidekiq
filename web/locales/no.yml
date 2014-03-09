@@ -12,7 +12,6 @@ no:
   Scheduled: Planlagt
   Retries: Forsøk
   Enqueued: I kø
-  ClearWorkerList: Nullstill jobbliste
   Worker: Arbeider
   Workers: Arbeidere
   LivePoll: Automatisk oppdatering

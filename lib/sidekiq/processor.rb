@@ -69,8 +69,8 @@ module Sidekiq
 
     private
 
-    def identity
-      @str ||= "#{hostname}:#{process_id}-#{Thread.current.object_id}:default"
+    def thread_identity
+      @str ||= "#{identity}-#{Thread.current.object_id}"
     end
 
     def stats(worker, msg, queue)
@@ -78,10 +78,10 @@ module Sidekiq
       # stats so calling code can react appropriately
       retry_and_suppress_exceptions do
         hash = Sidekiq.dump_json({:queue => queue, :payload => msg, :run_at => Time.now.to_i })
-        redis do |conn|
+        Sidekiq.redis do |conn|
           conn.multi do
-            conn.sadd('workers', identity)
-            conn.setex("worker:#{identity}", EXPIRY, hash)
+            conn.hmset("#{identity}:workers", Thread.current.object_id, hash)
+            conn.expire("#{identity}:workers", 60*60)
           end
         end
       end
@@ -90,7 +90,7 @@ module Sidekiq
         yield
       rescue Exception
         retry_and_suppress_exceptions do
-          redis do |conn|
+          Sidekiq.redis do |conn|
             failed = "stat:failed:#{Time.now.utc.to_date}"
             result = conn.multi do
               conn.incrby("stat:failed", 1)
@@ -102,11 +102,10 @@ module Sidekiq
         raise
       ensure
         retry_and_suppress_exceptions do
-          redis do |conn|
+          Sidekiq.redis do |conn|
             processed = "stat:processed:#{Time.now.utc.to_date}"
             result = conn.multi do
-              conn.srem("workers", identity)
-              conn.del("worker:#{identity}")
+              conn.hdel("#{identity}:workers", Thread.current.object_id)
               conn.incrby("stat:processed", 1)
               conn.incrby(processed, 1)
             end

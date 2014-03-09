@@ -4,6 +4,7 @@ require 'sidekiq/web'
 require 'rack/test'
 
 class TestWeb < Sidekiq::Test
+
   describe 'sidekiq web' do
     include Rack::Test::Methods
 
@@ -30,13 +31,16 @@ class TestWeb < Sidekiq::Test
 
     it 'can display workers' do
       Sidekiq.redis do |conn|
-        identity = 'foo:1234-123abc:default'
-        conn.sadd('workers', identity)
+        conn.incr('busy')
+        conn.sadd('processes', 'foo:1234')
+        conn.hmset('foo:1234', 'info', Sidekiq.dump_json('hostname' => 'foo', 'started_at' => Time.now.to_f), 'at', Time.now.to_f, 'busy', 4)
+        identity = 'foo:1234:workers'
         hash = {:queue => 'critical', :payload => { 'class' => WebWorker.name, 'args' => [1,'abc'] }, :run_at => Time.now.to_i }
-        conn.setex("worker:#{identity}", 10, Sidekiq.dump_json(hash))
+        conn.hmset(identity, 1001, Sidekiq.dump_json(hash))
       end
+      assert_equal ['1001'], Sidekiq::Workers.new.map { |pid, tid, data| tid }
 
-      get '/workers'
+      get '/busy'
       assert_equal 200, last_response.status
       assert_match /status-active/, last_response.body
       assert_match /critical/, last_response.body
@@ -72,26 +76,6 @@ class TestWeb < Sidekiq::Test
       Sidekiq.redis do |conn|
         refute conn.smembers('queues').include?('foo')
         refute conn.exists('queues:foo')
-      end
-    end
-
-    it 'can clear an empty worker list' do
-      post '/reset'
-      assert_equal 302, last_response.status
-    end
-
-    it 'can clear a non-empty worker list' do
-      Sidekiq.redis do |conn|
-        identity = 'foo'
-        conn.sadd('workers', identity)
-      end
-
-      post '/reset'
-
-      assert_equal 302, last_response.status
-
-      Sidekiq.redis do |conn|
-        refute conn.smembers('workers').any?
       end
     end
 
@@ -277,16 +261,18 @@ class TestWeb < Sidekiq::Test
       assert last_response.body.include?( "args\">&quot;&lt;a&gt;hello&lt;&#x2F;a&gt;&quot;<" )
       assert !last_response.body.include?( "args\"><a>hello</a><" )
 
-
       # on /workers page
       Sidekiq.redis do |conn|
-        identity = 'foo:1234-123abc:default'
-        conn.sadd('workers', identity)
+        pro = 'foo:1234'
+        conn.sadd('processes', pro)
+        conn.hmset(pro, 'info', Sidekiq.dump_json('started_at' => Time.now.to_f), 'busy', 1, 'beat', Time.now.to_f)
+        identity = "#{pro}:workers"
         hash = {:queue => 'critical', :payload => { 'class' => "FailWorker", 'args' => ["<a>hello</a>"] }, :run_at => Time.now.to_i }
-        conn.setex("worker:#{identity}", 10, Sidekiq.dump_json(hash))
+        conn.hmset(identity, 100001, Sidekiq.dump_json(hash))
+        conn.incr('busy')
       end
 
-      get '/workers'
+      get '/busy'
       assert_equal 200, last_response.status
       assert_match /FailWorker/, last_response.body
       assert last_response.body.include?( "&lt;a&gt;hello&lt;&#x2F;a&gt;" )
@@ -338,6 +324,8 @@ class TestWeb < Sidekiq::Test
     end
 
     describe 'stats' do
+      include Sidekiq::Util
+
       before do
         Sidekiq.redis do |conn|
           conn.set("stat:processed", 5)
@@ -487,11 +475,14 @@ class TestWeb < Sidekiq::Test
     end
 
     def add_worker
-      process_id = rand(1000)
+      key = "#{hostname}:#{$$}"
       msg = "{\"queue\":\"default\",\"payload\":{\"retry\":true,\"queue\":\"default\",\"timeout\":20,\"backtrace\":5,\"class\":\"HardWorker\",\"args\":[\"bob\",10,5],\"jid\":\"2b5ad2b016f5e063a1c62872\"},\"run_at\":1361208995}"
       Sidekiq.redis do |conn|
-        conn.sadd("workers", "mercury.home:#{process_id}-70215157189060:default")
-        conn.set("worker:mercury.home:#{process_id}-70215157189060:default", msg)
+        conn.multi do
+          conn.sadd("processes", key)
+          conn.hmset(key, 'busy', 4)
+          conn.hmset("#{key}:workers", Time.now.to_f, msg)
+        end
       end
     end
   end

@@ -26,12 +26,12 @@ module Sidekiq
       Sidekiq.redis(&block)
     end
 
-    def process_id
-      @@process_id ||= SecureRandom.hex
-    end
-
     def hostname
       Socket.gethostname
+    end
+
+    def identity
+      @@identity ||= "#{hostname}:#{$$}"
     end
   end
 end
