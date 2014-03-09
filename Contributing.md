@@ -1,7 +1,6 @@
 # Contributing
 
-First of all, thank you for even opening this file up!  I hope you find
-it worthwhile to help out with Sidekiq.
+First of all, thank you!  I hope you find it worthwhile to help out with Sidekiq.
 
 ## Issues
 
@@ -20,7 +19,6 @@ It's always best to open an issue before investing a lot of time into a
 fix or new functionality.  Functionality must meet my design goals and
 vision for the project to be accepted; I would be happy to discuss how
 your idea can best fit into Sidekiq.
-
 
 ## Sponsorship
 

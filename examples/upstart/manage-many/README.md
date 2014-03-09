@@ -43,7 +43,7 @@ Each sidekiq instance is named after its directory, so for an app called `/home/
 
 * The script expects:
   * a config file to exist under `config/sidekiq.yml` in your app. E.g.: `/home/apps/my-app/config/sidekiq.yml`.
-  * a temporary folder to put the processes PIDs exists called `tmp/sidekiq`. E.g.: `/home/apps/my-app/tmp/sidekiq`.
+  * a temporary folder to put the processes PIDs exists called `tmp/pids`. E.g.: `/home/apps/my-app/tmp/pids`.
 
 You can always change those defaults by editing the scripts.
 

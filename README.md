@@ -17,14 +17,14 @@ use the Resque client to enqueue jobs in Redis to be processed by Sidekiq.
 
 At the same time, Sidekiq uses multithreading so it is much more memory efficient than
 Resque (which forks a new process for every job).  You'll find that you might need
-50 200MB resque processes to peg your CPU whereas one 300MB Sidekiq process will peg
+10 200MB resque processes to peg your CPU whereas one 300MB Sidekiq process will peg
 the same CPU and perform the same amount of work.
 
 
 Requirements
 -----------------
 
-I test with the latest Ruby (2.0) and JRuby versions (1.7).  Other versions/VMs
+I test with the latest Ruby (2.1, 2.0) and JRuby versions (1.7).  Other versions/VMs
 are untested but might work fine.
 
 The last two major Rails releases (3.2 and 4.0) are officially supported, other
