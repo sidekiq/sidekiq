@@ -1,5 +1,7 @@
-3.0.0 - Unreleased
+3.0.0
 -----------
+
+**Not yet released**
 
 Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
 
