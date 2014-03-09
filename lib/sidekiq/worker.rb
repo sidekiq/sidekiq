@@ -28,10 +28,16 @@ module Sidekiq
       base.class_attribute :sidekiq_options_hash
       base.class_attribute :sidekiq_retry_in_block
       base.class_attribute :sidekiq_retries_exhausted_block
+      base.class_attribute :sidekiq_logger_block
     end
 
     def logger
-      Sidekiq.logger
+      unless @logger
+        @logger = Sidekiq.logger.dup
+        self.class.sidekiq_logger_block.try(:call, @logger)
+      end
+
+      @logger
     end
 
     module ClassMethods
@@ -73,6 +79,10 @@ module Sidekiq
 
       def sidekiq_retries_exhausted(&block)
         self.sidekiq_retries_exhausted_block = block
+      end
+
+      def sidekiq_logger(&block)
+        self.sidekiq_logger_block = block
       end
 
       def get_sidekiq_options # :nodoc:

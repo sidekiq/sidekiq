@@ -1,6 +1,11 @@
 require 'time'
 require 'logger'
 
+# new attribute for Logger, don't log if not over execution_threshold
+class Logger
+  attr_accessor :execution_threshold
+end
+
 module Sidekiq
   module Logging
 
