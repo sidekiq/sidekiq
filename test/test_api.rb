@@ -414,6 +414,28 @@ class TestApi < Sidekiq::Test
       assert(retries.map { |r| r.score > (Time.now.to_f + 9) }.any?)
     end
 
+    it 'prunes processes which have died' do
+      data = { 'pid' => rand(10_000), 'hostname' => "app#{rand(1_000)}", 'started_at' => Time.now.to_f }
+      key = "#{data['hostname']}:#{data['pid']}"
+      Sidekiq.redis do |conn|
+        conn.sadd('processes', key)
+        conn.hmset(key, 'info', Sidekiq.dump_json(data), 'busy', 0, 'beat', Time.now.to_f)
+      end
+
+      ps = Sidekiq::ProcessSet.new
+      assert_equal 1, ps.size
+      assert_equal 1, ps.to_a.size
+
+      Sidekiq.redis do |conn|
+        conn.sadd('processes', "bar:987")
+        conn.sadd('processes', "bar:986")
+      end
+
+      ps = Sidekiq::ProcessSet.new
+      assert_equal 3, ps.size
+      assert_equal 1, ps.to_a.size
+    end
+
     def add_retry(jid = 'bob', at = Time.now.to_f)
       payload = Sidekiq.dump_json('class' => 'ApiWorker', 'args' => [1, 'mike'], 'queue' => 'default', 'jid' => jid, 'retry_count' => 2, 'failed_at' => Time.now.to_f)
       Sidekiq.redis do |conn|
