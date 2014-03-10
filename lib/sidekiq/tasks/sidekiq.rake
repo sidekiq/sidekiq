@@ -44,9 +44,9 @@ namespace :sidekiq do
   task :quiet do
     on roles fetch(:sidekiq_role) do
       for_each_process do |pid_file, idx|
-        if test "[ -f #{fetch(:sidekiq_pid)} ]" and test "kill -0 $( cat #{fetch(:puma_pid)} )"
+        if test("[ -f #{pid_file)} ]") and test("kill -0 $( cat #{pid_file} )")
           within current_path do
-            execute :bundle, :exec, :sidekiqctl, 'quiet', "#{fetch(:sidekiq_pid)}"
+            execute :bundle, :exec, :sidekiqctl, 'quiet', "#{pid_file}"
           end
         end
       end
@@ -57,7 +57,7 @@ namespace :sidekiq do
   task :stop do
     on roles fetch(:sidekiq_role) do
       for_each_process do |pid_file, idx|
-        if test "[ -f #{pid_file} ]" and test "kill -0 $( cat #{pid_file} )"
+        if test("[ -f #{pid_file} ]") and test("kill -0 $( cat #{pid_file} )")
           within current_path do
             execute :bundle, :exec, :sidekiqctl, 'stop', "#{pid_file}", fetch(:sidekiq_timeout)
           end
@@ -66,7 +66,7 @@ namespace :sidekiq do
     end
   end
 
-  desc "Start sidekiq"
+  desc 'Start sidekiq'
   task :start do
     on roles fetch(:sidekiq_role) do
       within current_path do
