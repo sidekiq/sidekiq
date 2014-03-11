@@ -20,6 +20,11 @@ module Sidekiq
     :timeout => 8,
     :profile => false,
     :error_handlers => [],
+    :process_lifecycle => {
+      :start => nil,
+      :quiet => nil,
+      :shutdown => nil
+    }
   }
 
   def self.❨╯°□°❩╯︵┻━┻
@@ -95,6 +100,12 @@ module Sidekiq
 
   def self.default_worker_options
     @default_worker_options || { 'retry' => true, 'queue' => 'default' }
+  end
+
+  def self.on(lifecycle_event, &block)
+    raise "process lifecycle event unrecognized (#{lifecycle_event}). options are #{self.options[:process_lifecycle].keys.join('|')}" unless self.options[:process_lifecycle].keys.include?(lifecycle_event.to_sym)
+    self.options[:process_lifecycle][lifecycle_event] = block
+    block
   end
 
   def self.load_json(string)
