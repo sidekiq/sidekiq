@@ -56,8 +56,6 @@ module Sidekiq
   class EmptyQueueError < RuntimeError; end
 
   class Client
-    alias_method :raw_push_real, :raw_push
-
     def raw_push(payloads)
       if Sidekiq::Testing.fake?
         payloads.each do |job|
@@ -77,6 +75,8 @@ module Sidekiq
         raw_push_real(payloads)
       end
     end
+
+    alias_method :raw_push_real, :raw_push
   end
 
   module Worker
