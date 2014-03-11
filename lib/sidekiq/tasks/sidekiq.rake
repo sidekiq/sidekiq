@@ -28,7 +28,7 @@ end
 namespace :sidekiq do
   def for_each_process(&block)
     fetch(:sidekiq_processes).times do |idx|
-      yield((idx == 0 ? "#{fetch(:sidekiq_pid)}" : "#{fetch(:sidekiq_pid).gsub('.pid', "-#{idx}.pid")}"), idx)
+      yield((idx.zero? ? "#{fetch(:sidekiq_pid)}" : "#{fetch(:sidekiq_pid).gsub('.pid', "-#{idx}.pid")}"), idx)
     end
   end
 
@@ -44,7 +44,7 @@ namespace :sidekiq do
   task :quiet do
     on roles fetch(:sidekiq_role) do
       for_each_process do |pid_file, idx|
-        if test("[ -f #{pid_file)} ]") and test("kill -0 $( cat #{pid_file} )")
+        if test("[ -f #{pid_file} ]") and test("kill -0 $( cat #{pid_file} )")
           within current_path do
             execute :bundle, :exec, :sidekiqctl, 'quiet', "#{pid_file}"
           end
