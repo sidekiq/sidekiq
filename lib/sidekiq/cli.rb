@@ -74,7 +74,7 @@ module Sidekiq
       logger.info "Running in #{RUBY_DESCRIPTION}"
       logger.info Sidekiq::LICENSE
 
-      fire_event(:boot)
+      fire_event(:startup)
 
       if !options[:daemon]
         logger.info 'Starting processing, hit Ctrl-C to stop'

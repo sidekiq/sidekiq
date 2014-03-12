@@ -10,7 +10,7 @@ Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
   after 6 months or 10,000 jobs.  The Web UI contains a "Dead" tab
   exposing these jobs.
 - **Process Lifecycle Events** - you can now register blocks to run at
-  certain points during the Sidekiq process lifecycle: boot, quiet and
+  certain points during the Sidekiq process lifecycle: startup, quiet and
   shutdown.
 - **Global Error Handlers** - blocks of code which handle errors that
   occur anywhere within Sidekiq, not just within middleware.

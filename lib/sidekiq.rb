@@ -21,7 +21,7 @@ module Sidekiq
     :profile => false,
     :error_handlers => [],
     :lifecycle_events => {
-      :boot => [],
+      :startup => [],
       :quiet => [],
       :shutdown => [],
     },
