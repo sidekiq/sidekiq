@@ -1,5 +1,4 @@
 require 'bundler/capistrano'
-require 'sidekiq/capistrano'
 
 set :scm, :git
 set :repository, 'git@github.com:mperham/sidekiq'
