@@ -6,7 +6,6 @@ require 'optparse'
 require 'erb'
 
 require 'sidekiq'
-require 'sidekiq/banner'
 require 'sidekiq/util'
 
 module Sidekiq
@@ -19,7 +18,6 @@ module Sidekiq
   class Shutdown < Interrupt; end
 
   class CLI
-    include Banner
     include Util
     include Singleton
 
@@ -58,16 +56,10 @@ module Sidekiq
       end
 
       # Print logo and banner for development
-      if environment == 'development'
-        if Sidekiq::NAME == 'Sidekiq Pro'
-          puts "\e[#{31}m"
-          print_pro_banner
-          puts "\e[0m"
-        else
-          puts "\e[#{31}m"
-          print_oss_banner
-          puts "\e[0m"
-        end
+      if environment == 'development' && $stdout.tty?
+        puts "\e[#{31}m"
+        puts Sidekiq::BANNER
+        puts "\e[0m"
       end
 
       redis {} # noop to connect redis and print info

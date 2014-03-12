@@ -131,6 +131,20 @@ module Sidekiq
     raise ArgumentError, "Invalid event name: #{event}" if !options[:lifecycle_events].keys.include?(event)
     options[:lifecycle_events][event] << block
   end
+
+  BANNER = %q{         s
+        ss
+   sss  sss         ss
+   s  sss s   ssss sss   ____  _     _      _    _
+   s     sssss ssss     / ___|(_) __| | ___| | _(_) __ _
+  s         sss         \___ \| |/ _` |/ _ \ |/ / |/ _` |
+  s sssss  s             ___) | | (_| |  __/   <| | (_| |
+  ss    s  s            |____/|_|\__,_|\___|_|\_\_|\__, |
+  s     s s                                           |_|
+        s s
+       sss
+       sss }
+
 end
 
 require 'sidekiq/extensions/class_methods'
