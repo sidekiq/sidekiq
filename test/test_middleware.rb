@@ -112,6 +112,7 @@ class TestMiddleware < Sidekiq::Test
   describe 'i18n' do
     before do
       require 'i18n'
+      I18n.enforce_available_locales = false
       require 'sidekiq/middleware/i18n'
     end
 
@@ -142,7 +143,7 @@ class TestMiddleware < Sidekiq::Test
         assert_equal :jp, I18n.locale
       end
 
-      I18n.enforce_available_locales = nil
+      I18n.enforce_available_locales = false
       I18n.available_locales = nil
     end
   end
