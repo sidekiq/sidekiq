@@ -20,6 +20,11 @@ module Sidekiq
     :timeout => 8,
     :profile => false,
     :error_handlers => [],
+    :lifecycle_events => {
+      :boot => [],
+      :quiet => [],
+      :shutdown => [],
+    },
   }
 
   def self.❨╯°□°❩╯︵┻━┻
@@ -121,6 +126,11 @@ module Sidekiq
     self.options[:error_handlers]
   end
 
+  def self.on(event, &block)
+    raise ArgumentError, "Symbols only please: #{event}" if !event.is_a?(Symbol)
+    raise ArgumentError, "Invalid event name: #{event}" if !options[:lifecycle_events].keys.include?(event)
+    options[:lifecycle_events][event] << block
+  end
 end
 
 require 'sidekiq/extensions/class_methods'

@@ -5,28 +5,31 @@
 
 Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
 
-- **Global Error Handlers** - blocks of code which handle errors that
-  occur anywhere within Sidekiq, not just within middleware.
 - **Dead Job Queue** - jobs which run out of retries are now moved to a dead
   job queue.  These jobs must be retried manually or they will expire
   after 6 months or 10,000 jobs.  The Web UI contains a "Dead" tab
   exposing these jobs.
+- **Process Lifecycle Events** - you can now register blocks to run at
+  certain points during the Sidekiq process lifecycle: boot, quiet and
+  shutdown.
+- **Global Error Handlers** - blocks of code which handle errors that
+  occur anywhere within Sidekiq, not just within middleware.
 - **Process Heartbeat** - each Sidekiq process will ping Redis every 5
   seconds to give a summary of the Sidekiq population at work.
-- The Workers tab is now renamed to Busy and contains a list of live
-  Sidekiq processes and jobs in progress.
 - **Remove official support for Ruby 1.9**  Things still might work but
   I no longer actively test on it.
 - **Remove built-in support for Redis-to-Go**.
   Heroku users: `heroku config:set REDIS_PROVIDER=REDISTOGO_URL`
-- Removed 'sidekiq/yaml\_patch', this was never documented or recommended.
 - **Remove built-in error integration for Airbrake, Honeybadger, ExceptionNotifier and Exceptional**.
   Each error gem should provide its own Sidekiq integration.  Update your error gem to the latest
   version to pick up Sidekiq support.
 - Remove deprecated Sidekiq::Client.registered\_\* APIs
 - Remove deprecated support for the old Sidekiq::Worker#retries\_exhausted method.
+- Removed 'sidekiq/yaml\_patch', this was never documented or recommended.
 - Remove usage of the term 'Worker' in the UI for clarity.  Users would call both threads and
   processes 'workers'.  Instead, use "Thread", "Process" or "Job".
+- The Workers tab is now renamed to Busy and contains a list of live
+  Sidekiq processes and jobs in progress.
 
 2.17.7
 -----------
