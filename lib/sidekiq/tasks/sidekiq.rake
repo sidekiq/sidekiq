@@ -1,26 +1,22 @@
 namespace :load do
   task :defaults do
+    set :sidekiq_default_hooks, -> { true }
 
-    set :sidekiq_default_hooks, ->{ true }
-
-    # If you need a special boot commands
-    #
-    # set :sidekiq_cmd,           ->{ "bundle exec sidekiq"  }
-    # set :sidekiqctl_cmd,        ->{ "bundle exec sidekiqctl" }
-    set :sidekiq_cmd,           ->{  }
-    set :sidekiqctl_cmd,        ->{  }
-
-    # If this changes, you'll need to manually
-    # stop the existing sidekiq process.
-    set :sidekiq_pid,             ->{ "tmp/sidekiq.pid" }
+    set :sidekiq_pid, -> { File.join(shared_path, 'tmp', 'pids', 'sidekiq.pid') }
+    set :sidekiq_env, -> { fetch(:rack_env, fetch(:rails_env, fetch(:stage))) }
+    set :sidekiq_log, -> { File.join(shared_path, 'log', 'sidekiq.log') }
 
     # "-d -i INT -P PATH" are added automatically.
-    set :sidekiq_options,       ->{ "-e #{fetch(:rails_env, 'production')} -L #{current_path}/log/sidekiq.log" }
+    set :sidekiq_options, -> { "-e #{fetch(:sidekiq_env)} -L #{fetch(:sidekiq_log)}" }
 
-    set :sidekiq_timeout,       ->{ 10 }
-    set :sidekiq_role,            ->{ :app }
-    set :sidekiq_processes,   ->{ 1 }
+    set :sidekiq_timeout, -> { 10 }
+    set :sidekiq_role, -> { :app }
+    set :sidekiq_processes, -> { 1 }
+    # Rbenv and RVM integration
+    set :rbenv_map_bins, fetch(:rbenv_map_bins).to_a.concat(%w{ sidekiq sidekiqctl })
+    set :rvm_map_bins, fetch(:rvm_map_bins).to_a.concat(%w{ sidekiq sidekiqctl })
   end
+
 end
 
 namespace :deploy do
@@ -32,85 +28,63 @@ end
 namespace :sidekiq do
   def for_each_process(&block)
     fetch(:sidekiq_processes).times do |idx|
-      yield((idx == 0 ? "#{fetch(:sidekiq_pid)}" : "#{fetch(:sidekiq_pid)}-#{idx}"), idx)
+      yield((idx.zero? ? "#{fetch(:sidekiq_pid)}" : "#{fetch(:sidekiq_pid).gsub('.pid', "-#{idx}.pid")}"), idx)
     end
   end
 
-  def pid_full_path(pid_path)
-    if pid_path.start_with?("/")
-      pid_path
-    else
-      "#{current_path}/#{pid_path}"
-    end
-  end
 
   task :add_default_hooks do
-    after 'deploy:starting',  'sidekiq:quiet'
-    after 'deploy:updated',   'sidekiq:stop'
-    after 'deploy:reverted',  'sidekiq:stop'
+    after 'deploy:starting', 'sidekiq:quiet'
+    after 'deploy:updated', 'sidekiq:stop'
+    after 'deploy:reverted', 'sidekiq:stop'
     after 'deploy:published', 'sidekiq:start'
   end
 
-  desc "Quiet sidekiq (stop accepting new work)"
+  desc 'Quiet sidekiq (stop processing new tasks)'
   task :quiet do
     on roles fetch(:sidekiq_role) do
       for_each_process do |pid_file, idx|
-        if test "[ -f #{pid_full_path(pid_file)} ]"
+        if test("[ -f #{pid_file} ]") and test("kill -0 $( cat #{pid_file} )")
           within current_path do
-            if fetch(:sidekiqctl_cmd)
-              execute fetch(:sidekiqctl_cmd), 'quiet', "#{pid_full_path(pid_file)}"
-            else
-              execute :bundle, :exec, :sidekiqctl, 'quiet', "#{pid_full_path(pid_file)}"
-            end
+            execute :bundle, :exec, :sidekiqctl, 'quiet', "#{pid_file}"
           end
         end
       end
     end
   end
 
-  desc "Stop sidekiq"
+  desc 'Stop sidekiq'
   task :stop do
     on roles fetch(:sidekiq_role) do
       for_each_process do |pid_file, idx|
-        if test "[ -f #{pid_full_path(pid_file)} ]"
+        if test("[ -f #{pid_file} ]") and test("kill -0 $( cat #{pid_file} )")
           within current_path do
-            if fetch(:sidekiqctl_cmd)
-              execute fetch(:sidekiqctl_cmd), 'stop', "#{pid_full_path(pid_file)}", fetch(:sidekiq_timeout)
-            else
-              execute :bundle, :exec, :sidekiqctl, 'stop', "#{pid_full_path(pid_file)}", fetch(:sidekiq_timeout)
-            end
+            execute :bundle, :exec, :sidekiqctl, 'stop', "#{pid_file}", fetch(:sidekiq_timeout)
           end
         end
       end
     end
   end
 
-  desc "Start sidekiq"
+  desc 'Start sidekiq'
   task :start do
     on roles fetch(:sidekiq_role) do
-      rails_env = fetch(:rails_env, "production")
       within current_path do
         for_each_process do |pid_file, idx|
-          if !defined? JRUBY_VERSION
-            if fetch(:sidekiq_cmd)
-              execute fetch(:sidekiq_cmd), "-d -i #{idx} -P #{pid_full_path(pid_file)} #{fetch(:sidekiq_options)}"
-            else
-              execute :bundle, :exec, :sidekiq, "-d -i #{idx} -P #{pid_full_path(pid_file)} #{fetch(:sidekiq_options)}"
-            end
+          command = "-i #{idx} -P #{pid_file} #{fetch(:sidekiq_options)}"
+          if defined?(JRUBY_VERSION)
+            command = "#{command} >/dev/null 2>&1 &"
+            warn 'Since JRuby doesn\'t support Process.daemon, Sidekiq will be running without the -d flag.'
           else
-            execute "echo 'Since JRuby doesn't support Process.daemon, Sidekiq will be running without the -d flag."
-            if fetch(:sidekiq_cmd)
-              execute fetch(:sidekiq_cmd), "-i #{idx} -P #{pid_full_path(pid_file)} #{fetch(:sidekiq_options)} >/dev/null 2>&1 &"
-            else
-              execute :bundle, :exec, :sidekiq, "-i #{idx} -P #{pid_full_path(pid_file)} #{fetch(:sidekiq_options)} >/dev/null 2>&1 &"
-            end
+            command = "-d #{command}"
           end
+          execute :bundle, :exec, :sidekiq, command
         end
       end
     end
   end
 
-  desc "Restart sidekiq"
+  desc 'Restart sidekiq'
   task :restart do
     invoke 'sidekiq:stop'
     invoke 'sidekiq:start'
