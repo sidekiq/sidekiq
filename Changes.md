@@ -16,7 +16,9 @@ Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
   occur anywhere within Sidekiq, not just within middleware.
 - **Process Heartbeat** - each Sidekiq process will ping Redis every 5
   seconds to give a summary of the Sidekiq population at work.
-- **Remove official support for Ruby 1.9**  Things still might work but
+- **Remove official Capistrano integration** - this integration has been
+  moved into the capistrano-sidekiq gem.
+- **Remove official support for Ruby 1.9** - Things still might work but
   I no longer actively test on it.
 - **Remove built-in support for Redis-to-Go**.
   Heroku users: `heroku config:set REDIS_PROVIDER=REDISTOGO_URL`
