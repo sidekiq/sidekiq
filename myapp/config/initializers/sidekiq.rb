@@ -3,7 +3,7 @@ Sidekiq.configure_client do |config|
 end
 Sidekiq.configure_server do |config|
   config.redis = { :size => 25, :namespace => 'foo' }
-  config.on(:boot) { puts "Hello!" }
+  config.on(:startup) { puts "Hello!" }
   config.on(:quiet) { puts "Quiet down!" }
   config.on(:shutdown) { puts "Goodbye!" }
 end
