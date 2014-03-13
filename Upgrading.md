@@ -6,6 +6,9 @@ changes a few data elements in Redis.  To upgrade cleanly:
 * Upgrade to the latest Sidekiq 2.x and run it for a few weeks.
   `gem 'sidekiq', '< 3'`
   This is only needed if you have retries pending.
+* If you used the capistrano integration, you'll need to pull in the
+  new [capistrano-sidekiq](https://github.com/seuros/capistrano-sidekiq)
+  gem and use it in your deploy.rb.
 * API changes:
   - `Sidekiq::Client.registered_workers` replaced by `Sidekiq::Workers.new`
   - `Sidekiq::Client.registered_queues` replaced by `Sidekiq::Queue.all`

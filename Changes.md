@@ -17,7 +17,7 @@ Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
 - **Process Heartbeat** - each Sidekiq process will ping Redis every 5
   seconds to give a summary of the Sidekiq population at work.
 - **Remove official Capistrano integration** - this integration has been
-  moved into the capistrano-sidekiq gem.
+  moved into the [capistrano-sidekiq](https://github.com/seuros/capistrano-sidekiq) gem.
 - **Remove official support for Ruby 1.9** - Things still might work but
   I no longer actively test on it.
 - **Remove built-in support for Redis-to-Go**.
