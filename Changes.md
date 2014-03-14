@@ -25,6 +25,7 @@ Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
 - **Remove built-in error integration for Airbrake, Honeybadger, ExceptionNotifier and Exceptional**.
   Each error gem should provide its own Sidekiq integration.  Update your error gem to the latest
   version to pick up Sidekiq support.
+- Upgrade to connection\_pool 2.0 which creates connections lazily.
 - Remove deprecated Sidekiq::Client.registered\_\* APIs
 - Remove deprecated support for the old Sidekiq::Worker#retries\_exhausted method.
 - Removed 'sidekiq/yaml\_patch', this was never documented or recommended.
