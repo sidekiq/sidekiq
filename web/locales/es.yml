@@ -20,6 +20,7 @@ es:
   Class: Clase
   Job: Trabajo
   Arguments: Argumentos
+  Extras: Extras
   Started: Hora de Inicio
   ShowAll: Mostrar Todo
   CurrentMessagesInQueue: Mensajes actualmente en <span class='title'>%{queue}</span>
@@ -58,3 +59,11 @@ es:
   OneMonth: 1 mes
   ThreeMonths: 3 meses
   SixMonths: 6 meses
+  Failures: Fallas
+  DeadJobs: Trabajos muertos
+  NoDeadJobsFound: No hay trabajos muertos
+  Dead: Muerto
+  Processes: Procesos
+  Thread: Hilo
+  Threads: Hilos
+  Jobs: Trabajos
