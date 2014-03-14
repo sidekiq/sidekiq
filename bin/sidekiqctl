@@ -3,8 +3,18 @@
 require 'fileutils'
 
 class Sidekiqctl
+  DEFAULT_TIMEOUT = 10
 
   attr_reader :stage, :pidfile, :timeout
+
+  def self.print_usage
+    puts
+    puts "Usage: #{File.basename($0)} <command> <pidfile> <timeout>"
+    puts " where <command> is either 'quiet', 'stop' or 'shutdown'"
+    puts "       <pidfile> is path to a pidfile"
+    puts "       <timeout> is number of seconds to wait till Sidekiq exits (default: #{Sidekiqctl::DEFAULT_TIMEOUT})"
+    puts
+  end
 
   def initialize(stage, pidfile, timeout)
     @stage = stage
@@ -67,12 +77,15 @@ class Sidekiqctl
     quiet
     stop
   end
-
 end
 
-stage = ARGV[0]
-pidfile = ARGV[1]
-timeout = ARGV[2].to_i
-timeout = 10 if timeout == 0
+if ARGV.length < 2
+  Sidekiqctl.print_usage
+else
+  stage = ARGV[0]
+  pidfile = ARGV[1]
+  timeout = ARGV[2].to_i
+  timeout = Sidekiqctl::DEFAULT_TIMEOUT if timeout == 0
 
-Sidekiqctl.new(stage, pidfile, timeout)
+  Sidekiqctl.new(stage, pidfile, timeout)
+end
