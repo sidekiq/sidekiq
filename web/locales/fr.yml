@@ -4,57 +4,66 @@ fr:
   Status: État
   Time: Heure
   Namespace: Namespace
-  Realtime: Temps Réel
+  Realtime: Temps eéel
   History: Historique
   Busy: Occupées
   Processed: Traitées
   Failed: Échouées
-  Scheduled: Datées
-  Retries: Réessayées
-  Enqueued: En File
+  Scheduled: Planifiée
+  Retries: Tentatives
+  Enqueued: En file
   Worker: Travailleur
   Workers: Travailleurs
-  LivePoll: Live Poll
-  StopPolling: Arrêt du Polling
+  LivePoll: Live polling
+  StopPolling: Arrêter le polling
   Queue: File
   Class: Classe
   Job: Tâche
   Arguments: Arguments
+  Extras: Extras
   Started: Démarrées
-  ShowAll: Montrer Tout
+  ShowAll: Montrer tout
   CurrentMessagesInQueue: Messages actuellement dans <span class='title'>%{queue}</span>
   Delete: Supprimer
   AddToQueue: Ajouter à la liste
-  AreYouSureDeleteJob: Êtes-vous certain de vouloir supprimer cette tâche?
-  AreYouSureDeleteQueue: Êtes-vous certain de vouloir supprimer la file %{queue}?
+  AreYouSureDeleteJob: Êtes-vous certain de vouloir supprimer cette tâche ?
+  AreYouSureDeleteQueue: Êtes-vous certain de vouloir supprimer la file %{queue} ?
   Queues: Queues
   Size: Taille
   Actions: Actions
-  NextRetry: Prochain Essai
-  RetryCount: Nombre d'Essais
-  RetryNow: Réessayer Maintenant
-  LastRetry: Dernier Essai
-  OriginallyFailed: Échec Original
+  NextRetry: Prochain essai
+  RetryCount: Nombre d'essais
+  RetryNow: Réessayer maintenant
+  LastRetry: Dernier essai
+  OriginallyFailed: Échec original
   AreYouSure: Êtes-vous certain?
-  DeleteAll: Supprimer Tout
-  RetryAll: Réessayer Tout
+  DeleteAll: Supprimer tout
+  RetryAll: Réessayer tout
   NoRetriesFound: Aucune tâche à réessayer n’a été trouvée
   Error: Erreur
   ErrorClass: Classe d’Erreur
-  ErrorMessage: Message d’Erreur
-  ErrorBacktrace: Backtrace d’Erreur
+  ErrorMessage: Message d’erreur
+  ErrorBacktrace: Trace de débogage
   GoBack: ← Retour
-  NoScheduledFound: Pas de tâches datées trouvées
+  NoScheduledFound: Pas de tâches planifiées trouvées
   When: Quand
-  ScheduledJobs: Tâches Datées
+  ScheduledJobs: Tâches planifiées
   idle: en attente
   active: actives
   Version: Version
   Connections: Connexions
   MemoryUsage: Mémoire Utilisée
-  PeakMemoryUsage: Mémoire Utilisée (max.)
-  Uptime: Uptime (jours)
+  PeakMemoryUsage: Mémoire utilisée (max.)
+  Uptime: Disponibilité (jours)
   OneWeek: 1 semaine
   OneMonth: 1 mois
   ThreeMonths: 3 mois
   SixMonths: 6 mois
+  Failures: Echecs
+  DeadJobs: Tâches mortes
+  NoDeadJobsFound: Aucune tâche morte n'a été trouvée
+  Dead: Morte
+  Processes: Processus
+  Thread: Fil
+  Threads: Fils
+  Jobs: Tâches
