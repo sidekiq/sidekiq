@@ -12,20 +12,21 @@ it:
   Scheduled: Pianificato
   Retries: Nuovi Tentativi
   Enqueued: In Coda
-  Worker: Lavoratore
-  Workers: Lavoratori
-  LivePoll: Aggiorna Live
+  Worker: Worker
+  Workers: Workers
+  LivePoll: Aggiornamento Continuo
   StopPolling: Ferma Aggiornamento Continuo
   Queue: Coda
   Class: Classe
-  Job: Lavoro
+  Job: Job
   Arguments: Argomenti
+  Extras: Extra
   Started: Iniziato
   ShowAll: Mostra tutti
   CurrentMessagesInQueue: Messaggi in <span class='title'>%{queue}</span>
   Delete: Cancella
-  AddToQueue: Aggiungi a coda
-  AreYouSureDeleteJob: Sei sicuro di voler cancellare questo lavoro?
+  AddToQueue: Aggiungi alla coda
+  AreYouSureDeleteJob: Sei sicuro di voler cancellare questo job?
   AreYouSureDeleteQueue: Sei sicuro di voler cancellare la coda %{queue}?
   Queues: Code
   Size: Dimensione
@@ -41,12 +42,12 @@ it:
   NoRetriesFound: Non sono stati trovati nuovi tentativi
   Error: Errore
   ErrorClass: Classe dell'Errore
-  ErrorMessage: Error Message
-  ErrorBacktrace: Error Backtrace
+  ErrorMessage: Messaggio d'Errore
+  ErrorBacktrace: Backtrace dell'Errore
   GoBack: ← Indietro
-  NoScheduledFound: Non ci sono lavori pianificati
+  NoScheduledFound: Non ci sono job pianificati
   When: Quando
-  ScheduledJobs: Lavori Pianificati
+  ScheduledJobs: Job Pianificati
   idle: inattivo
   active: attivo
   Version: Versione
@@ -58,3 +59,11 @@ it:
   OneMonth: 1 mese
   ThreeMonths: 3 mesi
   SixMonths: 6 mesi
+  Failures: Fallimenti
+  DeadJobs: Job morto
+  NoDeadJobsFound: Non sono stati trovati job morti
+  Dead: Morto
+  Processes: Processi
+  Thread: Thread
+  Threads: Thread
+  Jobs: Job
