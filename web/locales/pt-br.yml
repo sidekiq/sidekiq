@@ -23,7 +23,7 @@
   Extras: Extras
   Started: Iniciados
   ShowAll: Mostrar todos
-  CurrentMessagesInQueue: Mensagens atualmenta na <span class='title'>%{queue}</span>
+  CurrentMessagesInQueue: Mensagens atualmente na <span class='title'>%{queue}</span>
   Delete: Apagar
   AddToQueue: Adicionar à fila
   AreYouSureDeleteJob: Deseja deletar esta tarefa?
@@ -32,7 +32,7 @@
   Size: Tamanho
   Actions: Ações
   NextRetry: Próxima Tentativa
-  RetryCount: Retry Count
+  RetryCount: Número de Tentativas
   RetryNow: Tentar novamente agora
   LastRetry: Última tentativa
   OriginallyFailed: Falhou originalmente
@@ -54,8 +54,16 @@
   Connections: Conexões
   MemoryUsage: Uso de memória
   PeakMemoryUsage: Pico de uso de memória
-  Uptime: Tempo rodando
+  Uptime: Dias rodando
   OneWeek: 1 semana
   OneMonth: 1 mês
   ThreeMonths: 3 meses
   SixMonths: 6 meses
+  Failures : Falhas
+  DeadJobs : Tarefas mortas
+  NoDeadJobsFound : Nenhuma tarefa morta foi encontrada
+  Dead : Morta
+  Processes : Processos
+  Thread : Thread
+  Threads : Threads
+  Jobs : Tarefas
