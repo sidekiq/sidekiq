@@ -9,17 +9,18 @@ fr:
   Busy: Occupées
   Processed: Traitées
   Failed: Échouées
-  Scheduled: Datées
-  Retries: Réessayées
+  Scheduled: Planifiée
+  Retries: Tentatives
   Enqueued: En File
   Worker: Travailleur
   Workers: Travailleurs
-  LivePoll: Live Poll
-  StopPolling: Arrêt du Polling
+  LivePoll: Live polling
+  StopPolling: Arrêter Polling
   Queue: File
   Class: Classe
   Job: Tâche
   Arguments: Arguments
+  Extras: Extras
   Started: Démarrées
   ShowAll: Montrer Tout
   CurrentMessagesInQueue: Messages actuellement dans <span class='title'>%{queue}</span>
@@ -42,19 +43,27 @@ fr:
   Error: Erreur
   ErrorClass: Classe d’Erreur
   ErrorMessage: Message d’Erreur
-  ErrorBacktrace: Backtrace d’Erreur
+  ErrorBacktrace: Trace de débogage
   GoBack: ← Retour
-  NoScheduledFound: Pas de tâches datées trouvées
+  NoScheduledFound: Pas de tâches planifiées trouvées
   When: Quand
-  ScheduledJobs: Tâches Datées
+  ScheduledJobs: Tâches planifiées
   idle: en attente
   active: actives
   Version: Version
   Connections: Connexions
   MemoryUsage: Mémoire Utilisée
   PeakMemoryUsage: Mémoire Utilisée (max.)
-  Uptime: Uptime (jours)
+  Uptime: durée de fonctionnent (jours)
   OneWeek: 1 semaine
   OneMonth: 1 mois
   ThreeMonths: 3 mois
   SixMonths: 6 mois
+  Failures: Echecs
+  DeadJobs: Tâches mortes
+  NoDeadJobsFound: Aucune tâche morte n'a été trouvée
+  Dead: Morte
+  Processes: Processus
+  Thread: Fil
+  Threads: Fils
+  Jobs: Tâches
