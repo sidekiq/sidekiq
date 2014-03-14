@@ -10,15 +10,15 @@ it:
   Processed: Processato
   Failed: Fallito
   Scheduled: Pianificato
-  Retries: Nuovi Tentativi
-  Enqueued: In Coda
-  Worker: Worker
-  Workers: Workers
-  LivePoll: Aggiornamento Continuo
-  StopPolling: Ferma Aggiornamento Continuo
+  Retries: Nuovi tentativi
+  Enqueued: In coda
+  Worker: Lavoratore
+  Workers: Lavoratori
+  LivePoll: Live poll
+  StopPolling: Ferma il polling
   Queue: Coda
   Class: Classe
-  Job: Job
+  Job: Lavoro
   Arguments: Argomenti
   Extras: Extra
   Started: Iniziato
@@ -26,44 +26,44 @@ it:
   CurrentMessagesInQueue: Messaggi in <span class='title'>%{queue}</span>
   Delete: Cancella
   AddToQueue: Aggiungi alla coda
-  AreYouSureDeleteJob: Sei sicuro di voler cancellare questo job?
+  AreYouSureDeleteJob: Sei sicuro di voler cancellare questo lavoro?
   AreYouSureDeleteQueue: Sei sicuro di voler cancellare la coda %{queue}?
   Queues: Code
   Size: Dimensione
   Actions: Azioni
-  NextRetry: Prossimo Tentativo
-  RetryCount: Totale Tentativi
-  RetryNow: Riprova Ora
+  NextRetry: Prossimo tentativo
+  RetryCount: Totale tentativi
+  RetryNow: Riprova
   LastRetry: Ultimo tentativo
-  OriginallyFailed: Fallito Inizialmente
+  OriginallyFailed: Primo fallimento
   AreYouSure: Sei sicuro?
-  DeleteAll: Cancella Tutti
-  RetryAll: Riprova Tutti
+  DeleteAll: Cancella tutti
+  RetryAll: Riprova tutti
   NoRetriesFound: Non sono stati trovati nuovi tentativi
   Error: Errore
-  ErrorClass: Classe dell'Errore
-  ErrorMessage: Messaggio d'Errore
-  ErrorBacktrace: Backtrace dell'Errore
+  ErrorClass: Classe dell'errore
+  ErrorMessage: Messaggio di errore
+  ErrorBacktrace: Backtrace dell'errore
   GoBack: ← Indietro
-  NoScheduledFound: Non ci sono job pianificati
+  NoScheduledFound: Non ci sono lavori pianificati
   When: Quando
-  ScheduledJobs: Job Pianificati
+  ScheduledJobs: Lavori pianificati
   idle: inattivo
   active: attivo
   Version: Versione
   Connections: Connessioni
-  MemoryUsage: Uso di Memoria
-  PeakMemoryUsage: Picco Uso di Memoria
+  MemoryUsage: Memoria utilizzata
+  PeakMemoryUsage: Memoria utilizzata (max.)
   Uptime: Uptime (giorni)
   OneWeek: 1 settimana
   OneMonth: 1 mese
   ThreeMonths: 3 mesi
   SixMonths: 6 mesi
   Failures: Fallimenti
-  DeadJobs: Job morto
-  NoDeadJobsFound: Non sono stati trovati job morti
-  Dead: Morto
+  DeadJobs: Lavori arrestati
+  NoDeadJobsFound: Non ci sono lavori arrestati
+  Dead: Arrestato
   Processes: Processi
   Thread: Thread
   Threads: Thread
-  Jobs: Job
+  Jobs: Lavori
