@@ -18,12 +18,13 @@ de:
   Queue: Warteschlange
   Class: Klasse
   Job: Job
+  Extras: Extras
   Arguments: Argumente
-  Started: Startet
+  Started: Gestartet
   ShowAll: Alle anzeigen
   CurrentMessagesInQueue: Aktuelle Nachrichten in <span class='title'>%{queue}</span>
   Delete: Löschen
-  AddToQueue: Add to queue
+  AddToQueue: In Warteschlange einreihen
   AreYouSureDeleteJob: Möchtest du diesen Job wirklich löschen?
   AreYouSureDeleteQueue: Möchtest du %{queue} wirklich löschen?
   Queues: Warteschlangen
@@ -33,15 +34,15 @@ de:
   RetryCount: Anzahl der Versuche
   RetryNow: Jetzt erneut versuchen
   LastRetry: Letzter Versuch
-  OriginallyFailed: Ursprünglich Fehlgeschlagen
+  OriginallyFailed: Ursprünglich fehlgeschlagen
   AreYouSure: Bist du sicher?
   DeleteAll: Alle löschen
   RetryAll: Alle erneut versuchen
   NoRetriesFound: Keine erneuten Versuche gefunden
   Error: Fehler
-  ErrorClass: Fehler klasse
-  ErrorMessage: Fehler-Nachricht
-  ErrorBacktrace: Fehler-Backtrace
+  ErrorClass: Fehlerklasse
+  ErrorMessage: Fehlernachricht
+  ErrorBacktrace: Fehlerbericht
   GoBack: ← Zurück
   NoScheduledFound: Keine geplanten Jobs gefunden
   When: Wann
@@ -57,3 +58,11 @@ de:
   OneMonth: 1 Monat
   ThreeMonths: 3 Monate
   SixMonths: 6 Monate
+  Failures: Ausfälle
+  DeadJobs: Gestorbene Jobs
+  NoDeadJobsFound: Keine toten Jobs gefunden
+  Dead: Tot
+  Processes: Prozesse
+  Thread: Thread
+  Threads: Threads
+  Jobs: Jobs
