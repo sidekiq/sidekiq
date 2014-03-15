@@ -16,6 +16,8 @@ Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
   occur anywhere within Sidekiq, not just within middleware.
 - **Process Heartbeat** - each Sidekiq process will ping Redis every 5
   seconds to give a summary of the Sidekiq population at work.
+- New Chinese, Greek and Czech translations for the Web UI.
+- Updated most languages translations for the new UI features.
 - **Remove official Capistrano integration** - this integration has been
   moved into the [capistrano-sidekiq](https://github.com/seuros/capistrano-sidekiq) gem.
 - **Remove official support for Ruby 1.9** - Things still might work but
@@ -25,7 +27,7 @@ Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
 - **Remove built-in error integration for Airbrake, Honeybadger, ExceptionNotifier and Exceptional**.
   Each error gem should provide its own Sidekiq integration.  Update your error gem to the latest
   version to pick up Sidekiq support.
-- Upgrade to connection\_pool 2.0 which creates connections lazily.
+- Upgrade to connection\_pool 2.0 which now creates connections lazily.
 - Remove deprecated Sidekiq::Client.registered\_\* APIs
 - Remove deprecated support for the old Sidekiq::Worker#retries\_exhausted method.
 - Removed 'sidekiq/yaml\_patch', this was never documented or recommended.
