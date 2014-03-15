@@ -13,7 +13,6 @@ no:
   Retries: Forsøk
   Enqueued: I kø
   Worker: Arbeider
-  Workers: Arbeidere
   LivePoll: Automatisk oppdatering
   StopPolling: Stopp automatisk oppdatering
   Queue: Kø

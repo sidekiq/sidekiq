@@ -13,7 +13,6 @@ ko:
   Retries: 재시도
   Enqueued: 대기 중
   Worker: 워커
-  Workers: 워커
   LivePoll: 폴링 시작
   StopPolling: 폴링 중단
   Queue: 큐

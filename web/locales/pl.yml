@@ -13,7 +13,6 @@ pl:
   Retries: Prób
   Enqueued: Zakolejkowane
   Worker: Worker
-  Workers: Workery
   LivePoll: Wczytuj na żywo
   StopPolling: Zatrzymaj wczytywanie na żywo
   Queue: Kolejka

@@ -13,7 +13,6 @@ es:
   Retries: Reintentos
   Enqueued: En Fila
   Worker: Trabajador
-  Workers: Trabajadores
   LivePoll: Sondeo en Vivo
   StopPolling: Detener Sondeo
   Queue: Fila

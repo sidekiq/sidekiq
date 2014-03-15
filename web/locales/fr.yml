@@ -13,7 +13,6 @@ fr:
   Retries: Tentatives
   Enqueued: En queue
   Worker: Travailleur
-  Workers: Travailleurs
   LivePoll: Live polling
   StopPolling: Arrêt du polling
   Queue: File

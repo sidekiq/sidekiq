@@ -13,7 +13,6 @@ it:
   Retries: Nuovi tentativi
   Enqueued: In coda
   Worker: Lavoratore
-  Workers: Lavoratori
   LivePoll: Live poll
   StopPolling: Ferma il polling
   Queue: Coda

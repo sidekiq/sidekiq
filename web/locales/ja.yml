@@ -13,7 +13,6 @@ ja:
   Retries: 再試行
   Enqueued: 待機状態
   Worker: 動作中の作業
-  Workers: 動作中の作業
   LivePoll: ポーリング開始
   StopPolling: ポーリング停止
   Queue: キュー

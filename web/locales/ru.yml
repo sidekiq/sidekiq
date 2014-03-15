@@ -12,7 +12,6 @@ ru:
   Retries: Попыток
   Enqueued: В очереди
   Worker: Обработчик
-  Workers: Обработчики
   LivePoll: Постоянный опрос
   StopPolling: Остановить опрос
   Queue: Очередь

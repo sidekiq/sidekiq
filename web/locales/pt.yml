@@ -13,7 +13,6 @@ pt:
   Retries: Tentativas
   Enqueued: Em espera
   Worker: Worker
-  Workers: Workers
   LivePoll: Live Poll
   StopPolling: Desactivar Live Poll
   Queue: Fila
