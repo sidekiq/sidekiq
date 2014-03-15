@@ -33,14 +33,14 @@ de:
   RetryCount: Anzahl der Versuche
   RetryNow: Jetzt erneut versuchen
   LastRetry: Letzter Versuch
-  OriginallyFailed: Ursprünglich Fehlgeschlagen
+  OriginallyFailed: Ursprünglich fehlgeschlagen
   AreYouSure: Bist du sicher?
   DeleteAll: Alle löschen
   RetryAll: Alle erneut versuchen
   NoRetriesFound: Keine erneuten Versuche gefunden
   Error: Fehler
-  ErrorClass: Fehler klasse
-  ErrorMessage: Fehler-Nachricht
+  ErrorClass: Fehlerklasse
+  ErrorMessage: Fehlernachricht
   ErrorBacktrace: Fehler-Backtrace
   GoBack: ← Zurück
   NoScheduledFound: Keine geplanten Jobs gefunden
@@ -57,3 +57,11 @@ de:
   OneMonth: 1 Monat
   ThreeMonths: 3 Monate
   SixMonths: 6 Monate
+  Failures: Fehlschläge
+  DeadJobs: Tote Jobs
+  NoDeadJobsFound: Keine toten Jobs gefunden
+  Dead: tot
+  Processes: Prozesse
+  Thread: Thread
+  Threads: Threads
+  Jobs: Jobs
