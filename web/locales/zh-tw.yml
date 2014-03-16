@@ -19,7 +19,7 @@
   Class: 類別
   Job: 工作
   Arguments: 引數
-  Extras: 額外
+  Extras: 額外資料
   Started: 開始於
   ShowAll: 全部顯示
   CurrentMessagesInQueue: 目前 <span class='title'>%{queue}</span> 佇列中的訊息
