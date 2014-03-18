@@ -1,58 +1,67 @@
 ru:
-  Dashboard: Панель управления
-  Status: Статус
-  Time: Время
-  Namespace: Пространство имен
-  Realtime: Сейчас
-  History: История
-  Busy: Занят
-  Processed: Обработано
-  Failed: Провалено
-  Scheduled: Запланировано
-  Retries: Попыток
-  Enqueued: В очереди
-  Worker: Обработчик
-  LivePoll: Постоянный опрос
-  StopPolling: Остановить опрос
-  Queue: Очередь
-  Class: Класс
-  Job: Задание
-  Arguments: Аргументы
-  Started: Запущено
-  ShowAll: Показать все
-  CurrentMessagesInQueue: Текущие сообщения в <span class='title'>%{queue}</span>
-  Delete: Удалить
-  AddToQueue: Добавить в очередь
-  AreYouSureDeleteJob: Вы уверены в том, что хотите удалить задание?
-  AreYouSureDeleteQueue: Вы уверены в том, что хотите удалить очередь %{queue}?
-  Queues: Очереди
-  Size: Размер
-  Actions: Действия
-  NextRetry: Следующая попытка
-  RetryCount: Количество попыток
-  RetryNow: Повторить немедленно
-  LastRetry: Последняя попытка
-  OriginallyFailed: Первоначально провалилось
-  AreYouSure: Вы уверены?
-  DeleteAll: Удалить все
-  RetryAll: Повторить все
-  NoRetriesFound: Не зафиксировано попыток
-  Error: Ошибка
-  ErrorClass: Класс ошибки
-  ErrorMessage: Сообщение об ошибке
-  ErrorBacktrace: Трассировка ошибок
-  GoBack: ← Назад
-  NoScheduledFound: Не обнаружено запланированных заданий
-  When: Когда
-  ScheduledJobs: Запланированные задания
-  idle: бездействует
-  active: активен
-  Version: Версия
-  Connections: Соединений
-  MemoryUsage: Расход памяти
-  PeakMemoryUsage: Максимальный расход памяти
-  Uptime: Uptime (в днях)
-  OneWeek: неделя
-  OneMonth: месяц
-  ThreeMonths: 3 месяца
-  SixMonths: пол года
+  Actions:                Действия
+  AddToQueue:             Добавить в очередь
+  AreYouSure:             Вы уверены?
+  AreYouSureDeleteJob:    Вы уверены, что хотите удалить эту задачу?
+  AreYouSureDeleteQueue:  Вы уверены, что хотите удалить очередь %{queue}?
+  Arguments:              Аргументы
+  Busy:                   Занят
+  Class:                  Класс
+  Connections:            Соединения
+  CurrentMessagesInQueue: Текущие задачи в очереди <span class='title'>%{queue}</span>
+  Dashboard:              Панель управления
+  Dead:                   Убито
+  DeadJobs:               Убитые задачи
+  Delete:                 Удалить
+  DeleteAll:              Удалить все
+  Enqueued:               В очереди
+  Error:                  Ошибка
+  ErrorBacktrace:         Трассировка ошибки
+  ErrorClass:             Класс ошибки
+  ErrorMessage:           Сообщение об ошибке
+  Extras:                 Дополнительно
+  Failed:                 Провалено
+  Failures:               Провалы
+  GoBack:                 ← Назад
+  History:                История
+  Job:                    Задача
+  Jobs:                   Задачи
+  LastRetry:              Последняя попытка
+  LivePoll:               Постоянный опрос
+  MemoryUsage:            Использование памяти
+  Namespace:              Пространоство имен
+  NextRetry:              Следующая попытка
+  NoDeadJobsFound:        Нет убитых задач
+  NoRetriesFound:         Нет попыток
+  NoScheduledFound:       Нет запланированных задач
+  OneMonth:               1 месяц
+  OneWeek:                1 неделя
+  OriginallyFailed:       Первый провал
+  PeakMemoryUsage:        Максимальный расход памяти
+  Processed:              Обработано
+  Processes:              Процессы
+  Queue:                  Очередь
+  Queues:                 Очереди
+  Realtime:               Сейчас
+  Retries:                Попытки
+  RetryAll:               Повторить все
+  RetryCount:             Кол-во попыток
+  RetryNow:               Повторить сейчас
+  Scheduled:              Запланировано
+  ScheduledJobs:          Запланированные задачи
+  ShowAll:                Показать все
+  SixMonths:              6 месяцев
+  Size:                   Размер
+  Started:                Запущено
+  Status:                 Статус
+  StopPolling:            Остановить опрос
+  Thread:                 Поток
+  Threads:                Потоки
+  ThreeMonths:            3 месяца
+  Time:                   Время
+  Uptime:                 Дня(ей) бесперебойной работы
+  Version:                Версия
+  When:                   Когда
+  Worker:                 Обработчик
+  active:                 активен
+  idle:                   отдыхает
