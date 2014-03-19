@@ -24,7 +24,7 @@ the same CPU and perform the same amount of work.
 Requirements
 -----------------
 
-I test with the latest Ruby (2.1, 2.0) and JRuby versions (1.7).  Other versions/VMs
+I test with the latest MRI (2.1, 2.0) and JRuby versions (1.7).  Other versions/VMs
 are untested but might work fine.
 
 The last two major Rails releases (3.2 and 4.0) are officially supported, other

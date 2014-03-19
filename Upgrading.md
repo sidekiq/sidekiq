@@ -23,10 +23,11 @@ changes a few data elements in Redis.  To upgrade cleanly:
   will need to update their error gem version to the latest to pull in
   Sidekiq support.  Sidekiq will not provide explicit support for these
   services so as to not play favorites with any particular error service.
-* Ruby 1.9 is no longer officially supported.  Sidekiq's official
+* MRI 1.9 is no longer officially supported.  Sidekiq's official
   support policy is to support the current and previous major releases
-  of Ruby and Rails.  As of February 2014, that's Ruby 2.1, Ruby 2.0, Rails 4.0
-  and Rails 3.2.  I will consider PRs to fix issues found by users.
+  of MRI and Rails.  As of February 2014, that's MRI 2.1, MRI 2.0, JRuby 1.7, Rails 4.0
+  and Rails 3.2.  I will consider PRs to fix issues found by users for
+  other platforms/versions.
 
 ## Error Service Providers
 

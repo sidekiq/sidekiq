@@ -16,11 +16,11 @@ Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
   occur anywhere within Sidekiq, not just within middleware.
 - **Process Heartbeat** - each Sidekiq process will ping Redis every 5
   seconds to give a summary of the Sidekiq population at work.
-- New Chinese, Greek and Czech translations for the Web UI.
+- New Chinese, Greek, Swedish and Czech translations for the Web UI.
 - Updated most languages translations for the new UI features.
 - **Remove official Capistrano integration** - this integration has been
   moved into the [capistrano-sidekiq](https://github.com/seuros/capistrano-sidekiq) gem.
-- **Remove official support for Ruby 1.9** - Things still might work but
+- **Remove official support for MRI 1.9** - Things still might work but
   I no longer actively test on it.
 - **Remove built-in support for Redis-to-Go**.
   Heroku users: `heroku config:set REDIS_PROVIDER=REDISTOGO_URL`
