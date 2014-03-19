@@ -2,57 +2,66 @@ ru:
   Dashboard: Панель управления
   Status: Статус
   Time: Время
-  Namespace: Пространство имен
+  Namespace: Пространоство имен
   Realtime: Сейчас
   History: История
   Busy: Занят
   Processed: Обработано
   Failed: Провалено
   Scheduled: Запланировано
-  Retries: Попыток
+  Retries: Попытки
   Enqueued: В очереди
   Worker: Обработчик
   LivePoll: Постоянный опрос
   StopPolling: Остановить опрос
   Queue: Очередь
   Class: Класс
-  Job: Задание
+  Job: Задача
   Arguments: Аргументы
+  Extras: Дополнительно
   Started: Запущено
   ShowAll: Показать все
-  CurrentMessagesInQueue: Текущие сообщения в <span class='title'>%{queue}</span>
+  CurrentMessagesInQueue: Текущие задачи в очереди <span class='title'>%{queue}</span>
   Delete: Удалить
   AddToQueue: Добавить в очередь
-  AreYouSureDeleteJob: Вы уверены в том, что хотите удалить задание?
-  AreYouSureDeleteQueue: Вы уверены в том, что хотите удалить очередь %{queue}?
+  AreYouSureDeleteJob: Вы уверены, что хотите удалить эту задачу?
+  AreYouSureDeleteQueue: Вы уверены, что хотите удалить очередь %{queue}?
   Queues: Очереди
   Size: Размер
   Actions: Действия
   NextRetry: Следующая попытка
-  RetryCount: Количество попыток
-  RetryNow: Повторить немедленно
+  RetryCount: Кол-во попыток
+  RetryNow: Повторить сейчас
   LastRetry: Последняя попытка
-  OriginallyFailed: Первоначально провалилось
+  OriginallyFailed: Первый провал
   AreYouSure: Вы уверены?
   DeleteAll: Удалить все
   RetryAll: Повторить все
-  NoRetriesFound: Не зафиксировано попыток
+  NoRetriesFound: Нет попыток
   Error: Ошибка
   ErrorClass: Класс ошибки
   ErrorMessage: Сообщение об ошибке
-  ErrorBacktrace: Трассировка ошибок
+  ErrorBacktrace: Трассировка ошибки
   GoBack: ← Назад
-  NoScheduledFound: Не обнаружено запланированных заданий
+  NoScheduledFound: Нет запланированных задач
   When: Когда
-  ScheduledJobs: Запланированные задания
-  idle: бездействует
+  ScheduledJobs: Запланированные задачи
+  idle: отдыхает
   active: активен
   Version: Версия
-  Connections: Соединений
-  MemoryUsage: Расход памяти
+  Connections: Соединения
+  MemoryUsage: Использование памяти
   PeakMemoryUsage: Максимальный расход памяти
-  Uptime: Uptime (в днях)
-  OneWeek: неделя
-  OneMonth: месяц
+  Uptime: Дня(ей) бесперебойной работы
+  OneWeek: 1 неделя
+  OneMonth: 1 месяц
   ThreeMonths: 3 месяца
-  SixMonths: пол года
+  SixMonths: 6 месяцев
+  Failures: Провалы
+  DeadJobs: Убитые задачи
+  NoDeadJobsFound: Нет убитых задач
+  Dead: Убито
+  Processes: Процессы
+  Thread: Поток
+  Threads: Потоки
+  Jobs: Задачи
