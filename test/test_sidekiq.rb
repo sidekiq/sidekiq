@@ -40,11 +40,11 @@ class TestSidekiq < Sidekiq::Test
       e = assert_raises ArgumentError do
         Sidekiq.on(:startp)
       end
-      assert_match /Invalid event name/, e.message
+      assert_match(/Invalid event name/, e.message)
       e = assert_raises ArgumentError do
         Sidekiq.on('startup')
       end
-      assert_match /Symbols only/, e.message
+      assert_match(/Symbols only/, e.message)
       Sidekiq.on(:startup) do
         1 + 1
       end

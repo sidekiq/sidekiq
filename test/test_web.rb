@@ -42,9 +42,9 @@ class TestWeb < Sidekiq::Test
 
       get '/busy'
       assert_equal 200, last_response.status
-      assert_match /status-active/, last_response.body
-      assert_match /critical/, last_response.body
-      assert_match /WebWorker/, last_response.body
+      assert_match(/status-active/, last_response.body)
+      assert_match(/critical/, last_response.body)
+      assert_match(/WebWorker/, last_response.body)
     end
 
     it 'can display queues' do
@@ -52,8 +52,8 @@ class TestWeb < Sidekiq::Test
 
       get '/queues'
       assert_equal 200, last_response.status
-      assert_match /foo/, last_response.body
-      refute_match /HardWorker/, last_response.body
+      assert_match(/foo/, last_response.body)
+      refute_match(/HardWorker/, last_response.body)
     end
 
     it 'handles queue view' do
@@ -100,15 +100,15 @@ class TestWeb < Sidekiq::Test
     it 'can display retries' do
       get '/retries'
       assert_equal 200, last_response.status
-      assert_match /found/, last_response.body
-      refute_match /HardWorker/, last_response.body
+      assert_match(/found/, last_response.body)
+      refute_match(/HardWorker/, last_response.body)
 
       add_retry
 
       get '/retries'
       assert_equal 200, last_response.status
-      refute_match /found/, last_response.body
-      assert_match /HardWorker/, last_response.body
+      refute_match(/found/, last_response.body)
+      assert_match(/HardWorker/, last_response.body)
     end
 
     it 'can display a single retry' do
@@ -117,7 +117,7 @@ class TestWeb < Sidekiq::Test
       assert_equal 302, last_response.status
       get "/retries/#{job_params(*params)}"
       assert_equal 200, last_response.status
-      assert_match /HardWorker/, last_response.body
+      assert_match(/HardWorker/, last_response.body)
     end
 
     it 'handles missing retry' do
@@ -133,7 +133,7 @@ class TestWeb < Sidekiq::Test
 
       get "/retries"
       assert_equal 200, last_response.status
-      refute_match /#{params.first['args'][2]}/, last_response.body
+      refute_match(/#{params.first['args'][2]}/, last_response.body)
     end
 
     it 'can delete all retries' do
@@ -153,21 +153,21 @@ class TestWeb < Sidekiq::Test
 
       get '/queues/default'
       assert_equal 200, last_response.status
-      assert_match /#{params.first['args'][2]}/, last_response.body
+      assert_match(/#{params.first['args'][2]}/, last_response.body)
     end
 
     it 'can display scheduled' do
       get '/scheduled'
       assert_equal 200, last_response.status
-      assert_match /found/, last_response.body
-      refute_match /HardWorker/, last_response.body
+      assert_match(/found/, last_response.body)
+      refute_match(/HardWorker/, last_response.body)
 
       add_scheduled
 
       get '/scheduled'
       assert_equal 200, last_response.status
-      refute_match /found/, last_response.body
-      assert_match /HardWorker/, last_response.body
+      refute_match(/found/, last_response.body)
+      assert_match(/HardWorker/, last_response.body)
     end
 
     it 'can display a single scheduled job' do
@@ -176,7 +176,7 @@ class TestWeb < Sidekiq::Test
       assert_equal 302, last_response.status
       get "/scheduled/#{job_params(*params)}"
       assert_equal 200, last_response.status
-      assert_match /HardWorker/, last_response.body
+      assert_match(/HardWorker/, last_response.body)
     end
 
     it 'handles missing scheduled job' do
@@ -192,7 +192,7 @@ class TestWeb < Sidekiq::Test
 
       get '/queues/default'
       assert_equal 200, last_response.status
-      assert_match /#{params.first['args'][2]}/, last_response.body
+      assert_match(/#{params.first['args'][2]}/, last_response.body)
     end
 
     it 'can delete a single scheduled job' do
@@ -203,7 +203,7 @@ class TestWeb < Sidekiq::Test
 
       get "/scheduled"
       assert_equal 200, last_response.status
-      refute_match /#{params.first['args'][2]}/, last_response.body
+      refute_match(/#{params.first['args'][2]}/, last_response.body)
     end
 
     it 'can delete scheduled' do
@@ -230,12 +230,12 @@ class TestWeb < Sidekiq::Test
         assert_equal 1, q.size
         get '/queues/default'
         assert_equal 200, last_response.status
-        assert_match /#{params[0]['args'][2]}/, last_response.body
+        assert_match(/#{params[0]['args'][2]}/, last_response.body)
       end
     end
 
     it 'can retry all retries' do
-      msg, score = add_retry
+      msg = add_retry.first
       add_retry
 
       post "/retries/all/retry", 'retry' => 'Retry'
@@ -253,7 +253,7 @@ class TestWeb < Sidekiq::Test
       params = add_xss_retry
       get '/retries'
       assert_equal 200, last_response.status
-      assert_match /FailWorker/, last_response.body
+      assert_match(/FailWorker/, last_response.body)
 
       assert last_response.body.include?( "fail message: &lt;a&gt;hello&lt;&#x2F;a&gt;" )
       assert !last_response.body.include?( "fail message: <a>hello</a>" )
@@ -274,7 +274,7 @@ class TestWeb < Sidekiq::Test
 
       get '/busy'
       assert_equal 200, last_response.status
-      assert_match /FailWorker/, last_response.body
+      assert_match(/FailWorker/, last_response.body)
       assert last_response.body.include?( "&lt;a&gt;hello&lt;&#x2F;a&gt;" )
       assert !last_response.body.include?( "<a>hello</a>" )
 
@@ -316,7 +316,7 @@ class TestWeb < Sidekiq::Test
         end
 
         get '/custom'
-        assert_match /Changed text/, last_response.body
+        assert_match(/Changed text/, last_response.body)
 
       ensure
         Sidekiq::Web.tabs.delete 'Custom Tab'
@@ -390,7 +390,7 @@ class TestWeb < Sidekiq::Test
         (_, score) = add_dead
         get 'morgue'
         assert_equal 200, last_response.status
-        assert_match /#{score}/, last_response.body
+        assert_match(/#{score}/, last_response.body)
       end
 
       it 'can delete all dead' do
@@ -411,7 +411,7 @@ class TestWeb < Sidekiq::Test
 
         get '/queues/foo'
         assert_equal 200, last_response.status
-        assert_match /#{params.first['args'][2]}/, last_response.body
+        assert_match(/#{params.first['args'][2]}/, last_response.body)
       end
     end
 
