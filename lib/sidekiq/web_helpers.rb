@@ -31,7 +31,11 @@ module Sidekiq
 
     def t(msg, options={})
       string = get_locale[msg] || msg
-      string % options
+      if options.empty?
+        string
+      else
+        string % options
+      end
     end
 
     def workers_size

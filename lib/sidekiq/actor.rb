@@ -16,6 +16,7 @@ module Sidekiq
       def after(interval)
       end
       def alive?
+        @dead = false unless defined?(@dead)
         !@dead
       end
       def terminate

@@ -395,7 +395,7 @@ class TestApi < Sidekiq::Test
         end
       end
 
-      assert_equal ['1234', '5678'], w.map { |pid, tid, data| tid }
+      assert_equal ['1234', '5678'], w.map { |_, tid, _| tid }
     end
 
     it 'can reschedule jobs' do

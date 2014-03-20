@@ -26,7 +26,7 @@ module Sidekiq
     end
 
     def self.initialize_logger(log_target = STDOUT)
-      oldlogger = @logger
+      oldlogger = defined?(@logger) ? @logger : nil
       @logger = Logger.new(log_target)
       @logger.level = Logger::INFO
       @logger.formatter = Pretty.new
@@ -35,7 +35,7 @@ module Sidekiq
     end
 
     def self.logger
-      @logger || initialize_logger
+      defined?(@logger) ? @logger : initialize_logger
     end
 
     def self.logger=(log)

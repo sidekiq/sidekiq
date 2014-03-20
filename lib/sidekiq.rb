@@ -4,7 +4,6 @@ require 'sidekiq/logging'
 require 'sidekiq/client'
 require 'sidekiq/worker'
 require 'sidekiq/redis_connection'
-require 'sidekiq/api'
 
 require 'json'
 
@@ -97,7 +96,7 @@ module Sidekiq
   end
 
   def self.default_worker_options
-    @default_worker_options || { 'retry' => true, 'queue' => 'default' }
+    defined?(@default_worker_options) ? @default_worker_options : { 'retry' => true, 'queue' => 'default' }
   end
 
   def self.load_json(string)
