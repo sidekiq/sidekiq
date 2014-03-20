@@ -32,9 +32,9 @@ class TestExceptionHandler < Sidekiq::Test
       Component.new.invoke_exception(:a => 1)
       @str_logger.rewind
       log = @str_logger.readlines
-      assert_match /a=>1/, log[0], "didn't include the context"
-      assert_match /Something didn't work!/, log[1], "didn't include the exception message"
-      assert_match /test\/test_exception_handler.rb/, log[2], "didn't include the backtrace"
+      assert_match(/a=>1/, log[0], "didn't include the context")
+      assert_match(/Something didn't work!/, log[1], "didn't include the exception message")
+      assert_match(/test\/test_exception_handler.rb/, log[2], "didn't include the backtrace")
     end
 
     describe "when the exception does not have a backtrace" do
@@ -45,7 +45,7 @@ class TestExceptionHandler < Sidekiq::Test
         begin
           Component.new.handle_exception exception
           pass
-        rescue => e
+        rescue StandardError
           flunk "failed handling a nil backtrace"
         end
       end

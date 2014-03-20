@@ -6,7 +6,6 @@ rescue LoadError
   # Class#class_attribute helper.
   class Class
     def class_attribute(*attrs)
-      instance_reader = true
       instance_writer = true
 
       attrs.each do |name|
@@ -29,14 +28,12 @@ rescue LoadError
             val
           end
 
-          if instance_reader
-            def #{name}
-              defined?(@#{name}) ? @#{name} : self.class.#{name}
-            end
+          def #{name}
+            defined?(@#{name}) ? @#{name} : self.class.#{name}
+          end
 
-            def #{name}?
-              !!#{name}
-            end
+          def #{name}?
+            !!#{name}
           end
         RUBY
 
