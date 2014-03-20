@@ -55,14 +55,6 @@ module Sidekiq
         end
       end
 
-      # Print logo and banner for development
-      if environment == 'development' && $stdout.tty?
-        puts "\e[#{31}m"
-        puts Sidekiq::BANNER
-        puts "\e[0m"
-      end
-
-      redis {} # noop to connect redis and print info
       logger.info "Running in #{RUBY_DESCRIPTION}"
       logger.info Sidekiq::LICENSE
 
@@ -218,6 +210,13 @@ module Sidekiq
       ENV['RACK_ENV'] = ENV['RAILS_ENV'] = environment
 
       raise ArgumentError, "#{options[:require]} does not exist" unless File.exist?(options[:require])
+
+      # Print logo and banner for development
+      if environment == 'development' && $stdout.tty?
+        puts "\e[#{31}m"
+        puts Sidekiq::BANNER
+        puts "\e[0m"
+      end
 
       if File.directory?(options[:require])
         require 'rails'
