@@ -70,7 +70,7 @@ module Sidekiq
     private
 
     def thread_identity
-      @str ||= "#{identity}-#{Thread.current.object_id}"
+      @str ||= Thread.current.object_id.to_s(36)
     end
 
     def stats(worker, msg, queue)
@@ -80,7 +80,7 @@ module Sidekiq
         hash = Sidekiq.dump_json({:queue => queue, :payload => msg, :run_at => Time.now.to_i })
         Sidekiq.redis do |conn|
           conn.multi do
-            conn.hmset("#{identity}:workers", Thread.current.object_id, hash)
+            conn.hmset("#{identity}:workers", thread_identity, hash)
             conn.expire("#{identity}:workers", 60*60)
           end
         end
@@ -105,7 +105,7 @@ module Sidekiq
           Sidekiq.redis do |conn|
             processed = "stat:processed:#{Time.now.utc.to_date}"
             result = conn.multi do
-              conn.hdel("#{identity}:workers", Thread.current.object_id)
+              conn.hdel("#{identity}:workers", thread_identity)
               conn.incrby("stat:processed", 1)
               conn.incrby(processed, 1)
             end
