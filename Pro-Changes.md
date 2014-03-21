@@ -3,6 +3,13 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+1.5.0
+-----------
+
+- Compatible with upcoming Sidekiq 3.0 release
+- Fix issue on Heroku where reliable fetch could orphan jobs [#1573]
+
+
 1.4.3
 -----------
 
