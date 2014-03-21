@@ -19,6 +19,7 @@ da:
   Class: Klasse
   Job: Job
   Arguments: Argumenter
+  Extras: Ekstra
   Started: Startet
   ShowAll: Vis alle
   CurrentMessagesInQueue: Nuværende beskeder i <span class='title'>%{queue}</span>
@@ -57,3 +58,11 @@ da:
   OneMonth: 1 måned
   ThreeMonths: 3 måneder
   SixMonths: 6 måneder
+  Failures: Fejl
+  DeadJobs: Døde jobs
+  NoDeadJobsFound: Ingen døde jobs fundet
+  Dead: Død
+  Processes: Processer
+  Thread: Tråd
+  Threads: Tråde
+  Jobs: Jobs
