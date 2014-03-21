@@ -36,6 +36,8 @@ module Sidekiq
       watchdog('Launcher#run') do
         manager.async.start
         poller.async.poll(true)
+
+        start_heartbeat(@options[:tag] ? "#{@options[:tag]} " : '')
       end
     end
 
@@ -55,6 +57,8 @@ module Sidekiq
         stop_heartbeat
       end
     end
+
+    private
 
     def start_heartbeat(tag)
       key = identity
