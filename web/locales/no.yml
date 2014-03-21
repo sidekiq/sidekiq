@@ -19,6 +19,7 @@ no:
   Class: Klasse
   Job: Jobb
   Arguments: Argumenter
+  Extras: Ekstra
   Started: Startet
   ShowAll: Vis alle
   CurrentMessagesInQueue: Nåværende melding i <span class='title'>%{queue}</span>
@@ -58,4 +59,11 @@ no:
   ThreeMonths: 3 måneder
   SixMonths: 6 måneder
   Batches: Samlinger
-  Failures: Mislykkeser
+  Failures: Feil
+  DeadJobs: Døde jobber
+  NoDeadJobsFound: Ingen døde jobber funnet
+  Dead: Død
+  Processes: Prosesser
+  Thread: Tråd
+  Threads: Tråder
+  Jobs: Jobber
