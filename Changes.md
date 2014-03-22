@@ -10,8 +10,8 @@ Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
   after 6 months or 10,000 jobs.  The Web UI contains a "Dead" tab
   exposing these jobs.  Use `sidekiq_options :retry => false` if you
 don't wish jobs to be retried or put in the DJQ.  Use
-`sidekiq_options :retry => 0` if you want jobs to not retry but go
-straight to the DJQ`
+`sidekiq_options :retry => 0` if you don't want jobs to retry but go
+straight to the DJQ.
 - **Process Lifecycle Events** - you can now register blocks to run at
   certain points during the Sidekiq process lifecycle: startup, quiet and
   shutdown.
