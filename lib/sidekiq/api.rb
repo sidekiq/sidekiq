@@ -498,7 +498,7 @@ module Sidekiq
       Sidekiq.redis do |conn|
         procs = conn.smembers('processes')
         procs.sort.each do |key|
-          valid, workers = conn.multi do
+          valid, workers = conn.pipelined do
             conn.exists(key)
             conn.hgetall("#{key}:workers")
           end
@@ -521,7 +521,7 @@ module Sidekiq
         procs = conn.smembers('processes')
         return 0 if procs.empty?
 
-        conn.multi do
+        conn.pipelined do
           procs.each do |key|
             conn.hget(key, 'busy')
           end
