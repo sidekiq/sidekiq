@@ -24,8 +24,16 @@ module Sidekiq
       Sidekiq.redis do |conn|
         queues = conn.smembers('queues')
 
+        lengths = conn.pipelined do
+          queues.each do |queue|
+            conn.llen("queue:#{queue}")
+          end
+        end
+
+        i = 0
         array_of_arrays = queues.inject({}) do |memo, queue|
-          memo[queue] = conn.llen("queue:#{queue}")
+          memo[queue] = lengths[i]
+          i += 1
           memo
         end.sort_by { |_, size| size }
 
