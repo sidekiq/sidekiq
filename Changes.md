@@ -8,12 +8,27 @@ Please see [Upgrading.md](Upgrading.md) for more comprehensive upgrade notes.
 - **Dead Job Queue** - jobs which run out of retries are now moved to a dead
   job queue.  These jobs must be retried manually or they will expire
   after 6 months or 10,000 jobs.  The Web UI contains a "Dead" tab
-  exposing these jobs.
+  exposing these jobs.  Use `sidekiq_options :retry => false` if you
+don't wish jobs to be retried or put in the DJQ.  Use
+`sidekiq_options :retry => 0` if you want jobs to not retry but go
+straight to the DJQ`
 - **Process Lifecycle Events** - you can now register blocks to run at
   certain points during the Sidekiq process lifecycle: startup, quiet and
   shutdown.
+```ruby
+Sidekiq.configure_server do |config|
+  config.on(:startup) do
+    # do something
+  end
+end
+```
 - **Global Error Handlers** - blocks of code which handle errors that
   occur anywhere within Sidekiq, not just within middleware.
+```ruby
+Sidekiq.configure_server do |config|
+  config.error_handlers << Proc.new {|ex,ctx| ... }
+end
+```
 - **Process Heartbeat** - each Sidekiq process will ping Redis every 5
   seconds to give a summary of the Sidekiq population at work.
 - New Chinese, Greek, Swedish and Czech translations for the Web UI.
