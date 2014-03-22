@@ -15,8 +15,13 @@ module Sidekiq
       all   = %w(failed processed)
       stats = stats.empty? ? all : all & stats.flatten.compact.map(&:to_s)
 
+      mset_args = []
+      stats.each do |stat|
+        mset_args << "stat:#{stat}"
+        mset_args << 0
+      end
       Sidekiq.redis do |conn|
-        stats.each { |stat| conn.set("stat:#{stat}", 0) }
+        conn.mset(*mset_args)
       end
     end
 
