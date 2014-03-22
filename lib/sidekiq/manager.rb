@@ -136,7 +136,7 @@ module Sidekiq
       return if stopped?
 
       $0 = "sidekiq #{Sidekiq::VERSION} #{data['tag']}[#{@busy.size} of #{data['concurrency']} busy]#{stopped? ? ' stopping' : ''}"
-      ❤(key, data)
+      ❤(key)
       after(5) do
         heartbeat(key, data)
       end
@@ -144,7 +144,7 @@ module Sidekiq
 
     private
 
-    def ❤(key, data)
+    def ❤(key)
       begin
         Sidekiq.redis do |conn|
           conn.multi do

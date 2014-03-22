@@ -37,7 +37,7 @@ module Sidekiq
         manager.async.start
         poller.async.poll(true)
 
-        start_heartbeat(@options[:tag] ? "#{@options[:tag]} " : '')
+        start_heartbeat
       end
     end
 
@@ -60,13 +60,13 @@ module Sidekiq
 
     private
 
-    def start_heartbeat(tag)
+    def start_heartbeat
       key = identity
       data = {
         'hostname' => hostname,
         'started_at' => Time.now.to_f,
         'pid' => $$,
-        'tag' => tag.strip,
+        'tag' => @options[:tag] || '',
         'concurrency' => @options[:concurrency],
         'queues' => @options[:queues].uniq,
       }
