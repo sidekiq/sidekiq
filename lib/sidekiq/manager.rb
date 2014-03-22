@@ -145,13 +145,16 @@ module Sidekiq
     private
 
     def ❤(key, data)
-      watchdog('heartbeat') do
+      begin
         Sidekiq.redis do |conn|
           conn.multi do
             conn.hmset(key, 'busy', @busy.size, 'beat', Time.now.to_f)
             conn.expire(key, 60)
           end
         end
+      rescue => e
+        # ignore all redis/network issues
+        logger.error("heartbeat: #{e.message}")
       end
     end
 
