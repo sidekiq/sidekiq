@@ -68,15 +68,19 @@ module Sidekiq
       def date_stat_hash(stat)
         i = 0
         stat_hash = {}
+        keys = []
+        dates = []
+
+        while i < @days_previous
+          date = @start_date - i
+          keys << "stat:#{stat}:#{date}"
+          dates << date
+          i += 1
+        end
 
         Sidekiq.redis do |conn|
-          while i < @days_previous
-            date = @start_date - i
-            value = conn.get("stat:#{stat}:#{date}")
-
-            stat_hash[date.to_s] = value ? value.to_i : 0
-
-            i += 1
+          conn.mget(keys).each_with_index do |value, i|
+            stat_hash[dates[i].to_s] = value ? value.to_i : 0
           end
         end
 
