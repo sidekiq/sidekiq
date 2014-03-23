@@ -118,10 +118,25 @@ module Sidekiq
     self.options[:poll_interval] = interval
   end
 
+  # Register a proc to handle any error which occurs within the Sidekiq process.
+  #
+  #   Sidekiq.configure_server do |config|
+  #     config.error_handlers << Proc.new {|ex,ctx_hash| MyErrorService.notify(ex, ctx_hash) }
+  #   end
+  #
+  # The default error handler logs errors to Sidekiq.logger.
   def self.error_handlers
     self.options[:error_handlers]
   end
 
+  # Register a block to run at a point in the Sidekiq lifecycle.
+  # :startup, :quiet or :shutdown are valid events.
+  #
+  #   Sidekiq.configure_server do |config|
+  #     config.on(:shutdown) do
+  #       puts "Goodbye cruel world!"
+  #     end
+  #   end
   def self.on(event, &block)
     raise ArgumentError, "Symbols only please: #{event}" if !event.is_a?(Symbol)
     raise ArgumentError, "Invalid event name: #{event}" if !options[:lifecycle_events].keys.include?(event)
