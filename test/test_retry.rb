@@ -10,6 +10,7 @@ class TestRetry < Sidekiq::Test
       Sidekiq.instance_variable_set(:@redis, @redis)
 
       def @redis.with; yield self; end
+      def @redis.multi; yield self; end
     end
 
     let(:worker) do
@@ -50,6 +51,9 @@ class TestRetry < Sidekiq::Test
       1.upto(max_retries) do
         @redis.expect :zadd, 1, ['retry', String, String]
       end
+      @redis.expect :zadd, 1, ['dead', Float, String]
+      @redis.expect :zremrangebyscore, 0, ['dead', String, Float]
+      @redis.expect :zremrangebyrank, 0, ['dead', Numeric, Numeric]
       msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }
       handler = Sidekiq::Middleware::Server::RetryJobs.new({:max_retries => max_retries})
       1.upto(max_retries + 1) do
@@ -166,72 +170,31 @@ class TestRetry < Sidekiq::Test
     it 'throws away old messages after too many retries (using the default)' do
       now = Time.now.to_f
       msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry"=>true, "retry_count"=>25}
-      @redis.expect :zadd, 1, [ 'retry', String, String ]
+      @redis.expect :zadd, 1, ['dead', Float, String]
+      @redis.expect :zremrangebyscore, 0, ['dead', String, Float]
+      @redis.expect :zremrangebyrank, 0, ['dead', Numeric, Numeric]
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
         handler.call(worker, msg, 'default') do
           raise "kerblammo!"
         end
       end
-      # Minitest can't assert that a method call did NOT happen!?
-      assert_raises(MockExpectationError) { @redis.verify }
+      @redis.verify
     end
 
     it 'throws away old messages after too many retries (using user-specified max)' do
       now = Time.now.to_f
       msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry"=>3, "retry_count"=>3}
-      @redis.expect :zadd, 1, [ 'retry', String, String ]
+      @redis.expect :zadd, 1, ['dead', Float, String]
+      @redis.expect :zremrangebyscore, 0, ['dead', String, Float]
+      @redis.expect :zremrangebyrank, 0, ['dead', Numeric, Numeric]
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
         handler.call(worker, msg, 'default') do
           raise "kerblammo!"
         end
       end
-      # Minitest can't assert that a method call did NOT happen!?
-      assert_raises(MockExpectationError) { @redis.verify }
-    end
-
-    describe "retry exhaustion" do
-      let(:handler){ Sidekiq::Middleware::Server::RetryJobs.new }
-      let(:worker) { Minitest::Mock.new }
-      let(:msg){ {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>Time.now.to_f, "retry"=>3, "retry_count"=>3} }
-
-      describe "worker block" do
-        let(:worker) do
-          Class.new do
-            include Sidekiq::Worker
-
-            sidekiq_retries_exhausted do |msg|
-              msg.tap {|m| m['called_by_callback'] = true }
-            end
-          end
-        end
-
-        it 'calls worker sidekiq_retries_exhausted_block after too many retries' do
-          new_msg      = handler.__send__(:retries_exhausted, worker.new, msg)
-          expected_msg = msg.merge('called_by_callback' => true)
-
-          assert_equal expected_msg, new_msg, "sidekiq_retries_exhausted block not called"
-        end
-      end
-
-      it 'handles and logs retries_exhausted failures gracefully (drops them)' do
-        def worker.retries_exhausted(*args)
-          raise 'bam!'
-        end
-
-        e = task_misbehaving_worker
-        assert_equal e.message, "kerblammo!"
-        worker.verify
-      end
-
-      def task_misbehaving_worker
-        assert_raises RuntimeError do
-          handler.call(worker, msg, 'default') do
-            raise 'kerblammo!'
-          end
-        end
-      end
+      @redis.verify
     end
 
     describe "custom retry delay" do

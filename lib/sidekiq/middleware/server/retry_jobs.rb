@@ -113,21 +113,28 @@ module Sidekiq
 
         def retries_exhausted(worker, msg)
           logger.debug { "Dropping message after hitting the retry maximum: #{msg}" }
-          if worker.sidekiq_retries_exhausted_block?
-            worker.sidekiq_retries_exhausted_block.call(msg)
-          else
-            Sidekiq.logger.info { "Adding a dead #{msg['class']} job" }
-            payload = Sidekiq.dump_json(msg)
-            Sidekiq.redis do |conn|
-              conn.multi do
-                conn.zadd('dead', Time.now.to_f, payload)
-                conn.zremrangebyscore('dead', '-inf', (Time.now.to_i - DEAD_JOB_TIMEOUT).to_f)
-                conn.zremrangebyrank('dead', 0, -MAX_JOBS)
-              end
+          begin
+            if worker.sidekiq_retries_exhausted_block?
+              worker.sidekiq_retries_exhausted_block.call(msg)
+            end
+          rescue => e
+            handle_exception(e, { :context => "Error calling retries_exhausted" })
+          end
+
+          send_to_morgue(msg)
+        end
+
+        def send_to_morgue(msg)
+          Sidekiq.logger.info { "Adding dead #{msg['class']} job #{msg['jid']}" }
+          payload = Sidekiq.dump_json(msg)
+          now = Time.now.to_f
+          Sidekiq.redis do |conn|
+            conn.multi do
+              conn.zadd('dead', now, payload)
+              conn.zremrangebyscore('dead', '-inf', now - DEAD_JOB_TIMEOUT)
+              conn.zremrangebyrank('dead', 0, -MAX_JOBS)
             end
           end
-        rescue Exception => e
-          handle_exception(e, { :context => "Error calling retries_exhausted" })
         end
 
         def retry_attempts_from(msg_retry, default)
