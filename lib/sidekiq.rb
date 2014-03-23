@@ -17,7 +17,6 @@ module Sidekiq
     :require => '.',
     :environment => nil,
     :timeout => 8,
-    :profile => false,
     :error_handlers => [],
     :lifecycle_events => {
       :startup => [],

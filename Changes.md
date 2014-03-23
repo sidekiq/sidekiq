@@ -46,6 +46,7 @@ end
 - Remove deprecated Sidekiq::Client.registered\_\* APIs
 - Remove deprecated support for the old Sidekiq::Worker#retries\_exhausted method.
 - Removed 'sidekiq/yaml\_patch', this was never documented or recommended.
+- Removed --profile option, #1592
 - Remove usage of the term 'Worker' in the UI for clarity.  Users would call both threads and
   processes 'workers'.  Instead, use "Thread", "Process" or "Job".
 - The Workers tab is now renamed to Busy and contains a list of live

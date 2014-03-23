@@ -75,10 +75,6 @@ module Sidekiq
       @launcher = Sidekiq::Launcher.new(options)
 
       begin
-        if options[:profile]
-          require 'ruby-prof'
-          RubyProf.start
-        end
         launcher.run
 
         while readable_io = IO.select([self_read])
@@ -111,13 +107,6 @@ module Sidekiq
       Sidekiq.logger.debug "Got #{sig} signal"
       case sig
       when 'INT'
-        if Sidekiq.options[:profile]
-          result = RubyProf.stop
-          printer = RubyProf::GraphHtmlPrinter.new(result)
-          File.open("profile.html", 'w') do |f|
-            printer.print(f, :min_percent => 1)
-          end
-        end
         # Handle Ctrl-C in JRuby like MRI
         # http://jira.codehaus.org/browse/JRUBY-4637
         raise Interrupt
@@ -275,10 +264,6 @@ module Sidekiq
 
         o.on '-i', '--index INT', "unique process index on this machine" do |arg|
           opts[:index] = Integer(arg.match(/\d+/)[0])
-        end
-
-        o.on '-p', '--profile', "Profile all code run by Sidekiq" do |arg|
-          opts[:profile] = arg
         end
 
         o.on "-q", "--queue QUEUE[,WEIGHT]", "Queues to process with optional weights" do |arg|
