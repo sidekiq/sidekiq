@@ -25,6 +25,10 @@ module Sidekiq
       @chain
     end
 
+    def initialize(redis_connection = Sidekiq.redis_connection)
+      @redis_connection = redis_connection
+    end
+
     ##
     # The main method used to push a job to Redis.  Accepts a number of options:
     #
@@ -135,7 +139,7 @@ module Sidekiq
 
     def raw_push(payloads)
       pushed = false
-      Sidekiq.redis do |conn|
+      @redis_connection.with do |conn|
         if payloads.first['at']
           pushed = conn.zadd('schedule', payloads.map do |hash|
             at = hash.delete('at').to_s

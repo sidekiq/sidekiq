@@ -4,11 +4,16 @@ require 'sidekiq/scheduled'
 class TestScheduling < Sidekiq::Test
   describe 'middleware' do
     before do
+      Sidekiq::Client.instance_variable_set(:@default, nil)
       @redis = Minitest::Mock.new
       # Ugh, this is terrible.
       Sidekiq.instance_variable_set(:@redis, @redis)
       def @redis.multi; [yield] * 2 if block_given?; end
       def @redis.with; yield self; end
+    end
+
+    after do
+      Sidekiq::Client.instance_variable_set(:@default, nil)
     end
 
     class ScheduledWorker
