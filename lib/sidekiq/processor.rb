@@ -11,7 +11,9 @@ module Sidekiq
   # processes it.  It instantiates the worker, runs the middleware
   # chain and then calls Sidekiq::Worker#perform.
   class Processor
-    STATS_TIMEOUT = 180 * 24 * 60 * 60
+    # To prevent a memory leak, ensure that stats expire. However, they should take up a minimal amount of storage
+    # so keep them around for a long time
+    STATS_TIMEOUT = 24 * 60 * 60 * 365 * 5
 
     include Util
     include Actor
