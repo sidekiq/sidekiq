@@ -51,6 +51,7 @@ end
   processes 'workers'.  Instead, use "Thread", "Process" or "Job".
 - The Workers tab is now renamed to Busy and contains a list of live
   Sidekiq processes and jobs in progress.
+- Processed/failed stats will now expire in 5 years instead of 180 days [#1593]
 
 2.17.7
 -----------
