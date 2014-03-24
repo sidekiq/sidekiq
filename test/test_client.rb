@@ -20,10 +20,12 @@ class TestClient < Sidekiq::Test
       def @redis.with; yield self; end
       def @redis.exec; true; end
       Sidekiq.instance_variable_set(:@redis, @redis)
+      Sidekiq::Client.instance_variable_set(:@default, nil)
     end
 
     after do
       Sidekiq.instance_variable_set(:@redis, REDIS)
+      Sidekiq::Client.instance_variable_set(:@default, nil)
     end
 
     it 'raises ArgumentError with invalid params' do
