@@ -25,8 +25,8 @@ module Sidekiq
       @chain
     end
 
-    def initialize(redis_connection = Sidekiq.redis_connection)
-      @redis_connection = redis_connection
+    def initialize(redis_pool = Sidekiq.redis_pool)
+      @redis_pool = redis_pool
     end
 
     ##
@@ -139,7 +139,7 @@ module Sidekiq
 
     def raw_push(payloads)
       pushed = false
-      @redis_connection.with do |conn|
+      @redis_pool.with do |conn|
         if payloads.first['at']
           pushed = conn.zadd('schedule', payloads.map do |hash|
             at = hash.delete('at').to_s
