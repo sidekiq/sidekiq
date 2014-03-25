@@ -35,7 +35,9 @@ end
   Sidekiq processes and jobs in progress based on the heartbeat.
 - **Shardable Client** - Sidekiq::Client instances can use a custom
   Redis connection pool, allowing very large Sidekiq installations to scale by
-  sharding: sending different jobs to different Redis instances.
+  sharding: sending different jobs to different Redis instances. You can also
+  send jobs to different Redis instances using
+  MyJob.with(:redis => connection_pool).perform_async/perform_in/perform_at
 ```ruby
 client = Sidekiq::Client.new(ConnectionPool.new { Redis.new })
 client.push(...)
