@@ -32,8 +32,8 @@ module Sidekiq
     #
     #   Sidekiq::Client.new(ConnectionPool.new { Redis.new })
     #
-    def initialize(redis_pool = Sidekiq.redis_pool)
-      @redis_pool = redis_pool
+    def initialize(redis_pool = nil)
+      @redis_pool = redis_pool || Sidekiq.redis_pool
     end
 
     ##
@@ -54,12 +54,15 @@ module Sidekiq
     #   push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
     #
     def push(item)
+      Thread.current[:current_pool] = @redis_pool
       normed = normalize_item(item)
       payload = process_single(item['class'], normed)
 
       pushed = false
       pushed = raw_push([payload]) if payload
       pushed ? payload['jid'] : nil
+    ensure
+      Thread.current[:current_pool] = nil
     end
 
     ##
@@ -77,6 +80,7 @@ module Sidekiq
     # pushed can be less than the number given if the middleware stopped processing for one
     # or more jobs.
     def push_bulk(items)
+      Thread.current[:current_pool] = @redis_pool
       normed = normalize_item(items)
       payloads = items['args'].map do |args|
         raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" if !args.is_a?(Array)
@@ -86,9 +90,44 @@ module Sidekiq
       pushed = false
       pushed = raw_push(payloads) if !payloads.empty?
       pushed ? payloads.collect { |payload| payload['jid'] } : nil
+    ensure
+      Thread.current[:current_pool] = nil
     end
 
     class << self
+
+      # Allows sharding of jobs across any number of Redis instances.  All jobs
+      # defined within the block will use the given Redis connection pool.
+      #
+      #   pool = ConnectionPool.new { Redis.new }
+      #   Sidekiq::Client.via(pool) do
+      #     SomeWorker.perform_async(1,2,3)
+      #     SomeOtherWorker.perform_async(1,2,3)
+      #   end
+      #
+      # Generally this is only needed for very large Sidekiq installs processing
+      # more than thousands jobs per second.
+      def via(pool)
+        raise ArgumentError, "No pool given" if pool.nil?
+        Thread.current[:sidekiq_via_pool] = pool
+        yield
+      ensure
+        Thread.current[:sidekiq_via_pool] = nil
+      end
+
+      #
+      # Returns the Redis pool being used for the current client operation.
+      # Client operations should use +Sidekiq::Client.redis_pool+ whereas server
+      # operations should use +Sidekiq.redis_pool+.
+      #
+      # For example, in client-side middleware, you must use this method.
+      # In server-side middleware, you use +Sidekiq.redis_pool+.
+      #
+      # This complexity is necessary to support Redis sharding.
+      def redis_pool
+        Thread.current[:current_pool] || Sidekiq.redis_pool
+      end
+
       def default
         @default ||= new
       end
