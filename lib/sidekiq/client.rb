@@ -25,6 +25,13 @@ module Sidekiq
       @chain
     end
 
+    # Sidekiq::Client normally uses the default Redis pool but you may
+    # pass a custom ConnectionPool if you want to shard your
+    # Sidekiq jobs across several Redis instances (for scalability
+    # reasons, e.g.)
+    #
+    #   Sidekiq::Client.new(ConnectionPool.new { Redis.new })
+    #
     def initialize(redis_pool = Sidekiq.redis_pool)
       @redis_pool = redis_pool
     end

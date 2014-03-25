@@ -31,6 +31,13 @@ end
 ```
 - **Process Heartbeat** - each Sidekiq process will ping Redis every 5
   seconds to give a summary of the Sidekiq population at work.
+- **Targetable Client** - Sidekiq::Client instances can target different
+  Redis instances, allowing very large Sidekiq installations to scale by
+  targeting different jobs to different Redis instances.
+```ruby
+client = Sidekiq::Client.new(ConnectionPool.new { Redis.new })
+client.push(...)
+```
 - New Chinese, Greek, Swedish and Czech translations for the Web UI.
 - Updated most languages translations for the new UI features.
 - **Remove official Capistrano integration** - this integration has been
