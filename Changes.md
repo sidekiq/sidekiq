@@ -31,6 +31,8 @@ end
 ```
 - **Process Heartbeat** - each Sidekiq process will ping Redis every 5
   seconds to give a summary of the Sidekiq population at work.
+- The Workers tab is now renamed to Busy and contains a list of live
+  Sidekiq processes and jobs in progress based on the heartbeat.
 - **Shardable Client** - Sidekiq::Client instances can use a custom
   Redis connection pool, allowing very large Sidekiq installations to scale by
   sharding: sending different jobs to different Redis instances.
@@ -56,9 +58,6 @@ client.push(...)
 - Removed --profile option, #1592
 - Remove usage of the term 'Worker' in the UI for clarity.  Users would call both threads and
   processes 'workers'.  Instead, use "Thread", "Process" or "Job".
-- The Workers tab is now renamed to Busy and contains a list of live
-  Sidekiq processes and jobs in progress.
-- Processed/failed stats will now expire in 5 years instead of 180 days [#1593]
 
 2.17.7
 -----------
