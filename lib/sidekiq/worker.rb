@@ -40,6 +40,12 @@ module Sidekiq
         client_push('class' => self, 'args' => args)
       end
 
+      # Provide options for the next enqueue of a job, e.g., MyJob.with(:redis => other_server).perform_async
+      def with(options)
+        @connection_for_next_push = options[:redis] if options[:redis]
+        self
+      end
+
       def perform_in(interval, *args)
         int = interval.to_f
         now = Time.now.to_f
@@ -80,7 +86,9 @@ module Sidekiq
       end
 
       def client_push(item) # :nodoc:
-        Sidekiq::Client.push(item.stringify_keys)
+        result = Sidekiq::Client.push(item.stringify_keys, @connection_for_next_push)
+        @connection_for_next_push = nil
+        result
       end
 
     end

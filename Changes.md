@@ -52,6 +52,8 @@ end
 - The Workers tab is now renamed to Busy and contains a list of live
   Sidekiq processes and jobs in progress.
 - Processed/failed stats will now expire in 5 years instead of 180 days [#1593]
+- You can dynamically enqueue jobs to different Redis instances using
+  MyJob.with(:redis => connection_pool).perform_async/perform_in/perform_at
 
 2.17.7
 -----------

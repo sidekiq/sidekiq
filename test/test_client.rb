@@ -105,6 +105,50 @@ class TestClient < Sidekiq::Test
       @redis.verify
     end
 
+    it 'can switch out the connection pool for perform_async using #with' do
+      conn = Minitest::Mock.new
+      def conn.multi; [yield] * 2 if block_given?; end
+      def conn.set(*); true; end
+      def conn.sadd(*); true; end
+      def conn.srem(*); true; end
+      def conn.get(*); nil; end
+      def conn.del(*); nil; end
+      def conn.incrby(*); nil; end
+      def conn.setex(*); true; end
+      def conn.expire(*); true; end
+      def conn.watch(*); true; end
+      def conn.with_connection; yield self; end
+      def conn.with; yield self; end
+      def conn.exec; true; end
+
+      conn.expect :lpush, 1, ['queue:default', Array]
+      pushed = MyWorker.with(:redis => conn).perform_async(1, 2)
+      assert pushed
+      conn.verify
+    end
+
+    it 'can switch out the connection pool for perform_in using #with' do
+      conn = Minitest::Mock.new
+      def conn.multi; [yield] * 2 if block_given?; end
+      def conn.set(*); true; end
+      def conn.sadd(*); true; end
+      def conn.srem(*); true; end
+      def conn.get(*); nil; end
+      def conn.del(*); nil; end
+      def conn.incrby(*); nil; end
+      def conn.setex(*); true; end
+      def conn.expire(*); true; end
+      def conn.watch(*); true; end
+      def conn.with_connection; yield self; end
+      def conn.with; yield self; end
+      def conn.exec; true; end
+
+      conn.expect :zadd, 1, ['schedule', Array]
+      pushed = MyWorker.with(:redis => conn).perform_in(3.minutes, 1, 2)
+      assert pushed
+      conn.verify
+    end
+
     it 'handles perform_async on failure' do
       @redis.expect :lpush, nil, ['queue:default', Array]
       pushed = MyWorker.perform_async(1, 2)

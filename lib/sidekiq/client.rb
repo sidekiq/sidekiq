@@ -86,8 +86,12 @@ module Sidekiq
         @default ||= new
       end
 
-      def push(item)
-        default.push(item)
+      def push(item, connection_pool = nil)
+        if connection_pool
+          new(connection_pool).push(item)
+        else
+          default.push(item)
+        end
       end
 
       def push_bulk(items)
