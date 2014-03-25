@@ -31,9 +31,9 @@ end
 ```
 - **Process Heartbeat** - each Sidekiq process will ping Redis every 5
   seconds to give a summary of the Sidekiq population at work.
-- **Targetable Client** - Sidekiq::Client instances can target different
-  Redis instances, allowing very large Sidekiq installations to scale by
-  targeting different jobs to different Redis instances.
+- **Shardable Client** - Sidekiq::Client instances can use a custom
+  Redis connection pool, allowing very large Sidekiq installations to scale by
+  sharding: sending different jobs to different Redis instances.
 ```ruby
 client = Sidekiq::Client.new(ConnectionPool.new { Redis.new })
 client.push(...)
