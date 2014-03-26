@@ -246,16 +246,6 @@ class TestClient < Sidekiq::Test
       DWorker.perform_async(1,2,3)
       conn.verify
     end
-    it 'allows #via to point to different Redi' do
-      conn = MiniTest::Mock.new
-      conn.expect(:multi, [0, 1])
-      default = Sidekiq::Client.redis_pool
-      Sidekiq::Client.via(ConnectionPool.new(size: 1) { conn }) do
-        CWorker.perform_async(1,2,3)
-      end
-      assert_equal default, Sidekiq::Client.redis_pool
-      conn.verify
-    end
     it 'allows Resque helpers to point to different Redi' do
       conn = MiniTest::Mock.new
       conn.expect(:zadd, 1, [String, Array])

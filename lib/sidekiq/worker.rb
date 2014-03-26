@@ -34,25 +34,6 @@ module Sidekiq
       Sidekiq.logger
     end
 
-    # Allows sharding of jobs across any number of Redis instances.  All jobs
-    # defined within the block will use the given Redis connection pool.
-    #
-    #   pool = ConnectionPool.new { Redis.new }
-    #   Sidekiq::Worker.via(pool) do
-    #     SomeWorker.perform_async(1,2,3)
-    #     SomeOtherWorker.perform_async(1,2,3)
-    #   end
-    #
-    # Generally this is only needed for very large Sidekiq installs processing
-    # more than thousands jobs per second.
-    def self.via(pool)
-      raise ArgumentError, "No pool given" if pool.nil?
-      Thread.current[:sidekiq_via_pool] = pool
-      yield
-    ensure
-      Thread.current[:sidekiq_via_pool] = nil
-    end
-
     module ClassMethods
 
       def perform_async(*args)
@@ -100,7 +81,7 @@ module Sidekiq
       end
 
       def client_push(item) # :nodoc:
-        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options['pool'] || Sidekiq.redis_pool
+        pool = get_sidekiq_options['pool'] || Sidekiq.redis_pool
         Sidekiq::Client.new(pool).push(item.stringify_keys)
       end
 
