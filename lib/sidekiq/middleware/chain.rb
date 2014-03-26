@@ -54,7 +54,7 @@ module Sidekiq
   # to Redis:
   #
   # class MyClientHook
-  #   def call(worker_class, msg, queue)
+  #   def call(worker_class, msg, queue, redis_pool)
   #     puts "Before push"
   #     result = yield
   #     puts "After push"

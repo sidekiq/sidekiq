@@ -28,7 +28,7 @@ class TestScheduled < Sidekiq::Test
     end
 
     class Stopper
-      def call(worker_class, message, queue)
+      def call(worker_class, message, queue, r)
         yield if message['args'].first.odd?
       end
     end

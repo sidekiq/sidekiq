@@ -61,7 +61,7 @@ class TestClient < Sidekiq::Test
       it 'allows local middleware modification' do
         @redis.expect :lpush, 1, ['queue:default', Array]
         $called = false
-        mware = Class.new { def call(worker_klass,msg,q); $called = true; msg;end }
+        mware = Class.new { def call(worker_klass,msg,q,r); $called = true; msg;end }
         client = Sidekiq::Client.new
         client.middleware do |chain|
           chain.add mware
@@ -200,7 +200,8 @@ class TestClient < Sidekiq::Test
   describe 'client middleware' do
 
     class Stopper
-      def call(worker_class, message, queue)
+      def call(worker_class, message, queue, r)
+        raise ArgumentError unless r
         yield if message['args'].first.odd?
       end
     end

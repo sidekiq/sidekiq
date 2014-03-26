@@ -54,15 +54,12 @@ module Sidekiq
     #   push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
     #
     def push(item)
-      Thread.current[:current_pool] = @redis_pool
       normed = normalize_item(item)
       payload = process_single(item['class'], normed)
 
       pushed = false
       pushed = raw_push([payload]) if payload
       pushed ? payload['jid'] : nil
-    ensure
-      Thread.current[:current_pool] = nil
     end
 
     ##
@@ -80,7 +77,6 @@ module Sidekiq
     # pushed can be less than the number given if the middleware stopped processing for one
     # or more jobs.
     def push_bulk(items)
-      Thread.current[:current_pool] = @redis_pool
       normed = normalize_item(items)
       payloads = items['args'].map do |args|
         raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" if !args.is_a?(Array)
@@ -90,24 +86,9 @@ module Sidekiq
       pushed = false
       pushed = raw_push(payloads) if !payloads.empty?
       pushed ? payloads.collect { |payload| payload['jid'] } : nil
-    ensure
-      Thread.current[:current_pool] = nil
     end
 
     class << self
-
-      #
-      # Returns the Redis pool being used for the current client operation.
-      # Client operations should use +Sidekiq::Client.redis_pool+ whereas server
-      # operations should use +Sidekiq.redis_pool+.
-      #
-      # For example, in client-side middleware, you must use this method.
-      # In server-side middleware, you use +Sidekiq.redis_pool+.
-      #
-      # This complexity is necessary to support Redis sharding.
-      def redis_pool
-        Thread.current[:current_pool] || Sidekiq.redis_pool
-      end
 
       def default
         @default ||= new
@@ -187,7 +168,7 @@ module Sidekiq
     def process_single(worker_class, item)
       queue = item['queue']
 
-      middleware.invoke(worker_class, item, queue) do
+      middleware.invoke(worker_class, item, queue, @redis_pool) do
         item
       end
     end

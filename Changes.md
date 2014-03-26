@@ -40,6 +40,8 @@ end
 client = Sidekiq::Client.new(ConnectionPool.new { Redis.new })
 client.push(...)
 ```
+  **Sharding support does require a breaking change to client-side
+middleware, see Upgrading.md.**
 - New Chinese, Greek, Swedish and Czech translations for the Web UI.
 - Updated most languages translations for the new UI features.
 - **Remove official Capistrano integration** - this integration has been

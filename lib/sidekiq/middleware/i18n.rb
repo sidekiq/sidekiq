@@ -2,7 +2,7 @@ module Sidekiq::Middleware::I18n
   # Get the current locale and store it in the message
   # to be sent to Sidekiq.
   class Client
-    def call(worker_class, msg, queue)
+    def call(worker_class, msg, queue, redis_pool)
       msg['locale'] ||= I18n.locale
       yield
     end
