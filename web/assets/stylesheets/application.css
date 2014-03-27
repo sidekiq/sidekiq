@@ -128,8 +128,13 @@ header.row .pagination {
 .summary_bar ul li {
   padding: 4px 0 2px 0;
   text-align: center;
+  width: 14%;
 }
 @media (max-width: 767px) and (min-width: 400px) {
+  .summary_bar ul li {
+    width: 100%;
+  }
+
   .summary_bar ul li span {
     width: 50% !important;
   }
