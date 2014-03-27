@@ -17,6 +17,7 @@ module Sidekiq
     attr_reader :manager, :poller, :fetcher
 
     def initialize(options)
+      @redis_pool = Sidekiq.redis_pool
       @manager = Sidekiq::Manager.new_link options
       @poller = Sidekiq::Scheduled::Poller.new_link
       @fetcher = Sidekiq::Fetcher.new_link @manager, options
@@ -70,7 +71,7 @@ module Sidekiq
         'concurrency' => @options[:concurrency],
         'queues' => @options[:queues].uniq,
       }
-      Sidekiq.redis do |conn|
+      @redis_pool.with do |conn|
         conn.multi do
           conn.sadd('processes', key)
           conn.hset(key, 'info', Sidekiq.dump_json(data))
@@ -81,7 +82,7 @@ module Sidekiq
     end
 
     def stop_heartbeat
-      Sidekiq.redis do |conn|
+      @redis_pool.with do |conn|
         conn.srem('processes', identity)
       end
     end

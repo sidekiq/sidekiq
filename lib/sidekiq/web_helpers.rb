@@ -51,21 +51,21 @@ module Sidekiq
     end
 
     def retries_with_score(score)
-      Sidekiq.redis do |conn|
+      settings.redis_pool.with do |conn|
         conn.zrangebyscore('retry', score, score)
       end.map { |msg| Sidekiq.load_json(msg) }
     end
 
     def location
-      Sidekiq.redis { |conn| conn.client.location }
+      settings.redis_pool.with { |conn| conn.client.location }
     end
 
     def redis_connection
-      Sidekiq.redis { |conn| conn.client.id }
+      settings.redis_pool.with { |conn| conn.client.id }
     end
 
     def namespace
-      @@ns ||= Sidekiq.redis {|conn| conn.respond_to?(:namespace) ? conn.namespace : nil }
+      @@ns ||= settings.redis_pool.with {|conn| conn.respond_to?(:namespace) ? conn.namespace : nil }
     end
 
     def root_path

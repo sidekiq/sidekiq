@@ -8,7 +8,7 @@ module Sidekiq
       starting = pageidx * page_size
       ending = starting + page_size - 1
 
-      Sidekiq.redis do |conn|
+      settings.redis_pool.with do |conn|
         type = conn.type(key)
 
         case type
