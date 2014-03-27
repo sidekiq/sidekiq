@@ -6,6 +6,15 @@ changes a few data elements in Redis.  To upgrade cleanly:
 * Upgrade to the latest Sidekiq 2.x and run it for a few weeks.
   `gem 'sidekiq', '< 3'`
   This is only needed if you have retries pending.
+* 3rd party gems which use **client-side middleware** will need to update
+  due to an API change.  The Redis connection for a particular job is
+  passed thru the middleware to handle sharding where jobs can
+  be pushed to different redis server instances.
+
+  `def call(worker_class, msg, queue, redis_pool)`
+
+  Client-side middleware should use `redis_pool.with { |conn| ... }` to
+  perform Redis operations and **not** `Sidekiq.redis`.
 * If you used the capistrano integration, you'll need to pull in the
   new [capistrano-sidekiq](https://github.com/seuros/capistrano-sidekiq)
   gem and use it in your deploy.rb.

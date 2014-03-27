@@ -61,7 +61,7 @@ class TestClient < Sidekiq::Test
       it 'allows local middleware modification' do
         @redis.expect :lpush, 1, ['queue:default', Array]
         $called = false
-        mware = Class.new { def call(worker_klass,msg,q); $called = true; msg;end }
+        mware = Class.new { def call(worker_klass,msg,q,r); $called = true; msg;end }
         client = Sidekiq::Client.new
         client.middleware do |chain|
           chain.add mware
@@ -200,7 +200,8 @@ class TestClient < Sidekiq::Test
   describe 'client middleware' do
 
     class Stopper
-      def call(worker_class, message, queue)
+      def call(worker_class, message, queue, r)
+        raise ArgumentError unless r
         yield if message['args'].first.odd?
       end
     end
@@ -233,6 +234,42 @@ class TestClient < Sidekiq::Test
 
     it "does not normalize numeric retry's" do
       assert_equal 2, Sidekiq::Client.new.__send__(:normalize_item, 'class' => CWorker, 'args' => [])['retry']
+    end
+  end
+
+  describe 'sharding' do
+    class DWorker < BaseWorker
+    end
+    it 'allows sidekiq_options to point to different Redi' do
+      conn = MiniTest::Mock.new
+      conn.expect(:multi, [0, 1])
+      DWorker.sidekiq_options('pool' => ConnectionPool.new(size: 1) { conn })
+      DWorker.perform_async(1,2,3)
+      conn.verify
+    end
+    it 'allows #via to point to different Redi' do
+      conn = MiniTest::Mock.new
+      conn.expect(:multi, [0, 1])
+      default = Sidekiq::Client.new.redis_pool
+      sharded_pool = ConnectionPool.new(size: 1) { conn }
+      Sidekiq::Client.via(sharded_pool) do
+        CWorker.perform_async(1,2,3)
+        assert_equal sharded_pool, Sidekiq::Client.new.redis_pool
+        assert_raises RuntimeError do
+          Sidekiq::Client.via(default) do
+            # nothing
+          end
+        end
+      end
+      assert_equal default, Sidekiq::Client.new.redis_pool
+      conn.verify
+    end
+    it 'allows Resque helpers to point to different Redi' do
+      conn = MiniTest::Mock.new
+      conn.expect(:zadd, 1, [String, Array])
+      DWorker.sidekiq_options('pool' => ConnectionPool.new(size: 1) { conn })
+      Sidekiq::Client.enqueue_in(10, DWorker, 3)
+      conn.verify
     end
   end
 end

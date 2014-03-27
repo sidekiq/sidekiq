@@ -25,6 +25,8 @@ module Sidekiq
       @chain
     end
 
+    attr_accessor :redis_pool
+
     # Sidekiq::Client normally uses the default Redis pool but you may
     # pass a custom ConnectionPool if you want to shard your
     # Sidekiq jobs across several Redis instances (for scalability
@@ -32,8 +34,13 @@ module Sidekiq
     #
     #   Sidekiq::Client.new(ConnectionPool.new { Redis.new })
     #
-    def initialize(redis_pool = Sidekiq.redis_pool)
-      @redis_pool = redis_pool
+    # Generally this is only needed for very large Sidekiq installs processing
+    # more than thousands jobs per second.  I do not recommend sharding unless
+    # you truly cannot scale any other way (e.g. splitting your app into smaller apps).
+    # Some features, like the API, do not support sharding: they are designed to work
+    # against a single Redis instance only.
+    def initialize(redis_pool=nil)
+      @redis_pool = redis_pool || Thread.current[:sidekiq_via_pool] || Sidekiq.redis_pool
     end
 
     ##
@@ -88,7 +95,31 @@ module Sidekiq
       pushed ? payloads.collect { |payload| payload['jid'] } : nil
     end
 
+    # Allows sharding of jobs across any number of Redis instances.  All jobs
+    # defined within the block will use the given Redis connection pool.
+    #
+    #   pool = ConnectionPool.new { Redis.new }
+    #   Sidekiq::Client.via(pool) do
+    #     SomeWorker.perform_async(1,2,3)
+    #     SomeOtherWorker.perform_async(1,2,3)
+    #   end
+    #
+    # Generally this is only needed for very large Sidekiq installs processing
+    # more than thousands jobs per second.  I do not recommend sharding unless
+    # you truly cannot scale any other way (e.g. splitting your app into smaller apps).
+    # Some features, like the API, do not support sharding: they are designed to work
+    # against a single Redis instance.
+    def self.via(pool)
+      raise ArgumentError, "No pool given" if pool.nil?
+      raise RuntimeError, "Sidekiq::Client.via is not re-entrant" if x = Thread.current[:sidekiq_via_pool] && x != pool
+      Thread.current[:sidekiq_via_pool] = pool
+      yield
+    ensure
+      Thread.current[:sidekiq_via_pool] = nil
+    end
+
     class << self
+
       def default
         @default ||= new
       end
@@ -167,7 +198,7 @@ module Sidekiq
     def process_single(worker_class, item)
       queue = item['queue']
 
-      middleware.invoke(worker_class, item, queue) do
+      middleware.invoke(worker_class, item, queue, @redis_pool) do
         item
       end
     end

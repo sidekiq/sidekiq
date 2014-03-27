@@ -120,7 +120,7 @@ class TestMiddleware < Sidekiq::Test
       I18n.locale = 'fr'
       msg = {}
       mw = Sidekiq::Middleware::I18n::Client.new
-      mw.call(nil, msg, nil) { }
+      mw.call(nil, msg, nil, nil) { }
       assert_equal :fr, msg['locale']
 
       msg['locale'] = 'jp'

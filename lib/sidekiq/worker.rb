@@ -62,6 +62,7 @@ module Sidekiq
       #   :retry - enable the RetryJobs middleware for this Worker, default *true*
       #   :backtrace - whether to save any error backtrace in the retry payload to display in web UI,
       #      can be true, false or an integer number of lines to save, default *false*
+      #   :pool - use the given Redis connection pool to push this type of job to a given shard.
       def sidekiq_options(opts={})
         self.sidekiq_options_hash = get_sidekiq_options.merge((opts || {}).stringify_keys)
         ::Sidekiq.logger.warn("#{self.name} - :timeout is unsafe and support has been removed from Sidekiq, see http://bit.ly/OtYpK for details") if opts.include? :timeout
@@ -80,7 +81,8 @@ module Sidekiq
       end
 
       def client_push(item) # :nodoc:
-        Sidekiq::Client.push(item.stringify_keys)
+        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options['pool'] || Sidekiq.redis_pool
+        Sidekiq::Client.new(pool).push(item.stringify_keys)
       end
 
     end
