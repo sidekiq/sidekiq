@@ -3,6 +3,17 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+HEAD
+-----------
+
+- Compatible with Sidekiq 3.
+
+1.5.1
+-----------
+
+- Due to a breaking API change in Sidekiq 3.0, this version is limited
+  to Sidekiq 2.x.
+
 1.5.0
 -----------
 
