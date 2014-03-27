@@ -25,6 +25,7 @@ module Sidekiq
     def initialize(options={})
       logger.debug { options.inspect }
       @options = options
+      @redis_pool = Sidekiq.redis_pool
       @count = options[:concurrency] || 25
       @done_callback = nil
 
@@ -146,7 +147,7 @@ module Sidekiq
 
     def ❤(key)
       begin
-        Sidekiq.redis do |conn|
+        @redis_pool.with do |conn|
           conn.multi do
             conn.hmset(key, 'busy', @busy.size, 'beat', Time.now.to_f)
             conn.expire(key, 60)

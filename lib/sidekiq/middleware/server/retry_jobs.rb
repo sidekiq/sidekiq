@@ -55,6 +55,7 @@ module Sidekiq
         DEFAULT_MAX_RETRY_ATTEMPTS = 25
 
         def initialize(options = {})
+          @redis_pool = Sidekiq.redis_pool
           @max_retries = options.fetch(:max_retries, DEFAULT_MAX_RETRY_ATTEMPTS)
         end
 
@@ -95,7 +96,7 @@ module Sidekiq
             logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
             retry_at = Time.now.to_f + delay
             payload = Sidekiq.dump_json(msg)
-            Sidekiq.redis do |conn|
+            @redis_pool.with do |conn|
               conn.zadd('retry', retry_at.to_s, payload)
             end
           else
@@ -128,7 +129,7 @@ module Sidekiq
           Sidekiq.logger.info { "Adding dead #{msg['class']} job #{msg['jid']}" }
           payload = Sidekiq.dump_json(msg)
           now = Time.now.to_f
-          Sidekiq.redis do |conn|
+          @redis_pool.with do |conn|
             conn.multi do
               conn.zadd('dead', now, payload)
               conn.zremrangebyscore('dead', '-inf', now - DEAD_JOB_TIMEOUT)

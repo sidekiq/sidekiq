@@ -29,6 +29,7 @@ module Sidekiq
     attr_accessor :proxy_id
 
     def initialize(boss)
+      @redis_pool = Sidekiq.redis_pool
       @boss = boss
     end
 
@@ -80,7 +81,7 @@ module Sidekiq
       # stats so calling code can react appropriately
       retry_and_suppress_exceptions do
         hash = Sidekiq.dump_json({:queue => queue, :payload => msg, :run_at => Time.now.to_i })
-        Sidekiq.redis do |conn|
+        @redis_pool.with do |conn|
           conn.multi do
             conn.hmset("#{identity}:workers", thread_identity, hash)
             conn.expire("#{identity}:workers", 60*60)
@@ -92,7 +93,7 @@ module Sidekiq
         yield
       rescue Exception
         retry_and_suppress_exceptions do
-          Sidekiq.redis do |conn|
+          @redis_pool.with do |conn|
             failed = "stat:failed:#{Time.now.utc.to_date}"
             result = conn.multi do
               conn.incrby("stat:failed", 1)
@@ -104,7 +105,7 @@ module Sidekiq
         raise
       ensure
         retry_and_suppress_exceptions do
-          Sidekiq.redis do |conn|
+          @redis_pool.with do |conn|
             processed = "stat:processed:#{Time.now.utc.to_date}"
             result = conn.multi do
               conn.hdel("#{identity}:workers", thread_identity)

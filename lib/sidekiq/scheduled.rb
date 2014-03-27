@@ -18,6 +18,10 @@ module Sidekiq
 
       SETS = %w(retry schedule)
 
+      def initialize
+        @redis_pool = Sidekiq.redis_pool
+      end
+
       def poll(first_time=false)
         watchdog('scheduling poller thread died!') do
           add_jitter if first_time
@@ -26,7 +30,7 @@ module Sidekiq
             # A message's "score" in Redis is the time at which it should be processed.
             # Just check Redis for the set of messages with a timestamp before now.
             now = Time.now.to_f.to_s
-            Sidekiq.redis do |conn|
+            @redis_pool.with do |conn|
               SETS.each do |sorted_set|
                 # Get the next item in the queue if it's score (time to execute) is <= now.
                 # We need to go through the list one at a time to reduce the risk of something

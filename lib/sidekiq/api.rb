@@ -3,12 +3,16 @@ require 'sidekiq'
 
 module Sidekiq
   class Stats
+    def initialize
+      @redis_pool = Sidekiq.redis_pool
+    end
+
     def processed
-      Sidekiq.redis { |conn| conn.get("stat:processed") }.to_i
+      @redis_pool.with { |conn| conn.get("stat:processed") }.to_i
     end
 
     def failed
-      Sidekiq.redis { |conn| conn.get("stat:failed") }.to_i
+      @redis_pool.with { |conn| conn.get("stat:failed") }.to_i
     end
 
     def reset(*stats)
@@ -20,13 +24,13 @@ module Sidekiq
         mset_args << "stat:#{stat}"
         mset_args << 0
       end
-      Sidekiq.redis do |conn|
+      @redis_pool.with do |conn|
         conn.mset(*mset_args)
       end
     end
 
     def queues
-      Sidekiq.redis do |conn|
+      @redis_pool.with do |conn|
         queues = conn.smembers('queues')
 
         lengths = conn.pipelined do
@@ -51,19 +55,20 @@ module Sidekiq
     end
 
     def scheduled_size
-      Sidekiq.redis {|c| c.zcard('schedule') }
+      @redis_pool.with {|c| c.zcard('schedule') }
     end
 
     def retry_size
-      Sidekiq.redis {|c| c.zcard('retry') }
+      @redis_pool.with {|c| c.zcard('retry') }
     end
 
     def dead_size
-      Sidekiq.redis {|c| c.zcard('dead') }
+      @redis_pool.with {|c| c.zcard('dead') }
     end
 
     class History
       def initialize(days_previous, start_date = nil)
+        @redis_pool = Sidekiq.redis_pool
         @days_previous = days_previous
         @start_date = start_date || Time.now.utc.to_date
       end
@@ -91,7 +96,7 @@ module Sidekiq
           i += 1
         end
 
-        Sidekiq.redis do |conn|
+        @redis_pool.with do |conn|
           conn.mget(keys).each_with_index do |value, i|
             stat_hash[dates[i].to_s] = value ? value.to_i : 0
           end
@@ -118,22 +123,23 @@ module Sidekiq
     include Enumerable
 
     def self.all
-      Sidekiq.redis {|c| c.smembers('queues') }.map {|q| Sidekiq::Queue.new(q) }
+      (Thread.current[:sidekiq_via_pool] || Sidekiq.redis_pool).with {|c| c.smembers('queues') }.map {|q| Sidekiq::Queue.new(q) }
     end
 
     attr_reader :name
 
     def initialize(name="default")
+      @redis_pool = Sidekiq.redis_pool
       @name = name
       @rname = "queue:#{name}"
     end
 
     def size
-      Sidekiq.redis { |con| con.llen(@rname) }
+      @redis_pool.with { |con| con.llen(@rname) }
     end
 
     def latency
-      entry = Sidekiq.redis do |conn|
+      entry = @redis_pool.with do |conn|
         conn.lrange(@rname, -1, -1)
       end.first
       return 0 unless entry
@@ -149,7 +155,7 @@ module Sidekiq
       loop do
         range_start = page * page_size - deleted_size
         range_end   = page * page_size - deleted_size + (page_size - 1)
-        entries = Sidekiq.redis do |conn|
+        entries = @redis_pool.with do |conn|
           conn.lrange @rname, range_start, range_end
         end
         break if entries.empty?
@@ -166,7 +172,7 @@ module Sidekiq
     end
 
     def clear
-      Sidekiq.redis do |conn|
+      @redis_pool.with do |conn|
         conn.multi do
           conn.del(@rname)
           conn.srem("queues", name)
@@ -187,6 +193,7 @@ module Sidekiq
     attr_reader :item
 
     def initialize(item, queue_name=nil)
+      @redis_pool = Sidekiq.redis_pool
       @value = item
       @item = Sidekiq.load_json(item)
       @queue = queue_name || @item['queue']
@@ -219,7 +226,7 @@ module Sidekiq
     ##
     # Remove this job from the queue.
     def delete
-      count = Sidekiq.redis do |conn|
+      count = @redis_pool.with do |conn|
         conn.lrem("queue:#{@queue}", 1, @value)
       end
       count != 0
@@ -254,7 +261,7 @@ module Sidekiq
     end
 
     def add_to_queue
-      Sidekiq.redis do |conn|
+      @redis_pool.with do |conn|
         results = conn.multi do
           conn.zrangebyscore('schedule', score, score)
           conn.zremrangebyscore('schedule', score, score)
@@ -268,7 +275,7 @@ module Sidekiq
 
     def retry
       raise "Retry not available on jobs which have not failed" unless item["failed_at"]
-      Sidekiq.redis do |conn|
+      @redis_pool.with do |conn|
         results = conn.multi do
           conn.zrangebyscore(parent.name, score, score)
           conn.zremrangebyscore(parent.name, score, score)
@@ -288,16 +295,17 @@ module Sidekiq
     attr_reader :name
 
     def initialize(name)
+      @redis_pool = Sidekiq.redis_pool
       @name = name
       @_size = size
     end
 
     def size
-      Sidekiq.redis {|c| c.zcard(name) }
+      @redis_pool.with {|c| c.zcard(name) }
     end
 
     def clear
-      Sidekiq.redis do |conn|
+      @redis_pool.with do |conn|
         conn.del(name)
       end
     end
@@ -307,7 +315,7 @@ module Sidekiq
   class JobSet < SortedSet
 
     def schedule(timestamp, message)
-      Sidekiq.redis do |conn|
+      @redis_pool.with do |conn|
         conn.zadd(name, timestamp.to_f.to_s, Sidekiq.dump_json(message))
       end
     end
@@ -321,7 +329,7 @@ module Sidekiq
       loop do
         range_start = page * page_size + offset_size
         range_end   = page * page_size + offset_size + (page_size - 1)
-        elements = Sidekiq.redis do |conn|
+        elements = @redis_pool.with do |conn|
           conn.zrange name, range_start, range_end, :with_scores => true
         end
         break if elements.empty?
@@ -334,7 +342,7 @@ module Sidekiq
     end
 
     def fetch(score, jid = nil)
-      elements = Sidekiq.redis do |conn|
+      elements = @redis_pool.with do |conn|
         conn.zrangebyscore(name, score, score)
       end
 
@@ -355,7 +363,7 @@ module Sidekiq
 
     def delete(score, jid = nil)
       if jid
-        elements = Sidekiq.redis do |conn|
+        elements = @redis_pool.with do |conn|
           conn.zrangebyscore(name, score, score)
         end
 
@@ -363,7 +371,7 @@ module Sidekiq
           message = Sidekiq.load_json(element)
 
           if message["jid"] == jid
-            _, @_size = Sidekiq.redis do |conn|
+            _, @_size = @redis_pool.with do |conn|
               conn.multi do
                 conn.zrem(name, element)
                 conn.zcard name
@@ -373,7 +381,7 @@ module Sidekiq
         end
         elements_with_jid.count != 0
       else
-        count, @_size = Sidekiq.redis do |conn|
+        count, @_size = @redis_pool.with do |conn|
           conn.multi do
             conn.zremrangebyscore(name, score, score)
             conn.zcard name
@@ -460,12 +468,16 @@ module Sidekiq
   class ProcessSet
     include Enumerable
 
+    def initialize
+      @redis_pool = Sidekiq.redis_pool
+    end
+
     def each(&block)
-      procs = Sidekiq.redis { |conn| conn.smembers('processes') }
+      procs = @redis_pool.with { |conn| conn.smembers('processes') }
 
       to_prune = []
       sorted = procs.sort
-      Sidekiq.redis do |conn|
+      @redis_pool.with do |conn|
         # We're making a tradeoff here between consuming more memory instead of
         # making more roundtrips to Redis, but if you have hundreds or thousands of workers,
         # you'll be happier this way
@@ -485,7 +497,7 @@ module Sidekiq
         end
       end
 
-      Sidekiq.redis {|conn| conn.srem('processes', to_prune) } unless to_prune.empty?
+      @redis_pool.with {|conn| conn.srem('processes', to_prune) } unless to_prune.empty?
       nil
     end
 
@@ -494,7 +506,7 @@ module Sidekiq
     # contains Sidekiq processes which have sent a heartbeat within the last
     # 60 seconds.
     def size
-      Sidekiq.redis { |conn| conn.scard('processes') }
+      @redis_pool.with { |conn| conn.scard('processes') }
     end
   end
 
@@ -520,8 +532,12 @@ module Sidekiq
   class Workers
     include Enumerable
 
+    def initialize
+      @redis_pool = Sidekiq.redis_pool
+    end
+
     def each(&block)
-      Sidekiq.redis do |conn|
+      @redis_pool.with do |conn|
         procs = conn.smembers('processes')
         procs.sort.each do |key|
           valid, workers = conn.pipelined do
@@ -543,7 +559,7 @@ module Sidekiq
     # processes but the alternative is a global counter
     # which can easily get out of sync with crashy processes.
     def size
-      Sidekiq.redis do |conn|
+      @redis_pool.with do |conn|
         procs = conn.smembers('processes')
         return 0 if procs.empty?
 

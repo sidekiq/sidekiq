@@ -16,6 +16,10 @@ module Sidekiq
     set :views, Proc.new { "#{root}/views" }
     set :locales, ["#{root}/locales"]
 
+    configure do
+      set :redis_pool, Proc.new { Sidekiq.redis_pool }
+    end
+
     helpers WebHelpers
 
     DEFAULT_TABS = {
@@ -215,7 +219,7 @@ module Sidekiq
     end
 
     get '/' do
-      @redis_info = Sidekiq.redis { |conn| conn.info }.select{ |k, v| REDIS_KEYS.include? k }
+      @redis_info = settings.redis_pool.with { |conn| conn.info }.select{ |k, v| REDIS_KEYS.include? k }
       stats_history = Sidekiq::Stats::History.new((params[:days] || 30).to_i)
       @processed_history = stats_history.processed
       @failed_history = stats_history.failed
@@ -227,7 +231,7 @@ module Sidekiq
     get '/dashboard/stats' do
       sidekiq_stats = Sidekiq::Stats.new
       queue         = Sidekiq::Queue.new
-      redis_stats   = Sidekiq.redis { |conn| conn.info }.select{ |k, v| REDIS_KEYS.include? k }
+      redis_stats   = settings.redis_pool.with { |conn| conn.info }.select{ |k, v| REDIS_KEYS.include? k }
 
       content_type :json
       Sidekiq.dump_json({
