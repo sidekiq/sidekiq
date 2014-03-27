@@ -250,11 +250,18 @@ class TestClient < Sidekiq::Test
     it 'allows #via to point to different Redi' do
       conn = MiniTest::Mock.new
       conn.expect(:multi, [0, 1])
-      default = Sidekiq::Client.redis_pool
-      Sidekiq::Client.via(ConnectionPool.new(size: 1) { conn }) do
+      default = Sidekiq::Client.new.redis_pool
+      sharded_pool = ConnectionPool.new(size: 1) { conn }
+      Sidekiq::Client.via(sharded_pool) do
         CWorker.perform_async(1,2,3)
+        assert_equal sharded_pool, Sidekiq::Client.new.redis_pool
+        assert_raises RuntimeError do
+          Sidekiq::Client.via(default) do
+            # nothing
+          end
+        end
       end
-      assert_equal default, Sidekiq::Client.redis_pool
+      assert_equal default, Sidekiq::Client.new.redis_pool
       conn.verify
     end
     it 'allows Resque helpers to point to different Redi' do
