@@ -40,6 +40,12 @@ end
 client = Sidekiq::Client.new(ConnectionPool.new { Redis.new })
 client.push(...)
 ```
+```ruby
+Sidekiq::Client.via(ConnectionPool.new { Redis.new }) do
+  FooWorker.perform_async
+  BarWorker.perform_async
+end
+```
   **Sharding support does require a breaking change to client-side
 middleware, see 3.0-Upgrade.md.**
 - New Chinese, Greek, Swedish and Czech translations for the Web UI.
