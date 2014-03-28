@@ -1,8 +1,6 @@
 3.0.0
 -----------
 
-**Not yet released**
-
 Please see [3.0-Upgrade.md](3.0-Upgrade.md) for more comprehensive upgrade notes.
 
 - **Dead Job Queue** - jobs which run out of retries are now moved to a dead
