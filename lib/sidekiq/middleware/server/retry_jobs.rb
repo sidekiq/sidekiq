@@ -121,7 +121,7 @@ module Sidekiq
             handle_exception(e, { :context => "Error calling retries_exhausted" })
           end
 
-          send_to_morgue(msg)
+          send_to_morgue(msg) unless msg['dead'] == false
         end
 
         def send_to_morgue(msg)
