@@ -1,11 +1,11 @@
 module Sidekiq
   def self.hook_rails!
-    if defined?(::ActiveRecord)
-      ::ActiveRecord::Base.__send__(:include, Sidekiq::Extensions::ActiveRecord)
+    ActiveSupport.on_load(:active_record) do
+      include Sidekiq::Extensions::ActiveRecord
     end
 
-    if defined?(::ActionMailer)
-      ::ActionMailer::Base.extend(Sidekiq::Extensions::ActionMailer)
+    ActiveSupport.on_load(:action_mailer) do
+      extend Sidekiq::Extensions::ActionMailer
     end
   end
 
