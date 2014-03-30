@@ -68,7 +68,7 @@ module Sidekiq
       end
 
       def determine_redis_provider
-        ENV[ENV['REDIS_PROVIDER'] || 'REDIS_URL']
+        ENV['REDIS_PROVIDER'] || ENV['REDIS_URL']
       end
 
     end
