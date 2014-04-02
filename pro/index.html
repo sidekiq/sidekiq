@@ -63,6 +63,34 @@
                 <div class="row highlighted well">
                   <div class="slider">
                     <div class='content'>
+                      <h2 class='visible-phone'>Reliability</h2>
+                      <h3>100% reliable message processing.</h3>
+                      <div class="row-fluid">
+                        <div class="span8">
+                          <img alt="" src="../examples/reliability.png"/>
+                        </div>
+                        <div class="span4">
+                          <p>
+                            If a Sidekiq process crashes while processing a job, that job is lost.
+                          </p>
+                          <p>
+                            Sidekiq Pro uses Redis's RPOPLPUSH command to ensure that
+                            jobs will not be lost if the process crashes or gets a
+                            KILL signal.
+                          </p>
+                          <p>
+                            If the Sidekiq client gets a networking error while pushing a job to Redis,
+                            an exception is raised.
+                          </p>
+                          <p>
+                            The Sidekiq Pro client can withstand transient Redis outages.  It will enqueue jobs
+                            locally upon error and attempt to deliver those jobs once connectivity is restored.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class='content'>
                       <h2 class='visible-phone'>Batches</h2>
                       <h3>Group jobs into a set and follow their progress.</h3>
                       <div class="row-fluid">
@@ -107,35 +135,8 @@
                             processes.
                           </p>
                           <p>
-                            Want support for other notification mediums?  Contact me
-                            and let me know.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div class='content'>
-                      <h2 class='visible-phone'>Reliability</h2>
-                      <h3>100% reliable message processing.</h3>
-                      <div class="row-fluid">
-                        <div class="span8">
-                          <img alt="" src="../examples/reliability.png"/>
-                        </div>
-                        <div class="span4">
-                          <p>
-                            If a Sidekiq process crashes while processing a job, that job is lost.
-                          </p>
-                          <p>
-                            Sidekiq Pro uses Redis's RPOPLPUSH command to ensure that
-                            jobs will not be lost if the process crashes or gets a
-                            KILL signal.
-                          </p>
-                          <p>
-                            If the Sidekiq client gets a networking error while pushing a job to Redis,
-                            an exception is raised.
-                          </p>
-                          <p>
-                            The Sidekiq Pro client can withstand transient Redis outages.  It will enqueue jobs
-                            locally upon error and attempt to deliver those jobs once connectivity is restored.
+                            Your own custom notification mechanisms can easily be added with Sidekiq Pro's
+                            Batch callback API.
                           </p>
                         </div>
                       </div>
