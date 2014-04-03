@@ -319,11 +319,12 @@ module Sidekiq
 
     def write_pid
       if path = options[:pidfile]
-        File.open(path, 'w') do |f|
+        pidfile = File.expand_path(path)
+        File.open(pidfile, 'w') do |f|
           f.puts Process.pid
         end
         at_exit do
-          FileUtils.rm_f path
+          FileUtils.rm_f pidfile
         end
       end
     end
