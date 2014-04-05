@@ -4,6 +4,7 @@ require 'yaml'
 require 'singleton'
 require 'optparse'
 require 'erb'
+require 'fileutils'
 
 require 'sidekiq'
 require 'sidekiq/util'
