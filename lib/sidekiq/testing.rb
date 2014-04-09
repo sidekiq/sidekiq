@@ -1,4 +1,5 @@
 require 'securerandom'
+require 'sidekiq'
 
 module Sidekiq
 
