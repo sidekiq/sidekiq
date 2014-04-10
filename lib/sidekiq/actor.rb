@@ -1,3 +1,5 @@
+require 'celluloid'
+
 module Sidekiq
   module Actor
 
