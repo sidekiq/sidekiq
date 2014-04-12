@@ -1,6 +1,10 @@
 HEAD
 -----------
 
+- Add ability to disable jobs going to the DJQ with the `dead` option.
+```ruby
+sidekiq_options :dead => false, :retry => 5
+```
 - Minor fixes
 
 
