@@ -133,13 +133,14 @@ module Sidekiq
     end
 
     def heartbeat(key, data)
-      return if stopped?
-
       proctitle = ['sidekiq', Sidekiq::VERSION]
       proctitle << data['tag'] unless data['tag'].empty?
       proctitle << "[#{@busy.size} of #{data['concurrency']} busy]"
       proctitle << 'stopping' if stopped?
       $0 = proctitle.join(' ')
+
+      return if stopped?
+
       ❤(key)
       after(5) do
         heartbeat(key, data)

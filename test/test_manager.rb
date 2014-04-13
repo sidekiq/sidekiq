@@ -1,5 +1,6 @@
 require 'helper'
 require 'sidekiq/manager'
+require 'sidekiq/util'
 
 class TestManager < Sidekiq::Test
 
@@ -77,8 +78,35 @@ class TestManager < Sidekiq::Test
       fetcher.verify
     end
 
+    describe 'heartbeat' do
+      describe 'proctitle' do
+        it 'sets useful info' do
+          mgr = Sidekiq::Manager.new(options)
+          mgr.heartbeat('identity', heartbeat_data)
+
+          proctitle = $0
+          assert_equal $0, "sidekiq #{Sidekiq::VERSION} myapp [0 of 3 busy]"
+          $0 = proctitle
+        end
+
+        it 'indicates when stopped' do
+          mgr = Sidekiq::Manager.new(options)
+          mgr.stop
+          mgr.heartbeat('identity', heartbeat_data)
+
+          proctitle = $0
+          assert_equal $0, "sidekiq #{Sidekiq::VERSION} myapp [0 of 3 busy] stopping"
+          $0 = proctitle
+        end
+      end
+    end
+
     def options
       { :concurrency => 3, :queues => ['default'] }
+    end
+
+    def heartbeat_data
+      { 'concurrency' => 3, 'tag' => 'myapp' }
     end
   end
 
