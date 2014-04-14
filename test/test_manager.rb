@@ -94,6 +94,11 @@ class TestManager < Sidekiq::Test
         @mgr.assign(uow)
 
         @processor.verify
+        @proctitle = $0
+      end
+
+      after do
+        $0 = @proctitle
       end
 
       describe 'when manager is active' do
@@ -102,9 +107,7 @@ class TestManager < Sidekiq::Test
         end
 
         it 'sets useful info to proctitle' do
-          proctitle = $0
           assert_equal "sidekiq #{Sidekiq::VERSION} myapp [1 of 3 busy]", $0
-          $0 = proctitle
         end
 
         it 'stores process info in redis' do
@@ -128,9 +131,7 @@ class TestManager < Sidekiq::Test
         end
 
         it 'indicates status in proctitle' do
-          proctitle = $0
           assert_equal "sidekiq #{Sidekiq::VERSION} myapp [0 of 3 busy] stopping", $0
-          $0 = proctitle
         end
 
         it 'stores process info in redis' do
