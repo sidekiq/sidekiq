@@ -139,8 +139,6 @@ module Sidekiq
       proctitle << 'stopping' if stopped?
       $0 = proctitle.join(' ')
 
-      return if stopped?
-
       ❤(key)
       after(5) do
         heartbeat(key, data)
