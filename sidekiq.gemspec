@@ -7,7 +7,10 @@ Gem::Specification.new do |gem|
   gem.description   = gem.summary = "Simple, efficient background processing for Ruby"
   gem.homepage      = "http://sidekiq.org"
   gem.license       = "LGPL-3.0"
-
+  
+  # Sidekiq 3 requires ruby 2.0.x
+  gem.required_ruby_version = '~> 2.0'
+  
   gem.executables   = ['sidekiq', 'sidekiqctl']
   gem.files         = `git ls-files | grep -Ev '^(myapp|examples)'`.split("\n")
   gem.test_files    = `git ls-files -- test/*`.split("\n")
