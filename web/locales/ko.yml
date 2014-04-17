@@ -6,7 +6,7 @@ ko:
   Namespace: 네임스페이스
   Realtime: 실시간
   History: 히스토리
-  Busy: 바쁨
+  Busy: 작동
   Processed: 처리완료
   Failed: 실패
   Scheduled: 예약
@@ -59,3 +59,10 @@ ko:
   SixMonths: 6 달
   Batches: 배치
   Failures: 실패
+  DeadJobs: 죽은 작업
+  NoDeadJobsFound: 죽은 작업이 없습니다
+  Dead: 죽음
+  Processes: 프로세스
+  Thread: 스레드
+  Threads: 스레드
+  Jobs: 작업
