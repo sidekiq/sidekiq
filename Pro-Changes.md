@@ -3,6 +3,20 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+1.7.0
+-----------
+
+- Add ability to pause reliable queues via API.
+```ruby
+q = Sidekiq::Queue.new("critical")
+q.pause!
+q.paused? # => true
+q.unpause!
+```
+
+Sidekiq polls Redis every 10 seconds for paused queues so pausing will take
+a few seconds to take effect.
+
 1.6.0
 -----------
 
