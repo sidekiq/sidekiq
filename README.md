@@ -78,6 +78,13 @@ If you have a problem, please review the [FAQ](https://github.com/mperham/sideki
 The mailing list is the preferred place to ask questions on usage. If you are encountering what you think is a bug, please open an issue.
 
 
+Thanks
+-----------------
+
+Sidekiq stays fast by using the [JProfiler java profiler](http://www.ej-technologies.com/products/jprofiler/overview.html) to find and fix
+performance problems on JRuby.  Unfortunately MRI does not have good profile tooling.
+
+
 License
 -----------------
 
