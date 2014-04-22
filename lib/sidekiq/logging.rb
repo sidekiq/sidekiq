@@ -85,6 +85,9 @@ module Sidekiq
         end
       end
       nr
+    rescue RuntimeError => ex
+      # RuntimeError: ObjectSpace is disabled; each_object will only work with Class, pass -X+O to enable
+      puts "Unable to reopen logs: #{ex.message}"
     end
 
     def logger
