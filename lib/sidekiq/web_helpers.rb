@@ -111,7 +111,7 @@ module Sidekiq
       args.map do |arg|
         a = arg.inspect
         h(truncate(a))
-      end.join(", ")
+      end.join(", ") if args
     end
 
     RETRY_JOB_KEYS = Set.new(%w(
