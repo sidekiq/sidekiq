@@ -132,6 +132,11 @@ module Sidekiq
       Sidekiq.redis { |con| con.llen(@rname) }
     end
 
+    # Sidekiq Pro overrides this
+    def paused?
+      false
+    end
+
     def latency
       entry = Sidekiq.redis do |conn|
         conn.lrange(@rname, -1, -1)

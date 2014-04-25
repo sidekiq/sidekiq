@@ -1,6 +1,7 @@
 HEAD
 -----------
 
+- Show warning on the Queues page if a queue is paused [#1672]
 - Only activate the ActiveRecord middleware if ActiveRecord::Base is defined on boot. [#1666]
 - Add ability to disable jobs going to the DJQ with the `dead` option.
 ```ruby

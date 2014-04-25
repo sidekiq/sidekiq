@@ -66,3 +66,4 @@ en: # <---- change this to your locale code
   Thread: Thread
   Threads: Threads
   Jobs: Jobs
+  Paused: Paused

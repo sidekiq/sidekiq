@@ -2,6 +2,9 @@
   <div class="col-sm-5">
     <h3>
       <%= t('CurrentMessagesInQueue', :queue => @name) %>
+      <% if @queue.paused? %>
+        <span class="label label-danger"><%= t('Paused') %></span>
+      <% end %>
     </h3>
   </div>
   <div class="col-sm-4 pull-right">
