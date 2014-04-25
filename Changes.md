@@ -1,6 +1,7 @@
 HEAD
 -----------
 
+- Only activate the ActiveRecord middleware if ActiveRecord::Base is defined on boot. [#1666]
 - Add ability to disable jobs going to the DJQ with the `dead` option.
 ```ruby
 sidekiq_options :dead => false, :retry => 5

@@ -5,7 +5,7 @@ module Sidekiq
         def call(*args)
           yield
         ensure
-          ::ActiveRecord::Base.clear_active_connections! if defined?(::ActiveRecord)
+          ::ActiveRecord::Base.clear_active_connections!
         end
       end
     end

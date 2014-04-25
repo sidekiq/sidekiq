@@ -1,7 +1,6 @@
 require 'sidekiq/util'
 require 'sidekiq/actor'
 
-require 'sidekiq/middleware/server/active_record'
 require 'sidekiq/middleware/server/retry_jobs'
 require 'sidekiq/middleware/server/logging'
 
@@ -22,7 +21,10 @@ module Sidekiq
       Middleware::Chain.new do |m|
         m.add Middleware::Server::Logging
         m.add Middleware::Server::RetryJobs
-        m.add Middleware::Server::ActiveRecord
+        if defined?(::ActiveRecord::Base)
+          require 'sidekiq/middleware/server/active_record'
+          m.add Sidekiq::Middleware::Server::ActiveRecord
+        end
       end
     end
 
