@@ -324,9 +324,6 @@ module Sidekiq
         File.open(pidfile, 'w') do |f|
           f.puts Process.pid
         end
-        at_exit do
-          FileUtils.rm_f pidfile
-        end
       end
     end
 

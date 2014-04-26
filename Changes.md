@@ -1,6 +1,8 @@
 HEAD
 -----------
 
+- Revert pidfile behavior from 2.17.5: Sidekiq will no longer remove its own pidfile
+  as this is a race condition when restarting. [#1470, #1677]
 - Show warning on the Queues page if a queue is paused [#1672]
 - Only activate the ActiveRecord middleware if ActiveRecord::Base is defined on boot. [#1666]
 - Add ability to disable jobs going to the DJQ with the `dead` option.
