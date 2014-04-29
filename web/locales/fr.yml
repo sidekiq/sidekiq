@@ -13,9 +13,9 @@ fr:
   Retries: Tentatives
   Enqueued: En queue
   Worker: Travailleur
-  LivePoll: Live polling
-  StopPolling: Arrêt du polling
-  Queue: File
+  LivePoll: Temps réel
+  StopPolling: Arrêt du temps réel
+  Queue: Queue
   Class: Classe
   Job: Tâche
   Arguments: Arguments
