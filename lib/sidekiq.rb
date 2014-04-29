@@ -26,7 +26,7 @@ module Sidekiq
   }
 
   def self.❨╯°□°❩╯︵┻━┻
-    puts "Calm down, bro"
+    puts "┬─┬ノ( º _ ºノ) Calm down, bro"
   end
 
   def self.options
