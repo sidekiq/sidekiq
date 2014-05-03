@@ -1,4 +1,4 @@
-HEAD
+3.0.1
 -----------
 
 - Revert pidfile behavior from 2.17.5: Sidekiq will no longer remove its own pidfile
