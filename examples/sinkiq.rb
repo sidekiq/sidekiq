@@ -7,6 +7,7 @@
 require 'sinatra'
 require 'sidekiq'
 require 'redis'
+require 'sidekiq/api'
 
 $redis = Redis.new
 
