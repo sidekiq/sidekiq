@@ -1,3 +1,9 @@
+3.0.2
+-----------
+
+- Revert gemfile requirement of Ruby 2.0.  JRuby 1.7 calls itself Ruby
+  1.9.3 and broke with this requirement.
+
 3.0.1
 -----------
 
