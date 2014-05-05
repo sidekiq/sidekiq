@@ -25,7 +25,7 @@ Requirements
 -----------------
 
 I test with the latest MRI (2.1, 2.0) and JRuby versions (1.7).  Other versions/VMs
-are untested but might work fine.
+are untested but might work fine.  MRI 1.9 is no longer supported.
 
 The last two major Rails releases (3.2 and 4.0) are officially supported, other
 versions might work fine.
