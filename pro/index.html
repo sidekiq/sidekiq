@@ -70,8 +70,17 @@
                           <img alt="" src="../examples/reliability.png"/>
                         </div>
                         <div class="span4">
+                          <p><b>
+                            Cloud environments are noisy and unreliable.  Seeing timeouts?
+                            Wild swings in latency or performance?  Ruby VM crashes or
+                            processes disappearing?
+                          </b></p>
                           <p>
                             If a Sidekiq process crashes while processing a job, that job is lost.
+                          </p>
+                          <p>
+                            If the Sidekiq client gets a networking error while pushing a job to Redis,
+                            an exception is raised and the job is not delivered.
                           </p>
                           <p>
                             Sidekiq Pro uses Redis's RPOPLPUSH command to ensure that
@@ -79,11 +88,7 @@
                             KILL signal.
                           </p>
                           <p>
-                            If the Sidekiq client gets a networking error while pushing a job to Redis,
-                            an exception is raised.
-                          </p>
-                          <p>
-                            The Sidekiq Pro client can withstand transient Redis outages.  It will enqueue jobs
+                            The Sidekiq Pro client can withstand transient Redis outages or timeouts.  It will enqueue jobs
                             locally upon error and attempt to deliver those jobs once connectivity is restored.
                           </p>
                         </div>
@@ -183,7 +188,7 @@
               <p>
                 Sidekiq Pro contains the following functionality:
                 <ul>
-                  <li>Batches with Notifications</li>
+                  <li>Batches with Callbacks and Notifications</li>
                   <li>Better server reliability in the face of Ruby VM crashes</li>
                   <li>Better client reliability in the face of Redis networking problems</li>
                   <li>Pause queues (e.g. only process a queue during business hours)</li>
