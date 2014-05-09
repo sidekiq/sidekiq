@@ -377,6 +377,22 @@ class TestWeb < Sidekiq::Test
         it 'are namespaced' do
           assert_includes @response.keys, "redis"
         end
+
+        it 'reports uptime' do
+          assert_includes @response["redis"].keys, "uptime_in_days"
+        end
+
+        it 'reports connected clients' do
+          assert_includes @response["redis"].keys, "connected_clients"
+        end
+
+        it 'reports user memory' do
+          assert_includes @response["redis"].keys, "used_memory_human"
+        end
+
+        it 'reports memory peak' do
+          assert_includes @response["redis"].keys, "used_memory_peak_human"
+        end
       end
     end
 
