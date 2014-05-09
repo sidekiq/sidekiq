@@ -378,6 +378,10 @@ class TestWeb < Sidekiq::Test
           assert_includes @response.keys, "redis"
         end
 
+        it 'reports version' do
+          assert_includes @response["redis"].keys, "redis_version"
+        end
+
         it 'reports uptime' do
           assert_includes @response["redis"].keys, "uptime_in_days"
         end

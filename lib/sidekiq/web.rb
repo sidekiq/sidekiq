@@ -223,7 +223,7 @@ module Sidekiq
       erb :dashboard
     end
 
-    REDIS_KEYS = %w(redis_stats uptime_in_days connected_clients used_memory_human used_memory_peak_human)
+    REDIS_KEYS = %w(redis_version uptime_in_days connected_clients used_memory_human used_memory_peak_human)
 
     get '/dashboard/stats' do
       sidekiq_stats = Sidekiq::Stats.new
