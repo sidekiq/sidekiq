@@ -298,7 +298,7 @@ class TestApi < Sidekiq::Test
       assert_equal 'ApiWorker', retri.klass
       assert_equal 'default', retri.queue
       assert_equal 'bob', retri.jid
-      assert_in_delta Time.now.to_f, retri.at.to_f, 0.01
+      assert_in_delta Time.now.to_f, retri.at.to_f, 0.02
     end
 
     it 'can delete multiple retries from score' do
