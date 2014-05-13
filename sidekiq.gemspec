@@ -20,8 +20,8 @@ Gem::Specification.new do |gem|
   gem.add_dependency                  'celluloid', '>= 0.15.2'
   gem.add_dependency                  'json'
   gem.add_development_dependency      'sinatra'
-  gem.add_development_dependency      'minitest', '~> 4.2'
+  gem.add_development_dependency      'minitest', '~> 5.3.3'
   gem.add_development_dependency      'rake'
-  gem.add_development_dependency      'rails', '>= 4.0.0'
+  gem.add_development_dependency      'rails', '~> 4.1.1'
   gem.add_development_dependency      'coveralls'
 end
