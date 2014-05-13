@@ -138,7 +138,7 @@ class TestManager < Sidekiq::Test
           info = Sidekiq.redis { |c| c.hmget('identity', 'busy') }
           assert_equal ["0"], info
           expires = Sidekiq.redis { |c| c.pttl('identity') }
-          assert_in_delta 60000, expires, 1
+          assert_in_delta 60000, expires, 5
         end
       end
     end
