@@ -14,6 +14,7 @@ class TestScheduling < Sidekiq::Test
 
     after do
       Sidekiq::Client.instance_variable_set(:@default, nil)
+      Sidekiq.instance_variable_set(:@redis, REDIS)
     end
 
     class ScheduledWorker

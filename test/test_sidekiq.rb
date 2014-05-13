@@ -37,6 +37,8 @@ class TestSidekiq < Sidekiq::Test
 
   describe 'lifecycle events' do
     it 'handles invalid input' do
+      Sidekiq.options[:lifecycle_events][:startup].clear
+
       e = assert_raises ArgumentError do
         Sidekiq.on(:startp)
       end
