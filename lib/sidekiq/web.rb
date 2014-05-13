@@ -86,8 +86,7 @@ module Sidekiq
 
       params['key'].each do |key|
         job = Sidekiq::DeadSet.new.fetch(*parse_params(key)).first
-        next unless job
-        retry_or_delete job, params
+        retry_or_delete job, params if job
       end
       redirect_with_query("#{root_path}morgue")
     end
@@ -129,8 +128,7 @@ module Sidekiq
 
       params['key'].each do |key|
         job = Sidekiq::RetrySet.new.fetch(*parse_params(key)).first
-        next unless job
-        retry_or_delete job, params
+        retry_or_delete job, params if job
       end
       redirect_with_query("#{root_path}retries")
     end
