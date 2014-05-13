@@ -87,11 +87,7 @@ module Sidekiq
       params['key'].each do |key|
         job = Sidekiq::DeadSet.new.fetch(*parse_params(key)).first
         next unless job
-        if params['retry']
-          job.retry
-        elsif params['delete']
-          job.delete
-        end
+        retry_or_delete job, params
       end
       redirect_with_query("#{root_path}morgue")
     end
@@ -109,13 +105,7 @@ module Sidekiq
     post "/morgue/:key" do
       halt 404 unless params['key']
       job = Sidekiq::DeadSet.new.fetch(*parse_params(params['key'])).first
-      if job
-        if params['retry']
-          job.retry
-        elsif params['delete']
-          job.delete
-        end
-      end
+      retry_or_delete job, params if job
       redirect_with_query("#{root_path}morgue")
     end
 
@@ -140,11 +130,7 @@ module Sidekiq
       params['key'].each do |key|
         job = Sidekiq::RetrySet.new.fetch(*parse_params(key)).first
         next unless job
-        if params['retry']
-          job.retry
-        elsif params['delete']
-          job.delete
-        end
+        retry_or_delete job, params
       end
       redirect_with_query("#{root_path}retries")
     end
@@ -162,13 +148,7 @@ module Sidekiq
     post "/retries/:key" do
       halt 404 unless params['key']
       job = Sidekiq::RetrySet.new.fetch(*parse_params(params['key'])).first
-      if job
-        if params['retry']
-          job.retry
-        elsif params['delete']
-          job.delete
-        end
-      end
+      retry_or_delete job, params if job
       redirect_with_query("#{root_path}retries")
     end
 
@@ -191,13 +171,7 @@ module Sidekiq
 
       params['key'].each do |key|
         job = Sidekiq::ScheduledSet.new.fetch(*parse_params(key)).first
-        if job
-          if params['delete']
-            job.delete
-          elsif params['add_to_queue']
-            job.add_to_queue
-          end
-        end
+        delete_or_add_queue job, params if job
       end
       redirect_with_query("#{root_path}scheduled")
     end
@@ -205,13 +179,7 @@ module Sidekiq
     post "/scheduled/:key" do
       halt 404 unless params['key']
       job = Sidekiq::ScheduledSet.new.fetch(*parse_params(params['key'])).first
-      if job
-        if params['add_to_queue']
-          job.add_to_queue
-        elsif params['delete']
-          job.delete
-        end
-      end
+      delete_or_add_queue job, params if job
       redirect_with_query("#{root_path}scheduled")
     end
 
@@ -245,5 +213,22 @@ module Sidekiq
       })
     end
 
+    private
+
+    def retry_or_delete job, params
+      if params['retry']
+        job.retry
+      elsif params['delete']
+        job.delete
+      end
+    end
+
+    def delete_or_add_queue job, params
+      if params['delete']
+        job.delete
+      elsif params['add_to_queue']
+        job.add_to_queue
+      end
+    end
   end
 end
