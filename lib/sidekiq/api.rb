@@ -514,6 +514,22 @@ module Sidekiq
     def [](key)
       @attribs[key]
     end
+
+    def quiet!
+      key = "#{identity}-signals"
+      Sidekiq.redis do |c|
+        c.multi do
+          c.lpush(key, 'USR1')
+          c.expire(key, 60)
+        end
+      end
+    end
+
+    private
+
+    def identity
+      @id ||= "#{self['hostname']}:#{self['pid']}"
+    end
   end
 
   ##

@@ -95,16 +95,6 @@ module Sidekiq
 
     private
 
-    def fire_event(event)
-      Sidekiq.options[:lifecycle_events][event].each do |block|
-        begin
-          block.call
-        rescue => ex
-          handle_exception(ex, { :event => event })
-        end
-      end
-    end
-
     def handle_signal(sig)
       Sidekiq.logger.debug "Got #{sig} signal"
       case sig

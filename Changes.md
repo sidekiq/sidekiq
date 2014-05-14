@@ -1,3 +1,20 @@
+3.1.0
+-----------
+
+- New remote signals feature: you can remotely trigger Sidekiq to quiet
+  or terminate remotely via API, without signals.  This is most useful
+  on Heroku which does not support the USR1 'quiet' signal.  Now you can
+  run a rake task like this at the start of your deploy to quiet your
+  set of Sidekiq processes.
+```ruby
+namespace :sidekiq do
+  task :quiet => :environment do
+    Sidekiq::ProcessSet.new.each(&:quiet!)
+  end
+end
+```
+
+
 3.0.2
 -----------
 
