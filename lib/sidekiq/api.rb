@@ -449,18 +449,8 @@ module Sidekiq
   # right now.  Each process send a heartbeat to Redis every 5 seconds
   # so this set should be relatively accurate, barring network partitions.
   #
-  # Yields a hash of data which looks something like this:
+  # Yields a Sidekiq::Process.
   #
-  # {
-  #   'hostname' => 'app-1.example.com',
-  #   'started_at' => <process start time>,
-  #   'pid' => 12345,
-  #   'tag' => 'myapp'
-  #   'concurrency' => 25,
-  #   'queues' => ['default', 'low'],
-  #   'busy' => 10,
-  #   'beat' => <last heartbeat>,
-  # }
 
   class ProcessSet
     include Enumerable
@@ -486,7 +476,7 @@ module Sidekiq
           # in to Redis and probably died.
           (to_prune << sorted[i]; next) if info.nil?
           hash = Sidekiq.load_json(info)
-          yield hash.merge('busy' => busy.to_i, 'beat' => at_s.to_f)
+          yield Process.new(hash.merge('busy' => busy.to_i, 'beat' => at_s.to_f))
         end
       end
 
@@ -500,6 +490,29 @@ module Sidekiq
     # 60 seconds.
     def size
       Sidekiq.redis { |conn| conn.scard('processes') }
+    end
+  end
+
+  #
+  # Sidekiq::Process has a set of attributes which look like this:
+  #
+  # {
+  #   'hostname' => 'app-1.example.com',
+  #   'started_at' => <process start time>,
+  #   'pid' => 12345,
+  #   'tag' => 'myapp'
+  #   'concurrency' => 25,
+  #   'queues' => ['default', 'low'],
+  #   'busy' => 10,
+  #   'beat' => <last heartbeat>,
+  # }
+  class Process
+    def initialize(hash)
+      @attribs = hash
+    end
+
+    def [](key)
+      @attribs[key]
     end
   end
 

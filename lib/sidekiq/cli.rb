@@ -158,7 +158,7 @@ module Sidekiq
         files_to_reopen << file unless file.closed?
       end
 
-      Process.daemon(true, true)
+      ::Process.daemon(true, true)
 
       files_to_reopen.each do |file|
         begin
@@ -323,7 +323,7 @@ module Sidekiq
       if path = options[:pidfile]
         pidfile = File.expand_path(path)
         File.open(pidfile, 'w') do |f|
-          f.puts Process.pid
+          f.puts ::Process.pid
         end
       end
     end
