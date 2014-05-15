@@ -3,6 +3,14 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+1.7.1
+-----------
+
+- Fix for paused queues being processed for a few seconds when starting
+  a new Sidekiq process.
+- Add a 5 sec delay when starting reliable fetch on Heroku to minimize
+  any duplicate job processing with another process shutting down.
+
 1.7.0
 -----------
 
