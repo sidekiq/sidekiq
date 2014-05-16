@@ -29,22 +29,39 @@ class TestWeb < Sidekiq::Test
       end
     end
 
-    it 'can display workers' do
-      Sidekiq.redis do |conn|
-        conn.incr('busy')
-        conn.sadd('processes', 'foo:1234')
-        conn.hmset('foo:1234', 'info', Sidekiq.dump_json('hostname' => 'foo', 'started_at' => Time.now.to_f), 'at', Time.now.to_f, 'busy', 4)
-        identity = 'foo:1234:workers'
-        hash = {:queue => 'critical', :payload => { 'class' => WebWorker.name, 'args' => [1,'abc'] }, :run_at => Time.now.to_i }
-        conn.hmset(identity, 1001, Sidekiq.dump_json(hash))
-      end
-      assert_equal ['1001'], Sidekiq::Workers.new.map { |pid, tid, data| tid }
+    describe 'busy' do
 
-      get '/busy'
-      assert_equal 200, last_response.status
-      assert_match(/status-active/, last_response.body)
-      assert_match(/critical/, last_response.body)
-      assert_match(/WebWorker/, last_response.body)
+      it 'can display workers' do
+        Sidekiq.redis do |conn|
+          conn.incr('busy')
+          conn.sadd('processes', 'foo:1234')
+          conn.hmset('foo:1234', 'info', Sidekiq.dump_json('hostname' => 'foo', 'started_at' => Time.now.to_f), 'at', Time.now.to_f, 'busy', 4)
+          identity = 'foo:1234:workers'
+          hash = {:queue => 'critical', :payload => { 'class' => WebWorker.name, 'args' => [1,'abc'] }, :run_at => Time.now.to_i }
+          conn.hmset(identity, 1001, Sidekiq.dump_json(hash))
+        end
+        assert_equal ['1001'], Sidekiq::Workers.new.map { |pid, tid, data| tid }
+
+        get '/busy'
+        assert_equal 200, last_response.status
+        assert_match(/status-active/, last_response.body)
+        assert_match(/critical/, last_response.body)
+        assert_match(/WebWorker/, last_response.body)
+      end
+
+      it 'can quiet a process' do
+        assert_nil Sidekiq.redis { |c| c.lpop "host:pid-signals" }
+        post '/busy', 'quiet' => '1', 'hostname' => 'host', 'pid' => 'pid'
+        assert_equal 302, last_response.status
+        assert_equal 'USR1', Sidekiq.redis { |c| c.lpop "host:pid-signals" }
+      end
+
+      it 'can stop a process' do
+        assert_nil Sidekiq.redis { |c| c.lpop "host:pid-signals" }
+        post '/busy', 'stop' => '1', 'hostname' => 'host', 'pid' => 'pid'
+        assert_equal 302, last_response.status
+        assert_equal 'TERM', Sidekiq.redis { |c| c.lpop "host:pid-signals" }
+      end
     end
 
     it 'can display queues' do

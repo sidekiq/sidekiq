@@ -516,16 +516,24 @@ module Sidekiq
     end
 
     def quiet!
+      signal('USR1')
+    end
+
+    def stop!
+      signal('TERM')
+    end
+
+    private
+
+    def signal(sig)
       key = "#{identity}-signals"
       Sidekiq.redis do |c|
         c.multi do
-          c.lpush(key, 'USR1')
+          c.lpush(key, sig)
           c.expire(key, 60)
         end
       end
     end
-
-    private
 
     def identity
       @id ||= "#{self['hostname']}:#{self['pid']}"
