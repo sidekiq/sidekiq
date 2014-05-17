@@ -356,7 +356,13 @@ class TestApi < Sidekiq::Test
       ps = Sidekiq::ProcessSet.new.to_a
       assert_equal 1, ps.size
       data = ps.first
-      assert_equal odata.merge('busy' => 10, 'beat' => time), data
+      assert_equal 10, data['busy']
+      assert_equal time, data['beat']
+      assert_equal 123, data['pid']
+      data.quiet!
+      data.stop!
+      assert_equal "TERM", Sidekiq.redis{|c| c.lpop("#{hostname}:123-signals") }
+      assert_equal "USR1", Sidekiq.redis{|c| c.lpop("#{hostname}:123-signals") }
     end
 
     it 'can enumerate workers' do

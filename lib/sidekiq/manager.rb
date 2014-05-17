@@ -149,12 +149,15 @@ module Sidekiq
 
     def ❤(key)
       begin
-        Sidekiq.redis do |conn|
+        _, _, msg = Sidekiq.redis do |conn|
           conn.multi do
             conn.hmset(key, 'busy', @busy.size, 'beat', Time.now.to_f)
             conn.expire(key, 60)
+            conn.rpop("#{key}-signals")
           end
         end
+
+        ::Process.kill(msg, $$) if msg
       rescue => e
         # ignore all redis/network issues
         logger.error("heartbeat: #{e.message}")

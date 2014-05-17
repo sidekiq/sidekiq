@@ -42,6 +42,20 @@ module Sidekiq
       erb :busy
     end
 
+    post "/busy" do
+      if params['hostname']
+        pro = Sidekiq::Process.new('hostname' => params["hostname"], 'pid' => params['pid'])
+        pro.quiet! if params[:quiet]
+        pro.stop! if params[:stop]
+      else
+        Sidekiq::ProcessSet.new.each do |pro|
+          pro.quiet! if params[:quiet]
+          pro.stop! if params[:stop]
+        end
+      end
+      redirect "#{root_path}busy"
+    end
+
     get "/queues" do
       @queues = Sidekiq::Queue.all
       erb :queues

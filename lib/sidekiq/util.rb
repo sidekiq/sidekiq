@@ -33,5 +33,16 @@ module Sidekiq
     def identity
       @@identity ||= "#{hostname}:#{$$}"
     end
+
+    def fire_event(event)
+      Sidekiq.options[:lifecycle_events][event].each do |block|
+        begin
+          block.call
+        rescue => ex
+          handle_exception(ex, { :event => event })
+        end
+      end
+    end
+
   end
 end
