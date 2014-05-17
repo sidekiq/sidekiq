@@ -2,20 +2,26 @@ require 'helper'
 require 'sidekiq/cli'
 require 'tempfile'
 
-cli = Sidekiq::CLI.instance
-def cli.die(code)
-  @code = code
-end
+class Sidekiq::CLI
+  def die(code)
+    @code = code
+  end
 
-def cli.valid?
-  !@code
+  def valid?
+    !@code
+  end
 end
 
 class TestCli < Sidekiq::Test
   describe 'CLI#parse' do
 
     before do
-      @cli = Sidekiq::CLI.instance
+      @cli = Sidekiq::CLI.new
+      @opts = Sidekiq.options.dup
+    end
+
+    after do
+      Sidekiq.options = @opts
     end
 
     it 'does not require the specified Ruby code' do

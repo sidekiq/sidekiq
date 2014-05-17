@@ -24,7 +24,7 @@ class TestClient < Sidekiq::Test
     end
 
     after do
-      Sidekiq.instance_variable_set(:@redis, REDIS)
+      Sidekiq.redis = REDIS
       Sidekiq::Client.instance_variable_set(:@default, nil)
     end
 

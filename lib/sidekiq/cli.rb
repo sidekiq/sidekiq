@@ -20,7 +20,7 @@ module Sidekiq
 
   class CLI
     include Util
-    include Singleton
+    include Singleton unless $TESTING
 
     # Used for CLI testing
     attr_accessor :code

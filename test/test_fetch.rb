@@ -11,6 +11,10 @@ class TestFetcher < Sidekiq::Test
       end
     end
 
+    after do
+      Sidekiq.redis = REDIS
+    end
+
     it 'retrieves' do
       fetch = Sidekiq::BasicFetch.new(:queues => ['basic', 'bar'])
       uow = fetch.retrieve_work

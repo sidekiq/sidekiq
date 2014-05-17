@@ -5,6 +5,7 @@ class TestManager < Sidekiq::Test
 
   describe 'manager' do
     before do
+      Sidekiq.redis = REDIS
       Sidekiq.redis {|c| c.flushdb }
     end
 

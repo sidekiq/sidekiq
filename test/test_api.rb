@@ -261,7 +261,7 @@ class TestApi < Sidekiq::Test
 
       Sidekiq.redis do |conn|
         refute conn.smembers('queues').include?('foo')
-        refute conn.exists('queues:foo')
+        refute conn.exists('queue:foo')
       end
     end
 
