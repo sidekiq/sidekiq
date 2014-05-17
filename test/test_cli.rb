@@ -12,28 +12,22 @@ def cli.valid?
 end
 
 class TestCli < Sidekiq::Test
-  describe 'with cli' do
+  describe 'CLI#parse' do
 
     before do
       @cli = Sidekiq::CLI.instance
     end
 
-    it 'blows up with an invalid require' do
-      assert_raises ArgumentError do
-        @cli.parse(['sidekiq', '-r', 'foobar'])
-      end
-    end
-
-    it 'requires the specified Ruby code' do
+    it 'does not require the specified Ruby code' do
       @cli.parse(['sidekiq', '-r', './test/fake_env.rb'])
-      assert($LOADED_FEATURES.any? { |x| x =~ /fake_env/ })
+      refute($LOADED_FEATURES.any? { |x| x =~ /fake_env/ })
       assert @cli.valid?
     end
 
-    it 'boots rails' do
+    it 'does not boot rails' do
       refute defined?(::Rails)
       @cli.parse(['sidekiq', '-r', './myapp'])
-      assert defined?(::Rails)
+      refute defined?(::Rails)
     end
 
     it 'changes concurrency' do

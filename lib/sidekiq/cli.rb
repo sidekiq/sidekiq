@@ -40,16 +40,14 @@ module Sidekiq
       daemonize
       write_pid
       load_celluloid
-      boot_system
+      print_banner
     end
 
+    # Code within this method is not tested because it alters
+    # global process state irreversibly.  PRs which improve the
+    # test coverage of Sidekiq::CLI are welcomed.
     def run
-      # Print logo and banner for development
-      if environment == 'development' && $stdout.tty?
-        puts "\e[#{31}m"
-        puts Sidekiq::BANNER
-        puts "\e[0m"
-      end
+      boot_system
 
       self_read, self_write = IO.pipe
 
@@ -94,6 +92,15 @@ module Sidekiq
     end
 
     private
+
+    def print_banner
+      # Print logo and banner for development
+      if environment == 'development' && $stdout.tty?
+        puts "\e[#{31}m"
+        puts Sidekiq::BANNER
+        puts "\e[0m"
+      end
+    end
 
     def handle_signal(sig)
       Sidekiq.logger.debug "Got #{sig} signal"

@@ -4,6 +4,7 @@ class TestApi < Sidekiq::Test
 
   describe "stats" do
     before do
+      Sidekiq.redis = REDIS
       Sidekiq.redis {|c| c.flushdb }
     end
 
@@ -164,6 +165,7 @@ class TestApi < Sidekiq::Test
     include Sidekiq::Util
 
     before do
+      Sidekiq.redis = REDIS
       Sidekiq.redis {|c| c.flushdb }
     end
 
