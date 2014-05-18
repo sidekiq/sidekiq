@@ -1,18 +1,25 @@
 <script type="text/javascript" src="<%= root_path %>javascripts/dashboard.js"></script>
-
-<h3 class="clearfix">
-  <%= t('Dashboard') %>
-  <span class="beacon">
-    <span class="ring"></span>
-    <span class="dot"></span>
-  </span>
-  <span class="interval-slider">
+<div class= "dashboard clearfix">
+  <h3 >
+    <%= t('Dashboard') %>
+    <span class="beacon">
+      <span class="ring"></span>
+      <span class="dot"></span>
+    </span>
+  </h3>
+  <div class="interval-slider">
     <span class="interval-slider-label"><%= t('PollingInterval') %>:</span>
     <span class="current-interval">2 sec</span>
     <br/>
-    <input type="range" min="2000" max="20000" step="10" value="2000"/>
-  </span>
-</h3>
+    <input type="range" min="2000" max="20000" step="1000" value="2000"/>
+    <ul class= "ticks">
+      <li class="first">2</li>
+      <li class="second">8</li>
+      <li class="third">14</li>
+      <li class="fourth">20</li> 
+    </ul>
+  </div>
+</div>
 
 <h5></h5>
 <div id="realtime"></div>

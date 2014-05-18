@@ -370,15 +370,17 @@ img.smallogo {
   }
 }
 
-span.interval-slider {
-  float: right;
-  line-height: 1.3;
-  font-size: 0.5em;
+/* Dashboard
+********************************** */
+div.dashboard h3 {
+  float: left;
 }
 
-span.interval-slider-label {
-  font-size: 12px;
-  margin-right: 5px;
+div.interval-slider {
+  float: right;
+  line-height: 1.3;
+  font-size: 0.95em;
+  padding: 15px 0 0;
 }
 
 span.current-interval {
@@ -388,9 +390,49 @@ span.current-interval {
   color: #B1003E;
 }
 
-span.interval-slider input {
+div.interval-slider input {
   width: 160px;
 }
+
+/* Polling Slider Ticks
+********************************** */
+ul.ticks {
+  overflow: hidden;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 160px;
+  position: relative;
+  top: -6px;
+}
+
+ul.ticks li {
+  font-size: 10px;
+  float: left;
+  width: 40px;
+  padding: 5px 0 0;
+  background: url(../images/tick-mark.png) no-repeat 0 0;
+}
+
+ul.ticks li.first {
+  background-position: 18% 0;
+  padding-left: 0.5em;
+}
+ul.ticks li.second {
+  background-position: 38% 0;
+  padding-left: 1.266em;
+}
+ul.ticks li.third {
+  background-position: 62% 0;
+  padding-left: 1.8em;
+}
+ul.ticks li.fourth {
+  background-position: 82% 0;
+  padding-left: 2.66em;
+}
+
+/* Beacon 
+********************************** */
 
 .beacon {
   position: relative;

@@ -18,7 +18,7 @@ this.seriesPathFactory()).attr("class","area"),this.stroke&&b.append("svg:path")
 var poller;
 
 var realtimeGraph = function(updatePath) {
-  var timeInterval = parseInt(sessionStorage.timeInterval || '2000');
+  var timeInterval = parseInt(localStorage.timeInterval || '2000');
 
   var graph = new Rickshaw.Graph( {
     element: document.getElementById("realtime"),
@@ -165,25 +165,29 @@ var renderGraphs = function() {
   historyGraph();
 };
 
-var setSliderLabel = function() {
-  var label = Math.round(parseFloat(sessionStorage.timeInterval) / 1000) + ' sec';
+var setSliderLabel = function(val) {
+  var label = Math.round(parseFloat(val) / 1000) + ' sec';
   $('span.current-interval').html(label);
 }
 
 $(function(){
   renderGraphs();
 
-  if (typeof sessionStorage.timeInterval !== 'undefined'){
-    $('span.interval-slider input').val(sessionStorage.timeInterval);
-    setSliderLabel();
+  if (typeof localStorage.timeInterval !== 'undefined'){
+    $('div.interval-slider input').val(localStorage.timeInterval);
+    setSliderLabel(localStorage.timeInterval);
   }
 
-  $(document).on('change', 'span.interval-slider input', function(){
+  $(document).on('change', 'div.interval-slider input', function(){
     clearInterval(poller);
-    sessionStorage.timeInterval = $(this).val();
-    setSliderLabel();
+    localStorage.timeInterval = $(this).val();
+    setSliderLabel($(this).val());
     resetGraphs();
     renderGraphs();
+  });
+
+  $(document).on('mousemove', 'div.interval-slider input', function(){
+    setSliderLabel($(this).val());
   });
 
 });
