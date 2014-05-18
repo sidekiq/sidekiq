@@ -369,6 +369,29 @@ img.smallogo {
     margin: 5px 5px 5px 10px;
   }
 }
+
+span.interval-slider {
+  float: right;
+  line-height: 1.3;
+  font-size: 0.5em;
+}
+
+span.interval-slider-label {
+  font-size: 12px;
+  margin-right: 5px;
+}
+
+span.current-interval {
+  min-width: 40px;
+  display: inline-block;
+  padding: 0 0 5px 0;
+  color: #B1003E;
+}
+
+span.interval-slider input {
+  width: 160px;
+}
+
 .beacon {
   position: relative;
   height: 20px;

@@ -71,3 +71,4 @@ en: # <---- change this to your locale code
   Quiet: Quiet
   StopAll: Stop All
   QuietAll: Quiet All
+  PollingInterval: Polling interval
