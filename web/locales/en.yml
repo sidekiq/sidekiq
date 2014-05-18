@@ -67,3 +67,7 @@ en: # <---- change this to your locale code
   Threads: Threads
   Jobs: Jobs
   Paused: Paused
+  Stop: Stop
+  Quiet: Quiet
+  StopAll: Stop All
+  QuietAll: Quiet All
