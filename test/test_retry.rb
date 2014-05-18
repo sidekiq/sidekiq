@@ -13,6 +13,10 @@ class TestRetry < Sidekiq::Test
       def @redis.multi; yield self; end
     end
 
+    after do
+      Sidekiq.redis = REDIS
+    end
+
     let(:worker) do
       Class.new do
         include ::Sidekiq::Worker
