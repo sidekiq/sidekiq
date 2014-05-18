@@ -131,7 +131,7 @@ class TestManager < Sidekiq::Test
           @processor.verify
         end
 
-        it 'indicates status in proctitle' do
+        it 'indicates stopping status in proctitle' do
           assert_equal "sidekiq #{Sidekiq::VERSION} myapp [0 of 3 busy] stopping", $0
         end
 
