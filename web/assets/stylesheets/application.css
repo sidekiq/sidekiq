@@ -370,15 +370,17 @@ img.smallogo {
   }
 }
 
-span.interval-slider {
-  float: right;
-  line-height: 1.3;
-  font-size: 0.5em;
+/* Dashboard
+********************************** */
+div.dashboard h3 {
+  float: left;
 }
 
-span.interval-slider-label {
-  font-size: 12px;
-  margin-right: 5px;
+div.interval-slider {
+  float: right;
+  line-height: 1.3;
+  font-size: 0.95em;
+  padding: 15px 0 0;
 }
 
 span.current-interval {
@@ -388,9 +390,12 @@ span.current-interval {
   color: #B1003E;
 }
 
-span.interval-slider input {
+div.interval-slider input {
   width: 160px;
 }
+
+/* Beacon 
+********************************** */
 
 .beacon {
   position: relative;
