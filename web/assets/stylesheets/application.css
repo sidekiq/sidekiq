@@ -394,43 +394,6 @@ div.interval-slider input {
   width: 160px;
 }
 
-/* Polling Slider Ticks
-********************************** */
-ul.ticks {
-  overflow: hidden;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  width: 160px;
-  position: relative;
-  top: -6px;
-}
-
-ul.ticks li {
-  font-size: 10px;
-  float: left;
-  width: 40px;
-  padding: 5px 0 0;
-  background: url(../images/tick-mark.png) no-repeat 0 0;
-}
-
-ul.ticks li.first {
-  background-position: 18% 0;
-  padding-left: 0.5em;
-}
-ul.ticks li.second {
-  background-position: 38% 0;
-  padding-left: 1.266em;
-}
-ul.ticks li.third {
-  background-position: 62% 0;
-  padding-left: 1.8em;
-}
-ul.ticks li.fourth {
-  background-position: 82% 0;
-  padding-left: 2.66em;
-}
-
 /* Beacon 
 ********************************** */
 
