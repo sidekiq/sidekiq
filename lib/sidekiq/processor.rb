@@ -119,9 +119,6 @@ module Sidekiq
       end
     end
 
-    # Singleton classes are not clonable.
-    SINGLETON_CLASSES = [ NilClass, TrueClass, FalseClass, Symbol, Fixnum, Float, Bignum ].freeze
-
     # Deep clone the arguments passed to the worker so that if
     # the message fails, what is pushed back onto Redis hasn't
     # been mutated by the worker.
