@@ -7,13 +7,13 @@
     <tr>
       <th><%= t('Queue') %></th>
       <td>
-        <a href="<%= root_path %>queues/<%= job['queue'] %>"><%= job['queue'] %></a>
+        <a href="<%= root_path %>queues/<%= job.queue %>"><%= job.queue %></a>
       </td>
     </tr>
     <tr>
-      <th><%= t('Class') %></th>
+      <th><%= t('Job') %></th>
       <td>
-        <code><%= job['class'] %></code>
+        <code><%= job.display_class %></code>
       </td>
     </tr>
     <tr>
@@ -21,7 +21,7 @@
       <td>
         <code class="code-wrap">
           <!-- We don't want to truncate any job arguments when viewing a single job's status page -->
-          <div class="args-extended"><%= display_args(job['args'], nil) %></div>
+          <div class="args-extended"><%= display_args(job.display_args, nil) %></div>
         </code>
       </td>
     </tr>

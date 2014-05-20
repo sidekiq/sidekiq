@@ -189,7 +189,6 @@ class TestApi < Sidekiq::Test
         assert_equal 24, job.jid.size
         assert_equal [1, 'mike'], job.args
         assert_equal Time.new(2012, 12, 26), job.enqueued_at
-
       end
 
       assert q.latency > 10_000_000
@@ -198,10 +197,23 @@ class TestApi < Sidekiq::Test
       assert_equal 0, q.size
     end
 
+    it 'unwraps delayed jobs' do
+      ApiWorker.delay.foo(1,2,3)
+      q = Sidekiq::Queue.new
+      x = q.first
+      assert_equal "TestApi::ApiWorker.foo", x.display_class
+      assert_equal [1,2,3], x.display_args
+    end
+
     it 'can delete jobs' do
       q = Sidekiq::Queue.new
       ApiWorker.perform_async(1, 'mike')
       assert_equal 1, q.size
+
+      x = q.first
+      assert_equal "TestApi::ApiWorker", x.display_class
+      assert_equal [1,'mike'], x.display_args
+
       assert_equal [true], q.map(&:delete)
       assert_equal 0, q.size
     end

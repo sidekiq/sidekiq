@@ -53,21 +53,22 @@
     <th><%= t('TID') %></th>
     <th><%= t('JID') %></th>
     <th><%= t('Queue') %></th>
-    <th><%= t('Class') %></th>
+    <th><%= t('Job') %></th>
     <th><%= t('Arguments') %></th>
     <th><%= t('Started') %></th>
   </thead>
   <% workers.each_with_index do |(process, thread, msg), index| %>
+    <% job = Sidekiq::Job.new(msg['payload']) -%>
     <tr>
       <td><%= process %></td>
       <td><%= thread %></td>
-      <td><%= msg['payload']['jid'] %></td>
+      <td><%= job.jid %></td>
       <td>
         <a href="<%= root_path %>queues/<%= msg['queue'] %>"><%= msg['queue'] %></a>
       </td>
-      <td><%= msg['payload']['class'] %></td>
+      <td><%= job.display_class %></td>
       <td>
-        <div class="args"><%= display_args(msg['payload']['args']) %></div>
+        <div class="args"><%= display_args(job.display_args) %></div>
       </td>
       <td><%= relative_time(Time.at(msg['run_at'])) %></td>
     </tr>

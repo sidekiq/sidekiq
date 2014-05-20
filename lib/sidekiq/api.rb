@@ -189,16 +189,43 @@ module Sidekiq
   # removed from the queue via Job#delete.
   #
   class Job
+    KNOWN_WRAPPERS = [/\ASidekiq::Extensions::Delayed/, "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"]
     attr_reader :item
 
     def initialize(item, queue_name=nil)
       @value = item
-      @item = Sidekiq.load_json(item)
+      @item = item.is_a?(Hash) ? item : Sidekiq.load_json(item)
       @queue = queue_name || @item['queue']
     end
 
     def klass
       @item['class']
+    end
+
+    def display_class
+      # Unwrap known wrappers so they show up in a human-friendly manner in the Web UI
+      @klass ||= case klass
+                 when /\ASidekiq::Extensions::Delayed/
+                   (target, method, _) = YAML.load(args[0])
+                   "#{target}.#{method}"
+                 when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
+                   args[0]
+                 else
+                   klass
+                 end
+    end
+
+    def display_args
+      # Unwrap known wrappers so they show up in a human-friendly manner in the Web UI
+      @args ||= case klass
+                when /\ASidekiq::Extensions::Delayed/
+                  (_, _, arg) = YAML.load(args[0])
+                  arg
+                when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
+                  args[1..-1]
+                else
+                  args
+                end
     end
 
     def args

@@ -14,6 +14,8 @@ namespace :sidekiq do
 end
 ```
 - The Web UI can use the API to quiet or stop all processes on the Busy tab.
+- The Web UI understands and hides the `Sidekiq::Extensions::Delay*`
+  classes, instead showing `Class.method` as the Job. [#1718]
 
 
 3.0.2
