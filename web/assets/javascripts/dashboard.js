@@ -93,7 +93,7 @@ var realtimeGraph = function(updatePath) {
         var failed = data.sidekiq.failed - Sidekiq.failed;
       }
 
-      graph.series.addData({ failed: failed, processed: processed });
+      graph.series.addData({ Failed: failed, Processed: processed });
       graph.render();
 
       Sidekiq.processed = data.sidekiq.processed;
