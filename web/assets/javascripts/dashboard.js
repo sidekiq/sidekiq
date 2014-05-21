@@ -172,7 +172,6 @@ var setSliderLabel = function(val) {
 
 $(function(){
   renderGraphs();
-  clearInterval(poller);
 
   if (typeof localStorage.timeInterval !== 'undefined'){
     $('div.interval-slider input').val(localStorage.timeInterval);
