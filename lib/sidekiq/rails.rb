@@ -12,9 +12,9 @@ module Sidekiq
   # Removes the generic aliases which MAY clash with names of already
   #  created methods by other applications. The methods `sidekiq_delay`,
   #  `sidekiq_delay_for` and `sidekiq_delay_until` can be used instead.
-  def self.namespace_delay_methods
-    [Extensions::ActiveRecord, 
-     Extensions::ActionMailer, 
+  def self.remove_delay!
+    [Extensions::ActiveRecord,
+     Extensions::ActionMailer,
      Extensions::Klass].each do |mod|
       mod.module_eval do
         remove_method :delay if respond_to?(:delay)
