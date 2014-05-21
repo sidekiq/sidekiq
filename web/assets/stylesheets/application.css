@@ -394,31 +394,43 @@ div.interval-slider input {
   width: 160px;
 }
 
-#realtime-legend {
+#realtime-legend,
+#history-legend {
   width: 490px;
   text-align: left;
   margin-top: 5px;
   float: right;
 }
-#realtime-legend .line {
+#realtime-legend .line,
+#history-legend .line {
   display: inline-block;
   margin: 0 0 0 20px;
 }
-#realtime-legend .swatch {
+#realtime-legend .swatch,
+#history-legend .swatch {
   display: inline-block;
   width: 10px;
   height: 10px;
   margin: 0 8px 0 0;
 }
-#realtime-legend .tag {
+#realtime-legend .tag,
+#history-legend .tag {
   display: inline-block;
 }
 
 @media (max-width: 790px) {
-  #realtime-legend {
+  #realtime-legend,
+  #history-legend {
     float: none;
     width: 100%;
     margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 500px) {
+  #realtime-legend,
+  #history-legend {
+    text-align: center;
   }
 }
 /* Beacon
