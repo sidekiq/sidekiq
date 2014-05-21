@@ -400,12 +400,18 @@ div.interval-slider input {
   margin-top: 5px;
   float: right;
 }
-#realtime-legend .tag {
-  display: inline-block;
-}
 #realtime-legend .line {
   display: inline-block;
   margin: 0 0 0 20px;
+}
+#realtime-legend .swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: 0 8px 0 0;
+}
+#realtime-legend .tag {
+  display: inline-block;
 }
 
 @media (max-width: 790px) {
