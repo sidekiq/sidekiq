@@ -404,7 +404,7 @@ div.interval-slider input {
 #realtime-legend .timestamp,
 #history-legend .timestamp {
   display: inline-block;
-  width: 250px;
+  width: 220px;
   text-align: right;
 }
 #realtime-legend .line,
