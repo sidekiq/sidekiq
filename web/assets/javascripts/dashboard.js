@@ -211,6 +211,7 @@ var debounce = function(fn, timeout)
 };
 
 window.onresize = debounce(function() {
+    clearInterval(poller);
     resetGraphs();
     renderGraphs();
 }, 125);
