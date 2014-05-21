@@ -401,6 +401,12 @@ div.interval-slider input {
   margin-top: 5px;
   float: right;
 }
+#realtime-legend .timestamp,
+#history-legend .timestamp {
+  display: inline-block;
+  width: 250px;
+  text-align: right;
+}
 #realtime-legend .line,
 #history-legend .line {
   display: inline-block;
