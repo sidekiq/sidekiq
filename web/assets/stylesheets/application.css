@@ -394,6 +394,27 @@ div.interval-slider input {
   width: 160px;
 }
 
+#realtime-legend {
+  width: 440px;
+  text-align: left;
+  margin-top: 5px;
+  float: right;
+}
+#realtime-legend .tag {
+  display: inline-block;
+}
+#realtime-legend .line {
+  display: inline-block;
+  margin: 0 0 0 20px;
+}
+
+@media (max-width: 790px) {
+  #realtime-legend {
+    float: none;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+}
 /* Beacon
 ********************************** */
 
