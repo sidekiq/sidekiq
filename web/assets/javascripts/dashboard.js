@@ -22,14 +22,16 @@ var poller;
 var realtimeGraph = function(updatePath) {
   var timeInterval = parseInt(localStorage.timeInterval || '2000');
 
+  var graphElement = document.getElementById("realtime");
+
   var graph = new Rickshaw.Graph( {
-    element: document.getElementById("realtime"),
+    element: graphElement,
     width: responsiveWidth(),
     height: 200,
     renderer: 'line',
     interpolation: 'linear',
 
-    series: new Rickshaw.Series.FixedDuration([{ name: 'Failed', color: '#B1003E' }, { name: 'Processed', color: '#006f68' }], undefined, {
+    series: new Rickshaw.Series.FixedDuration([{ name: graphElement.dataset.failedLabel, color: '#B1003E' }, { name: graphElement.dataset.processedLabel, color: '#006f68' }], undefined, {
         timeInterval: timeInterval,
         maxDataPoints: 100,
     })
@@ -93,7 +95,11 @@ var realtimeGraph = function(updatePath) {
         var failed = data.sidekiq.failed - Sidekiq.failed;
       }
 
-      graph.series.addData({ failed: failed, processed: processed });
+      dataPoint = {};
+      dataPoint[graphElement.dataset.failedLabel] = failed;
+      dataPoint[graphElement.dataset.processedLabel] = processed;
+
+      graph.series.addData(dataPoint);
       graph.render();
 
       Sidekiq.processed = data.sidekiq.processed;
@@ -111,8 +117,9 @@ var historyGraph = function() {
   processed = createSeries($("#history").data("processed"))
   failed = createSeries($("#history").data("failed"))
 
+  var graphElement = document.getElementById("history");
   var graph = new Rickshaw.Graph( {
-    element: document.getElementById("history"),
+    element: graphElement,
     width: responsiveWidth(),
     height: 200,
     renderer: 'line',
@@ -121,11 +128,11 @@ var historyGraph = function() {
       {
         color: "#B1003E",
         data: failed,
-        name: 'Failed'
+        name: graphElement.dataset.failedLabel
       }, {
         color: "#006f68",
         data: processed,
-        name: 'Processed'
+        name: graphElement.dataset.processedLabel
       }
     ]
   } );
