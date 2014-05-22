@@ -48,7 +48,13 @@ var realtimeGraph = function(updatePath) {
   var legend = document.querySelector('#realtime-legend');
   var Hover = Rickshaw.Class.create(Rickshaw.Graph.HoverDetail, {
     render: function(args) {
-      legend.innerHTML = args.formattedXValue;
+
+      legend.innerHTML = "";
+
+      var timestamp = document.createElement('div');
+      timestamp.className = 'timestamp';
+      timestamp.innerHTML = args.formattedXValue;
+      legend.appendChild(timestamp);
 
       args.detail.sort(function(a, b) { return a.order - b.order }).forEach( function(d) {
         var line = document.createElement('div');
@@ -149,7 +155,13 @@ var historyGraph = function() {
   var legend = document.querySelector('#history-legend');
   var Hover = Rickshaw.Class.create(Rickshaw.Graph.HoverDetail, {
     render: function(args) {
-      legend.innerHTML = args.formattedXValue;
+
+      legend.innerHTML = "";
+
+      var timestamp = document.createElement('div');
+      timestamp.className = 'timestamp';
+      timestamp.innerHTML = args.formattedXValue;
+      legend.appendChild(timestamp);
 
       args.detail.sort(function(a, b) { return a.order - b.order }).forEach( function(d) {
         var line = document.createElement('div');
