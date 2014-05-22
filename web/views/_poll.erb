@@ -1,6 +1,6 @@
 <% if params[:poll] %>
   <script>
-    setInterval("window.location.reload(true)", 2000);
+    setInterval("window.location.reload(true)", parseInt(localStorage.timeInterval) || 2000);
   </script>
 <% end %>
 <% unless current_path == '' %>
