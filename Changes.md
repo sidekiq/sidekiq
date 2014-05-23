@@ -1,3 +1,10 @@
+3.1.1
+-----------
+
+- Sidekiq::CLI now runs `Bundler.require(:default, environment)` to boot all gems
+  before loading any app code.
+
+
 3.1.0
 -----------
 
