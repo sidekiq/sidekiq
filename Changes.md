@@ -23,6 +23,7 @@ end
 - The Web UI can use the API to quiet or stop all processes via the Busy page.
 - The Web UI understands and hides the `Sidekiq::Extensions::Delay*`
   classes, instead showing `Class.method` as the Job. [#1718]
+- Polish the Dashboard graphs a bit, update Rickshaw [brandonhilker, #1725]
 - The poll interval is now configurable in the Web UI [madebydna, #1713]
 - Delay extensions can be removed so they don't conflict with
   DelayedJob: put `Sidekiq.remove_delay!` in your initializer. [devaroop, #1674]
