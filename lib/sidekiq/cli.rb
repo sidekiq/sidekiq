@@ -40,6 +40,8 @@ module Sidekiq
       daemonize
       write_pid
       load_celluloid
+
+      Bundler.require(:default, environment)
       print_banner
     end
 
