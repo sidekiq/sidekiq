@@ -58,6 +58,7 @@ module Sidekiq
 
     get "/queues" do
       @queues = Sidekiq::Queue.all
+      @queues.sort! {|a,b| a.name <=> b.name}
       erb :queues
     end
 
