@@ -1,3 +1,9 @@
+3.1.2
+-----------
+
+- Suitably chastised, @mperham reverts the Bundler change.
+
+
 3.1.1
 -----------
 
