@@ -118,7 +118,7 @@ module Sidekiq
     include Enumerable
 
     def self.all
-      Sidekiq.redis {|c| c.smembers('queues') }.map {|q| Sidekiq::Queue.new(q) }
+      Sidekiq.redis {|c| c.smembers('queues') }.sort.map {|q| Sidekiq::Queue.new(q) }
     end
 
     attr_reader :name
