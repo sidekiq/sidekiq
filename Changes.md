@@ -3,6 +3,7 @@
 
 - Sidekiq::CLI now runs `Bundler.require(:default, environment)` to boot all gems
   before loading any app code.
+- Sort queues by name in Web UI [#1734]
 
 
 3.1.0
