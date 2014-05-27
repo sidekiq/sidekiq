@@ -21,7 +21,7 @@
     <tr>
       <td><%= msg.display_class %></td>
       <td>
-        <% a = msg.display_args.inspect -%>
+        <% a = msg.display_args.inspect %>
         <% if a.size > 100 %>
           <%= h(msg.display_args.inspect[0..100]) + "... " %>
           <button data-toggle="collapse" data-target="#worker_<%= index %>" class="btn btn-default btn-xs"><%= t('ShowAll') %></button>
