@@ -116,8 +116,10 @@ module Sidekiq
       end
 
       Sidekiq.redis do |conn|
-        jobs_to_requeue.each do |queue, jobs|
-          conn.rpush("queue:#{queue}", jobs)
+        conn.pipelined do
+          jobs_to_requeue.each do |queue, jobs|
+            conn.rpush("queue:#{queue}", jobs)
+          end
         end
       end
       Sidekiq.logger.info("Pushed #{inprogress.size} messages back to Redis")
