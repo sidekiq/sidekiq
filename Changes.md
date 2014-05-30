@@ -1,3 +1,9 @@
+3.1.3
+-----------
+
+- Use ENV['DYNO'] on Heroku for hostname display, rather than an ugly UUID. [#1742]
+
+
 3.1.2
 -----------
 

@@ -27,7 +27,7 @@ module Sidekiq
     end
 
     def hostname
-      Socket.gethostname
+      ENV['DYNO'] || Socket.gethostname
     end
 
     def identity
