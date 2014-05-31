@@ -282,7 +282,7 @@ class TestWeb < Sidekiq::Test
       Sidekiq.redis do |conn|
         pro = 'foo:1234'
         conn.sadd('processes', pro)
-        conn.hmset(pro, 'info', Sidekiq.dump_json('started_at' => Time.now.to_f), 'busy', 1, 'beat', Time.now.to_f)
+        conn.hmset(pro, 'info', Sidekiq.dump_json('started_at' => Time.now.to_f, 'labels' => ['frumduz']), 'busy', 1, 'beat', Time.now.to_f)
         identity = "#{pro}:workers"
         hash = {:queue => 'critical', :payload => { 'class' => "FailWorker", 'args' => ["<a>hello</a>"] }, :run_at => Time.now.to_i }
         conn.hmset(identity, 100001, Sidekiq.dump_json(hash))
@@ -292,6 +292,7 @@ class TestWeb < Sidekiq::Test
       get '/busy'
       assert_equal 200, last_response.status
       assert_match(/FailWorker/, last_response.body)
+      assert_match(/frumduz/, last_response.body)
       assert last_response.body.include?( "&lt;a&gt;hello&lt;&#x2F;a&gt;" )
       assert !last_response.body.include?( "<a>hello</a>" )
 

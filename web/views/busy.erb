@@ -25,7 +25,7 @@
     <tr>
       <td>
         <%= "#{process['hostname']}:#{process['pid']}" %>
-        <% process['labels'].each do |label| %>
+        <% Array(process['labels']).each do |label| %>
           <span class="label label-info"><%= label %></span>
         <% end %>
       </td>
