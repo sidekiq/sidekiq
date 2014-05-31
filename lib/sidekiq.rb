@@ -13,6 +13,7 @@ module Sidekiq
 
   DEFAULTS = {
     :queues => [],
+    :labels => [],
     :concurrency => 25,
     :require => '.',
     :environment => nil,

@@ -23,7 +23,12 @@
   </thead>
   <% Sidekiq::ProcessSet.new.each_with_index do |process, index| %>
     <tr>
-      <td><%= "#{process['hostname']}:#{process['pid']}" %></td>
+      <td>
+        <%= "#{process['hostname']}:#{process['pid']}" %>
+        <% process['labels'].each do |label| %>
+          <span class="label label-info"><%= label %></span>
+        <% end %>
+      </td>
       <td><%= relative_time(Time.at(process['started_at'])) %></td>
       <td><%= process['concurrency'] %></td>
       <td><%= process['busy'] %></td>

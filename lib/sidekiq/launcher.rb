@@ -69,6 +69,7 @@ module Sidekiq
         'tag' => @options[:tag] || '',
         'concurrency' => @options[:concurrency],
         'queues' => @options[:queues].uniq,
+        'labels' => Sidekiq.options[:labels],
       }
       Sidekiq.redis do |conn|
         conn.multi do
