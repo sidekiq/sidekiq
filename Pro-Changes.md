@@ -3,6 +3,15 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+HEAD
+-----------
+
+- **DEPRECATION** Use `Batch#on(:complete)` instead of `Batch#notify`.
+  The specific Campfire, HipChat, email and other notification schemes
+  will be removed in 2.0.0.
+- Remove batch from UI when successful. [#1745]
+- Convert batch callbacks to be asynchronous jobs for error handling [#1744]
+
 1.7.1
 -----------
 
