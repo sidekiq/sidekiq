@@ -2,6 +2,7 @@
 -----------
 
 - Use ENV['DYNO'] on Heroku for hostname display, rather than an ugly UUID. [#1742]
+- Show per-process labels on the Busy page, for feature tagging [#1673]
 
 
 3.1.2
