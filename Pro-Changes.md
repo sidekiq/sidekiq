@@ -3,6 +3,11 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+1.7.3
+-----------
+
+- Batch callbacks should use the same queue as the associated jobs.
+
 1.7.2
 -----------
 
