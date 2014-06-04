@@ -136,7 +136,7 @@ module Sidekiq
       proctitle = ['sidekiq', Sidekiq::VERSION]
       proctitle << data['tag'] unless data['tag'].empty?
       proctitle << "[#{@busy.size} of #{data['concurrency']} busy]"
-      proctitle << "(#{data['queues'].join(',')})" unless data['queues'].empty?
+      proctitle << "(#{data['queues'].join(',')})" unless data['queues'].nil?
       proctitle << 'stopping' if stopped?
       $0 = proctitle.join(' ')
 
