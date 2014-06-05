@@ -84,6 +84,7 @@ module Sidekiq
     def stop_heartbeat
       Sidekiq.redis do |conn|
         conn.srem('processes', identity)
+        conn.del("#{identity}:workers")
       end
     end
   end
