@@ -206,13 +206,8 @@ module Sidekiq
       # Unwrap known wrappers so they show up in a human-friendly manner in the Web UI
       @klass ||= case klass
                  when /\ASidekiq::Extensions::Delayed/
-                   begin
-                     (target, method, _) = YAML.load(args[0])
+                   safe_load(args[0], klass) do |target, method, _|
                      "#{target}.#{method}"
-                   rescue ::ArgumentError => ex
-                     Sidekiq.logger.error ex.message
-                     Sidekiq.logger.error ex.backtrace.join("\n") unless ex.backtrace.nil?
-                     klass
                    end
                  when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
                    args[0]
@@ -225,13 +220,8 @@ module Sidekiq
       # Unwrap known wrappers so they show up in a human-friendly manner in the Web UI
       @args ||= case klass
                 when /\ASidekiq::Extensions::Delayed/
-                  begin
-                    (_, _, arg) = YAML.load(args[0])
+                  safe_load(args[0], args) do |_, _, arg|
                     arg
-                  rescue ::ArgumentError => ex
-                    Sidekiq.logger.error ex.message
-                    Sidekiq.logger.error ex.backtrace.join("\n") unless ex.backtrace.nil?
-                    args
                   end
                 when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
                   args[1..-1]
@@ -271,6 +261,19 @@ module Sidekiq
 
     def [](name)
       @item.__send__(:[], name)
+    end
+
+    private
+
+    def safe_load(content, default)
+      begin
+        yield *YAML.load(content)
+      rescue ::ArgumentError => ex
+        # #1761 in dev mode, it's possible to have jobs enqueued which haven't been loaded into
+        # memory yet so the YAML can't be loaded.
+        Sidekiq.logger.warn "Unable to load YAML: #{ex.message}" unless Sidekiq.options[:environment] == 'development'
+        default
+      end
     end
   end
 
