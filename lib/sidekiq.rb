@@ -118,9 +118,7 @@ module Sidekiq
     Sidekiq::Logging.logger = log
   end
 
-  # The default poll interval is 15 seconds.  This should generally be set to
-  # (Sidekiq process count * 5).  So if you have a dozen Sidekiq processes, set
-  # poll_interval to 60.
+  # See sidekiq/scheduled.rb for an in-depth explanation of this value
   def self.poll_interval=(interval)
     self.options[:poll_interval] = interval
   end
