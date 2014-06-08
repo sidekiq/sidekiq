@@ -71,7 +71,7 @@ class TestRedisConnection < Sidekiq::Test
   describe ".determine_redis_provider" do
 
     before do
-      @old_env = ENV.to_h
+      @old_env = ENV.to_hash
     end
 
     after do
