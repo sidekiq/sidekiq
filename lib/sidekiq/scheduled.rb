@@ -5,7 +5,7 @@ require 'sidekiq/actor'
 module Sidekiq
   module Scheduled
 
-    INITIAL_WAIT = 15
+    INITIAL_WAIT = 10
 
     ##
     # The Poller checks Redis every N seconds for messages in the retry or scheduled
@@ -79,7 +79,11 @@ module Sidekiq
 
       def initial_wait
         begin
+          # Have all processes sleep between 10-15 seconds.  10 seconds
+          # to give time for the heartbeat to register and 5 random seconds
+          # to ensure they don't all hit Redis at the same time.
           sleep(INITIAL_WAIT)
+          sleep(5 * rand)
         rescue Celluloid::Task::TerminatedError
           # Hit Ctrl-C when Sidekiq is finished booting and we have a chance
           # to get here.
