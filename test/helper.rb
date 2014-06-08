@@ -31,9 +31,9 @@ Sidekiq.logger.level = Logger::ERROR
 Sidekiq::Test = Minitest::Test
 
 require 'sidekiq/redis_connection'
-redis_url = ENV['REDIS_URL'] || 'redis://localhost/15'
-REDIS = Sidekiq::RedisConnection.create(:url => redis_url, :namespace => 'testy')
+REDIS_URL = ENV['REDIS_URL'] || 'redis://localhost/15'
+REDIS = Sidekiq::RedisConnection.create(:url => REDIS_URL, :namespace => 'testy')
 
 Sidekiq.configure_client do |config|
-  config.redis = { :url => redis_url, :namespace => 'testy' }
+  config.redis = { :url => REDIS_URL, :namespace => 'testy' }
 end
