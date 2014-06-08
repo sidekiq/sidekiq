@@ -4,7 +4,7 @@ require 'sidekiq/fetch'
 class TestFetcher < Sidekiq::Test
   describe 'fetcher' do
     before do
-      Sidekiq.redis = { :namespace => 'fuzzy' }
+      Sidekiq.redis = { :url => REDIS_URL, :namespace => 'fuzzy' }
       Sidekiq.redis do |conn|
         conn.flushdb
         conn.rpush('queue:basic', 'msg')
