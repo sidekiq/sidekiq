@@ -2,7 +2,7 @@
 -----------
 
 - Happy π release!
-- Self-tuning Scheduler polling, we use heartbeat info to better tune poll\_inteval [#1630]
+- Self-tuning Scheduler polling, we use heartbeat info to better tune poll\_interval [#1630]
 - Remove all table column width rules, hopefully get better column formatting [#1747]
 - Handle rare case where YAML can't be decoded in dev mode [#1761]
 - Fix lingering jobs in Busy page on Heroku [#1764]
