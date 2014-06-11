@@ -85,7 +85,7 @@ module Sidekiq
         Sidekiq.redis do |conn|
           conn.multi do
             conn.hmset("#{identity}:workers", thread_identity, hash)
-            conn.expire("#{identity}:workers", 60*60)
+            conn.expire("#{identity}:workers", 60*60*4)
           end
         end
       end
