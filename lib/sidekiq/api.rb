@@ -301,32 +301,56 @@ module Sidekiq
     end
 
     def add_to_queue
-      Sidekiq.redis do |conn|
-        results = conn.multi do
-          conn.zrangebyscore('schedule', score, score)
-          conn.zremrangebyscore('schedule', score, score)
-        end.first
-        results.map do |message|
-          msg = Sidekiq.load_json(message)
-          Sidekiq::Client.push(msg)
-        end
+      remove_job do |message|
+        msg = Sidekiq.load_json(message)
+        Sidekiq::Client.push(msg)
       end
     end
 
     def retry
       raise "Retry not available on jobs which have not failed" unless item["failed_at"]
+      remove_job do |message|
+        msg = Sidekiq.load_json(message)
+        msg['retry_count'] = msg['retry_count'] - 1
+        Sidekiq::Client.push(msg)
+      end
+    end
+
+    private
+
+    def remove_job
       Sidekiq.redis do |conn|
         results = conn.multi do
           conn.zrangebyscore(parent.name, score, score)
           conn.zremrangebyscore(parent.name, score, score)
         end.first
-        results.map do |message|
-          msg = Sidekiq.load_json(message)
-          msg['retry_count'] = msg['retry_count'] - 1
-          Sidekiq::Client.push(msg)
+
+        if results.size == 1
+          yield results.first
+        else
+          # multiple jobs with the same score
+          # find the one with the right JID and push it
+          hash = results.group_by do |message|
+            if message.index(jid)
+              msg = Sidekiq.load_json(message)
+              msg['jid'] == jid
+            else
+              false
+            end
+          end
+          message = hash[true].first
+          yield message
+
+          # push the rest back onto the sorted set
+          conn.multi do
+            hash[false].each do |message|
+              conn.zadd(parent.name, score.to_f.to_s, message)
+            end
+          end
         end
       end
     end
+
   end
 
   class SortedSet

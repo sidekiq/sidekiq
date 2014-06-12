@@ -219,6 +219,7 @@ class TestApi < Sidekiq::Test
     end
 
     it "can move scheduled job to queue" do
+      remain_id = ApiWorker.perform_in(100, 1, 'jason')
       job_id = ApiWorker.perform_in(100, 1, 'jason')
       job = Sidekiq::ScheduledSet.new.find_job(job_id)
       q = Sidekiq::Queue.new
@@ -226,8 +227,24 @@ class TestApi < Sidekiq::Test
       queued_job = q.find_job(job_id)
       refute_nil queued_job
       assert_equal queued_job.jid, job_id
+      assert_nil Sidekiq::ScheduledSet.new.find_job(job_id)
+      refute_nil Sidekiq::ScheduledSet.new.find_job(remain_id)
+    end
+
+    it "handles multiple scheduled jobs when moving to queue" do
+      jids = Sidekiq::Client.push_bulk('class' => ApiWorker,
+                                       'args' => [[1, 'jason'], [2, 'jason']],
+                                       'at' => Time.now.to_f)
+      assert_equal 2, jids.size
+      (remain_id, job_id) = jids
       job = Sidekiq::ScheduledSet.new.find_job(job_id)
-      assert_nil job
+      q = Sidekiq::Queue.new
+      job.add_to_queue
+      queued_job = q.find_job(job_id)
+      refute_nil queued_job
+      assert_equal queued_job.jid, job_id
+      assert_nil Sidekiq::ScheduledSet.new.find_job(job_id)
+      refute_nil Sidekiq::ScheduledSet.new.find_job(remain_id)
     end
 
     it 'can find job by id in sorted sets' do
