@@ -3,6 +3,12 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+1.7.4
+-----------
+
+- Awesome ANSI art startup banner!
+
+
 1.7.3
 -----------
 
