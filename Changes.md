@@ -2,6 +2,7 @@
 -----------
 
 - Update how Sidekiq eager loads Rails application code [#1791, jonleighton]
+- Change logging timestamp to show milliseconds.
 
 3.1.4
 -----------
