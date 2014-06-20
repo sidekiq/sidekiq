@@ -55,10 +55,14 @@ module Sidekiq
 
       def log_info(options)
         # Don't log Redis AUTH password
+        redacted = "REDACTED"
         scrubbed_options = options.dup
         if scrubbed_options[:url] && (uri = URI.parse(scrubbed_options[:url])) && uri.password
-          uri.password = "REDACTED"
+          uri.password = redacted
           scrubbed_options[:url] = uri.to_s
+        end
+        if scrubbed_options[:password]
+          scrubbed_options[:password] = redacted
         end
         if Sidekiq.server?
           Sidekiq.logger.info("Booting Sidekiq #{Sidekiq::VERSION} with redis options #{scrubbed_options}")
