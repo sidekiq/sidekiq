@@ -1,3 +1,8 @@
+3.2.0
+-----------
+
+- Update how Sidekiq eager loads Rails application code [#1791, jonleighton]
+
 3.1.4
 -----------
 

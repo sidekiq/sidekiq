@@ -221,10 +221,10 @@ module Sidekiq
       raise ArgumentError, "#{options[:require]} does not exist" unless File.exist?(options[:require])
 
       if File.directory?(options[:require])
-        require 'rails'
+        require File.expand_path("#{options[:require]}/config/application.rb")
+        Rails.application.config.eager_load = true
         require 'sidekiq/rails'
         require File.expand_path("#{options[:require]}/config/environment.rb")
-        ::Rails.application.eager_load!
         options[:tag] ||= default_tag
       else
         require options[:require]
