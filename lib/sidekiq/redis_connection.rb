@@ -67,7 +67,7 @@ module Sidekiq
         if Sidekiq.server?
           Sidekiq.logger.info("Booting Sidekiq #{Sidekiq::VERSION} with redis options #{scrubbed_options}")
         else
-          Sidekiq.logger.info("#{Sidekiq::NAME} client with redis options #{scrubbed_options}")
+          Sidekiq.logger.debug("#{Sidekiq::NAME} client with redis options #{scrubbed_options}")
         end
       end
 
