@@ -19,6 +19,7 @@ module Sidekiq
     :environment => nil,
     :timeout => 8,
     :error_handlers => [],
+    :silent_startup_logger => false,
     :lifecycle_events => {
       :startup => [],
       :quiet => [],
