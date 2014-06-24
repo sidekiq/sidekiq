@@ -223,8 +223,8 @@ module Sidekiq
       if File.directory?(options[:require])
         # Painful contortions, see 1791 for discussion
         require File.expand_path("#{options[:require]}/config/application.rb")
-        Rails::Application.initializer "sidekiq.eager_load" do
-          Rails.application.config.eager_load = true
+        ::Rails::Application.initializer "sidekiq.eager_load" do
+          ::Rails.application.config.eager_load = true
         end
         require 'sidekiq/rails'
         require File.expand_path("#{options[:require]}/config/environment.rb")
