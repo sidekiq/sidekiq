@@ -66,7 +66,7 @@ var realtimeGraph = function(updatePath) {
 
         var label = document.createElement('div');
         label.className = 'tag';
-        label.innerHTML = d.name + ": " + Math.floor(d.formattedYValue);
+        label.innerHTML = d.name + ": " + Math.floor(d.formattedYValue).numberWithDelimiter();
 
         line.appendChild(swatch);
         line.appendChild(label);
@@ -173,7 +173,7 @@ var historyGraph = function() {
 
         var label = document.createElement('div');
         label.className = 'tag';
-        label.innerHTML = d.name + ": " + Math.floor(d.formattedYValue);
+        label.innerHTML = d.name + ": " + Math.floor(d.formattedYValue).numberWithDelimiter();
 
         line.appendChild(swatch);
         line.appendChild(label);
