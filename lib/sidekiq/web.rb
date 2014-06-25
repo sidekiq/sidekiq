@@ -44,9 +44,9 @@ module Sidekiq
 
     post "/busy" do
       if params['hostname']
-        pro = Sidekiq::Process.new('hostname' => params["hostname"], 'pid' => params['pid'])
-        pro.quiet! if params[:quiet]
-        pro.stop! if params[:stop]
+        p = Sidekiq::Process.new('hostname' => params["hostname"], 'pid' => params['pid'])
+        p.quiet! if params[:quiet]
+        p.stop! if params[:stop]
       else
         Sidekiq::ProcessSet.new.each do |pro|
           pro.quiet! if params[:quiet]
