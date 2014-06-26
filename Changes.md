@@ -3,6 +3,7 @@
 
 - Update how Sidekiq eager loads Rails application code [#1791, jonleighton]
 - Change logging timestamp to show milliseconds.
+- Reverse sorting of Dead tab so newer jobs are listed first [#1802]
 
 3.1.4
 -----------

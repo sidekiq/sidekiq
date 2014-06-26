@@ -83,7 +83,7 @@ module Sidekiq
 
     get '/morgue' do
       @count = (params[:count] || 25).to_i
-      (@current_page, @total_size, @dead) = page("dead", params[:page], @count)
+      (@current_page, @total_size, @dead) = page("dead", params[:page], @count, :reverse => true)
       @dead = @dead.map {|msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
       erb :morgue
     end
