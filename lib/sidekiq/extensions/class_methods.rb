@@ -36,4 +36,4 @@ module Sidekiq
   end
 end
 
-Module.__send__(:include, Sidekiq::Extensions::Klass)
+Module.__send__(:include, Sidekiq::Extensions::Klass) unless defined?(::Rails)
