@@ -100,6 +100,21 @@ class TestExtensions < Sidekiq::Test
     def queue_size(name='default')
       Sidekiq::Queue.new(name).size
     end
+
+    it 'allows removing of the #delay methods' do
+      Sidekiq.remove_delay!
+      assert_equal 0, queue_size
+      assert_raises NoMethodError do
+        SomeModule.delay.doit(Date.today)
+      end
+
+      Sidekiq.instance_eval { remove_instance_variable :@delay_removed }
+      # Reload modified modules
+      load 'sidekiq/extensions/action_mailer.rb'
+      load 'sidekiq/extensions/active_record.rb'
+      load 'sidekiq/extensions/generic_proxy.rb'
+      load 'sidekiq/extensions/class_methods.rb'
+    end
   end
 
 end
