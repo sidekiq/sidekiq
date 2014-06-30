@@ -29,7 +29,7 @@
   <body id="pro" class='pro'>
 
     <div class="row">
-      <div class="col-md-9">
+      <div class="col-xs-12 col-md-9">
         <div class="jumbotron centered" id="top">
           <h1 class='title reset'>
             <span class='image'><img src="../img/logopro.png" class='logo' /></span><span class='text'>Sidekiq <strong>Pro</strong></span>
@@ -37,7 +37,8 @@
           <p>Black belt functionality for Sidekiq.</p>
         </div>
       </div>
-      <div class="col-md-2 highlighted well" id="call_to_action">
+
+      <div class="col-xs-8 col-xs-offset-2 col-md-offset-0 col-md-2 highlighted well" id="call_to_action">
         <div class="payment-widget">
           <div class="item-price-box">
             <span class="item-price-currency">$</span><span class="item-price">750.00</span>/year
@@ -53,7 +54,7 @@
         <div class="row">
 
           <section id='features' class='col-md-12'>
-              <div class='row names hidden-phone hidden-xs' id="features_bullets">
+              <div class='row names hidden-sm hidden-xs' id="features_bullets">
                 <div class='entry col-md-2 col-md-offset-1 selected'><h4>Reliability</h4> <div class="arrow up"></div></div>
                 <div class='entry col-md-2'><h4>Batches</h4> <div class="arrow up"></div></div>
                 <div class='entry col-md-3'><h4>Notifications</h4> <div class="arrow up"></div></div>
@@ -264,7 +265,7 @@
                 <h3>Contact</h3>
               </div>
               <p>Questions? Concerns?</p>
-              Email: <a class='btn btn-primary btn-large' href="mailto:proinfo&#64;sidekiq.org?subject=Sidekiq%20Pro%20inquiry">proinfo&#64;sidekiq.org</a>
+              Email: <a class='btn btn-primary btn-lg' href="mailto:proinfo&#64;sidekiq.org?subject=Sidekiq%20Pro%20inquiry">proinfo&#64;sidekiq.org</a>
             </section>
           </div>
 
@@ -277,60 +278,66 @@
                 <blockquote>
                   <p>"Sidekiq is a critical part of our Travis CI infrastructure and works perfectly!"</p>
                 </blockquote>
-                <p><strong>Mathias Meyer</strong>, @roidrage<br/>Infrastructure Head Honcho</p>
+                <p class="text-right"><strong>Mathias Meyer</strong>, @roidrage<br/>Infrastructure Head Honcho</p>
               </li>
               <li class='quoted well'>
                 <a href="http://codeclimate.com"><img alt="" src="../img/codeclimate.png" width="205"/></a>
                 <blockquote>
                   <p>"Sidekiq let us stop worrying about queues and focus on our app.  Half a billion jobs later and it's holding up great."</p>
                 </blockquote>
-                <p><strong>Bryan Helmkamp</strong>, @brynary<br/>Co-Founder</p>
+                <p class="text-right"><strong>Bryan Helmkamp</strong>, @brynary<br/>Co-Founder</p>
               </li>
               <li class='quoted well'>
                 <img alt="" src="../img/site5.png" width="205"/>
                 <blockquote>
                   <p>"Replacing Resque with Sidekiq reduced our job processing hardware cost by a factor of six."</p>
                 </blockquote>
-                <p><strong>Justin Mazzi</strong>, @jmazzi<br/>Chief of Engineering</p>
+                <p class="text-right"><strong>Justin Mazzi</strong>, @jmazzi<br/>Chief of Engineering</p>
               </li>
-              <li class='col-md-4'>
-                <span class='thumbnail'> <img class="img-responsive" alt="digitalocean" src="../img/digitalocean.png"/> </span>
-                <span class='thumbnail'> <img class="img-responsive" alt="groupon" src="../img/groupon.png"/> </span>
-                <span class='thumbnail'> <img class="img-responsive" alt="groupon" src="../img/livingsocial.png"/> </span>
-                <span class='thumbnail'> <img class="img-responsive" alt="heroku" src="../img/heroku.png"/> </span>
-                <span class='thumbnail'> <img alt="oracle" src="../img/oracle.png"/> </span>
-                <span class='thumbnail'> <img alt="discourse" src="../img/discourse.png"/> </span>
-                <span class='thumbnail'> <img alt="watsi" src="../img/watsi.png"/> </span>
-                <span class='thumbnail'> <img alt="gogobot" src="../img/gogobot.png"/> </span>
-                <span class='thumbnail'> <img alt="customer-io" src="../img/customer-io.png"/> </span>
-                <span class='thumbnail'> <img alt="pushio" src="../img/pushio.png"/> </span>
-                <span class='thumbnail'> <img alt="preplay" src="../img/preplay.png"/> </span>
-                <span class='thumbnail'> <img alt="bitium" src="../img/bitium.png"/> </span>
-                <span class='thumbnail'> <img alt="ttm" src="../img/ttm.png"/> </span>
-                <span class='thumbnail'> <img alt="tabeso" src="../img/tabeso-logo.png"/> </span>
-              </li>
-              <li class='col-md-4'>
-                <p>
-                  ...and over <strong>200</strong> other companies!
-                </p>
-              </li>
-
             </ul>
+              <div class="row text-center">
+                <div class="col-md-12">
+                    <span class='thumbnail'> <img class="img-responsive" alt="digitalocean" src="../img/digitalocean.png"/> </span>
+                    <span class='thumbnail'> <img class="img-responsive" alt="groupon" src="../img/groupon.png"/> </span>
+                    <span class='thumbnail'> <img class="img-responsive" alt="groupon" src="../img/livingsocial.png"/> </span>
+                    <span class='thumbnail'> <img class="img-responsive" alt="heroku" src="../img/heroku.png"/> </span>
+                    <span class='thumbnail'> <img class="img-responsive" alt="oracle" src="../img/oracle.png"/> </span>
+                    <span class='thumbnail'> <img class="img-responsive" alt="discourse" src="../img/discourse.png"/> </span>
+                    <span class='thumbnail'> <img class="img-responsive" alt="watsi" src="../img/watsi.png"/> </span>
+                    <span class='thumbnail'> <img class="img-responsive" alt="gogobot" src="../img/gogobot.png"/> </span>
+                    <span class='thumbnail'> <img class="img-responsive" alt="customer-io" src="../img/customer-io.png"/> </span>
+                    <span class='thumbnail'> <img class="img-responsive" alt="pushio" src="../img/pushio.png"/> </span>
+                    <span class='thumbnail'> <img class="img-responsive" alt="preplay" src="../img/preplay.png"/> </span>
+                    <span class='thumbnail'> <img class="img-responsive" alt="bitium" src="../img/bitium.png"/> </span>
+                    <span class='thumbnail'> <img class="img-responsive" alt="ttm" src="../img/ttm.png"/> </span>
+                    <span class='thumbnail'> <img class="img-responsive" alt="tabeso" src="../img/tabeso-logo.png"/> </span>
+                </div>
+
+                <div class="col-md-12">
+                    <p>
+                      ...and over <strong>200</strong> other companies!
+                    </p>
+                </div>
+              </div>
           </section>
         </div>
 
         <footer>
-          <div class="container">
-            <div class='row'>
-              <span class='edits'>
-                Modified <a href='http://twitter.github.com/bootstrap/'>Twitter Bootstrap</a>
-                design by <a href='http://hull.io'>hull.io</a>
-              </span>
-                &copy; 2014 Mike Perham, Thank you for supporting Open Source software!
-                <a href="http://www.twitter.com/mperham">@mperham</a> /
-                <a href="http://www.mikeperham.com">mikeperham.com</a>
+            <div class="container">
+                <div class='row'>
+                    <div class="col-xs-12 col-md-4 text-center'">
+                      <span class='edits'>
+                        Modified <a href='http://twitter.github.com/bootstrap/'>Twitter Bootstrap</a>
+                        design by <a href='http://hull.io'>hull.io</a>
+                      </span>
+                    </div>
+                    <div class="col-xs-12 col-md-8 text-center">
+                        &copy; 2014 Mike Perham, Thank you for supporting Open Source software!
+                        <a href="http://www.twitter.com/mperham">@mperham</a> /
+                        <a href="http://www.mikeperham.com">mikeperham.com</a>
+                    </div>
+                </div>
             </div>
-          </div>
         </footer>
 
       </div>

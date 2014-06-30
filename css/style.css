@@ -582,9 +582,10 @@ img.smallogo {
 #call_to_action {
   position: relative;
 }
-@media (min-width: 979px) {
+@media (min-width: 992px) {
   /* line 116, ../scss/style.scss */
   #call_to_action #pro_button {
+    margin-top: 40px;
     -webkit-transition: -webkit-transform 0.2s ease-out;
     -moz-transition: -webkit-transform 0.2s ease-out;
     -o-transition: -webkit-transform 0.2s ease-out;
@@ -625,10 +626,9 @@ img.smallogo {
 }
 /* line 141, ../scss/style.scss */
 .pro #call_to_action {
-  margin-top: 40px;
   padding-top: 13px;
 }
-@media (max-width: 767px) {
+@media (max-width: 769px) {
   /* line 141, ../scss/style.scss */
   .pro #call_to_action {
     -webkit-border-radius: 0;
@@ -636,8 +636,7 @@ img.smallogo {
     -ms-border-radius: 0;
     -o-border-radius: 0;
     border-radius: 0;
-    padding-top:0;
-    height: 100px;
+
   }
 }
 /* line 148, ../scss/style.scss */
@@ -822,4 +821,8 @@ img.smallogo {
   margin-top: 20px;
   display: block;
   text-align: center;
+}
+
+span.tt {
+    font-family:'Lucida Console', monospace"
 }
