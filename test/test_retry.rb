@@ -132,6 +132,8 @@ class TestRetry < Sidekiq::Test
     end
 
     it 'shuts down cleanly when shutdown causes exception' do
+      skip('Not supported in Ruby < 2.1.0') if RUBY_VERSION < '2.1.0'
+
       @redis.expect :zadd, 1, ['retry', String, String]
       msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }
       handler = Sidekiq::Middleware::Server::RetryJobs.new
@@ -150,6 +152,8 @@ class TestRetry < Sidekiq::Test
     end
 
     it 'shuts down cleanly when shutdown causes chained exceptions' do
+      skip('Not supported in Ruby < 2.1.0') if RUBY_VERSION < '2.1.0'
+
       @redis.expect :zadd, 1, ['retry', String, String]
       msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }
       handler = Sidekiq::Middleware::Server::RetryJobs.new
