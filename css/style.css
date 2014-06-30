@@ -671,6 +671,8 @@ img.smallogo {
   border: 0;
   box-shadow: none;
   display: inline;
+  margin: 10px;
+  background-color: transparent;
 }
 /* line 168, ../scss/style.scss */
 .pro .payment-widget {
