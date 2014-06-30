@@ -828,7 +828,7 @@ img.smallogo {
   text-align: center;
 }
 
-i.fa {
+li.list-group-item > i {
   margin-right: 0.25em;
 }
 
