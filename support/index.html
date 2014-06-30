@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta charset="utf-8">
+    <title>Sidekiq Support</title>
+    <meta name="description" content="Simple, efficient message or background job processing for Ruby">
+    <meta property="og:site_name" content="Sidekiq"/>
+    <meta property="og:type" content="company"/>
+    <meta property="og:title" content="Simple, efficient message processing for Ruby"/>
+    <meta property="og:url" content="http://sidekiq.org"/>
+    <meta property="og:image" content="http://sidekiq.org/img/logo.png"/>
+    <meta property="og:description"
+          content="Sidekiq is a simple, efficient system for message or background job processing"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="canonical" href="http://sidekiq.org/"/>
+    <link rel="shortcut icon" type="image/png" href="/favicon.png">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" media="all">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.css" media="all">
+    <link rel="stylesheet" href="../css/style.css" media="all">
+    <script src='../js/modernizr.js'></script>
+    <script>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                    m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-2569989-6', {'sampleRate': 100});
+        ga('send', 'pageview');
+    </script>
+</head>
+<body data-target=".navbar">
+
+<header>
+
+</header>
+
+<section class="container">
+<div class="jumbotron centered" id="top">
+    <h1 class='title reset'>
+        <span class='image'><img src="../img/logo.png" class='logo'/></span><span class='text'>Sidekiq</span>
+    </h1>
+
+    <p>Simple, efficient background processing for Ruby.</p>
+</div>
+
+<div class="row">
+
+    <hr>
+    <div class="col-xs-12">
+        <h1>Sidekiq support</h1>
+    </div>
+</div>
+
+<hr>
+<div class="row">
+    <div class="col-xs-12 col-md-6">
+        <div class="row">
+            <div class="col-xs-12">
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt
+                    ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                    laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
+                    voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+                    cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                </p>
+
+                <div class="media">
+                    <div class="media-body">
+                        <h4 class="media-heading">Lorem</h4>
+                        <img src="http://lorempixel.com/400/400/cats" alt="Egyptian god">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-md-6">
+        <div class="media">
+            <div class="media-body">
+                <h4 class="media-heading">Lorem</h4>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                incididunt
+                ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                ullamco
+                laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit
+                in
+                voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+                cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+            </div>
+        </div>
+        <div class="media">
+            <div class="media-body">
+                <h4 class="media-heading">Lorem</h4>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                incididunt
+                ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                ullamco
+                laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit
+                in
+                voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+                cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+            </div>
+        </div>
+        <div class="media">
+            <div class="media-body">
+                <h4 class="media-heading">Lorem</h4>
+                <img src="http://lorempixel.com/400/200/cats" alt="Egyptian god">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<hr>
+<div class="row price-boxes">
+
+    <div class="col-sm-12 col-md-4">
+        <div class="panel panel-danger">
+            <div class="panel-heading">
+                <h3 class="text-center">Happy Hour</h3>
+            </div>
+            <div class="panel-body text-center">
+                <p class="lead" style="font-size:40px"><strong>FREE</strong></p>
+            </div>
+            <ul class="list-group list-group-flush text-center">
+                <li class="list-group-item"><i class="fa fa-clock-o text-danger"></i>one hour per week</li>
+                <li class="list-group-item"><i class="fa fa-group text-danger"></i>Free and open to the public
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div class="col-sm-12 col-md-4">
+        <div class="panel panel-info">
+            <div class="panel-heading"><h3 class="text-center">Application Tuneup</h3></div>
+
+            <ul class="list-group list-group-flush text-center">
+                <li class="list-group-item"><i class="fa fa-clock-o text-info"></i>12-24h</li>
+                <li class="list-group-item"><i class="fa fa-eye text-info"></i>I examine your application code
+                    in
+                    detail
+                </li>
+                <li class="list-group-item"><i class="fa fa-graduation-cap  text-info"></i>Offer advice on
+                    Sidekiq
+                    usage and potential problems.
+                </li>
+                <li class="list-group-item"><i class="fa fa-search text-info"></i>Look for thread-safety issues
+                    in
+                    your code.
+                </li>
+                <li class="list-group-item"><i class="fa fa-tachometer  text-info"></i>For a full day I'll also
+                    examine the gems used by your application.
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div class="col-sm-12 col-md-4">
+        <div class="panel panel-success">
+            <div class="panel-heading"><h3 class="text-center">Custom Development or Support</h3></div>
+            <div class="panel-body text-center">
+                <p class="lead" style="font-size:40px"><strong>Estimated and billed in days</strong></p>
+            </div>
+            <ul class="list-group list-group-flush text-center">
+                <li class="list-group-item"><i class="fa fa-sliders text-success"></i>Tweak Sidekiq to meet
+                    specific
+                    requirements
+                </li>
+                <li class="list-group-item"><i class="fa fa-envelope text-success"></i>Email to discuss details.
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+<hr>
+<div class="row faqs">
+    <div class="col-xs-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>FAQ</h4>
+            </div>
+            <div class="panel-body">
+
+
+                <div class="media">
+                    <div class="media-body">
+                        <h4 class="media-heading">Question</h4>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                        incididunt
+                        ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                        ullamco
+                        laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit
+                        in
+                        voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+                        cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                    </div>
+                </div>
+
+
+                <div class="media">
+                    <div class="media-body">
+                        <h4 class="media-heading">Question</h4>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                        incididunt
+                        ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                        ullamco
+                        laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit
+                        in
+                        voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+                        cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                    </div>
+                </div>
+
+
+                <div class="media">
+
+                    <div class="media-body">
+                        <h4 class="media-heading">Question</h4>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                        incididunt
+                        ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                        ullamco
+                        laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit
+                        in
+                        voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+                        cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                    </div>
+                </div>
+
+
+                <div class="media">
+                    <div class="media-body">
+                        <h4 class="media-heading">Question</h4>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                        incididunt
+                        ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                        ullamco
+                        laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit
+                        in
+                        voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+                        cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+</section>
+<hr>
+<footer>
+    <div class="container">
+        <div class='row'>
+            <div class="col-xs-12 col-md-6 text-center">
+                <span class='edits'>
+                  Modified <a href='http://twitter.github.com/bootstrap/'>Twitter Bootstrap</a>
+                </span>
+            </div>
+            <div class="col-xs-12 col-md-6 text-center">
+                &copy; 2014 Mike Perham,
+                <a href="http://www.twitter.com/mperham">@mperham</a> /
+                <a href="http://www.mikeperham.com">mikeperham.com</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
