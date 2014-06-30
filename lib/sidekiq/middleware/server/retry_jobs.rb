@@ -64,10 +64,8 @@ module Sidekiq
           # ignore, will be pushed back onto queue during hard_shutdown
           raise
         rescue Exception => e
-          if exception_caused_by_shutdown?(e)
-            # ignore, will be pushed back onto queue during hard_shutdown.
-            raise Sidekiq::Shutdown
-          end
+          # ignore, will be pushed back onto queue during hard_shutdown
+          raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
 
           raise e unless msg['retry']
           max_retry_attempts = retry_attempts_from(msg['retry'], @max_retries)
@@ -170,11 +168,10 @@ module Sidekiq
 
         def exception_caused_by_shutdown?(e)
           # In Ruby 2.1.0 only, check if exception is a result of shutdown.
-          defined?(e.cause) &&
-          (
-            e.cause.class == Sidekiq::Shutdown ||
+          return false unless defined?(e.cause)
+
+          e.cause.instance_of?(Sidekiq::Shutdown) ||
             exception_caused_by_shutdown?(e.cause)
-          )
         end
 
       end
