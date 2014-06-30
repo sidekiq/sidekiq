@@ -117,6 +117,64 @@ class TestRetry < Sidekiq::Test
       @redis.verify
     end
 
+    it 'shuts down without retrying work-in-progress, which will resume' do
+      @redis.expect :zadd, 1, ['retry', String, String]
+      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      assert_raises Sidekiq::Shutdown do
+        handler.call(worker, msg, 'default') do
+          raise Sidekiq::Shutdown
+        end
+      end
+      assert_raises(MockExpectationError, "zadd should not be called") do
+        @redis.verify
+      end
+    end
+
+    it 'shuts down cleanly when shutdown causes exception' do
+      skip('Not supported in Ruby < 2.1.0') if RUBY_VERSION < '2.1.0'
+
+      @redis.expect :zadd, 1, ['retry', String, String]
+      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      assert_raises Sidekiq::Shutdown do
+        handler.call(worker, msg, 'default') do
+          begin
+            raise Sidekiq::Shutdown
+          rescue Interrupt
+            raise "kerblammo!"
+          end
+        end
+      end
+      assert_raises(MockExpectationError, "zadd should not be called") do
+        @redis.verify
+      end
+    end
+
+    it 'shuts down cleanly when shutdown causes chained exceptions' do
+      skip('Not supported in Ruby < 2.1.0') if RUBY_VERSION < '2.1.0'
+
+      @redis.expect :zadd, 1, ['retry', String, String]
+      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      assert_raises Sidekiq::Shutdown do
+        handler.call(worker, msg, 'default') do
+          begin
+            raise Sidekiq::Shutdown
+          rescue Interrupt
+            begin
+              raise "kerblammo!"
+            rescue
+              raise "kablooie!"
+            end
+          end
+        end
+      end
+      assert_raises(MockExpectationError, "zadd should not be called") do
+        @redis.verify
+      end
+    end
+
     it 'allows a retry queue' do
       @redis.expect :zadd, 1, ['retry', String, String]
       msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true, 'retry_queue' => 'retry' }
