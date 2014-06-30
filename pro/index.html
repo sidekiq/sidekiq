@@ -26,21 +26,21 @@
       ga('send', 'pageview');
     </script>
   </head>
-  <body id="pro" class='pro' data-target=".navbar">
+  <body id="pro" class='pro'>
 
     <div class="row">
-      <div class="span9">
-        <div class="hero-unit centered" id="top">
+      <div class="col-md-9">
+        <div class="jumbotron centered" id="top">
           <h1 class='title reset'>
             <span class='image'><img src="../img/logopro.png" class='logo' /></span><span class='text'>Sidekiq <strong>Pro</strong></span>
           </h1>
           <p>Black belt functionality for Sidekiq.</p>
         </div>
       </div>
-      <div class="span3 highlighted well" id="call_to_action">
+      <div class="col-md-2 highlighted well" id="call_to_action">
         <div class="payment-widget">
           <div class="item-price-box">
-            <span class="item-price-currency">$</span><span class="item-price">750.00</span>/yr
+            <span class="item-price-currency">$</span><span class="item-price">750.00</span>/year
           </div>
           <a class="payment-button" id="buy_now" href="https://spacebox.io/s/YSeEjhi5ga">Buy Now</a>
         </div>
@@ -52,24 +52,24 @@
 
         <div class="row">
 
-          <section id='features' class='span12'>
+          <section id='features' class='col-md-12'>
               <div class='row names hidden-phone' id="features_bullets">
-                <div class='entry span2 offset1 selected'><h4>Reliability</h4> <div class="arrow up"></div></div>
-                <div class='entry span2'><h4>Batches</h4> <div class="arrow up"></div></div>
-                <div class='entry span3'><h4>Notifications</h4> <div class="arrow up"></div></div>
-                <div class='entry span2'><h4>Support</h4> <div class="arrow up"></div></div>
+                <div class='entry col-md-2 col-md-offset-1 selected'><h4>Reliability</h4> <div class="arrow up"></div></div>
+                <div class='entry col-md-2'><h4>Batches</h4> <div class="arrow up"></div></div>
+                <div class='entry col-md-3'><h4>Notifications</h4> <div class="arrow up"></div></div>
+                <div class='entry col-md-2'><h4>Support</h4> <div class="arrow up"></div></div>
               </div>
-              <div class="span10 offset1">
+              <div class="col-md-10 col-md-offset-1">
                 <div class="row highlighted well">
                   <div class="slider">
                     <div class='content'>
                       <h2 class='visible-phone'>Reliability</h2>
                       <h3>100% reliable message processing.</h3>
                       <div class="row-fluid">
-                        <div class="span8">
-                          <img alt="" src="../examples/reliability.png"/>
+                        <div class="col-md-8">
+                          <img class="img-responsive" alt="" src="../examples/reliability.png"/>
                         </div>
-                        <div class="span4">
+                        <div class="col-md-4">
                           <p><b>
                             Cloud environments are noisy and unreliable.  Seeing timeouts?
                             Wild swings in latency or performance?  Ruby VM crashes or
@@ -99,10 +99,10 @@
                       <h2 class='visible-phone'>Batches</h2>
                       <h3>Group jobs into a set and follow their progress.</h3>
                       <div class="row-fluid">
-                        <div class="span8">
-                          <img alt="" src="../examples/batch.png" />
+                        <div class="col-md-8">
+                          <img class="img-responsive" alt="" src="../examples/batch.png" />
                         </div>
-                        <div class="span4">
+                        <div class="col-md-4">
                           <p>Create a set of jobs which can be tracked as a group,
                             programmatically or within the Sidekiq Web interface.
                             You can see success and failure counts along with error
@@ -124,10 +124,10 @@
                       <h2 class='visible-phone'>Notifications</h2>
                       <h3>Receive notification via several different mediums when a batch completes.</h3>
                       <div class="row-fluid">
-                        <div class="span8">
-                          <img alt=""  src="../examples/webhook.png"/>
+                        <div class="col-md-8">
+                          <img class="img-responsive" alt=""  src="../examples/webhook.png"/>
                         </div>
-                        <div class="span4">
+                        <div class="col-md-4">
                           <p>
                             <strong>Are you a human?</strong>  Receive an email,
                             Campfire or HipChat notification when a batch has completed
@@ -150,10 +150,10 @@
                       <h2 class='visible-phone'>Support</h2>
                       <h3>Priority support from the author of Sidekiq</h3>
                       <div class="row-fluid">
-                        <div class="span8">
-                          <img alt="" src="../examples/support.png"/>
+                        <div class="col-md-8">
+                          <img class="img-responsive" alt="" src="../examples/support.png"/>
                         </div>
-                        <div class="span4">
+                        <div class="col-md-4">
                           <p>
                             Background processing is a major component of your application.
                             Guarantee direct access to a Sidekiq expert.
@@ -170,7 +170,7 @@
         </div>
 
         <div class="row">
-          <div class="span7">
+          <div class="col-md-7">
             <section id="main">
 
               <div class="page-header">
@@ -268,7 +268,7 @@
             </section>
           </div>
 
-          <section id='customers' class='span4 offset1'>
+          <section id='customers' class='col-md-4 col-md-offset-1'>
 
             <h3>Happy Pro customers.</h3>
             <ul class='thumbnails'>
@@ -293,11 +293,11 @@
                 </blockquote>
                 <p><strong>Justin Mazzi</strong>, @jmazzi<br/>Chief of Engineering</p>
               </li>
-              <li class='span4'>
-                <span class='thumbnail'> <img alt="digitalocean" src="../img/digitalocean.png"/> </span>
-                <span class='thumbnail'> <img alt="groupon" src="../img/groupon.png"/> </span>
-                <span class='thumbnail'> <img alt="groupon" src="../img/livingsocial.png"/> </span>
-                <span class='thumbnail'> <img alt="heroku" src="../img/heroku.png"/> </span>
+              <li class='col-md-4'>
+                <span class='thumbnail'> <img class="img-responsive" alt="digitalocean" src="../img/digitalocean.png"/> </span>
+                <span class='thumbnail'> <img class="img-responsive" alt="groupon" src="../img/groupon.png"/> </span>
+                <span class='thumbnail'> <img class="img-responsive" alt="groupon" src="../img/livingsocial.png"/> </span>
+                <span class='thumbnail'> <img class="img-responsive" alt="heroku" src="../img/heroku.png"/> </span>
                 <span class='thumbnail'> <img alt="oracle" src="../img/oracle.png"/> </span>
                 <span class='thumbnail'> <img alt="discourse" src="../img/discourse.png"/> </span>
                 <span class='thumbnail'> <img alt="watsi" src="../img/watsi.png"/> </span>
@@ -309,7 +309,7 @@
                 <span class='thumbnail'> <img alt="ttm" src="../img/ttm.png"/> </span>
                 <span class='thumbnail'> <img alt="tabeso" src="../img/tabeso-logo.png"/> </span>
               </li>
-              <li class='span4'>
+              <li class='col-md-4'>
                 <p>
                   ...and over <strong>200</strong> other companies!
                 </p>

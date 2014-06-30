@@ -62,7 +62,7 @@ h1, h2, h3, h4, h5, h6, strong {
 }
 
 /* line 43, ../scss/partials/_base.scss */
-.brand, .hero-unit .title {
+.brand, .jumbotron .title {
   font-family: Armata;
   font-weight: 400;
 }
@@ -81,23 +81,23 @@ h1, h2, h3, h4, h5, h6, strong {
 }
 
 /* line 57, ../scss/partials/_base.scss */
-.hero-unit {
+.jumbotron {
   background: none;
 }
 @media (max-width: 500px) {
   /* line 57, ../scss/partials/_base.scss */
-  .hero-unit {
+  .jumbotron {
     padding: 20px;
   }
 }
 /* line 62, ../scss/partials/_base.scss */
-.hero-unit .title {
+.jumbotron .title {
   color: #b1003e;
   text-shadow: none;
 }
 @media (min-width: 500px) {
   /* line 62, ../scss/partials/_base.scss */
-  .hero-unit .title {
+  .jumbotron .title {
     font-size: 96px;
   }
 }
@@ -174,7 +174,7 @@ footer .edits {
 }
 
 /* line 36, ../scss/partials/_layout.scss */
-.hero-unit {
+.jumbotron {
   margin-bottom: 0;
 }
 
@@ -193,14 +193,14 @@ pre.prettyprint {
   height: 40px;
 }
 /* line 5, ../scss/partials/_navbar.scss */
-.navbar-container .brand, .navbar-container .hero-unit .title, .hero-unit .navbar-container .title {
+.navbar-container .brand, .navbar-container .jumbotron .title, .jumbotron .navbar-container .title {
   -webkit-transition: all 0.2s ease-out;
   -moz-transition: all 0.2s ease-out;
   -o-transition: all 0.2s ease-out;
   transition: all 0.2s ease-out;
 }
 /* line 7, ../scss/partials/_navbar.scss */
-.navbar-container .brand span, .navbar-container .hero-unit .title span, .hero-unit .navbar-container .title span {
+.navbar-container .brand span, .navbar-container .jumbotron .title span, .jumbotron .navbar-container .title span {
   -webkit-transition: all 0.3s ease-in;
   -moz-transition: all 0.3s ease-in;
   -o-transition: all 0.3s ease-in;
@@ -209,58 +209,58 @@ pre.prettyprint {
 }
 
 /* line 15, ../scss/partials/_navbar.scss */
-.navbar-container .brand, .navbar-container .hero-unit .title, .hero-unit .navbar-container .title {
+.navbar-container .brand, .navbar-container .jumbotron .title, .jumbotron .navbar-container .title {
   padding: 4px 0;
   margin-left: -1150px;
 }
 @media (min-width: 1450px) {
   /* line 15, ../scss/partials/_navbar.scss */
-  .navbar-container .brand, .navbar-container .hero-unit .title, .hero-unit .navbar-container .title {
+  .navbar-container .brand, .navbar-container .jumbotron .title, .jumbotron .navbar-container .title {
     margin-left: -1250px;
   }
 }
 @media (min-width: 1650px) {
   /* line 15, ../scss/partials/_navbar.scss */
-  .navbar-container .brand, .navbar-container .hero-unit .title, .hero-unit .navbar-container .title {
+  .navbar-container .brand, .navbar-container .jumbotron .title, .jumbotron .navbar-container .title {
     margin-left: -1350px;
   }
 }
 @media (min-width: 1850px) {
   /* line 15, ../scss/partials/_navbar.scss */
-  .navbar-container .brand, .navbar-container .hero-unit .title, .hero-unit .navbar-container .title {
+  .navbar-container .brand, .navbar-container .jumbotron .title, .jumbotron .navbar-container .title {
     margin-left: -1450px;
   }
 }
 @media (min-width: 2050px) {
   /* line 15, ../scss/partials/_navbar.scss */
-  .navbar-container .brand, .navbar-container .hero-unit .title, .hero-unit .navbar-container .title {
+  .navbar-container .brand, .navbar-container .jumbotron .title, .jumbotron .navbar-container .title {
     margin-left: -1550px;
   }
 }
 @media (min-width: 2250px) {
   /* line 15, ../scss/partials/_navbar.scss */
-  .navbar-container .brand, .navbar-container .hero-unit .title, .hero-unit .navbar-container .title {
+  .navbar-container .brand, .navbar-container .jumbotron .title, .jumbotron .navbar-container .title {
     margin-left: -1650px;
   }
 }
 @media (min-width: 2450px) {
   /* line 15, ../scss/partials/_navbar.scss */
-  .navbar-container .brand, .navbar-container .hero-unit .title, .hero-unit .navbar-container .title {
+  .navbar-container .brand, .navbar-container .jumbotron .title, .jumbotron .navbar-container .title {
     margin-left: -1750px;
   }
 }
 @media (min-width: 2650px) {
   /* line 15, ../scss/partials/_navbar.scss */
-  .navbar-container .brand, .navbar-container .hero-unit .title, .hero-unit .navbar-container .title {
+  .navbar-container .brand, .navbar-container .jumbotron .title, .jumbotron .navbar-container .title {
     margin-left: -1850px;
   }
 }
 /* line 39, ../scss/partials/_navbar.scss */
-.navbar-container .brand span, .navbar-container .hero-unit .title span, .hero-unit .navbar-container .title span {
+.navbar-container .brand span, .navbar-container .jumbotron .title span, .jumbotron .navbar-container .title span {
   margin-left: 0;
 }
 /* line 45, ../scss/partials/_navbar.scss */
-.navbar-container .affix .brand, .navbar-container .affix .hero-unit .title, .hero-unit .navbar-container .affix .title {
+.navbar-container .affix .brand, .navbar-container .affix .jumbotron .title, .jumbotron .navbar-container .affix .title {
   margin-left: 0px;
 }
 
@@ -282,7 +282,7 @@ pre.prettyprint {
   }
 }
 /* line 67, ../scss/partials/_navbar.scss */
-.navbar ul.nav a.brand, .navbar ul.nav .hero-unit a.title, .hero-unit .navbar ul.nav a.title {
+.navbar ul.nav a.brand, .navbar ul.nav .jumbotron a.title, .jumbotron .navbar ul.nav a.title {
   font-weight: 400;
   padding: 0 15px 0 0;
   color: #980035;
@@ -290,7 +290,7 @@ pre.prettyprint {
 }
 @media (max-width: 500px) {
   /* line 67, ../scss/partials/_navbar.scss */
-  .navbar ul.nav a.brand, .navbar ul.nav .hero-unit a.title, .hero-unit .navbar ul.nav a.title {
+  .navbar ul.nav a.brand, .navbar ul.nav .jumbotron a.title, .jumbotron .navbar ul.nav a.title {
     padding-right: 5px;
   }
 }
@@ -644,8 +644,12 @@ img.smallogo {
   color: #b1003e;
 }
 /* line 155, ../scss/style.scss */
-.pro .hero-unit .title strong {
+.pro .jumbotron .title strong {
   color: #242222;
+}
+.thumbnails {
+  margin-left: -40px;
+  list-style: none;
 }
 .pro #customers .thumbnail > img {
   display: inline;
