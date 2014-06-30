@@ -665,13 +665,16 @@ img.smallogo {
   background-color: white;
   min-height: 100px;
 }
+.pro #customers .finale {
+  margin-top: 20px;
+}
 .pro #customers .thumbnail {
 /*  background-color: white;
   min-height: 100px;*/
+  padding: 1px;
   border: 0;
   box-shadow: none;
   display: inline;
-  margin: 10px;
   background-color: transparent;
 }
 /* line 168, ../scss/style.scss */
