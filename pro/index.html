@@ -14,7 +14,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link rel="canonical" href="http://sidekiq.org/pro" />
     <link rel="shortcut icon" type="image/png" href="/favicon.png">
-    <link rel="stylesheet" href="../css/bootstrap.min.css" media="all">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" media="all">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/jquery.slick/1.3.6/slick.css" media="all">
     <link rel="stylesheet" href="../css/style.css" media="all">
     <script src='../js/modernizr.js'></script>
     <script>
@@ -51,124 +52,174 @@
     <div id="page">
       <div class="container">
 
-        <div class="row">
-
+      <div class="row">
           <section id='features' class='col-md-12'>
               <div class='row names hidden-sm hidden-xs' id="features_bullets">
-                <div class='entry col-md-2 col-md-offset-1 selected'><h4>Reliability</h4> <div class="arrow up"></div></div>
-                <div class='entry col-md-2'><h4>Batches</h4> <div class="arrow up"></div></div>
-                <div class='entry col-md-3'><h4>Notifications</h4> <div class="arrow up"></div></div>
-                <div class='entry col-md-2'><h4>Support</h4> <div class="arrow up"></div></div>
+                  <div class='entry col-md-2 col-md-offset-1 selected'>
+                      <h4>Reliability</h4>
+                      <div class="arrow up"></div>
+                  </div>
+                  <div class='entry col-md-2'>
+                      <h4>Batches</h4>
+                      <div class="arrow up"></div>
+                  </div>
+                  <div class='entry col-md-3'>
+                      <h4>Notifications</h4>
+                      <div class="arrow up"></div>
+                  </div>
+                  <div class='entry col-md-2'>
+                      <h4>Support</h4>
+                      <div class="arrow up"></div>
+                  </div>
               </div>
               <div class="col-md-10 col-md-offset-1">
-                <div class="row highlighted well">
-                  <div class="slider">
-                    <div class='content'>
-                      <h2 class='visible-phone'>Reliability</h2>
-                      <h3>100% reliable message processing.</h3>
-                      <div class="row-fluid">
-                        <div class="col-md-8">
-                          <img class="img-responsive" alt="" src="../examples/reliability.png"/>
-                        </div>
-                        <div class="col-md-4">
-                          <p><b>
-                            Cloud environments are noisy and unreliable.  Seeing timeouts?
-                            Wild swings in latency or performance?  Ruby VM crashes or
-                            processes disappearing?
-                          </b></p>
-                          <p>
-                            If a Sidekiq process crashes while processing a job, that job is lost.
-                          </p>
-                          <p>
-                            If the Sidekiq client gets a networking error while pushing a job to Redis,
-                            an exception is raised and the job is not delivered.
-                          </p>
-                          <p>
-                            Sidekiq Pro uses Redis's RPOPLPUSH command to ensure that
-                            jobs will not be lost if the process crashes or gets a
-                            KILL signal.
-                          </p>
-                          <p>
-                            The Sidekiq Pro client can withstand transient Redis outages or timeouts.  It will enqueue jobs
-                            locally upon error and attempt to deliver those jobs once connectivity is restored.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                  <div class="row highlighted well">
+                      <div id='slider' class="slider">
+                          <div class='content'>
+                              <div class="row-fluid">
+                                  <div class="col-md-12">
+                                      <h2 class='visible-phone'>Reliability</h2>
 
-                    <div class='content'>
-                      <h2 class='visible-phone'>Batches</h2>
-                      <h3>Group jobs into a set and follow their progress.</h3>
-                      <div class="row-fluid">
-                        <div class="col-md-8">
-                          <img class="img-responsive" alt="" src="../examples/batch.png" />
-                        </div>
-                        <div class="col-md-4">
-                          <p>Create a set of jobs which can be tracked as a group,
-                            programmatically or within the Sidekiq Web interface.
-                            You can see success and failure counts along with error
-                            information for failed jobs within the batch.
-                          </p>
-                          <p>
-                            We use batches
-                            at <a target="_new" href="http://www.theclymb.com/invite-from/mperham">The
-                            Clymb</a> when uploading product catalogs to our
-                            database.  Each product becomes a job, uploading 1000
-                            products makes 1000 jobs, which are quickly processed by
-                            our swarm of Sidekiq workers.  Once finished, the
-                            catalog team is notified of the results.
-                          </p>
-                        </div>
+                                      <h3>100% reliable message processing.</h3>
+
+                                      <div class="row-fluid">
+                                          <div class="col-md-8">
+                                              <img class="img-responsive" alt="" src="../examples/reliability.png"/>
+                                          </div>
+                                          <div class="col-md-4">
+                                              <p><b>
+                                                  Cloud environments are noisy and unreliable. Seeing timeouts?
+                                                  Wild swings in latency or performance? Ruby VM crashes or
+                                                  processes disappearing?
+                                              </b></p>
+
+                                              <p>
+                                                  If a Sidekiq process crashes while processing a job, that job is lost.
+                                              </p>
+
+                                              <p>
+                                                  If the Sidekiq client gets a networking error while pushing a job to
+                                                  Redis,
+                                                  an exception is raised and the job is not delivered.
+                                              </p>
+
+                                              <p>
+                                                  Sidekiq Pro uses Redis's RPOPLPUSH command to ensure that
+                                                  jobs will not be lost if the process crashes or gets a
+                                                  KILL signal.
+                                              </p>
+
+                                              <p>
+                                                  The Sidekiq Pro client can withstand transient Redis outages or
+                                                  timeouts. It will enqueue jobs
+                                                  locally upon error and attempt to deliver those jobs once connectivity
+                                                  is restored.
+                                              </p>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class='content'>
+                              <div class="row-fluid">
+                                  <div class="col-md-12">
+                                      <h2 class='visible-phone'>Batches</h2>
+
+                                      <h3>Group jobs into a set and follow their progress.</h3>
+
+                                      <div class="row-fluid">
+                                          <div class="col-md-8">
+                                              <img class="img-responsive" alt="" src="../examples/batch.png"/>
+                                          </div>
+                                          <div class="col-md-4">
+                                              <p>Create a set of jobs which can be tracked as a group,
+                                                  programmatically or within the Sidekiq Web interface.
+                                                  You can see success and failure counts along with error
+                                                  information for failed jobs within the batch.
+                                              </p>
+
+                                              <p>
+                                                  We use batches
+                                                  at <a target="_new"
+                                                        href="http://www.theclymb.com/invite-from/mperham">The
+                                                  Clymb</a> when uploading product catalogs to our
+                                                  database. Each product becomes a job, uploading 1000
+                                                  products makes 1000 jobs, which are quickly processed by
+                                                  our swarm of Sidekiq workers. Once finished, the
+                                                  catalog team is notified of the results.
+                                              </p>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class='content'>
+                              <div class="row-fluid">
+                                  <div class="col-md-12">
+                                      <h2 class='visible-phone'>Notifications</h2>
+
+                                      <h3>Receive notification via several different mediums when a batch
+                                          completes.</h3>
+
+                                      <div class="row-fluid">
+                                          <div class="col-md-8">
+                                              <img class="img-responsive" alt="" src="../examples/webhook.png"/>
+                                          </div>
+                                          <div class="col-md-4">
+                                              <p>
+                                                  <strong>Are you a human?</strong> Receive an email,
+                                                  Campfire or HipChat notification when a batch has completed
+                                                  processing.
+                                              </p>
+
+                                              <p>
+                                                  <strong>Are you a robot?</strong> Receive a webhook
+                                                  or in-process callback when the batch is complete. Use Redis pub/sub
+                                                  to
+                                                  receive <strong>real-time</strong> updates as your batch
+                                                  processes.
+                                              </p>
+
+                                              <p>
+                                                  Your own custom notification mechanisms can easily be added with
+                                                  Sidekiq Pro's
+                                                  Batch callback API.
+                                              </p>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class='content'>
+                              <div class="row-fluid">
+                                  <div class="col-md-12">
+                                      <h2 class='visible-phone'>Support</h2>
+
+                                      <h3>Priority support from the author of Sidekiq</h3>
+
+                                      <div class="row-fluid">
+                                          <div class="col-md-8">
+                                              <img class="img-responsive" alt="" src="../examples/support.png"/>
+                                          </div>
+                                          <div class="col-md-4">
+                                              <p>
+                                                  Background processing is a major component of your application.
+                                                  Guarantee direct access to a Sidekiq expert.
+                                                  Your Sidekiq Pro subscription gives you priority support for any
+                                                  unforeseen
+                                                  issues.
+                                              </p>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
                       </div>
-                    </div>
-                    <div class='content'>
-                      <h2 class='visible-phone'>Notifications</h2>
-                      <h3>Receive notification via several different mediums when a batch completes.</h3>
-                      <div class="row-fluid">
-                        <div class="col-md-8">
-                          <img class="img-responsive" alt=""  src="../examples/webhook.png"/>
-                        </div>
-                        <div class="col-md-4">
-                          <p>
-                            <strong>Are you a human?</strong>  Receive an email,
-                            Campfire or HipChat notification when a batch has completed
-                            processing.
-                          </p>
-                          <p>
-                            <strong>Are you a robot?</strong>  Receive a webhook
-                            or in-process callback when the batch is complete.  Use Redis pub/sub to
-                            receive <strong>real-time</strong> updates as your batch
-                            processes.
-                          </p>
-                          <p>
-                            Your own custom notification mechanisms can easily be added with Sidekiq Pro's
-                            Batch callback API.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div class='content'>
-                      <h2 class='visible-phone'>Support</h2>
-                      <h3>Priority support from the author of Sidekiq</h3>
-                      <div class="row-fluid">
-                        <div class="col-md-8">
-                          <img class="img-responsive" alt="" src="../examples/support.png"/>
-                        </div>
-                        <div class="col-md-4">
-                          <p>
-                            Background processing is a major component of your application.
-                            Guarantee direct access to a Sidekiq expert.
-                            Your Sidekiq Pro subscription gives you priority support for any unforeseen
-                            issues.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                </div>
+                  </div>
               </div>
-            </div>
+
           </section>
-        </div>
+      </div>
 
         <div class="row">
           <div class="col-md-7">
@@ -345,8 +396,7 @@
 
     <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
     <script src='../js/google-code-prettify.js'></script>
-    <script src="../js/jquery.easing.1.3.js"></script>
-    <script src='../js/jquery.bxSlider.min.js'></script>
+    <script src="//cdn.jsdelivr.net/jquery.slick/1.3.6/slick.min.js"></script>
     <script src='../js/app.js'></script>
     <script src='../js/ready.js'></script>
     <script type="text/javascript">
