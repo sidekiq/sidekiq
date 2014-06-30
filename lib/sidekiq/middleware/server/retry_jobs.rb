@@ -64,9 +64,8 @@ module Sidekiq
           # ignore, will be pushed back onto queue during hard_shutdown
           raise
         rescue Exception => e
-          # In Ruby 2.1.0 only, check if exception is a result of shutdown.
-          # If so, will be pushed back onto queue during hard_shutdown.
-          if defined?(e.cause) && e.cause.class == Sidekiq::Shutdown
+          if exception_caused_by_shutdown?(e)
+            # ignore, will be pushed back onto queue during hard_shutdown.
             raise Sidekiq::Shutdown
           end
 
@@ -167,6 +166,15 @@ module Sidekiq
             handle_exception(e, { :context => "Failure scheduling retry using the defined `sidekiq_retry_in` in #{worker.class.name}, falling back to default" })
             nil
           end
+        end
+
+        def exception_caused_by_shutdown?(e)
+          # In Ruby 2.1.0 only, check if exception is a result of shutdown.
+          defined?(e.cause) &&
+          (
+            e.cause.class == Sidekiq::Shutdown ||
+            exception_caused_by_shutdown?(e.cause)
+          )
         end
 
       end
