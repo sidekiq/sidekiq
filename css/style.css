@@ -831,3 +831,7 @@ img.smallogo {
 span.tt {
     font-family:'Lucida Console', monospace"
 }
+
+.navbar-default .navbar-nav > .active > a {
+    color: #b1003e;
+}
