@@ -836,6 +836,32 @@ span.tt {
     font-family:'Lucida Console', monospace;
 }
 
-.navbar-default .navbar-nav > .active > a {
+.navbar {
+    border-radius: 0 0 4px 4px;
+}
+
+.navbar .navbar-brand {
+    color: #FFF;
+}
+
+.navbar .navbar-brand:hover {
+    font-size: 1.5em;
+}
+
+.navbar-inverse .navbar-nav > li > a {
+    color: #FFF;
+}
+
+.navbar-inverse .navbar-nav > li > a:hover {
+    color: #980035;
+}
+
+.navbar-inverse .navbar-nav > .active > a {
     color: #b1003e;
 }
+
+.navbar-inverse .navbar-nav > .active > a:hover {
+    color: #980035;
+}
+
+
