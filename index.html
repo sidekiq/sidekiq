@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if lt IE 7]>    <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>     <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>     <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
 <head>
   <meta charset="utf-8">
@@ -21,149 +21,149 @@
   <link rel="stylesheet" href="css/style.css" media="all">
   <script src='js/modernizr.js'></script>
   <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-    ga('create', 'UA-2569989-6', {'sampleRate': 100});
-    ga('send', 'pageview');
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-2569989-6', {'sampleRate': 100});
+  ga('send', 'pageview');
   </script>
 </head>
 <body data-target=".navbar">
 
 <nav class="navbar navbar-inverse" role="navigation">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="/">Sidekiq</a>
-        </div>
-
-        <div class="navbar-collapse">
-            <ul class="nav navbar-nav navbar-right">
-                <li class="active"><a href="/">Home</a></li>
-                <li><a href="/support/">Support</a></li>
-                <li><a href="/pro/">Sidekiq Pro</a></li>
-            </ul>
-        </div>
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/">Sidekiq</a>
     </div>
+
+    <div class="collapse navbar-collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li class="active"><a href="/"><i class="fa fa-home"></i> Home</a></li>
+        <li><a href="/support/"><i class="fa fa-support"></i> Support</a></li>
+        <li><a href="/pro/"><i class="fa fa-plus-square"></i> Sidekiq Pro</a></li>
+      </ul>
+    </div>
+  </div>
 </nav>
 
   <div class="jumbotron centered" id="top">
-    <h1 class='title reset'>
-      <span class='image'><img src="img/logo.png" class='logo' /></span><span class='text'>Sidekiq</span>
-    </h1>
-    <p>Simple, efficient background processing for Ruby.</p>
+  <h1 class='title reset'>
+    <span class='image'><img src="img/logo.png" class='logo' /></span><span class='text'>Sidekiq</span>
+  </h1>
+  <p>Simple, efficient background processing for Ruby.</p>
   </div>
 
   <div id="page">
-    <div class="container">
-      <div class="row tagline">
-        <div class="col-md-8">
-          <h2 class='subheader'>
-            What if <strong>1</strong> Sidekiq process could do the work of <strong>20</strong> Resque or DelayedJob processes?
-          </h2>
-        </div>
+  <div class="container">
+    <div class="row tagline">
+    <div class="col-md-8">
+      <h2 class='subheader'>
+      What if <strong>1</strong> Sidekiq process could do the work of <strong>20</strong> Resque or DelayedJob processes?
+      </h2>
+    </div>
 
-        <div class="col-md-4" id="call_to_action">
-          <a id='pro_button' class='btn btn-inverse btn-block btn-lg' href="pro/">
-            Upgrade to<br/>
-            <strong>Sidekiq Pro</strong><br/>
-            for more great<br/>
-            features!
-          </a>
-          <a class="btn btn-lg btn-block btn-primary" id="download_btn" href="https://github.com/mperham/sidekiq">Get the Source</a>
-          <a class="btn btn-lg btn-block" href="https://github.com/mperham/sidekiq/wiki">Documentation</a>
-        </div>
+    <div class="col-md-4" id="call_to_action">
+      <a id='pro_button' class='btn btn-inverse btn-block btn-lg' href="pro/">
+      Upgrade to<br/>
+      <strong>Sidekiq Pro</strong><br/>
+      for more great<br/>
+      features!
+      </a>
+      <a class="btn btn-lg btn-block btn-primary" id="download_btn" href="https://github.com/mperham/sidekiq">Get the Source</a>
+      <a class="btn btn-lg btn-block" href="https://github.com/mperham/sidekiq/wiki">Documentation</a>
+    </div>
+    </div>
+
+    <div class="row">
+
+    <section class='col-md-8' id="install">
+      <div class="page-header">
+      <h4>Install It</h4>
       </div>
 
-      <div class="row">
+      <p>
+      Put sidekiq in your <span class="tt">Gemfile</span>:
+      </p>
 
-        <section class='col-md-8' id="install">
-          <div class="page-header">
-            <h4>Install It</h4>
-          </div>
+      <pre class='prettyprint'>gem 'sidekiq'</pre>
 
-          <p>
-            Put sidekiq in your <span class="tt">Gemfile</span>:
-          </p>
+      <p>
+      Install the gem with <a href='http://gembundler.com/'>Bundler</a>:
+      </p>
 
-          <pre class='prettyprint'>gem 'sidekiq'</pre>
+      <pre class='prettyprint'>bundle install</pre>
+      <div class="page-header">
+      <h4>Call It</h4>
+      </div>
 
-          <p>
-            Install the gem with <a href='http://gembundler.com/'>Bundler</a>:
-          </p>
+      <p>
+      Place your worker classes in <span class="tt">app/workers</span>:
+      </p>
 
-          <pre class='prettyprint'>bundle install</pre>
-          <div class="page-header">
-            <h4>Call It</h4>
-          </div>
-
-          <p>
-            Place your worker classes in <span class="tt">app/workers</span>:
-          </p>
-
-          <pre class='prettyprint'>
+      <pre class='prettyprint'>
 # app/workers/hard_worker.rb
 class HardWorker
   include Sidekiq::Worker
 
   def perform(name, count)
-    puts 'Doing hard work'
+  puts 'Doing hard work'
   end
 end</pre>
 
-          <p>
-            In your controller action or model, call <code>HardWorker.perform_async</code>:
-          </p>
+      <p>
+      In your controller action or model, call <code>HardWorker.perform_async</code>:
+      </p>
 
-          <pre class='prettyprint'>HardWorker.perform_async('bob', 5)</pre>
+      <pre class='prettyprint'>HardWorker.perform_async('bob', 5)</pre>
 
-          <div class="page-header">
-            <h4>Start It</h4>
-          </div>
-          <p>
-            Finally, start sidekiq from the root directory of your Rails
-            app.
-          </p>
-
-          <pre class='prettyprint'>bundle exec sidekiq</pre>
-        </section>
-
-        <section class='col-md-4' id="start">
-          <a class="twitter-timeline" href="https://twitter.com/sidekiq" data-widget-id="394602923956502528">Tweets by @sidekiq</a>
-          <a href="http://www.blackducksoftware.com/open-source-rookies#4035" class="oss-rookie-link"><img src="img/rookie.png" width="118" height="125"/></a>
-        </section>
+      <div class="page-header">
+      <h4>Start It</h4>
       </div>
+      <p>
+      Finally, start sidekiq from the root directory of your Rails
+      app.
+      </p>
 
+      <pre class='prettyprint'>bundle exec sidekiq</pre>
+    </section>
+
+    <section class='col-md-4' id="start">
+      <a class="twitter-timeline" href="https://twitter.com/sidekiq" data-widget-id="394602923956502528">Tweets by @sidekiq</a>
+      <a href="http://www.blackducksoftware.com/open-source-rookies#4035" class="oss-rookie-link"><img src="img/rookie.png" width="118" height="125"/></a>
+    </section>
     </div>
+
+  </div>
   </div>
 
   <nav class="navbar navbar-default">
-    <div class="container-fluid">
-      <ul class="nav navbar-nav">
-        <li><a href="http://confreaks.com/videos/1290-rubyconf2012-asynchronous-processing-for-fun-and-profit">My Talk at Rubyconf 2012</a></li>
-        <li><a href="http://www.twitter.com/sidekiq">Twitter</a></li>
-        <li><a href="http://github.com/mperham/sidekiq/wiki">Wiki</a></li>
-        <li><a href="http://github.com/mperham/sidekiq">Source</a></li>
-      </ul>
-    </div>
+  <div class="container-fluid">
+    <ul class="nav navbar-nav">
+    <li><a href="http://confreaks.com/videos/1290-rubyconf2012-asynchronous-processing-for-fun-and-profit">My Talk at Rubyconf 2012</a></li>
+    <li><a href="http://www.twitter.com/sidekiq">Twitter</a></li>
+    <li><a href="http://github.com/mperham/sidekiq/wiki">Wiki</a></li>
+    <li><a href="http://github.com/mperham/sidekiq">Source</a></li>
+    </ul>
+  </div>
   </nav>
 
   <footer>
-      <div class="container">
-          <div class='row'>
-              <div class="col-xs-12 col-md-6 text-center">
-                <span class='edits '>
-                  Modified <a href='http://twitter.github.com/bootstrap/'>Twitter Bootstrap</a>
-                  design by <a href='http://hull.io'>hull.io</a>
-                </span>
-              </div>
-              <div class="col-xs-12 col-md-6 text-center">
-                  &copy; 2014 Mike Perham,
-                  <a href="http://www.twitter.com/mperham">@mperham</a> /
-                  <a href="http://www.mikeperham.com">mikeperham.com</a>
-              </div>
-          </div>
+    <div class="container">
+      <div class='row'>
+        <div class="col-xs-12 col-md-6 text-center">
+        <span class='edits '>
+          Modified <a href='http://twitter.github.com/bootstrap/'>Twitter Bootstrap</a>
+          design by <a href='http://hull.io'>hull.io</a>
+        </span>
+        </div>
+        <div class="col-xs-12 col-md-6 text-center">
+          &copy; 2014 Mike Perham,
+          <a href="http://www.twitter.com/mperham">@mperham</a> /
+          <a href="http://www.mikeperham.com">mikeperham.com</a>
+        </div>
       </div>
+    </div>
   </footer>
 
   <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
