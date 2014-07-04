@@ -864,4 +864,12 @@ span.tt {
     color: #980035;
 }
 
-
+.committers li {
+  width: 165px;
+  height: 205px;
+  text-align: center;
+}
+.committers img {
+  width: 150px;
+  height: 150px;
+}
