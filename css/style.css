@@ -828,7 +828,7 @@ img.smallogo {
   text-align: center;
 }
 
-li.list-group-item > i {
+i.icon {
   margin-right: 0.25em;
 }
 
@@ -868,8 +868,17 @@ span.tt {
   width: 165px;
   height: 205px;
   text-align: center;
+  margin: 10px;
 }
 .committers img {
   width: 150px;
   height: 150px;
+}
+.committers .name {
+    display: block;
+}
+
+.committers i.icon {
+    font-size: 1.3em;
+    color: black;
 }

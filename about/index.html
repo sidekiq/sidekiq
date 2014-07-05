@@ -43,10 +43,10 @@
 
     <div class="collapse navbar-collapse">
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="/"><i class="fa fa-home"></i> Home</a></li>
-        <li><a href="/pro/"><i class="fa fa-plus-square"></i> Sidekiq Pro</a></li>
-        <li><a href="/support/"><i class="fa fa-support"></i> Support</a></li>
-        <li class="active"><a href="/about/"><i class="fa fa-info-circle"></i> About</a></li>
+        <li><a href="/"><i class="fa fa-home icon"></i>Home</a></li>
+        <li><a href="/pro/"><i class="fa fa-plus-square icon"></i>Sidekiq Pro</a></li>
+        <li><a href="/support/"><i class="fa fa-support icon"></i>Support</a></li>
+        <li class="active"><a href="/about/"><i class="fa fa-info-circle"></i>About</a></li>
       </ul>
     </div>
   </div>
@@ -69,66 +69,131 @@
   </div>
   <hr/>
 
-  <ul class="list-group list-inline committers">
-    <li class="list-group-item">
-      <img class="img-responsive" src="http://www.mikeperham.com/images/headshot2.jpg"/>
-      <p>Mike Perham / <a href="https://github.com/mperham">mperham</a></p>
-    </li>
-    <li class="list-group-item">
-      <img class="img-responsive" src="https://avatars1.githubusercontent.com/u/797?s=150"/>
-      <p>Tony Arcieri / <a href="https://github.com/tarcieri">tarcieri</a></p>
-    </li>
-    <li class="list-group-item">
-      <img class="img-responsive" src="https://avatars1.githubusercontent.com/u/9458?s=150"/>
-      <p>Romain Dardour / <a href="https://github.com/unity">unity</a></p>
-    </li>
-    <li class="list-group-item">
-      <img class="img-responsive" src="https://avatars0.githubusercontent.com/u/18191?s=150"/>
-      <p>Jesse Cooke / <a href="https://github.com/jc00ke">jc00ke</a></p>
-    </li>
-    <li class="list-group-item">
-      <img class="img-responsive" src="https://avatars2.githubusercontent.com/u/34627?s=150"/>
-      <p>Petteri Räty / <a href="https://github.com/betelgeuse">betelgeuse</a></p>
-    </li>
-    <li class="list-group-item">
-      <img class="img-responsive" src="https://avatars1.githubusercontent.com/u/40455?s=150"/>
-      <p>Ezekiel Templin / <a href="https://github.com/ezkl">ezkl</a></p>
-    </li>
-    <li class="list-group-item">
-      <img class="img-responsive" src="https://avatars2.githubusercontent.com/u/146013?s=150"/>
-      <p>Ryan Schlesinger / <a href="https://github.com/ryansch">ryansch</a></p>
-    </li>
-    <li class="list-group-item">
-      <img class="img-responsive" src="https://avatars0.githubusercontent.com/u/186424?s=150"/>
-      <p>Pan Thomakos / <a href="https://github.com/panthomakos">panthomakos</a></p>
-    </li>
-    <li class="list-group-item">
-      <img class="img-responsive" src="https://avatars3.githubusercontent.com/u/637158?s=150"/>
-      <p>Ryan LeCompte / <a href="https://github.com/ryanlecompte">ryanlecompte</a></p>
-    </li>
-    <li class="list-group-item">
-      <img class="img-responsive" src="https://avatars1.githubusercontent.com/u/744212?s=150"/>
-      <p>Brandon Hilkert / <a href="https://github.com/brandonhilkert">brandonhilkert</a></p>
-    </li>
-    <li class="list-group-item">
-      <img class="img-responsive" src="https://avatars2.githubusercontent.com/u/786640?s=150"/>
-      <p>Aaron Ackerman / <a href="https://github.com/aackerman">aackerman</a></p>
-    </li>
-    <li class="list-group-item">
-      <img class="img-responsive" src="https://avatars0.githubusercontent.com/u/832655?s=150"/>
-      <p>Jonathan Hyman / <a href="https://github.com/jonhyman">jonhyman</a></p>
-    </li>
-    <li class="list-group-item">
-      <img class="img-responsive" src="https://avatars3.githubusercontent.com/u/2394703?s=150"/>
-      <p>Abdelkader Boudih / <a href="https://github.com/seuros">seuros</a></p>
-    </li>
-  </ul>
+    <ul class="list-group list-inline committers">
+        <li class="list-group-item">
+            <figure itemscope itemtype="http://schema.org/Person">
+                <img class="img-responsive" src="http://www.mikeperham.com/images/headshot2.jpg"/>
+                <figcaption>
+                    <span class='name' itemprop="name">Mike Perham</span>
+                    <a href="https://github.com/mperham"><i class="fa fa-github icon"></i>mperham</a>
+                </figcaption>
+            </figure>
+        </li>
+        <li class="list-group-item">
+            <figure itemscope itemtype="http://schema.org/Person">
+                <img class="img-responsive" src="https://avatars1.githubusercontent.com/u/797?s=150"/>
+                <figcaption>
+                    <span class='name' itemprop="name">Tony Arcieri</span>
+                    <a href="https://github.com/tarcieri"><i class="fa fa-github icon"></i>tarcieri</a>
+                </figcaption>
+            </figure>
+        </li>
+        <li class="list-group-item">
+            <figure itemscope itemtype="http://schema.org/Person">
+                <img class="img-responsive" src="https://avatars1.githubusercontent.com/u/9458?s=150"/>
+                <figcaption>
+                    <span class='name' itemprop="name">Romain Dardour</span>
+                    <a href="https://github.com/unity"><i class="fa fa-github icon"></i>unity</a>
+                </figcaption>
+            </figure>
+        </li>
+        <li class="list-group-item">
+            <figure itemscope itemtype="http://schema.org/Person">
+                <img class="img-responsive" src="https://avatars0.githubusercontent.com/u/18191?s=150"/>
+                <figcaption>
+                    <span class='name' itemprop="name">Jesse Cooke</span>
+                    <a href="https://github.com/jc00ke"><i class="fa fa-github icon"></i>jc00ke</a>
+                </figcaption>
+            </figure>
+        </li>
+        <li class="list-group-item">
+            <figure itemscope itemtype="http://schema.org/Person">
+                <img class="img-responsive" src="https://avatars2.githubusercontent.com/u/34627?s=150"/>
+                <figcaption>
+                    <span class='name' itemprop="name">Petteri Räty</span>
+                    <a href="https://github.com/betelgeuse"><i class="fa fa-github icon"></i>betelgeuse</a>
+                </figcaption>
+            </figure>
+        </li>
+        <li class="list-group-item">
+            <figure itemscope itemtype="http://schema.org/Person">
+                <img class="img-responsive" src="https://avatars1.githubusercontent.com/u/40455?s=150"/>
+                <figcaption>
+                    <span class='name' itemprop="name">Ezekiel Templin</span>
+                    <a href="https://github.com/ezkl"><i class="fa fa-github icon"></i>ezkl</a>
+                </figcaption>
+            </figure>
+        </li>
+        <li class="list-group-item">
+            <figure itemscope itemtype="http://schema.org/Person">
+                <img class="img-responsive" src="https://avatars2.githubusercontent.com/u/146013?s=150"/>
+                <figcaption>
+                    <span class='name' itemprop="name">Ryan Schlesinger</span>
+                    <a href="https://github.com/ryansch"><i class="fa fa-github icon"></i>ryansch</a>
+                </figcaption>
+            </figure>
+        </li>
+        <li class="list-group-item">
+            <figure itemscope itemtype="http://schema.org/Person">
+                <img class="img-responsive" src="https://avatars0.githubusercontent.com/u/186424?s=150"/>
+                <figcaption>
+                    <span class='name' itemprop="name">Pan Thomakos</span>
+                    <a href="https://github.com/panthomakos"><i class="fa fa-github icon"></i>panthomakos</a>
+                </figcaption>
+            </figure>
+        </li>
+        <li class="list-group-item">
+            <figure itemscope itemtype="http://schema.org/Person">
+                <img class="img-responsive" src="https://avatars3.githubusercontent.com/u/637158?s=150"/>
+                <figcaption>
+                    <span class='name' itemprop="name">Ryan LeCompte</span>
+                    <a href="https://github.com/ryanlecompte"><i class="fa fa-github icon"></i>ryanlecompte</a>
+                </figcaption>
+            </figure>
+        </li>
+        <li class="list-group-item">
+            <figure itemscope itemtype="http://schema.org/Person">
+                <img class="img-responsive" src="https://avatars1.githubusercontent.com/u/744212?s=150"/>
+                <figcaption>
+                    <span class='name' itemprop="name">Brandon Hilkert</span>
+                    <a href="https://github.com/brandonhilkert"><i class="fa fa-github icon"></i>brandonhilkert</a>
+                </figcaption>
+            </figure>
+        </li>
+        <li class="list-group-item">
+            <figure itemscope itemtype="http://schema.org/Person">
+                <img class="img-responsive" src="https://avatars2.githubusercontent.com/u/786640?s=150"/>
+                <figcaption>
+                    <span class='name' itemprop="name">Aaron Ackerman</span>
+                    <a href="https://github.com/aackerman"><i class="fa fa-github icon"></i>aackerman</a>
+                </figcaption>
+            </figure>
+        </li>
+        <li class="list-group-item">
+            <figure itemscope itemtype="http://schema.org/Person">
+                <img class="img-responsive" src="https://avatars0.githubusercontent.com/u/832655?s=150"/>
+                <figcaption>
+                    <span class='name' itemprop="name">Jonathan Hyman</span>
+                    <a href="https://github.com/jonhyman"><i class="fa fa-github icon"></i>jonhyman</a>
+                </figcaption>
+            </figure>
+        </li>
+        <li class="list-group-item">
+            <figure itemscope itemtype="http://schema.org/Person">
+                <img class="img-responsive" src="https://avatars3.githubusercontent.com/u/2394703?s=150"/>
+                <figcaption>
+                    <span class='name' itemprop="name">Abdelkader Boudih</span>
+                    <a href="https://github.com/seuros"><i class="fa fa-github icon"></i>seuros</a>
+                </figcaption>
+            </figure>
+        </li>
+    </ul>
 </section>
 
 <footer>
   <div class="container">
     <div class='row'>
-      <div class="col-xs-12 col-md-6 text-center">
+      <div class="col-xs-12 col-md-6 col-md-offset-6 text-center">
         &copy; 2014 Mike Perham,
         <a href="http://www.twitter.com/mperham">@mperham</a> /
         <a href="http://www.mikeperham.com">mikeperham.com</a>
