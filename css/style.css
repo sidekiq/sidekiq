@@ -882,3 +882,11 @@ span.tt {
     font-size: 1.3em;
     color: black;
 }
+
+i.github {
+    color: black;
+}
+
+i.twitter {
+    color: #00aced;
+}
