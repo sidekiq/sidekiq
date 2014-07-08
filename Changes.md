@@ -1,3 +1,9 @@
+3.2.1
+-----------
+
+- Revert eager loading change for Rails 3.x apps, as it broke a few edge
+  cases.
+
 3.2.0
 -----------
 
