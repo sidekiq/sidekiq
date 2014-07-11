@@ -36,6 +36,7 @@ module Sidekiq
 
     def process(work)
       msgstr = work.message
+      return if msgstr == nil
       queue = work.queue_name
 
       @boss.async.real_thread(proxy_id, Thread.current)
