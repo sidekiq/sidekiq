@@ -36,21 +36,22 @@ module Sidekiq
 
     def process(work)
       msgstr = work.message
-      return if msgstr == nil
       queue = work.queue_name
 
       @boss.async.real_thread(proxy_id, Thread.current)
 
       ack = true
       begin
-        msg = Sidekiq.load_json(msgstr)
-        klass  = msg['class'].constantize
-        worker = klass.new
-        worker.jid = msg['jid']
+        if msgstr.present?
+          msg = Sidekiq.load_json(msgstr)
+          klass  = msg['class'].constantize
+          worker = klass.new
+          worker.jid = msg['jid']
 
-        stats(worker, msg, queue) do
-          Sidekiq.server_middleware.invoke(worker, msg, queue) do
-            worker.perform(*cloned(msg['args']))
+          stats(worker, msg, queue) do
+            Sidekiq.server_middleware.invoke(worker, msg, queue) do
+              worker.perform(*cloned(msg['args']))
+            end
           end
         end
       rescue Sidekiq::Shutdown
