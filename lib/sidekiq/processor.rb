@@ -42,7 +42,7 @@ module Sidekiq
 
       ack = true
       begin
-        if msgstr.present?
+        if msgstr != nil
           msg = Sidekiq.load_json(msgstr)
           klass  = msg['class'].constantize
           worker = klass.new
