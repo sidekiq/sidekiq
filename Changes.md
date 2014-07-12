@@ -1,3 +1,8 @@
+Master
+------
+
+- Add ability to truncate error messages with the `error_message_limit` option.
+
 3.2.1
 -----------
 
@@ -173,7 +178,7 @@ middleware, see 3.0-Upgrade.md.**
 
 - Automatically use the config file found at `config/sidekiq.yml`, if not passed `-C`. [#1481]
 - Store 'retried\_at' and 'failed\_at' timestamps as Floats, not Strings. [#1473]
-- A `USR2` signal will now reopen _all_ logs, using IO#reopen. Thus, instead of creating a new Logger object, 
+- A `USR2` signal will now reopen _all_ logs, using IO#reopen. Thus, instead of creating a new Logger object,
   Sidekiq will now just update the existing Logger's file descriptor [#1163].
 - Remove pidfile when shutting down if started with `-P` [#1470]
 
