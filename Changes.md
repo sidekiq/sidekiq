@@ -1,8 +1,3 @@
-Master
-------
-
-- Add ability to truncate error messages with the `error_message_limit` option.
-
 3.2.1
 -----------
 

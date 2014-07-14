@@ -259,24 +259,6 @@ class TestRetry < Sidekiq::Test
       @redis.verify
     end
 
-    it 'truncates the error_message down to the user-specified limit' do
-      @redis.expect :zadd, 1, ['retry', String, String]
-      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true, 'error_message_limit' => 10 }
-      handler = Sidekiq::Middleware::Server::RetryJobs.new
-      assert_raises RuntimeError do
-        handler.call(worker, msg, 'default') do
-          raise "kerblammo! (Truncate this part, please.)"
-        end
-      end
-      assert_equal 'default', msg["queue"]
-      assert_equal 'kerblammo!', msg["error_message"]
-      assert_equal 'RuntimeError', msg["error_class"]
-      assert_equal 0, msg["retry_count"]
-      refute msg["error_backtrace"]
-      assert msg["failed_at"]
-      @redis.verify
-    end
-
     describe "custom retry delay" do
       before do
         @old_logger    = Sidekiq.logger

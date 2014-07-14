@@ -50,8 +50,6 @@ module Sidekiq
       #     end
       #   end
       #
-      # The error message may be truncated to a maximum size by specifying an
-      # `error_message_limit` in a worker's `sidekiq_options` or globally.
       class RetryJobs
         include Sidekiq::Util
 
@@ -78,7 +76,7 @@ module Sidekiq
           else
             queue
           end
-          msg['error_message'] = e.message[0..(msg['error_message_limit'].to_i - 1)]
+          msg['error_message'] = e.message[0..10_000]
           msg['error_class'] = e.class.name
           count = if msg['retry_count']
             msg['retried_at'] = Time.now.to_f
