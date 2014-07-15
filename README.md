@@ -62,11 +62,9 @@ More Information
 
 Please see the [sidekiq wiki](https://github.com/mperham/sidekiq/wiki) for the official documentation.
 [#sidekiq on irc.freenode.net](irc://irc.freenode.net/#sidekiq) is dedicated to this project,
-but bug reports or feature requests suggestions should still go through [issues on Github](https://github.com/mperham/sidekiq/issues).  Release announcements are made to [@sidekiq](https://twitter.com/sidekiq)
+but bug reports or feature requests suggestions should still go through [issues on Github](https://github.com/mperham/sidekiq/issues).  Release announcements are made to the [@sidekiq](https://twitter.com/sidekiq) Twitter account.
 
-There's also a mailing list via [Librelist](http://librelist.org) that you can subscribe to by sending
-an email to <sidekiq@librelist.org> with a greeting in the body. To unsubscribe, send an email to <sidekiq-unsubscribe@librelist.org> and that's it!
-Once archiving begins, you'll be able to visit [the archives](http://librelist.com/browser/sidekiq/) to see past threads.
+You may also find useful a [Google Group](https://groups.google.com/forum/#!forum/sidekiq) dedicated to Sidekiq discussion and [a Sidekiq tag](https://stackoverflow.com/questions/tagged/sidekiq) on Stack Overflow.
 
 
 Problems?
