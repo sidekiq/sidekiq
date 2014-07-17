@@ -92,4 +92,4 @@ Please see [LICENSE](https://github.com/mperham/sidekiq/blob/master/LICENSE) for
 Author
 -----------------
 
-Mike Perham, [@mperham](https://twitter.com/mperham) / [@sidekiq](https://twitter.com/sidekiq), [http://mikeperham.com](http://mikeperham.com)
+Mike Perham, [@mperham](https://twitter.com/mperham) / [@sidekiq](https://twitter.com/sidekiq), [http://mikeperham.com](http://mikeperham.com) / [http://www.contribsys.com](http://www.contribsys.com)

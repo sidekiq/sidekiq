@@ -20,6 +20,11 @@ fix or new functionality.  Functionality must meet my design goals and
 vision for the project to be accepted; I would be happy to discuss how
 your idea can best fit into Sidekiq.
 
-## Sponsorship
+## Legal
 
-If you've got more money than time and want to sponsor Sidekiq's continued support, your company can buy [Sidekiq Pro](http://sidekiq.org/pro).  You get great functionality, I continue to fix bugs and enhance Sidekiq for years to come.
+By submitting a Pull Request, you disavow any rights or
+claims to any changes submitted to the Sidekiq project and assign the copyright of
+those changes to Contributed Systems LLC.
+
+This is a legal way of saying "If you submit a PR to us, that code becomes ours".
+99.9% of the time that's what you intend anyways; we hope it doesn't scare you away from contributing!
