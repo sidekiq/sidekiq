@@ -338,12 +338,13 @@ module Sidekiq
               false
             end
           end
-          message = hash[true].first
-          yield message
+
+          msg = hash.fetch(true, []).first
+          yield msg if msg
 
           # push the rest back onto the sorted set
           conn.multi do
-            hash[false].each do |message|
+            hash.fetch(false, []).each do |message|
               conn.zadd(parent.name, score.to_f.to_s, message)
             end
           end
