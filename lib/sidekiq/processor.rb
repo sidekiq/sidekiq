@@ -42,14 +42,16 @@ module Sidekiq
 
       ack = true
       begin
-        msg = Sidekiq.load_json(msgstr)
-        klass  = msg['class'].constantize
-        worker = klass.new
-        worker.jid = msg['jid']
+        if msgstr != nil
+          msg = Sidekiq.load_json(msgstr)
+          klass  = msg['class'].constantize
+          worker = klass.new
+          worker.jid = msg['jid']
 
-        stats(worker, msg, queue) do
-          Sidekiq.server_middleware.invoke(worker, msg, queue) do
-            worker.perform(*cloned(msg['args']))
+          stats(worker, msg, queue) do
+            Sidekiq.server_middleware.invoke(worker, msg, queue) do
+              worker.perform(*cloned(msg['args']))
+            end
           end
         end
       rescue Sidekiq::Shutdown
