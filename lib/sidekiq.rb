@@ -1,5 +1,7 @@
 # encoding: utf-8
 require 'sidekiq/version'
+fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby 1.9." if RUBY_PLATFORM != 'java' && RUBY_VERSION < '2.0.0'
+
 require 'sidekiq/logging'
 require 'sidekiq/client'
 require 'sidekiq/worker'
@@ -23,7 +25,7 @@ module Sidekiq
       :startup => [],
       :quiet => [],
       :shutdown => [],
-    },
+    }
   }
 
   def self.❨╯°□°❩╯︵┻━┻
@@ -66,7 +68,7 @@ module Sidekiq
   end
 
   def self.redis(&block)
-    raise ArgumentError, "requires a block" if !block
+    raise ArgumentError, "requires a block" unless block
     redis_pool.with(&block)
   end
 
@@ -143,8 +145,8 @@ module Sidekiq
   #     end
   #   end
   def self.on(event, &block)
-    raise ArgumentError, "Symbols only please: #{event}" if !event.is_a?(Symbol)
-    raise ArgumentError, "Invalid event name: #{event}" if !options[:lifecycle_events].keys.include?(event)
+    raise ArgumentError, "Symbols only please: #{event}" unless event.is_a?(Symbol)
+    raise ArgumentError, "Invalid event name: #{event}" unless options[:lifecycle_events].keys.include?(event)
     options[:lifecycle_events][event] << block
   end
 end

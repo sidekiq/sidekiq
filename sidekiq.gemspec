@@ -13,7 +13,6 @@ Gem::Specification.new do |gem|
   gem.test_files    = `git ls-files -- test/*`.split("\n")
   gem.name          = "sidekiq"
   gem.require_paths = ["lib"]
-  gem.required_ruby_version = '>= 2.0.0'
   gem.version       = Sidekiq::VERSION
   gem.add_dependency                  'redis', '>= 3.0.6'
   gem.add_dependency                  'redis-namespace', '>= 1.3.1'
