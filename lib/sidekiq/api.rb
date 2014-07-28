@@ -499,6 +499,9 @@ module Sidekiq
     end
   end
 
+  ##
+  # Allows enumeration of dead jobs within Sidekiq.
+  #
   class DeadSet < JobSet
     def initialize
       super 'dead'
