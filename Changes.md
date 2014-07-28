@@ -1,3 +1,8 @@
+3.2.2
+-----------
+
+- Add "Kill" button to move retries directly to the DJQ so they don't retry. [seuros, #1867]
+
 3.2.1
 -----------
 
