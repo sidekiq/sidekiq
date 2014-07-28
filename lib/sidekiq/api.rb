@@ -316,6 +316,23 @@ module Sidekiq
       end
     end
 
+    ##
+    # Place job in the dead set
+    def kill
+      raise 'Kill not available on jobs which have not failed' unless item['failed_at']
+      remove_job do |message|
+        Sidekiq.logger.info { "Killing job #{message['jid']}" }
+        now = Time.now.to_f
+        Sidekiq.redis do |conn|
+          conn.multi do
+            conn.zadd('dead', now, message)
+            conn.zremrangebyscore('dead', '-inf', now - DeadSet::DEAD_JOB_TIMEOUT)
+            conn.zremrangebyrank('dead', 0, - DeadSet::MAX_JOBS)
+          end
+        end
+      end
+    end
+
     private
 
     def remove_job
@@ -503,6 +520,9 @@ module Sidekiq
   # Allows enumeration of dead jobs within Sidekiq.
   #
   class DeadSet < JobSet
+    DEAD_JOB_TIMEOUT = 180 * 24 * 60 * 60 # 6 months
+    MAX_JOBS = 10_000
+
     def initialize
       super 'dead'
     end
