@@ -33,6 +33,7 @@ fr:
   NextRetry: Prochain essai
   RetryCount: Nombre d'essais
   RetryNow: Réessayer maintenant
+  Kill: Tuer
   LastRetry: Dernier essai
   OriginallyFailed: Échec originel
   AreYouSure: Êtes-vous certain ?

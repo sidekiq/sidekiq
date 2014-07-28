@@ -33,6 +33,7 @@ es:
   NextRetry: Siguiente Intento
   RetryCount: Numero de Reintentos
   RetryNow: Reintentar Ahora
+  Kill: Matar
   LastRetry: Último Reintento
   OriginallyFailed: Falló Originalmente
   AreYouSure: ¿Estás seguro?

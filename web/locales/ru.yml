@@ -32,6 +32,7 @@ ru:
   NextRetry: Следующая попытка
   RetryCount: Кол-во попыток
   RetryNow: Повторить сейчас
+  Kill: Убиваем
   LastRetry: Последняя попытка
   OriginallyFailed: Первый провал
   AreYouSure: Вы уверены?

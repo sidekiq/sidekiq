@@ -173,6 +173,17 @@ class TestWeb < Sidekiq::Test
       assert_match(/#{params.first['args'][2]}/, last_response.body)
     end
 
+    it 'can kill a single retry now' do
+      params = add_retry
+      post "/retries/#{job_params(*params)}", 'kill' => 'Kill'
+      assert_equal 302, last_response.status
+      assert_equal 'http://example.org/retries', last_response.header['Location']
+
+      get '/morgue'
+      assert_equal 200, last_response.status
+      assert_match(/#{params.first['args'][2]}/, last_response.body)
+    end
+
     it 'can display scheduled' do
       get '/scheduled'
       assert_equal 200, last_response.status

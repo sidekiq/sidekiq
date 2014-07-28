@@ -33,6 +33,7 @@ en: # <---- change this to your locale code
   NextRetry: Next Retry
   RetryCount: Retry Count
   RetryNow: Retry Now
+  Kill: Kill
   LastRetry: Last Retry
   OriginallyFailed: Originally Failed
   AreYouSure: Are you sure?

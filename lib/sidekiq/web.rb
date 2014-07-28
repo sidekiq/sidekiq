@@ -100,7 +100,7 @@ module Sidekiq
 
       params['key'].each do |key|
         job = Sidekiq::DeadSet.new.fetch(*parse_params(key)).first
-        retry_or_delete job, params if job
+        retry_or_delete_or_kill job, params if job
       end
       redirect_with_query("#{root_path}morgue")
     end
@@ -118,7 +118,7 @@ module Sidekiq
     post "/morgue/:key" do
       halt 404 unless params['key']
       job = Sidekiq::DeadSet.new.fetch(*parse_params(params['key'])).first
-      retry_or_delete job, params if job
+      retry_or_delete_or_kill job, params if job
       redirect_with_query("#{root_path}morgue")
     end
 
@@ -142,7 +142,7 @@ module Sidekiq
 
       params['key'].each do |key|
         job = Sidekiq::RetrySet.new.fetch(*parse_params(key)).first
-        retry_or_delete job, params if job
+        retry_or_delete_or_kill job, params if job
       end
       redirect_with_query("#{root_path}retries")
     end
@@ -160,7 +160,7 @@ module Sidekiq
     post "/retries/:key" do
       halt 404 unless params['key']
       job = Sidekiq::RetrySet.new.fetch(*parse_params(params['key'])).first
-      retry_or_delete job, params if job
+      retry_or_delete_or_kill job, params if job
       redirect_with_query("#{root_path}retries")
     end
 
@@ -227,11 +227,13 @@ module Sidekiq
 
     private
 
-    def retry_or_delete job, params
+    def retry_or_delete_or_kill job, params
       if params['retry']
         job.retry
       elsif params['delete']
         job.delete
+      elsif params['kill']
+        job.kill
       end
     end
 
