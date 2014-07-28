@@ -68,6 +68,18 @@ module Sidekiq
       @@ns ||= Sidekiq.redis {|conn| conn.respond_to?(:namespace) ? conn.namespace : nil }
     end
 
+    def redis_info
+      Sidekiq.redis do |conn|
+        # admin commands can't go through redis-namespace starting
+        # in redis-namespace 2.0
+        if conn.respond_to?(:namespace)
+          conn.redis.info
+        else
+          conn.info
+        end
+      end
+    end
+
     def root_path
       "#{env['SCRIPT_NAME']}/"
     end

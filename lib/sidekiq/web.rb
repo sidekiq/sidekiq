@@ -196,7 +196,7 @@ module Sidekiq
     end
 
     get '/' do
-      @redis_info = Sidekiq.redis { |conn| conn.info }.select{ |k, v| REDIS_KEYS.include? k }
+      @redis_info = redis_info.select{ |k, v| REDIS_KEYS.include? k }
       stats_history = Sidekiq::Stats::History.new((params[:days] || 30).to_i)
       @processed_history = stats_history.processed
       @failed_history = stats_history.failed
@@ -208,7 +208,7 @@ module Sidekiq
     get '/dashboard/stats' do
       sidekiq_stats = Sidekiq::Stats.new
       queue         = Sidekiq::Queue.new
-      redis_stats   = Sidekiq.redis { |conn| conn.info }.select{ |k, v| REDIS_KEYS.include? k }
+      redis_stats   = redis_info.select{ |k, v| REDIS_KEYS.include? k }
 
       content_type :json
       Sidekiq.dump_json({
