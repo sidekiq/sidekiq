@@ -155,7 +155,7 @@ module Sidekiq
       # because it spins up threads and creates locks which get
       # into a very bad state if forked.
       require 'celluloid/autostart'
-      Celluloid.logger = (options[:verbose] ? Sidekiq.logger : nil)
+      Celluloid.logger = Sidekiq.logger if options[:verbose]
 
       require 'sidekiq/manager'
       require 'sidekiq/scheduled'
