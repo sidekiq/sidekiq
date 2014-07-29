@@ -189,7 +189,9 @@ module Sidekiq
   # removed from the queue via Job#delete.
   #
   class Job
-    KNOWN_WRAPPERS = [/\ASidekiq::Extensions::Delayed/, "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"]
+    KNOWN_WRAPPERS = [/\ASidekiq::Extensions::Delayed/,
+                      'ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper',
+                      'ActionMailer::DeliverLater::MailMessageWrapper']
     attr_reader :item
 
     def initialize(item, queue_name=nil)
@@ -209,7 +211,8 @@ module Sidekiq
                    safe_load(args[0], klass) do |target, method, _|
                      "#{target}.#{method}"
                    end
-                 when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
+                 when 'ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper',
+                       'ActionMailer::DeliverLater::MailMessageWrapper'
                    args[0]
                  else
                    klass
@@ -223,7 +226,8 @@ module Sidekiq
                   safe_load(args[0], args) do |_, _, arg|
                     arg
                   end
-                when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
+                when 'ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper',
+                      'ActionMailer::DeliverLater::MailMessageWrapper'
                   args[1..-1]
                 else
                   args
