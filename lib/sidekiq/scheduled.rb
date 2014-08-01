@@ -51,7 +51,10 @@ module Sidekiq
             logger.error ex.backtrace.first
           end
 
-          after(poll_interval * rand) { poll }
+          # Randomizing scales the interval by half since
+          # on average calling `rand` returns 0.5.
+          # We make up for this by doubling the interval
+          after(poll_interval * 2 * rand) { poll }
         end
       end
 
@@ -73,7 +76,7 @@ module Sidekiq
       def poll_interval
         Sidekiq.options[:poll_interval] ||= begin
           pcount = Sidekiq.redis {|c| c.scard('processes') } || 1
-          pcount * 15 * 2
+          pcount * 15
         end
       end
 
