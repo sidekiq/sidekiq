@@ -36,6 +36,8 @@ module Sidekiq
         @custom_tabs ||= {}
       end
       alias_method :tabs, :custom_tabs
+
+      attr_accessor :app_url
     end
 
     get "/busy" do

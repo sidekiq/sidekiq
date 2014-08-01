@@ -1,10 +1,8 @@
-<% if params[:poll] %>
-  <script>
-    setInterval("window.location.reload(true)", parseInt(localStorage.timeInterval) || 2000);
-  </script>
-<% end %>
-<% unless current_path == '' %>
+<% if current_path != '' %>
   <% if params[:poll] %>
+    <script>
+        setInterval("window.location.reload(true)", parseInt(localStorage.timeInterval) || 2000);
+    </script>
     <a id="live-poll" class="btn btn-primary active" href="<%= root_path %><%= current_path %>"><%= t('StopPolling') %></a>
   <% else %>
     <a id="live-poll" class="btn btn-primary" href="<%= root_path %><%= current_path %>?<%= qparams(poll: true) %>"><%= t('LivePoll') %></a>

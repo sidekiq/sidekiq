@@ -632,6 +632,10 @@ div.interval-slider input {
     margin: 0 9px 9px;
   }
 
+  .poll-wrapper > div {
+      margin: 10px;
+  }
+
   .navbar.navbar-fixed-bottom ul {
     float: none;
     margin-right: 0;
