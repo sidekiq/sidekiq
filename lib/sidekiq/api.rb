@@ -601,6 +601,14 @@ module Sidekiq
       @attribs = hash
     end
 
+    def tag
+      self['tag']
+    end
+
+    def labels
+      Array(self['labels'])
+    end
+
     def [](key)
       @attribs[key]
     end

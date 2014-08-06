@@ -1,6 +1,7 @@
 3.2.2
 -----------
 
+- Add process tag (`-g tag`) to the Busy page so you can differentiate processes at a glance. [seuros, #1878]
 - Add "Kill" button to move retries directly to the DJQ so they don't retry. [seuros, #1867]
 
 3.2.1

@@ -1,4 +1,5 @@
 Myapp::Application.routes.draw do
+  Sidekiq::Web.app_url = '/'
   mount Sidekiq::Web => '/sidekiq'
   get "work" => "work#index"
   get "work/email" => "work#email"

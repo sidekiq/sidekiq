@@ -24,9 +24,9 @@
   <% Sidekiq::ProcessSet.new.each do |process| %>
     <tr>
       <td>
-        <span class="label label-default"><%= process['tag'] %></span>
         <%= "#{process['hostname']}:#{process['pid']}" %>
-        <% Array(process['labels']).each do |label| %>
+        <span class="label label-success"><%= process.tag %></span>
+        <% process.labels.each do |label| %>
           <span class="label label-info"><%= label %></span>
         <% end %>
       </td>
