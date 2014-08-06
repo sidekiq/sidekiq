@@ -1,6 +1,8 @@
 3.2.2
 -----------
 
+- Add "Back to App" button in Web UI.  You can set the button link via
+  `Sidekiq::Web.app_url = 'http://www.mysite.com'` [#1875, seuros]
 - Add process tag (`-g tag`) to the Busy page so you can differentiate processes at a glance. [seuros, #1878]
 - Add "Kill" button to move retries directly to the DJQ so they don't retry. [seuros, #1867]
 
