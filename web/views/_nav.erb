@@ -1,30 +1,42 @@
-<div class="navbar-inner">
-  <div class="container">
-    <a class="navbar-brand" href="<%= root_path %>">
-      <%= Sidekiq::NAME %>
-      <%= erb :_status %>
-    </a>
-    <ul class="nav navbar-nav">
-      <% Sidekiq::Web.default_tabs.each do |title, url| %>
-        <% if url == '' %>
-          <li class="<%= current_path == url ? 'active' : '' %>">
-            <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
-          </li>
-        <% else %>
-          <li class="<%= current_path.start_with?(url) ? 'active' : '' %>">
-            <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
-          </li>
-        <% end %>
-      <% end %>
-      <% Sidekiq::Web.custom_tabs.each do |title, url| %>
-        <li class="<%= current_path.start_with?(url) ? 'active' : '' %>">
-          <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
-        </li>
-      <% end %>
-    </ul>
-
-    <div class="poll-wrapper pull-right">
-      <%= erb :_poll %>
+<div class="navbar navbar-default navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container">
+      <div class="col-lg-8">
+        <a class="navbar-brand" href="<%= root_path %>">
+          <%= Sidekiq::NAME %>
+          <%= erb :_status %>
+        </a>
+        <ul class="nav navbar-nav">
+          <% Sidekiq::Web.default_tabs.each do |title, url| %>
+              <% if url == '' %>
+                  <li class="<%= current_path == url ? 'active' : '' %>">
+                    <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
+                  </li>
+              <% else %>
+                  <li class="<%= current_path.start_with?(url) ? 'active' : '' %>">
+                    <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
+                  </li>
+              <% end %>
+          <% end %>
+          <% Sidekiq::Web.custom_tabs.each do |title, url| %>
+              <li class="<%= current_path.start_with?(url) ? 'active' : '' %>">
+                <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
+              </li>
+          <% end %>
+        </ul>
+      </div>
+      <div class="col-lg-4">
+        <div class="poll-wrapper text-center">
+          <div class="col-xs-12 col-lg-6">
+            <%= erb :_poll %>
+          </div>
+          <div class="col-xs-12 col-lg-4">
+            <%- if Sidekiq::Web.app_url -%>
+                <a class="btn btn-inverse" href="<%= Sidekiq::Web.app_url %>">Back to App</a>
+            <%- end -%>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

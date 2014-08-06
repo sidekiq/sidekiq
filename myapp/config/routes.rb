@@ -1,5 +1,3 @@
-require 'sidekiq/web'
-
 Myapp::Application.routes.draw do
   mount Sidekiq::Web => '/sidekiq'
   get "work" => "work#index"

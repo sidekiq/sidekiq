@@ -1,0 +1,22 @@
+<div class="navbar navbar-fixed-bottom navbar-inverse">
+  <div class="navbar-inner">
+    <div class="container">
+        <ul class="nav">
+          <li>
+            <p class="navbar-text" style="color:white;">Sidekiq v<%= Sidekiq::VERSION %></p>
+          </li>
+          <li>
+            <p class="navbar-text">Redis: <%= redis_connection %></p>
+          </li>
+          <li>
+            <p class="navbar-text"><%= t('Time') %>: <%= Time.now.utc.strftime('%H:%M:%S UTC') %></p>
+          </li>
+          <% if namespace %>
+              <li>
+                <p class="navbar-text"><%= t('Namespace') %>: <%= namespace %></p>
+              </li>
+          <% end %>
+        </ul>
+    </div>
+  </div>
+</div>
