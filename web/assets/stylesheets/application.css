@@ -102,7 +102,7 @@ header.row .pagination {
   border-width: 0;
 }
 .poll-wrapper {
-  margin: 9px 0;
+    margin: 9px;
 }
 .nav #live-poll {
   height: 25px;
@@ -604,10 +604,6 @@ div.interval-slider input {
 }
 
 @media (max-width: 768px) {
-  .navbar .container {
-    text-align: center
-  }
-
   .navbar .navbar-brand {
     float: none;
     display: block;
@@ -629,11 +625,13 @@ div.interval-slider input {
   }
 
   .poll-wrapper {
-    margin: 0 9px 9px;
+    width: 100%;
+    text-align: center;
   }
 
-  .poll-wrapper > div {
-      margin: 10px;
+  .poll-wrapper > a {
+    display: inline-block;
+    margin: 5px;
   }
 
   .navbar.navbar-fixed-bottom ul {
