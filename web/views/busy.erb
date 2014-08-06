@@ -21,9 +21,10 @@
     <th><%= t('Busy') %></th>
     <th>&nbsp;</th>
   </thead>
-  <% Sidekiq::ProcessSet.new.each_with_index do |process, index| %>
+  <% Sidekiq::ProcessSet.new.each do |process| %>
     <tr>
       <td>
+        <span class="label label-default"><%= process['tag'] %></span>
         <%= "#{process['hostname']}:#{process['pid']}" %>
         <% Array(process['labels']).each do |label| %>
           <span class="label label-info"><%= label %></span>
