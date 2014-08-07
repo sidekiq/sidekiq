@@ -26,9 +26,9 @@
     </div>
     <div class="poll-wrapper pull-right">
         <%= erb :_poll %>
-        <%- if Sidekiq::Web.app_url -%>
+        <% if Sidekiq::Web.app_url %>
             <a class="btn btn-inverse" href="<%= Sidekiq::Web.app_url %>">Back to App</a>
-        <%- end -%>
+        <% end %>
     </div>
   </div>
 </div>
