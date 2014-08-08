@@ -6,21 +6,22 @@ module Sidekiq
       ##
       # Automatically retry jobs that fail in Sidekiq.
       # Sidekiq's retry support assumes a typical development lifecycle:
-      # 0. push some code changes with a bug in it
-      # 1. bug causes message processing to fail, sidekiq's middleware captures
-      #    the message and pushes it onto a retry queue
-      # 2. sidekiq retries messages in the retry queue multiple times with
-      #    an exponential delay, the message continues to fail
-      # 3. after a few days, a developer deploys a fix.  the message is
-      #    reprocessed successfully.
-      # 4. if 3 never happens, sidekiq will eventually give up and throw the
-      #    message away. If the worker defines a method called 'retries_exhausted',
-      #    this will be called before throwing the message away. If the
-      #    'retries_exhausted' method throws an exception, it's dropped and logged.
       #
-      # A message looks like:
+      #   0. push some code changes with a bug in it
+      #   1. bug causes job processing to fail, sidekiq's middleware captures
+      #      the job and pushes it onto a retry queue
+      #   2. sidekiq retries jobs in the retry queue multiple times with
+      #      an exponential delay, the job continues to fail
+      #   3. after a few days, a developer deploys a fix.  the job is
+      #      reprocessed successfully.
+      #   4. once retries are exhausted, sidekiq will give up and move the
+      #      job to the Dead Job Queue (aka morgue) where it must be dealt with
+      #      manually in the Web UI.
+      #   5. After 6 months on the DJQ, Sidekiq will discard the job.
       #
-      #     { 'class' => 'HardWorker', 'args' => [1, 2, 'foo'] }
+      # A job looks like:
+      #
+      #     { 'class' => 'HardWorker', 'args' => [1, 2, 'foo'], 'retry' => true }
       #
       # The 'retry' option also accepts a number (in place of 'true'):
       #
@@ -29,7 +30,7 @@ module Sidekiq
       # The job will be retried this number of times before giving up. (If simply
       # 'true', Sidekiq retries 25 times)
       #
-      # We'll add a bit more data to the message to support retries:
+      # We'll add a bit more data to the job to support retries:
       #
       #  * 'queue' - the queue to use
       #  * 'retry_count' - number of times we've retried so far.
@@ -37,18 +38,27 @@ module Sidekiq
       #  * 'error_class' - the exception class
       #  * 'failed_at' - the first time it failed
       #  * 'retried_at' - the last time it was retried
+      #  * 'backtrace' - the number of lines of error backtrace to store
       #
-      # We don't store the backtrace as that can add a lot of overhead
-      # to the message and everyone is using Airbrake, right?
+      # We don't store the backtrace by default as that can add a lot of overhead
+      # to the job and everyone is using an error service, right?
       #
-      # The default number of retry attempts is 25. You can pass a value for the
-      # number of retry attempts when adding the middleware using the options hash:
+      # The default number of retry attempts is 25 which works out to about 3 weeks
+      # of retries. You can pass a value for the max number of retry attempts when
+      # adding the middleware using the options hash:
       #
       #   Sidekiq.configure_server do |config|
       #     config.server_middleware do |chain|
       #       chain.add Middleware::Server::RetryJobs, :max_retries => 7
       #     end
       #   end
+      #
+      # or limit the number of retries for a particular worker with:
+      #
+      #    class MyWorker
+      #      include Sidekiq::Worker
+      #      sidekiq_options :retry => 10
+      #    end
       #
       class RetryJobs
         include Sidekiq::Util
