@@ -71,14 +71,10 @@ module Sidekiq
         'queues' => @options[:queues].uniq,
         'labels' => Sidekiq.options[:labels],
       }
-      Sidekiq.redis do |conn|
-        conn.multi do
-          conn.sadd('processes', key)
-          conn.hset(key, 'info', Sidekiq.dump_json(data))
-          conn.expire(key, 60)
-        end
-      end
-      manager.heartbeat(key, data)
+      # this data doesn't change so dump it to a string
+      # now so we don't need to dump it every heartbeat.
+      json = Sidekiq.dump_json(data)
+      manager.heartbeat(key, data, json)
     end
 
     def stop_heartbeat
@@ -89,5 +85,6 @@ module Sidekiq
         end
       end
     end
+
   end
 end

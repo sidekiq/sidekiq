@@ -132,26 +132,27 @@ module Sidekiq
       @threads[proxy_id] = thr
     end
 
-    def heartbeat(key, data)
+    def heartbeat(key, data, json)
       proctitle = ['sidekiq', Sidekiq::VERSION]
       proctitle << data['tag'] unless data['tag'].empty?
       proctitle << "[#{@busy.size} of #{data['concurrency']} busy]"
       proctitle << 'stopping' if stopped?
       $0 = proctitle.join(' ')
 
-      ❤(key)
+      ❤(key, json)
       after(5) do
-        heartbeat(key, data)
+        heartbeat(key, data, json)
       end
     end
 
     private
 
-    def ❤(key)
+    def ❤(key, json)
       begin
-        _, _, msg = Sidekiq.redis do |conn|
+        _, _, _, msg = Sidekiq.redis do |conn|
           conn.multi do
-            conn.hmset(key, 'busy', @busy.size, 'beat', Time.now.to_f)
+            conn.sadd('processes', key)
+            conn.hmset(key, 'info', json, 'busy', @busy.size, 'beat', Time.now.to_f)
             conn.expire(key, 60)
             conn.rpop("#{key}-signals")
           end

@@ -1,6 +1,8 @@
 3.2.2
 -----------
 
+- Fix issue which could cause Sidekiq workers to disappear from the Busy
+  tab while still being active [#1884]
 - Add "Back to App" button in Web UI.  You can set the button link via
   `Sidekiq::Web.app_url = 'http://www.mysite.com'` [#1875, seuros]
 - Add process tag (`-g tag`) to the Busy page so you can differentiate processes at a glance. [seuros, #1878]
