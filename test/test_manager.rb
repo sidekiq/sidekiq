@@ -104,7 +104,7 @@ class TestManager < Sidekiq::Test
 
       describe 'when manager is active' do
         before do
-          @mgr.heartbeat('identity', heartbeat_data)
+          @mgr.heartbeat('identity', heartbeat_data, Sidekiq.dump_json(heartbeat_data))
         end
 
         it 'sets useful info to proctitle' do
@@ -126,7 +126,7 @@ class TestManager < Sidekiq::Test
 
           @mgr.stop
           @mgr.processor_done(@processor)
-          @mgr.heartbeat('identity', heartbeat_data)
+          @mgr.heartbeat('identity', heartbeat_data, Sidekiq.dump_json(heartbeat_data))
 
           @processor.verify
         end
