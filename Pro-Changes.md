@@ -7,6 +7,7 @@ Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and
 -----------
 
 - Fix job filtering within the Dead tab.
+- Add APIs and wiki documentation for invalidating jobs within a batch.
 
 
 1.7.4
