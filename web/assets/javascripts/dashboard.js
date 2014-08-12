@@ -214,6 +214,8 @@ var updateStatsSummary = function(data) {
   $('ul.summary li.scheduled span.count').html(data.scheduled.numberWithDelimiter())
   $('ul.summary li.retries span.count').html(data.retries.numberWithDelimiter())
   $('ul.summary li.enqueued span.count').html(data.enqueued.numberWithDelimiter())
+  $('ul.summary li.dead span.count').html(data.dead.numberWithDelimiter())
+
 }
 
 var updateRedisStats = function(data) {
