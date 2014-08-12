@@ -1,6 +1,8 @@
 3.2.2
 -----------
 
+- **This version of Sidekiq will no longer start on Ruby 1.9.**  Sidekiq
+  3 does not support MRI 1.9 but we've allowed it to run before now.
 - Fix issue which could cause Sidekiq workers to disappear from the Busy
   tab while still being active [#1884]
 - Add "Back to App" button in Web UI.  You can set the button link via
