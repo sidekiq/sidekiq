@@ -221,6 +221,7 @@ module Sidekiq
           enqueued:   sidekiq_stats.enqueued,
           scheduled:  sidekiq_stats.scheduled_size,
           retries:    sidekiq_stats.retry_size,
+          dead:       sidekiq_stats.dead_size,
           default_latency: queue.latency,
         },
         redis: redis_stats
