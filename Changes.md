@@ -1,3 +1,8 @@
+3.2.3
+-----------
+
+- Add queues list for each process to the Busy page. [davetoxa, #1897]
+
 3.2.2
 -----------
 
