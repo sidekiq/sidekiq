@@ -1,3 +1,9 @@
+#
+# Simple middleware to save the current locale and restore it when the job executes.
+# Use it by requiring it in your initializer:
+#
+#     require 'sidekiq/middleware/i18n'
+#
 module Sidekiq::Middleware::I18n
   # Get the current locale and store it in the message
   # to be sent to Sidekiq.
