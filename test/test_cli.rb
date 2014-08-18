@@ -241,6 +241,35 @@ class TestCli < Sidekiq::Test
       end
     end
 
+    describe 'with an empty config file' do
+      before do
+        @tmp_file = Tempfile.new('sidekiq-test')
+        @tmp_path = @tmp_file.path
+        @tmp_file.close!
+      end
+
+      after do
+        File.unlink @tmp_path if File.exist? @tmp_path
+      end
+
+      it 'takes a path' do
+        @cli.parse(['sidekiq', '-C', @tmp_path])
+        assert_equal @tmp_path, Sidekiq.options[:config_file]
+      end
+
+      it 'should have an identical options hash, except for config_file' do
+        @cli.parse(['sidekiq'])
+        old_options = Sidekiq.options.clone
+
+        @cli.parse(['sidekiq', '-C', @tmp_path])
+        new_options = Sidekiq.options.clone
+        refute_equal old_options, new_options
+
+        new_options.delete(:config_file)
+        assert_equal old_options, new_options
+      end
+    end
+
     describe 'with config file and flags' do
       before do
         # We need an actual file here.

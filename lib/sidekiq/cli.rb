@@ -353,7 +353,7 @@ module Sidekiq
     def parse_config(cfile)
       opts = {}
       if File.exist?(cfile)
-        opts = YAML.load(ERB.new(IO.read(cfile)).result)
+        opts = YAML.load(ERB.new(IO.read(cfile)).result) || opts
         opts = opts.merge(opts.delete(environment) || {})
         parse_queues(opts, opts.delete(:queues) || [])
       else
