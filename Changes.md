@@ -2,6 +2,7 @@
 -----------
 
 - Add queues list for each process to the Busy page. [davetoxa, #1897]
+- Fix for crash caused by empty config file. [jordan0day, #1901]
 
 3.2.2
 -----------
