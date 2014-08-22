@@ -3,6 +3,8 @@
 
 - Add queues list for each process to the Busy page. [davetoxa, #1897]
 - Fix for crash caused by empty config file. [jordan0day, #1901]
+- Add worker generator. You can generate a worker and it test file  with
+  `rails g sidekiq:worker User`, that will create UserWorker. [seuros, #1909]
 
 3.2.2
 -----------
