@@ -3,7 +3,7 @@ require 'rails/generators/named_base'
 module Sidekiq
   module Generators # :nodoc:
     class WorkerGenerator < ::Rails::Generators::NamedBase # :nodoc:
-      desc 'This generator creates a sidekiq worker file at app/workers'
+      desc 'This generator creates a Sidekiq Worker in app/workers and a corresponding test'
 
       check_class_collision suffix: 'Worker'
 
