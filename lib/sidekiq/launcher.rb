@@ -49,7 +49,7 @@ module Sidekiq
         poller.terminate if poller.alive?
 
         manager.async.stop(:shutdown => true, :timeout => @options[:timeout])
-        manager.wait(:shutdown)
+        manager.wait(:shutdown) if manager.alive?
 
         # Requeue everything in case there was a worker who grabbed work while stopped
         Sidekiq::Fetcher.strategy.bulk_requeue([], @options)
