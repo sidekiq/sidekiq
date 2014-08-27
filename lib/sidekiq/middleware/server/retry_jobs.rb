@@ -86,7 +86,16 @@ module Sidekiq
           else
             queue
           end
-          msg['error_message'] = e.message[0..10_000]
+
+          # App code can stuff all sorts of crazy binary data into the error message
+          # that won't convert to JSON.
+          m = e.message[0..10_000]
+          if m.respond_to?(:scrub!)
+            m.force_encoding("utf-8")
+            m.scrub!
+          end
+
+          msg['error_message'] = m
           msg['error_class'] = e.class.name
           count = if msg['retry_count']
             msg['retried_at'] = Time.now.to_f

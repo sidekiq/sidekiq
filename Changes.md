@@ -1,6 +1,7 @@
 3.2.3
 -----------
 
+- Clean invalid bytes from error message before converting to JSON (requires Ruby 2.1+) [#1705]
 - Add queues list for each process to the Busy page. [davetoxa, #1897]
 - Fix for crash caused by empty config file. [jordan0day, #1901]
 - Add Rails Worker generator, `rails g sidekiq:worker User` will create `app/workers/user_worker.rb`. [seuros, #1909]
