@@ -1,4 +1,5 @@
 require 'sidekiq/scheduled'
+require 'sidekiq/api'
 
 module Sidekiq
   module Middleware
@@ -131,9 +132,6 @@ module Sidekiq
 
         private
 
-        DEAD_JOB_TIMEOUT = 180 * 24 * 60 * 60 # 6 months
-        MAX_JOBS = 10_000
-
         def retries_exhausted(worker, msg)
           logger.debug { "Dropping message after hitting the retry maximum: #{msg}" }
           begin
@@ -154,7 +152,7 @@ module Sidekiq
           Sidekiq.redis do |conn|
             conn.multi do
               conn.zadd('dead', now, payload)
-              conn.zremrangebyscore('dead', '-inf', now - DeadSet::DEAD_JOB_TIMEOUT)
+              conn.zremrangebyscore('dead', '-inf', now - DeadSet::TIMEOUT)
               conn.zremrangebyrank('dead', 0, -DeadSet::MAX_JOBS)
             end
           end

@@ -326,7 +326,7 @@ module Sidekiq
         Sidekiq.redis do |conn|
           conn.multi do
             conn.zadd('dead', now, message)
-            conn.zremrangebyscore('dead', '-inf', now - DeadSet::DEAD_JOB_TIMEOUT)
+            conn.zremrangebyscore('dead', '-inf', now - DeadSet::TIMEOUT)
             conn.zremrangebyrank('dead', 0, - DeadSet::MAX_JOBS)
           end
         end
@@ -520,7 +520,7 @@ module Sidekiq
   # Allows enumeration of dead jobs within Sidekiq.
   #
   class DeadSet < JobSet
-    DEAD_JOB_TIMEOUT = 180 * 24 * 60 * 60 # 6 months
+    TIMEOUT = 180 * 24 * 60 * 60 # 6 months
     MAX_JOBS = 10_000
 
     def initialize
