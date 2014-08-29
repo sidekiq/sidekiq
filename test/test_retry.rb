@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'helper'
 require 'sidekiq/scheduled'
 require 'sidekiq/middleware/server/retry_jobs'
@@ -51,6 +52,7 @@ class TestRetry < Sidekiq::Test
     end
 
     it 'handles zany characters in error message, #1705' do
+      skip 'skipped! test requires ruby 2.1+' if RUBY_VERSION <= '2.1.0'
       @redis.expect :zadd, 1, ['retry', String, String]
       msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => 2 }
       msg2 = msg.dup
