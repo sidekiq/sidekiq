@@ -675,10 +675,12 @@ div.interval-slider input {
 .args {
   overflow-y: auto;
   max-height: 100px;
+  word-break: break-all;
 }
 .args-extended {
   overflow-y: scroll;
   max-height: 500px;
+  word-break: break-all;
 }
 
 
