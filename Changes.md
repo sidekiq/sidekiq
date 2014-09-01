@@ -5,6 +5,8 @@
 - Add queues list for each process to the Busy page. [davetoxa, #1897]
 - Fix for crash caused by empty config file. [jordan0day, #1901]
 - Add Rails Worker generator, `rails g sidekiq:worker User` will create `app/workers/user_worker.rb`. [seuros, #1909]
+- Fix Web UI rendering with huge job arguments [jhass, #1918]
+- Minor refactoring of Sidekiq::Client internals, for Sidekiq Pro. [#1919]
 
 3.2.2
 -----------
