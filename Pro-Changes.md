@@ -11,6 +11,12 @@ Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and
   Sidekiq 3.2.3. [#1919]
 
 
+1.7.6
+-----------
+
+- Quick release to verify #1919
+
+
 1.7.5
 -----------
 
