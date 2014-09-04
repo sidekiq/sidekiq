@@ -25,7 +25,7 @@ class TestCli < Sidekiq::Test
     end
 
     it 'does not require the specified Ruby code' do
-      @cli.parse(['sidekiq', '-r', './test/fake_env.rb'])
+      @cli.parse(['sidekiq', '-r', './test/fake_env'])
       refute($LOADED_FEATURES.any? { |x| x =~ /fake_env/ })
       assert @cli.valid?
     end
