@@ -80,6 +80,12 @@ module Sidekiq
           raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
 
           raise e unless msg['retry']
+          attempt_retry(worker, msg, queue, e)
+        end
+
+        private
+
+        def attempt_retry(worker, msg, queue, exception)
           max_retry_attempts = retry_attempts_from(msg['retry'], @max_retries)
 
           msg['queue'] = if msg['retry_queue']
@@ -90,14 +96,14 @@ module Sidekiq
 
           # App code can stuff all sorts of crazy binary data into the error message
           # that won't convert to JSON.
-          m = e.message[0..10_000]
+          m = exception.message[0..10_000]
           if m.respond_to?(:scrub!)
             m.force_encoding("utf-8")
             m.scrub!
           end
 
           msg['error_message'] = m
-          msg['error_class'] = e.class.name
+          msg['error_class'] = exception.class.name
           count = if msg['retry_count']
             msg['retried_at'] = Time.now.to_f
             msg['retry_count'] += 1
@@ -107,11 +113,11 @@ module Sidekiq
           end
 
           if msg['backtrace'] == true
-            msg['error_backtrace'] = e.backtrace
+            msg['error_backtrace'] = exception.backtrace
           elsif msg['backtrace'] == false
             # do nothing
           elsif msg['backtrace'].to_i != 0
-            msg['error_backtrace'] = e.backtrace[0..msg['backtrace'].to_i]
+            msg['error_backtrace'] = exception.backtrace[0..msg['backtrace'].to_i]
           end
 
           if count < max_retry_attempts
@@ -127,10 +133,8 @@ module Sidekiq
             retries_exhausted(worker, msg)
           end
 
-          raise e
+          raise exception
         end
-
-        private
 
         def retries_exhausted(worker, msg)
           logger.debug { "Dropping message after hitting the retry maximum: #{msg}" }
