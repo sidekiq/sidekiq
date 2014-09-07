@@ -1,3 +1,9 @@
+3.2.4
+-----------
+
+- Fix issue preventing ActionMailer sends working in some cases with
+  Rails 4. [pbhogan, #1923]
+
 3.2.3
 -----------
 
