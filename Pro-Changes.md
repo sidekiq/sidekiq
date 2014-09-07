@@ -6,7 +6,7 @@ Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and
 1.8.0
 -----------
 
-- Fix long standing Batch race condition where Batches can complete
+- Fix race condition where Batches can complete
   before they have been fully defined or only half-defined. Requires
   Sidekiq 3.2.3. [#1919]
 
