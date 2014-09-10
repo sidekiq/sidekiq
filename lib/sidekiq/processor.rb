@@ -49,7 +49,7 @@ module Sidekiq
 
         stats(worker, msg, queue) do
           Sidekiq.server_middleware.invoke(worker, msg, queue) do
-            worker.perform(*cloned(msg['args']))
+            execute_job(worker, cloned(msg['args']))
           end
         end
       rescue Sidekiq::Shutdown
@@ -69,6 +69,10 @@ module Sidekiq
 
     def inspect
       "<Processor##{object_id.to_s(16)}>"
+    end
+
+    def execute_job(worker, cloned_args)
+      worker.perform(*cloned_args)
     end
 
     private

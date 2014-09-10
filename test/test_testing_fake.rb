@@ -261,5 +261,11 @@ class TestTesting < Sidekiq::Test
       assert_equal 1, FirstWorker.count
       assert_equal 1, SecondWorker.count
     end
+
+    it 'can execute a job' do
+      worker = Minitest::Mock.new
+      worker.expect(:perform, nil, [1, 2, 3])
+      DirectWorker.execute_job(worker, [1, 2, 3])
+    end
   end
 end
