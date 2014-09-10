@@ -52,6 +52,7 @@ module Sidekiq
         manager.wait(:shutdown) if manager.alive?
 
         # Requeue everything in case there was a worker who grabbed work while stopped
+        # This call is a no-op in Sidekiq but necessary for Sidekiq Pro.
         Sidekiq::Fetcher.strategy.bulk_requeue([], @options)
 
         stop_heartbeat
