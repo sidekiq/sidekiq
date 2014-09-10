@@ -153,7 +153,7 @@ module Sidekiq
         while job = jobs.shift do
           worker = new
           worker.jid = job['jid']
-          worker.perform(*job['args'])
+          execute_job(worker, job['args'])
         end
       end
 
@@ -163,7 +163,11 @@ module Sidekiq
         job = jobs.shift
         worker = new
         worker.jid = job['jid']
-        worker.perform(*job['args'])
+        execute_job(worker, job['args'])
+      end
+
+      def execute_job(worker, args)
+        worker.perform(*args)
       end
     end
 
