@@ -1,3 +1,9 @@
+2.17.8
+-----------
+
+- Tighten allowed gem versions to prevent future incompatibility.  Fixes
+  breakage with Celluloid 0.16.
+
 2.17.7
 -----------
 
