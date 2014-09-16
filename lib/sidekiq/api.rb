@@ -239,7 +239,8 @@ module Sidekiq
     end
 
     def enqueued_at
-      Time.at(@item['enqueued_at'] || 0).utc
+      fail ArgumentError, 'Invalid value for enqueued_at, must be numeric' unless @item['enqueued_at'].class <= Numeric
+      Time.at(@item['enqueued_at'].to_f).utc
     end
 
     def queue

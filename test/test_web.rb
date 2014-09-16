@@ -468,7 +468,8 @@ class TestWeb < Sidekiq::Test
       score = Time.now.to_f
       msg = { 'class' => 'HardWorker',
               'args' => ['bob', 1, Time.now.to_f],
-              'jid' => SecureRandom.hex(12) }
+              'jid' => SecureRandom.hex(12),
+              'enqueued_at' => Time.now.to_f}
       Sidekiq.redis do |conn|
         conn.zadd('schedule', score, Sidekiq.dump_json(msg))
       end
@@ -483,7 +484,8 @@ class TestWeb < Sidekiq::Test
               'error_class' => 'RuntimeError',
               'retry_count' => 0,
               'failed_at' => Time.now.to_f,
-              'jid' => SecureRandom.hex(12) }
+              'jid' => SecureRandom.hex(12),
+              'enqueued_at' => Time.now.to_f }
       score = Time.now.to_f
       Sidekiq.redis do |conn|
         conn.zadd('retry', score, Sidekiq.dump_json(msg))
