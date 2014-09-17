@@ -3,6 +3,12 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+HEAD
+-----------
+
+- Add '$' batch success token to the pubsub support. [#1953]
+
+
 1.8.0
 -----------
 
