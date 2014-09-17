@@ -133,14 +133,13 @@ module Sidekiq
     end
 
     get "/retries/:key" do
-      halt 404 unless params['key']
       @retry = Sidekiq::RetrySet.new.fetch(*parse_params(params['key'])).first
       redirect "#{root_path}retries" if @retry.nil?
       erb :retry
     end
 
     post '/retries' do
-      halt 404 unless params['key']
+      redirect request.path unless params['key']
 
       params['key'].each do |key|
         job = Sidekiq::RetrySet.new.fetch(*parse_params(key)).first
@@ -160,7 +159,6 @@ module Sidekiq
     end
 
     post "/retries/:key" do
-      halt 404 unless params['key']
       job = Sidekiq::RetrySet.new.fetch(*parse_params(params['key'])).first
       retry_or_delete_or_kill job, params if job
       redirect_with_query("#{root_path}retries")
@@ -174,14 +172,13 @@ module Sidekiq
     end
 
     get "/scheduled/:key" do
-      halt 404 unless params['key']
       @job = Sidekiq::ScheduledSet.new.fetch(*parse_params(params['key'])).first
       redirect "#{root_path}scheduled" if @job.nil?
       erb :scheduled_job_info
     end
 
     post '/scheduled' do
-      halt 404 unless params['key']
+      redirect request.path unless params['key']
 
       params['key'].each do |key|
         job = Sidekiq::ScheduledSet.new.fetch(*parse_params(key)).first
