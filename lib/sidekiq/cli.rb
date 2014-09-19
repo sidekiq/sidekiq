@@ -138,11 +138,11 @@ module Sidekiq
         end
       when 'TTIN'
         Thread.list.each do |thread|
-          Sidekiq.logger.info "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
+          Sidekiq.logger.warn "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
           if thread.backtrace
-            Sidekiq.logger.info thread.backtrace.join("\n")
+            Sidekiq.logger.warn thread.backtrace.join("\n")
           else
-            Sidekiq.logger.info "<no backtrace available>"
+            Sidekiq.logger.warn "<no backtrace available>"
           end
         end
       end
