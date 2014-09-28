@@ -17,7 +17,19 @@ module Sidekiq
         msg = target.public_send(method_name, *args)
         # The email method can return nil, which causes ActionMailer to return
         # an undeliverable empty message.
-        msg.deliver if msg && (msg.to || msg.cc || msg.bcc) && msg.from
+        deliver(msg) if msg && (msg.to || msg.cc || msg.bcc) && msg.from
+      end
+
+      private
+
+      def deliver(msg)
+        if msg.respond_to?(:deliver_now)
+          # Rails 4.2/5.0
+          msg.deliver_now
+        else
+          # Rails 3.2/4.0/4.1
+          msg.deliver
+        end
       end
     end
 
