@@ -1,3 +1,8 @@
+HEAD
+-----------
+
+- Use Rails 4.2's new `deliver_now` method if possible. [#1933]
+
 3.2.5
 -----------
 
