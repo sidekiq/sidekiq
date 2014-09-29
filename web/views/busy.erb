@@ -27,7 +27,11 @@
         <%= "#{process['hostname']}:#{process['pid']}" %>
         <span class="label label-success"><%= process.tag %></span>
         <% process.labels.each do |label| %>
-          <span class="label label-info"><%= label %></span>
+          <% if label.is_a?(Array) %>
+            <span class="label label-<%= label.last %>"><%= label.first %></span>
+          <% else %>
+            <span class="label label-info"><%= label %></span>
+          <% end %>
         <% end %>
         <br>
         <b><%= "#{t('Queues')}: " %></b>
