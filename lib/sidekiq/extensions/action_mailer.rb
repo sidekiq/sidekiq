@@ -24,6 +24,7 @@ module Sidekiq
 
       def deliver(msg)
         if msg.respond_to?(:deliver_now)
+          ActiveSupport::Deprecation.warn('#delay.deliver has been deprecated. Use ActionMailer #deliver_later method instead')
           # Rails 4.2/5.0
           msg.deliver_now
         else
