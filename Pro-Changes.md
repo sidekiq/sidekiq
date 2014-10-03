@@ -6,6 +6,8 @@ Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and
 HEAD
 -----------
 
+- Add new expiring jobs feature [#1982]
+- Show batch expiration on Batch details page [#1981]
 - Add '$' batch success token to the pubsub support. [#1953]
 
 
