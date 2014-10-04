@@ -75,6 +75,7 @@ module Sidekiq
       # We only do this if poll_interval is unset (the default).
       def poll_interval
         Sidekiq.options[:poll_interval] ||= begin
+          cleanup_dead_process_records
           pcount = Sidekiq.redis {|c| c.scard('processes') } || 1
           pcount * 15
         end
