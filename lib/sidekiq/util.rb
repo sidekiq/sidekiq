@@ -44,5 +44,21 @@ module Sidekiq
       end
     end
 
+    # Cleans up dead processes recorded in Redis.
+    def cleanup_dead_process_records
+      Sidekiq.redis do |conn|
+        procs = conn.smembers('processes').sort
+        heartbeats = conn.pipelined do
+          procs.each do |key|
+            conn.hget(key, 'beat')
+          end
+        end
+
+        heartbeats.each_with_index do |beat, i|
+          conn.srem('processes', procs[i]) if beat.nil?
+        end
+      end
+    end
+
   end
 end
