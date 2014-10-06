@@ -76,8 +76,9 @@ module Sidekiq
       # We only do this if poll_interval is unset (the default).
       def poll_interval
         Sidekiq.options[:poll_interval] ||= begin
-          Sidekiq::ProcessSet.cleanup
-          pcount = Sidekiq.redis {|c| c.scard('processes') } || 1
+          ps = Sidekiq::ProcessSet.new
+          pcount = ps.size
+          pcount = 1 if pcount == 0
           pcount * 15
         end
       end
