@@ -3,7 +3,7 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
-HEAD
+1.9.0
 -----------
 
 - Add new expiring jobs feature [#1982]
