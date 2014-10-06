@@ -1,6 +1,7 @@
 require 'sidekiq'
 require 'sidekiq/util'
 require 'sidekiq/actor'
+require 'sidekiq/api'
 
 module Sidekiq
   module Scheduled
@@ -75,7 +76,7 @@ module Sidekiq
       # We only do this if poll_interval is unset (the default).
       def poll_interval
         Sidekiq.options[:poll_interval] ||= begin
-          cleanup_dead_process_records
+          Sidekiq::ProcessSet.cleanup
           pcount = Sidekiq.redis {|c| c.scard('processes') } || 1
           pcount * 15
         end
