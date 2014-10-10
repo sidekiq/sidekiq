@@ -7,7 +7,8 @@ HEAD
 3.2.5
 -----------
 
-- Lock Celluloid to 0.15.2 due to bugs in 0.16.0.
+- Lock Celluloid to 0.15.2 due to bugs in 0.16.0.  This prevents the
+  "hang on shutdown" problem with Celluloid 0.16.0.
 
 3.2.4
 -----------
