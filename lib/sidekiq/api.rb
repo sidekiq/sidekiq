@@ -31,7 +31,7 @@ module Sidekiq
 
         lengths = conn.pipelined do
           queues.each do |queue|
-            conn.llen("queue:#{queue}")
+            conn.zcard("queue:#{queue}")
           end
         end
 
@@ -129,7 +129,7 @@ module Sidekiq
     end
 
     def size
-      Sidekiq.redis { |con| con.llen(@rname) }
+      Sidekiq.redis { |con| con.zcard(@rname) }
     end
 
     # Sidekiq Pro overrides this
@@ -139,7 +139,7 @@ module Sidekiq
 
     def latency
       entry = Sidekiq.redis do |conn|
-        conn.lrange(@rname, -1, -1)
+        conn.zrange(@rname, -1, -1)
       end.first
       return 0 unless entry
       Time.now.to_f - Sidekiq.load_json(entry)['enqueued_at']
@@ -155,7 +155,7 @@ module Sidekiq
         range_start = page * page_size - deleted_size
         range_end   = page * page_size - deleted_size + (page_size - 1)
         entries = Sidekiq.redis do |conn|
-          conn.lrange @rname, range_start, range_end
+          conn.zrevrange @rname, range_start, range_end
         end
         break if entries.empty?
         page += 1
@@ -254,7 +254,7 @@ module Sidekiq
     # Remove this job from the queue.
     def delete
       count = Sidekiq.redis do |conn|
-        conn.lrem("queue:#{@queue}", 1, @value)
+        conn.zrem("queue:#{@queue}", @value)
       end
       count != 0
     end

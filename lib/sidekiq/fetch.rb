@@ -99,8 +99,23 @@ module Sidekiq
     end
 
     def retrieve_work
-      work = Sidekiq.redis { |conn| conn.brpop(*queues_cmd) }
-      UnitOfWork.new(*work) if work
+      work = nil
+
+      Sidekiq.redis do |conn|
+        queues.find do |queue|
+          response = conn.multi do
+            conn.zrange(queue, 0, 0)
+            conn.zremrangebyrank(queue, 0, 0)
+          end.flatten(1)
+
+          next if response.length == 1
+          work = [queue, response.first]
+          break
+        end
+      end
+
+      return UnitOfWork.new(*work) if work
+      sleep 1; nil
     end
 
     # By leaving this as a class method, it can be pluggable and used by the Manager actor. Making it
@@ -118,7 +133,9 @@ module Sidekiq
       Sidekiq.redis do |conn|
         conn.pipelined do
           jobs_to_requeue.each do |queue, jobs|
-            conn.rpush("queue:#{queue}", jobs)
+            jobs.each do |job|
+              conn.zadd("queue:#{queue}", 0, job)
+            end
           end
         end
       end
@@ -138,19 +155,13 @@ module Sidekiq
 
       def requeue
         Sidekiq.redis do |conn|
-          conn.rpush("queue:#{queue_name}", message)
+          conn.zadd("queue:#{queue_name}", 0, message)
         end
       end
     end
 
-    # Creating the Redis#brpop command takes into account any
-    # configured queue weights. By default Redis#brpop returns
-    # data from the first queue that has pending elements. We
-    # recreate the queue command each time we invoke Redis#brpop
-    # to honor weights and avoid queue starvation.
-    def queues_cmd
-      queues = @strictly_ordered_queues ? @unique_queues.dup : @queues.shuffle.uniq
-      queues << Sidekiq::Fetcher::TIMEOUT
+    def queues
+      @strictly_ordered_queues ? @unique_queues.dup : @queues.shuffle.uniq
     end
   end
 end

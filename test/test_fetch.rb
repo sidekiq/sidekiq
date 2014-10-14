@@ -7,7 +7,7 @@ class TestFetcher < Sidekiq::Test
       Sidekiq.redis = { :url => REDIS_URL, :namespace => 'fuzzy' }
       Sidekiq.redis do |conn|
         conn.flushdb
-        conn.rpush('queue:basic', 'msg')
+        conn.zadd('queue:basic', 0, 'msg')
       end
     end
 
@@ -28,10 +28,22 @@ class TestFetcher < Sidekiq::Test
       assert_nil uow.acknowledge
     end
 
+    it 'respects priority' do
+      fetch = Sidekiq::BasicFetch.new(:queues => ['basic', 'bar'])
+
+      Sidekiq.redis { |conn| conn.zadd('queue:basic', -1, 'other_msg') }
+      uow = fetch.retrieve_work
+      assert_equal 'other_msg', uow.message
+
+      uow = fetch.retrieve_work
+      refute_nil uow
+      assert_equal 'msg', uow.message
+    end
+
     it 'retrieves with strict setting' do
       fetch = Sidekiq::BasicFetch.new(:queues => ['basic', 'bar', 'bar'], :strict => true)
-      cmd = fetch.queues_cmd
-      assert_equal cmd, ['queue:basic', 'queue:bar', 1]
+      cmd = fetch.queues
+      assert_equal cmd, ['queue:basic', 'queue:bar']
     end
 
     it 'bulk requeues' do

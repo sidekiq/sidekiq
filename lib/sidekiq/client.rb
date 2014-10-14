@@ -192,9 +192,14 @@ module Sidekiq
         end)
       else
         q = payloads.first['queue']
-        to_push = payloads.map { |entry| Sidekiq.dump_json(entry) }
+
         conn.sadd('queues', q)
-        conn.lpush("queue:#{q}", to_push)
+
+        payloads.each do |entry|
+          to_push  = Sidekiq.dump_json(entry)
+          priority = entry['priority'] || 0
+          conn.zadd("queue:#{q}", priority, to_push)
+        end
       end
     end
 
@@ -223,6 +228,10 @@ module Sidekiq
       normalized_item['queue'] = normalized_item['queue'].to_s
       normalized_item['jid'] ||= SecureRandom.hex(12)
       normalized_item['enqueued_at'] ||= Time.now.to_f
+      if normalized_item['priority'].is_a?(Proc)
+        normalized_item['priority'] = normalized_item['priority'].call(*item['args'])
+      end
+      normalized_item['priority'] ||= 0
       normalized_item
     end
 

@@ -52,14 +52,14 @@ class TestClient < Sidekiq::Test
 
     describe 'as instance' do
       it 'can push' do
-        @redis.expect :lpush, 1, ['queue:default', Array]
+        @redis.expect :zadd, 1, ['queue:default', 0, String]
         client = Sidekiq::Client.new
         jid = client.push('class' => 'Blah', 'args' => [1,2,3])
         assert_equal 24, jid.size
       end
 
       it 'allows local middleware modification' do
-        @redis.expect :lpush, 1, ['queue:default', Array]
+        @redis.expect :zadd, 1, ['queue:default', 0, String]
         $called = false
         mware = Class.new { def call(worker_klass,msg,q,r); $called = true; msg;end }
         client = Sidekiq::Client.new
@@ -75,7 +75,7 @@ class TestClient < Sidekiq::Test
     end
 
     it 'pushes messages to redis' do
-      @redis.expect :lpush, 1, ['queue:foo', Array]
+      @redis.expect :zadd, 1, ['queue:foo', 0, String]
       pushed = Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1, 2])
       assert pushed
       assert_equal 24, pushed.size
@@ -83,7 +83,7 @@ class TestClient < Sidekiq::Test
     end
 
     it 'pushes messages to redis using a String class' do
-      @redis.expect :lpush, 1, ['queue:foo', Array]
+      @redis.expect :zadd, 1, ['queue:foo', 0, String]
       pushed = Sidekiq::Client.push('queue' => 'foo', 'class' => 'MyWorker', 'args' => [1, 2])
       assert pushed
       assert_equal 24, pushed.size
@@ -99,21 +99,21 @@ class TestClient < Sidekiq::Test
     end
 
     it 'handles perform_async' do
-      @redis.expect :lpush, 1, ['queue:default', Array]
+      @redis.expect :zadd, 1, ['queue:default', 0, String]
       pushed = MyWorker.perform_async(1, 2)
       assert pushed
       @redis.verify
     end
 
     it 'enqueues messages to redis' do
-      @redis.expect :lpush, 1, ['queue:default', Array]
+      @redis.expect :zadd, 1, ['queue:default', 0, String]
       pushed = Sidekiq::Client.enqueue(MyWorker, 1, 2)
       assert pushed
       @redis.verify
     end
 
     it 'enqueues messages to redis' do
-      @redis.expect :lpush, 1, ['queue:custom_queue', Array]
+      @redis.expect :zadd, 1, ['queue:custom_queue', 0, String]
       pushed = Sidekiq::Client.enqueue_to(:custom_queue, MyWorker, 1, 2)
       assert pushed
       @redis.verify
@@ -127,7 +127,7 @@ class TestClient < Sidekiq::Test
     end
 
     it 'enqueues messages to redis (delayed into past, custom queue)' do
-      @redis.expect :lpush, 1, ['queue:custom_queue', Array]
+      @redis.expect :zadd, 1, ['queue:custom_queue', 0, String]
       pushed = Sidekiq::Client.enqueue_to_in(:custom_queue, -3.minutes, MyWorker, 1, 2)
       assert pushed
       @redis.verify
@@ -146,7 +146,7 @@ class TestClient < Sidekiq::Test
     end
 
     it 'enqueues to the named queue' do
-      @redis.expect :lpush, 1, ['queue:flimflam', Array]
+      @redis.expect :zadd, 1, ['queue:flimflam', 0, String]
       pushed = QueuedWorker.perform_async(1, 2)
       assert pushed
       @redis.verify
@@ -155,6 +155,21 @@ class TestClient < Sidekiq::Test
     it 'retrieves queues' do
       @redis.expect :smembers, ['bob'], ['queues']
       assert_equal ['bob'], Sidekiq::Queue.all.map(&:name)
+    end
+
+    class PrioritizedWorker
+      include Sidekiq::Worker
+      sidekiq_options :priority => lambda { |a, b| a * b }
+
+      def perform(a, b)
+      end
+    end
+
+    it 'enqueues to the right priority' do
+      @redis.expect :zadd, 1, ['queue:default', 6, String]
+      pushed = PrioritizedWorker.perform_async(2, 3)
+      assert pushed
+      @redis.verify
     end
   end
 

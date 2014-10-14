@@ -80,7 +80,7 @@ class TestWeb < Sidekiq::Test
 
     it 'can delete a queue' do
       Sidekiq.redis do |conn|
-        conn.rpush('queue:foo', '{}')
+        conn.zadd('queue:foo', 0, '{}')
         conn.sadd('queues', 'foo')
       end
 
@@ -98,9 +98,9 @@ class TestWeb < Sidekiq::Test
 
     it 'can delete a job' do
       Sidekiq.redis do |conn|
-        conn.rpush('queue:foo', "{}")
-        conn.rpush('queue:foo', "{\"foo\":\"bar\"}")
-        conn.rpush('queue:foo', "{\"foo2\":\"bar2\"}")
+        conn.zadd('queue:foo', 0, "{}")
+        conn.zadd('queue:foo', 0, "{\"foo\":\"bar\"}")
+        conn.zadd('queue:foo', 0, "{\"foo2\":\"bar2\"}")
       end
 
       get '/queues/foo'
@@ -110,7 +110,7 @@ class TestWeb < Sidekiq::Test
       assert_equal 302, last_response.status
 
       Sidekiq.redis do |conn|
-        refute conn.lrange('queue:foo', 0, -1).include?("{\"foo\":\"bar\"}")
+        refute conn.zrange('queue:foo', 0, -1).include?("{\"foo\":\"bar\"}")
       end
     end
 
