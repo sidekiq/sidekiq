@@ -1,4 +1,4 @@
-HEAD
+3.2.6
 -----------
 
 - Deprecate delay extension for ActionMailer 4.2+ . [#1933]
