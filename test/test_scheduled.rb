@@ -44,10 +44,10 @@ class TestScheduled < Sidekiq::Test
         @poller.poll
 
         Sidekiq.redis do |conn|
-          assert_equal 0, conn.llen("queue:queue_1")
-          assert_equal 1, conn.llen("queue:queue_2")
-          assert_equal 0, conn.llen("queue:queue_5")
-          assert_equal 1, conn.llen("queue:queue_6")
+          assert_equal 0, conn.zcard("queue:queue_1")
+          assert_equal 1, conn.zcard("queue:queue_2")
+          assert_equal 0, conn.zcard("queue:queue_5")
+          assert_equal 1, conn.zcard("queue:queue_6")
         end
       ensure
         Sidekiq.client_middleware.remove Stopper
@@ -68,14 +68,14 @@ class TestScheduled < Sidekiq::Test
         @poller.poll
 
         Sidekiq.redis do |conn|
-          assert_equal 1, conn.llen("queue:queue_1")
-          assert_equal enqueued_time.to_f, Sidekiq.load_json(conn.lrange("queue:queue_1", 0, -1)[0])['enqueued_at']
-          assert_equal 1, conn.llen("queue:queue_2")
-          assert_equal enqueued_time.to_f, Sidekiq.load_json(conn.lrange("queue:queue_2", 0, -1)[0])['enqueued_at']
-          assert_equal 1, conn.llen("queue:queue_4")
-          assert_equal enqueued_time.to_f, Sidekiq.load_json(conn.lrange("queue:queue_4", 0, -1)[0])['enqueued_at']
-          assert_equal 1, conn.llen("queue:queue_5")
-          assert_equal enqueued_time.to_f, Sidekiq.load_json(conn.lrange("queue:queue_5", 0, -1)[0])['enqueued_at']
+          assert_equal 1, conn.zcard("queue:queue_1")
+          assert_equal enqueued_time.to_f, Sidekiq.load_json(conn.zrange("queue:queue_1", 0, -1)[0])['enqueued_at']
+          assert_equal 1, conn.zcard("queue:queue_2")
+          assert_equal enqueued_time.to_f, Sidekiq.load_json(conn.zrange("queue:queue_2", 0, -1)[0])['enqueued_at']
+          assert_equal 1, conn.zcard("queue:queue_4")
+          assert_equal enqueued_time.to_f, Sidekiq.load_json(conn.zrange("queue:queue_4", 0, -1)[0])['enqueued_at']
+          assert_equal 1, conn.zcard("queue:queue_5")
+          assert_equal enqueued_time.to_f, Sidekiq.load_json(conn.zrange("queue:queue_5", 0, -1)[0])['enqueued_at']
         end
 
         assert_equal 1, @retry.size

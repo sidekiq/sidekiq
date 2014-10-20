@@ -23,18 +23,18 @@ class TestExtensions < Sidekiq::Test
 
     it 'allows delayed execution of ActiveRecord class methods' do
       assert_equal [], Sidekiq::Queue.all.map(&:name)
-      assert_equal 0, Sidekiq.redis {|c| c.llen('queue:default') }
+      assert_equal 0, Sidekiq.redis {|c| c.zcard('queue:default') }
       MyModel.delay.long_class_method
       assert_equal ['default'], Sidekiq::Queue.all.map(&:name)
-      assert_equal 1, Sidekiq.redis {|c| c.llen('queue:default') }
+      assert_equal 1, Sidekiq.redis {|c| c.zcard('queue:default') }
     end
 
     it 'uses and stringifies specified options' do
       assert_equal [], Sidekiq::Queue.all.map(&:name)
-      assert_equal 0, Sidekiq.redis {|c| c.llen('queue:notdefault') }
+      assert_equal 0, Sidekiq.redis {|c| c.zcard('queue:notdefault') }
       MyModel.delay(queue: :notdefault).long_class_method
       assert_equal ['notdefault'], Sidekiq::Queue.all.map(&:name)
-      assert_equal 1, Sidekiq.redis {|c| c.llen('queue:notdefault') }
+      assert_equal 1, Sidekiq.redis {|c| c.zcard('queue:notdefault') }
     end
 
     it 'allows delayed scheduling of AR class methods' do
@@ -57,10 +57,10 @@ class TestExtensions < Sidekiq::Test
 
     it 'allows delayed delivery of ActionMailer mails' do
       assert_equal [], Sidekiq::Queue.all.map(&:name)
-      assert_equal 0, Sidekiq.redis {|c| c.llen('queue:default') }
+      assert_equal 0, Sidekiq.redis {|c| c.zcard('queue:default') }
       UserMailer.delay.greetings(1, 2)
       assert_equal ['default'], Sidekiq::Queue.all.map(&:name)
-      assert_equal 1, Sidekiq.redis {|c| c.llen('queue:default') }
+      assert_equal 1, Sidekiq.redis {|c| c.zcard('queue:default') }
     end
 
     it 'allows delayed scheduling of AM mails' do

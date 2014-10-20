@@ -69,7 +69,7 @@ module Sidekiq
       @name = params[:name]
       @queue = Sidekiq::Queue.new(@name)
       (@current_page, @total_size, @messages) = page("queue:#{@name}", params[:page], @count)
-      @messages = @messages.map {|msg| Sidekiq::Job.new(msg, @name) }
+      @messages = @messages.map {|msg, priority| Sidekiq::Job.new(msg, @name) }
       erb :queue
     end
 

@@ -83,10 +83,10 @@ class TestApi < Sidekiq::Test
 
       it "returns a hash of queue and size in order" do
         Sidekiq.redis do |conn|
-          conn.rpush 'queue:foo', '{}'
+          conn.zadd 'queue:foo', 0, '{}'
           conn.sadd 'queues', 'foo'
 
-          3.times { conn.rpush 'queue:bar', '{}' }
+          3.times { |x| conn.zadd 'queue:bar', 0, "{\"id\": #{x}}" }
           conn.sadd 'queues', 'bar'
         end
 
@@ -104,10 +104,10 @@ class TestApi < Sidekiq::Test
 
       it "returns total enqueued jobs" do
         Sidekiq.redis do |conn|
-          conn.rpush 'queue:foo', '{}'
+          conn.zadd 'queue:foo', 0, '{}'
           conn.sadd 'queues', 'foo'
 
-          3.times { conn.rpush 'queue:bar', '{}' }
+          3.times { |x| conn.zadd 'queue:bar', 0, "{\"id\": #{x}}" }
           conn.sadd 'queues', 'bar'
         end
 

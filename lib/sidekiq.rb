@@ -101,7 +101,7 @@ module Sidekiq
   end
 
   def self.default_worker_options
-    defined?(@default_worker_options) ? @default_worker_options : { 'retry' => true, 'queue' => 'default' }
+    defined?(@default_worker_options) ? @default_worker_options : { 'retry' => true, 'queue' => 'default', 'priority' => 0 }
   end
 
   def self.load_json(string)
