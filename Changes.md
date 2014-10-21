@@ -1,3 +1,8 @@
+HEAD
+-----------
+
+- Fix typo for generator test file name [dlackty, #2016]
+
 3.2.6
 -----------
 
