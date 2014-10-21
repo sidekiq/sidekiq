@@ -140,8 +140,15 @@ module Sidekiq
       $0 = proctitle.join(' ')
 
       ❤(key, json)
-      after(5) do
-        heartbeat(key, data, json)
+
+      unless stopped?
+        after(5) do
+          heartbeat(key, data, json)
+        end
+
+      else
+        shutdown if @busy.empty?
+        return
       end
     end
 
