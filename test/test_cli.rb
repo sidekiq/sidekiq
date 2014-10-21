@@ -31,9 +31,9 @@ class TestCli < Sidekiq::Test
     end
 
     it 'does not boot rails' do
-      refute defined?(::Rails)
+      refute defined?(::Rails::Application)
       @cli.parse(['sidekiq', '-r', './myapp'])
-      refute defined?(::Rails)
+      refute defined?(::Rails::Application)
     end
 
     it 'changes concurrency' do
