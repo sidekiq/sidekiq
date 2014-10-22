@@ -29,7 +29,7 @@ module Sidekiq
         template_file = File.join(
             'spec/workers',
             class_path,
-            "#{file_name}_spec.rb"
+            "#{file_name}_worker_spec.rb"
         )
         template 'worker_spec.rb.erb', template_file
       end
@@ -38,7 +38,7 @@ module Sidekiq
         template_file = File.join(
             'test/workers',
             class_path,
-            "#{file_name}_test.rb"
+            "#{file_name}_worker_test.rb"
         )
         template 'worker_test.rb.erb', template_file
       end
