@@ -2,11 +2,12 @@ HEAD
 -----------
 
 - Fix typo for generator test file name [dlackty, #2016]
+- Add Sidekiq::Middleware::Chain#prepend [seuros, #2029]
 
 3.2.6
 -----------
 
-- Deprecate delay extension for ActionMailer 4.2+ . [#1933]
+- Deprecate delay extension for ActionMailer 4.2+ . [seuros, #1933]
 - Poll interval tuning now accounts for dead processes [epchris, #1984]
 - Add non-production environment to Web UI page titles [JacobEvelyn, #2004]
 
