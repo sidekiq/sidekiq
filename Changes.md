@@ -3,6 +3,7 @@ HEAD
 
 - Fix typo for generator test file name [dlackty, #2016]
 - Add Sidekiq::Middleware::Chain#prepend [seuros, #2029]
+- Debug: Print the used config file
 
 3.2.6
 -----------
