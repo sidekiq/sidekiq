@@ -36,6 +36,9 @@
         <br>
         <b><%= "#{t('Queues')}: " %></b>
         <%= process['queues'] * ", " %>
+        <br>
+        <b><%= 'Memory Usage: ' %></b>
+        <%= process['mem'] %>
       </td>
       <td><%= relative_time(Time.at(process['started_at'])) %></td>
       <td><%= process['concurrency'] %></td>
