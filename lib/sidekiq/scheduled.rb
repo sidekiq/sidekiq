@@ -1,6 +1,7 @@
 require 'sidekiq'
 require 'sidekiq/util'
 require 'sidekiq/actor'
+require 'sidekiq/api'
 
 module Sidekiq
   module Scheduled
@@ -8,10 +9,10 @@ module Sidekiq
     INITIAL_WAIT = 10
 
     ##
-    # The Poller checks Redis every N seconds for messages in the retry or scheduled
+    # The Poller checks Redis every N seconds for jobs in the retry or scheduled
     # set have passed their timestamp and should be enqueued.  If so, it
-    # just pops the message back onto its original queue so the
-    # workers can pick it up like any other message.
+    # just pops the job back onto its original queue so the
+    # workers can pick it up like any other job.
     class Poller
       include Util
       include Actor
@@ -23,8 +24,8 @@ module Sidekiq
           initial_wait if first_time
 
           begin
-            # A message's "score" in Redis is the time at which it should be processed.
-            # Just check Redis for the set of messages with a timestamp before now.
+            # A job's "score" in Redis is the time at which it should be processed.
+            # Just check Redis for the set of jobs with a timestamp before now.
             now = Time.now.to_f.to_s
             Sidekiq.redis do |conn|
               SETS.each do |sorted_set|
@@ -32,14 +33,14 @@ module Sidekiq
                 # We need to go through the list one at a time to reduce the risk of something
                 # going wrong between the time jobs are popped from the scheduled queue and when
                 # they are pushed onto a work queue and losing the jobs.
-                while message = conn.zrangebyscore(sorted_set, '-inf', now, :limit => [0, 1]).first do
+                while job = conn.zrangebyscore(sorted_set, '-inf', now, :limit => [0, 1]).first do
 
                   # Pop item off the queue and add it to the work queue. If the job can't be popped from
                   # the queue, it's because another process already popped it so we can move on to the
                   # next one.
-                  if conn.zrem(sorted_set, message)
-                    Sidekiq::Client.push(Sidekiq.load_json(message))
-                    logger.debug { "enqueued #{sorted_set}: #{message}" }
+                  if conn.zrem(sorted_set, job)
+                    Sidekiq::Client.push(Sidekiq.load_json(job))
+                    logger.debug { "enqueued #{sorted_set}: #{job}" }
                   end
                 end
               end
@@ -75,7 +76,9 @@ module Sidekiq
       # We only do this if poll_interval is unset (the default).
       def poll_interval
         Sidekiq.options[:poll_interval] ||= begin
-          pcount = Sidekiq.redis {|c| c.scard('processes') } || 1
+          ps = Sidekiq::ProcessSet.new
+          pcount = ps.size
+          pcount = 1 if pcount == 0
           pcount * 15
         end
       end

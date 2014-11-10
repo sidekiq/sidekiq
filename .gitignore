@@ -9,3 +9,4 @@ coverage/
 vendor/
 .bundle/
 .sass-cache/
+tmp/

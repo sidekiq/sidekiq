@@ -3,9 +3,17 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
-HEAD
+1.9.1
 -----------
 
+- **SECURITY** Fix XSS in batch description, thanks to intercom.io for reporting the
+  issue.  If you don't use batch descriptions, you don't need the fix.
+
+1.9.0
+-----------
+
+- Add new expiring jobs feature [#1982]
+- Show batch expiration on Batch details page [#1981]
 - Add '$' batch success token to the pubsub support. [#1953]
 
 

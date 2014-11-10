@@ -96,6 +96,15 @@ class TestMiddleware < Sidekiq::Test
       assert_equal 1, chain.count
     end
 
+    it 'correctly prepends middleware' do
+      chain = Sidekiq::Middleware::Chain.new
+      chain_entries = chain.entries
+      chain.add CustomMiddleware
+      chain.prepend YetAnotherCustomMiddleware
+      assert_equal YetAnotherCustomMiddleware, chain_entries.first.klass
+      assert_equal CustomMiddleware, chain_entries.last.klass
+    end
+
     it 'allows middleware to abruptly stop processing rest of chain' do
       recorder = []
       chain = Sidekiq::Middleware::Chain.new

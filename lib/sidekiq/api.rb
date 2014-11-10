@@ -545,32 +545,53 @@ module Sidekiq
   class ProcessSet
     include Enumerable
 
-    def each(&block)
-      procs = Sidekiq.redis { |conn| conn.smembers('processes') }
+    def initialize(clean_plz=true)
+      self.class.cleanup if clean_plz
+    end
 
-      to_prune = []
-      sorted = procs.sort
+    # Cleans up dead processes recorded in Redis.
+    # Returns the number of processes cleaned.
+    def self.cleanup
+      count = 0
+      Sidekiq.redis do |conn|
+        procs = conn.smembers('processes').sort
+        heartbeats = conn.pipelined do
+          procs.each do |key|
+            conn.hget(key, 'info')
+          end
+        end
+
+        # the hash named key has an expiry of 60 seconds.
+        # if it's not found, that means the process has not reported
+        # in to Redis and probably died.
+        to_prune = []
+        heartbeats.each_with_index do |beat, i|
+          to_prune << procs[i] if beat.nil?
+        end
+        count = conn.srem('processes', to_prune) unless to_prune.empty?
+      end
+      count
+    end
+
+    def each(&block)
+      procs = Sidekiq.redis { |conn| conn.smembers('processes') }.sort
+
       Sidekiq.redis do |conn|
         # We're making a tradeoff here between consuming more memory instead of
         # making more roundtrips to Redis, but if you have hundreds or thousands of workers,
         # you'll be happier this way
         result = conn.pipelined do
-          sorted.each do |key|
+          procs.each do |key|
             conn.hmget(key, 'info', 'busy', 'beat')
           end
         end
 
         result.each_with_index do |(info, busy, at_s), i|
-          # the hash named key has an expiry of 60 seconds.
-          # if it's not found, that means the process has not reported
-          # in to Redis and probably died.
-          (to_prune << sorted[i]; next) if info.nil?
           hash = Sidekiq.load_json(info)
           yield Process.new(hash.merge('busy' => busy.to_i, 'beat' => at_s.to_f))
         end
       end
 
-      Sidekiq.redis {|conn| conn.srem('processes', to_prune) } unless to_prune.empty?
       nil
     end
 

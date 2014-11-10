@@ -469,7 +469,7 @@ class TestApi < Sidekiq::Test
       end
 
       ps = Sidekiq::ProcessSet.new
-      assert_equal 3, ps.size
+      assert_equal 1, ps.size
       assert_equal 1, ps.to_a.size
     end
 
