@@ -582,13 +582,13 @@ module Sidekiq
         # you'll be happier this way
         result = conn.pipelined do
           procs.each do |key|
-            conn.hmget(key, 'info', 'busy', 'beat')
+            conn.hmget(key, 'info', 'busy', 'beat', 'mem')
           end
         end
 
-        result.each_with_index do |(info, busy, at_s), i|
+        result.each_with_index do |(info, busy, at_s, mem), i|
           hash = Sidekiq.load_json(info)
-          yield Process.new(hash.merge('busy' => busy.to_i, 'beat' => at_s.to_f))
+          yield Process.new(hash.merge('busy' => busy.to_i, 'beat' => at_s.to_f, 'mem' => mem))
         end
       end
 
