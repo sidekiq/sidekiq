@@ -139,6 +139,8 @@ module Sidekiq
       proctitle << 'stopping' if stopped?
       $0 = proctitle.join(' ')
 
+      data['mem'] = `pmap #{$$} | grep 'total'`.chomp[/\d+K/]
+
       ❤(key, json)
       after(5) do
         heartbeat(key, data, json)
