@@ -152,7 +152,7 @@ module Sidekiq
         _, _, _, msg = Sidekiq.redis do |conn|
           conn.multi do
             conn.sadd('processes', key)
-            conn.hmset(key, 'info', json, 'busy', @busy.size, 'beat', Time.now.to_f)
+            conn.hmset(key, 'info', json, 'busy', @busy.size, 'beat', Time.now.to_f, 'mem', `pmap #{$$} | grep 'total'`.chomp[/\d+K/])
             conn.expire(key, 60)
             conn.rpop("#{key}-signals")
           end
