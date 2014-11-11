@@ -67,7 +67,6 @@ module Sidekiq
         'hostname' => hostname,
         'started_at' => Time.now.to_f,
         'pid' => $$,
-        # 'mem' => `pmap #{$$} | grep 'total'`.chomp[/\d+K/],
         'tag' => @options[:tag] || '',
         'concurrency' => @options[:concurrency],
         'queues' => @options[:queues].uniq,
