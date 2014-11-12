@@ -15,7 +15,7 @@ if ENV.has_key?("SIMPLECOV")
 end
 
 begin
-  require 'pry'
+  require 'pry-byebug'
 rescue LoadError
 end
 
