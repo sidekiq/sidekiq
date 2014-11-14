@@ -204,6 +204,7 @@ module Sidekiq
 
     def shutdown
       requeue
+      terminate
       signal_shutdown
     end
 
