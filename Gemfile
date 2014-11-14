@@ -12,6 +12,10 @@ platforms :ruby do
   gem 'sqlite3'
 end
 
+platforms :mri_21 do
+  gem 'pry-byebug'
+end
+
 platforms :jruby do
   gem 'jruby-openssl'
   gem 'activerecord-jdbcsqlite3-adapter'

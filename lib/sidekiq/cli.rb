@@ -1,3 +1,4 @@
+# encoding: utf-8
 $stdout.sync = true
 
 require 'yaml'
@@ -195,9 +196,8 @@ module Sidekiq
       @environment = cli_env || ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
     end
 
-    def die(code)
-      exit(code)
-    end
+    alias_method :die, :exit
+    alias_method :☠, :exit
 
     def setup_options(args)
       opts = parse_options(args)
@@ -353,7 +353,6 @@ module Sidekiq
     def parse_config(cfile)
       opts = {}
       if File.exist?(cfile)
-        logger.debug "Using config file: #{cfile}"
         opts = YAML.load(ERB.new(IO.read(cfile)).result) || opts
         opts = opts.merge(opts.delete(environment) || {})
         parse_queues(opts, opts.delete(:queues) || [])
