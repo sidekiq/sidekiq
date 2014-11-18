@@ -22,11 +22,12 @@ module Sidekiq
 
     SPIN_TIME_FOR_GRACEFUL_SHUTDOWN = 1
 
-    def initialize(options={})
+    def initialize(condvar, options={})
       logger.debug { options.inspect }
       @options = options
       @count = options[:concurrency] || 25
       @done_callback = nil
+      @finished = condvar
 
       @in_progress = {}
       @threads = {}
@@ -183,7 +184,7 @@ module Sidekiq
             end
           end
 
-          signal_shutdown
+          @finished.signal
         end
       end
     end
@@ -204,11 +205,7 @@ module Sidekiq
 
     def shutdown
       requeue
-      signal_shutdown
-    end
-
-    def signal_shutdown
-      after(0) { signal(:shutdown) }
+      @finished.signal
     end
 
     def requeue

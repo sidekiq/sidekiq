@@ -9,8 +9,14 @@ class TestManager < Sidekiq::Test
       Sidekiq.redis {|c| c.flushdb }
     end
 
+    def new_manager(opts)
+      condvar = Minitest::Mock.new
+      condvar.expect(:signal, nil, [])
+      Sidekiq::Manager.new(condvar, opts)
+    end
+
     it 'creates N processor instances' do
-      mgr = Sidekiq::Manager.new(options)
+      mgr = new_manager(options)
       assert_equal options[:concurrency], mgr.ready.size
       assert_equal [], mgr.busy
     end
@@ -21,7 +27,7 @@ class TestManager < Sidekiq::Test
       processor.expect(:async, processor, [])
       processor.expect(:process, nil, [uow])
 
-      mgr = Sidekiq::Manager.new(options)
+      mgr = new_manager(options)
       mgr.ready << processor
       mgr.assign(uow)
       assert_equal 1, mgr.busy.size
@@ -33,7 +39,7 @@ class TestManager < Sidekiq::Test
       uow = Minitest::Mock.new
       uow.expect(:requeue, nil, [])
 
-      mgr = Sidekiq::Manager.new(options)
+      mgr = new_manager(options)
       mgr.fetcher = Sidekiq::BasicFetch.new({:queues => []})
       mgr.stop
       mgr.assign(uow)
@@ -41,7 +47,7 @@ class TestManager < Sidekiq::Test
     end
 
     it 'shuts down the system' do
-      mgr = Sidekiq::Manager.new(options)
+      mgr = new_manager(options)
       mgr.fetcher = Sidekiq::BasicFetch.new({:queues => []})
       mgr.stop
 
@@ -53,7 +59,7 @@ class TestManager < Sidekiq::Test
       fetcher = MiniTest::Mock.new
       fetcher.expect :async, fetcher, []
       fetcher.expect :fetch, nil, []
-      mgr = Sidekiq::Manager.new(options)
+      mgr = new_manager(options)
       mgr.fetcher = fetcher
       init_size = mgr.ready.size
       processor = mgr.ready.pop
@@ -69,7 +75,7 @@ class TestManager < Sidekiq::Test
       fetcher = MiniTest::Mock.new
       fetcher.expect :async, fetcher, []
       fetcher.expect :fetch, nil, []
-      mgr = Sidekiq::Manager.new(options)
+      mgr = new_manager(options)
       mgr.fetcher = fetcher
       init_size = mgr.ready.size
       processor = mgr.ready.pop
@@ -90,7 +96,7 @@ class TestManager < Sidekiq::Test
         @processor.expect(:async, @processor, [])
         @processor.expect(:process, nil, [uow])
 
-        @mgr = Sidekiq::Manager.new(options)
+        @mgr = new_manager(options)
         @mgr.ready << @processor
         @mgr.assign(uow)
 
