@@ -1,6 +1,7 @@
-HEAD
+3.3.0
 -----------
 
+- Upgrade to Celluloid 0.16 [#2056]
 - Fix typo for generator test file name [dlackty, #2016]
 - Add Sidekiq::Middleware::Chain#prepend [seuros, #2029]
 
