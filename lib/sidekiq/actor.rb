@@ -7,6 +7,8 @@ module Sidekiq
       def new_link(*args)
         new(*args)
       end
+      def task_class(*args)
+      end
     end
 
     module InstanceMethods
@@ -33,6 +35,7 @@ module Sidekiq
         klass.__send__(:extend, ClassMethods)
       else
         klass.__send__(:include, Celluloid)
+        klass.task_class ::Celluloid::TaskThread
       end
     end
   end
