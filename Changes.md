@@ -1,3 +1,9 @@
+HEAD
+-----------
+
+- Log Sidekiq Pro's Batch ID if available [#2076]
+
+
 3.3.0
 -----------
 
