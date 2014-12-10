@@ -27,7 +27,9 @@ module Sidekiq
     end
 
     def actor_died(actor, reason)
-      return if @done
+      # https://github.com/mperham/sidekiq/issues/2057#issuecomment-66485477
+      return if @done || !reason
+
       Sidekiq.logger.warn("Sidekiq died due to the following error, cannot recover, process exiting")
       handle_exception(reason)
       exit(1)
