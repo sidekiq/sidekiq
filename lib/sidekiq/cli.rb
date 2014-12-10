@@ -107,17 +107,6 @@ module Sidekiq
          sss }
     end
 
-    private
-
-    def print_banner
-      # Print logo and banner for development
-      if environment == 'development' && $stdout.tty?
-        puts "\e[#{31}m"
-        puts Sidekiq::CLI.banner
-        puts "\e[0m"
-      end
-    end
-
     def handle_signal(sig)
       Sidekiq.logger.debug "Got #{sig} signal"
       case sig
@@ -146,6 +135,17 @@ module Sidekiq
             Sidekiq.logger.warn "<no backtrace available>"
           end
         end
+      end
+    end
+
+    private
+
+    def print_banner
+      # Print logo and banner for development
+      if environment == 'development' && $stdout.tty?
+        puts "\e[#{31}m"
+        puts Sidekiq::CLI.banner
+        puts "\e[0m"
       end
     end
 
