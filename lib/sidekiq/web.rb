@@ -69,7 +69,7 @@ module Sidekiq
       @name = params[:name]
       @queue = Sidekiq::Queue.new(@name)
       (@current_page, @total_size, @messages) = page("queue:#{@name}", params[:page], @count)
-      @messages = @messages.map {|msg| Sidekiq::Job.new(msg, @name) }
+      @messages = @messages.map { |msg| Sidekiq::Job.new(msg, @name) }
       erb :queue
     end
 
@@ -85,8 +85,8 @@ module Sidekiq
 
     get '/morgue' do
       @count = (params[:count] || 25).to_i
-      (@current_page, @total_size, @dead) = page("dead", params[:page], @count, :reverse => true)
-      @dead = @dead.map {|msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+      (@current_page, @total_size, @dead) = page("dead", params[:page], @count, reverse: true)
+      @dead = @dead.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
       erb :morgue
     end
 
@@ -128,7 +128,7 @@ module Sidekiq
     get '/retries' do
       @count = (params[:count] || 25).to_i
       (@current_page, @total_size, @retries) = page("retry", params[:page], @count)
-      @retries = @retries.map {|msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+      @retries = @retries.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
       erb :retries
     end
 
@@ -167,7 +167,7 @@ module Sidekiq
     get '/scheduled' do
       @count = (params[:count] || 25).to_i
       (@current_page, @total_size, @scheduled) = page("schedule", params[:page], @count)
-      @scheduled = @scheduled.map {|msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+      @scheduled = @scheduled.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
       erb :scheduled
     end
 

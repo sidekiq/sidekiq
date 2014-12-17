@@ -65,7 +65,7 @@ module Sidekiq
     end
 
     def namespace
-      @@ns ||= Sidekiq.redis {|conn| conn.respond_to?(:namespace) ? conn.namespace : nil }
+      @@ns ||= Sidekiq.redis { |conn| conn.respond_to?(:namespace) ? conn.namespace : nil }
     end
 
     def redis_info
@@ -110,9 +110,9 @@ module Sidekiq
     # Merge options with current params, filter safe params, and stringify to query string
     def qparams(options)
       options = options.stringify_keys
-      params.merge(options).map { |key, value|
+      params.merge(options).map do |key, value|
         SAFE_QPARAMS.include?(key) ? "#{key}=#{value}" : next
-      }.join("&")
+      end.join("&")
     end
 
     def truncate(text, truncate_after_chars = 2000)
@@ -147,7 +147,7 @@ module Sidekiq
         return number
       end
 
-      options = {:delimiter => ',', :separator => '.'}
+      options = {delimiter: ',', separator: '.'}
       parts = number.to_s.to_str.split('.')
       parts[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{options[:delimiter]}")
       parts.join(options[:separator])

@@ -14,7 +14,7 @@ module Sidekiq
     def watchdog(last_words)
       yield
     rescue Exception => ex
-      handle_exception(ex, { :context => last_words })
+      handle_exception(ex, { context: last_words })
       raise ex
     end
 
@@ -39,7 +39,7 @@ module Sidekiq
         begin
           block.call
         rescue => ex
-          handle_exception(ex, { :event => event })
+          handle_exception(ex, { event: event })
         end
       end
     end
