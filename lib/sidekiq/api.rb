@@ -382,7 +382,7 @@ module Sidekiq
     end
 
     def size
-      Sidekiq.redis {|c| c.zcard(name) }
+      Sidekiq.redis { |c| c.zcard(name) }
     end
 
     def clear
@@ -411,7 +411,7 @@ module Sidekiq
         range_start = page * page_size + offset_size
         range_end   = page * page_size + offset_size + (page_size - 1)
         elements = Sidekiq.redis do |conn|
-          conn.zrange name, range_start, range_end, :with_scores => true
+          conn.zrange name, range_start, range_end, with_scores: true
         end
         break if elements.empty?
         page -= 1

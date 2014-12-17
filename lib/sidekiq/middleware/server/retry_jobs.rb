@@ -143,7 +143,7 @@ module Sidekiq
               worker.sidekiq_retries_exhausted_block.call(msg)
             end
           rescue => e
-            handle_exception(e, { :context => "Error calling retries_exhausted for #{worker.class}", :job => msg })
+            handle_exception(e, { context: "Error calling retries_exhausted for #{worker.class}", job: msg })
           end
 
           send_to_morgue(msg) unless msg['dead'] == false
@@ -183,7 +183,7 @@ module Sidekiq
           begin
             worker.sidekiq_retry_in_block.call(count)
           rescue Exception => e
-            handle_exception(e, { :context => "Failure scheduling retry using the defined `sidekiq_retry_in` in #{worker.class.name}, falling back to default" })
+            handle_exception(e, { context: "Failure scheduling retry using the defined `sidekiq_retry_in` in #{worker.class.name}, falling back to default" })
             nil
           end
         end
