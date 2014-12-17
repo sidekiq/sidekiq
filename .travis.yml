@@ -1,4 +1,5 @@
 language: ruby
+sudo: false
 services:
   - redis-server
 rvm:
