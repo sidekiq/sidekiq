@@ -1,3 +1,4 @@
+require 'sidekiq'
 require 'sidekiq/client'
 require 'sidekiq/core_ext'
 
