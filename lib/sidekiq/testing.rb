@@ -7,12 +7,12 @@ module Sidekiq
     class << self
       attr_accessor :__test_mode
 
-      def __set_test_mode(mode, &block)
-        if block
+      def __set_test_mode(mode)
+        if block_given?
           current_mode = self.__test_mode
           begin
             self.__test_mode = mode
-            block.call
+            yield
           ensure
             self.__test_mode = current_mode
           end
