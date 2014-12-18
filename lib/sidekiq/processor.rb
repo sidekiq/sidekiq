@@ -98,26 +98,26 @@ module Sidekiq
         yield
       rescue Exception
         retry_and_suppress_exceptions do
+          failed = "stat:failed:#{Time.now.utc.to_date}"
           Sidekiq.redis do |conn|
-            failed = "stat:failed:#{Time.now.utc.to_date}"
-            result = conn.multi do
+            conn.multi do
               conn.incrby("stat:failed", 1)
               conn.incrby(failed, 1)
+              conn.expire(failed, STATS_TIMEOUT)
             end
-            conn.expire(failed, STATS_TIMEOUT) if result.last == 1
           end
         end
         raise
       ensure
         retry_and_suppress_exceptions do
+          processed = "stat:processed:#{Time.now.utc.to_date}"
           Sidekiq.redis do |conn|
-            processed = "stat:processed:#{Time.now.utc.to_date}"
-            result = conn.multi do
+            conn.multi do
               conn.hdel("#{identity}:workers", thread_identity)
               conn.incrby("stat:processed", 1)
               conn.incrby(processed, 1)
+              conn.expire(processed, STATS_TIMEOUT)
             end
-            conn.expire(processed, STATS_TIMEOUT) if result.last == 1
           end
         end
       end
