@@ -390,7 +390,7 @@ class TestWeb < Sidekiq::Test
       end
 
       it 'reports queue count' do
-        assert_equal 1, @response["queues"]["count"]
+        assert_equal 1, @response["queues"]
       end
 
       describe 'queues' do
@@ -400,7 +400,7 @@ class TestWeb < Sidekiq::Test
         end
 
         it 'reports the queue depth' do
-          assert_equal 0, @response["default"]["depth"]
+          assert_equal 0, @response["default"]
         end
       end
 
@@ -410,12 +410,8 @@ class TestWeb < Sidekiq::Test
           @response = Sidekiq.load_json(last_response.body)
         end
 
-        it 'reports the queue depth' do
-          assert_equal 0, @response["depth"]
-        end
-
-        it 'reports the queue name' do
-          assert_equal 'default', @response["name"]
+        it 'reports the queue size' do
+          assert_equal 0, @response["size"]
         end
       end
     end

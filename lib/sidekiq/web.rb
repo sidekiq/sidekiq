@@ -238,27 +238,16 @@ module Sidekiq
         scheduled:  sidekiq_stats.scheduled_size,
         retries:    sidekiq_stats.retry_size,
         dead:       sidekiq_stats.dead_size,
-        queues:     {
-          count: queues.size,
-          href: "#{uri}/queues"
-        }
+        queues:     queues.size
       )
     end
 
     get '/stats/queues' do
-      queues = Sidekiq::Queue.all
-
-      queue_sizes = queues.reduce({}) do |ret, queue|
-        ret[queue.name] = {
-          depth: queue.size,
-          href: "#{uri}/#{queue.name}"
-        }
-        ret
-      end
+      stats = Sidekiq::Stats.new
 
       content_type :json
       Sidekiq.dump_json(
-        queue_sizes
+        stats.queues
       )
     end
 
@@ -267,9 +256,7 @@ module Sidekiq
 
       content_type :json
       Sidekiq.dump_json(
-        name: queue.name,
-        depth: queue.size,
-        href: uri
+        size: queue.size
       )
     end
 
