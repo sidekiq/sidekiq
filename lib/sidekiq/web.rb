@@ -237,8 +237,7 @@ module Sidekiq
         enqueued:   sidekiq_stats.enqueued,
         scheduled:  sidekiq_stats.scheduled_size,
         retries:    sidekiq_stats.retry_size,
-        dead:       sidekiq_stats.dead_size,
-        queues:     queues.size
+        dead:       sidekiq_stats.dead_size
       )
     end
 

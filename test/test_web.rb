@@ -389,10 +389,6 @@ class TestWeb < Sidekiq::Test
         assert_equal 3, @response["scheduled"]
       end
 
-      it 'reports queue count' do
-        assert_equal 1, @response["queues"]
-      end
-
       describe 'queues' do
         before do
           get '/stats/queues'
