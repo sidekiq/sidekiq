@@ -12,6 +12,16 @@ class TestSidekiq < Sidekiq::Test
     end
   end
 
+  describe 'executing workers' do
+
+    it 'executes as expected' do
+      worker = Minitest::Mock.new
+      worker.expect(:perform, nil, [1, 2, 3])
+      Sidekiq.execute_job(worker, [1, 2, 3])
+    end
+
+  end
+
   describe "redis connection" do
   	it "returns error without creating a connection if block is not given" do
       mock = Minitest::Mock.new

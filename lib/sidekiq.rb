@@ -112,6 +112,10 @@ module Sidekiq
     JSON.generate(object)
   end
 
+  def self.execute_job(worker, cloned_args)
+    worker.perform(*cloned_args)
+  end
+
   def self.logger
     Sidekiq::Logging.logger
   end
