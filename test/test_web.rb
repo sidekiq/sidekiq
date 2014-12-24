@@ -359,6 +359,74 @@ class TestWeb < Sidekiq::Test
         Sidekiq.redis do |conn|
           conn.set("stat:processed", 5)
           conn.set("stat:failed", 2)
+          conn.sadd("queues", "default")
+        end
+        2.times { add_retry }
+        3.times { add_scheduled }
+        4.times { add_worker }
+
+        get '/stats'
+        @response = Sidekiq.load_json(last_response.body)
+      end
+
+      it 'reports processed' do
+        assert_equal 5, @response["processed"]
+      end
+
+      it 'reports failed' do
+        assert_equal 2, @response["failed"]
+      end
+
+      it 'reports busy' do
+        assert_equal 4, @response["busy"]
+      end
+
+      it 'reports retries' do
+        assert_equal 2, @response["retries"]
+      end
+
+      it 'reports scheduled' do
+        assert_equal 3, @response["scheduled"]
+      end
+
+      it 'reports queue count' do
+        assert_equal 1, @response["queues"]["count"]
+      end
+
+      describe 'queues' do
+        before do
+          get '/stats/queues'
+          @response = Sidekiq.load_json(last_response.body)
+        end
+
+        it 'reports the queue depth' do
+          assert_equal 0, @response["default"]["depth"]
+        end
+      end
+
+      describe 'queues/:name' do
+        before do
+          get '/stats/queues/default'
+          @response = Sidekiq.load_json(last_response.body)
+        end
+
+        it 'reports the queue depth' do
+          assert_equal 0, @response["depth"]
+        end
+
+        it 'reports the queue name' do
+          assert_equal 'default', @response["name"]
+        end
+      end
+    end
+
+    describe 'dashboard/stats' do
+      include Sidekiq::Util
+
+      before do
+        Sidekiq.redis do |conn|
+          conn.set("stat:processed", 5)
+          conn.set("stat:failed", 2)
         end
         2.times { add_retry }
         3.times { add_scheduled }

@@ -225,6 +225,54 @@ module Sidekiq
       })
     end
 
+    get '/stats' do
+      sidekiq_stats = Sidekiq::Stats.new
+      queues = Sidekiq::Queue.all
+
+      content_type :json
+      Sidekiq.dump_json(
+        processed:  sidekiq_stats.processed,
+        failed:     sidekiq_stats.failed,
+        busy:       workers_size,
+        enqueued:   sidekiq_stats.enqueued,
+        scheduled:  sidekiq_stats.scheduled_size,
+        retries:    sidekiq_stats.retry_size,
+        dead:       sidekiq_stats.dead_size,
+        queues:     {
+          count: queues.size,
+          href: "#{uri}/queues"
+        }
+      )
+    end
+
+    get '/stats/queues' do
+      queues = Sidekiq::Queue.all
+
+      queue_sizes = queues.reduce({}) do |ret, queue|
+        ret[queue.name] = {
+          depth: queue.size,
+          href: "#{uri}/#{queue.name}"
+        }
+        ret
+      end
+
+      content_type :json
+      Sidekiq.dump_json(
+        queue_sizes
+      )
+    end
+
+    get '/stats/queues/:name' do
+      queue = Sidekiq::Queue.new(params[:name])
+
+      content_type :json
+      Sidekiq.dump_json(
+        name: queue.name,
+        depth: queue.size,
+        href: uri
+      )
+    end
+
     private
 
     def retry_or_delete_or_kill job, params
