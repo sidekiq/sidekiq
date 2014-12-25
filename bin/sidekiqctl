@@ -1,25 +1,29 @@
 #!/usr/bin/env ruby
 
 require 'fileutils'
+require 'sidekiq/api'
 
 class Sidekiqctl
-  DEFAULT_TIMEOUT = 10
+  DEFAULT_KILL_TIMEOUT = 10
+  DEFAULT_STOP_TIMEOUT = 60
 
-  attr_reader :stage, :pidfile, :timeout
+  attr_reader :stage, :pidfile, :kill_timeout, :stop_timeout
 
   def self.print_usage
     puts
-    puts "Usage: #{File.basename($0)} <command> <pidfile> <timeout>"
+    puts "Usage: #{File.basename($0)} <command> <pidfile> [kill_timeout [stop_timeout]]"
     puts " where <command> is either 'quiet', 'stop' or 'shutdown'"
     puts "       <pidfile> is path to a pidfile"
-    puts "       <timeout> is number of seconds to wait till Sidekiq exits (default: #{Sidekiqctl::DEFAULT_TIMEOUT})"
+    puts "       [kill_timeout] is number of seconds to wait before forcefully killing Sidekiq when using stop or shutdown (default: #{Sidekiqctl::DEFAULT_KILL_TIMEOUT})"
+    puts "       [stop_timeout] is number of seconds to wait for all jobs to complete gracefully when using shutdown (default: #{Sidekiqctl::DEFAULT_STOP_TIMEOUT})"
     puts
   end
 
-  def initialize(stage, pidfile, timeout)
+  def initialize(stage, pidfile, kill_timeout, stop_timeout)
     @stage = stage
     @pidfile = pidfile
-    @timeout = timeout
+    @kill_timeout = kill_timeout
+    @stop_timeout = stop_timeout
 
     done('No pidfile given', :error) if !pidfile
     done("Pidfile #{pidfile} does not exist", :warn) if !File.exist?(pidfile)
@@ -59,7 +63,7 @@ class Sidekiqctl
 
   def stop
     `kill -TERM #{pid}`
-    timeout.times do
+    kill_timeout.times do
       begin
         Process.getpgid(pid)
       rescue Errno::ESRCH
@@ -75,6 +79,12 @@ class Sidekiqctl
 
   def shutdown
     quiet
+    workers = Sidekiq::Workers.new
+    stop_timeout.times do
+      until workers.size == 0
+        sleep 1
+      end
+    end
     stop
   end
 end
@@ -84,8 +94,10 @@ if ARGV.length < 2
 else
   stage = ARGV[0]
   pidfile = ARGV[1]
-  timeout = ARGV[2].to_i
-  timeout = Sidekiqctl::DEFAULT_TIMEOUT if timeout == 0
+  kill_timeout = ARGV[2].to_i
+  kill_timeout = Sidekiqctl::DEFAULT_KILL_TIMEOUT if kill_timeout == 0
+  stop_timeout = ARGV[3].to_i
+  stop_timeout = Sidekiqctl::DEFAULT_STOP_TIMEOUT if stop_timeout == 0
 
-  Sidekiqctl.new(stage, pidfile, timeout)
+  Sidekiqctl.new(stage, pidfile, kill_timeout, stop_timeout)
 end
