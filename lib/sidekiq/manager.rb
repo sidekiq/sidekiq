@@ -48,7 +48,7 @@ module Sidekiq
 
         @done = true
 
-        logger.info { "Shutting down #{@ready.size} quiet workers" }
+        logger.info { "Terminating #{@ready.size} quiet workers" }
         @ready.each { |x| x.terminate if x.alive? }
         @ready.clear
 
