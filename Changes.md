@@ -3,6 +3,7 @@ HEAD
 
 - Log Sidekiq Pro's Batch ID if available [#2076]
 - Refactor Processor Redis usage to avoid redis/redis-rb#490 [#]
+- Add better usage text for `sidekiqctl`.
 
 
 3.3.0
