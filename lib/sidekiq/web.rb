@@ -205,12 +205,16 @@ module Sidekiq
     REDIS_KEYS = %w(redis_version uptime_in_days connected_clients used_memory_human used_memory_peak_human)
 
     get '/dashboard/stats' do
+      redirect "#{root_path}stats"
+    end
+
+    get '/stats' do
       sidekiq_stats = Sidekiq::Stats.new
       queue         = Sidekiq::Queue.new
-      redis_stats   = redis_info.select{ |k, v| REDIS_KEYS.include? k }
+      redis_stats   = redis_info.select { |k, v| REDIS_KEYS.include? k }
 
       content_type :json
-      Sidekiq.dump_json({
+      Sidekiq.dump_json(
         sidekiq: {
           processed:  sidekiq_stats.processed,
           failed:     sidekiq_stats.failed,
@@ -219,24 +223,9 @@ module Sidekiq
           scheduled:  sidekiq_stats.scheduled_size,
           retries:    sidekiq_stats.retry_size,
           dead:       sidekiq_stats.dead_size,
-          default_latency: queue.latency,
+          default_latency: queue.latency
         },
         redis: redis_stats
-      })
-    end
-
-    get '/stats' do
-      sidekiq_stats = Sidekiq::Stats.new
-
-      content_type :json
-      Sidekiq.dump_json(
-        processed:  sidekiq_stats.processed,
-        failed:     sidekiq_stats.failed,
-        busy:       workers_size,
-        enqueued:   sidekiq_stats.enqueued,
-        scheduled:  sidekiq_stats.scheduled_size,
-        retries:    sidekiq_stats.retry_size,
-        dead:       sidekiq_stats.dead_size
       )
     end
 
