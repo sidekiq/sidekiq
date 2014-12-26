@@ -227,7 +227,6 @@ module Sidekiq
 
     get '/stats' do
       sidekiq_stats = Sidekiq::Stats.new
-      queues = Sidekiq::Queue.all
 
       content_type :json
       Sidekiq.dump_json(
@@ -247,15 +246,6 @@ module Sidekiq
       content_type :json
       Sidekiq.dump_json(
         stats.queues
-      )
-    end
-
-    get '/stats/queues/:name' do
-      queue = Sidekiq::Queue.new(params[:name])
-
-      content_type :json
-      Sidekiq.dump_json(
-        size: queue.size
       )
     end
 

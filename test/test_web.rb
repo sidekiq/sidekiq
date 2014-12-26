@@ -399,17 +399,6 @@ class TestWeb < Sidekiq::Test
           assert_equal 0, @response["default"]
         end
       end
-
-      describe 'queues/:name' do
-        before do
-          get '/stats/queues/default'
-          @response = Sidekiq.load_json(last_response.body)
-        end
-
-        it 'reports the queue size' do
-          assert_equal 0, @response["size"]
-        end
-      end
     end
 
     describe 'dashboard/stats' do
