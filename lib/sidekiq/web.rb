@@ -1,3 +1,5 @@
+gem 'sinatra', '>= 1.4'
+
 require 'erb'
 require 'yaml'
 require 'sinatra/base'
