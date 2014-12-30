@@ -17,12 +17,10 @@ module Sidekiq
     end
 
     def self.with_context(msg)
-      begin
-        Thread.current[:sidekiq_context] = msg
-        yield
-      ensure
-        Thread.current[:sidekiq_context] = nil
-      end
+      previous, Thread.current[:sidekiq_context] = Thread.current[:sidekiq_context], msg
+      yield
+    ensure
+      Thread.current[:sidekiq_context] = previous
     end
 
     def self.initialize_logger(log_target = STDOUT)
