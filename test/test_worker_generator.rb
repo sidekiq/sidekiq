@@ -1,4 +1,4 @@
-require 'helper'
+require_relative 'helper'
 require 'rails/generators/test_case'
 require 'generators/sidekiq/worker_generator'
 

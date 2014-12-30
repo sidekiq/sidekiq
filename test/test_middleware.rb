@@ -1,4 +1,4 @@
-require 'helper'
+require_relative 'helper'
 require 'sidekiq/middleware/chain'
 require 'sidekiq/processor'
 
