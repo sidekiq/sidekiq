@@ -1,4 +1,4 @@
-require 'helper'
+require_relative 'helper'
 require 'sidekiq'
 require 'sidekiq/worker'
 require 'active_record'
