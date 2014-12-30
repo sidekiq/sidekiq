@@ -4,6 +4,8 @@ HEAD
 - Log Sidekiq Pro's Batch ID if available [#2076]
 - Refactor Processor Redis usage to avoid redis/redis-rb#490 [#]
 - Add better usage text for `sidekiqctl`.
+- `Sidekiq::Logging.with_context` is now a stack so you can set your
+  own job context for logging purposes [grosser, #2110]
 
 
 3.3.0
