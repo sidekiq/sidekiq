@@ -20,7 +20,7 @@ rescue LoadError
 end
 
 require 'minitest/autorun'
-require 'minitest/pride'
+require 'minitest/rg'
 
 require 'celluloid/test'
 Celluloid.boot
