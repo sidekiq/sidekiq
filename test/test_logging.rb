@@ -1,4 +1,4 @@
-require 'helper'
+require_relative 'helper'
 require 'sidekiq/logging'
 
 class TestFetcher < Sidekiq::Test
