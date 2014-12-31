@@ -616,6 +616,7 @@ module Sidekiq
   #   'queues' => ['default', 'low'],
   #   'busy' => 10,
   #   'beat' => <last heartbeat>,
+  #   'identity' => <unique string identifying the process>,
   # }
   class Process
     def initialize(hash)
@@ -655,7 +656,7 @@ module Sidekiq
     end
 
     def identity
-      @id ||= "#{self['hostname']}:#{self['pid']}"
+      self['identity']
     end
   end
 

@@ -45,8 +45,8 @@ module Sidekiq
     end
 
     post "/busy" do
-      if params['hostname']
-        p = Sidekiq::Process.new('hostname' => params["hostname"], 'pid' => params['pid'])
+      if params['identity']
+        p = Sidekiq::Process.new('identity' => params['identity'])
         p.quiet! if params[:quiet]
         p.stop! if params[:stop]
       else
