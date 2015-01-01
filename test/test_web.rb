@@ -50,17 +50,23 @@ class TestWeb < Sidekiq::Test
       end
 
       it 'can quiet a process' do
-        assert_nil Sidekiq.redis { |c| c.lpop "host:pid-signals" }
-        post '/busy', 'quiet' => '1', 'hostname' => 'host', 'pid' => 'pid'
+        identity = 'identity'
+        signals_key = "#{identity}-signals"
+
+        assert_nil Sidekiq.redis { |c| c.lpop signals_key }
+        post '/busy', 'quiet' => '1', 'identity' => identity
         assert_equal 302, last_response.status
-        assert_equal 'USR1', Sidekiq.redis { |c| c.lpop "host:pid-signals" }
+        assert_equal 'USR1', Sidekiq.redis { |c| c.lpop signals_key }
       end
 
       it 'can stop a process' do
-        assert_nil Sidekiq.redis { |c| c.lpop "host:pid-signals" }
-        post '/busy', 'stop' => '1', 'hostname' => 'host', 'pid' => 'pid'
+        identity = 'identity'
+        signals_key = "#{identity}-signals"
+
+        assert_nil Sidekiq.redis { |c| c.lpop signals_key }
+        post '/busy', 'stop' => '1', 'identity' => identity
         assert_equal 302, last_response.status
-        assert_equal 'TERM', Sidekiq.redis { |c| c.lpop "host:pid-signals" }
+        assert_equal 'TERM', Sidekiq.redis { |c| c.lpop signals_key }
       end
     end
 
