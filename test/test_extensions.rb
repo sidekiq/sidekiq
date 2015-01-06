@@ -1,4 +1,4 @@
-require 'helper'
+require_relative 'helper'
 require 'sidekiq'
 require 'active_record'
 require 'action_mailer'

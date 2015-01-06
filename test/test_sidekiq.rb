@@ -1,5 +1,5 @@
 # encoding: utf-8
-require 'helper'
+require_relative 'helper'
 
 class TestSidekiq < Sidekiq::Test
   describe 'json processing' do

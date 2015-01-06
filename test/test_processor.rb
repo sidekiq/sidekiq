@@ -1,4 +1,4 @@
-require 'helper'
+require_relative 'helper'
 require 'sidekiq/processor'
 
 class TestProcessor < Sidekiq::Test

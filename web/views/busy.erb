@@ -39,8 +39,7 @@
       <td>
         <div class="btn-group pull-right">
           <form method="POST">
-            <input type="hidden" name="hostname" value="<%= process['hostname'] %>"/>
-            <input type="hidden" name="pid" value="<%= process['pid'] %>"/>
+            <input type="hidden" name="identity" value="<%= process['identity'] %>"/>
             <button class="btn btn-warn" type="submit" name="quiet" value="1"><%= t('Quiet') %></button>
             <button class="btn btn-danger" type="submit" name="stop" value="1"><%= t('Stop') %></button>
           </form>

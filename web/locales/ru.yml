@@ -66,3 +66,9 @@ ru:
   Thread: Поток
   Threads: Потоки
   Jobs: Задачи
+  Paused: Приостановлено
+  Stop: Остановить
+  Quiet: Отдыхать
+  StopAll: Остановить все
+  QuietAll: Отдыхать всем
+  PollingInterval: Интервал опроса

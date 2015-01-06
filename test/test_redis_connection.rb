@@ -1,4 +1,4 @@
-require 'helper'
+require_relative 'helper'
 require 'sidekiq/redis_connection'
 
 class TestRedisConnection < Sidekiq::Test

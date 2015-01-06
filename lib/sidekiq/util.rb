@@ -1,4 +1,5 @@
 require 'socket'
+require 'securerandom'
 require 'sidekiq/exception_handler'
 require 'sidekiq/core_ext'
 
@@ -30,8 +31,12 @@ module Sidekiq
       ENV['DYNO'] || Socket.gethostname
     end
 
+    def process_nonce
+      @@process_nonce ||= SecureRandom.hex(6)
+    end
+
     def identity
-      @@identity ||= "#{hostname}:#{$$}"
+      @@identity ||= "#{hostname}:#{$$}:#{process_nonce}"
     end
 
     def fire_event(event)

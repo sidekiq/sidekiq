@@ -1,5 +1,5 @@
 # encoding: utf-8
-require 'helper'
+require_relative 'helper'
 require 'sidekiq/scheduled'
 require 'sidekiq/middleware/server/retry_jobs'
 

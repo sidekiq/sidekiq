@@ -1,4 +1,4 @@
-require 'helper'
+require_relative 'helper'
 require 'sidekiq/manager'
 
 class TestManager < Sidekiq::Test

@@ -1,13 +1,16 @@
 language: ruby
 sudo: false
+cache: bundler
 services:
   - redis-server
 rvm:
-  - jruby-19mode
-  - rbx-2
-  - 2.0.0
   - 2.1
+  - 2.0.0
   - 2.2
+  - jruby-19mode
+  - jruby
+  - rbx-2
 matrix:
   allow_failures:
     - rvm: rbx-2
+    - rvm: jruby
