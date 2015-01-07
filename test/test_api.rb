@@ -252,7 +252,7 @@ class TestApi < Sidekiq::Test
       job = Sidekiq::ScheduledSet.new.find_job(job_id)
       refute_nil job
       assert_equal job_id, job.jid
-      assert_in_delta job.latency, 0.0, 0.01
+      assert_in_delta job.latency, 0.0, 0.1
     end
 
     it 'can remove jobs when iterating over a sorted set' do
