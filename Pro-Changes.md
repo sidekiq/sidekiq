@@ -6,6 +6,8 @@ Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and
 1.9.2
 -----------
 
+- As of 1/1/2015, Sidekiq Pro is hosted on a new dedicated server.
+  Happy new year and let's hope for 100% uptime!
 - Fix bug in reliable\_fetch where jobs could be duplicated if a Sidekiq
   process crashed and you were using weighted queues. [#2120]
 
