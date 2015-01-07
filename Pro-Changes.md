@@ -3,6 +3,12 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+1.9.2
+-----------
+
+- Fix bug in reliable\_fetch where jobs could be duplicated if a Sidekiq
+  process crashed and you were using weighted queues. [#2120]
+
 1.9.1
 -----------
 
