@@ -24,7 +24,7 @@ the same CPU and perform the same amount of work.
 Requirements
 -----------------
 
-I test with the latest MRI (2.1, 2.0) and JRuby versions (1.7).  Other versions/VMs
+I test with the latest MRI (2.2, 2.1 and 2.0) and JRuby versions (1.7).  Other versions/VMs
 are untested but might work fine.  MRI 1.9 is no longer supported.
 
 All Rails releases starting from 3.2 are officially supported.
