@@ -1,6 +1,6 @@
 HEAD
 -----------
-- Stringify Sidekiq.default_worker_options's keys [#]
+- Stringify Sidekiq.default_worker_options's keys [#2126]
 - Add random integer to process identity [#2113, michaeldiscala]
 - Log Sidekiq Pro's Batch ID if available [#2076]
 - Refactor Processor Redis usage to avoid redis/redis-rb#490 [#]
