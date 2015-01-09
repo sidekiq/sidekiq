@@ -54,4 +54,16 @@ class TestSidekiq < Sidekiq::Test
       assert_equal 2, Sidekiq.options[:lifecycle_events][:startup].first.call
     end
   end
+
+  describe 'default_worker_options' do
+    before do
+      @old_options = Sidekiq.default_worker_options
+    end
+    after  { Sidekiq.default_worker_options = @old_options }
+
+    it 'stringify keys' do
+      Sidekiq.default_worker_options = { queue: 'cat'}
+      assert_equal 'cat', Sidekiq.default_worker_options['queue']
+    end
+  end
 end
