@@ -97,7 +97,7 @@ module Sidekiq
   end
 
   def self.default_worker_options=(hash)
-    @default_worker_options = default_worker_options.merge(hash).stringify_keys
+    @default_worker_options = default_worker_options.merge(hash.stringify_keys)
   end
 
   def self.default_worker_options
