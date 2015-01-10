@@ -114,10 +114,10 @@ module Sidekiq
 
           if msg['backtrace'] == true
             msg['error_backtrace'] = exception.backtrace
-          elsif msg['backtrace'] == false
+          elsif !msg['backtrace']
             # do nothing
           elsif msg['backtrace'].to_i != 0
-            msg['error_backtrace'] = exception.backtrace[0..msg['backtrace'].to_i]
+            msg['error_backtrace'] = exception.backtrace[0...msg['backtrace'].to_i]
           end
 
           if count < max_retry_attempts
