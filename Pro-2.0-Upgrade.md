@@ -1,13 +1,14 @@
 # Upgrading to Sidekiq Pro 2.0
 
 Sidekiq Pro 2.0 removes deprecated APIs, changes the batch data format and
-how features are activated. To upgrade cleanly:
+how features are activated.  Read carefully to ensure your upgrade goes
+smoothly.
 
 ## Batches
 
 The batch data model was overhauled.  Batch data should take
 significantly less space in Redis now.  A simple benchmark shows 25%
-savings.
+savings but real world savings should be even greater.
 
 * Batch 2.x BIDs are 14 character URL-safe Base64-encoded strings, e.g.
   "vTF1-9QvLPnREQ".  Batch 1.x BIDs were 16 character hex-encoded
@@ -29,6 +30,7 @@ savings.
 Sidekiq.configure_server do |config|
   config.reliable_fetch!
 end
+```
 * Reliable push is now activated without a require:
 ```ruby
 Sidekiq::Client.reliable_push!
