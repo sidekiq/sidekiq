@@ -7,16 +7,7 @@ Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and
 2.0.0 (see mperham/sidekiq#2130 for progress)
 -----------
 
-- Batch IDs (bids) are now 14 char Base64-encoded strings, not 16
-  char hex-encoded strings.
-- Rework of the batch data model.  This results in a 25% reduction in
-  data size in Redis.  5000 batches go from 6260 -> 4611 KB in Redis and
-  creation is 10% faster.
-- Batch job errors no longer store the backtrace in Redis unless the
-  job's `backtrace` option is set.  This should result in another big data
-  size reduction.
-- Notifications must now be required first `require 'sidekiq/pro/notifications'`
-- Remove deprecated APIs.
+- See [[Pro-2.0-Upgrade.md]] for thorough release notes.
 
 1.9.2
 -----------
