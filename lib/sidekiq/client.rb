@@ -160,7 +160,7 @@ module Sidekiq
         ts = (int < 1_000_000_000 ? now + int : int)
 
         item = { 'class' => klass, 'args' => args, 'at' => ts, 'queue' => queue }
-        item.delete('at') if ts <= now
+        item.delete('at'.freeze) if ts <= now
 
         klass.client_push(item)
       end
@@ -186,14 +186,14 @@ module Sidekiq
 
     def atomic_push(conn, payloads)
       if payloads.first['at']
-        conn.zadd('schedule', payloads.map do |hash|
-          at = hash.delete('at').to_s
+        conn.zadd('schedule'.freeze, payloads.map do |hash|
+          at = hash.delete('at'.freeze).to_s
           [at, Sidekiq.dump_json(hash)]
         end)
       else
         q = payloads.first['queue']
         to_push = payloads.map { |entry| Sidekiq.dump_json(entry) }
-        conn.sadd('queues', q)
+        conn.sadd('queues'.freeze, q)
         conn.lpush("queue:#{q}", to_push)
       end
     end

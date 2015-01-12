@@ -27,7 +27,7 @@ module Sidekiq
 
     def queues
       Sidekiq.redis do |conn|
-        queues = conn.smembers('queues')
+        queues = conn.smembers('queues'.freeze)
 
         lengths = conn.pipelined do
           queues.each do |queue|
@@ -118,7 +118,7 @@ module Sidekiq
     include Enumerable
 
     def self.all
-      Sidekiq.redis {|c| c.smembers('queues') }.sort.map {|q| Sidekiq::Queue.new(q) }
+      Sidekiq.redis {|c| c.smembers('queues'.freeze) }.sort.map {|q| Sidekiq::Queue.new(q) }
     end
 
     attr_reader :name
@@ -174,7 +174,7 @@ module Sidekiq
       Sidekiq.redis do |conn|
         conn.multi do
           conn.del(@rname)
-          conn.srem("queues", name)
+          conn.srem("queues".freeze, name)
         end
       end
     end
