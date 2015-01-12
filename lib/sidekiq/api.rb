@@ -92,8 +92,8 @@ module Sidekiq
         end
 
         Sidekiq.redis do |conn|
-          conn.mget(keys).each_with_index do |value, i|
-            stat_hash[dates[i].to_s] = value ? value.to_i : 0
+          conn.mget(keys).each_with_index do |value, idx|
+            stat_hash[dates[idx].to_s] = value ? value.to_i : 0
           end
         end
 
@@ -267,7 +267,7 @@ module Sidekiq
 
     def safe_load(content, default)
       begin
-        yield *YAML.load(content)
+        yield(*YAML.load(content))
       rescue ::ArgumentError => ex
         # #1761 in dev mode, it's possible to have jobs enqueued which haven't been loaded into
         # memory yet so the YAML can't be loaded.
