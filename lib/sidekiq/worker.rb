@@ -48,7 +48,7 @@ module Sidekiq
         item = { 'class' => self, 'args' => args, 'at' => ts }
 
         # Optimization to enqueue something now that is scheduled to go out now or in the past
-        item.delete('at') if ts <= now
+        item.delete('at'.freeze) if ts <= now
 
         client_push(item)
       end
