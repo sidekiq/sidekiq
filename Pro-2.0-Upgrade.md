@@ -1,10 +1,31 @@
 # Upgrading to Sidekiq Pro 2.0
 
-Sidekiq Pro 2.0 removes deprecated APIs, changes the batch data format and
+Sidekiq Pro 2.0 allows nested batches for more complex job workflows.
+It also removes deprecated APIs, changes the batch data format and
 how features are activated.  Read carefully to ensure your upgrade goes
 smoothly.
 
-## Batches
+## Nested Batches
+
+Batches can now be nested within in the `jobs` method for more complex job workflows.
+
+```ruby
+a = Sidekiq::Batch.new
+a.on(:success, SomeCallback)
+a.jobs do
+  SomeWork.perform_async
+  b = Sidekiq::Batch.new
+  b.on(:success, MyCallback)
+  b.jobs do
+    OtherWork.perform_async
+  end
+end
+```
+
+Parent batch callbacks are not processed until all child batch callbacks have
+run.
+
+## Batch Data
 
 The batch data model was overhauled.  Batch data should take
 significantly less space in Redis now.  A simple benchmark shows 25%
@@ -19,9 +40,10 @@ savings but real world savings should be even greater.
 * Because of the former point, batch expiry is no longer a concern.
   Batch expiry is hardcoded to 30 days and is no longer user-tunable.
 * Failed batch jobs no longer automatically store any associated
-  backtrace in Redis unless the job's `backtrace` option is set.
-* You must require `sidekiq/notifications` if you want to use the
-  pre-defined notification schemes.
+  backtrace in Redis.
+
+**There's no data migration required.  Sidekiq Pro transparently handles
+both old and new format.**
 
 ## Reliability
 
@@ -35,3 +57,9 @@ end
 ```ruby
 Sidekiq::Client.reliable_push!
 ```
+
+## Other Changes
+
+* You must require `sidekiq/notifications` if you want to use the
+  existing notification schemes.  I don't recommend using them as the
+  newer-style `Sidekiq::Batch#on` method is more flexible and simpler.
