@@ -210,6 +210,7 @@ module Sidekiq
 
     get '/stats' do
       sidekiq_stats = Sidekiq::Stats.new
+      sidekiq_stats.fetch_stats!
       queue         = Sidekiq::Queue.new
       redis_stats   = redis_info.select { |k, v| REDIS_KEYS.include? k }
 

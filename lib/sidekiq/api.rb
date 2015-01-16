@@ -4,11 +4,73 @@ require 'sidekiq'
 module Sidekiq
   class Stats
     def processed
-      Sidekiq.redis { |conn| conn.get("stat:processed") }.to_i
+      stat 'processed'
     end
 
     def failed
-      Sidekiq.redis { |conn| conn.get("stat:failed") }.to_i
+      stat 'failed'
+    end
+
+    def scheduled_size
+      stat 'scheduled_size'
+    end
+
+    def retry_size
+      stat 'retry_size'
+    end
+
+    def dead_size
+      stat 'dead_size'
+    end
+
+    def stats(*only)
+      all     = %w(processed failed queues enqueued scheduled_size retry_size dead_size)
+      metrics = only.any? ? only : all
+
+      if @all_stats
+        @all_stats.slice(*metrics)
+      else
+        if metrics == all
+          @all_stats = load_stats(*all)
+        else
+          load_stats(*metrics)
+        end
+      end
+    end
+
+    def fetch_stats!
+      stats
+    end
+
+    def stat(s)
+      stats(s)[s]
+    end
+
+    def load_stats(*metrics)
+      read_pipelined = %w(processed failed scheduled_size retry_size dead_size) & metrics
+
+      loaded_stats = {}
+      if read_pipelined.any?
+        results = Sidekiq.redis do |conn|
+          conn.pipelined do
+            read_pipelined.each do |key|
+              case key
+              when 'processed'      then conn.get('stat:processed')
+              when 'failed'         then conn.get('stat:failed')
+              when 'scheduled_size' then conn.zcard('schedule')
+              when 'retry_size'     then conn.zcard('retry')
+              when 'dead_size'      then conn.zcard('dead')
+              end
+            end
+          end
+        end
+        read_pipelined.zip(results).each {|metric, v| loaded_stats[metric] = v.to_i }
+      end
+
+      (metrics - read_pipelined).each do |metric|
+        loaded_stats[metric] = public_send(metric)
+      end
+      loaded_stats
     end
 
     def reset(*stats)
@@ -48,18 +110,6 @@ module Sidekiq
 
     def enqueued
       queues.values.inject(&:+) || 0
-    end
-
-    def scheduled_size
-      Sidekiq.redis {|c| c.zcard('schedule') }
-    end
-
-    def retry_size
-      Sidekiq.redis {|c| c.zcard('retry') }
-    end
-
-    def dead_size
-      Sidekiq.redis {|c| c.zcard('dead') }
     end
 
     class History
