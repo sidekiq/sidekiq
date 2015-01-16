@@ -586,7 +586,7 @@ module Sidekiq
           end
         end
 
-        result.each_with_index do |(info, busy, at_s), i|
+        result.each do |info, busy, at_s|
           hash = Sidekiq.load_json(info)
           yield Process.new(hash.merge('busy' => busy.to_i, 'beat' => at_s.to_f))
         end
