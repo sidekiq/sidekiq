@@ -38,16 +38,8 @@ module Sidekiq
       end
     end
 
-    def workers_size
-      @workers_size ||= workers.size
-    end
-
     def workers
       @workers ||= Sidekiq::Workers.new
-    end
-
-    def processes_size
-      @processes_size ||= processes.size
     end
 
     def processes
@@ -97,7 +89,7 @@ module Sidekiq
     end
 
     def current_status
-      workers_size == 0 ? 'idle' : 'active'
+      workers.size == 0 ? 'idle' : 'active'
     end
 
     def relative_time(time)

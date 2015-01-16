@@ -218,8 +218,8 @@ module Sidekiq
         sidekiq: {
           processed:  sidekiq_stats.processed,
           failed:     sidekiq_stats.failed,
-          busy:       workers_size,
-          processes:  processes_size,
+          busy:       workers.size,
+          processes:  processes.size,
           enqueued:   sidekiq_stats.enqueued,
           scheduled:  sidekiq_stats.scheduled_size,
           retries:    sidekiq_stats.retry_size,
