@@ -50,7 +50,7 @@ module Sidekiq
         p.quiet! if params[:quiet]
         p.stop! if params[:stop]
       else
-        Sidekiq::ProcessSet.new.each do |pro|
+        processes.each do |pro|
           pro.quiet! if params[:quiet]
           pro.stop! if params[:stop]
         end
@@ -219,6 +219,7 @@ module Sidekiq
           processed:  sidekiq_stats.processed,
           failed:     sidekiq_stats.failed,
           busy:       workers_size,
+          processes:  processes_size,
           enqueued:   sidekiq_stats.enqueued,
           scheduled:  sidekiq_stats.scheduled_size,
           retries:    sidekiq_stats.retry_size,

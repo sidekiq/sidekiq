@@ -404,6 +404,10 @@ class TestWeb < Sidekiq::Test
           assert_equal 4, @response["sidekiq"]["busy"]
         end
 
+        it 'reports processes' do
+          assert_equal 1, @response["sidekiq"]["processes"]
+        end
+
         it 'reports retries' do
           assert_equal 2, @response["sidekiq"]["retries"]
         end
@@ -568,7 +572,7 @@ class TestWeb < Sidekiq::Test
       Sidekiq.redis do |conn|
         conn.multi do
           conn.sadd("processes", key)
-          conn.hmset(key, 'busy', 4)
+          conn.hmset(key, 'info', Sidekiq.dump_json('hostname' => 'foo', 'started_at' => Time.now.to_f, "queues" => []), 'at', Time.now.to_f, 'busy', 4)
           conn.hmset("#{key}:workers", Time.now.to_f, msg)
         end
       end

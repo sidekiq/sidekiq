@@ -46,6 +46,14 @@ module Sidekiq
       @workers ||= Sidekiq::Workers.new
     end
 
+    def processes_size
+      @processes_size ||= processes.size
+    end
+
+    def processes
+      @processes ||= Sidekiq::ProcessSet.new
+    end
+
     def stats
       @stats ||= Sidekiq::Stats.new
     end

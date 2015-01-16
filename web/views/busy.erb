@@ -21,7 +21,7 @@
     <th><%= t('Busy') %></th>
     <th>&nbsp;</th>
   </thead>
-  <% Sidekiq::ProcessSet.new.each do |process| %>
+  <% processes.each do |process| %>
     <tr>
       <td width="50%">
         <%= "#{process['hostname']}:#{process['pid']}" %>
@@ -65,7 +65,7 @@
     <th><%= t('Arguments') %></th>
     <th><%= t('Started') %></th>
   </thead>
-  <% workers.each_with_index do |(process, thread, msg), index| %>
+  <% workers.each do |process, thread, msg| %>
     <% job = Sidekiq::Job.new(msg['payload']) %>
     <tr>
       <td><%= process %></td>
