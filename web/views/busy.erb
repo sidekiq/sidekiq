@@ -21,7 +21,7 @@
     <th><%= t('Busy') %></th>
     <th>&nbsp;</th>
   </thead>
-  <% Sidekiq::ProcessSet.new.each do |process| %>
+  <% processes.each do |process| %>
     <tr>
       <td width="50%">
         <%= "#{process['hostname']}:#{process['pid']}" %>
