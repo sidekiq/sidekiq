@@ -52,7 +52,6 @@ module Sidekiq
           conn.zcard('retry')
           conn.zcard('dead')
           conn.scard('processes')
-
           conn.lrange("queue:default", -1, -1)
           conn.smembers('processes')
           conn.smembers('queues'.freeze)
@@ -66,8 +65,9 @@ module Sidekiq
         end
       end
 
-      workers_size = pipe2_res.pop(pipe1_res[7].size).map(&:to_i).inject(0, &:+)
-      enqueued     = pipe2_res.pop(pipe1_res[8].size).map(&:to_i).inject(0, &:+)
+      s = pipe1_res[7].size
+      workers_size = pipe2_res[0...s].map(&:to_i).inject(0, &:+)
+      enqueued     = pipe2_res[s..-1].map(&:to_i).inject(0, &:+)
 
       default_queue_latency = if (entry = pipe1_res[6].first)
                                 Time.now.to_f - Sidekiq.load_json(entry)['enqueued_at']
