@@ -3,12 +3,89 @@ require 'sidekiq'
 
 module Sidekiq
   class Stats
+    def initialize
+      fetch_stats!
+    end
+
     def processed
-      Sidekiq.redis { |conn| conn.get("stat:processed") }.to_i
+      stat :processed
     end
 
     def failed
-      Sidekiq.redis { |conn| conn.get("stat:failed") }.to_i
+      stat :failed
+    end
+
+    def scheduled_size
+      stat :scheduled_size
+    end
+
+    def retry_size
+      stat :retry_size
+    end
+
+    def dead_size
+      stat :dead_size
+    end
+
+    def enqueued
+      stat :enqueued
+    end
+
+    def processes_size
+      stat :processes_size
+    end
+
+    def workers_size
+      stat :workers_size
+    end
+
+    def default_queue_latency
+      stat :default_queue_latency
+    end
+
+    def fetch_stats!
+      pipe1_res = Sidekiq.redis do |conn|
+        conn.pipelined do
+          conn.get('stat:processed')
+          conn.get('stat:failed')
+          conn.zcard('schedule')
+          conn.zcard('retry')
+          conn.zcard('dead')
+          conn.scard('processes')
+          conn.lrange("queue:default", -1, -1)
+          conn.smembers('processes')
+          conn.smembers('queues'.freeze)
+        end
+      end
+
+      pipe2_res = Sidekiq.redis do |conn|
+        conn.pipelined do
+          pipe1_res[7].each {|key| conn.hget(key, 'busy') }
+          pipe1_res[8].each {|queue| conn.llen("queue:#{queue}") }
+        end
+      end
+
+      s = pipe1_res[7].size
+      workers_size = pipe2_res[0...s].map(&:to_i).inject(0, &:+)
+      enqueued     = pipe2_res[s..-1].map(&:to_i).inject(0, &:+)
+
+      default_queue_latency = if (entry = pipe1_res[6].first)
+                                Time.now.to_f - Sidekiq.load_json(entry)['enqueued_at']
+                              else
+                                0
+                              end
+      @stats = {
+        processed:             pipe1_res[0].to_i,
+        failed:                pipe1_res[1].to_i,
+        scheduled_size:        pipe1_res[2],
+        retry_size:            pipe1_res[3],
+        dead_size:             pipe1_res[4],
+        processes_size:        pipe1_res[5],
+
+        default_queue_latency: default_queue_latency,
+        workers_size:          workers_size,
+        enqueued:              enqueued
+      }
     end
 
     def reset(*stats)
@@ -25,41 +102,33 @@ module Sidekiq
       end
     end
 
-    def queues
-      Sidekiq.redis do |conn|
-        queues = conn.smembers('queues'.freeze)
+    private
 
-        lengths = conn.pipelined do
-          queues.each do |queue|
-            conn.llen("queue:#{queue}")
+    def stat(s)
+      @stats[s]
+    end
+
+    class Queues
+      def lengths
+        Sidekiq.redis do |conn|
+          queues = conn.smembers('queues'.freeze)
+
+          lengths = conn.pipelined do
+            queues.each do |queue|
+              conn.llen("queue:#{queue}")
+            end
           end
+
+          i = 0
+          array_of_arrays = queues.inject({}) do |memo, queue|
+            memo[queue] = lengths[i]
+            i += 1
+            memo
+          end.sort_by { |_, size| size }
+
+          Hash[array_of_arrays.reverse]
         end
-
-        i = 0
-        array_of_arrays = queues.inject({}) do |memo, queue|
-          memo[queue] = lengths[i]
-          i += 1
-          memo
-        end.sort_by { |_, size| size }
-
-        Hash[array_of_arrays.reverse]
       end
-    end
-
-    def enqueued
-      queues.values.inject(&:+) || 0
-    end
-
-    def scheduled_size
-      Sidekiq.redis {|c| c.zcard('schedule') }
-    end
-
-    def retry_size
-      Sidekiq.redis {|c| c.zcard('retry') }
-    end
-
-    def dead_size
-      Sidekiq.redis {|c| c.zcard('dead') }
     end
 
     class History

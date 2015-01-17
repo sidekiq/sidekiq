@@ -77,8 +77,8 @@ class TestApi < Sidekiq::Test
 
     describe "queues" do
       it "is initially empty" do
-        s = Sidekiq::Stats.new
-        assert_equal 0, s.queues.size
+        s = Sidekiq::Stats::Queues.new
+        assert_equal 0, s.lengths.size
       end
 
       it "returns a hash of queue and size in order" do
@@ -90,9 +90,9 @@ class TestApi < Sidekiq::Test
           conn.sadd 'queues', 'bar'
         end
 
-        s = Sidekiq::Stats.new
-        assert_equal ({ "foo" => 1, "bar" => 3 }), s.queues
-        assert_equal "bar", s.queues.first.first
+        s = Sidekiq::Stats::Queues.new
+        assert_equal ({ "foo" => 1, "bar" => 3 }), s.lengths
+        assert_equal "bar", s.lengths.first.first
       end
     end
 

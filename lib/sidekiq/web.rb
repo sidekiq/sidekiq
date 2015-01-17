@@ -210,32 +210,31 @@ module Sidekiq
 
     get '/stats' do
       sidekiq_stats = Sidekiq::Stats.new
-      queue         = Sidekiq::Queue.new
       redis_stats   = redis_info.select { |k, v| REDIS_KEYS.include? k }
 
       content_type :json
       Sidekiq.dump_json(
         sidekiq: {
-          processed:  sidekiq_stats.processed,
-          failed:     sidekiq_stats.failed,
-          busy:       workers.size,
-          processes:  processes.size,
-          enqueued:   sidekiq_stats.enqueued,
-          scheduled:  sidekiq_stats.scheduled_size,
-          retries:    sidekiq_stats.retry_size,
-          dead:       sidekiq_stats.dead_size,
-          default_latency: queue.latency
+          processed:       sidekiq_stats.processed,
+          failed:          sidekiq_stats.failed,
+          busy:            sidekiq_stats.workers_size,
+          processes:       sidekiq_stats.processes_size,
+          enqueued:        sidekiq_stats.enqueued,
+          scheduled:       sidekiq_stats.scheduled_size,
+          retries:         sidekiq_stats.retry_size,
+          dead:            sidekiq_stats.dead_size,
+          default_latency: sidekiq_stats.default_queue_latency
         },
         redis: redis_stats
       )
     end
 
     get '/stats/queues' do
-      stats = Sidekiq::Stats.new
+      queue_stats = Sidekiq::Stats::Queues.new
 
       content_type :json
       Sidekiq.dump_json(
-        stats.queues
+        queue_stats.lengths
       )
     end
 
