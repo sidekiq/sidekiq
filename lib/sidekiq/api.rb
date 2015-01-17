@@ -46,21 +46,21 @@ module Sidekiq
     def fetch_stats!
       pipe1_res = Sidekiq.redis do |conn|
         conn.pipelined do
-          conn.get('stat:processed')
-          conn.get('stat:failed')
-          conn.zcard('schedule')
-          conn.zcard('retry')
-          conn.zcard('dead')
-          conn.scard('processes')
-          conn.lrange("queue:default", -1, -1)
-          conn.smembers('processes')
+          conn.get('stat:processed'.freeze)
+          conn.get('stat:failed'.freeze)
+          conn.zcard('schedule'.freeze)
+          conn.zcard('retry'.freeze)
+          conn.zcard('dead'.freeze)
+          conn.scard('processes'.freeze)
+          conn.lrange('queue:default'.freeze, -1, -1)
+          conn.smembers('processes'.freeze)
           conn.smembers('queues'.freeze)
         end
       end
 
       pipe2_res = Sidekiq.redis do |conn|
         conn.pipelined do
-          pipe1_res[7].each {|key| conn.hget(key, 'busy') }
+          pipe1_res[7].each {|key| conn.hget(key, 'busy'.freeze) }
           pipe1_res[8].each {|queue| conn.llen("queue:#{queue}") }
         end
       end
@@ -70,7 +70,7 @@ module Sidekiq
       enqueued     = pipe2_res[s..-1].map(&:to_i).inject(0, &:+)
 
       default_queue_latency = if (entry = pipe1_res[6].first)
-                                Time.now.to_f - Sidekiq.load_json(entry)['enqueued_at']
+                                Time.now.to_f - Sidekiq.load_json(entry)['enqueued_at'.freeze]
                               else
                                 0
                               end
