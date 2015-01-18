@@ -8,6 +8,14 @@
     <script type="text/javascript" src="<%= root_path %>javascripts/application.js"></script>
     <script type="text/javascript" src="<%= root_path %>javascripts/locales/jquery.timeago.<%= locale %>.js"></script>
     <meta name="google" content="notranslate" />
+    <script>
+$(function(){
+ setTimeout(function(){
+  $('HEAD').append($('<link href="//fonts.googleapis.com/css?family=Gudea:400,700" media="screen" rel="stylesheet" type="text/css" />'));
+  $('HEAD').append($('<link href="//fonts.googleapis.com/css?family=Armata" media="screen" rel="stylesheet" type="text/css" />'));
+ }, 100);
+});
+</script>
   </head>
   <body class="admin">
     <%= erb :_nav %>
