@@ -6,9 +6,11 @@ HEAD
 - Refactor Processor Redis usage to avoid redis/redis-rb#490 [#]
 - Move /dashboard/stats to /stats.  Add /stats/queues. [moserke, #2099]
 - Add processes count to /stats [ismaelga, #2141]
+- Greatly improve speed of Sidekiq::Stats [ismaelga, #2142]
 - Add better usage text for `sidekiqctl`.
 - `Sidekiq::Logging.with_context` is now a stack so you can set your
   own job context for logging purposes [grosser, #2110]
+- Remove usage of Google Fonts in Web UI so it loads in China [#2144]
 
 3.3.0
 -----------
