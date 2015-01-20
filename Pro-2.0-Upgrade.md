@@ -7,13 +7,14 @@ smoothly.
 
 ## Nested Batches
 
-Batches can now be nested within in the `jobs` method for more complex job workflows.
+Batches can now be nested within the `jobs` method for more complex job workflows.
 
 ```ruby
 a = Sidekiq::Batch.new
 a.on(:success, SomeCallback)
 a.jobs do
   SomeWork.perform_async
+
   b = Sidekiq::Batch.new
   b.on(:success, MyCallback)
   b.jobs do
@@ -22,8 +23,8 @@ a.jobs do
 end
 ```
 
-Parent batch callbacks are not processed until all child batch callbacks have
-run.
+Parent batch callbacks are not processed until any child batch callbacks have
+run successfully.
 
 ## Batch Data
 
@@ -42,7 +43,7 @@ savings but real world savings should be even greater.
 * Failed batch jobs no longer automatically store any associated
   backtrace in Redis.
 
-**There's no data migration required.  Sidekiq Pro transparently handles
+**There's no data migration required.  Sidekiq Pro 2.0 transparently handles
 both old and new format.**
 
 ## Reliability
@@ -62,4 +63,4 @@ Sidekiq::Client.reliable_push!
 
 * You must require `sidekiq/notifications` if you want to use the
   existing notification schemes.  I don't recommend using them as the
-  newer-style `Sidekiq::Batch#on` method is more flexible and simpler.
+  newer-style `Sidekiq::Batch#on` method is simpler and more flexible.
