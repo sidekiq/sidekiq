@@ -24,7 +24,8 @@ end
 ```
 
 Parent batch callbacks are not processed until any child batch callbacks have
-run successfully.
+run successfully.  In the example above, `MyCallback` will always fire
+before `SomeCallback` because `b` is considered a child of `a`.
 
 ## Batch Data
 
@@ -46,15 +47,20 @@ savings but real world savings should be even greater.
 **There's no data migration required.  Sidekiq Pro 2.0 transparently handles
 both old and new format.**
 
+**Note that you CANNOT go back to Pro 1.x once you've created batches
+with 2.x.  The new batches will not process correctly with 1.x.**
+
 ## Reliability
 
-* Reliable fetch is now activated without a require:
+You no longer need to require anything to use Reliability features.
+
+* Activate reliable fetch:
 ```ruby
 Sidekiq.configure_server do |config|
   config.reliable_fetch!
 end
 ```
-* Reliable push is now activated without a require:
+* Activate reliable push:
 ```ruby
 Sidekiq::Client.reliable_push!
 ```
@@ -64,3 +70,7 @@ Sidekiq::Client.reliable_push!
 * You must require `sidekiq/notifications` if you want to use the
   existing notification schemes.  I don't recommend using them as the
   newer-style `Sidekiq::Batch#on` method is simpler and more flexible.
+* Several classes have been renamed.  Generally these classes are ones
+  you should not need to require/use in your own code, e.g. the Batch
+  middleware.
+* The Web UI now shows the Sidekiq Pro version in the footer.
