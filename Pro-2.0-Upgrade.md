@@ -7,7 +7,9 @@ smoothly.
 
 ## Nested Batches
 
-Batches can now be nested within the `jobs` method for more complex job workflows.
+Batches can now be nested within the `jobs` method.
+This feature enables Sidekiq Pro to handle workflow processing of any size
+and complexity!
 
 ```ruby
 a = Sidekiq::Batch.new
@@ -26,6 +28,25 @@ end
 Parent batch callbacks are not processed until any child batch callbacks have
 run successfully.  In the example above, `MyCallback` will always fire
 before `SomeCallback` because `b` is considered a child of `a`.
+
+Of course you can dynamically add child batches while a batch job is executing.
+
+```ruby
+def perform(*args)
+  do_something(args)
+
+  if more_work?
+    # Sidekiq::Worker#batch returns the Batch this job is part of.
+    batch.jobs do
+      b = Sidekiq::Batch.new
+      b.on(:success, MyCallback)
+      b.jobs do
+        OtherWork.perform_async
+      end
+    end
+  end
+end
+```
 
 ## Batch Data
 
