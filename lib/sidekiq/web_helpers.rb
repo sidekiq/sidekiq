@@ -178,5 +178,9 @@ module Sidekiq
 
       "[#{environment.upcase}] " unless environment == "production"
     end
+
+    def product_version
+      "Sidekiq v#{Sidekiq::VERSION}"
+    end
   end
 end
