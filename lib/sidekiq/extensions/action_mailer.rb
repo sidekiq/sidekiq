@@ -17,7 +17,11 @@ module Sidekiq
         msg = target.public_send(method_name, *args)
         # The email method can return nil, which causes ActionMailer to return
         # an undeliverable empty message.
-        deliver(msg) if msg && (msg.to || msg.cc || msg.bcc) && msg.from
+        if msg
+          deliver(msg)
+        else
+          logger.warn("#{target.name}##{method_name} returned an undeliverable mail object")
+        end
       end
 
       private

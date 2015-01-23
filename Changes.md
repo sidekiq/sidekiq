@@ -1,5 +1,7 @@
 HEAD
 -----------
+
+- Dumb down ActionMailer integration so it tries to deliver if possible [#2149]
 - Stringify Sidekiq.default_worker_options's keys [#2126]
 - Add random integer to process identity [#2113, michaeldiscala]
 - Log Sidekiq Pro's Batch ID if available [#2076]
