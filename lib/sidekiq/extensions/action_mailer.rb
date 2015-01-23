@@ -20,7 +20,7 @@ module Sidekiq
         if msg
           deliver(msg)
         else
-          logger.warn("#{target.name}##{method_name} returned an undeliverable mail object")
+          raise "#{target.name}##{method_name} returned an undeliverable mail object"
         end
       end
 
