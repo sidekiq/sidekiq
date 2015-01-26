@@ -55,7 +55,7 @@ module Sidekiq
     # All options must be strings, not symbols.  NB: because we are serializing to JSON, all
     # symbols in 'args' will be converted to strings.
     #
-    # Returns a unique Job ID.
+    # Returns a unique Job ID.  If middleware stops the job, nil will be returned instead.
     #
     # Example:
     #   push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
@@ -64,8 +64,10 @@ module Sidekiq
       normed = normalize_item(item)
       payload = process_single(item['class'], normed)
 
-      raw_push([payload]) if payload
-      payload['jid']
+      if payload
+        raw_push([payload])
+        payload['jid']
+      end
     end
 
     ##
