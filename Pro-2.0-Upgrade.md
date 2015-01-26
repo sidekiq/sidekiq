@@ -95,3 +95,8 @@ Sidekiq::Client.reliable_push!
   you should not need to require/use in your own code, e.g. the Batch
   middleware.
 * The Web UI now shows the Sidekiq Pro version in the footer.
+
+## Thanks
+
+Adam Prescott, Luke van der Hoeven and Jon Hyman all provided valuable
+feedback during the release process.  Thank you guys!
