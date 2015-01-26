@@ -55,7 +55,7 @@ module Sidekiq
     # All options must be strings, not symbols.  NB: because we are serializing to JSON, all
     # symbols in 'args' will be converted to strings.
     #
-    # Returns nil if not pushed to Redis or a unique Job ID if pushed.
+    # Returns a unique Job ID.
     #
     # Example:
     #   push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
@@ -64,9 +64,8 @@ module Sidekiq
       normed = normalize_item(item)
       payload = process_single(item['class'], normed)
 
-      pushed = false
-      pushed = raw_push([payload]) if payload
-      pushed ? payload['jid'] : nil
+      raw_push([payload]) if payload
+      payload['jid']
     end
 
     ##
@@ -80,9 +79,8 @@ module Sidekiq
     # is run through the client middleware pipeline and each job gets its own Job ID
     # as normal.
     #
-    # Returns an array of the of pushed jobs' jids or nil if the pushed failed.  The number of jobs
-    # pushed can be less than the number given if the middleware stopped processing for one
-    # or more jobs.
+    # Returns an array of the of pushed jobs' jids.  The number of jobs pushed can be less
+    # than the number given if the middleware stopped processing for one or more jobs.
     def push_bulk(items)
       normed = normalize_item(items)
       payloads = items['args'].map do |args|
@@ -90,9 +88,8 @@ module Sidekiq
         process_single(items['class'], normed.merge('args' => args, 'jid' => SecureRandom.hex(12), 'enqueued_at' => Time.now.to_f))
       end.compact
 
-      pushed = false
-      pushed = raw_push(payloads) if !payloads.empty?
-      pushed ? payloads.collect { |payload| payload['jid'] } : nil
+      raw_push(payloads) if !payloads.empty?
+      payloads.collect { |payload| payload['jid'] }
     end
 
     # Allows sharding of jobs across any number of Redis instances.  All jobs
