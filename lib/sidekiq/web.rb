@@ -19,12 +19,12 @@ module Sidekiq
     helpers WebHelpers
 
     DEFAULT_TABS = {
-      "Dashboard" => '',
-      "Busy"      => 'busy',
-      "Queues"    => 'queues',
-      "Retries"   => 'retries',
-      "Scheduled" => 'scheduled',
-      "Dead"      => 'morgue',
+      'Dashboard'.freeze => '',
+      'Busy'.freeze      => 'busy'.freeze,
+      'Queues'.freeze    => 'queues'.freeze,
+      'Retries'.freeze   => 'retries'.freeze,
+      'Scheduled'.freeze => 'scheduled'.freeze,
+      'Dead'.freeze      => 'morgue'.freeze,
     }
 
     class << self

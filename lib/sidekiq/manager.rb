@@ -21,7 +21,7 @@ module Sidekiq
     attr_accessor :fetcher
 
     SPIN_TIME_FOR_GRACEFUL_SHUTDOWN = 1
-    JVM_RESERVED_SIGNALS = ['USR1', 'USR2'] # Don't Process#kill if we get these signals via the API
+    JVM_RESERVED_SIGNALS = ['USR1'.freeze, 'USR2'.freeze] # Don't Process#kill if we get these signals via the API
 
     def initialize(condvar, options={})
       logger.debug { options.inspect }
@@ -135,10 +135,10 @@ module Sidekiq
     end
 
     def heartbeat(key, data, json)
-      proctitle = ['sidekiq', Sidekiq::VERSION]
-      proctitle << data['tag'] unless data['tag'].empty?
-      proctitle << "[#{@busy.size} of #{data['concurrency']} busy]"
-      proctitle << 'stopping' if stopped?
+      proctitle = ['sidekiq'.freeze, Sidekiq::VERSION]
+      proctitle << data['tag'.freeze] unless data['tag'.freeze].empty?
+      proctitle << "[#{@busy.size} of #{data['concurrency'.freeze]} busy]"
+      proctitle << 'stopping'.freeze if stopped?
       $0 = proctitle.join(' ')
 
       ❤(key, json)
@@ -153,8 +153,8 @@ module Sidekiq
       begin
         _, _, _, msg = Sidekiq.redis do |conn|
           conn.multi do
-            conn.sadd('processes', key)
-            conn.hmset(key, 'info', json, 'busy', @busy.size, 'beat', Time.now.to_f)
+            conn.sadd('processes'.freeze, key)
+            conn.hmset(key, 'info'.freeze, json, 'busy'.freeze, @busy.size, 'beat'.freeze, Time.now.to_f)
             conn.expire(key, 60)
             conn.rpop("#{key}-signals")
           end

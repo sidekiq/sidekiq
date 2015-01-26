@@ -211,7 +211,7 @@ module Sidekiq
         conn.lrange(@rname, -1, -1)
       end.first
       return 0 unless entry
-      Time.now.to_f - Sidekiq.load_json(entry)['enqueued_at']
+      Time.now.to_f - Sidekiq.load_json(entry)['enqueued_at'.freeze]
     end
 
     def each(&block)
@@ -264,11 +264,11 @@ module Sidekiq
     def initialize(item, queue_name=nil)
       @value = item
       @item = item.is_a?(Hash) ? item : Sidekiq.load_json(item)
-      @queue = queue_name || @item['queue']
+      @queue = queue_name || @item['queue'.freeze]
     end
 
     def klass
-      @item['class']
+      @item['class'.freeze]
     end
 
     def display_class
@@ -300,15 +300,15 @@ module Sidekiq
     end
 
     def args
-      @item['args']
+      @item['args'.freeze]
     end
 
     def jid
-      @item['jid']
+      @item['jid'.freeze]
     end
 
     def enqueued_at
-      Time.at(@item['enqueued_at'] || 0).utc
+      Time.at(@item['enqueued_at'.freeze] || 0).utc
     end
 
     def queue
@@ -316,7 +316,7 @@ module Sidekiq
     end
 
     def latency
-      Time.now.to_f - @item['enqueued_at']
+      Time.now.to_f - @item['enqueued_at'.freeze]
     end
 
     ##
@@ -340,7 +340,7 @@ module Sidekiq
       rescue ::ArgumentError => ex
         # #1761 in dev mode, it's possible to have jobs enqueued which haven't been loaded into
         # memory yet so the YAML can't be loaded.
-        Sidekiq.logger.warn "Unable to load YAML: #{ex.message}" unless Sidekiq.options[:environment] == 'development'
+        Sidekiq.logger.warn "Unable to load YAML: #{ex.message}" unless Sidekiq.options[:environment] == 'development'.freeze
         default
       end
     end
@@ -380,7 +380,7 @@ module Sidekiq
       raise "Retry not available on jobs which have not failed" unless item["failed_at"]
       remove_job do |message|
         msg = Sidekiq.load_json(message)
-        msg['retry_count'] = msg['retry_count'] - 1
+        msg['retry_count'.freeze] = msg['retry_count'.freeze] - 1
         Sidekiq::Client.push(msg)
       end
     end
@@ -388,15 +388,15 @@ module Sidekiq
     ##
     # Place job in the dead set
     def kill
-      raise 'Kill not available on jobs which have not failed' unless item['failed_at']
+      raise 'Kill not available on jobs which have not failed' unless item['failed_at'.freeze]
       remove_job do |message|
-        Sidekiq.logger.info { "Killing job #{message['jid']}" }
+        Sidekiq.logger.info { "Killing job #{message['jid'.freeze]}" }
         now = Time.now.to_f
         Sidekiq.redis do |conn|
           conn.multi do
-            conn.zadd('dead', now, message)
-            conn.zremrangebyscore('dead', '-inf', now - DeadSet::TIMEOUT)
-            conn.zremrangebyrank('dead', 0, - DeadSet::MAX_JOBS)
+            conn.zadd('dead'.freeze, now, message)
+            conn.zremrangebyscore('dead'.freeze, '-inf', now - DeadSet::TIMEOUT)
+            conn.zremrangebyrank('dead'.freeze, 0, - DeadSet::MAX_JOBS)
           end
         end
       end
@@ -419,7 +419,7 @@ module Sidekiq
           hash = results.group_by do |message|
             if message.index(jid)
               msg = Sidekiq.load_json(message)
-              msg['jid'] == jid
+              msg['jid'.freeze] == jid
             else
               false
             end
@@ -557,7 +557,7 @@ module Sidekiq
   #   end.map(&:delete)
   class ScheduledSet < JobSet
     def initialize
-      super 'schedule'
+      super 'schedule'.freeze
     end
   end
 
@@ -575,7 +575,7 @@ module Sidekiq
   #   end.map(&:delete)
   class RetrySet < JobSet
     def initialize
-      super 'retry'
+      super 'retry'.freeze
     end
 
     def retry_all
@@ -593,7 +593,7 @@ module Sidekiq
     MAX_JOBS = 10_000
 
     def initialize
-      super 'dead'
+      super 'dead'.freeze
     end
 
     def retry_all
@@ -623,10 +623,10 @@ module Sidekiq
     def self.cleanup
       count = 0
       Sidekiq.redis do |conn|
-        procs = conn.smembers('processes').sort
+        procs = conn.smembers('processes'.freeze).sort
         heartbeats = conn.pipelined do
           procs.each do |key|
-            conn.hget(key, 'info')
+            conn.hget(key, 'info'.freeze)
           end
         end
 
@@ -637,13 +637,13 @@ module Sidekiq
         heartbeats.each_with_index do |beat, i|
           to_prune << procs[i] if beat.nil?
         end
-        count = conn.srem('processes', to_prune) unless to_prune.empty?
+        count = conn.srem('processes'.freeze, to_prune) unless to_prune.empty?
       end
       count
     end
 
     def each(&block)
-      procs = Sidekiq.redis { |conn| conn.smembers('processes') }.sort
+      procs = Sidekiq.redis { |conn| conn.smembers('processes'.freeze) }.sort
 
       Sidekiq.redis do |conn|
         # We're making a tradeoff here between consuming more memory instead of
@@ -651,13 +651,13 @@ module Sidekiq
         # you'll be happier this way
         result = conn.pipelined do
           procs.each do |key|
-            conn.hmget(key, 'info', 'busy', 'beat')
+            conn.hmget(key, 'info'.freeze, 'busy'.freeze, 'beat'.freeze)
           end
         end
 
         result.each do |info, busy, at_s|
           hash = Sidekiq.load_json(info)
-          yield Process.new(hash.merge('busy' => busy.to_i, 'beat' => at_s.to_f))
+          yield Process.new(hash.merge('busy'.freeze => busy.to_i, 'beat'.freeze => at_s.to_f))
         end
       end
 
@@ -669,7 +669,7 @@ module Sidekiq
     # contains Sidekiq processes which have sent a heartbeat within the last
     # 60 seconds.
     def size
-      Sidekiq.redis { |conn| conn.scard('processes') }
+      Sidekiq.redis { |conn| conn.scard('processes'.freeze) }
     end
   end
 
@@ -693,11 +693,11 @@ module Sidekiq
     end
 
     def tag
-      self['tag']
+      self['tag'.freeze]
     end
 
     def labels
-      Array(self['labels'])
+      Array(self['labels'.freeze])
     end
 
     def [](key)
@@ -705,11 +705,11 @@ module Sidekiq
     end
 
     def quiet!
-      signal('USR1')
+      signal('USR1'.freeze)
     end
 
     def stop!
-      signal('TERM')
+      signal('TERM'.freeze)
     end
 
     private
@@ -725,7 +725,7 @@ module Sidekiq
     end
 
     def identity
-      self['identity']
+      self['identity'.freeze]
     end
   end
 
@@ -753,7 +753,7 @@ module Sidekiq
 
     def each(&block)
       Sidekiq.redis do |conn|
-        procs = conn.smembers('processes')
+        procs = conn.smembers('processes'.freeze)
         procs.sort.each do |key|
           valid, workers = conn.pipelined do
             conn.exists(key)
@@ -775,12 +775,12 @@ module Sidekiq
     # which can easily get out of sync with crashy processes.
     def size
       Sidekiq.redis do |conn|
-        procs = conn.smembers('processes')
+        procs = conn.smembers('processes'.freeze)
         return 0 if procs.empty?
 
         conn.pipelined do
           procs.each do |key|
-            conn.hget(key, 'busy')
+            conn.hget(key, 'busy'.freeze)
           end
         end.map(&:to_i).inject(:+)
       end

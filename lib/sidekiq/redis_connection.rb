@@ -48,7 +48,7 @@ module Sidekiq
           opts.delete(:network_timeout)
         end
 
-        opts[:driver] = opts[:driver] || 'ruby'
+        opts[:driver] = opts[:driver] || 'ruby'.freeze
 
         opts
       end

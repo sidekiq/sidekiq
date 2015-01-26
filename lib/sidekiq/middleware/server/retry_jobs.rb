@@ -79,17 +79,17 @@ module Sidekiq
           # ignore, will be pushed back onto queue during hard_shutdown
           raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
 
-          raise e unless msg['retry']
+          raise e unless msg['retry'.freeze]
           attempt_retry(worker, msg, queue, e)
         end
 
         private
 
         def attempt_retry(worker, msg, queue, exception)
-          max_retry_attempts = retry_attempts_from(msg['retry'], @max_retries)
+          max_retry_attempts = retry_attempts_from(msg['retry'.freeze], @max_retries)
 
-          msg['queue'] = if msg['retry_queue']
-            msg['retry_queue']
+          msg['queue'.freeze] = if msg['retry_queue'.freeze]
+            msg['retry_queue'.freeze]
           else
             queue
           end
@@ -98,26 +98,26 @@ module Sidekiq
           # that won't convert to JSON.
           m = exception.message[0..10_000]
           if m.respond_to?(:scrub!)
-            m.force_encoding("utf-8")
+            m.force_encoding('utf-8'.freeze)
             m.scrub!
           end
 
-          msg['error_message'] = m
-          msg['error_class'] = exception.class.name
-          count = if msg['retry_count']
-            msg['retried_at'] = Time.now.to_f
-            msg['retry_count'] += 1
+          msg['error_message'.freeze] = m
+          msg['error_class'.freeze] = exception.class.name
+          count = if msg['retry_count'.freeze]
+            msg['retried_at'.freeze] = Time.now.to_f
+            msg['retry_count'.freeze] += 1
           else
-            msg['failed_at'] = Time.now.to_f
-            msg['retry_count'] = 0
+            msg['failed_at'.freeze] = Time.now.to_f
+            msg['retry_count'.freeze] = 0
           end
 
-          if msg['backtrace'] == true
-            msg['error_backtrace'] = exception.backtrace
-          elsif !msg['backtrace']
+          if msg['backtrace'.freeze] == true
+            msg['error_backtrace'.freeze] = exception.backtrace
+          elsif !msg['backtrace'.freeze]
             # do nothing
-          elsif msg['backtrace'].to_i != 0
-            msg['error_backtrace'] = exception.backtrace[0...msg['backtrace'].to_i]
+          elsif msg['backtrace'.freeze].to_i != 0
+            msg['error_backtrace'.freeze] = exception.backtrace[0...msg['backtrace'.freeze].to_i]
           end
 
           if count < max_retry_attempts
@@ -126,7 +126,7 @@ module Sidekiq
             retry_at = Time.now.to_f + delay
             payload = Sidekiq.dump_json(msg)
             Sidekiq.redis do |conn|
-              conn.zadd('retry', retry_at.to_s, payload)
+              conn.zadd('retry'.freeze, retry_at.to_s, payload)
             end
           else
             # Goodbye dear message, you (re)tried your best I'm sure.
@@ -146,18 +146,18 @@ module Sidekiq
             handle_exception(e, { context: "Error calling retries_exhausted for #{worker.class}", job: msg })
           end
 
-          send_to_morgue(msg) unless msg['dead'] == false
+          send_to_morgue(msg) unless msg['dead'.freeze] == false
         end
 
         def send_to_morgue(msg)
-          Sidekiq.logger.info { "Adding dead #{msg['class']} job #{msg['jid']}" }
+          Sidekiq.logger.info { "Adding dead #{msg['class'.freeze]} job #{msg['jid'.freeze]}" }
           payload = Sidekiq.dump_json(msg)
           now = Time.now.to_f
           Sidekiq.redis do |conn|
             conn.multi do
-              conn.zadd('dead', now, payload)
-              conn.zremrangebyscore('dead', '-inf', now - DeadSet::TIMEOUT)
-              conn.zremrangebyrank('dead', 0, -DeadSet::MAX_JOBS)
+              conn.zadd('dead'.freeze, now, payload)
+              conn.zremrangebyscore('dead'.freeze, '-inf'.freeze, now - DeadSet::TIMEOUT)
+              conn.zremrangebyrank('dead'.freeze, 0, -DeadSet::MAX_JOBS)
             end
           end
         end

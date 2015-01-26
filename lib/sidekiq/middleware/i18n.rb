@@ -9,7 +9,7 @@ module Sidekiq::Middleware::I18n
   # to be sent to Sidekiq.
   class Client
     def call(worker_class, msg, queue, redis_pool)
-      msg['locale'] ||= I18n.locale
+      msg['locale'.freeze] ||= I18n.locale
       yield
     end
   end
@@ -17,7 +17,7 @@ module Sidekiq::Middleware::I18n
   # Pull the msg locale out and set the current thread to use it.
   class Server
     def call(worker, msg, queue)
-      I18n.locale = msg['locale'] || I18n.default_locale
+      I18n.locale = msg['locale'.freeze] || I18n.default_locale
       yield
     ensure
       I18n.locale = I18n.default_locale

@@ -52,7 +52,7 @@ module Sidekiq
 
     def retries_with_score(score)
       Sidekiq.redis do |conn|
-        conn.zrangebyscore('retry', score, score)
+        conn.zrangebyscore('retry'.freeze, score, score)
       end.map { |msg| Sidekiq.load_json(msg) }
     end
 
@@ -97,7 +97,7 @@ module Sidekiq
     end
 
     def job_params(job, score)
-      "#{score}-#{job['jid']}"
+      "#{score}-#{job['jid'.freeze]}"
     end
 
     def parse_params(params)

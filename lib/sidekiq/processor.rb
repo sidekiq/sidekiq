@@ -43,13 +43,13 @@ module Sidekiq
       ack = true
       begin
         msg = Sidekiq.load_json(msgstr)
-        klass  = msg['class'].constantize
+        klass  = msg['class'.freeze].constantize
         worker = klass.new
-        worker.jid = msg['jid']
+        worker.jid = msg['jid'.freeze]
 
         stats(worker, msg, queue) do
           Sidekiq.server_middleware.invoke(worker, msg, queue) do
-            execute_job(worker, cloned(msg['args']))
+            execute_job(worker, cloned(msg['args'.freeze]))
           end
         end
       rescue Sidekiq::Shutdown
