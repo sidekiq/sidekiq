@@ -18,6 +18,7 @@ module Sidekiq
   # otherwise Ruby's Thread#kill will commit.  See #377.
   # DO NOT RESCUE THIS ERROR.
   class Shutdown < Interrupt; end
+  class Retry < Exception; end
 
   class CLI
     include Util
