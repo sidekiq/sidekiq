@@ -128,7 +128,7 @@ module Sidekiq
         end
       when 'TTIN'
         Thread.list.each do |thread|
-          Sidekiq.logger.warn "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
+          Sidekiq.logger.warn "Thread TID-#{thread.object_id.to_s(36)} #{thread['label'.freeze]}"
           if thread.backtrace
             Sidekiq.logger.warn thread.backtrace.join("\n")
           else
@@ -142,7 +142,7 @@ module Sidekiq
 
     def print_banner
       # Print logo and banner for development
-      if environment == 'development' && $stdout.tty?
+      if environment == 'development'.freeze && $stdout.tty?
         puts "\e[#{31}m"
         puts Sidekiq::CLI.banner
         puts "\e[0m"
@@ -245,7 +245,7 @@ module Sidekiq
       dir = ::Rails.root
       name = File.basename(dir)
       if name.to_i != 0 && prevdir = File.dirname(dir) # Capistrano release directory?
-        if File.basename(prevdir) == 'releases'
+        if File.basename(prevdir) == 'releases'.freeze
           return File.basename(File.dirname(prevdir))
         end
       end
@@ -253,7 +253,7 @@ module Sidekiq
     end
 
     def validate!
-      options[:queues] << 'default' if options[:queues].empty?
+      options[:queues] << 'default'.freeze if options[:queues].empty?
 
       if !File.exist?(options[:require]) ||
          (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))

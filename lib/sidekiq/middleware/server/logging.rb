@@ -4,10 +4,10 @@ module Sidekiq
       class Logging
 
         def call(worker, item, queue)
-          Sidekiq::Logging.with_context("#{worker.class.to_s} JID-#{item['jid']}#{" BID-#{item['bid']}" if item['bid']}") do
+          Sidekiq::Logging.with_context("#{worker.class.to_s} JID-#{item['jid'.freeze]}#{" BID-#{item['bid'.freeze]}" if item['bid'.freeze]}") do
             begin
               start = Time.now
-              logger.info { "start" }
+              logger.info { 'start'.freeze }
               yield
               logger.info { "done: #{elapsed(start)} sec" }
             rescue Exception

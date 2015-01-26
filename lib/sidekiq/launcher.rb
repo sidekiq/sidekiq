@@ -68,14 +68,14 @@ module Sidekiq
     def start_heartbeat
       key = identity
       data = {
-        'hostname' => hostname,
-        'started_at' => Time.now.to_f,
-        'pid' => $$,
-        'tag' => @options[:tag] || '',
-        'concurrency' => @options[:concurrency],
-        'queues' => @options[:queues].uniq,
-        'labels' => Sidekiq.options[:labels],
-        'identity' => identity,
+        'hostname'.freeze => hostname,
+        'started_at'.freeze => Time.now.to_f,
+        'pid'.freeze => $$,
+        'tag'.freeze => @options[:tag] || ''.freeze,
+        'concurrency'.freeze => @options[:concurrency],
+        'queues'.freeze => @options[:queues].uniq,
+        'labels'.freeze => Sidekiq.options[:labels],
+        'identity'.freeze => identity,
       }
       # this data doesn't change so dump it to a string
       # now so we don't need to dump it every heartbeat.
@@ -86,7 +86,7 @@ module Sidekiq
     def stop_heartbeat
       Sidekiq.redis do |conn|
         conn.pipelined do
-          conn.srem('processes', identity)
+          conn.srem('processes'.freeze, identity)
           conn.del("#{identity}:workers")
         end
       end

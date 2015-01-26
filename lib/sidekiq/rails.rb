@@ -31,7 +31,7 @@ module Sidekiq
   end
 
   class Rails < ::Rails::Engine
-    initializer 'sidekiq' do
+    initializer 'sidekiq'.freeze do
       Sidekiq.hook_rails!
     end
   end if defined?(::Rails)

@@ -12,7 +12,7 @@ module Sidekiq
         type = conn.type(key)
 
         case type
-        when 'zset'
+        when 'zset'.freeze
           rev = opts && opts[:reverse]
           total_size, items = conn.multi do
             conn.zcard(key)
@@ -22,12 +22,12 @@ module Sidekiq
               conn.zrange(key, starting, ending, :with_scores => true)
             end
           end
-        when 'list'
+        when 'list'.freeze
           total_size, items = conn.multi do
             conn.llen(key)
             conn.lrange(key, starting, ending)
           end
-        when 'none'
+        when 'none'.freeze
           return [1, 0, []]
         else
           raise "can't page a #{type}"

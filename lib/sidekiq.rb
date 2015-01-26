@@ -10,7 +10,7 @@ require 'sidekiq/redis_connection'
 require 'json'
 
 module Sidekiq
-  NAME = 'Sidekiq'
+  NAME = 'Sidekiq'.freeze
   LICENSE = 'See LICENSE and the LGPL-3.0 for licensing details.'
 
   DEFAULTS = {
@@ -101,7 +101,7 @@ module Sidekiq
   end
 
   def self.default_worker_options
-    defined?(@default_worker_options) ? @default_worker_options : { 'retry' => true, 'queue' => 'default' }
+    defined?(@default_worker_options) ? @default_worker_options : { 'retry'.freeze => true, 'queue'.freeze => 'default'.freeze }
   end
 
   def self.load_json(string)

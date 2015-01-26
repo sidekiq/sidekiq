@@ -62,11 +62,11 @@ module Sidekiq
     #
     def push(item)
       normed = normalize_item(item)
-      payload = process_single(item['class'], normed)
+      payload = process_single(item['class'.freeze], normed)
 
       pushed = false
       pushed = raw_push([payload]) if payload
-      pushed ? payload['jid'] : nil
+      pushed ? payload['jid'.freeze] : nil
     end
 
     ##
@@ -85,14 +85,14 @@ module Sidekiq
     # or more jobs.
     def push_bulk(items)
       normed = normalize_item(items)
-      payloads = items['args'].map do |args|
+      payloads = items['args'.freeze].map do |args|
         raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" if !args.is_a?(Array)
-        process_single(items['class'], normed.merge('args' => args, 'jid' => SecureRandom.hex(12), 'enqueued_at' => Time.now.to_f))
+        process_single(items['class'.freeze], normed.merge('args'.freeze => args, 'jid'.freeze => SecureRandom.hex(12), 'enqueued_at'.freeze => Time.now.to_f))
       end.compact
 
       pushed = false
       pushed = raw_push(payloads) if !payloads.empty?
-      pushed ? payloads.collect { |payload| payload['jid'] } : nil
+      pushed ? payloads.collect { |payload| payload['jid'.freeze] } : nil
     end
 
     # Allows sharding of jobs across any number of Redis instances.  All jobs
@@ -141,14 +141,14 @@ module Sidekiq
       # Messages are enqueued to the 'default' queue.
       #
       def enqueue(klass, *args)
-        klass.client_push('class' => klass, 'args' => args)
+        klass.client_push('class'.freeze => klass, 'args'.freeze => args)
       end
 
       # Example usage:
       #   Sidekiq::Client.enqueue_to(:queue_name, MyWorker, 'foo', 1, :bat => 'bar')
       #
       def enqueue_to(queue, klass, *args)
-        klass.client_push('queue' => queue, 'class' => klass, 'args' => args)
+        klass.client_push('queue'.freeze => queue, 'class'.freeze => klass, 'args'.freeze => args)
       end
 
       # Example usage:
@@ -159,7 +159,7 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        item = { 'class' => klass, 'args' => args, 'at' => ts, 'queue' => queue }
+        item = { 'class'.freeze => klass, 'args'.freeze => args, 'at'.freeze => ts, 'queue'.freeze => queue }
         item.delete('at'.freeze) if ts <= now
 
         klass.client_push(item)
@@ -185,13 +185,13 @@ module Sidekiq
     end
 
     def atomic_push(conn, payloads)
-      if payloads.first['at']
+      if payloads.first['at'.freeze]
         conn.zadd('schedule'.freeze, payloads.map do |hash|
           at = hash.delete('at'.freeze).to_s
           [at, Sidekiq.dump_json(hash)]
         end)
       else
-        q = payloads.first['queue']
+        q = payloads.first['queue'.freeze]
         to_push = payloads.map { |entry| Sidekiq.dump_json(entry) }
         conn.sadd('queues'.freeze, q)
         conn.lpush("queue:#{q}", to_push)
@@ -199,7 +199,7 @@ module Sidekiq
     end
 
     def process_single(worker_class, item)
-      queue = item['queue']
+      queue = item['queue'.freeze]
 
       middleware.invoke(worker_class, item, queue, @redis_pool) do
         item
@@ -208,21 +208,21 @@ module Sidekiq
 
     def normalize_item(item)
       raise(ArgumentError, "Message must be a Hash of the form: { 'class' => SomeWorker, 'args' => ['bob', 1, :foo => 'bar'] }") unless item.is_a?(Hash)
-      raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") if !item['class'] || !item['args']
-      raise(ArgumentError, "Message args must be an Array") unless item['args'].is_a?(Array)
-      raise(ArgumentError, "Message class must be either a Class or String representation of the class name") unless item['class'].is_a?(Class) || item['class'].is_a?(String)
+      raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") if !item['class'.freeze] || !item['args'.freeze]
+      raise(ArgumentError, "Message args must be an Array") unless item['args'.freeze].is_a?(Array)
+      raise(ArgumentError, "Message class must be either a Class or String representation of the class name") unless item['class'.freeze].is_a?(Class) || item['class'.freeze].is_a?(String)
 
-      if item['class'].is_a?(Class)
-        raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item['class'].ancestors.inspect}") if !item['class'].respond_to?('get_sidekiq_options')
-        normalized_item = item['class'].get_sidekiq_options.merge(item)
-        normalized_item['class'] = normalized_item['class'].to_s
+      if item['class'.freeze].is_a?(Class)
+        raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item['class'.freeze].ancestors.inspect}") if !item['class'.freeze].respond_to?('get_sidekiq_options'.freeze)
+        normalized_item = item['class'.freeze].get_sidekiq_options.merge(item)
+        normalized_item['class'.freeze] = normalized_item['class'.freeze].to_s
       else
         normalized_item = Sidekiq.default_worker_options.merge(item)
       end
 
-      normalized_item['queue'] = normalized_item['queue'].to_s
-      normalized_item['jid'] ||= SecureRandom.hex(12)
-      normalized_item['enqueued_at'] ||= Time.now.to_f
+      normalized_item['queue'.freeze] = normalized_item['queue'.freeze].to_s
+      normalized_item['jid'.freeze] ||= SecureRandom.hex(12)
+      normalized_item['enqueued_at'.freeze] ||= Time.now.to_f
       normalized_item
     end
 

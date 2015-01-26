@@ -37,7 +37,7 @@ module Sidekiq
     module ClassMethods
 
       def perform_async(*args)
-        client_push('class' => self, 'args' => args)
+        client_push('class'.freeze => self, 'args'.freeze => args)
       end
 
       def perform_in(interval, *args)
@@ -45,7 +45,7 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        item = { 'class' => self, 'args' => args, 'at' => ts }
+        item = { 'class'.freeze => self, 'args'.freeze => args, 'at'.freeze => ts }
 
         # Optimization to enqueue something now that is scheduled to go out now or in the past
         item.delete('at'.freeze) if ts <= now
@@ -80,7 +80,7 @@ module Sidekiq
       end
 
       def client_push(item) # :nodoc:
-        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options['pool'] || Sidekiq.redis_pool
+        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options['pool'.freeze] || Sidekiq.redis_pool
         Sidekiq::Client.new(pool).push(item.stringify_keys)
       end
 

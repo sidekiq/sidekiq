@@ -62,13 +62,13 @@ module Sidekiq
     def raw_push(payloads)
       if Sidekiq::Testing.fake?
         payloads.each do |job|
-          job['class'].constantize.jobs << Sidekiq.load_json(Sidekiq.dump_json(job))
+          job['class'.freeze].constantize.jobs << Sidekiq.load_json(Sidekiq.dump_json(job))
         end
         true
       elsif Sidekiq::Testing.inline?
         payloads.each do |job|
-          job['jid'] ||= SecureRandom.hex(12)
-          klass = job['class'].constantize
+          job['jid'.freeze] ||= SecureRandom.hex(12)
+          klass = job['class'.freeze].constantize
           klass.jobs.unshift Sidekiq.load_json(Sidekiq.dump_json(job))
           klass.perform_one
         end
@@ -151,18 +151,18 @@ module Sidekiq
       def drain
         while job = jobs.shift do
           worker = new
-          worker.jid = job['jid']
-          execute_job(worker, job['args'])
+          worker.jid = job['jid'.freeze]
+          execute_job(worker, job['args'.freeze])
         end
       end
 
       # Pop out a single job and perform it
       def perform_one
-        raise(EmptyQueueError, "perform_one called with empty job queue") if jobs.empty?
+        raise(EmptyQueueError, 'perform_one called with empty job queue'.freeze) if jobs.empty?
         job = jobs.shift
         worker = new
-        worker.jid = job['jid']
-        execute_job(worker, job['args'])
+        worker.jid = job['jid'.freeze]
+        execute_job(worker, job['args'.freeze])
       end
 
       def execute_job(worker, args)
