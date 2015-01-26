@@ -75,17 +75,22 @@ module Sidekiq
         rescue Sidekiq::Shutdown
           # ignore, will be pushed back onto queue during hard_shutdown
           raise
+        rescue Sidekiq::Retry => e
+          # ignore, will be pushed back onto queue during hard_shutdown
+          raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
+
+          attempt_retry(worker, msg, queue, e, false)
         rescue Exception => e
           # ignore, will be pushed back onto queue during hard_shutdown
           raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
 
           raise e unless msg['retry']
-          attempt_retry(worker, msg, queue, e)
+          attempt_retry(worker, msg, queue, e, true)
         end
 
         private
 
-        def attempt_retry(worker, msg, queue, exception)
+        def attempt_retry(worker, msg, queue, exception, reraise)
           max_retry_attempts = retry_attempts_from(msg['retry'], @max_retries)
 
           msg['queue'] = if msg['retry_queue']
@@ -133,7 +138,7 @@ module Sidekiq
             retries_exhausted(worker, msg)
           end
 
-          raise exception
+          raise exception if reraise
         end
 
         def retries_exhausted(worker, msg)
