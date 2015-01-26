@@ -213,6 +213,22 @@ class TestRetry < Sidekiq::Test
       @redis.verify
     end
 
+    it 'allows a retry rescuing exception' do
+      @redis.expect :zadd, 1, ['retry', String, String]
+      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true, 'retry_queue' => 'retry' }
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      handler.call(worker, msg, 'default') do
+        raise Sidekiq::Retry
+      end
+      assert_equal 'retry', msg["queue"]
+      assert_equal 'Sidekiq::Retry', msg["error_message"]
+      assert_equal 'Sidekiq::Retry', msg["error_class"]
+      assert_equal 0, msg["retry_count"]
+      refute msg["error_backtrace"]
+      assert msg["failed_at"]
+      @redis.verify
+    end
+
     it 'handles a recurring failed message' do
       @redis.expect :zadd, 1, ['retry', String, String]
       now = Time.now.to_f
