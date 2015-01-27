@@ -11,7 +11,7 @@ module Sidekiq
     #   client.middleware do |chain|
     #     chain.use MyClientMiddleware
     #   end
-    #   client.push('class' => 'SomeWorker', 'args' => [1,2,3])
+    #   client.push('class' => 'SomeJob', 'args' => [1,2,3])
     #
     # All client instances default to the globally-defined
     # Sidekiq.client_middleware but you can change as necessary.
@@ -47,7 +47,7 @@ module Sidekiq
     # The main method used to push a job to Redis.  Accepts a number of options:
     #
     #   queue - the named queue to use, default 'default'
-    #   class - the worker class to call, required
+    #   class - the job class to call, required
     #   args - an array of simple arguments to the perform method, must be JSON-serializable
     #   retry - whether to retry this job if it fails, true or false, default true
     #   backtrace - whether to save any error backtrace, default false
@@ -58,7 +58,7 @@ module Sidekiq
     # Returns a unique Job ID.  If middleware stops the job, nil will be returned instead.
     #
     # Example:
-    #   push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
+    #   push('queue' => 'my_queue', 'class' => MyJob, 'args' => ['foo', 1, :bat => 'bar'])
     #
     def push(item)
       normed = normalize_item(item)
@@ -99,8 +99,8 @@ module Sidekiq
     #
     #   pool = ConnectionPool.new { Redis.new }
     #   Sidekiq::Client.via(pool) do
-    #     SomeWorker.perform_async(1,2,3)
-    #     SomeOtherWorker.perform_async(1,2,3)
+    #     SomeJob.perform_async(1,2,3)
+    #     SomeOtherJob.perform_async(1,2,3)
     #   end
     #
     # Generally this is only needed for very large Sidekiq installs processing
@@ -132,10 +132,10 @@ module Sidekiq
       end
 
       # Resque compatibility helpers.  Note all helpers
-      # should go through Worker#client_push.
+      # should go through Job#client_push.
       #
       # Example usage:
-      #   Sidekiq::Client.enqueue(MyWorker, 'foo', 1, :bat => 'bar')
+      #   Sidekiq::Client.enqueue(MyJob, 'foo', 1, :bat => 'bar')
       #
       # Messages are enqueued to the 'default' queue.
       #
@@ -144,14 +144,14 @@ module Sidekiq
       end
 
       # Example usage:
-      #   Sidekiq::Client.enqueue_to(:queue_name, MyWorker, 'foo', 1, :bat => 'bar')
+      #   Sidekiq::Client.enqueue_to(:queue_name, MyJob, 'foo', 1, :bat => 'bar')
       #
       def enqueue_to(queue, klass, *args)
         klass.client_push('queue' => queue, 'class' => klass, 'args' => args)
       end
 
       # Example usage:
-      #   Sidekiq::Client.enqueue_to_in(:queue_name, 3.minutes, MyWorker, 'foo', 1, :bat => 'bar')
+      #   Sidekiq::Client.enqueue_to_in(:queue_name, 3.minutes, MyJob, 'foo', 1, :bat => 'bar')
       #
       def enqueue_to_in(queue, interval, klass, *args)
         int = interval.to_f
@@ -165,7 +165,7 @@ module Sidekiq
       end
 
       # Example usage:
-      #   Sidekiq::Client.enqueue_in(3.minutes, MyWorker, 'foo', 1, :bat => 'bar')
+      #   Sidekiq::Client.enqueue_in(3.minutes, MyJob, 'foo', 1, :bat => 'bar')
       #
       def enqueue_in(interval, klass, *args)
         klass.perform_in(interval, *args)
@@ -197,26 +197,26 @@ module Sidekiq
       end
     end
 
-    def process_single(worker_class, item)
+    def process_single(job_class, item)
       queue = item['queue']
 
-      middleware.invoke(worker_class, item, queue, @redis_pool) do
+      middleware.invoke(job_class, item, queue, @redis_pool) do
         item
       end
     end
 
     def normalize_item(item)
-      raise(ArgumentError, "Message must be a Hash of the form: { 'class' => SomeWorker, 'args' => ['bob', 1, :foo => 'bar'] }") unless item.is_a?(Hash)
+      raise(ArgumentError, "Message must be a Hash of the form: { 'class' => SomeJob, 'args' => ['bob', 1, :foo => 'bar'] }") unless item.is_a?(Hash)
       raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") if !item['class'] || !item['args']
       raise(ArgumentError, "Message args must be an Array") unless item['args'].is_a?(Array)
       raise(ArgumentError, "Message class must be either a Class or String representation of the class name") unless item['class'].is_a?(Class) || item['class'].is_a?(String)
 
       if item['class'].is_a?(Class)
-        raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item['class'].ancestors.inspect}") if !item['class'].respond_to?('get_sidekiq_options')
+        raise(ArgumentError, "Message must include a Sidekiq::Job class, not class name: #{item['class'].ancestors.inspect}") if !item['class'].respond_to?('get_sidekiq_options')
         normalized_item = item['class'].get_sidekiq_options.merge(item)
         normalized_item['class'] = normalized_item['class'].to_s
       else
-        normalized_item = Sidekiq.default_worker_options.merge(item)
+        normalized_item = Sidekiq.default_job_options.merge(item)
       end
 
       normalized_item['queue'] = normalized_item['queue'].to_s

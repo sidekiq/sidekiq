@@ -4,7 +4,7 @@ fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby 1.9." if RUBY_PLATFORM !
 
 require 'sidekiq/logging'
 require 'sidekiq/client'
-require 'sidekiq/worker'
+require 'sidekiq/job'
 require 'sidekiq/redis_connection'
 
 require 'json'
@@ -96,12 +96,20 @@ module Sidekiq
     @server_chain
   end
 
+  def self.default_job_options=(hash)
+    @default_job_options = default_job_options.merge(hash.stringify_keys)
+  end
+
+  def self.default_job_options
+    defined?(@default_job_options) ? @default_job_options : { 'retry' => true, 'queue' => 'default' }
+  end
+
   def self.default_worker_options=(hash)
-    @default_worker_options = default_worker_options.merge(hash.stringify_keys)
+    raise "This method has been renamed to default_job_options"
   end
 
   def self.default_worker_options
-    defined?(@default_worker_options) ? @default_worker_options : { 'retry' => true, 'queue' => 'default' }
+    raise "This method has been renamed to default_job_options"
   end
 
   def self.load_json(string)

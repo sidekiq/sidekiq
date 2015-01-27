@@ -178,7 +178,7 @@ module Sidekiq
   #
   #   queue = Sidekiq::Queue.new("mailer")
   #   queue.each do |job|
-  #     job.klass # => 'MyWorker'
+  #     job.klass # => 'MyJob'
   #     job.args # => [1, 2, 3]
   #     job.delete if job.jid == 'abcdef1234567890'
   #   end
@@ -229,7 +229,7 @@ module Sidekiq
         break if entries.empty?
         page += 1
         entries.each do |entry|
-          block.call Job.new(entry, @name)
+          block.call PendingJob.new(entry, @name)
         end
         deleted_size = initial_size - size
       end
@@ -255,9 +255,9 @@ module Sidekiq
   # sorted set.
   #
   # The job should be considered immutable but may be
-  # removed from the queue via Job#delete.
+  # removed from the queue via PendingJob#delete.
   #
-  class Job
+  class PendingJob
     KNOWN_WRAPPERS = [/\ASidekiq::Extensions::Delayed/, "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"]
     attr_reader :item
 
@@ -346,7 +346,7 @@ module Sidekiq
     end
   end
 
-  class SortedEntry < Job
+  class SortedEntry < PendingJob
     attr_reader :score
     attr_reader :parent
 

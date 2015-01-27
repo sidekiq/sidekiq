@@ -1,6 +1,6 @@
 <% module_namespacing do -%>
-class <%= class_name %>Worker
-  include Sidekiq::Worker
+class <%= class_name %>Job
+  include Sidekiq::Job
 
   def perform(*args)
     # Do something

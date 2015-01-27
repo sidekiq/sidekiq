@@ -7,8 +7,8 @@ require 'sidekiq/middleware/server/logging'
 module Sidekiq
   ##
   # The Processor receives a message from the Manager and actually
-  # processes it.  It instantiates the worker, runs the middleware
-  # chain and then calls Sidekiq::Worker#perform.
+  # processes it.  It instantiates the Job, runs the middleware
+  # chain and then calls Sidekiq::Job#perform.
   class Processor
     # To prevent a memory leak, ensure that stats expire. However, they should take up a minimal amount of storage
     # so keep them around for a long time
@@ -44,12 +44,12 @@ module Sidekiq
       begin
         msg = Sidekiq.load_json(msgstr)
         klass  = msg['class'].constantize
-        worker = klass.new
-        worker.jid = msg['jid']
+        job = klass.new
+        job.jid = msg['jid']
 
-        stats(worker, msg, queue) do
-          Sidekiq.server_middleware.invoke(worker, msg, queue) do
-            execute_job(worker, cloned(msg['args']))
+        stats(job, msg, queue) do
+          Sidekiq.server_middleware.invoke(job, msg, queue) do
+            execute_job(job, cloned(msg['args']))
           end
         end
       rescue Sidekiq::Shutdown
@@ -71,8 +71,8 @@ module Sidekiq
       "<Processor##{object_id.to_s(16)}>"
     end
 
-    def execute_job(worker, cloned_args)
-      worker.perform(*cloned_args)
+    def execute_job(job, cloned_args)
+      job.perform(*cloned_args)
     end
 
     private
@@ -81,7 +81,7 @@ module Sidekiq
       @str ||= Thread.current.object_id.to_s(36)
     end
 
-    def stats(worker, msg, queue)
+    def stats(job, msg, queue)
       # Do not conflate errors from the job with errors caused by updating
       # stats so calling code can react appropriately
       retry_and_suppress_exceptions do
@@ -123,9 +123,9 @@ module Sidekiq
       end
     end
 
-    # Deep clone the arguments passed to the worker so that if
-    # the message fails, what is pushed back onto Redis hasn't
-    # been mutated by the worker.
+    # Deep clone the arguments passed to the job so that if
+    # the job fails, what is pushed back onto Redis hasn't
+    # been mutated by the job.
     def cloned(ary)
       Marshal.load(Marshal.dump(ary))
     end

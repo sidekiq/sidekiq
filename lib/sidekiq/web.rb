@@ -69,7 +69,7 @@ module Sidekiq
       @name = params[:name]
       @queue = Sidekiq::Queue.new(@name)
       (@current_page, @total_size, @messages) = page("queue:#{@name}", params[:page], @count)
-      @messages = @messages.map { |msg| Sidekiq::Job.new(msg, @name) }
+      @messages = @messages.map { |msg| Sidekiq::PendingJob.new(msg, @name) }
       erb :queue
     end
 
@@ -79,7 +79,7 @@ module Sidekiq
     end
 
     post "/queues/:name/delete" do
-      Sidekiq::Job.new(params[:key_val], params[:name]).delete
+      Sidekiq::PendingJob.new(params[:key_val], params[:name]).delete
       redirect_with_query("#{root_path}queues/#{params[:name]}")
     end
 

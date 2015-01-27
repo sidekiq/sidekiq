@@ -55,15 +55,15 @@ class TestSidekiq < Sidekiq::Test
     end
   end
 
-  describe 'default_worker_options' do
+  describe 'default_job_options' do
     before do
-      @old_options = Sidekiq.default_worker_options
+      @old_options = Sidekiq.default_job_options
     end
-    after  { Sidekiq.default_worker_options = @old_options }
+    after  { Sidekiq.default_job_options = @old_options }
 
     it 'stringify keys' do
-      Sidekiq.default_worker_options = { queue: 'cat'}
-      assert_equal 'cat', Sidekiq.default_worker_options['queue']
+      Sidekiq.default_job_options = { queue: 'cat'}
+      assert_equal 'cat', Sidekiq.default_job_options['queue']
     end
   end
 end

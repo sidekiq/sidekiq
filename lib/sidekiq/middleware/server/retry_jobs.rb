@@ -22,11 +22,11 @@ module Sidekiq
       #
       # A job looks like:
       #
-      #     { 'class' => 'HardWorker', 'args' => [1, 2, 'foo'], 'retry' => true }
+      #     { 'class' => 'Hardjob', 'args' => [1, 2, 'foo'], 'retry' => true }
       #
       # The 'retry' option also accepts a number (in place of 'true'):
       #
-      #     { 'class' => 'HardWorker', 'args' => [1, 2, 'foo'], 'retry' => 5 }
+      #     { 'class' => 'Hardjob', 'args' => [1, 2, 'foo'], 'retry' => 5 }
       #
       # The job will be retried this number of times before giving up. (If simply
       # 'true', Sidekiq retries 25 times)
@@ -54,10 +54,10 @@ module Sidekiq
       #     end
       #   end
       #
-      # or limit the number of retries for a particular worker with:
+      # or limit the number of retries for a particular job with:
       #
-      #    class MyWorker
-      #      include Sidekiq::Worker
+      #    class Myjob
+      #      include Sidekiq::job
       #      sidekiq_options :retry => 10
       #    end
       #
@@ -70,7 +70,7 @@ module Sidekiq
           @max_retries = options.fetch(:max_retries, DEFAULT_MAX_RETRY_ATTEMPTS)
         end
 
-        def call(worker, msg, queue)
+        def call(job, msg, queue)
           yield
         rescue Sidekiq::Shutdown
           # ignore, will be pushed back onto queue during hard_shutdown
@@ -80,12 +80,12 @@ module Sidekiq
           raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
 
           raise e unless msg['retry']
-          attempt_retry(worker, msg, queue, e)
+          attempt_retry(job, msg, queue, e)
         end
 
         private
 
-        def attempt_retry(worker, msg, queue, exception)
+        def attempt_retry(job, msg, queue, exception)
           max_retry_attempts = retry_attempts_from(msg['retry'], @max_retries)
 
           msg['queue'] = if msg['retry_queue']
@@ -121,7 +121,7 @@ module Sidekiq
           end
 
           if count < max_retry_attempts
-            delay = delay_for(worker, count)
+            delay = delay_for(job, count)
             logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
             retry_at = Time.now.to_f + delay
             payload = Sidekiq.dump_json(msg)
@@ -130,20 +130,20 @@ module Sidekiq
             end
           else
             # Goodbye dear message, you (re)tried your best I'm sure.
-            retries_exhausted(worker, msg)
+            retries_exhausted(job, msg)
           end
 
           raise exception
         end
 
-        def retries_exhausted(worker, msg)
+        def retries_exhausted(job, msg)
           logger.debug { "Dropping message after hitting the retry maximum: #{msg}" }
           begin
-            if worker.sidekiq_retries_exhausted_block?
-              worker.sidekiq_retries_exhausted_block.call(msg)
+            if job.sidekiq_retries_exhausted_block?
+              job.sidekiq_retries_exhausted_block.call(msg)
             end
           rescue => e
-            handle_exception(e, { context: "Error calling retries_exhausted for #{worker.class}", job: msg })
+            handle_exception(e, { context: "Error calling retries_exhausted for #{job.class}", job: msg })
           end
 
           send_to_morgue(msg) unless msg['dead'] == false
@@ -170,8 +170,8 @@ module Sidekiq
           end
         end
 
-        def delay_for(worker, count)
-          worker.sidekiq_retry_in_block? && retry_in(worker, count) || seconds_to_delay(count)
+        def delay_for(job, count)
+          job.sidekiq_retry_in_block? && retry_in(job, count) || seconds_to_delay(count)
         end
 
         # delayed_job uses the same basic formula
@@ -179,11 +179,11 @@ module Sidekiq
           (count ** 4) + 15 + (rand(30)*(count+1))
         end
 
-        def retry_in(worker, count)
+        def retry_in(job, count)
           begin
-            worker.sidekiq_retry_in_block.call(count)
+            job.sidekiq_retry_in_block.call(count)
           rescue Exception => e
-            handle_exception(e, { context: "Failure scheduling retry using the defined `sidekiq_retry_in` in #{worker.class.name}, falling back to default" })
+            handle_exception(e, { context: "Failure scheduling retry using the defined `sidekiq_retry_in` in #{job.class.name}, falling back to default" })
             nil
           end
         end

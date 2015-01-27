@@ -4,11 +4,11 @@ require 'sidekiq/core_ext'
 module Sidekiq
 
   ##
-  # Include this module in your worker class and you can easily create
+  # Include this module in your job class and you can easily create
   # asynchronous jobs:
   #
-  # class HardWorker
-  #   include Sidekiq::Worker
+  # class HardJob
+  #   include Sidekiq::Job
   #
   #   def perform(*args)
   #     # do some work
@@ -17,10 +17,10 @@ module Sidekiq
   #
   # Then in your Rails app, you can do this:
   #
-  #   HardWorker.perform_async(1, 2, 3)
+  #   HardJob.perform_async(1, 2, 3)
   #
   # Note that perform_async is a class method, perform is an instance method.
-  module Worker
+  module Job
     attr_accessor :jid
 
     def self.included(base)
@@ -55,11 +55,11 @@ module Sidekiq
       alias_method :perform_at, :perform_in
 
       ##
-      # Allows customization for this type of Worker.
+      # Allows customization for this type of Job.
       # Legal options:
       #
-      #   :queue - use a named queue for this Worker, default 'default'
-      #   :retry - enable the RetryJobs middleware for this Worker, default *true*
+      #   :queue - use a named queue for this Job, default 'default'
+      #   :retry - enable the RetryJobs middleware for this Job, default *true*
       #   :backtrace - whether to save any error backtrace in the retry payload to display in web UI,
       #      can be true, false or an integer number of lines to save, default *false*
       #   :pool - use the given Redis connection pool to push this type of job to a given shard.
@@ -76,7 +76,7 @@ module Sidekiq
       end
 
       def get_sidekiq_options # :nodoc:
-        self.sidekiq_options_hash ||= Sidekiq.default_worker_options
+        self.sidekiq_options_hash ||= Sidekiq.default_job_options
       end
 
       def client_push(item) # :nodoc:
@@ -86,4 +86,7 @@ module Sidekiq
 
     end
   end
+
+  # Backwards compatibility
+  Worker = Job
 end

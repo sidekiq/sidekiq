@@ -3,8 +3,8 @@ module Sidekiq
     module Server
       class Logging
 
-        def call(worker, item, queue)
-          Sidekiq::Logging.with_context("#{worker.class.to_s} JID-#{item['jid']}#{" BID-#{item['bid']}" if item['bid']}") do
+        def call(job, item, queue)
+          Sidekiq::Logging.with_context("#{job.class.to_s} JID-#{item['jid']}#{" BID-#{item['bid']}" if item['bid']}") do
             begin
               start = Time.now
               logger.info { "start" }

@@ -259,7 +259,7 @@ module Sidekiq
          (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))
         logger.info "=================================================================="
         logger.info "  Please point sidekiq to a Rails 3/4 application or a Ruby file  "
-        logger.info "  to load your worker classes with -r [DIR|FILE]."
+        logger.info "  to load your job classes with -r [DIR|FILE]."
         logger.info "=================================================================="
         logger.info @parser
         die(1)
@@ -295,7 +295,7 @@ module Sidekiq
           parse_queue opts, queue, weight
         end
 
-        o.on '-r', '--require [PATH|DIR]', "Location of Rails application with workers or file to require" do |arg|
+        o.on '-r', '--require [PATH|DIR]', "Location of Rails application with jobs or file to require" do |arg|
           opts[:require] = arg
         end
 

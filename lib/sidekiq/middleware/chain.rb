@@ -42,7 +42,7 @@ module Sidekiq
   # This is an example of a minimal server middleware:
   #
   # class MyServerHook
-  #   def call(worker_instance, msg, queue)
+  #   def call(job_instance, msg, queue)
   #     puts "Before work"
   #     yield
   #     puts "After work"
@@ -54,7 +54,7 @@ module Sidekiq
   # to Redis:
   #
   # class MyClientHook
-  #   def call(worker_class, msg, queue, redis_pool)
+  #   def call(job_class, msg, queue, redis_pool)
   #     puts "Before push"
   #     result = yield
   #     puts "After push"

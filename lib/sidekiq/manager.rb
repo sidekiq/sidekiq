@@ -48,7 +48,7 @@ module Sidekiq
 
         @done = true
 
-        logger.info { "Terminating #{@ready.size} quiet workers" }
+        logger.info { "Terminating #{@ready.size} quiet threads" }
         @ready.each { |x| x.terminate if x.alive? }
         @ready.clear
 
@@ -174,13 +174,13 @@ module Sidekiq
     end
 
     def hard_shutdown_in(delay)
-      logger.info { "Pausing up to #{delay} seconds to allow workers to finish..." }
+      logger.info { "Pausing up to #{delay} seconds to allow threads to finish..." }
 
       after(delay) do
         watchdog("Manager#hard_shutdown_in died") do
-          # We've reached the timeout and we still have busy workers.
+          # We've reached the timeout and we still have busy threads.
           # They must die but their messages shall live on.
-          logger.warn { "Terminating #{@busy.size} busy worker threads" }
+          logger.warn { "Terminating #{@busy.size} busy threads" }
           logger.warn { "Work still in progress #{@in_progress.values.inspect}" }
 
           requeue

@@ -1,6 +1,5 @@
 require_relative 'helper'
 require 'sidekiq/client'
-require 'sidekiq/worker'
 
 class TestClient < Sidekiq::Test
   describe 'with mock redis' do
@@ -38,7 +37,7 @@ class TestClient < Sidekiq::Test
       end
 
       assert_raises ArgumentError do
-        Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'noargs' => [1, 2])
+        Sidekiq::Client.push('queue' => 'foo', 'class' => MyJob, 'noargs' => [1, 2])
       end
 
       assert_raises ArgumentError do
@@ -46,7 +45,7 @@ class TestClient < Sidekiq::Test
       end
 
       assert_raises ArgumentError do
-        Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => 1)
+        Sidekiq::Client.push('queue' => 'foo', 'class' => MyJob, 'args' => 1)
       end
     end
 
@@ -76,7 +75,7 @@ class TestClient < Sidekiq::Test
 
     it 'pushes messages to redis' do
       @redis.expect :lpush, 1, ['queue:foo', Array]
-      pushed = Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1, 2])
+      pushed = Sidekiq::Client.push('queue' => 'foo', 'class' => MyJob, 'args' => [1, 2])
       assert pushed
       assert_equal 24, pushed.size
       @redis.verify
@@ -84,70 +83,70 @@ class TestClient < Sidekiq::Test
 
     it 'pushes messages to redis using a String class' do
       @redis.expect :lpush, 1, ['queue:foo', Array]
-      pushed = Sidekiq::Client.push('queue' => 'foo', 'class' => 'MyWorker', 'args' => [1, 2])
+      pushed = Sidekiq::Client.push('queue' => 'foo', 'class' => 'MyJob', 'args' => [1, 2])
       assert pushed
       assert_equal 24, pushed.size
       @redis.verify
     end
 
-    class MyWorker
-      include Sidekiq::Worker
+    class MyJob
+      include Sidekiq::Job
     end
 
     it 'has default options' do
-      assert_equal Sidekiq.default_worker_options, MyWorker.get_sidekiq_options
+      assert_equal Sidekiq.default_job_options, MyJob.get_sidekiq_options
     end
 
     it 'handles perform_async' do
       @redis.expect :lpush, 1, ['queue:default', Array]
-      pushed = MyWorker.perform_async(1, 2)
+      pushed = MyJob.perform_async(1, 2)
       assert pushed
       @redis.verify
     end
 
     it 'enqueues messages to redis' do
       @redis.expect :lpush, 1, ['queue:default', Array]
-      pushed = Sidekiq::Client.enqueue(MyWorker, 1, 2)
+      pushed = Sidekiq::Client.enqueue(MyJob, 1, 2)
       assert pushed
       @redis.verify
     end
 
     it 'enqueues messages to redis' do
       @redis.expect :lpush, 1, ['queue:custom_queue', Array]
-      pushed = Sidekiq::Client.enqueue_to(:custom_queue, MyWorker, 1, 2)
+      pushed = Sidekiq::Client.enqueue_to(:custom_queue, MyJob, 1, 2)
       assert pushed
       @redis.verify
     end
 
     it 'enqueues messages to redis (delayed, custom queue)' do
       @redis.expect :zadd, 1, ['schedule', Array]
-      pushed = Sidekiq::Client.enqueue_to_in(:custom_queue, 3.minutes, MyWorker, 1, 2)
+      pushed = Sidekiq::Client.enqueue_to_in(:custom_queue, 3.minutes, MyJob, 1, 2)
       assert pushed
       @redis.verify
     end
 
     it 'enqueues messages to redis (delayed into past, custom queue)' do
       @redis.expect :lpush, 1, ['queue:custom_queue', Array]
-      pushed = Sidekiq::Client.enqueue_to_in(:custom_queue, -3.minutes, MyWorker, 1, 2)
+      pushed = Sidekiq::Client.enqueue_to_in(:custom_queue, -3.minutes, MyJob, 1, 2)
       assert pushed
       @redis.verify
     end
 
     it 'enqueues messages to redis (delayed)' do
       @redis.expect :zadd, 1, ['schedule', Array]
-      pushed = Sidekiq::Client.enqueue_in(3.minutes, MyWorker, 1, 2)
+      pushed = Sidekiq::Client.enqueue_in(3.minutes, MyJob, 1, 2)
       assert pushed
       @redis.verify
     end
 
-    class QueuedWorker
-      include Sidekiq::Worker
+    class QueuedJob
+      include Sidekiq::Job
       sidekiq_options :queue => :flimflam
     end
 
     it 'enqueues to the named queue' do
       @redis.expect :lpush, 1, ['queue:flimflam', Array]
-      pushed = QueuedWorker.perform_async(1, 2)
+      pushed = QueuedJob.perform_async(1, 2)
       assert pushed
       @redis.verify
     end
@@ -163,30 +162,30 @@ class TestClient < Sidekiq::Test
       Sidekiq::Queue.new.clear
     end
     it 'can push a large set of jobs at once' do
-      jids = Sidekiq::Client.push_bulk('class' => QueuedWorker, 'args' => (1..1_000).to_a.map { |x| Array(x) })
+      jids = Sidekiq::Client.push_bulk('class' => QueuedJob, 'args' => (1..1_000).to_a.map { |x| Array(x) })
       assert_equal 1_000, jids.size
     end
     it 'can push a large set of jobs at once using a String class' do
-      jids = Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => (1..1_000).to_a.map { |x| Array(x) })
+      jids = Sidekiq::Client.push_bulk('class' => 'QueuedJob', 'args' => (1..1_000).to_a.map { |x| Array(x) })
       assert_equal 1_000, jids.size
     end
     it 'returns the jids for the jobs' do
-      Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => (1..2).to_a.map { |x| Array(x) }).each do |jid|
+      Sidekiq::Client.push_bulk('class' => 'QueuedJob', 'args' => (1..2).to_a.map { |x| Array(x) }).each do |jid|
         assert_match(/[0-9a-f]{12}/, jid)
       end
     end
   end
 
-  class BaseWorker
-    include Sidekiq::Worker
+  class BaseJob
+    include Sidekiq::Job
     sidekiq_options 'retry' => 'base'
   end
-  class AWorker < BaseWorker
+  class AJob < BaseJob
   end
-  class BWorker < BaseWorker
+  class BJob < BaseJob
     sidekiq_options 'retry' => 'b'
   end
-  class CWorker < BaseWorker
+  class CJob < BaseJob
     sidekiq_options 'retry' => 2
   end
 
@@ -202,9 +201,9 @@ class TestClient < Sidekiq::Test
     it 'can stop some of the jobs from pushing' do
       Sidekiq.client_middleware.add Stopper
       begin
-        assert_equal nil, Sidekiq::Client.push('class' => MyWorker, 'args' => [0])
-        assert_match(/[0-9a-f]{12}/, Sidekiq::Client.push('class' => MyWorker, 'args' => [1]))
-        Sidekiq::Client.push_bulk('class' => MyWorker, 'args' => [[0], [1]]).each do |jid|
+        assert_equal nil, Sidekiq::Client.push('class' => MyJob, 'args' => [0])
+        assert_match(/[0-9a-f]{12}/, Sidekiq::Client.push('class' => MyJob, 'args' => [1]))
+        Sidekiq::Client.push_bulk('class' => MyJob, 'args' => [[0], [1]]).each do |jid|
           assert_match(/[0-9a-f]{12}/, jid)
         end
       ensure
@@ -215,29 +214,29 @@ class TestClient < Sidekiq::Test
 
   describe 'inheritance' do
     it 'inherits sidekiq options' do
-      assert_equal 'base', AWorker.get_sidekiq_options['retry']
-      assert_equal 'b', BWorker.get_sidekiq_options['retry']
+      assert_equal 'base', AJob.get_sidekiq_options['retry']
+      assert_equal 'b', BJob.get_sidekiq_options['retry']
     end
   end
 
   describe 'item normalization' do
     it 'defaults retry to true' do
-      assert_equal true, Sidekiq::Client.new.__send__(:normalize_item, 'class' => QueuedWorker, 'args' => [])['retry']
+      assert_equal true, Sidekiq::Client.new.__send__(:normalize_item, 'class' => QueuedJob, 'args' => [])['retry']
     end
 
     it "does not normalize numeric retry's" do
-      assert_equal 2, Sidekiq::Client.new.__send__(:normalize_item, 'class' => CWorker, 'args' => [])['retry']
+      assert_equal 2, Sidekiq::Client.new.__send__(:normalize_item, 'class' => CJob, 'args' => [])['retry']
     end
   end
 
   describe 'sharding' do
-    class DWorker < BaseWorker
+    class DJob < BaseJob
     end
     it 'allows sidekiq_options to point to different Redi' do
       conn = MiniTest::Mock.new
       conn.expect(:multi, [0, 1])
-      DWorker.sidekiq_options('pool' => ConnectionPool.new(size: 1) { conn })
-      DWorker.perform_async(1,2,3)
+      DJob.sidekiq_options('pool' => ConnectionPool.new(size: 1) { conn })
+      DJob.perform_async(1,2,3)
       conn.verify
     end
     it 'allows #via to point to different Redi' do
@@ -246,7 +245,7 @@ class TestClient < Sidekiq::Test
       default = Sidekiq::Client.new.redis_pool
       sharded_pool = ConnectionPool.new(size: 1) { conn }
       Sidekiq::Client.via(sharded_pool) do
-        CWorker.perform_async(1,2,3)
+        CJob.perform_async(1,2,3)
         assert_equal sharded_pool, Sidekiq::Client.new.redis_pool
         assert_raises RuntimeError do
           Sidekiq::Client.via(default) do
@@ -261,8 +260,8 @@ class TestClient < Sidekiq::Test
       conn = MiniTest::Mock.new
       conn.expect(:multi, []) { |*args, &block| block.call }
       conn.expect(:zadd, 1, [String, Array])
-      DWorker.sidekiq_options('pool' => ConnectionPool.new(size: 1) { conn })
-      Sidekiq::Client.enqueue_in(10, DWorker, 3)
+      DJob.sidekiq_options('pool' => ConnectionPool.new(size: 1) { conn })
+      Sidekiq::Client.enqueue_in(10, DJob, 3)
       conn.verify
     end
   end
