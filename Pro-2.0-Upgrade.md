@@ -5,6 +5,9 @@ It also removes deprecated APIs, changes the batch data format and
 how features are activated.  Read carefully to ensure your upgrade goes
 smoothly.
 
+**Note that you CANNOT go back to Pro 1.x once you've created batches
+with 2.x.  The new batches will not process correctly with 1.x.**
+
 ## Nested Batches
 
 Batches can now be nested within the `jobs` method.
@@ -67,9 +70,6 @@ savings but real world savings should be even greater.
 
 **There's no data migration required.  Sidekiq Pro 2.0 transparently handles
 both old and new format.**
-
-**Note that you CANNOT go back to Pro 1.x once you've created batches
-with 2.x.  The new batches will not process correctly with 1.x.**
 
 ## Reliability
 
