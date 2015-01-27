@@ -5,7 +5,7 @@ HEAD
 - Stringify Sidekiq.default_worker_options's keys [#2126]
 - Add random integer to process identity [#2113, michaeldiscala]
 - Log Sidekiq Pro's Batch ID if available [#2076]
-- Refactor Processor Redis usage to avoid redis/redis-rb#490 [#]
+- Refactor Processor Redis usage to avoid redis/redis-rb#490 [#2094]
 - Move /dashboard/stats to /stats.  Add /stats/queues. [moserke, #2099]
 - Add processes count to /stats [ismaelga, #2141]
 - Greatly improve speed of Sidekiq::Stats [ismaelga, #2142]
