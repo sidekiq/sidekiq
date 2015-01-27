@@ -85,10 +85,10 @@ module Sidekiq
 
       def initial_wait
         begin
-          # Have all processes sleep between 10-15 seconds.  10 seconds
-          # to give time for the heartbeat to register and 5 random seconds
-          # to ensure they don't all hit Redis at the same time.
-          sleep(INITIAL_WAIT)
+          # Have all processes sleep between 5-15 seconds.  10 seconds
+          # to give time for the heartbeat to register (if the poll interval is going to be calculated by the number
+          # of workers), and 5 random seconds to ensure they don't all hit Redis at the same time.
+          sleep(INITIAL_WAIT) unless Sidekiq.options[:poll_interval]
           sleep(5 * rand)
         rescue Celluloid::Task::TerminatedError
           # Hit Ctrl-C when Sidekiq is finished booting and we have a chance
