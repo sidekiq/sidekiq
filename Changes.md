@@ -1,4 +1,4 @@
-HEAD
+3.3.1
 -----------
 
 - Dumb down ActionMailer integration so it tries to deliver if possible [#2149]
