@@ -43,6 +43,10 @@ module Sidekiq
       stat :default_queue_latency
     end
 
+    def queues
+      Sidekiq::Stats::Queues.new.lengths
+    end
+
     def fetch_stats!
       pipe1_res = Sidekiq.redis do |conn|
         conn.pipelined do
