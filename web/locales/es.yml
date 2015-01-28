@@ -1,69 +1,69 @@
 # elements like %{queue} are variables and should not be translated
 es:
-  Dashboard: Panel de Control
-  Status: Estatus
-  Time: Tiempo
-  Namespace: Espacio de Nombre
-  Realtime: Tiempo Real
-  History: Historial
-  Busy: Ocupado
-  Processed: Procesadas
-  Failed: Fallidas
-  Scheduled: Programadas
-  Retries: Reintentos
-  Enqueued: En Fila
-  Worker: Trabajador
-  LivePoll: Sondeo en Vivo
-  StopPolling: Detener Sondeo
-  Queue: Fila
-  Class: Clase
-  Job: Trabajo
-  Arguments: Argumentos
-  Extras: Extras
-  Started: Hora de Inicio
-  ShowAll: Mostrar Todo
-  CurrentMessagesInQueue: Mensajes actualmente en <span class='title'>%{queue}</span>
-  Delete: Eliminar
+  Actions: Acciones
+  active: activo
   AddToQueue: Añadir a fila
+  AreYouSure: ¿Estás seguro?
   AreYouSureDeleteJob: ¿Estás seguro de eliminar este trabajo?
   AreYouSureDeleteQueue: ¿Estás seguro de eliminar la fila  %{queue}?
-  Queues: Filas
-  Size: Tamaño
-  Actions: Acciones
-  NextRetry: Siguiente Intento
-  RetryCount: Numero de Reintentos
-  RetryNow: Reintentar Ahora
-  Kill: Matar
-  LastRetry: Último Reintento
-  OriginallyFailed: Falló Originalmente
-  AreYouSure: ¿Estás seguro?
+  Arguments: Argumentos
+  Busy: Ocupado
+  Class: Clase
+  Connections: Conexiones
+  CurrentMessagesInQueue: Mensajes actualmente en <span class='title'>%{queue}</span>
+  Dashboard: Panel de Control
+  Dead: Muerto
+  DeadJobs: Trabajos muertos
+  Delete: Eliminar
   DeleteAll: Borrar Todo
-  RetryAll: Reintentar Todo
-  NoRetriesFound: No se encontraron reintentos
+  Enqueued: En Fila
   Error: Error
+  ErrorBacktrace: Trazado del Error
   ErrorClass: Clase del Error
   ErrorMessage: Mensaje de Error
-  ErrorBacktrace: Trazado del Error
-  GoBack: ← Regresar
-  NoScheduledFound: No se encontraron trabajos pendientes
-  When: Cuando
-  ScheduledJobs: Trabajos programados
-  idle: inactivo
-  active: activo
-  Version: Versión
-  Connections: Conexiones
-  MemoryUsage: Uso de Memoria
-  PeakMemoryUsage: Máximo Uso de Memoria
-  Uptime: Tiempo de Funcionamiento (días)
-  OneWeek: 1 semana
-  OneMonth: 1 mes
-  ThreeMonths: 3 meses
-  SixMonths: 6 meses
+  Extras: Extras
+  Failed: Fallidas
   Failures: Fallas
-  DeadJobs: Trabajos muertos
+  GoBack: ← Regresar
+  History: Historial
+  idle: inactivo
+  Job: Trabajo
+  Jobs: Trabajos
+  Kill: Matar
+  LastRetry: Último Reintento
+  LivePoll: Sondeo en Vivo
+  MemoryUsage: Uso de Memoria
+  Namespace: Espacio de Nombre
+  NextRetry: Siguiente Intento
   NoDeadJobsFound: No hay trabajos muertos
-  Dead: Muerto
+  NoRetriesFound: No se encontraron reintentos
+  NoScheduledFound: No se encontraron trabajos pendientes
+  OneMonth: 1 mes
+  OneWeek: 1 semana
+  OriginallyFailed: Falló Originalmente
+  PeakMemoryUsage: Máximo Uso de Memoria
+  Processed: Procesadas
   Processes: Procesos
+  Queue: Fila
+  Queues: Filas
+  Realtime: Tiempo Real
+  Retries: Reintentos
+  RetryAll: Reintentar Todo
+  RetryCount: Numero de Reintentos
+  RetryNow: Reintentar Ahora
+  Scheduled: Programadas
+  ScheduledJobs: Trabajos programados
+  ShowAll: Mostrar Todo
+  SixMonths: 6 meses
+  Size: Tamaño
+  Started: Hora de Inicio
+  Status: Estatus
+  StopPolling: Detener Sondeo
   Thread: Hilo
   Threads: Hilos
-  Jobs: Trabajos
+  ThreeMonths: 3 meses
+  Time: Tiempo
+  Uptime: Tiempo de Funcionamiento (días)
+  Version: Versión
+  When: Cuando
+  Worker: Trabajador

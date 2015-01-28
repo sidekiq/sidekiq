@@ -1,69 +1,69 @@
 # elements like %{queue} are variables and should not be translated
 fr:
-  Dashboard: Tableau de Bord
-  Status: État
-  Time: Heure
-  Namespace: Namespace
-  Realtime: Temps réel
-  History: Historique
-  Busy: Occupées
-  Processed: Traitées
-  Failed: Échouées
-  Scheduled: Planifiée
-  Retries: Tentatives
-  Enqueued: En queue
-  Worker: Travailleur
-  LivePoll: Temps réel
-  StopPolling: Arrêt du temps réel
-  Queue: Queue
-  Class: Classe
-  Job: Tâche
-  Arguments: Arguments
-  Extras: Extras
-  Started: Démarrées
-  ShowAll: Montrer tout
-  CurrentMessagesInQueue: Messages actuellement dans <span class='title'>%{queue}</span>
-  Delete: Supprimer
+  Actions: Actions
+  active: actives
   AddToQueue: Ajouter à la queue
+  AreYouSure: Êtes-vous certain ?
   AreYouSureDeleteJob: Êtes-vous certain de vouloir supprimer cette tâche ?
   AreYouSureDeleteQueue: Êtes-vous certain de vouloir supprimer la queue %{queue} ?
-  Queues: Queues
-  Size: Taille
-  Actions: Actions
-  NextRetry: Prochain essai
-  RetryCount: Nombre d'essais
-  RetryNow: Réessayer maintenant
-  Kill: Tuer
-  LastRetry: Dernier essai
-  OriginallyFailed: Échec originel
-  AreYouSure: Êtes-vous certain ?
+  Arguments: Arguments
+  Busy: Occupées
+  Class: Classe
+  Connections: Connexions
+  CurrentMessagesInQueue: Messages actuellement dans <span class='title'>%{queue}</span>
+  Dashboard: Tableau de Bord
+  Dead: Morte
+  DeadJobs: Tâches mortes
+  Delete: Supprimer
   DeleteAll: Tout supprimer
-  RetryAll: Tout réessayer
-  NoRetriesFound: Aucune tâche à réessayer n’a été trouvée
+  Enqueued: En queue
   Error: Erreur
+  ErrorBacktrace: Backtrace d’erreur
   ErrorClass: Classe d’erreur
   ErrorMessage: Message d’erreur
-  ErrorBacktrace: Backtrace d’erreur
-  GoBack: ← Retour
-  NoScheduledFound: Pas de tâches planifiées trouvées
-  When: Quand
-  ScheduledJobs: Tâches planifiées
-  idle: en attente
-  active: actives
-  Version: Version
-  Connections: Connexions
-  MemoryUsage: Mémoire utilisée
-  PeakMemoryUsage: Mémoire utilisée (max.)
-  Uptime: Uptime (jours)
-  OneWeek: 1 semaine
-  OneMonth: 1 mois
-  ThreeMonths: 3 mois
-  SixMonths: 6 mois
+  Extras: Extras
+  Failed: Échouées
   Failures: Echecs
-  DeadJobs: Tâches mortes
+  GoBack: ← Retour
+  History: Historique
+  idle: en attente
+  Job: Tâche
+  Jobs: Tâches
+  Kill: Tuer
+  LastRetry: Dernier essai
+  LivePoll: Temps réel
+  MemoryUsage: Mémoire utilisée
+  Namespace: Namespace
+  NextRetry: Prochain essai
   NoDeadJobsFound: Aucune tâche morte n'a été trouvée
-  Dead: Morte
+  NoRetriesFound: Aucune tâche à réessayer n’a été trouvée
+  NoScheduledFound: Pas de tâches planifiées trouvées
+  OneMonth: 1 mois
+  OneWeek: 1 semaine
+  OriginallyFailed: Échec originel
+  PeakMemoryUsage: Mémoire utilisée (max.)
+  Processed: Traitées
   Processes: Processus
+  Queue: Queue
+  Queues: Queues
+  Realtime: Temps réel
+  Retries: Tentatives
+  RetryAll: Tout réessayer
+  RetryCount: Nombre d'essais
+  RetryNow: Réessayer maintenant
+  Scheduled: Planifiée
+  ScheduledJobs: Tâches planifiées
+  ShowAll: Montrer tout
+  SixMonths: 6 mois
+  Size: Taille
+  Started: Démarrées
+  Status: État
+  StopPolling: Arrêt du temps réel
   Thread: Fil
   Threads: Fils
-  Jobs: Tâches
+  ThreeMonths: 3 mois
+  Time: Heure
+  Uptime: Uptime (jours)
+  Version: Version
+  When: Quand
+  Worker: Travailleur
