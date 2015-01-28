@@ -7,40 +7,15 @@ module Sidekiq
       fetch_stats!
     end
 
-    def processed
-      stat :processed
-    end
+    stats_methods = %w(
+      processed failed scheduled_size retry_size dead_size 
+      enqueued processes_size workers_size default_queue_latency
+    )
 
-    def failed
-      stat :failed
-    end
-
-    def scheduled_size
-      stat :scheduled_size
-    end
-
-    def retry_size
-      stat :retry_size
-    end
-
-    def dead_size
-      stat :dead_size
-    end
-
-    def enqueued
-      stat :enqueued
-    end
-
-    def processes_size
-      stat :processes_size
-    end
-
-    def workers_size
-      stat :workers_size
-    end
-
-    def default_queue_latency
-      stat :default_queue_latency
+    stats_methods.each do |method|
+      define_method method do
+        stat method.to_sym
+      end
     end
 
     def queues
@@ -142,11 +117,11 @@ module Sidekiq
       end
 
       def processed
-        date_stat_hash("processed")
+        date_stat_hash :processed
       end
 
       def failed
-        date_stat_hash("failed")
+        date_stat_hash :failed
       end
 
       private
