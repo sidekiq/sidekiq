@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'sidekiq/version'
 fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby 1.9." if RUBY_PLATFORM != 'java' && RUBY_VERSION < '2.0.0'
 

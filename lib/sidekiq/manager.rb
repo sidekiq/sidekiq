@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'sidekiq/util'
 require 'sidekiq/actor'
 require 'sidekiq/processor'

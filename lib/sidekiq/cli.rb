@@ -1,4 +1,3 @@
-# encoding: utf-8
 $stdout.sync = true
 
 require 'yaml'
