@@ -1,9 +1,15 @@
 # Upgrading to Sidekiq Pro 2.0
 
-Sidekiq Pro 2.0 allows nested batches for more complex job workflows.
+Sidekiq Pro 2.0 allows nested batches for more complex job workflows
+and provides a Lua-based scheduler for reliability and performance.
+
 It also removes deprecated APIs, changes the batch data format and
 how features are activated.  Read carefully to ensure your upgrade goes
 smoothly.
+
+Sidekiq Pro 2.0 requires Sidekiq 3.3.0 or greater.  Redis 2.8 is
+recommended; Redis 2.4 or 2.6 will work but some functionality will not be
+available.
 
 **Note that you CANNOT go back to Pro 1.x once you've created batches
 with 2.x.  The new batches will not process correctly with 1.x.**
@@ -75,10 +81,11 @@ both old and new format.**
 
 You no longer need to require anything to use Reliability features.
 
-* Activate reliable fetch:
+* Activate reliable fetch and/or reliable scheduler:
 ```ruby
 Sidekiq.configure_server do |config|
   config.reliable_fetch!
+  config.reliable_scheduler!
 end
 ```
 * Activate reliable push:
@@ -86,9 +93,16 @@ end
 Sidekiq::Client.reliable_push!
 ```
 
+The new reliable scheduler uses Lua inside Redis so enqueuing scheduled
+jobs is atomic.  Benchmarks also show it 50x faster when enqueuing
+lots of jobs.  **One caveat**: client-side middleware is not executed
+for each job when enqueued with the reliable scheduler.  No Sidekiq or
+Sidekiq Pro functionality is affected by this change but some 3rd party
+plugins might be.
+
 ## Other Changes
 
-* You must require `sidekiq/notifications` if you want to use the
+* You must require `sidekiq/pro/notifications` if you want to use the
   existing notification schemes.  I don't recommend using them as the
   newer-style `Sidekiq::Batch#on` method is simpler and more flexible.
 * Several classes have been renamed.  Generally these classes are ones

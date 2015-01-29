@@ -4,10 +4,10 @@ Sidekiq Pro Changelog
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
 
-2.0.0 (see mperham/sidekiq#2130 for progress)
+2.0.0 (unreleased)
 -----------
 
-- See [[Pro-2.0-Upgrade.md]] for thorough release notes.
+- See [the Upgrade Notes](Pro-2.0-Upgrade.md) for detailed notes.
 
 1.9.2
 -----------

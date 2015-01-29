@@ -44,7 +44,7 @@ module Sidekiq
       INITIAL_WAIT = 10
 
       def initialize
-        @enq = (Sidekiq.options[:poll_enq] || Sidekiq::Scheduled::Enq).new
+        @enq = (Sidekiq.options[:scheduled_enq] || Sidekiq::Scheduled::Enq).new
       end
 
       def poll(first_time=false)
