@@ -79,9 +79,16 @@ both old and new format.**
 
 ## Reliability
 
-You no longer need to require anything to use Reliability features.
+2.0 brings a new reliable scheduler which uses Lua inside Redis so enqueuing
+scheduled jobs is atomic.  Benchmarks show it 50x faster when enqueuing
+lots of jobs.  **One caveat**: client-side middleware is not executed
+for each job when enqueued with the reliable scheduler.  No Sidekiq or
+Sidekiq Pro functionality is affected by this change but some 3rd party
+plugins might be.
 
-* Activate reliable fetch and/or reliable scheduler:
+**You no longer require anything to use the Reliability features.**
+
+* Activate reliable fetch and/or the new reliable scheduler:
 ```ruby
 Sidekiq.configure_server do |config|
   config.reliable_fetch!
@@ -92,13 +99,6 @@ end
 ```ruby
 Sidekiq::Client.reliable_push!
 ```
-
-The new reliable scheduler uses Lua inside Redis so enqueuing scheduled
-jobs is atomic.  Benchmarks also show it 50x faster when enqueuing
-lots of jobs.  **One caveat**: client-side middleware is not executed
-for each job when enqueued with the reliable scheduler.  No Sidekiq or
-Sidekiq Pro functionality is affected by this change but some 3rd party
-plugins might be.
 
 ## Other Changes
 
