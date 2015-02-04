@@ -1,3 +1,7 @@
+3.3.2 (unreleased)
+-----------
+- Allows configuration of dead job set size and timeout
+
 3.3.1
 -----------
 
