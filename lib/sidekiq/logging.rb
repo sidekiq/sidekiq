@@ -59,6 +59,9 @@ module Sidekiq
           if !fp.closed? && fp.stat.file? && fp.sync && (fp.fcntl(Fcntl::F_GETFL) & append_flags) == append_flags
             to_reopen << fp
           end
+        rescue Errno::ENOENT => e
+          RUBY_PLATFORM == "java" or raise e
+          to_reopen << fp
         rescue IOError, Errno::EBADF
         end
       end
@@ -67,6 +70,8 @@ module Sidekiq
       to_reopen.each do |fp|
         orig_st = begin
           fp.stat
+        rescue Errno::ENOENT => e
+          RUBY_PLATFORM == "java" or raise e
         rescue IOError, Errno::EBADF
           next
         end
