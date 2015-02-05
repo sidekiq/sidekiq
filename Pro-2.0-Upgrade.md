@@ -1,13 +1,14 @@
 # Upgrading to Sidekiq Pro 2.0
 
 Sidekiq Pro 2.0 allows nested batches for more complex job workflows
-and provides a Lua-based scheduler for reliability and performance.
+and provides a new reliable scheduler which uses Lua to guarantee
+atomicity and much higher performance.
 
 It also removes deprecated APIs, changes the batch data format and
 how features are activated.  Read carefully to ensure your upgrade goes
 smoothly.
 
-Sidekiq Pro 2.0 requires Sidekiq 3.3.0 or greater.  Redis 2.8 is
+Sidekiq Pro 2.0 requires Sidekiq 3.3.2 or greater.  Redis 2.8 is
 recommended; Redis 2.4 or 2.6 will work but some functionality will not be
 available.
 

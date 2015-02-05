@@ -1,8 +1,9 @@
-HEAD
+3.3.2
 -----------
 
 - Add Sidekiq::Stats#queues back
-- Allows configuration of dead job set size and timeout (#2173, jonhyman)
+- Allows configuration of dead job set size and timeout [#2173, jonhyman]
+- Refactor scheduler enqueuing so Sidekiq Pro can override it. [#2159]
 
 3.3.1
 -----------
