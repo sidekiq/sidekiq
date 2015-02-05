@@ -15,6 +15,9 @@ available.
 **Note that you CANNOT go back to Pro 1.x once you've created batches
 with 2.x.  The new batches will not process correctly with 1.x.**
 
+**If you are on a version of Sidekiq Pro <1.5, you should upgrade to the
+latest 1.x version and run it for a week before upgrading to 2.0.**
+
 ## Nested Batches
 
 Batches can now be nested within the `jobs` method.
