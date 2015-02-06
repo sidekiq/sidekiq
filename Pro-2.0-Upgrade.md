@@ -61,6 +61,8 @@ def perform(*args)
 end
 ```
 
+More context: [#1485]
+
 ## Batch Data
 
 The batch data model was overhauled.  Batch data should take
@@ -80,6 +82,8 @@ savings but real world savings should be even greater.
 
 **There's no data migration required.  Sidekiq Pro 2.0 transparently handles
 both old and new format.**
+
+More context: [#2130]
 
 ## Reliability
 
@@ -104,6 +108,8 @@ end
 Sidekiq::Client.reliable_push!
 ```
 
+More context: [#2130]
+
 ## Other Changes
 
 * You must require `sidekiq/pro/notifications` if you want to use the
@@ -112,7 +118,9 @@ Sidekiq::Client.reliable_push!
 * Several classes have been renamed.  Generally these classes are ones
   you should not need to require/use in your own code, e.g. the Batch
   middleware.
-* The Web UI now shows the Sidekiq Pro version in the footer.
+* You can add `attr_accessor :jid` to a Batch callback class and Sidekiq
+  Pro will set it to the jid of the callback job. [#2178]
+* The Web UI now shows the Sidekiq Pro version in the footer. [#1991]
 
 ## Thanks
 
