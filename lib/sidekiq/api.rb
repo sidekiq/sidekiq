@@ -43,6 +43,10 @@ module Sidekiq
       stat :default_queue_latency
     end
 
+    def queues
+      Sidekiq::Stats::Queues.new.lengths
+    end
+
     def fetch_stats!
       pipe1_res = Sidekiq.redis do |conn|
         conn.pipelined do
@@ -395,8 +399,8 @@ module Sidekiq
         Sidekiq.redis do |conn|
           conn.multi do
             conn.zadd('dead', now, message)
-            conn.zremrangebyscore('dead', '-inf', now - DeadSet::TIMEOUT)
-            conn.zremrangebyrank('dead', 0, - DeadSet::MAX_JOBS)
+            conn.zremrangebyscore('dead', '-inf', now - DeadSet.timeout)
+            conn.zremrangebyrank('dead', 0, - DeadSet.max_jobs)
           end
         end
       end
@@ -589,9 +593,6 @@ module Sidekiq
   # Allows enumeration of dead jobs within Sidekiq.
   #
   class DeadSet < JobSet
-    TIMEOUT = 180 * 24 * 60 * 60 # 6 months
-    MAX_JOBS = 10_000
-
     def initialize
       super 'dead'
     end
@@ -600,6 +601,14 @@ module Sidekiq
       while size > 0
         each(&:retry)
       end
+    end
+
+    def self.max_jobs
+      Sidekiq.options[:dead_max_jobs]
+    end
+
+    def self.timeout
+      Sidekiq.options[:dead_timeout_in_seconds]
     end
   end
 

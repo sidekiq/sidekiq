@@ -1,7 +1,11 @@
 Sidekiq
 ==============
 
-[![Gem Version](https://badge.fury.io/rb/sidekiq.png)](https://rubygems.org/gems/sidekiq) [![Code Climate](https://codeclimate.com/github/mperham/sidekiq.png)](https://codeclimate.com/github/mperham/sidekiq) [![Build Status](https://travis-ci.org/mperham/sidekiq.png)](https://travis-ci.org/mperham/sidekiq) [![Coverage Status](https://coveralls.io/repos/mperham/sidekiq/badge.png?branch=master)](https://coveralls.io/r/mperham/sidekiq)
+[![Gem Version](https://badge.fury.io/rb/sidekiq.png)](https://rubygems.org/gems/sidekiq) 
+[![Code Climate](https://codeclimate.com/github/mperham/sidekiq.png)](https://codeclimate.com/github/mperham/sidekiq) 
+[![Build Status](https://travis-ci.org/mperham/sidekiq.png)](https://travis-ci.org/mperham/sidekiq) 
+[![Coverage Status](https://coveralls.io/repos/mperham/sidekiq/badge.png?branch=master)](https://coveralls.io/r/mperham/sidekiq) 
+[![Gitter Chat](https://badges.gitter.im/mperham/sidekiq.png)](https://gitter.im/mperham/sidekiq)
 
 
 Simple, efficient background processing for Ruby.
@@ -60,7 +64,7 @@ More Information
 -----------------
 
 Please see the [sidekiq wiki](https://github.com/mperham/sidekiq/wiki) for the official documentation.
-[#sidekiq on irc.freenode.net](irc://irc.freenode.net/#sidekiq) is dedicated to this project,
+[mperham/sidekiq on Gitter](https://gitter.im/mperham/sidekiq) is dedicated to this project,
 but bug reports or feature requests suggestions should still go through [issues on Github](https://github.com/mperham/sidekiq/issues).  Release announcements are made to the [@sidekiq](https://twitter.com/sidekiq) Twitter account.
 
 You may also find useful a [Google Group](https://groups.google.com/forum/#!forum/sidekiq) dedicated to Sidekiq discussion and [a Sidekiq tag](https://stackoverflow.com/questions/tagged/sidekiq) on Stack Overflow.
@@ -71,7 +75,7 @@ Problems?
 
 **Please do not directly email any Sidekiq committers with questions or problems.**  A community is best served when discussions are held in public.
 
-If you have a problem, please review the [FAQ](https://github.com/mperham/sidekiq/wiki/FAQ) and [Troubleshooting](https://github.com/mperham/sidekiq/wiki/Problems-and-Troubleshooting) wiki pages. Searching the issues for your problem is also a good idea.  If that doesn't help, feel free to email the Sidekiq mailing list or open a new issue.
+If you have a problem, please review the [FAQ](https://github.com/mperham/sidekiq/wiki/FAQ) and [Troubleshooting](https://github.com/mperham/sidekiq/wiki/Problems-and-Troubleshooting) wiki pages. Searching the issues for your problem is also a good idea.  If that doesn't help, feel free to email the Sidekiq mailing list, chat in Gitter, or open a new issue.
 The mailing list is the preferred place to ask questions on usage. If you are encountering what you think is a bug, please open an issue.
 
 

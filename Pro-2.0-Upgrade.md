@@ -1,12 +1,22 @@
 # Upgrading to Sidekiq Pro 2.0
 
-Sidekiq Pro 2.0 allows nested batches for more complex job workflows.
+Sidekiq Pro 2.0 allows nested batches for more complex job workflows
+and provides a new reliable scheduler which uses Lua to guarantee
+atomicity and much higher performance.
+
 It also removes deprecated APIs, changes the batch data format and
 how features are activated.  Read carefully to ensure your upgrade goes
 smoothly.
 
+Sidekiq Pro 2.0 requires Sidekiq 3.3.2 or greater.  Redis 2.8 is
+recommended; Redis 2.4 or 2.6 will work but some functionality will not be
+available.
+
 **Note that you CANNOT go back to Pro 1.x once you've created batches
 with 2.x.  The new batches will not process correctly with 1.x.**
+
+**If you are on a version of Sidekiq Pro <1.5, you should upgrade to the
+latest 1.x version and run it for a week before upgrading to 2.0.**
 
 ## Nested Batches
 
@@ -51,6 +61,8 @@ def perform(*args)
 end
 ```
 
+More context: [#1485]
+
 ## Batch Data
 
 The batch data model was overhauled.  Batch data should take
@@ -71,14 +83,24 @@ savings but real world savings should be even greater.
 **There's no data migration required.  Sidekiq Pro 2.0 transparently handles
 both old and new format.**
 
+More context: [#2130]
+
 ## Reliability
 
-You no longer need to require anything to use Reliability features.
+2.0 brings a new reliable scheduler which uses Lua inside Redis so enqueuing
+scheduled jobs is atomic.  Benchmarks show it 50x faster when enqueuing
+lots of jobs.  **One caveat**: client-side middleware is not executed
+for each job when enqueued with the reliable scheduler.  No Sidekiq or
+Sidekiq Pro functionality is affected by this change but some 3rd party
+plugins might be.
 
-* Activate reliable fetch:
+**You no longer require anything to use the Reliability features.**
+
+* Activate reliable fetch and/or the new reliable scheduler:
 ```ruby
 Sidekiq.configure_server do |config|
   config.reliable_fetch!
+  config.reliable_scheduler!
 end
 ```
 * Activate reliable push:
@@ -86,15 +108,19 @@ end
 Sidekiq::Client.reliable_push!
 ```
 
+More context: [#2130]
+
 ## Other Changes
 
-* You must require `sidekiq/notifications` if you want to use the
+* You must require `sidekiq/pro/notifications` if you want to use the
   existing notification schemes.  I don't recommend using them as the
   newer-style `Sidekiq::Batch#on` method is simpler and more flexible.
 * Several classes have been renamed.  Generally these classes are ones
   you should not need to require/use in your own code, e.g. the Batch
   middleware.
-* The Web UI now shows the Sidekiq Pro version in the footer.
+* You can add `attr_accessor :jid` to a Batch callback class and Sidekiq
+  Pro will set it to the jid of the callback job. [#2178]
+* The Web UI now shows the Sidekiq Pro version in the footer. [#1991]
 
 ## Thanks
 

@@ -156,8 +156,8 @@ module Sidekiq
           Sidekiq.redis do |conn|
             conn.multi do
               conn.zadd('dead', now, payload)
-              conn.zremrangebyscore('dead', '-inf', now - DeadSet::TIMEOUT)
-              conn.zremrangebyrank('dead', 0, -DeadSet::MAX_JOBS)
+              conn.zremrangebyscore('dead', '-inf', now - DeadSet.timeout)
+              conn.zremrangebyrank('dead', 0, -DeadSet.max_jobs)
             end
           end
         end

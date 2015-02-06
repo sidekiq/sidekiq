@@ -1,8 +1,15 @@
+3.3.2
+-----------
+
+- Add Sidekiq::Stats#queues back
+- Allows configuration of dead job set size and timeout [#2173, jonhyman]
+- Refactor scheduler enqueuing so Sidekiq Pro can override it. [#2159]
+
 3.3.1
 -----------
 
 - Dumb down ActionMailer integration so it tries to deliver if possible [#2149]
-- Stringify Sidekiq.default_worker_options's keys [#2126]
+- Stringify Sidekiq.default\_worker\_options's keys [#2126]
 - Add random integer to process identity [#2113, michaeldiscala]
 - Log Sidekiq Pro's Batch ID if available [#2076]
 - Refactor Processor Redis usage to avoid redis/redis-rb#490 [#2094]

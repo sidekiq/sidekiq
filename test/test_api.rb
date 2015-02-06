@@ -76,6 +76,10 @@ class TestApi < Sidekiq::Test
     end
 
     describe "queues" do
+      it "returns all queues" do
+        assert_equal Sidekiq::Stats.new.queues, Sidekiq::Stats::Queues.new.lengths
+      end
+
       it "is initially empty" do
         s = Sidekiq::Stats::Queues.new
         assert_equal 0, s.lengths.size
