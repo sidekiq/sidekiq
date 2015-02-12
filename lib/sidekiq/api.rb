@@ -218,7 +218,7 @@ module Sidekiq
       Time.now.to_f - Sidekiq.load_json(entry)['enqueued_at']
     end
 
-    def each(&block)
+    def each
       initial_size = size
       deleted_size = 0
       page = 0
@@ -233,14 +233,14 @@ module Sidekiq
         break if entries.empty?
         page += 1
         entries.each do |entry|
-          block.call Job.new(entry, @name)
+          yield Job.new(entry, @name)
         end
         deleted_size = initial_size - size
       end
     end
 
     def find_job(jid)
-      self.detect { |j| j.jid == jid }
+      detect { |j| j.jid == jid }
     end
 
     def clear
@@ -474,7 +474,7 @@ module Sidekiq
       end
     end
 
-    def each(&block)
+    def each
       initial_size = @_size
       offset_size = 0
       page = -1
@@ -489,7 +489,7 @@ module Sidekiq
         break if elements.empty?
         page -= 1
         elements.each do |element, score|
-          block.call SortedEntry.new(self, score, element)
+          yield SortedEntry.new(self, score, element)
         end
         offset_size = initial_size - @_size
       end
@@ -651,7 +651,7 @@ module Sidekiq
       count
     end
 
-    def each(&block)
+    def each
       procs = Sidekiq.redis { |conn| conn.smembers('processes') }.sort
 
       Sidekiq.redis do |conn|
@@ -760,7 +760,7 @@ module Sidekiq
   class Workers
     include Enumerable
 
-    def each(&block)
+    def each
       Sidekiq.redis do |conn|
         procs = conn.smembers('processes')
         procs.sort.each do |key|

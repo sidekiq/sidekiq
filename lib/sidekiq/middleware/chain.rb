@@ -120,11 +120,11 @@ module Sidekiq
         entries.clear
       end
 
-      def invoke(*args, &final_action)
+      def invoke(*args)
         chain = retrieve.dup
         traverse_chain = lambda do
           if chain.empty?
-            final_action.call
+            yield
           else
             chain.shift.call(*args, &traverse_chain)
           end
