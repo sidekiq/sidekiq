@@ -240,7 +240,7 @@ module Sidekiq
     end
 
     def find_job(jid)
-      self.detect { |j| j.jid == jid }
+      detect { |j| j.jid == jid }
     end
 
     def clear
