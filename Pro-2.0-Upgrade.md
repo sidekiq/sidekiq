@@ -120,6 +120,10 @@ More context: [#2130]
   middleware.
 * You can add `attr_accessor :jid` to a Batch callback class and Sidekiq
   Pro will set it to the jid of the callback job. [#2178]
+* There's now an official API to iterate all known Batches [#2191]
+```ruby
+Sidekiq::BatchSet.new.each {|status| p status.bid }
+```
 * The Web UI now shows the Sidekiq Pro version in the footer. [#1991]
 
 ## Thanks
