@@ -97,9 +97,8 @@ lots of jobs.
   Sidekiq Pro functionality is affected by this change but some 3rd party
   plugins might be.
 - The Lua script used inside the reliable scheduler is not safe for use
-  with Redis Cluster, Redis Labs, or other distributed Redis solutions.
-  The reliable scheduler does not use an explicit list of keys when
-  calling EVAL/EVALSHA.  See http://redis.io/commands/EVAL for more information.
+  with Redis Cluster, Redis Sentinel or other distributed Redis solutions.
+  It is safe to use with a typical master/slave replication setup.
 
 **You no longer require anything to use the Reliability features.**
 
