@@ -89,10 +89,17 @@ More context: [#2130]
 
 2.0 brings a new reliable scheduler which uses Lua inside Redis so enqueuing
 scheduled jobs is atomic.  Benchmarks show it 50x faster when enqueuing
-lots of jobs.  **One caveat**: client-side middleware is not executed
-for each job when enqueued with the reliable scheduler.  No Sidekiq or
-Sidekiq Pro functionality is affected by this change but some 3rd party
-plugins might be.
+lots of jobs.
+
+**Two caveats**:
+- Client-side middleware is not executed
+  for each job when enqueued with the reliable scheduler.  No Sidekiq or
+  Sidekiq Pro functionality is affected by this change but some 3rd party
+  plugins might be.
+- The Lua script used inside the reliable scheduler is not safe for use
+  with Redis Cluster, Redis Labs, or other distributed Redis solutions.
+  The reliable scheduler does not use an explicit list of keys when
+  calling EVAL/EVALSHA.  See http://redis.io/commands/EVAL for more information.
 
 **You no longer require anything to use the Reliability features.**
 
