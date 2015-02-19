@@ -1,11 +1,11 @@
 Sidekiq
 ==============
 
-[![Gem Version](https://badge.fury.io/rb/sidekiq.png)](https://rubygems.org/gems/sidekiq) 
-[![Code Climate](https://codeclimate.com/github/mperham/sidekiq.png)](https://codeclimate.com/github/mperham/sidekiq) 
-[![Build Status](https://travis-ci.org/mperham/sidekiq.png)](https://travis-ci.org/mperham/sidekiq) 
-[![Coverage Status](https://coveralls.io/repos/mperham/sidekiq/badge.png?branch=master)](https://coveralls.io/r/mperham/sidekiq) 
-[![Gitter Chat](https://badges.gitter.im/mperham/sidekiq.png)](https://gitter.im/mperham/sidekiq)
+[![Gem Version](https://badge.fury.io/rb/sidekiq.svg)](https://rubygems.org/gems/sidekiq)
+[![Code Climate](https://codeclimate.com/github/mperham/sidekiq.svg)](https://codeclimate.com/github/mperham/sidekiq)
+[![Build Status](https://travis-ci.org/mperham/sidekiq.svg)](https://travis-ci.org/mperham/sidekiq)
+[![Coverage Status](https://coveralls.io/repos/mperham/sidekiq/badge.svg?branch=master)](https://coveralls.io/r/mperham/sidekiq)
+[![Gitter Chat](https://badges.gitter.im/mperham/sidekiq.svg)](https://gitter.im/mperham/sidekiq)
 
 
 Simple, efficient background processing for Ruby.
@@ -46,7 +46,7 @@ Getting Started
 -----------------
 
 See the [sidekiq home page](http://sidekiq.org) for the simple 3-step process.
-You can watch [Railscast #366](http://railscasts.com/episodes/366-sidekiq) to see Sidekiq in action.  If you do everything right, you should see this: 
+You can watch [Railscast #366](http://railscasts.com/episodes/366-sidekiq) to see Sidekiq in action.  If you do everything right, you should see this:
 
 ![Web UI](https://github.com/mperham/sidekiq/raw/master/examples/web-ui.png)
 
