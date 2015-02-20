@@ -42,13 +42,13 @@ module Sidekiq
 
       def perform_in(interval, *args)
         int = interval.to_f
-        now = Time.now.to_f
-        ts = (int < 1_000_000_000 ? now + int : int)
+        now = Time.now
+        ts = (int < 1_000_000_000 ? (now + interval).to_f : int)
 
         item = { 'class' => self, 'args' => args, 'at' => ts }
 
         # Optimization to enqueue something now that is scheduled to go out now or in the past
-        item.delete('at'.freeze) if ts <= now
+        item.delete('at'.freeze) if ts <= now.to_f
 
         client_push(item)
       end
