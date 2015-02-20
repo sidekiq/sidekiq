@@ -30,6 +30,15 @@ class TestScheduling < Sidekiq::Test
       @redis.verify
     end
 
+    it 'schedules a job in one month' do
+      @redis.expect :zadd, true do |key, args|
+        assert_equal 'schedule', key
+        assert_in_delta 1.month.since.to_f, args[0][0].to_f, 1
+      end
+      assert ScheduledWorker.perform_in(1.month, 'mike')
+      @redis.verify
+    end
+
     it 'schedules a job via timestamp' do
       @redis.expect :zadd, true, ['schedule', Array]
       assert ScheduledWorker.perform_in(5.days.from_now, 'mike')
