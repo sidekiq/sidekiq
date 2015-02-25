@@ -24,7 +24,7 @@ class TestApi < Sidekiq::Test
     describe "failed" do
       it "is initially zero" do
         s = Sidekiq::Stats.new
-        assert_equal 0, s.processed
+        assert_equal 0, s.failed
       end
 
       it "returns number of failed jobs" do
