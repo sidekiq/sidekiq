@@ -24,7 +24,7 @@ class TestApi < Sidekiq::Test
     describe "failed" do
       it "is initially zero" do
         s = Sidekiq::Stats.new
-        assert_equal 0, s.processed
+        assert_equal 0, s.failed
       end
 
       it "returns number of failed jobs" do
@@ -311,8 +311,6 @@ class TestApi < Sidekiq::Test
       add_retry('bob1', same_time)
       add_retry('bob2', same_time)
       r = Sidekiq::RetrySet.new
-      # jobs = r.fetch(same_time)
-      # puts jobs[1].jid
       assert_equal 1, r.fetch(same_time, 'bob1').size
     end
 
