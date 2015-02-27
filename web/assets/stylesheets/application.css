@@ -695,6 +695,12 @@ div.interval-slider input {
 
 .redis-url
 {
-    max-width: 500px;
+    max-width: 400px;
+    overflow: hidden;
+}
+
+.redis-namespace
+{
+    max-width: 250px;
     overflow: hidden;
 }
