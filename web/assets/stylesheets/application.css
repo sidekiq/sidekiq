@@ -692,3 +692,15 @@ div.interval-slider input {
     top: auto;
   }
 }
+
+.redis-url
+{
+    max-width: 400px;
+    overflow: hidden;
+}
+
+.redis-namespace
+{
+    max-width: 250px;
+    overflow: hidden;
+}
