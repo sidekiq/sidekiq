@@ -1,3 +1,8 @@
+HEAD
+-----------
+
+- Undeprecate delay extension for ActionMailer 4.2+ . [#2186]
+
 3.3.2
 -----------
 
