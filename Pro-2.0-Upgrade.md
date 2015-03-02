@@ -38,7 +38,7 @@ a.jobs do
 end
 ```
 
-Parent batch callbacks are not processed until any child batch callbacks have
+Parent batch callbacks are not processed until all child batch callbacks have
 run successfully.  In the example above, `MyCallback` will always fire
 before `SomeCallback` because `b` is considered a child of `a`.
 
