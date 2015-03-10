@@ -68,6 +68,11 @@ module Sidekiq
 
       fire_event(:startup)
 
+      Sidekiq.redis do |conn|
+        # touch the connection pool so it is created before we
+        # launch the actors.
+      end
+
       if !options[:daemon]
         logger.info 'Starting processing, hit Ctrl-C to stop'
       end
