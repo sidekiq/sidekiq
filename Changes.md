@@ -3,6 +3,7 @@ HEAD
 
 - **Improve ActiveJob integration** - Web UI now shows ActiveJobs in a
   nicer format and job logging shows the actual class name [#2248, #2259]
+- Added helper which provide ability to add your html code to page `<head>` tag [#2270]
 - Web UI polling now uses Ajax to avoid page reload [#2266]
 - Add Sidekiq::Process#dump\_threads API to trigger TTIN output [#2247]
 
