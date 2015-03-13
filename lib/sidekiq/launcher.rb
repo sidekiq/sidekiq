@@ -90,6 +90,8 @@ module Sidekiq
           conn.del("#{identity}:workers")
         end
       end
+    rescue
+      # best effort, ignore network errors
     end
 
   end
