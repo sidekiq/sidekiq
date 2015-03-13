@@ -50,7 +50,7 @@ module Sidekiq
       #
       #   Sidekiq.configure_server do |config|
       #     config.server_middleware do |chain|
-      #       chain.add Middleware::Server::RetryJobs, :max_retries => 7
+      #       chain.add Sidekiq::Middleware::Server::RetryJobs, :max_retries => 7
       #     end
       #   end
       #
