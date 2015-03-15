@@ -4,6 +4,12 @@ Sidekiq Pro Changelog
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
 
+2.0.1
+-----------
+
+- Add `batch.callback_queue` so batch callbacks can use a higher
+  priority queue than jobs. [#2200]
+
 2.0.0
 -----------
 
