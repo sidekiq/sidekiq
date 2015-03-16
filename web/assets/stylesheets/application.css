@@ -704,3 +704,7 @@ div.interval-slider input {
     max-width: 250px;
     overflow: hidden;
 }
+
+.search{
+  text-align: right;
+}

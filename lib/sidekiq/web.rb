@@ -70,6 +70,8 @@ module Sidekiq
       @queue = Sidekiq::Queue.new(@name)
       (@current_page, @total_size, @messages) = page("queue:#{@name}", params[:page], @count)
       @messages = @messages.map { |msg| Sidekiq::Job.new(msg, @name) }
+      @search = true
+      @messages = search(@messages) if params[:search]
       erb :queue
     end
 
@@ -87,6 +89,8 @@ module Sidekiq
       @count = (params[:count] || 25).to_i
       (@current_page, @total_size, @dead) = page("dead", params[:page], @count, reverse: true)
       @dead = @dead.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+      @search = true
+      @dead = search(@dead) if params[:search]
       erb :morgue
     end
 
@@ -129,6 +133,8 @@ module Sidekiq
       @count = (params[:count] || 25).to_i
       (@current_page, @total_size, @retries) = page("retry", params[:page], @count)
       @retries = @retries.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+      @search = true
+      @retries = search(@retries) if params[:search]
       erb :retries
     end
 
@@ -168,6 +174,8 @@ module Sidekiq
       @count = (params[:count] || 25).to_i
       (@current_page, @total_size, @scheduled) = page("schedule", params[:page], @count)
       @scheduled = @scheduled.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+      @search = true
+      @scheduled = search(@scheduled) if params[:search]
       erb :scheduled
     end
 
@@ -256,6 +264,10 @@ module Sidekiq
       elsif params['add_to_queue']
         job.add_to_queue
       end
+    end
+
+    def search(collection)
+      collection.select{|job| job.item.values.join.include? params['search']}
     end
   end
 end

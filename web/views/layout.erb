@@ -17,7 +17,11 @@
           <div class="col-sm-12 summary_bar">
             <%= erb :_summary %>
           </div>
-
+          <% if @search %>
+            <div class="col-sm-12 search">
+              <%= erb :_search %>
+            </div>
+          <% end %>
           <div class="col-sm-12">
             <%= yield %>
           </div>
