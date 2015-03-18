@@ -9,6 +9,8 @@ Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and
 
 - Add `batch.callback_queue` so batch callbacks can use a higher
   priority queue than jobs. [#2200]
+- Gracefully recover if someone runs `SCRIPT FLUSH` on Redis. [#2240]
+- Ignore errors when attempting `bulk_requeue`, allowing clean shutdown
 
 2.0.0
 -----------
