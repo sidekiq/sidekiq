@@ -38,13 +38,19 @@ module Sidekiq
     end
 
     module ActionMailer
+      def default_options
+        Sidekiq.options[:mailer_queue] ? {queue: Sidekiq.options[:mailer_queue]} : {}
+      end
       def sidekiq_delay(options={})
+        options = default_options.merge(options}
         Proxy.new(DelayedMailer, self, options)
       end
       def sidekiq_delay_for(interval, options={})
+        options = default_options.merge(options}
         Proxy.new(DelayedMailer, self, options.merge('at' => Time.now.to_f + interval.to_f))
       end
       def sidekiq_delay_until(timestamp, options={})
+        options = default_options.merge(options}
         Proxy.new(DelayedMailer, self, options.merge('at' => timestamp.to_f))
       end
       alias_method :delay, :sidekiq_delay
