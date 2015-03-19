@@ -341,7 +341,7 @@ module Sidekiq
     def safe_load(content, default)
       begin
         yield(*YAML.load(content))
-      rescue ::ArgumentError => ex
+      rescue => ex
         # #1761 in dev mode, it's possible to have jobs enqueued which haven't been loaded into
         # memory yet so the YAML can't be loaded.
         Sidekiq.logger.warn "Unable to load YAML: #{ex.message}" unless Sidekiq.options[:environment] == 'development'

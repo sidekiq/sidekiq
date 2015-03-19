@@ -1,6 +1,8 @@
-HEAD
+3.3.3
 -----------
 
+- Fix crash on exit when Redis is down [#2235]
+- Fix duplicate logging on startup
 - Undeprecate delay extension for ActionMailer 4.2+ . [#2186]
 
 3.3.2
