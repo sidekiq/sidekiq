@@ -472,6 +472,45 @@ class TestWeb < Sidekiq::Test
       end
     end
 
+    describe 'stats/monitor' do
+      include Sidekiq::Util
+
+      before do
+        Sidekiq.redis do |conn|
+          conn.sadd("queues", "default")
+          conn.sadd("queues", "queue2")
+          conn.sadd('processes', 'foo:1234')
+
+          process_stats = {
+            'hostname'    => 'foo',
+            'pid'         => 1234,
+            'started_at'  => Time.now.to_f,
+            'queues'      => ['default'],
+            'concurrency' => 25
+          }
+          conn.hmset('foo:1234', 'info', Sidekiq.dump_json(process_stats), 'at', Time.now.to_f, 'busy', 4)
+        end
+
+        get '/stats/monitor'
+        @response = Sidekiq.load_json(last_response.body)
+      end
+
+      it 'returns backlog and latency for queues' do
+        assert_equal 0, @response["queues"]["default"]["backlog"]
+        assert_equal 0, @response["queues"]["default"]["latency"]
+      end
+
+      it 'returns a list of processes' do
+        process_stats = @response["processes"][0]
+
+        assert_equal "foo",       process_stats["hostname"]
+        assert_equal 1234,        process_stats["pid"]
+        assert_equal ["default"], process_stats["queues"]
+        assert_equal 25,          process_stats["concurrency"]
+        assert_equal 4,           process_stats["busy"]
+      end
+    end
+
     describe 'dead jobs' do
       it 'shows empty index' do
         get 'morgue'
