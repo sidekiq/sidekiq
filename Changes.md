@@ -1,3 +1,8 @@
+HEAD
+-----------
+
+- Add Sidekiq::Process#dump\_threads API to trigger TTIN output [#2247]
+
 3.3.3
 -----------
 

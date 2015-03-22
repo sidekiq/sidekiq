@@ -721,6 +721,10 @@ module Sidekiq
       signal('TERM')
     end
 
+    def dump_threads
+      signal('TTIN')
+    end
+
     private
 
     def signal(sig)
