@@ -239,30 +239,12 @@ module Sidekiq
     end
 
     get '/stats/monitor' do
-      queues = Sidekiq::Queue.all
-      processes = Sidekiq::ProcessSet.new
-
-      queue_metrics = queues.each_with_object({}) do |queue, hash|
-        hash[queue.name] = {
-          backlog: queue.size,
-          latency: queue.latency.to_i
-        }
-      end
-
-      process_metrics = processes.map do |process|
-        {
-          hostname:    process['hostname'],
-          pid:         process['pid'],
-          queues:      process['queues'],
-          concurrency: process['concurrency'],
-          busy:        process['busy']
-        }
-      end
+      monitor_stats = Sidekiq::Monitor.new
 
       content_type :json
       Sidekiq.dump_json(
-        queues:    queue_metrics,
-        processes: process_metrics,
+        queues:    monitor_stats.all_queue_metrics,
+        processes: monitor_stats.all_process_metrics
       )
     end
 
