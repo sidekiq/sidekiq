@@ -484,11 +484,15 @@ class TestWeb < Sidekiq::Test
           process_stats = {
             'hostname'    => 'foo',
             'pid'         => 1234,
+            'tag'         => 'default',
             'started_at'  => Time.now.to_f,
             'queues'      => ['default'],
+            'labels'      => ['reliable'],
             'concurrency' => 25
           }
-          conn.hmset('foo:1234', 'info', Sidekiq.dump_json(process_stats), 'at', Time.now.to_f, 'busy', 4)
+
+          @started_at = Time.now
+          conn.hmset('foo:1234', 'info', Sidekiq.dump_json(process_stats), 'at', @started_at.to_f, 'busy', 4)
         end
 
         get '/stats/monitor'
@@ -503,11 +507,15 @@ class TestWeb < Sidekiq::Test
       it 'returns a list of processes' do
         process_stats = @response["processes"][0]
 
-        assert_equal "foo",       process_stats["hostname"]
-        assert_equal 1234,        process_stats["pid"]
-        assert_equal ["default"], process_stats["queues"]
-        assert_equal 25,          process_stats["concurrency"]
-        assert_equal 4,           process_stats["busy"]
+        assert_in_delta @started_at, Time.parse(process_stats["started_at"]), 1
+
+        assert_equal "foo",        process_stats["hostname"]
+        assert_equal 1234,         process_stats["pid"]
+        assert_equal "default",    process_stats["tag"]
+        assert_equal ["default"],  process_stats["queues"]
+        assert_equal ["reliable"], process_stats["labels"]
+        assert_equal 25,           process_stats["concurrency"]
+        assert_equal 4,            process_stats["busy"]
       end
     end
 

@@ -231,7 +231,7 @@ module Sidekiq
         results.map do |json_info, busy|
           info = Sidekiq.load_json(json_info)
           info['busy'] = busy.to_i
-          info['started_at'] = Time.at(info['started_at'])
+          info['started_at'] = Time.at(info['started_at']).iso8601
           info
         end
       end
