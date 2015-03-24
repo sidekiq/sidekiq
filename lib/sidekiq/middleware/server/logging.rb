@@ -4,7 +4,11 @@ module Sidekiq
       class Logging
 
         def call(worker, item, queue)
-          Sidekiq::Logging.with_context("#{worker.class.to_s} JID-#{item['jid']}#{" BID-#{item['bid']}" if item['bid']}") do
+          # If we're using a wrapper class, like ActiveJob, use the "wrapped"
+          # attribute to expose the underlying thing.
+          klass = item['wrapped'] || worker.class.to_s
+
+          Sidekiq::Logging.with_context("#{klass} JID-#{item['jid']}#{" BID-#{item['bid']}" if item['bid']}") do
             begin
               start = Time.now
               logger.info { "start" }

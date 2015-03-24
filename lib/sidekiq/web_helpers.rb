@@ -129,7 +129,7 @@ module Sidekiq
     RETRY_JOB_KEYS = Set.new(%w(
       queue class args retry_count retried_at failed_at
       jid error_message error_class backtrace
-      error_backtrace enqueued_at retry
+      error_backtrace enqueued_at retry wrapped
     ))
 
     def retry_extra_items(retry_job)

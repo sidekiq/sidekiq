@@ -283,7 +283,7 @@ module Sidekiq
                      "#{target}.#{method}"
                    end
                  when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
-                   args[0]
+                   @item['wrapped'] || args[0]
                  else
                    klass
                  end
@@ -297,7 +297,7 @@ module Sidekiq
                     arg
                   end
                 when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
-                  args[1..-1]
+                  @item['wrapped'] ? args[0]["arguments"] : []
                 else
                   args
                 end
