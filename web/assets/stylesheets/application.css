@@ -101,11 +101,6 @@ header.row .pagination {
 .poll-wrapper {
     margin: 9px;
 }
-.nav #live-poll {
-  height: 25px;
-  line-height: 25px;
-  width: 195px;
-}
 #live-poll.active {
   background-color: #009300;
 }
@@ -206,6 +201,36 @@ table .table-checkbox label {
 
 .navbar .navbar-brand .status {
   color: #585454;
+}
+
+@media (max-width: 768px) {
+  .navbar .navbar-header .navbar-livereload {
+    border: none;
+    margin: 9px 10px 0;
+    padding: 0;
+  }
+
+  .navbar .navbar-collapse .navbar-livereload {
+    display: none;
+  }
+
+  .navbar.navbar-fixed-top ul {
+    margin-right: -15px!important;
+  }
+
+  .navbar .nav a {
+    text-align: center;
+  }
+}
+
+@media (width: 768px) {
+  .navbar .navbar-collapse .navbar-livereload {
+    display: block;
+  }
+
+  .navbar .poll-wrapper {
+    margin: 4px 4px 0 0;
+  }
 }
 
 .navbar-footer .navbar ul.nav {
@@ -616,12 +641,10 @@ div.interval-slider input {
   }
 
   .navbar.navbar-fixed-top ul {
-    float: none;
     margin-right: 0;
   }
 
   .navbar.navbar-fixed-top li {
-    float: none;
     margin-right: 0;
   }
 
