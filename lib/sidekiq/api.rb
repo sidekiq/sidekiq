@@ -198,12 +198,15 @@ module Sidekiq
         results = conn.pipelined do
           @queues.each do |queue_name|
             rname = "queue:#{queue_name}"
+            conn.exists(rname)
             conn.llen(rname)
             conn.lrange(rname, -1, -1)
           end
         end
 
-        results.each_slice(2).with_index do |(size, entry), idx|
+        results.each_slice(3).with_index do |(exists, size, entry), idx|
+          next unless exists
+
           latency = if entry.first
                       Time.now.to_f - Sidekiq.load_json(entry)['enqueued_at']
                     else
@@ -221,20 +224,28 @@ module Sidekiq
     end
 
     def all_process_metrics
+      metrics = []
+
       Sidekiq.redis do |conn|
         results = conn.pipelined do
           @procs.each do |key|
+            conn.exists(key)
             conn.hmget(key, 'info', 'busy')
           end
         end
 
-        results.map do |json_info, busy|
+        results.each_slice(2) do |exists, (json_info, busy)|
+          next unless exists
+
           info = Sidekiq.load_json(json_info)
           info['busy'] = busy.to_i
           info['started_at'] = Time.at(info['started_at']).iso8601
-          info
+
+          metrics << info
         end
       end
+
+      metrics
     end
   end
 
