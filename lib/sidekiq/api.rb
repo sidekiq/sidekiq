@@ -182,21 +182,14 @@ module Sidekiq
   # Exposed in the web interface on /stats/monitor.
   #
   class Monitor
-    def initialize
-      Sidekiq.redis do |conn|
-        @procs, @queues = conn.pipelined do
-          conn.smembers('processes'.freeze)
-          conn.smembers('queues'.freeze)
-        end
-      end
-    end
-
     def all_queue_metrics
       metrics = {}
 
       Sidekiq.redis do |conn|
+        queues = conn.smembers('queues'.freeze)
+
         results = conn.pipelined do
-          @queues.each do |queue_name|
+          queues.each do |queue_name|
             rname = "queue:#{queue_name}"
             conn.exists(rname)
             conn.llen(rname)
@@ -204,16 +197,16 @@ module Sidekiq
           end
         end
 
-        results.each_slice(3).with_index do |(exists, size, entry), idx|
+        results.each_slice(3).with_index do |(exists, size, entries), idx|
           next unless exists
 
-          latency = if entry.first
+          latency = if entry = entries.first
                       Time.now.to_f - Sidekiq.load_json(entry)['enqueued_at']
                     else
                       0
                     end
 
-          metrics[@queues[idx]] = {
+          metrics[queues[idx]] = {
             backlog: size,
             latency: latency.to_i
           }
@@ -227,8 +220,10 @@ module Sidekiq
       metrics = []
 
       Sidekiq.redis do |conn|
+        procs = conn.smembers('processes'.freeze)
+
         results = conn.pipelined do
-          @procs.each do |key|
+          procs.each do |key|
             conn.exists(key)
             conn.hmget(key, 'info', 'busy')
           end

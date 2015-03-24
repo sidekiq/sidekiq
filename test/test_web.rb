@@ -477,8 +477,11 @@ class TestWeb < Sidekiq::Test
 
       before do
         Sidekiq.redis do |conn|
+          @started_at = Time.now
+
           conn.sadd("queues", "default")
-          conn.sadd("queues", "queue2")
+          conn.lpush("queue:default", Sidekiq.dump_json('enqueued_at' => @started_at.to_f))
+
           conn.sadd('processes', 'foo:1234')
 
           process_stats = {
@@ -491,7 +494,6 @@ class TestWeb < Sidekiq::Test
             'concurrency' => 25
           }
 
-          @started_at = Time.now
           conn.hmset('foo:1234', 'info', Sidekiq.dump_json(process_stats), 'at', @started_at.to_f, 'busy', 4)
         end
 
@@ -500,7 +502,7 @@ class TestWeb < Sidekiq::Test
       end
 
       it 'returns backlog and latency for queues' do
-        assert_equal 0, @response["queues"]["default"]["backlog"]
+        assert_equal 1, @response["queues"]["default"]["backlog"]
         assert_equal 0, @response["queues"]["default"]["latency"]
       end
 
