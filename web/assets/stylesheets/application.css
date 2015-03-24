@@ -644,6 +644,7 @@ div.interval-slider input {
   .navbar-text {
     float:none;
     line-height: 30px;
+    margin: 15px auto;
   }
 }
 
