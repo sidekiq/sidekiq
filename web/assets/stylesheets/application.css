@@ -581,6 +581,10 @@ div.interval-slider input {
   }
 }
 
+.chart {
+  margin: 0;
+}
+
 .history-heading {
   padding-right: 15px;
 }
