@@ -42,3 +42,15 @@ $(function() {
     $($(this).attr('data-target')).toggle();
   });
 });
+
+function updatePage(url) {
+  setInterval(function () {
+    $.ajax({
+      url: url,
+      dataType: 'html'
+    }).done(function (data) {
+      var $page = $(data).filter('#page')
+      $('#page').replaceWith($page)
+    })
+  }, parseInt(localStorage.timeInterval) || 2000);
+}
