@@ -9,7 +9,7 @@ platforms :jruby do
   gem 'activerecord-jdbcsqlite3-adapter'
 end
 
-gem 'rails', '~> 4.1.1'
+gem 'rails'
 gem 'sidekiq', :path => '..'
 gem 'pry-byebug'
 
