@@ -226,6 +226,7 @@ table .table-checkbox label {
 @media (width: 768px) {
   .navbar .navbar-collapse .navbar-livereload {
     display: block;
+    margin-top: 5px;
   }
 
   .navbar .poll-wrapper {
@@ -629,7 +630,7 @@ div.interval-slider input {
   text-decoration: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .navbar .navbar-brand {
     float: none;
     display: block;
@@ -675,7 +676,7 @@ div.interval-slider input {
   }
 }
 
-@media (max-width: 979px) {
+@media (max-width: 767px) {
   .navbar-fixed-top, .navbar-fixed-bottom {
     margin: 0 -20px;
   }
@@ -714,7 +715,7 @@ div.interval-slider input {
 .container {
   padding: 0;
 }
-@media (max-width: 979px) {
+@media (max-width: 767px) {
   .navbar-fixed-top, .navbar-fixed-bottom {
     position: relative;
     top: auto;
