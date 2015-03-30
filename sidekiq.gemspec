@@ -19,6 +19,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency                  'connection_pool', '>= 2.1.1'
   gem.add_dependency                  'celluloid', '>= 0.16.0'
   gem.add_dependency                  'json'
+  gem.add_dependency                  'addressable'
   gem.add_development_dependency      'sinatra'
   gem.add_development_dependency      'minitest', '~> 5.3.3'
   gem.add_development_dependency      'rake'

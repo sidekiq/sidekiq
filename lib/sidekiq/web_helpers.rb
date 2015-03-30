@@ -1,4 +1,4 @@
-require 'uri'
+require 'addressable/uri'
 
 module Sidekiq
   # This is not a public API
@@ -166,7 +166,7 @@ module Sidekiq
     def redirect_with_query(url)
       r = request.referer
       if r && r =~ /\?/
-        ref = URI(r)
+        ref = Addressable::URI.parse(r)
         redirect("#{url}?#{ref.query}")
       else
         redirect url

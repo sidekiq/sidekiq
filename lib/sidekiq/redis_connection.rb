@@ -1,6 +1,6 @@
 require 'connection_pool'
 require 'redis'
-require 'uri'
+require 'addressable/uri'
 
 module Sidekiq
   class RedisConnection
@@ -57,7 +57,7 @@ module Sidekiq
         # Don't log Redis AUTH password
         redacted = "REDACTED"
         scrubbed_options = options.dup
-        if scrubbed_options[:url] && (uri = URI.parse(scrubbed_options[:url])) && uri.password
+        if scrubbed_options[:url] && (uri = Addressable::URI.parse(scrubbed_options[:url])) && uri.password
           uri.password = redacted
           scrubbed_options[:url] = uri.to_s
         end
