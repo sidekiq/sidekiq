@@ -20,6 +20,31 @@ module Sidekiq
     def filtering(*)
     end
 
+    # This view helper provide ability display you html code in
+    # to head of page. Example:
+    #
+    #   <% add_to_head do %>
+    #     <link rel="stylesheet" .../>
+    #     <meta .../>
+    #   <% end %>
+    #
+    def add_to_head(&block)
+      @head_html ||= []
+      @head_html << block if block_given?
+    end
+
+    def display_custom_head
+      return unless @head_html
+      @head_html.map { |block| capture(&block) }.join
+    end
+
+    # Simple capture method for erb templates. The origin was
+    # capture method from sinatra-contrib library.
+    def capture(&block)
+      block.call
+      eval('', block.binding)
+    end
+
     def locale
       lang = (request.env["HTTP_ACCEPT_LANGUAGE"] || 'en').split(',')[0].downcase
       strings[lang] ? lang : 'en'
