@@ -191,15 +191,12 @@ module Sidekiq
         results = conn.pipelined do
           queues.each do |queue_name|
             rname = "queue:#{queue_name}"
-            conn.exists(rname)
             conn.llen(rname)
             conn.lrange(rname, -1, -1)
           end
         end
 
-        results.each_slice(3).with_index do |(exists, size, entries), idx|
-          next unless exists
-
+        results.each_slice(2).with_index do |(size, entries), idx|
           latency = if entry = entries.first
                       Time.now.to_f - Sidekiq.load_json(entry)['enqueued_at']
                     else
@@ -224,13 +221,12 @@ module Sidekiq
 
         results = conn.pipelined do
           procs.each do |key|
-            conn.exists(key)
             conn.hmget(key, 'info', 'busy')
           end
         end
 
-        results.each_slice(2) do |exists, (json_info, busy)|
-          next unless exists
+        results.each do |json_info, busy|
+          next unless json_info
 
           info = Sidekiq.load_json(json_info)
           info['busy'] = busy.to_i
