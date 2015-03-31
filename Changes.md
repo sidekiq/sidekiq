@@ -3,8 +3,10 @@ HEAD
 
 - **Improved ActiveJob integration** - Web UI now shows ActiveJobs in a
   nicer format and job logging shows the actual class name [#2248, #2259]
-- Web UI polling now uses Ajax to avoid page reload [#2266]
 - Add Sidekiq::Process#dump\_threads API to trigger TTIN output [#2247]
+- Web UI polling now uses Ajax to avoid page reload [#2266, davydovanton]
+- Several Web UI styling improvements [davydovanton]
+- Add Hindi locale for Web UI [#2275, tejasbubane]
 
 3.3.3
 -----------
