@@ -22,7 +22,7 @@ module Sidekiq
         end
 
         def elapsed(start)
-          (Time.now - start).to_f.round(3)
+          (Time.now - start).round(3)
         end
 
         def logger

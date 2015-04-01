@@ -35,7 +35,7 @@ module Sidekiq
 
         begin
           work = @strategy.retrieve_work
-          ::Sidekiq.logger.info("Redis is online, #{Time.now.to_f - @down.to_f} sec downtime") if @down
+          ::Sidekiq.logger.info("Redis is online, #{Time.now - @down} sec downtime") if @down
           @down = nil
 
           if work
