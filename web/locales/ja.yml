@@ -1,69 +1,69 @@
 # elements like %{queue} are variables and should not be translated
 ja:
-  Dashboard: ダッシュボード
-  Status: 状態
-  Time: 時間
-  Namespace: ネームスペース
-  Realtime: リアルタイム
-  History: 履歴
-  Busy: ビジー
-  Processed: 処理完了
-  Failed: 失敗
-  Scheduled: 予定
-  Retries: 再試行
-  Enqueued: 待機状態
-  Worker: 動作中の作業
-  LivePoll: ポーリング開始
-  StopPolling: ポーリング停止
-  Queue: キュー
-  Class: クラス
-  Job: ジョブ
-  Arguments: 引数
-  Extras: エクストラ
-  Started: 開始
-  ShowAll: 全て見せる
-  CurrentMessagesInQueue: <span class='title'>%{queue}</span>に メッセージがあります
-  Delete: 削除
+  Actions: アクション
+  active: アクティブ
   AddToQueue: キューに追加
+  AreYouSure: いいですか？
   AreYouSureDeleteJob: このジョブを削除しますか？
   AreYouSureDeleteQueue: この %{queue} キューを削除しますか?
-  Queues: キュー
-  Size: サイズ
-  Actions: アクション
-  NextRetry: 再試行
-  RetryCount: 再試行
-  RetryNow: 今すぐ再試行
-  LastRetry: 再試行履歴
-  OriginallyFailed: 失敗
-  AreYouSure: いいですか？
+  Arguments: 引数
+  Batches: バッチ
+  Busy: ビジー
+  Class: クラス
+  Connections: 接続
+  CurrentMessagesInQueue: <span class='title'>%{queue}</span>に メッセージがあります
+  Dashboard: ダッシュボード
+  Dead: 死亡
+  DeadJobs: 死亡したジョブ
+  Delete: 削除
   DeleteAll: 全て削除
-  RetryAll: 全て再試行
-  NoRetriesFound: 再試行できません
+  Enqueued: 待機状態
   Error: エラー
+  ErrorBacktrace: エラーバックトレース
   ErrorClass: クラスエラー
   ErrorMessage: エラーメッセージ
-  ErrorBacktrace: エラーバックトレース
-  GoBack: ← 戻る
-  NoScheduledFound: 予定したジョブはありません
-  When: いつ
-  ScheduledJobs: 予定したジョブ
-  idle: アイドル
-  active: アクティブ
-  Version: バージョン
-  Connections: 接続
-  MemoryUsage: メモリー容量
-  PeakMemoryUsage: 最大メモリー容量
-  Uptime: Uptime (days)
-  OneWeek: 1 週
-  OneMonth: 1 ヶ月
-  ThreeMonths: 3 ヶ月
-  SixMonths: 6 ヶ月
-  Batches: バッチ
+  Extras: エクストラ
+  Failed: 失敗
   Failures: 失敗
-  DeadJobs: 死亡したジョブ
+  GoBack: ← 戻る
+  History: 履歴
+  idle: アイドル
+  Job: ジョブ
+  Jobs: ジョブ
+  LastRetry: 再試行履歴
+  LivePoll: ポーリング開始
+  MemoryUsage: メモリー容量
+  Namespace: ネームスペース
+  NextRetry: 再試行
   NoDeadJobsFound: 死亡したジョブはありません
-  Dead: 死亡
+  NoRetriesFound: 再試行できません
+  NoScheduledFound: 予定したジョブはありません
+  OneMonth: 1 ヶ月
+  OneWeek: 1 週
+  OriginallyFailed: 失敗
+  PeakMemoryUsage: 最大メモリー容量
+  Processed: 処理完了
   Processes: プロセス
+  Queue: キュー
+  Queues: キュー
+  Realtime: リアルタイム
+  Retries: 再試行
+  RetryAll: 全て再試行
+  RetryCount: 再試行
+  RetryNow: 今すぐ再試行
+  Scheduled: 予定
+  ScheduledJobs: 予定したジョブ
+  ShowAll: 全て見せる
+  SixMonths: 6 ヶ月
+  Size: サイズ
+  Started: 開始
+  Status: 状態
+  StopPolling: ポーリング停止
   Thread: スレッド
   Threads: スレッド
-  Jobs: ジョブ
+  ThreeMonths: 3 ヶ月
+  Time: 時間
+  Uptime: Uptime (days)
+  Version: バージョン
+  When: いつ
+  Worker: 動作中の作業
