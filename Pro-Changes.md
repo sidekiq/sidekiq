@@ -3,6 +3,18 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+2.0.2
+-----------
+
+- Multiple Web UIs can now run in the same process. [#2267] If you have
+  multiple Redis shards, you can mount UIs for all in the same process:
+```ruby
+POOL1 = ConnectionPool.new { Redis.new(:url => "redis://localhost:6379/0") }
+POOL2 = ConnectionPool.new { Redis.new(:url => "redis://localhost:6378/0") }
+
+mount Sidekiq::Pro::Web.with(redis_pool: POOL1) => '/sidekiq1'
+mount Sidekiq::Pro::Web.with(redis_pool: POOL2) => '/sidekiq2'
+```
 
 2.0.1
 -----------
