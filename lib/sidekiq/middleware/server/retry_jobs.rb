@@ -188,12 +188,16 @@ module Sidekiq
           end
         end
 
-        def exception_caused_by_shutdown?(e)
+        def exception_caused_by_shutdown?(e, checked_causes = [])
           # In Ruby 2.1.0 only, check if exception is a result of shutdown.
           return false unless defined?(e.cause)
 
+          # Handle circular causes
+          checked_causes << e.object_id
+          return false if checked_causes.include?(e.cause.object_id)
+
           e.cause.instance_of?(Sidekiq::Shutdown) ||
-            exception_caused_by_shutdown?(e.cause)
+            exception_caused_by_shutdown?(e.cause, checked_causes)
         end
 
       end
