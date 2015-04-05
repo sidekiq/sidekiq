@@ -73,3 +73,4 @@ en: # <---- change this to your locale code
   StopAll: Stop All
   QuietAll: Quiet All
   PollingInterval: Polling interval
+  Plugins: Plugins
