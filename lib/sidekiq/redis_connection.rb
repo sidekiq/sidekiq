@@ -7,10 +7,7 @@ module Sidekiq
     class << self
 
       def create(options={})
-        url = options[:url] || determine_redis_provider
-        if url
-          options[:url] = url
-        end
+        options[:url] ||= determine_redis_provider
 
         # need a connection for Fetcher and Retry
         size = options[:size] || (Sidekiq.server? ? (Sidekiq.options[:concurrency] + 2) : 5)

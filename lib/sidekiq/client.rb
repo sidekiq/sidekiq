@@ -211,19 +211,23 @@ module Sidekiq
       raise(ArgumentError, "Message args must be an Array") unless item['args'].is_a?(Array)
       raise(ArgumentError, "Message class must be either a Class or String representation of the class name") unless item['class'].is_a?(Class) || item['class'].is_a?(String)
 
-      if item['class'].is_a?(Class)
-        raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item['class'].ancestors.inspect}") if !item['class'].respond_to?('get_sidekiq_options')
-        normalized_item = item['class'].get_sidekiq_options.merge(item)
-        normalized_item['class'] = normalized_item['class'].to_s
-      else
-        normalized_item = Sidekiq.default_worker_options.merge(item)
-      end
+      normalized_hash(item['class'.freeze])
+        .each{ |key, value| item[key] = value if item[key].nil? }
 
-      normalized_item['queue'] = normalized_item['queue'].to_s
-      normalized_item['jid'] ||= SecureRandom.hex(12)
-      normalized_item['enqueued_at'] ||= Time.now.to_f
-      normalized_item
+      item['class'.freeze] = item['class'.freeze].to_s
+      item['queue'.freeze] = item['queue'.freeze].to_s
+      item['jid'.freeze] ||= SecureRandom.hex(12)
+      item['enqueued_at'.freeze] ||= Time.now.to_f
+      item
     end
 
+    def normalized_hash(item_class)
+      if item_class.is_a?(Class)
+        raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item_class.ancestors.inspect}") if !item_class.respond_to?('get_sidekiq_options'.freeze)
+        item_class.get_sidekiq_options
+      else
+        Sidekiq.default_worker_options
+      end
+    end
   end
 end

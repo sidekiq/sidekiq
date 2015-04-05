@@ -30,6 +30,11 @@ module Sidekiq
     dead_timeout_in_seconds: 180 * 24 * 60 * 60 # 6 months
   }
 
+  DEFAULT_WORKER_OPTIONS = {
+    'retry' => true,
+    'queue' => 'default'
+  }
+
   def self.❨╯°□°❩╯︵┻━┻
     puts "Calm down, bro"
   end
@@ -103,7 +108,7 @@ module Sidekiq
   end
 
   def self.default_worker_options
-    defined?(@default_worker_options) ? @default_worker_options : { 'retry' => true, 'queue' => 'default' }
+    defined?(@default_worker_options) ? @default_worker_options : DEFAULT_WORKER_OPTIONS
   end
 
   def self.load_json(string)
