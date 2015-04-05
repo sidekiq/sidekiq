@@ -64,7 +64,7 @@ module Sidekiq
       #      can be true, false or an integer number of lines to save, default *false*
       #   :pool - use the given Redis connection pool to push this type of job to a given shard.
       def sidekiq_options(opts={})
-        self.sidekiq_options_hash = get_sidekiq_options.merge((opts || {}).stringify_keys)
+        self.sidekiq_options_hash = get_sidekiq_options.merge(opts.stringify_keys)
       end
 
       def sidekiq_retry_in(&block)
