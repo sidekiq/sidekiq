@@ -8,14 +8,16 @@
   </thead>
   <% @queues.each do |queue| %>
     <tr>
-      <td>
+      <td data-label="<%= t('Queue') %>">
         <a href="<%= root_path %>queues/<%= queue.name %>"><%= queue.name %></a>
         <% if queue.paused? %>
           <span class="label label-danger"><%= t('Paused') %></span>
         <% end %>
       </td>
-      <td><%= number_with_delimiter(queue.size) %> </td>
-      <td width="20%">
+      <td data-label="<%= t('Size') %>">
+        <%= number_with_delimiter(queue.size) %>
+      </td>
+      <td data-label="<%= t('Actions') %>" class="actions">
         <form action="<%=root_path %>queues/<%= queue.name %>" method="post">
           <input class="btn btn-danger btn-xs" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSureDeleteQueue', :queue => queue.name) %>" />
         </form>

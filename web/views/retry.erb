@@ -5,13 +5,15 @@
   <tbody>
     <tr>
       <th><%= t('ErrorClass') %></th>
-      <td>
+      <td data-label="<%= t('ErrorClass') %>">
         <code><%= @retry['error_class'] %></code>
       </td>
     </tr>
     <tr>
       <th><%= t('ErrorMessage') %></th>
-      <td><%= h(@retry['error_message']) %></td>
+      <td data-label="<%= t('ErrorMessage') %>">
+        <%= h(@retry['error_message']) %>
+      </td>
     </tr>
     <% if !@retry['error_backtrace'].nil? %>
       <tr>

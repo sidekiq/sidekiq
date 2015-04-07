@@ -19,8 +19,10 @@
   </thead>
   <% @messages.each_with_index do |msg, index| %>
     <tr>
-      <td><%= msg.display_class %></td>
-      <td>
+      <td data-label="<%= t('Job') %>">
+        <%= msg.display_class %>
+      </td>
+      <td data-label="<%= t('Arguments') %>">
         <% a = msg.display_args.inspect %>
         <% if a.size > 100 %>
           <%= h(msg.display_args.inspect[0..100]) + "... " %>
