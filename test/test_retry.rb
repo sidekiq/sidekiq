@@ -328,6 +328,46 @@ class TestRetry < Sidekiq::Test
                      File.read(@tmp_log_path), 'Log entry missing for sidekiq_retry_in')
       end
     end
+
+    describe 'handles errors withouth cause' do
+      before do
+        @error = nil
+        begin
+          raise ::StandardError, 'Error'
+        rescue ::StandardError => e
+          @error = e
+        end
+      end
+
+      it "does not recurse infinitely checking if it's a shutdown" do
+        assert(!Sidekiq::Middleware::Server::RetryJobs.new.send(
+          :exception_caused_by_shutdown?, @error))
+      end
+    end
+
+    describe 'handles errors with circular causes' do
+      before do
+        @error = nil
+        begin
+          begin
+            raise ::StandardError, 'Error 1'
+          rescue ::StandardError => e1
+            begin
+              raise ::StandardError, 'Error 2'
+            rescue ::StandardError => e2
+              raise e1
+            end
+          end
+        rescue ::StandardError => e
+          @error = e
+        end
+      end
+
+      it "does not recurse infinitely checking if it's a shutdown" do
+        assert(!Sidekiq::Middleware::Server::RetryJobs.new.send(
+          :exception_caused_by_shutdown?, @error))
+      end
+    end
   end
 
 end
