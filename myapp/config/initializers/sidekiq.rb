@@ -8,9 +8,6 @@ Sidekiq.configure_server do |config|
   config.on(:shutdown) { puts "Goodbye!" }
 end
 
-require 'sidekiq/web'
-Sidekiq::Web.app_url = '/'
-
 class EmptyWorker
   include Sidekiq::Worker
 
