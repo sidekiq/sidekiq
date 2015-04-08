@@ -8,6 +8,7 @@ HEAD
 - Web UI polling now uses Ajax to avoid page reload [#2266, davydovanton]
 - Several Web UI styling improvements [davydovanton]
 - Add Tamil, Hindi translations for Web UI [ferdinandrosario, tejasbubane]
+- Handle circular error causes [#2285,  eugenk]  
 
 3.3.3
 -----------
