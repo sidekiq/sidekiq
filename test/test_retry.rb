@@ -329,6 +329,22 @@ class TestRetry < Sidekiq::Test
       end
     end
 
+    describe 'handles errors withouth cause' do
+      before do
+        @error = nil
+        begin
+          raise ::StandardError, 'Error'
+        rescue ::StandardError => e
+          @error = e
+        end
+      end
+
+      it "does not recurse infinitely checking if it's a shutdown" do
+        assert(!Sidekiq::Middleware::Server::RetryJobs.new.send(
+          :exception_caused_by_shutdown?, @error))
+      end
+    end
+
     describe 'handles errors with circular causes' do
       before do
         @error = nil
@@ -347,7 +363,7 @@ class TestRetry < Sidekiq::Test
         end
       end
 
-      it "does not recurse infinitely checking if it's a shudtown" do
+      it "does not recurse infinitely checking if it's a shutdown" do
         assert(!Sidekiq::Middleware::Server::RetryJobs.new.send(
           :exception_caused_by_shutdown?, @error))
       end
