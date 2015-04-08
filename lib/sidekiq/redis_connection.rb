@@ -22,15 +22,26 @@ module Sidekiq
 
       private
 
+      REDIS_MIN_VERSION = '2.4'.freeze
+
       def build_client(options)
         namespace = options[:namespace]
 
         client = Redis.new client_opts(options)
+        check_redis_version(client)
         if namespace
           require 'redis/namespace'
           Redis::Namespace.new(namespace, :redis => client)
         else
           client
+        end
+      end
+
+      def check_redis_version(client)
+        redis_version = Gem::Version.new(client.info['redis_version'])
+        required_version = Gem::Version.new(REDIS_MIN_VERSION)
+        if required_version > redis_version
+          raise "Sidekiq requires redis #{REDIS_MIN_VERSION} or greater, your current version is #{version}"
         end
       end
 

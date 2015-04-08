@@ -46,6 +46,7 @@ HEAD
 - Upgrade to Celluloid 0.16 [#2056]
 - Fix typo for generator test file name [dlackty, #2016]
 - Add Sidekiq::Middleware::Chain#prepend [seuros, #2029]
+- Raise error if redis version < 2.4
 
 3.2.6
 -----------
