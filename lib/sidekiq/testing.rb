@@ -149,11 +149,7 @@ module Sidekiq
 
       # Drain and run all jobs for this worker
       def drain
-        while job = jobs.shift do
-          worker = new
-          worker.jid = job['jid']
-          execute_job(worker, job['args'])
-        end
+        perform_one while !jobs.empty?
       end
 
       # Pop out a single job and perform it
@@ -162,11 +158,7 @@ module Sidekiq
         job = jobs.shift
         worker = new
         worker.jid = job['jid']
-        execute_job(worker, job['args'])
-      end
-
-      def execute_job(worker, args)
-        worker.perform(*args)
+        worker.perform(*job['args'])
       end
     end
 
