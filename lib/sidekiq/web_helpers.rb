@@ -45,9 +45,20 @@ module Sidekiq
       eval('', block.binding)
     end
 
+    # Given a browser request Accept-Language header like
+    # "fr-FR,fr;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2", this function
+    # will return "fr" since that's the first code with a matching
+    # locale in web/locales
     def locale
-      lang = (request.env["HTTP_ACCEPT_LANGUAGE"] || 'en').split(',')[0].downcase
-      strings[lang] ? lang : 'en'
+      @locale ||= begin
+        locale = 'en'.freeze
+        languages = request.env['HTTP_ACCEPT_LANGUAGE'.freeze] || 'en'.freeze
+        languages.downcase.split(','.freeze).each do |lang|
+          lang = lang.split(';'.freeze)[0]
+          break locale = lang if strings.has_key?(lang)
+        end
+        locale
+      end
     end
 
     def get_locale
