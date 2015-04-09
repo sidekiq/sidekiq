@@ -3,17 +3,28 @@ require 'uri'
 module Sidekiq
   # This is not a public API
   module WebHelpers
-    def strings
-      @@strings ||= begin
+    def strings(lang)
+      @@strings ||= {}
+      @@strings[lang] ||= begin
         # Allow sidekiq-web extensions to add locale paths
         # so extensions can be localized
-        settings.locales.each_with_object({}) do |path,global|
-          Dir["#{path}/*.yml"].each_with_object(global) do |file,hash|
+        settings.locales.each_with_object({}) do |path, global|
+          find_locale_files(lang).each do |file|
             strs = YAML.load(File.open(file))
-            hash.deep_merge!(strs)
+            global.deep_merge!(strs[lang])
           end
         end
       end
+    end
+
+    def locale_files
+      @@locale_files = settings.locales.flat_map do |path|
+        Dir["#{path}/*.yml"]
+      end
+    end
+
+    def find_locale_files(lang)
+      locale_files.select { |file| file =~ /\/#{lang}\.yml$/ }
     end
 
     # This is a hook for a Sidekiq Pro feature.  Please don't touch.
@@ -55,14 +66,14 @@ module Sidekiq
         languages = request.env['HTTP_ACCEPT_LANGUAGE'.freeze] || 'en'.freeze
         languages.downcase.split(','.freeze).each do |lang|
           lang = lang.split(';'.freeze)[0]
-          break locale = lang if strings.has_key?(lang)
+          break locale = lang if find_locale_files(lang).any?
         end
         locale
       end
     end
 
     def get_locale
-      strings[locale]
+      strings(locale)
     end
 
     def t(msg, options={})
