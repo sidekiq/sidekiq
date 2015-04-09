@@ -1,3 +1,4 @@
+# encoding: utf-8
 require_relative 'helper'
 require 'sidekiq'
 require 'sidekiq/web'
@@ -27,6 +28,18 @@ class TestWeb < Sidekiq::Test
       def perform(a, b)
         a + b
       end
+    end
+
+    it 'can show text with any locales' do
+      rackenv = {'HTTP_ACCEPT_LANGUAGE' => 'ru,en'}
+      get '/', {}, rackenv
+      assert_match(/Панель управления/, last_response.body)
+      rackenv = {'HTTP_ACCEPT_LANGUAGE' => 'es,en'}
+      get '/', {}, rackenv
+      assert_match(/Panel de Control/, last_response.body)
+      rackenv = {'HTTP_ACCEPT_LANGUAGE' => 'en-us'}
+      get '/', {}, rackenv
+      assert_match(/Dashboard/, last_response.body)
     end
 
     describe 'busy' do
