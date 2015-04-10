@@ -789,13 +789,15 @@ module Sidekiq
     def size
       Sidekiq.redis do |conn|
         procs = conn.smembers('processes')
-        return 0 if procs.empty?
-
-        conn.pipelined do
-          procs.each do |key|
-            conn.hget(key, 'busy')
-          end
-        end.map(&:to_i).inject(:+)
+        if procs.empty?
+          0
+        else
+          conn.pipelined do
+            procs.each do |key|
+              conn.hget(key, 'busy')
+            end
+          end.map(&:to_i).inject(:+)
+        end
       end
     end
   end
