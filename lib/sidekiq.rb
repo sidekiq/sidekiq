@@ -92,7 +92,7 @@ module Sidekiq
   end
 
   def self.client_middleware
-    @client_chain ||= Middleware::Chain.new
+    @client_chain ||= Processor.default_client_middleware
     yield @client_chain if block_given?
     @client_chain
   end
