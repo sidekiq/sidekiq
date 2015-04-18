@@ -17,6 +17,12 @@ module Sidekiq
     include Util
     include Actor
 
+    def self.default_client_middleware
+      Middleware::Chain.new do |m|
+        m.add Middleware::Client::RetryJobCleaner
+      end
+    end
+
     def self.default_middleware
       Middleware::Chain.new do |m|
         m.add Middleware::Server::Logging
