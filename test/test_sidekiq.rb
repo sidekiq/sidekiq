@@ -31,7 +31,7 @@ class TestSidekiq < Sidekiq::Test
 
     it "allows angry developers to express their emotional constitution and remedies it" do
       Sidekiq.❨╯°□°❩╯︵┻━┻
-      assert_equal "Calm down, bro\n", $stdout.string
+      assert_equal "Calm down, yo.\n", $stdout.string
     end
   end
 
