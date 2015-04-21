@@ -19,7 +19,7 @@
   </thead>
   <% @messages.each_with_index do |msg, index| %>
     <tr>
-      <td><%= msg.display_class %></td>
+      <td><%= h(msg.display_class) %></td>
       <td>
         <% a = msg.display_args.inspect %>
         <% if a.size > 100 %>
