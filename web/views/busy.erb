@@ -23,7 +23,7 @@
   </thead>
   <% processes.each do |process| %>
     <tr>
-      <td width="50%">
+      <td data-label="<%= t('Name') %>" class="name">
         <%= "#{process['hostname']}:#{process['pid']}" %>
         <span class="label label-success"><%= process.tag %></span>
         <% process.labels.each do |label| %>
@@ -33,10 +33,16 @@
         <b><%= "#{t('Queues')}: " %></b>
         <%= process['queues'] * ", " %>
       </td>
-      <td><%= relative_time(Time.at(process['started_at'])) %></td>
-      <td><%= process['concurrency'] %></td>
-      <td><%= process['busy'] %></td>
-      <td>
+      <td data-label="<%= t('Started') %>">
+        <%= relative_time(Time.at(process['started_at'])) %>
+      </td>
+      <td data-label="<%= t('Threads') %>">
+        <%= process['concurrency'] %>
+      </td>
+      <td data-label="<%= t('Busy') %>">
+        <%= process['busy'] %>
+      </td>
+      <td class="actions">
         <div class="btn-group pull-right">
           <form method="POST">
             <input type="hidden" name="identity" value="<%= process['identity'] %>"/>
@@ -68,17 +74,27 @@
   <% workers.each do |process, thread, msg| %>
     <% job = Sidekiq::Job.new(msg['payload']) %>
     <tr>
-      <td><%= process %></td>
-      <td><%= thread %></td>
-      <td><%= job.jid %></td>
-      <td>
+      <td data-label="<%= t('Process') %>">
+        <%= process %>
+      </td>
+      <td data-label="<%= t('TID') %>">
+        <%= thread %>
+      </td>
+      <td data-label="<%= t('JID') %>">
+        <%= job.jid %>
+      </td>
+      <td data-label="<%= t('Queue') %>">
         <a href="<%= root_path %>queues/<%= msg['queue'] %>"><%= msg['queue'] %></a>
       </td>
-      <td><%= job.display_class %></td>
-      <td>
+      <td data-label="<%= t('Job') %>">
+        <%= job.display_class %>
+      </td>
+      <td data-label="<%= t('Arguments') %>">
         <div class="args"><%= display_args(job.display_args) %></div>
       </td>
-      <td><%= relative_time(Time.at(msg['run_at'])) %></td>
+      <td data-label="<%= t('Started') %>">
+        <%= relative_time(Time.at(msg['run_at'])) %>
+      </td>
     </tr>
   <% end %>
 </table>
