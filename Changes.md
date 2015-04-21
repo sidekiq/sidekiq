@@ -1,4 +1,4 @@
-HEAD
+3.3.4
 -----------
 
 - **Improved ActiveJob integration** - Web UI now shows ActiveJobs in a
@@ -9,7 +9,7 @@ HEAD
 - Several Web UI styling improvements [davydovanton]
 - Add Tamil, Hindi translations for Web UI [ferdinandrosario, tejasbubane]
 - Fix Web UI to work with country-specific locales [#2243]
-- Handle circular error causes [#2285,  eugenk]  
+- Handle circular error causes [#2285,  eugenk]
 
 3.3.3
 -----------
