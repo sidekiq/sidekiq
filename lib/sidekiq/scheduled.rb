@@ -60,14 +60,16 @@ module Sidekiq
             logger.error ex.backtrace.first
           end
 
-          # Randomizing scales the interval by half since
-          # on average calling `rand` returns 0.5.
-          # We make up for this by doubling the interval
-          after(poll_interval * 2 * rand) { poll }
+          after(random_poll_interval) { poll }
         end
       end
 
       private
+
+      # Calculates a random interval that is ±50% the desired average.
+      def random_poll_interval
+        poll_interval * rand + poll_interval.to_f / 2
+      end
 
       # We do our best to tune poll_interval to the size of the active Sidekiq
       # cluster.  If you have 30 processes and poll every 15 seconds, that means one
@@ -75,9 +77,9 @@ module Sidekiq
       # and really bad if the retry or scheduled sets are large.
       #
       # Instead try to avoid polling more than once every 15 seconds.  If you have
-      # 30 Sidekiq processes, we'll set poll_interval to 30 * 15 * 2 or 900 seconds.
+      # 30 Sidekiq processes, we'll set poll_interval to 30 * 15 or 450 seconds.
       # To keep things statistically random, we'll sleep a random amount between
-      # 0 and 900 seconds for each poll or 450 seconds on average.  Otherwise restarting
+      # 225 and 675 seconds for each poll or 450 seconds on average.  Otherwise restarting
       # all your Sidekiq processes at the same time will lead to them all polling at
       # the same time: the thundering herd problem.
       #
