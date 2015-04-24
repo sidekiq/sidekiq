@@ -82,5 +82,47 @@ class TestScheduled < Sidekiq::Test
         assert_equal 1, @scheduled.size
       end
     end
+
+    def with_sidekiq_option(name, value)
+      _original, Sidekiq.options[name] = Sidekiq.options[name], value
+      begin
+        yield
+      ensure
+        Sidekiq.options[name] = _original
+      end
+    end
+
+    it 'generates random intervals that target a configured average' do
+      with_sidekiq_option(:poll_interval_average, 10) do
+        i = 500
+        intervals = i.times.map{ @poller.send(:random_poll_interval) }
+
+        assert intervals.all?{|i| i >= 5}
+        assert intervals.all?{|i| i <= 15}
+        assert_in_delta 10, intervals.reduce(&:+).to_f / i, 0.5
+      end
+    end
+
+    it 'calculates an average poll interval based on the number of known Sidekiq processes' do
+      with_sidekiq_option(:global_poll_interval_average, 10) do
+        begin
+          3.times do |i|
+            Sidekiq.redis do |conn|
+              conn.sadd("processes", "process-#{i}")
+              conn.hset("process-#{i}", "info", nil)
+            end
+          end
+
+          assert_equal 30, @poller.send(:scaled_poll_interval)
+        ensure
+          3.times do |i|
+            Sidekiq.redis do |conn|
+              conn.srem("processes", "process-#{i}")
+              conn.del("process-#{i}")
+            end
+          end
+        end
+      end
+    end
   end
 end

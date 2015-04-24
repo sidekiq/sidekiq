@@ -68,7 +68,7 @@ module Sidekiq
 
       # Calculates a random interval that is ±50% the desired average.
       def random_poll_interval
-        poll_interval * rand + poll_interval.to_f / 2
+        poll_interval_average * rand + poll_interval_average.to_f / 2
       end
 
       # We do our best to tune poll_interval to the size of the active Sidekiq
@@ -84,13 +84,17 @@ module Sidekiq
       # the same time: the thundering herd problem.
       #
       # We only do this if poll_interval is unset (the default).
-      def poll_interval
-        Sidekiq.options[:poll_interval] ||= begin
-          ps = Sidekiq::ProcessSet.new
-          pcount = ps.size
-          pcount = 1 if pcount == 0
-          pcount * 15
-        end
+      def poll_interval_average
+        Sidekiq.options[:poll_interval_average] ||= scaled_poll_interval
+      end
+
+      # Calculates an average poll interval based on the number of known Sidekiq processes.
+      # This minimizes a single point of failure by dispersing check-ins but without taxing
+      # Redis if you run many Sidekiq processes.
+      def scaled_poll_interval
+        pcount = Sidekiq::ProcessSet.new.size
+        pcount = 1 if pcount == 0
+        pcount * Sidekiq.options[:global_poll_interval_average]
       end
 
       def initial_wait

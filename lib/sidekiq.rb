@@ -20,6 +20,8 @@ module Sidekiq
     require: '.',
     environment: nil,
     timeout: 8,
+    poll_interval_average: nil,
+    global_poll_interval_average: 15,
     error_handlers: [],
     lifecycle_events: {
       startup: [],
@@ -127,9 +129,13 @@ module Sidekiq
     Sidekiq::Logging.logger = log
   end
 
+  # When set, overrides Sidekiq.options[:global_poll_interval_average] and sets the
+  # average interval that this process will delay before checking for scheduled jobs
+  # or job retries that are ready to run.
+  #
   # See sidekiq/scheduled.rb for an in-depth explanation of this value
   def self.poll_interval=(interval)
-    self.options[:poll_interval] = interval
+    self.options[:poll_interval_average] = interval
   end
 
   # Register a proc to handle any error which occurs within the Sidekiq process.
