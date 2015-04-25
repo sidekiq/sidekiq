@@ -135,6 +135,7 @@ module Sidekiq
   #
   # See sidekiq/scheduled.rb for an in-depth explanation of this value
   def self.poll_interval=(interval)
+    $stderr.puts "DEPRECATION: `Sidekiq.poll_interval = #{interval}` will be removed in Sidekiq 4. Please update to `Sidekiq.options[:global_poll_interval_average] = #{interval}`."
     self.options[:poll_interval_average] = interval
   end
 
