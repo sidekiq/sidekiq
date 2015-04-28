@@ -738,14 +738,36 @@ div.interval-slider input {
   }
 }
 
-.redis-url
-{
-    max-width: 400px;
-    overflow: hidden;
+.redis-url, .redis-namespace {
+  overflow: scroll;
+  white-space: nowrap;
 }
 
-.redis-namespace
-{
-    max-width: 250px;
-    overflow: hidden;
+@media (min-width: 768px) {
+  .redis-url {
+    max-width: 200px;
+  }
+
+  .redis-namespace {
+    max-width: 150px;
+  }
+}
+
+@media (min-width: 992px) {
+  .redis-url {
+    max-width: 340px;
+  }
+
+  .redis-namespace {
+    max-width: 350px;
+  }
+}
+@media (min-width: 1200px) {
+  .redis-url {
+    max-width: 540px;
+  }
+
+  .redis-namespace {
+    max-width: 350px;
+  }
 }
