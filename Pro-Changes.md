@@ -15,6 +15,8 @@ POOL2 = ConnectionPool.new { Redis.new(:url => "redis://localhost:6378/0") }
 mount Sidekiq::Pro::Web.with(redis_pool: POOL1) => '/sidekiq1'
 mount Sidekiq::Pro::Web.with(redis_pool: POOL2) => '/sidekiq2'
 ```
+- **SECURITY** Fix batch XSS in error data.  Thanks to moneybird.com for
+  reporting the issue.
 
 2.0.1
 -----------
