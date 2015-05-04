@@ -94,7 +94,7 @@ module Sidekiq
       def scaled_poll_interval
         pcount = Sidekiq::ProcessSet.new.size
         pcount = 1 if pcount == 0
-        pcount * Sidekiq.options[:global_poll_interval_average]
+        pcount * Sidekiq.options[:average_scheduled_poll_interval]
       end
 
       def initial_wait

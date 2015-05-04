@@ -104,7 +104,7 @@ class TestScheduled < Sidekiq::Test
     end
 
     it 'calculates an average poll interval based on the number of known Sidekiq processes' do
-      with_sidekiq_option(:global_poll_interval_average, 10) do
+      with_sidekiq_option(:average_scheduled_poll_interval, 10) do
         3.times do |i|
           Sidekiq.redis do |conn|
             conn.sadd("processes", "process-#{i}")

@@ -21,7 +21,7 @@ module Sidekiq
     environment: nil,
     timeout: 8,
     poll_interval_average: nil,
-    global_poll_interval_average: 15,
+    average_scheduled_poll_interval: 15,
     error_handlers: [],
     lifecycle_events: {
       startup: [],
@@ -129,14 +129,23 @@ module Sidekiq
     Sidekiq::Logging.logger = log
   end
 
-  # When set, overrides Sidekiq.options[:global_poll_interval_average] and sets the
-  # average interval that this process will delay before checking for scheduled jobs
-  # or job retries that are ready to run.
+  # When set, overrides Sidekiq.options[:average_scheduled_poll_interval] and sets
+  # the average interval that this process will delay before checking for
+  # scheduled jobs or job retries that are ready to run.
   #
   # See sidekiq/scheduled.rb for an in-depth explanation of this value
   def self.poll_interval=(interval)
-    $stderr.puts "DEPRECATION: `Sidekiq.poll_interval = #{interval}` will be removed in Sidekiq 4. Please update to `Sidekiq.options[:global_poll_interval_average] = #{interval}`."
+    $stderr.puts "DEPRECATION: `Sidekiq.poll_interval = #{interval}` will be removed in Sidekiq 4. Please update to `Sidekiq.average_scheduled_poll_interval = #{interval}`."
     self.options[:poll_interval_average] = interval
+  end
+
+  # How frequently Redis should be checked by a random Sidekiq process for
+  # scheduled and retriable jobs. Each individual process will take turns by
+  # waiting some multiple of this value.
+  #
+  # See sidekiq/scheduled.rb for an in-depth explanation of this value
+  def self.average_scheduled_poll_interval=(interval)
+    self.options[:average_scheduled_poll_interval] = interval
   end
 
   # Register a proc to handle any error which occurs within the Sidekiq process.
