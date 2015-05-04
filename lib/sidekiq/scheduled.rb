@@ -71,13 +71,13 @@ module Sidekiq
         poll_interval_average * rand + poll_interval_average.to_f / 2
       end
 
-      # We do our best to tune poll_interval to the size of the active Sidekiq
+      # We do our best to tune the poll interval to the size of the active Sidekiq
       # cluster.  If you have 30 processes and poll every 15 seconds, that means one
       # Sidekiq is checking Redis every 0.5 seconds - way too often for most people
       # and really bad if the retry or scheduled sets are large.
       #
       # Instead try to avoid polling more than once every 15 seconds.  If you have
-      # 30 Sidekiq processes, we'll set poll_interval to 30 * 15 or 450 seconds.
+      # 30 Sidekiq processes, we'll poll every 30 * 15 or 450 seconds.
       # To keep things statistically random, we'll sleep a random amount between
       # 225 and 675 seconds for each poll or 450 seconds on average.  Otherwise restarting
       # all your Sidekiq processes at the same time will lead to them all polling at
@@ -102,7 +102,7 @@ module Sidekiq
           # Have all processes sleep between 5-15 seconds.  10 seconds
           # to give time for the heartbeat to register (if the poll interval is going to be calculated by the number
           # of workers), and 5 random seconds to ensure they don't all hit Redis at the same time.
-          sleep(INITIAL_WAIT) unless Sidekiq.options[:poll_interval]
+          sleep(INITIAL_WAIT) unless Sidekiq.options[:poll_interval_average]
           sleep(5 * rand)
         rescue Celluloid::Task::TerminatedError
           # Hit Ctrl-C when Sidekiq is finished booting and we have a chance
