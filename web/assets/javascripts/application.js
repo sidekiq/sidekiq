@@ -60,6 +60,8 @@ function updatePage(url) {
     }).done(function (data) {
       var $page = $(data).filter('#page')
       $('#page').replaceWith($page)
+
+      $("time").timeago()
     })
   }, parseInt(localStorage.timeInterval) || 2000);
 }
