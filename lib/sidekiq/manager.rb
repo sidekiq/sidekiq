@@ -147,6 +147,10 @@ module Sidekiq
       end
     end
 
+    def self.strategy
+      Sidekiq.options[:manager] || Manager
+    end
+
     private
 
     def ❤(key, json)
