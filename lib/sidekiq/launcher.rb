@@ -18,7 +18,7 @@ module Sidekiq
 
     def initialize(options)
       @condvar = Celluloid::Condition.new
-      @manager = Sidekiq::Manager.new_link(@condvar, options)
+      @manager = Sidekiq::Manager.strategy.new_link(@condvar, options)
       @poller = Sidekiq::Scheduled::Poller.new_link
       @fetcher = Sidekiq::Fetcher.new_link(@manager, options)
       @manager.fetcher = @fetcher
