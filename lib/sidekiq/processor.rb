@@ -46,6 +46,7 @@ module Sidekiq
         klass  = msg['class'].constantize
         worker = klass.new
         worker.jid = msg['jid']
+        worker.enqueued_at = msg['enqueued_at']
 
         stats(worker, msg, queue) do
           Sidekiq.server_middleware.invoke(worker, msg, queue) do
