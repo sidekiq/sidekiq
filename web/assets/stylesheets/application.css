@@ -165,6 +165,10 @@ header.row .pagination {
   width: 100%;
 }
 
+.table_container {
+  overflow: overlay;
+}
+
 table.table-white {
   background-color: #fff;
 }
