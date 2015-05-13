@@ -152,6 +152,7 @@ module Sidekiq
         while job = jobs.shift do
           worker = new
           worker.jid = job['jid']
+          worker.bid = job['bid'] if worker.respond_to?(:bid=)
           execute_job(worker, job['args'])
         end
       end
@@ -162,6 +163,7 @@ module Sidekiq
         job = jobs.shift
         worker = new
         worker.jid = job['jid']
+        worker.bid = job['bid'] if worker.respond_to?(:bid=)
         execute_job(worker, job['args'])
       end
 
