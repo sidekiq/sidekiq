@@ -3,6 +3,13 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+2.0.3
+-----------
+
+- Display Batch callback data on the Batch details page. [#2347]
+- Fix incompatibility with Pro Web and Rack middleware. [#2344] Thank
+  you to Jason Clark for the tip on how to fix it.
+
 2.0.2
 -----------
 
@@ -12,8 +19,9 @@ Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and
 POOL1 = ConnectionPool.new { Redis.new(:url => "redis://localhost:6379/0") }
 POOL2 = ConnectionPool.new { Redis.new(:url => "redis://localhost:6378/0") }
 
-mount Sidekiq::Pro::Web.with(redis_pool: POOL1) => '/sidekiq1'
-mount Sidekiq::Pro::Web.with(redis_pool: POOL2) => '/sidekiq2'
+mount Sidekiq::Pro::Web => '/sidekiq' # default
+mount Sidekiq::Pro::Web.with(redis_pool: POOL1), at: '/sidekiq1', as: 'sidekiq1' # shard1
+mount Sidekiq::Pro::Web.with(redis_pool: POOL2), at: '/sidekiq2', as: 'sidekiq2' # shard2
 ```
 - **SECURITY** Fix batch XSS in error data.  Thanks to moneybird.com for
   reporting the issue.
