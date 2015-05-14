@@ -271,17 +271,25 @@ module Sidekiq
       end
 
       errors = []
-      [:concurrency, :index, :timeout].each do |arg|
-        if options.has_key? arg
-          Integer(options[arg]) rescue errors.push("#{arg.to_s} must be an integer")
+
+      # Ensure numeric option values are numbers and fall in reasonable ranges
+      [:concurrency, :timeout].each do |option|
+        next unless options.has_key?(option)
+
+        unless options[option].is_a? Integer
+          errors.push(%{parameter "#{option}": "#{options[option]}" is not a valid integer})
+          next
         end
+
+        errors.push(%{parameter "#{option}": "#{options[option]}" must be > 0}) if options[option] <= 0
       end
+
       if options.has_key? :verbose
         val = options[:verbose]
-        errors.push("verbose must be true or false") unless val == true || val == false
+        errors.push(%{parameter "verbose" must be set to true or false}) unless val == true || val == false
       end
-      raise("Invalid configuration found: " + errors.join(", ")) unless errors.empty?
 
+      raise("Invalid values found in configuration file settings: " + errors.join(", ")) unless errors.empty?
     end
 
     def parse_options(argv)
