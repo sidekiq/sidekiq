@@ -269,6 +269,19 @@ module Sidekiq
         logger.info @parser
         die(1)
       end
+
+      errors = []
+      [:concurrency, :index, :timeout].each do |arg|
+        if options.has_key? arg
+          Integer(options[arg]) rescue errors.push("#{arg.to_s} must be an integer")
+        end
+      end
+      if options.has_key? :verbose
+        val = options[:verbose]
+        errors.push("verbose must be true or false") unless val == true || val == false
+      end
+      raise("Invalid configuration found: " + errors.join(", ")) unless errors.empty?
+
     end
 
     def parse_options(argv)
