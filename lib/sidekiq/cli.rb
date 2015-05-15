@@ -284,11 +284,6 @@ module Sidekiq
         errors.push(%{parameter "#{option}": "#{options[option]}" must be > 0}) if options[option] <= 0
       end
 
-      if options.has_key? :verbose
-        val = options[:verbose]
-        errors.push(%{parameter "verbose" must be set to true or false}) unless val == true || val == false
-      end
-
       raise("Invalid values found in configuration file settings: " + errors.join(", ")) unless errors.empty?
     end
 
