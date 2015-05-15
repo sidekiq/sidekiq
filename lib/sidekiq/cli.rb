@@ -270,21 +270,18 @@ module Sidekiq
         die(1)
       end
 
-      errors = []
-
       # Ensure numeric option values are numbers and fall in reasonable ranges
       [:concurrency, :timeout].each do |option|
         next unless options.has_key?(option)
 
         unless options[option].is_a? Integer
-          errors.push(%{parameter "#{option}": "#{options[option]}" is not a valid integer})
-          next
+          raise(%{Configuration file parameter "#{option}": "#{options[option]}" is not a valid integer})
         end
 
-        errors.push(%{parameter "#{option}": "#{options[option]}" must be > 0}) if options[option] <= 0
+        if options[option] <= 0
+          raise(%{Configuration file parameter "#{option}": "#{options[option]}" must be > 0})
+        end
       end
-
-      raise("Invalid values found in configuration file settings: " + errors.join(", ")) unless errors.empty?
     end
 
     def parse_options(argv)
