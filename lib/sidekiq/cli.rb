@@ -275,11 +275,17 @@ module Sidekiq
         next unless options.has_key?(option)
 
         unless options[option].is_a? Integer
-          raise(%{Configuration file parameter "#{option}": "#{options[option]}" is not a valid integer})
+          raise(
+            ArgumentError,
+            %{Configuration parameter "#{option}": "#{options[option]}" is not a valid integer}
+          )
         end
 
         if options[option] <= 0
-          raise(%{Configuration file parameter "#{option}": must be > 0 (current value: #{options[option]})})
+          raise(
+            ArgumentError,
+            %{Configuration parameter "#{option}": must be > 0 (current value: #{options[option]})}
+          )
         end
       end
     end
