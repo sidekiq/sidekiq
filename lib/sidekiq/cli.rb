@@ -269,6 +269,25 @@ module Sidekiq
         logger.info @parser
         die(1)
       end
+
+      # Ensure numeric option values are numbers and fall in reasonable ranges
+      [:concurrency, :timeout].each do |option|
+        next unless options.has_key?(option)
+
+        unless options[option].is_a? Integer
+          raise(
+            ArgumentError,
+            %{"#{option}": "#{options[option]}" is not a valid integer}
+          )
+        end
+
+        if options[option] <= 0
+          raise(
+            ArgumentError,
+            %{"#{option}": must be > 0 (current value: #{options[option]})}
+          )
+        end
+      end
     end
 
     def parse_options(argv)
