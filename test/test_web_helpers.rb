@@ -42,5 +42,11 @@ class TestWebHelpers < Sidekiq::Test
 
     obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2')
     assert_equal 'zh-cn', obj.locale
+
+    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'en-us; *')
+    assert_equal 'en', obj.locale
+
+    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => '*')
+    assert_equal 'en', obj.locale
   end
 end

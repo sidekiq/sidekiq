@@ -65,6 +65,7 @@ module Sidekiq
         locale = 'en'.freeze
         languages = request.env['HTTP_ACCEPT_LANGUAGE'.freeze] || 'en'.freeze
         languages.downcase.split(','.freeze).each do |lang|
+          next if lang == '*'
           lang = lang.split(';'.freeze)[0]
           break locale = lang if find_locale_files(lang).any?
         end
