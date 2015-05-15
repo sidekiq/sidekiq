@@ -270,23 +270,8 @@ module Sidekiq
         die(1)
       end
 
-      # Ensure numeric option values are numbers and fall in reasonable ranges
-      [:concurrency, :timeout].each do |option|
-        next unless options.has_key?(option)
-
-        unless options[option].is_a? Integer
-          raise(
-            ArgumentError,
-            %{"#{option}": "#{options[option]}" is not a valid integer}
-          )
-        end
-
-        if options[option] <= 0
-          raise(
-            ArgumentError,
-            %{"#{option}": must be > 0 (current value: #{options[option]})}
-          )
-        end
+      [:concurrency, :timeout].each do |opt|
+        raise ArgumentError, "#{opt}: #{options[opt]} is not a valid value" if options.has_key?(opt) && options[opt].to_i <= 0
       end
     end
 
