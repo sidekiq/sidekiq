@@ -9,7 +9,7 @@
             <p class="navbar-text redis-url">Redis: <%= redis_connection %></p>
           </li>
           <li>
-            <p class="navbar-text"><%= t('Time') %>: <%= Time.now.utc.strftime('%H:%M:%S UTC') %></p>
+            <p class="navbar-text current-time"><%= t('Time') %>: <span><%= Time.now.utc.strftime('%T') %></span> UTC</p>
           </li>
           <% if namespace %>
               <li>
