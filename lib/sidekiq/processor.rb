@@ -132,7 +132,7 @@ module Sidekiq
 
     # If an exception occurs in the block passed to this method, that block will be retried up to max_retries times.
     # All exceptions will be swallowed and logged.
-    def retry_and_suppress_exceptions(max_retries = 2)
+    def retry_and_suppress_exceptions(max_retries = 5)
       retry_count = 0
       begin
         yield
