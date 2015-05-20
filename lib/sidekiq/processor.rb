@@ -140,7 +140,7 @@ module Sidekiq
         retry_count += 1
         if retry_count <= max_retries
           Sidekiq.logger.debug {"Suppressing and retrying error: #{e.inspect}"}
-          sleep_retry_count(retry_count)
+          pause_for_recovery(retry_count)
           retry
         else
           handle_exception(e, { :message => "Exhausted #{max_retries} retries"})
@@ -148,7 +148,7 @@ module Sidekiq
       end
     end
 
-    def sleep_retry_count(retry_count)
+    def pause_for_recovery(retry_count)
       sleep(retry_count)
     end
   end
