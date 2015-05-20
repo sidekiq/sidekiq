@@ -132,7 +132,7 @@ module Sidekiq
 
     # If an exception occurs in the block passed to this method, that block will be retried up to max_retries times.
     # All exceptions will be swallowed and logged.
-    def retry_and_suppress_exceptions(max_retries = 2)
+    def retry_and_suppress_exceptions(max_retries = 5)
       retry_count = 0
       begin
         yield
@@ -140,12 +140,16 @@ module Sidekiq
         retry_count += 1
         if retry_count <= max_retries
           Sidekiq.logger.debug {"Suppressing and retrying error: #{e.inspect}"}
-          sleep(1)
+          sleep_retry_count(retry_count)
           retry
         else
           handle_exception(e, { :message => "Exhausted #{max_retries} retries"})
         end
       end
+    end
+
+    def sleep_retry_count(retry_count)
+      sleep(retry_count)
     end
   end
 end
