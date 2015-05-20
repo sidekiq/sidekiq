@@ -50,6 +50,10 @@ $(function() {
   $(document).on("click", "[data-toggle]", function() {
     $($(this).attr('data-target')).toggle();
   });
+
+  setInterval(function () {
+    $('.current-time span').text(new Date().toUTCString().slice(-12, -4))
+  }, 1000);
 });
 
 function updatePage(url) {
