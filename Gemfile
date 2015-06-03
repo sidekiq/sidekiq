@@ -12,7 +12,7 @@ platforms :ruby do
   gem 'sqlite3'
 end
 
-platforms :mri_21 do
+platforms :mri do
   gem 'pry-byebug'
 end
 
