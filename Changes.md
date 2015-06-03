@@ -1,4 +1,4 @@
-3.3.5
+HEAD
 -----------
 
 - Set a `created_at` attribute when jobs are created, set `enqueued_at` only
