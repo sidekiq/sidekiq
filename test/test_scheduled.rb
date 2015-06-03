@@ -55,27 +55,28 @@ class TestScheduled < Sidekiq::Test
     end
 
     it 'should empty the retry and scheduled queues up to the current time' do
+      created_time  = Time.new(2013, 2, 3)
       enqueued_time = Time.new(2013, 2, 4)
 
-      Time.stub(:now, enqueued_time) do
-        @retry.schedule (Time.now - 60).to_f, @error_1
-        @retry.schedule (Time.now - 50).to_f, @error_2
-        @retry.schedule (Time.now + 60).to_f, @error_3
-        @scheduled.schedule (Time.now - 60).to_f, @future_1
-        @scheduled.schedule (Time.now - 50).to_f, @future_2
-        @scheduled.schedule (Time.now + 60).to_f, @future_3
+      Time.stub(:now, created_time) do
+        @retry.schedule (enqueued_time - 60).to_f, @error_1.merge!('created_at' => created_time.to_f)
+        @retry.schedule (enqueued_time - 50).to_f, @error_2.merge!('created_at' => created_time.to_f)
+        @retry.schedule (enqueued_time + 60).to_f, @error_3.merge!('created_at' => created_time.to_f)
+        @scheduled.schedule (enqueued_time - 60).to_f, @future_1.merge!('created_at' => created_time.to_f)
+        @scheduled.schedule (enqueued_time - 50).to_f, @future_2.merge!('created_at' => created_time.to_f)
+        @scheduled.schedule (enqueued_time + 60).to_f, @future_3.merge!('created_at' => created_time.to_f)
+      end
 
+      Time.stub(:now, enqueued_time) do
         @poller.poll
 
         Sidekiq.redis do |conn|
-          assert_equal 1, conn.llen("queue:queue_1")
-          assert_equal enqueued_time.to_f, Sidekiq.load_json(conn.lrange("queue:queue_1", 0, -1)[0])['enqueued_at']
-          assert_equal 1, conn.llen("queue:queue_2")
-          assert_equal enqueued_time.to_f, Sidekiq.load_json(conn.lrange("queue:queue_2", 0, -1)[0])['enqueued_at']
-          assert_equal 1, conn.llen("queue:queue_4")
-          assert_equal enqueued_time.to_f, Sidekiq.load_json(conn.lrange("queue:queue_4", 0, -1)[0])['enqueued_at']
-          assert_equal 1, conn.llen("queue:queue_5")
-          assert_equal enqueued_time.to_f, Sidekiq.load_json(conn.lrange("queue:queue_5", 0, -1)[0])['enqueued_at']
+          %w(queue:queue_1 queue:queue_2 queue:queue_4 queue:queue_5).each do |queue_name|
+            assert_equal 1, conn.llen(queue_name)
+            job = Sidekiq.load_json(conn.lrange(queue_name, 0, -1)[0])
+            assert_equal enqueued_time.to_f, job['enqueued_at']
+            assert_equal created_time.to_f,  job['created_at']
+          end
         end
 
         assert_equal 1, @retry.size

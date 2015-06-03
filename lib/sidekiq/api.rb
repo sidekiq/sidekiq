@@ -315,12 +315,16 @@ module Sidekiq
       Time.at(@item['enqueued_at'] || 0).utc
     end
 
+    def created_at
+      Time.at(@item['created_at'] || @item['enqueued_at'] || 0).utc
+    end
+
     def queue
       @queue
     end
 
     def latency
-      Time.now.to_f - @item['enqueued_at']
+      Time.now.to_f - (@item['enqueued_at'] || @item['created_at'])
     end
 
     ##

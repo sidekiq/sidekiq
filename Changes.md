@@ -1,3 +1,10 @@
+3.3.5
+-----------
+
+- Set a created_at attribute when jobs are created, and the enqueued_at only
+  when they go into the queue. Aims to help with latency, specially for
+  scheduled jobs. [#2373, mrsimo]
+
 3.3.4
 -----------
 
