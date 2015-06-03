@@ -57,6 +57,15 @@ class TestScheduling < Sidekiq::Test
       assert Sidekiq::Client.push_bulk('class' => ScheduledWorker, 'args' => [['mike'], ['mike']], 'at' => 600)
       @redis.verify
     end
+
+    it 'removes the enqueued_at field when scheduling' do
+      @redis.expect :zadd, true do |key, args|
+        job = Sidekiq.load_json(args.first.last)
+        job.key?('created_at') && !job.key?('enqueued_at')
+      end
+      assert ScheduledWorker.perform_in(1.month, 'mike')
+      @redis.verify
+    end
   end
 
 end

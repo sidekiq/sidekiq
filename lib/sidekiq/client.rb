@@ -191,7 +191,10 @@ module Sidekiq
         end)
       else
         q = payloads.first['queue']
-        to_push = payloads.map { |entry| Sidekiq.dump_json(entry) }
+        to_push = payloads.map do |entry|
+          entry['enqueued_at'.freeze] ||= Time.now.to_f
+          Sidekiq.dump_json(entry)
+        end
         conn.sadd('queues'.freeze, q)
         conn.lpush("queue:#{q}", to_push)
       end
@@ -217,7 +220,7 @@ module Sidekiq
       item['class'.freeze] = item['class'.freeze].to_s
       item['queue'.freeze] = item['queue'.freeze].to_s
       item['jid'.freeze] ||= SecureRandom.hex(12)
-      item['enqueued_at'.freeze] ||= Time.now.to_f
+      item['created_at'.freeze] ||= Time.now.to_f
       item
     end
 
