@@ -110,11 +110,13 @@ class TestManager < Sidekiq::Test
 
       describe 'when manager is active' do
         before do
+          Sidekiq::Manager::PROCTITLES << Proc.new { "xyz" }
           @mgr.heartbeat('identity', heartbeat_data, Sidekiq.dump_json(heartbeat_data))
+          Sidekiq::Manager::PROCTITLES.pop
         end
 
         it 'sets useful info to proctitle' do
-          assert_equal "sidekiq #{Sidekiq::VERSION} myapp [1 of 3 busy]", $0
+          assert_equal "sidekiq #{Sidekiq::VERSION} myapp [1 of 3 busy] xyz", $0
         end
 
         it 'stores process info in redis' do
