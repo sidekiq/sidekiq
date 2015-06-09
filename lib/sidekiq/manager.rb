@@ -134,17 +134,25 @@ module Sidekiq
       @threads[proxy_id] = thr
     end
 
+    PROCTITLES = [
+      Proc.new { 'sidekiq'.freeze },
+      Proc.new { Sidekiq::VERSION },
+      Proc.new { |mgr, data| data['tag'] },
+      Proc.new { |mgr, data| "[#{mgr.busy.size} of #{data['concurrency']} busy]" },
+      Proc.new { |mgr, data| "stopping" if mgr.stopped? },
+    ]
+
     def heartbeat(key, data, json)
-      proctitle = ['sidekiq', Sidekiq::VERSION]
-      proctitle << data['tag'] unless data['tag'].empty?
-      proctitle << "[#{@busy.size} of #{data['concurrency']} busy]"
-      proctitle << 'stopping' if stopped?
-      $0 = proctitle.join(' ')
+      $0 = PROCTITLES.map {|x| x.call(self, data) }.join(' ')
 
       ❤(key, json)
       after(5) do
         heartbeat(key, data, json)
       end
+    end
+
+    def stopped?
+      @done
     end
 
     private
@@ -204,10 +212,6 @@ module Sidekiq
       raise "No ready processor!?" if @ready.empty?
 
       @fetcher.async.fetch
-    end
-
-    def stopped?
-      @done
     end
 
     def shutdown
