@@ -114,7 +114,7 @@ class TestManager < Sidekiq::Test
         end
 
         it 'sets useful info to proctitle' do
-          assert_equal "sidekiq #{Sidekiq::VERSION} myapp [1 of 3 busy]", $0
+          assert_equal "sidekiq #{Sidekiq::VERSION} myapp [1 of 3 busy] ", $0
         end
 
         it 'stores process info in redis' do
