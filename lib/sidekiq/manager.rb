@@ -143,7 +143,9 @@ module Sidekiq
     ]
 
     def heartbeat(key, data, json)
-      $0 = PROCTITLES.map {|x| x.call(self, data) }.join(' ')
+      results = PROCTITLES.map {|x| x.call(self, data) }
+      results.compact!
+      $0 = results.join(' ')
 
       ❤(key, json)
       after(5) do
