@@ -3,6 +3,11 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+HEAD
+-----------
+
+- Reliable push now only catches Redis exceptions [#2307]
+
 2.0.3
 -----------
 
