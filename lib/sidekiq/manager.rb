@@ -135,15 +135,15 @@ module Sidekiq
     end
 
     PROCTITLES = [
-      Proc.new { 'sidekiq'.freeze },
-      Proc.new { Sidekiq::VERSION },
-      Proc.new { |mgr, data| data['tag'] },
-      Proc.new { |mgr, data| "[#{mgr.busy.size} of #{data['concurrency']} busy]" },
-      Proc.new { |mgr, data| "stopping" if mgr.stopped? },
+      proc { 'sidekiq'.freeze },
+      proc { Sidekiq::VERSION },
+      proc { |mgr, data| data['tag'] },
+      proc { |mgr, data| "[#{mgr.busy.size} of #{data['concurrency']} busy]" },
+      proc { |mgr, data| "stopping" if mgr.stopped? },
     ]
 
     def heartbeat(key, data, json)
-      results = PROCTITLES.map {|x| x.call(self, data) }
+      results = PROCTITLES.map {|x| x.(self, data) }
       results.compact!
       $0 = results.join(' ')
 
