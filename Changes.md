@@ -213,7 +213,7 @@ end
   occur anywhere within Sidekiq, not just within middleware.
 ```ruby
 Sidekiq.configure_server do |config|
-  config.error_handlers << Proc.new {|ex,ctx| ... }
+  config.error_handlers << proc {|ex,ctx| ... }
 end
 ```
 - **Process Heartbeat** - each Sidekiq process will ping Redis every 5
