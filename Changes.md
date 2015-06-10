@@ -4,6 +4,7 @@ HEAD
 - Set a `created_at` attribute when jobs are created, set `enqueued_at` only
   when they go into a queue. Fixes invalid latency calculations with scheduled jobs.
   [#2373, mrsimo]
+- Don't log timestamp on Heroku [#2343]
 
 3.3.4
 -----------
