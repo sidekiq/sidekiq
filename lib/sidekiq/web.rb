@@ -12,8 +12,8 @@ module Sidekiq
     include Sidekiq::Paginator
 
     set :root, File.expand_path(File.dirname(__FILE__) + "/../../web")
-    set :public_folder, Proc.new { "#{root}/assets" }
-    set :views, Proc.new { "#{root}/views" }
+    set :public_folder, proc { "#{root}/assets" }
+    set :views, proc { "#{root}/views" }
     set :locales, ["#{root}/locales"]
 
     helpers WebHelpers

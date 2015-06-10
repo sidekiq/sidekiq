@@ -110,7 +110,7 @@ class TestManager < Sidekiq::Test
 
       describe 'when manager is active' do
         before do
-          Sidekiq::Manager::PROCTITLES << Proc.new { "xyz" }
+          Sidekiq::Manager::PROCTITLES << proc { "xyz" }
           @mgr.heartbeat('identity', heartbeat_data, Sidekiq.dump_json(heartbeat_data))
           Sidekiq::Manager::PROCTITLES.pop
         end
