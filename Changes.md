@@ -1,10 +1,19 @@
-HEAD
+3.4.0
 -----------
 
 - Set a `created_at` attribute when jobs are created, set `enqueued_at` only
   when they go into a queue. Fixes invalid latency calculations with scheduled jobs.
   [#2373, mrsimo]
 - Don't log timestamp on Heroku [#2343]
+- Run `shutdown` event handlers in reverse order of definition [#2374]
+- Rename and rework `poll_interval` to be simpler, more predictable [#2317, cainlevy]
+  The new setting is `average_scheduled_poll_interval`.  To configure
+  Sidekiq to look for scheduled jobs every 5 seconds, just set it to 5.
+```ruby
+Sidekiq.configure_server do |config|
+  config.average_scheduled_poll_interval = 5
+end
+```
 
 3.3.4
 -----------
