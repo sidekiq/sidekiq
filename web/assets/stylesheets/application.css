@@ -743,7 +743,7 @@ div.interval-slider input {
 }
 
 .redis-url, .redis-namespace {
-  overflow: scroll;
+  overflow: hidden;
   white-space: nowrap;
 }
 
