@@ -295,6 +295,12 @@ class TestWeb < Sidekiq::Test
       assert_match /#{msg['args'][2]}/, last_response.body
     end
 
+    it 'calls updatePage() once when polling' do
+      get '/busy?poll=true'
+      assert_equal 200, last_response.status
+      assert_equal 1, last_response.body.scan('updatePage(').count
+    end
+
     it 'escape job args and error messages' do
       # on /retries page
       params = add_xss_retry
