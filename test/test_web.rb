@@ -292,7 +292,7 @@ class TestWeb < Sidekiq::Test
 
       get '/queues/default'
       assert_equal 200, last_response.status
-      assert_match /#{msg['args'][2]}/, last_response.body
+      assert_match(/#{msg['args'][2]}/, last_response.body)
     end
 
     it 'calls updatePage() once when polling' do

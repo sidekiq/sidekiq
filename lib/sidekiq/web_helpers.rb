@@ -45,7 +45,7 @@ module Sidekiq
     end
 
     def display_custom_head
-      return unless @head_html
+      return unless defined?(@head_html)
       @head_html.map { |block| capture(&block) }.join
     end
 

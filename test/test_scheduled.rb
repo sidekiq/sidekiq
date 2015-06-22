@@ -98,8 +98,8 @@ class TestScheduled < Sidekiq::Test
         i = 500
         intervals = i.times.map{ @poller.send(:random_poll_interval) }
 
-        assert intervals.all?{|i| i >= 5}
-        assert intervals.all?{|i| i <= 15}
+        assert intervals.all?{|x| x >= 5}
+        assert intervals.all?{|x| x <= 15}
         assert_in_delta 10, intervals.reduce(&:+).to_f / i, 0.5
       end
     end

@@ -1,3 +1,4 @@
+$CELLULOID_DEBUG = false
 $TESTING = true
 require 'coveralls'
 Coveralls.wear! do

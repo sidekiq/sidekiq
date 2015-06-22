@@ -83,7 +83,7 @@ module Sidekiq
     end
 
     def self.done?
-      @done
+      defined? @done
     end
 
     def self.strategy
