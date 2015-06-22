@@ -354,7 +354,7 @@ class TestRetry < Sidekiq::Test
           rescue ::StandardError => e1
             begin
               raise ::StandardError, 'Error 2'
-            rescue ::StandardError => _
+            rescue ::StandardError
               raise e1
             end
           end
