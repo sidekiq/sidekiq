@@ -169,9 +169,20 @@ module Sidekiq
 
     def display_args(args, truncate_after_chars = 2000)
       args.map do |arg|
-        a = arg.inspect
-        h(truncate(a))
+        h(truncate(to_display(arg)))
       end.join(", ")
+    end
+
+    def to_display(arg)
+      begin
+        arg.inspect
+      rescue
+        begin
+          arg.to_s
+        rescue => ex
+          "Cannot display argument: [#{ex.class.name}] #{ex.message}"
+        end
+      end
     end
 
     RETRY_JOB_KEYS = Set.new(%w(

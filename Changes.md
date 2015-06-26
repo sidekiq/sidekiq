@@ -1,3 +1,8 @@
+HEAD
+-----------
+
+- Safer display of job data in Web UI [#2405]
+
 3.4.1
 -----------
 
