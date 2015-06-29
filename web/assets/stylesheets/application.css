@@ -742,9 +742,22 @@ div.interval-slider input {
   }
 }
 
-.redis-url, .redis-namespace {
+.redis-namespace {
   overflow: hidden;
   white-space: nowrap;
+}
+
+.redis-url button {
+  background: transparent;
+  border: 0;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  color: #999;
+  padding: 0;
+}
+
+.redis-url__show {
+  display: none;
 }
 
 @media (min-width: 768px) {
