@@ -80,4 +80,12 @@ $(function() {
     $('[data-navbar="custom-tab"]').hide()
     $('[data-navbar="dropdown"]').show()
   }
+
+  $(document).on('click', '.redis-url button', function () {
+    $('.redis-url button').toggle()
+  })
+
+  if ($('.redis-url__text').text().length > 40) {
+    $('.redis-url button').toggle()
+  }
 });
