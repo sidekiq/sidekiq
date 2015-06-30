@@ -759,16 +759,16 @@ div.interval-slider input {
 
 @media (min-width: 992px) {
   .redis-url {
-    max-width: 340px;
+    max-width: 390px;
   }
 
   .redis-namespace {
-    max-width: 350px;
+    max-width: 300px;
   }
 }
 @media (min-width: 1200px) {
   .redis-url {
-    max-width: 540px;
+    max-width: 480px;
   }
 
   .redis-namespace {
