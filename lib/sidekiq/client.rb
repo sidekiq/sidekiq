@@ -210,10 +210,10 @@ module Sidekiq
     end
 
     def normalize_item(item)
-      raise(ArgumentError, "Message must be a Hash of the form: { 'class' => SomeWorker, 'args' => ['bob', 1, :foo => 'bar'] }") unless item.is_a?(Hash)
-      raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") if !item['class'] || !item['args']
-      raise(ArgumentError, "Message args must be an Array") unless item['args'].is_a?(Array)
-      raise(ArgumentError, "Message class must be either a Class or String representation of the class name") unless item['class'].is_a?(Class) || item['class'].is_a?(String)
+      raise(ArgumentError, "Job must be a Hash with 'class' and 'args' keys: { 'class' => SomeWorker, 'args' => ['bob', 1, :foo => 'bar'] }") unless item.is_a?(Hash) && item.has_key?('class'.freeze) && item.has_key?('args'.freeze)
+      raise(ArgumentError, "Job must include a class and set of arguments: #{item.inspect}") if !item['class'.freeze] || !item['args'.freeze]
+      raise(ArgumentError, "Job args must be an Array") unless item['args'].is_a?(Array)
+      raise(ArgumentError, "Job class must be either a Class or String representation of the class name") unless item['class'.freeze].is_a?(Class) || item['class'.freeze].is_a?(String)
 
       normalized_hash(item['class'.freeze])
         .each{ |key, value| item[key] = value if item[key].nil? }
