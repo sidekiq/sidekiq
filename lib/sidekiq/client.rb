@@ -211,6 +211,9 @@ module Sidekiq
 
     def normalize_item(item)
       raise(ArgumentError, "Message must be a Hash of the form: { 'class' => SomeWorker, 'args' => ['bob', 1, :foo => 'bar'] }") unless item.is_a?(Hash)
+
+      item = stringify_keys(item)
+
       raise(ArgumentError, "Message must include a class and set of arguments: #{item.inspect}") if !item['class'] || !item['args']
       raise(ArgumentError, "Message args must be an Array") unless item['args'].is_a?(Array)
       raise(ArgumentError, "Message class must be either a Class or String representation of the class name") unless item['class'].is_a?(Class) || item['class'].is_a?(String)
@@ -231,6 +234,14 @@ module Sidekiq
         item_class.get_sidekiq_options
       else
         Sidekiq.default_worker_options
+      end
+    end
+
+    def stringify_keys(hash)
+      hash.tap do |h|
+        h.keys.each do |key|
+          h[key.to_s] = h.delete(key)
+        end
       end
     end
   end
