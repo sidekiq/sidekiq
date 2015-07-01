@@ -90,6 +90,30 @@ class TestClient < Sidekiq::Test
       @redis.verify
     end
 
+    it 'pushes messages to redis using a symbol for the queue parameter' do
+      @redis.expect :lpush, 1, ['queue:foo', Array]
+      pushed = Sidekiq::Client.push(queue: 'foo', 'class' => 'MyWorker', 'args' => [1, 2])
+      assert pushed
+      assert_equal 24, pushed.size
+      @redis.verify
+    end
+
+    it 'pushes messages to redis using a symbol for the class parameter' do
+      @redis.expect :lpush, 1, ['queue:foo', Array]
+      pushed = Sidekiq::Client.push('queue' => 'foo', class: 'MyWorker', 'args' => [1, 2])
+      assert pushed
+      assert_equal 24, pushed.size
+      @redis.verify
+    end
+
+    it 'pushes messages to redis using a symbol for the args parameter' do
+      @redis.expect :lpush, 1, ['queue:foo', Array]
+      pushed = Sidekiq::Client.push('queue' => 'foo', 'class' => 'MyWorker', args: [1, 2])
+      assert pushed
+      assert_equal 24, pushed.size
+      @redis.verify
+    end
+
     class MyWorker
       include Sidekiq::Worker
     end
