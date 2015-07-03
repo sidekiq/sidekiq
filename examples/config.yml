@@ -5,12 +5,18 @@
 ---
 :verbose: false
 :concurrency: 10
+
 # Set timeout to 8 on Heroku, longer if you manage your own systems.
 :timeout: 30
+
+# Sidekiq will run this file through ERB when reading it so you can
+# even put in dynamic logic, like a host-specific queue.
+# http://www.mikeperham.com/2013/11/13/advanced-sidekiq-host-specific-queues/
 :queues:
-  - [critical, 3]
-  - [default, 2]
-  - [low, 1]
+  - critical
+  - default
+  - <%= `hostname`.strip %>
+  - low
 
 # you can override concurrency based on environment
 production:
