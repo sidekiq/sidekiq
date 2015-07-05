@@ -160,7 +160,7 @@ module Sidekiq
       # Celluloid can't be loaded until after we've daemonized
       # because it spins up threads and creates locks which get
       # into a very bad state if forked.
-      require 'celluloid/autostart'
+      require 'celluloid/current'
       Celluloid.logger = (options[:verbose] ? Sidekiq.logger : nil)
 
       require 'sidekiq/manager'
