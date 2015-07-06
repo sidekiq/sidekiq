@@ -11,6 +11,8 @@ module Sidekiq
   class Web < Sinatra::Base
     include Sidekiq::Paginator
 
+    use Rack::Protection, :use => :authenticity_token unless ENV['RACK_ENV'] == 'test'
+
     set :root, File.expand_path(File.dirname(__FILE__) + "/../../web")
     set :public_folder, proc { "#{root}/assets" }
     set :views, proc { "#{root}/views" }

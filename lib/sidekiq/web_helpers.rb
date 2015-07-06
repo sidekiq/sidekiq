@@ -173,6 +173,10 @@ module Sidekiq
       end.join(", ")
     end
 
+    def tkn
+      session[:csrf]
+    end
+
     def to_display(arg)
       begin
         arg.inspect

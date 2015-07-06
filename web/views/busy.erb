@@ -4,6 +4,7 @@
   </div>
   <div class="col-sm-4 pull-right">
     <form method="POST" style="margin-top: 20px; margin-bottom: 10px;">
+      <input type="hidden" name="authenticity_token" value="<%= tkn %>"/>
       <div class="btn-group pull-right">
         <button class="btn btn-warn" type="submit" name="quiet" value="1"><%= t('QuietAll') %></button>
         <button class="btn btn-danger" type="submit" name="stop" value="1"><%= t('StopAll') %></button>
@@ -40,6 +41,7 @@
         <td>
           <div class="btn-group pull-right">
             <form method="POST">
+              <input type="hidden" name="authenticity_token" value="<%= tkn %>"/>
               <input type="hidden" name="identity" value="<%= process['identity'] %>"/>
               <button class="btn btn-warn" type="submit" name="quiet" value="1"><%= t('Quiet') %></button>
               <button class="btn btn-danger" type="submit" name="stop" value="1"><%= t('Stop') %></button>
