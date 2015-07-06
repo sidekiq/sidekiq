@@ -27,7 +27,7 @@
 </div>
 
 <form class="form-horizontal" action="<%= root_path %>retries/<%= job_params(@retry, @retry.score) %>" method="post">
-  <input type="hidden" name="authenticity_token" value="<%= tkn %>"/>
+  <%= csrf_tag %>
   <a class="btn btn-default" href="<%= root_path %>retries"><%= t('GoBack') %></a>
   <input class="btn btn-primary" type="submit" name="retry" value="<%= t('RetryNow') %>" />
   <input class="btn btn-danger" type="submit" name="delete" value="<%= t('Delete') %>" />
