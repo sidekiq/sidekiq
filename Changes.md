@@ -1,7 +1,14 @@
-HEAD
+3.4.2
 -----------
 
 - Safer display of job data in Web UI [#2405]
+- Fix CSRF vulenerability in Web UI, thanks to Egor Homakov for
+  reporting. [#2422] If you are running the Web UI as a standalone Rack app,
+  ensure you have a [session middleware
+configured](https://github.com/mperham/sidekiq/wiki/Monitoring#standalone):
+```ruby
+use Rack::Session::Cookie, :secret => "some unique secret string here"
+```
 
 3.4.1
 -----------
