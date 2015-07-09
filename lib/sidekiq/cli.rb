@@ -344,6 +344,8 @@ module Sidekiq
     def write_pid
       if path = options[:pidfile]
         pidfile = File.expand_path(path)
+        directory = File.dirname(pidfile)
+        FileUtils.mkdir_p(directory)
         File.open(pidfile, 'w') do |f|
           f.puts ::Process.pid
         end
