@@ -100,7 +100,7 @@ module Sidekiq
     end
 
     post '/morgue' do
-      halt 404 unless params['key']
+      redirect request.path unless params['key']
 
       params['key'].each do |key|
         job = Sidekiq::DeadSet.new.fetch(*parse_params(key)).first
