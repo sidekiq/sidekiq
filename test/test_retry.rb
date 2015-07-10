@@ -39,16 +39,33 @@ class TestRetry < Sidekiq::Test
     it 'allows a numeric retry' do
       @redis.expect :zadd, 1, ['retry', String, String]
       msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => 2 }
-      msg2 = msg.dup
       handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
-        handler.call(worker, msg2, 'default') do
+        handler.call(worker, msg, 'default') do
           raise "kerblammo!"
         end
       end
-      msg2.delete('failed_at')
-      assert_equal({"class"=>"Bob", "args"=>[1, 2, "foo"], "retry"=>2, "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "retry_count"=>0}, msg2)
+      msg.delete('failed_at')
+      assert_equal({"class"=>"Bob", "args"=>[1, 2, "foo"], "retry"=>2, "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "retry_count"=>0}, msg)
       @redis.verify
+    end
+
+    it 'allows 0 retry => no retry and dead queue' do
+      @redis.expect :zadd, 1, ['dead', Float, String]
+      @redis.expect :zremrangebyscore, 0, ['dead', String, Float]
+      @redis.expect :zremrangebyrank, 0, ['dead', Numeric, Numeric]
+      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => 0 }
+      msg2 = msg.dup
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      assert_raises RuntimeError do
+        handler.call(worker, msg, 'default') do
+          raise "kerblammo!"
+        end
+      end
+      msg.delete('failed_at')
+      expected = msg2.merge "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "retry_count"=>0
+      assert_equal expected, msg
+      @redis.verify # not called
     end
 
     it 'handles zany characters in error message, #1705' do
