@@ -23,5 +23,4 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency      'minitest', '~> 5.3.3'
   gem.add_development_dependency      'rake'
   gem.add_development_dependency      'rails', '~> 4.1.1'
-  gem.add_development_dependency      'coveralls'
 end

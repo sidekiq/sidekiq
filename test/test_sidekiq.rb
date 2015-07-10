@@ -66,4 +66,14 @@ class TestSidekiq < Sidekiq::Test
       assert_equal 'cat', Sidekiq.default_worker_options['queue']
     end
   end
+
+  describe 'error handling' do
+    it 'deals with user-specified error handlers which raise errors' do
+      Sidekiq.error_handlers << proc {|x, hash|
+        raise 'boom'
+      }
+      cli = Sidekiq::CLI.new
+      cli.handle_exception(RuntimeError.new("hello"))
+    end
+  end
 end
