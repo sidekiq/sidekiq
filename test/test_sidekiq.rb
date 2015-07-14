@@ -70,11 +70,15 @@ class TestSidekiq < Sidekiq::Test
   describe 'error handling' do
     it 'deals with user-specified error handlers which raise errors' do
       output = capture_logging do
-        Sidekiq.error_handlers << proc {|x, hash|
-          raise 'boom'
-        }
-        cli = Sidekiq::CLI.new
-        cli.handle_exception(RuntimeError.new("hello"))
+        begin
+          Sidekiq.error_handlers << proc {|x, hash|
+            raise 'boom'
+          }
+          cli = Sidekiq::CLI.new
+          cli.handle_exception(RuntimeError.new("hello"))
+        ensure
+          Sidekiq.error_handlers.pop
+        end
       end
       assert_includes output, "boom"
       assert_includes output, "ERROR"
