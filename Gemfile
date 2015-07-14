@@ -1,7 +1,9 @@
 source 'https://rubygems.org'
 gemspec
 
+gem 'rails', '~> 4.2'
 gem 'simplecov'
+gem 'minitest'
 
 platforms :rbx do
   gem 'rubysl', '~> 2.0'         # if using anything in the ruby standard library
