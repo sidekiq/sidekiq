@@ -1,7 +1,7 @@
 3.4.2
 -----------
 
-- Don't allow `Sidekiq::Worker` in ActiveJob::Base classes.
+- Don't allow `Sidekiq::Worker` in ActiveJob::Base classes. [#2424]
 - Safer display of job data in Web UI [#2405]
 - Fix CSRF vulenerability in Web UI, thanks to Egor Homakov for
   reporting. [#2422] If you are running the Web UI as a standalone Rack app,
