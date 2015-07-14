@@ -159,14 +159,15 @@ module Sidekiq
 
         while i < @days_previous
           date = @start_date - i
-          keys << "stat:#{stat}:#{date}"
-          dates << date
+          datestr = date.strftime("%Y-%m-%d".freeze)
+          keys << "stat:#{stat}:#{datestr}"
+          dates << datestr
           i += 1
         end
 
         Sidekiq.redis do |conn|
           conn.mget(keys).each_with_index do |value, idx|
-            stat_hash[dates[idx].to_s] = value ? value.to_i : 0
+            stat_hash[dates[idx]] = value ? value.to_i : 0
           end
         end
 

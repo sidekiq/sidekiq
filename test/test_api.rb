@@ -4,8 +4,14 @@ class TestApi < Sidekiq::Test
 
   describe "stats" do
     before do
+      @before = DateTime::DATE_FORMATS[:default]
+      DateTime::DATE_FORMATS[:default] = "%d/%m/%Y %H:%M:%S"
       Sidekiq.redis = REDIS
       Sidekiq.redis {|c| c.flushdb }
+    end
+
+    after do
+      DateTime::DATE_FORMATS[:default] = @before
     end
 
     describe "processed" do
