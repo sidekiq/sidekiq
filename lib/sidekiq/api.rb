@@ -152,17 +152,15 @@ module Sidekiq
       private
 
       def date_stat_hash(stat)
-        i = 0
         stat_hash = {}
         keys = []
         dates = []
 
-        while i < @days_previous
+        @days_previous.times do |i|
           date = @start_date - i
           datestr = date.strftime("%Y-%m-%d".freeze)
           keys << "stat:#{stat}:#{datestr}"
           dates << datestr
-          i += 1
         end
 
         Sidekiq.redis do |conn|
@@ -517,7 +515,7 @@ module Sidekiq
     end
 
     def find_job(jid)
-      self.detect { |j| j.jid == jid }
+      detect { |j| j.jid == jid }
     end
 
     def delete(score, jid = nil)
