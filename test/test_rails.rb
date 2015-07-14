@@ -15,7 +15,7 @@ class TestRails < Sidekiq::Test
     it 'does not allow Sidekiq::Worker in AJ::Base classes' do
       ex = assert_raises ArgumentError do
         c = Class.new(ActiveJob::Base)
-        c.include Sidekiq::Worker
+        c.send(:include, Sidekiq::Worker)
       end
       assert_includes ex.message, "cannot include"
     end if $HAS_AJ
