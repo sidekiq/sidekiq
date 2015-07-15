@@ -8,6 +8,7 @@ HEAD
 
 - Atomic scheduler now sets `enqueued_at` [#2414]
 - Batches now account for jobs which are stopped by client middleware [#2406]
+- Ignore redundant calls to `Sidekiq::Client.reliable_push!` [#2408]
 
 2.0.4
 -----------
