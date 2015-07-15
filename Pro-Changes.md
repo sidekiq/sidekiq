@@ -3,7 +3,7 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
-HEAD
+2.0.5
 -----------
 
 - Atomic scheduler now sets `enqueued_at` [#2414]
