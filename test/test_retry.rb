@@ -24,6 +24,26 @@ class TestRetry < Sidekiq::Test
       end
     end
 
+    it 'allows disabling raise until exhaustion' do
+      @redis.expect :zadd, 1, ['retry', String, String]
+      msg = { 'class' => 'Bob', 'args' => [], 'retry' => 1, 'raise_on_dead' => true }
+      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      handler.call(worker, msg, 'default') do
+        raise "kerblammo!"
+      end
+      @redis.verify
+
+      @redis.expect :zadd, 1, ['dead', Float, String]
+      @redis.expect :zremrangebyscore, 0, ['dead', String, Float]
+      @redis.expect :zremrangebyrank, 0, ['dead', Numeric, Numeric]
+      assert_raises RuntimeError do
+        handler.call(worker, msg, 'default') do
+          raise "kerblammo!"
+        end
+      end
+      @redis.verify
+    end
+
     it 'allows disabling retry' do
       msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => false }
       msg2 = msg.dup

@@ -133,7 +133,9 @@ module Sidekiq
             retries_exhausted(worker, msg)
           end
 
-          raise exception
+          if !msg['raise_on_dead'] || count >= max_retry_attempts
+            raise exception
+          end
         end
 
         def retries_exhausted(worker, msg)
