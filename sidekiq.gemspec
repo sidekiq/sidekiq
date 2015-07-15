@@ -4,7 +4,8 @@ require File.expand_path('../lib/sidekiq/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["Mike Perham"]
   gem.email         = ["mperham@gmail.com"]
-  gem.description   = gem.summary = "Simple, efficient background processing for Ruby"
+  gem.summary       = "Simple, efficient background processing for Ruby"
+  gem.description   = "Simple, efficient background processing for Ruby."
   gem.homepage      = "http://sidekiq.org"
   gem.license       = "LGPL-3.0"
 
@@ -14,13 +15,13 @@ Gem::Specification.new do |gem|
   gem.name          = "sidekiq"
   gem.require_paths = ["lib"]
   gem.version       = Sidekiq::VERSION
-  gem.add_dependency                  'redis', '>= 3.0.6'
-  gem.add_dependency                  'redis-namespace', '>= 1.3.1'
-  gem.add_dependency                  'connection_pool', '>= 2.1.1'
+  gem.add_dependency                  'redis', '~> 3.2', '>= 3.2.1'
+  gem.add_dependency                  'redis-namespace', '~> 1.5', '>= 1.5.2'
+  gem.add_dependency                  'connection_pool', '~> 2.2', '>= 2.2.0'
   gem.add_dependency                  'celluloid', '~> 0.16.0'
-  gem.add_dependency                  'json'
-  gem.add_development_dependency      'sinatra'
-  gem.add_development_dependency      'minitest', '~> 5.3'
-  gem.add_development_dependency      'rake'
-  gem.add_development_dependency      'rails', '>= 3.2.0'
+  gem.add_dependency                  'json', '~> 1.0'
+  gem.add_development_dependency      'sinatra', '~> 1.4', '>= 1.4.6'
+  gem.add_development_dependency      'minitest', '~> 5.7', '>= 5.7.0'
+  gem.add_development_dependency      'rake', '~> 10.0'
+  gem.add_development_dependency      'rails', '~> 4', '>= 3.2.0'
 end
