@@ -263,7 +263,6 @@ module Sidekiq
   # removed from the queue via Job#delete.
   #
   class Job
-    KNOWN_WRAPPERS = [/\ASidekiq::Extensions::Delayed/, "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"]
     attr_reader :item
 
     def initialize(item, queue_name=nil)
