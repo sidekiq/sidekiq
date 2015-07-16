@@ -26,6 +26,7 @@ module Sidekiq
     lifecycle_events: {
       startup: [],
       quiet: [],
+      status: [],
       shutdown: [],
     },
     dead_max_jobs: 10_000,
