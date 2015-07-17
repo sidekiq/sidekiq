@@ -3,6 +3,12 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+2.0.6, 1.9.3
+--------------
+
+- CSRF protection in Sidekiq 3.4.2 broke job filtering in the Web UI [#2442]
+- Sidekiq Pro 1.x is now limited to Sidekiq < 3.5.0.
+
 2.0.5
 -----------
 
