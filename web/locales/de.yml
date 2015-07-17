@@ -47,7 +47,7 @@ de:
   GoBack: ← Zurück
   NoScheduledFound: Keine geplanten Jobs gefunden
   When: Wann
-  ScheduledJobs: Jobs in Wartschlange
+  ScheduledJobs: Jobs in der Warteschlange
   idle: inaktiv
   active: aktiv
   Version: Version
