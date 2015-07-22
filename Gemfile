@@ -1,7 +1,8 @@
 source 'https://rubygems.org'
 gemspec
 
-gem 'rails', '~> 4.2'
+gem 'rails', path: '../rails'
+gem 'arel', github: 'rails/arel'
 gem 'simplecov'
 gem 'minitest'
 

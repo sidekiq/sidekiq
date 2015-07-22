@@ -32,6 +32,11 @@ module Sidekiq
 
     def initialize(boss)
       @boss = boss
+
+      @rails5dev = defined?(::Rails) && ::Rails.version.to_i >= 5 && (Sidekiq.options[:environment] || 'development') == 'development'
+      if @rails5dev
+        logger.info { "Detected Rails 5 in development mode, code reloading active." }
+      end
     end
 
     def process(work)
@@ -40,31 +45,47 @@ module Sidekiq
 
       @boss.async.real_thread(proxy_id, Thread.current)
 
-      ack = true
-      begin
-        msg = Sidekiq.load_json(msgstr)
-        klass  = msg['class'].constantize
-        worker = klass.new
-        worker.jid = msg['jid']
+      executor do
+        ack = true
+        begin
+          msg = Sidekiq.load_json(msgstr)
+          klass  = msg['class'].constantize
+          worker = klass.new
+          worker.jid = msg['jid']
 
-        stats(worker, msg, queue) do
-          Sidekiq.server_middleware.invoke(worker, msg, queue) do
-            execute_job(worker, cloned(msg['args']))
+          stats(worker, msg, queue) do
+            Sidekiq.server_middleware.invoke(worker, msg, queue) do
+              execute_job(worker, cloned(msg['args']))
+            end
           end
+        rescue Sidekiq::Shutdown
+          # Had to force kill this job because it didn't finish
+          # within the timeout.  Don't acknowledge the work since
+          # we didn't properly finish it.
+          ack = false
+        rescue Exception => ex
+          handle_exception(ex, msg || { :message => msgstr })
+          raise
+        ensure
+          work.acknowledge if ack
         end
-      rescue Sidekiq::Shutdown
-        # Had to force kill this job because it didn't finish
-        # within the timeout.  Don't acknowledge the work since
-        # we didn't properly finish it.
-        ack = false
-      rescue Exception => ex
-        handle_exception(ex, msg || { :message => msgstr })
-        raise
-      ensure
-        work.acknowledge if ack
       end
 
       @boss.async.processor_done(current_actor)
+    end
+
+    def executor
+      if @rails5dev
+        begin
+          interlock = ActiveSupport::Dependencies.interlock
+          interlock.start_running
+          yield
+        ensure
+          interlock.done_running
+        end
+      else
+        yield
+      end
     end
 
     def inspect
