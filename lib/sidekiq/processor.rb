@@ -82,6 +82,10 @@ module Sidekiq
           yield
         ensure
           interlock.done_running
+          ActiveSupport::Dependencies.interlock.attempt_loading do
+            ActiveSupport::DescendantsTracker.clear
+            ActiveSupport::Dependencies.clear
+          end
         end
       else
         yield
