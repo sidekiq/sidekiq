@@ -227,15 +227,16 @@ module Sidekiq
 
       if File.directory?(options[:require])
         require 'rails'
-        if ::Rails::VERSION::MAJOR < 4
+        if ::Rails::VERSION::MAJOR == 3
           require 'sidekiq/rails'
           require File.expand_path("#{options[:require]}/config/environment.rb")
           ::Rails.application.eager_load!
         else
+          Sidekiq.options[:lazy] = ::Rails::VERSION::MAJOR >= 5 && ::Rails.env.development?
           # Painful contortions, see 1791 for discussion
           require File.expand_path("#{options[:require]}/config/application.rb")
           ::Rails::Application.initializer "sidekiq.eager_load" do
-            ::Rails.application.config.eager_load = true
+            ::Rails.application.config.eager_load = !Sidekiq.options[:lazy]
           end
           require 'sidekiq/rails'
           require File.expand_path("#{options[:require]}/config/environment.rb")

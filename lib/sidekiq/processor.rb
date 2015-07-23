@@ -33,9 +33,9 @@ module Sidekiq
     def initialize(boss)
       @boss = boss
 
-      @rails5dev = defined?(::Rails) && ::Rails.version.to_i >= 5 && (Sidekiq.options[:environment] || 'development') == 'development'
+      @rails5dev = Sidekiq.options[:lazy]
       if @rails5dev
-        logger.info { "Detected Rails 5 in development mode, code reloading active." }
+        logger.info { "Detected Rails 5+ in development mode, code reloading active." }
       end
     end
 
