@@ -34,7 +34,7 @@
       </tr>
       <tr>
         <th><%= t('Enqueued') %></th>
-        <td><%= relative_time(job.enqueued_at) %></td>
+        <td><%= relative_time(job.enqueued_at || job.created_at) %></td>
       </tr>
       <% unless retry_extra_items(job).empty? %>
         <tr>
