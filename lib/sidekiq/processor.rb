@@ -30,13 +30,11 @@ module Sidekiq
 
     attr_accessor :proxy_id
 
+    DEFAULT = proc {|&block| block.call }
+
     def initialize(boss)
       @boss = boss
-
-      @rails5dev = Sidekiq.options[:lazy]
-      if @rails5dev
-        logger.info { "Detected Rails 5+ in development mode, code reloading active." }
-      end
+      @reloader = Sidekiq.options[:reloader] || DEFAULT
     end
 
     def process(work)
@@ -45,7 +43,7 @@ module Sidekiq
 
       @boss.async.real_thread(proxy_id, Thread.current)
 
-      executor do
+      @reloader.call do
         ack = true
         begin
           msg = Sidekiq.load_json(msgstr)
@@ -72,24 +70,6 @@ module Sidekiq
       end
 
       @boss.async.processor_done(current_actor)
-    end
-
-    def executor
-      if @rails5dev
-        begin
-          interlock = ActiveSupport::Dependencies.interlock
-          interlock.start_running
-          yield
-        ensure
-          interlock.done_running
-          ActiveSupport::Dependencies.interlock.attempt_loading do
-            ActiveSupport::DescendantsTracker.clear
-            ActiveSupport::Dependencies.clear
-          end
-        end
-      else
-        yield
-      end
     end
 
     def inspect

@@ -28,7 +28,6 @@ module Sidekiq
       quiet: [],
       shutdown: [],
     },
-    lazy: false,
     dead_max_jobs: 10_000,
     dead_timeout_in_seconds: 180 * 24 * 60 * 60 # 6 months
   }

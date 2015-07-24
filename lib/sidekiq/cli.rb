@@ -232,14 +232,18 @@ module Sidekiq
           require File.expand_path("#{options[:require]}/config/environment.rb")
           ::Rails.application.eager_load!
         else
-          Sidekiq.options[:lazy] = ::Rails::VERSION::MAJOR >= 5 && ::Rails.env.development?
           # Painful contortions, see 1791 for discussion
           require File.expand_path("#{options[:require]}/config/application.rb")
           ::Rails::Application.initializer "sidekiq.eager_load" do
-            ::Rails.application.config.eager_load = !Sidekiq.options[:lazy]
+            ::Rails.application.config.eager_load = true
           end
           require 'sidekiq/rails'
           require File.expand_path("#{options[:require]}/config/environment.rb")
+
+          if ::Rails::VERSION::MAJOR >= 5 && ::Rails.env.development?
+            Sidekiq.options[:reloader] = Sidekiq::Rails::Reloader.new
+            logger.debug { "Detected Rails 5+ in dev mode, code reloading active." }
+          end
         end
         options[:tag] ||= default_tag
       else
