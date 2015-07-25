@@ -3,6 +3,11 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+2.0.7
+-----------
+
+- Optimize delete of enormous batches (100,000s of jobs) [#2458]
+
 2.0.6, 1.9.3
 --------------
 
