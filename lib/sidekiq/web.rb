@@ -11,6 +11,7 @@ module Sidekiq
   class Web < Sinatra::Base
     include Sidekiq::Paginator
 
+    enable :sessions
     use Rack::Protection, :use => :authenticity_token unless ENV['RACK_ENV'] == 'test'
 
     set :root, File.expand_path(File.dirname(__FILE__) + "/../../web")
