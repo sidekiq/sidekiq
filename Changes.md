@@ -1,3 +1,11 @@
+HEAD
+-----------
+
+- Activate sessions in Sinatra for CSRF protection.  See issue #2460
+  if you see a Rails error with `ActionDispatch::Request::Session`
+  on upgrade.  This is a Rails incompatibility with Rack and not a
+  Sidekiq bug. [#2460]
+
 3.4.2
 -----------
 
