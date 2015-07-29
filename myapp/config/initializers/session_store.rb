@@ -13,11 +13,9 @@ require 'rack/session/abstract/id'
 class Rack::Session::Abstract::SessionHash
   private
   def stringify_keys(other)
-    hash = {}
     other = other.to_hash unless other.is_a?(Hash) # hack hack hack
-    other.each do |key, value|
+    other.each_with_object({}) do |(key, value), hash|
       hash[key.to_s] = value
     end
-    hash
   end
 end
