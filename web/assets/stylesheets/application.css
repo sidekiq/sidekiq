@@ -490,7 +490,7 @@ div.interval-slider input {
   z-index: 10;
 }
 
-.beacon .dot.pulse {
+.beacon.pulse .dot {
   -webkit-animation: beacon-dot-pulse 1s ease-out;
   -moz-animation: beacon-dot-pulse 1s ease-out;
   animation: beacon-dot-pulse 1s ease-out;
@@ -573,7 +573,7 @@ div.interval-slider input {
   z-index: 5;
 }
 
-.beacon .ring.pulse {
+.beacon.pulse .ring {
   -webkit-animation: beacon-ring-pulse 1s;
   -moz-animation: beacon-ring-pulse 1s;
   animation: beacon-ring-pulse 1s;

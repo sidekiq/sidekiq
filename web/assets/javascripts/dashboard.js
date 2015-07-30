@@ -227,14 +227,8 @@ var updateRedisStats = function(data) {
 }
 
 var pulseBeacon = function(){
-  $beacon = $('.beacon')
-  $beacon.find('.dot').addClass('pulse').delay(1000).queue(function(){
-    $(this).removeClass('pulse');
-    $(this).dequeue();
-  });
-  $beacon.find('.ring').addClass('pulse').delay(1000).queue(function(){
-    $(this).removeClass('pulse');
-    $(this).dequeue();
+  $('.beacon').addClass('pulse').delay(1000).queue(function(){
+    $(this).removeClass('pulse').dequeue();
   });
 }
 
