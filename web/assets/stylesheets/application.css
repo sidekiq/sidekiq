@@ -500,70 +500,49 @@ div.interval-slider input {
   -webkit-animation: beacon-dot-pulse 1s ease-out;
   -moz-animation: beacon-dot-pulse 1s ease-out;
   animation: beacon-dot-pulse 1s ease-out;
-  -webkit-animation-iteration-count: 1;
-  -moz-animation-iteration-count: 1;
-  animation-iteration-count: 1;
 }
 
 @-webkit-keyframes beacon-dot-pulse {
   from {
     background-color: #80002d;
     -webkit-box-shadow: 0 0 9px #666;
-    -moz-box-shadow: 0 0 9px #666;
-    box-shadow: 0 0 9px #666;
   }
   50% {
     background-color: #c90047;
     -webkit-box-shadow: 0 0 18px #666;
-    -moz-box-shadow: 0 0 18px #666;
-    box-shadow: 0 0 18px #666;
   }
   to {
     background-color: #80002d;
     -webkit-box-shadow: 0 0 9px #666;
-    -moz-box-shadow: 0 0 9px #666;
-    box-shadow: 0 0 9px #666;
   }
 }
 
 @-moz-keyframes beacon-dot-pulse {
   from {
     background-color: #80002d;
-    -webkit-box-shadow: 0 0 9px #666;
     -moz-box-shadow: 0 0 9px #666;
-    box-shadow: 0 0 9px #666;
   }
   50% {
     background-color: #c90047;
-    -webkit-box-shadow: 0 0 18px #666;
     -moz-box-shadow: 0 0 18px #666;
-    box-shadow: 0 0 18px #666;
   }
   to {
     background-color: #80002d;
-    -webkit-box-shadow: 0 0 9px #666;
     -moz-box-shadow: 0 0 9px #666;
-    box-shadow: 0 0 9px #666;
   }
 }
 
 @keyframes beacon-dot-pulse {
   from {
     background-color: #80002d;
-    -webkit-box-shadow: 0 0 9px #666;
-    -moz-box-shadow: 0 0 9px #666;
     box-shadow: 0 0 9px #666;
   }
   50% {
     background-color: #c90047;
-    -webkit-box-shadow: 0 0 18px #666;
-    -moz-box-shadow: 0 0 18px #666;
     box-shadow: 0 0 18px #666;
   }
   to {
     background-color: #80002d;
-    -webkit-box-shadow: 0 0 9px #666;
-    -moz-box-shadow: 0 0 9px #666;
     box-shadow: 0 0 9px #666;
   }
 }
@@ -582,9 +561,6 @@ div.interval-slider input {
   -webkit-animation: beacon-ring-pulse 1s;
   -moz-animation: beacon-ring-pulse 1s;
   animation: beacon-ring-pulse 1s;
-  -webkit-animation-iteration-count: 1;
-  -moz-animation-iteration-count: 1;
-  animation-iteration-count: 1;
 }
 
 @-webkit-keyframes beacon-ring-pulse {
