@@ -369,11 +369,17 @@ module Sidekiq
     end
 
     def delete
-      @parent.delete(score, jid)
+      if @value
+        @parent.delete_by_value(@parent.name, @value)
+      elsif jid
+        @parent.delete_by_jid(score, jid)
+      else
+        @parent.delete_by_score(score, score)
+      end
     end
 
     def reschedule(at)
-      @parent.delete(score, jid)
+      delete
       @parent.schedule(at, item)
     end
 
@@ -520,35 +526,41 @@ module Sidekiq
     end
 
     def delete(score, jid = nil)
-      if jid
-        elements = Sidekiq.redis do |conn|
-          conn.zrangebyscore(name, score, score)
-        end
+      jid ? delete_by_jid(score, jid) : delete_by_score(score, score)
+    end
 
-        elements_with_jid = elements.map do |element|
-          message = Sidekiq.load_json(element)
-
-          if message["jid"] == jid
-            _, @_size = Sidekiq.redis do |conn|
-              conn.multi do
-                conn.zrem(name, element)
-                conn.zcard name
-              end
-            end
-          end
-        end
-        elements_with_jid.count != 0
-      else
-        count, @_size = Sidekiq.redis do |conn|
-          conn.multi do
-            conn.zremrangebyscore(name, score, score)
-            conn.zcard name
-          end
-        end
-        count != 0
+    def delete_by_value(name, value)
+      Sidekiq.redis do |conn|
+        ret = conn.zrem(name, value)
+        @_size -= 1 if ret
+        ret
       end
     end
 
+    def delete_by_jid(score, jid)
+      elements = Sidekiq.redis do |conn|
+        conn.zrangebyscore(name, score, score)
+      end
+      elements.each do |element|
+        message = Sidekiq.load_json(element)
+        if message["jid"] == jid
+          break Sidekiq.redis do |conn|
+            ret = conn.zrem(name, element)
+            @_size -= 1 if ret
+            ret
+          end
+        end
+        false
+      end
+    end
+
+    def delete_by_score(score_min, score_max)
+      Sidekiq.redis do |conn|
+        ret = conn.zremrangebyscore(name, score_min, score_max)
+        @_size -= ret
+        ret
+      end
+    end
   end
 
   ##
