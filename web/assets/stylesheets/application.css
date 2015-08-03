@@ -471,16 +471,22 @@ div.interval-slider input {
 
 .beacon {
   position: relative;
+  width: 20px;
   height: 20px;
   display: inline-block;
 }
 
-.beacon .dot {
+.beacon .dot,
+.beacon .ring {
   position: absolute;
-  top: 5px;
-  left: 10px;
+  top: 50%;
+  left: 50%;
+}
+
+.beacon .dot {
   width: 10px;
   height: 10px;
+  margin: -5px 0 0 -5px;
   background-color: #80002d;
   border-radius: 10px;
   box-shadow: 0 0 9px #666;
@@ -490,140 +496,103 @@ div.interval-slider input {
   z-index: 10;
 }
 
-.beacon .dot.pulse {
+.beacon.pulse .dot {
   -webkit-animation: beacon-dot-pulse 1s ease-out;
   -moz-animation: beacon-dot-pulse 1s ease-out;
   animation: beacon-dot-pulse 1s ease-out;
-  -webkit-animation-iteration-count: 1;
-  -moz-animation-iteration-count: 1;
-  animation-iteration-count: 1;
 }
 
 @-webkit-keyframes beacon-dot-pulse {
   from {
     background-color: #80002d;
     -webkit-box-shadow: 0 0 9px #666;
-    -moz-box-shadow: 0 0 9px #666;
-    box-shadow: 0 0 9px #666;
   }
   50% {
     background-color: #c90047;
     -webkit-box-shadow: 0 0 18px #666;
-    -moz-box-shadow: 0 0 18px #666;
-    box-shadow: 0 0 18px #666;
   }
   to {
     background-color: #80002d;
     -webkit-box-shadow: 0 0 9px #666;
-    -moz-box-shadow: 0 0 9px #666;
-    box-shadow: 0 0 9px #666;
   }
 }
 
 @-moz-keyframes beacon-dot-pulse {
   from {
     background-color: #80002d;
-    -webkit-box-shadow: 0 0 9px #666;
     -moz-box-shadow: 0 0 9px #666;
-    box-shadow: 0 0 9px #666;
   }
   50% {
     background-color: #c90047;
-    -webkit-box-shadow: 0 0 18px #666;
     -moz-box-shadow: 0 0 18px #666;
-    box-shadow: 0 0 18px #666;
   }
   to {
     background-color: #80002d;
-    -webkit-box-shadow: 0 0 9px #666;
     -moz-box-shadow: 0 0 9px #666;
-    box-shadow: 0 0 9px #666;
   }
 }
 
 @keyframes beacon-dot-pulse {
   from {
     background-color: #80002d;
-    -webkit-box-shadow: 0 0 9px #666;
-    -moz-box-shadow: 0 0 9px #666;
     box-shadow: 0 0 9px #666;
   }
   50% {
     background-color: #c90047;
-    -webkit-box-shadow: 0 0 18px #666;
-    -moz-box-shadow: 0 0 18px #666;
     box-shadow: 0 0 18px #666;
   }
   to {
     background-color: #80002d;
-    -webkit-box-shadow: 0 0 9px #666;
-    -moz-box-shadow: 0 0 9px #666;
     box-shadow: 0 0 9px #666;
   }
 }
 
 .beacon .ring {
-  position: absolute;
-  top: 7px;
-  left: 12px;
-  width: 0;
-  height: 0;
-  border-radius: 3px;
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  border-radius: 28px;
   border: 3px solid #80002d;
   z-index: 5;
+  opacity: 0;
 }
 
-.beacon .ring.pulse {
+.beacon.pulse .ring {
   -webkit-animation: beacon-ring-pulse 1s;
   -moz-animation: beacon-ring-pulse 1s;
   animation: beacon-ring-pulse 1s;
-  -webkit-animation-iteration-count: 1;
-  -moz-animation-iteration-count: 1;
-  animation-iteration-count: 1;
 }
 
 @-webkit-keyframes beacon-ring-pulse {
   0% {
       opacity: 1;
-      -webkit-transform: scale(0);
+      -webkit-transform: scale(0.3);
   }
   100% {
       opacity: 0;
-      border-radius: 15px;
-      padding: 8px;
-      top: 0;
-      left: 4px;
-      -webkit-transform: scale(1.5);
+      -webkit-transform: scale(1);
   }
 }
 
 @-moz-keyframes beacon-ring-pulse {
   0% {
       opacity: 1;
-      -moz-transform: scale(0);
+      -moz-transform: scale(0.3);
   }
   100% {
       opacity: 0;
-      border-radius: 15px;
-      padding: 8px;
-      top: 2px;
-      left: 7px;
-      -moz-transform: scale(1.6);
+      -moz-transform: scale(1);
   }
 }
 
 @keyframes beacon-ring-pulse {
   0% {
       opacity: 1;
-      transform: scale(0);
+      transform: scale(0.3);
   }
   100% {
       opacity: 0;
-      border-radius: 15px;
-      padding: 8px;
-      top: 0;
-      left: 5px;
-      transform: scale(1.5);
+      transform: scale(1);
   }
 }
 
