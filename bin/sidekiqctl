@@ -60,11 +60,11 @@ class Sidekiqctl
   end
 
   def quiet
-    `kill -USR1 #{pid}`
+    Process.kill(:USR1, pid)
   end
 
   def stop
-    `kill -TERM #{pid}`
+    Process.kill(:TERM, pid)
     kill_timeout.times do
       begin
         Process.getpgid(pid)
@@ -74,7 +74,7 @@ class Sidekiqctl
       end
       sleep 1
     end
-    `kill -9 #{pid}`
+    Process.kill(:KILL, pid)
     FileUtils.rm_f pidfile
     done 'Sidekiq shut down forcefully.'
   end
