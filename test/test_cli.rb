@@ -128,7 +128,7 @@ class TestCli < Sidekiq::Test
 
       it 'appends messages to a logfile' do
         File.open(@tmp_log_path, 'w') do |f|
-          f.puts 'already existant log message'
+          f.puts 'already existent log message'
         end
 
         @cli.parse(['sidekiq', '-L', @tmp_log_path, '-r', './test/fake_env.rb'])
@@ -136,7 +136,7 @@ class TestCli < Sidekiq::Test
         Sidekiq.logger.info('test message')
 
         log_file_content = File.read(@tmp_log_path)
-        assert_match(/already existant/, log_file_content, "didn't include the old message")
+        assert_match(/already existent/, log_file_content, "didn't include the old message")
         assert_match(/test message/, log_file_content, "didn't include the new message")
       end
     end
