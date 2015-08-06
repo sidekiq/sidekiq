@@ -13,6 +13,7 @@ $(document).ready(function() {
         if(pageScroll > 0 && pageScroll < headerHeight ) {
             $(".navbar, .navbar-header, .skq-header").css({'height' : headerHeight-(pageScroll*0.58333333)});
             $(".navbar").css({'min-height' : 50});
+            $(".navbar-toggle").css({'margin-top' : 43-(pageScroll*0.28333333)});
 
             $(".skq, .skq-nav-link").css({'padding-top' : 49-(pageScroll*0.28333333), 'padding-bottom' : 49-(pageScroll*0.28333333)});
 
@@ -26,6 +27,7 @@ $(document).ready(function() {
             $(".navbar").css({'min-height' : 50});
             
             $(".skq, .skq-nav-link").css({'padding-top' : 15, 'padding-bottom' : 15});
+            $(".navbar-toggle").css({'margin-top' : 8});
 
             $(".skq").css({'font-size' : 25});
             $(".skq-tagline").css({'opacity' : 0});
