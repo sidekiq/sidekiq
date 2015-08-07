@@ -3,6 +3,12 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
+2.0.8
+-----------
+
+- Fix reliable scheduler mangling large numeric arguments.  Lua's CJSON
+  library cannot accurately encode numbers larger than 14 digits! [#2478]
+
 2.0.7
 -----------
 
