@@ -340,14 +340,12 @@ class TestApi < Sidekiq::Test
       assert_in_delta Time.now.to_f, retri.at.to_f, 0.02
     end
 
-    it 'can delete multiple retries from score' do
-      same_time = Time.now.to_f
-      add_retry('bob1', same_time)
-      add_retry('bob2', same_time)
-      r = Sidekiq::RetrySet.new
-      assert_equal 2, r.size
-      Sidekiq::RetrySet.new.delete(same_time)
-      assert_equal 0, r.size
+    it 'requires a jid to delete an entry' do
+      start_time = Time.now.to_f
+      add_retry('bob2', Time.now.to_f)
+      assert_raises(ArgumentError) do
+        Sidekiq::RetrySet.new.delete(start_time)
+      end
     end
 
     it 'can delete a single retry from score and jid' do

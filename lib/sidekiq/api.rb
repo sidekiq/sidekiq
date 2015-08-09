@@ -371,10 +371,8 @@ module Sidekiq
     def delete
       if @value
         @parent.delete_by_value(@parent.name, @value)
-      elsif jid
-        @parent.delete_by_jid(score, jid)
       else
-        @parent.delete_by_score(score, score)
+        @parent.delete_by_jid(score, jid)
       end
     end
 
@@ -525,10 +523,6 @@ module Sidekiq
       self.detect { |j| j.jid == jid }
     end
 
-    def delete(score, jid = nil)
-      jid ? delete_by_jid(score, jid) : delete_by_score(score, score)
-    end
-
     def delete_by_value(name, value)
       Sidekiq.redis do |conn|
         ret = conn.zrem(name, value)
@@ -538,29 +532,21 @@ module Sidekiq
     end
 
     def delete_by_jid(score, jid)
-      elements = Sidekiq.redis do |conn|
-        conn.zrangebyscore(name, score, score)
-      end
-      elements.each do |element|
-        message = Sidekiq.load_json(element)
-        if message["jid"] == jid
-          break Sidekiq.redis do |conn|
+      Sidekiq.redis do |conn|
+        elements = conn.zrangebyscore(name, score, score)
+        elements.each do |element|
+          message = Sidekiq.load_json(element)
+          if message["jid"] == jid
             ret = conn.zrem(name, element)
             @_size -= 1 if ret
-            ret
+            break ret
           end
+          false
         end
-        false
       end
     end
 
-    def delete_by_score(score_min, score_max)
-      Sidekiq.redis do |conn|
-        ret = conn.zremrangebyscore(name, score_min, score_max)
-        @_size -= ret
-        ret
-      end
-    end
+    alias_method :delete, :delete_by_jid
   end
 
   ##
