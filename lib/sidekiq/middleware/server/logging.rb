@@ -4,11 +4,7 @@ module Sidekiq
       class Logging
 
         def call(worker, item, queue)
-          # If we're using a wrapper class, like ActiveJob, use the "wrapped"
-          # attribute to expose the underlying thing.
-          klass = item['wrapped'] || worker.class.to_s
-
-          Sidekiq::Logging.with_context("#{klass} JID-#{item['jid']}#{" BID-#{item['bid']}" if item['bid']}") do
+          Sidekiq::Logging.with_context(log_context(worker, item)) do
             begin
               start = Time.now
               logger.info { "start" }
@@ -19,6 +15,15 @@ module Sidekiq
               raise
             end
           end
+        end
+
+        private
+
+        # If we're using a wrapper class, like ActiveJob, use the "wrapped"
+        # attribute to expose the underlying thing.
+        def log_context(worker, item)
+          klass = item['wrapped'.freeze] || worker.class.to_s
+          "#{klass} JID-#{item['jid'.freeze]}#{" BID-#{item['bid'.freeze]}" if item['bid'.freeze]}"
         end
 
         def elapsed(start)
