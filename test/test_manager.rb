@@ -88,6 +88,11 @@ class TestManager < Sidekiq::Test
       fetcher.verify
     end
 
+    it 'does not support invalid concurrency' do
+      assert_raises(ArgumentError) { new_manager(concurrency: 0) }
+      assert_raises(ArgumentError) { new_manager(concurrency: -1) }
+    end
+
     describe 'heartbeat' do
       before do
         uow = Object.new
