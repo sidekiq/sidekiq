@@ -66,7 +66,7 @@ module Sidekiq
       @down ||= Time.now
       pause
       after(0) { fetch }
-    rescue Task::TerminatedError
+    rescue Celluloid::TaskTerminated
       # If redis is down when we try to shut down, all the fetch backlog
       # raises these errors.  Haven't been able to figure out what I'm doing wrong.
     end
