@@ -207,6 +207,12 @@ class TestApi < Sidekiq::Test
       assert_equal 0, q.size
     end
 
+    it 'has no enqueued_at time for jobs enqueued in the future' do
+      job_id = ApiWorker.perform_in(100, 1, 'foo')
+      job = Sidekiq::ScheduledSet.new.find_job(job_id)
+      assert_nil job.enqueued_at
+    end
+
     it 'unwraps delayed jobs' do
       ApiWorker.delay.foo(1,2,3)
       q = Sidekiq::Queue.new
