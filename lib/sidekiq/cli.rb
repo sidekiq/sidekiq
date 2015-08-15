@@ -64,7 +64,7 @@ module Sidekiq
 
       logger.info "Running in #{RUBY_DESCRIPTION}"
       logger.info Sidekiq::LICENSE
-      logger.info "Upgrade to Sidekiq Pro for more features and support: http://sidekiq.org/pro" unless defined?(::Sidekiq::Pro)
+      logger.info "Upgrade to Sidekiq Pro for more features and support: http://sidekiq.org" unless defined?(::Sidekiq::Pro)
 
       fire_event(:startup)
 

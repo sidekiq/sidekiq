@@ -11,6 +11,9 @@ module Sidekiq
   class Web < Sinatra::Base
     include Sidekiq::Paginator
 
+    enable :sessions
+    use Rack::Protection, :use => :authenticity_token unless ENV['RACK_ENV'] == 'test'
+
     set :root, File.expand_path(File.dirname(__FILE__) + "/../../web")
     set :public_folder, proc { "#{root}/assets" }
     set :views, proc { "#{root}/views" }
@@ -98,7 +101,7 @@ module Sidekiq
     end
 
     post '/morgue' do
-      halt 404 unless params['key']
+      redirect request.path unless params['key']
 
       params['key'].each do |key|
         job = Sidekiq::DeadSet.new.fetch(*parse_params(key)).first

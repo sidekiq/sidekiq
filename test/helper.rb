@@ -1,19 +1,13 @@
 $CELLULOID_DEBUG = false
 $TESTING = true
-require 'coveralls'
-Coveralls.wear! do
-  add_filter "/test/"
-  add_filter "/myapp/"
-end
-
-ENV['RACK_ENV'] = ENV['RAILS_ENV'] = 'test'
-if ENV.has_key?("SIMPLECOV")
+if ENV["COVERAGE"]
   require 'simplecov'
   SimpleCov.start do
     add_filter "/test/"
     add_filter "/myapp/"
   end
 end
+ENV['RACK_ENV'] = ENV['RAILS_ENV'] = 'test'
 
 begin
   require 'pry-byebug'
@@ -38,4 +32,18 @@ REDIS = Sidekiq::RedisConnection.create(:url => REDIS_URL, :namespace => 'testy'
 
 Sidekiq.configure_client do |config|
   config.redis = { :url => REDIS_URL, :namespace => 'testy' }
+end
+
+def capture_logging(lvl=Logger::INFO)
+  old = Sidekiq.logger
+  begin
+    out = StringIO.new
+    logger = Logger.new(out)
+    logger.level = lvl
+    Sidekiq.logger = logger
+    yield
+    out.string
+  ensure
+    Sidekiq.logger = old
+  end
 end

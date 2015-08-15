@@ -18,6 +18,7 @@
         <td><%= number_with_delimiter(queue.size) %> </td>
         <td width="20%">
           <form action="<%=root_path %>queues/<%= queue.name %>" method="post">
+            <%= csrf_tag %>
             <input class="btn btn-danger btn-xs" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSureDeleteQueue', :queue => h(queue.name)) %>" />
           </form>
         </td>

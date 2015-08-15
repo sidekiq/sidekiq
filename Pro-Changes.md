@@ -3,10 +3,29 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
 
-HEAD
+2.0.8
+-----------
+
+- Fix reliable scheduler mangling large numeric arguments.  Lua's CJSON
+  library cannot accurately encode numbers larger than 14 digits! [#2478]
+
+2.0.7
+-----------
+
+- Optimize delete of enormous batches (100,000s of jobs) [#2458]
+
+2.0.6, 1.9.3
+--------------
+
+- CSRF protection in Sidekiq 3.4.2 broke job filtering in the Web UI [#2442]
+- Sidekiq Pro 1.x is now limited to Sidekiq < 3.5.0.
+
+2.0.5
 -----------
 
 - Atomic scheduler now sets `enqueued_at` [#2414]
+- Batches now account for jobs which are stopped by client middleware [#2406]
+- Ignore redundant calls to `Sidekiq::Client.reliable_push!` [#2408]
 
 2.0.4
 -----------

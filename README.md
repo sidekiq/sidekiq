@@ -4,7 +4,6 @@ Sidekiq
 [![Gem Version](https://badge.fury.io/rb/sidekiq.svg)](https://rubygems.org/gems/sidekiq)
 [![Code Climate](https://codeclimate.com/github/mperham/sidekiq.svg)](https://codeclimate.com/github/mperham/sidekiq)
 [![Build Status](https://travis-ci.org/mperham/sidekiq.svg)](https://travis-ci.org/mperham/sidekiq)
-[![Coverage Status](https://coveralls.io/repos/mperham/sidekiq/badge.svg?branch=master)](https://coveralls.io/r/mperham/sidekiq)
 [![Gitter Chat](https://badges.gitter.im/mperham/sidekiq.svg)](https://gitter.im/mperham/sidekiq)
 
 

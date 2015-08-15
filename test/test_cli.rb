@@ -128,7 +128,7 @@ class TestCli < Sidekiq::Test
 
       it 'appends messages to a logfile' do
         File.open(@tmp_log_path, 'w') do |f|
-          f.puts 'already existant log message'
+          f.puts 'already existent log message'
         end
 
         @cli.parse(['sidekiq', '-L', @tmp_log_path, '-r', './test/fake_env.rb'])
@@ -136,7 +136,7 @@ class TestCli < Sidekiq::Test
         Sidekiq.logger.info('test message')
 
         log_file_content = File.read(@tmp_log_path)
-        assert_match(/already existant/, log_file_content, "didn't include the old message")
+        assert_match(/already existent/, log_file_content, "didn't include the old message")
         assert_match(/test message/, log_file_content, "didn't include the new message")
       end
     end
@@ -359,6 +359,30 @@ class TestCli < Sidekiq::Test
           assert opts[:strict]
         end
       end
+    end
+  end
+
+  describe 'misc' do
+    it 'handles interrupts' do
+      cli = Sidekiq::CLI.new
+      assert_raises Interrupt do
+        cli.handle_signal('INT')
+      end
+      assert_raises Interrupt do
+        cli.handle_signal('TERM')
+      end
+      cli.handle_signal('USR2')
+      cli.handle_signal('TTIN')
+    end
+
+    it 'can fire events' do
+      count = 0
+      Sidekiq.options[:lifecycle_events][:startup] = [proc {
+        count += 1
+      }]
+      cli = Sidekiq::CLI.new
+      cli.fire_event(:startup)
+      assert_equal 1, count
     end
   end
 

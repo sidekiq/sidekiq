@@ -173,6 +173,10 @@ module Sidekiq
       end.join(", ")
     end
 
+    def csrf_tag
+      "<input type='hidden' name='authenticity_token' value='#{session[:csrf]}'/>"
+    end
+
     def to_display(arg)
       begin
         arg.inspect
