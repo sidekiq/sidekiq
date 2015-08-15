@@ -1,6 +1,264 @@
-<!DOCTYPE html><html><head><meta charset="utf8"/><title>Sidekiq</title><meta name="description" content="Simple, efficient message or background job processing for Ruby"/><meta property="og:site_name" content="Sidekiq"/><meta property="og:type" content="company"/><meta property="og:title" content="Simple, efficient message processing for Ruby"/><meta property="og:url" content="http://sidekiq.org"/><meta property="og:image" content="http://sidekiq.org/img/logo.png"/><meta property="og:description" content="Sidekiq is a simple, efficient system for message or background job processing"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="stylesheet" href="./css/global.css"/><link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Armata|Montserrat:400,700"/><link rel="canonical" href="http://sidekiq.org/"/><link rel="shortcut icon" type="image/ico" href="/favicon.ico"/><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script><script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script><script src="./js/scrollingcarousel.2.0.min.js"></script><script src="./js/skq-global.js"></script></head><body><header><nav role="navigation" class="navbar navbar-default navbar-fixed-top default"><div class="container-fluid skq-header"><div class="navbar-header"><button data-toggle="collapse" data-target="#navbar-top-collapse-1" class="navbar-toggle"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button><a href="./" class="skq navbar-brand">Sidekiq</a><span class="default skq-tagline navbar-brand col-sm-5 hidden-xs">Simple, efficient background processing for Ruby.</span></div><div id="navbar-top-collapse-1" class="collapse navbar-collapse"><ul class="nav navbar-nav navbar-right"><li><a href="./products/pro" class="skq-nav-link">Pro</a></li><li><a href="./products/enterprise" class="skq-nav-link">Enterprise</a></li><li><a href="./support" class="skq-nav-link">Support</a></li><li><a href="./about" class="skq-nav-link">About</a></li></ul></div></div></nav></header><main><div class="container skq-hero-area"><div class="row"><div class="col-sm-7"><p class="skq-hero-text">What if <span class="skq-counter-number">1</span> Sidekiq process could do the job of <span class="skq-counter-number">20</span> Resque or DelayedJob processes?</p></div><div class="col-sm-5 rule-left"><div id="carousel" data-ride="carousel" class="carousel slide carousel-fade"><div class="carousel-inner"><div class="active item"><p class="skq-quote"><span class="floating-quotation">"</span>Replacing Resque with Sidekiq reduced our job processing hardware cost by a factor of six."</p><div class="skq-quoted"><strong>Justin Mazzi</strong>, @jmazzi<br>Chief of Engineering, <a href="http://site5.com/" target="_new">Site5.com</a></div></div><div class="item"><p class="skq-quote"><span class="floating-quotation">"</span>Sidekiq let us stop worrying about queues and focus on our app. Half a billion jobs later and it's holding up great."</p><div class="skq-quoted"><strong>Bryan Helmkamp</strong>, @brynary<br>Co-Founder, <a href="http://codeclimate.com/" target="_new">Code Climate</a></div></div><div class="item"><p class="skq-quote"><span class="floating-quotation">"</span>Sidekiq is the first tool I reach for in new apps—and the last one I have to tune when they grow to demand massive data processing."</p><div class="skq-quoted"><strong>Christopher Keele</strong>, @christhekeele<br>VP Development, <a href="http://unitednetworksofamerica.com/" target="_new">United Networks of America</a></div></div></div></div></div></div><div class="row"><div class="col-sm-12"><h5>Trusted By</h5><hr></div></div></div><div id="logo-carousel" class="logo-carousel noscript-carousel"><ul class="logo-list"><li><img src="./img/digitalocean.png"></li><li><img src="./img/groupon.png"></li><li><img src="./img/livingsocial.png"></li><li><img src="./img/oracle.png"></li><li><img src="./img/heroku.png"></li><li><img src="./img/netflix.png"></li><li><img src="./img/condenast.png"></li><li><img src="./img/adobe.png"></li><li><img src="./img/kickstarter.png"></li><li><img src="./img/esri.png"></li><li><img src="./img/charitywater.png"></li><li><img src="./img/watsi.png"></li><li><img src="./img/customerio.png"></li><li><img src="./img/zenpayroll.png"></li></ul></div><div id="products" class="container"><div class="comparison-chart"><div class="row"><div class="col-sm-3 no-padding key-wrapper"><ul class="key"><li></li><li>Audience</li><li>Scheduled Jobs</li><li>Error Handling</li><li>Web UI</li><li>Ruby API</li><li>Middleware</li><li>Batches</li><li>Enhanced Reliability</li><li>Search in Web UI</li><li>Rate Limiting</li><li>Cron Jobs</li><li>Unique Jobs</li><li>Dedicated Support</li><li>License</li><li>Pricing</li><li>Purchasing</li></ul></div><div class="col-sm-9 no-padding"><div class="charts-wrapper"><ul class="product col-oss"><li><h3><img src="./img/octocat.png" class="icon"><a href="https://github.com/mperham/sidekiq/" target="_new">OSS</a></h3></li><li>Hobbyists</li><li> <span class="glyphicon glyphicon-ok-sign"> </span></li><li><span class="glyphicon glyphicon-ok-sign"></span></li><li> <span class="glyphicon glyphicon-ok-sign"> </span></li><li><span class="glyphicon glyphicon-ok-sign"></span></li><li> <span class="glyphicon glyphicon-ok-sign"></span></li><li><span class="glyphicon glyphicon-minus-sign"></span></li><li> <span class="glyphicon glyphicon-minus-sign"> </span></li><li><span class="glyphicon glyphicon-minus-sign"></span></li><li><span class="glyphicon glyphicon-minus-sign"></span></li><li><span class="glyphicon glyphicon-minus-sign">    </span></li><li><span class="glyphicon glyphicon-minus-sign">             </span></li><li>None</li><li>LGPL</li><li>Free</li><li>n/a</li><li><a href="https://github.com/mperham/sidekiq/wiki" target="_new" class="btn btn-primary btn-lg btn-white">Get Started &emsp;<span class="glyphicon glyphicon-new-window"></span></a></li></ul><ul class="product col-pro"><li> <h3><a href="./products/pro">Pro</a></h3></li><li>Small Business</li><li> <span class="glyphicon glyphicon-ok-sign"> </span></li><li><span class="glyphicon glyphicon-ok-sign"></span></li><li> <span class="glyphicon glyphicon-ok-sign"> </span></li><li><span class="glyphicon glyphicon-ok-sign"></span></li><li> <span class="glyphicon glyphicon-ok-sign"> </span></li><li><span class="glyphicon glyphicon-ok-sign"></span></li><li> <span class="glyphicon glyphicon-ok-sign"> </span></li><li><span class="glyphicon glyphicon-ok-sign"></span></li><li><span class="glyphicon glyphicon-minus-sign"></span></li><li><span class="glyphicon glyphicon-minus-sign">    </span></li><li><span class="glyphicon glyphicon-minus-sign">             </span></li><li>Email</li><li>Commercial<br><small>No Custom Terms</small></li><li> 
-$950 / year<br><small>Unlimited Usage</small></li><li>Credit Card</li><li><a href="./products/pro" target="_new" class="btn btn-primary btn-lg btn-black">Learn more &amp; Buy
-&emsp;<span class="glyphicon glyphicon-chevron-right"></span></a></li></ul><ul class="product col-ent"><li><h3><a href="./products/enterprise">Enterprise</a></h3></li><li>Med&ndash;Large Companies</li><li> <span class="glyphicon glyphicon-ok-sign"> </span></li><li><span class="glyphicon glyphicon-ok-sign"></span></li><li> <span class="glyphicon glyphicon-ok-sign"> </span></li><li><span class="glyphicon glyphicon-ok-sign"></span></li><li> <span class="glyphicon glyphicon-ok-sign"> </span></li><li><span class="glyphicon glyphicon-ok-sign"></span></li><li> <span class="glyphicon glyphicon-ok-sign"> </span></li><li><span class="glyphicon glyphicon-ok-sign"></span></li><li><span class="glyphicon glyphicon-ok-sign"></span></li><li><span class="glyphicon glyphicon-ok-sign">    </span></li><li><span class="glyphicon glyphicon-ok-sign">             </span></li><li>Email, Onboarding Session</li><li>Commercial<br><small>with Custom Terms</small></li><li> 
-$1750 / year<br><small title="Workers are calculated by adding up the concurrency of all your production processes. 10 processes with the default concurrency of 25 = 250 workers." class="help">per 250 Workers</small></li><li>Quote + Invoice</li><li><a href="./products/enterprise" class="btn btn-primary btn-lg">Learn more &amp; Buy
-&emsp;<span class="glyphicon glyphicon-chevron-right"></span></a></li></ul></div></div></div></div><div class="spacer-md"></div></div><footer class="skq-subfooter"><div class="fluid-container"><h4>	Questions, comments, &amp; concerns?<a href="mailto:info@contribsys.com?subject=Sidekiq%20question,%20comment,%20concern" type="button" class="btn btn-default">info@contribsys.com</a></h4></div></footer></main><footer><div class="container-fluid"><div class="row"><div class="col-sm-7"><div class="skq-footer-brand">Sidekiq<a href="http://rubyheroes.com/" target="_new"><img src="./img/hero-award.svg" class="skq-award"/></a><a href="https://www.blackducksoftware.com/open-source-rookies/2012-recipients" target="_new"><img src="./img/rookie-award.png" class="skq-award"/></a></div></div><div class="col-xs-5"> <a href="http://contribsys.com/" target="_new"><img src="./img/cs-footer-logo.png" class="skq-footer-logo"/></a></div></div><hr/><div class="row"><div class="col-sm-2"><a href="https://github.com/mperham/sidekiq/" target="_new">OSS <small> <span class="glyphicon glyphicon-new-window"></span></small></a><br/><a href="./products/pro">Pro</a><br/><a href="./products/enterprise">Enterprise</a></div><div class="col-sm-2"><a href="https://github.com/mperham/sidekiq/wiki" target="_new">Wiki</a><br/><a href="./support">Support</a><br/><a href="https://github.com/mperham/sidekiq/" target="_new">Source</a></div><div class="col-sm-3"><a href="./about">About</a><br/><a href="https://twitter.com/sidekiq" target="_new">On Twitter</a><br/><a href="http://confreaks.com/videos/1290-rubyconf2012-asynchronous-processing-for-fun-and-profit" target="_new">At Rubyconf 2012</a></div><div class="col-sm-5"><hr class="visible-xs"/><small> 
-Copyright &copy; 2015 Contributed Systems LLC.<br class="hidden-xs"/> Made with care in Portland, OR.</small></div></div></div></footer></body></html>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient message or background job processing for Ruby">
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient message processing for Ruby">
+  <meta property="og:url" content="http://sidekiq.org">
+  <meta property="og:image" content="http://sidekiq.org/img/logo.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient system for message or background job processing">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./css/global.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="canonical" href="http://sidekiq.org/">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js">
+  </script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js">
+  </script>
+  <script src="./js/scrollingcarousel.2.0.min.js">
+  </script>
+  <script src="./js/skq-global.js">
+  </script>
+</head>
+<body>
+  <header>
+    <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+      <div class="container-fluid skq-header">
+        <div class="navbar-header">
+          <button data-toggle="collapse" data-target="#navbar-top-collapse-1" class="navbar-toggle"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button><a href="./" class="skq navbar-brand">Sidekiq</a><span class="default skq-tagline navbar-brand col-sm-5 hidden-xs">Simple, efficient background processing for Ruby.</span>
+        </div>
+        <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="./products/pro" class="skq-nav-link">Pro</a>
+            </li>
+            <li>
+              <a href="./products/enterprise" class="skq-nav-link">Enterprise</a>
+            </li>
+            <li>
+              <a href="./support" class="skq-nav-link">Support</a>
+            </li>
+            <li>
+              <a href="./about" class="skq-nav-link">About</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <main>
+    <div class="container skq-hero-area">
+      <div class="row">
+        <div class="col-sm-7">
+          <p class="skq-hero-text">What if <span class="skq-counter-number">1</span> Sidekiq process could do the job of <span class="skq-counter-number">20</span> Resque or DelayedJob processes?</p>
+        </div>
+        <div class="col-sm-5 rule-left">
+          <div id="carousel" data-ride="carousel" class="carousel slide carousel-fade">
+            <div class="carousel-inner">
+              <div class="active item">
+                <p class="skq-quote"><span class="floating-quotation">"</span>Replacing Resque with Sidekiq reduced our job processing hardware cost by a factor of six."</p>
+                <div class="skq-quoted">
+                  <strong>Justin Mazzi</strong>, @jmazzi<br>
+                  Chief of Engineering, <a href="http://site5.com/" target="_new">Site5.com</a>
+                </div>
+              </div>
+              <div class="item">
+                <p class="skq-quote"><span class="floating-quotation">"</span>Sidekiq let us stop worrying about queues and focus on our app. Half a billion jobs later and it's holding up great."</p>
+                <div class="skq-quoted">
+                  <strong>Bryan Helmkamp</strong>, @brynary<br>
+                  Co-Founder, <a href="http://codeclimate.com/" target="_new">Code Climate</a>
+                </div>
+              </div>
+              <div class="item">
+                <p class="skq-quote"><span class="floating-quotation">"</span>Sidekiq is the first tool I reach for in new apps—and the last one I have to tune when they grow to demand massive data processing."</p>
+                <div class="skq-quoted">
+                  <strong>Christopher Keele</strong>, @christhekeele<br>
+                  VP Development, <a href="http://unitednetworksofamerica.com/" target="_new">United Networks of America</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <h5>Trusted By</h5>
+          <hr>
+        </div>
+      </div>
+    </div>
+    <div id="logo-carousel" class="logo-carousel noscript-carousel">
+      <ul class="logo-list">
+        <li><img src="./img/digitalocean.png"></li>
+        <li><img src="./img/groupon.png"></li>
+        <li><img src="./img/livingsocial.png"></li>
+        <li><img src="./img/oracle.png"></li>
+        <li><img src="./img/heroku.png"></li>
+        <li><img src="./img/netflix.png"></li>
+        <li><img src="./img/condenast.png"></li>
+        <li><img src="./img/adobe.png"></li>
+        <li><img src="./img/kickstarter.png"></li>
+        <li><img src="./img/esri.png"></li>
+        <li><img src="./img/charitywater.png"></li>
+        <li><img src="./img/watsi.png"></li>
+        <li><img src="./img/customerio.png"></li>
+        <li><img src="./img/zenpayroll.png"></li>
+      </ul>
+    </div>
+    <div id="products" class="container">
+      <div class="comparison-chart">
+        <div class="row">
+          <div class="col-sm-3 no-padding key-wrapper">
+            <ul class="key">
+              <li></li>
+              <li>Audience</li>
+              <li>Scheduled Jobs</li>
+              <li>Error Handling</li>
+              <li>Web UI</li>
+              <li>Ruby API</li>
+              <li>Middleware</li>
+              <li>Batches</li>
+              <li>Enhanced Reliability</li>
+              <li>Search in Web UI</li>
+              <li>Rate Limiting</li>
+              <li>Cron Jobs</li>
+              <li>Unique Jobs</li>
+              <li>Dedicated Support</li>
+              <li>License</li>
+              <li>Pricing</li>
+              <li>Purchasing</li>
+            </ul>
+          </div>
+          <div class="col-sm-9 no-padding">
+            <div class="charts-wrapper">
+              <ul class="product col-oss">
+                <li>
+                  <h3><img src="./img/octocat.png" class="icon"><a href="https://github.com/mperham/sidekiq/" target="_new">OSS</a></h3>
+                </li>
+                <li>Hobbyists</li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
+                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
+                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
+                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
+                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
+                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
+                <li>None</li>
+                <li>LGPL</li>
+                <li>Free</li>
+                <li>n/a</li>
+                <li>
+                  <a href="https://github.com/mperham/sidekiq/wiki" target="_new" class="btn btn-primary btn-lg btn-white">Get Started  <span class="glyphicon glyphicon-new-window"></span></a>
+                </li>
+              </ul>
+              <ul class="product col-pro">
+                <li>
+                  <h3><a href="./products/pro">Pro</a></h3>
+                </li>
+                <li>Small Business</li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
+                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
+                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
+                <li>Email</li>
+                <li>Commercial<br>
+                <small>No Custom Terms</small></li>
+                <li>$950 / year<br>
+                <small>Unlimited Usage</small></li>
+                <li>Credit Card</li>
+                <li>
+                  <a href="./products/pro" target="_new" class="btn btn-primary btn-lg btn-black">Learn more &amp; Buy  <span class="glyphicon glyphicon-chevron-right"></span></a>
+                </li>
+              </ul>
+              <ul class="product col-ent">
+                <li>
+                  <h3><a href="./products/enterprise">Enterprise</a></h3>
+                </li>
+                <li>Med–Large Companies</li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
+                <li>Email, Onboarding Session</li>
+                <li>Commercial<br>
+                <small>with Custom Terms</small></li>
+                <li>$1750 / year<br>
+                <small title="Workers are calculated by adding up the concurrency of all your production processes. 10 processes with the default concurrency of 25 = 250 workers." class="help">per 250 Workers</small></li>
+                <li>Quote + Invoice</li>
+                <li>
+                  <a href="./products/enterprise" class="btn btn-primary btn-lg">Learn more &amp; Buy  <span class="glyphicon glyphicon-chevron-right"></span></a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="spacer-md"></div>
+    </div>
+    <footer class="skq-subfooter">
+      <div class="fluid-container">
+        <h4>Questions, comments, &amp; concerns?<a href="mailto:info@contribsys.com?subject=Sidekiq%20question,%20comment,%20concern" type="button" class="btn btn-default">info@contribsys.com</a></h4>
+      </div>
+    </footer>
+  </main>
+  <footer>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-7">
+          <div class="skq-footer-brand">
+            Sidekiq<a href="http://rubyheroes.com/" target="_new"><img src="./img/hero-award.svg" class="skq-award"></a><a href="https://www.blackducksoftware.com/open-source-rookies/2012-recipients" target="_new"><img src="./img/rookie-award.png" class="skq-award"></a>
+          </div>
+        </div>
+        <div class="col-xs-5">
+          <a href="http://contribsys.com/" target="_new"><img src="./img/cs-footer-logo.png" class="skq-footer-logo"></a>
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col-sm-2">
+          <a href="https://github.com/mperham/sidekiq/" target="_new">OSS <small><span class="glyphicon glyphicon-new-window"></span></small></a><br>
+          <a href="./products/pro">Pro</a><br>
+          <a href="./products/enterprise">Enterprise</a>
+        </div>
+        <div class="col-sm-2">
+          <a href="https://github.com/mperham/sidekiq/wiki" target="_new">Wiki</a><br>
+          <a href="./support">Support</a><br>
+          <a href="https://github.com/mperham/sidekiq/" target="_new">Source</a>
+        </div>
+        <div class="col-sm-3">
+          <a href="./about">About</a><br>
+          <a href="https://twitter.com/sidekiq" target="_new">On Twitter</a><br>
+          <a href="http://confreaks.com/videos/1290-rubyconf2012-asynchronous-processing-for-fun-and-profit" target="_new">At Rubyconf 2012</a>
+        </div>
+        <div class="col-sm-5">
+          <hr class="visible-xs">
+          <small>Copyright © 2015 Contributed Systems LLC.<br class="hidden-xs">
+          Made with care in Portland, OR.</small>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
