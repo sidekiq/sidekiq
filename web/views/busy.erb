@@ -31,6 +31,9 @@
           <% process.labels.each do |label| %>
             <span class="label label-info"><%= label %></span>
           <% end %>
+          <% if defined?(::Sidekiq::Pro) %>
+            <span class="label label-default">Index <%= process['index'] %></span>
+          <% end %>
           <br>
           <b><%= "#{t('Queues')}: " %></b>
           <%= process['queues'] * ", " %>
