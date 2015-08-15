@@ -104,7 +104,7 @@ module Sidekiq
           # of workers), and 5 random seconds to ensure they don't all hit Redis at the same time.
           sleep(INITIAL_WAIT) unless Sidekiq.options[:poll_interval_average]
           sleep(5 * rand)
-        rescue Celluloid::Task::TerminatedError
+        rescue Celluloid::TaskTerminated
           # Hit Ctrl-C when Sidekiq is finished booting and we have a chance
           # to get here.
         end

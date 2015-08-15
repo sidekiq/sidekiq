@@ -11,7 +11,9 @@ end
 
 gem 'rails'
 gem 'sidekiq', :path => '..'
-gem 'pry-byebug'
+
+#de Does not work with jruby or rbx:
+#de gem 'pry-byebug'
 
 # sidekiq-web dependencies
 gem 'sinatra'

@@ -2,6 +2,7 @@ HEAD
 -----------
 
 - Safer display of job data in Web UI [#2405]
+- Updated for compatibility with Celluloid `0.17.*`
 
 3.4.1
 -----------
