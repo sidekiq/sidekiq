@@ -74,3 +74,4 @@ en: # <---- change this to your locale code
   QuietAll: Quiet All
   PollingInterval: Polling interval
   Plugins: Plugins
+  NotYetEnqueued: Not yet enqueued

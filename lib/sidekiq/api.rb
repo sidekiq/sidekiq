@@ -312,7 +312,7 @@ module Sidekiq
     end
 
     def enqueued_at
-      Time.at(@item['enqueued_at'] || 0).utc
+      @item['enqueued_at'] ? Time.at(@item['enqueued_at']).utc : nil
     end
 
     def created_at
