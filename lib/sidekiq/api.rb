@@ -369,11 +369,15 @@ module Sidekiq
     end
 
     def delete
-      @parent.delete(score, jid)
+      if @value
+        @parent.delete_by_value(@parent.name, @value)
+      else
+        @parent.delete_by_jid(score, jid)
+      end
     end
 
     def reschedule(at)
-      @parent.delete(score, jid)
+      delete
       @parent.schedule(at, item)
     end
 
@@ -519,36 +523,30 @@ module Sidekiq
       self.detect { |j| j.jid == jid }
     end
 
-    def delete(score, jid = nil)
-      if jid
-        elements = Sidekiq.redis do |conn|
-          conn.zrangebyscore(name, score, score)
-        end
-
-        elements_with_jid = elements.map do |element|
-          message = Sidekiq.load_json(element)
-
-          if message["jid"] == jid
-            _, @_size = Sidekiq.redis do |conn|
-              conn.multi do
-                conn.zrem(name, element)
-                conn.zcard name
-              end
-            end
-          end
-        end
-        elements_with_jid.count != 0
-      else
-        count, @_size = Sidekiq.redis do |conn|
-          conn.multi do
-            conn.zremrangebyscore(name, score, score)
-            conn.zcard name
-          end
-        end
-        count != 0
+    def delete_by_value(name, value)
+      Sidekiq.redis do |conn|
+        ret = conn.zrem(name, value)
+        @_size -= 1 if ret
+        ret
       end
     end
 
+    def delete_by_jid(score, jid)
+      Sidekiq.redis do |conn|
+        elements = conn.zrangebyscore(name, score, score)
+        elements.each do |element|
+          message = Sidekiq.load_json(element)
+          if message["jid"] == jid
+            ret = conn.zrem(name, element)
+            @_size -= 1 if ret
+            break ret
+          end
+          false
+        end
+      end
+    end
+
+    alias_method :delete, :delete_by_jid
   end
 
   ##
