@@ -6369,7 +6369,8 @@ h6 {
     height: 80px
 }
 .comparison-chart ul li:nth-child(18) {
-    height: 100px
+    height: auto;
+    padding-bottom: 1px
 }
 .comparison-chart .glyphicon-ok-sign {
     color: #449d44
@@ -6396,11 +6397,14 @@ h6 {
     margin: 0;
     padding: 1.5em 1.5em;
     font-size: .85em;
-    white-space: normal
+    white-space: normal;
+    width: 100%
 }
 .comparison-chart ul.product li .btn-black {
+    margin: .8em 0;
     background-color: #333;
-    border-color: #333
+    border-color: #333;
+    width: 100%
 }
 .comparison-chart ul.product li .btn-black:hover {
     background-color: #111
@@ -6493,6 +6497,7 @@ img.icon {
 .purchase {
     position: fixed;
     top: 0;
+    margin-top: 120px;
     background-color: #333;
     z-index: 20
 }
