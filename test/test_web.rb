@@ -3,6 +3,7 @@ require_relative 'helper'
 require 'sidekiq'
 require 'sidekiq/web'
 require 'rack/test'
+require 'tilt/erubis'
 
 class TestWeb < Sidekiq::Test
 
