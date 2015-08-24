@@ -68,6 +68,10 @@ module Sidekiq
 
       fire_event(:startup)
 
+      logger.debug {
+        "Middleware: #{Sidekiq.server_middleware.map(&:klass).join(', ')}"
+      }
+
       Sidekiq.redis do |conn|
         # touch the connection pool so it is created before we
         # launch the actors.
