@@ -262,3 +262,16 @@ module Sidekiq
     end
   end
 end
+
+if defined?(::ActionDispatch::Request::Session) &&
+    !::ActionDispatch::Request::Session.respond_to?(:each)
+  # mperham/sidekiq#2460
+  # Rack apps can't reuse the Rails session store without
+  # this monkeypatch
+  class ActionDispatch::Request::Session
+    def each(&block)
+      hash = self.to_hash
+      hash.each(&block)
+    end
+  end
+end
