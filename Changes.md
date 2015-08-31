@@ -1,11 +1,10 @@
-HEAD
+3.5.0
 -----------
 
-- Upgrade to Celluloid 0.17. [#2420]
-- Activate sessions in Sinatra for CSRF protection.  See issue #2460
-  if you see a Rails error with `ActionDispatch::Request::Session`
-  on upgrade.  This is a Rails incompatibility with Rack and not a
-  Sidekiq bug. The issue contains a monkeypatch workaround. [#2460]
+- Polished new banner! [#2522, firedev]
+- Upgrade to Celluloid 0.17. [#2420, digitalextremist]
+- Activate sessions in Sinatra for CSRF protection, requires Rails
+  monkeypatch due to rails/rails#15843. [#2460, jc00ke]
 
 3.4.2
 -----------
