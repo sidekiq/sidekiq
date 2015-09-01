@@ -1,7 +1,7 @@
 Sidekiq Pro Changelog
 =======================
 
-Please see [http://sidekiq.org/pro](http://sidekiq.org/pro) for more details and how to buy.
+Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
 2.0.8
 -----------
