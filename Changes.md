@@ -1,3 +1,8 @@
+HEAD
+-----------
+
+- Add Arabic translation for Web UI [Milena Novikova]
+
 3.5.0
 -----------
 
