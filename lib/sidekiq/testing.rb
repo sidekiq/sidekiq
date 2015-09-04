@@ -48,6 +48,12 @@ module Sidekiq
       def inline?
         self.__test_mode == :inline
       end
+
+      def server_middleware
+        @server_chain ||= Middleware::Chain.new
+        yield @server_chain if block_given?
+        @server_chain
+      end
     end
   end
 
@@ -150,10 +156,7 @@ module Sidekiq
       # Drain and run all jobs for this worker
       def drain
         while job = jobs.shift do
-          worker = new
-          worker.jid = job['jid']
-          worker.bid = job['bid'] if worker.respond_to?(:bid=)
-          execute_job(worker, job['args'])
+          process_job(job)
         end
       end
 
@@ -161,10 +164,16 @@ module Sidekiq
       def perform_one
         raise(EmptyQueueError, "perform_one called with empty job queue") if jobs.empty?
         job = jobs.shift
+        process_job(job)
+      end
+
+      def process_job(job)
         worker = new
         worker.jid = job['jid']
         worker.bid = job['bid'] if worker.respond_to?(:bid=)
-        execute_job(worker, job['args'])
+        Sidekiq::Testing.server_middleware.invoke(worker, job, job['queue']) do
+          execute_job(worker, job['args'])
+        end
       end
 
       def execute_job(worker, args)
