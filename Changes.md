@@ -1,3 +1,8 @@
+Next
+-----------
+
+- Add middleware stack to testing harness; see [wiki documentation](https://github.com/mperham/sidekiq/wiki/Testing#testing-server-middleware) [#2534, ryansch]
+
 3.5.0
 -----------
 
