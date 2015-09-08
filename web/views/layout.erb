@@ -7,8 +7,6 @@
     <link href="<%= root_path %>stylesheets/application.css" media="screen" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="<%= root_path %>javascripts/application.js"></script>
     <script type="text/javascript" src="<%= root_path %>javascripts/locales/jquery.timeago.<%= locale %>.js"></script>
-    <script type="text/javascript" src="<%= root_path %>javascripts/keymaster.js"></script>
-    <script type="text/javascript" src="<%= root_path %>javascripts/jquery.chaves.js"></script>
     <meta name="google" content="notranslate" />
     <%= display_custom_head %>
   </head>
@@ -29,17 +27,5 @@
     </div>
     <%=  erb :_footer %>
     <%= erb :_poll_js %>
-    <script>
-      $('body').chaves({
-        bindings: [
-        <% (Sidekiq::Web::DEFAULT_TABS.merge Sidekiq::Web.tabs).each_pair do |title, url|
-          chr = Sidekiq::Web::SHORTCUTS[title]
-          if chr %>
-            ['<%= chr %>', '<%= t(title) %>', function() { window.location.href = '<%= root_path %><%= url %>' }],
-          <% end %>
-        <% end %>
-        ]
-      });
-    </script>
   </body>
 </html>

@@ -23,11 +23,11 @@
         <% Sidekiq::Web.default_tabs.each do |title, url| %>
           <% if url == '' %>
             <li class="<%= current_path == url ? 'active' : '' %>">
-            <a href="<%= root_path %><%= url %>" accesskey="<%= Sidekiq::Web::SHORTCUTS[title] %>"><%= t(title) %></a>
+            <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
             </li>
           <% else %>
             <li class="<%= current_path.start_with?(url) ? 'active' : '' %>">
-            <a href="<%= root_path %><%= url %>" accesskey="<%= Sidekiq::Web::SHORTCUTS[title] %>"><%= t(title) %></a>
+            <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
             </li>
           <% end %>
         <% end %>
@@ -39,7 +39,7 @@
           <ul class="dropdown-menu" role="menu">
             <% Sidekiq::Web.custom_tabs.each do |title, url| %>
               <li>
-                <a href="<%= root_path %><%= url %>" accesskey="<%= Sidekiq::Web::SHORTCUTS[title] %>"><%= t(title) %></a>
+                <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
               </li>
             <% end %>
           </ul>
@@ -47,7 +47,7 @@
 
         <% Sidekiq::Web.custom_tabs.each do |title, url| %>
           <li class="<%= current_path.start_with?(url) ? 'active' : '' %>" data-navbar="custom-tab">
-            <a href="<%= root_path %><%= url %>" accesskey="<%= Sidekiq::Web::SHORTCUTS[title] %>"><%= t(title) %></a>
+            <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
           </li>
         <% end %>
       </ul>

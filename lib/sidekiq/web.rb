@@ -30,18 +30,6 @@ module Sidekiq
       "Dead"      => 'morgue',
     }
 
-    SHORTCUTS = {
-      'Dashboard' => 'h',
-      'Busy' => 'b',
-      'Queues' => 'q',
-      'Retries' => 'r',
-      'Scheduled' => 's',
-      'Dead' => 'd',
-      'Limits' => 'l',
-      'Batches' => 'a',
-      'Cron' => 'c',
-    }
-
     class << self
       def default_tabs
         DEFAULT_TABS
