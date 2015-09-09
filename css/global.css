@@ -6433,6 +6433,11 @@ h6 {
     white-space: nowrap;
     color: #999
 }
+@media (max-width: 768px) {
+  .comparison-chart .money-back {
+    margin-left: 110px;
+  }
+}
 .skq-copy {
     padding: 0 30px
 }
