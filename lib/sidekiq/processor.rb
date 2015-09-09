@@ -40,7 +40,7 @@ module Sidekiq
 
       @boss.async.real_thread(proxy_id, Thread.current)
 
-      ack = true
+      ack = false
       begin
         msg = Sidekiq.load_json(msgstr)
         klass  = msg['class'].constantize
@@ -49,9 +49,14 @@ module Sidekiq
 
         stats(worker, msg, queue) do
           Sidekiq.server_middleware.invoke(worker, msg, queue) do
+            # Only ack if we either attempted to start this job or
+            # successfully completed it. This prevents us from
+            # losing jobs if a middleware raises an exception before yielding
+            ack = true
             execute_job(worker, cloned(msg['args']))
           end
         end
+        ack = true
       rescue Sidekiq::Shutdown
         # Had to force kill this job because it didn't finish
         # within the timeout.  Don't acknowledge the work since
