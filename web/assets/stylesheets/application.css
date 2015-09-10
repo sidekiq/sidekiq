@@ -744,3 +744,57 @@ div.interval-slider input {
     max-width: 350px;
   }
 }
+
+.jquery-chaves-help {
+  width: 250px;
+  position: fixed;
+  left: 50%;
+  top: 20%;
+  padding: 15px 0px;
+  margin-left: -110px;
+  margin-top: -200px;
+  background: white;
+  display: none;
+  border: 3px solid #efefef;
+  border-radius: 5px;
+  box-shadow: 0 0 18px rgba(0,0,0,0.4);
+  z-index: 9000;
+  font-family: Helvetica,arial,freesans,clean,sans-serif;
+}
+
+.jquery-chaves-help h3 {
+  border-bottom: 1px solid #DDD;
+  margin: 0 0 20px;
+  padding: 5px 20px 10px;
+  font-size: 16px;
+  font-weight: bold;
+}
+.jquery-chaves-help dl {
+  padding: 0 20px;
+  margin: 0;
+}
+.jquery-chaves-help dt {
+  display: inline-block;
+  font-size: 11px;
+  margin: 0 0 15px 0;
+  padding: 3px 6px;
+  min-width: 10px;
+  text-align: center;
+  font-family: Monaco,"Courier New","DejaVu Sans Mono","Bitstream Vera Sans Mono",monospace;
+  background: #333;
+  color: #EEE;
+  border-radius: 2px;
+  text-shadow: 1px 1px 0 black;
+}
+.jquery-chaves-help dd {
+  display: inline;
+  margin: 0 0 0 10px;
+  font-size: 13px;
+}
+.jquery-chaves-help dd:after {
+  content: '\A';
+  white-space: pre;
+}
+.jquery-chaves-help.visible {
+  display: block;
+}
