@@ -3,6 +3,15 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+-----------
+
+- Explicit support for sharding batches.  You list your Redis shards and
+  Sidekiq Pro will randomly spread batches across the shards.  The BID
+  will indicate which shard contains the batch data.  Jobs within a
+  batch may be spread across all shards too. [#2548, jonhyman]
+
+
 2.0.8
 -----------
 
