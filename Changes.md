@@ -1,7 +1,8 @@
-Next
+HEAD
 -----------
 
-- Add middleware stack to testing harness; see [wiki documentation](https://github.com/mperham/sidekiq/wiki/Testing#testing-server-middleware) [#2534, ryansch]
+- Disconnect and retry Redis operations if we see a READONLY error [#2550]
+- Add server middleware testing harness; see [wiki](https://github.com/mperham/sidekiq/wiki/Testing#testing-server-middleware) [#2534, ryansch]
 
 3.5.0
 -----------

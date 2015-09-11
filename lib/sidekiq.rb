@@ -76,9 +76,19 @@ module Sidekiq
     defined?(Sidekiq::CLI)
   end
 
-  def self.redis(&block)
-    raise ArgumentError, "requires a block" unless block
-    redis_pool.with(&block)
+  def self.redis
+    raise ArgumentError, "requires a block" unless block_given?
+    redis_pool.with do |conn|
+      retryable = true
+      begin
+        yield conn
+      rescue Redis::CommandError => ex
+        #2550 Failover can cause the server to become a slave, need
+        # to disconnect and reopen the socket to get back to the master.
+        (conn.disconnect!; retryable = false; retry) if retryable && ex.message =~ /READONLY/
+        raise
+      end
+    end
   end
 
   def self.redis_pool
