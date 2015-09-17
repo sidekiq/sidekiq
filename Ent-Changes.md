@@ -3,6 +3,20 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+----------
+
+- Rework `Sidekiq::Limiter` redis handling to match global redis handling.
+- Allow user to customize rate limit backoff logic and handle custom
+  rate limit errors.
+- Fix scalability issue with Limiter index page.
+
+
+0.7.2
+----------
+
+- Fix typo which prevented limiters with '0' in their names.
+
 0.7.1
 ----------
 
