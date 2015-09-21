@@ -32,7 +32,7 @@ are untested but might work fine.  MRI 1.9 is no longer supported.
 
 All Rails releases starting from 3.2 are officially supported.
 
-Redis 2.4 or greater is required.
+Redis 2.6.12 or greater is required.
 
 
 Installation
