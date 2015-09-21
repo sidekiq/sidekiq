@@ -43,9 +43,9 @@ module Sidekiq
       ack = false
       begin
         msg = Sidekiq.load_json(msgstr)
-        klass  = msg['class'].constantize
+        klass  = msg['class'.freeze].constantize
         worker = klass.new
-        worker.jid = msg['jid']
+        worker.jid = msg['jid'.freeze]
 
         stats(worker, msg, queue) do
           Sidekiq.server_middleware.invoke(worker, msg, queue) do
@@ -53,7 +53,7 @@ module Sidekiq
             # successfully completed it. This prevents us from
             # losing jobs if a middleware raises an exception before yielding
             ack = true
-            execute_job(worker, cloned(msg['args']))
+            execute_job(worker, cloned(msg['args'.freeze]))
           end
         end
         ack = true
@@ -99,14 +99,15 @@ module Sidekiq
         end
       end
 
+      nowdate = Time.now.utc.strftime("%Y-%m-%d".freeze)
       begin
         yield
       rescue Exception
         retry_and_suppress_exceptions do
-          failed = "stat:failed:#{Time.now.utc.to_date}"
+          failed = "stat:failed:#{nowdate}"
           Sidekiq.redis do |conn|
             conn.multi do
-              conn.incrby("stat:failed", 1)
+              conn.incrby("stat:failed".freeze, 1)
               conn.incrby(failed, 1)
               conn.expire(failed, STATS_TIMEOUT)
             end
@@ -115,11 +116,11 @@ module Sidekiq
         raise
       ensure
         retry_and_suppress_exceptions do
-          processed = "stat:processed:#{Time.now.utc.to_date}"
+          processed = "stat:processed:#{nowdate}"
           Sidekiq.redis do |conn|
             conn.multi do
               conn.hdel("#{identity}:workers", thread_identity)
-              conn.incrby("stat:processed", 1)
+              conn.incrby("stat:processed".freeze, 1)
               conn.incrby(processed, 1)
               conn.expire(processed, STATS_TIMEOUT)
             end
