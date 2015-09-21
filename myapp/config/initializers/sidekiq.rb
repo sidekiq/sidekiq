@@ -3,9 +3,18 @@ Sidekiq.configure_client do |config|
 end
 Sidekiq.configure_server do |config|
   config.redis = { :size => 25, :namespace => 'foo' }
-  config.on(:startup) { puts "Hello!" }
-  config.on(:quiet) { puts "Quiet down!" }
-  config.on(:shutdown) { puts "Goodbye!" }
+  config.on(:startup) { }
+  config.on(:quiet) { }
+  config.on(:shutdown) do
+    #result = RubyProf.stop
+
+    ## Write the results to a file
+    ## Requires railsexpress patched MRI build
+    # brew install qcachegrind
+    #File.open("callgrind.profile", "w") do |f|
+      #RubyProf::CallTreePrinter.new(result).print(f, :min_percent => 1)
+    #end
+  end
 end
 
 require 'sidekiq/web'

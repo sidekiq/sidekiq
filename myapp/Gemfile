@@ -11,6 +11,7 @@ end
 
 gem 'rails'
 gem 'sidekiq', :path => '..'
+#gem 'ruby-prof'
 
 #de Does not work with jruby or rbx:
 #de gem 'pry-byebug'
