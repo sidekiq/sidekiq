@@ -3,23 +3,16 @@ require_relative 'helper'
 class TestApi < Sidekiq::Test
 
   describe "stats" do
-    before do
-      @before = DateTime::DATE_FORMATS[:default]
-      DateTime::DATE_FORMATS[:default] = "%d/%m/%Y %H:%M:%S"
-      Sidekiq.redis = REDIS
-      Sidekiq.redis {|c| c.flushdb }
-    end
 
-    after do
-      DateTime::DATE_FORMATS[:default] = @before
+    it "is initially zero" do
+      Sidekiq.redis {|c| c.flushdb }
+      s = Sidekiq::Stats.new
+      assert_equal 0, s.processed
+      assert_equal 0, s.failed
+      assert_equal 0, s.enqueued
     end
 
     describe "processed" do
-      it "is initially zero" do
-        s = Sidekiq::Stats.new
-        assert_equal 0, s.processed
-      end
-
       it "returns number of processed jobs" do
         Sidekiq.redis { |conn| conn.set("stat:processed", 5) }
         s = Sidekiq::Stats.new
@@ -28,11 +21,6 @@ class TestApi < Sidekiq::Test
     end
 
     describe "failed" do
-      it "is initially zero" do
-        s = Sidekiq::Stats.new
-        assert_equal 0, s.failed
-      end
-
       it "returns number of failed jobs" do
         Sidekiq.redis { |conn| conn.set("stat:failed", 5) }
         s = Sidekiq::Stats.new
@@ -50,40 +38,36 @@ class TestApi < Sidekiq::Test
 
       it 'will reset all stats by default' do
         Sidekiq::Stats.new.reset
-        Sidekiq.redis do |conn|
-          assert_equal '0', conn.get('stat:processed')
-          assert_equal '0', conn.get('stat:failed')
-        end
+        s = Sidekiq::Stats.new
+        assert_equal 0, s.failed
+        assert_equal 0, s.processed
       end
 
       it 'can reset individual stats' do
         Sidekiq::Stats.new.reset('failed')
-        Sidekiq.redis do |conn|
-          assert_equal '5', conn.get('stat:processed')
-          assert_equal '0', conn.get('stat:failed')
-        end
+        s = Sidekiq::Stats.new
+        assert_equal 0, s.failed
+        assert_equal 5, s.processed
       end
 
       it 'can accept anything that responds to #to_s' do
         Sidekiq::Stats.new.reset(:failed)
-        Sidekiq.redis do |conn|
-          assert_equal '5', conn.get('stat:processed')
-          assert_equal '0', conn.get('stat:failed')
-        end
+        s = Sidekiq::Stats.new
+        assert_equal 0, s.failed
+        assert_equal 5, s.processed
       end
 
       it 'ignores anything other than "failed" or "processed"' do
         Sidekiq::Stats.new.reset((1..10).to_a, ['failed'])
-        Sidekiq.redis do |conn|
-          assert_equal '5', conn.get('stat:processed')
-          assert_equal '0', conn.get('stat:failed')
-        end
+        s = Sidekiq::Stats.new
+        assert_equal 0, s.failed
+        assert_equal 5, s.processed
       end
     end
 
     describe "queues" do
-      it "returns all queues" do
-        assert_equal Sidekiq::Stats.new.queues, Sidekiq::Stats::Queues.new.lengths
+      before do
+        Sidekiq.redis {|c| c.flushdb }
       end
 
       it "is initially empty" do
@@ -103,17 +87,15 @@ class TestApi < Sidekiq::Test
         s = Sidekiq::Stats::Queues.new
         assert_equal ({ "foo" => 1, "bar" => 3 }), s.lengths
         assert_equal "bar", s.lengths.first.first
+
+        assert_equal Sidekiq::Stats.new.queues, Sidekiq::Stats::Queues.new.lengths
       end
     end
 
     describe "enqueued" do
-      it "is initially empty" do
-        s = Sidekiq::Stats.new
-        assert_equal 0, s.enqueued
-      end
-
       it "returns total enqueued jobs" do
         Sidekiq.redis do |conn|
+          conn.flushdb
           conn.rpush 'queue:foo', '{}'
           conn.sadd 'queues', 'foo'
 
@@ -127,6 +109,15 @@ class TestApi < Sidekiq::Test
     end
 
     describe "over time" do
+      before do
+        @before = DateTime::DATE_FORMATS[:default]
+        DateTime::DATE_FORMATS[:default] = "%d/%m/%Y %H:%M:%S"
+      end
+
+      after do
+        DateTime::DATE_FORMATS[:default] = @before
+      end
+
       describe "processed" do
         it 'retrieves hash of dates' do
           Sidekiq.redis do |c|
@@ -137,13 +128,13 @@ class TestApi < Sidekiq::Test
           end
           Time.stub(:now, Time.parse("2012-12-26 1:00:00 -0500")) do
             s = Sidekiq::Stats::History.new(2)
-            assert_equal ({ "2012-12-26" => 6, "2012-12-25" => 1 }), s.processed
+            assert_equal({ "2012-12-26" => 6, "2012-12-25" => 1 }, s.processed)
 
             s = Sidekiq::Stats::History.new(3)
-            assert_equal ({ "2012-12-26" => 6, "2012-12-25" => 1, "2012-12-24" => 4 }), s.processed
+            assert_equal({ "2012-12-26" => 6, "2012-12-25" => 1, "2012-12-24" => 4 }, s.processed)
 
             s = Sidekiq::Stats::History.new(2, Date.parse("2012-12-25"))
-            assert_equal ({ "2012-12-25" => 1, "2012-12-24" => 4 }), s.processed
+            assert_equal({ "2012-12-25" => 1, "2012-12-24" => 4 }, s.processed)
           end
         end
       end
@@ -172,10 +163,7 @@ class TestApi < Sidekiq::Test
   end
 
   describe 'with an empty database' do
-    include Sidekiq::Util
-
     before do
-      Sidekiq.redis = REDIS
       Sidekiq.redis {|c| c.flushdb }
     end
 
@@ -389,7 +377,7 @@ class TestApi < Sidekiq::Test
       identity_string = "identity_string"
       odata = {
         'pid' => 123,
-        'hostname' => hostname,
+        'hostname' => Socket.gethostname,
         'key' => identity_string,
         'identity' => identity_string,
         'started_at' => Time.now.to_f - 15,
@@ -424,8 +412,9 @@ class TestApi < Sidekiq::Test
         assert false
       end
 
-      key = "#{hostname}:#{$$}"
-      pdata = { 'pid' => $$, 'hostname' => hostname, 'started_at' => Time.now.to_i }
+      hn = Socket.gethostname
+      key = "#{hn}:#{$$}"
+      pdata = { 'pid' => $$, 'hostname' => hn, 'started_at' => Time.now.to_i }
       Sidekiq.redis do |conn|
         conn.sadd('processes', key)
         conn.hmset(key, 'info', Sidekiq.dump_json(pdata), 'busy', 0, 'beat', Time.now.to_f)

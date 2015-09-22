@@ -1,6 +1,5 @@
 require_relative 'helper'
-require 'sidekiq'
-require 'sidekiq/worker'
+
 require 'active_record'
 require 'action_mailer'
 require 'sidekiq/rails'
@@ -47,7 +46,7 @@ class TestTesting < Sidekiq::Test
     end
 
     before do
-      require 'sidekiq/testing.rb'
+      require 'sidekiq/testing'
       Sidekiq::Testing.fake!
       EnqueuedWorker.jobs.clear
       DirectWorker.jobs.clear
@@ -106,7 +105,6 @@ class TestTesting < Sidekiq::Test
         StoredWorker.drain
       end
       assert_equal 0, StoredWorker.jobs.size
-
     end
 
     class SpecificJidWorker
@@ -263,47 +261,8 @@ class TestTesting < Sidekiq::Test
     end
 
     it 'can execute a job' do
-      worker = Minitest::Mock.new
-      worker.expect(:perform, nil, [1, 2, 3])
-      DirectWorker.execute_job(worker, [1, 2, 3])
+      DirectWorker.execute_job(DirectWorker.new, [2, 3])
     end
 
-    describe 'with middleware' do
-      class AttributeWorker
-        include Sidekiq::Worker
-        class_attribute :count
-        self.count = 0
-        attr_accessor :foo
-
-        def perform
-          self.class.count += 1 if foo == :bar
-        end
-      end
-
-      class AttributeMiddleware
-        def call(worker, msg, queue)
-          worker.foo = :bar if worker.respond_to?(:foo=)
-          yield
-        end
-      end
-
-      before do
-        Sidekiq::Testing.server_middleware do |chain|
-          chain.add AttributeMiddleware
-        end
-      end
-
-      after do
-        Sidekiq::Testing.server_middleware do |chain|
-          chain.clear
-        end
-      end
-
-      it 'wraps the inlined worker with middleware' do
-        AttributeWorker.perform_async
-        AttributeWorker.perform_one
-        assert_equal 1, AttributeWorker.count
-      end
-    end
   end
 end

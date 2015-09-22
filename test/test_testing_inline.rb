@@ -1,6 +1,5 @@
 require_relative 'helper'
-require 'sidekiq'
-require 'sidekiq/worker'
+
 require 'active_record'
 require 'action_mailer'
 require 'sidekiq/rails'
@@ -42,7 +41,7 @@ class TestInline < Sidekiq::Test
     end
 
     before do
-      require 'sidekiq/testing/inline.rb'
+      require 'sidekiq/testing/inline'
       Sidekiq::Testing.inline!
     end
 
@@ -90,41 +89,5 @@ class TestInline < Sidekiq::Test
       assert Sidekiq::Client.enqueue(InlineWorkerWithTimeParam, Time.now)
     end
 
-    describe 'with middleware' do
-      class AttributeWorker
-        include Sidekiq::Worker
-        class_attribute :count
-        self.count = 0
-        attr_accessor :foo
-
-        def perform
-          self.class.count += 1 if foo == :bar
-        end
-      end
-
-      class AttributeMiddleware
-        def call(worker, msg, queue)
-          worker.foo = :bar if worker.respond_to?(:foo=)
-          yield
-        end
-      end
-
-      before do
-        Sidekiq::Testing.server_middleware do |chain|
-          chain.add AttributeMiddleware
-        end
-      end
-
-      after do
-        Sidekiq::Testing.server_middleware do |chain|
-          chain.clear
-        end
-      end
-
-      it 'wraps the inlined worker with middleware' do
-        AttributeWorker.perform_async
-        assert_equal 1, AttributeWorker.count
-      end
-    end
   end
 end

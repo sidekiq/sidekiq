@@ -1,6 +1,5 @@
 # encoding: utf-8
 require_relative 'helper'
-require 'sidekiq'
 require 'sidekiq/web'
 require 'rack/test'
 require 'tilt/erubis'
@@ -19,7 +18,6 @@ class TestWeb < Sidekiq::Test
     end
 
     before do
-      Sidekiq.redis = REDIS
       Sidekiq.redis {|c| c.flushdb }
     end
 

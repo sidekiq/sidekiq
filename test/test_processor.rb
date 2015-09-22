@@ -10,8 +10,6 @@ class TestProcessor < Sidekiq::Test
       $invokes = 0
       @boss = Minitest::Mock.new
       @processor = ::Sidekiq::Processor.new(@boss)
-      Celluloid.logger = nil
-      Sidekiq.redis = REDIS
     end
 
     class MockWorker
@@ -192,18 +190,8 @@ class TestProcessor < Sidekiq::Test
         Sidekiq.redis {|c| c.flushdb }
       end
 
-      def with_expire(time)
-        begin
-          old = Sidekiq::Processor::STATS_TIMEOUT
-          silence_warnings { Sidekiq::Processor.const_set(:STATS_TIMEOUT, time) }
-          yield
-        ensure
-          silence_warnings { Sidekiq::Processor.const_set(:STATS_TIMEOUT, old) }
-        end
-      end
-
       describe 'when successful' do
-        let(:processed_today_key) { "stat:processed:#{Time.now.utc.to_date}" }
+        let(:processed_today_key) { "stat:processed:#{Time.now.utc.strftime("%Y-%m-%d")}" }
 
         def successful_job
           msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
@@ -216,23 +204,15 @@ class TestProcessor < Sidekiq::Test
         end
 
         it 'increments processed stat' do
+          assert_equal 0, Sidekiq::Stats.new.processed
           successful_job
           assert_equal 1, Sidekiq::Stats.new.processed
-        end
-
-        it 'expires processed stat' do
-          successful_job
           assert_equal Sidekiq::Processor::STATS_TIMEOUT, Sidekiq.redis { |conn| conn.ttl(processed_today_key) }
-        end
-
-        it 'increments date processed stat' do
-          successful_job
-          assert_equal 1, Sidekiq.redis { |conn| conn.get(processed_today_key) }.to_i
         end
       end
 
       describe 'when failed' do
-        let(:failed_today_key) { "stat:failed:#{Time.now.utc.to_date}" }
+        let(:failed_today_key) { "stat:failed:#{Time.now.utc.strftime("%Y-%m-%d")}" }
 
         def failed_job
           actor = Minitest::Mock.new
@@ -246,17 +226,9 @@ class TestProcessor < Sidekiq::Test
         end
 
         it 'increments failed stat' do
+          assert_equal 0, Sidekiq::Stats.new.failed
           failed_job
           assert_equal 1, Sidekiq::Stats.new.failed
-        end
-
-        it 'increments date failed stat' do
-          failed_job
-          assert_equal 1, Sidekiq.redis { |conn| conn.get(failed_today_key) }.to_i
-        end
-
-        it 'expires failed stat' do
-          failed_job
           assert_equal Sidekiq::Processor::STATS_TIMEOUT, Sidekiq.redis { |conn| conn.ttl(failed_today_key) }
         end
       end
