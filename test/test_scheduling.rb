@@ -25,9 +25,11 @@ class TestScheduling < Sidekiq::Test
       assert ScheduledWorker.perform_in(5.days.from_now, 'mike')
       assert_equal 3, ss.size
 
+      q = Sidekiq::Queue.new("custom_queue")
+      qs = q.size
       assert ScheduledWorker.perform_in(-300, 'mike')
       assert_equal 3, ss.size
-      assert_equal 1, Sidekiq::Queue.new("custom_queue").size
+      assert_equal qs+1, q.size
 
       assert Sidekiq::Client.push_bulk('class' => ScheduledWorker, 'args' => [['mike'], ['mike']], 'at' => 600)
       assert_equal 5, ss.size
