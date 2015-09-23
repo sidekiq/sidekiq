@@ -1,6 +1,4 @@
 require_relative 'helper'
-require 'sidekiq'
-require 'sidekiq/web_helpers'
 
 $HAS_AJ = true
 begin

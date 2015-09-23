@@ -3,24 +3,16 @@ require_relative 'helper'
 
 class TestSidekiq < Sidekiq::Test
   describe 'json processing' do
-    it 'loads json' do
-      assert_equal ({"foo" => "bar"}), Sidekiq.load_json("{\"foo\":\"bar\"}")
-    end
-
-    it 'dumps json' do
+    it 'handles json' do
+      assert_equal({"foo" => "bar"}, Sidekiq.load_json("{\"foo\":\"bar\"}"))
       assert_equal "{\"foo\":\"bar\"}", Sidekiq.dump_json({ "foo" => "bar" })
     end
   end
 
   describe "redis connection" do
   	it "returns error without creating a connection if block is not given" do
-      mock = Minitest::Mock.new
-      mock.expect :create, nil #Sidekiq::RedisConnection, create
-  		assert_raises(ArgumentError) {
+  		assert_raises(ArgumentError) do
   			Sidekiq.redis
-  		}
-      assert_raises(MockExpectationError, "create should not be called") do
-        mock.verify
       end
   	end
   end
@@ -56,14 +48,14 @@ class TestSidekiq < Sidekiq::Test
   end
 
   describe 'default_worker_options' do
-    before do
+    it 'stringifies keys' do
       @old_options = Sidekiq.default_worker_options
-    end
-    after  { Sidekiq.default_worker_options = @old_options }
-
-    it 'stringify keys' do
-      Sidekiq.default_worker_options = { queue: 'cat'}
-      assert_equal 'cat', Sidekiq.default_worker_options['queue']
+      begin
+        Sidekiq.default_worker_options = { queue: 'cat'}
+        assert_equal 'cat', Sidekiq.default_worker_options['queue']
+      ensure
+        Sidekiq.default_worker_options = @old_options
+      end
     end
   end
 

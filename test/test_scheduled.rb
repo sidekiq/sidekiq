@@ -10,11 +10,7 @@ class TestScheduled < Sidekiq::Test
 
   describe 'poller' do
     before do
-      Sidekiq.redis = REDIS
-      Sidekiq.redis do |conn|
-        conn.flushdb
-      end
-
+      Sidekiq.redis{|c| c.flushdb}
       @error_1  = { 'class' => ScheduledWorker.name, 'args' => [0], 'queue' => 'queue_1' }
       @error_2  = { 'class' => ScheduledWorker.name, 'args' => [1], 'queue' => 'queue_2' }
       @error_3  = { 'class' => ScheduledWorker.name, 'args' => [2], 'queue' => 'queue_3' }
@@ -28,8 +24,8 @@ class TestScheduled < Sidekiq::Test
     end
 
     class Stopper
-      def call(worker_class, message, queue, r)
-        yield if message['args'].first.odd?
+      def call(worker_class, job, queue, r)
+        yield if job['args'].first.odd?
       end
     end
 
@@ -43,12 +39,10 @@ class TestScheduled < Sidekiq::Test
 
         @poller.poll
 
-        Sidekiq.redis do |conn|
-          assert_equal 0, conn.llen("queue:queue_1")
-          assert_equal 1, conn.llen("queue:queue_2")
-          assert_equal 0, conn.llen("queue:queue_5")
-          assert_equal 1, conn.llen("queue:queue_6")
-        end
+        assert_equal 0, Sidekiq::Queue.new("queue_1").size
+        assert_equal 1, Sidekiq::Queue.new("queue_2").size
+        assert_equal 0, Sidekiq::Queue.new("queue_5").size
+        assert_equal 1, Sidekiq::Queue.new("queue_6").size
       ensure
         Sidekiq.client_middleware.remove Stopper
       end

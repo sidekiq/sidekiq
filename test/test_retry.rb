@@ -5,175 +5,136 @@ require 'sidekiq/middleware/server/retry_jobs'
 
 class TestRetry < Sidekiq::Test
   describe 'middleware' do
+    class SomeWorker
+      include Sidekiq::Worker
+    end
+
     before do
-      @redis = Minitest::Mock.new
-      # Ugh, this is terrible.
-      Sidekiq.instance_variable_set(:@redis, @redis)
-
-      def @redis.with; yield self; end
-      def @redis.multi; yield self; end
+      Sidekiq.redis {|c| c.flushdb }
     end
 
-    after do
-      Sidekiq.redis = REDIS
+    def worker
+      @worker ||= SomeWorker.new
     end
 
-    let(:worker) do
-      Class.new do
-        include ::Sidekiq::Worker
-      end
+    def handler(options={})
+      @handler ||= Sidekiq::Middleware::Server::RetryJobs.new(options)
+    end
+
+    def job(options={})
+      @job ||= { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }.merge(options)
     end
 
     it 'allows disabling retry' do
-      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => false }
-      msg2 = msg.dup
-      handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
-        handler.call(worker, msg2, 'default') do
+        handler.call(worker, job('retry' => false), 'default') do
           raise "kerblammo!"
         end
       end
-      assert_equal msg, msg2
+      assert_equal 0, Sidekiq::RetrySet.new.size
     end
 
     it 'allows a numeric retry' do
-      @redis.expect :zadd, 1, ['retry', String, String]
-      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => 2 }
-      handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
-        handler.call(worker, msg, 'default') do
+        handler.call(worker, job('retry' => 2), 'default') do
           raise "kerblammo!"
         end
       end
-      msg.delete('failed_at')
-      assert_equal({"class"=>"Bob", "args"=>[1, 2, "foo"], "retry"=>2, "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "retry_count"=>0}, msg)
-      @redis.verify
+      assert_equal 1, Sidekiq::RetrySet.new.size
+      assert_equal 0, Sidekiq::DeadSet.new.size
     end
 
     it 'allows 0 retry => no retry and dead queue' do
-      @redis.expect :zadd, 1, ['dead', Float, String]
-      @redis.expect :zremrangebyscore, 0, ['dead', String, Float]
-      @redis.expect :zremrangebyrank, 0, ['dead', Numeric, Numeric]
-      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => 0 }
-      msg2 = msg.dup
-      handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
-        handler.call(worker, msg, 'default') do
+        handler.call(worker, job('retry' => 0), 'default') do
           raise "kerblammo!"
         end
       end
-      msg.delete('failed_at')
-      expected = msg2.merge "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "retry_count"=>0
-      assert_equal expected, msg
-      @redis.verify # not called
+      assert_equal 0, Sidekiq::RetrySet.new.size
+      assert_equal 1, Sidekiq::DeadSet.new.size
     end
 
     it 'handles zany characters in error message, #1705' do
       skip 'skipped! test requires ruby 2.1+' if RUBY_VERSION <= '2.1.0'
-      @redis.expect :zadd, 1, ['retry', String, String]
-      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => 2 }
-      msg2 = msg.dup
-      handler = Sidekiq::Middleware::Server::RetryJobs.new
+
       assert_raises RuntimeError do
-        handler.call(worker, msg2, 'default') do
+        handler.call(worker, job, 'default') do
           raise "kerblammo! #{195.chr}"
         end
       end
-      msg2.delete('failed_at')
-      assert_equal({"class"=>"Bob", "args"=>[1, 2, "foo"], "retry"=>2, "queue"=>"default", "error_message"=>"kerblammo! �", "error_class"=>"RuntimeError", "retry_count"=>0}, msg2)
-      @redis.verify
+      assert_equal "kerblammo! �", job["error_message"]
     end
 
 
     it 'allows a max_retries option in initializer' do
       max_retries = 7
-      1.upto(max_retries) do
-        @redis.expect :zadd, 1, ['retry', String, String]
-      end
-      @redis.expect :zadd, 1, ['dead', Float, String]
-      @redis.expect :zremrangebyscore, 0, ['dead', String, Float]
-      @redis.expect :zremrangebyrank, 0, ['dead', Numeric, Numeric]
-      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }
-      handler = Sidekiq::Middleware::Server::RetryJobs.new({:max_retries => max_retries})
       1.upto(max_retries + 1) do
         assert_raises RuntimeError do
-          handler.call(worker, msg, 'default') do
+          handler(:max_retries => max_retries).call(worker, job, 'default') do
             raise "kerblammo!"
           end
         end
       end
-      @redis.verify
+
+      assert_equal max_retries, Sidekiq::RetrySet.new.size
+      assert_equal 1, Sidekiq::DeadSet.new.size
     end
 
     it 'saves backtraces' do
-      @redis.expect :zadd, 1, ['retry', String, String]
-      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true, 'backtrace' => true }
-      handler = Sidekiq::Middleware::Server::RetryJobs.new
       c = nil
       assert_raises RuntimeError do
-        handler.call(worker, msg, 'default') do
+        handler.call(worker, job('backtrace' => true), 'default') do
           c = caller(0); raise "kerblammo!"
         end
       end
-      assert msg["error_backtrace"]
-      assert_equal c[0], msg["error_backtrace"][0]
-      @redis.verify
+      assert job["error_backtrace"]
+      assert_equal c[0], job["error_backtrace"][0]
     end
 
     it 'saves partial backtraces' do
-      @redis.expect :zadd, 1, ['retry', String, String]
-      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true, 'backtrace' => 3 }
-      handler = Sidekiq::Middleware::Server::RetryJobs.new
       c = nil
       assert_raises RuntimeError do
-        handler.call(worker, msg, 'default') do
+        handler.call(worker, job('backtrace' => 3), 'default') do
           c = caller(0)[0...3]; raise "kerblammo!"
         end
       end
-      assert msg["error_backtrace"]
-      assert_equal c, msg["error_backtrace"]
+      assert job["error_backtrace"]
+      assert_equal c, job["error_backtrace"]
       assert_equal 3, c.size
-      assert_equal 3, msg["error_backtrace"].size
     end
 
     it 'handles a new failed message' do
-      @redis.expect :zadd, 1, ['retry', String, String]
-      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }
-      handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
-        handler.call(worker, msg, 'default') do
+        handler.call(worker, job, 'default') do
           raise "kerblammo!"
         end
       end
-      assert_equal 'default', msg["queue"]
-      assert_equal 'kerblammo!', msg["error_message"]
-      assert_equal 'RuntimeError', msg["error_class"]
-      assert_equal 0, msg["retry_count"]
-      refute msg["error_backtrace"]
-      assert msg["failed_at"]
-      @redis.verify
+      assert_equal 'default', job["queue"]
+      assert_equal 'kerblammo!', job["error_message"]
+      assert_equal 'RuntimeError', job["error_class"]
+      assert_equal 0, job["retry_count"]
+      refute job["error_backtrace"]
+      assert job["failed_at"]
     end
 
     it 'shuts down without retrying work-in-progress, which will resume' do
-      @redis.expect :zadd, 1, ['retry', String, String]
+      rs = Sidekiq::RetrySet.new
+      assert_equal 0, rs.size
       msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }
-      handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises Sidekiq::Shutdown do
         handler.call(worker, msg, 'default') do
           raise Sidekiq::Shutdown
         end
       end
-      assert_raises(MockExpectationError, "zadd should not be called") do
-        @redis.verify
-      end
+      assert_equal 0, rs.size
     end
 
     it 'shuts down cleanly when shutdown causes exception' do
       skip('Not supported in Ruby < 2.1.0') if RUBY_VERSION < '2.1.0'
 
-      @redis.expect :zadd, 1, ['retry', String, String]
+      rs = Sidekiq::RetrySet.new
+      assert_equal 0, rs.size
       msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }
-      handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises Sidekiq::Shutdown do
         handler.call(worker, msg, 'default') do
           begin
@@ -183,19 +144,16 @@ class TestRetry < Sidekiq::Test
           end
         end
       end
-      assert_raises(MockExpectationError, "zadd should not be called") do
-        @redis.verify
-      end
+      assert_equal 0, rs.size
     end
 
     it 'shuts down cleanly when shutdown causes chained exceptions' do
       skip('Not supported in Ruby < 2.1.0') if RUBY_VERSION < '2.1.0'
 
-      @redis.expect :zadd, 1, ['retry', String, String]
-      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }
-      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      rs = Sidekiq::RetrySet.new
+      assert_equal 0, rs.size
       assert_raises Sidekiq::Shutdown do
-        handler.call(worker, msg, 'default') do
+        handler.call(worker, job, 'default') do
           begin
             raise Sidekiq::Shutdown
           rescue Interrupt
@@ -207,93 +165,55 @@ class TestRetry < Sidekiq::Test
           end
         end
       end
-      assert_raises(MockExpectationError, "zadd should not be called") do
-        @redis.verify
-      end
+      assert_equal 0, rs.size
     end
 
     it 'allows a retry queue' do
-      @redis.expect :zadd, 1, ['retry', String, String]
-      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true, 'retry_queue' => 'retry' }
-      handler = Sidekiq::Middleware::Server::RetryJobs.new
       assert_raises RuntimeError do
-        handler.call(worker, msg, 'default') do
+        handler.call(worker, job("retry_queue" => 'retryx'), 'default') do
           raise "kerblammo!"
         end
       end
-      assert_equal 'retry', msg["queue"]
-      assert_equal 'kerblammo!', msg["error_message"]
-      assert_equal 'RuntimeError', msg["error_class"]
-      assert_equal 0, msg["retry_count"]
-      refute msg["error_backtrace"]
-      assert msg["failed_at"]
-      @redis.verify
+      assert_equal 'retryx', job["queue"]
+      assert_equal 'kerblammo!', job["error_message"]
+      assert_equal 'RuntimeError', job["error_class"]
+      assert_equal 0, job["retry_count"]
+      refute job["error_backtrace"]
+      assert job["failed_at"]
     end
 
     it 'handles a recurring failed message' do
-      @redis.expect :zadd, 1, ['retry', String, String]
       now = Time.now.to_f
-      msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], 'retry' => true, "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>10}
-      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      msg = {"queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>10}
       assert_raises RuntimeError do
-        handler.call(worker, msg, 'default') do
+        handler.call(worker, job(msg), 'default') do
           raise "kerblammo!"
         end
       end
-      assert_equal 'default', msg["queue"]
-      assert_equal 'kerblammo!', msg["error_message"]
-      assert_equal 'RuntimeError', msg["error_class"]
-      assert_equal 11, msg["retry_count"]
-      assert msg["failed_at"]
-      @redis.verify
-    end
-
-    it 'handles a recurring failed message before reaching user-specifed max' do
-      @redis.expect :zadd, 1, ['retry', String, String]
-      now = Time.now.to_f
-      msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], 'retry' => 10, "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>8}
-      handler = Sidekiq::Middleware::Server::RetryJobs.new
-      assert_raises RuntimeError do
-        handler.call(worker, msg, 'default') do
-          raise "kerblammo!"
-        end
-      end
-      assert_equal 'default', msg["queue"]
-      assert_equal 'kerblammo!', msg["error_message"]
-      assert_equal 'RuntimeError', msg["error_class"]
-      assert_equal 9, msg["retry_count"]
-      assert msg["failed_at"]
-      @redis.verify
+      assert_equal 'default', job["queue"]
+      assert_equal 'kerblammo!', job["error_message"]
+      assert_equal 'RuntimeError', job["error_class"]
+      assert_equal 11, job["retry_count"]
+      assert job["failed_at"]
     end
 
     it 'throws away old messages after too many retries (using the default)' do
+      q = Sidekiq::Queue.new
+      rs = Sidekiq::RetrySet.new
+      ds = Sidekiq::DeadSet.new
+      assert_equal 0, q.size
+      assert_equal 0, rs.size
+      assert_equal 0, ds.size
       now = Time.now.to_f
-      msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry"=>true, "retry_count"=>25}
-      @redis.expect :zadd, 1, ['dead', Float, String]
-      @redis.expect :zremrangebyscore, 0, ['dead', String, Float]
-      @redis.expect :zremrangebyrank, 0, ['dead', Numeric, Numeric]
-      handler = Sidekiq::Middleware::Server::RetryJobs.new
+      msg = {"queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>25}
       assert_raises RuntimeError do
-        handler.call(worker, msg, 'default') do
+        handler.call(worker, job(msg), 'default') do
           raise "kerblammo!"
         end
       end
-      @redis.verify
-    end
-
-    it 'throws away old messages after too many retries (using user-specified max)' do
-      now = Time.now.to_f
-      msg = {"class"=>"Bob", "args"=>[1, 2, "foo"], "queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry"=>3, "retry_count"=>3}
-      @redis.expect :zadd, 1, ['dead', Float, String]
-      @redis.expect :zremrangebyscore, 0, ['dead', String, Float]
-      @redis.expect :zremrangebyrank, 0, ['dead', Numeric, Numeric]
-      handler = Sidekiq::Middleware::Server::RetryJobs.new
-      assert_raises RuntimeError do
-        handler.call(worker, msg, 'default') do
-          raise "kerblammo!"
-        end
-      end
-      @redis.verify
+      assert_equal 0, q.size
+      assert_equal 0, rs.size
+      assert_equal 1, ds.size
     end
 
     describe "custom retry delay" do
@@ -309,38 +229,32 @@ class TestRetry < Sidekiq::Test
         File.unlink @tmp_log_path if File.exist?(@tmp_log_path)
       end
 
-      let(:custom_worker) do
-        Class.new do
-          include ::Sidekiq::Worker
+      class CustomWorker
+        include Sidekiq::Worker
 
-          sidekiq_retry_in do |count|
-            count * 2
-          end
+        sidekiq_retry_in do |count|
+          count * 2
         end
       end
 
-      let(:error_worker) do
-        Class.new do
-          include ::Sidekiq::Worker
+      class ErrorWorker
+        include Sidekiq::Worker
 
-          sidekiq_retry_in do |count|
-            count / 0
-          end
+        sidekiq_retry_in do |count|
+          count / 0
         end
       end
-
-      let(:handler) { Sidekiq::Middleware::Server::RetryJobs.new }
 
       it "retries with a default delay" do
         refute_equal 4, handler.__send__(:delay_for, worker, 2)
       end
 
       it "retries with a custom delay" do
-        assert_equal 4, handler.__send__(:delay_for, custom_worker, 2)
+        assert_equal 4, handler.__send__(:delay_for, CustomWorker, 2)
       end
 
       it "falls back to the default retry on exception" do
-        refute_equal 4, handler.__send__(:delay_for, error_worker, 2)
+        refute_equal 4, handler.__send__(:delay_for, ErrorWorker, 2)
         assert_match(/Failure scheduling retry using the defined `sidekiq_retry_in`/,
                      File.read(@tmp_log_path), 'Log entry missing for sidekiq_retry_in')
       end
