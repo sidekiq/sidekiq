@@ -10,6 +10,8 @@ HEAD
   Sidekiq Pro will randomly spread batches across the shards.  The BID
   will indicate which shard contains the batch data.  Jobs within a
   batch may be spread across all shards too. [#2548, jonhyman]
+- Officially deprecate Sidekiq::Notifications code.  Notifications have
+  been undocumented for months now. [#2575]
 
 
 2.0.8
