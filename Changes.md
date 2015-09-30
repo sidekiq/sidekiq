@@ -408,7 +408,7 @@ middleware, see 3.0-Upgrade.md.**
 [Testing](https://github.com/mperham/sidekiq/wiki/Testing) for detail. [#1193]
 - The Retries table has a new column for the error message.
 - The Web UI topbar now contains the status and live poll button.
-- Orphaned worker records are now auto-vacuumed when you vist the
+- Orphaned worker records are now auto-vacuumed when you visit the
   Workers page in the Web UI.
 - Sidekiq.default\_worker\_options allows you to configure default
   options for all Sidekiq worker types.
