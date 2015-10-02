@@ -19,6 +19,12 @@ module Sidekiq
       raise ex
     end
 
+    def safe_thread(name, &block)
+      Thread.new do
+        watchdog(name, &block)
+      end
+    end
+
     def logger
       Sidekiq.logger
     end

@@ -1,60 +1,100 @@
 require 'sidekiq'
 require 'sidekiq/util'
 require 'sidekiq/actor'
+require 'thread'
 
 module Sidekiq
   ##
-  # The Fetcher blocks on Redis, waiting for a message to process
-  # from the queues.  It gets the message and hands it to the Manager
+  # The Fetcher blocks on Redis, waiting for a job to process
+  # from the queues.  It gets the job and hands it to the Manager
   # to assign to a ready Processor.
+  #
+  #     f = Fetcher.new(mgr, opts)
+  #     f.start
+  #
+  # Now anyone can call:
+  #
+  #     f.request_job
+  #
+  # and the fetcher will handle a job to the mgr.
+  #
+  # The Manager makes a request_job call for each idle processor
+  # when Sidekiq starts and then issues a new request_job call
+  # every time a Processor finishes a job.
+  #
   class Fetcher
     include Util
-    include Actor
 
     TIMEOUT = 1
+    REQUEST = Object.new
 
     attr_reader :down
 
     def initialize(mgr, options)
+      @done = false
       @down = nil
       @mgr = mgr
       @strategy = Fetcher.strategy.new(options)
+      @requests = ConnectionPool::TimedStack.new
     end
 
-    # Fetching is straightforward: the Manager makes a fetch
-    # request for each idle processor when Sidekiq starts and
-    # then issues a new fetch request every time a Processor
-    # finishes a message.
-    #
-    # Because we have to shut down cleanly, we can't block
-    # forever and we can't loop forever.  Instead we reschedule
-    # a new fetch if the current fetch turned up nothing.
-    def fetch
-      watchdog('Fetcher#fetch died') do
-        return if Sidekiq::Fetcher.done?
+    def request_job
+      @requests << REQUEST
+      nil
+    end
 
-        begin
-          work = @strategy.retrieve_work
-          ::Sidekiq.logger.info("Redis is online, #{Time.now - @down} sec downtime") if @down
-          @down = nil
+    # Shut down this Fetcher instance, will pause until
+    # the thread is dead.
+    def terminate
+      @done = true
+      if @thread
+        t = @thread
+        @thread = nil
+        @requests << 0
+        t.value
+      end
+    end
 
-          if work
-            @mgr.async.assign(work)
-          else
-            after(0) { fetch }
-          end
-        rescue => ex
-          handle_fetch_exception(ex)
+    # Spins up the thread for this Fetcher instance
+    def start
+      @thread ||= safe_thread("fetcher") do
+        while !@done
+          get_one
         end
+        Sidekiq.logger.debug("Fetcher shutting down")
+      end
+    end
 
+    # not for public use, testing only
+    def wait_for_request
+      begin
+        req = @requests.pop(1)
+        return if !req || @done
+
+        result = yield
+        unless result
+          @requests << req
+        end
+        result
+      rescue => ex
+        handle_fetch_exception(ex)
+        @requests << REQUEST
+      end
+    end
+
+    # not for public use, testing only
+    def get_one
+      wait_for_request do
+        work = @strategy.retrieve_work
+        ::Sidekiq.logger.info("Redis is online, #{Time.now - @down} sec downtime") if @down
+        @down = nil
+
+        @mgr.assign(work) if work
+        work
       end
     end
 
     private
-
-    def pause
-      sleep(TIMEOUT)
-    end
 
     def handle_fetch_exception(ex)
       if !@down
@@ -64,26 +104,7 @@ module Sidekiq
         end
       end
       @down ||= Time.now
-      pause
-      after(0) { fetch }
-    rescue Celluloid::TaskTerminated
-      # If redis is down when we try to shut down, all the fetch backlog
-      # raises these errors.  Haven't been able to figure out what I'm doing wrong.
-    end
-
-    # Ugh.  Say hello to a bloody hack.
-    # Can't find a clean way to get the fetcher to just stop processing
-    # its mailbox when shutdown starts.
-    def self.done!
-      @done = true
-    end
-
-    def self.reset # testing only
-      @done = nil
-    end
-
-    def self.done?
-      defined?(@done) && @done
+      sleep(TIMEOUT)
     end
 
     def self.strategy

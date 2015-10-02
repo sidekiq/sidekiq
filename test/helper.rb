@@ -17,9 +17,6 @@ end
 require 'minitest/autorun'
 require 'minitest/pride'
 
-require 'celluloid/current'
-require 'celluloid/test'
-Celluloid.boot
 require 'sidekiq'
 require 'sidekiq/util'
 Sidekiq.logger.level = Logger::ERROR

@@ -40,7 +40,6 @@ module Sidekiq
       validate!
       daemonize
       write_pid
-      load_celluloid
     end
 
     # Code within this method is not tested because it alters
@@ -158,19 +157,6 @@ module Sidekiq
         puts Sidekiq::CLI.banner
         puts "\e[0m"
       end
-    end
-
-    def load_celluloid
-      raise "Celluloid cannot be required until here, or it will break Sidekiq's daemonization" if defined?(::Celluloid) && options[:daemon]
-
-      # Celluloid can't be loaded until after we've daemonized
-      # because it spins up threads and creates locks which get
-      # into a very bad state if forked.
-      require 'celluloid/current'
-      Celluloid.logger = (options[:verbose] ? Sidekiq.logger : nil)
-
-      require 'sidekiq/manager'
-      require 'sidekiq/scheduled'
     end
 
     def daemonize
