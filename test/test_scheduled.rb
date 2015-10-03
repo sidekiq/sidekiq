@@ -37,7 +37,7 @@ class TestScheduled < Sidekiq::Test
         @scheduled.schedule (Time.now - 60).to_f, @future_2
         @scheduled.schedule (Time.now - 60).to_f, @future_3
 
-        @poller.poll
+        @poller.enqueue
 
         assert_equal 0, Sidekiq::Queue.new("queue_1").size
         assert_equal 1, Sidekiq::Queue.new("queue_2").size
@@ -62,7 +62,7 @@ class TestScheduled < Sidekiq::Test
       end
 
       Time.stub(:now, enqueued_time) do
-        @poller.poll
+        @poller.enqueue
 
         Sidekiq.redis do |conn|
           %w(queue:queue_1 queue:queue_2 queue:queue_4 queue:queue_5).each do |queue_name|

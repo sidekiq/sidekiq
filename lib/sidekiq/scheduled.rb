@@ -39,28 +39,46 @@ module Sidekiq
     # workers can pick it up like any other job.
     class Poller
       include Util
-      include Actor
 
       INITIAL_WAIT = 10
 
       def initialize
         @enq = (Sidekiq.options[:scheduled_enq] || Sidekiq::Scheduled::Enq).new
+        @done = false
+        @queue = ConnectionPool::TimedStack.new
       end
 
-      def poll(first_time=false)
-        watchdog('scheduling poller thread died!') do
-          initial_wait if first_time
+      # Shut down this Fetcher instance, will pause until
+      # the thread is dead.
+      def terminate
+        @done = true
+        if @thread
+          t = @thread
+          @thread = nil
+          @queue << 0
+          t.value
+        end
+      end
 
-          begin
-            @enq.enqueue_jobs
-          rescue => ex
-            # Most likely a problem with redis networking.
-            # Punt and try again at the next interval
-            logger.error ex.message
-            logger.error ex.backtrace.first
+      def start
+        @thread ||= safe_thread("scheduler") do
+          @queue.pop(initial_wait)
+
+          while !@done
+            enqueue
+            @queue.pop(random_poll_interval)
           end
+        end
+      end
 
-          after(random_poll_interval) { poll }
+      def enqueue
+        begin
+          @enq.enqueue_jobs
+        rescue => ex
+          # Most likely a problem with redis networking.
+          # Punt and try again at the next interval
+          logger.error ex.message
+          logger.error ex.backtrace.first
         end
       end
 
@@ -98,16 +116,12 @@ module Sidekiq
       end
 
       def initial_wait
-        begin
-          # Have all processes sleep between 5-15 seconds.  10 seconds
-          # to give time for the heartbeat to register (if the poll interval is going to be calculated by the number
-          # of workers), and 5 random seconds to ensure they don't all hit Redis at the same time.
-          sleep(INITIAL_WAIT) unless Sidekiq.options[:poll_interval_average]
-          sleep(5 * rand)
-        rescue Celluloid::TaskTerminated
-          # Hit Ctrl-C when Sidekiq is finished booting and we have a chance
-          # to get here.
-        end
+        # Have all processes sleep between 5-15 seconds.  10 seconds
+        # to give time for the heartbeat to register (if the poll interval is going to be calculated by the number
+        # of workers), and 5 random seconds to ensure they don't all hit Redis at the same time.
+        total = 0
+        total += INITIAL_WAIT unless Sidekiq.options[:poll_interval_average]
+        total += (5 * rand)
       end
 
     end
