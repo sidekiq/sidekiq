@@ -66,9 +66,6 @@ function updatePage(url) {
       var $header_status = $data.find('.status')
       $('.status').replaceWith($header_status)
 
-      var $favicon = $data.filter('link[rel$="icon"]')
-      $('link[rel$="icon"]').replaceWith($favicon)
-
       $("time").timeago()
     })
   }, parseInt(localStorage.timeInterval) || 2000);
