@@ -1,5 +1,4 @@
 require 'sidekiq/util'
-require 'sidekiq/actor'
 
 require 'sidekiq/middleware/server/retry_jobs'
 require 'sidekiq/middleware/server/logging'
@@ -10,12 +9,12 @@ module Sidekiq
   # processes it.  It instantiates the worker, runs the middleware
   # chain and then calls Sidekiq::Worker#perform.
   class Processor
-    # To prevent a memory leak, ensure that stats expire. However, they should take up a minimal amount of storage
-    # so keep them around for a long time
+    # To prevent a memory leak, ensure that stats expire. However, they
+    # should take up a minimal amount of storage so keep them around
+    # for a long time.
     STATS_TIMEOUT = 24 * 60 * 60 * 365 * 5
 
     include Util
-    include Actor
 
     def self.default_middleware
       Middleware::Chain.new do |m|
@@ -28,17 +27,53 @@ module Sidekiq
       end
     end
 
-    attr_accessor :proxy_id
+    attr_reader :thread
 
-    def initialize(boss)
-      @boss = boss
+    def initialize(mgr)
+      @mgr = mgr
+      @done = false
+      @work = ::Queue.new
+      @thread = safe_thread("processor", &method(:run))
+    end
+
+    def terminate(wait=false)
+      @done = true
+      @work << nil
+      # unlike the other actors, terminate does not wait
+      # for the thread to finish because we don't know how
+      # long the job will take to finish.  Instead we
+      # provide a `kill` method to call after the shutdown
+      # timeout passes.
+      @thread.value if wait
+    end
+
+    def kill(wait=false)
+      @thread.raise ::Sidekiq::Shutdown
+      @thread.value if wait
     end
 
     def process(work)
+      raise ArgumentError, "Processor is shut down!" if @done
+      @work << work
+    end
+
+    private
+
+    def run
+      begin
+        while !@done
+          job = @work.pop
+          go(job) if job
+        end
+      rescue Exception => ex
+        Sidekiq.logger.warn(ex.message)
+        @mgr.processor_died(self, ex)
+      end
+    end
+
+    def go(work)
       msgstr = work.message
       queue = work.queue_name
-
-      @boss.async.real_thread(proxy_id, Thread.current)
 
       ack = false
       begin
@@ -69,18 +104,12 @@ module Sidekiq
         work.acknowledge if ack
       end
 
-      @boss.async.processor_done(current_actor)
-    end
-
-    def inspect
-      "<Processor##{object_id.to_s(16)}>"
+      @mgr.processor_done(self)
     end
 
     def execute_job(worker, cloned_args)
       worker.perform(*cloned_args)
     end
-
-    private
 
     def thread_identity
       @str ||= Thread.current.object_id.to_s(36)
@@ -94,7 +123,7 @@ module Sidekiq
         Sidekiq.redis do |conn|
           conn.multi do
             conn.hmset("#{identity}:workers", thread_identity, hash)
-            conn.expire("#{identity}:workers", 60*60*4)
+            conn.expire("#{identity}:workers", 14400)
           end
         end
       end
