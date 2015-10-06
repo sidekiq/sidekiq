@@ -45,7 +45,10 @@ module Sidekiq
     end
 
     def start
-      @ready.each { |x| x.start; dispatch }
+      @ready.each do |x|
+        x.start
+        dispatch
+      end
     end
 
     def quiet
@@ -63,16 +66,16 @@ module Sidekiq
 
     def stop(deadline)
       quiet
-      return shutdown if @in_progress.empty?
+      return if @in_progress.empty?
 
       logger.info { "Pausing to allow workers to finish..." }
       remaining = deadline - Time.now
       while remaining > 0.5
-        return shutdown if @in_progress.empty?
+        return if @in_progress.empty?
         sleep 0.5
         remaining = deadline - Time.now
       end
-      return shutdown if @in_progress.empty?
+      return if @in_progress.empty?
 
       hard_shutdown
     end
@@ -96,7 +99,9 @@ module Sidekiq
         if @done
           #shutdown if @in_progress.empty?
         else
-          @ready << Processor.new(self)
+          p = Processor.new(self)
+          p.start
+          @ready << p
         end
       end
       dispatch
@@ -127,13 +132,25 @@ module Sidekiq
 
     def hard_shutdown
       # We've reached the timeout and we still have busy workers.
-      # They must die but their messages shall live on.
-      logger.warn { "Terminating #{@in_progress.size} busy worker threads" }
-      logger.warn { "Work still in progress #{@in_progress.values.inspect}" }
+      # They must die but their jobs shall live on.
+      cleanup = nil
+      @plock.synchronize do
+        cleanup = @in_progress.dup
+      end
 
-      requeue
+      if cleanup.size > 0
+        logger.warn { "Terminating #{cleanup.size} busy worker threads" }
+        logger.warn { "Work still in progress #{cleanup.values.inspect}" }
+        # Re-enqueue unfinished jobs
+        # NOTE: You may notice that we may push a job back to redis before
+        # the worker thread is terminated. This is ok because Sidekiq's
+        # contract says that jobs are run AT LEAST once. Process termination
+        # is delayed until we're certain the jobs are back in Redis because
+        # it is worse to lose a job than to run it twice.
+        Sidekiq::Fetcher.strategy.bulk_requeue(cleanup.values, @options)
+      end
 
-      @in_progress.each do |processor, _|
+      cleanup.each do |processor, _|
         processor.kill
       end
     end
@@ -147,22 +164,5 @@ module Sidekiq
       @fetcher.request_job
     end
 
-    def shutdown
-      requeue
-    end
-
-    def requeue
-      # Re-enqueue unfinished jobs
-      # NOTE: You may notice that we may push a job back to redis before
-      # the worker thread is terminated. This is ok because Sidekiq's
-      # contract says that jobs are run AT LEAST once. Process termination
-      # is delayed until we're certain the jobs are back in Redis because
-      # it is worse to lose a job than to run it twice.
-      jobs = nil
-      @plock.synchronize do
-        jobs = @in_progress.values
-      end
-      Sidekiq::Fetcher.strategy.bulk_requeue(jobs, @options) if jobs.size > 0
-    end
   end
 end

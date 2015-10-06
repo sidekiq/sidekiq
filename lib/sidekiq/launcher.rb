@@ -53,7 +53,7 @@ module Sidekiq
       # This call is a no-op in Sidekiq but necessary for Sidekiq Pro.
       Sidekiq::Fetcher.strategy.bulk_requeue([], @options)
 
-      stop_heartbeat
+      clear_heartbeat
     end
 
     private unless $TESTING
@@ -120,10 +120,13 @@ module Sidekiq
         heartbeat(key, data, json)
         sleep 5
       end
+      Sidekiq.logger.info("Heartbeat stopping...")
     end
 
-    def stop_heartbeat
-      @done = true
+    def clear_heartbeat
+      # Remove record from Redis since we are shutting down.
+      # Note we don't stop the heartbeat thread; if the process
+      # doesn't actually exit, it'll reappear in the Web UI.
       Sidekiq.redis do |conn|
         conn.pipelined do
           conn.srem('processes', identity)

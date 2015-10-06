@@ -70,7 +70,6 @@ module Sidekiq
           process(job) if job
         end
       rescue Exception => ex
-        Sidekiq.logger.warn(ex.message)
         @mgr.processor_died(self, ex)
       end
     end

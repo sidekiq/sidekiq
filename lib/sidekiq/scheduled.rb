@@ -62,12 +62,13 @@ module Sidekiq
 
       def start
         @thread ||= safe_thread("scheduler") do
-          @queue.pop(initial_wait)
+          initial_wait
 
           while !@done
             enqueue
-            @queue.pop(random_poll_interval)
+            wait
           end
+          Sidekiq.logger.info("Scheduler exiting...")
         end
       end
 
@@ -83,6 +84,11 @@ module Sidekiq
       end
 
       private
+
+      def wait
+        @queue.pop(random_poll_interval)
+      rescue Timeout::Error
+      end
 
       # Calculates a random interval that is ±50% the desired average.
       def random_poll_interval
@@ -122,6 +128,9 @@ module Sidekiq
         total = 0
         total += INITIAL_WAIT unless Sidekiq.options[:poll_interval_average]
         total += (5 * rand)
+
+        @queue.pop(total)
+      rescue Timeout::Error
       end
 
     end

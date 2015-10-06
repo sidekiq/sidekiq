@@ -61,7 +61,7 @@ module Sidekiq
         while !@done
           get_one
         end
-        Sidekiq.logger.debug("Fetcher shutting down")
+        Sidekiq.logger.info("Fetcher exiting...")
       end
     end
 
