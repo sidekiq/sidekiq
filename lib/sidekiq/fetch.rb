@@ -68,8 +68,13 @@ module Sidekiq
     # not for public use, testing only
     def wait_for_request
       begin
-        req = @requests.pop(1)
-        return if !req || @done
+        req = nil
+        begin
+          req = @requests.pop(1)
+          return if @done
+        rescue Timeout::Error
+          return
+        end
 
         result = yield
         unless result
