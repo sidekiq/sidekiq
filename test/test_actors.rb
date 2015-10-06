@@ -94,13 +94,14 @@ class TestActors < Sidekiq::Test
       mgr = Mgr.new
 
       p = Sidekiq::Processor.new(mgr)
+      p.start
       SomeWorker.perform_async(0)
 
       job = Sidekiq.redis { |c| c.lpop("queue:default") }
       uow = Sidekiq::BasicFetch::UnitOfWork.new('default', job)
       a = $count
       mgr.mutex.synchronize do
-        p.process(uow)
+        p.request_process(uow)
         mgr.cond.wait(mgr.mutex)
       end
       b = $count
@@ -115,13 +116,14 @@ class TestActors < Sidekiq::Test
       mgr = Mgr.new
 
       p = Sidekiq::Processor.new(mgr)
+      p.start
       SomeWorker.perform_async("boom")
 
       job = Sidekiq.redis { |c| c.lpop("queue:default") }
       uow = Sidekiq::BasicFetch::UnitOfWork.new('default', job)
       a = $count
       mgr.mutex.synchronize do
-        p.process(uow)
+        p.request_process(uow)
         mgr.cond.wait(mgr.mutex)
       end
       b = $count
@@ -140,7 +142,8 @@ class TestActors < Sidekiq::Test
       job = Sidekiq.redis { |c| c.lpop("queue:default") }
       uow = Sidekiq::BasicFetch::UnitOfWork.new('default', job)
       a = $count
-      p.process(uow)
+      p.start
+      p.request_process(uow)
       sleep(0.02)
       p.terminate
       p.kill(true)

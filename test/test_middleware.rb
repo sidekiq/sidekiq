@@ -80,11 +80,7 @@ class TestMiddleware < Sidekiq::Test
 
       boss = Minitest::Mock.new
       processor = Sidekiq::Processor.new(boss)
-      actor = Minitest::Mock.new
-      actor.expect(:processor_done, nil, [processor])
-      actor.expect(:real_thread, nil, [nil, Thread])
-      boss.expect(:async, actor, [])
-      boss.expect(:async, actor, [])
+      boss.expect(:processor_done, nil, [processor])
       processor.process(Sidekiq::BasicFetch::UnitOfWork.new('queue:default', msg))
       assert_equal %w(2 before 3 before 1 before work_performed 1 after 3 after 2 after), $recorder.flatten
     end

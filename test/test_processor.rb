@@ -1,15 +1,17 @@
 require_relative 'helper'
+require 'sidekiq/fetch'
+require 'sidekiq/cli'
 require 'sidekiq/processor'
 
 class TestProcessor < Sidekiq::Test
   TestException = Class.new(StandardError)
   TEST_EXCEPTION = TestException.new("kerboom!")
 
-  describe 'with mock setup' do
+  describe 'processor' do
     before do
       $invokes = 0
-      @boss = Minitest::Mock.new
-      @processor = ::Sidekiq::Processor.new(@boss)
+      @mgr = Minitest::Mock.new
+      @processor = ::Sidekiq::Processor.new(@mgr)
     end
 
     class MockWorker
@@ -27,13 +29,9 @@ class TestProcessor < Sidekiq::Test
 
     it 'processes as expected' do
       msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
-      actor = Minitest::Mock.new
-      actor.expect(:processor_done, nil, [@processor])
-      actor.expect(:real_thread, nil, [nil, Thread])
-      @boss.expect(:async, actor, [])
-      @boss.expect(:async, actor, [])
+      @mgr.expect(:processor_done, nil, [Sidekiq::Processor])
       @processor.process(work(msg))
-      @boss.verify
+      @mgr.verify
       assert_equal 1, $invokes
     end
 
@@ -43,46 +41,26 @@ class TestProcessor < Sidekiq::Test
       @processor.execute_job(worker, [1, 2, 3])
     end
 
-    it 'passes exceptions to ExceptionHandler' do
-      actor = Minitest::Mock.new
-      actor.expect(:real_thread, nil, [nil, Thread])
-      @boss.expect(:async, actor, [])
-      msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'] })
-      begin
-        @processor.process(work(msg))
-        flunk "Expected #process to raise exception"
-      rescue TestException
-      end
-
-      assert_equal 0, $invokes
-    end
-
     it 're-raises exceptions after handling' do
       msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'] })
       re_raise = false
-      actor = Minitest::Mock.new
-      actor.expect(:real_thread, nil, [nil, Thread])
-      @boss.expect(:async, actor, [])
 
       begin
         @processor.process(work(msg))
+        flunk "Expected exception"
       rescue TestException
         re_raise = true
       end
 
+      assert_equal 0, $invokes
       assert re_raise, "does not re-raise exceptions after handling"
     end
 
     it 'does not modify original arguments' do
       msg = { 'class' => MockWorker.to_s, 'args' => [['myarg']] }
       msgstr = Sidekiq.dump_json(msg)
-      processor = ::Sidekiq::Processor.new(@boss)
-      actor = Minitest::Mock.new
-      actor.expect(:processor_done, nil, [processor])
-      actor.expect(:real_thread, nil, [nil, Thread])
-      @boss.expect(:async, actor, [])
-      @boss.expect(:async, actor, [])
-      processor.process(work(msgstr))
+      @mgr.expect(:processor_done, nil, [@processor])
+      @processor.process(work(msgstr))
       assert_equal [['myarg']], msg['args']
     end
 
@@ -106,17 +84,13 @@ class TestProcessor < Sidekiq::Test
       let(:skip_job) { false }
       let(:worker_args) { ['myarg'] }
       let(:work) { MiniTest::Mock.new }
-      let(:actor) { Minitest::Mock.new }
 
       before do
-        work.expect(:queue_name, 'queues:default')
+        work.expect(:queue_name, 'queue:default')
         work.expect(:message, Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => worker_args }))
         Sidekiq.server_middleware do |chain|
           chain.prepend ExceptionRaisingMiddleware, raise_before_yield, raise_after_yield, skip_job
         end
-
-        actor.expect(:real_thread, nil, [nil, Thread])
-        @boss.expect(:async, actor, [])
       end
 
       after do
@@ -156,8 +130,7 @@ class TestProcessor < Sidekiq::Test
 
         it 'acks the job' do
           work.expect(:acknowledge, nil)
-          @boss.expect(:async, actor, [])
-          actor.expect(:processor_done, nil, [@processor])
+          @mgr.expect(:processor_done, nil, [@processor])
           @processor.process(work)
         end
       end
@@ -178,8 +151,7 @@ class TestProcessor < Sidekiq::Test
       describe 'everything goes well' do
         it 'acks the job' do
           work.expect(:acknowledge, nil)
-          @boss.expect(:async, actor, [])
-          actor.expect(:processor_done, nil, [@processor])
+          @mgr.expect(:processor_done, nil, [@processor])
           @processor.process(work)
         end
       end
@@ -195,11 +167,7 @@ class TestProcessor < Sidekiq::Test
 
         def successful_job
           msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
-          actor = Minitest::Mock.new
-          actor.expect(:real_thread, nil, [nil, Thread])
-          actor.expect(:processor_done, nil, [@processor])
-          @boss.expect(:async, actor, [])
-          @boss.expect(:async, actor, [])
+          @mgr.expect(:processor_done, nil, [@processor])
           @processor.process(work(msg))
         end
 
@@ -215,9 +183,6 @@ class TestProcessor < Sidekiq::Test
         let(:failed_today_key) { "stat:failed:#{Time.now.utc.strftime("%Y-%m-%d")}" }
 
         def failed_job
-          actor = Minitest::Mock.new
-          actor.expect(:real_thread, nil, [nil, Thread])
-          @boss.expect(:async, actor, [])
           msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'] })
           begin
             @processor.process(work(msg))

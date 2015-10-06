@@ -33,37 +33,41 @@ module Sidekiq
       @mgr = mgr
       @done = false
       @work = ::Queue.new
-      @thread = safe_thread("processor", &method(:run))
     end
 
     def terminate(wait=false)
       @done = true
       @work << nil
+      @thread.value if wait
+    end
+
+    def kill(wait=false)
       # unlike the other actors, terminate does not wait
       # for the thread to finish because we don't know how
       # long the job will take to finish.  Instead we
       # provide a `kill` method to call after the shutdown
       # timeout passes.
-      @thread.value if wait
-    end
-
-    def kill(wait=false)
       @thread.raise ::Sidekiq::Shutdown
       @thread.value if wait
     end
 
-    def process(work)
+    def start
+      @thread ||= safe_thread("processor", &method(:run))
+    end
+
+    def request_process(work)
       raise ArgumentError, "Processor is shut down!" if @done
+      raise ArgumentError, "Processor has not started!" unless @thread
       @work << work
     end
 
-    private
+    private unless $TESTING
 
     def run
       begin
         while !@done
           job = @work.pop
-          go(job) if job
+          process(job) if job
         end
       rescue Exception => ex
         Sidekiq.logger.warn(ex.message)
@@ -71,7 +75,7 @@ module Sidekiq
       end
     end
 
-    def go(work)
+    def process(work)
       msgstr = work.message
       queue = work.queue_name
 
@@ -121,7 +125,7 @@ module Sidekiq
       retry_and_suppress_exceptions do
         hash = Sidekiq.dump_json({:queue => queue, :payload => msg, :run_at => Time.now.to_i })
         Sidekiq.redis do |conn|
-          conn.multi do
+          conn.pipelined do
             conn.hmset("#{identity}:workers", thread_identity, hash)
             conn.expire("#{identity}:workers", 14400)
           end
@@ -135,7 +139,7 @@ module Sidekiq
         retry_and_suppress_exceptions do
           failed = "stat:failed:#{nowdate}"
           Sidekiq.redis do |conn|
-            conn.multi do
+            conn.pipelined do
               conn.incrby("stat:failed".freeze, 1)
               conn.incrby(failed, 1)
               conn.expire(failed, STATS_TIMEOUT)
@@ -147,7 +151,7 @@ module Sidekiq
         retry_and_suppress_exceptions do
           processed = "stat:processed:#{nowdate}"
           Sidekiq.redis do |conn|
-            conn.multi do
+            conn.pipelined do
               conn.hdel("#{identity}:workers", thread_identity)
               conn.incrby("stat:processed".freeze, 1)
               conn.incrby(processed, 1)
@@ -174,7 +178,7 @@ module Sidekiq
       rescue => e
         retry_count += 1
         if retry_count <= max_retries
-          Sidekiq.logger.debug {"Suppressing and retrying error: #{e.inspect}"}
+          Sidekiq.logger.info {"Suppressing and retrying error: #{e.inspect}"}
           pause_for_recovery(retry_count)
           retry
         else

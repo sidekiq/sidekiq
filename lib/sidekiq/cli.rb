@@ -129,7 +129,7 @@ module Sidekiq
         raise Interrupt
       when 'USR1'
         Sidekiq.logger.info "Received USR1, no longer accepting new work"
-        launcher.manager.async.stop
+        launcher.quiet
         fire_event(:quiet, true)
       when 'USR2'
         if Sidekiq.options[:logfile]
