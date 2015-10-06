@@ -107,7 +107,6 @@ class TestActors < Sidekiq::Test
       b = $count
       assert_equal a + 1, b
 
-      assert_equal "sleep", p.thread.status
       p.terminate(true)
       assert_equal false, p.thread.status
     end
