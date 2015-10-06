@@ -3,13 +3,9 @@
 # Quiet some warnings we see when running in warning mode:
 # RUBYOPT=-w bundle exec sidekiq
 $TESTING = false
-$CELLULOID_DEBUG = false
 
-require 'celluloid/current'
-puts Celluloid::VERSION
 require_relative '../lib/sidekiq/cli'
 require_relative '../lib/sidekiq/launcher'
-Celluloid.logger = nil
 
 include Sidekiq::Util
 
@@ -56,8 +52,7 @@ def handle_signal(launcher, sig)
     raise Interrupt
   when 'USR1'
     Sidekiq.logger.info "Received USR1, no longer accepting new work"
-    launcher.manager.async.stop
-    #fire_event(:quiet, true)
+    launcher.quiet
   when 'USR2'
     if Sidekiq.options[:logfile]
       Sidekiq.logger.info "Received USR2, reopening log file"
@@ -112,7 +107,6 @@ Monitoring = Thread.new do
       Sidekiq.logger.error("RSS: #{Process.rss} Pending: #{total}")
       if total == 0
         Sidekiq.logger.error("Done")
-        Celluloid.shutdown
         exit(0)
       end
     end
