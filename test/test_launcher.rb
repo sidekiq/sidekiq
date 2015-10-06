@@ -58,6 +58,7 @@ class TestLauncher < Sidekiq::Test
 
       describe 'when manager is stopped' do
         before do
+          @processor.expect(:hash, 1234, [])
           @processor.expect(:terminate, [])
 
           @launcher.quiet

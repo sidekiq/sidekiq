@@ -56,7 +56,7 @@ module Sidekiq
       stop_heartbeat
     end
 
-    private
+    private unless $TESTING
 
     JVM_RESERVED_SIGNALS = ['USR1', 'USR2'] # Don't Process#kill if we get these signals via the API
 
@@ -69,14 +69,11 @@ module Sidekiq
     ]
 
     def heartbeat(key, data, json)
-      while !@done
-        results = PROCTITLES.map {|x| x.(self, data) }
-        results.compact!
-        $0 = results.join(' ')
+      results = PROCTITLES.map {|x| x.(self, data) }
+      results.compact!
+      $0 = results.join(' ')
 
-        ❤(key, json)
-        sleep 5
-      end
+      ❤(key, json)
     end
 
     def ❤(key, json)
@@ -118,7 +115,11 @@ module Sidekiq
       # this data doesn't change so dump it to a string
       # now so we don't need to dump it every heartbeat.
       json = Sidekiq.dump_json(data)
-      heartbeat(key, data, json)
+
+      while !@done
+        heartbeat(key, data, json)
+        sleep 5
+      end
     end
 
     def stop_heartbeat

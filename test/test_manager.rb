@@ -23,7 +23,7 @@ class TestManager < Sidekiq::Test
     it 'assigns work to a processor' do
       uow = Object.new
       processor = Minitest::Mock.new
-      processor.expect(:process, nil, [uow])
+      processor.expect(:request_process, nil, [uow])
       processor.expect(:hash, 1234, [])
 
       mgr = new_manager(options)
