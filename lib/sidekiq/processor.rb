@@ -1,31 +1,18 @@
 require 'sidekiq/util'
 
-require 'sidekiq/middleware/server/retry_jobs'
-require 'sidekiq/middleware/server/logging'
-
 module Sidekiq
   ##
   # The Processor receives a message from the Manager and actually
   # processes it.  It instantiates the worker, runs the middleware
   # chain and then calls Sidekiq::Worker#perform.
   class Processor
+
     # To prevent a memory leak, ensure that stats expire. However, they
     # should take up a minimal amount of storage so keep them around
     # for a long time.
     STATS_TIMEOUT = 24 * 60 * 60 * 365 * 5
 
     include Util
-
-    def self.default_middleware
-      Middleware::Chain.new do |m|
-        m.add Middleware::Server::Logging
-        m.add Middleware::Server::RetryJobs
-        if defined?(::ActiveRecord::Base)
-          require 'sidekiq/middleware/server/active_record'
-          m.add Sidekiq::Middleware::Server::ActiveRecord
-        end
-      end
-    end
 
     attr_reader :thread
 

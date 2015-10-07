@@ -110,9 +110,23 @@ module Sidekiq
   end
 
   def self.server_middleware
-    @server_chain ||= Processor.default_middleware
+    @server_chain ||= default_server_middleware
     yield @server_chain if block_given?
     @server_chain
+  end
+
+  def self.default_server_middleware
+    require 'sidekiq/middleware/server/retry_jobs'
+    require 'sidekiq/middleware/server/logging'
+
+    Middleware::Chain.new do |m|
+      m.add Middleware::Server::Logging
+      m.add Middleware::Server::RetryJobs
+      if defined?(::ActiveRecord::Base)
+        require 'sidekiq/middleware/server/active_record'
+        m.add Sidekiq::Middleware::Server::ActiveRecord
+      end
+    end
   end
 
   def self.default_worker_options=(hash)
