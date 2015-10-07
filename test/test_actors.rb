@@ -72,6 +72,7 @@ class TestActors < Sidekiq::Test
     end
 
     class Mgr
+      attr_reader :latest_error
       attr_reader :mutex
       attr_reader :cond
       def initialize
@@ -79,11 +80,13 @@ class TestActors < Sidekiq::Test
         @cond = ::ConditionVariable.new
       end
       def processor_done(inst)
+        @latest_error = nil
         @mutex.synchronize do
           @cond.signal
         end
       end
       def processor_died(inst, err)
+        @latest_error = err
         @mutex.synchronize do
           @cond.signal
         end
@@ -131,6 +134,8 @@ class TestActors < Sidekiq::Test
       sleep 0.001
       assert_equal false, p.thread.status
       p.terminate(true)
+      refute_nil mgr.latest_error
+      assert_equal RuntimeError, mgr.latest_error.class
     end
 
     it 'gracefully kills' do
@@ -151,6 +156,7 @@ class TestActors < Sidekiq::Test
       b = $count
       assert_equal a, b
       assert_equal false, p.thread.status
+      assert_nil mgr.latest_error
     end
   end
 end
