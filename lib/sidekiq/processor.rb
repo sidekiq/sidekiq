@@ -1,4 +1,5 @@
 require 'sidekiq/util'
+require 'thread'
 
 module Sidekiq
   ##

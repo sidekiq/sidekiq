@@ -1,6 +1,5 @@
 require 'sidekiq'
 require 'sidekiq/util'
-require 'sidekiq/actor'
 require 'sidekiq/api'
 
 module Sidekiq

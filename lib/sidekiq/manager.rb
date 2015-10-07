@@ -2,6 +2,7 @@
 require 'sidekiq/util'
 require 'sidekiq/processor'
 require 'sidekiq/fetch'
+require 'thread'
 
 module Sidekiq
 

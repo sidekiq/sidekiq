@@ -1,7 +1,6 @@
 require 'sidekiq'
 require 'sidekiq/util'
-require 'sidekiq/actor'
-require 'thread'
+require 'connection_pool/timed_stack'
 
 module Sidekiq
   ##
