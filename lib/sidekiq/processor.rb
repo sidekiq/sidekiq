@@ -1,4 +1,5 @@
 require 'sidekiq/util'
+require 'sidekiq/fetch'
 require 'thread'
 require 'concurrent'
 
@@ -17,16 +18,18 @@ module Sidekiq
     include Util
 
     attr_reader :thread
+    attr_accessor :job
 
-    def initialize(mgr)
+    def initialize(mgr, options)
       @mgr = mgr
+      @down = false
       @done = false
-      @work = ::Queue.new
+      @job = nil
+      @strategy = (options[:fetch] || Sidekiq::BasicFetch).new(options)
     end
 
     def terminate(wait=false)
       @done = true
-      @work << nil
       @thread.value if wait
     end
 
@@ -44,23 +47,49 @@ module Sidekiq
       @thread ||= safe_thread("processor", &method(:run))
     end
 
-    def request_process(work)
-      raise ArgumentError, "Processor is shut down!" if @done
-      raise ArgumentError, "Processor has not started!" unless @thread
-      @work << work
-    end
-
     private unless $TESTING
 
     def run
       begin
         while !@done
-          job = @work.pop
+          self.job = fetch
           process(job) if job
+          self.job = nil
         end
       rescue Exception => ex
         @mgr.processor_died(self, ex)
       end
+    end
+
+    def get_one
+      begin
+        work = @strategy.retrieve_work
+        (logger.info("Redis is online, #{Time.now - @down} sec downtime"); @down = nil) if @down
+        work
+      rescue => ex
+        handle_fetch_exception(ex)
+      end
+    end
+
+    def fetch
+      j = get_one
+      if j && @done
+        j.requeue
+        nil
+      else
+        j
+      end
+    end
+
+    def handle_fetch_exception(ex)
+      if !@down
+        @down = Time.now
+        logger.error("Error fetching message: #{ex}")
+        ex.backtrace.each do |bt|
+          logger.error(bt)
+        end
+      end
+      sleep(1)
     end
 
     def process(work)
@@ -95,8 +124,6 @@ module Sidekiq
       ensure
         work.acknowledge if ack
       end
-
-      @mgr.processor_done(self)
     end
 
     def execute_job(worker, cloned_args)

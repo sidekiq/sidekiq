@@ -24,9 +24,8 @@ module Sidekiq
   class Manager
     include Util
 
-    attr_writer :fetcher
-    attr_reader :in_progress
-    attr_reader :ready
+    #attr_writer :fetcher
+    attr_reader :workers
 
     SPIN_TIME_FOR_GRACEFUL_SHUTDOWN = 1
 
@@ -35,92 +34,53 @@ module Sidekiq
       @options = options
       @count = options[:concurrency] || 25
       raise ArgumentError, "Concurrency of #{@count} is not supported" if @count < 1
-      @finished = condvar
 
-      @in_progress = {}
       @done = false
-      @ready = Array.new(@count) do
-        Processor.new(self)
+      @workers = Set.new
+      @count.times do
+        @workers << Processor.new(self, options)
       end
       @plock = Mutex.new
     end
 
     def start
-      @ready.each do |x|
+      @workers.each do |x|
         x.start
-      end
-      @ready.each do |x|
-        dispatch
       end
     end
 
     def quiet
       return if @done
-
       @done = true
 
       logger.info { "Terminating quiet workers" }
-
-      @plock.synchronize do
-        @ready.each { |x| x.terminate }
-        @ready.clear
-      end
+      @workers.each { |x| x.terminate }
     end
 
     def stop(deadline)
       quiet
-      return if @in_progress.empty?
+      return if @workers.empty?
 
       logger.info { "Pausing to allow workers to finish..." }
       remaining = deadline - Time.now
       while remaining > 0.5
-        return if @in_progress.empty?
+        return if @workers.empty?
         sleep 0.5
         remaining = deadline - Time.now
       end
-      return if @in_progress.empty?
+      return if @workers.empty?
 
       hard_shutdown
     end
 
-    def processor_done(processor)
-      @plock.synchronize do
-        @in_progress.delete(processor)
-        if @done
-          processor.terminate
-        else
-          @ready << processor
-        end
-      end
-      dispatch
-    end
-
     def processor_died(processor, reason)
       @plock.synchronize do
-        @in_progress.delete(processor)
+        @workers.delete(processor)
         unless @done
-          p = Processor.new(self)
+          p = Processor.new(self, @options)
+          @workers << p
           p.start
-          @ready << p
         end
-      end
-      dispatch
-    end
-
-    def assign(work)
-      if @done
-        # Race condition between Manager#stop if Fetcher
-        # is blocked on redis and gets a message after
-        # all the ready Processors have been stopped.
-        # Push the message back to redis.
-        work.requeue
-      else
-        processor = nil
-        @plock.synchronize do
-          processor = @ready.pop
-          @in_progress[processor] = work
-        end
-        processor.request_process(work)
       end
     end
 
@@ -135,33 +95,28 @@ module Sidekiq
       # They must die but their jobs shall live on.
       cleanup = nil
       @plock.synchronize do
-        cleanup = @in_progress.dup
+        cleanup = @workers.dup
       end
 
       if cleanup.size > 0
+        jobs = cleanup.map {|p| p.job }.compact
+
         logger.warn { "Terminating #{cleanup.size} busy worker threads" }
-        logger.warn { "Work still in progress #{cleanup.values.inspect}" }
+        logger.warn { "Work still in progress #{jobs.inspect}" }
+
         # Re-enqueue unfinished jobs
         # NOTE: You may notice that we may push a job back to redis before
         # the worker thread is terminated. This is ok because Sidekiq's
         # contract says that jobs are run AT LEAST once. Process termination
         # is delayed until we're certain the jobs are back in Redis because
         # it is worse to lose a job than to run it twice.
-        Sidekiq::Fetcher.strategy.bulk_requeue(cleanup.values, @options)
+        strategy = (@options[:fetch] || Sidekiq::BasicFetch)
+        strategy.bulk_requeue(jobs, @options)
       end
 
-      cleanup.each do |processor, _|
+      cleanup.each do |processor|
         processor.kill
       end
-    end
-
-    def dispatch
-      return if @done
-      # This is a safety check to ensure we haven't leaked processors somehow.
-      raise "BUG: No processors, cannot continue!" if @ready.empty? && @in_progress.empty?
-      raise "No ready processor!?" if @ready.empty?
-
-      @fetcher.request_job
     end
 
   end

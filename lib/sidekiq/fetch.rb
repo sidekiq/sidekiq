@@ -24,7 +24,7 @@ module Sidekiq
   class Fetcher
     include Util
 
-    TIMEOUT = 1
+    TIMEOUT = 2
     REQUEST = Object.new
 
     attr_reader :down
@@ -98,22 +98,6 @@ module Sidekiq
       end
     end
 
-    private
-
-    def handle_fetch_exception(ex)
-      if !@down
-        logger.error("Error fetching message: #{ex}")
-        ex.backtrace.each do |bt|
-          logger.error(bt)
-        end
-      end
-      @down ||= Time.now
-      sleep(TIMEOUT)
-    end
-
-    def self.strategy
-      Sidekiq.options[:fetch] || BasicFetch
-    end
   end
 
   class BasicFetch

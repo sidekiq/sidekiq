@@ -17,15 +17,12 @@ module Sidekiq
       @condvar = ::ConditionVariable.new
       @manager = Sidekiq::Manager.new(@condvar, options)
       @poller = Sidekiq::Scheduled::Poller.new
-      @fetcher = Sidekiq::Fetcher.new(@manager, options)
-      @manager.fetcher = @fetcher
       @done = false
       @options = options
     end
 
     def run
       @thread = safe_thread("heartbeat", &method(:start_heartbeat))
-      @fetcher.start
       @poller.start
       @manager.start
     end
@@ -35,7 +32,6 @@ module Sidekiq
     def quiet
       @done = true
       @manager.quiet
-      @fetcher.terminate
       @poller.terminate
     end
 
@@ -47,14 +43,14 @@ module Sidekiq
 
       @done = true
       @manager.quiet
-      @fetcher.terminate
       @poller.terminate
 
       @manager.stop(deadline)
 
       # Requeue everything in case there was a worker who grabbed work while stopped
       # This call is a no-op in Sidekiq but necessary for Sidekiq Pro.
-      Sidekiq::Fetcher.strategy.bulk_requeue([], @options)
+      strategy = (@options[:fetch] || Sidekiq::BasicFetch)
+      strategy.bulk_requeue([], @options)
 
       clear_heartbeat
     end
@@ -75,15 +71,15 @@ module Sidekiq
       proc { |me, data| "stopping" if me.stopping? },
     ]
 
-    def heartbeat(key, data, json)
+    def heartbeat(k, data, json)
       results = PROCTITLES.map {|x| x.(self, data) }
       results.compact!
       $0 = results.join(' ')
 
-      ❤(key, json)
+      ❤(k, json)
     end
 
-    def ❤(key, json)
+    def ❤(k, json)
       begin
         fails = 0
         Processor::FAILURE.update {|curr| fails = curr; 0 }
@@ -128,7 +124,7 @@ module Sidekiq
     end
 
     def start_heartbeat
-      key = identity
+      k = identity
       data = {
         'hostname' => hostname,
         'started_at' => Time.now.to_f,
@@ -137,14 +133,14 @@ module Sidekiq
         'concurrency' => @options[:concurrency],
         'queues' => @options[:queues].uniq,
         'labels' => @options[:labels],
-        'identity' => identity,
+        'identity' => k,
       }
       # this data doesn't change so dump it to a string
       # now so we don't need to dump it every heartbeat.
       json = Sidekiq.dump_json(data)
 
       while true
-        heartbeat(key, data, json)
+        heartbeat(k, data, json)
         sleep 5
       end
       Sidekiq.logger.info("Heartbeat stopping...")
