@@ -47,6 +47,8 @@ module Sidekiq
     def start
       @ready.each do |x|
         x.start
+      end
+      @ready.each do |x|
         dispatch
       end
     end
