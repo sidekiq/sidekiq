@@ -120,7 +120,10 @@ module Sidekiq
     def initialize(options)
       @strictly_ordered_queues = !!options[:strict]
       @queues = options[:queues].map { |q| "queue:#{q}" }
-      @unique_queues = @queues.uniq
+      if @strictly_ordered_queues
+        @queues = @queues.uniq
+        @queues << Sidekiq::Fetcher::TIMEOUT
+      end
     end
 
     def retrieve_work
@@ -158,7 +161,7 @@ module Sidekiq
       end
 
       def queue_name
-        queue.gsub(/.*queue:/, '')
+        queue.gsub(/.*queue:/, ''.freeze)
       end
 
       def requeue
@@ -174,8 +177,13 @@ module Sidekiq
     # recreate the queue command each time we invoke Redis#brpop
     # to honor weights and avoid queue starvation.
     def queues_cmd
-      queues = @strictly_ordered_queues ? @unique_queues.dup : @queues.shuffle.uniq
-      queues << Sidekiq::Fetcher::TIMEOUT
+      if @strictly_ordered_queues
+        @queues
+      else
+        queues = @queues.shuffle.uniq
+        queues << Sidekiq::Fetcher::TIMEOUT
+        queues
+      end
     end
   end
 end
