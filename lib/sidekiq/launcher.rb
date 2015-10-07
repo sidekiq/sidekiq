@@ -79,7 +79,7 @@ module Sidekiq
       ❤(k, json)
     end
 
-    def ❤(k, json)
+    def ❤(key, json)
       begin
         fails = 0
         Processor::FAILURE.update {|curr| fails = curr; 0 }
