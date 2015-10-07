@@ -172,10 +172,9 @@ class TestProcessor < Sidekiq::Test
         end
 
         it 'increments processed stat' do
-          assert_equal 0, Sidekiq::Stats.new.processed
+          Sidekiq::Processor::PROCESSED.value = 0
           successful_job
-          assert_equal 1, Sidekiq::Stats.new.processed
-          assert_equal Sidekiq::Processor::STATS_TIMEOUT, Sidekiq.redis { |conn| conn.ttl(processed_today_key) }
+          assert_equal 1, Sidekiq::Processor::PROCESSED.value
         end
       end
 
@@ -191,10 +190,9 @@ class TestProcessor < Sidekiq::Test
         end
 
         it 'increments failed stat' do
-          assert_equal 0, Sidekiq::Stats.new.failed
+          Sidekiq::Processor::FAILURE.value = 0
           failed_job
-          assert_equal 1, Sidekiq::Stats.new.failed
-          assert_equal Sidekiq::Processor::STATS_TIMEOUT, Sidekiq.redis { |conn| conn.ttl(failed_today_key) }
+          assert_equal 1, Sidekiq::Processor::FAILURE.value
         end
       end
     end
