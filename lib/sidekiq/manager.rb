@@ -26,7 +26,7 @@ module Sidekiq
     def initialize(condvar, options={})
       logger.debug { options.inspect }
       @options = options
-      @count = options[:concurrency] || 25
+      @count = (options[:concurrency] || 25).to_i
       raise ArgumentError, "Concurrency of #{@count} is not supported" if @count < 1
       @done_callback = nil
       @finished = condvar
