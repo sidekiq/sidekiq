@@ -18,6 +18,7 @@ end
 
 platforms :mri do
   gem 'pry-byebug'
+  gem 'ruby-prof'
 end
 
 platforms :jruby do

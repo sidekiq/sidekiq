@@ -33,6 +33,7 @@ module Sidekiq
     # Stops this instance from processing any more jobs,
     #
     def quiet
+      @done = true
       @manager.quiet
       @fetcher.terminate
       @poller.terminate
@@ -44,6 +45,7 @@ module Sidekiq
     def stop
       deadline = Time.now + @options[:timeout]
 
+      @done = true
       @manager.quiet
       @fetcher.terminate
       @poller.terminate
@@ -57,6 +59,10 @@ module Sidekiq
       clear_heartbeat
     end
 
+    def stopping?
+      @done
+    end
+
     private unless $TESTING
 
     JVM_RESERVED_SIGNALS = ['USR1', 'USR2'] # Don't Process#kill if we get these signals via the API
@@ -65,8 +71,8 @@ module Sidekiq
       proc { 'sidekiq'.freeze },
       proc { Sidekiq::VERSION },
       proc { |me, data| data['tag'] },
-      proc { |me, data| "[#{me.manager.in_progress.size} of #{data['concurrency']} busy]" },
-      proc { |me, data| "stopping" if me.manager.stopped? },
+      proc { |me, data| "[#{Processor::WORKER_STATE.size} of #{data['concurrency']} busy]" },
+      proc { |me, data| "stopping" if me.stopping? },
     ]
 
     def heartbeat(key, data, json)
@@ -79,10 +85,30 @@ module Sidekiq
 
     def ❤(key, json)
       begin
+        fails = 0
+        Processor::FAILURE.update {|curr| fails = curr; 0 }
+        procd = 0
+        Processor::PROCESSED.update {|curr| procd = curr; 0 }
+
+        workers_key = "#{key}:workers".freeze
+        nowdate = Time.now.utc.strftime("%Y-%m-%d".freeze)
+        Sidekiq.redis do |conn|
+          conn.pipelined do
+            conn.incrby("stat:processed".freeze, procd)
+            conn.incrby("stat:processed:#{nowdate}", procd)
+            conn.incrby("stat:failed".freeze, fails)
+            conn.incrby("stat:failed:#{nowdate}", fails)
+            conn.del(workers_key)
+            Processor::WORKER_STATE.each_pair do |tid, hash|
+              conn.hset(workers_key, tid, Sidekiq.dump_json(hash))
+            end
+          end
+        end
+
         _, _, _, msg = Sidekiq.redis do |conn|
           conn.pipelined do
             conn.sadd('processes', key)
-            conn.hmset(key, 'info', json, 'busy', manager.in_progress.size, 'beat', Time.now.to_f)
+            conn.hmset(key, 'info', json, 'busy', Processor::WORKER_STATE.size, 'beat', Time.now.to_f)
             conn.expire(key, 60)
             conn.rpop("#{key}-signals")
           end
@@ -117,7 +143,7 @@ module Sidekiq
       # now so we don't need to dump it every heartbeat.
       json = Sidekiq.dump_json(data)
 
-      while !@done
+      while true
         heartbeat(key, data, json)
         sleep 5
       end

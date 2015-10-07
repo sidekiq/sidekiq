@@ -1,5 +1,6 @@
 require 'sidekiq/util'
 require 'thread'
+require 'concurrent'
 
 module Sidekiq
   ##
@@ -106,46 +107,24 @@ module Sidekiq
       @str ||= Thread.current.object_id.to_s(36)
     end
 
+    WORKER_STATE = Concurrent::Map.new
+    PROCESSED = Concurrent::AtomicFixnum.new
+    FAILURE = Concurrent::AtomicFixnum.new
+
     def stats(worker, msg, queue)
       # Do not conflate errors from the job with errors caused by updating
       # stats so calling code can react appropriately
-      retry_and_suppress_exceptions do
-        hash = Sidekiq.dump_json({:queue => queue, :payload => msg, :run_at => Time.now.to_i })
-        Sidekiq.redis do |conn|
-          conn.pipelined do
-            conn.hmset("#{identity}:workers", thread_identity, hash)
-            conn.expire("#{identity}:workers", 14400)
-          end
-        end
-      end
+      tid = thread_identity
+      WORKER_STATE[tid] = {:queue => queue, :payload => msg, :run_at => Time.now.to_i }
 
-      nowdate = Time.now.utc.strftime("%Y-%m-%d".freeze)
       begin
         yield
       rescue Exception
-        retry_and_suppress_exceptions do
-          failed = "stat:failed:#{nowdate}"
-          Sidekiq.redis do |conn|
-            conn.pipelined do
-              conn.incrby("stat:failed".freeze, 1)
-              conn.incrby(failed, 1)
-              conn.expire(failed, STATS_TIMEOUT)
-            end
-          end
-        end
+        FAILURE.increment
         raise
       ensure
-        retry_and_suppress_exceptions do
-          processed = "stat:processed:#{nowdate}"
-          Sidekiq.redis do |conn|
-            conn.pipelined do
-              conn.hdel("#{identity}:workers", thread_identity)
-              conn.incrby("stat:processed".freeze, 1)
-              conn.incrby(processed, 1)
-              conn.expire(processed, STATS_TIMEOUT)
-            end
-          end
-        end
+        WORKER_STATE.delete(tid)
+        PROCESSED.increment
       end
     end
 

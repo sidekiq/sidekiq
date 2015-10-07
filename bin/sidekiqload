@@ -4,6 +4,8 @@
 # RUBYOPT=-w bundle exec sidekiq
 $TESTING = false
 
+#require 'ruby-prof'
+
 require_relative '../lib/sidekiq/cli'
 require_relative '../lib/sidekiq/launcher'
 
@@ -77,20 +79,16 @@ end
 iter = 10
 count = 10_000
 
-Client = Thread.new do
-  watchdog("client thread") do
-    iter.times do
-      arr = Array.new(count) do
-        []
-      end
-      count.times do |idx|
-        arr[idx][0] = idx
-      end
-      Sidekiq::Client.push_bulk('class' => LoadWorker, 'args' => arr)
-    end
-    Sidekiq.logger.error "Created #{count*iter} jobs"
+iter.times do
+  arr = Array.new(count) do
+    []
   end
+  count.times do |idx|
+    arr[idx][0] = idx
+  end
+  Sidekiq::Client.push_bulk('class' => LoadWorker, 'args' => arr)
 end
+Sidekiq.logger.error "Created #{count*iter} jobs"
 
 Monitoring = Thread.new do
   watchdog("monitor thread") do
@@ -103,7 +101,7 @@ Monitoring = Thread.new do
         end
       end.map(&:to_i)
       total = qsize + retries
-      GC.start
+      #GC.start
       Sidekiq.logger.error("RSS: #{Process.rss} Pending: #{total}")
       if total == 0
         Sidekiq.logger.error("Done")
@@ -114,6 +112,8 @@ Monitoring = Thread.new do
 end
 
 begin
+  #RubyProf::exclude_threads = [ Monitoring ]
+  #RubyProf.start
   launcher = Sidekiq::Launcher.new(Sidekiq.options)
   launcher.run
 
@@ -122,6 +122,10 @@ begin
     handle_signal(launcher, signal)
   end
 rescue SystemExit => e
+  #Sidekiq.logger.error("Profiling...")
+  #result = RubyProf.stop
+  #printer = RubyProf::GraphHtmlPrinter.new(result)
+  #printer.print(File.new("output.html", "w"), :min_percent => 1)
   # normal
 rescue => e
   raise e if $DEBUG
