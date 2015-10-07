@@ -11,8 +11,22 @@ require_relative '../lib/sidekiq/launcher'
 
 include Sidekiq::Util
 
+# brew tap shopify/shopify
+# brew install toxiproxy
+# gem install toxiproxy
+require 'toxiproxy'
+# simulate a non-localhost network for realer-world conditions.
+# adding 1ms of network latency has an ENORMOUS impact on benchmarks
+Toxiproxy.populate([{
+    "name": "redis",
+    "listen": "127.0.0.1:6380",
+    "upstream": "127.0.0.1:6379"
+}])
+
+
 Sidekiq.configure_server do |config|
-  config.redis = { db: 13 }
+  config.redis = { db: 13, port: 6380 }
+  #config.redis = { db: 13 }
   config.options[:queues] << 'default'
   config.logger.level = Logger::ERROR
   config.average_scheduled_poll_interval = 2
@@ -27,7 +41,7 @@ class LoadWorker
   end
 
   def perform(idx)
-    raise idx.to_s if idx % 100 == 1
+    #raise idx.to_s if idx % 100 == 1
   end
 end
 
@@ -114,12 +128,15 @@ end
 begin
   #RubyProf::exclude_threads = [ Monitoring ]
   #RubyProf.start
-  launcher = Sidekiq::Launcher.new(Sidekiq.options)
-  launcher.run
+  Sidekiq.logger.error "Simulating 1ms of latency between Sidekiq and redis"
+  Toxiproxy[:redis].downstream(:latency, latency: 1).apply do
+    launcher = Sidekiq::Launcher.new(Sidekiq.options)
+    launcher.run
 
-  while readable_io = IO.select([self_read])
-    signal = readable_io.first[0].gets.strip
-    handle_signal(launcher, signal)
+    while readable_io = IO.select([self_read])
+      signal = readable_io.first[0].gets.strip
+      handle_signal(launcher, signal)
+    end
   end
 rescue SystemExit => e
   #Sidekiq.logger.error("Profiling...")
