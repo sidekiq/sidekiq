@@ -88,7 +88,6 @@ module Sidekiq
         @in_progress.delete(processor)
         if @done
           processor.terminate
-          #shutdown if @in_progress.empty?
         else
           @ready << processor
         end
@@ -99,9 +98,7 @@ module Sidekiq
     def processor_died(processor, reason)
       @plock.synchronize do
         @in_progress.delete(processor)
-        if @done
-          #shutdown if @in_progress.empty?
-        else
+        unless @done
           p = Processor.new(self)
           p.start
           @ready << p
