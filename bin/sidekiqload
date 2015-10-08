@@ -31,7 +31,6 @@ Sidekiq.configure_server do |config|
   config.logger.level = Logger::ERROR
   config.average_scheduled_poll_interval = 2
 end
-Sidekiq.redis {|c| c.flushdb}
 
 class LoadWorker
   include Sidekiq::Worker
@@ -45,6 +44,18 @@ class LoadWorker
   end
 end
 
+# brew tap shopify/shopify
+# brew install toxiproxy
+# gem install toxiproxy
+require 'toxiproxy'
+# simulate a non-localhost network for realer-world conditions.
+# adding 1ms of network latency has an ENORMOUS impact on benchmarks
+Toxiproxy.populate([{
+    "name": "redis",
+    "listen": "127.0.0.1:6380",
+    "upstream": "127.0.0.1:6379"
+}])
+
 self_read, self_write = IO.pipe
 %w(INT TERM USR1 USR2 TTIN).each do |sig|
   begin
@@ -56,6 +67,7 @@ self_read, self_write = IO.pipe
   end
 end
 
+Sidekiq.redis {|c| c.flushdb}
 def handle_signal(launcher, sig)
   Sidekiq.logger.debug "Got #{sig} signal"
   case sig
