@@ -3,7 +3,7 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+2.1.0
 -----------
 
 - Explicit support for sharding batches.  You list your Redis shards and
