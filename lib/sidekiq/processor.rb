@@ -10,15 +10,10 @@ module Sidekiq
   # chain and then calls Sidekiq::Worker#perform.
   class Processor
 
-    # To prevent a memory leak, ensure that stats expire. However, they
-    # should take up a minimal amount of storage so keep them around
-    # for a long time.
-    STATS_TIMEOUT = 24 * 60 * 60 * 365 * 5
-
     include Util
 
     attr_reader :thread
-    attr_accessor :job
+    attr_reader :job
 
     def initialize(mgr)
       @mgr = mgr
@@ -57,21 +52,22 @@ module Sidekiq
         while !@done
           process_one
         end
+        @mgr.processor_stopped(self, ex)
       rescue Exception => ex
         @mgr.processor_died(self, ex)
       end
     end
 
     def process_one
-      self.job = fetch
-      process(job) if job
-      self.job = nil
+      @job = fetch
+      process(@job) if @job
+      @job = nil
     end
 
     def get_one
       begin
         work = @strategy.retrieve_work
-        (logger.info("Redis is online, #{Time.now - @down} sec downtime"); @down = nil) if @down
+        (logger.info { "Redis is online, #{Time.now - @down} sec downtime" }; @down = nil) if @down
         work
       rescue Sidekiq::Shutdown
       rescue => ex
@@ -147,8 +143,6 @@ module Sidekiq
     FAILURE = Concurrent::AtomicFixnum.new
 
     def stats(worker, msg, queue)
-      # Do not conflate errors from the job with errors caused by updating
-      # stats so calling code can react appropriately
       tid = thread_identity
       WORKER_STATE[tid] = {:queue => queue, :payload => msg, :run_at => Time.now.to_i }
 

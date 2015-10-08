@@ -28,8 +28,6 @@ module Sidekiq
     attr_reader :workers
     attr_reader :options
 
-    SPIN_TIME_FOR_GRACEFUL_SHUTDOWN = 1
-
     def initialize(options={})
       logger.debug { options.inspect }
       @options = options
@@ -72,6 +70,12 @@ module Sidekiq
       return if @workers.empty?
 
       hard_shutdown
+    end
+
+    def processor_stopped(processor)
+      @plock.synchronize do
+        @workers.delete(processor)
+      end
     end
 
     def processor_died(processor, reason)
