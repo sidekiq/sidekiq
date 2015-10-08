@@ -1,112 +1,15 @@
 require 'sidekiq'
-require 'sidekiq/util'
-require 'connection_pool/timed_stack'
 
 module Sidekiq
-  ##
-  # The Fetcher blocks on Redis, waiting for a job to process
-  # from the queues.  It gets the job and hands it to the Manager
-  # to assign to a ready Processor.
-  #
-  #     f = Fetcher.new(mgr, opts)
-  #     f.start
-  #
-  # Now anyone can call:
-  #
-  #     f.request_job
-  #
-  # and the fetcher will handle a job to the mgr.
-  #
-  # The Manager makes a request_job call for each idle processor
-  # when Sidekiq starts and then issues a new request_job call
-  # every time a Processor finishes a job.
-  #
-  class Fetcher
-    include Util
-
-    TIMEOUT = 2
-    REQUEST = Object.new
-
-    attr_reader :down
-
-    def initialize(mgr, options)
-      @done = false
-      @down = nil
-      @mgr = mgr
-      @strategy = Fetcher.strategy.new(options)
-      @requests = ConnectionPool::TimedStack.new
-    end
-
-    def request_job
-      @requests << REQUEST
-      nil
-    end
-
-    # Shut down this Fetcher instance, will pause until
-    # the thread is dead.
-    def terminate
-      @done = true
-      if @thread
-        t = @thread
-        @thread = nil
-        @requests << 0
-        t.value
-      end
-    end
-
-    # Spins up the thread for this Fetcher instance
-    def start
-      @thread ||= safe_thread("fetcher") do
-        while !@done
-          get_one
-        end
-        Sidekiq.logger.info("Fetcher exiting...")
-      end
-    end
-
-    # not for public use, testing only
-    def wait_for_request
-      begin
-        req = nil
-        begin
-          req = @requests.pop(1)
-          return if @done
-        rescue Timeout::Error
-          return
-        end
-
-        result = yield
-        unless result
-          @requests << req
-        end
-        result
-      rescue => ex
-        handle_fetch_exception(ex)
-        @requests << REQUEST
-      end
-    end
-
-    # not for public use, testing only
-    def get_one
-      wait_for_request do
-        work = @strategy.retrieve_work
-        ::Sidekiq.logger.info("Redis is online, #{Time.now - @down} sec downtime") if @down
-        @down = nil
-
-        @mgr.assign(work) if work
-        work
-      end
-    end
-
-  end
-
   class BasicFetch
+    TIMEOUT = 2
+
     def initialize(options)
       @strictly_ordered_queues = !!options[:strict]
       @queues = options[:queues].map { |q| "queue:#{q}" }
       if @strictly_ordered_queues
         @queues = @queues.uniq
-        @queues << Sidekiq::Fetcher::TIMEOUT
+        @queues << TIMEOUT
       end
     end
 
@@ -165,7 +68,7 @@ module Sidekiq
         @queues
       else
         queues = @queues.shuffle.uniq
-        queues << Sidekiq::Fetcher::TIMEOUT
+        queues << TIMEOUT
         queues
       end
     end

@@ -20,20 +20,23 @@ module Sidekiq
     attr_reader :thread
     attr_accessor :job
 
-    def initialize(mgr, options)
+    def initialize(mgr)
       @mgr = mgr
       @down = false
       @done = false
       @job = nil
-      @strategy = (options[:fetch] || Sidekiq::BasicFetch).new(options)
+      @strategy = (mgr.options[:fetch] || Sidekiq::BasicFetch).new(mgr.options)
     end
 
     def terminate(wait=false)
       @done = true
+      return if !@thread
       @thread.value if wait
     end
 
     def kill(wait=false)
+      @done = true
+      return if !@thread
       # unlike the other actors, terminate does not wait
       # for the thread to finish because we don't know how
       # long the job will take to finish.  Instead we
@@ -52,13 +55,17 @@ module Sidekiq
     def run
       begin
         while !@done
-          self.job = fetch
-          process(job) if job
-          self.job = nil
+          process_one
         end
       rescue Exception => ex
         @mgr.processor_died(self, ex)
       end
+    end
+
+    def process_one
+      self.job = fetch
+      process(job) if job
+      self.job = nil
     end
 
     def get_one
@@ -66,6 +73,7 @@ module Sidekiq
         work = @strategy.retrieve_work
         (logger.info("Redis is online, #{Time.now - @down} sec downtime"); @down = nil) if @down
         work
+      rescue Sidekiq::Shutdown
       rescue => ex
         handle_fetch_exception(ex)
       end
@@ -162,26 +170,5 @@ module Sidekiq
       Marshal.load(Marshal.dump(ary))
     end
 
-    # If an exception occurs in the block passed to this method, that block will be retried up to max_retries times.
-    # All exceptions will be swallowed and logged.
-    def retry_and_suppress_exceptions(max_retries = 5)
-      retry_count = 0
-      begin
-        yield
-      rescue => e
-        retry_count += 1
-        if retry_count <= max_retries
-          Sidekiq.logger.info {"Suppressing and retrying error: #{e.inspect}"}
-          pause_for_recovery(retry_count)
-          retry
-        else
-          handle_exception(e, { :message => "Exhausted #{max_retries} retries"})
-        end
-      end
-    end
-
-    def pause_for_recovery(retry_count)
-      sleep(retry_count)
-    end
   end
 end

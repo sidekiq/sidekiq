@@ -26,10 +26,11 @@ module Sidekiq
 
     #attr_writer :fetcher
     attr_reader :workers
+    attr_reader :options
 
     SPIN_TIME_FOR_GRACEFUL_SHUTDOWN = 1
 
-    def initialize(condvar, options={})
+    def initialize(options={})
       logger.debug { options.inspect }
       @options = options
       @count = options[:concurrency] || 25
@@ -38,7 +39,7 @@ module Sidekiq
       @done = false
       @workers = Set.new
       @count.times do
-        @workers << Processor.new(self, options)
+        @workers << Processor.new(self)
       end
       @plock = Mutex.new
     end
@@ -77,7 +78,7 @@ module Sidekiq
       @plock.synchronize do
         @workers.delete(processor)
         unless @done
-          p = Processor.new(self, @options)
+          p = Processor.new(self)
           @workers << p
           p.start
         end

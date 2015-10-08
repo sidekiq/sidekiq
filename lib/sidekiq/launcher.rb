@@ -14,8 +14,7 @@ module Sidekiq
     attr_accessor :manager, :poller, :fetcher
 
     def initialize(options)
-      @condvar = ::ConditionVariable.new
-      @manager = Sidekiq::Manager.new(@condvar, options)
+      @manager = Sidekiq::Manager.new(options)
       @poller = Sidekiq::Scheduled::Poller.new
       @done = false
       @options = options

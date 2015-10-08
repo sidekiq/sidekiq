@@ -11,6 +11,8 @@ class TestProcessor < Sidekiq::Test
     before do
       $invokes = 0
       @mgr = Minitest::Mock.new
+      @mgr.expect(:options, {:queues => ['default']})
+      @mgr.expect(:options, {:queues => ['default']})
       @processor = ::Sidekiq::Processor.new(@mgr)
     end
 
@@ -29,9 +31,7 @@ class TestProcessor < Sidekiq::Test
 
     it 'processes as expected' do
       msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
-      @mgr.expect(:processor_done, nil, [Sidekiq::Processor])
       @processor.process(work(msg))
-      @mgr.verify
       assert_equal 1, $invokes
     end
 

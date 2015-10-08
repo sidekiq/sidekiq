@@ -9,7 +9,7 @@ class TestLauncher < Sidekiq::Test
     end
 
     def new_manager(opts)
-      Sidekiq::Manager.new(nil, opts)
+      Sidekiq::Manager.new(opts)
     end
 
     describe 'heartbeat' do

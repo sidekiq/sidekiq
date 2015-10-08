@@ -3,6 +3,9 @@ require_relative 'helper'
 class TestApi < Sidekiq::Test
 
   describe "stats" do
+    before do
+      Sidekiq.redis {|c| c.flushdb }
+    end
 
     it "is initially zero" do
       Sidekiq.redis {|c| c.flushdb }

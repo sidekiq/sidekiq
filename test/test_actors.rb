@@ -1,6 +1,7 @@
 require_relative 'helper'
 require 'sidekiq/cli'
 require 'sidekiq/fetch'
+require 'sidekiq/scheduled'
 require 'sidekiq/processor'
 
 class TestActors < Sidekiq::Test
@@ -10,27 +11,6 @@ class TestActors < Sidekiq::Test
       raise "boom" if slp == "boom"
       sleep(slp) if slp > 0
       $count += 1
-    end
-  end
-
-  describe 'fetcher' do
-    it 'can start and stop' do
-      f = Sidekiq::Fetcher.new(nil, { queues: ['default'] })
-      f.start
-      f.terminate
-    end
-
-    it 'can fetch' do
-      SomeWorker.perform_async(0)
-
-      mgr = Minitest::Mock.new
-      mgr.expect(:assign, nil, [Sidekiq::BasicFetch::UnitOfWork])
-      f = Sidekiq::Fetcher.new(mgr, { queues: ['default'] })
-      f.start
-      f.request_job
-      sleep 0.001
-      f.terminate
-      mgr.verify
     end
   end
 
@@ -52,7 +32,7 @@ class TestActors < Sidekiq::Test
       assert_equal 0, q.size
       assert_equal 1, ss.size
 
-      sleep 0.01
+      sleep 0.015
       s = Sidekiq::Scheduled::Poller.new
       s.enqueue
       assert_equal 1, q.size
@@ -67,7 +47,7 @@ class TestActors < Sidekiq::Test
     end
 
     it 'can start and stop' do
-      f = Sidekiq::Processor.new(nil)
+      f = Sidekiq::Processor.new(Mgr.new)
       f.terminate
     end
 
@@ -79,17 +59,14 @@ class TestActors < Sidekiq::Test
         @mutex = ::Mutex.new
         @cond = ::ConditionVariable.new
       end
-      def processor_done(inst)
-        @latest_error = nil
-        @mutex.synchronize do
-          @cond.signal
-        end
-      end
       def processor_died(inst, err)
         @latest_error = err
         @mutex.synchronize do
           @cond.signal
         end
+      end
+      def options
+        { :concurrency => 3, :queues => ['default'] }
       end
     end
 
@@ -97,35 +74,23 @@ class TestActors < Sidekiq::Test
       mgr = Mgr.new
 
       p = Sidekiq::Processor.new(mgr)
-      p.start
       SomeWorker.perform_async(0)
 
-      job = Sidekiq.redis { |c| c.lpop("queue:default") }
-      uow = Sidekiq::BasicFetch::UnitOfWork.new('default', job)
       a = $count
-      mgr.mutex.synchronize do
-        p.request_process(uow)
-        mgr.cond.wait(mgr.mutex)
-      end
+      p.process_one
       b = $count
       assert_equal a + 1, b
-
-      p.terminate(true)
-      assert_equal false, p.thread.status
     end
 
     it 'deals with errors' do
       mgr = Mgr.new
 
       p = Sidekiq::Processor.new(mgr)
-      p.start
       SomeWorker.perform_async("boom")
 
-      job = Sidekiq.redis { |c| c.lpop("queue:default") }
-      uow = Sidekiq::BasicFetch::UnitOfWork.new('default', job)
       a = $count
       mgr.mutex.synchronize do
-        p.request_process(uow)
+        p.start
         mgr.cond.wait(mgr.mutex)
       end
       b = $count
@@ -142,13 +107,10 @@ class TestActors < Sidekiq::Test
       mgr = Mgr.new
 
       p = Sidekiq::Processor.new(mgr)
-      SomeWorker.perform_async(0.1)
+      SomeWorker.perform_async(1)
 
-      job = Sidekiq.redis { |c| c.lpop("queue:default") }
-      uow = Sidekiq::BasicFetch::UnitOfWork.new('default', job)
       a = $count
       p.start
-      p.request_process(uow)
       sleep(0.02)
       p.terminate
       p.kill(true)
@@ -156,7 +118,7 @@ class TestActors < Sidekiq::Test
       b = $count
       assert_equal a, b
       assert_equal false, p.thread.status
-      assert_nil mgr.latest_error
+      refute mgr.latest_error
     end
   end
 end

@@ -1,4 +1,3 @@
-$CELLULOID_DEBUG = false
 $TESTING = true
 if ENV["COVERAGE"]
   require 'simplecov'
@@ -8,6 +7,8 @@ if ENV["COVERAGE"]
   end
 end
 ENV['RACK_ENV'] = ENV['RAILS_ENV'] = 'test'
+
+puts "PID: #{$$}"
 
 trap 'USR1' do
   threads = Thread.list
