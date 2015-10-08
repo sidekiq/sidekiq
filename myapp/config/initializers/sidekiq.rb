@@ -26,3 +26,12 @@ class EmptyWorker
   def perform
   end
 end
+
+class TimedWorker
+  include Sidekiq::Worker
+
+  def perform(start)
+    now = Time.now.to_f
+    puts "Latency: #{now - start} sec"
+  end
+end
