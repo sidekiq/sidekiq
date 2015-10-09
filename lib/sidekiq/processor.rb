@@ -53,7 +53,7 @@ module Sidekiq
         while !@done
           process_one
         end
-        @mgr.processor_stopped(self, ex)
+        @mgr.processor_stopped(self)
       rescue Exception => ex
         @mgr.processor_died(self, ex)
       end

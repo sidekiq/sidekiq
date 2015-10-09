@@ -65,6 +65,11 @@ class TestActors < Sidekiq::Test
           @cond.signal
         end
       end
+      def processor_stopped(inst)
+        @mutex.synchronize do
+          @cond.signal
+        end
+      end
       def options
         { :concurrency => 3, :queues => ['default'] }
       end
@@ -118,7 +123,7 @@ class TestActors < Sidekiq::Test
       b = $count
       assert_equal a, b
       assert_equal false, p.thread.status
-      refute mgr.latest_error
+      refute mgr.latest_error, mgr.latest_error.to_s
     end
   end
 end
