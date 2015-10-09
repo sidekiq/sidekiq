@@ -22,6 +22,7 @@ module Sidekiq
     timeout: 8,
     poll_interval_average: nil,
     average_scheduled_poll_interval: 15,
+    average_queue_poll_interval: 5,
     error_handlers: [],
     lifecycle_events: {
       startup: [],
@@ -156,6 +157,15 @@ module Sidekiq
   # See sidekiq/scheduled.rb for an in-depth explanation of this value
   def self.average_scheduled_poll_interval=(interval)
     self.options[:average_scheduled_poll_interval] = interval
+  end
+
+  # How frequently Redis should be checked by a random Sidekiq process for
+  # queued jobs. Each individual process will take turns by  waiting some
+  # multiple of this value.
+  #
+  # See sidekiq/fetch.rb for how this value is used
+  def self.average_queue_poll_interval=(interval)
+    self.options[:average_queue_poll_interval] = interval
   end
 
   # Register a proc to handle any error which occurs within the Sidekiq process.
