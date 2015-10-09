@@ -1,7 +1,8 @@
 require 'sidekiq/util'
 require 'sidekiq/fetch'
 require 'thread'
-require 'concurrent'
+require 'concurrent/map'
+require 'concurrent/atomic/atomic_fixnum'
 
 module Sidekiq
   ##
