@@ -2,7 +2,25 @@ require 'sidekiq'
 
 module Sidekiq
   class BasicFetch
+    # We want the fetch operation to timeout every few seconds so the thread
+    # can check if the process is shutting down.
     TIMEOUT = 2
+
+    UnitOfWork = Struct.new(:queue, :message) do
+      def acknowledge
+        # nothing to do
+      end
+
+      def queue_name
+        queue.gsub(/.*queue:/, ''.freeze)
+      end
+
+      def requeue
+        Sidekiq.redis do |conn|
+          conn.rpush("queue:#{queue_name}", message)
+        end
+      end
+    end
 
     def initialize(options)
       @strictly_ordered_queues = !!options[:strict]
@@ -17,6 +35,22 @@ module Sidekiq
       work = Sidekiq.redis { |conn| conn.brpop(*queues_cmd) }
       UnitOfWork.new(*work) if work
     end
+
+    # Creating the Redis#brpop command takes into account any
+    # configured queue weights. By default Redis#brpop returns
+    # data from the first queue that has pending elements. We
+    # recreate the queue command each time we invoke Redis#brpop
+    # to honor weights and avoid queue starvation.
+    def queues_cmd
+      if @strictly_ordered_queues
+        @queues
+      else
+        queues = @queues.shuffle.uniq
+        queues << TIMEOUT
+        queues
+      end
+    end
+
 
     # By leaving this as a class method, it can be pluggable and used by the Manager actor. Making it
     # an instance method will make it async to the Fetcher actor
@@ -42,35 +76,5 @@ module Sidekiq
       Sidekiq.logger.warn("Failed to requeue #{inprogress.size} jobs: #{ex.message}")
     end
 
-    UnitOfWork = Struct.new(:queue, :message) do
-      def acknowledge
-        # nothing to do
-      end
-
-      def queue_name
-        queue.gsub(/.*queue:/, ''.freeze)
-      end
-
-      def requeue
-        Sidekiq.redis do |conn|
-          conn.rpush("queue:#{queue_name}", message)
-        end
-      end
-    end
-
-    # Creating the Redis#brpop command takes into account any
-    # configured queue weights. By default Redis#brpop returns
-    # data from the first queue that has pending elements. We
-    # recreate the queue command each time we invoke Redis#brpop
-    # to honor weights and avoid queue starvation.
-    def queues_cmd
-      if @strictly_ordered_queues
-        @queues
-      else
-        queues = @queues.shuffle.uniq
-        queues << TIMEOUT
-        queues
-      end
-    end
   end
 end

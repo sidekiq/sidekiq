@@ -12,19 +12,17 @@ module Sidekiq
   #
   # Tasks:
   #
-  # 1. start: Spin up Processors.  Issue fetch requests for each.
-  # 2. processor_done: Handle job success, issue fetch request.
-  # 3. processor_died: Handle job failure, throw away Processor, issue fetch request.
-  # 4. quiet: shutdown idle Processors, ignore further fetch requests.
+  # 1. start: Spin up Processors.
+  # 3. processor_died: Handle job failure, throw away Processor, create new one.
+  # 4. quiet: shutdown idle Processors.
   # 5. stop: hard stop the Processors by deadline.
   #
-  # Note that only the last task requires a Thread since it has to monitor
+  # Note that only the last task requires its own Thread since it has to monitor
   # the shutdown process.  The other tasks are performed by other threads.
   #
   class Manager
     include Util
 
-    #attr_writer :fetcher
     attr_reader :workers
     attr_reader :options
 

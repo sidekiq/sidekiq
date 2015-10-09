@@ -6,9 +6,21 @@ require 'concurrent/atomic/atomic_fixnum'
 
 module Sidekiq
   ##
-  # The Processor receives a message from the Manager and actually
-  # processes it.  It instantiates the worker, runs the middleware
-  # chain and then calls Sidekiq::Worker#perform.
+  # The Processor is a standalone thread which:
+  #
+  # 1. fetches a job from Redis
+  # 2. executes the job
+  #   a. instantiate the Worker
+  #   b. run the middleware chain
+  #   c. call #perform
+  #
+  # A Processor can exit due to shutdown (processor_stopped)
+  # or due to an error during job execution (processor_died)
+  #
+  # If an error occurs in the job execution, the
+  # Processor calls the Manager to create a new one
+  # to replace itself and exits.
+  #
   class Processor
 
     include Util
@@ -21,6 +33,7 @@ module Sidekiq
       @down = false
       @done = false
       @job = nil
+      @thread = nil
       @strategy = (mgr.options[:fetch] || Sidekiq::BasicFetch).new(mgr.options)
     end
 
@@ -53,6 +66,8 @@ module Sidekiq
         while !@done
           process_one
         end
+        @mgr.processor_stopped(self)
+      rescue Sidekiq::Shutdown
         @mgr.processor_stopped(self)
       rescue Exception => ex
         @mgr.processor_died(self, ex)

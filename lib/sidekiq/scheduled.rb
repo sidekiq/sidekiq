@@ -43,18 +43,17 @@ module Sidekiq
 
       def initialize
         @enq = (Sidekiq.options[:scheduled_enq] || Sidekiq::Scheduled::Enq).new
+        @sleeper = ConnectionPool::TimedStack.new
         @done = false
-        @queue = ConnectionPool::TimedStack.new
       end
 
-      # Shut down this Fetcher instance, will pause until
-      # the thread is dead.
+      # Shut down this instance, will pause until the thread is dead.
       def terminate
         @done = true
         if @thread
           t = @thread
           @thread = nil
-          @queue << 0
+          @sleeper << 0
           t.value
         end
       end
@@ -85,7 +84,7 @@ module Sidekiq
       private
 
       def wait
-        @queue.pop(random_poll_interval)
+        @sleeper.pop(random_poll_interval)
       rescue Timeout::Error
       end
 
@@ -128,7 +127,7 @@ module Sidekiq
         total += INITIAL_WAIT unless Sidekiq.options[:poll_interval_average]
         total += (5 * rand)
 
-        @queue.pop(total)
+        @sleeper.pop(total)
       rescue Timeout::Error
       end
 
