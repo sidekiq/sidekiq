@@ -196,6 +196,15 @@ module Sidekiq
     raise ArgumentError, "Invalid event name: #{event}" unless options[:lifecycle_events].key?(event)
     options[:lifecycle_events][event] << block
   end
+
+  # We are shutting down Sidekiq but what about workers that
+  # are working on some long job?  This error is
+  # raised in workers that have not finished within the hard
+  # timeout limit.  This is needed to rollback db transactions,
+  # otherwise Ruby's Thread#kill will commit.  See #377.
+  # DO NOT RESCUE THIS ERROR IN YOUR WORKERS
+  class Shutdown < Interrupt; end
+
 end
 
 require 'sidekiq/extensions/class_methods'
