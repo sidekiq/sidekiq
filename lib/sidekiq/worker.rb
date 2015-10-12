@@ -38,6 +38,18 @@ module Sidekiq
 
     module ClassMethods
 
+      def delay(*args)
+        raise ArgumentError, "Do not call .delay on a Sidekiq::Worker class, call .perform_async"
+      end
+
+      def delay_for(*args)
+        raise ArgumentError, "Do not call .delay_for on a Sidekiq::Worker class, call .perform_in"
+      end
+
+      def delay_until(*args)
+        raise ArgumentError, "Do not call .delay_until on a Sidekiq::Worker class, call .perform_at"
+      end
+
       def perform_async(*args)
         client_push('class' => self, 'args' => args)
       end
