@@ -32,9 +32,9 @@ class TestLauncher < Sidekiq::Test
 
       describe 'when manager is active' do
         before do
-          Sidekiq::Launcher::PROCTITLES << proc { "xyz" }
+          Sidekiq::CLI::PROCTITLES << proc { "xyz" }
           @launcher.heartbeat('identity', heartbeat_data, Sidekiq.dump_json(heartbeat_data))
-          Sidekiq::Launcher::PROCTITLES.pop
+          Sidekiq::CLI::PROCTITLES.pop
         end
 
         it 'sets useful info to proctitle' do

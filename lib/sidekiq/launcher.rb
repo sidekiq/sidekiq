@@ -62,16 +62,8 @@ module Sidekiq
 
     JVM_RESERVED_SIGNALS = ['USR1', 'USR2'] # Don't Process#kill if we get these signals via the API
 
-    PROCTITLES = [
-      proc { 'sidekiq'.freeze },
-      proc { Sidekiq::VERSION },
-      proc { |me, data| data['tag'] },
-      proc { |me, data| "[#{Processor::WORKER_STATE.size} of #{data['concurrency']} busy]" },
-      proc { |me, data| "stopping" if me.stopping? },
-    ]
-
     def heartbeat(k, data, json)
-      results = PROCTITLES.map {|x| x.(self, data) }
+      results = Sidekiq::CLI::PROCTITLES.map {|x| x.(self, data) }
       results.compact!
       $0 = results.join(' ')
 
