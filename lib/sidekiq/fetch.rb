@@ -41,7 +41,7 @@ module Sidekiq
           if work
             @mgr.async.assign(work)
           else
-            after(0) { fetch }
+            after(random_poll_interval) { fetch }
           end
         rescue => ex
           handle_fetch_exception(ex)
@@ -51,6 +51,20 @@ module Sidekiq
     end
 
     private
+
+    # Calculates a random interval that is ±50% the desired average.
+    def random_poll_interval
+      scaled_poll_interval * rand + scaled_poll_interval.to_f / 2
+    end
+
+    # Calculates an average poll interval based on the number of known Sidekiq processes.
+    # This minimizes a single point of failure by dispersing check-ins but without taxing
+    # Redis if you run many Sidekiq processes.
+    def scaled_poll_interval
+      pcount = Sidekiq::ProcessSet.new.size
+      pcount = 1 if pcount == 0
+      pcount * Sidekiq.options[:average_queue_poll_interval]
+    end
 
     def pause
       sleep(TIMEOUT)
