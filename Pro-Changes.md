@@ -3,6 +3,12 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+2.1.1
+-----------
+
+- Make ShardSet lazier so Redis can first be initialized at startup. [#2603]
+
+
 2.1.0
 -----------
 
