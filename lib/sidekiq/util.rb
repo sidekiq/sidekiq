@@ -55,6 +55,7 @@ module Sidekiq
           handle_exception(ex, { event: event })
         end
       end
+      arr.clear
     end
 
     def want_a_hertz_donut?
