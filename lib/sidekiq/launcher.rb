@@ -71,10 +71,9 @@ module Sidekiq
     end
 
     def ❤(key, json)
+      fails = procd = 0
       begin
-        fails = 0
         Processor::FAILURE.update {|curr| fails = curr; 0 }
-        procd = 0
         Processor::PROCESSED.update {|curr| procd = curr; 0 }
 
         workers_key = "#{key}:workers".freeze
@@ -91,6 +90,7 @@ module Sidekiq
             end
           end
         end
+        fails = procd = 0
 
         _, _, _, msg = Sidekiq.redis do |conn|
           conn.pipelined do
@@ -111,6 +111,9 @@ module Sidekiq
       rescue => e
         # ignore all redis/network issues
         logger.error("heartbeat: #{e.message}")
+        # don't lose the counts if there was a network issue
+        PROCESSED.increment(procd)
+        FAILURE.increment(fails)
       end
     end
 
