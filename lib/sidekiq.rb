@@ -153,16 +153,6 @@ module Sidekiq
     Sidekiq::Logging.logger = log
   end
 
-  # When set, overrides Sidekiq.options[:average_scheduled_poll_interval] and sets
-  # the average interval that this process will delay before checking for
-  # scheduled jobs or job retries that are ready to run.
-  #
-  # See sidekiq/scheduled.rb for an in-depth explanation of this value
-  def self.poll_interval=(interval)
-    $stderr.puts "DEPRECATION: `config.poll_interval = #{interval}` will be removed in Sidekiq 4. Please update to `config.average_scheduled_poll_interval = #{interval}`."
-    self.options[:poll_interval_average] = interval
-  end
-
   # How frequently Redis should be checked by a random Sidekiq process for
   # scheduled and retriable jobs. Each individual process will take turns by
   # waiting some multiple of this value.

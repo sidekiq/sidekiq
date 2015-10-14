@@ -105,7 +105,7 @@ module Sidekiq
       # all your Sidekiq processes at the same time will lead to them all polling at
       # the same time: the thundering herd problem.
       #
-      # We only do this if poll_interval is unset (the default).
+      # We only do this if poll_interval_average is unset (the default).
       def poll_interval_average
         Sidekiq.options[:poll_interval_average] ||= scaled_poll_interval
       end
