@@ -3,9 +3,10 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+0.7.4
 ----------
 
+- Add additional check to prevent duplicate periodic job creation
 - Allow user-specified TTLs for rate limiters [#2607]
 - Paginate rate limiter index page [#2606]
 
