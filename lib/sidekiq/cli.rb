@@ -65,16 +65,18 @@ module Sidekiq
       logger.info Sidekiq::LICENSE
       logger.info "Upgrade to Sidekiq Pro for more features and support: http://sidekiq.org" unless defined?(::Sidekiq::Pro)
 
+      Sidekiq.redis do |conn|
+        # touch the connection pool so it is created before we
+        # fire startup and start multithreading.
+      end
+
+      # Before this point, the process is initializing with just the main thread.
+      # Starting here the process will now have multiple threads running.
       fire_event(:startup)
 
       logger.debug {
         "Middleware: #{Sidekiq.server_middleware.map(&:klass).join(', ')}"
       }
-
-      Sidekiq.redis do |conn|
-        # touch the connection pool so it is created before we
-        # launch the actors.
-      end
 
       if !options[:daemon]
         logger.info 'Starting processing, hit Ctrl-C to stop'
