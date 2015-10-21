@@ -9,10 +9,11 @@ module Sidekiq
       def create(options={})
         options[:url] ||= determine_redis_provider
 
-        # need a connection for Fetcher and Retry
         size = options[:size] || (Sidekiq.server? ? (Sidekiq.options[:concurrency] + 2) : 5)
-        pool_timeout = options[:pool_timeout] || 1
 
+        verify_sizing(size, Sidekiq.options[:concurrency]) if Sidekiq.server?
+
+        pool_timeout = options[:pool_timeout] || 1
         log_info(options)
 
         ConnectionPool.new(:timeout => pool_timeout, :size => size) do
@@ -22,13 +23,30 @@ module Sidekiq
 
       private
 
+      # Sidekiq needs a lot of concurrent Redis connections.
+      #
+      # We need a connection for each Processor.
+      # We need a connection for Pro's real-time change listener
+      # We need a connection to various features to call Redis every few seconds:
+      #   - the process heartbeat.
+      #   - enterprise's leader election
+      #   - enterprise's cron support
+      def verify_sizing(size, concurrency)
+        raise ArgumentError, "Your Redis connection pool is too small for Sidekiq to work, your pool has #{size} connections but really needs to have at least #{concurrency + 2}" if size <= concurrency
+      end
+
       def build_client(options)
         namespace = options[:namespace]
 
         client = Redis.new client_opts(options)
         if namespace
-          require 'redis/namespace'
-          Redis::Namespace.new(namespace, :redis => client)
+          begin
+            require 'redis/namespace'
+            Redis::Namespace.new(namespace, :redis => client)
+          rescue LoadError
+            Sidekiq.logger.error("redis-namespace gem not included in Gemfile, cannot use namespace '#{namespace}'")
+            exit(-127)
+          end
         else
           client
         end
