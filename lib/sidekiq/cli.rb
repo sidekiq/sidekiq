@@ -68,6 +68,8 @@ module Sidekiq
       Sidekiq.redis do |conn|
         # touch the connection pool so it is created before we
         # fire startup and start multithreading.
+        ver = conn.info['redis_version']
+        raise "Oops, you are using Redis v#{ver}, Sidekiq requires Redis v2.8.0 or greater" if ver < '2.8'
       end
 
       # Before this point, the process is initializing with just the main thread.
