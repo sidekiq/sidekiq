@@ -26,10 +26,14 @@ class TestManager < Sidekiq::Test
       mgr = new_manager(options)
       init_size = mgr.workers.size
       processor = mgr.workers.first
-      mgr.processor_died(processor, 'ignored')
+      begin
+        mgr.processor_died(processor, 'ignored')
 
-      assert_equal init_size, mgr.workers.size
-      refute mgr.workers.include?(processor)
+        assert_equal init_size, mgr.workers.size
+        refute mgr.workers.include?(processor)
+      ensure
+        mgr.workers.each {|p| p.terminate(true) }
+      end
     end
 
     it 'does not support invalid concurrency' do

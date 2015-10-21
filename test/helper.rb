@@ -1,4 +1,7 @@
 $TESTING = true
+# disable minitest/parallel threads
+ENV["N"] = "0"
+
 if ENV["COVERAGE"]
   require 'simplecov'
   SimpleCov.start do
@@ -33,7 +36,6 @@ rescue LoadError
 end
 
 require 'minitest/autorun'
-require 'minitest/pride'
 
 require 'sidekiq'
 require 'sidekiq/util'
@@ -60,5 +62,15 @@ def capture_logging(lvl=Logger::INFO)
     out.string
   ensure
     Sidekiq.logger = old
+  end
+end
+
+def with_logging(lvl=Logger::DEBUG)
+  old = Sidekiq.logger.level
+  begin
+    Sidekiq.logger.level = lvl
+    yield
+  ensure
+    Sidekiq.logger.level = old
   end
 end

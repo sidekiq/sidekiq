@@ -5,7 +5,7 @@ require 'sidekiq/scheduled'
 require 'sidekiq/processor'
 
 class TestActors < Sidekiq::Test
-  class SomeWorker
+  class JoeWorker
     include Sidekiq::Worker
     def perform(slp)
       raise "boom" if slp == "boom"
@@ -30,7 +30,7 @@ class TestActors < Sidekiq::Test
         ss = Sidekiq::ScheduledSet.new
         q = Sidekiq::Queue.new
 
-        SomeWorker.perform_in(0.01, 0)
+        JoeWorker.perform_in(0.01, 0)
 
         assert_equal 0, q.size
         assert_equal 1, ss.size
@@ -82,7 +82,7 @@ class TestActors < Sidekiq::Test
         mgr = Mgr.new
 
         p = Sidekiq::Processor.new(mgr)
-        SomeWorker.perform_async(0)
+        JoeWorker.perform_async(0)
 
         a = $count
         p.process_one
@@ -94,7 +94,9 @@ class TestActors < Sidekiq::Test
         mgr = Mgr.new
 
         p = Sidekiq::Processor.new(mgr)
-        SomeWorker.perform_async("boom")
+        JoeWorker.perform_async("boom")
+        q = Sidekiq::Queue.new
+        assert_equal 1, q.size
 
         a = $count
         mgr.mutex.synchronize do
@@ -115,7 +117,9 @@ class TestActors < Sidekiq::Test
         mgr = Mgr.new
 
         p = Sidekiq::Processor.new(mgr)
-        SomeWorker.perform_async(1)
+        JoeWorker.perform_async(1)
+        q = Sidekiq::Queue.new
+        assert_equal 1, q.size
 
         a = $count
         p.start
