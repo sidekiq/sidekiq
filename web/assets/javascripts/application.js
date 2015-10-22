@@ -58,8 +58,13 @@ function updatePage(url) {
       url: url,
       dataType: 'html'
     }).done(function (data) {
-      var $page = $(data).filter('#page')
+      $data = $(data)
+
+      var $page = $data.filter('#page')
       $('#page').replaceWith($page)
+
+      var $header_status = $data.find('.status')
+      $('.status').replaceWith($header_status)
 
       $("time").timeago()
     })

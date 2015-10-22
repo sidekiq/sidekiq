@@ -181,6 +181,10 @@ form .btn {
   margin-right: 5px;
 }
 
+form .btn-group .btn {
+  margin-right: 1px;
+}
+
 td form {
   margin-bottom: 0;
 }

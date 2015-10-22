@@ -336,7 +336,11 @@ module Sidekiq
         die 1
       end
       @parser.parse!(argv)
-      opts[:config_file] ||= 'config/sidekiq.yml' if File.exist?('config/sidekiq.yml')
+
+      %w[config/sidekiq.yml config/sidekiq.yml.erb].each do |filename|
+        opts[:config_file] ||= filename if File.exist?(filename)
+      end
+
       opts
     end
 

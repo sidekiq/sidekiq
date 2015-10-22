@@ -183,7 +183,6 @@ class TestApi < Sidekiq::Test
           assert_equal [1, 'mike'], job.args
           assert_equal Time.new(2012, 12, 26), job.enqueued_at
         end
-
         assert q.latency > 10_000_000
 
         q = Sidekiq::Queue.new('other')
@@ -197,11 +196,17 @@ class TestApi < Sidekiq::Test
       end
 
       it 'unwraps delayed jobs' do
-        ApiWorker.delay.foo(1,2,3)
+        Sidekiq::Queue.delay.foo(1,2,3)
         q = Sidekiq::Queue.new
         x = q.first
-        assert_equal "TestApi::ApiWorker.foo", x.display_class
+        assert_equal "Sidekiq::Queue.foo", x.display_class
         assert_equal [1,2,3], x.display_args
+      end
+
+      it 'has no enqueued_at time for jobs enqueued in the future' do
+        job_id = ApiWorker.perform_in(100, 1, 'foo')
+        job = Sidekiq::ScheduledSet.new.find_job(job_id)
+        assert_nil job.enqueued_at
       end
 
       it 'can delete jobs' do
