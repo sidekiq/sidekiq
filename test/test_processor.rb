@@ -87,7 +87,7 @@ class TestProcessor < Sidekiq::Test
 
       before do
         work.expect(:queue_name, 'queue:default')
-        work.expect(:message, Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => worker_args }))
+        work.expect(:job, Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => worker_args }))
         Sidekiq.server_middleware do |chain|
           chain.prepend ExceptionRaisingMiddleware, raise_before_yield, raise_after_yield, skip_job
         end

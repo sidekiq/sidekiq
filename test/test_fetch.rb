@@ -20,7 +20,7 @@ class TestFetcher < Sidekiq::Test
       uow = fetch.retrieve_work
       refute_nil uow
       assert_equal 'basic', uow.queue_name
-      assert_equal 'msg', uow.message
+      assert_equal 'msg', uow.job
       q = Sidekiq::Queue.new('basic')
       assert_equal 0, q.size
       uow.requeue

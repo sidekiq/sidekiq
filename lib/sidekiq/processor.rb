@@ -104,7 +104,7 @@ module Sidekiq
     def handle_fetch_exception(ex)
       if !@down
         @down = Time.now
-        logger.error("Error fetching message: #{ex}")
+        logger.error("Error fetching job: #{ex}")
         ex.backtrace.each do |bt|
           logger.error(bt)
         end
@@ -113,23 +113,23 @@ module Sidekiq
     end
 
     def process(work)
-      msgstr = work.message
+      jobstr = work.job
       queue = work.queue_name
 
       ack = false
       begin
-        msg = Sidekiq.load_json(msgstr)
-        klass  = msg['class'.freeze].constantize
+        job = Sidekiq.load_json(jobstr)
+        klass  = job['class'.freeze].constantize
         worker = klass.new
-        worker.jid = msg['jid'.freeze]
+        worker.jid = job['jid'.freeze]
 
-        stats(worker, msg, queue) do
-          Sidekiq.server_middleware.invoke(worker, msg, queue) do
+        stats(worker, job, queue) do
+          Sidekiq.server_middleware.invoke(worker, job, queue) do
             # Only ack if we either attempted to start this job or
             # successfully completed it. This prevents us from
             # losing jobs if a middleware raises an exception before yielding
             ack = true
-            execute_job(worker, cloned(msg['args'.freeze]))
+            execute_job(worker, cloned(job['args'.freeze]))
           end
         end
         ack = true
@@ -139,7 +139,7 @@ module Sidekiq
         # we didn't properly finish it.
         ack = false
       rescue Exception => ex
-        handle_exception(ex, msg || { :message => msgstr })
+        handle_exception(ex, job || { :job => jobstr })
         raise
       ensure
         work.acknowledge if ack
@@ -158,9 +158,9 @@ module Sidekiq
     PROCESSED = Concurrent::AtomicFixnum.new
     FAILURE = Concurrent::AtomicFixnum.new
 
-    def stats(worker, msg, queue)
+    def stats(worker, job, queue)
       tid = thread_identity
-      WORKER_STATE[tid] = {:queue => queue, :payload => msg, :run_at => Time.now.to_i }
+      WORKER_STATE[tid] = {:queue => queue, :payload => job, :run_at => Time.now.to_i }
 
       begin
         yield
@@ -174,7 +174,7 @@ module Sidekiq
     end
 
     # Deep clone the arguments passed to the worker so that if
-    # the message fails, what is pushed back onto Redis hasn't
+    # the job fails, what is pushed back onto Redis hasn't
     # been mutated by the worker.
     def cloned(ary)
       Marshal.load(Marshal.dump(ary))

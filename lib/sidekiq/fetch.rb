@@ -6,7 +6,7 @@ module Sidekiq
     # can check if the process is shutting down.
     TIMEOUT = 2
 
-    UnitOfWork = Struct.new(:queue, :message) do
+    UnitOfWork = Struct.new(:queue, :job) do
       def acknowledge
         # nothing to do
       end
@@ -17,7 +17,7 @@ module Sidekiq
 
       def requeue
         Sidekiq.redis do |conn|
-          conn.rpush("queue:#{queue_name}", message)
+          conn.rpush("queue:#{queue_name}", job)
         end
       end
     end
@@ -61,7 +61,7 @@ module Sidekiq
       jobs_to_requeue = {}
       inprogress.each do |unit_of_work|
         jobs_to_requeue[unit_of_work.queue_name] ||= []
-        jobs_to_requeue[unit_of_work.queue_name] << unit_of_work.message
+        jobs_to_requeue[unit_of_work.queue_name] << unit_of_work.job
       end
 
       Sidekiq.redis do |conn|
@@ -71,7 +71,7 @@ module Sidekiq
           end
         end
       end
-      Sidekiq.logger.info("Pushed #{inprogress.size} messages back to Redis")
+      Sidekiq.logger.info("Pushed #{inprogress.size} jobs back to Redis")
     rescue => ex
       Sidekiq.logger.warn("Failed to requeue #{inprogress.size} jobs: #{ex.message}")
     end
