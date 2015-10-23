@@ -11,8 +11,6 @@ if ENV["COVERAGE"]
 end
 ENV['RACK_ENV'] = ENV['RAILS_ENV'] = 'test'
 
-puts "PID: #{$$}"
-
 trap 'USR1' do
   threads = Thread.list
 
