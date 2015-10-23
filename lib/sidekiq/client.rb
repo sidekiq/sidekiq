@@ -119,11 +119,6 @@ module Sidekiq
 
     class << self
 
-      # deprecated
-      def default
-        @default ||= new
-      end
-
       def push(item)
         new.push(item)
       end
