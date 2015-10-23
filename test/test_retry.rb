@@ -80,6 +80,28 @@ class TestRetry < Sidekiq::Test
       assert_equal 1, Sidekiq::DeadSet.new.size
     end
 
+    it 'allows a max_retries option as a block in initializer' do
+      max_retries = Proc.new do |exception|
+        case exception
+        when ArgumentError
+          50
+        else
+          25
+        end
+      end
+
+      1.upto(51) do
+        assert_raises ArgumentError do
+          handler(:max_retries => max_retries).call(worker, job, 'default') do
+            raise ArgumentError.new("kerblammo!")
+          end
+        end
+      end
+
+      assert_equal 50, Sidekiq::RetrySet.new.size
+      assert_equal 1, Sidekiq::DeadSet.new.size
+    end
+
     it 'saves backtraces' do
       c = nil
       assert_raises RuntimeError do

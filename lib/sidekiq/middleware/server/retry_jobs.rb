@@ -85,8 +85,12 @@ module Sidekiq
 
         private
 
+        def max_retries(exception)
+          @max_retries.is_a?(Proc) ? @max_retries.call(exception) : @max_retries
+        end
+
         def attempt_retry(worker, msg, queue, exception)
-          max_retry_attempts = retry_attempts_from(msg['retry'], @max_retries)
+          max_retry_attempts = retry_attempts_from(msg['retry'], max_retries(exception))
 
           msg['queue'] = if msg['retry_queue']
             msg['retry_queue']
