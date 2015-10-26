@@ -121,7 +121,7 @@ module Sidekiq
           end
 
           if count < max_retry_attempts
-            delay = delay_for(worker, count)
+            delay = delay_for(worker, count, exception)
             logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
             retry_at = Time.now.to_f + delay
             payload = Sidekiq.dump_json(msg)
@@ -170,8 +170,8 @@ module Sidekiq
           end
         end
 
-        def delay_for(worker, count)
-          worker.sidekiq_retry_in_block? && retry_in(worker, count) || seconds_to_delay(count)
+        def delay_for(worker, count, exception)
+          worker.sidekiq_retry_in_block? && retry_in(worker, count, exception) || seconds_to_delay(count)
         end
 
         # delayed_job uses the same basic formula
@@ -179,9 +179,9 @@ module Sidekiq
           (count ** 4) + 15 + (rand(30)*(count+1))
         end
 
-        def retry_in(worker, count)
+        def retry_in(worker, count, exception)
           begin
-            worker.sidekiq_retry_in_block.call(count).to_i
+            worker.sidekiq_retry_in_block.call(count, exception).to_i
           rescue Exception => e
             handle_exception(e, { context: "Failure scheduling retry using the defined `sidekiq_retry_in` in #{worker.class.name}, falling back to default" })
             nil
