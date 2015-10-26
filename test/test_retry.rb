@@ -229,11 +229,24 @@ class TestRetry < Sidekiq::Test
         File.unlink @tmp_log_path if File.exist?(@tmp_log_path)
       end
 
-      class CustomWorker
+      class CustomWorkerWithoutException
         include Sidekiq::Worker
 
         sidekiq_retry_in do |count|
           count * 2
+        end
+      end
+
+      class CustomWorkerWithException
+        include Sidekiq::Worker
+
+        sidekiq_retry_in do |count, exception|
+          case exception
+          when ArgumentError
+            count * 4
+          else
+            count * 2
+          end
         end
       end
 
@@ -246,15 +259,23 @@ class TestRetry < Sidekiq::Test
       end
 
       it "retries with a default delay" do
-        refute_equal 4, handler.__send__(:delay_for, worker, 2)
+        refute_equal 4, handler.__send__(:delay_for, worker, 2, StandardError.new)
       end
 
-      it "retries with a custom delay" do
-        assert_equal 4, handler.__send__(:delay_for, CustomWorker, 2)
+      it "retries with a custom delay and exception 1" do
+        assert_equal 8, handler.__send__(:delay_for, CustomWorkerWithException, 2, ArgumentError.new)
+      end
+
+      it "retries with a custom delay and exception 2" do
+        assert_equal 4, handler.__send__(:delay_for, CustomWorkerWithException, 2, StandardError.new)
+      end
+
+      it "retries with a custom delay without exception" do
+        assert_equal 4, handler.__send__(:delay_for, CustomWorkerWithoutException, 2, StandardError.new)
       end
 
       it "falls back to the default retry on exception" do
-        refute_equal 4, handler.__send__(:delay_for, ErrorWorker, 2)
+        refute_equal 4, handler.__send__(:delay_for, ErrorWorker, 2, StandardError.new)
         assert_match(/Failure scheduling retry using the defined `sidekiq_retry_in`/,
                      File.read(@tmp_log_path), 'Log entry missing for sidekiq_retry_in')
       end
