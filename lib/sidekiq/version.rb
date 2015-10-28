@@ -1,3 +1,3 @@
 module Sidekiq
-  VERSION = "3.5.1"
+  VERSION = "3.5.2"
 end

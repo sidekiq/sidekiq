@@ -1,8 +1,9 @@
 # Sidekiq Changes
 
-HEAD
+3.5.2
 -----------
 
+- **Sidekiq 3 is now in maintenance mode**, only major bugs will be fixed.
 - The exception triggering a retry is now passed into `sidekiq_retry_in`,
   allowing you to retry more frequently for certain types of errors.
   [#2619, kreynolds]
