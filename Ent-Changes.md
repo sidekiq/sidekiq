@@ -3,6 +3,12 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+----------
+
+- Redesign how overrated jobs are rescheduled to avoid creating new
+  jobs. [#2619]
+
 0.7.5
 ----------
 
