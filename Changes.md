@@ -1,3 +1,22 @@
+# Sidekiq Changes
+
+HEAD
+-----------
+
+- The exception triggering a retry is now passed into `sidekiq_retry_in`,
+  allowing you to retry more frequently for certain types of errors.
+  [#2619, kreynolds]
+```ruby
+  sidekiq_retry_in do |count, ex|
+    case ex
+    when RuntimeError
+      5 * count
+    else
+      10 * count
+    end
+  end
+```
+
 3.5.1
 -----------
 
