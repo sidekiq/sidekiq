@@ -225,7 +225,7 @@ module Sidekiq
       page = 0
       page_size = 50
 
-      loop do
+      while true do
         range_start = page * page_size - deleted_size
         range_end   = page * page_size - deleted_size + (page_size - 1)
         entries = Sidekiq.redis do |conn|
@@ -488,7 +488,7 @@ module Sidekiq
       page = -1
       page_size = 50
 
-      loop do
+      while true do
         range_start = page * page_size + offset_size
         range_end   = page * page_size + offset_size + (page_size - 1)
         elements = Sidekiq.redis do |conn|
