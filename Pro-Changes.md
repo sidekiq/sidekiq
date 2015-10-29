@@ -3,6 +3,16 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+3.0.0
+-----------
+
+- See the [Pro 3.0 release notes](Pro-3.0-Upgrade.md).
+
+2.1.2
+-----------
+
+- Lock Sidekiq Pro 2.x to Sidekiq 3.x.
+
 2.1.1
 -----------
 
