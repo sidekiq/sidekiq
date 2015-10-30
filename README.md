@@ -66,7 +66,7 @@ Please see the [sidekiq wiki](https://github.com/mperham/sidekiq/wiki) for the o
 [mperham/sidekiq on Gitter](https://gitter.im/mperham/sidekiq) is dedicated to this project,
 but bug reports or feature requests suggestions should still go through [issues on Github](https://github.com/mperham/sidekiq/issues).  Release announcements are made to the [@sidekiq](https://twitter.com/sidekiq) Twitter account.
 
-You may also find useful a [Google Group](https://groups.google.com/forum/#!forum/sidekiq) dedicated to Sidekiq discussion and [a Sidekiq tag](https://stackoverflow.com/questions/tagged/sidekiq) on Stack Overflow.
+You may also find useful a [Reddit area](https://reddit.com/r/sidekiq) dedicated to Sidekiq discussion and [a Sidekiq tag](https://stackoverflow.com/questions/tagged/sidekiq) on Stack Overflow.
 
 
 Problems?
