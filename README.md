@@ -32,7 +32,7 @@ are untested but might work fine.  MRI 1.9 is no longer supported.
 
 All Rails releases starting from 3.2 are officially supported.
 
-Redis 2.4 or greater is required.
+Redis 2.8 or greater is required.
 
 
 Installation
@@ -75,14 +75,14 @@ Problems?
 **Please do not directly email any Sidekiq committers with questions or problems.**  A community is best served when discussions are held in public.
 
 If you have a problem, please review the [FAQ](https://github.com/mperham/sidekiq/wiki/FAQ) and [Troubleshooting](https://github.com/mperham/sidekiq/wiki/Problems-and-Troubleshooting) wiki pages. Searching the issues for your problem is also a good idea.  If that doesn't help, feel free to email the Sidekiq mailing list, chat in Gitter, or open a new issue.
-The mailing list is the preferred place to ask questions on usage. If you are encountering what you think is a bug, please open an issue.
+StackOverflow or Reddit is the preferred place to ask questions on usage. If you are encountering what you think is a bug, please open an issue.
 
 
 Thanks
 -----------------
 
 Sidekiq stays fast by using the [JProfiler java profiler](http://www.ej-technologies.com/products/jprofiler/overview.html) to find and fix
-performance problems on JRuby.  Unfortunately MRI does not have good profile tooling.
+performance problems on JRuby.  Unfortunately MRI does not have good multithreaded profiling tools.
 
 
 License
