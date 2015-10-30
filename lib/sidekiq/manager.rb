@@ -52,10 +52,17 @@ module Sidekiq
 
       logger.info { "Terminating quiet workers" }
       @workers.each { |x| x.terminate }
+      fire_event(:quiet, true)
     end
 
     def stop(deadline)
       quiet
+      fire_event(:shutdown, true)
+
+      # some of the shutdown events can be async,
+      # we don't have any way to know when they're done but
+      # give them a little time to take effect
+      sleep 0.5
       return if @workers.empty?
 
       logger.info { "Pausing to allow workers to finish..." }
