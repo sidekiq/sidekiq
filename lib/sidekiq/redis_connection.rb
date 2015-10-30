@@ -9,7 +9,7 @@ module Sidekiq
       def create(options={})
         options[:url] ||= determine_redis_provider
 
-        size = options[:size] || (Sidekiq.server? ? (Sidekiq.options[:concurrency] + 2) : 5)
+        size = options[:size] || (Sidekiq.server? ? (Sidekiq.options[:concurrency] + 5) : 5)
 
         verify_sizing(size, Sidekiq.options[:concurrency]) if Sidekiq.server?
 
