@@ -94,7 +94,6 @@ module Sidekiq
       rescue Interrupt
         logger.info 'Shutting down'
         launcher.stop
-        fire_event(:shutdown, true)
         # Explicitly exit so busy Processor threads can't block
         # process shutdown.
         exit(0)

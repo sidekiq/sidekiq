@@ -52,6 +52,7 @@ module Sidekiq
         poller.terminate if poller.alive?
 
         manager.async.stop(:shutdown => true, :timeout => @options[:timeout])
+        fire_event(:shutdown, true)
         @condvar.wait
         manager.terminate
 

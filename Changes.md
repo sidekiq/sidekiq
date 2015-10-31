@@ -1,5 +1,10 @@
 # Sidekiq Changes
 
+3.5.3
+-----------
+
+- Adjust shutdown event to run in parallel with the rest of system shutdown. [#2635]
+
 3.5.2
 -----------
 
