@@ -8,6 +8,11 @@
   [detailed on my blog](http://www.mikeperham.com/2015/10/14/optimizing-sidekiq/).
 - See the [4.0 upgrade notes](4.0-Upgrade.md) for more detail.
 
+3.5.3
+-----------
+
+- Adjust shutdown event to run in parallel with the rest of system shutdown. [#2635]
+
 3.5.2
 -----------
 
