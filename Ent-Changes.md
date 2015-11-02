@@ -3,6 +3,13 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+0.7.7
+----------
+
+- Fix racy shutdown event which could lead to disappearing periodic
+  jobs, requires Sidekiq >= 3.5.3.
+- Add new :leader event which is fired when a process gains leadership.
+
 0.7.6
 ----------
 
