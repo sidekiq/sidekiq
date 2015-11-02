@@ -3,7 +3,12 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-3.0.0
+3.0.0.pre2
+-----------
+
+- Fix excessive connection usage by reliable fetch.
+
+3.0.0.pre1
 -----------
 
 - See the [Pro 3.0 release notes](Pro-3.0-Upgrade.md).
