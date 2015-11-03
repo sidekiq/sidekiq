@@ -13,6 +13,12 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 
 - See the [Pro 3.0 release notes](Pro-3.0-Upgrade.md).
 
+2.1.3
+-----------
+
+- Don't enable strict priority if using weighted queueing like `-q a,1 -q b,1`
+- Safer JSON mangling in Lua [#2639]
+
 2.1.2
 -----------
 
