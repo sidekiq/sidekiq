@@ -7,6 +7,8 @@
   and to remove dependencies.  This has resulted in major speedups, as
   [detailed on my blog](http://www.mikeperham.com/2015/10/14/optimizing-sidekiq/).
 - See the [4.0 upgrade notes](4.0-Upgrade.md) for more detail.
+- Invoke error handlers on an uncaught exception, when using the
+  Sidekiq::Testing helper. [#2641, kyrylo]
 
 3.5.3
 -----------
