@@ -3,17 +3,17 @@
     <div class="container text-center">
         <ul class="nav">
           <li>
-            <p class="navbar-text" style="color:white;"><%= product_version %></p>
+            <p class="navbar-text product-version" title="<%= h(product_version) %>"><%= product_version %></p>
           </li>
           <li>
-            <p class="navbar-text redis-url">Redis: <%= redis_connection %></p>
+            <p class="navbar-text redis-url" title="<%= h(redis_connection)%>">Redis: <%= redis_connection %></p>
           </li>
           <li>
             <p class="navbar-text"><%= t('Time') %>: <%= Time.now.utc.strftime('%H:%M:%S UTC') %></p>
           </li>
           <% if namespace %>
               <li>
-                <p class="navbar-text redis-namespace"><%= t('Namespace') %>: <%= namespace %></p>
+                <p class="navbar-text redis-namespace" title="<%= h(namespace)%>" ><%= t('Namespace') %>: <%= namespace %></p>
               </li>
           <% end %>
         </ul>
