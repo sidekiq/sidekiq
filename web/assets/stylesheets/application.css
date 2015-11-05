@@ -713,38 +713,37 @@ div.interval-slider input {
     position: relative;
     top: auto;
   }
-}
 
-.redis-url, .redis-namespace {
-  overflow: hidden;
-  white-space: nowrap;
+  .navbar-fixed-bottom .navbar-text {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: normal;
+  }
 }
 
 @media (min-width: 768px) {
-  .redis-url {
-    max-width: 200px;
+  .navbar-fixed-bottom .navbar-text {
+    max-width: 22.5%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: 3%;
+    margin-right: 0;
+  }
+  .navbar-fixed-bottom li:first-child .navbar-text {
+    margin-left: 0;
   }
 
-  .redis-namespace {
-    max-width: 150px;
-  }
-}
-
-@media (min-width: 992px) {
-  .redis-url {
-    max-width: 390px;
+  .navbar-fixed-bottom .navbar-text.redis-url {
+    max-width: 27%;
   }
 
-  .redis-namespace {
-    max-width: 300px;
+  .navbar-fixed-bottom .navbar-text.redis-namespace {
+    max-width: 18%;
   }
-}
-@media (min-width: 1200px) {
-  .redis-url {
-    max-width: 480px;
-  }
-
-  .redis-namespace {
-    max-width: 350px;
+  .navbar-fixed-bottom .navbar-text.product-version {
+    color: white;
   }
 }
