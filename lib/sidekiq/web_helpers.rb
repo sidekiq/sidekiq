@@ -246,7 +246,7 @@ module Sidekiq
       "Sidekiq v#{Sidekiq::VERSION}"
     end
 
-    def redis_url_and_namespace
+    def redis_connection_and_namespace
       namespace_suffix = namespace.blank? ? '' : "##{namespace}"
       "#{redis_connection}#{namespace_suffix}"
     end
