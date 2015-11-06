@@ -6,16 +6,11 @@
             <p class="navbar-text" style="color:white;"><%= product_version %></p>
           </li>
           <li>
-            <p class="navbar-text redis-url">Redis: <%= redis_connection %></p>
+            <p class="navbar-text redis-url"><%= redis_connection %><% if namespace %>#<%= namespace %><% end %></p>
           </li>
           <li>
-            <p class="navbar-text"><%= t('Time') %>: <%= Time.now.utc.strftime('%H:%M:%S UTC') %></p>
+            <p class="navbar-text"><%= Time.now.utc.strftime('%H:%M:%S UTC') %></p>
           </li>
-          <% if namespace %>
-              <li>
-                <p class="navbar-text redis-namespace"><%= t('Namespace') %>: <%= namespace %></p>
-              </li>
-          <% end %>
         </ul>
     </div>
   </div>
