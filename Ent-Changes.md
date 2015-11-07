@@ -3,9 +3,17 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+1.0.0.pre1
+----------
+
+- Enterprise 1.x targets Sidekiq 4.x.
+- Rewrite several features to remove Celluloid dependency.  No
+  functional changes.
+
 0.7.7
 ----------
 
+- Enterprise 0.x targets Sidekiq 3.x.
 - Fix racy shutdown event which could lead to disappearing periodic
   jobs, requires Sidekiq >= 3.5.3.
 - Add new :leader event which is fired when a process gains leadership.
