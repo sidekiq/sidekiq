@@ -245,5 +245,12 @@ module Sidekiq
     def product_version
       "Sidekiq v#{Sidekiq::VERSION}"
     end
+
+    def redis_connection_and_namespace
+      @redis_connection_and_namespace ||= begin
+        namespace_suffix = namespace.blank? ? '' : "##{namespace}"
+        "#{redis_connection}#{namespace_suffix}"
+      end
+    end
   end
 end

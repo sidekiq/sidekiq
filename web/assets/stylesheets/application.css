@@ -748,3 +748,7 @@ div.interval-slider input {
     max-width: 350px;
   }
 }
+
+.redis-url {
+  text-overflow: ellipsis;
+}
