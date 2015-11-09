@@ -247,8 +247,10 @@ module Sidekiq
     end
 
     def redis_connection_and_namespace
-      namespace_suffix = namespace.blank? ? '' : "##{namespace}"
-      "#{redis_connection}#{namespace_suffix}"
+      @redis_connection_and_namespace ||= begin
+        namespace_suffix = namespace.blank? ? '' : "##{namespace}"
+        "#{redis_connection}#{namespace_suffix}"
+      end
     end
   end
 end
