@@ -41,9 +41,13 @@ class Sidekiqctl
   end
 
   def fetch_process
-    Process.getpgid(pid)
+    Process.kill(0, pid)
   rescue Errno::ESRCH
     done "Process doesn't exist", :error
+  # We were not allowed to send a signal, but the process must have existed
+  # when Process.kill() was called.
+  rescue Errno::EPERM
+    return pid
   end
 
   def done(msg, error = nil)
@@ -67,10 +71,12 @@ class Sidekiqctl
     `kill -TERM #{pid}`
     kill_timeout.times do
       begin
-        Process.getpgid(pid)
+        Process.kill(0, pid)
       rescue Errno::ESRCH
         FileUtils.rm_f pidfile
         done 'Sidekiq shut down gracefully.'
+      rescue Errno::EPERM
+        done 'Not permitted to shut down Sidekiq.'
       end
       sleep 1
     end
