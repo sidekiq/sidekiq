@@ -5,6 +5,7 @@
 $TESTING = false
 
 #require 'ruby-prof'
+Bundler.require(:default)
 
 require_relative '../lib/sidekiq/cli'
 require_relative '../lib/sidekiq/launcher'
@@ -30,6 +31,7 @@ Sidekiq.configure_server do |config|
   config.options[:queues] << 'default'
   config.logger.level = Logger::ERROR
   config.average_scheduled_poll_interval = 2
+  config.reliable! if defined?(Sidekiq::Pro)
 end
 
 class LoadWorker
@@ -140,6 +142,7 @@ end
 begin
   #RubyProf::exclude_threads = [ Monitoring ]
   #RubyProf.start
+  fire_event(:startup)
   Sidekiq.logger.error "Simulating 1ms of latency between Sidekiq and redis"
   Toxiproxy[:redis].downstream(:latency, latency: 1).apply do
     launcher = Sidekiq::Launcher.new(Sidekiq.options)
