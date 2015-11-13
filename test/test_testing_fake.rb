@@ -94,7 +94,7 @@ class TestTesting < Sidekiq::Test
     it 'stubs the enqueue_to call' do
       assert_equal 0, EnqueuedWorker.jobs.size
       assert Sidekiq::Client.enqueue_to('someq', EnqueuedWorker, 1, 2)
-      assert_equal 1, EnqueuedWorker.jobs.size
+      assert_equal 1, Sidekiq::Queues['someq'].size
     end
 
     it 'executes all stored jobs' do
@@ -316,6 +316,16 @@ class TestTesting < Sidekiq::Test
 
       assert_equal 0, Sidekiq::Queues["default"].size
       assert_equal 0, Sidekiq::Queues["alt"].size
+    end
+
+    it 'finds jobs enqueued by client' do
+      Sidekiq::Client.push(
+        'class' => 'NonExistentWorker',
+        'queue' => 'missing',
+        'args' => [1]
+      )
+
+      assert_equal 1, Sidekiq::Queues["missing"].size
     end
   end
 end

@@ -68,7 +68,7 @@ module Sidekiq
     def raw_push(payloads)
       if Sidekiq::Testing.fake?
         payloads.each do |job|
-          Queues.jobs[job['class'].constantize.sidekiq_options["queue"]] << Sidekiq.load_json(Sidekiq.dump_json(job))
+          Queues.jobs[job['queue']] << Sidekiq.load_json(Sidekiq.dump_json(job))
         end
         true
       elsif Sidekiq::Testing.inline?
