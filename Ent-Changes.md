@@ -10,6 +10,12 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 - Rewrite several features to remove Celluloid dependency.  No
   functional changes.
 
+0.7.8
+----------
+
+- Fix `unique_for: false` [#2658]
+
+
 0.7.7
 ----------
 
