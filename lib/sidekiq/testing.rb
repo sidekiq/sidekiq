@@ -261,7 +261,7 @@ module Sidekiq
       # Drain all queued jobs across all workers
       def drain_all
         while jobs.any?
-          worker_classes = jobs.map { |job| job["class"] }
+          worker_classes = jobs.map { |job| job["class"] }.uniq
 
           worker_classes.each do |worker_class|
             worker_class.constantize.drain

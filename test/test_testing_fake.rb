@@ -286,7 +286,7 @@ class TestTesting < Sidekiq::Test
 
     class AltQueueWorker
       include Sidekiq::Worker
-      sidekiq_options queue: "alt"
+      sidekiq_options queue: :alt
       def perform(a, b)
         a + b
       end
