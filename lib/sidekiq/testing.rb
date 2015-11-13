@@ -73,10 +73,11 @@ module Sidekiq
         true
       elsif Sidekiq::Testing.inline?
         payloads.each do |job|
-          job['jid'] ||= SecureRandom.hex(12)
           klass = job['class'].constantize
-          klass.jobs.unshift Sidekiq.load_json(Sidekiq.dump_json(job))
-          klass.perform_one
+          worker = klass.new
+          worker.jid = job['jid'] || SecureRandom.hex(12)
+          args = Sidekiq.load_json(Sidekiq.dump_json(job))["args"]
+          worker.perform(*args)
         end
         true
       else
