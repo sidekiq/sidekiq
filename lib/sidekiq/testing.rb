@@ -74,10 +74,9 @@ module Sidekiq
       elsif Sidekiq::Testing.inline?
         payloads.each do |job|
           klass = job['class'].constantize
-          worker = klass.new
-          worker.jid = job['jid'] || SecureRandom.hex(12)
-          args = Sidekiq.load_json(Sidekiq.dump_json(job))["args"]
-          worker.perform(*args)
+          job['id'] ||= SecureRandom.hex(12)
+          job_hash = Sidekiq.load_json(Sidekiq.dump_json(job))
+          klass.process_job(job_hash)
         end
         true
       else
