@@ -113,7 +113,7 @@ module Sidekiq
     #   assert_equal 1, Sidekiq::Queues["default"].size
     #   assert_equal :something, Sidekiq::Queues["default"].first['args'][0]
     #
-    # You can also clear and drain all workers' jobs:
+    # You can also clear all workers' jobs:
     #
     #   assert_equal 0, Sidekiq::Queues["default"].size
     #   HardWorker.perform_async(:something)
