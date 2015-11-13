@@ -7,6 +7,16 @@
   and to remove dependencies.  This has resulted in major speedups, as
   [detailed on my blog](http://www.mikeperham.com/2015/10/14/optimizing-sidekiq/).
 - See the [4.0 upgrade notes](4.0-Upgrade.md) for more detail.
+- There's a new testing API based off the `Sidekiq::Queues` namespace. All
+  assertions made against the Worker class still work as expected.
+  [#2659, brandonhilkert]
+```ruby
+assert_equal 0, Sidekiq::Queues["default"].size
+HardWorker.perform_async("log")
+assert_equal 1, Sidekiq::Queues["default"].size
+assert_equal "log", Sidekiq::Queues["default"].first['args'][0]
+Sidekiq::Queues.clear_all
+```
 
 3.5.3
 -----------
