@@ -160,7 +160,7 @@ module Sidekiq
       options = options.stringify_keys
       params.merge(options).map do |key, value|
         SAFE_QPARAMS.include?(key) ? "#{key}=#{value}" : next
-      end.join("&")
+      end.compact.join("&")
     end
 
     def truncate(text, truncate_after_chars = 2000)
