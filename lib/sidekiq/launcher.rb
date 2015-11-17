@@ -112,8 +112,8 @@ module Sidekiq
         # ignore all redis/network issues
         logger.error("heartbeat: #{e.message}")
         # don't lose the counts if there was a network issue
-        PROCESSED.increment(procd)
-        FAILURE.increment(fails)
+        Processor::PROCESSED.increment(procd)
+        Processor::FAILURE.increment(fails)
       end
     end
 
