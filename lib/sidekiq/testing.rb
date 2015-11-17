@@ -130,7 +130,7 @@ module Sidekiq
     #
     class << self
       def [](queue)
-        jobs[queue.to_s]
+        jobs[queue]
       end
 
       def jobs
@@ -203,7 +203,7 @@ module Sidekiq
 
       # Queue for this worker
       def queue
-        self.sidekiq_options["queue"].to_s
+        self.sidekiq_options["queue"]
       end
 
       # Jobs queued for this worker
