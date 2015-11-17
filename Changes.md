@@ -1,6 +1,12 @@
 # Sidekiq Changes
 
-4.0.0.pre1
+4.0.1
+-----------
+
+- Yank new queue-based testing API [#2663]
+- Fix invalid constant reference in heartbeat
+
+4.0.0
 -----------
 
 - Sidekiq's internals have been completely overhauled for performance
