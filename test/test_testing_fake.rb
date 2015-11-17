@@ -54,7 +54,6 @@ class TestTesting < Sidekiq::Test
 
     after do
       Sidekiq::Testing.disable!
-      Sidekiq::Queues.clear_all
     end
 
     it 'stubs the async call' do
@@ -94,7 +93,7 @@ class TestTesting < Sidekiq::Test
     it 'stubs the enqueue_to call' do
       assert_equal 0, EnqueuedWorker.jobs.size
       assert Sidekiq::Client.enqueue_to('someq', EnqueuedWorker, 1, 2)
-      assert_equal 1, Sidekiq::Queues['someq'].size
+      assert_equal 1, EnqueuedWorker.jobs.size
     end
 
     it 'executes all stored jobs' do
@@ -264,68 +263,6 @@ class TestTesting < Sidekiq::Test
     it 'can execute a job' do
       DirectWorker.execute_job(DirectWorker.new, [2, 3])
     end
-  end
 
-  describe 'queue testing' do
-    before do
-      require 'sidekiq/testing'
-      Sidekiq::Testing.fake!
-    end
-
-    after do
-      Sidekiq::Testing.disable!
-      Sidekiq::Queues.clear_all
-    end
-
-    class QueueWorker
-      include Sidekiq::Worker
-      def perform(a, b)
-        a + b
-      end
-    end
-
-    class AltQueueWorker
-      include Sidekiq::Worker
-      sidekiq_options queue: :alt
-      def perform(a, b)
-        a + b
-      end
-    end
-
-    it 'finds enqueued jobs' do
-      assert_equal 0, Sidekiq::Queues["default"].size
-
-      QueueWorker.perform_async(1, 2)
-      QueueWorker.perform_async(1, 2)
-      AltQueueWorker.perform_async(1, 2)
-
-      assert_equal 2, Sidekiq::Queues["default"].size
-      assert_equal [1, 2], Sidekiq::Queues["default"].first["args"]
-
-      assert_equal 1, Sidekiq::Queues["alt"].size
-    end
-
-    it 'clears out all queues' do
-      assert_equal 0, Sidekiq::Queues["default"].size
-
-      QueueWorker.perform_async(1, 2)
-      QueueWorker.perform_async(1, 2)
-      AltQueueWorker.perform_async(1, 2)
-
-      Sidekiq::Queues.clear_all
-
-      assert_equal 0, Sidekiq::Queues["default"].size
-      assert_equal 0, Sidekiq::Queues["alt"].size
-    end
-
-    it 'finds jobs enqueued by client' do
-      Sidekiq::Client.push(
-        'class' => 'NonExistentWorker',
-        'queue' => 'missing',
-        'args' => [1]
-      )
-
-      assert_equal 1, Sidekiq::Queues["missing"].size
-    end
   end
 end
