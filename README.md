@@ -20,7 +20,7 @@ use the Resque client to enqueue jobs in Redis to be processed by Sidekiq.
 
 Sidekiq is extremely fast.
 
-Version |	Latency | Garbage created when processing 10,000 jobs	| Time to process 100,000 jobs |	Throughput
+Version |	Latency | Garbage created for 10,000 jobs	| Time to process 100,000 jobs |	Throughput
 -----------------|------|---------|---------|------------------------
 Sidekiq 4.0.0    | 10ms	| 151 MB  | 22 sec  | **4500 jobs/sec**
 Sidekiq 3.5.1    | 22ms	| 1257 MB | 125 sec | 800 jobs/sec
