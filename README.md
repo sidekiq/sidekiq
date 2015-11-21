@@ -18,21 +18,26 @@ message format as Resque so it can integrate into an existing Resque processing 
 You can have Sidekiq and Resque run side-by-side at the same time and
 use the Resque client to enqueue jobs in Redis to be processed by Sidekiq.
 
-At the same time, Sidekiq uses multithreading so it is much more memory efficient than
-Resque (which forks a new process for every job).  You'll find that you might need
-10 200MB resque processes to peg your CPU whereas one 300MB Sidekiq process will peg
-the same CPU and perform the same amount of work.
+Sidekiq is extremely fast.
+
+Version |	Latency | Garbage created when processing 10,000 jobs	| Time to process 100,000 jobs |	Throughput
+-----------------|------|---------|---------|------------------------
+Sidekiq 4.0.0    | 10ms	| 151 MB  | 22 sec  | **4500 jobs/sec**
+Sidekiq 3.5.1    | 22ms	| 1257 MB | 125 sec | 800 jobs/sec
+Resque 1.25.2    |  -	  | -       | 420 sec | 240 jobs/sec
+DelayedJob 4.1.1 |  -   | -       | 465 sec | 215 jobs/sec
 
 
 Requirements
 -----------------
 
-I test with the latest MRI (2.2, 2.1 and 2.0) and JRuby versions (1.7).  Other versions/VMs
-are untested but might work fine.  MRI 1.9 is no longer supported.
+I test with the latest CRuby (2.2, 2.1 and 2.0) and JRuby versions (9k).  Other versions/VMs
+are untested but might work fine.  CRuby 1.9 is not supported.
 
-All Rails releases starting from 3.2 are officially supported.
+All Rails releases from 3.2 are officially supported.
 
-Redis 2.8 or greater is required.
+Redis 2.8 or greater is required.  3.0.3+ is recommended for large
+installations with thousands of worker threads.
 
 
 Installation
