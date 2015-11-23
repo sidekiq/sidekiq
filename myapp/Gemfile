@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 platforms :ruby do
   gem 'sqlite3'
+  gem 'redis-namespace'
 end
 
 platforms :jruby do
