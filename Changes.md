@@ -1,5 +1,19 @@
 # Sidekiq Changes
 
+4.0.2
+-----------
+
+- There's a new testing API based off the `Sidekiq::Queues` namespace. All
+  assertions made against the Worker class still work as expected.
+  [#2676, brandonhilkert]
+```ruby
+assert_equal 0, Sidekiq::Queues["default"].size
+HardWorker.perform_async("log")
+assert_equal 1, Sidekiq::Queues["default"].size
+assert_equal "log", Sidekiq::Queues["default"].first['args'][0]
+Sidekiq::Queues.clear_all
+```
+
 4.0.1
 -----------
 
