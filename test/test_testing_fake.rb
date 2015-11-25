@@ -315,7 +315,9 @@ class TestTesting < Sidekiq::Test
       Sidekiq::Queues.clear_all
 
       assert_equal 0, Sidekiq::Queues["default"].size
+      assert_equal 0, QueueWorker.jobs.size
       assert_equal 0, Sidekiq::Queues["alt"].size
+      assert_equal 0, AltQueueWorker.jobs.size
     end
 
     it 'finds jobs enqueued by client' do
@@ -326,6 +328,19 @@ class TestTesting < Sidekiq::Test
       )
 
       assert_equal 1, Sidekiq::Queues["missing"].size
+    end
+
+    it 'respects underlying array changes' do
+      # Rspec expect change() syntax saves a reference to
+      # an underlying array. When the array containing jobs is
+      # derived, Rspec test using `change(QueueWorker.jobs, :size).by(1)`
+      # won't pass. This attemps to recreate that scenario
+      # by saving a reference to the jobs array and ensuring
+      # it changes properly on enqueueing
+      jobs = QueueWorker.jobs
+      assert_equal 0, jobs.size
+      QueueWorker.perform_async(1, 2)
+      assert_equal 1, jobs.size
     end
   end
 end
