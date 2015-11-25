@@ -8,5 +8,7 @@ Sidekiq.configure_client do |config|
   config.redis = { url: 'redis://localhost:6379/0', size: 1, namespace: 'foo' }
 end
 
+Sidekiq::Client.push('class' => "HardWorker", 'args' => [])
+
 require 'sidekiq/web'
 run Sidekiq::Web

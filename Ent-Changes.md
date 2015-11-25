@@ -3,7 +3,13 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-1.0.0.pre1
+1.0.1
+----------
+
+- Fix crash in periodic subsystem when a follower shuts down, thanks
+  to @justinko for reporting.
+
+1.0.0
 ----------
 
 - Enterprise 1.x targets Sidekiq 4.x.
