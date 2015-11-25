@@ -88,11 +88,34 @@ module Sidekiq
   module Queues
     ##
     # The Queues class is only for testing the fake queue implementation.
-    # The data is structured as a hash with queue name as hash key and array
-    # of job data as the value.
+    # There are 2 data structures involved in tandem. This is due to the
+    # Rspec syntax of change(QueueWorker.jobs, :size). It keeps a reference
+    # to the array. Because the array was dervied from a filter of the total
+    # jobs enqueued, it appeared as though the array didn't change.
+    #
+    # To solve this, we'll keep 2 hashes containing the jobs. One with keys based
+    # on the queue, and another with keys of the worker names, so the array for
+    # QueueWorker.jobs is a straight reference to a real array.
+    #
+    # Queue-based hash:
     #
     # {
     #   "default"=>[
+    #     {
+    #       "class"=>"TestTesting::QueueWorker",
+    #       "args"=>[1, 2],
+    #       "retry"=>true,
+    #       "queue"=>"default",
+    #       "jid"=>"abc5b065c5c4b27fc1102833",
+    #       "created_at"=>1447445554.419934
+    #     }
+    #   ]
+    # }
+    #
+    # Worker-based hash:
+    #
+    # {
+    #   "TestTesting::QueueWorker"=>[
     #     {
     #       "class"=>"TestTesting::QueueWorker",
     #       "args"=>[1, 2],
