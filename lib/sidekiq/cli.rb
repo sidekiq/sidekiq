@@ -165,22 +165,31 @@ module Sidekiq
     def daemonize
       return unless options[:daemon]
 
+      reopen_files_in_readwrite_mode
+      redirect_standard_output
+      initialize_logger
+    end
+
+    def reopen_files_in_readwrite_mode
       raise ArgumentError, "You really should set a logfile if you're going to daemonize" unless options[:logfile]
-      files_to_reopen = []
-      ObjectSpace.each_object(File) do |file|
-        files_to_reopen << file unless file.closed?
-      end
 
       ::Process.daemon(true, true)
 
-      files_to_reopen.each do |file|
-        begin
-          file.reopen file.path, "a+"
-          file.sync = true
-        rescue ::Exception
-        end
-      end
+      files_to_reopen.each { |file| reopen_file(file) }
+    end
 
+    def files_to_reopen
+      ObjectSpace.each_object(File).reject { |file| file.closed? }
+    end
+
+    def reopen_file(file)
+      file.reopen file.path, "a+"
+      file.sync = true
+    rescue ::Exception
+      # ignored
+    end
+
+    def redirect_standard_output
       [$stdout, $stderr].each do |io|
         File.open(options[:logfile], 'ab') do |f|
           io.reopen(f)
@@ -188,8 +197,6 @@ module Sidekiq
         io.sync = true
       end
       $stdin.reopen('/dev/null')
-
-      initialize_logger
     end
 
     def set_environment(cli_env)
