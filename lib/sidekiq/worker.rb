@@ -54,6 +54,8 @@ module Sidekiq
         client_push('class' => self, 'args' => args)
       end
 
+      # +interval+ must be a timestamp, numeric or something that acts
+      #   numeric (like an activesupport time interval).
       def perform_in(interval, *args)
         int = interval.to_f
         now = Time.now
