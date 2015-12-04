@@ -57,7 +57,7 @@ module Sidekiq
       def perform_in(interval, *args)
         int = interval.to_f
         now = Time.now
-        ts = (int < 1_000_000_000 ? (now + interval).to_f : int)
+        ts = (int < 1_000_000_000 ? ((interval.is_a? String) ? now + int : now + interval).to_f : int)
 
         item = { 'class' => self, 'args' => args, 'at' => ts }
 
