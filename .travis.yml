@@ -4,9 +4,9 @@ cache: bundler
 services:
   - redis-server
 rvm:
-  - 2.1
+  - 2.1.7
   - 2.0.0
-  - 2.2
+  - 2.2.3
   - jruby
   - jruby-head
   - rbx-2
