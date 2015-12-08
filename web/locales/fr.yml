@@ -64,6 +64,6 @@ fr:
   NoDeadJobsFound: Aucune tâche morte n'a été trouvée
   Dead: Morte
   Processes: Processus
-  Thread: Fil
-  Threads: Fils
+  Thread: Thread
+  Threads: Threads
   Jobs: Tâches
