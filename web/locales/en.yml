@@ -75,3 +75,4 @@ en: # <---- change this to your locale code
   PollingInterval: Polling interval
   Plugins: Plugins
   NotYetEnqueued: Not yet enqueued
+  CreatedAt: Created At

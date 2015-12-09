@@ -33,6 +33,10 @@
         </td>
       </tr>
       <tr>
+        <th><%= t('CreatedAt') %></th>
+        <td><%= relative_time(job.created_at) %></td>
+      </tr>
+      <tr>
         <th><%= t('Enqueued') %></th>
         <td><%= (enqueued_at = job.enqueued_at) ? relative_time(enqueued_at) : t('NotYetEnqueued') %></td>
       </tr>
