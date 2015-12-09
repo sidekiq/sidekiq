@@ -6,6 +6,7 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 0.7.9, 1.0.2
 -------------
 
+- Window limiters can now accept arbitrary window sizes [#2686]
 - Fix race condition in window limiters leading to non-stop OverLimit [#2704]
 - Fix invalid overage counts when nesting concurrent limiters
 
