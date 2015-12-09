@@ -334,7 +334,7 @@ class TestTesting < Sidekiq::Test
       # Rspec expect change() syntax saves a reference to
       # an underlying array. When the array containing jobs is
       # derived, Rspec test using `change(QueueWorker.jobs, :size).by(1)`
-      # won't pass. This attemps to recreate that scenario
+      # won't pass. This attempts to recreate that scenario
       # by saving a reference to the jobs array and ensuring
       # it changes properly on enqueueing
       jobs = QueueWorker.jobs
