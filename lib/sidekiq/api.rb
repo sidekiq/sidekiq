@@ -283,7 +283,13 @@ module Sidekiq
                      "#{target}.#{method}"
                    end
                  when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
-                   @item['wrapped'] || args[0]
+                   job_class = @item['wrapped'] || args[0]
+                   if 'ActionMailer::DeliveryJob' == job_class
+                     # MailerClass#mailer_method
+                     args[0]['arguments'][0..1].join('#')
+                   else
+                    job_class
+                   end
                  else
                    klass
                  end
@@ -297,7 +303,13 @@ module Sidekiq
                     arg
                   end
                 when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
-                  @item['wrapped'] ? args[0]["arguments"] : []
+                  job_args = @item['wrapped'] ? args[0]["arguments"] : []
+                  if 'ActionMailer::DeliveryJob' == (@item['wrapped'] || args[0])
+                   # remove MailerClass, mailer_method and 'deliver_now'
+                   job_args.drop(3)
+                  else
+                   job_args
+                  end
                 else
                   args
                 end

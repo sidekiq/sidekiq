@@ -1,5 +1,7 @@
 require_relative 'helper'
 require 'sidekiq/api'
+require 'active_job'
+require 'action_mailer'
 
 class TestApi < Sidekiq::Test
   describe 'api' do
@@ -168,6 +170,21 @@ class TestApi < Sidekiq::Test
         assert_equal 0, q.latency
       end
 
+      before do
+        ActiveJob::Base.queue_adapter = :sidekiq
+        ActiveJob::Base.logger = nil
+
+        class ApiMailer < ActionMailer::Base
+          def test_email(*)
+          end
+        end
+
+        class ApiJob < ActiveJob::Base
+          def perform(*)
+          end
+        end
+      end
+
       class ApiWorker
         include Sidekiq::Worker
       end
@@ -200,6 +217,22 @@ class TestApi < Sidekiq::Test
         q = Sidekiq::Queue.new
         x = q.first
         assert_equal "Sidekiq::Queue.foo", x.display_class
+        assert_equal [1,2,3], x.display_args
+      end
+
+      it 'unwraps ActiveJob jobs' do
+        ApiJob.perform_later(1, 2, 3)
+        q = Sidekiq::Queue.new
+        x = q.first
+        assert_equal "TestApi::ApiJob", x.display_class
+        assert_equal [1,2,3], x.display_args
+      end
+
+      it 'unwraps ActionMailer jobs' do
+        ApiMailer.test_email(1, 2, 3).deliver_later
+        q = Sidekiq::Queue.new('mailers')
+        x = q.first
+        assert_equal "TestApi::ApiMailer#test_email", x.display_class
         assert_equal [1,2,3], x.display_args
       end
 
