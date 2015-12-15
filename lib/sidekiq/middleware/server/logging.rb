@@ -7,11 +7,11 @@ module Sidekiq
           Sidekiq::Logging.with_context(log_context(worker, item)) do
             begin
               start = Time.now
-              logger.info { "start" }
+              logger.info("start".freeze)
               yield
-              logger.info { "done: #{elapsed(start)} sec" }
+              logger.info("done: #{elapsed(start)} sec")
             rescue Exception
-              logger.info { "fail: #{elapsed(start)} sec" }
+              logger.info("fail: #{elapsed(start)} sec")
               raise
             end
           end
