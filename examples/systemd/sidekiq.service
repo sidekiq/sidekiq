@@ -25,7 +25,7 @@ After=syslog.target network.target
 [Service]
 Type=simple
 WorkingDirectory=/opt/myapp/current
-ExecStart=/usr/local/bin/bundler exec sidekiq -e production
+ExecStart=/usr/local/bin/bundle exec sidekiq -e production
 User=deploy
 Group=deploy
 UMask=0002
