@@ -12,7 +12,7 @@ module Sidekiq
     include Sidekiq::Paginator
 
     enable :sessions
-    use Rack::Protection, :use => :authenticity_token unless ENV['RACK_ENV'] == 'test'
+    use ::Rack::Protection, :use => :authenticity_token unless ENV['RACK_ENV'] == 'test'
 
     set :root, File.expand_path(File.dirname(__FILE__) + "/../../web")
     set :public_folder, proc { "#{root}/assets" }
