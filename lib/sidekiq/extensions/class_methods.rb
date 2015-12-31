@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'sidekiq/extensions/generic_proxy'
 
 module Sidekiq

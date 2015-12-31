@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'sidekiq'
 require 'sidekiq/util'
 require 'sidekiq/api'

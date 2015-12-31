@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 # Simple middleware to save the current locale and restore it when the job executes.
 # Use it by requiring it in your initializer:
