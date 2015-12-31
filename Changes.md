@@ -3,6 +3,7 @@
 4.0.2
 -----------
 
+- Remove `json` gem dependency from gemspec. [#2743]
 - There's a new testing API based off the `Sidekiq::Queues` namespace. All
   assertions made against the Worker class still work as expected.
   [#2676, brandonhilkert]
