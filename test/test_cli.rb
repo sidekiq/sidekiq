@@ -317,8 +317,20 @@ class TestCli < Sidekiq::Test
       assert_raises Interrupt do
         cli.handle_signal('TERM')
       end
-      cli.handle_signal('USR2')
+
+      cli.stub(:launcher , OpenStruct.new) do
+        cli.handle_signal('USR1')
+      end
+
+      options_with_log = Sidekiq.options.merge(:logfile => 'tmp/test.log')
+      Sidekiq.stub(:options, options_with_log) do
+        cli.handle_signal('USR2')
+      end
       cli.handle_signal('TTIN')
+
+      Thread.stub(:list, [OpenStruct.new]) do
+        cli.handle_signal('TTIN')
+      end
     end
 
     it 'can fire events' do
