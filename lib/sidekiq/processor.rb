@@ -35,6 +35,7 @@ module Sidekiq
       @job = nil
       @thread = nil
       @strategy = (mgr.options[:fetch] || Sidekiq::BasicFetch).new(mgr.options)
+      @reusable_workers = {}
     end
 
     def terminate(wait=false)
@@ -120,7 +121,7 @@ module Sidekiq
       begin
         job = Sidekiq.load_json(jobstr)
         klass  = job['class'.freeze].constantize
-        worker = klass.new
+        worker = worker_object(klass)
         worker.jid = job['jid'.freeze]
 
         stats(worker, job, queue) do
@@ -143,6 +144,14 @@ module Sidekiq
         raise
       ensure
         work.acknowledge if ack
+      end
+    end
+
+    def worker_object(klass)
+      if klass.get_sidekiq_options['reuse']
+        @reusable_workers[klass] ||= klass.new
+      else
+        klass.new
       end
     end
 
