@@ -38,7 +38,7 @@ ja:
   AreYouSure: いいですか？
   DeleteAll: 全て削除
   RetryAll: 全て再試行
-  NoRetriesFound: 再試行できません
+  NoRetriesFound: 再試行するジョブはありません
   Error: エラー
   ErrorClass: クラスエラー
   ErrorMessage: エラーメッセージ
