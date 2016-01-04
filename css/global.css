@@ -6331,109 +6331,16 @@ h6 {
     max-width: 1700px;
     margin: 20px auto
 }
-.comparison-chart ul li {
-    height: 4.8vh;
-    min-height: 42px;
-    padding: 12px 10px 0;
-    color: #333;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.15)
-}
-.comparison-chart ul li small {
-    color: #999
-}
-.comparison-chart ul li .help {
-    cursor: help;
-    border-bottom: 1px dashed #000
-}
-.comparison-chart ul li:first-child {
-    border-bottom-width: 2px
-}
-.comparison-chart ul li:first-child a {
-    color: #222
-}
-.comparison-chart ul li:first-child a:hover {
-    text-decoration: none;
-    color: #b1003e
-}
-.comparison-chart ul li:last-child {
-    border-bottom: 0
-}
-.comparison-chart ul li:nth-child(14),
-.comparison-chart ul li:nth-child(15),
-.comparison-chart ul li:nth-child(16) {
-    height: 70px
-}
-.comparison-chart ul li:first-child {
-    height: 80px
-}
-.comparison-chart ul li:nth-child(18) {
-    height: auto;
-    padding-bottom: 1px
-}
 .comparison-chart .glyphicon-ok-sign {
     color: #449d44
 }
 .comparison-chart .glyphicon-minus-sign {
     color: #c9302c
 }
-.comparison-chart ul.product {
-    float: left;
-    width: 33.3%;
-    height: 100%;
-    text-transform: none;
-    letter-spacing: 0;
-    font-family: "Montserrat", Helvetica, Arial, sans-serif;
-    font-size: 1.1em;
-    margin: 0 0 0 0;
-    padding: 0;
-    border: none
+.comparison-chart .money-back {
+  margin: 10px auto;
 }
-.comparison-chart ul.product li:nth-child(17) {
-    border-bottom: none
-}
-.comparison-chart ul.product li .btn-primary {
-    margin: 0;
-    padding: 1.5em 1.5em;
-    font-size: .85em;
-    white-space: normal;
-    width: 100%
-}
-.comparison-chart ul.product li .btn-black {
-    margin: .8em 0;
-    background-color: #333;
-    border-color: #333;
-    width: 100%
-}
-.comparison-chart ul.product li .btn-black:hover {
-    background-color: #111
-}
-.comparison-chart ul.product li .btn-white {
-    border: 2px solid #999
-}
-.comparison-chart ul.product li .btn-white:hover,
-.comparison-chart ul.product li .btn-white:focus,
-.comparison-chart ul.product li .btn-white:active {
-    background-color: #999
-}
-.comparison-chart ul.key {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    text-transform: uppercase;
-    font-family: "Montserrat", Helvetica, Arial, sans-serif;
-    font-size: .75em;
-    letter-spacing: .1em
-}
-.comparison-chart ul.key li {
-    padding-right: 2em;
-    text-align: right;
-    white-space: nowrap;
-    color: #999
-}
-@media (max-width: 768px) {
+@media (min-width: 760px) {
   .comparison-chart .money-back {
     margin-left: 110px;
   }
@@ -6746,4 +6653,235 @@ footer small a:hover {
     .product {
         height: auto!important
     }
+}
+
+@media (max-width: 760px) {
+  .products-table, thead, tbody, th, td, tr {
+    display: block;
+  }
+}
+
+.products-table {
+  margin: 0 auto;
+  min-width: 300px;
+  width: 100%;
+}
+
+.products-table thead tr {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+}
+
+@media (min-width: 760px) {
+  .products-table thead tr {
+    border-bottom: 2px solid rgba(0, 0, 0, 0.15);
+    position: static;
+  }
+}
+
+.products-table tfoot tr {
+  border-bottom: none;
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+}
+
+@media (min-width: 760px) {
+  .products-table tfoot tr {
+    position: static;
+  }
+
+  .products-table tfoot th {
+    padding: 12px 10px 0;
+  }
+
+  .products-table tfoot .invisible-block {
+    display: inline-block;
+    height: 75px;
+  }
+}
+
+.products-table th {
+  border: none;
+}
+
+@media (min-width: 760px) {
+  .products-table th {
+    text-align: left;
+  }
+}
+
+.products-table td {
+  font-family: "Montserrat", Helvetica, Arial, sans-serif;
+  font-size: 0.8em;
+  position: relative;
+  text-align: center;
+  color: black;
+  padding-left: 35%;
+}
+
+@media (min-width: 760px) {
+  .products-table td {
+    font-size: 1.1em;
+    text-align: left;
+    width: 25%;
+    padding: 10px 25px 10px 10px;
+  }
+
+  .products-table .key {
+    color: #999;
+    text-align: right;
+    text-transform: uppercase;
+    font-size: 0.8em;
+  }
+}
+
+.products-table td img {
+  width: 20px;
+}
+
+@media (min-width: 760px) {
+  .products-table td img {
+    width: 30px;
+  }
+}
+
+.products-table td:before {
+  left: 6px;
+  padding-right: 10px;
+  position: absolute;
+  top: 6px;
+  white-space: nowrap;
+  width: 45%;
+}
+
+.products-table td:nth-of-type(1):before {
+  content: "";
+  font-weight: bold;
+  padding-bottom: 3px;
+}
+
+@media (min-width: 760px) {
+  .products-table td:nth-of-type(1):before {
+    content: "";
+  }
+}
+
+.products-table td:nth-of-type(2):before {
+  content: "OSS";
+  margin-top: -5px;
+}
+
+@media (min-width: 760px) {
+  .products-table td:nth-of-type(2):before {
+    content: "";
+    margin-top: 0;
+  }
+}
+
+.products-table td:nth-of-type(3):before {
+  content: "PRO";
+  margin-top: -5px;
+}
+
+@media (min-width: 760px) {
+  .products-table td:nth-of-type(3):before {
+    content: "";
+    margin-top: 0;
+  }
+}
+
+.products-table td:nth-of-type(4):before {
+  content: "ENTERPRISE";
+  margin-top: -5px;
+}
+
+@media (min-width: 760px) {
+  .products-table td:nth-of-type(4):before {
+    content: "";
+    margin-top: 0;
+  }
+}
+
+.products-table tr {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  padding: 10px 5px;
+}
+
+.products-table tr:nth-child(odd) {
+  color: white;
+}
+
+.products-table tr:nth-child(even) {
+  color: white;
+}
+
+.products-table tbody tr:last-child  {
+  border: none;
+}
+
+.products-table th a {
+  color: #222;
+}
+
+.products-table th a:hover {
+  text-decoration: none;
+  color: #b1003e;
+}
+
+.product-table tbody .key {
+  text-align: right;
+}
+
+.products-table td small {
+  color: #999;
+}
+
+.products-table td .help {
+  cursor: help;
+  border-bottom: 1px dashed #000
+}
+
+.products-table .btn {
+  color: #fff;
+}
+
+.products-table .btn:hover,
+.products-table .btn:focus,
+.products-table .btn:active {
+  color: #fff;
+}
+
+.products-table .btn-primary {
+  margin: 0;
+  padding: 1.5em 1.5em;
+  font-size: .85em;
+  white-space: normal;
+  width: 100%;
+}
+.products-table .btn-black {
+  margin: .8em 0;
+  background-color: #333;
+  border-color: #333;
+  width: 100%
+}
+.products-table .btn-black:hover {
+  background-color: #111
+}
+.products-table .btn-white {
+  color: black;
+  border: 2px solid #999
+}
+.products-table .btn-white:hover,
+.products-table .btn-white:focus,
+.products-table .btn-white:active {
+  background-color: #999
+}
+
+.products-table .glyphicon-ok-sign {
+  color: #449d44
+}
+.products-table .glyphicon-minus-sign {
+  color: #c9302c
 }
