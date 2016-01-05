@@ -111,109 +111,142 @@
     <div id="products" class="container">
       <div class="comparison-chart">
         <div class="row">
-          <div class="col-sm-3 no-padding key-wrapper">
-            <ul class="key">
-              <li></li>
-              <li>Audience</li>
-              <li>Scheduled Jobs</li>
-              <li>Error Handling</li>
-              <li>Web UI</li>
-              <li>Ruby API</li>
-              <li>Middleware</li>
-              <li>Batches</li>
-              <li>Enhanced Reliability</li>
-              <li>Search in Web UI</li>
-              <li>Rate Limiting</li>
-              <li>Cron Jobs</li>
-              <li>Unique Jobs</li>
-              <li>Dedicated Support</li>
-              <li>License</li>
-              <li>Pricing</li>
-              <li>Purchasing</li>
-            </ul>
-          </div>
-          <div class="col-sm-9 no-padding">
-            <div class="charts-wrapper">
-              <ul class="product col-oss">
-                <li>
+          <table class="products-table" >
+            <thead>
+              <tr>
+                <th></th>
+                <th>
                   <h3><img src="./img/octocat.png" class="icon"><a href="https://github.com/mperham/sidekiq/" target="_new">OSS</a></h3>
-                </li>
-                <li>Hobbyists</li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
-                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
-                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
-                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
-                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
-                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
-                <li>None</li>
-                <li>LGPL</li>
-                <li>Free</li>
-                <li>n/a</li>
-                <li>
-                  <a href="https://github.com/mperham/sidekiq/wiki" target="_new" style="width: 100%" class="btn btn-primary btn-white">Get Started  <span class="glyphicon glyphicon-new-window"></span></a>
-                </li>
-              </ul>
-              <ul class="product col-pro">
-                <li>
+                </th>
+                <th>
                   <h3><a href="./products/pro">Pro</a></h3>
-                </li>
-                <li>Small Business</li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
-                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
-                <li><span class="glyphicon glyphicon-minus-sign"></span></li>
-                <li>Email</li>
-                <li>Commercial<br>
-                <small>No Custom Terms</small></li>
-                <li>$950 / year<br>
-                <small>Unlimited Usage</small></li>
-                <li>Credit Card</li>
-                <li>
+                </th>
+                <th>
+                  <h3><a href="./products/enterprise">Enterprise</a></h3>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="key">Audience</td>
+                <td>Hobbyists</td>
+                <td>Small Business</td>
+                <td>Med–Large Companies</td>
+              </tr>
+              <tr>
+                <td class="key">Scheduled Jobs</td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+              </tr>
+              <tr>
+                <td class="key">Error Handling</td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+              </tr>
+              <tr>
+                <td class="key">Web UI</td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+              </tr>
+              <tr>
+                <td class="key">Ruby API</td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+              </tr>
+              <tr>
+                <td class="key">Middleware</td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+              </tr>
+              <tr>
+                <td class="key">Batches</td>
+                <td><span class="glyphicon glyphicon-minus-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+              </tr>
+              <tr>
+                <td class="key">Enhanced Reliability</td>
+                <td><span class="glyphicon glyphicon-minus-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+              </tr>
+              <tr>
+                <td class="key">Search in Web UI</td>
+                <td><span class="glyphicon glyphicon-minus-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+              </tr>
+              <tr>
+                <td class="key">Rate Limiting</td>
+                <td><span class="glyphicon glyphicon-minus-sign"></span></td>
+                <td><span class="glyphicon glyphicon-minus-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+              </tr>
+              <tr>
+                <td class="key">Cron Jobs</td>
+                <td><span class="glyphicon glyphicon-minus-sign"></span></td>
+                <td><span class="glyphicon glyphicon-minus-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+              </tr>
+              <tr>
+                <td class="key">Unique Jobs</td>
+                <td><span class="glyphicon glyphicon-minus-sign"></span></td>
+                <td><span class="glyphicon glyphicon-minus-sign"></span></td>
+                <td><span class="glyphicon glyphicon-ok-sign"></span></td>
+              </tr>
+
+              <tr>
+                <td class="key">Dedicated Support</td>
+                <td>None</td>
+                <td>Email</td>
+                <td>Email, Onboarding Session</td>
+              </tr>
+              <tr>
+                <td class="key">License</td>
+                <td>LGPL</td>
+                <td>Commercial<br>
+                  <small>No Custom Terms</small></td>
+                <td>Commercial<br>
+                  <small>with Custom Terms</small></td>
+              </tr>
+              <tr>
+                <td class="key">Pricing</td>
+                <td>Free</td>
+                <td>$950 / year<br>
+                  <small>Unlimited Usage</small></td>
+                <td>$1950 / year<br>
+                  <small title="Workers are calculated by adding up the concurrency of all your production processes. 10 processes with the default concurrency of 25 = 250 workers." class="help">per 250 Workers</small></td>
+              </tr>
+              <tr>
+                <td class="key">Purchasing</td>
+                <td>n/a</td>
+                <td>Credit Card</td>
+                <td>Credit Card, Bank transfer, Check</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th></th>
+                <th>
+                  <a href="https://github.com/mperham/sidekiq/wiki" target="_new" style="width: 100%" class="btn btn-primary btn-white">Get Started  <span class="glyphicon glyphicon-new-window"></span></a>
+                  <div class="invisible-block"></div>
+                </th>
+                <th>
                   <a href="/products/pro" target="_new" class="btn btn-primary">Learn More <span class="glyphicon glyphicon-chevron-right"></span></a>
                   <a href="https://plasso.co/s/YSeEjhi5ga" target="_new" class="btn btn-black btn-primary">Buy <span class="glyphicon glyphicon-chevron-right"></span></a>
-                </li>
-              </ul>
-              <ul class="product col-ent">
-                <li>
-                  <h3><a href="./products/enterprise">Enterprise</a></h3>
-                </li>
-                <li>Med–Large Companies</li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li><span class="glyphicon glyphicon-ok-sign"></span></li>
-                <li>Email, Onboarding Session</li>
-                <li>Commercial<br>
-                <small>with Custom Terms</small></li>
-                <li>$1950 / year<br>
-                <small title="Workers are calculated by adding up the concurrency of all your production processes. 10 processes with the default concurrency of 25 = 250 workers." class="help">per 250 Workers</small></li>
-                <li>Credit Card, Bank transfer, Check</li>
-                <li>
+                </th>
+                <th>
                   <a href="./products/enterprise" class="btn btn-primary">Learn more <span class="glyphicon glyphicon-chevron-right"></span></a>
                   <a href="https://enterprise.contribsys.com/quote.html" class="btn btn-primary btn-black">Buy <span class="glyphicon glyphicon-chevron-right"></span></a>
-                </li>
-              </ul>
-            </div>
-          </div>
+                </th>
+              </tr>
+            </tfoot>
+          </table>
           <div class="spacer"></div>
           <p class="money-back text-center">
             All sales come with a two week, 100% money back guarantee.
