@@ -17,6 +17,11 @@ module Sidekiq
       end
     end
 
+    def clear_caches
+      @@strings = nil
+      @@locale_files = nil
+    end
+
     def locale_files
       @@locale_files ||= settings.locales.flat_map do |path|
         Dir["#{path}/*.yml"]
