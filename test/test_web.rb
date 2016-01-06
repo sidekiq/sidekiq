@@ -369,19 +369,31 @@ class TestWeb < Sidekiq::Test
       assert_equal 200, last_response.status
     end
 
-    Sidekiq::Web.settings.locales << File.join(File.dirname(__FILE__), "fixtures")
-    it 'can show user defined tab with custom locales' do
-      begin
-        Sidekiq::Web.tabs['Custom Tab'] = '/custom'
-        Sidekiq::Web.get('/custom') do
+    describe 'with custom locales' do
+      before do
+        custom_locale_file = "#{File.join(File.dirname(__FILE__), "fixtures")}/en.yml"
+        custom_locale = YAML.load(File.open(custom_locale_file))['en']
+
+        app.tabs['Custom Tab'] = '/custom'
+        app.get('/custom') do
+          strings('en').merge! custom_locale
           t('translated_text')
         end
+      end
 
-        get '/custom'
-        assert_match(/Changed text/, last_response.body)
+      after do
+        app.get('/custom') do
+          strings('en').delete 'translated_text'
+        end
+      end
 
-      ensure
-        Sidekiq::Web.tabs.delete 'Custom Tab'
+      it 'can show user defined tab' do
+        begin
+          get '/custom'
+          assert_match(/Changed text/, last_response.body)
+        ensure
+          Sidekiq::Web.tabs.delete 'Custom Tab'
+        end
       end
     end
 
