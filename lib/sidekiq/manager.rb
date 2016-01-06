@@ -55,6 +55,8 @@ module Sidekiq
       fire_event(:quiet, true)
     end
 
+    PAUSE_TIME = $TESTING ? 0.1 : 0.5
+
     def stop(deadline)
       quiet
       fire_event(:shutdown, true)
@@ -62,14 +64,14 @@ module Sidekiq
       # some of the shutdown events can be async,
       # we don't have any way to know when they're done but
       # give them a little time to take effect
-      sleep 0.5
+      sleep PAUSE_TIME
       return if @workers.empty?
 
       logger.info { "Pausing to allow workers to finish..." }
       remaining = deadline - Time.now
-      while remaining > 0.5
+      while remaining > PAUSE_TIME
         return if @workers.empty?
-        sleep 0.5
+        sleep PAUSE_TIME
         remaining = deadline - Time.now
       end
       return if @workers.empty?
