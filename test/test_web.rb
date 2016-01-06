@@ -29,6 +29,8 @@ class TestWeb < Sidekiq::Test
       end
     end
 
+    Sidekiq::Web.settings.locales << File.join(File.dirname(__FILE__), "fixtures")
+
     it 'can show text with any locales' do
       rackenv = {'HTTP_ACCEPT_LANGUAGE' => 'ru,en'}
       get '/', {}, rackenv
@@ -369,7 +371,6 @@ class TestWeb < Sidekiq::Test
       assert_equal 200, last_response.status
     end
 
-    Sidekiq::Web.settings.locales << File.join(File.dirname(__FILE__), "fixtures")
     it 'can show user defined tab with custom locales' do
       begin
         Sidekiq::Web.tabs['Custom Tab'] = '/custom'
