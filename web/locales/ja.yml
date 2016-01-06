@@ -67,3 +67,12 @@ ja:
   Thread: スレッド
   Threads: スレッド
   Jobs: ジョブ
+  Paused: 一時停止中
+  Stop: 停止
+  Quiet: 処理終了
+  StopAll: すべて停止
+  QuietAll: すべて処理終了
+  PollingInterval: ポーリング間隔
+  Plugins: プラグイン
+  NotYetEnqueued: キューに入っていません
+  CreatedAt: 作成日時
