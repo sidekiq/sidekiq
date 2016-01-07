@@ -95,7 +95,7 @@ module Sidekiq
         _, _, _, msg = Sidekiq.redis do |conn|
           conn.pipelined do
             conn.sadd('processes', key)
-            conn.hmset(key, 'info', json, 'busy', Processor::WORKER_STATE.size, 'beat', Time.now.to_f)
+            conn.hmset(key, 'info', json, 'busy', Processor::WORKER_STATE.size, 'beat', Time.now.to_f, 'quiet', @done)
             conn.expire(key, 60)
             conn.rpop("#{key}-signals")
           end
@@ -127,7 +127,7 @@ module Sidekiq
         'concurrency' => @options[:concurrency],
         'queues' => @options[:queues].uniq,
         'labels' => @options[:labels],
-        'identity' => k,
+        'identity' => k
       }
       # this data doesn't change so dump it to a string
       # now so we don't need to dump it every heartbeat.

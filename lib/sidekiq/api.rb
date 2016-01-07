@@ -674,13 +674,13 @@ module Sidekiq
         # you'll be happier this way
         result = conn.pipelined do
           procs.each do |key|
-            conn.hmget(key, 'info', 'busy', 'beat')
+            conn.hmget(key, 'info', 'busy', 'beat', 'quiet')
           end
         end
 
-        result.each do |info, busy, at_s|
+        result.each do |info, busy, at_s, quiet|
           hash = Sidekiq.load_json(info)
-          yield Process.new(hash.merge('busy' => busy.to_i, 'beat' => at_s.to_f))
+          yield Process.new(hash.merge('busy' => busy.to_i, 'beat' => at_s.to_f, 'quiet' => quiet))
         end
       end
 
@@ -737,6 +737,10 @@ module Sidekiq
 
     def dump_threads
       signal('TTIN')
+    end
+
+    def stopping?
+      self['quiet'] == 'true'
     end
 
     private
