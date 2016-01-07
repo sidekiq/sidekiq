@@ -31,8 +31,8 @@
             <span class="label label-info"><%= label %></span>
           <% end %>
           <% if process.stopping? %>
-		  	    <span class="label label-danger">Quiet</span>
-		      <% end %>
+            <span class="label label-danger">Quiet</span>
+          <% end %>
           <br>
           <b><%= "#{t('Queues')}: " %></b>
           <%= process['queues'] * ", " %>
