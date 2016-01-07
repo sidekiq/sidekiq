@@ -738,6 +738,10 @@ module Sidekiq
     def dump_threads
       signal('TTIN')
     end
+    
+    def stopping?
+      self['stopping']
+    end
 
     private
 
