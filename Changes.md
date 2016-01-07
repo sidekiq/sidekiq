@@ -1,5 +1,11 @@
 # Sidekiq Changes
 
+HEAD
+-----------
+
+- Tag quiet processes in the Web UI [#2757, jcarlson]
+
+
 4.0.2
 -----------
 

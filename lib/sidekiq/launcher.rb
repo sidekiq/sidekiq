@@ -127,7 +127,7 @@ module Sidekiq
         'concurrency' => @options[:concurrency],
         'queues' => @options[:queues].uniq,
         'labels' => @options[:labels],
-        'identity' => k
+        'identity' => k,
       }
       # this data doesn't change so dump it to a string
       # now so we don't need to dump it every heartbeat.
