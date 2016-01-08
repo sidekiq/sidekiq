@@ -3,6 +3,12 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+3.0.1
+-----------
+
+- Remove a number of Redis version checks since we can assume 2.8+ now.
+- Fix expiring jobs client middleware not loaded on server
+
 3.0.0
 -----------
 
