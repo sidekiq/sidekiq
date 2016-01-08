@@ -91,15 +91,19 @@ module Sidekiq
     end
   end
 
+  REDIS_MUTEX = Mutex.new
+
   def self.redis_pool
-    @redis ||= Sidekiq::RedisConnection.create
+    @redis || REDIS_MUTEX.synchronize do
+      @redis ||= Sidekiq::RedisConnection.create(@redis_params || {})
+    end
   end
 
   def self.redis=(hash)
-    @redis = if hash.is_a?(ConnectionPool)
-      hash
+    if hash.is_a?(ConnectionPool)
+      REDIS_MUTEX.synchronize { @redis = hash }
     else
-      Sidekiq::RedisConnection.create(hash)
+      @redis_params = hash
     end
   end
 
