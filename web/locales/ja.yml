@@ -6,8 +6,8 @@ ja:
   Namespace: ネームスペース
   Realtime: リアルタイム
   History: 履歴
-  Busy: ビジー
-  Processed: 処理完了
+  Busy: 実行中
+  Processed: 完了
   Failed: 失敗
   Scheduled: 予定
   Retries: 再試行
@@ -35,25 +35,25 @@ ja:
   RetryNow: 今すぐ再試行
   LastRetry: 再試行履歴
   OriginallyFailed: 失敗
-  AreYouSure: いいですか？
+  AreYouSure: よろしいですか？
   DeleteAll: 全て削除
   RetryAll: 全て再試行
   NoRetriesFound: 再試行するジョブはありません
   Error: エラー
-  ErrorClass: クラスエラー
+  ErrorClass: エラークラス
   ErrorMessage: エラーメッセージ
   ErrorBacktrace: エラーバックトレース
   GoBack: ← 戻る
-  NoScheduledFound: 予定したジョブはありません
+  NoScheduledFound: 予定されたジョブはありません
   When: いつ
-  ScheduledJobs: 予定したジョブ
+  ScheduledJobs: 予定されたジョブ
   idle: アイドル
   active: アクティブ
   Version: バージョン
   Connections: 接続
-  MemoryUsage: メモリー容量
-  PeakMemoryUsage: 最大メモリー容量
-  Uptime: Uptime (days)
+  MemoryUsage: メモリー使用量
+  PeakMemoryUsage: 最大メモリー使用量
+  Uptime: 連続稼働時間 (日)
   OneWeek: 1 週
   OneMonth: 1 ヶ月
   ThreeMonths: 3 ヶ月
