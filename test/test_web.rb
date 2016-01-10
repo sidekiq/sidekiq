@@ -68,6 +68,7 @@ class TestWeb < Sidekiq::Test
         assert_match(/status-active/, last_response.body)
         assert_match(/critical/, last_response.body)
         assert_match(/WebWorker/, last_response.body)
+        assert_match(/Processes \(\d+\)/, last_response.body)
       end
 
       it 'can quiet a process' do
