@@ -36,6 +36,12 @@ Sidekiq::Queues.clear_all
   [detailed on my blog](http://www.mikeperham.com/2015/10/14/optimizing-sidekiq/).
 - See the [4.0 upgrade notes](4.0-Upgrade.md) for more detail.
 
+3.5.4
+-----------
+
+- Ensure exception message is a string [#2707]
+- Revert racy Process.kill usage in sidekiqctl
+
 3.5.3
 -----------
 
