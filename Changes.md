@@ -1,5 +1,11 @@
 # Sidekiq Changes
 
+3.5.4
+-----------
+
+- Ensure exception message is a string [#2707]
+- Revert racy Process.kill usage in sidekiqctl
+
 3.5.3
 -----------
 
