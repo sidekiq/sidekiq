@@ -227,7 +227,7 @@ module Sidekiq
 
       while true do
         range_start = page * page_size - deleted_size
-        range_end   = range_start + (page_size - 1)
+        range_end   = range_start + page_size - 1
         entries = Sidekiq.redis do |conn|
           conn.lrange @rname, range_start, range_end
         end
@@ -502,7 +502,7 @@ module Sidekiq
 
       while true do
         range_start = page * page_size + offset_size
-        range_end   = page * page_size + offset_size + (page_size - 1)
+        range_end   = range_start + page_size - 1
         elements = Sidekiq.redis do |conn|
           conn.zrange name, range_start, range_end, with_scores: true
         end
