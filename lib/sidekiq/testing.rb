@@ -170,7 +170,7 @@ module Sidekiq
       end
 
       def delete_for(jid, queue, klass)
-        jobs_by_queue[queue].delete_if { |job| job["jid"] == jid }
+        jobs_by_queue[queue.to_s].delete_if { |job| job["jid"] == jid }
         jobs_by_worker[klass].delete_if { |job| job["jid"] == jid }
       end
 
