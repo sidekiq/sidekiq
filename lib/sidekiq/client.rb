@@ -35,10 +35,8 @@ module Sidekiq
     #   Sidekiq::Client.new(ConnectionPool.new { Redis.new })
     #
     # Generally this is only needed for very large Sidekiq installs processing
-    # more than thousands jobs per second.  I do not recommend sharding unless
-    # you truly cannot scale any other way (e.g. splitting your app into smaller apps).
-    # Some features, like the API, do not support sharding: they are designed to work
-    # against a single Redis instance only.
+    # thousands of jobs per second.  I don't recommend sharding unless you
+    # cannot scale any other way (e.g. splitting your app into smaller apps).
     def initialize(redis_pool=nil)
       @redis_pool = redis_pool || Thread.current[:sidekiq_via_pool] || Sidekiq.redis_pool
     end
@@ -49,11 +47,12 @@ module Sidekiq
     #   queue - the named queue to use, default 'default'
     #   class - the worker class to call, required
     #   args - an array of simple arguments to the perform method, must be JSON-serializable
-    #   retry - whether to retry this job if it fails, true or false, default true
+    #   retry - whether to retry this job if it fails, default true or an integer number of retries
     #   backtrace - whether to save any error backtrace, default false
     #
     # All options must be strings, not symbols.  NB: because we are serializing to JSON, all
-    # symbols in 'args' will be converted to strings.
+    # symbols in 'args' will be converted to strings.  Note that +backtrace: true+ can take quite a bit of
+    # space in Redis; a large volume of failing jobs can start Redis swapping if you aren't careful.
     #
     # Returns a unique Job ID.  If middleware stops the job, nil will be returned instead.
     #
@@ -72,9 +71,8 @@ module Sidekiq
 
     ##
     # Push a large number of jobs to Redis.  In practice this method is only
-    # useful if you are pushing tens of thousands of jobs or more, or if you need
-    # to ensure that a batch doesn't complete prematurely.  This method
-    # basically cuts down on the redis round trip latency.
+    # useful if you are pushing thousands of jobs or more.  This method
+    # cuts out the redis network round trip latency.
     #
     # Takes the same arguments as #push except that args is expected to be
     # an Array of Arrays.  All other keys are duplicated for each job.  Each job
@@ -104,10 +102,8 @@ module Sidekiq
     #   end
     #
     # Generally this is only needed for very large Sidekiq installs processing
-    # more than thousands jobs per second.  I do not recommend sharding unless
-    # you truly cannot scale any other way (e.g. splitting your app into smaller apps).
-    # Some features, like the API, do not support sharding: they are designed to work
-    # against a single Redis instance.
+    # thousands of jobs per second.  I do not recommend sharding unless
+    # you cannot scale any other way (e.g. splitting your app into smaller apps).
     def self.via(pool)
       raise ArgumentError, "No pool given" if pool.nil?
       raise RuntimeError, "Sidekiq::Client.via is not re-entrant" if x = Thread.current[:sidekiq_via_pool] && x != pool
