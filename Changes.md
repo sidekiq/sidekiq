@@ -4,7 +4,21 @@ HEAD
 -----------
 
 - Tag quiet processes in the Web UI [#2757, jcarlson]
+- Add native support for ActiveJob's `set(options)` method allowing
+you to override worker options dynamically.  This should make it
+even easier to switch between ActiveJob and Sidekiq's native APIs [#2780]
+```ruby
+class MyWorker
+  include Sidekiq::Worker
+  sidekiq_options queue: 'default', retry: true
 
+  def perform(*args)
+    # do something
+  end
+end
+
+MyWorker.set(queue: 'high', retry: false).perform_async(1)
+```
 
 4.0.2
 -----------
