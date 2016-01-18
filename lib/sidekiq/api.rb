@@ -191,6 +191,9 @@ module Sidekiq
   class Queue
     include Enumerable
 
+    ##
+    # Return all known queues within Redis.
+    #
     def self.all
       Sidekiq.redis {|c| c.smembers('queues'.freeze) }.sort.map {|q| Sidekiq::Queue.new(q) }
     end
@@ -211,6 +214,11 @@ module Sidekiq
       false
     end
 
+    ##
+    # Calculates this queue's latency, the difference in seconds since the oldest
+    # job in the queue was enqueued.
+    #
+    # @return Float
     def latency
       entry = Sidekiq.redis do |conn|
         conn.lrange(@rname, -1, -1)
@@ -240,6 +248,11 @@ module Sidekiq
       end
     end
 
+    ##
+    # Find the job with the given JID within this queue.
+    #
+    # This is a slow, inefficient operation.  Do not use under
+    # normal conditions.  Sidekiq Pro contains a faster version.
     def find_job(jid)
       detect { |j| j.jid == jid }
     end
@@ -349,7 +362,7 @@ module Sidekiq
     end
 
     def [](name)
-      @item.__send__(:[], name)
+      @item[name]
     end
 
     private
@@ -531,6 +544,11 @@ module Sidekiq
       end
     end
 
+    ##
+    # Find the job with the given JID within this sorted set.
+    #
+    # This is a slow, inefficient operation.  Do not use under
+    # normal conditions.  Sidekiq Pro contains a faster version.
     def find_job(jid)
       self.detect { |j| j.jid == jid }
     end
@@ -633,7 +651,6 @@ module Sidekiq
   #
   # Yields a Sidekiq::Process.
   #
-
   class ProcessSet
     include Enumerable
 
@@ -697,7 +714,8 @@ module Sidekiq
   end
 
   #
-  # Sidekiq::Process has a set of attributes which look like this:
+  # Sidekiq::Process represents an active Sidekiq process talking with Redis.
+  # Each process has a set of attributes which look like this:
   #
   # {
   #   'hostname' => 'app-1.example.com',
@@ -761,6 +779,7 @@ module Sidekiq
   end
 
   ##
+  # A worker is a thread that is currently processing a job.
   # Programmatic access to the current active worker set.
   #
   # WARNING WARNING WARNING
