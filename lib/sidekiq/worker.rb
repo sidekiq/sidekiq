@@ -50,6 +50,11 @@ module Sidekiq
         raise ArgumentError, "Do not call .delay_until on a Sidekiq::Worker class, call .perform_at"
       end
 
+      def set(options)
+        Thread.current[:sidekiq_worker_set] = options
+        self
+      end
+
       def perform_async(*args)
         client_push('class' => self, 'args' => args)
       end
@@ -97,7 +102,13 @@ module Sidekiq
 
       def client_push(item) # :nodoc:
         pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options['pool'] || Sidekiq.redis_pool
-        Sidekiq::Client.new(pool).push(item.stringify_keys)
+        hash = if Thread.current[:sidekiq_worker_set]
+          x, Thread.current[:sidekiq_worker_set] = Thread.current[:sidekiq_worker_set], nil
+          x.stringify_keys.merge(item.stringify_keys)
+        else
+          item.stringify_keys
+        end
+        Sidekiq::Client.new(pool).push(hash)
       end
 
     end
