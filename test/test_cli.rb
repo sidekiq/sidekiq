@@ -343,9 +343,6 @@ class TestCli < Sidekiq::Test
           @cli.handle_signal('USR2')
         end
         mock.verify
-
-        #@cli.handle_signal('USR2')
-        #klass.verify
       end
     end
 
