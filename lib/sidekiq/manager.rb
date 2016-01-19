@@ -55,7 +55,8 @@ module Sidekiq
       fire_event(:quiet, true)
     end
 
-    PAUSE_TIME = $TESTING ? 0.1 : 0.5
+    # hack for quicker development / testing environment #2774
+    PAUSE_TIME = STDOUT.tty? ? 0.1 : 0.5
 
     def stop(deadline)
       quiet
