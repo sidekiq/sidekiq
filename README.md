@@ -71,7 +71,10 @@ Problems?
 
 Please see the [sidekiq wiki](https://github.com/mperham/sidekiq/wiki) for the official documentation.
 [mperham/sidekiq on Gitter](https://gitter.im/mperham/sidekiq) is dedicated to this project,
-but bug reports or feature requests suggestions should still go through [issues on Github](https://github.com/mperham/sidekiq/issues).  Release announcements are made to the [@sidekiq](https://twitter.com/sidekiq) Twitter account.  **NO SUPPORT VIA TWITTER**
+but bug reports or feature requests suggestions should still go through [issues on Github](https://github.com/mperham/sidekiq/issues).  Release announcements are made to the [@sidekiq](https://twitter.com/sidekiq) Twitter account.  **No support via Twitter.**
+
+Every Friday morning is Sidekiq happy hour: I video chat and answer questions.
+See the [Sidekiq support page](http://sidekiq.org/support).
 
 You may also find useful a [Reddit area](https://reddit.com/r/sidekiq) dedicated to Sidekiq discussion and [a Sidekiq tag](https://stackoverflow.com/questions/tagged/sidekiq) on Stack Overflow.
 
