@@ -64,23 +64,18 @@ quality open source development all at the same time.  Please see the
 [Sidekiq](http://sidekiq.org/) homepage for more detail.
 
 
-More Information
------------------
-
-Please see the [sidekiq wiki](https://github.com/mperham/sidekiq/wiki) for the official documentation.
-[mperham/sidekiq on Gitter](https://gitter.im/mperham/sidekiq) is dedicated to this project,
-but bug reports or feature requests suggestions should still go through [issues on Github](https://github.com/mperham/sidekiq/issues).  Release announcements are made to the [@sidekiq](https://twitter.com/sidekiq) Twitter account.
-
-You may also find useful a [Reddit area](https://reddit.com/r/sidekiq) dedicated to Sidekiq discussion and [a Sidekiq tag](https://stackoverflow.com/questions/tagged/sidekiq) on Stack Overflow.
-
-
 Problems?
 -----------------
 
 **Please do not directly email any Sidekiq committers with questions or problems.**  A community is best served when discussions are held in public.
 
-If you have a problem, please review the [FAQ](https://github.com/mperham/sidekiq/wiki/FAQ) and [Troubleshooting](https://github.com/mperham/sidekiq/wiki/Problems-and-Troubleshooting) wiki pages. Searching the issues for your problem is also a good idea.  If that doesn't help, feel free to email the Sidekiq mailing list, chat in Gitter, or open a new issue.
-StackOverflow or Reddit is the preferred place to ask questions on usage. If you are encountering what you think is a bug, please open an issue.
+Please see the [sidekiq wiki](https://github.com/mperham/sidekiq/wiki) for the official documentation.
+[mperham/sidekiq on Gitter](https://gitter.im/mperham/sidekiq) is dedicated to this project,
+but bug reports or feature requests suggestions should still go through [issues on Github](https://github.com/mperham/sidekiq/issues).  Release announcements are made to the [@sidekiq](https://twitter.com/sidekiq) Twitter account.  **NO SUPPORT VIA TWITTER**
+
+You may also find useful a [Reddit area](https://reddit.com/r/sidekiq) dedicated to Sidekiq discussion and [a Sidekiq tag](https://stackoverflow.com/questions/tagged/sidekiq) on Stack Overflow.
+
+If you have a problem, please review the [FAQ](https://github.com/mperham/sidekiq/wiki/FAQ) and [Troubleshooting](https://github.com/mperham/sidekiq/wiki/Problems-and-Troubleshooting) wiki pages. Searching the issues for your problem is also a good idea.  If that doesn't help, feel free to email the Sidekiq mailing list, chat in Gitter, or open a new issue.  StackOverflow or Reddit is the preferred place to ask questions on usage. If you are encountering what you think is a bug, please open an issue.
 
 
 Thanks
