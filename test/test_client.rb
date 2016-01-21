@@ -195,7 +195,7 @@ class TestClient < Sidekiq::Test
   describe 'Sidekiq::Worker#set' do
     class SetWorker
       include Sidekiq::Worker
-      sidekiq_options queue: :foo, 'retry': 12
+      sidekiq_options :queue => :foo, 'retry' => 12
     end
 
     def setup
