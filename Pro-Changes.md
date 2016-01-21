@@ -3,6 +3,12 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+-----------
+
+- Make job registration with batch part of the atomic push so batch
+  metadata can't get out of sync with the job data. [#2714]
+
 3.0.1
 -----------
 
