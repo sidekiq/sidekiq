@@ -3,6 +3,14 @@
 HEAD
 -----------
 
+- Pass last exception to sidekiq\_retries\_exhausted block [#2787, Nowaker]
+```ruby
+class MyWorker
+  include Sidekiq::Worker
+  sidekiq_retries_exhausted do |job, exception|
+  end
+end
+```
 - Tag quiet processes in the Web UI [#2757, jcarlson]
 - Add native support for ActiveJob's `set(options)` method allowing
 you to override worker options dynamically.  This should make it
