@@ -3,6 +3,14 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+1.2.0
+-------------
+
+- **NEW FEATURE** Multi-process mode!  Sidekiq Enterprise can now fork multiple worker
+  processes, enabling significant memory savings.  See the [wiki
+documentation](https://github.com/mperham/sidekiq/wiki/Ent-Multi-Process) for details.
+
+
 0.7.10
 -------------
 
