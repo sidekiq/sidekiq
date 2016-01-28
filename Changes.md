@@ -1,8 +1,9 @@
 # Sidekiq Changes
 
-HEAD
+4.1.0
 -----------
 
+- Tag quiet processes in the Web UI [#2757, jcarlson]
 - Pass last exception to sidekiq\_retries\_exhausted block [#2787, Nowaker]
 ```ruby
 class MyWorker
@@ -11,7 +12,6 @@ class MyWorker
   end
 end
 ```
-- Tag quiet processes in the Web UI [#2757, jcarlson]
 - Add native support for ActiveJob's `set(options)` method allowing
 you to override worker options dynamically.  This should make it
 even easier to switch between ActiveJob and Sidekiq's native APIs [#2780]
