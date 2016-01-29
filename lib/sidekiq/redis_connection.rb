@@ -44,7 +44,8 @@ module Sidekiq
             require 'redis/namespace'
             Redis::Namespace.new(namespace, :redis => client)
           rescue LoadError
-            Sidekiq.logger.error("redis-namespace gem not included in Gemfile, cannot use namespace '#{namespace}'")
+            Sidekiq.logger.error("Your Redis configuration use the namespace '#{namespace}' but the redis-namespace gem not included in Gemfile." \
+                                 "Add the gem to your Gemfile in case you would like to keep using a namespace, otherwise remove the namespace parameter.")
             exit(-127)
           end
         else
