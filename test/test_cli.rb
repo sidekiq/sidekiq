@@ -323,6 +323,15 @@ class TestCli < Sidekiq::Test
     end
 
     describe 'handles USR1 and USR2' do
+      before do
+        @tmp_log_path = '/tmp/sidekiq.log'
+        @cli.parse(['sidekiq', '-L', @tmp_log_path, '-r', './test/fake_env.rb'])
+      end
+
+      after do
+        File.unlink @tmp_log_path if File.exists? @tmp_log_path
+      end
+
       it 'shuts down the worker' do
         count = 0
         Sidekiq.options[:lifecycle_events][:quiet] = [proc {
