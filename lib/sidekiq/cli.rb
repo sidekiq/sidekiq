@@ -233,6 +233,11 @@ module Sidekiq
           end
           require 'sidekiq/rails'
           require File.expand_path("#{options[:require]}/config/environment.rb")
+
+          if ::Rails::VERSION::MAJOR > 4 && ::Rails.env.development?
+            logger.debug "Enabling Rails 5+ code reloading, so hot!"
+            Sidekiq.options[:reloader] = Sidekiq::Rails::Reloader.new
+          end
         end
         options[:tag] ||= default_tag
       else

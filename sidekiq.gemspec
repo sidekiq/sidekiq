@@ -19,8 +19,8 @@ Gem::Specification.new do |gem|
   gem.add_dependency                  'connection_pool', '~> 2.2', '>= 2.2.0'
   gem.add_dependency                  'concurrent-ruby', '~> 1.0'
   gem.add_development_dependency      'redis-namespace', '~> 1.5', '>= 1.5.2'
-  gem.add_development_dependency      'sinatra', '~> 1.4', '>= 1.4.6'
+  gem.add_development_dependency      'sinatra', '>= 1.4.6'
   gem.add_development_dependency      'minitest', '~> 5.7', '>= 5.7.0'
   gem.add_development_dependency      'rake', '~> 10.0'
-  gem.add_development_dependency      'rails', '~> 4', '>= 3.2.0'
+  gem.add_development_dependency      'rails', '>= 3.2.0'
 end
