@@ -3,6 +3,12 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+3.0.3, 2.1.4
+------------
+
+- Convert Lua-based `Sidekiq::Queue#delete_by_class` to Ruby-based, to
+  avoid O(N^2) performance and possible Redis failure. [#2806]
+
 3.0.2
 -----------
 
