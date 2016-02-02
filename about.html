@@ -1,261 +1,173 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf8">
-  <title>Sidekiq</title>
-  <meta name="description" content="Simple, efficient background job processing for Ruby">
-  <meta property="og:site_name" content="Sidekiq">
-  <meta property="og:type" content="company">
-  <meta property="og:title" content="Simple, efficient job processing for Ruby">
-  <meta property="og:url" content="http://sidekiq.org">
-  <meta property="og:image" content="http://sidekiq.org/img/logo.png">
-  <meta property="og:description" content="Sidekiq is a simple, efficient system for job processing">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="canonical" href="http://sidekiq.org/about">
-  <link rel="stylesheet" href="http://sidekiq.org/css/global.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
-  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.0/jquery.min.js">
-  </script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js">
-  </script>
-  <script defer src="js/scrollingcarousel.2.0.min.js">
-  </script>
-  <script defer src="js/skq-global.js">
-  </script>
-</head>
-<body>
-  <header>
-    <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
-      <div class="container-fluid skq-header">
-        <div class="navbar-header">
-          <button data-toggle="collapse" data-target="#navbar-top-collapse-1" class="navbar-toggle"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button><a href="./" class="skq navbar-brand">Sidekiq</a><span class="default skq-tagline navbar-brand col-sm-5 hidden-xs">Simple, efficient background processing for Ruby.</span>
-        </div>
-        <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
-          <ul class="nav navbar-nav navbar-right">
-            <li>
-              <a href="./products/pro" class="skq-nav-link">Pro</a>
-            </li>
-            <li>
-              <a href="./products/enterprise" class="skq-nav-link">Enterprise</a>
-            </li>
-            <li>
-              <a href="./support" class="skq-nav-link">Support</a>
-            </li>
-            <li>
-              <a href="./about" class="skq-nav-link">About</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-  </header>
-  <main>
+---
+layout: default
+---
+<main>
     <div class="container skq-hero-area">
-      <div class="row">
-        <div class="col-sm-9">
-          <h1>Powered by Open Source</h1>
-          <p>Sidekiq is an open source project, anyone may contribute to it. The following people have made significant contributions—</p>
+        <div class="row">
+            <div class="col-sm-9">
+                <h1>Powered by Open Source</h1>
+                <p>Sidekiq is an open source project, anyone may contribute to it. The following people have made significant contributions—</p>
+            </div>
         </div>
-      </div>
     </div>
     <div class="container">
-      <ul class="list-group list-inline skq-contributors">
-        <li class="list-group-item">
-          <figure itemtype="http://schema.org/Person">
-            <img itemprop="image" src="https://avatars1.githubusercontent.com/u/2911?s=300" class="skq-contributor-img">
-            <figcaption>
-              <span itemprop="name" class="name">Mike Perham</span><br>
-              <a itemprop="url" href="https://github.com/mperham" target="_new"><img src="./img/octocat.png" class="icon">mperham</a>
-            </figcaption>
-          </figure>
-        </li>
-        <li class="list-group-item">
-          <figure itemtype="http://schema.org/Person">
-            <img itemprop="image" src="https://avatars1.githubusercontent.com/u/797?s=300" class="skq-contributor-img">
-            <figcaption>
-              <span itemprop="name" class="name">Tony Arcieri</span><br>
-              <a itemprop="url" target="_new" href="https://github.com/tarcieri"><img src="./img/octocat.png" class="icon">tarcieri</a>
-            </figcaption>
-          </figure>
-        </li>
-        <li class="list-group-item">
-          <figure itemtype="http://schema.org/Person">
-            <img itemprop="image" src="https://avatars1.githubusercontent.com/u/9458?s=300" class="skq-contributor-img">
-            <figcaption>
-              <span itemprop="name" class="name">Romain Dardour</span><br>
-              <a itemprop="url" target="_new" href="https://github.com/unity"><img src="./img/octocat.png" class="icon">unity</a>
-            </figcaption>
-          </figure>
-        </li>
-        <li class="list-group-item">
-          <figure itemtype="http://schema.org/Person">
-            <img itemprop="image" src="https://avatars0.githubusercontent.com/u/18191?s=300" class="skq-contributor-img">
-            <figcaption>
-              <span itemprop="name" class="name">Jesse Cooke</span><br>
-              <a itemprop="url" target="_new" href="https://github.com/jc00ke"><img src="./img/octocat.png" class="icon">jc00ke</a>
-            </figcaption>
-          </figure>
-        </li>
-        <li class="list-group-item">
-          <figure itemtype="http://schema.org/Person">
-            <img itemprop="image" src="https://avatars2.githubusercontent.com/u/34627?s=300" class="skq-contributor-img">
-            <figcaption>
-              <span itemprop="name" class="name">Petteri Räty</span><br>
-              <a itemprop="url" target="_new" href="https://github.com/betelgeuse"><img src="./img/octocat.png" class="icon">betelgeuse</a>
-            </figcaption>
-          </figure>
-        </li>
-        <li class="list-group-item">
-          <figure itemtype="http://schema.org/Person">
-            <img itemprop="image" src="https://avatars1.githubusercontent.com/u/40455?s=300" class="skq-contributor-img">
-            <figcaption>
-              <span itemprop="name" class="name">Ezekiel Templin</span><br>
-              <a itemprop="url" target="_new" href="https://github.com/ezkl"><img src="./img/octocat.png" class="icon">ezkl</a>
-            </figcaption>
-          </figure>
-        </li>
-        <li class="list-group-item">
-          <figure itemtype="http://schema.org/Person">
-            <img itemprop="image" src="https://avatars2.githubusercontent.com/u/146013?s=300" class="skq-contributor-img">
-            <figcaption>
-              <span itemprop="name" class="name">Ryan Schlesinger</span><br>
-              <a itemprop="url" target="_new" href="https://github.com/ryansch"><img src="./img/octocat.png" class="icon">ryansch</a>
-            </figcaption>
-          </figure>
-        </li>
-        <li class="list-group-item">
-          <figure itemtype="http://schema.org/Person">
-            <img itemprop="image" src="https://avatars0.githubusercontent.com/u/186424?s=300" class="skq-contributor-img">
-            <figcaption>
-              <span itemprop="name" class="name">Pan Thomakos</span><br>
-              <a itemprop="url" target="_new" href="https://github.com/panthomakos"><img src="./img/octocat.png" class="icon">panthomakos</a>
-            </figcaption>
-          </figure>
-        </li>
-        <li class="list-group-item">
-          <figure itemtype="http://schema.org/Person">
-            <img itemprop="image" src="https://avatars3.githubusercontent.com/u/637158?s=300" class="skq-contributor-img">
-            <figcaption>
-              <span itemprop="name" class="name">Ryan LeCompte</span><br>
-              <a itemprop="url" target="_new" href="https://github.com/ryanlecompte"><img src="./img/octocat.png" class="icon">ryanlecompte</a>
-            </figcaption>
-          </figure>
-        </li>
-        <li class="list-group-item">
-          <figure itemtype="http://schema.org/Person">
-            <img itemprop="image" src="https://avatars1.githubusercontent.com/u/744212?s=300" class="skq-contributor-img">
-            <figcaption>
-              <span itemprop="name" class="name">Brandon Hilkert</span><br>
-              <a itemprop="url" target="_new" href="https://github.com/brandonhilkert"><img src="./img/octocat.png" class="icon">brandonhilkert</a>
-            </figcaption>
-          </figure>
-        </li>
-        <li class="list-group-item">
-          <figure itemtype="http://schema.org/Person">
-            <img itemprop="image" src="https://avatars2.githubusercontent.com/u/786640?s=300" class="skq-contributor-img">
-            <figcaption>
-              <span itemprop="name" class="name">Aaron Ackerman</span><br>
-              <a itemprop="url" target="_new" href="https://github.com/aackerman"><img src="./img/octocat.png" class="icon">aackerman</a>
-            </figcaption>
-          </figure>
-        </li>
-        <li class="list-group-item">
-          <figure itemtype="http://schema.org/Person">
-            <img itemprop="image" src="https://avatars0.githubusercontent.com/u/832655?s=300" class="skq-contributor-img">
-            <figcaption>
-              <span itemprop="name" class="name">Jonathan Hyman</span><br>
-              <a itemprop="url" target="_new" href="https://github.com/jonhyman"><img src="./img/octocat.png" class="icon">jonhyman</a>
-            </figcaption>
-          </figure>
-        </li>
-        <li class="list-group-item">
-          <figure itemtype="http://schema.org/Person">
-            <img itemprop="image" src="https://avatars3.githubusercontent.com/u/2394703?s=300" class="skq-contributor-img">
-            <figcaption>
-              <span itemprop="name" class="name">Abdelkader Boudih</span><br>
-              <a itemprop="url" target="_new" href="https://github.com/seuros"><img src="./img/octocat.png" class="icon">seuros</a>
-            </figcaption>
-          </figure>
-        </li>
-        <li class="list-group-item">
-          <figure itemtype="http://schema.org/Person">
-            <img itemprop="image" src="https://avatars3.githubusercontent.com/u/1147484?s=300" class="skq-contributor-img">
-            <figcaption>
-              <span itemprop="name" class="name">Anton Davydov</span><br>
-              <a itemprop="url" target="_new" href="https://github.com/davydovanton"><img src="./img/octocat.png" class="icon">davydovanton</a>
-            </figcaption>
-          </figure>
-        </li>
-      </ul>
+        <ul class="list-group list-inline skq-contributors">
+            <li class="list-group-item">
+                <figure itemtype="http://schema.org/Person">
+                    <img itemprop="image" src="https://avatars1.githubusercontent.com/u/2911?s=300" class="skq-contributor-img">
+                    <figcaption>
+                        <span itemprop="name" class="name">Mike Perham</span><br>
+                        <a itemprop="url" href="https://github.com/mperham" target="_new"><img src="./img/octocat.png" class="icon">mperham</a>
+                    </figcaption>
+                </figure>
+            </li>
+            <li class="list-group-item">
+                <figure itemtype="http://schema.org/Person">
+                    <img itemprop="image" src="https://avatars1.githubusercontent.com/u/797?s=300" class="skq-contributor-img">
+                    <figcaption>
+                        <span itemprop="name" class="name">Tony Arcieri</span><br>
+                        <a itemprop="url" target="_new" href="https://github.com/tarcieri"><img src="./img/octocat.png" class="icon">tarcieri</a>
+                    </figcaption>
+                </figure>
+            </li>
+            <li class="list-group-item">
+                <figure itemtype="http://schema.org/Person">
+                    <img itemprop="image" src="https://avatars1.githubusercontent.com/u/9458?s=300" class="skq-contributor-img">
+                    <figcaption>
+                        <span itemprop="name" class="name">Romain Dardour</span><br>
+                        <a itemprop="url" target="_new" href="https://github.com/unity"><img src="./img/octocat.png" class="icon">unity</a>
+                    </figcaption>
+                </figure>
+            </li>
+            <li class="list-group-item">
+                <figure itemtype="http://schema.org/Person">
+                    <img itemprop="image" src="https://avatars0.githubusercontent.com/u/18191?s=300" class="skq-contributor-img">
+                    <figcaption>
+                        <span itemprop="name" class="name">Jesse Cooke</span><br>
+                        <a itemprop="url" target="_new" href="https://github.com/jc00ke"><img src="./img/octocat.png" class="icon">jc00ke</a>
+                    </figcaption>
+                </figure>
+            </li>
+            <li class="list-group-item">
+                <figure itemtype="http://schema.org/Person">
+                    <img itemprop="image" src="https://avatars2.githubusercontent.com/u/34627?s=300" class="skq-contributor-img">
+                    <figcaption>
+                        <span itemprop="name" class="name">Petteri Räty</span><br>
+                        <a itemprop="url" target="_new" href="https://github.com/betelgeuse"><img src="./img/octocat.png" class="icon">betelgeuse</a>
+                    </figcaption>
+                </figure>
+            </li>
+            <li class="list-group-item">
+                <figure itemtype="http://schema.org/Person">
+                    <img itemprop="image" src="https://avatars1.githubusercontent.com/u/40455?s=300" class="skq-contributor-img">
+                    <figcaption>
+                        <span itemprop="name" class="name">Ezekiel Templin</span><br>
+                        <a itemprop="url" target="_new" href="https://github.com/ezkl"><img src="./img/octocat.png" class="icon">ezkl</a>
+                    </figcaption>
+                </figure>
+            </li>
+            <li class="list-group-item">
+                <figure itemtype="http://schema.org/Person">
+                    <img itemprop="image" src="https://avatars2.githubusercontent.com/u/146013?s=300" class="skq-contributor-img">
+                    <figcaption>
+                        <span itemprop="name" class="name">Ryan Schlesinger</span><br>
+                        <a itemprop="url" target="_new" href="https://github.com/ryansch"><img src="./img/octocat.png" class="icon">ryansch</a>
+                    </figcaption>
+                </figure>
+            </li>
+            <li class="list-group-item">
+                <figure itemtype="http://schema.org/Person">
+                    <img itemprop="image" src="https://avatars0.githubusercontent.com/u/186424?s=300" class="skq-contributor-img">
+                    <figcaption>
+                        <span itemprop="name" class="name">Pan Thomakos</span><br>
+                        <a itemprop="url" target="_new" href="https://github.com/panthomakos"><img src="./img/octocat.png" class="icon">panthomakos</a>
+                    </figcaption>
+                </figure>
+            </li>
+            <li class="list-group-item">
+                <figure itemtype="http://schema.org/Person">
+                    <img itemprop="image" src="https://avatars3.githubusercontent.com/u/637158?s=300" class="skq-contributor-img">
+                    <figcaption>
+                        <span itemprop="name" class="name">Ryan LeCompte</span><br>
+                        <a itemprop="url" target="_new" href="https://github.com/ryanlecompte"><img src="./img/octocat.png" class="icon">ryanlecompte</a>
+                    </figcaption>
+                </figure>
+            </li>
+            <li class="list-group-item">
+                <figure itemtype="http://schema.org/Person">
+                    <img itemprop="image" src="https://avatars1.githubusercontent.com/u/744212?s=300" class="skq-contributor-img">
+                    <figcaption>
+                        <span itemprop="name" class="name">Brandon Hilkert</span><br>
+                        <a itemprop="url" target="_new" href="https://github.com/brandonhilkert"><img src="./img/octocat.png" class="icon">brandonhilkert</a>
+                    </figcaption>
+                </figure>
+            </li>
+            <li class="list-group-item">
+                <figure itemtype="http://schema.org/Person">
+                    <img itemprop="image" src="https://avatars2.githubusercontent.com/u/786640?s=300" class="skq-contributor-img">
+                    <figcaption>
+                        <span itemprop="name" class="name">Aaron Ackerman</span><br>
+                        <a itemprop="url" target="_new" href="https://github.com/aackerman"><img src="./img/octocat.png" class="icon">aackerman</a>
+                    </figcaption>
+                </figure>
+            </li>
+            <li class="list-group-item">
+                <figure itemtype="http://schema.org/Person">
+                    <img itemprop="image" src="https://avatars0.githubusercontent.com/u/832655?s=300" class="skq-contributor-img">
+                    <figcaption>
+                        <span itemprop="name" class="name">Jonathan Hyman</span><br>
+                        <a itemprop="url" target="_new" href="https://github.com/jonhyman"><img src="./img/octocat.png" class="icon">jonhyman</a>
+                    </figcaption>
+                </figure>
+            </li>
+            <li class="list-group-item">
+                <figure itemtype="http://schema.org/Person">
+                    <img itemprop="image" src="https://avatars3.githubusercontent.com/u/2394703?s=300" class="skq-contributor-img">
+                    <figcaption>
+                        <span itemprop="name" class="name">Abdelkader Boudih</span><br>
+                        <a itemprop="url" target="_new" href="https://github.com/seuros"><img src="./img/octocat.png" class="icon">seuros</a>
+                    </figcaption>
+                </figure>
+            </li>
+            <li class="list-group-item">
+                <figure itemtype="http://schema.org/Person">
+                    <img itemprop="image" src="https://avatars3.githubusercontent.com/u/1147484?s=300" class="skq-contributor-img">
+                    <figcaption>
+                        <span itemprop="name" class="name">Anton Davydov</span><br>
+                        <a itemprop="url" target="_new" href="https://github.com/davydovanton"><img src="./img/octocat.png" class="icon">davydovanton</a>
+                    </figcaption>
+                </figure>
+            </li>
+        </ul>
     </div>
     <div class="container">
-      <div class="row">
-        <div class="col-sm-9">
-          <h1>Media Assets</h1>
-          <p>These assets may be used by the general public for conference talks, blog posts, etc and
-            are licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
-            <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a>
-          </p>
+        <div class="row">
+            <div class="col-sm-9">
+                <h1>Media Assets</h1>
+                <p>These assets may be used by the general public for conference talks, blog posts, etc and
+                    are licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+                    <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a>
+                </p>
+            </div>
         </div>
-      </div>
     </div>
     <div class="container">
-      <ul class="list-group list-inline">
-        <li class="list-group-item">
-          <a href="http://sidekiq.org/assets/sidekiq-pro.svg">
-            <img src="http://sidekiq.org/assets/sidekiq-pro.svg" width="200">
-          </a>
-        </li>
-        <li class="list-group-item">
-          <a href="http://sidekiq.org/assets/kicker.svg">
-            <img src="http://sidekiq.org/assets/kicker.svg" width="200">
-          </a>
-        </li>
-        <li class="list-group-item">
-          <a href="http://sidekiq.org/assets/sidekiq.png">
-            <img src="http://sidekiq.org/assets/sidekiq.png" width="200">
-          </a>
-        </li>
-      </ul>
+        <ul class="list-group list-inline">
+            <li class="list-group-item">
+                <a href="http://sidekiq.org/assets/sidekiq-pro.svg">
+                    <img src="http://sidekiq.org/assets/sidekiq-pro.svg" width="200">
+                </a>
+            </li>
+            <li class="list-group-item">
+                <a href="http://sidekiq.org/assets/kicker.svg">
+                    <img src="http://sidekiq.org/assets/kicker.svg" width="200">
+                </a>
+            </li>
+            <li class="list-group-item">
+                <a href="http://sidekiq.org/assets/sidekiq.png">
+                    <img src="http://sidekiq.org/assets/sidekiq.png" width="200">
+                </a>
+            </li>
+        </ul>
     </div>
-  </main>
-  <footer>
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-sm-7">
-          <div class="skq-footer-brand">
-            Sidekiq<a href="http://rubyheroes.com/" target="_new"><img src="./img/hero-award.svg" class="skq-award"></a><a href="https://www.blackducksoftware.com/open-source-rookies/2012-recipients" target="_new"><img src="./img/rookie-award.png" class="skq-award"></a>
-          </div>
-        </div>
-        <div class="col-xs-5">
-          <a href="http://contribsys.com/" target="_new"><img src="./img/cs-footer-logo.png" class="skq-footer-logo"></a>
-        </div>
-      </div>
-      <hr>
-      <div class="row">
-        <div class="col-sm-2">
-          <a href="https://github.com/mperham/sidekiq/" target="_new">OSS <small><span class="glyphicon glyphicon-new-window"></span></small></a><br>
-          <a href="./products/pro">Pro</a><br>
-          <a href="./products/enterprise">Enterprise</a>
-        </div>
-        <div class="col-sm-2">
-          <a href="https://github.com/mperham/sidekiq/wiki" target="_new">Wiki</a><br>
-          <a href="./support">Support</a><br>
-          <a href="https://github.com/mperham/sidekiq/" target="_new">Source</a>
-        </div>
-        <div class="col-sm-3">
-          <a href="./about">About</a><br>
-          <a href="https://twitter.com/sidekiq" target="_new">On Twitter</a><br>
-          <a href="http://confreaks.com/videos/1290-rubyconf2012-asynchronous-processing-for-fun-and-profit" target="_new">At Rubyconf 2012</a>
-        </div>
-        <div class="col-sm-5">
-          <hr class="visible-xs">
-          <small>Copyright © 2016 Contributed Systems LLC.<br class="hidden-xs">
-          Made with care in Portland, OR.</small>
-        </div>
-      </div>
-    </div>
-  </footer>
-</body>
-</html>
+</main>
