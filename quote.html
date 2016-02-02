@@ -1,83 +1,81 @@
 ---
 layout: default
 ---
-<main>
-    <div class="container">
-        <h1>Create a Custom Quote</h1>
-        <p>Enter your company information to get a customized quote for purchasing Sidekiq Enterprise. You'll get an
-            email with a PDF quote. Reply to that email with your purchase order or just "OK" and we'll send an invoice
-            which you can pay with either a credit card, ACH transfer or check.</p>
-        <p>Email <a href="mailto:info@contribsys.com?subject=Sidekiq%20Enterprise%20Question">info@contribsys.com</a>
-            with further questions.</p>
-        <hr>
-        <div class="spacer"></div>
-        <form name="invoice" action="/cheqout/quoter" method="post" id="invoice">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <label for="workercount">Worker Count *</label><input id="workercount" type="number" min="1"
-                                                                               value="250" class="form-control">
-                            </div>
-                            <div class="col-md-8">
-                                <p class="help-block">This is the maximum number of worker threads you wish to run in
-                                    production, sold in packs of 250. Ten processes with the default concurrency of 25 =
-                                    250.</p>
-                            </div>
+<div class="container">
+    <h1>Create a Custom Quote</h1>
+    <p>Enter your company information to get a customized quote for purchasing Sidekiq Enterprise. You'll get an
+        email with a PDF quote. Reply to that email with your purchase order or just "OK" and we'll send an invoice
+        which you can pay with either a credit card, ACH transfer or check.</p>
+    <p>Email <a href="mailto:info@contribsys.com?subject=Sidekiq%20Enterprise%20Question">info@contribsys.com</a>
+        with further questions.</p>
+    <hr>
+    <div class="spacer"></div>
+    <form name="invoice" action="/cheqout/quoter" method="post" id="invoice">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="workercount">Worker Count *</label><input id="workercount" type="number" min="1"
+                                                                                  value="250" class="form-control">
+                        </div>
+                        <div class="col-md-8">
+                            <p class="help-block">This is the maximum number of worker threads you wish to run in
+                                production, sold in packs of 250. Ten processes with the default concurrency of 25 =
+                                250.</p>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="yourname">Your Name *</label><input type="input" id="yourname" placeholder="Jane Doe"
-                                                                    maxlength="64" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>Your Email
-                            <small>— quote will be sent here</small>
-                            *</label><input type="email" name="youremail" placeholder="someone@acmecorp.com"
-                                            maxlength="64" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>Billing Email
-                            <small>— annual invoice will be sent here, no personal email addresses</small>
-                            *</label><input type="email" name="billemail" placeholder="billing@acmecorp.com"
-                                            maxlength="64" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>Technical Email
-                            <small>— product download details sent here after purchase</small>
-                            *</label><input type="email" name="techemail" placeholder="engineering@acmecorp.com"
-                                            maxlength="64" class="form-control">
-                    </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Organization Name *</label><input type="input" name="orgname" placeholder="Acme Corp"
-                                                                 maxlength="64" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>Organization Address *</label><input type="input" name="line1" placeholder="123 Fake St"
+                <div class="form-group">
+                    <label for="yourname">Your Name *</label><input type="input" id="yourname" placeholder="Jane Doe"
                                                                     maxlength="64" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <input type="input" name="line2" placeholder="Suite 200" maxlength="64" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <input type="input" name="line3" placeholder="Portland OR 97209" maxlength="64"
-                               class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>Any additional notes to include on <span onclick="$('#disc').toggle()">quote</span>/invoice?</label><input
-                            type="input" name="notes" placeholder="For project XYZ" maxlength="64" class="form-control">
-                    </div>
-                    <div id="disc" style="display: none" class="form-group">
-                        <label>Discount (%)</label><input type="input" name="discount" value="0" class="form-control">
-                    </div>
-                    <p class="help-block">* Required</p>
-                    <button type="submit" value="submit" class="btn btn-default btn-primary btn-lg">Submit</button>
+                </div>
+                <div class="form-group">
+                    <label>Your Email
+                        <small>— quote will be sent here</small>
+                        *</label><input type="email" name="youremail" placeholder="someone@acmecorp.com"
+                                        maxlength="64" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Billing Email
+                        <small>— annual invoice will be sent here, no personal email addresses</small>
+                        *</label><input type="email" name="billemail" placeholder="billing@acmecorp.com"
+                                        maxlength="64" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Technical Email
+                        <small>— product download details sent here after purchase</small>
+                        *</label><input type="email" name="techemail" placeholder="engineering@acmecorp.com"
+                                        maxlength="64" class="form-control">
                 </div>
             </div>
-        </form>
-        <div class="spacer-md"></div>
-    </div>
-</main>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Organization Name *</label><input type="input" name="orgname" placeholder="Acme Corp"
+                                                             maxlength="64" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Organization Address *</label><input type="input" name="line1" placeholder="123 Fake St"
+                                                                maxlength="64" class="form-control">
+                </div>
+                <div class="form-group">
+                    <input type="input" name="line2" placeholder="Suite 200" maxlength="64" class="form-control">
+                </div>
+                <div class="form-group">
+                    <input type="input" name="line3" placeholder="Portland OR 97209" maxlength="64"
+                           class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Any additional notes to include on <span onclick="$('#disc').toggle()">quote</span>/invoice?</label><input
+                        type="input" name="notes" placeholder="For project XYZ" maxlength="64" class="form-control">
+                </div>
+                <div id="disc" style="display: none" class="form-group">
+                    <label>Discount (%)</label><input type="input" name="discount" value="0" class="form-control">
+                </div>
+                <p class="help-block">* Required</p>
+                <button type="submit" value="submit" class="btn btn-default btn-primary btn-lg">Submit</button>
+            </div>
+        </div>
+    </form>
+    <div class="spacer-md"></div>
+</div>
