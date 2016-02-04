@@ -3,6 +3,11 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+3.0.4
+---------
+
+- Queue pausing no longer requires reliable fetch. [#2786]
+
 3.0.3, 2.1.4
 ------------
 
