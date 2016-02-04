@@ -128,7 +128,7 @@ class TestRetryExhausted < Sidekiq::Test
 
         exhausted_job = nil
         exhausted_exception = nil
-        Sidekiq.default_retries_exhausted = -> (job, ex) do
+        Sidekiq.default_retries_exhausted = lambda do |job, ex|
           exhausted_job = job
           exhausted_exception = ex
         end
