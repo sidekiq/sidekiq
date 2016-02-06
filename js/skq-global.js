@@ -5,7 +5,7 @@ $(document).ready(function() {
     var scrollPos = document.body.scrollTop;
     var mobileBreak = 992;
     var logoCarousel = $(".logo-carousel");
-    var navBar = navbar;
+    var navBar = $(".navbar");
     
     setCarouselHeight('#carousel');
     logoCarousel.addClass('js-carousel');
