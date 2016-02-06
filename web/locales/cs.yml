@@ -33,6 +33,7 @@ cs:
   NextRetry: Další opakování
   RetryCount: Počet opakování
   RetryNow: Opakovat teď
+  Kill: Zabít
   LastRetry: Poslední opakování
   OriginallyFailed: Původně se nezdařilo
   AreYouSure: Jste si jisti?
@@ -61,8 +62,17 @@ cs:
   Failures: Selhání
   DeadJobs: Mrtvé úkoly
   NoDeadJobsFound: Nebyly nalezeny žádné mrtvé úkoly
-  Dead: Mrtvý
+  Dead: Mrtvé
   Processes: Procesy
   Thread: Vlákno
   Threads: Vlákna
   Jobs: Úkoly
+  Paused: Pozastavené
+  Stop: Zastavit
+  Quiet: Ztišit
+  StopAll: Zastavit vše
+  QuietAll: Ztišit vše
+  PollingInterval: Interval obnovení
+  Plugins: Doplňky
+  NotYetEnqueued: Ještě nezařazeno
+  CreatedAt: Vytvořeno
