@@ -1,13 +1,15 @@
 $(document).ready(function() {
 
     var body = $('html, body');
-    var windowHeight = $(window).height()
-    var scrollPos = document.body.scrollTop
-    var mobileBreak = 992
-
+    var windowHeight = $(window).height();
+    var scrollPos = document.body.scrollTop;
+    var mobileBreak = 992;
+    var logoCarousel = $(".logo-carousel");
+    var navBar = $(".navbar");
+    
     setCarouselHeight('#carousel');
-    $(".logo-carousel").addClass('js-carousel');
-    $(".logo-carousel").removeClass('noscript-carousel');
+    logoCarousel.addClass('js-carousel');
+    logoCarousel.removeClass('noscript-carousel');
 
     function setCarouselHeight(id) {
       var slideHeight = [];
@@ -24,13 +26,12 @@ $(document).ready(function() {
 
     function collapseHeader() {
         var pageScroll = $(this).scrollTop();
-        var elementPadding = $('a.skq').css('padding-top').replace(/[^-\d\.]/g, '');
-        var headerHeight = 120
+        var headerHeight = 120;
 
         // Animate collapse attached to scrolling position
         if(pageScroll > 0 && pageScroll < headerHeight ) {
             $(".navbar, .navbar-header, .skq-header").css({'height' : headerHeight-(pageScroll*0.58333333)});
-            $(".navbar").css({'min-height' : 50});
+            navBar.css({'min-height' : 50});
             $(".navbar-toggle").css({'margin-top' : 43-(pageScroll*0.28333333)});
 
             $(".skq, .skq-nav-link").css({'padding-top' : 49-(pageScroll*0.28333333), 'padding-bottom' : 49-(pageScroll*0.28333333)});
@@ -41,8 +42,8 @@ $(document).ready(function() {
         // Set to collapsed after scrolling past headerHeight
         if(pageScroll > headerHeight) {
             $(".navbar, .navbar-header, .skq-header").css({'height' : 50});
-            $(".navbar").addClass('nav-mini');
-            $(".navbar").css({'min-height' : 50});
+            navBar.addClass('nav-mini');
+            navBar.css({'min-height' : 50});
             
             $(".skq, .skq-nav-link").css({'padding-top' : 15, 'padding-bottom' : 15});
             $(".navbar-toggle").css({'margin-top' : 8});
@@ -53,7 +54,7 @@ $(document).ready(function() {
         // Reset elements at scrolltop
         if(pageScroll < 5) {
             $(".navbar, .navbar-header, .skq-header").css({'height' : headerHeight});
-            $(".navbar").removeClass('nav-mini');
+            navBar.removeClass('nav-mini');
             
             $(".skq, .skq-nav-link").css({'padding-top' : 49, 'padding-bottom' : 49});
             $(".navbar-toggle").css({'margin-top' : 43});
