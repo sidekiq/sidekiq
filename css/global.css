@@ -6218,6 +6218,13 @@ h6 {
 .skq-col-left .glyphicon {
     color: #69952f
 }
+.skq-col-center {
+    background-color: rgba(250, 88, 130, 0.2)
+}
+.skq-col-center h3,
+.skq-col-center .glyphicon {
+    color: #FA5882
+}
 .skq-col-right {
     background-color: rgba(0, 85, 141, 0.2)
 }
