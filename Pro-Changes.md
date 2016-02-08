@@ -3,6 +3,12 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+3.0.5
+---------
+
+- Statsd metrics now account for ActiveJob class names
+- Allow reliable fetch internals to be overridden [jonhyman]
+
 3.0.4
 ---------
 
