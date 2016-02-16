@@ -1,5 +1,17 @@
 # Sidekiq Changes
 
+HEAD
+-----------
+
+- Allow definition of a global retries_exhausted handler. [#2807]
+```ruby
+Sidekiq.configure_server do |config|
+  config.default_retries_exhausted = -> (job, ex) do
+    Sidekiq.logger.info "#{job['class']} job is now dead"
+  end
+end
+```
+
 4.1.0
 -----------
 

@@ -44,7 +44,6 @@ module Sidekiq
   def self.options
     @options ||= DEFAULTS.dup
   end
-
   def self.options=(opts)
     @options = opts
   end
@@ -132,15 +131,24 @@ module Sidekiq
   def self.default_worker_options=(hash)
     @default_worker_options = default_worker_options.merge(hash.stringify_keys)
   end
-
   def self.default_worker_options
     defined?(@default_worker_options) ? @default_worker_options : DEFAULT_WORKER_OPTIONS
+  end
+
+  # Sidekiq.configure_server do |config|
+  #   config.default_retries_exhausted = -> (job, ex) do
+  #   end
+  # end
+  def self.default_retries_exhausted=(prok)
+    @default_retries_exhausted = prok
+  end
+  def self.default_retries_exhausted
+    @default_retries_exhausted
   end
 
   def self.load_json(string)
     JSON.parse(string)
   end
-
   def self.dump_json(object)
     JSON.generate(object)
   end
@@ -148,7 +156,6 @@ module Sidekiq
   def self.logger
     Sidekiq::Logging.logger
   end
-
   def self.logger=(log)
     Sidekiq::Logging.logger = log
   end
