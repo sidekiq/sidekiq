@@ -6516,10 +6516,10 @@ footer .skq-footer-brand {
     margin-left: .5em;
     font-size: 1.8em;
     font-family: "Armata", Helvetica, Arial, sans-serif;
-    color: #222
+    color: #ddd;
 }
 footer .skq-footer-logo {
-    margin-top: 2em;
+    margin-top: 1em;
     width: auto;
     height: 27px
 }
