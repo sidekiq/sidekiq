@@ -31,7 +31,7 @@ DelayedJob 4.1.1 |  -   | -       | 465 sec | 215 jobs/sec
 Requirements
 -----------------
 
-I test with the latest CRuby (2.2, 2.1 and 2.0) and JRuby versions (9k).  Other versions/VMs
+I test with the latest CRuby (2.3, 2.2, 2.1 and 2.0) and JRuby versions (9k).  Other versions/VMs
 are untested but might work fine.  CRuby 1.9 is not supported.
 
 All Rails releases from 3.2 are officially supported.
