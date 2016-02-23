@@ -11,7 +11,7 @@ Simple, efficient background processing for Ruby.
 
 Sidekiq uses threads to handle many jobs at the same time in the
 same process.  It does not require Rails but will integrate tightly with
-Rails 3/4 to make background processing dead simple.
+Rails to make background processing dead simple.
 
 Sidekiq is compatible with Resque.  It uses the exact same
 message format as Resque so it can integrate into an existing Resque processing farm.
@@ -31,10 +31,9 @@ DelayedJob 4.1.1 |  -   | -       | 465 sec | 215 jobs/sec
 Requirements
 -----------------
 
-I test with the latest CRuby (2.2, 2.1 and 2.0) and JRuby versions (9k).  Other versions/VMs
-are untested but might work fine.  CRuby 1.9 is not supported.
+Sidekiq supports CRuby 2.0+ and JRuby 9k.
 
-All Rails releases from 3.2 are officially supported.
+All Rails releases >= 3.2 are officially supported.
 
 Redis 2.8 or greater is required.  3.0.3+ is recommended for large
 installations with thousands of worker threads.
