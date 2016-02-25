@@ -122,15 +122,7 @@ module Sidekiq
     end
 
     def redis_info
-      Sidekiq.redis do |conn|
-        # admin commands can't go through redis-namespace starting
-        # in redis-namespace 2.0
-        if conn.respond_to?(:namespace)
-          conn.redis.info
-        else
-          conn.info
-        end
-      end
+      Sidekiq.redis_info
     end
 
     def root_path
