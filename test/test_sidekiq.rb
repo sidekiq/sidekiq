@@ -101,7 +101,6 @@ class TestSidekiq < Sidekiq::Test
     it 'calls the INFO command which returns at least redis_version' do
       output = Sidekiq.redis_info
       assert_includes output.keys, "redis_version"
-      assert_includes output.keys, "uptime_in_days"
     end
   end
 end

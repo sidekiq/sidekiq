@@ -37,6 +37,14 @@ module Sidekiq
     'queue' => 'default'
   }
 
+  FAKE_INFO = {
+    "redis_version" => "9.9.9",
+    "uptime_in_days" => "9999",
+    "connected_clients" => "9999",
+    "used_memory_human" => "9P",
+    "used_memory_peak_human" => "9P"
+  }.freeze
+
   def self.❨╯°□°❩╯︵┻━┻
     puts "Calm down, yo."
   end
@@ -92,12 +100,18 @@ module Sidekiq
 
   def self.redis_info
     redis do |conn|
-      # admin commands can't go through redis-namespace starting
-      # in redis-namespace 2.0
-      if conn.respond_to?(:namespace)
-        conn.redis.info
-      else
-        conn.info
+      begin
+        # admin commands can't go through redis-namespace starting
+        # in redis-namespace 2.0
+        if conn.respond_to?(:namespace)
+          conn.redis.info
+        else
+          conn.info
+        end
+      rescue Redis::CommandError => ex
+        #2850 return fake version when INFO command has (probably) been renamed
+        raise unless ex.message =~ /unknown command/
+        FAKE_INFO
       end
     end
   end
