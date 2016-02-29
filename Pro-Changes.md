@@ -3,6 +3,11 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+3.0.6
+---------
+
+- Fix race condition on reliable fetch shutdown
+
 3.0.5
 ---------
 
