@@ -110,6 +110,7 @@ module Sidekiq
         end
       end
       sleep(1)
+      nil
     end
 
     def process(work)
