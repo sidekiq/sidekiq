@@ -5,6 +5,7 @@ Sidekiq
 [![Code Climate](https://codeclimate.com/github/mperham/sidekiq.svg)](https://codeclimate.com/github/mperham/sidekiq)
 [![Build Status](https://travis-ci.org/mperham/sidekiq.svg)](https://travis-ci.org/mperham/sidekiq)
 [![Gitter Chat](https://badges.gitter.im/mperham/sidekiq.svg)](https://gitter.im/mperham/sidekiq)
+[![codebeat](https://codebeat.co/badges/d05b157b-f8b9-40c6-a92e-27dbbc59c614)](https://codebeat.co/projects/github-com-mperham-sidekiq)
 
 
 Simple, efficient background processing for Ruby.
