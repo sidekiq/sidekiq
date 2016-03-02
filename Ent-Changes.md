@@ -3,6 +3,15 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+1.2.1
+-------------
+
+- Multi-Process mode can now monitor the RSS memory of children and
+  restart any that grow too large.  To limit children to 1GB each:
+```
+MAXMEM_KB=1048576 COUNT=2 bundle exec sidekiqswarm ...
+```
+
 1.2.0
 -------------
 
