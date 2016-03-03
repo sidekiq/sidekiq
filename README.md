@@ -62,7 +62,7 @@ features, a commercial-friendly license and allow you to support high
 quality open source development all at the same time.  Please see the
 [Sidekiq](http://sidekiq.org/) homepage for more detail.
 
-Subscribe to the **[monthly newsletter](https://tinyletter.com/sidekiq)** to stay informed about the latest
+Subscribe to the **[quarterly newsletter](https://tinyletter.com/sidekiq)** to stay informed about the latest
 features and changes to Sidekiq and its bigger siblings.
 
 
