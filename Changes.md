@@ -1,8 +1,10 @@
 # Sidekiq Changes
 
-HEAD
+4.1.1
 -----------
 
+- Much better behavior when Redis disappears and comes back. [#2866]
+- Update FR locale [dbachet]
 - Don't fill logfile in case of Redis downtime [#2860]
 - Allow definition of a global retries_exhausted handler. [#2807]
 ```ruby
