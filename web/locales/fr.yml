@@ -6,12 +6,12 @@ fr:
   Namespace: Namespace
   Realtime: Temps réel
   History: Historique
-  Busy: Occupées
+  Busy: En cours
   Processed: Traitées
   Failed: Échouées
-  Scheduled: Planifiée
+  Scheduled: Planifiées
   Retries: Tentatives
-  Enqueued: En queue
+  Enqueued: En attente
   Worker: Travailleur
   LivePoll: Temps réel
   StopPolling: Arrêt du temps réel
@@ -20,8 +20,8 @@ fr:
   Job: Tâche
   Arguments: Arguments
   Extras: Extras
-  Started: Démarrées
-  ShowAll: Montrer tout
+  Started: Démarrée
+  ShowAll: Tout montrer
   CurrentMessagesInQueue: Messages actuellement dans <span class='title'>%{queue}</span>
   Delete: Supprimer
   AddToQueue: Ajouter à la queue
@@ -35,7 +35,7 @@ fr:
   RetryNow: Réessayer maintenant
   Kill: Tuer
   LastRetry: Dernier essai
-  OriginallyFailed: Échec originel
+  OriginallyFailed: Échec initial
   AreYouSure: Êtes-vous certain ?
   DeleteAll: Tout supprimer
   RetryAll: Tout réessayer
@@ -45,11 +45,11 @@ fr:
   ErrorMessage: Message d’erreur
   ErrorBacktrace: Backtrace d’erreur
   GoBack: ← Retour
-  NoScheduledFound: Pas de tâches planifiées trouvées
+  NoScheduledFound: Aucune tâche planifiée n'a été trouvée
   When: Quand
   ScheduledJobs: Tâches planifiées
-  idle: en attente
-  active: actives
+  idle: inactif
+  active: actif
   Version: Version
   Connections: Connexions
   MemoryUsage: Mémoire utilisée
@@ -62,8 +62,17 @@ fr:
   Failures: Echecs
   DeadJobs: Tâches mortes
   NoDeadJobsFound: Aucune tâche morte n'a été trouvée
-  Dead: Morte
+  Dead: Mortes
   Processes: Processus
   Thread: Thread
   Threads: Threads
   Jobs: Tâches
+  Paused: Mise en pause
+  Stop: Arrêter
+  Quiet: Clôturer
+  StopAll: Tout arrêter
+  QuietAll: Tout clôturer
+  PollingInterval: Interval de rafraîchissement
+  Plugins: Plugins
+  NotYetEnqueued: Pas encore en file d'attente
+  CreatedAt: Créée le
