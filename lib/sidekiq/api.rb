@@ -277,6 +277,7 @@ module Sidekiq
   #
   class Job
     attr_reader :item
+    attr_reader :value
 
     def initialize(item, queue_name=nil)
       @value = item
