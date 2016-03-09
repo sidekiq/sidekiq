@@ -86,7 +86,7 @@ class TestInline < Sidekiq::Test
     end
 
     it 'should relay parameters through json' do
-      assert Sidekiq::Client.enqueue(InlineWorkerWithTimeParam, Time.now)
+      assert Sidekiq::Client.enqueue(InlineWorkerWithTimeParam, Time.now.to_f)
     end
 
   end
