@@ -1,5 +1,10 @@
 # Sidekiq Changes
 
+4.1.2
+-----------
+
+- Client middleware can now stop bulk job push. [#2887]
+
 4.1.1
 -----------
 
