@@ -3,6 +3,16 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+3.1.0
+---------
+
+- New container-friendly fetch algorithm: `timed_fetch`.  See the
+  [wiki documentation](https://github.com/mperham/sidekiq/wiki/Pro-Reliability-Server)
+  for trade offs between the two reliability options.  You should
+consider using this if you are on Heroku, Docker, Amazon ECS or EBS or
+another container tech.
+
+
 3.0.6
 ---------
 
