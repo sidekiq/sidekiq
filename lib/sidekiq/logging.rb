@@ -47,7 +47,8 @@ module Sidekiq
     end
 
     def self.logger=(log)
-      @logger = (log ? log : Logger.new('/dev/null'))
+      null_path = (File.exists?('/dev/null') ? '/dev/null' : 'nul')
+      @logger = (log ? log : Logger.new(null_path))
     end
 
     # This reopens ALL logfiles in the process that have been rotated
