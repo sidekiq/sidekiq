@@ -3,14 +3,25 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+3.2.0
+---------
+
+- Fixed detection of missing batches, `NoSuchBatch` should be raised
+  properly now if `Sidekiq::Batch.new(bid)` is called on a batch no
+  longer in Redis.
+- Remove support for Pro 1.x format batches.  This version will no
+  longer seamlessly process batches created with Sidekiq Pro 1.x.
+  As always, upgrade one major version at a time to ensure a smooth
+  transition.
+
 3.1.0
 ---------
 
 - New container-friendly fetch algorithm: `timed_fetch`.  See the
   [wiki documentation](https://github.com/mperham/sidekiq/wiki/Pro-Reliability-Server)
   for trade offs between the two reliability options.  You should
-consider using this if you are on Heroku, Docker, Amazon ECS or EBS or
-another container tech.
+  use this if you are on Heroku, Docker, Amazon ECS or EBS or
+  another container-based system.
 
 
 3.0.6
