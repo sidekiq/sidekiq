@@ -181,6 +181,18 @@ class TestClient < Sidekiq::Test
       conn.verify
     end
 
+    it 'allows #via to point to same Redi' do
+      conn = MiniTest::Mock.new
+      conn.expect(:multi, [0, 1])
+      sharded_pool = ConnectionPool.new(size: 1) { conn }
+      Sidekiq::Client.via(sharded_pool) do
+        Sidekiq::Client.via(sharded_pool) do
+          CWorker.perform_async(1,2,3)
+        end
+      end
+      conn.verify
+    end
+
     it 'allows #via to point to different Redi' do
       conn = MiniTest::Mock.new
       conn.expect(:multi, [0, 1])
