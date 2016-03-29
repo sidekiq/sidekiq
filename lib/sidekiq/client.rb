@@ -110,7 +110,8 @@ module Sidekiq
     # you cannot scale any other way (e.g. splitting your app into smaller apps).
     def self.via(pool)
       raise ArgumentError, "No pool given" if pool.nil?
-      raise RuntimeError, "Sidekiq::Client.via is not re-entrant" if x = Thread.current[:sidekiq_via_pool] && x != pool
+      current_sidekiq_pool = Thread.current[:sidekiq_via_pool]
+      raise RuntimeError, "Sidekiq::Client.via is not re-entrant" if current_sidekiq_pool && current_sidekiq_pool != pool
       Thread.current[:sidekiq_via_pool] = pool
       yield
     ensure
