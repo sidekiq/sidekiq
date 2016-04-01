@@ -13,6 +13,8 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
   longer seamlessly process batches created with Sidekiq Pro 1.x.
   As always, upgrade one major version at a time to ensure a smooth
   transition.
+- Fix edge case where a parent batch could expire before a child batch
+  was finished processing, leading to missing batches [#2889]
 
 3.1.0
 ---------
