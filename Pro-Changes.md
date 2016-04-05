@@ -3,6 +3,12 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+3.2.1
+---------
+
+- timed\_fetch now works with namespaces.  [ryansch]
+
+
 3.2.0
 ---------
 
