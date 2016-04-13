@@ -1,5 +1,6 @@
 require 'time'
 require 'logger'
+require 'fcntl'
 
 module Sidekiq
   module Logging
@@ -46,7 +47,7 @@ module Sidekiq
     end
 
     def self.logger=(log)
-      @logger = (log ? log : Logger.new('/dev/null'))
+      @logger = (log ? log : Logger.new(File::NULL))
     end
 
     # This reopens ALL logfiles in the process that have been rotated

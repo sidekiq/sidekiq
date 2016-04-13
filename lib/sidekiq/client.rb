@@ -82,10 +82,14 @@ module Sidekiq
     # Returns an array of the of pushed jobs' jids.  The number of jobs pushed can be less
     # than the number given if the middleware stopped processing for one or more jobs.
     def push_bulk(items)
+      arg = items['args'].first
+      raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" if !arg.is_a?(Array)
+
       normed = normalize_item(items)
       payloads = items['args'].map do |args|
-        raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" if !args.is_a?(Array)
-        process_single(items['class'], normed.merge('args' => args, 'jid' => SecureRandom.hex(12), 'enqueued_at' => Time.now.to_f))
+        copy = normed.merge('args' => args, 'jid' => SecureRandom.hex(12), 'enqueued_at' => Time.now.to_f)
+        result = process_single(items['class'], copy)
+        result ? result : nil
       end.compact
 
       raw_push(payloads) if !payloads.empty?
@@ -106,7 +110,8 @@ module Sidekiq
     # you cannot scale any other way (e.g. splitting your app into smaller apps).
     def self.via(pool)
       raise ArgumentError, "No pool given" if pool.nil?
-      raise RuntimeError, "Sidekiq::Client.via is not re-entrant" if x = Thread.current[:sidekiq_via_pool] && x != pool
+      current_sidekiq_pool = Thread.current[:sidekiq_via_pool]
+      raise RuntimeError, "Sidekiq::Client.via is not re-entrant" if current_sidekiq_pool && current_sidekiq_pool != pool
       Thread.current[:sidekiq_via_pool] = pool
       yield
     ensure
@@ -205,6 +210,7 @@ module Sidekiq
       raise(ArgumentError, "Job must be a Hash with 'class' and 'args' keys: { 'class' => SomeWorker, 'args' => ['bob', 1, :foo => 'bar'] }") unless item.is_a?(Hash) && item.has_key?('class'.freeze) && item.has_key?('args'.freeze)
       raise(ArgumentError, "Job args must be an Array") unless item['args'].is_a?(Array)
       raise(ArgumentError, "Job class must be either a Class or String representation of the class name") unless item['class'.freeze].is_a?(Class) || item['class'.freeze].is_a?(String)
+      #raise(ArgumentError, "Arguments must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices") unless JSON.load(JSON.dump(item['args'])) == item['args']
 
       normalized_hash(item['class'.freeze])
         .each{ |key, value| item[key] = value if item[key].nil? }

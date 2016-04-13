@@ -6,11 +6,7 @@ class TestUtil < Sidekiq::Test
     include Sidekiq::Util
   end
 
-  def test_hertz_donut
-    obj = Helpers.new
-    output = capture_logging(Logger::DEBUG) do
-      assert_equal false, obj.want_a_hertz_donut?
-    end
-    assert_includes output, "hz: 10"
+  def test_nothing_atm
+    assert true
   end
 end

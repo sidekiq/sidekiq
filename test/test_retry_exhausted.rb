@@ -7,11 +7,11 @@ class TestRetryExhausted < Sidekiq::Test
     class NewWorker
       include Sidekiq::Worker
 
-      class_attribute :exhausted_called, :exhausted_message, :exhausted_exception
+      class_attribute :exhausted_called, :exhausted_job, :exhausted_exception
 
-      sidekiq_retries_exhausted do |msg, e|
+      sidekiq_retries_exhausted do |job, e|
         self.exhausted_called = true
-        self.exhausted_message = msg
+        self.exhausted_job = job
         self.exhausted_exception = e
       end
     end
@@ -19,18 +19,18 @@ class TestRetryExhausted < Sidekiq::Test
     class OldWorker
       include Sidekiq::Worker
 
-      class_attribute :exhausted_called, :exhausted_message, :exhausted_exception
+      class_attribute :exhausted_called, :exhausted_job, :exhausted_exception
 
-      sidekiq_retries_exhausted do |msg|
+      sidekiq_retries_exhausted do |job|
         self.exhausted_called = true
-        self.exhausted_message = msg
+        self.exhausted_job = job
       end
     end
 
     def cleanup
       [NewWorker, OldWorker].each do |worker_class|
         worker_class.exhausted_called = nil
-        worker_class.exhausted_message = nil
+        worker_class.exhausted_job = nil
         worker_class.exhausted_exception = nil
       end
     end
@@ -96,7 +96,7 @@ class TestRetryExhausted < Sidekiq::Test
     end
 
 
-    it 'passes message and exception to retries exhausted block' do
+    it 'passes job and exception to retries exhausted block' do
       raised_error = assert_raises RuntimeError do
         handler.call(new_worker, job('retry_count' => 0, 'retry' => 1), 'default') do
           raise 'kerblammo!'
@@ -104,11 +104,11 @@ class TestRetryExhausted < Sidekiq::Test
       end
 
       assert new_worker.exhausted_called?
-      assert_equal raised_error.message, new_worker.exhausted_message['error_message']
+      assert_equal raised_error.message, new_worker.exhausted_job['error_message']
       assert_equal raised_error, new_worker.exhausted_exception
     end
 
-    it 'passes message to retries exhausted block' do
+    it 'passes job to retries exhausted block' do
       raised_error = assert_raises RuntimeError do
         handler.call(old_worker, job('retry_count' => 0, 'retry' => 1), 'default') do
           raise 'kerblammo!'
@@ -116,8 +116,34 @@ class TestRetryExhausted < Sidekiq::Test
       end
 
       assert old_worker.exhausted_called?
-      assert_equal raised_error.message, old_worker.exhausted_message['error_message']
+      assert_equal raised_error.message, old_worker.exhausted_job['error_message']
       assert_equal nil, new_worker.exhausted_exception
+    end
+
+    it 'allows a global default handler' do
+      begin
+        class Foobar
+          include Sidekiq::Worker
+        end
+
+        exhausted_job = nil
+        exhausted_exception = nil
+        Sidekiq.default_retries_exhausted = lambda do |job, ex|
+          exhausted_job = job
+          exhausted_exception = ex
+        end
+        f = Foobar.new
+        raised_error = assert_raises RuntimeError do
+          handler.call(f, job('retry_count' => 0, 'retry' => 1), 'default') do
+            raise 'kerblammo!'
+          end
+        end
+
+        assert exhausted_job
+        assert_equal raised_error, exhausted_exception
+      ensure
+        Sidekiq.default_retries_exhausted = nil
+      end
     end
   end
 end

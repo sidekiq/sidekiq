@@ -96,4 +96,11 @@ class TestSidekiq < Sidekiq::Test
       assert_equal counts[0] + 1, counts[1]
     end
   end
+
+  describe 'redis info' do
+    it 'calls the INFO command which returns at least redis_version' do
+      output = Sidekiq.redis_info
+      assert_includes output.keys, "redis_version"
+    end
+  end
 end

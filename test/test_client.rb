@@ -32,6 +32,23 @@ class TestClient < Sidekiq::Test
       assert_equal 24, jid.size
     end
 
+    it 'allows middleware to stop bulk jobs' do
+      mware = Class.new do
+        def call(worker_klass,msg,q,r)
+          msg['args'][0] == 1 ? yield : false
+        end
+      end
+      client = Sidekiq::Client.new
+      client.middleware do |chain|
+        chain.add mware
+      end
+      q = Sidekiq::Queue.new
+      q.clear
+      result = client.push_bulk('class' => 'Blah', 'args' => [[1],[2],[3]])
+      assert_equal 1, result.size
+      assert_equal 1, q.size
+    end
+
     it 'allows local middleware modification' do
       $called = false
       mware = Class.new { def call(worker_klass,msg,q,r); $called = true; msg;end }
@@ -161,6 +178,18 @@ class TestClient < Sidekiq::Test
       conn.expect(:multi, [0, 1])
       DWorker.sidekiq_options('pool' => ConnectionPool.new(size: 1) { conn })
       DWorker.perform_async(1,2,3)
+      conn.verify
+    end
+
+    it 'allows #via to point to same Redi' do
+      conn = MiniTest::Mock.new
+      conn.expect(:multi, [0, 1])
+      sharded_pool = ConnectionPool.new(size: 1) { conn }
+      Sidekiq::Client.via(sharded_pool) do
+        Sidekiq::Client.via(sharded_pool) do
+          CWorker.perform_async(1,2,3)
+        end
+      end
       conn.verify
     end
 

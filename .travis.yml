@@ -3,6 +3,9 @@ sudo: false
 cache: bundler
 services:
   - redis-server
+before_install:
+  - gem install bundler
+  - gem update bundler
 rvm:
   - 2.2.4
   - 2.3.0
