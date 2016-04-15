@@ -3,6 +3,11 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+-------------
+
+- Add API to check if a unique lock is present. See [#2932] for details.
+
 1.2.1
 -------------
 
