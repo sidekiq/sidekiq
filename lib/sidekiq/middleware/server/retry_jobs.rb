@@ -8,14 +8,14 @@ module Sidekiq
       # Automatically retry jobs that fail in Sidekiq.
       # Sidekiq's retry support assumes a typical development lifecycle:
       #
-      #   0. push some code changes with a bug in it
-      #   1. bug causes job processing to fail, sidekiq's middleware captures
-      #      the job and pushes it onto a retry queue
-      #   2. sidekiq retries jobs in the retry queue multiple times with
-      #      an exponential delay, the job continues to fail
-      #   3. after a few days, a developer deploys a fix.  the job is
+      #   0. Push some code changes with a bug in it.
+      #   1. Bug causes job processing to fail, Sidekiq's middleware captures
+      #      the job and pushes it onto a retry queue.
+      #   2. Sidekiq retries jobs in the retry queue multiple times with
+      #      an exponential delay, the job continues to fail.
+      #   3. After a few days, a developer deploys a fix. The job is
       #      reprocessed successfully.
-      #   4. once retries are exhausted, sidekiq will give up and move the
+      #   4. Once retries are exhausted, Sidekiq will give up and move the
       #      job to the Dead Job Queue (aka morgue) where it must be dealt with
       #      manually in the Web UI.
       #   5. After 6 months on the DJQ, Sidekiq will discard the job.
