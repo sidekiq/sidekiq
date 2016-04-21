@@ -96,7 +96,7 @@ module Sidekiq
         _, _, _, msg = Sidekiq.redis do |conn|
           conn.pipelined do
             conn.sadd('processes', key)
-            conn.hmset(key, 'info', json, 'busy', Processor::WORKER_STATE.size, 'beat', Time.now.to_f)
+            conn.hmset(key, 'info', json, 'busy', Processor::WORKER_STATE.size, 'beat', Time.now.to_f, 'quiet', @done)
             conn.expire(key, 60)
             conn.rpop("#{key}-signals")
           end

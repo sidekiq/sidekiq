@@ -18,6 +18,11 @@ module Sidekiq
       end
     end
 
+    def clear_caches
+      @@strings = nil
+      @@locale_files = nil
+    end
+
     def locale_files
       @@locale_files ||= settings.locales.flat_map do |path|
         Dir["#{path}/*.yml"]
@@ -118,15 +123,7 @@ module Sidekiq
     end
 
     def redis_info
-      Sidekiq.redis do |conn|
-        # admin commands can't go through redis-namespace starting
-        # in redis-namespace 2.0
-        if conn.respond_to?(:namespace)
-          conn.redis.info
-        else
-          conn.info
-        end
-      end
+      Sidekiq.redis_info
     end
 
     def root_path
@@ -170,7 +167,7 @@ module Sidekiq
 
     def display_args(args, truncate_after_chars = 2000)
       args.map do |arg|
-        h(truncate(to_display(arg)))
+        h(truncate(to_display(arg), truncate_after_chars))
       end.join(", ")
     end
 

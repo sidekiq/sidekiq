@@ -1,8 +1,58 @@
 # Sidekiq Changes
 
+4.1.2
+-----------
+
+- Client middleware can now stop bulk job push. [#2887]
+
+4.1.1
+-----------
+
+- Much better behavior when Redis disappears and comes back. [#2866]
+- Update FR locale [dbachet]
+- Don't fill logfile in case of Redis downtime [#2860]
+- Allow definition of a global retries_exhausted handler. [#2807]
+```ruby
+Sidekiq.configure_server do |config|
+  config.default_retries_exhausted = -> (job, ex) do
+    Sidekiq.logger.info "#{job['class']} job is now dead"
+  end
+end
+```
+
+4.1.0
+-----------
+
+- Tag quiet processes in the Web UI [#2757, jcarlson]
+- Pass last exception to sidekiq\_retries\_exhausted block [#2787, Nowaker]
+```ruby
+class MyWorker
+  include Sidekiq::Worker
+  sidekiq_retries_exhausted do |job, exception|
+  end
+end
+```
+- Add native support for ActiveJob's `set(options)` method allowing
+you to override worker options dynamically.  This should make it
+even easier to switch between ActiveJob and Sidekiq's native APIs [#2780]
+```ruby
+class MyWorker
+  include Sidekiq::Worker
+  sidekiq_options queue: 'default', retry: true
+
+  def perform(*args)
+    # do something
+  end
+end
+
+MyWorker.set(queue: 'high', retry: false).perform_async(1)
+```
+
 4.0.2
 -----------
 
+- Better Japanese translations
+- Remove `json` gem dependency from gemspec. [#2743]
 - There's a new testing API based off the `Sidekiq::Queues` namespace. All
   assertions made against the Worker class still work as expected.
   [#2676, brandonhilkert]
@@ -27,6 +77,12 @@ Sidekiq::Queues.clear_all
   and to remove dependencies.  This has resulted in major speedups, as
   [detailed on my blog](http://www.mikeperham.com/2015/10/14/optimizing-sidekiq/).
 - See the [4.0 upgrade notes](4.0-Upgrade.md) for more detail.
+
+3.5.4
+-----------
+
+- Ensure exception message is a string [#2707]
+- Revert racy Process.kill usage in sidekiqctl
 
 3.5.3
 -----------

@@ -91,7 +91,7 @@ class TestScheduled < Sidekiq::Test
     it 'generates random intervals that target a configured average' do
       with_sidekiq_option(:poll_interval_average, 10) do
         i = 500
-        intervals = i.times.map{ @poller.send(:random_poll_interval) }
+        intervals = Array.new(i){ @poller.send(:random_poll_interval) }
 
         assert intervals.all?{|x| x >= 5}
         assert intervals.all?{|x| x <= 15}

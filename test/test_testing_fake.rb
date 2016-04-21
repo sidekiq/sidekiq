@@ -262,6 +262,16 @@ class TestTesting < Sidekiq::Test
       assert_equal 1, SecondWorker.count
     end
 
+    it 'drains jobs of workers with symbolized queue names' do
+      Sidekiq::Worker.jobs.clear
+
+      AltQueueWorker.perform_async(5,6)
+      assert_equal 1, AltQueueWorker.jobs.size
+
+      Sidekiq::Worker.drain_all
+      assert_equal 0, AltQueueWorker.jobs.size
+    end
+
     it 'can execute a job' do
       DirectWorker.execute_job(DirectWorker.new, [2, 3])
     end

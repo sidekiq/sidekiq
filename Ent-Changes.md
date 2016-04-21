@@ -3,6 +3,38 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+-------------
+
+- Add API to check if a unique lock is present. See [#2932] for details.
+
+1.2.1
+-------------
+
+- Multi-Process mode can now monitor the RSS memory of children and
+  restart any that grow too large.  To limit children to 1GB each:
+```
+MAXMEM_KB=1048576 COUNT=2 bundle exec sidekiqswarm ...
+```
+
+1.2.0
+-------------
+
+- **NEW FEATURE** Multi-process mode!  Sidekiq Enterprise can now fork multiple worker
+  processes, enabling significant memory savings.  See the [wiki
+documentation](https://github.com/mperham/sidekiq/wiki/Ent-Multi-Process) for details.
+
+
+0.7.10
+-------------
+
+- More precise gemspec dependency versioning
+
+1.1.0
+-------------
+
+- **NEW FEATURE** Historical queue metrics, [documented in the wiki](https://github.com/mperham/sidekiq/wiki/Ent-Historical-Metrics) [#2719]
+
 0.7.9, 1.0.2
 -------------
 

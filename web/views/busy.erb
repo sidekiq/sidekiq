@@ -6,8 +6,8 @@
     <form method="POST" style="margin-top: 20px; margin-bottom: 10px;">
       <%= csrf_tag %>
       <div class="btn-group pull-right">
-        <button class="btn btn-warn" type="submit" name="quiet" value="1"><%= t('QuietAll') %></button>
-        <button class="btn btn-danger" type="submit" name="stop" value="1"><%= t('StopAll') %></button>
+        <button class="btn btn-warn" type="submit" name="quiet" value="1" data-confirm="<%= t('AreYouSure') %>"><%= t('QuietAll') %></button>
+        <button class="btn btn-danger" type="submit" name="stop" value="1" data-confirm="<%= t('AreYouSure') %>"><%= t('StopAll') %></button>
       </div>
     </form>
   </div>
@@ -30,6 +30,9 @@
           <% process.labels.each do |label| %>
             <span class="label label-info"><%= label %></span>
           <% end %>
+          <% if process.stopping? %>
+            <span class="label label-danger">Quiet</span>
+          <% end %>
           <br>
           <b><%= "#{t('Queues')}: " %></b>
           <%= process['queues'] * ", " %>
@@ -42,7 +45,9 @@
             <form method="POST">
               <%= csrf_tag %>
               <input type="hidden" name="identity" value="<%= process['identity'] %>"/>
-              <button class="btn btn-warn" type="submit" name="quiet" value="1"><%= t('Quiet') %></button>
+              <% unless process.stopping? %>
+                <button class="btn btn-warn" type="submit" name="quiet" value="1"><%= t('Quiet') %></button>
+              <% end %>
               <button class="btn btn-danger" type="submit" name="stop" value="1"><%= t('Stop') %></button>
             </form>
           </div>

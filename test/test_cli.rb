@@ -310,17 +310,87 @@ class TestCli < Sidekiq::Test
   end
 
   describe 'misc' do
-    it 'handles interrupts' do
-      cli = Sidekiq::CLI.new
-      assert_raises Interrupt do
-        cli.handle_signal('INT')
-      end
-      assert_raises Interrupt do
-        cli.handle_signal('TERM')
-      end
-      cli.handle_signal('USR2')
-      cli.handle_signal('TTIN')
+    before do
+      @cli = Sidekiq::CLI.new
     end
+
+    it 'handles interrupts' do
+      assert_raises Interrupt do
+        @cli.handle_signal('INT')
+      end
+      assert_raises Interrupt do
+        @cli.handle_signal('TERM')
+      end
+    end
+
+    describe 'handles USR1 and USR2' do
+      before do
+        @tmp_log_path = '/tmp/sidekiq.log'
+        @cli.parse(['sidekiq', '-L', @tmp_log_path, '-r', './test/fake_env.rb'])
+      end
+
+      after do
+        File.unlink @tmp_log_path if File.exists? @tmp_log_path
+      end
+
+      it 'shuts down the worker' do
+        count = 0
+        Sidekiq.options[:lifecycle_events][:quiet] = [proc {
+          count += 1
+        }]
+        @cli.launcher = Sidekiq::Launcher.new(Sidekiq.options)
+        @cli.handle_signal('USR1')
+
+        assert_equal 1, count
+      end
+
+      it 'reopens logs' do
+        mock = MiniTest::Mock.new
+        # reopen_logs returns number of files reopened so mock that
+        mock.expect(:call, 1)
+
+        Sidekiq::Logging.stub(:reopen_logs, mock) do
+          @cli.handle_signal('USR2')
+        end
+        mock.verify
+      end
+    end
+
+    describe 'handles TTIN' do
+      before do
+        @tmp_log_path = '/tmp/sidekiq.log'
+        @cli.parse(['sidekiq', '-L', @tmp_log_path, '-r', './test/fake_env.rb'])
+        @mock_thread = MiniTest::Mock.new
+        @mock_thread.expect(:[], 'interrupt_test', ['label'])
+      end
+
+      after do
+        File.unlink @tmp_log_path if File.exists? @tmp_log_path
+      end
+
+      describe 'with backtrace' do
+        it 'logs backtrace' do
+          2.times { @mock_thread.expect(:backtrace, ['something went wrong']) }
+
+          Thread.stub(:list, [@mock_thread]) do
+            @cli.handle_signal('TTIN')
+            assert_match(/something went wrong/, File.read(@tmp_log_path), "didn't include the log message")
+          end
+        end
+      end
+
+      describe 'without backtrace' do
+        it 'logs no backtrace available' do
+          @mock_thread.expect(:backtrace, nil)
+
+          Thread.stub(:list, [@mock_thread]) do
+            @cli.handle_signal('TTIN')
+            assert_match(/no backtrace available/, File.read(@tmp_log_path), "didn't include the log message")
+          end
+        end
+      end
+    end
+
 
     it 'can fire events' do
       count = 0

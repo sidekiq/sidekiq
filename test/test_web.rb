@@ -370,19 +370,24 @@ class TestWeb < Sidekiq::Test
       assert_equal 200, last_response.status
     end
 
-    Sidekiq::Web.settings.locales << File.join(File.dirname(__FILE__), "fixtures")
-    it 'can show user defined tab with custom locales' do
-      begin
+    describe 'custom locales' do
+      before do
+        Sidekiq::Web.settings.locales << File.join(File.dirname(__FILE__), "fixtures")
         Sidekiq::Web.tabs['Custom Tab'] = '/custom'
         Sidekiq::Web.get('/custom') do
+          clear_caches # ugly hack since I can't figure out how to access WebHelpers outside of this context
           t('translated_text')
         end
+      end
 
+      after do
+        Sidekiq::Web.tabs.delete 'Custom Tab'
+        Sidekiq::Web.settings.locales.pop
+      end
+
+      it 'can show user defined tab with custom locales' do
         get '/custom'
         assert_match(/Changed text/, last_response.body)
-
-      ensure
-        Sidekiq::Web.tabs.delete 'Custom Tab'
       end
     end
 

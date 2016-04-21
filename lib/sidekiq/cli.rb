@@ -66,20 +66,17 @@ module Sidekiq
       logger.info Sidekiq::LICENSE
       logger.info "Upgrade to Sidekiq Pro for more features and support: http://sidekiq.org" unless defined?(::Sidekiq::Pro)
 
-      Sidekiq.redis do |conn|
-        # touch the connection pool so it is created before we
-        # fire startup and start multithreading.
-        ver = conn.info['redis_version']
-        raise "You are using Redis v#{ver}, Sidekiq requires Redis v2.8.0 or greater" if ver < '2.8'
-      end
+      # touch the connection pool so it is created before we
+      # fire startup and start multithreading.
+      ver = Sidekiq.redis_info['redis_version']
+      raise "You are using Redis v#{ver}, Sidekiq requires Redis v2.8.0 or greater" if ver < '2.8'
 
       # Before this point, the process is initializing with just the main thread.
       # Starting here the process will now have multiple threads running.
       fire_event(:startup)
 
-      logger.debug {
-        "Middleware: #{Sidekiq.server_middleware.map(&:klass).join(', ')}"
-      }
+      logger.debug { "Client Middleware: #{Sidekiq.client_middleware.map(&:klass).join(', ')}" }
+      logger.debug { "Server Middleware: #{Sidekiq.server_middleware.map(&:klass).join(', ')}" }
 
       if !options[:daemon]
         logger.info 'Starting processing, hit Ctrl-C to stop'

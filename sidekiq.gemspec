@@ -17,7 +17,6 @@ Gem::Specification.new do |gem|
   gem.version       = Sidekiq::VERSION
   gem.add_dependency                  'redis', '~> 3.2', '>= 3.2.1'
   gem.add_dependency                  'connection_pool', '~> 2.2', '>= 2.2.0'
-  gem.add_dependency                  'json', '~> 1.0'
   gem.add_dependency                  'concurrent-ruby', '~> 1.0'
   gem.add_development_dependency      'redis-namespace', '~> 1.5', '>= 1.5.2'
   gem.add_development_dependency      'sinatra', '~> 1.4', '>= 1.4.6'

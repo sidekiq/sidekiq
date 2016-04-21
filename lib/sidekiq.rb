@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # encoding: utf-8
 require 'sidekiq/version'
-fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby 1.9." if RUBY_PLATFORM != 'java' && RUBY_VERSION < '2.0.0'
+fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 2.0.0." if RUBY_PLATFORM != 'java' && RUBY_VERSION < '2.0.0'
 
 require 'sidekiq/logging'
 require 'sidekiq/client'
@@ -38,6 +38,14 @@ module Sidekiq
     'queue' => 'default'
   }
 
+  FAKE_INFO = {
+    "redis_version" => "9.9.9",
+    "uptime_in_days" => "9999",
+    "connected_clients" => "9999",
+    "used_memory_human" => "9P",
+    "used_memory_peak_human" => "9P"
+  }.freeze
+
   def self.❨╯°□°❩╯︵┻━┻
     puts "Calm down, yo."
   end
@@ -45,7 +53,6 @@ module Sidekiq
   def self.options
     @options ||= DEFAULTS.dup
   end
-
   def self.options=(opts)
     @options = opts
   end
@@ -92,6 +99,24 @@ module Sidekiq
     end
   end
 
+  def self.redis_info
+    redis do |conn|
+      begin
+        # admin commands can't go through redis-namespace starting
+        # in redis-namespace 2.0
+        if conn.respond_to?(:namespace)
+          conn.redis.info
+        else
+          conn.info
+        end
+      rescue Redis::CommandError => ex
+        #2850 return fake version when INFO command has (probably) been renamed
+        raise unless ex.message =~ /unknown command/
+        FAKE_INFO
+      end
+    end
+  end
+
   def self.redis_pool
     @redis ||= Sidekiq::RedisConnection.create
   end
@@ -133,15 +158,24 @@ module Sidekiq
   def self.default_worker_options=(hash)
     @default_worker_options = default_worker_options.merge(hash.stringify_keys)
   end
-
   def self.default_worker_options
     defined?(@default_worker_options) ? @default_worker_options : DEFAULT_WORKER_OPTIONS
+  end
+
+  # Sidekiq.configure_server do |config|
+  #   config.default_retries_exhausted = -> (job, ex) do
+  #   end
+  # end
+  def self.default_retries_exhausted=(prok)
+    @default_retries_exhausted = prok
+  end
+  def self.default_retries_exhausted
+    @default_retries_exhausted
   end
 
   def self.load_json(string)
     JSON.parse(string)
   end
-
   def self.dump_json(object)
     JSON.generate(object)
   end
@@ -149,7 +183,6 @@ module Sidekiq
   def self.logger
     Sidekiq::Logging.logger
   end
-
   def self.logger=(log)
     Sidekiq::Logging.logger = log
   end

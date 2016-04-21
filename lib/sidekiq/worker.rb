@@ -51,6 +51,11 @@ module Sidekiq
         raise ArgumentError, "Do not call .delay_until on a Sidekiq::Worker class, call .perform_at"
       end
 
+      def set(options)
+        Thread.current[:sidekiq_worker_set] = options
+        self
+      end
+
       def perform_async(*args)
         client_push('class' => self, 'args' => args)
       end
@@ -75,11 +80,15 @@ module Sidekiq
       # Allows customization for this type of Worker.
       # Legal options:
       #
-      #   :queue - use a named queue for this Worker, default 'default'
-      #   :retry - enable the RetryJobs middleware for this Worker, default *true*
-      #   :backtrace - whether to save any error backtrace in the retry payload to display in web UI,
+      #   queue - use a named queue for this Worker, default 'default'
+      #   retry - enable the RetryJobs middleware for this Worker, *true* to use the default
+      #      or *Integer* count
+      #   backtrace - whether to save any error backtrace in the retry payload to display in web UI,
       #      can be true, false or an integer number of lines to save, default *false*
-      #   :pool - use the given Redis connection pool to push this type of job to a given shard.
+      #   pool - use the given Redis connection pool to push this type of job to a given shard.
+      #
+      # In practice, any option is allowed.  This is the main mechanism to configure the
+      # options for a specific job.
       def sidekiq_options(opts={})
         self.sidekiq_options_hash = get_sidekiq_options.merge(opts.stringify_keys)
       end
@@ -98,7 +107,13 @@ module Sidekiq
 
       def client_push(item) # :nodoc:
         pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options['pool'] || Sidekiq.redis_pool
-        Sidekiq::Client.new(pool).push(item.stringify_keys)
+        hash = if Thread.current[:sidekiq_worker_set]
+          x, Thread.current[:sidekiq_worker_set] = Thread.current[:sidekiq_worker_set], nil
+          x.stringify_keys.merge(item.stringify_keys)
+        else
+          item.stringify_keys
+        end
+        Sidekiq::Client.new(pool).push(hash)
       end
 
     end
