@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 gemspec
 
+gem "hiredis"
 gem 'rails', '~> 4.2'
 gem 'simplecov'
 gem 'minitest'
