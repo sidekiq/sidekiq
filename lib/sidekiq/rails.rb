@@ -41,20 +41,9 @@ module Sidekiq
       end
 
       def call
-        ActiveSupport::Dependencies.interlock.running do
-          begin
-            ActionDispatch::Reloader.prepare! if do_reload_now = reload_dependencies?
-            yield
-          ensure
-            ActionDispatch::Reloader.cleanup! if do_reload_now
-          end
+        @app.reloader.wrap do
+          yield
         end
-      end
-
-      private
-
-      def reload_dependencies?
-        @app.config.reload_classes_only_on_change != true || @app.reloaders.any?(&:updated?)
       end
     end
   end if defined?(::Rails)
