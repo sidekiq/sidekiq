@@ -37,6 +37,7 @@ module Sidekiq
 
     class Reloader
       def initialize(app = ::Rails.application)
+        Sidekiq.logger.debug "Enabling Rails 5+ development code reloading, so hot!"
         @app = app
       end
 
@@ -44,6 +45,10 @@ module Sidekiq
         @app.reloader.wrap do
           yield
         end
+      end
+
+      def inspect
+        "#<Sidekiq::Rails::Reloader @app=#{@app.class.name}>"
       end
     end
   end if defined?(::Rails)
