@@ -73,3 +73,6 @@ ru:
   QuietAll: Отдыхать всем
   PollingInterval: Интервал опроса
   Plugins: Плагины
+  NotYetEnqueued: Пока не в очереди
+  CreatedAt: Создан
+  BackToApp: Назад
