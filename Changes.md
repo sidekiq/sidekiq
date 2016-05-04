@@ -3,6 +3,8 @@
 4.1.2
 -----------
 
+- **IMPORTANT** Fix memory leak with worker data in Redis.
+- Freeze all string literals with Ruby 2.3. [#2741]
 - Client middleware can now stop bulk job push. [#2887]
 
 4.1.1

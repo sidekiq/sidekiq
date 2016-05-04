@@ -56,6 +56,10 @@ class TestLauncher < Sidekiq::Test
           @launcher.heartbeat('identity', heartbeat_data, Sidekiq.dump_json(heartbeat_data))
         end
 
+        #after do
+          #puts system('redis-cli -n 15 keys  "*" | while read LINE ; do TTL=`redis-cli -n 15 ttl "$LINE"`; if [ "$TTL" -eq -1 ]; then echo "$LINE"; fi; done;')
+        #end
+
         it 'indicates stopping status in proctitle' do
           assert_equal "sidekiq #{Sidekiq::VERSION} myapp [1 of 3 busy] stopping", $0
         end
