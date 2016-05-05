@@ -9,6 +9,7 @@ script:
 ```bash
 $ redis-cli keys  "*:workers" | while read LINE ; do TTL=`redis-cli expire "$LINE" 60`; echo "$LINE"; done;
 ```
+  Please note that `keys` can be dangerous to run on a large, busy Redis.  Caveat runner.
 - Freeze all string literals with Ruby 2.3. [#2741]
 - Client middleware can now stop bulk job push. [#2887]
 
