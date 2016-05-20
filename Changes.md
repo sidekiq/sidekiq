@@ -3,7 +3,7 @@
 4.1.2
 -----------
 
-- Fix memory leak with worker data in Redis when a busy Sidekiq process
+- Fix Redis data leak with worker data when a busy Sidekiq process
   crashes.  You can find and expire leaked data in Redis with this
 script:
 ```bash
