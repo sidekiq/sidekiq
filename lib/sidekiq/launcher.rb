@@ -80,7 +80,7 @@ module Sidekiq
         workers_key = "#{key}:workers".freeze
         nowdate = Time.now.utc.strftime("%Y-%m-%d".freeze)
         Sidekiq.redis do |conn|
-          conn.pipelined do
+          conn.multi do
             conn.incrby("stat:processed".freeze, procd)
             conn.incrby("stat:processed:#{nowdate}", procd)
             conn.incrby("stat:failed".freeze, fails)
@@ -95,7 +95,7 @@ module Sidekiq
         fails = procd = 0
 
         _, _, _, msg = Sidekiq.redis do |conn|
-          conn.pipelined do
+          conn.multi do
             conn.sadd('processes', key)
             conn.hmset(key, 'info', json, 'busy', Processor::WORKER_STATE.size, 'beat', Time.now.to_f, 'quiet', @done)
             conn.expire(key, 60)
