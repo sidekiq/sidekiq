@@ -1,5 +1,12 @@
 # Sidekiq Changes
 
+HEAD
+-----------
+
+- Fixed race condition in heartbeat which could rarely lead to lingering
+  processes on the Busy tab. [#2982]
+
+
 4.1.2
 -----------
 
