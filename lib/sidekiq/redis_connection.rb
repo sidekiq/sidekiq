@@ -8,6 +8,8 @@ module Sidekiq
     class << self
 
       def create(options={})
+        options = options.symbolize_keys
+
         options[:url] ||= determine_redis_provider
 
         size = options[:size] || (Sidekiq.server? ? (Sidekiq.options[:concurrency] + 5) : 5)
@@ -33,7 +35,7 @@ module Sidekiq
       #   - enterprise's leader election
       #   - enterprise's cron support
       def verify_sizing(size, concurrency)
-        raise ArgumentError, "Your Redis connection pool is too small for Sidekiq to work, your pool has #{size} connections but really needs to have at least #{concurrency + 2}" if size <= concurrency
+        raise ArgumentError, "Your Redis connection pool is too small for Sidekiq to work. Your pool has #{size} connections but really needs to have at least #{concurrency + 2}" if size <= concurrency
       end
 
       def build_client(options)
@@ -45,8 +47,8 @@ module Sidekiq
             require 'redis/namespace'
             Redis::Namespace.new(namespace, :redis => client)
           rescue LoadError
-            Sidekiq.logger.error("Your Redis configuration use the namespace '#{namespace}' but the redis-namespace gem not included in Gemfile." \
-                                 "Add the gem to your Gemfile in case you would like to keep using a namespace, otherwise remove the namespace parameter.")
+            Sidekiq.logger.error("Your Redis configuration uses the namespace '#{namespace}' but the redis-namespace gem is not included in the Gemfile." \
+                                 "Add the gem to your Gemfile to continue using a namespace. Otherwise, remove the namespace parameter.")
             exit(-127)
           end
         else

@@ -27,8 +27,13 @@ class TestRedisConnection < Sidekiq::Test
     end
 
     describe "namespace" do
-      it "uses a given :namespace" do
+      it "uses a given :namespace set by a symbol key" do
         pool = Sidekiq::RedisConnection.create(:namespace => "xxx")
+        assert_equal "xxx", pool.checkout.namespace
+      end
+
+      it "uses a given :namespace set by a string key" do
+        pool = Sidekiq::RedisConnection.create("namespace" => "xxx")
         assert_equal "xxx", pool.checkout.namespace
       end
 
