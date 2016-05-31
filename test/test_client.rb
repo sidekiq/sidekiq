@@ -126,6 +126,10 @@ class TestClient < Sidekiq::Test
         assert_match(/[0-9a-f]{12}/, jid)
       end
     end
+    it 'handles no jobs' do
+      result = Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => [])
+      assert_equal 0, result.size
+    end
   end
 
   class BaseWorker
