@@ -5,6 +5,20 @@ HEAD
 
 - Fixed race condition in heartbeat which could rarely lead to lingering
   processes on the Busy tab. [#2982]
+```ruby
+# to clean up lingering processes, modify this as necessary to connect to your Redis.
+# after 60 seconds, lingering processes should disappear from the Busy page.
+
+require 'redis'
+r = Redis.new(url: "redis://localhost:6379/0")
+# uncomment if you need a namespace
+#require 'redis-namespace'
+#r = Redis::Namespace.new("foo", r)
+r.smembers("processes").each do |pro|
+  r.expire(pro, 60)
+  r.expire("#{pro}:workers", 60)
+end
+```
 
 
 4.1.2
