@@ -6,6 +6,7 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 HEAD
 ---------
 
+- Don't permanently delete batches immediately upon success [#3011]
 - New `Sidekiq::PendingSet#destroy(jid)` API to remove poison pill jobs [#3015]
 
 3.2.2
