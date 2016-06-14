@@ -3,6 +3,11 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- New `Sidekiq::PendingSet#destroy(jid)` API to remove poison pill jobs [#3015]
+
 3.2.2
 ---------
 
