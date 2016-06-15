@@ -233,7 +233,7 @@ module Sidekiq
           require 'sidekiq/rails'
           require File.expand_path("#{options[:require]}/config/environment.rb")
 
-          if ::Rails::VERSION::MAJOR > 4 && ::Rails.env.development?
+          if ::Rails::VERSION::MAJOR > 4 && !::Rails.application.config.cache_classes
             Sidekiq.options[:reloader] = Sidekiq::Rails::Reloader.new
           end
         end
