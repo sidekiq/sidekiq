@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Sidekiq
   def self.hook_rails!
     return if defined?(@delay_removed)

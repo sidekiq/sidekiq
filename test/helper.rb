@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 $TESTING = true
 # disable minitest/parallel threads
 ENV["N"] = "0"

@@ -26,8 +26,8 @@ Toxiproxy.populate([{
 
 
 Sidekiq.configure_server do |config|
-  config.redis = { db: 13, port: 6380 }
-  #config.redis = { db: 13 }
+  #config.options[:concurrency] = 1
+  config.redis = { driver: :hiredis, db: 13, port: 6380 }
   config.options[:queues] << 'default'
   config.logger.level = Logger::ERROR
   config.average_scheduled_poll_interval = 2

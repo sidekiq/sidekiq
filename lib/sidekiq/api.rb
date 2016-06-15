@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # encoding: utf-8
 require 'sidekiq'
 
@@ -195,7 +196,7 @@ module Sidekiq
     # Return all known queues within Redis.
     #
     def self.all
-      Sidekiq.redis {|c| c.smembers('queues'.freeze) }.sort.map {|q| Sidekiq::Queue.new(q) }
+      Sidekiq.redis { |c| c.smembers('queues'.freeze) }.sort.map { |q| Sidekiq::Queue.new(q) }
     end
 
     attr_reader :name

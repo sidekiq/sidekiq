@@ -2,8 +2,8 @@ source 'https://rubygems.org'
 
 gem 'pry'
 gem 'sidekiq', :path => '..'
-gem 'rails', '5.0.0.beta4'
-gem 'rack', '2.0.0.alpha'
+gem 'rails', '5.0.0.rc1'
+gem 'rack', '2.0.0.rc1'
 gem 'sinatra', github: 'sinatra/sinatra'
 
 platforms :ruby do

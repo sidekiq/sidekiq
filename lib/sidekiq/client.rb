@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'securerandom'
 require 'sidekiq/middleware/chain'
 
@@ -83,6 +84,7 @@ module Sidekiq
     # than the number given if the middleware stopped processing for one or more jobs.
     def push_bulk(items)
       arg = items['args'].first
+      return [] unless arg # no jobs to push
       raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" if !arg.is_a?(Array)
 
       normed = normalize_item(items)

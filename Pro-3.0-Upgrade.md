@@ -17,17 +17,15 @@ Sidekiq Pro 3.0 is designed to work with Sidekiq 4.0.
 * Reliable fetch has been re-implemented due to the fetch changes in
   Sidekiq 4.0.
 
-* Support for platforms without persistent hostnames.  Since reliable fetch
-  normally requires a persistent hostname, you may disable hostname usage on
-  platforms like Heroku and Docker:
+* Support for platforms without persistent hostnames.  Since the reliable\_fetch
+  algorithm requires a persistent hostname, an alternative reliability
+algorithm is now available for platforms like Heroku and Docker:
 ```ruby
 Sidekiq.configure_server do |config|
-  config.options[:ephemeral_hostname] = true
-  config.reliable_fetch!
+  config.timed_fetch!
 end
 ```
-  This option is enabled automatically if Heroku's DYNO environment variable is present.
-  Without a persistent hostname, each Sidekiq process **must** have its own unique index.
+  The wiki contains [much more detail about each reliability option](https://github.com/mperham/sidekiq/wiki/Pro-Reliability-Server).
 
 * The old 'sidekiq/notifications' features have been removed.
 

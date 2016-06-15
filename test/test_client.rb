@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require_relative 'helper'
 
 class TestClient < Sidekiq::Test
@@ -124,6 +125,10 @@ class TestClient < Sidekiq::Test
       Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => (1..2).to_a.map { |x| Array(x) }).each do |jid|
         assert_match(/[0-9a-f]{12}/, jid)
       end
+    end
+    it 'handles no jobs' do
+      result = Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => [])
+      assert_equal 0, result.size
     end
   end
 

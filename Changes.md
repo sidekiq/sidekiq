@@ -1,8 +1,37 @@
 # Sidekiq Changes
 
+HEAD
+-----------
+
+- Fixed race condition in heartbeat which could rarely lead to lingering
+  processes on the Busy tab. [#2982]
+```ruby
+# to clean up lingering processes, modify this as necessary to connect to your Redis.
+# after 60 seconds, lingering processes should disappear from the Busy page.
+
+require 'redis'
+r = Redis.new(url: "redis://localhost:6379/0")
+# uncomment if you need a namespace
+#require 'redis-namespace'
+#r = Redis::Namespace.new("foo", r)
+r.smembers("processes").each do |pro|
+  r.expire(pro, 60)
+  r.expire("#{pro}:workers", 60)
+end
+```
+
+
 4.1.2
 -----------
 
+- Fix Redis data leak with worker data when a busy Sidekiq process
+  crashes.  You can find and expire leaked data in Redis with this
+script:
+```bash
+$ redis-cli keys  "*:workers" | while read LINE ; do TTL=`redis-cli expire "$LINE" 60`; echo "$LINE"; done;
+```
+  Please note that `keys` can be dangerous to run on a large, busy Redis.  Caveat runner.
+- Freeze all string literals with Ruby 2.3. [#2741]
 - Client middleware can now stop bulk job push. [#2887]
 
 4.1.1

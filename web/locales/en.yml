@@ -76,3 +76,4 @@ en: # <---- change this to your locale code
   Plugins: Plugins
   NotYetEnqueued: Not yet enqueued
   CreatedAt: Created At
+  BackToApp: Back to App

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require_relative 'helper'
 require 'sidekiq/exception_handler'
 require 'stringio'
@@ -32,7 +33,7 @@ class TestExceptionHandler < Sidekiq::Test
       Component.new.invoke_exception(:a => 1)
       @str_logger.rewind
       log = @str_logger.readlines
-      assert_match(/a=>1/, log[0], "didn't include the context")
+      assert_match(/"a":1/, log[0], "didn't include the context")
       assert_match(/Something didn't work!/, log[1], "didn't include the exception message")
       assert_match(/test\/test_exception_handler.rb/, log[2], "didn't include the backtrace")
     end

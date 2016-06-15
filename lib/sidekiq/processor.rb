@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'sidekiq/util'
 require 'sidekiq/fetch'
 require 'thread'
