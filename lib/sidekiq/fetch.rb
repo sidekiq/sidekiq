@@ -8,18 +8,12 @@ module Sidekiq
     TIMEOUT = 2
 
     UnitOfWork = Struct.new(:queue, :job) do
-      def acknowledge
+      def acknowledge(conn)
         # nothing to do
       end
 
       def queue_name
         queue.sub(/.*queue:/, ''.freeze)
-      end
-
-      def requeue
-        Sidekiq.redis do |conn|
-          conn.rpush("queue:#{queue_name}", job)
-        end
       end
     end
 

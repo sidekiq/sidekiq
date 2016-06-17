@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require 'sidekiq/util'
 require 'sidekiq/fetch'
+require 'sidekiq/transaction'
 require 'thread'
 require 'concurrent/map'
 require 'concurrent/atomic/atomic_fixnum'
@@ -76,7 +77,7 @@ module Sidekiq
     end
 
     def process_one
-      @job = fetch
+      @job = get_one
       process(@job) if @job
       @job = nil
     end
@@ -89,16 +90,6 @@ module Sidekiq
       rescue Sidekiq::Shutdown
       rescue => ex
         handle_fetch_exception(ex)
-      end
-    end
-
-    def fetch
-      j = get_one
-      if j && @done
-        j.requeue
-        nil
-      else
-        j
       end
     end
 
@@ -125,6 +116,10 @@ module Sidekiq
         worker = klass.new
         worker.jid = job['jid'.freeze]
 
+        worker.sqxa.on_finish_multi do |conn|
+          work.acknowledge(conn)
+        end
+
         stats(worker, job, queue) do
           Sidekiq.server_middleware.invoke(worker, job, queue) do
             # Only ack if we either attempted to start this job or
@@ -144,7 +139,7 @@ module Sidekiq
         handle_exception(ex, job || { :job => jobstr })
         raise
       ensure
-        work.acknowledge if ack
+        worker.sqxa.finish if ack
       end
     end
 

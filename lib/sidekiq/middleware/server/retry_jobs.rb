@@ -125,7 +125,7 @@ module Sidekiq
             logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
             retry_at = Time.now.to_f + delay
             payload = Sidekiq.dump_json(msg)
-            Sidekiq.redis do |conn|
+            worker.sqxa.on_finish_multi do |conn|
               conn.zadd('retry', retry_at.to_s, payload)
             end
           else
@@ -145,19 +145,21 @@ module Sidekiq
             handle_exception(e, { context: "Error calling retries_exhausted for #{worker.class}", job: msg })
           end
 
-          send_to_morgue(msg) unless msg['dead'] == false
+          send_to_morgue(worker, msg) unless msg['dead'] == false
         end
 
-        def send_to_morgue(msg)
+        def send_to_morgue(worker, msg)
           Sidekiq.logger.info { "Adding dead #{msg['class']} job #{msg['jid']}" }
           payload = Sidekiq.dump_json(msg)
           now = Time.now.to_f
-          Sidekiq.redis do |conn|
-            conn.multi do
-              conn.zadd('dead', now, payload)
-              conn.zremrangebyscore('dead', '-inf', now - DeadSet.timeout)
-              conn.zremrangebyrank('dead', 0, -DeadSet.max_jobs)
-            end
+
+          worker.sqxa.on_finish_multi do |conn|
+            conn.zadd('dead', now, payload)
+          end
+
+          worker.sqxa.on_finish_pipeline do |conn|
+            conn.zremrangebyscore('dead', '-inf', now - DeadSet.timeout)
+            conn.zremrangebyrank('dead', 0, -DeadSet.max_jobs)
           end
         end
 
