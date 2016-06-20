@@ -8,6 +8,12 @@ HEAD
 
 - Add API to check if a unique lock is present. See [#2932] for details.
 - Tune concurrent limiters to minimize thread thrashing under heavy contention. [#2944]
+- Add option for tuning which Bundler groups get preloaded with `sidekiqswarm` [#3025]
+```
+SIDEKIQ_PRELOAD=default,production bin/sidekiqswarm ...
+# Use an empty value for maximum application compatibility
+SIDEKIQ_PRELOAD= bin/sidekiqswarm ...
+```
 
 1.2.1
 -------------
