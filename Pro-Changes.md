@@ -3,10 +3,11 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+3.3.0
 ---------
 
-- Don't permanently delete batches immediately upon success [#3011]
+- Don't delete batches immediately upon success but set a 24 hr expiry, this allows
+  Sidekiq::Batch::Status#poll to work, even after batch success. [#3011]
 - New `Sidekiq::PendingSet#destroy(jid)` API to remove poison pill jobs [#3015]
 
 3.2.2
