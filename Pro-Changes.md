@@ -3,6 +3,11 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+3.3.1
+---------
+
+- If environment is unset, treat it as development so reliable\_fetch works as before 3.2.2.
+
 3.3.0
 ---------
 
