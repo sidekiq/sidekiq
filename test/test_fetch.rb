@@ -24,9 +24,6 @@ class TestFetcher < Sidekiq::Test
       assert_equal 'msg', uow.job
       q = Sidekiq::Queue.new('basic')
       assert_equal 0, q.size
-      uow.requeue
-      assert_equal 1, q.size
-      assert_nil uow.acknowledge
     end
 
     it 'retrieves with strict setting' do

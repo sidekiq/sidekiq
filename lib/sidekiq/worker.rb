@@ -24,6 +24,10 @@ module Sidekiq
   module Worker
     attr_accessor :jid
 
+    def sqxa
+      @sqxa ||= Sidekiq::Transaction.new
+    end
+
     def self.included(base)
       raise ArgumentError, "You cannot include Sidekiq::Worker in an ActiveJob: #{base.name}" if base.ancestors.any? {|c| c.name == 'ActiveJob::Base' }
 

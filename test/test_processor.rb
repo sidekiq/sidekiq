@@ -117,7 +117,7 @@ class TestProcessor < Sidekiq::Test
         let(:raise_after_yield) { true }
 
         it 'acks the job' do
-          work.expect(:acknowledge, nil)
+          work.expect(:acknowledge, nil, [Object])
           begin
             @processor.process(work)
             flunk "Expected #process to raise exception"
@@ -130,7 +130,7 @@ class TestProcessor < Sidekiq::Test
         let(:skip_job) { true }
 
         it 'acks the job' do
-          work.expect(:acknowledge, nil)
+          work.expect(:acknowledge, nil, [Object])
           @mgr.expect(:processor_done, nil, [@processor])
           @processor.process(work)
         end
@@ -140,7 +140,7 @@ class TestProcessor < Sidekiq::Test
         let(:worker_args) { ['boom'] }
 
         it 'acks the job' do
-          work.expect(:acknowledge, nil)
+          work.expect(:acknowledge, nil, [Object])
           begin
             @processor.process(work)
             flunk "Expected #process to raise exception"
@@ -151,7 +151,7 @@ class TestProcessor < Sidekiq::Test
 
       describe 'everything goes well' do
         it 'acks the job' do
-          work.expect(:acknowledge, nil)
+          work.expect(:acknowledge, nil, [Object])
           @mgr.expect(:processor_done, nil, [@processor])
           @processor.process(work)
         end
