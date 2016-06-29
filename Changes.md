@@ -3,6 +3,8 @@
 HEAD
 -----------
 
+- Sinatra 1.4.x is now a required dependency, avoiding cryptic errors
+  and old bugs due to people not upgrading Sinatra for years. [#3042]
 - Fixed race condition in heartbeat which could rarely lead to lingering
   processes on the Busy tab. [#2982]
 ```ruby
