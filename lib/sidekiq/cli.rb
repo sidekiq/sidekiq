@@ -227,7 +227,7 @@ module Sidekiq
           require 'sidekiq/rails'
           require File.expand_path("#{options[:require]}/config/environment.rb")
           ::Rails.application.eager_load!
-        else
+        elsif ::Rails::VERSION::MAJOR == 4
           # Painful contortions, see 1791 for discussion
           require File.expand_path("#{options[:require]}/config/application.rb")
           ::Rails::Application.initializer "sidekiq.eager_load" do
@@ -235,10 +235,10 @@ module Sidekiq
           end
           require 'sidekiq/rails'
           require File.expand_path("#{options[:require]}/config/environment.rb")
-
-          if ::Rails::VERSION::MAJOR > 4 && !::Rails.application.config.cache_classes
-            Sidekiq.options[:reloader] = Sidekiq::Rails::Reloader.new
-          end
+        else
+          require 'sidekiq/rails'
+          require File.expand_path("#{options[:require]}/config/environment.rb")
+          Sidekiq.options[:reloader] = Sidekiq::Rails::Reloader.new
         end
         options[:tag] ||= default_tag
       else
