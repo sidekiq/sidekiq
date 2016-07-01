@@ -1,13 +1,17 @@
 # Sidekiq Changes
 
-HEAD
+4.1.3
 -----------
 
+- Please note the Redis 3.3.0 gem has a [memory leak](https://github.com/redis/redis-rb/issues/612),
+  Redis 3.2.2 is recommended until that issue is fixed.
+- Sinatra 1.4.x is now a required dependency, avoiding cryptic errors
+  and old bugs due to people not upgrading Sinatra for years. [#3042]
 - Fixed race condition in heartbeat which could rarely lead to lingering
   processes on the Busy tab. [#2982]
 ```ruby
-# to clean up lingering processes, modify this as necessary to connect to your Redis.
-# after 60 seconds, lingering processes should disappear from the Busy page.
+# To clean up lingering processes, modify this as necessary to connect to your Redis.
+# After 60 seconds, lingering processes should disappear from the Busy page.
 
 require 'redis'
 r = Redis.new(url: "redis://localhost:6379/0")

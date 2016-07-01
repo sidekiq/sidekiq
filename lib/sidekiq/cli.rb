@@ -71,6 +71,9 @@ module Sidekiq
       ver = Sidekiq.redis_info['redis_version']
       raise "You are using Redis v#{ver}, Sidekiq requires Redis v2.8.0 or greater" if ver < '2.8'
 
+      # Touch middleware so it isn't lazy loaded by multiple threads, #3043
+      Sidekiq.server_middleware
+
       # Before this point, the process is initializing with just the main thread.
       # Starting here the process will now have multiple threads running.
       fire_event(:startup)
