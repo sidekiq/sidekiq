@@ -1,5 +1,12 @@
 # Sidekiq Changes
 
+4.1.4
+-----------
+
+- Unlock Sinatra so a Rails 5.0 compatible version may be used [#3048]
+- Fix race condition on startup with JRuby [#3043]
+
+
 4.1.3
 -----------
 
