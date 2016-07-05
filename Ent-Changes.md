@@ -3,7 +3,7 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+1.2.3
 -------------
 
 - Periodic jobs could stop executing until process restart if Redis goes down [#3047]
