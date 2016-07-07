@@ -3,6 +3,12 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+1.2.4
+-------------
+
+- Fix issue causing some minutely jobs to execute every other minute.
+- Log a warning if slow periodic processing causes us to miss a clock tick.
+
 1.2.3
 -------------
 
