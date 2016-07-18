@@ -3,6 +3,12 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+1.3.0
+-------------
+
+- **BETA** [New encryption feature](https://github.com/mperham/sidekiq/wiki/Ent-Encryption)
+  which automatically encrypts the last argument of a Worker, aka the secret bag.
+
 1.2.4
 -------------
 
