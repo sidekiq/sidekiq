@@ -59,16 +59,14 @@ layout: default
   <hr>
   <div class="row">
     <div class="col-sm-7">
-      <h3>Unique Jobs</h3>
-      <h6>Ensure your application doesn't enqueue redundant copies of the same job</h6>
-      <p>Sometimes applications create jobs based on user input or events which can lead to duplicate jobs. If
-        these jobs are expensive, processing those duplicates can take up significant resources. Sidekiq
-        Enterprise can detect and stop those duplicate jobs.</p>
-      <p>(Unique jobs not pictured, here's a cat instead.)</p>
+      <h3>Encryption</h3>
+      <h6>Keep your customer-sensitive data secret</h6>
+      <p>Sometimes jobs will need sensitive data and regulations require protecting that data when at rest.
+        Sidekiq Enterprise can transparently encrypt and decrypt sensitive data in your jobs.</p>
     </div>
     <div class="col-sm-5">
       <div class="spacer"></div>
-      <img src="/img/cat.png" class="skq-copy-img img-responsive"></div>
+      <img src="/img/encryption.png" class="skq-copy-img img-responsive"></div>
   </div>
 </div>
 <div id="details" class="container skq-white-bg">
@@ -80,11 +78,12 @@ layout: default
       <h3>Features</h3>
       <p>Sidekiq Enterprise contains the following functionality:</p>
       <ul>
+        <li>Encryption</li>
         <li>Rate Limiting</li>
         <li>Periodic Jobs</li>
         <li>Unique Jobs</li>
         <li>Historical Metrics</li>
-        <li>Copy-on-Write-friendly Multi-Processing</li>
+        <li>Multi-Core Processing</li>
         <li>Leader Election</li>
         <li>All Sidekiq Pro features</li>
       </ul>
