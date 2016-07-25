@@ -3,12 +3,16 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+1.3.2
+-------------
+
+- Upgrade encryption to use OpenSSL's more secure GCM mode. [#3060]
+
 1.3.1
 -------------
 
 - Fix multi-process memory monitoring on CentOS 6.x [#3063]
 - Polish the new encryption feature a bit.
-
 
 1.3.0
 -------------
