@@ -1,3 +1,5 @@
+<% job = locals[:job] %>
+
 <header>
   <h3><%= t('Job') %></h3>
 </header>
@@ -50,7 +52,7 @@
           </td>
         </tr>
       <% end %>
-      <% if type == :retry %>
+      <% if locals[:type] == :retry %>
         <% if job['retry_count'] && job['retry_count'] > 0 %>
           <tr>
             <th><%= t('RetryCount') %></th>
@@ -71,13 +73,13 @@
           <td><%= relative_time(job.at) %></td>
         </tr>
       <% end %>
-      <% if type == :scheduled %>
+      <% if locals[:type] == :scheduled %>
         <tr>
           <th><%= t('Scheduled') %></th>
           <td><%= relative_time(job.at) %></td>
         </tr>
       <% end %>
-      <% if type == :dead %>
+      <% if locals[:type] == :dead %>
         <tr>
           <th><%= t('LastRetry') %></th>
           <td><%= relative_time(job.at) %></td>

@@ -3,7 +3,7 @@
 require_relative 'helper'
 require 'sidekiq/web'
 require 'rack/test'
-require 'tilt/erubis'
+#require 'tilt/erubis'
 
 class TestWeb < Sidekiq::Test
 
@@ -341,7 +341,6 @@ class TestWeb < Sidekiq::Test
       assert last_response.body.include?( "&lt;a&gt;hello&lt;&#x2F;a&gt;" )
       assert !last_response.body.include?( "<a>hello</a>" )
 
-
       # on /queues page
       params = add_xss_retry # sorry, don't know how to easily make this show up on queues page otherwise.
       post "/retries/#{job_params(*params)}", 'retry' => 'Retry'
@@ -372,21 +371,23 @@ class TestWeb < Sidekiq::Test
 
     describe 'custom locales' do
       before do
-        Sidekiq::Web.settings.locales << File.join(File.dirname(__FILE__), "fixtures")
+        Sidekiq::Web.locales << File.join(File.dirname(__FILE__), "fixtures")
         Sidekiq::Web.tabs['Custom Tab'] = '/custom'
-        Sidekiq::Web.get('/custom') do
+        Sidekiq::WebApplication.get('/custom') do
           clear_caches # ugly hack since I can't figure out how to access WebHelpers outside of this context
-          t('translated_text')
+
+          [200, { "Content-Type" => 'text/html' }, [ t('translated_text') ]]
         end
       end
 
       after do
         Sidekiq::Web.tabs.delete 'Custom Tab'
-        Sidekiq::Web.settings.locales.pop
+        Sidekiq::Web.locales.pop
       end
 
       it 'can show user defined tab with custom locales' do
         get '/custom'
+
         assert_match(/Changed text/, last_response.body)
       end
     end
@@ -564,6 +565,7 @@ class TestWeb < Sidekiq::Test
       Sidekiq.redis do |conn|
         conn.zadd('retry', score, Sidekiq.dump_json(msg))
       end
+
       [msg, score]
     end
 
