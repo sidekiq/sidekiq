@@ -12,8 +12,21 @@ module Sidekiq
   class Web < Sinatra::Base
     include Sidekiq::Paginator
 
+
     enable :sessions
-    use ::Rack::Protection, :use => :authenticity_token unless ENV['RACK_ENV'] == 'test'
+
+    # N.B. until https://github.com/sinatra/rack-protection/pull/111 lands,
+    #  you'll need to uncomment the next line:
+    Rack::Protection::ContentSecurityPolicy::KEYS.push :img_src
+    unless ENV['RACK_ENV'] == 'test'
+      local = ENV['RACK_ENV'] == 'development' ? "'self' localhost" : "'self'"
+      set :protection,
+          connect_src: local,
+          default_src: local,
+          script_src:  local,
+          style_src:   "#{local} 'unsafe-inline'",
+          img_src:     "'self' data:"
+    end
 
     set :root, File.expand_path(File.dirname(__FILE__) + "/../../web")
     set :public_folder, proc { "#{root}/assets" }
