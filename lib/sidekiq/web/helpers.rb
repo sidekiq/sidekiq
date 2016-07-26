@@ -9,7 +9,7 @@ module Sidekiq
       @@strings[lang] ||= begin
         # Allow sidekiq-web extensions to add locale paths
         # so extensions can be localized
-        settings.locales.each_with_object({}) do |path, global|
+        Web.locales.each_with_object({}) do |path, global|
           find_locale_files(lang).each do |file|
             strs = YAML.load(File.open(file))
             global.deep_merge!(strs[lang])
@@ -24,7 +24,7 @@ module Sidekiq
     end
 
     def locale_files
-      @@locale_files ||= settings.locales.flat_map do |path|
+      @@locale_files ||= Web.locales.flat_map do |path|
         Dir["#{path}/*.yml"]
       end
     end
@@ -69,7 +69,7 @@ module Sidekiq
     def locale
       @locale ||= begin
         locale = 'en'.freeze
-        languages = request.env['HTTP_ACCEPT_LANGUAGE'.freeze] || 'en'.freeze
+        languages = env['HTTP_ACCEPT_LANGUAGE'.freeze] || 'en'.freeze
         languages.downcase.split(','.freeze).each do |lang|
           next if lang == '*'.freeze
           lang = lang.split(';'.freeze)[0]

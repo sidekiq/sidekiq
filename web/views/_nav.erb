@@ -7,14 +7,14 @@
         <span class="icon-bar"></span>
       </button>
       <div class="navbar-toggle collapsed navbar-livereload">
-        <%= erb :_poll_link %>
+        <%= partial :poll_link %>
         <% if Sidekiq::Web.app_url %>
           <a class="btn btn-inverse" href="<%= Sidekiq::Web.app_url %>">Back to App</a>
         <% end %>
       </div>
       <a class="navbar-brand" href="<%= root_path %>">
         <%= Sidekiq::NAME %>
-        <%= erb :_status %>
+        <%= partial :status %>
       </a>
     </div>
 
@@ -54,7 +54,7 @@
       <ul class="nav navbar-nav navbar-right navbar-livereload" data-navbar="static">
         <li>
           <div class="poll-wrapper pull-right">
-            <%= erb :_poll_link %>
+            <%= partial :poll_link %>
             <% if Sidekiq::Web.app_url %>
               <a class="btn btn-inverse" href="<%= Sidekiq::Web.app_url %>"><%= t('BackToApp') %></a>
             <% end %>

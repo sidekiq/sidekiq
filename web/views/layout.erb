@@ -12,12 +12,12 @@
     <%= display_custom_head %>
   </head>
   <body class="admin">
-    <%= erb :_nav %>
+    <%= partial :nav %>
     <div id="page">
       <div class="container">
         <div class="row">
           <div class="col-sm-12 summary_bar">
-            <%= erb :_summary %>
+            <%= partial :summary %>
           </div>
 
           <div class="col-sm-12">
@@ -26,7 +26,7 @@
         </div>
       </div>
     </div>
-    <%=  erb :_footer %>
-    <%= erb :_poll_js %>
+    <%= partial :footer %>
+    <%= partial :poll_js %>
   </body>
 </html>
