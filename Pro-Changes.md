@@ -3,6 +3,11 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Extract batch's 24 hr linger expiry to a LINGER constant so it can be tuned. [#3011]
+
 3.3.1
 ---------
 
