@@ -61,24 +61,18 @@ module Sidekiq
       secret = Web.session_secret
 
       if secret.nil?
-        # explicitly generating a session secret eagerly to play nice with preforking
-        begin
-          require 'securerandom'
-          secret = SecureRandom.hex(64)
-        rescue LoadError, NotImplementedError
-          # SecureRandom raises a NotImplementedError if no random device is available
-          secret = "%064x" % Kernel.rand(2**256-1)
-        end
+        require 'securerandom'
+        secret = SecureRandom.hex(64)
       end
 
-      @app = Rack::Builder.new do
+      @app = ::Rack::Builder.new do
         %w(stylesheets javascripts images).each do |asset_dir|
           map "/#{asset_dir}" do
-            run Rack::File.new("#{ASSETS}/#{asset_dir}")
+            run ::Rack::File.new("#{ASSETS}/#{asset_dir}")
           end
         end
 
-        use Rack::Session::Cookie, secret: secret
+        use ::Rack::Session::Cookie, secret: secret
         use ::Rack::Protection, use: :authenticity_token unless ENV['RACK_ENV'] == 'test'
 
         run WebApplication.new
@@ -92,6 +86,10 @@ module Sidekiq
     def self.call(env)
       @app ||= new
       @app.call(env)
+    end
+
+    def self.register(extension)
+      extension.registered(WebApplication)
     end
 
     ERB.new(File.read LAYOUT).def_method(WebAction, '_render')

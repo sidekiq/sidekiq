@@ -42,7 +42,7 @@ module Sidekiq
     get "/queues/:name" do
       @name = route_params[:name]
 
-      next(not_found(env)) unless @name
+      next(NOPE) unless @name
 
       @count = (params['count'] || 25).to_i
       @queue = Sidekiq::Queue.new(@name)
@@ -74,7 +74,7 @@ module Sidekiq
     end
 
     get "/morgue/:key" do
-      next not_found(env) unless key = route_params[:key]
+      next NOPE unless key = route_params[:key]
 
       @dead = Sidekiq::DeadSet.new.fetch(*parse_params(key)).first
 
@@ -109,7 +109,7 @@ module Sidekiq
     end
 
     post "/morgue/:key" do
-      next not_found(env) unless key = route_params[:key]
+      next NOPE unless key = route_params[:key]
 
       job = Sidekiq::DeadSet.new.fetch(*parse_params(key)).first
       retry_or_delete_or_kill job, params if job
@@ -196,7 +196,7 @@ module Sidekiq
     end
 
     post "/scheduled/:key" do
-      next not_found(env) unless key = route_params[:key]
+      next NOPE unless key = route_params[:key]
 
       job = Sidekiq::ScheduledSet.new.fetch(*parse_params(key)).first
       delete_or_add_queue job, params if job
@@ -232,14 +232,49 @@ module Sidekiq
       json Sidekiq::Stats::Queues.new.lengths
     end
 
-    def not_found(env)
-      [404, {}, []]
-    end
+    NOPE = [404, {}, []]
 
     def call(env)
-      action = self.class.match(env) || WebAction.new(env, method(:not_found).to_proc)
+      action = self.class.match(env)
+      return NOPE unless action
 
-      action.instance_exec env, &action.app
+      self.class.run_befores(env)
+      resp = action.instance_exec env, &action.app
+      self.class.run_afters(env)
+      resp
     end
+
+    def self.helpers(mod)
+      WebAction.send(:include, mod)
+    end
+
+    def self.before(&block)
+      befores << block
+    end
+
+    def self.after(&block)
+      afters << block
+    end
+
+    def self.run_befores(env)
+      befores.each do |b|
+        b.call(env)
+      end
+    end
+
+    def self.run_afters(env)
+      afters.each do |b|
+        b.call(env)
+      end
+    end
+
+    def self.befores
+      @befores ||= []
+    end
+
+    def self.afters
+      @afters ||= []
+    end
+
   end
 end
