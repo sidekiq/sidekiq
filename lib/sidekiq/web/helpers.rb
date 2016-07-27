@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'uri'
+require 'yaml'
 
 module Sidekiq
   # This is not a public API
@@ -249,6 +250,24 @@ module Sidekiq
       @redis_connection_and_namespace ||= begin
         namespace_suffix = namespace == nil ? '' : "##{namespace}"
         "#{redis_connection}#{namespace_suffix}"
+      end
+    end
+
+    def retry_or_delete_or_kill(job, params)
+      if params['retry']
+        job.retry
+      elsif params['delete']
+        job.delete
+      elsif params['kill']
+        job.kill
+      end
+    end
+
+    def delete_or_add_queue(job, params)
+      if params['delete']
+        job.delete
+      elsif params['add_to_queue']
+        job.add_to_queue
       end
     end
   end

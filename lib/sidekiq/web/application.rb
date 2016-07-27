@@ -1,9 +1,11 @@
 # frozen_string_literal: true
+
 module Sidekiq
   class WebApplication
     extend WebRouter
 
     REDIS_KEYS = %w(redis_version uptime_in_days connected_clients used_memory_human used_memory_peak_human)
+    NOPE = [404, {}, []]
 
     get "/" do
       @redis_info = redis_info.select{ |k, v| REDIS_KEYS.include? k }
@@ -232,8 +234,6 @@ module Sidekiq
       json Sidekiq::Stats::Queues.new.lengths
     end
 
-    NOPE = [404, {}, []]
-
     def call(env)
       action = self.class.match(env)
       return NOPE unless action
@@ -241,7 +241,15 @@ module Sidekiq
       self.class.run_befores(env)
       resp = action.instance_exec env, &action.app
       self.class.run_afters(env)
-      resp
+
+      case resp
+      when Array
+        resp
+      when Integer
+        [resp, {}, []]
+      else
+        [200, WebAction::TEXT_HTML, [resp]]
+      end
     end
 
     def self.helpers(mod)
@@ -275,6 +283,5 @@ module Sidekiq
     def self.afters
       @afters ||= []
     end
-
   end
 end

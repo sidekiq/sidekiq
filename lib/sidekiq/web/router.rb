@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'sidekiq/web/helpers'
 
 module Sidekiq
   module WebRouter
@@ -35,78 +34,6 @@ module Sidekiq
       end
 
       nil
-    end
-  end
-
-  class WebAction
-    include WebHelpers
-    include Sidekiq::Paginator
-
-    RACK_SESSION = 'rack.session'.freeze
-
-    CONTENT_TYPE = "Content-Type".freeze
-    LOCATION = "Location".freeze
-
-    TEXT_HTML = "text/html".freeze
-    APPLICATION_JSON = "application/json".freeze
-
-    attr_accessor :env, :app
-
-    def request
-      @request ||= Rack::Request.new(env)
-    end
-
-    def params
-      request.params
-    end
-
-    def route_params
-      env[WebRouter::ROUTE_PARAMS]
-    end
-
-    def session
-      env[RACK_SESSION]
-    end
-
-    def render(file)
-      output = _render { ERB.new(File.read "#{Web::VIEWS}/#{file}.erb").result(binding) }
-
-      [200, { CONTENT_TYPE => TEXT_HTML }, [output]]
-    end
-
-    def redirect(location)
-      [302, { LOCATION => "#{request.base_url}#{root_path}#{location}" }, []]
-    end
-
-    def json(payload)
-      [200, { CONTENT_TYPE => APPLICATION_JSON }, [Sidekiq.dump_json(payload)]]
-    end
-
-    def partial(file, locals = {})
-      ERB.new(File.read "#{Web::VIEWS}/_#{file}.erb").result(binding)
-    end
-
-    def initialize(env, app)
-      @env = env
-      @app = app
-    end
-
-    def retry_or_delete_or_kill(job, params)
-      if params['retry']
-        job.retry
-      elsif params['delete']
-        job.delete
-      elsif params['kill']
-        job.kill
-      end
-    end
-
-    def delete_or_add_queue(job, params)
-      if params['delete']
-        job.delete
-      elsif params['add_to_queue']
-        job.add_to_queue
-      end
     end
   end
 
@@ -155,19 +82,6 @@ module Sidekiq
       end
 
       true
-    end
-
-    def eql?(o)
-      o.is_a?(self.class) &&
-        o.request_method == request_method &&
-        o.pattern == pattern &&
-        o.app == app &&
-        o.constraints == constraints
-    end
-    alias == eql?
-
-    def hash
-      request_method.hash ^ pattern.hash ^ app.hash ^ constraints.hash
     end
   end
 end

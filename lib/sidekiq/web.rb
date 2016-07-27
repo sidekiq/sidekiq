@@ -1,30 +1,28 @@
 # frozen_string_literal: true
 require 'erb'
-require 'yaml'
 
 require 'sidekiq'
 require 'sidekiq/api'
 require 'sidekiq/paginator'
+require 'sidekiq/web/helpers'
 
 require 'sidekiq/web/router'
+require 'sidekiq/web/action'
 require 'sidekiq/web/application'
 
 require 'rack/protection'
 
 require 'rack/builder'
-require 'rack/static'
+require 'rack/file'
 require 'rack/session/cookie'
 
 module Sidekiq
   class Web
-    REQUEST_METHOD = 'REQUEST_METHOD'.freeze
-    PATH_INFO = 'PATH_INFO'.freeze
-
-    ROOT = File.expand_path(File.dirname(__FILE__) + "/../../web")
-    VIEWS = "#{ROOT}/views"
-    LOCALES = ["#{ROOT}/locales"]
-    LAYOUT = "#{VIEWS}/layout.erb"
-    ASSETS = "#{ROOT}/assets"
+    ROOT = File.expand_path("#{File.dirname(__FILE__)}/../../web")
+    VIEWS = "#{ROOT}/views".freeze
+    LOCALES = ["#{ROOT}/locales".freeze]
+    LAYOUT = "#{VIEWS}/layout.erb".freeze
+    ASSETS = "#{ROOT}/assets".freeze
 
     DEFAULT_TABS = {
       "Dashboard" => '',
@@ -58,9 +56,7 @@ module Sidekiq
     end
 
     def initialize
-      secret = Web.session_secret
-
-      if secret.nil?
+      unless secret = Web.session_secret
         require 'securerandom'
         secret = SecureRandom.hex(64)
       end
@@ -91,9 +87,12 @@ module Sidekiq
     def self.register(extension)
       extension.registered(WebApplication)
     end
-
-    ERB.new(File.read LAYOUT).def_method(WebAction, '_render')
   end
+
+  Sidekiq::WebApplication.helpers WebHelpers
+  Sidekiq::WebApplication.helpers Sidekiq::Paginator
+
+  ERB.new(File.read Web::LAYOUT).def_method(WebAction, '_render')
 end
 
 if defined?(::ActionDispatch::Request::Session) &&
