@@ -4,6 +4,7 @@ module Sidekiq
   class WebApplication
     extend WebRouter
 
+    CONTENT_LENGTH = "Content-Length".freeze
     CONTENT_TYPE = "Content-Type".freeze
     REDIS_KEYS = %w(redis_version uptime_in_days connected_clients used_memory_human used_memory_peak_human)
     NOT_FOUND = [404, {"Content-Type" => "text/plain", "X-Cascade" => "pass" }, ["Not Found"]]
@@ -263,13 +264,13 @@ module Sidekiq
         resp
       end
 
-      case resp
+      resp = case resp
       when Array
         resp
       when Fixnum
         [resp, {}, []]
       else
-        headers = case action.type
+        type_header = case action.type
         when :json
           WebAction::APPLICATION_JSON
         when String
@@ -278,8 +279,12 @@ module Sidekiq
           WebAction::TEXT_HTML
         end
 
-        [200, headers, [resp]]
+        [200, type_header, [resp]]
       end
+
+      resp[1][CONTENT_LENGTH] = resp[2].inject(0) { |l, p| l + p.bytesize }.to_s
+
+      resp
     end
 
     def self.helpers(mod=nil, &block)
