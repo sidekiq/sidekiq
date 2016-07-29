@@ -106,7 +106,7 @@ module Sidekiq
   Sidekiq::WebApplication.helpers WebHelpers
   Sidekiq::WebApplication.helpers Sidekiq::Paginator
 
-  ERB.new(File.read Web::LAYOUT).def_method(WebAction, '_render')
+  Sidekiq::WebAction.class_eval "def _render\n#{ERB.new(File.read(Web::LAYOUT)).src}\nend"
 end
 
 if defined?(::ActionDispatch::Request::Session) &&

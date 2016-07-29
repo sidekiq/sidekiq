@@ -51,9 +51,9 @@ module Sidekiq
 
     def erb(content, options = {})
       if content.kind_of? Symbol
-        filename = "#{Web.settings.views}/#{content}.erb"
-        unless content = @@files[filename]
-          content = @@files[filename] = ERB.new(File.read(filename))
+        unless respond_to?(:"_erb_#{content}")
+          src = ERB.new(File.read("#{Web.settings.views}/#{content}.erb")).src
+          WebAction.class_eval("def _erb_#{content}\n#{src}\n end")
         end
       end
 
@@ -92,7 +92,7 @@ module Sidekiq
       if file.kind_of?(String)
         ERB.new(file).result(binding)
       else
-        file.result(binding)
+        send(:"_erb_#{file}")
       end
     end
   end
