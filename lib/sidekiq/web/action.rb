@@ -10,14 +10,14 @@ module Sidekiq
     TEXT_HTML = { CONTENT_TYPE => "text/html".freeze }
     APPLICATION_JSON = { CONTENT_TYPE => "application/json".freeze }
 
-    attr_accessor :env, :app, :type
+    attr_accessor :env, :block, :type
 
     def settings
       Web.settings
     end
 
     def request
-      @request ||= Rack::Request.new(env)
+      @request ||= ::Rack::Request.new(env)
     end
 
     def halt(res)
@@ -74,9 +74,9 @@ module Sidekiq
       [200, APPLICATION_JSON, [Sidekiq.dump_json(payload)]]
     end
 
-    def initialize(env, app)
+    def initialize(env, block)
       @env = env
-      @app = app
+      @block = block
     end
 
     private

@@ -59,7 +59,7 @@ module Sidekiq
         @session_secret = secret
       end
 
-      attr_accessor :app_url, :session_secret
+      attr_accessor :app_url, :session_secret, :redis_pool
       attr_writer :locales, :views
     end
 
@@ -73,6 +73,8 @@ module Sidekiq
         secret = SecureRandom.hex(64)
       end
 
+      klass = self.class
+
       @app = ::Rack::Builder.new do
         %w(stylesheets javascripts images).each do |asset_dir|
           map "/#{asset_dir}" do
@@ -83,7 +85,7 @@ module Sidekiq
         use ::Rack::Session::Cookie, secret: secret
         use ::Rack::Protection, use: :authenticity_token unless ENV['RACK_ENV'] == 'test'
 
-        run WebApplication.new
+        run WebApplication.new(klass)
       end
     end
 

@@ -6,7 +6,15 @@ module Sidekiq
 
     CONTENT_TYPE = "Content-Type".freeze
     REDIS_KEYS = %w(redis_version uptime_in_days connected_clients used_memory_human used_memory_peak_human)
-    NOPE = [404, {}, []]
+    NOT_FOUND = [404, {"Content-Type" => "text/plain", "X-Cascade" => "pass" }, ["Not Found"]]
+
+    def initialize(klass)
+      @klass = klass
+    end
+
+    def settings
+      @klass.settings
+    end
 
     def self.settings
       Web.settings
@@ -241,12 +249,16 @@ module Sidekiq
 
     def call(env)
       action = self.class.match(env)
-      return NOPE unless action
+      return NOT_FOUND unless action
 
       resp = catch(:halt) do
-        self.class.run_befores(action)
-        resp = action.instance_exec env, &action.app
-        self.class.run_afters(action)
+        app = @klass
+        self.class.run_befores(app, action)
+        begin
+          resp = action.instance_exec env, &action.block
+        ensure
+          self.class.run_afters(app, action)
+        end
 
         resp
       end
@@ -286,17 +298,17 @@ module Sidekiq
       afters << [path && Regexp.new("\\A#{path.gsub("*", ".*")}\\z"), block]
     end
 
-    def self.run_befores(action)
-      run_hooks(befores, action)
+    def self.run_befores(app, action)
+      run_hooks(befores, app, action)
     end
 
-    def self.run_afters(action)
-      run_hooks(afters, action)
+    def self.run_afters(app, action)
+      run_hooks(afters, app, action)
     end
 
-    def self.run_hooks(hooks, action)
+    def self.run_hooks(hooks, app, action)
       hooks.select { |p,_| !p || p =~ action.env[WebRouter::PATH_INFO] }.
-            each {|_,b| action.instance_exec(action.env, &b) }
+            each {|_,b| action.instance_exec(action.env, app, &b) }
     end
 
     def self.befores

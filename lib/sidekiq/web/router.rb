@@ -34,7 +34,7 @@ module Sidekiq
       @routes.each do |route|
         if params = route.match(request_method, env[PATH_INFO])
           env[ROUTE_PARAMS] = params
-          return WebAction.new(env, route.app)
+          return WebAction.new(env, route.block)
         end
       end
 
@@ -43,14 +43,14 @@ module Sidekiq
   end
 
   class WebRoute
-    attr_accessor :request_method, :pattern, :app, :constraints, :name
+    attr_accessor :request_method, :pattern, :block, :constraints, :name
 
     NAMED_SEGMENTS_PATTERN = /\/([^\/]*):([^:$\/]+)/.freeze
 
-    def initialize(request_method, pattern, app)
+    def initialize(request_method, pattern, block)
       @request_method = request_method
       @pattern = pattern
-      @app = app
+      @block = block
     end
 
     def regexp
