@@ -3,7 +3,7 @@
     <h3><%= t('Processes') %></h3>
   </div>
   <div class="col-sm-4 pull-right">
-    <form method="POST" style="margin-top: 20px; margin-bottom: 10px;">
+    <form method="POST" id="warningmessages">
       <%= csrf_tag %>
       <div class="btn-group pull-right">
         <button class="btn btn-warn" type="submit" name="quiet" value="1" data-confirm="<%= t('AreYouSure') %>"><%= t('QuietAll') %></button>
@@ -24,7 +24,7 @@
     </thead>
     <% processes.each do |process| %>
       <tr>
-        <td width="50%">
+        <td id="box">
           <%= "#{process['hostname']}:#{process['pid']}" %>
           <span class="label label-success"><%= process.tag %></span>
           <% process.labels.each do |label| %>
