@@ -51,7 +51,10 @@ module Sidekiq
 
     def erb(content, options = {})
       if content.kind_of? Symbol
-        content = File.read("#{Web.settings.views}/#{content}.erb")
+        filename = "#{Web.settings.views}/#{content}.erb"
+        unless content = @@files[filename]
+          content = @@files[filename] = ERB.new(File.read(filename))
+        end
       end
 
       if @_erb
@@ -77,14 +80,20 @@ module Sidekiq
     def initialize(env, block)
       @env = env
       @block = block
+      @@files ||= {}
     end
 
     private
 
     def _erb(file, locals)
+      # TODO Use Binding#local_variable_set if/when support for 2.0.0 is dropped
       locals.each {|k, v| define_singleton_method(k){ v } } if locals
 
-      ERB.new(file).result(binding)
+      if file.kind_of?(String)
+        ERB.new(file).result(binding)
+      else
+        file.result(binding)
+      end
     end
   end
 end
