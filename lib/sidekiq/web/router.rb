@@ -5,6 +5,8 @@ module Sidekiq
     GET = 'GET'.freeze
     DELETE = 'DELETE'.freeze
     POST = 'POST'.freeze
+    PUT = 'PUT'.freeze
+    PATCH = 'PATCH'.freeze
     HEAD = 'HEAD'.freeze
 
     ROUTE_PARAMS = 'rack.route_params'.freeze
@@ -19,21 +21,33 @@ module Sidekiq
       route(POST, path, &block)
     end
 
+    def put(path, &block)
+      route(PUT, path, &block)
+    end
+
+    def patch(path, &block)
+      route(PATCH, path, &block)
+    end
+
     def delete(path, &block)
       route(DELETE, path, &block)
     end
 
     def route(method, path, &block)
-      @routes ||= []
-      @routes << WebRoute.new(method, path, block)
+      @routes ||= { GET => [], POST => [], PUT => [], PATCH => [], DELETE => [], HEAD => [] }
+
+      @routes[method] << WebRoute.new(method, path, block)
+      @routes[HEAD] << WebRoute.new(method, path, block) if method == GET
     end
 
     def match(env)
       request_method = env[REQUEST_METHOD]
-      request_method = GET if request_method == HEAD
-      @routes.each do |route|
-        if params = route.match(request_method, env[PATH_INFO])
+      path_info = env[PATH_INFO]
+
+      @routes[request_method].each do |route|
+        if params = route.match(request_method, path_info)
           env[ROUTE_PARAMS] = params
+
           return WebAction.new(env, route.block)
         end
       end
@@ -53,25 +67,28 @@ module Sidekiq
       @block = block
     end
 
-    def regexp
-      @regexp ||= compile
+    def matcher
+      @matcher ||= compile
     end
 
     def compile
-      p = if pattern.match(NAMED_SEGMENTS_PATTERN)
-        pattern.gsub(NAMED_SEGMENTS_PATTERN, '/\1(?<\2>[^$/]+)')
+      if pattern.match(NAMED_SEGMENTS_PATTERN)
+        p = pattern.gsub(NAMED_SEGMENTS_PATTERN, '/\1(?<\2>[^$/]+)')
+
+        Regexp.new("\\A#{p}\\Z")
       else
         pattern
       end
-
-      Regexp.new("\\A#{p}\\Z")
     end
 
     def match(request_method, path)
-      return nil unless request_method == self.request_method
-
-      if path_match = path.match(regexp)
-        params = Hash[path_match.names.map(&:to_sym).zip(path_match.captures)]
+      case matcher
+      when String
+        {} if path == matcher
+      else
+        if path_match = path.match(matcher)
+          params = Hash[path_match.names.map(&:to_sym).zip(path_match.captures)]
+        end
       end
     end
   end
