@@ -86,7 +86,6 @@ module Sidekiq
     private
 
     def _erb(file, locals)
-      # TODO Use Binding#local_variable_set if/when support for 2.0.0 is dropped
       locals.each {|k, v| define_singleton_method(k){ v } } if locals
 
       if file.kind_of?(String)
