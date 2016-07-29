@@ -43,7 +43,7 @@ module Sidekiq
   end
 
   class WebRoute
-    attr_accessor :request_method, :pattern, :block, :constraints, :name
+    attr_accessor :request_method, :pattern, :block, :name
 
     NAMED_SEGMENTS_PATTERN = /\/([^\/]*):([^:$\/]+)/.freeze
 
@@ -72,21 +72,7 @@ module Sidekiq
 
       if path_match = path.match(regexp)
         params = Hash[path_match.names.map(&:to_sym).zip(path_match.captures)]
-
-        params if meets_constraints(params)
       end
-    end
-
-    def meets_constraints(params)
-      if constraints
-        constraints.each do |param, constraint|
-          unless params[param].to_s.match(constraint)
-            return false
-          end
-        end
-      end
-
-      true
     end
   end
 end
