@@ -3,7 +3,6 @@
 require_relative 'helper'
 require 'sidekiq/web'
 require 'rack/test'
-#require 'tilt/erubis'
 
 class TestWeb < Sidekiq::Test
 
@@ -371,18 +370,17 @@ class TestWeb < Sidekiq::Test
 
     describe 'custom locales' do
       before do
-        Sidekiq::Web.locales << File.join(File.dirname(__FILE__), "fixtures")
+        Sidekiq::Web.settings.locales << File.join(File.dirname(__FILE__), "fixtures")
         Sidekiq::Web.tabs['Custom Tab'] = '/custom'
         Sidekiq::WebApplication.get('/custom') do
           clear_caches # ugly hack since I can't figure out how to access WebHelpers outside of this context
-
-          [200, { "Content-Type" => 'text/html' }, [ t('translated_text') ]]
+          t('translated_text')
         end
       end
 
       after do
         Sidekiq::Web.tabs.delete 'Custom Tab'
-        Sidekiq::Web.locales.pop
+        Sidekiq::Web.settings.locales.pop
       end
 
       it 'can show user defined tab with custom locales' do

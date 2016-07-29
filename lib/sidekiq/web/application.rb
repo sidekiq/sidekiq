@@ -4,8 +4,13 @@ module Sidekiq
   class WebApplication
     extend WebRouter
 
+    CONTENT_TYPE = "Content-Type".freeze
     REDIS_KEYS = %w(redis_version uptime_in_days connected_clients used_memory_human used_memory_peak_human)
     NOPE = [404, {}, []]
+
+    def self.settings
+      Web.settings
+    end
 
     get "/" do
       @redis_info = redis_info.select{ |k, v| REDIS_KEYS.include? k }
@@ -13,11 +18,11 @@ module Sidekiq
       @processed_history = stats_history.processed
       @failed_history = stats_history.failed
 
-      render(:dashboard)
+      erb(:dashboard)
     end
 
     get "/busy" do
-      render(:busy)
+      erb(:busy)
     end
 
     post "/busy" do
@@ -32,39 +37,39 @@ module Sidekiq
         end
       end
 
-      redirect "busy"
+      redirect "#{root_path}busy"
     end
 
     get "/queues" do
       @queues = Sidekiq::Queue.all
 
-      render(:queues)
+      erb(:queues)
     end
 
     get "/queues/:name" do
       @name = route_params[:name]
 
-      next(NOPE) unless @name
+      halt(404) unless @name
 
       @count = (params['count'] || 25).to_i
       @queue = Sidekiq::Queue.new(@name)
       (@current_page, @total_size, @messages) = page("queue:#{@name}", params['page'], @count)
       @messages = @messages.map { |msg| Sidekiq::Job.new(msg, @name) }
 
-      render(:queue)
+      erb(:queue)
     end
 
     post "/queues/:name" do
       Sidekiq::Queue.new(route_params[:name]).clear
 
-      redirect "queues"
+      redirect "#{root_path}queues"
     end
 
     post "/queues/:name/delete" do
       name = route_params[:name]
       Sidekiq::Job.new(params['key_val'], name).delete
 
-      redirect_with_query("queues/#{name}")
+      redirect_with_query("#{root_path}queues/#{name}")
     end
 
     get '/morgue' do
@@ -72,51 +77,51 @@ module Sidekiq
       (@current_page, @total_size, @dead) = page("dead", params['page'], @count, reverse: true)
       @dead = @dead.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
 
-      render(:morgue)
+      erb(:morgue)
     end
 
     get "/morgue/:key" do
-      next NOPE unless key = route_params[:key]
+      halt(404) unless key = route_params[:key]
 
       @dead = Sidekiq::DeadSet.new.fetch(*parse_params(key)).first
 
       if @dead.nil?
-        redirect "morgue"
+        redirect "#{root_path}morgue"
       else
-        render(:dead)
+        erb(:dead)
       end
     end
 
     post '/morgue' do
-      next redirect(request.path) unless params['key']
+      redirect(request.path) unless params['key']
 
       params['key'].each do |key|
         job = Sidekiq::DeadSet.new.fetch(*parse_params(key)).first
         retry_or_delete_or_kill job, params if job
       end
 
-      redirect_with_query("morgue")
+      redirect_with_query("#{root_path}morgue")
     end
 
     post "/morgue/all/delete" do
       Sidekiq::DeadSet.new.clear
 
-      redirect "morgue"
+      redirect "#{root_path}morgue"
     end
 
     post "/morgue/all/retry" do
       Sidekiq::DeadSet.new.retry_all
 
-      redirect "morgue"
+      redirect "#{root_path}morgue"
     end
 
     post "/morgue/:key" do
-      next NOPE unless key = route_params[:key]
+      halt(404) unless key = route_params[:key]
 
       job = Sidekiq::DeadSet.new.fetch(*parse_params(key)).first
       retry_or_delete_or_kill job, params if job
 
-      redirect_with_query("morgue")
+      redirect_with_query("#{root_path}morgue")
     end
 
     get '/retries' do
@@ -124,40 +129,40 @@ module Sidekiq
       (@current_page, @total_size, @retries) = page("retry", params['page'], @count)
       @retries = @retries.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
 
-      render(:retries)
+      erb(:retries)
     end
 
     get "/retries/:key" do
       @retry = Sidekiq::RetrySet.new.fetch(*parse_params(route_params[:key])).first
 
       if @retry.nil?
-        redirect "retries"
+        redirect "#{root_path}retries"
       else
-        render(:retry)
+        erb(:retry)
       end
     end
 
     post '/retries' do
-      next redirect(request.path) unless params['key']
+      redirect(request.path) unless params['key']
 
       params['key'].each do |key|
         job = Sidekiq::RetrySet.new.fetch(*parse_params(key)).first
         retry_or_delete_or_kill job, params if job
       end
 
-      redirect_with_query("retries")
+      redirect_with_query("#{root_path}retries")
     end
 
     post "/retries/all/delete" do
       Sidekiq::RetrySet.new.clear
 
-      redirect "retries"
+      redirect "#{root_path}retries"
     end
 
     post "/retries/all/retry" do
       Sidekiq::RetrySet.new.retry_all
 
-      redirect "retries"
+      redirect "#{root_path}retries"
     end
 
     post "/retries/:key" do
@@ -165,7 +170,7 @@ module Sidekiq
 
       retry_or_delete_or_kill job, params if job
 
-      redirect_with_query("retries")
+      redirect_with_query("#{root_path}retries")
     end
 
     get '/scheduled' do
@@ -173,41 +178,41 @@ module Sidekiq
       (@current_page, @total_size, @scheduled) = page("schedule", params['page'], @count)
       @scheduled = @scheduled.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
 
-      render(:scheduled)
+      erb(:scheduled)
     end
 
     get "/scheduled/:key" do
       @job = Sidekiq::ScheduledSet.new.fetch(*parse_params(route_params[:key])).first
 
       if @job.nil?
-        redirect "scheduled"
+        redirect "#{root_path}scheduled"
       else
-        render(:scheduled_job_info)
+        erb(:scheduled_job_info)
       end
     end
 
     post '/scheduled' do
-      next redirect(request.path) unless params['key']
+      redirect(request.path) unless params['key']
 
       params['key'].each do |key|
         job = Sidekiq::ScheduledSet.new.fetch(*parse_params(key)).first
         delete_or_add_queue job, params if job
       end
 
-      redirect_with_query("scheduled")
+      redirect_with_query("#{root_path}scheduled")
     end
 
     post "/scheduled/:key" do
-      next NOPE unless key = route_params[:key]
+      halt(404) unless key = route_params[:key]
 
       job = Sidekiq::ScheduledSet.new.fetch(*parse_params(key)).first
       delete_or_add_queue job, params if job
 
-      redirect_with_query("scheduled")
+      redirect_with_query("#{root_path}scheduled")
     end
 
     get '/dashboard/stats' do
-      redirect "stats"
+      redirect "#{root_path}stats"
     end
 
     get '/stats' do
@@ -238,42 +243,60 @@ module Sidekiq
       action = self.class.match(env)
       return NOPE unless action
 
-      self.class.run_befores(env)
-      resp = action.instance_exec env, &action.app
-      self.class.run_afters(env)
+      resp = catch(:halt) do
+        self.class.run_befores(action)
+        resp = action.instance_exec env, &action.app
+        self.class.run_afters(action)
+
+        resp
+      end
 
       case resp
       when Array
         resp
-      when Integer
+      when Fixnum
         [resp, {}, []]
       else
-        [200, WebAction::TEXT_HTML, [resp]]
+        headers = case action.type
+        when :json
+          WebAction::APPLICATION_JSON
+        when String
+          { WebAction::CONTENT_TYPE => action.type }
+        else
+          WebAction::TEXT_HTML
+        end
+
+        [200, headers, [resp]]
       end
     end
 
-    def self.helpers(mod)
-      WebAction.send(:include, mod)
-    end
-
-    def self.before(&block)
-      befores << block
-    end
-
-    def self.after(&block)
-      afters << block
-    end
-
-    def self.run_befores(env)
-      befores.each do |b|
-        b.call(env)
+    def self.helpers(mod=nil, &block)
+      if block_given?
+        WebAction.class_eval(&block)
+      else
+        WebAction.send(:include, mod)
       end
     end
 
-    def self.run_afters(env)
-      afters.each do |b|
-        b.call(env)
-      end
+    def self.before(path=nil, &block)
+      befores << [path && Regexp.new("\\A#{path.gsub("*", ".*")}\\z"), block]
+    end
+
+    def self.after(path=nil, &block)
+      afters << [path && Regexp.new("\\A#{path.gsub("*", ".*")}\\z"), block]
+    end
+
+    def self.run_befores(action)
+      run_hooks(befores, action)
+    end
+
+    def self.run_afters(action)
+      run_hooks(afters, action)
+    end
+
+    def self.run_hooks(hooks, action)
+      hooks.select { |p,_| !p || p =~ action.env[WebRouter::PATH_INFO] }.
+            each {|_,b| action.instance_exec(action.env, &b) }
     end
 
     def self.befores

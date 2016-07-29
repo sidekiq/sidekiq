@@ -2,6 +2,7 @@
 <html>
   <head>
     <title><%= environment_title_prefix %><%= Sidekiq::NAME %></title>
+    <meta charset="utf8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <link href="<%= root_path %>stylesheets/bootstrap.css" media="screen" rel="stylesheet" type="text/css" />
     <link href="<%= root_path %>stylesheets/application.css" media="screen" rel="stylesheet" type="text/css" />
@@ -12,12 +13,12 @@
     <%= display_custom_head %>
   </head>
   <body class="admin">
-    <%= partial :nav %>
+    <%= erb :_nav %>
     <div id="page">
       <div class="container">
         <div class="row">
           <div class="col-sm-12 summary_bar">
-            <%= partial :summary %>
+            <%= erb :_summary %>
           </div>
 
           <div class="col-sm-12">
@@ -26,7 +27,7 @@
         </div>
       </div>
     </div>
-    <%= partial :footer %>
-    <%= partial :poll_js %>
+    <%= erb :_footer %>
+    <%= erb :_poll_js %>
   </body>
 </html>

@@ -10,7 +10,7 @@ module Sidekiq
       @@strings[lang] ||= begin
         # Allow sidekiq-web extensions to add locale paths
         # so extensions can be localized
-        Web.locales.each_with_object({}) do |path, global|
+        settings.locales.each_with_object({}) do |path, global|
           find_locale_files(lang).each do |file|
             strs = YAML.load(File.open(file))
             global.deep_merge!(strs[lang])
@@ -25,7 +25,7 @@ module Sidekiq
     end
 
     def locale_files
-      @@locale_files ||= Web.locales.flat_map do |path|
+      @@locale_files ||= settings.locales.flat_map do |path|
         Dir["#{path}/*.yml"]
       end
     end
@@ -46,21 +46,13 @@ module Sidekiq
     #     <meta .../>
     #   <% end %>
     #
-    def add_to_head(&block)
+    def add_to_head
       @head_html ||= []
-      @head_html << block if block_given?
+      @head_html << yield.dup if block_given?
     end
 
     def display_custom_head
-      return unless defined?(@head_html)
-      @head_html.map { |block| capture(&block) }.join
-    end
-
-    # Simple capture method for erb templates. The origin was
-    # capture method from sinatra-contrib library.
-    def capture(&block)
-      block.call
-      eval('', block.binding)
+      @head_html.join if @head_html
     end
 
     # Given a browser request Accept-Language header like

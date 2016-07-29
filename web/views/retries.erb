@@ -4,7 +4,7 @@
   </div>
   <% if @retries.size > 0 && @total_size > @count %>
     <div class="col-sm-4">
-      <%= partial :paging, url: "#{root_path}retries" %>
+      <%= erb :_paging, locals: { url: "#{root_path}retries" } %>
     </div>
   <% end %>
   <%= filtering('retries') %>

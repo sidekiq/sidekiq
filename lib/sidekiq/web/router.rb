@@ -3,6 +3,7 @@
 module Sidekiq
   module WebRouter
     GET = 'GET'.freeze
+    DELETE = 'DELETE'.freeze
     POST = 'POST'.freeze
     HEAD = 'HEAD'.freeze
 
@@ -16,6 +17,10 @@ module Sidekiq
 
     def post(path, &block)
       route(POST, path, &block)
+    end
+
+    def delete(path, &block)
+      route(DELETE, path, &block)
     end
 
     def route(method, path, &block)

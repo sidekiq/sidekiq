@@ -4,7 +4,7 @@
   </div>
   <% if @scheduled.size > 0 && @total_size > @count %>
     <div class="col-sm-4">
-      <%= partial :paging, url: "#{root_path}scheduled" %>
+      <%= erb :_paging, locals: { url: "#{root_path}scheduled" } %>
     </div>
   <% end %>
   <%= filtering('scheduled') %>

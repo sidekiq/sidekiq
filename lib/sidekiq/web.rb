@@ -34,6 +34,10 @@ module Sidekiq
     }
 
     class << self
+      def settings
+        self
+      end
+
       def default_tabs
         DEFAULT_TABS
       end
@@ -47,12 +51,20 @@ module Sidekiq
         @locales ||= LOCALES
       end
 
+      def views
+        @views ||= VIEWS
+      end
+
       def session_secret=(secret)
-        @secret = secret
+        @session_secret = secret
       end
 
       attr_accessor :app_url, :session_secret
-      attr_writer :locales
+      attr_writer :locales, :views
+    end
+
+    def settings
+      self.class.settings
     end
 
     def initialize
