@@ -75,15 +75,43 @@ module Sidekiq
       self.class.settings
     end
 
-    def initialize
+    def use(*middleware_args, &block)
+      middlewares << [middleware_args, block]
+    end
+
+    def middlewares
+      @middlewares ||= Web.middlewares
+    end
+
+    def call(env)
+      app.call(env)
+    end
+
+    def self.call(env)
+      @app ||= new
+      @app.call(env)
+    end
+
+    def app
+      @app ||= build
+    end
+
+    def self.register(extension)
+      extension.registered(WebApplication)
+    end
+
+    private
+
+    def build
       unless secret = Web.session_secret
         require 'securerandom'
         secret = SecureRandom.hex(64)
       end
 
+      middlewares = self.middlewares
       klass = self.class
 
-      @app = ::Rack::Builder.new do
+      ::Rack::Builder.new do
         %w(stylesheets javascripts images).each do |asset_dir|
           map "/#{asset_dir}" do
             run ::Rack::File.new("#{ASSETS}/#{asset_dir}")
@@ -93,23 +121,10 @@ module Sidekiq
         use ::Rack::Session::Cookie, secret: secret
         use ::Rack::Protection, use: :authenticity_token unless ENV['RACK_ENV'] == 'test'
 
-        Web.middlewares.each {|middleware, block| use *middleware, &block }
+        middlewares.each {|middleware, block| use *middleware, &block }
 
         run WebApplication.new(klass)
       end
-    end
-
-    def call(env)
-      @app.call(env)
-    end
-
-    def self.call(env)
-      @app ||= new
-      @app.call(env)
-    end
-
-    def self.register(extension)
-      extension.registered(WebApplication)
     end
   end
 
