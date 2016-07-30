@@ -38,6 +38,14 @@ module Sidekiq
         self
       end
 
+      def middlewares
+        @middlewares ||= []
+      end
+
+      def use(*middleware_args, &block)
+        middlewares << [middleware_args, block]
+      end
+
       def default_tabs
         DEFAULT_TABS
       end
@@ -84,6 +92,8 @@ module Sidekiq
 
         use ::Rack::Session::Cookie, secret: secret
         use ::Rack::Protection, use: :authenticity_token unless ENV['RACK_ENV'] == 'test'
+
+        Web.middlewares.each {|middleware, block| use *middleware, &block }
 
         run WebApplication.new(klass)
       end
