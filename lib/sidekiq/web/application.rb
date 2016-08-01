@@ -18,7 +18,15 @@ module Sidekiq
     end
 
     def self.settings
-      Web.settings
+      Sidekiq::Web.settings
+    end
+
+    def self.tabs
+      Sidekiq::Web.tabs
+    end
+
+    def self.set(key, val)
+      # nothing, backwards compatibility
     end
 
     get "/" do
