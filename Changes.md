@@ -1,5 +1,23 @@
 # Sidekiq Changes
 
+HEAD
+-----------
+
+- Allow tuning of concurrency with the `RAILS_MAX_THREADS` env var. [#2985]
+  This is the same var used by Puma so you can tune all of your systems
+  the same way:
+```sh
+web: RAILS_MAX_THREADS=5 bundle exec puma ...
+worker: RAILS_MAX_THREADS=10 bundle exec sidekiq ...
+```
+Using `-c` or `config/sidekiq.yml` overrides this setting.  I recommend
+adjusting your `config/database.yml` to use it too so connections are
+auto-scaled:
+```yaml
+  pool: <%= ENV['RAILS_MAX_THREADS'] || 5 %>
+```
+
+
 4.1.4
 -----------
 

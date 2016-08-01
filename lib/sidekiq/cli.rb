@@ -208,6 +208,7 @@ module Sidekiq
       opts = parse_config(cfile).merge(opts) if cfile
 
       opts[:strict] = true if opts[:strict].nil?
+      opts[:concurrency] = Integer(ENV["RAILS_MAX_THREADS"]) if !opts[:concurrency] && ENV["RAILS_MAX_THREADS"]
 
       options.merge!(opts)
     end
