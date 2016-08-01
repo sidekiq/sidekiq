@@ -178,7 +178,7 @@ class TestClient < Sidekiq::Test
     class DWorker < BaseWorker
     end
 
-    it 'allows sidekiq_options to point to different Redi' do
+    it 'allows sidekiq_options to point to different Redis' do
       conn = MiniTest::Mock.new
       conn.expect(:multi, [0, 1])
       DWorker.sidekiq_options('pool' => ConnectionPool.new(size: 1) { conn })
@@ -186,7 +186,7 @@ class TestClient < Sidekiq::Test
       conn.verify
     end
 
-    it 'allows #via to point to same Redi' do
+    it 'allows #via to point to same Redis' do
       conn = MiniTest::Mock.new
       conn.expect(:multi, [0, 1])
       sharded_pool = ConnectionPool.new(size: 1) { conn }
@@ -198,7 +198,7 @@ class TestClient < Sidekiq::Test
       conn.verify
     end
 
-    it 'allows #via to point to different Redi' do
+    it 'allows #via to point to different Redis' do
       conn = MiniTest::Mock.new
       conn.expect(:multi, [0, 1])
       default = Sidekiq::Client.new.redis_pool
@@ -216,7 +216,7 @@ class TestClient < Sidekiq::Test
       conn.verify
     end
 
-    it 'allows Resque helpers to point to different Redi' do
+    it 'allows Resque helpers to point to different Redis' do
       conn = MiniTest::Mock.new
       conn.expect(:multi, []) { |*args, &block| block.call }
       conn.expect(:zadd, 1, [String, Array])
