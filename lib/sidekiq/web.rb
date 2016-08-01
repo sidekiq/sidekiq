@@ -102,10 +102,24 @@ module Sidekiq
 
     private
 
+    def using?(middleware)
+      middlewares.any? do |(m,_)|
+        m.kind_of?(Array) && (m[0] == middleware || m[0].kind_of?(middleware))
+      end
+    end
+
     def build
-      unless secret = Web.session_secret
-        require 'securerandom'
-        secret = SecureRandom.hex(64)
+      unless using? ::Rack::Session::Cookie
+        unless secret = Web.session_secret
+          require 'securerandom'
+          secret = SecureRandom.hex(64)
+        end
+
+        use ::Rack::Session::Cookie, secret: secret
+      end
+
+      unless using?(::Rack::Protection) || ENV['RACK_ENV'] == 'test'
+        use ::Rack::Protection, use: :authenticity_token
       end
 
       middlewares = self.middlewares
@@ -117,9 +131,6 @@ module Sidekiq
             run ::Rack::File.new("#{ASSETS}/#{asset_dir}")
           end
         end
-
-        use ::Rack::Session::Cookie, secret: secret
-        use ::Rack::Protection, use: :authenticity_token unless ENV['RACK_ENV'] == 'test'
 
         middlewares.each {|middleware, block| use *middleware, &block }
 

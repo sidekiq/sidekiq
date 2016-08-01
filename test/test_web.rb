@@ -595,6 +595,7 @@ class TestWeb < Sidekiq::Test
       Sidekiq.redis do |conn|
         conn.zadd('retry', score, Sidekiq.dump_json(msg))
       end
+
       [msg, score]
     end
 
@@ -634,6 +635,27 @@ class TestWeb < Sidekiq::Test
       get '/'
 
       assert_equal 200, last_response.status
+    end
+  end
+
+  describe 'sidekiq web with custom session' do
+    include Rack::Test::Methods
+
+    def app
+      app = Sidekiq::Web.new
+
+      app.use Rack::Session::Cookie, secret: 'v3rys3cr31', host: 'nicehost.org'
+
+      app
+    end
+
+    it 'requires basic authentication' do
+      get '/'
+
+      session_options = last_request.env['rack.session'].options
+
+      assert_equal 'v3rys3cr31', session_options[:secret]
+      assert_equal 'nicehost.org', session_options[:host]
     end
   end
 end
