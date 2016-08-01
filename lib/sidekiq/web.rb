@@ -80,7 +80,7 @@ module Sidekiq
     end
 
     def middlewares
-      @middlewares ||= Web.middlewares
+      @middlewares ||= Web.middlewares.dup
     end
 
     def call(env)
