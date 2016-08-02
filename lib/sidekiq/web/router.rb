@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'rack'
 
 module Sidekiq
   module WebRouter
@@ -42,7 +43,7 @@ module Sidekiq
 
     def match(env)
       request_method = env[REQUEST_METHOD]
-      path_info = env[PATH_INFO]
+      path_info = ::Rack::Utils.unescape env[PATH_INFO]
 
       @routes[request_method].each do |route|
         if params = route.match(request_method, path_info)
