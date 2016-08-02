@@ -59,7 +59,7 @@ module Sidekiq
   class WebRoute
     attr_accessor :request_method, :pattern, :block, :name
 
-    NAMED_SEGMENTS_PATTERN = /\/([^\/]*):([^:$\/]+)/.freeze
+    NAMED_SEGMENTS_PATTERN = /\/([^\/]*):([^\.:$\/]+)/.freeze
 
     def initialize(request_method, pattern, block)
       @request_method = request_method
