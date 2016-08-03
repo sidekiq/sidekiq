@@ -209,6 +209,7 @@ module Sidekiq
 
       opts[:strict] = true if opts[:strict].nil?
       opts[:concurrency] = Integer(ENV["RAILS_MAX_THREADS"]) if !opts[:concurrency] && ENV["RAILS_MAX_THREADS"]
+      opts[:identity] = identity
 
       options.merge!(opts)
     end
