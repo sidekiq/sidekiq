@@ -753,11 +753,11 @@ div.interval-slider input {
   text-overflow: ellipsis;
 }
 
-#product_version {
+.product-version {
   color:white;
 }
 
-#warningmessages {
+.warning-messages {
   margin-top: 20px;
   margin-bottom: 10px;
 }
@@ -766,14 +766,14 @@ div.interval-slider input {
   display: none;
 }
 
-#box {
+.box {
   width: 50%;
 }
 
-.width {
+.checkbox-column {
   width: 20px;
 }
 
-#deleteconfirm {
+.delete-confirm {
   width: 20%;
 }
