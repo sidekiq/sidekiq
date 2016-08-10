@@ -47,7 +47,7 @@ module Sidekiq
   }.freeze
 
   def self.❨╯°□°❩╯︵┻━┻
-    puts "Calm down, yo."
+    puts "┬──┬﻿ ¯\_(ツ)"
   end
 
   def self.options
