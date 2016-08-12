@@ -15,8 +15,6 @@ class TestLauncher < Sidekiq::Test
 
     describe 'heartbeat' do
       before do
-        uow = Object.new
-
         @mgr = new_manager(options)
         @launcher = Sidekiq::Launcher.new(options)
         @launcher.manager = @mgr
@@ -29,6 +27,18 @@ class TestLauncher < Sidekiq::Test
       after do
         Sidekiq::Processor::WORKER_STATE.clear
         $0 = @proctitle
+      end
+
+      it 'fires new heartbeat events' do
+        i = 0
+        Sidekiq.on(:heartbeat) do
+          i += 1
+        end
+        assert_equal 0, i
+        @launcher.heartbeat('identity', heartbeat_data, Sidekiq.dump_json(heartbeat_data))
+        assert_equal 1, i
+        @launcher.heartbeat('identity', heartbeat_data, Sidekiq.dump_json(heartbeat_data))
+        assert_equal 1, i
       end
 
       describe 'when manager is active' do
