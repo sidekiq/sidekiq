@@ -4,7 +4,7 @@
   </div>
   <% if @dead.size > 0 && @total_size > @count %>
     <div class="col-sm-4">
-      <%= erb :_paging, :locals => { :url => "#{root_path}morgue" } %>
+      <%= partial :paging, url: "#{root_path}morgue" %>
     </div>
   <% end %>
   <%= filtering('dead') %>
