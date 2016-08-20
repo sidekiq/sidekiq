@@ -26,7 +26,7 @@
           <% if a.size > 100 %>
             <%= h(msg.display_args.inspect[0..100]) + "... " %>
             <button data-toggle="collapse" data-target="#worker_<%= index %>" class="btn btn-default btn-xs"><%= t('ShowAll') %></button>
-            <div class="toggle" id="worker_<%= index %>" style="display: none;"><%= h(msg.display_args) %></div>
+            <div class="toggle" id="worker_<%= index %>"><%= h(msg.display_args) %></div>
           <% else %>
             <%= h(msg.display_args) %>
           <% end %>

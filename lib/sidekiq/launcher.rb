@@ -94,14 +94,18 @@ module Sidekiq
         end
         fails = procd = 0
 
-        _, _, _, msg = Sidekiq.redis do |conn|
+        _, exists, _, _, msg = Sidekiq.redis do |conn|
           conn.multi do
             conn.sadd('processes', key)
+            conn.exists(key)
             conn.hmset(key, 'info', json, 'busy', Processor::WORKER_STATE.size, 'beat', Time.now.to_f, 'quiet', @done)
             conn.expire(key, 60)
             conn.rpop("#{key}-signals")
           end
         end
+
+        # first heartbeat or recovering from an outage and need to reestablish our heartbeat
+        fire_event(:heartbeat) if !exists
 
         return unless msg
 
