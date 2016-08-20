@@ -1,5 +1,17 @@
 # Sidekiq Changes
 
+4.2.0
+-----------
+
+- Remove Sinatra dependency.  Sidekiq's Web UI now uses Rack directly.
+  Thank you to Sidekiq's newest committer, **badosu**, for writing the code
+  and doing a lot of testing to ensure compatibility with many different
+  3rd party plugins.  If your Web UI works with 4.1.4 but fails with
+  4.2.0, please open an issue.
+- Add support for development mode code reloading with Rails 5's new
+  thread-safe Interlock API.  With Rails 5, you no longer need to
+  restart Sidekiq when making code changes locally!
+
 4.1.4
 -----------
 
