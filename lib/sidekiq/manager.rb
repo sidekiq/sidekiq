@@ -4,6 +4,7 @@ require 'sidekiq/util'
 require 'sidekiq/processor'
 require 'sidekiq/fetch'
 require 'thread'
+require 'set'
 
 module Sidekiq
 

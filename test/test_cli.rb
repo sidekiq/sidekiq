@@ -42,6 +42,18 @@ class TestCli < Sidekiq::Test
       assert_equal 60, Sidekiq.options[:concurrency]
     end
 
+    it 'changes concurrency with ENV' do
+      begin
+        ENV['RAILS_MAX_THREADS'] = '9'
+        @cli.parse(['sidekiq', '-c', '60', '-r', './test/fake_env.rb'])
+        assert_equal 60, Sidekiq.options[:concurrency]
+        @cli.parse(['sidekiq', '-r', './test/fake_env.rb'])
+        assert_equal 9, Sidekiq.options[:concurrency]
+      ensure
+        ENV.delete('RAILS_MAX_THREADS')
+      end
+    end
+
     it 'changes queues' do
       @cli.parse(['sidekiq', '-q', 'foo', '-r', './test/fake_env.rb'])
       assert_equal ['foo'], Sidekiq.options[:queues]

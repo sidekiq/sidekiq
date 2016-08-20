@@ -752,3 +752,28 @@ div.interval-slider input {
 .redis-url {
   text-overflow: ellipsis;
 }
+
+.product-version {
+  color:white;
+}
+
+.warning-messages {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.toggle {
+  display: none;
+}
+
+.box {
+  width: 50%;
+}
+
+.checkbox-column {
+  width: 20px;
+}
+
+.delete-confirm {
+  width: 20%;
+}
