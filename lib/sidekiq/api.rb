@@ -178,6 +178,71 @@ module Sidekiq
   end
 
   ##
+  # Specific metrics useful for monitoring. These can all be gathered using the other
+  # classes in ths file, but this way we only use three roundtrips to Redis.
+  #
+  # Exposed in the web interface on /stats/monitor.
+  #
+  class Monitor
+    def all_queue_metrics
+      metrics = {}
+
+      Sidekiq.redis do |conn|
+        queues = conn.smembers('queues'.freeze)
+
+        results = conn.pipelined do
+          queues.each do |queue_name|
+            rname = "queue:#{queue_name}"
+            conn.llen(rname)
+            conn.lrange(rname, -1, -1)
+          end
+        end
+
+        results.each_slice(2).with_index do |(size, entries), idx|
+          latency = if entry = entries.first
+                      Time.now.to_f - Sidekiq.load_json(entry)['enqueued_at']
+                    else
+                      0
+                    end
+
+          metrics[queues[idx]] = {
+            backlog: size,
+            latency: latency.to_i
+          }
+        end
+      end
+
+      metrics
+    end
+
+    def all_process_metrics
+      metrics = []
+
+      Sidekiq.redis do |conn|
+        procs = conn.smembers('processes'.freeze)
+
+        results = conn.pipelined do
+          procs.each do |key|
+            conn.hmget(key, 'info', 'busy')
+          end
+        end
+
+        results.each do |json_info, busy|
+          next unless json_info
+
+          info = Sidekiq.load_json(json_info)
+          info['busy'] = busy.to_i
+          info['started_at'] = Time.at(info['started_at']).iso8601
+
+          metrics << info
+        end
+      end
+
+      metrics
+    end
+  end
+
+  ##
   # Encapsulates a queue within Sidekiq.
   # Allows enumeration of all jobs within the queue
   # and deletion of jobs.

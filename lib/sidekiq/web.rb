@@ -242,6 +242,16 @@ module Sidekiq
       )
     end
 
+    get '/stats/monitor' do
+      monitor_stats = Sidekiq::Monitor.new
+
+      content_type :json
+      Sidekiq.dump_json(
+        queues:    monitor_stats.all_queue_metrics,
+        processes: monitor_stats.all_process_metrics
+      )
+    end
+
     private
 
     def retry_or_delete_or_kill job, params
