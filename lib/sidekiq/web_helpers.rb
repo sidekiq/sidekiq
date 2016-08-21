@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'uri'
+require 'time'
 
 module Sidekiq
   # This is not a public API
@@ -139,7 +140,7 @@ module Sidekiq
     end
 
     def relative_time(time)
-      %{<time datetime="#{time.getutc.iso8601}">#{time}</time>}
+      %{<time datetime="#{time.to_time.getutc.iso8601}">#{time}</time>}
     end
 
     def job_params(job, score)
