@@ -51,4 +51,13 @@ class TestWebHelpers < Sidekiq::Test
     obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => '*')
     assert_equal 'en', obj.locale
   end
+
+  def test_view_helpers
+    obj = Helpers.new
+
+    assert_equal '&quot;arg1&quot;, &quot;arg2&quot;', obj.display_args(['arg1', 'arg2'])
+    assert_equal '&quot;arg...', obj.display_args(['arg1'], 3)
+    assert_equal '&quot;arg1&quot;...', obj.display_args(['arg1'], 5)
+    assert_equal '&quot;arg1&quot;', obj.display_args('arg1')
+  end
 end
