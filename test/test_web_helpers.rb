@@ -51,4 +51,9 @@ class TestWebHelpers < Sidekiq::Test
     obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => '*')
     assert_equal 'en', obj.locale
   end
+
+  def test_relative_time
+    obj = Helpers.new
+    assert_equal "<time datetime=\"2026-01-20T14:22:39Z\">January 20, 2026 14:22</time>", obj.relative_time(Time.new(2026, 1, 20, 14, 22, 39))
+  end
 end

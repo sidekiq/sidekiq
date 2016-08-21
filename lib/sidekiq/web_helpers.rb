@@ -139,7 +139,7 @@ module Sidekiq
     end
 
     def relative_time(time)
-      %{<time datetime="#{time.getutc.iso8601}">#{time}</time>}
+      %{<time datetime="#{time.getutc.iso8601}">#{time.to_formatted_s(:long)}</time>}
     end
 
     def job_params(job, score)
