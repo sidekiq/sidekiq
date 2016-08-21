@@ -221,7 +221,7 @@ module Sidekiq
     def boot_system
       ENV['RACK_ENV'] = ENV['RAILS_ENV'] = environment
 
-      raise ArgumentError, "#{options[:require]} does not exist" unless File.exist?(options[:require])
+      raise ArgumentError, "#{options[:require]} does not exist" unless File.exist?("#{options[:require]}.rb")
 
       if File.directory?(options[:require])
         require 'rails'
@@ -240,6 +240,7 @@ module Sidekiq
         end
         options[:tag] ||= default_tag
       else
+        $LOAD_PATH.unshift(File.expand_path(Dir.getwd))
         require options[:require]
       end
     end
@@ -258,7 +259,7 @@ module Sidekiq
     def validate!
       options[:queues] << 'default' if options[:queues].empty?
 
-      if !File.exist?(options[:require]) ||
+      if !File.exist?("#{options[:require]}.rb") ||
          (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))
         logger.info "=================================================================="
         logger.info "  Please point sidekiq to a Rails 3/4 application or a Ruby file  "
