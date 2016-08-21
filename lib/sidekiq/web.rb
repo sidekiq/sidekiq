@@ -19,6 +19,7 @@ module Sidekiq
     set :public_folder, proc { "#{root}/assets" }
     set :views, proc { "#{root}/views" }
     set :locales, ["#{root}/locales"]
+    set :logging, false
 
     helpers WebHelpers
 
