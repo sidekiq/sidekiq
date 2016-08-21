@@ -777,3 +777,7 @@ div.interval-slider input {
 .delete-confirm {
   width: 20%;
 }
+
+.search{
+  text-align: right;
+}
