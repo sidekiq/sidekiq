@@ -13,7 +13,19 @@ module Sidekiq
     include Sidekiq::Paginator
 
     enable :sessions
-    use ::Rack::Protection, :use => :authenticity_token unless ENV['RACK_ENV'] == 'test'
+
+    def self.protections
+      local = ENV['RACK_ENV'] == 'development' ? "'self' localhost" : "'self'"
+      {
+        use:         :authenticity_token,
+        connect_src: local,
+        default_src: local,
+        script_src:  local,
+        style_src:   "#{local} 'unsafe-inline'",
+        img_src:     "'self' data:"
+      }
+    end
+    use ::Rack::Protection, protections unless ENV['RACK_ENV'] == 'test'
 
     set :root, File.expand_path(File.dirname(__FILE__) + "/../../web")
     set :public_folder, proc { "#{root}/assets" }
