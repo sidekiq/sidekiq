@@ -2,7 +2,6 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'rails', '5.0.0'
-gem 'sinatra', github: 'sinatra/sinatra'
 gem "hiredis"
 gem 'simplecov'
 gem 'minitest'
