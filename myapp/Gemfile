@@ -18,4 +18,4 @@ gem 'sidekiq', :path => '..'
 #de gem 'pry-byebug'
 
 # sidekiq-web dependencies
-gem 'sinatra'
+gem 'rack-protection'

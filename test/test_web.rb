@@ -3,10 +3,8 @@
 require_relative 'helper'
 require 'sidekiq/web'
 require 'rack/test'
-require 'tilt/erubis'
 
 class TestWeb < Sidekiq::Test
-
   describe 'sidekiq web' do
     include Rack::Test::Methods
 
@@ -341,7 +339,6 @@ class TestWeb < Sidekiq::Test
       assert last_response.body.include?( "&lt;a&gt;hello&lt;&#x2F;a&gt;" )
       assert !last_response.body.include?( "<a>hello</a>" )
 
-
       # on /queues page
       params = add_xss_retry # sorry, don't know how to easily make this show up on queues page otherwise.
       post "/retries/#{job_params(*params)}", 'retry' => 'Retry'
@@ -374,7 +371,7 @@ class TestWeb < Sidekiq::Test
       before do
         Sidekiq::Web.settings.locales << File.join(File.dirname(__FILE__), "fixtures")
         Sidekiq::Web.tabs['Custom Tab'] = '/custom'
-        Sidekiq::Web.get('/custom') do
+        Sidekiq::WebApplication.get('/custom') do
           clear_caches # ugly hack since I can't figure out how to access WebHelpers outside of this context
           t('translated_text')
         end
@@ -387,6 +384,7 @@ class TestWeb < Sidekiq::Test
 
       it 'can show user defined tab with custom locales' do
         get '/custom'
+
         assert_match(/Changed text/, last_response.body)
       end
     end
@@ -564,6 +562,7 @@ class TestWeb < Sidekiq::Test
       Sidekiq.redis do |conn|
         conn.zadd('retry', score, Sidekiq.dump_json(msg))
       end
+
       [msg, score]
     end
 
@@ -596,6 +595,7 @@ class TestWeb < Sidekiq::Test
       Sidekiq.redis do |conn|
         conn.zadd('retry', score, Sidekiq.dump_json(msg))
       end
+
       [msg, score]
     end
 
@@ -609,6 +609,53 @@ class TestWeb < Sidekiq::Test
           conn.hmset("#{key}:workers", Time.now.to_f, msg)
         end
       end
+    end
+  end
+
+  describe 'sidekiq web with basic auth' do
+    include Rack::Test::Methods
+
+    def app
+      app = Sidekiq::Web.new
+      app.use(Rack::Auth::Basic) { |user, pass| user == "a" && pass == "b" }
+
+      app
+    end
+
+    it 'requires basic authentication' do
+      get '/'
+
+      assert_equal 401, last_response.status
+      refute_nil last_response.header["WWW-Authenticate"]
+    end
+
+    it 'authenticates successfuly' do
+      basic_authorize 'a', 'b'
+
+      get '/'
+
+      assert_equal 200, last_response.status
+    end
+  end
+
+  describe 'sidekiq web with custom session' do
+    include Rack::Test::Methods
+
+    def app
+      app = Sidekiq::Web.new
+
+      app.use Rack::Session::Cookie, secret: 'v3rys3cr31', host: 'nicehost.org'
+
+      app
+    end
+
+    it 'requires basic authentication' do
+      get '/'
+
+      session_options = last_request.env['rack.session'].options
+
+      assert_equal 'v3rys3cr31', session_options[:secret]
+      assert_equal 'nicehost.org', session_options[:host]
     end
   end
 end
