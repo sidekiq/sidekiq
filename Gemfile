@@ -1,8 +1,8 @@
 source 'https://rubygems.org'
 gemspec
 
+gem 'rails', '5.0.0'
 gem "hiredis"
-gem 'rails', '~> 4.2'
 gem 'simplecov'
 gem 'minitest'
 gem 'minitest-utils'
@@ -23,7 +23,7 @@ platforms :mri do
   gem 'ruby-prof'
 end
 
-platforms :jruby do
-  gem 'jruby-openssl'
-  gem 'activerecord-jdbcsqlite3-adapter'
-end
+#platforms :jruby do
+  #gem 'jruby-openssl'
+  #gem 'activerecord-jdbcsqlite3-adapter'
+#end

@@ -1,21 +1,20 @@
 source 'https://rubygems.org'
 
+gem 'pry'
+gem 'sidekiq', :path => '..'
+gem 'rails', '5.0.0'
+
 platforms :ruby do
   gem 'sqlite3'
   gem 'redis-namespace'
 end
 
-platforms :jruby do
-  gem 'jruby-openssl'
-  gem 'activerecord-jdbcsqlite3-adapter'
-end
+#platforms :jruby do
+  #gem 'jruby-openssl'
+  #gem 'activerecord-jdbcsqlite3-adapter'
+#end
 
-gem 'rails', '~> 4.2'
-gem 'sidekiq', :path => '..'
 #gem 'ruby-prof'
 
 #de Does not work with jruby or rbx:
 #de gem 'pry-byebug'
-
-# sidekiq-web dependencies
-gem 'rack-protection'

@@ -35,5 +35,22 @@ module Sidekiq
     initializer 'sidekiq' do
       Sidekiq.hook_rails!
     end
+
+    class Reloader
+      def initialize(app = ::Rails.application)
+        Sidekiq.logger.debug "Enabling Rails 5+ live code reloading, so hot!" unless app.config.cache_classes
+        @app = app
+      end
+
+      def call
+        @app.reloader.wrap do
+          yield
+        end
+      end
+
+      def inspect
+        "#<Sidekiq::Rails::Reloader @app=#{@app.class.name}>"
+      end
+    end
   end if defined?(::Rails)
 end

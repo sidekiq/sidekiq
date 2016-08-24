@@ -36,6 +36,7 @@ module Sidekiq
       @job = nil
       @thread = nil
       @strategy = (mgr.options[:fetch] || Sidekiq::BasicFetch).new(mgr.options)
+      @reloader = Sidekiq.options[:reloader]
     end
 
     def terminate(wait=false)
@@ -118,33 +119,35 @@ module Sidekiq
       jobstr = work.job
       queue = work.queue_name
 
-      ack = false
-      begin
-        job = Sidekiq.load_json(jobstr)
-        klass  = job['class'.freeze].constantize
-        worker = klass.new
-        worker.jid = job['jid'.freeze]
-
-        stats(worker, job, queue) do
-          Sidekiq.server_middleware.invoke(worker, job, queue) do
-            # Only ack if we either attempted to start this job or
-            # successfully completed it. This prevents us from
-            # losing jobs if a middleware raises an exception before yielding
-            ack = true
-            execute_job(worker, cloned(job['args'.freeze]))
-          end
-        end
-        ack = true
-      rescue Sidekiq::Shutdown
-        # Had to force kill this job because it didn't finish
-        # within the timeout.  Don't acknowledge the work since
-        # we didn't properly finish it.
+      @reloader.call do
         ack = false
-      rescue Exception => ex
-        handle_exception(ex, job || { :job => jobstr })
-        raise
-      ensure
-        work.acknowledge if ack
+        begin
+          job = Sidekiq.load_json(jobstr)
+          klass  = job['class'.freeze].constantize
+          worker = klass.new
+          worker.jid = job['jid'.freeze]
+
+          stats(worker, job, queue) do
+            Sidekiq.server_middleware.invoke(worker, job, queue) do
+              # Only ack if we either attempted to start this job or
+              # successfully completed it. This prevents us from
+              # losing jobs if a middleware raises an exception before yielding
+              ack = true
+              execute_job(worker, cloned(job['args'.freeze]))
+            end
+          end
+          ack = true
+        rescue Sidekiq::Shutdown
+          # Had to force kill this job because it didn't finish
+          # within the timeout.  Don't acknowledge the work since
+          # we didn't properly finish it.
+          ack = false
+        rescue Exception => ex
+          handle_exception(ex, job || { :job => jobstr })
+          raise
+        ensure
+          work.acknowledge if ack
+        end
       end
     end
 
