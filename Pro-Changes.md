@@ -3,6 +3,11 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+3.3.3
+---------
+
+- Update Web UI extension to work with Sidekiq 4.2.0's new Web UI. [#3075]
+
 3.3.2
 ---------
 
