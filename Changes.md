@@ -1,10 +1,15 @@
 # Sidekiq Changes
 
-HEAD
+4.2.0
 -----------
 
-- Enable development-mode code reloading.  With Rails 5.0+, you don't need
-  to restart Sidekiq to pick up your Sidekiq::Worker changes anymore! [#2457]
+- Enable development-mode code reloading.  **With Rails 5.0+, you don't need
+  to restart Sidekiq to pick up your Sidekiq::Worker changes anymore!** [#2457]
+- **Remove Sinatra dependency**.  Sidekiq's Web UI now uses Rack directly.
+  Thank you to Sidekiq's newest committer, **badosu**, for writing the code
+  and doing a lot of testing to ensure compatibility with many different
+  3rd party plugins.  If your Web UI works with 4.1.4 but fails with
+  4.2.0, please open an issue. [#3075]
 - Allow tuning of concurrency with the `RAILS_MAX_THREADS` env var. [#2985]
   This is the same var used by Puma so you can tune all of your systems
   the same way:

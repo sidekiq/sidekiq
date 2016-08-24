@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'uri'
+require 'yaml'
 
 module Sidekiq
   # This is not a public API
@@ -45,21 +46,13 @@ module Sidekiq
     #     <meta .../>
     #   <% end %>
     #
-    def add_to_head(&block)
+    def add_to_head
       @head_html ||= []
-      @head_html << block if block_given?
+      @head_html << yield.dup if block_given?
     end
 
     def display_custom_head
-      return unless defined?(@head_html)
-      @head_html.map { |block| capture(&block) }.join
-    end
-
-    # Simple capture method for erb templates. The origin was
-    # capture method from sinatra-contrib library.
-    def capture(&block)
-      block.call
-      eval('', block.binding)
+      @head_html.join if @head_html
     end
 
     # Given a browser request Accept-Language header like
@@ -69,7 +62,7 @@ module Sidekiq
     def locale
       @locale ||= begin
         locale = 'en'.freeze
-        languages = request.env['HTTP_ACCEPT_LANGUAGE'.freeze] || 'en'.freeze
+        languages = env['HTTP_ACCEPT_LANGUAGE'.freeze] || 'en'.freeze
         languages.downcase.split(','.freeze).each do |lang|
           next if lang == '*'.freeze
           lang = lang.split(';'.freeze)[0]
@@ -249,6 +242,24 @@ module Sidekiq
       @redis_connection_and_namespace ||= begin
         namespace_suffix = namespace == nil ? '' : "##{namespace}"
         "#{redis_connection}#{namespace_suffix}"
+      end
+    end
+
+    def retry_or_delete_or_kill(job, params)
+      if params['retry']
+        job.retry
+      elsif params['delete']
+        job.delete
+      elsif params['kill']
+        job.kill
+      end
+    end
+
+    def delete_or_add_queue(job, params)
+      if params['delete']
+        job.delete
+      elsif params['add_to_queue']
+        job.add_to_queue
       end
     end
   end
