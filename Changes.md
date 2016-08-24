@@ -1,6 +1,6 @@
 # Sidekiq Changes
 
-4.2.0
+HEAD
 -----------
 
 - Enable development-mode code reloading.  **With Rails 5.0+, you don't need
