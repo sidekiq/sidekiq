@@ -25,6 +25,9 @@ After=syslog.target network.target
 [Service]
 Type=simple
 WorkingDirectory=/opt/myapp/current
+# If you use rbenv:
+# ExecStart=/bin/bash -lc 'bundle exec sidekiq -e production'
+# If you use the system's ruby:
 ExecStart=/usr/local/bin/bundle exec sidekiq -e production
 User=deploy
 Group=deploy
