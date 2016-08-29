@@ -31,6 +31,14 @@ class TestCli < Sidekiq::Test
       assert @cli.valid?
     end
 
+    it 'does not require existing file' do
+      @cli.parse(['sidekiq', '-r', 'sidekiq.rb'])
+
+      assert_raises ArgumentError do
+        @cli.run
+      end
+    end
+
     it 'does not boot rails' do
       refute defined?(::Rails::Application)
       @cli.parse(['sidekiq', '-r', './myapp'])

@@ -244,7 +244,7 @@ module Sidekiq
         end
         options[:tag] ||= default_tag
       else
-        require options[:require]
+        require options[:require] or raise ArgumentError, "#{options[:require]} was not required"
       end
     end
 
