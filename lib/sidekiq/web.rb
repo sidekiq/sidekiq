@@ -128,7 +128,7 @@ module Sidekiq
       ::Rack::Builder.new do
         %w(stylesheets javascripts images).each do |asset_dir|
           map "/#{asset_dir}" do
-            run ::Rack::File.new("#{ASSETS}/#{asset_dir}")
+            run ::Rack::File.new("#{ASSETS}/#{asset_dir}", { 'Cache-Control' => 'public, max-age=86400' })
           end
         end
 
