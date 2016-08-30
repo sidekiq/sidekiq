@@ -132,7 +132,7 @@ module Sidekiq
           end
         end
 
-        middlewares.each {|middleware, block| use *middleware, &block }
+        middlewares.each {|middleware, block| use(*middleware, &block) }
 
         run WebApplication.new(klass)
       end
