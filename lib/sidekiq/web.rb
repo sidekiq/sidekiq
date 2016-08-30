@@ -63,10 +63,6 @@ module Sidekiq
         @views ||= VIEWS
       end
 
-      def session_secret=(secret)
-        @session_secret = secret
-      end
-
       attr_accessor :app_url, :session_secret, :redis_pool
       attr_writer :locales, :views
     end

@@ -46,6 +46,7 @@ module Sidekiq
         @enq = (Sidekiq.options[:scheduled_enq] || Sidekiq::Scheduled::Enq).new
         @sleeper = ConnectionPool::TimedStack.new
         @done = false
+        @thread = nil
       end
 
       # Shut down this instance, will pause until the thread is dead.

@@ -52,7 +52,7 @@ module Sidekiq
     end
 
     def display_custom_head
-      @head_html.join if @head_html
+      @head_html.join if defined?(@head_html)
     end
 
     # Given a browser request Accept-Language header like
