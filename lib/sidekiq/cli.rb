@@ -244,7 +244,10 @@ module Sidekiq
         end
         options[:tag] ||= default_tag
       else
-        require options[:require]
+        not_required_message = "#{options[:require]} was not required, you should use an explicit path: " +
+            "./#{options[:require]} or /path/to/#{options[:require]}"
+
+        require(options[:require]) || raise(ArgumentError, not_required_message)
       end
     end
 
