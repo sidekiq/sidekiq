@@ -342,7 +342,7 @@ class TestCli < Sidekiq::Test
       end
 
       after do
-        File.unlink @tmp_log_path if File.exists? @tmp_log_path
+        File.unlink @tmp_log_path if File.exist? @tmp_log_path
       end
 
       it 'shuts down the worker' do
@@ -377,7 +377,7 @@ class TestCli < Sidekiq::Test
       end
 
       after do
-        File.unlink @tmp_log_path if File.exists? @tmp_log_path
+        File.unlink @tmp_log_path if File.exist? @tmp_log_path
       end
 
       describe 'with backtrace' do

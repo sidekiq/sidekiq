@@ -78,6 +78,7 @@ module Sidekiq
     end
 
     def initialize(env, block)
+      @_erb = false
       @env = env
       @block = block
       @@files ||= {}

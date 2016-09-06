@@ -171,6 +171,7 @@ module Sidekiq
   def self.default_retries_exhausted=(prok)
     @default_retries_exhausted = prok
   end
+  @default_retries_exhausted = ->(job, ex) { }
   def self.default_retries_exhausted
     @default_retries_exhausted
   end

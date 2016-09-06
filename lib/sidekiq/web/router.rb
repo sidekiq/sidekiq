@@ -88,7 +88,7 @@ module Sidekiq
         {} if path == matcher
       else
         if path_match = path.match(matcher)
-          params = Hash[path_match.names.map(&:to_sym).zip(path_match.captures)]
+          Hash[path_match.names.map(&:to_sym).zip(path_match.captures)]
         end
       end
     end

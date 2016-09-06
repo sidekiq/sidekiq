@@ -63,10 +63,6 @@ module Sidekiq
         @views ||= VIEWS
       end
 
-      def session_secret=(secret)
-        @session_secret = secret
-      end
-
       attr_accessor :app_url, :session_secret, :redis_pool
       attr_writer :locales, :views
     end
@@ -128,11 +124,11 @@ module Sidekiq
       ::Rack::Builder.new do
         %w(stylesheets javascripts images).each do |asset_dir|
           map "/#{asset_dir}" do
-            run ::Rack::File.new("#{ASSETS}/#{asset_dir}")
+            run ::Rack::File.new("#{ASSETS}/#{asset_dir}", { 'Cache-Control' => 'public, max-age=86400' })
           end
         end
 
-        middlewares.each {|middleware, block| use *middleware, &block }
+        middlewares.each {|middleware, block| use(*middleware, &block) }
 
         run WebApplication.new(klass)
       end
@@ -149,7 +145,7 @@ if defined?(::ActionDispatch::Request::Session) &&
     !::ActionDispatch::Request::Session.respond_to?(:each)
   # mperham/sidekiq#2460
   # Rack apps can't reuse the Rails session store without
-  # this monkeypatch
+  # this monkeypatch, fixed in Rails 5.
   class ActionDispatch::Request::Session
     def each(&block)
       hash = self.to_hash
