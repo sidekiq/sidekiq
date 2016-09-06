@@ -145,7 +145,7 @@ if defined?(::ActionDispatch::Request::Session) &&
     !::ActionDispatch::Request::Session.respond_to?(:each)
   # mperham/sidekiq#2460
   # Rack apps can't reuse the Rails session store without
-  # this monkeypatch
+  # this monkeypatch, fixed in Rails 5.
   class ActionDispatch::Request::Session
     def each(&block)
       hash = self.to_hash
