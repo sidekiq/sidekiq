@@ -34,6 +34,11 @@ $(function() {
   $.timeago.settings.refreshMillis = 0;
   $("time").timeago();
 
+  var pollpath = $('body').data('poll-path');
+  if (pollpath != "") {
+    updatePage(pollpath);
+  }
+
   $(document).on('click', '.check_all', function() {
     var checked = $(this).attr('checked');
     if (checked == 'checked') {

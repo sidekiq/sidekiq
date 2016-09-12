@@ -305,7 +305,7 @@ class TestWeb < Sidekiq::Test
     it 'calls updatePage() once when polling' do
       get '/busy?poll=true'
       assert_equal 200, last_response.status
-      assert_equal 1, last_response.body.scan('updatePage(').count
+      assert_equal 1, last_response.body.scan('data-poll-path="/busy').count
     end
 
     it 'escape job args and error messages' do

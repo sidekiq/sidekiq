@@ -12,7 +12,7 @@
     <meta name="google" content="notranslate" />
     <%= display_custom_head %>
   </head>
-  <body class="admin">
+  <body class="admin" data-poll-path="<%= poll_path %>">
     <%= erb :_nav %>
     <div id="page">
       <div class="container">
@@ -28,6 +28,5 @@
       </div>
     </div>
     <%= erb :_footer %>
-    <%= erb :_poll_js %>
   </body>
 </html>
