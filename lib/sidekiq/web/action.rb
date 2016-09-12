@@ -7,7 +7,7 @@ module Sidekiq
     LOCATION = "Location".freeze
 
     CONTENT_TYPE = "Content-Type".freeze
-    TEXT_HTML = { CONTENT_TYPE => "text/html".freeze }
+    TEXT_HTML = { CONTENT_TYPE => "text/html".freeze, "Cache-Control" => "no-cache" }
     APPLICATION_JSON = { CONTENT_TYPE => "application/json".freeze }
 
     attr_accessor :env, :block, :type

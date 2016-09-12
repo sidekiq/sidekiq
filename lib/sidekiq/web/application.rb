@@ -282,7 +282,7 @@ module Sidekiq
         when :json
           WebAction::APPLICATION_JSON
         when String
-          { WebAction::CONTENT_TYPE => action.type }
+          { WebAction::CONTENT_TYPE => action.type, "Cache-Control" => "no-cache" }
         else
           WebAction::TEXT_HTML
         end
