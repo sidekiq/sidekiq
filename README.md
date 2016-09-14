@@ -84,8 +84,8 @@ Useful resources:
 
 **No support via Twitter, 140 characters is not enough.**
 
-Every Friday morning 9am Pacific is Sidekiq happy hour: I video chat and answer questions.
-See the [Sidekiq support page](http://sidekiq.org/support).
+Every Friday morning is Sidekiq happy hour: I video chat and answer questions.
+See the [Sidekiq support page](http://sidekiq.org/support) for details.
 
 Thanks
 -----------------
