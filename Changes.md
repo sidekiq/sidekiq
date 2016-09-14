@@ -1,5 +1,11 @@
 # Sidekiq Changes
 
+HEAD
+-----------
+
+- Ensure browser does not cache JSON/AJAX responses. [#3136]
+
+
 4.2.0
 -----------
 

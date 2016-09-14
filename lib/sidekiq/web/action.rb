@@ -2,13 +2,9 @@
 
 module Sidekiq
   class WebAction
-    RACK_SESSION = 'rack.session'.freeze
-
-    LOCATION = "Location".freeze
-
-    CONTENT_TYPE = "Content-Type".freeze
-    TEXT_HTML = { CONTENT_TYPE => "text/html".freeze, "Cache-Control" => "no-cache" }
-    APPLICATION_JSON = { CONTENT_TYPE => "application/json".freeze }
+    RACK_SESSION = 'rack.session'
+    TEXT_HTML = { "Content-Type" => "text/html", "Cache-Control" => "no-cache" }
+    APPLICATION_JSON = { "Content-Type" => "application/json", "Cache-Control" => "no-cache" }
 
     attr_accessor :env, :block, :type
 
@@ -25,7 +21,7 @@ module Sidekiq
     end
 
     def redirect(location)
-      throw :halt, [302, { LOCATION => "#{request.base_url}#{location}" }, []]
+      throw :halt, [302, { "Location" => "#{request.base_url}#{location}" }, []]
     end
 
     def params
