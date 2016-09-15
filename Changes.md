@@ -1,10 +1,10 @@
 # Sidekiq Changes
 
-HEAD
+4.2.1
 -----------
 
 - Ensure browser does not cache JSON/AJAX responses. [#3136]
-
+- Support old Sinatra syntax for setting config [#3139]
 
 4.2.0
 -----------
