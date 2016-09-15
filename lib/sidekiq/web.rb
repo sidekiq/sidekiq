@@ -63,6 +63,11 @@ module Sidekiq
         @views ||= VIEWS
       end
 
+      # Helper for the Sinatra syntax: Sidekiq::Web.set(:session_secret, Rails.application.secrets...)
+      def set(attribute, value)
+        send(:"#{attribute}=", value)
+      end
+
       attr_accessor :app_url, :session_secret, :redis_pool
       attr_writer :locales, :views
     end

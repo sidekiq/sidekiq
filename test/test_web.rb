@@ -28,6 +28,11 @@ class TestWeb < Sidekiq::Test
       end
     end
 
+    it 'can configure via set() syntax' do
+      app.set(:session_secret, "foo")
+      assert_equal "foo", app.session_secret
+    end
+
     it 'can show text with any locales' do
       rackenv = {'HTTP_ACCEPT_LANGUAGE' => 'ru,en'}
       get '/', {}, rackenv
