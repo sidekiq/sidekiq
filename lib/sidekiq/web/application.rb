@@ -7,7 +7,7 @@ module Sidekiq
     CONTENT_LENGTH = "Content-Length".freeze
     CONTENT_TYPE = "Content-Type".freeze
     REDIS_KEYS = %w(redis_version uptime_in_days connected_clients used_memory_human used_memory_peak_human)
-    NOT_FOUND = [404, {"Content-Type" => "text/plain", "X-Cascade" => "pass" }, ["Not Found"]]
+    NOT_FOUND = [404, {"Content-Type" => "text/plain", "X-Cascade" => "pass" }.freeze, ["Not Found"]]
 
     def initialize(klass)
       @klass = klass
@@ -289,6 +289,8 @@ module Sidekiq
 
         [200, type_header, [resp]]
       end
+
+      resp[1] = resp[1].dup
 
       resp[1][CONTENT_LENGTH] = resp[2].inject(0) { |l, p| l + p.bytesize }.to_s
 
