@@ -2,9 +2,9 @@
 
 module Sidekiq
   class WebAction
-    RACK_SESSION = 'rack.session'
-    TEXT_HTML = { "Content-Type" => "text/html", "Cache-Control" => "no-cache" }
-    APPLICATION_JSON = { "Content-Type" => "application/json", "Cache-Control" => "no-cache" }
+    RACK_SESSION = 'rack.session'.freeze
+    TEXT_HTML = { "Content-Type" => "text/html", "Cache-Control" => "no-cache" }.freeze
+    APPLICATION_JSON = { "Content-Type" => "application/json", "Cache-Control" => "no-cache" }.freeze
 
     attr_accessor :env, :block, :type
 
