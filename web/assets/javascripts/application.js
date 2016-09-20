@@ -45,7 +45,9 @@ $(function() {
     parts[1] = parts[1].toUpperCase();
     locale = parts.join('_');
   }
-  timeago().render(document.querySelectorAll('time'), locale);
+  var t = timeago()
+  t.render(document.querySelectorAll('time'), locale);
+  t.cancel();
 });
 
 function updatePage(url) {
