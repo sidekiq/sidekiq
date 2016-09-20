@@ -74,6 +74,9 @@ class TestActors < Sidekiq::Test
             @cond.signal
           end
         end
+        def strategy
+          Sidekiq::BasicFetch
+        end
         def options
           { :concurrency => 3, :queues => ['default'] }
         end

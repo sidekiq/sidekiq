@@ -103,6 +103,10 @@ module Sidekiq
       @done
     end
 
+    def strategy
+      @options[:fetch] ? Object.const_get(@options[:fetch]) : Sidekiq::BasicFetch
+    end
+
     private
 
     def hard_shutdown

@@ -12,6 +12,7 @@ class TestProcessor < Sidekiq::Test
     before do
       $invokes = 0
       @mgr = Minitest::Mock.new
+      @mgr.expect(:strategy, Sidekiq::BasicFetch)
       @mgr.expect(:options, {:queues => ['default']})
       @mgr.expect(:options, {:queues => ['default']})
       @processor = ::Sidekiq::Processor.new(@mgr)
