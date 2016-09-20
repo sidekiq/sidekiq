@@ -40,6 +40,11 @@ $(function() {
   });
 
   var locale = $('body').data('locale');
+  var parts = locale.split('-');
+  if (typeof parts[1] !== 'undefined') {
+    parts[1] = parts[1].toUpperCase();
+    locale = parts.join('_');
+  }
   timeago().render(document.querySelectorAll('time'), locale);
 });
 
