@@ -8,11 +8,10 @@
     <link href="<%= root_path %>stylesheets/application.css" media="screen" rel="stylesheet" type="text/css" />
     <link rel="shortcut icon" type="image/ico" href="<%= root_path %>images/favicon.ico" />
     <script type="text/javascript" src="<%= root_path %>javascripts/application.js"></script>
-    <script type="text/javascript" src="<%= root_path %>javascripts/locales/jquery.timeago.<%= locale %>.js"></script>
     <meta name="google" content="notranslate" />
     <%= display_custom_head %>
   </head>
-  <body class="admin" data-poll-path="<%= poll_path %>">
+  <body class="admin" data-poll-path="<%= poll_path %>" data-locale="<%= locale %>">
     <%= erb :_nav %>
     <div id="page">
       <div class="container">
