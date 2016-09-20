@@ -264,7 +264,7 @@ module Sidekiq
       def drain
         while jobs.any?
           next_job = jobs.first
-          Queues.delete_for(next_job["jid"], queue, self.to_s)
+          Queues.delete_for(next_job["jid"], next_job["queue"], self.to_s)
           process_job(next_job)
         end
       end
