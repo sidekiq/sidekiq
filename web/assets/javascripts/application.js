@@ -39,7 +39,8 @@ $(function() {
     $($(this).attr('data-target')).toggle();
   });
 
-  timeago().render(document.querySelectorAll('time'));
+  var locale = $('body').data('locale');
+  timeago().render(document.querySelectorAll('time'), locale);
 });
 
 function updatePage(url) {
