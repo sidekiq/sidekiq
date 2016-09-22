@@ -28,6 +28,10 @@ module Sidekiq
     def self.set(key, val)
       # nothing, backwards compatibility
     end
+    
+    get "" do
+      redirect(root_path)
+    end
 
     get "/" do
       @redis_info = redis_info.select{ |k, v| REDIS_KEYS.include? k }
