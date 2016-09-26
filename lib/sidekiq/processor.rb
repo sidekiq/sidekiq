@@ -143,7 +143,7 @@ module Sidekiq
           # we didn't properly finish it.
           ack = false
         rescue Exception => ex
-          handle_exception(ex, job || { :job => jobstr })
+          handle_exception(ex, { :context => "Job raised exception", :job => job, :jobstr => jobstr })
           raise
         ensure
           work.acknowledge if ack

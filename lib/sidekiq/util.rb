@@ -53,7 +53,7 @@ module Sidekiq
         begin
           block.call
         rescue => ex
-          handle_exception(ex, { event: event })
+          handle_exception(ex, { context: "Exception during Sidekiq lifecycle event.", event: event })
         end
       end
       arr.clear
