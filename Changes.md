@@ -1,5 +1,11 @@
 # Sidekiq Changes
 
+4.2.2
+-----------
+
+- Fix ever-increasing cookie size with nginx [#3146, cconstantine]
+- Fix so Web UI works without trailing slash [#3158, timdorr]
+
 4.2.1
 -----------
 
