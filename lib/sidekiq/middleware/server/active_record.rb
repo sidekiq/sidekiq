@@ -7,7 +7,8 @@ module Sidekiq
           #
           # The reloader needs the active connection to clear its query cache
           # before releasing it otherwise other workers will see dirty query
-          # cache data.
+          # cache data. The reloader will then take care of clearing
+          # ActiveRecord connections as well.
           #
           # We need to make sure folks remove this middleware if they've added
           # it themselves.
