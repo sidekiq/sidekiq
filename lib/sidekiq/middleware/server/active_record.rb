@@ -2,7 +2,9 @@ module Sidekiq
   module Middleware
     module Server
       class ActiveRecord
-        def initialize
+        def call(*args)
+          yield
+        ensure
           # We can't use this middleware with the Rails reloader.
           #
           # The reloader needs the active connection to clear its query cache
@@ -15,13 +17,9 @@ module Sidekiq
           #
           if defined?(Sidekiq::Rails::Reloader) && Sidekiq.options[:reloader].is_a?(Sidekiq::Rails::Reloader)
             raise ArgumentError, "Your are usign the Sidekiq ActiveRecord middleware and the new Rails 5 reloader which are incompatible. Please remove the ActiveRecord middleware from your Sidekiq middleware configuration."
+          else
+            ::ActiveRecord::Base.clear_active_connections!
           end
-        end
-
-        def call(*args)
-          yield
-        ensure
-          ::ActiveRecord::Base.clear_active_connections!
         end
       end
     end
