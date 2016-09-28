@@ -16,7 +16,7 @@ module Sidekiq
           # it themselves.
           #
           if defined?(Sidekiq::Rails::Reloader) && Sidekiq.options[:reloader].is_a?(Sidekiq::Rails::Reloader)
-            raise ArgumentError, "Your are usign the Sidekiq ActiveRecord middleware and the new Rails 5 reloader which are incompatible. Please remove the ActiveRecord middleware from your Sidekiq middleware configuration."
+            raise ArgumentError, "You are using the Sidekiq ActiveRecord middleware and the new Rails 5 reloader which are incompatible. Please remove the ActiveRecord middleware from your Sidekiq middleware configuration."
           else
             ::ActiveRecord::Base.clear_active_connections!
           end
