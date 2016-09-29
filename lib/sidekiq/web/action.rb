@@ -3,8 +3,6 @@
 module Sidekiq
   class WebAction
     RACK_SESSION = 'rack.session'.freeze
-    TEXT_HTML = { "Content-Type" => "text/html", "Cache-Control" => "no-cache" }.freeze
-    APPLICATION_JSON = { "Content-Type" => "application/json", "Cache-Control" => "no-cache" }.freeze
 
     attr_accessor :env, :block, :type
 
@@ -70,7 +68,7 @@ module Sidekiq
     end
 
     def json(payload)
-      [200, APPLICATION_JSON, [Sidekiq.dump_json(payload)]]
+      [200, { "Content-Type" => "application/json", "Cache-Control" => "no-cache" }, [Sidekiq.dump_json(payload)]]
     end
 
     def initialize(env, block)

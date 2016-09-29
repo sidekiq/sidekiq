@@ -7,7 +7,6 @@ module Sidekiq
     CONTENT_LENGTH = "Content-Length".freeze
     CONTENT_TYPE = "Content-Type".freeze
     REDIS_KEYS = %w(redis_version uptime_in_days connected_clients used_memory_human used_memory_peak_human)
-    NOT_FOUND = [404, {"Content-Type" => "text/plain", "X-Cascade" => "pass" }.freeze, ["Not Found"]]
 
     def initialize(klass)
       @klass = klass
@@ -262,7 +261,7 @@ module Sidekiq
 
     def call(env)
       action = self.class.match(env)
-      return NOT_FOUND unless action
+      return [404, {"Content-Type" => "text/plain", "X-Cascade" => "pass" }, ["Not Found"]] unless action
 
       resp = catch(:halt) do
         app = @klass
@@ -284,11 +283,11 @@ module Sidekiq
       else
         type_header = case action.type
         when :json
-          WebAction::APPLICATION_JSON
+          { "Content-Type" => "application/json", "Cache-Control" => "no-cache" }
         when String
           { "Content-Type" => action.type, "Cache-Control" => "no-cache" }
         else
-          WebAction::TEXT_HTML
+          { "Content-Type" => "text/html", "Cache-Control" => "no-cache" }
         end
 
         [200, type_header, [resp]]
