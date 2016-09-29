@@ -1,5 +1,11 @@
 # Sidekiq Changes
 
+HEAD
+-----------
+
+- Fix Web UI sharding support broken in 4.2.2. [#3169]
+- Relax rack-protection version to >= 1.5.0
+
 4.2.2
 -----------
 
