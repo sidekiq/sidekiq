@@ -28,7 +28,7 @@ module Sidekiq
     def self.set(key, val)
       # nothing, backwards compatibility
     end
-    
+
     get "" do
       redirect(root_path)
     end
