@@ -150,10 +150,6 @@ module Sidekiq
     Middleware::Chain.new do |m|
       m.add Middleware::Server::Logging
       m.add Middleware::Server::RetryJobs
-      if defined?(::ActiveRecord::Base) && !(defined?(Sidekiq::Rails::Reloader) && Sidekiq.options[:reloader].is_a?(Sidekiq::Rails::Reloader))
-        require 'sidekiq/middleware/server/active_record'
-        m.add Sidekiq::Middleware::Server::ActiveRecord
-      end
     end
   end
 
