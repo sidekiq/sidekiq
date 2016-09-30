@@ -59,8 +59,13 @@ module Sidekiq
     # from config/environment.rb back to sidekiq/cli.rb.
     config.after_initialize do
       if ::Rails::VERSION::MAJOR >= 5
-        # The reloader also takes care of ActiveRecord
-        Sidekiq.options[:reloader] = Sidekiq::Rails::Reloader.new
+        # The reloader also takes care of ActiveRecord but is incompatible with
+        # the ActiveRecord middleware so make sure it's not in the chain already.
+        if defined?(Sidekiq::Middleware::Server::ActiveRecord) && Sidekiq.server_middleware.exists?(Sidekiq::Middleware::Server::ActiveRecord)
+          raise ArgumentError, "You are using the Sidekiq ActiveRecord middleware and the new Rails 5 reloader which are incompatible. Please remove the ActiveRecord middleware from your Sidekiq middleware configuration."
+        else
+          Sidekiq.options[:reloader] = Sidekiq::Rails::Reloader.new
+        end
       end
     end
 
