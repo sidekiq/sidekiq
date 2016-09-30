@@ -150,10 +150,6 @@ module Sidekiq
     Middleware::Chain.new do |m|
       m.add Middleware::Server::Logging
       m.add Middleware::Server::RetryJobs
-      if defined?(::ActiveRecord::Base)
-        require 'sidekiq/middleware/server/active_record'
-        m.add Sidekiq::Middleware::Server::ActiveRecord
-      end
     end
   end
 

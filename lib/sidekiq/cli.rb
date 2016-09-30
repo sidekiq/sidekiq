@@ -240,7 +240,6 @@ module Sidekiq
         else
           require 'sidekiq/rails'
           require File.expand_path("#{options[:require]}/config/environment.rb")
-          Sidekiq.options[:reloader] = Sidekiq::Rails::Reloader.new
         end
         options[:tag] ||= default_tag
       else

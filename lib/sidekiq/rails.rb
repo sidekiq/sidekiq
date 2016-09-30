@@ -32,8 +32,41 @@ module Sidekiq
   end
 
   class Rails < ::Rails::Engine
+    # We need to setup this up before any application configuration which might
+    # change Sidekiq middleware.
+    #
+    # This hook happens after `Rails::Application` is inherited within
+    # config/application.rb and before config is touched, usually within the
+    # class block. Definitely before config/environments/*.rb and
+    # config/initializers/*.rb.
+    config.before_configuration do
+      if ::Rails::VERSION::MAJOR < 5 && defined?(::ActiveRecord)
+        Sidekiq.server_middleware do |chain|
+          require 'sidekiq/middleware/server/active_record'
+          chain.add Sidekiq::Middleware::Server::ActiveRecord
+        end
+      end
+    end
+
     initializer 'sidekiq' do
       Sidekiq.hook_rails!
+    end
+
+    # We have to add the reloader after initialize to see if cache_classes has
+    # been turned on.
+    #
+    # This hook happens after all initialziers are run, just before returning
+    # from config/environment.rb back to sidekiq/cli.rb.
+    config.after_initialize do
+      if ::Rails::VERSION::MAJOR >= 5
+        # The reloader also takes care of ActiveRecord but is incompatible with
+        # the ActiveRecord middleware so make sure it's not in the chain already.
+        if defined?(Sidekiq::Middleware::Server::ActiveRecord) && Sidekiq.server_middleware.exists?(Sidekiq::Middleware::Server::ActiveRecord)
+          raise ArgumentError, "You are using the Sidekiq ActiveRecord middleware and the new Rails 5 reloader which are incompatible. Please remove the ActiveRecord middleware from your Sidekiq middleware configuration."
+        else
+          Sidekiq.options[:reloader] = Sidekiq::Rails::Reloader.new
+        end
+      end
     end
 
     class Reloader
