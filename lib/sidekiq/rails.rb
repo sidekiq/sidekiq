@@ -32,9 +32,14 @@ module Sidekiq
   end
 
   class Rails < ::Rails::Engine
-    # We need to setup this up before the application's initializers run which
-    # might change Sidekiq middleware.
-    config.before_initialize do
+    # We need to setup this up before any application configuration which might
+    # change Sidekiq middleware.
+    #
+    # This hook happens after `Rails::Application` is inherited within
+    # config/application.rb and before config is touched, usually within the
+    # class block. Definitely before config/environments/*.rb and
+    # config/initializers/*.rb.
+    config.before_configuration do
       if ::Rails::VERSION::MAJOR < 5 && defined?(::ActiveRecord)
         Sidekiq.server_middleware do |chain|
           require 'sidekiq/middleware/server/active_record'
@@ -49,6 +54,9 @@ module Sidekiq
 
     # We have to add the reloader after initialize to see if cache_classes has
     # been turned on.
+    #
+    # This hook happens after all initialziers are run, just before returning
+    # from config/environment.rb back to sidekiq/cli.rb.
     config.after_initialize do
       if ::Rails::VERSION::MAJOR >= 5
         # The reloader also takes care of ActiveRecord
