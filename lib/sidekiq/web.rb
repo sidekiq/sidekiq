@@ -63,6 +63,22 @@ module Sidekiq
         @views ||= VIEWS
       end
 
+      def enabled_options
+        @enabled ||= %w(sessions)
+      end
+
+      def enabled?(key)
+        enabled_options.include?(key.to_s)
+      end
+
+      def enable(key)
+        enabled_options.push(key.to_s) unless enabled?(key)
+      end
+
+      def disable(key)
+        enabled_options.delete(key.to_s)
+      end
+
       # Helper for the Sinatra syntax: Sidekiq::Web.set(:session_secret, Rails.application.secrets...)
       def set(attribute, value)
         send(:"#{attribute}=", value)
@@ -109,9 +125,8 @@ module Sidekiq
       end
     end
 
-    def build
+    def add_session_middlewares
       middlewares = self.middlewares
-      klass = self.class
 
       unless using?(::Rack::Protection) || ENV['RACK_ENV'] == 'test'
         middlewares.unshift [[::Rack::Protection, { use: :authenticity_token }], nil]
@@ -125,6 +140,13 @@ module Sidekiq
 
         middlewares.unshift [[::Rack::Session::Cookie, { secret: secret }], nil]
       end
+    end
+
+    def build
+      add_session_middlewares if Web.enabled?(:sessions)
+
+      middlewares = self.middlewares
+      klass = self.class
 
       ::Rack::Builder.new do
         %w(stylesheets javascripts images).each do |asset_dir|

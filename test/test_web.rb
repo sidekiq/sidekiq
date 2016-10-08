@@ -663,4 +663,25 @@ class TestWeb < Sidekiq::Test
       assert_equal 'nicehost.org', session_options[:host]
     end
   end
+
+  describe 'sidekiq web without session' do
+    include Rack::Test::Methods
+
+    def app
+      Sidekiq::Web
+    end
+
+    before do
+      Sidekiq::Web.disable(:sessions)
+    end
+
+    after do
+      Sidekiq::Web.enable(:sessions)
+    end
+
+    it 'uses Sidekiq::Web.disable to suppress session' do
+      get '/'
+      assert_equal nil, last_request.env['rack.session']
+    end
+  end
 end
