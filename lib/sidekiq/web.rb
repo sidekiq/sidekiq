@@ -63,20 +63,12 @@ module Sidekiq
         @views ||= VIEWS
       end
 
-      def enabled_options
-        @enabled ||= %w(sessions)
+      def enable(*opts)
+        opts.each {|key| set(key, true) }
       end
 
-      def enabled?(key)
-        enabled_options.include?(key.to_s)
-      end
-
-      def enable(key)
-        enabled_options.push(key.to_s) unless enabled?(key)
-      end
-
-      def disable(key)
-        enabled_options.delete(key.to_s)
+      def disable(*opts)
+        opts.each {|key| set(key, false) }
       end
 
       # Helper for the Sinatra syntax: Sidekiq::Web.set(:session_secret, Rails.application.secrets...)
@@ -84,7 +76,7 @@ module Sidekiq
         send(:"#{attribute}=", value)
       end
 
-      attr_accessor :app_url, :session_secret, :redis_pool
+      attr_accessor :app_url, :session_secret, :redis_pool, :sessions
       attr_writer :locales, :views
     end
 
@@ -125,8 +117,11 @@ module Sidekiq
       end
     end
 
-    def add_session_middlewares
+    def build_sessions
       middlewares = self.middlewares
+      sessions = Web.sessions
+
+      return if sessions === false
 
       unless using?(::Rack::Protection) || ENV['RACK_ENV'] == 'test'
         middlewares.unshift [[::Rack::Protection, { use: :authenticity_token }], nil]
@@ -138,12 +133,15 @@ module Sidekiq
           secret = SecureRandom.hex(64)
         end
 
-        middlewares.unshift [[::Rack::Session::Cookie, { secret: secret }], nil]
+        options[:secret] = secret
+        options = options.merge(sessions.to_hash) if sessions.respond_to? :to_hash
+
+        middlewares.unshift [[::Rack::Session::Cookie, options], nil]
       end
     end
 
     def build
-      add_session_middlewares if Web.enabled?(:sessions)
+      build_sessions
 
       middlewares = self.middlewares
       klass = self.class
