@@ -133,7 +133,7 @@ module Sidekiq
           secret = SecureRandom.hex(64)
         end
 
-        options[:secret] = secret
+        options = { secret: secret }
         options = options.merge(sessions.to_hash) if sessions.respond_to? :to_hash
 
         middlewares.unshift [[::Rack::Session::Cookie, options], nil]

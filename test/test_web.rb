@@ -664,24 +664,45 @@ class TestWeb < Sidekiq::Test
     end
   end
 
-  describe 'sidekiq web without session' do
+  describe 'sidekiq web sessions options' do
     include Rack::Test::Methods
 
     def app
-      Sidekiq::Web
+      Sidekiq::Web.new
     end
 
-    before do
+    after { Sidekiq::Web.enable(:sessions) }
+
+    it "doesn't create sessions using Sidekiq::Web.disable(:sessions)" do
       Sidekiq::Web.disable(:sessions)
-    end
 
-    after do
-      Sidekiq::Web.enable(:sessions)
-    end
-
-    it 'uses Sidekiq::Web.disable to suppress session' do
       get '/'
-      assert_equal nil, last_request.env['rack.session']
+      assert_nil last_request.env['rack.session']
+    end
+
+    it "doesn't create sessions using Sidekiq::Web.set(:sessions, false)" do
+      Sidekiq::Web.set(:sessions, false)
+
+      get '/'
+      assert_nil last_request.env['rack.session']
+    end
+
+    it 'accepts a session hash option' do
+      Sidekiq::Web.set(:sessions, { domain: :all })
+
+      get '/'
+      refute_nil   last_request.env['rack.session']
+      refute_empty last_request.env['rack.session'].options
+      assert_equal :all, last_request.env['rack.session'].options[:domain]
+    end
+
+    it "keep create sessions when enable" do
+      Sidekiq::Web.enable(:sessions)
+
+      get '/'
+      refute_nil   last_request.env['rack.session']
+      refute_empty last_request.env['rack.session'].options
+      refute_nil   last_request.env['rack.session'].options[:secret]
     end
   end
 end
