@@ -667,42 +667,60 @@ class TestWeb < Sidekiq::Test
   describe 'sidekiq web sessions options' do
     include Rack::Test::Methods
 
-    def app
-      Sidekiq::Web.new
+    describe 'using #disable' do
+      def app
+        app = Sidekiq::Web.new
+        app.disable(:sessions)
+        app
+      end
+
+      it "doesn't create sessions" do
+        get '/'
+        assert_nil last_request.env['rack.session']
+      end
     end
 
-    after { Sidekiq::Web.enable(:sessions) }
+    describe 'using #set with false argument' do
+      def app
+        app = Sidekiq::Web.new
+        app.set(:sessions, false)
+        app
+      end
 
-    it "doesn't create sessions using Sidekiq::Web.disable(:sessions)" do
-      Sidekiq::Web.disable(:sessions)
-
-      get '/'
-      assert_nil last_request.env['rack.session']
+      it "doesn't create sessions" do
+        get '/'
+        assert_nil last_request.env['rack.session']
+      end
     end
 
-    it "doesn't create sessions using Sidekiq::Web.set(:sessions, false)" do
-      Sidekiq::Web.set(:sessions, false)
+    describe 'using #set with an hash' do
+      def app
+        app = Sidekiq::Web.new
+        app.set(:sessions, { domain: :all })
+        app
+      end
 
-      get '/'
-      assert_nil last_request.env['rack.session']
+      it "creates sessions" do
+        get '/'
+        refute_nil   last_request.env['rack.session']
+        refute_empty last_request.env['rack.session'].options
+        assert_equal :all, last_request.env['rack.session'].options[:domain]
+      end
     end
 
-    it 'accepts a session hash option' do
-      Sidekiq::Web.set(:sessions, { domain: :all })
+    describe 'using #enable' do
+      def app
+        app = Sidekiq::Web.new
+        app.enable(:sessions)
+        app
+      end
 
-      get '/'
-      refute_nil   last_request.env['rack.session']
-      refute_empty last_request.env['rack.session'].options
-      assert_equal :all, last_request.env['rack.session'].options[:domain]
-    end
-
-    it "keep create sessions when enable" do
-      Sidekiq::Web.enable(:sessions)
-
-      get '/'
-      refute_nil   last_request.env['rack.session']
-      refute_empty last_request.env['rack.session'].options
-      refute_nil   last_request.env['rack.session'].options[:secret]
+      it "creates sessions" do
+        get '/'
+        refute_nil   last_request.env['rack.session']
+        refute_empty last_request.env['rack.session'].options
+        refute_nil   last_request.env['rack.session'].options[:secret]
+      end
     end
   end
 end

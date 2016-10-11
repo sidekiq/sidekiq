@@ -105,6 +105,32 @@ module Sidekiq
       @app ||= build
     end
 
+    def enable(*opts)
+      opts.each {|key| set(key, true) }
+    end
+
+    def disable(*opts)
+      opts.each {|key| set(key, false) }
+    end
+
+    def set(attribute, value)
+      send(:"#{attribute}=", value)
+    end
+
+    # Default values
+    set :sessions, true
+
+    attr_writer :sessions
+
+    def sessions
+      unless instance_variable_defined?("@sessions")
+        @sessions = self.class.sessions
+        @sessions = @sessions.to_hash.dup if @sessions.respond_to?(:to_hash)
+      end
+
+      @sessions
+    end
+
     def self.register(extension)
       extension.registered(WebApplication)
     end
@@ -119,7 +145,7 @@ module Sidekiq
 
     def build_sessions
       middlewares = self.middlewares
-      sessions = Web.sessions
+      sessions = self.sessions
 
       return if sessions === false
 
