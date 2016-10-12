@@ -3,6 +3,21 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+3.4.0
+---------
+
+- Introducing the newest reliable fetching algorithm: `super_fetch`!  This
+  algorithm will replace reliable\_fetch in Pro 4.0.  super\_fetch is
+  bullet-proof across all environments, no longer requiring stable
+  hostnames or an index to be set per-process. [#3077]
+```ruby
+Sidekiq.configure_server do |config|
+  config.super_fetch!
+end
+```
+  Thank you to @jonhyman for code review and the Sidekiq Pro customers that
+  beta tested super\_fetch.
+
 3.3.3
 ---------
 
