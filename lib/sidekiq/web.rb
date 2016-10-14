@@ -145,13 +145,13 @@ module Sidekiq
 
     def build_sessions
       middlewares = self.middlewares
-      sessions = self.sessions
-
-      return if sessions === false
 
       unless using?(::Rack::Protection) || ENV['RACK_ENV'] == 'test'
         middlewares.unshift [[::Rack::Protection, { use: :authenticity_token }], nil]
       end
+
+      s = sessions
+      return unless s
 
       unless using? ::Rack::Session::Cookie
         unless secret = Web.session_secret
@@ -160,7 +160,7 @@ module Sidekiq
         end
 
         options = { secret: secret }
-        options = options.merge(sessions.to_hash) if sessions.respond_to? :to_hash
+        options = options.merge(s.to_hash) if s.respond_to? :to_hash
 
         middlewares.unshift [[::Rack::Session::Cookie, options], nil]
       end
