@@ -63,12 +63,20 @@ module Sidekiq
         @views ||= VIEWS
       end
 
+      def enable(*opts)
+        opts.each {|key| set(key, true) }
+      end
+
+      def disable(*opts)
+        opts.each {|key| set(key, false) }
+      end
+
       # Helper for the Sinatra syntax: Sidekiq::Web.set(:session_secret, Rails.application.secrets...)
       def set(attribute, value)
         send(:"#{attribute}=", value)
       end
 
-      attr_accessor :app_url, :session_secret, :redis_pool
+      attr_accessor :app_url, :session_secret, :redis_pool, :sessions
       attr_writer :locales, :views
     end
 
@@ -97,6 +105,32 @@ module Sidekiq
       @app ||= build
     end
 
+    def enable(*opts)
+      opts.each {|key| set(key, true) }
+    end
+
+    def disable(*opts)
+      opts.each {|key| set(key, false) }
+    end
+
+    def set(attribute, value)
+      send(:"#{attribute}=", value)
+    end
+
+    # Default values
+    set :sessions, true
+
+    attr_writer :sessions
+
+    def sessions
+      unless instance_variable_defined?("@sessions")
+        @sessions = self.class.sessions
+        @sessions = @sessions.to_hash.dup if @sessions.respond_to?(:to_hash)
+      end
+
+      @sessions
+    end
+
     def self.register(extension)
       extension.registered(WebApplication)
     end
@@ -109,9 +143,11 @@ module Sidekiq
       end
     end
 
-    def build
+    def build_sessions
       middlewares = self.middlewares
-      klass = self.class
+      sessions = self.sessions
+
+      return if sessions === false
 
       unless using?(::Rack::Protection) || ENV['RACK_ENV'] == 'test'
         middlewares.unshift [[::Rack::Protection, { use: :authenticity_token }], nil]
@@ -123,8 +159,18 @@ module Sidekiq
           secret = SecureRandom.hex(64)
         end
 
-        middlewares.unshift [[::Rack::Session::Cookie, { secret: secret }], nil]
+        options = { secret: secret }
+        options = options.merge(sessions.to_hash) if sessions.respond_to? :to_hash
+
+        middlewares.unshift [[::Rack::Session::Cookie, options], nil]
       end
+    end
+
+    def build
+      build_sessions
+
+      middlewares = self.middlewares
+      klass = self.class
 
       ::Rack::Builder.new do
         %w(stylesheets javascripts images).each do |asset_dir|
