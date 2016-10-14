@@ -193,7 +193,7 @@ module Sidekiq
 end
 
 if defined?(::ActionDispatch::Request::Session) &&
-    !::ActionDispatch::Request::Session.respond_to?(:each)
+    !::ActionDispatch::Request::Session.method_defined?(:each)
   # mperham/sidekiq#2460
   # Rack apps can't reuse the Rails session store without
   # this monkeypatch, fixed in Rails 5.
