@@ -39,16 +39,20 @@ $(function() {
     $($(this).attr('data-target')).toggle();
   });
 
-  var locale = $('body').data('locale');
+  updateFuzzyTimes($('body').data('locale'));
+});
+
+function updateFuzzyTimes(locale) {
   var parts = locale.split('-');
   if (typeof parts[1] !== 'undefined') {
     parts[1] = parts[1].toUpperCase();
     locale = parts.join('_');
   }
+
   var t = timeago()
   t.render(document.querySelectorAll('time'), locale);
   t.cancel();
-});
+}
 
 function updatePage(url) {
   setInterval(function () {
@@ -63,9 +67,13 @@ function updatePage(url) {
 
       var $header_status = $data.find('.status')
       $('.status').replaceWith($header_status)
+
+      updateFuzzyTimes($('body').data('locale'));
     })
   }, parseInt(localStorage.timeInterval) || 2000);
 }
+
+
 
 $(function() {
   'use strict';
