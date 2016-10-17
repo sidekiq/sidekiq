@@ -80,6 +80,13 @@ module Sidekiq
       attr_writer :locales, :views
     end
 
+    def self.inherited(child)
+      child.app_url = self.app_url
+      child.session_secret = self.session_secret
+      child.redis_pool = self.redis_pool
+      child.sessions = self.sessions
+    end
+
     def settings
       self.class.settings
     end
