@@ -63,6 +63,10 @@ module Sidekiq
         # the ActiveRecord middleware so make sure it's not in the chain already.
         if defined?(Sidekiq::Middleware::Server::ActiveRecord) && Sidekiq.server_middleware.exists?(Sidekiq::Middleware::Server::ActiveRecord)
           raise ArgumentError, "You are using the Sidekiq ActiveRecord middleware and the new Rails 5 reloader which are incompatible. Please remove the ActiveRecord middleware from your Sidekiq middleware configuration."
+        elsif ::Rails.application.config.cache_classes
+          # The reloader API has proven to be troublesome under load in production.
+          # We won't use it at all when classes are cached, see #3154
+          Sidekiq.logger.debug { "Autoload disabled in #{::Rails.env}, Sidekiq will not reload changed classes" }
         else
           Sidekiq.options[:reloader] = Sidekiq::Rails::Reloader.new
         end
