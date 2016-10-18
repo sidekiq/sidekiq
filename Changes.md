@@ -1,14 +1,17 @@
 # Sidekiq Changes
 
-HEAD
+4.2.3
 -----------
 
+- Disable use of Rails 5's Reloader API in non-development modes, it has proven
+  to be unstable under load [#3154]
 - Allow disabling of Sidekiq::Web's cookie session to handle the
-  case where the app provides a session already [#3180]
+  case where the app provides a session already [#3180, inkstak]
 ```ruby
 Sidekiq::Web.set :sessions, false
 ```
 - Fix Web UI sharding support broken in 4.2.2. [#3169]
+- Fix timestamps not updating during UI polling [#3193, shaneog]
 - Relax rack-protection version to >= 1.5.0
 
 4.2.2
