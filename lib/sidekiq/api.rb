@@ -201,7 +201,7 @@ module Sidekiq
 
     attr_reader :name
 
-    def initialize(name="default")
+    def initialize(name = "default")
       @name = name
       @rname = "queue:#{name}"
     end
@@ -280,7 +280,7 @@ module Sidekiq
     attr_reader :item
     attr_reader :value
 
-    def initialize(item, queue_name=nil)
+    def initialize(item, queue_name = nil)
       @value = item
       @item = item.is_a?(Hash) ? item : Sidekiq.load_json(item)
       @queue = queue_name || @item['queue']
@@ -656,7 +656,7 @@ module Sidekiq
   class ProcessSet
     include Enumerable
 
-    def initialize(clean_plz=true)
+    def initialize(clean_plz = true)
       self.class.cleanup if clean_plz
     end
 
