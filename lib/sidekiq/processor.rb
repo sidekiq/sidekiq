@@ -119,9 +119,9 @@ module Sidekiq
       jobstr = work.job
       queue = work.queue_name
 
-      @reloader.call do
-        ack = false
-        begin
+      ack = false
+      begin
+        @reloader.call do
           job = Sidekiq.load_json(jobstr)
           klass  = job['class'.freeze].constantize
           worker = klass.new
@@ -137,17 +137,17 @@ module Sidekiq
             end
           end
           ack = true
-        rescue Sidekiq::Shutdown
-          # Had to force kill this job because it didn't finish
-          # within the timeout.  Don't acknowledge the work since
-          # we didn't properly finish it.
-          ack = false
-        rescue Exception => ex
-          handle_exception(ex, { :context => "Job raised exception", :job => job, :jobstr => jobstr })
-          raise
-        ensure
-          work.acknowledge if ack
         end
+      rescue Sidekiq::Shutdown
+        # Had to force kill this job because it didn't finish
+        # within the timeout.  Don't acknowledge the work since
+        # we didn't properly finish it.
+        ack = false
+      rescue Exception => ex
+        handle_exception(ex, { :context => "Job raised exception", :job => job, :jobstr => jobstr })
+        raise
+      ensure
+        work.acknowledge if ack
       end
     end
 
