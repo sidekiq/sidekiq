@@ -65,6 +65,40 @@ class TestProcessor < Sidekiq::Test
       assert_equal [['myarg']], msg['args']
     end
 
+    describe 'exception handling' do
+      let(:errors) { [] }
+      let(:error_handler) { proc { |ex, _| errors << ex } }
+
+      before do
+        Sidekiq.error_handlers << error_handler
+      end
+
+      after do
+        Sidekiq.error_handlers.pop
+      end
+
+      it 'handles exceptions raised by the job' do
+        msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'] })
+        begin
+          @processor.process(work(msg))
+        rescue TestException
+        end
+        assert_equal 1, errors.count
+        assert_instance_of TestException, errors.first
+      end
+
+      it 'handles exceptions raised by the reloader' do
+        msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
+        @processor.instance_variable_set(:'@reloader', proc { raise TEST_EXCEPTION })
+        begin
+          @processor.process(work(msg))
+        rescue TestException
+        end
+        assert_equal 1, errors.count
+        assert_instance_of TestException, errors.first
+      end
+    end
+
     describe 'acknowledgement' do
       class ExceptionRaisingMiddleware
         def initialize(raise_before_yield, raise_after_yield, skip)
