@@ -1,5 +1,11 @@
 # Sidekiq Changes
 
+4.2.4
+-----------
+
+- Log errors coming from the Rails 5 reloader. [#3212, eugeneius]
+- Clone job data so middleware changes don't appear in Busy tab
+
 4.2.3
 -----------
 
