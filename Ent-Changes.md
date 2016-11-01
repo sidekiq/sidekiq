@@ -3,6 +3,11 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+1.4.0
+-------------
+
+- No functional changes, require latest Sidekiq and Sidekiq Pro versions
+
 1.3.2
 -------------
 
