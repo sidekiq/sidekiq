@@ -165,7 +165,7 @@ module Sidekiq
 
     def stats(worker, job, queue)
       tid = thread_identity
-      WORKER_STATE[tid] = {:queue => queue, :payload => job, :run_at => Time.now.to_i }
+      WORKER_STATE[tid] = {:queue => queue, :payload => cloned(job), :run_at => Time.now.to_i }
 
       begin
         yield
