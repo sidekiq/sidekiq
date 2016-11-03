@@ -229,8 +229,9 @@ module Sidekiq
           require 'sidekiq/rails'
           require File.expand_path("#{options[:require]}/config/environment.rb")
           ::Rails.application.eager_load!
-        elsif ::Rails::VERSION::MAJOR == 4
+        elsif ::Rails::VERSION::MAJOR >= 4 && environment != 'development'
           # Painful contortions, see 1791 for discussion
+          # No autoloading, we want to force eager load for everything.
           require File.expand_path("#{options[:require]}/config/application.rb")
           ::Rails::Application.initializer "sidekiq.eager_load" do
             ::Rails.application.config.eager_load = true
@@ -238,6 +239,7 @@ module Sidekiq
           require 'sidekiq/rails'
           require File.expand_path("#{options[:require]}/config/environment.rb")
         else
+          # Rails 5+ && development mode, use Reloader
           require 'sidekiq/rails'
           require File.expand_path("#{options[:require]}/config/environment.rb")
         end

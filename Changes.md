@@ -1,5 +1,10 @@
 # Sidekiq Changes
 
+4.2.5
+-----------
+
+- Re-enable eager loading of all code when running non-development Rails 5. [#3203]
+
 4.2.4
 -----------
 
