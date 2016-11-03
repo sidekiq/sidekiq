@@ -28,10 +28,6 @@ module Sidekiq
       # nothing, backwards compatibility
     end
 
-    get "" do
-      redirect(root_path)
-    end
-
     get "/" do
       @redis_info = redis_info.select{ |k, v| REDIS_KEYS.include? k }
       stats_history = Sidekiq::Stats::History.new((params['days'] || 30).to_i)

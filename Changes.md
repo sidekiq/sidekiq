@@ -4,6 +4,7 @@
 -----------
 
 - Re-enable eager loading of all code when running non-development Rails 5. [#3203]
+- Better root URL handling for zany web servers [#3207]
 
 4.2.4
 -----------

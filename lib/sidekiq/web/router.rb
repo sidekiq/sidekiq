@@ -45,6 +45,10 @@ module Sidekiq
       request_method = env[REQUEST_METHOD]
       path_info = ::Rack::Utils.unescape env[PATH_INFO]
 
+      # There are servers which send an empty string when requesting the root.
+      # These servers should be ashamed of themselves.
+      path_info = "/" if path_info == ""
+
       @routes[request_method].each do |route|
         if params = route.match(request_method, path_info)
           env[ROUTE_PARAMS] = params
