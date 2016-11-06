@@ -121,8 +121,8 @@ module Sidekiq
 
       ack = false
       begin
+        job = Sidekiq.load_json(jobstr)
         @reloader.call do
-          job = Sidekiq.load_json(jobstr)
           klass  = job['class'.freeze].constantize
           worker = klass.new
           worker.jid = job['jid'.freeze]
