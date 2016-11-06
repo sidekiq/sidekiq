@@ -67,15 +67,32 @@ module Sidekiq
           # The reloader API has proven to be troublesome under load in production.
           # We won't use it at all when classes are cached, see #3154
           Sidekiq.logger.debug { "Autoload disabled in #{::Rails.env}, Sidekiq will not reload changed classes" }
+          Sidekiq.options[:executor] = Sidekiq::Rails::Executor.new
         else
+          Sidekiq.logger.debug { "Enabling Rails 5+ live code reloading, so hot!" }
           Sidekiq.options[:reloader] = Sidekiq::Rails::Reloader.new
         end
       end
     end
 
+    class Executor
+      def initialize(app = ::Rails.application)
+        @app = app
+      end
+
+      def call
+        @app.executor.wrap do
+          yield
+        end
+      end
+
+      def inspect
+        "#<Sidekiq::Rails::Executor @app=#{@app.class.name}>"
+      end
+    end
+
     class Reloader
       def initialize(app = ::Rails.application)
-        Sidekiq.logger.debug "Enabling Rails 5+ live code reloading, so hot!" unless app.config.cache_classes
         @app = app
       end
 
