@@ -121,19 +121,19 @@ module Sidekiq
 
       ack = false
       begin
-        job = Sidekiq.load_json(jobstr)
+        job_hash = Sidekiq.load_json(jobstr)
         @reloader.call do
-          klass  = job['class'.freeze].constantize
+          klass  = job_hash['class'.freeze].constantize
           worker = klass.new
-          worker.jid = job['jid'.freeze]
+          worker.jid = job_hash['jid'.freeze]
 
-          stats(worker, job, queue) do
-            Sidekiq.server_middleware.invoke(worker, job, queue) do
+          stats(worker, job_hash, queue) do
+            Sidekiq.server_middleware.invoke(worker, job_hash, queue) do
               # Only ack if we either attempted to start this job or
               # successfully completed it. This prevents us from
               # losing jobs if a middleware raises an exception before yielding
               ack = true
-              execute_job(worker, cloned(job['args'.freeze]))
+              execute_job(worker, cloned(job_hash['args'.freeze]))
             end
           end
           ack = true
@@ -144,7 +144,7 @@ module Sidekiq
         # we didn't properly finish it.
         ack = false
       rescue Exception => ex
-        handle_exception(ex, { :context => "Job raised exception", :job => job, :jobstr => jobstr })
+        handle_exception(ex, { :context => "Job raised exception", :job => job_hash, :jobstr => jobstr })
         raise
       ensure
         work.acknowledge if ack
@@ -163,9 +163,9 @@ module Sidekiq
     PROCESSED = Concurrent::AtomicFixnum.new
     FAILURE = Concurrent::AtomicFixnum.new
 
-    def stats(worker, job, queue)
+    def stats(worker, job_hash, queue)
       tid = thread_identity
-      WORKER_STATE[tid] = {:queue => queue, :payload => cloned(job), :run_at => Time.now.to_i }
+      WORKER_STATE[tid] = {:queue => queue, :payload => cloned(job_hash), :run_at => Time.now.to_i }
 
       begin
         yield
