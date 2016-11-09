@@ -79,6 +79,10 @@ module Sidekiq
           # ignore, will be pushed back onto queue during hard_shutdown
           raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
 
+          if msg['retry'].nil?
+            msg['retry'] = worker.class.get_sidekiq_options['retry']
+          end
+
           raise e unless msg['retry']
           attempt_retry(worker, msg, queue, e)
         end
