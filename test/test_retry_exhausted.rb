@@ -1,6 +1,6 @@
 # encoding: utf-8
 require_relative 'helper'
-require 'sidekiq/middleware/server/retry_jobs'
+require 'sidekiq/job_retry'
 
 class TestRetryExhausted < Sidekiq::Test
   describe 'sidekiq_retries_exhausted' do
@@ -52,7 +52,7 @@ class TestRetryExhausted < Sidekiq::Test
     end
 
     def handler(options={})
-      @handler ||= Sidekiq::Middleware::Server::RetryJobs.new(options)
+      @handler ||= Sidekiq::JobRetry.new(options)
     end
 
     def job(options={})

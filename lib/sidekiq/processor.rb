@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 require 'sidekiq/util'
 require 'sidekiq/fetch'
+require 'sidekiq/job_logger'
+require 'sidekiq/job_retry'
 require 'thread'
 require 'concurrent/map'
 require 'concurrent/atomic/atomic_fixnum'
@@ -37,6 +39,8 @@ module Sidekiq
       @thread = nil
       @strategy = (mgr.options[:fetch] || Sidekiq::BasicFetch).new(mgr.options)
       @reloader = Sidekiq.options[:reloader]
+      @logging = Sidekiq::JobLogger.new
+      @retrier = Sidekiq::JobRetry.new
     end
 
     def terminate(wait=false)
@@ -115,28 +119,40 @@ module Sidekiq
       nil
     end
 
+    def dispatch(job_hash, queue)
+      @logging.call(job_hash, queue) do
+        @retrier.call(nil, job_hash, queue) do
+          stats(job_hash, queue) do
+            # Rails 5 requires a Reloader to wrap code execution.  In order to
+            # constantize the worker and instantiate an instance, we have to call
+            # the Reloader.  It handles code loading, db connection management, etc.
+            # Effectively this block denotes a "unit of work" to Rails.
+            @reloader.call do
+              klass  = job_hash['class'.freeze].constantize
+              worker = klass.new
+              worker.jid = job_hash['jid'.freeze]
+              @retrier.worker = worker
+              yield worker
+            end
+          end
+        end
+      end
+    end
+
     def process(work)
       jobstr = work.job
       queue = work.queue_name
 
       ack = false
       begin
+        # malformed JSON can't be recovered, error will be logged but job must be discarded.
         job_hash = Sidekiq.load_json(jobstr)
-        @reloader.call do
-          klass  = job_hash['class'.freeze].constantize
-          worker = klass.new
-          worker.jid = job_hash['jid'.freeze]
 
-          stats(worker, job_hash, queue) do
-            Sidekiq.server_middleware.invoke(worker, job_hash, queue) do
-              # Only ack if we either attempted to start this job or
-              # successfully completed it. This prevents us from
-              # losing jobs if a middleware raises an exception before yielding
-              ack = true
-              execute_job(worker, cloned(job_hash['args'.freeze]))
-            end
+        dispatch(job_hash, queue) do |worker|
+          Sidekiq.server_middleware.invoke(worker, job_hash, queue) do
+            ack = true
+            execute_job(worker, cloned(job_hash['args'.freeze]))
           end
-          ack = true
         end
       rescue Sidekiq::Shutdown
         # Had to force kill this job because it didn't finish
@@ -163,7 +179,7 @@ module Sidekiq
     PROCESSED = Concurrent::AtomicFixnum.new
     FAILURE = Concurrent::AtomicFixnum.new
 
-    def stats(worker, job_hash, queue)
+    def stats(job_hash, queue)
       tid = thread_identity
       WORKER_STATE[tid] = {:queue => queue, :payload => cloned(job_hash), :run_at => Time.now.to_i }
 

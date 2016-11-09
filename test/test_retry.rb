@@ -2,7 +2,7 @@
 # encoding: utf-8
 require_relative 'helper'
 require 'sidekiq/scheduled'
-require 'sidekiq/middleware/server/retry_jobs'
+require 'sidekiq/job_retry'
 
 class TestRetry < Sidekiq::Test
   describe 'middleware' do
@@ -19,7 +19,7 @@ class TestRetry < Sidekiq::Test
     end
 
     def handler(options={})
-      @handler ||= Sidekiq::Middleware::Server::RetryJobs.new(options)
+      @handler ||= Sidekiq::JobRetry.new(options)
     end
 
     def job(options={})
@@ -293,7 +293,7 @@ class TestRetry < Sidekiq::Test
       end
 
       it "does not recurse infinitely checking if it's a shutdown" do
-        assert(!Sidekiq::Middleware::Server::RetryJobs.new.send(
+        assert(!Sidekiq::JobRetry.new.send(
           :exception_caused_by_shutdown?, @error))
       end
     end
@@ -317,7 +317,7 @@ class TestRetry < Sidekiq::Test
       end
 
       it "does not recurse infinitely checking if it's a shutdown" do
-        assert(!Sidekiq::Middleware::Server::RetryJobs.new.send(
+        assert(!Sidekiq::JobRetry.new.send(
           :exception_caused_by_shutdown?, @error))
       end
     end

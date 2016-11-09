@@ -90,8 +90,8 @@ class TestMiddleware < Sidekiq::Test
 
     it 'correctly replaces middleware when using middleware with options in the initializer' do
       chain = Sidekiq::Middleware::Chain.new
-      chain.add Sidekiq::Middleware::Server::RetryJobs
-      chain.add Sidekiq::Middleware::Server::RetryJobs, {:max_retries => 5}
+      chain.add NonYieldingMiddleware
+      chain.add NonYieldingMiddleware, {:foo => 5}
       assert_equal 1, chain.count
     end
 

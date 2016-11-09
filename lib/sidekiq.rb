@@ -144,13 +144,7 @@ module Sidekiq
   end
 
   def self.default_server_middleware
-    require 'sidekiq/middleware/server/retry_jobs'
-    require 'sidekiq/middleware/server/logging'
-
-    Middleware::Chain.new do |m|
-      m.add Middleware::Server::Logging
-      m.add Middleware::Server::RetryJobs
-    end
+    Middleware::Chain.new
   end
 
   def self.default_worker_options=(hash)

@@ -1,5 +1,12 @@
 # Sidekiq Changes
 
+4.3.0
+-----------
+
+- Complete refactor of job dispatch to integrate with Rails 5's new
+  Reloader pattern.  This required the Logging and RetryJobs middleware
+  to be removed and integrated directly into the Processor.
+
 4.2.5
 -----------
 
