@@ -10,3 +10,4 @@ vendor/
 .bundle/
 .sass-cache/
 tmp/
+pkg/*.gem
