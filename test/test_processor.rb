@@ -152,7 +152,8 @@ class TestProcessor < Sidekiq::Test
       describe 'middleware throws an exception before processing the work' do
         let(:raise_before_yield) { true }
 
-        it 'does not ack' do
+        it 'acks the job' do
+          work.expect(:acknowledge, nil)
           begin
             @processor.process(work)
             flunk "Expected #process to raise exception"

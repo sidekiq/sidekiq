@@ -120,8 +120,8 @@ module Sidekiq
     end
 
     def dispatch(job_hash, queue)
-      @logging.call(job_hash, queue) do
-        @retrier.call(nil, job_hash, queue) do
+      @retrier.call(nil, job_hash, queue) do
+        @logging.call(job_hash, queue) do
           stats(job_hash, queue) do
             # Rails 5 requires a Reloader to wrap code execution.  In order to
             # constantize the worker and instantiate an instance, we have to call
@@ -145,12 +145,17 @@ module Sidekiq
 
       ack = false
       begin
-        # malformed JSON can't be recovered, error will be logged but job must be discarded.
+        # Treat malformed JSON like a process crash -- don't acknowledge it.
+        # * In Sidekiq, the error will be logged but job discarded.
+        # * In Sidekiq Pro, the error will be logged and the job retried when
+        #   it is recovered by the reliability algorithm.  The job may act like
+        #   a poison pill and never execute until manually removed but job loss
+        #   is considered worse.
         job_hash = Sidekiq.load_json(jobstr)
 
+        ack = true
         dispatch(job_hash, queue) do |worker|
           Sidekiq.server_middleware.invoke(worker, job_hash, queue) do
-            ack = true
             execute_job(worker, cloned(job_hash['args'.freeze]))
           end
         end

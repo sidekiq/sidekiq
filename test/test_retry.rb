@@ -26,6 +26,15 @@ class TestRetry < Sidekiq::Test
       @job ||= { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }.merge(options)
     end
 
+    it 'retries with a nil worker' do
+      assert_raises RuntimeError do
+        handler.call(nil, job, 'default') do
+          raise "boom"
+        end
+      end
+      assert_equal 1, Sidekiq::RetrySet.new.size
+    end
+
     it 'allows disabling retry' do
       assert_raises RuntimeError do
         handler.call(worker, job('retry' => false), 'default') do

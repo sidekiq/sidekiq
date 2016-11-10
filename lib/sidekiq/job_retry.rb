@@ -42,15 +42,10 @@ module Sidekiq
   # We don't store the backtrace by default as that can add a lot of overhead
   # to the job and everyone is using an error service, right?
   #
-  # The default number of retry attempts is 25 which works out to about 3 weeks
-  # of retries. You can pass a value for the max number of retry attempts when
-  # adding the middleware using the options hash:
+  # The default number of retries is 25 which works out to about 3 weeks
+  # You can change the default maximum number of retries in your initializer:
   #
-  #   Sidekiq.configure_server do |config|
-  #     config.server_middleware do |chain|
-  #       chain.add Sidekiq::Middleware::Server::RetryJobs, :max_retries => 7
-  #     end
-  #   end
+  #   Sidekiq.options[:max_retries] = 7
   #
   # or limit the number of retries for a particular worker with:
   #
@@ -86,6 +81,9 @@ module Sidekiq
 
     private
 
+    # Note that +worker+ can be nil here if an error is raised before we can
+    # instantiate the worker instance.  All access must be guarded and
+    # best effort.
     def attempt_retry(worker, msg, queue, exception)
       max_retry_attempts = retry_attempts_from(msg['retry'], @max_retries)
 
