@@ -120,9 +120,14 @@ module Sidekiq
     end
 
     def dispatch(job_hash, queue)
+      # since middleware can mutate the job hash
+      # we clone here so we report the original
+      # job structure to the Web UI
+      pristine = cloned(job_hash)
+
       @retrier.call(nil, job_hash, queue) do
         @logging.call(job_hash, queue) do
-          stats(job_hash, queue) do
+          stats(pristine, queue) do
             # Rails 5 requires a Reloader to wrap code execution.  In order to
             # constantize the worker and instantiate an instance, we have to call
             # the Reloader.  It handles code loading, db connection management, etc.
@@ -186,7 +191,7 @@ module Sidekiq
 
     def stats(job_hash, queue)
       tid = thread_identity
-      WORKER_STATE[tid] = {:queue => queue, :payload => cloned(job_hash), :run_at => Time.now.to_i }
+      WORKER_STATE[tid] = {:queue => queue, :payload => job_hash, :run_at => Time.now.to_i }
 
       begin
         yield
