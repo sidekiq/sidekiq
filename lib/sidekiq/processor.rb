@@ -207,8 +207,8 @@ module Sidekiq
     # Deep clone the arguments passed to the worker so that if
     # the job fails, what is pushed back onto Redis hasn't
     # been mutated by the worker.
-    def cloned(ary)
-      Marshal.load(Marshal.dump(ary))
+    def cloned(thing)
+      Marshal.load(Marshal.dump(thing))
     end
 
   end

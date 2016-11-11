@@ -7,6 +7,11 @@
   Reloader.  The **Logging** and **RetryJobs** server middleware were removed and
   functionality integrated directly into Sidekiq::Processor.  These aren't
   commonly used public APIs so this shouldn't impact most users.
+```
+Sidekiq::Middleware::Server::RetryJobs -> Sidekiq::JobRetry
+Sidekiq::Middleware::Server::Logging -> Sidekiq::JobLogging
+```
+
 
 4.2.5
 -----------
