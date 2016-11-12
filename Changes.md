@@ -3,8 +3,8 @@
 4.3.0
 -----------
 
-- **BREAKING CHANGE** Job dispatch was refactored to integrate with Rails 5's new
-  Reloader.  The **Logging** and **RetryJobs** server middleware were removed and
+- **BREAKING CHANGE** Job dispatch was refactored for cleaner integration with
+  Rails 5.  The **Logging** and **RetryJobs** server middleware were removed and
   functionality integrated directly into Sidekiq::Processor.  These aren't
   commonly used public APIs so this shouldn't impact most users.
 ```
@@ -12,6 +12,10 @@ Sidekiq::Middleware::Server::RetryJobs -> Sidekiq::JobRetry
 Sidekiq::Middleware::Server::Logging -> Sidekiq::JobLogging
 ```
 
+4.2.6
+-----------
+
+- Run Rails Executor when in production [#3221, eugeneius]
 
 4.2.5
 -----------
