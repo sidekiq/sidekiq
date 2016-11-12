@@ -37,6 +37,7 @@ module Sidekiq
       @thread = nil
       @strategy = (mgr.options[:fetch] || Sidekiq::BasicFetch).new(mgr.options)
       @reloader = Sidekiq.options[:reloader]
+      @executor = Sidekiq.options[:executor]
     end
 
     def terminate(wait=false)
@@ -129,11 +130,13 @@ module Sidekiq
 
           stats(worker, job_hash, queue) do
             Sidekiq.server_middleware.invoke(worker, job_hash, queue) do
-              # Only ack if we either attempted to start this job or
-              # successfully completed it. This prevents us from
-              # losing jobs if a middleware raises an exception before yielding
-              ack = true
-              execute_job(worker, cloned(job_hash['args'.freeze]))
+              @executor.call do
+                # Only ack if we either attempted to start this job or
+                # successfully completed it. This prevents us from
+                # losing jobs if a middleware raises an exception before yielding
+                ack = true
+                execute_job(worker, cloned(job_hash['args'.freeze]))
+              end
             end
           end
           ack = true
