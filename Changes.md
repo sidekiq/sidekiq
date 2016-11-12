@@ -1,5 +1,10 @@
 # Sidekiq Changes
 
+4.2.6
+-----------
+
+- Run Rails Executor when in production [#3221, eugeneius]
+
 4.2.5
 -----------
 
