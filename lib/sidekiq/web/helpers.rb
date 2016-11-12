@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'uri'
+require 'set'
 require 'yaml'
 
 module Sidekiq
