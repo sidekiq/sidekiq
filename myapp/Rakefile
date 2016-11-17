@@ -1,16 +1,32 @@
 #!/usr/bin/env rake
-# Add your own tasks in files placed in lib/tasks ending in .rake,
-# for example lib/tasks/capistrano.rake, and they will automatically be available to Rake.
 
 require File.expand_path('../config/application', __FILE__)
 
-Myapp::Application.load_tasks
+task :test do
+  require 'timeout'
 
-task :load_jobs => :environment do
-  require 'sidekiq/api'
-  Sidekiq::Queue.new.clear
+  %(production development).each do |env|
+    pid = fork do
+      ENV['RAILS_ENV'] = env
+      puts eval(File.read("integration_test.rb"))
+    end
 
-  50_000.times do |x|
-    EmptyWorker.perform_async
+    begin
+        Timeout.timeout(20) do
+            Process.wait
+        end
+    rescue Timeout::Error
+        Process.kill 9, pid
+        # collect status so it doesn't stick around as zombie process
+        Process.wait pid
+    end
+    puts "#{server} child exited, pid = #{pid}"
+    Process.wait4(pid)
   end
+end
+
+if !ENV["APPRAISAL_INITIALIZED"] && !ENV["TRAVIS"]
+  task :default => :appraisal
+else
+  task :default => :test
 end
