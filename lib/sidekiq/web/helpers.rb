@@ -81,6 +81,11 @@ module Sidekiq
       end
     end
 
+    # mperham/sidekiq#3243
+    def unfiltered?
+      yield unless env['PATH_INFO'].start_with?("/filter/")
+    end
+
     def get_locale
       strings(locale)
     end
