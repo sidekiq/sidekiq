@@ -3,6 +3,11 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Don't display "Delete/Retry All" buttons when filtering in Web UI, #3243
+
 3.4.0
 ---------
 
