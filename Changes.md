@@ -1,5 +1,14 @@
 # Sidekiq Changes
 
+4.2.7
+-----------
+
+- Add new integration testing to verify code loading and job execution
+  in development and production modes with Rails 4 and 5 [#3241]
+- Fix delayed extensions in development mode [#3227, DarthSim]
+- Use Worker's `retry` default if job payload does not have a retry
+  attribute [#3234, mlarraz]
+
 4.2.6
 -----------
 

@@ -54,3 +54,5 @@ task :appraise do
   end
   exit(failed ? -1 : 0)
 end
+
+task :default => :appraise
