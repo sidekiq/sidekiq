@@ -414,73 +414,26 @@ class TestWeb < Sidekiq::Test
         2.times { add_retry }
         3.times { add_scheduled }
         4.times { add_worker }
+      end
 
+      it 'works' do
         get '/stats'
         @response = Sidekiq.load_json(last_response.body)
-      end
-
-      it 'can refresh dashboard stats' do
         assert_equal 200, last_response.status
-      end
-
-      describe "for sidekiq" do
-        it 'are namespaced' do
-          assert_includes @response.keys, "sidekiq"
-        end
-
-        it 'reports processed' do
-          assert_equal 5, @response["sidekiq"]["processed"]
-        end
-
-        it 'reports failed' do
-          assert_equal 2, @response["sidekiq"]["failed"]
-        end
-
-        it 'reports busy' do
-          assert_equal 4, @response["sidekiq"]["busy"]
-        end
-
-        it 'reports processes' do
-          assert_equal 1, @response["sidekiq"]["processes"]
-        end
-
-        it 'reports retries' do
-          assert_equal 2, @response["sidekiq"]["retries"]
-        end
-
-        it 'reports scheduled' do
-          assert_equal 3, @response["sidekiq"]["scheduled"]
-        end
-
-        it 'reports latency' do
-          assert_equal 0, @response["sidekiq"]["default_latency"]
-        end
-      end
-
-      describe "for redis" do
-        it 'are namespaced' do
-          assert_includes @response.keys, "redis"
-        end
-
-        it 'reports version' do
-          assert_includes @response["redis"].keys, "redis_version"
-        end
-
-        it 'reports uptime' do
-          assert_includes @response["redis"].keys, "uptime_in_days"
-        end
-
-        it 'reports connected clients' do
-          assert_includes @response["redis"].keys, "connected_clients"
-        end
-
-        it 'reports user memory' do
-          assert_includes @response["redis"].keys, "used_memory_human"
-        end
-
-        it 'reports memory peak' do
-          assert_includes @response["redis"].keys, "used_memory_peak_human"
-        end
+        assert_includes @response.keys, "sidekiq"
+        assert_equal 5, @response["sidekiq"]["processed"]
+        assert_equal 2, @response["sidekiq"]["failed"]
+        assert_equal 4, @response["sidekiq"]["busy"]
+        assert_equal 1, @response["sidekiq"]["processes"]
+        assert_equal 2, @response["sidekiq"]["retries"]
+        assert_equal 3, @response["sidekiq"]["scheduled"]
+        assert_equal 0, @response["sidekiq"]["default_latency"]
+        assert_includes @response.keys, "redis"
+        assert_includes @response["redis"].keys, "redis_version"
+        assert_includes @response["redis"].keys, "uptime_in_days"
+        assert_includes @response["redis"].keys, "connected_clients"
+        assert_includes @response["redis"].keys, "used_memory_human"
+        assert_includes @response["redis"].keys, "used_memory_peak_human"
       end
     end
 
