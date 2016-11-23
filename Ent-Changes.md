@@ -3,6 +3,12 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+-------------
+
+- Add new web authorization API [#3251]
+- Update all sidekiqswarm env vars to use SIDEKIQ\_ prefix [#3218]
+
 1.4.0
 -------------
 
