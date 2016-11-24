@@ -117,10 +117,6 @@ module Sidekiq
       end.map { |msg| Sidekiq.load_json(msg) }
     end
 
-    def location
-      Sidekiq.redis { |conn| conn.client.location }
-    end
-
     def redis_connection
       Sidekiq.redis { |conn| conn.client.id }
     end
