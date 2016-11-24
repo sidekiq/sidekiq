@@ -21,6 +21,7 @@ module Sidekiq
       proc { Sidekiq::VERSION },
       proc { |me, data| data['tag'] },
       proc { |me, data| "[#{Processor::WORKER_STATE.size} of #{data['concurrency']} busy]" },
+      proc { |me, data| "(#{data['queues'].join(', ')})" },
       proc { |me, data| "stopping" if me.stopping? },
     ]
 
