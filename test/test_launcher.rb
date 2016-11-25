@@ -18,6 +18,7 @@ class TestLauncher < Sidekiq::Test
         @mgr = new_manager(options)
         @launcher = Sidekiq::Launcher.new(options)
         @launcher.manager = @mgr
+        @id = @launcher.identity
 
         Sidekiq::Processor::WORKER_STATE['a'] = {'b' => 1}
 
@@ -35,16 +36,16 @@ class TestLauncher < Sidekiq::Test
           i += 1
         end
         assert_equal 0, i
-        @launcher.heartbeat('identity', heartbeat_data, Sidekiq.dump_json(heartbeat_data))
+        @launcher.heartbeat
         assert_equal 1, i
-        @launcher.heartbeat('identity', heartbeat_data, Sidekiq.dump_json(heartbeat_data))
+        @launcher.heartbeat
         assert_equal 1, i
       end
 
       describe 'when manager is active' do
         before do
           Sidekiq::CLI::PROCTITLES << proc { "xyz" }
-          @launcher.heartbeat('identity', heartbeat_data, Sidekiq.dump_json(heartbeat_data))
+          @launcher.heartbeat
           Sidekiq::CLI::PROCTITLES.pop
         end
 
@@ -53,9 +54,9 @@ class TestLauncher < Sidekiq::Test
         end
 
         it 'stores process info in redis' do
-          info = Sidekiq.redis { |c| c.hmget('identity', 'busy') }
+          info = Sidekiq.redis { |c| c.hmget(@id, 'busy') }
           assert_equal ["1"], info
-          expires = Sidekiq.redis { |c| c.pttl('identity') }
+          expires = Sidekiq.redis { |c| c.pttl(@id) }
           assert_in_delta 60000, expires, 500
         end
       end
@@ -63,7 +64,7 @@ class TestLauncher < Sidekiq::Test
       describe 'when manager is stopped' do
         before do
           @launcher.quiet
-          @launcher.heartbeat('identity', heartbeat_data, Sidekiq.dump_json(heartbeat_data))
+          @launcher.heartbeat
         end
 
         #after do
@@ -75,21 +76,17 @@ class TestLauncher < Sidekiq::Test
         end
 
         it 'stores process info in redis' do
-          info = Sidekiq.redis { |c| c.hmget('identity', 'busy') }
+          info = Sidekiq.redis { |c| c.hmget(@id, 'busy') }
           assert_equal ["1"], info
-          expires = Sidekiq.redis { |c| c.pttl('identity') }
+          expires = Sidekiq.redis { |c| c.pttl(@id) }
           assert_in_delta 60000, expires, 50
         end
       end
     end
 
     def options
-      { :concurrency => 3, :queues => ['default'] }
+      { :concurrency => 3, :queues => ['default'], :tag => 'myapp' }
     end
 
-    def heartbeat_data
-      { 'concurrency' => 3, 'tag' => 'myapp' }
-    end
   end
-
 end
