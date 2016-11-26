@@ -61,8 +61,10 @@ class TestTesting < Sidekiq::Test
     it 'stubs the async call' do
       assert_equal 0, DirectWorker.jobs.size
       assert DirectWorker.perform_async(1, 2)
+      assert_in_delta Time.now.to_f, DirectWorker.jobs.last['enqueued_at'], 0.01
       assert_equal 1, DirectWorker.jobs.size
       assert DirectWorker.perform_in(10, 1, 2)
+      refute DirectWorker.jobs.last['enqueued_at']
       assert_equal 2, DirectWorker.jobs.size
       assert DirectWorker.perform_at(10, 1, 2)
       assert_equal 3, DirectWorker.jobs.size
