@@ -6,7 +6,15 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 HEAD
 ---------
 
-- Don't display "Delete/Retry All" buttons when filtering in Web UI, #3243
+- Officially deprecate reliable\_fetch algorithm, use super\_fetch instead:
+```ruby
+Sidekiq.configure_server do |config|
+  config.super_fetch!
+end
+```
+Also note that the `-i/--index` option is no longer used/required with super\_fetch.
+- Don't display "Delete/Retry All" buttons when filtering in Web UI [#3243]
+- Reimplement Sidekiq::JobSet#find\_job with ZSCAN [#3197]
 
 3.4.0
 ---------
