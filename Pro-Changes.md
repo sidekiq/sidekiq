@@ -6,6 +6,7 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 HEAD
 ---------
 
+- Allow super\_fetch's orphan job check to happen as often as every hour [#3273]
 - Officially deprecate reliable\_fetch algorithm, use super\_fetch instead:
 ```ruby
 Sidekiq.configure_server do |config|
