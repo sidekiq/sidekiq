@@ -7,13 +7,13 @@ HEAD
 ---------
 
 - Allow super\_fetch's orphan job check to happen as often as every hour [#3273]
-- Officially deprecate reliable\_fetch algorithm, use super\_fetch instead:
+- Officially deprecate reliable\_fetch algorithm, I now recommend you use `super_fetch` instead:
 ```ruby
 Sidekiq.configure_server do |config|
   config.super_fetch!
 end
 ```
-Also note that the `-i/--index` option is no longer used/required with super\_fetch.
+Also note that Sidekiq's `-i/--index` option is no longer used/relevant with super\_fetch.
 - Don't display "Delete/Retry All" buttons when filtering in Web UI [#3243]
 - Reimplement Sidekiq::JobSet#find\_job with ZSCAN [#3197]
 
