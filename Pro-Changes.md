@@ -3,7 +3,7 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+3.4.1
 ---------
 
 - Allow super\_fetch's orphan job check to happen as often as every hour [#3273]
