@@ -52,26 +52,30 @@ module Sidekiq
       Sidekiq.hook_rails!
     end
 
-    # We have to add the reloader after initialize to see if cache_classes has
-    # been turned on.
-    #
-    # This hook happens after all initialziers are run, just before returning
-    # from config/environment.rb back to sidekiq/cli.rb.
     config.after_initialize do
-      if ::Rails::VERSION::MAJOR >= 5
-        # The reloader also takes care of ActiveRecord but is incompatible with
-        # the ActiveRecord middleware so make sure it's not in the chain already.
-        if defined?(Sidekiq::Middleware::Server::ActiveRecord) && Sidekiq.server_middleware.exists?(Sidekiq::Middleware::Server::ActiveRecord)
-          raise ArgumentError, "You are using the Sidekiq ActiveRecord middleware and the new Rails 5 reloader which are incompatible. Please remove the ActiveRecord middleware from your Sidekiq middleware configuration."
-        elsif ::Rails.application.config.cache_classes
-          # The reloader API has proven to be troublesome under load in production.
-          # We won't use it at all when classes are cached, see #3154
-          Sidekiq.logger.debug { "Autoload disabled in #{::Rails.env}, Sidekiq will not reload changed classes" }
-          Sidekiq.options[:executor] = Sidekiq::Rails::Executor.new
-        else
-          Sidekiq.logger.debug { "Enabling Rails 5+ live code reloading, so hot!" }
-          Sidekiq.options[:reloader] = Sidekiq::Rails::Reloader.new
-          Psych::Visitors::ToRuby.prepend(Sidekiq::Rails::PsychAutoload)
+      # This hook happens after all initializers are run, just before returning
+      # from config/environment.rb back to sidekiq/cli.rb.
+      # We have to add the reloader after initialize to see if cache_classes has
+      # been turned on.
+      #
+      # None of this matters on the client-side, only within the Sidekiq process itself.
+      #
+      Sidekiq.configure_server do |_|
+        if ::Rails::VERSION::MAJOR >= 5
+          # The reloader also takes care of ActiveRecord but is incompatible with
+          # the ActiveRecord middleware so make sure it's not in the chain already.
+          if defined?(Sidekiq::Middleware::Server::ActiveRecord) && Sidekiq.server_middleware.exists?(Sidekiq::Middleware::Server::ActiveRecord)
+            raise ArgumentError, "You are using the Sidekiq ActiveRecord middleware and the new Rails 5 reloader which are incompatible. Please remove the ActiveRecord middleware from your Sidekiq middleware configuration."
+          elsif ::Rails.application.config.cache_classes
+            # The reloader API has proven to be troublesome under load in production.
+            # We won't use it at all when classes are cached, see #3154
+            Sidekiq.logger.debug { "Autoload disabled in #{::Rails.env}, Sidekiq will not reload changed classes" }
+            Sidekiq.options[:executor] = Sidekiq::Rails::Executor.new
+          else
+            Sidekiq.logger.debug { "Enabling Rails 5+ live code reloading, so hot!" }
+            Sidekiq.options[:reloader] = Sidekiq::Rails::Reloader.new
+            Psych::Visitors::ToRuby.prepend(Sidekiq::Rails::PsychAutoload)
+          end
         end
       end
     end
