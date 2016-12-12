@@ -1,0 +1,59 @@
+#!/usr/bin/env rake
+
+desc "Run rails integration tests for Sidekiq"
+task :appraise do
+  failed = false
+
+  %w(4 5).each do |ver|
+    %w(production development).each do |env|
+      output = `bundle exec ruby integration_setup.rb`
+      if output.strip != ''
+        puts output
+        exit(-1)
+      end
+
+      rout, wout = IO.pipe
+      rerr, werr = IO.pipe
+
+      command = "bundle exec sidekiq"
+      pid = Process.spawn({'RAILS_ENV' => env, 'BUNDLE_GEMFILE' => "gemfiles/rails_#{ver}.gemfile"},
+                          command, :out => wout, :err => werr)
+      status = nil
+      begin
+        require 'timeout'
+        Timeout.timeout(10) do
+          Process.wait(pid)
+        end
+      rescue Timeout::Error
+        puts "Killing #{pid}"
+        Process.kill('KILL', pid)
+      end
+      status = $?
+
+      # close write ends so we could read them
+      wout.close
+      werr.close
+
+      stdout = rout.readlines
+      stderr = rerr.readlines
+
+      # dispose the read ends of the pipes
+      rout.close
+      rerr.close
+
+      rc = status.exitstatus
+      success = stdout.grep(/Success/).size == 3
+      if success
+        puts "#{ver}/#{env} success, #{pid}/#{rc}/#{success}"
+      else
+        puts stdout.join
+        puts stderr.join if stderr.size > 0
+        puts "#{ver}/#{env} failed, #{pid}/#{rc}/#{success}"
+        failed = true
+      end
+    end
+  end
+  exit(failed ? -1 : 0)
+end
+
+task :default => :appraise
