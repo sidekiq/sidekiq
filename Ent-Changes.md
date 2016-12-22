@@ -3,6 +3,12 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+1.5.1
+-------------
+
+- Fix issue with census startup when not using Bundler configuration for
+  source credentials.
+
 1.5.0
 -------------
 
