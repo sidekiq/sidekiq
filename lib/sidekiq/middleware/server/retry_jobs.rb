@@ -162,7 +162,7 @@ module Sidekiq
         end
 
         def retry_attempts_from(msg_retry, default)
-          if msg_retry.is_a?(Fixnum)
+          if msg_retry.is_a?(Integer)
             msg_retry
           else
             default
