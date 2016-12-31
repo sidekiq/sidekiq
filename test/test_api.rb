@@ -174,15 +174,15 @@ class TestApi < Sidekiq::Test
       before do
         ActiveJob::Base.queue_adapter = :sidekiq
         ActiveJob::Base.logger = nil
+      end
 
-        class ApiMailer < ActionMailer::Base
-          def test_email(*)
-          end
+      class ApiMailer < ActionMailer::Base
+        def test_email(*)
         end
+      end
 
-        class ApiJob < ActiveJob::Base
-          def perform(*)
-          end
+      class ApiJob < ActiveJob::Base
+        def perform(*)
         end
       end
 

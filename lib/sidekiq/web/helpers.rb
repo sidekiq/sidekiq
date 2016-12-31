@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'uri'
+require 'set'
 require 'yaml'
 
 module Sidekiq
@@ -80,6 +81,11 @@ module Sidekiq
       end
     end
 
+    # mperham/sidekiq#3243
+    def unfiltered?
+      yield unless env['PATH_INFO'].start_with?("/filter/")
+    end
+
     def get_locale
       strings(locale)
     end
@@ -109,10 +115,6 @@ module Sidekiq
       Sidekiq.redis do |conn|
         conn.zrangebyscore('retry', score, score)
       end.map { |msg| Sidekiq.load_json(msg) }
-    end
-
-    def location
-      Sidekiq.redis { |conn| conn.client.location }
     end
 
     def redis_connection

@@ -1,9 +1,9 @@
 # Sidekiq Changes
 
-4.3.0
+5.0.0
 -----------
 
-- **BREAKING CHANGE** Job dispatch was refactored for cleaner integration with
+- **BREAKING CHANGE** Job dispatch was refactored for safer integration with
   Rails 5.  The **Logging** and **RetryJobs** server middleware were removed and
   functionality integrated directly into Sidekiq::Processor.  These aren't
   commonly used public APIs so this shouldn't impact most users.
@@ -11,6 +11,15 @@
 Sidekiq::Middleware::Server::RetryJobs -> Sidekiq::JobRetry
 Sidekiq::Middleware::Server::Logging -> Sidekiq::JobLogging
 ```
+
+4.2.7
+-----------
+
+- Add new integration testing to verify code loading and job execution
+  in development and production modes with Rails 4 and 5 [#3241]
+- Fix delayed extensions in development mode [#3227, DarthSim]
+- Use Worker's `retry` default if job payload does not have a retry
+  attribute [#3234, mlarraz]
 
 4.2.6
 -----------

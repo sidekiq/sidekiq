@@ -3,6 +3,19 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+1.5.1
+-------------
+
+- Fix issue with census startup when not using Bundler configuration for
+  source credentials.
+
+1.5.0
+-------------
+
+- Add new web authorization API [#3251]
+- Update all sidekiqswarm env vars to use SIDEKIQ\_ prefix [#3218]
+- Add census reporting, the leader will ping contribsys nightly with aggregate usage metrics
+
 1.4.0
 -------------
 

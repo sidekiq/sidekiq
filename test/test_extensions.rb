@@ -117,10 +117,12 @@ class TestExtensions < Sidekiq::Test
 
       Sidekiq.instance_eval { remove_instance_variable :@delay_removed }
       # Reload modified modules
-      load 'sidekiq/extensions/action_mailer.rb'
-      load 'sidekiq/extensions/active_record.rb'
-      load 'sidekiq/extensions/generic_proxy.rb'
-      load 'sidekiq/extensions/class_methods.rb'
+      silence_warnings do
+        load 'sidekiq/extensions/action_mailer.rb'
+        load 'sidekiq/extensions/active_record.rb'
+        load 'sidekiq/extensions/generic_proxy.rb'
+        load 'sidekiq/extensions/class_methods.rb'
+      end
     end
   end
 
