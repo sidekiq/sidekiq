@@ -5,7 +5,7 @@ gem 'rails', '5.0.0'
 gem "hiredis"
 gem 'simplecov'
 gem 'minitest'
-gem 'minitest-utils'
+#gem 'minitest-utils'
 gem 'toxiproxy'
 
 platforms :rbx do
