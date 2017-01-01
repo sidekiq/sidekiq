@@ -351,7 +351,7 @@ class TestCli < Sidekiq::Test
           count += 1
         }]
         @cli.launcher = Sidekiq::Launcher.new(Sidekiq.options)
-        @cli.handle_signal('USR1')
+        @cli.handle_signal('TSTP')
 
         assert_equal 1, count
       end
