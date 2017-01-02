@@ -23,4 +23,10 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency      'minitest', '~> 5.10', '>= 5.10.1'
   gem.add_development_dependency      'rake', '~> 10.0'
   gem.add_development_dependency      'rails', '>= 3.2.0'
+
+  gem.add_development_dependency      'capybara'
+  gem.add_development_dependency      'poltergeist'
+  gem.add_development_dependency      'percy-capybara'
+  gem.add_development_dependency      'timecop'
+  gem.add_development_dependency      'mocha'
 end

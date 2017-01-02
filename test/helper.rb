@@ -3,6 +3,17 @@ $TESTING = true
 # disable minitest/parallel threads
 ENV["N"] = "0"
 
+require 'capybara'
+require 'capybara/dsl'
+require 'capybara/poltergeist'
+require 'percy/capybara'
+
+Capybara.register_driver :poltergeist do |app|
+  Capybara::Poltergeist::Driver.new(app,
+    debug: false, js_errors: false, timeout: 180
+  )
+end
+
 if ENV["COVERAGE"]
   require 'simplecov'
   SimpleCov.start do
@@ -73,3 +84,10 @@ def with_logging(lvl=Logger::DEBUG)
     Sidekiq.logger.level = old
   end
 end
+
+
+# Initialize and finalize Percy.io
+Percy::Capybara.initialize_build
+MiniTest.after_run {
+  Percy::Capybara.finalize_build
+}
