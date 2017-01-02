@@ -274,7 +274,7 @@ module Sidekiq
       resp = case resp
       when Array
         resp
-      when Fixnum
+      when Integer
         [resp, {}, []]
       else
         type_header = case action.type

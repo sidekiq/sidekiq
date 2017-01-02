@@ -117,7 +117,7 @@ class TestRetryExhausted < Sidekiq::Test
 
       assert old_worker.exhausted_called?
       assert_equal raised_error.message, old_worker.exhausted_job['error_message']
-      assert_equal nil, new_worker.exhausted_exception
+      assert_nil new_worker.exhausted_exception
     end
 
     it 'allows a global default handler' do
