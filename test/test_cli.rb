@@ -185,7 +185,7 @@ class TestCli < Sidekiq::Test
         assert_equal './test/config.yml', Sidekiq.options[:config_file]
         refute Sidekiq.options[:verbose]
         assert_equal './test/fake_env.rb', Sidekiq.options[:require]
-        assert_equal nil, Sidekiq.options[:environment]
+        assert_nil Sidekiq.options[:environment]
         assert_equal 50, Sidekiq.options[:concurrency]
         assert_equal '/tmp/sidekiq-config-test.pid', Sidekiq.options[:pidfile]
         assert_equal '/tmp/sidekiq.log', Sidekiq.options[:logfile]
@@ -373,7 +373,7 @@ class TestCli < Sidekiq::Test
         @tmp_log_path = '/tmp/sidekiq.log'
         @cli.parse(['sidekiq', '-L', @tmp_log_path, '-r', './test/fake_env.rb'])
         @mock_thread = MiniTest::Mock.new
-        @mock_thread.expect(:[], 'interrupt_test', ['label'])
+        @mock_thread.expect(:[], 'interrupt_test', ['sidekiq_label'])
       end
 
       after do
