@@ -373,7 +373,7 @@ class TestCli < Sidekiq::Test
         @tmp_log_path = '/tmp/sidekiq.log'
         @cli.parse(['sidekiq', '-L', @tmp_log_path, '-r', './test/fake_env.rb'])
         @mock_thread = MiniTest::Mock.new
-        @mock_thread.expect(:[], 'interrupt_test', ['label'])
+        @mock_thread.expect(:[], 'interrupt_test', ['sidekiq_label'])
       end
 
       after do
