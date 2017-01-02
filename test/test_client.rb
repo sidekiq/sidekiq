@@ -159,7 +159,7 @@ class TestClient < Sidekiq::Test
         chain.add Stopper
       end
 
-      assert_equal nil, client.push('class' => MyWorker, 'args' => [0])
+      assert_nil client.push('class' => MyWorker, 'args' => [0])
       assert_match(/[0-9a-f]{12}/, client.push('class' => MyWorker, 'args' => [1]))
       client.push_bulk('class' => MyWorker, 'args' => [[0], [1]]).each do |jid|
         assert_match(/[0-9a-f]{12}/, jid)
