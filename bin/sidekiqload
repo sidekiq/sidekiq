@@ -46,7 +46,7 @@ Toxiproxy.populate([{
 }])
 
 self_read, self_write = IO.pipe
-%w(INT TERM USR1 USR2 TTIN).each do |sig|
+%w(INT TERM TSTP TTIN).each do |sig|
   begin
     trap sig do
       self_write.puts(sig)
@@ -67,14 +67,9 @@ def handle_signal(launcher, sig)
   when 'TERM'
     # Heroku sends TERM and then waits 10 seconds for process to exit.
     raise Interrupt
-  when 'USR1'
-    Sidekiq.logger.info "Received USR1, no longer accepting new work"
+  when 'TSTP'
+    Sidekiq.logger.info "Received TSTP, no longer accepting new work"
     launcher.quiet
-  when 'USR2'
-    if Sidekiq.options[:logfile]
-      Sidekiq.logger.info "Received USR2, reopening log file"
-      Sidekiq::Logging.reopen_logs
-    end
   when 'TTIN'
     Thread.list.each do |thread|
       Sidekiq.logger.warn "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
