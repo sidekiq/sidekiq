@@ -81,7 +81,7 @@ class TestWeb < Sidekiq::Test
         assert_nil Sidekiq.redis { |c| c.lpop signals_key }
         post '/busy', 'quiet' => '1', 'identity' => identity
         assert_equal 302, last_response.status
-        assert_equal 'USR1', Sidekiq.redis { |c| c.lpop signals_key }
+        assert_equal 'TSTP', Sidekiq.redis { |c| c.lpop signals_key }
       end
 
       it 'can stop a process' do

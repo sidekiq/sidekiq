@@ -436,7 +436,7 @@ class TestApi < Sidekiq::Test
         data.stop!
         signals_string = "#{odata['key']}-signals"
         assert_equal "TERM", Sidekiq.redis{|c| c.lpop(signals_string) }
-        assert_equal "USR1", Sidekiq.redis{|c| c.lpop(signals_string) }
+        assert_equal "TSTP", Sidekiq.redis{|c| c.lpop(signals_string) }
       end
 
       it 'can enumerate workers' do

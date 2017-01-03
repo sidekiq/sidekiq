@@ -61,8 +61,6 @@ module Sidekiq
 
     private unless $TESTING
 
-    JVM_RESERVED_SIGNALS = ['USR1', 'USR2'] # Don't Process#kill if we get these signals via the API
-
     def heartbeat
       results = Sidekiq::CLI::PROCTITLES.map {|x| x.(self, to_data) }
       results.compact!
@@ -110,11 +108,7 @@ module Sidekiq
 
         return unless msg
 
-        if JVM_RESERVED_SIGNALS.include?(msg)
-          Sidekiq::CLI.instance.handle_signal(msg)
-        else
-          ::Process.kill(msg, $$)
-        end
+        ::Process.kill(msg, $$)
       rescue => e
         # ignore all redis/network issues
         logger.error("heartbeat: #{e.message}")
