@@ -21,7 +21,7 @@ module Sidekiq
         obj = [@target, name, args]
         marshalled = ::YAML.dump(obj)
         if marshalled.size > SIZE_LIMIT
-          ::Sidekiq.logger.warn { "#{@target}.#{name} serialized argument is #{marshalled.bytesize} bytes, you should refactor it to reduce the size" }
+          ::Sidekiq.logger.warn { "#{@target}.#{name} job argument is #{marshalled.bytesize} bytes, you should refactor it to reduce the size" }
         end
         @performable.client_push({ 'class' => @performable, 'args' => [marshalled] }.merge(@opts))
       end
