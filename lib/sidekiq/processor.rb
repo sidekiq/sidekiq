@@ -156,7 +156,15 @@ module Sidekiq
         #   it is recovered by the reliability algorithm.  The job may act like
         #   a poison pill and never execute until manually removed but job loss
         #   is considered worse.
-        job_hash = Sidekiq.load_json(jobstr)
+        job_hash = nil
+        begin
+          job_hash = Sidekiq.load_json(jobstr)
+        rescue => ex
+          Sidekiq.logger.error { "Pushing job to dead queue due to invalid JSON: #{ex}" }
+          send_to_morgue(jobstr)
+          ack = true
+          raise
+        end
 
         ack = true
         dispatch(job_hash, queue) do |worker|
@@ -174,6 +182,17 @@ module Sidekiq
         raise
       ensure
         work.acknowledge if ack
+      end
+    end
+
+    def send_to_morgue(msg)
+      now = Time.now.to_f
+      Sidekiq.redis do |conn|
+        conn.multi do
+          conn.zadd('dead', now, msg)
+          conn.zremrangebyscore('dead', '-inf', now - DeadSet.timeout)
+          conn.zremrangebyrank('dead', 0, -DeadSet.max_jobs)
+        end
       end
     end
 

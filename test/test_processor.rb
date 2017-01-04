@@ -81,6 +81,20 @@ class TestProcessor < Sidekiq::Test
         Sidekiq.error_handlers.pop
       end
 
+      it 'handles invalid JSON' do
+        job_hash = { 'class' => MockWorker.to_s, 'args' => ['boom'] }
+        msg = Sidekiq.dump_json(job_hash)
+        job = work(msg[0...-2])
+        ds = Sidekiq::DeadSet.new
+        assert_equal 0, ds.size
+        begin
+          @processor.instance_variable_set(:'@job', job)
+          @processor.process(job)
+        rescue JSON::ParserError
+        end
+        assert_equal 1, ds.size
+      end
+
       it 'handles exceptions raised by the job' do
         job_hash = { 'class' => MockWorker.to_s, 'args' => ['boom'] }
         msg = Sidekiq.dump_json(job_hash)
