@@ -3,6 +3,8 @@ require 'yaml'
 
 module Sidekiq
   module Extensions
+    SIZE_LIMIT = 8_192
+
     class Proxy < BasicObject
       def initialize(performable, target, options={})
         @performable = performable
@@ -17,7 +19,11 @@ module Sidekiq
         # to JSON and then deserialized on the other side back into a
         # Ruby object.
         obj = [@target, name, args]
-        @performable.client_push({ 'class' => @performable, 'args' => [::YAML.dump(obj)] }.merge(@opts))
+        marshalled = ::YAML.dump(obj)
+        if marshalled.size > SIZE_LIMIT
+          ::Sidekiq.logger.warn { "#{@target}.#{name} job argument is #{marshalled.bytesize} bytes, you should refactor it to reduce the size" }
+        end
+        @performable.client_push({ 'class' => @performable, 'args' => [marshalled] }.merge(@opts))
       end
     end
 

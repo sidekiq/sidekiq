@@ -10,7 +10,7 @@ module Sidekiq
 
   ##
   # The Manager is the central coordination point in Sidekiq, controlling
-  # the lifecycle of the Processors and feeding them jobs as necessary.
+  # the lifecycle of the Processors.
   #
   # Tasks:
   #

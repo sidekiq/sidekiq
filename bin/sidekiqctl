@@ -64,7 +64,7 @@ class Sidekiqctl
   end
 
   def quiet
-    `kill -USR1 #{pid}`
+    `kill -TSTP #{pid}`
   end
 
   def stop

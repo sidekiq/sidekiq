@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 require_relative 'helper'
-require 'sidekiq'
+require 'sidekiq/api'
 require 'active_record'
 require 'action_mailer'
-require 'sidekiq/extensions/action_mailer'
-require 'sidekiq/extensions/active_record'
-require 'sidekiq/rails'
-
-Sidekiq.hook_rails!
+Sidekiq::Extensions.enable_delay!
 
 class TestExtensions < Sidekiq::Test
   describe 'sidekiq extensions' do
@@ -100,6 +96,13 @@ class TestExtensions < Sidekiq::Test
       end
     end
 
+    it 'logs large payloads' do
+      output = capture_logging(Logger::WARN) do
+        SomeClass.delay.doit('a' * 8192)
+      end
+      assert_match(/#{SomeClass}.doit job argument is/, output)
+    end
+
     it 'allows delay of any module class method' do
       q = Sidekiq::Queue.new
       assert_equal 0, q.size
@@ -107,23 +110,6 @@ class TestExtensions < Sidekiq::Test
       assert_equal 1, q.size
     end
 
-    it 'allows removing of the #delay methods' do
-      q = Sidekiq::Queue.new
-      Sidekiq.remove_delay!
-      assert_equal 0, q.size
-      assert_raises NoMethodError do
-        SomeModule.delay.doit(Date.today)
-      end
-
-      Sidekiq.instance_eval { remove_instance_variable :@delay_removed }
-      # Reload modified modules
-      silence_warnings do
-        load 'sidekiq/extensions/action_mailer.rb'
-        load 'sidekiq/extensions/active_record.rb'
-        load 'sidekiq/extensions/generic_proxy.rb'
-        load 'sidekiq/extensions/class_methods.rb'
-      end
-    end
   end
 
 end

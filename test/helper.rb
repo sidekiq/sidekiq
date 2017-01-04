@@ -12,12 +12,12 @@ if ENV["COVERAGE"]
 end
 ENV['RACK_ENV'] = ENV['RAILS_ENV'] = 'test'
 
-trap 'USR1' do
+trap 'TSTP' do
   threads = Thread.list
 
   puts
   puts "=" * 80
-  puts "Received USR1 signal; printing all #{threads.count} thread backtraces."
+  puts "Received TSTP signal; printing all #{threads.count} thread backtraces."
 
   threads.each do |thr|
     description = thr == Thread.main ? "Main thread" : thr.inspect

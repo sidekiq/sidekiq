@@ -9,4 +9,5 @@ before_install:
 rvm:
   - 2.2.4
   - 2.3.0
-  - jruby-head
+  - 2.4.0
+  - jruby-9.1.6.0

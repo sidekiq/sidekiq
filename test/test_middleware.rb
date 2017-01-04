@@ -112,7 +112,7 @@ class TestMiddleware < Sidekiq::Test
 
       final_action = nil
       chain.invoke { final_action = true }
-      assert_equal nil, final_action
+      assert_nil final_action
       assert_equal [], recorder
     end
   end

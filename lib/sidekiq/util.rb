@@ -22,6 +22,7 @@ module Sidekiq
 
     def safe_thread(name, &block)
       Thread.new do
+        Thread.current['sidekiq_label'] = name
         watchdog(name, &block)
       end
     end

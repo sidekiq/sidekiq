@@ -748,7 +748,7 @@ module Sidekiq
     end
 
     def quiet!
-      signal('USR1')
+      signal('TSTP')
     end
 
     def stop!

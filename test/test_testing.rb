@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 require_relative 'helper'
 
-require 'active_record'
-require 'action_mailer'
-require 'sidekiq/rails'
-require 'sidekiq/extensions/action_mailer'
-require 'sidekiq/extensions/active_record'
-
-Sidekiq.hook_rails!
-
 class TestTesting < Sidekiq::Test
   describe 'sidekiq testing' do
     describe 'require/load sidekiq/testing.rb' do
