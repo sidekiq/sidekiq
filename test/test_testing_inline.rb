@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 require_relative 'helper'
 
-require 'active_record'
-require 'action_mailer'
-require 'sidekiq/rails'
-require 'sidekiq/extensions/action_mailer'
-require 'sidekiq/extensions/active_record'
-
-Sidekiq.hook_rails!
-
 class TestInline < Sidekiq::Test
   describe 'sidekiq inline testing' do
     class InlineError < RuntimeError; end
@@ -29,18 +21,6 @@ class TestInline < Sidekiq::Test
       end
     end
 
-    class InlineFooMailer < ActionMailer::Base
-      def bar(str)
-        raise InlineError
-      end
-    end
-
-    class InlineFooModel < ActiveRecord::Base
-      def self.bar(str)
-        raise InlineError
-      end
-    end
-
     before do
       require 'sidekiq/testing/inline'
       Sidekiq::Testing.inline!
@@ -58,15 +38,34 @@ class TestInline < Sidekiq::Test
       end
     end
 
-    it 'stubs the delay call on mailers' do
-      assert_raises InlineError do
-        InlineFooMailer.delay.bar('three')
+    describe 'delay' do
+      require 'action_mailer'
+      class InlineFooMailer < ActionMailer::Base
+        def bar(str)
+          raise InlineError
+        end
       end
-    end
 
-    it 'stubs the delay call on models' do
-      assert_raises InlineError do
-        InlineFooModel.delay.bar('three')
+      class InlineFooModel
+        def self.bar(str)
+          raise InlineError
+        end
+      end
+
+      before do
+        Sidekiq::Extensions.enable_delay!
+      end
+
+      it 'stubs the delay call on mailers' do
+        assert_raises InlineError do
+          InlineFooMailer.delay.bar('three')
+        end
+      end
+
+      it 'stubs the delay call on models' do
+        assert_raises InlineError do
+          InlineFooModel.delay.bar('three')
+        end
       end
     end
 

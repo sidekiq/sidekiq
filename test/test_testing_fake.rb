@@ -1,15 +1,7 @@
 # frozen_string_literal: true
 require_relative 'helper'
 
-require 'active_record'
-require 'action_mailer'
-require 'sidekiq/rails'
-require 'sidekiq/extensions/action_mailer'
-require 'sidekiq/extensions/active_record'
-
-Sidekiq.hook_rails!
-
-class TestTesting < Sidekiq::Test
+class TestFake < Sidekiq::Test
   describe 'sidekiq testing' do
     class PerformError < RuntimeError; end
 
@@ -31,18 +23,6 @@ class TestTesting < Sidekiq::Test
       include Sidekiq::Worker
       def perform(error)
         raise PerformError if error
-      end
-    end
-
-    class FooMailer < ActionMailer::Base
-      def bar(str)
-        str
-      end
-    end
-
-    class FooModel < ActiveRecord::Base
-      def bar(str)
-        str
       end
     end
 
@@ -71,21 +51,34 @@ class TestTesting < Sidekiq::Test
       assert_in_delta 10.seconds.from_now.to_f, DirectWorker.jobs.last['at'], 0.01
     end
 
-    it 'stubs the delay call on mailers' do
-      assert_equal 0, Sidekiq::Extensions::DelayedMailer.jobs.size
-      FooMailer.delay.bar('hello!')
-      assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs.size
-    end
-
-    class Something
-      def self.foo(x)
+    describe 'delayed' do
+      require 'action_mailer'
+      class FooMailer < ActionMailer::Base
+        def bar(str)
+          str
+        end
       end
-    end
 
-    it 'stubs the delay call on models' do
-      assert_equal 0, Sidekiq::Extensions::DelayedClass.jobs.size
-      Something.delay.foo(Date.today)
-      assert_equal 1, Sidekiq::Extensions::DelayedClass.jobs.size
+      before do
+        Sidekiq::Extensions.enable_delay!
+      end
+
+      it 'stubs the delay call on mailers' do
+        assert_equal 0, Sidekiq::Extensions::DelayedMailer.jobs.size
+        FooMailer.delay.bar('hello!')
+        assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs.size
+      end
+
+      class Something
+        def self.foo(x)
+        end
+      end
+
+      it 'stubs the delay call on classes' do
+        assert_equal 0, Sidekiq::Extensions::DelayedClass.jobs.size
+        Something.delay.foo(Date.today)
+        assert_equal 1, Sidekiq::Extensions::DelayedClass.jobs.size
+      end
     end
 
     it 'stubs the enqueue call' do

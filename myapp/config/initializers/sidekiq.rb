@@ -34,3 +34,5 @@ class TimedWorker
     puts "Latency: #{now - start} sec"
   end
 end
+
+Sidekiq::Extensions.enable_delay!

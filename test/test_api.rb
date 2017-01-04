@@ -214,6 +214,7 @@ class TestApi < Sidekiq::Test
       end
 
       it 'unwraps delayed jobs' do
+        Sidekiq::Extensions.enable_delay!
         Sidekiq::Queue.delay.foo(1,2,3)
         q = Sidekiq::Queue.new
         x = q.first

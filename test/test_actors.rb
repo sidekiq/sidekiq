@@ -124,7 +124,7 @@ class TestActors < Sidekiq::Test
 
         a = $count
         p.start
-        sleep(0.02)
+        sleep(0.05)
         p.terminate
         p.kill(true)
 
