@@ -98,9 +98,9 @@ class TestExtensions < Sidekiq::Test
 
     it 'logs large payloads' do
       output = capture_logging(Logger::WARN) do
-        SomeClass.delay.doit('a' * 4096)
+        SomeClass.delay.doit('a' * 8192)
       end
-      assert_match(/#{SomeClass}.doit serialized argument very large/, output)
+      assert_match(/#{SomeClass}.doit serialized argument is/, output)
     end
 
     it 'allows delay of any module class method' do
