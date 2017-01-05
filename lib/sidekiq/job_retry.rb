@@ -55,19 +55,23 @@ module Sidekiq
   #    end
   #
   class JobRetry
+    class Skip < ::RuntimeError; end
+
     include Sidekiq::Util
 
     DEFAULT_MAX_RETRY_ATTEMPTS = 25
-
-    attr_accessor :worker
 
     def initialize(options = {})
       @max_retries = Sidekiq.options.merge(options).fetch(:max_retries, DEFAULT_MAX_RETRY_ATTEMPTS)
     end
 
-    def call(worker, msg, queue)
-      @worker = worker
+    # The global retry handler requires only the barest of data.
+    # We want to be able to retry as much as possible so we don't
+    # require the worker to be instantiated.
+    def global(msg, queue)
       yield
+    rescue Skip
+      raise
     rescue Sidekiq::Shutdown
       # ignore, will be pushed back onto queue during hard_shutdown
       raise
@@ -75,12 +79,34 @@ module Sidekiq
       # ignore, will be pushed back onto queue during hard_shutdown
       raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
 
-      if msg['retry'] == nil && worker
+      raise e unless msg['retry']
+      attempt_retry(nil, msg, queue, e)
+    end
+
+
+    # The local retry support means that any errors that occur within
+    # this block can be associated with the given worker instance.
+    # This is required to support the `sidekiq_retries_exhausted` block.
+    def local(worker, msg, queue)
+      yield
+    rescue Skip
+      raise
+    rescue Sidekiq::Shutdown
+      # ignore, will be pushed back onto queue during hard_shutdown
+      raise
+    rescue Exception => e
+      # ignore, will be pushed back onto queue during hard_shutdown
+      raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
+
+      if msg['retry'] == nil
         msg['retry'] = worker.class.get_sidekiq_options['retry']
       end
 
       raise e unless msg['retry']
       attempt_retry(worker, msg, queue, e)
+      # We've handled this error associated with this job, don't
+      # need to handle it at the global level
+      raise Skip
     end
 
     private

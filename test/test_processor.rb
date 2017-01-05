@@ -96,7 +96,7 @@ class TestProcessor < Sidekiq::Test
       end
 
       it 'handles exceptions raised by the job' do
-        job_hash = { 'class' => MockWorker.to_s, 'args' => ['boom'] }
+        job_hash = { 'class' => MockWorker.to_s, 'args' => ['boom'], 'jid' => '123987123' }
         msg = Sidekiq.dump_json(job_hash)
         job = work(msg)
         begin
@@ -107,7 +107,7 @@ class TestProcessor < Sidekiq::Test
         assert_equal 1, errors.count
         assert_instance_of TestException, errors.first[:exception]
         assert_equal msg, errors.first[:context][:jobstr]
-        assert_equal job_hash, errors.first[:context][:job]
+        assert_equal job_hash['jid'], errors.first[:context][:job]['jid']
       end
 
       it 'handles exceptions raised by the reloader' do

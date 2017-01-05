@@ -125,7 +125,7 @@ module Sidekiq
       # job structure to the Web UI
       pristine = cloned(job_hash)
 
-      @retrier.call(nil, job_hash, queue) do
+      @retrier.global(job_hash, queue) do
         @logging.call(job_hash, queue) do
           stats(pristine, queue) do
             # Rails 5 requires a Reloader to wrap code execution.  In order to
@@ -136,8 +136,9 @@ module Sidekiq
               klass  = job_hash['class'.freeze].constantize
               worker = klass.new
               worker.jid = job_hash['jid'.freeze]
-              @retrier.worker = worker
-              yield worker
+              @retrier.local(worker, job_hash, queue) do
+                yield worker
+              end
             end
           end
         end
