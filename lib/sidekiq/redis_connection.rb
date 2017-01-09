@@ -67,7 +67,8 @@ module Sidekiq
           opts.delete(:network_timeout)
         end
 
-        opts[:driver] = opts[:driver] || 'ruby'
+        opts[:driver] ||= 'ruby'
+        opts[:reconnect_attempts] ||= 0
 
         opts
       end
