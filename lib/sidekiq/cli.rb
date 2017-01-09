@@ -52,7 +52,7 @@ module Sidekiq
 
       self_read, self_write = IO.pipe
 
-      %w(INT TERM USR1 USR2 TTIN).each do |sig|
+      %w(INT TERM USR1 USR2 TTIN TSTP).each do |sig|
         begin
           trap sig do
             self_write.puts(sig)
@@ -134,6 +134,10 @@ module Sidekiq
         raise Interrupt
       when 'USR1'
         Sidekiq.logger.info "Received USR1, no longer accepting new work"
+        launcher.quiet
+      when 'TSTP'
+        # USR1 is not available on JVM, allow TSTP as an alternate signal
+        Sidekiq.logger.info "Received TSTP, no longer accepting new work"
         launcher.quiet
       when 'USR2'
         if Sidekiq.options[:logfile]

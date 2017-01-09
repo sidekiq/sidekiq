@@ -1,5 +1,10 @@
 # Sidekiq Changes
 
+HEAD
+-----------
+
+- Add support for TSTP signal, for Sidekiq 5.0 forward compatibility. [#3302]
+
 4.2.8
 -----------
 
