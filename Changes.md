@@ -1,9 +1,11 @@
 # Sidekiq Changes
 
-HEAD
+4.2.8
 -----------
 
-
+- Fix Rails 5 loading issue [#3275]
+- Restore missing tooltips to timestamps in Web UI [#3310]
+- Work on **Sidekiq 5.0** is now active! [#3301]
 
 4.2.7
 -----------
