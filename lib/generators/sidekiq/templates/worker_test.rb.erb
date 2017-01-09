@@ -1,4 +1,4 @@
-require_relative 'test_helper'
+require 'test_helper'
 <% module_namespacing do -%>
 class <%= class_name %>WorkerTest < <% if defined? Minitest::Test %>Minitest::Test<% else %>MiniTest::Unit::TestCase<% end %>
   def test_example
