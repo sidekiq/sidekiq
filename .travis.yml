@@ -6,8 +6,13 @@ services:
 before_install:
   - gem install bundler
   - gem update bundler
-rvm:
-  - 2.2.4
-  - 2.3.0
-  - 2.4.0
-  - jruby-9.1.6.0
+matrix:
+  include:
+    - rvm: 2.2.4
+      env: "PERCY_ENABLE=0"
+    - rvm: 2.3.0
+      env: "PERCY_ENABLE=0"
+    - rvm: 2.4.0
+      env: "PERCY_ENABLE=1"
+    - rvm: jruby-9.1.6.0
+      env: "PERCY_ENABLE=0"
