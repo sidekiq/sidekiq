@@ -1,8 +1,9 @@
 # Sidekiq Changes
 
-HEAD
+4.2.9
 -----------
 
+- Rollback [#3303] which broke Heroku Redis users [#3311]
 - Add support for TSTP signal, for Sidekiq 5.0 forward compatibility. [#3302]
 
 4.2.8
