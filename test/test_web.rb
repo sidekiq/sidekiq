@@ -61,32 +61,32 @@ class TestWeb < Sidekiq::Test
       page.driver.headers = { 'Accept-Language' => 'ru,en' }
       visit '/'
       assert_text('Панель управления')
-      Percy::Capybara.snapshot(page, name: 'Dashboard (Russian)')
+      snapshot(page, name: 'Dashboard (Russian)')
 
       page.driver.headers = { 'Accept-Language' => 'es,en' }
       visit '/'
       assert_text('Panel de Control')
-      Percy::Capybara.snapshot(page, name: 'Dashboard (Spanish)')
+      snapshot(page, name: 'Dashboard (Spanish)')
 
       page.driver.headers = { 'Accept-Language' => 'en-us' }
       visit '/'
       assert_text('Dashboard')
-      Percy::Capybara.snapshot(page, name: 'Dashboard (English)')
+      snapshot(page, name: 'Dashboard (English)')
 
       page.driver.headers = { 'Accept-Language' => 'zh-cn' }
       visit '/'
       assert_text('信息板')
-      Percy::Capybara.snapshot(page, name: 'Dashboard (Chinese)')
+      snapshot(page, name: 'Dashboard (Chinese)')
 
       page.driver.headers = { 'Accept-Language' => 'zh-tw' }
       visit '/'
       assert_text('資訊主頁')
-      Percy::Capybara.snapshot(page, name: 'Dashboard (Taiwanese)')
+      snapshot(page, name: 'Dashboard (Taiwanese)')
 
       page.driver.headers = { 'Accept-Language' => 'nb' }
       visit '/'
       assert_text('Oversikt')
-      Percy::Capybara.snapshot(page, name: 'Dashboard (Norwegian)')
+      snapshot(page, name: 'Dashboard (Norwegian)')
 
       page.driver.headers = { 'Accept-Language' => 'en-us' }
     end
@@ -118,7 +118,7 @@ class TestWeb < Sidekiq::Test
         assert has_button?('Quiet')
         assert has_button?('Stop')
 
-        Percy::Capybara.snapshot(page, name: 'Busy Page')
+        snapshot(page, name: 'Busy Page')
       end
 
       it 'can quiet a process' do
@@ -150,13 +150,13 @@ class TestWeb < Sidekiq::Test
         assert_equal 200, page.status_code
         assert_text('foo')
         assert_no_text('HardWorker')
-        Percy::Capybara.snapshot(page, name: 'Queues Page')
+        snapshot(page, name: 'Queues Page')
       end
 
       it 'handles queue view' do
         visit '/queues/default'
         assert_equal 200, page.status_code
-        Percy::Capybara.snapshot(page, name: 'Queue Page')
+        snapshot(page, name: 'Queue Page')
       end
 
       it 'can delete a queue' do
@@ -203,7 +203,7 @@ class TestWeb < Sidekiq::Test
         assert_equal 200, page.status_code
         assert_text('No retries were found')
         assert_no_text('HardWorker')
-        Percy::Capybara.snapshot(page, name: 'Retries Page - No Retries')
+        snapshot(page, name: 'Retries Page - No Retries')
 
         add_retry
 
@@ -211,7 +211,7 @@ class TestWeb < Sidekiq::Test
         assert_equal 200, page.status_code
         assert_no_text('No retries were found')
         assert_text('HardWorker')
-        Percy::Capybara.snapshot(page, name: 'Retries Page - With Retry')
+        snapshot(page, name: 'Retries Page - With Retry')
       end
 
       it 'can display a single retry' do
@@ -219,7 +219,7 @@ class TestWeb < Sidekiq::Test
         visit "/retries/#{job_params(*params)}"
         assert_equal 200, page.status_code
         assert_text('HardWorker')
-        Percy::Capybara.snapshot(page, name: 'Single Retry Page')
+        snapshot(page, name: 'Single Retry Page')
       end
 
       it 'will redirect to retries when viewing a non-existant retry' do
@@ -291,7 +291,7 @@ class TestWeb < Sidekiq::Test
         assert_equal 200, page.status_code
         assert_text('found')
         assert_no_text('HardWorker')
-        Percy::Capybara.snapshot(page, name: 'Scheduled Jobs Page - Nothing Scheduled')
+        snapshot(page, name: 'Scheduled Jobs Page - Nothing Scheduled')
 
         add_scheduled
 
@@ -299,7 +299,7 @@ class TestWeb < Sidekiq::Test
         assert_equal 200, page.status_code
         assert_no_text('found')
         assert_text('HardWorker')
-        Percy::Capybara.snapshot(page, name: 'Scheduled Jobs Page - Job Scheduled')
+        snapshot(page, name: 'Scheduled Jobs Page - Job Scheduled')
       end
 
       it 'can display a single scheduled job' do
@@ -307,7 +307,7 @@ class TestWeb < Sidekiq::Test
         visit "/scheduled/#{job_params(*params)}"
         assert_equal 200, page.status_code
         assert_text 'HardWorker'
-        Percy::Capybara.snapshot(page, name: 'Scheduled Job Page')
+        snapshot(page, name: 'Scheduled Job Page')
       end
 
       it 'handles missing scheduled job' do
@@ -525,7 +525,7 @@ class TestWeb < Sidekiq::Test
       it 'shows empty index' do
         visit '/morgue'
         assert_equal 200, page.status_code
-        Percy::Capybara.snapshot(page, name: 'Dead Jobs Page - Empty')
+        snapshot(page, name: 'Dead Jobs Page - Empty')
       end
 
       it 'shows index with jobs' do
@@ -533,7 +533,7 @@ class TestWeb < Sidekiq::Test
         visit '/morgue'
         assert_equal 200, page.status_code
         assert_text(score.to_i)
-        Percy::Capybara.snapshot(page, name: 'Dead Jobs Page - With Job')
+        snapshot(page, name: 'Dead Jobs Page - With Job')
       end
 
       it 'can delete all dead' do
@@ -629,6 +629,10 @@ class TestWeb < Sidekiq::Test
           conn.hmset("#{key}:workers", Time.now.to_f, msg)
         end
       end
+    end
+
+    def snapshot(page, options)
+      Percy::Capybara.snapshot(page, options)
     end
   end
 end
