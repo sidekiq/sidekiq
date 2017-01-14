@@ -24,9 +24,9 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency      'rake', '~> 10.0'
   gem.add_development_dependency      'rails', '>= 3.2.0'
 
-  gem.add_development_dependency      'capybara'
-  gem.add_development_dependency      'poltergeist'
-  gem.add_development_dependency      'percy-capybara'
-  gem.add_development_dependency      'timecop'
-  gem.add_development_dependency      'mocha'
+  gem.add_development_dependency      'capybara', '~> 2.11'
+  gem.add_development_dependency      'poltergeist', '~> 1.12'
+  gem.add_development_dependency      'percy-capybara', '~> 2.3'
+  gem.add_development_dependency      'timecop', '~> 0.8'
+  gem.add_development_dependency      'mocha', '~> 1.1'
 end
