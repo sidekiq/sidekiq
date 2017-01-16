@@ -632,7 +632,7 @@ class TestWeb < Sidekiq::Test
     end
 
     def snapshot(page, options)
-      Percy::Capybara.snapshot(page, options)
+      Percy::Capybara.snapshot(page, options) if percy_enabled?
     end
   end
 end

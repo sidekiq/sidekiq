@@ -6,13 +6,17 @@ ENV["N"] = "0"
 require 'capybara'
 require 'capybara/dsl'
 require 'capybara/poltergeist'
-require 'percy/capybara'
 
 Capybara.register_driver :poltergeist do |app|
   Capybara::Poltergeist::Driver.new(app,
     debug: false, js_errors: false, timeout: 180
   )
 end
+
+def percy_enabled?
+  !(ENV['PERCY_ENABLE'] == '0')
+end
+require 'percy/capybara' if percy_enabled?
 
 if ENV["COVERAGE"]
   require 'simplecov'
@@ -85,9 +89,10 @@ def with_logging(lvl=Logger::DEBUG)
   end
 end
 
-
-# Initialize and finalize Percy.io
-Percy::Capybara.initialize_build
-MiniTest.after_run {
-  Percy::Capybara.finalize_build
-}
+if percy_enabled?
+  # Initialize and finalize Percy.io
+  Percy::Capybara.initialize_build
+  MiniTest.after_run {
+    Percy::Capybara.finalize_build
+  }
+end
