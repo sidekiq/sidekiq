@@ -34,7 +34,6 @@ module Sidekiq
     dead_max_jobs: 10_000,
     dead_timeout_in_seconds: 180 * 24 * 60 * 60, # 6 months
     reloader: proc { |&block| block.call },
-    executor: proc { |&block| block.call },
   }
 
   DEFAULT_WORKER_OPTIONS = {
@@ -146,13 +145,7 @@ module Sidekiq
   end
 
   def self.default_server_middleware
-    require 'sidekiq/middleware/server/retry_jobs'
-    require 'sidekiq/middleware/server/logging'
-
-    Middleware::Chain.new do |m|
-      m.add Middleware::Server::Logging
-      m.add Middleware::Server::RetryJobs
-    end
+    Middleware::Chain.new
   end
 
   def self.default_worker_options=(hash)

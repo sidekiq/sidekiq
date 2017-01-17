@@ -251,7 +251,6 @@ module Sidekiq
           require 'sidekiq/rails'
           require File.expand_path("#{options[:require]}/config/environment.rb")
         else
-          # Rails 5+ && development mode, use Reloader
           require 'sidekiq/rails'
           require File.expand_path("#{options[:require]}/config/environment.rb")
         end

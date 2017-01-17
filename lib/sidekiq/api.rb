@@ -282,12 +282,16 @@ module Sidekiq
 
     def initialize(item, queue_name=nil)
       @value = item
-      @item = item.is_a?(Hash) ? item : Sidekiq.load_json(item)
-      @queue = queue_name || @item['queue']
+      @item = if item.is_a?(Hash)
+                item
+              else
+                Sidekiq.load_json(item) rescue nil
+              end
+      @queue = queue_name || self['queue']
     end
 
     def klass
-      @item['class']
+      self['class']
     end
 
     def display_class
@@ -318,8 +322,8 @@ module Sidekiq
                     arg
                   end
                 when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
-                  job_args = @item['wrapped'] ? args[0]["arguments"] : []
-                  if 'ActionMailer::DeliveryJob' == (@item['wrapped'] || args[0])
+                  job_args = self['wrapped'] ? args[0]["arguments"] : []
+                  if 'ActionMailer::DeliveryJob' == (self['wrapped'] || args[0])
                    # remove MailerClass, mailer_method and 'deliver_now'
                    job_args.drop(3)
                   else
@@ -331,19 +335,19 @@ module Sidekiq
     end
 
     def args
-      @item['args']
+      self['args']
     end
 
     def jid
-      @item['jid']
+      self['jid']
     end
 
     def enqueued_at
-      @item['enqueued_at'] ? Time.at(@item['enqueued_at']).utc : nil
+      self['enqueued_at'] ? Time.at(self['enqueued_at']).utc : nil
     end
 
     def created_at
-      Time.at(@item['created_at'] || @item['enqueued_at'] || 0).utc
+      Time.at(self['created_at'] || self['enqueued_at'] || 0).utc
     end
 
     def queue
@@ -351,7 +355,7 @@ module Sidekiq
     end
 
     def latency
-      Time.now.to_f - (@item['enqueued_at'] || @item['created_at'])
+      Time.now.to_f - (self['enqueued_at'] || self['created_at'] || 0)
     end
 
     ##
@@ -364,7 +368,10 @@ module Sidekiq
     end
 
     def [](name)
-      @item[name]
+      # nil will happen if the JSON fails to parse.
+      # We don't guarantee Sidekiq will work with bad job JSON but we should
+      # make a best effort to minimize the damage.
+      @item ? @item[name] : nil
     end
 
     private

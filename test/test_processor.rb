@@ -81,8 +81,24 @@ class TestProcessor < Sidekiq::Test
         Sidekiq.error_handlers.pop
       end
 
-      it 'handles exceptions raised by the job' do
+      it 'handles invalid JSON' do
+        ds = Sidekiq::DeadSet.new
+        ds.clear
         job_hash = { 'class' => MockWorker.to_s, 'args' => ['boom'] }
+        msg = Sidekiq.dump_json(job_hash)
+        job = work(msg[0...-2])
+        ds = Sidekiq::DeadSet.new
+        assert_equal 0, ds.size
+        begin
+          @processor.instance_variable_set(:'@job', job)
+          @processor.process(job)
+        rescue JSON::ParserError
+        end
+        assert_equal 1, ds.size
+      end
+
+      it 'handles exceptions raised by the job' do
+        job_hash = { 'class' => MockWorker.to_s, 'args' => ['boom'], 'jid' => '123987123' }
         msg = Sidekiq.dump_json(job_hash)
         job = work(msg)
         begin
@@ -93,7 +109,7 @@ class TestProcessor < Sidekiq::Test
         assert_equal 1, errors.count
         assert_instance_of TestException, errors.first[:exception]
         assert_equal msg, errors.first[:context][:jobstr]
-        assert_equal job_hash, errors.first[:context][:job]
+        assert_equal job_hash['jid'], errors.first[:context][:job]['jid']
       end
 
       it 'handles exceptions raised by the reloader' do
@@ -152,7 +168,8 @@ class TestProcessor < Sidekiq::Test
       describe 'middleware throws an exception before processing the work' do
         let(:raise_before_yield) { true }
 
-        it 'does not ack' do
+        it 'acks the job' do
+          work.expect(:acknowledge, nil)
           begin
             @processor.process(work)
             flunk "Expected #process to raise exception"

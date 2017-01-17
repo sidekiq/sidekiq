@@ -1,6 +1,6 @@
 # encoding: utf-8
 require_relative 'helper'
-require 'sidekiq/middleware/server/retry_jobs'
+require 'sidekiq/job_retry'
 
 class TestRetryExhausted < Sidekiq::Test
   describe 'sidekiq_retries_exhausted' do
@@ -52,7 +52,7 @@ class TestRetryExhausted < Sidekiq::Test
     end
 
     def handler(options={})
-      @handler ||= Sidekiq::Middleware::Server::RetryJobs.new(options)
+      @handler ||= Sidekiq::JobRetry.new(options)
     end
 
     def job(options={})
@@ -60,7 +60,7 @@ class TestRetryExhausted < Sidekiq::Test
     end
 
     it 'does not run exhausted block when job successful on first run' do
-      handler.call(new_worker, job('retry' => 2), 'default') do
+      handler.local(new_worker, job('retry' => 2), 'default') do
         # successful
       end
 
@@ -68,7 +68,7 @@ class TestRetryExhausted < Sidekiq::Test
     end
 
     it 'does not run exhausted block when job successful on last retry' do
-      handler.call(new_worker, job('retry_count' => 0, 'retry' => 1), 'default') do
+      handler.local(new_worker, job('retry_count' => 0, 'retry' => 1), 'default') do
         # successful
       end
 
@@ -77,7 +77,7 @@ class TestRetryExhausted < Sidekiq::Test
 
     it 'does not run exhausted block when retries not exhausted yet' do
       assert_raises RuntimeError do
-        handler.call(new_worker, job('retry' => 1), 'default') do
+        handler.local(new_worker, job('retry' => 1), 'default') do
           raise 'kerblammo!'
         end
       end
@@ -87,7 +87,7 @@ class TestRetryExhausted < Sidekiq::Test
 
     it 'runs exhausted block when retries exhausted' do
       assert_raises RuntimeError do
-        handler.call(new_worker, job('retry_count' => 0, 'retry' => 1), 'default') do
+        handler.local(new_worker, job('retry_count' => 0, 'retry' => 1), 'default') do
           raise 'kerblammo!'
         end
       end
@@ -98,7 +98,7 @@ class TestRetryExhausted < Sidekiq::Test
 
     it 'passes job and exception to retries exhausted block' do
       raised_error = assert_raises RuntimeError do
-        handler.call(new_worker, job('retry_count' => 0, 'retry' => 1), 'default') do
+        handler.local(new_worker, job('retry_count' => 0, 'retry' => 1), 'default') do
           raise 'kerblammo!'
         end
       end
@@ -110,7 +110,7 @@ class TestRetryExhausted < Sidekiq::Test
 
     it 'passes job to retries exhausted block' do
       raised_error = assert_raises RuntimeError do
-        handler.call(old_worker, job('retry_count' => 0, 'retry' => 1), 'default') do
+        handler.local(old_worker, job('retry_count' => 0, 'retry' => 1), 'default') do
           raise 'kerblammo!'
         end
       end
@@ -134,7 +134,7 @@ class TestRetryExhausted < Sidekiq::Test
         end
         f = Foobar.new
         raised_error = assert_raises RuntimeError do
-          handler.call(f, job('retry_count' => 0, 'retry' => 1), 'default') do
+          handler.local(f, job('retry_count' => 0, 'retry' => 1), 'default') do
             raise 'kerblammo!'
           end
         end
