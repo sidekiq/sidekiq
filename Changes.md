@@ -1,9 +1,18 @@
 # Sidekiq Changes
 
-HEAD
+4.2.9
 -----------
 
+- Rollback [#3303] which broke Heroku Redis users [#3311]
+- Add support for TSTP signal, for Sidekiq 5.0 forward compatibility. [#3302]
 
+4.2.8
+-----------
+
+- Fix rare edge case with Redis driver that can create duplicate jobs [#3303]
+- Fix Rails 5 loading issue [#3275]
+- Restore missing tooltips to timestamps in Web UI [#3310]
+- Work on **Sidekiq 5.0** is now active! [#3301]
 
 4.2.7
 -----------
@@ -44,6 +53,7 @@ Sidekiq::Web.set :sessions, false
 - Fix Web UI sharding support broken in 4.2.2. [#3169]
 - Fix timestamps not updating during UI polling [#3193, shaneog]
 - Relax rack-protection version to >= 1.5.0
+- Provide consistent interface to exception handlers, changing the structure of the context hash. [#3161]
 
 4.2.2
 -----------
