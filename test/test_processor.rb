@@ -82,6 +82,8 @@ class TestProcessor < Sidekiq::Test
       end
 
       it 'handles invalid JSON' do
+        ds = Sidekiq::DeadSet.new
+        ds.clear
         job_hash = { 'class' => MockWorker.to_s, 'args' => ['boom'] }
         msg = Sidekiq.dump_json(job_hash)
         job = work(msg[0...-2])
