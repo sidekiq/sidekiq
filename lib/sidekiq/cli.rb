@@ -240,9 +240,7 @@ module Sidekiq
       if File.directory?(options[:require])
         require 'rails'
         if ::Rails::VERSION::MAJOR < 4
-          require 'sidekiq/rails'
-          require File.expand_path("#{options[:require]}/config/environment.rb")
-          ::Rails.application.eager_load!
+          raise "Sidekiq no longer supports this version of Rails"
         elsif ::Rails::VERSION::MAJOR == 4
           # Painful contortions, see 1791 for discussion
           # No autoloading, we want to force eager load for everything.

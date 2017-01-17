@@ -1,7 +1,7 @@
 # encoding: utf-8
 # frozen_string_literal: true
 require 'sidekiq/version'
-fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 2.0.0." if RUBY_PLATFORM != 'java' && RUBY_VERSION < '2.0.0'
+fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 2.2.2." if RUBY_PLATFORM != 'java' && RUBY_VERSION < '2.2.2'
 
 require 'sidekiq/logging'
 require 'sidekiq/client'

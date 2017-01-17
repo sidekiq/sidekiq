@@ -67,7 +67,14 @@ module Sidekiq
           opts.delete(:network_timeout)
         end
 
-        opts[:driver] = opts[:driver] || 'ruby'
+        opts[:driver] ||= 'ruby'
+
+        # Issue #3303, redis-rb will silently retry an operation.
+        # This can lead to duplicate jobs if Sidekiq::Client's LPUSH
+        # is performed twice but I believe this is much, much rarer
+        # than the reconnect silently fixing a problem; we keep it
+        # on by default.
+        opts[:reconnect_attempts] ||= 1
 
         opts
       end

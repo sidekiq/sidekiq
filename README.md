@@ -32,9 +32,9 @@ DelayedJob 4.1.1 |  -   | -       | 465 sec | 215 jobs/sec
 Requirements
 -----------------
 
-Sidekiq supports CRuby 2.0+ and JRuby 9k.
+Sidekiq supports CRuby 2.2.2+ and JRuby 9k.
 
-All Rails releases >= 3.2 are officially supported.
+All Rails releases >= 4.0 are officially supported.
 
 Redis 2.8 or greater is required.  3.0.3+ is recommended for large
 installations with thousands of worker threads.
