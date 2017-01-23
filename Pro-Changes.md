@@ -3,6 +3,12 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+3.4.2
+---------
+
+- Add `Batch::Status#invalidated?` API which returns true if any/all
+  JIDs were invalidated within the batch. [#3326]
+
 3.4.1
 ---------
 
