@@ -85,7 +85,7 @@ module Sidekiq
     def push_bulk(items)
       arg = items['args'].first
       return [] unless arg # no jobs to push
-      raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" if !arg.is_a?(Array)
+      raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" unless arg.is_a?(Array)
 
       normed = normalize_item(items)
       payloads = items['args'].map do |args|
@@ -94,7 +94,7 @@ module Sidekiq
         result ? result : nil
       end.compact
 
-      raw_push(payloads) if !payloads.empty?
+      raw_push(payloads) unless payloads.empty?
       payloads.collect { |payload| payload['jid'] }
     end
 
@@ -226,7 +226,7 @@ module Sidekiq
 
     def normalized_hash(item_class)
       if item_class.is_a?(Class)
-        raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item_class.ancestors.inspect}") if !item_class.respond_to?('get_sidekiq_options'.freeze)
+        raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item_class.ancestors.inspect}") unless item_class.respond_to?('get_sidekiq_options'.freeze)
         item_class.get_sidekiq_options
       else
         Sidekiq.default_worker_options

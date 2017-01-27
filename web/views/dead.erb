@@ -14,7 +14,7 @@
         <th><%= t('ErrorMessage') %></th>
         <td><%= h(@dead['error_message']) %></td>
       </tr>
-      <% if !@dead['error_backtrace'].nil? %>
+      <% unless @dead['error_backtrace'].nil? %>
         <tr>
           <th><%= t('ErrorBacktrace') %></th>
           <td>
