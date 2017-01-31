@@ -12,6 +12,9 @@ Sidekiq::Middleware::Server::RetryJobs -> Sidekiq::JobRetry
 Sidekiq::Middleware::Server::Logging -> Sidekiq::JobLogging
 ```
 - Quieting Sidekiq is now done via the TSTP signal, the USR1 signal is deprecated.
+- The `delay` extension APIs are no longer available by default, you
+  must opt into them.
+- Rails 3.2 and Ruby 2.0 and 2.1 are no longer supported.
 - Please see the [5.0 Upgrade notes](5.0-Upgrade.md) for more detail.
 
 4.2.9
