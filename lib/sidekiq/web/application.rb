@@ -85,7 +85,7 @@ module Sidekiq
       name = route_params[:name]
       Sidekiq::Job.new(params['key_val'], name).delete
 
-      redirect_with_query("#{root_path}queues/#{name}")
+      redirect_with_query("#{root_path}queues/#{CGI.escape(name)}")
     end
 
     get '/morgue' do

@@ -3,6 +3,14 @@ Sidekiq Enterprise Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+-------------
+
+- Fix leak in concurrent rate limiter, run this in Rails console to clean up existing data [#3323]
+```ruby
+expiry = 1.month.to_i; Sidekiq::Limiter.redis { |c| c.scan_each(match: "lmtr-cfree-*") { |key| c.expire(key, expiry) } }
+```
+
 1.5.1
 -------------
 
