@@ -281,7 +281,7 @@ module Sidekiq
         when :json
           { "Content-Type" => "application/json", "Cache-Control" => "no-cache" }
         when String
-          { "Content-Type" => action.type, "Cache-Control" => "no-cache" }
+          { "Content-Type" => (action.type || "text/html"), "Cache-Control" => "no-cache" }
         else
           { "Content-Type" => "text/html", "Cache-Control" => "no-cache" }
         end
