@@ -75,7 +75,10 @@ module Sidekiq
       enqueued     = pipe2_res[s..-1].map(&:to_i).inject(0, &:+)
 
       default_queue_latency = if (entry = pipe1_res[6].first)
-                                Time.now.to_f - Sidekiq.load_json(entry)['enqueued_at'.freeze]
+                                job = Sidekiq.load_json(entry)
+                                now = Time.now.to_f
+                                thence = job['enqueued_at'.freeze] || now
+                                now - thence
                               else
                                 0
                               end
@@ -225,7 +228,10 @@ module Sidekiq
         conn.lrange(@rname, -1, -1)
       end.first
       return 0 unless entry
-      Time.now.to_f - Sidekiq.load_json(entry)['enqueued_at']
+      job = Sidekiq.load_json(entry)
+      now = Time.now.to_f
+      thence = job['enqueued_at'] || now
+      now - thence
     end
 
     def each
@@ -351,7 +357,8 @@ module Sidekiq
     end
 
     def latency
-      Time.now.to_f - (@item['enqueued_at'] || @item['created_at'])
+      now = Time.now.to_f
+      now - (@item['enqueued_at'] || @item['created_at'] || now)
     end
 
     ##

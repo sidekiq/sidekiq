@@ -16,6 +16,7 @@ class TestApi < Sidekiq::Test
         assert_equal 0, s.processed
         assert_equal 0, s.failed
         assert_equal 0, s.enqueued
+        assert_equal 0, s.default_queue_latency
       end
 
       describe "processed" do
@@ -95,6 +96,28 @@ class TestApi < Sidekiq::Test
       end
 
       describe "enqueued" do
+        it 'handles latency for good jobs' do
+          Sidekiq.redis do |conn|
+            conn.rpush 'queue:default', "{\"enqueued_at\": #{Time.now.to_f}}"
+            conn.sadd 'queues', 'default'
+          end
+          s = Sidekiq::Stats.new
+          assert s.default_queue_latency > 0
+          q = Sidekiq::Queue.new
+          assert q.latency > 0
+        end
+
+        it 'handles latency for incomplete jobs' do
+          Sidekiq.redis do |conn|
+            conn.rpush 'queue:default', '{}'
+            conn.sadd 'queues', 'default'
+          end
+          s = Sidekiq::Stats.new
+          assert_equal 0, s.default_queue_latency
+          q = Sidekiq::Queue.new
+          assert_equal 0, q.latency
+        end
+
         it "returns total enqueued jobs" do
           Sidekiq.redis do |conn|
             conn.rpush 'queue:foo', '{}'
