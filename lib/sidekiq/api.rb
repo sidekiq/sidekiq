@@ -592,13 +592,13 @@ module Sidekiq
   # Allows enumeration of scheduled jobs within Sidekiq.
   # Based on this, you can search/filter for jobs.  Here's an
   # example where I'm selecting all jobs of a certain type
-  # and deleting them from the retry queue.
+  # and deleting them from the schedule queue.
   #
   #   r = Sidekiq::ScheduledSet.new
-  #   r.select do |retri|
-  #     retri.klass == 'Sidekiq::Extensions::DelayedClass' &&
-  #     retri.args[0] == 'User' &&
-  #     retri.args[1] == 'setup_new_subscriber'
+  #   r.select do |scheduled|
+  #     scheduled.klass == 'Sidekiq::Extensions::DelayedClass' &&
+  #     scheduled.args[0] == 'User' &&
+  #     scheduled.args[1] == 'setup_new_subscriber'
   #   end.map(&:delete)
   class ScheduledSet < JobSet
     def initialize
