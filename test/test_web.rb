@@ -219,6 +219,7 @@ class TestWeb < Sidekiq::Test
         visit "/retries/#{job_params(*params)}"
         assert_equal 200, page.status_code
         assert_text('HardWorker')
+        assert_text('RuntimeError')
         snapshot(page, name: 'Single Retry Page')
       end
 
