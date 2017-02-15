@@ -557,6 +557,12 @@ class TestWeb < Sidekiq::Test
         assert_equal 200, last_response.status
         assert_match(/#{params.first['args'][2]}/, last_response.body)
       end
+
+      it 'handles bad query input' do
+        get '/queues/foo?page=B<H'
+        assert_equal 200, last_response.status
+        assert_match(/B%3CH/, last_response.body)
+      end
     end
 
     def add_scheduled(job_id=SecureRandom.hex(12))
