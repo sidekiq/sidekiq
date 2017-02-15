@@ -219,6 +219,7 @@ class TestWeb < Sidekiq::Test
         visit "/retries/#{job_params(*params)}"
         assert_equal 200, page.status_code
         assert_text('HardWorker')
+        assert_text('RuntimeError')
         snapshot(page, name: 'Single Retry Page')
       end
 
@@ -555,6 +556,12 @@ class TestWeb < Sidekiq::Test
         get '/queues/foo'
         assert_equal 200, last_response.status
         assert_match(/#{params.first['args'][2]}/, last_response.body)
+      end
+
+      it 'handles bad query input' do
+        get '/queues/foo?page=B<H'
+        assert_equal 200, last_response.status
+        assert_match(/B%3CH/, last_response.body)
       end
     end
 

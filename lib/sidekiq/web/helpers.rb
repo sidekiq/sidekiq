@@ -2,6 +2,7 @@
 require 'uri'
 require 'set'
 require 'yaml'
+require 'cgi'
 
 module Sidekiq
   # This is not a public API
@@ -161,7 +162,7 @@ module Sidekiq
     def qparams(options)
       options = options.stringify_keys
       params.merge(options).map do |key, value|
-        SAFE_QPARAMS.include?(key) ? "#{key}=#{value}" : next
+        SAFE_QPARAMS.include?(key) ? "#{key}=#{CGI.escape(value.to_s)}" : next
       end.compact.join("&")
     end
 

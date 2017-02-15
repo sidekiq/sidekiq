@@ -3,10 +3,11 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+3.4.3
 ---------
 
-- Update reliable scheduler to enqueue up to 100 jobs per call, minimizing Redis latency [#3332]
+- Limit reliable scheduler to enqueue up to 100 jobs per call, minimizing Redis latency [#3332]
+- Fix bug in super\_fetch logic for queues with `_` in the name [#3339]
 
 3.4.2
 ---------
