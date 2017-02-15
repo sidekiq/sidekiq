@@ -70,30 +70,36 @@ module Sidekiq
     # require the worker to be instantiated.
     def global(msg, queue)
       yield
-    rescue Skip
-      raise
-    rescue Sidekiq::Shutdown
+    rescue Skip => ex
+      raise ex
+    rescue Sidekiq::Shutdown => ey
       # ignore, will be pushed back onto queue during hard_shutdown
-      raise
+      raise ey
     rescue Exception => e
       # ignore, will be pushed back onto queue during hard_shutdown
       raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
 
       raise e unless msg['retry']
       attempt_retry(nil, msg, queue, e)
+      raise e
     end
 
 
     # The local retry support means that any errors that occur within
     # this block can be associated with the given worker instance.
     # This is required to support the `sidekiq_retries_exhausted` block.
+    #
+    # Note that any exception from the block is wrapped in the Skip
+    # exception so the global block does not reprocess the error.  The
+    # Skip exception is unwrapped within Sidekiq::Processor#process before
+    # calling the handle_exception handlers.
     def local(worker, msg, queue)
       yield
-    rescue Skip
-      raise
-    rescue Sidekiq::Shutdown
+    rescue Skip => ex
+      raise ex
+    rescue Sidekiq::Shutdown => ey
       # ignore, will be pushed back onto queue during hard_shutdown
-      raise
+      raise ey
     rescue Exception => e
       # ignore, will be pushed back onto queue during hard_shutdown
       raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
@@ -161,8 +167,6 @@ module Sidekiq
         # Goodbye dear message, you (re)tried your best I'm sure.
         retries_exhausted(worker, msg, exception)
       end
-
-      raise exception
     end
 
     def retries_exhausted(worker, msg, exception)
@@ -217,8 +221,7 @@ module Sidekiq
     end
 
     def exception_caused_by_shutdown?(e, checked_causes = [])
-      # In Ruby 2.1.0 only, check if exception is a result of shutdown.
-      return false unless defined?(e.cause)
+      return false unless e.cause
 
       # Handle circular causes
       checked_causes << e.object_id

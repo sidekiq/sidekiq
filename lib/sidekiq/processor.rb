@@ -179,8 +179,9 @@ module Sidekiq
         # we didn't properly finish it.
         ack = false
       rescue Exception => ex
-        handle_exception(ex, { :context => "Job raised exception", :job => job_hash, :jobstr => jobstr })
-        raise
+        e = ex.is_a?(::Sidekiq::JobRetry::Skip) && ex.cause ? ex.cause : ex
+        handle_exception(e, { :context => "Job raised exception", :job => job_hash, :jobstr => jobstr })
+        raise e
       ensure
         work.acknowledge if ack
       end

@@ -102,6 +102,7 @@ class TestRetryExhausted < Sidekiq::Test
           raise 'kerblammo!'
         end
       end
+      raised_error = raised_error.cause
 
       assert new_worker.exhausted_called?
       assert_equal raised_error.message, new_worker.exhausted_job['error_message']
@@ -114,6 +115,7 @@ class TestRetryExhausted < Sidekiq::Test
           raise 'kerblammo!'
         end
       end
+      raised_error = raised_error.cause
 
       assert old_worker.exhausted_called?
       assert_equal raised_error.message, old_worker.exhausted_job['error_message']
@@ -138,6 +140,7 @@ class TestRetryExhausted < Sidekiq::Test
             raise 'kerblammo!'
           end
         end
+        raised_error = raised_error.cause
 
         assert exhausted_job
         assert_equal raised_error, exhausted_exception
