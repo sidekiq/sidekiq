@@ -17,6 +17,12 @@ Sidekiq::Middleware::Server::Logging -> Sidekiq::JobLogging
 - Rails 3.2 and Ruby 2.0 and 2.1 are no longer supported.
 - Please see the [5.0 Upgrade notes](5.0-Upgrade.md) for more detail.
 
+master
+-----------
+
+- Fix error class name display on retry page [#3348]
+- More robust latency calculation [#3340]
+
 4.2.9
 -----------
 
