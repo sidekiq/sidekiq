@@ -1,5 +1,11 @@
 # Sidekiq Changes
 
+HEAD
+-----------
+
+- Fix error class name display on retry page [#3348]
+- More robust latency calculation [#3340]
+
 4.2.9
 -----------
 
