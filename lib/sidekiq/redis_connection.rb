@@ -12,7 +12,7 @@ module Sidekiq
 
         options[:url] ||= determine_redis_provider
 
-        size = options[:size] || (Sidekiq.server? ? (Sidekiq.options[:concurrency] + 5) : 5)
+        size = options[:size] || default_pool_size
 
         verify_sizing(size, Sidekiq.options[:concurrency]) if Sidekiq.server?
 
@@ -101,6 +101,13 @@ module Sidekiq
         ENV[ENV['REDIS_PROVIDER'] || 'REDIS_URL']
       end
 
+      def default_pool_size
+        if Sidekiq.server?
+          Sidekiq.options[:concurrency] + 5
+        elsif ENV['MAX_THREADS'] || ENV['RAILS_MAX_THREADS']
+          Integer(ENV['MAX_THREADS'] || ENV['RAILS_MAX_THREADS']) || 5
+        end
+      end
     end
   end
 end
