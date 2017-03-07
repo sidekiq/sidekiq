@@ -7,7 +7,8 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 ---------
 
 - Fix potential job loss with reliable scheduler when lots of jobs are scheduled
-  at precisely the same time. [#3371]
+  at precisely the same time. Thanks to raivil for his hard work in
+  reproducing the bug. [#3371]
 
 3.4.4
 ---------
