@@ -65,6 +65,10 @@ module Sidekiq
       end
     end
 
+    def rtl?
+      locale == 'fa'
+    end
+
     # Given a browser request Accept-Language header like
     # "fr-FR,fr;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2", this function
     # will return "fr" since that's the first code with a matching

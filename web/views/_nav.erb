@@ -53,7 +53,7 @@
       </ul>
       <ul class="nav navbar-nav navbar-right navbar-livereload" data-navbar="static">
         <li>
-          <div class="poll-wrapper pull-right">
+          <div class="poll-wrapper">
             <%= erb :_poll_link %>
             <% if Sidekiq::Web.app_url %>
               <a class="btn btn-inverse" href="<%= Sidekiq::Web.app_url %>"><%= t('BackToApp') %></a>
