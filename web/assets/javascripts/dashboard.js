@@ -20,7 +20,7 @@ factory.defined&&factory.defined(function(d){return d.y!==null});return factory}
 var poller;
 
 var realtimeGraph = function(updatePath) {
-  var timeInterval = parseInt(localStorage.timeInterval || '2000');
+  var timeInterval = parseInt(localStorage.timeInterval || '5000');
 
   var graphElement = document.getElementById("realtime");
 
