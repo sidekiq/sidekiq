@@ -148,7 +148,7 @@ module Sidekiq
 
     def relative_time(time)
       stamp = time.getutc.iso8601
-      %{<time title="#{stamp}" datetime="#{stamp}">#{time}</time>}
+      %{<time class="ltr" dir="ltr" title="#{stamp}" datetime="#{stamp}">#{time}</time>}
     end
 
     def job_params(job, score)

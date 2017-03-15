@@ -7,7 +7,7 @@
       <% end %>
     </h3>
   </div>
-  <div class="col-sm-4 pull-right">
+  <div class="col-sm-4 pull-right flip">
     <%= erb :_paging, locals: { url: "#{root_path}queues/#{CGI.escape(@name)}" } %>
   </div>
 </header>
