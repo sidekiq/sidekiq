@@ -149,8 +149,8 @@ module Sidekiq
     require 'sidekiq/middleware/server/logging'
 
     Middleware::Chain.new do |m|
-      m.add Middleware::Server::Logging
       m.add Middleware::Server::RetryJobs
+      m.add Middleware::Server::Logging
     end
   end
 

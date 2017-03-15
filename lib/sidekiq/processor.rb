@@ -129,13 +129,15 @@ module Sidekiq
           worker.jid = job_hash['jid'.freeze]
 
           stats(worker, job_hash, queue) do
-            Sidekiq.server_middleware.invoke(worker, job_hash, queue) do
-              @executor.call do
-                # Only ack if we either attempted to start this job or
-                # successfully completed it. This prevents us from
-                # losing jobs if a middleware raises an exception before yielding
-                ack = true
-                execute_job(worker, cloned(job_hash['args'.freeze]))
+            Sidekiq::Logging.with_context(log_context(job_hash)) do
+              ack = true
+              Sidekiq.server_middleware.invoke(worker, job_hash, queue) do
+                @executor.call do
+                  # Only ack if we either attempted to start this job or
+                  # successfully completed it. This prevents us from
+                  # losing jobs if a middleware raises an exception before yielding
+                  execute_job(worker, cloned(job_hash['args'.freeze]))
+                end
               end
             end
           end
@@ -152,6 +154,13 @@ module Sidekiq
       ensure
         work.acknowledge if ack
       end
+    end
+
+    # If we're using a wrapper class, like ActiveJob, use the "wrapped"
+    # attribute to expose the underlying thing.
+    def log_context(item)
+      klass = item['wrapped'.freeze] || item['class'.freeze]
+      "#{klass} JID-#{item['jid'.freeze]}#{" BID-#{item['bid'.freeze]}" if item['bid'.freeze]}"
     end
 
     def execute_job(worker, cloned_args)
