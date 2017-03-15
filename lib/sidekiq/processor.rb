@@ -151,17 +151,12 @@ module Sidekiq
 
       ack = false
       begin
-        # Treat malformed JSON like a process crash -- don't acknowledge it.
-        # * In Sidekiq, the error will be logged but job discarded.
-        # * In Sidekiq Pro, the error will be logged and the job retried when
-        #   it is recovered by the reliability algorithm.  The job may act like
-        #   a poison pill and never execute until manually removed but job loss
-        #   is considered worse.
+        # Treat malformed JSON as a special case: job goes straight to the morgue.
         job_hash = nil
         begin
           job_hash = Sidekiq.load_json(jobstr)
         rescue => ex
-          Sidekiq.logger.error { "Pushing job to dead queue due to invalid JSON: #{ex}" }
+          handle_exception(ex, { :context => "Invalid JSON for job", :jobstr => jobstr })
           send_to_morgue(jobstr)
           ack = true
           raise
