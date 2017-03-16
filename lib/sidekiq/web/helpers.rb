@@ -65,6 +65,14 @@ module Sidekiq
       end
     end
 
+    def text_direction
+      get_locale['TextDirection'] || 'ltr'
+    end
+
+    def rtl?
+      text_direction == 'rtl'
+    end
+
     # Given a browser request Accept-Language header like
     # "fr-FR,fr;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2", this function
     # will return "fr" since that's the first code with a matching
@@ -144,7 +152,7 @@ module Sidekiq
 
     def relative_time(time)
       stamp = time.getutc.iso8601
-      %{<time title="#{stamp}" datetime="#{stamp}">#{time}</time>}
+      %{<time class="ltr" dir="ltr" title="#{stamp}" datetime="#{stamp}">#{time}</time>}
     end
 
     def job_params(job, score)

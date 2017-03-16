@@ -1,0 +1,80 @@
+# elements like %{queue} are variables and should not be translated
+ar:
+  TextDirection: 'rtl'
+  Dashboard: لوحة القيادة
+  Status: حالة
+  Time: وقت
+  Namespace: مساحة الأسماء
+  Realtime: راهن
+  History: تاريخ
+  Busy: مصروف
+  Processed: مصنوع
+  Failed: فشل
+  Scheduled: مبرمج
+  Retries: محاولة
+  Enqueued: بالدور
+  Worker: عامل
+  LivePoll: استجواب
+  StopPolling: استجوب على الملكان
+  Queue: دورة
+  Class: فىة
+  Job: وظيفة
+  Arguments: براهين
+  Extras: اضافة
+  Started: ابتداء
+  ShowAll: عرض كل الشي
+  CurrentMessagesInQueue: الأعمال الجارية في <span class='title'>%{queue}</span>
+  AddToQueue: الإضافة إلى الدور
+  AreYouSureDeleteJob: ا تتأكد من العمل؟
+  AreYouSureDeleteQueue: ا تتأكد من إزالة %{queue} الدور؟
+  Delete: حذف
+  Queues: دورات
+  Size: حجم
+  Actions: اجراءات
+  NextRetry: المحاولة القادمة
+  RetryCount: عدد إعادة المحاولة
+  RetryNow: إعادة المحاولة الآن
+  Kill: ابطل
+  LastRetry: المحاولة الأخيرة
+  OriginallyFailed: فشل أصلا
+  AreYouSure: هل انت متأكد؟
+  DeleteAll: حذف كل شي
+  RetryAll: عاد كل شي
+  NoRetriesFound: لم وجد المحاولات
+  Error: خطأ
+  ErrorClass: طبقة الخطأ
+  ErrorMessage: رسالة الخطأ
+  ErrorBacktrace: الخطأ العودة التتبع
+  GoBack: تقهقر
+  NoScheduledFound: لم وجد المشاكل المبرمجة
+  When: متى
+  ScheduledJobs: المشاكل المبرمجة
+  idle: اشل
+  active: عامل
+  Version: تفريعة
+  Connections: اشتراك
+  MemoryUsage: استخدام الذاكرة
+  PeakMemoryUsage: ذروة استخدام الذاكرة
+  Uptime: أجال عامل
+  OneWeek: أسبوع
+  OneMonth: شهر
+  ThreeMonths: ثلاثة أشهر
+  SixMonths: ستة أشهر
+  Failures: فشل
+  DeadJobs: وظائف الميتة
+  NoDeadJobsFound: لم وجد وظائف الميتة
+  Dead: ميتة
+  Processes: عملية
+  Thread: خيط
+  Threads: خيوط
+  Jobs: وظائف
+  Paused: ركزة
+  Stop: خلاص
+  Quiet: هدوء
+  StopAll: خلاص كل الشي
+  QuietAll: الهدوء فقط
+  PollingInterval: استقصاء
+  Plugins: الإضافات
+  NotYetEnqueued: ليس في دورة حتى
+  CreatedAt: أنشئت في
+  BackToApp: العودة إلى التطبيق

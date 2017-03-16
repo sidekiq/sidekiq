@@ -1,11 +1,11 @@
 <div class="row header">
-  <div class="col-sm-8 pull-left">
+  <div class="col-sm-8 pull-left flip">
     <h3><%= t('Processes') %></h3>
   </div>
-  <div class="col-sm-4 pull-right">
+  <div class="col-sm-4 pull-right flip">
     <form method="POST" class="warning-messages">
       <%= csrf_tag %>
-      <div class="btn-group pull-right">
+      <div class="btn-group pull-right flip">
         <button class="btn btn-warn" type="submit" name="quiet" value="1" data-confirm="<%= t('AreYouSure') %>"><%= t('QuietAll') %></button>
         <button class="btn btn-danger" type="submit" name="stop" value="1" data-confirm="<%= t('AreYouSure') %>"><%= t('StopAll') %></button>
       </div>
@@ -41,7 +41,7 @@
         <td><%= process['concurrency'] %></td>
         <td><%= process['busy'] %></td>
         <td>
-          <div class="btn-group pull-right">
+          <div class="btn-group pull-right flip">
             <form method="POST">
               <%= csrf_tag %>
               <input type="hidden" name="identity" value="<%= process['identity'] %>"/>

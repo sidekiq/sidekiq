@@ -274,19 +274,14 @@ module Sidekiq
       resp = case resp
       when Array
         resp
-      when Integer
-        [resp, {}, []]
       else
-        type_header = case action.type
-        when :json
-          { "Content-Type" => "application/json", "Cache-Control" => "no-cache" }
-        when String
-          { "Content-Type" => (action.type || "text/html"), "Cache-Control" => "no-cache" }
-        else
-          { "Content-Type" => "text/html", "Cache-Control" => "no-cache" }
-        end
+        headers = {
+          "Content-Type" => "text/html",
+          "Cache-Control" => "no-cache",
+          "Content-Language" => action.locale,
+        }
 
-        [200, type_header, [resp]]
+        [200, headers, [resp]]
       end
 
       resp[1] = resp[1].dup
