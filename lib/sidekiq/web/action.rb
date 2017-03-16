@@ -39,10 +39,6 @@ module Sidekiq
       env[RACK_SESSION]
     end
 
-    def content_type(type)
-      @type = type
-    end
-
     def erb(content, options = {})
       if content.kind_of? Symbol
         unless respond_to?(:"_erb_#{content}")
