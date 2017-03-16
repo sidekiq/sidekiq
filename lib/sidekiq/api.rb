@@ -434,7 +434,6 @@ module Sidekiq
     ##
     # Place job in the dead set
     def kill
-      raise 'Kill not available on jobs which have not failed' unless item['failed_at']
       remove_job do |message|
         Sidekiq.logger.info { "Killing job #{message['jid']}" }
         now = Time.now.to_f
