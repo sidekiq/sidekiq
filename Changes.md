@@ -20,6 +20,9 @@ Sidekiq::Middleware::Server::Logging -> Sidekiq::JobLogging
 master
 -----------
 
+- Scheduled jobs can now be moved directly to the Dead queue via API [#3390]
+- Fix edge case leading to job duplication when using Sidekiq Pro's
+  reliability feature [#3388]
 - Fix error class name display on retry page [#3348]
 - More robust latency calculation [#3340]
 

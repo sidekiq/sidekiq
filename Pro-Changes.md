@@ -3,6 +3,11 @@ Sidekiq Pro Changelog
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Make Batch UI progress bar more friendly to the colorblind [#3387]
+
 3.4.5
 ---------
 

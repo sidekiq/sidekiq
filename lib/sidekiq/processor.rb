@@ -125,19 +125,26 @@ module Sidekiq
       # job structure to the Web UI
       pristine = cloned(job_hash)
 
-      @retrier.global(job_hash, queue) do
-        @logging.call(job_hash, queue) do
-          stats(pristine, queue) do
-            # Rails 5 requires a Reloader to wrap code execution.  In order to
-            # constantize the worker and instantiate an instance, we have to call
-            # the Reloader.  It handles code loading, db connection management, etc.
-            # Effectively this block denotes a "unit of work" to Rails.
-            @reloader.call do
-              klass  = job_hash['class'.freeze].constantize
-              worker = klass.new
-              worker.jid = job_hash['jid'.freeze]
-              @retrier.local(worker, job_hash, queue) do
-                yield worker
+      # If we're using a wrapper class, like ActiveJob, use the "wrapped"
+      # attribute to expose the underlying thing.
+      klass = job_hash['wrapped'.freeze] || job_hash["class".freeze]
+      ctx = "#{klass} JID-#{job_hash['jid'.freeze]}#{" BID-#{job_hash['bid'.freeze]}" if job_hash['bid'.freeze]}"
+
+      Sidekiq::Logging.with_context(ctx) do
+        @retrier.global(job_hash, queue) do
+          @logging.call(job_hash, queue) do
+            stats(pristine, queue) do
+              # Rails 5 requires a Reloader to wrap code execution.  In order to
+              # constantize the worker and instantiate an instance, we have to call
+              # the Reloader.  It handles code loading, db connection management, etc.
+              # Effectively this block denotes a "unit of work" to Rails.
+              @reloader.call do
+                klass  = job_hash['class'.freeze].constantize
+                worker = klass.new
+                worker.jid = job_hash['jid'.freeze]
+                @retrier.local(worker, job_hash, queue) do
+                  yield worker
+                end
               end
             end
           end
