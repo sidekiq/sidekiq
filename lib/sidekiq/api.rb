@@ -430,10 +430,9 @@ module Sidekiq
     end
 
     def retry
-      raise "Retry not available on jobs which have not failed" unless item["failed_at"]
       remove_job do |message|
         msg = Sidekiq.load_json(message)
-        msg['retry_count'] -= 1
+        msg['retry_count'] -= 1 if msg['retry_count']
         Sidekiq::Client.push(msg)
       end
     end
@@ -441,9 +440,7 @@ module Sidekiq
     ##
     # Place job in the dead set
     def kill
-      raise 'Kill not available on jobs which have not failed' unless item['failed_at']
       remove_job do |message|
-        Sidekiq.logger.info { "Killing job #{message['jid']}" }
         now = Time.now.to_f
         Sidekiq.redis do |conn|
           conn.multi do
@@ -453,6 +450,10 @@ module Sidekiq
           end
         end
       end
+    end
+
+    def error?
+      !!item['error_class']
     end
 
     private
