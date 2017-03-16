@@ -65,8 +65,12 @@ module Sidekiq
       end
     end
 
+    def text_direction
+      get_locale['TextDirection'] || 'ltr'
+    end
+
     def rtl?
-      locale == 'fa'
+      text_direction == 'rtl'
     end
 
     # Given a browser request Accept-Language header like
