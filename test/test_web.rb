@@ -547,6 +547,13 @@ class TestWeb < Sidekiq::Test
         assert_equal 'http://example.org/morgue', last_response.header['Location']
       end
 
+      it 'can display a dead job' do
+        params = add_dead
+        get "/morgue/#{job_params(*params)}"
+        assert_equal 200, last_response.status
+        snapshot(page, name: 'Dead Job Page')
+      end
+
       it 'can retry a dead job' do
         params = add_dead
         post "/morgue/#{job_params(*params)}", 'retry' => 'Retry'
