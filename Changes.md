@@ -1,6 +1,6 @@
 # Sidekiq Changes
 
-HEAD
+4.2.10
 -----------
 
 - Scheduled jobs can now be moved directly to the Dead queue via API [#3390]
