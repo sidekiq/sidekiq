@@ -10,7 +10,7 @@ he:
   Processed: מעובדים
   Failed: נכשלו
   Scheduled: מתוכננים
-  Retries: נסיונות
+  Retries: נסיונות חוזרים
   Enqueued: בתור
   Worker: עובד
   LivePoll: תשאול חי
@@ -23,23 +23,23 @@ he:
   Started: הותחלו
   ShowAll: הצג את הכל
   CurrentMessagesInQueue: עבודות נוכחיות בתור <span class='title'>%{queue}</span>
-  Delete: בטל
+  Delete: מחק
   AddToQueue: הוסף לתור
-  AreYouSureDeleteJob: האם אתם בטוחים שברצונכם לבטל את העבודה הזאת?
-  AreYouSureDeleteQueue: האם אתם בטוחים שברצונכם לבטל את התור %{queue}?
+  AreYouSureDeleteJob: האם אתם בטוחים שברצונכם למחוק את העבודה הזאת?
+  AreYouSureDeleteQueue: האם אתם בטוחים שברצונכם למחוק את התור %{queue}?
   Queues: תורים
   Size: אורך
   Actions: פעולות
-  NextRetry: ניסיון הבא
-  RetryCount: מספר נסיונות
+  NextRetry: ניסיון חוזר הבא
+  RetryCount: מספר נסיונות חוזרים
   RetryNow: נסה שוב עכשיו
   Kill: הרוג
-  LastRetry: ניסיון האחרון
+  LastRetry: ניסיון חוזר האחרון
   OriginallyFailed: נכשל בניסיון הראשון
   AreYouSure: אתם בטוחים?
-  DeleteAll: בטל הכל
+  DeleteAll: מחק הכל
   RetryAll: נסה שוב את הכל
-  NoRetriesFound: לא נמצאו נסיונות
+  NoRetriesFound: לא נמצאו נסיונות חוזרים
   Error: שגיאה
   ErrorClass: מחלקת השגיאה
   ErrorMessage: מסר השגיאה
