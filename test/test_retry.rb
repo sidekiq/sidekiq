@@ -5,6 +5,9 @@ require 'sidekiq/scheduled'
 require 'sidekiq/middleware/server/retry_jobs'
 
 class TestRetry < Sidekiq::Test
+  class ErrorToBeIgnored < StandardError
+  end
+
   describe 'middleware' do
     class SomeWorker
       include Sidekiq::Worker
@@ -33,6 +36,18 @@ class TestRetry < Sidekiq::Test
         end
       end
       assert_equal 0, Sidekiq::RetrySet.new.size
+    end
+
+    it 'allows disabling retry on specified exceptions' do
+      msg = { 'class' => 'Bob', 'args' => [1,2,'foo'] }
+      msg2 = msg.dup
+      handler = Sidekiq::Middleware::Server::RetryJobs.new({:ignored_exceptions => [ErrorToBeIgnored]})
+
+      handler.call(worker, msg2, 'default') do
+        raise ErrorToBeIgnored.new
+      end
+
+      assert_equal msg.merge('retry' => false), msg2
     end
 
     it 'allows a numeric retry' do

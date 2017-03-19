@@ -68,10 +68,14 @@ module Sidekiq
 
         def initialize(options = {})
           @max_retries = options.fetch(:max_retries, DEFAULT_MAX_RETRY_ATTEMPTS)
+          @ignored_exceptions = Array(options.fetch(:ignored_exceptions, nil))
         end
 
         def call(worker, msg, queue)
           yield
+        rescue *@ignored_exceptions
+          # no-op
+          msg['retry'] = false
         rescue Sidekiq::Shutdown
           # ignore, will be pushed back onto queue during hard_shutdown
           raise
