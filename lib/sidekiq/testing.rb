@@ -317,7 +317,7 @@ module Sidekiq
   end
 end
 
-if defined?(::Rails) && !Rails.env.test?
+if defined?(::Rails) && Rails.respond_to?(:env) && !Rails.env.test?
   puts("**************************************************")
   puts("⛔️ WARNING: Sidekiq testing API enabled, but this is not the test environment.  Your jobs will not go to Redis.")
   puts("**************************************************")
