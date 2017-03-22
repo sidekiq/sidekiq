@@ -1,79 +1,79 @@
 he:
   TextDirection: 'rtl'
-  Dashboard: Dashboard
-  Status: Status
-  Time: Time
-  Namespace: Namespace
-  Realtime: Real-time
-  History: History
-  Busy: Busy
-  Processed: Processed
-  Failed: Failed
-  Scheduled: Scheduled
-  Retries: Retries
-  Enqueued: Enqueued
-  Worker: Worker
-  LivePoll: Live Poll
-  StopPolling: Stop Polling
-  Queue: Queue
-  Class: Class
-  Job: Job
-  Arguments: Arguments
-  Extras: Extras
-  Started: Started
-  ShowAll: Show All
-  CurrentMessagesInQueue: Current jobs in <span class='title'>%{queue}</span>
-  Delete: Delete
-  AddToQueue: Add to queue
-  AreYouSureDeleteJob: Are you sure you want to delete this job?
-  AreYouSureDeleteQueue: Are you sure you want to delete the %{queue} queue?
-  Queues: Queues
-  Size: Size
-  Actions: Actions
-  NextRetry: Next Retry
-  RetryCount: Retry Count
-  RetryNow: Retry Now
-  Kill: Kill
-  LastRetry: Last Retry
-  OriginallyFailed: Originally Failed
-  AreYouSure: Are you sure?
-  DeleteAll: Delete All
-  RetryAll: Retry All
-  NoRetriesFound: No retries were found
-  Error: Error
-  ErrorClass: Error Class
-  ErrorMessage: Error Message
-  ErrorBacktrace: Error Backtrace
-  GoBack: ← Back
-  NoScheduledFound: No scheduled jobs were found
-  When: When
-  ScheduledJobs: Scheduled Jobs
-  idle: idle
-  active: active
-  Version: Version
-  Connections: Connections
-  MemoryUsage: Memory Usage
-  PeakMemoryUsage: Peak Memory Usage
-  Uptime: Uptime (days)
-  OneWeek: 1 week
-  OneMonth: 1 month
-  ThreeMonths: 3 months
-  SixMonths: 6 months
-  Failures: Failures
-  DeadJobs: Dead Jobs
-  NoDeadJobsFound: No dead jobs were found
-  Dead: Dead
-  Processes: Processes
-  Thread: Thread
-  Threads: Threads
-  Jobs: Jobs
-  Paused: Paused
-  Stop: Stop
-  Quiet: Quiet
-  StopAll: Stop All
-  QuietAll: Quiet All
-  PollingInterval: Polling interval
-  Plugins: Plugins
-  NotYetEnqueued: Not yet enqueued
-  CreatedAt: Created At
-  BackToApp: Back to App
+  Dashboard: לוח מחוונים
+  Status: מצב
+  Time: שעה
+  Namespace: מרחב שם
+  Realtime: זמן אמת
+  History: היסטוריה
+  Busy: עסוקים
+  Processed: מעובדים
+  Failed: נכשלו
+  Scheduled: מתוכננים
+  Retries: נסיונות חוזרים
+  Enqueued: בתור
+  Worker: עובד
+  LivePoll: תשאול חי
+  StopPolling: עצור תשאול
+  Queue: תור
+  Class: מחלקה
+  Job: עבודה
+  Arguments: ארגומנטים
+  Extras: תוספות
+  Started: הותחלו
+  ShowAll: הצג את הכל
+  CurrentMessagesInQueue: עבודות נוכחיות בתור <span class='title'>%{queue}</span>
+  Delete: מחק
+  AddToQueue: הוסף לתור
+  AreYouSureDeleteJob: האם אתם בטוחים שברצונכם למחוק את העבודה הזאת?
+  AreYouSureDeleteQueue: האם אתם בטוחים שברצונכם למחוק את התור %{queue}?
+  Queues: תורים
+  Size: אורך
+  Actions: פעולות
+  NextRetry: ניסיון חוזר הבא
+  RetryCount: מספר נסיונות חוזרים
+  RetryNow: נסה שוב עכשיו
+  Kill: הרוג
+  LastRetry: ניסיון חוזר האחרון
+  OriginallyFailed: נכשל בניסיון הראשון
+  AreYouSure: אתם בטוחים?
+  DeleteAll: מחק הכל
+  RetryAll: נסה שוב את הכל
+  NoRetriesFound: לא נמצאו נסיונות חוזרים
+  Error: שגיאה
+  ErrorClass: מחלקת השגיאה
+  ErrorMessage: מסר השגיאה
+  ErrorBacktrace: מעקב לאחור של השגיאה
+  GoBack: ← אחורה
+  NoScheduledFound: לא נמצאו עבודות מתוכננות
+  When: מתי
+  ScheduledJobs: עבודות מתוכננות
+  idle: סרק
+  active: פעיל
+  Version: גירסה
+  Connections: קישורים
+  MemoryUsage: שימוש בזיכרון
+  PeakMemoryUsage: שיא השימוש בזיכרון
+  Uptime: זמן פעילות (ימים)
+  OneWeek: שבוע 1
+  OneMonth: חודש 1
+  ThreeMonths: 3 חדשים
+  SixMonths: 6 חדשים
+  Failures: כשלונות
+  DeadJobs: עבודות מתות
+  NoDeadJobsFound: לא נמצאו עבודות מתות
+  Dead: מתים
+  Processes: תהליכים
+  Thread: נים
+  Threads: נימים
+  Jobs: עבודות
+  Paused: נפסקים
+  Stop: עצור
+  Quiet: שקט
+  StopAll: עצור את כולם
+  QuietAll: השקט את כולם
+  PollingInterval: רווח בין תשאולים
+  Plugins: תוספים
+  NotYetEnqueued: עוד לא בתור
+  CreatedAt: נוצר ב
+  BackToApp: חזרה לאפליקציה
