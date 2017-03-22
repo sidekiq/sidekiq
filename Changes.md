@@ -18,7 +18,7 @@ Sidekiq::Middleware::Server::Logging -> Sidekiq::JobLogging
 - Rails 3.2 and Ruby 2.0 and 2.1 are no longer supported.
 - Please see the [5.0 Upgrade notes](5.0-Upgrade.md) for more detail.
 
-master
+4.2.10
 -----------
 
 - Scheduled jobs can now be moved directly to the Dead queue via API [#3390]

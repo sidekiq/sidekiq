@@ -6,6 +6,8 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 HEAD
 ---------
 
+- Batch page displays Pending JIDs if less than 10 [#3130]
+- Batch page has a Search button to find associated Retries [#3130]
 - Make Batch UI progress bar more friendly to the colorblind [#3387]
 
 3.4.5

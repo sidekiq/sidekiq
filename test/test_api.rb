@@ -309,12 +309,13 @@ class TestApi < Sidekiq::Test
         refute_nil Sidekiq::ScheduledSet.new.find_job(remain_id)
       end
 
-      it 'can find job by id in sorted sets' do
+      it 'can kill a scheduled job' do
         job_id = ApiWorker.perform_in(100, 1, 'jason')
         job = Sidekiq::ScheduledSet.new.find_job(job_id)
-        refute_nil job
-        assert_equal job_id, job.jid
-        assert_in_delta job.latency, 0.0, 0.1
+        ds = Sidekiq::DeadSet.new
+        assert_equal 0, ds.size
+        refute_nil job.kill
+        assert_equal 1, ds.size
       end
 
       it 'can remove jobs when iterating over a sorted set' do
