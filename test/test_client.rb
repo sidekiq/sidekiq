@@ -23,6 +23,10 @@ class TestClient < Sidekiq::Test
       assert_raises ArgumentError do
         Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => 1)
       end
+
+      assert_raises ArgumentError do
+        Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1], 'at' => Time.now)
+      end
     end
   end
 
