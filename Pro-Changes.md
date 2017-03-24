@@ -6,6 +6,7 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 HEAD
 ---------
 
+- Re-implement `Sidekiq::Queue#delete_job` to avoid O(n) runtime [#3408]
 - Batch page displays Pending JIDs if less than 10 [#3130]
 - Batch page has a Search button to find associated Retries [#3130]
 - Make Batch UI progress bar more friendly to the colorblind [#3387]
