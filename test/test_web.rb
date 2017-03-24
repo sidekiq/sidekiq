@@ -498,6 +498,24 @@ class TestWeb < Sidekiq::Test
       end
     end
 
+    describe 'bad JSON' do
+      it 'displays without error' do
+        s = Sidekiq::DeadSet.new
+        (_, score) = kill_bad
+        assert_equal 1, s.size
+
+        get '/morgue'
+        assert_equal 200, last_response.status
+        assert_match(/#{score.to_i}/, last_response.body)
+        assert_match("something bad", last_response.body)
+        assert_equal 1, s.size
+
+        post "/morgue/#{score}-", 'delete' => 'Delete'
+        assert_equal 302, last_response.status
+        assert_equal 0, s.size
+      end
+    end
+
     describe 'stats/queues' do
       include Sidekiq::Util
 
@@ -614,6 +632,15 @@ class TestWeb < Sidekiq::Test
         conn.zadd('dead', score, Sidekiq.dump_json(msg))
       end
       [msg, score]
+    end
+
+    def kill_bad
+      job = "{ something bad }"
+      score = Time.now.to_f
+      Sidekiq.redis do |conn|
+        conn.zadd('schedule', score, job)
+      end
+      [job, score]
     end
 
     def add_xss_retry(job_id=SecureRandom.hex(12))

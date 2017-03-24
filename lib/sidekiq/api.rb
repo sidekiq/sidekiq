@@ -75,7 +75,7 @@ module Sidekiq
       enqueued     = pipe2_res[s..-1].map(&:to_i).inject(0, &:+)
 
       default_queue_latency = if (entry = pipe1_res[6].first)
-                                job = Sidekiq.load_json(entry)
+                                job = Sidekiq.load_json(entry) rescue {}
                                 now = Time.now.to_f
                                 thence = job['enqueued_at'.freeze] || now
                                 now - thence
@@ -287,13 +287,21 @@ module Sidekiq
     attr_reader :value
 
     def initialize(item, queue_name=nil)
+      @args = nil
       @value = item
-      @item = if item.is_a?(Hash)
-                item
-              else
-                Sidekiq.load_json(item) rescue nil
-              end
-      @queue = queue_name || self['queue']
+      @item = item.is_a?(Hash) ? item : parse(item)
+      @queue = queue_name || @item['queue']
+    end
+
+    def parse(item)
+      Sidekiq.load_json(item)
+    rescue JSON::ParserError
+      # If the job payload in Redis is invalid JSON, we'll load
+      # the item as an empty hash and store the invalid JSON as
+      # the job 'args' for display in the Web UI.
+      @invalid = true
+      @args = [item]
+      {}
     end
 
     def klass
@@ -341,7 +349,7 @@ module Sidekiq
     end
 
     def args
-      self['args']
+      @args || @item['args']
     end
 
     def jid
