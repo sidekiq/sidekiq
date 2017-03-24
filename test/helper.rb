@@ -59,10 +59,10 @@ Sidekiq::Test = Minitest::Test
 
 require 'sidekiq/redis_connection'
 REDIS_URL = ENV['REDIS_URL'] || 'redis://localhost/15'
-REDIS = Sidekiq::RedisConnection.create(:url => REDIS_URL, :namespace => 'testy')
+REDIS = Sidekiq::RedisConnection.create(:url => REDIS_URL)
 
 Sidekiq.configure_client do |config|
-  config.redis = { :url => REDIS_URL, :namespace => 'testy' }
+  config.redis = { :url => REDIS_URL }
 end
 
 def capture_logging(lvl=Logger::INFO)
