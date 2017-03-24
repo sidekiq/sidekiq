@@ -638,7 +638,7 @@ class TestWeb < Sidekiq::Test
       job = "{ something bad }"
       score = Time.now.to_f
       Sidekiq.redis do |conn|
-        conn.zadd('schedule', score, job)
+        conn.zadd('dead', score, job)
       end
       [job, score]
     end
