@@ -71,21 +71,43 @@ class TestTesting < Sidekiq::Test
       assert_in_delta 10.seconds.from_now.to_f, DirectWorker.jobs.last['at'], 0.01
     end
 
-    it 'stubs the delay call on mailers' do
-      assert_equal 0, Sidekiq::Extensions::DelayedMailer.jobs.size
-      FooMailer.delay.bar('hello!')
-      assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs.size
-    end
-
     class Something
       def self.foo(x)
       end
     end
 
-    it 'stubs the delay call on models' do
-      assert_equal 0, Sidekiq::Extensions::DelayedClass.jobs.size
-      Something.delay.foo(Date.today)
-      assert_equal 1, Sidekiq::Extensions::DelayedClass.jobs.size
+    describe 'delay call' do
+      it 'stubs the delay call on mailers' do
+        assert_equal 0, Sidekiq::Extensions::DelayedMailer.jobs.size
+        FooMailer.delay.bar('hello!')
+        assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs.size
+      end
+
+      describe '.delayed_a_job_for' do
+        it 'returns true if the method given has been delayed' do
+          FooMailer.delay.bar('hello!')
+          assert_equal true, Sidekiq::SpecHelpers.delayed_a_job_for('bar')
+
+          assert_equal false, Sidekiq::SpecHelpers.delayed_a_job_for('bar2')
+          assert_equal false, Sidekiq::SpecHelpers.delayed_a_job_for('ba')
+          assert_equal false, Sidekiq::SpecHelpers.delayed_a_job_for('foobar')
+        end
+
+        it 'validates the delay time' do
+          FooMailer.delay_for(1.hour).foo('hello!')
+
+          assert_equal true, Sidekiq::SpecHelpers.delayed_a_job_for('foo', 1.hour)
+          assert_equal true, Sidekiq::SpecHelpers.delayed_a_job_for('foo')
+
+          assert_equal false, Sidekiq::SpecHelpers.delayed_a_job_for('foo', 2.hours)
+        end
+      end
+
+      it 'stubs the delay call on models' do
+        assert_equal 0, Sidekiq::Extensions::DelayedClass.jobs.size
+        Something.delay.foo(Date.today)
+        assert_equal 1, Sidekiq::Extensions::DelayedClass.jobs.size
+      end
     end
 
     it 'stubs the enqueue call' do
