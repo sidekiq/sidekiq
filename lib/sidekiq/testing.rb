@@ -306,11 +306,9 @@ module Sidekiq
       # Drain all queued jobs across all workers
       def drain_all
         while jobs.any?
-          worker_classes = jobs.map { |job| job["class"] }.uniq
-
-          worker_classes.each do |worker_class|
-            worker_class.constantize.drain
-          end
+          next_job = jobs.first
+          Queues.delete_for(next_job["jid"], next_job["queue"], next_job["class"])
+          next_job["class"].constantize.process_job(next_job)
         end
       end
     end
