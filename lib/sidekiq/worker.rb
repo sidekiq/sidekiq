@@ -4,6 +4,7 @@ require 'sidekiq/core_ext'
 
 module Sidekiq
 
+
   ##
   # Include this module in your worker class and you can easily create
   # asynchronous jobs:
@@ -37,6 +38,34 @@ module Sidekiq
       Sidekiq.logger
     end
 
+    # This helper class encapsulates the set options for `set`, e.g.
+    #
+    #     SomeWorker.set(queue: 'foo').perform_async(....)
+    #
+    class Setter
+      def initialize(opts)
+        @opts = opts
+      end
+
+      def perform_async(*args)
+        @opts['class'].client_push(@opts.merge!('args' => args))
+      end
+
+      # +interval+ must be a timestamp, numeric or something that acts
+      #   numeric (like an activesupport time interval).
+      def perform_in(interval, *args)
+        int = interval.to_f
+        now = Time.now.to_f
+        ts = (int < 1_000_000_000 ? now + int : int)
+
+        @opts.merge! 'args' => args, 'at' => ts
+        # Optimization to enqueue something now that is scheduled to go out now or in the past
+        @opts.delete('at'.freeze) if ts <= now
+        @opts['class'].client_push(@opts)
+      end
+      alias_method :perform_at, :perform_in
+    end
+
     module ClassMethods
 
       def delay(*args)
@@ -52,8 +81,7 @@ module Sidekiq
       end
 
       def set(options)
-        Thread.current[:sidekiq_worker_set] = options
-        self
+        Setter.new(options.merge!('class' => self))
       end
 
       def perform_async(*args)
@@ -107,12 +135,7 @@ module Sidekiq
 
       def client_push(item) # :nodoc:
         pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options['pool'] || Sidekiq.redis_pool
-        hash = if Thread.current[:sidekiq_worker_set]
-          x, Thread.current[:sidekiq_worker_set] = Thread.current[:sidekiq_worker_set], nil
-          x.stringify_keys.merge(item.stringify_keys)
-        else
-          item.stringify_keys
-        end
+        hash = item.stringify_keys
         Sidekiq::Client.new(pool).push(hash)
       end
 
