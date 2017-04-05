@@ -7,7 +7,7 @@ he:
   Realtime: זמן אמת
   History: היסטוריה
   Busy: עסוקים
-  Processed: מעובדים
+  Processed: עובדו
   Failed: נכשלו
   Scheduled: מתוכננים
   Retries: נסיונות חוזרים
@@ -34,24 +34,24 @@ he:
   RetryCount: מספר נסיונות חוזרים
   RetryNow: נסה שוב עכשיו
   Kill: הרוג
-  LastRetry: ניסיון חוזר האחרון
+  LastRetry: ניסיון חוזר אחרון
   OriginallyFailed: נכשל בניסיון הראשון
   AreYouSure: אתם בטוחים?
   DeleteAll: מחק הכל
   RetryAll: נסה שוב את הכל
   NoRetriesFound: לא נמצאו נסיונות חוזרים
   Error: שגיאה
-  ErrorClass: מחלקת השגיאה
-  ErrorMessage: מסר השגיאה
+  ErrorClass: סוג השגיאה
+  ErrorMessage: הודעת השגיאה
   ErrorBacktrace: מעקב לאחור של השגיאה
   GoBack: ← אחורה
   NoScheduledFound: לא נמצאו עבודות מתוכננות
   When: מתי
   ScheduledJobs: עבודות מתוכננות
-  idle: סרק
+  idle: במנוחה
   active: פעיל
   Version: גירסה
-  Connections: קישורים
+  Connections: חיבורים
   MemoryUsage: שימוש בזיכרון
   PeakMemoryUsage: שיא השימוש בזיכרון
   Uptime: זמן פעילות (ימים)
@@ -64,15 +64,15 @@ he:
   NoDeadJobsFound: לא נמצאו עבודות מתות
   Dead: מתים
   Processes: תהליכים
-  Thread: נים
-  Threads: נימים
+  Thread: חוט
+  Threads: חוטים
   Jobs: עבודות
-  Paused: נפסקים
+  Paused: הופסקו
   Stop: עצור
   Quiet: שקט
-  StopAll: עצור את כולם
+  StopAll: עצור הכל
   QuietAll: השקט את כולם
-  PollingInterval: רווח בין תשאולים
+  PollingInterval: מרווח זמן בין תשאולים
   Plugins: תוספים
   NotYetEnqueued: עוד לא בתור
   CreatedAt: נוצר ב
