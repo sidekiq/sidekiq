@@ -59,18 +59,18 @@ rescue LoadError
         self[key.to_s] = delete(key)
       end
       self
-    end if !{}.respond_to?(:stringify_keys)
+    end unless {}.respond_to?(:stringify_keys)
 
     def symbolize_keys
       keys.each do |key|
         self[(key.to_sym rescue key) || key] = delete(key)
       end
       self
-    end if !{}.respond_to?(:symbolize_keys)
+    end unless {}.respond_to?(:symbolize_keys)
 
     def deep_merge(other_hash, &block)
       dup.deep_merge!(other_hash, &block)
-    end if !{}.respond_to?(:deep_merge)
+    end unless {}.respond_to?(:deep_merge)
 
     def deep_merge!(other_hash, &block)
       other_hash.each_pair do |k,v|
@@ -82,7 +82,7 @@ rescue LoadError
         end
       end
       self
-    end if !{}.respond_to?(:deep_merge!)
+    end unless {}.respond_to?(:deep_merge!)
   end
 end
 
@@ -100,7 +100,7 @@ rescue LoadError
       end
       constant
     end
-  end if !"".respond_to?(:constantize)
+  end unless "".respond_to?(:constantize)
 end
 
 

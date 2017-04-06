@@ -42,13 +42,13 @@ module Sidekiq
 
     def terminate(wait=false)
       @done = true
-      return if !@thread
+      return unless @thread
       @thread.value if wait
     end
 
     def kill(wait=false)
       @done = true
-      return if !@thread
+      return unless @thread
       # unlike the other actors, terminate does not wait
       # for the thread to finish because we don't know how
       # long the job will take to finish.  Instead we
@@ -105,7 +105,7 @@ module Sidekiq
     end
 
     def handle_fetch_exception(ex)
-      if !@down
+      unless @down
         @down = Time.now
         logger.error("Error fetching job: #{ex}")
         ex.backtrace.each do |bt|

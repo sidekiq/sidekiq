@@ -27,8 +27,8 @@ class Sidekiqctl
     @pidfile = pidfile
     @kill_timeout = timeout
 
-    done('No pidfile given', :error) if !pidfile
-    done("Pidfile #{pidfile} does not exist", :warn) if !File.exist?(pidfile)
+    done('No pidfile given', :error) unless pidfile
+    done("Pidfile #{pidfile} does not exist", :warn) unless File.exist?(pidfile)
     done('Invalid pidfile content', :error) if pid == 0
 
     fetch_process

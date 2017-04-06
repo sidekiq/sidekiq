@@ -81,9 +81,7 @@ module Sidekiq
       logger.debug { "Client Middleware: #{Sidekiq.client_middleware.map(&:klass).join(', ')}" }
       logger.debug { "Server Middleware: #{Sidekiq.server_middleware.map(&:klass).join(', ')}" }
 
-      if !options[:daemon]
-        logger.info 'Starting processing, hit Ctrl-C to stop'
-      end
+      logger.info('Starting processing, hit Ctrl-C to stop') unless options[:daemon]
 
       require 'sidekiq/launcher'
       @launcher = Sidekiq::Launcher.new(options)
