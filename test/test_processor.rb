@@ -93,7 +93,12 @@ class TestProcessor < Sidekiq::Test
         assert_equal 1, errors.count
         assert_instance_of TestException, errors.first[:exception]
         assert_equal msg, errors.first[:context][:jobstr]
-        assert_equal job_hash, errors.first[:context][:job]
+
+        # TODO: Replace with `assert errors.first[:context][:job] <= job_hash`
+        # when support for Ruby < 2.3 is dropped
+        job_hash.each do |key, value|
+          assert_equal value, errors.first[:context][:job][key]
+        end
       end
 
       it 'handles exceptions raised by the reloader' do
