@@ -1,5 +1,6 @@
-Sidekiq Enterprise Changelog
-=======================
+# Sidekiq Enterprise Changelog
+
+[Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
