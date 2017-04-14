@@ -12,7 +12,7 @@ require 'sidekiq/delay'
 require 'json'
 
 module Sidekiq
-  NAME = 'Sidekiq'
+  NAME = 'Sidekiq'.freeze
   LICENSE = 'See LICENSE and the LGPL-3.0 for licensing details.'
 
   DEFAULTS = {

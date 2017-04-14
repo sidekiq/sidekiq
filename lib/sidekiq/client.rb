@@ -63,11 +63,11 @@ module Sidekiq
     #
     def push(item)
       normed = normalize_item(item)
-      payload = process_single(item['class'], normed)
+      payload = process_single(item['class'.freeze], normed)
 
       if payload
         raw_push([payload])
-        payload['jid']
+        payload['jid'.freeze]
       end
     end
 
@@ -84,19 +84,19 @@ module Sidekiq
     # Returns an array of the of pushed jobs' jids.  The number of jobs pushed can be less
     # than the number given if the middleware stopped processing for one or more jobs.
     def push_bulk(items)
-      arg = items['args'].first
+      arg = items['args'.freeze].first
       return [] unless arg # no jobs to push
       raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" if !arg.is_a?(Array)
 
       normed = normalize_item(items)
-      payloads = items['args'].map do |args|
-        copy = normed.merge('args' => args, 'jid' => SecureRandom.hex(12), 'enqueued_at' => Time.now.to_f)
-        result = process_single(items['class'], copy)
+      payloads = items['args'.freeze].map do |args|
+        copy = normed.merge('args'.freeze => args, 'jid'.freeze => SecureRandom.hex(12), 'enqueued_at'.freeze => Time.now.to_f)
+        result = process_single(items['class'.freeze], copy)
         result ? result : nil
       end.compact
 
       raw_push(payloads) if !payloads.empty?
-      payloads.collect { |payload| payload['jid'] }
+      payloads.collect { |payload| payload['jid'.freeze] }
     end
 
     # Allows sharding of jobs across any number of Redis instances.  All jobs
@@ -140,14 +140,14 @@ module Sidekiq
       # Messages are enqueued to the 'default' queue.
       #
       def enqueue(klass, *args)
-        klass.client_push('class' => klass, 'args' => args)
+        klass.client_push('class'.freeze => klass, 'args'.freeze => args)
       end
 
       # Example usage:
       #   Sidekiq::Client.enqueue_to(:queue_name, MyWorker, 'foo', 1, :bat => 'bar')
       #
       def enqueue_to(queue, klass, *args)
-        klass.client_push('queue' => queue, 'class' => klass, 'args' => args)
+        klass.client_push('queue'.freeze => queue, 'class'.freeze => klass, 'args'.freeze => args)
       end
 
       # Example usage:
@@ -158,7 +158,7 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        item = { 'class' => klass, 'args' => args, 'at' => ts, 'queue' => queue }
+        item = { 'class'.freeze => klass, 'args'.freeze => args, 'at'.freeze => ts, 'queue'.freeze => queue }
         item.delete('at'.freeze) if ts <= now
 
         klass.client_push(item)
@@ -184,13 +184,13 @@ module Sidekiq
     end
 
     def atomic_push(conn, payloads)
-      if payloads.first['at']
+      if payloads.first['at'.freeze]
         conn.zadd('schedule'.freeze, payloads.map do |hash|
           at = hash.delete('at'.freeze).to_s
           [at, Sidekiq.dump_json(hash)]
         end)
       else
-        q = payloads.first['queue']
+        q = payloads.first['queue'.freeze]
         now = Time.now.to_f
         to_push = payloads.map do |entry|
           entry['enqueued_at'.freeze] = now
@@ -202,7 +202,7 @@ module Sidekiq
     end
 
     def process_single(worker_class, item)
-      queue = item['queue']
+      queue = item['queue'.freeze]
 
       middleware.invoke(worker_class, item, queue, @redis_pool) do
         item

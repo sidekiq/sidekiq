@@ -48,7 +48,7 @@ module Sidekiq
       end
 
       def perform_async(*args)
-        @opts['class'].client_push(@opts.merge!('args' => args))
+        @opts['class'.freeze].client_push(@opts.merge!('args'.freeze => args))
       end
 
       # +interval+ must be a timestamp, numeric or something that acts
@@ -58,10 +58,10 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        @opts.merge! 'args' => args, 'at' => ts
+        @opts.merge! 'args'.freeze => args, 'at'.freeze => ts
         # Optimization to enqueue something now that is scheduled to go out now or in the past
         @opts.delete('at'.freeze) if ts <= now
-        @opts['class'].client_push(@opts)
+        @opts['class'.freeze].client_push(@opts)
       end
       alias_method :perform_at, :perform_in
     end
@@ -81,11 +81,11 @@ module Sidekiq
       end
 
       def set(options)
-        Setter.new(options.merge!('class' => self))
+        Setter.new(options.merge!('class'.freeze => self))
       end
 
       def perform_async(*args)
-        client_push('class' => self, 'args' => args)
+        client_push('class'.freeze => self, 'args'.freeze => args)
       end
 
       # +interval+ must be a timestamp, numeric or something that acts
@@ -95,7 +95,7 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        item = { 'class' => self, 'args' => args, 'at' => ts }
+        item = { 'class'.freeze => self, 'args'.freeze => args, 'at'.freeze => ts }
 
         # Optimization to enqueue something now that is scheduled to go out now or in the past
         item.delete('at'.freeze) if ts <= now
@@ -134,7 +134,7 @@ module Sidekiq
       end
 
       def client_push(item) # :nodoc:
-        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options['pool'] || Sidekiq.redis_pool
+        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options['pool'.freeze] || Sidekiq.redis_pool
         hash = item.stringify_keys
         Sidekiq::Client.new(pool).push(hash)
       end
