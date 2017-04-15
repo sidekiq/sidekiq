@@ -329,6 +329,10 @@ module Sidekiq
           opts[:timeout] = Integer(arg)
         end
 
+        o.on '-ft', '--fetch-timeout NUM', "Reliable fetch blocking timeout" do |arg|
+          opts[:fetch_timeout] = Integer(arg)
+        end
+
         o.on "-v", "--verbose", "Print more verbose output" do |arg|
           opts[:verbose] = arg
         end
