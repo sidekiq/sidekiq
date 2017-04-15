@@ -104,6 +104,10 @@ module Sidekiq
       end
       alias_method :perform_at, :perform_in
 
+      def perform_bulk_async(args)
+        Sidekiq::Client.push_bulk('class' => self, 'args' => args)
+      end
+
       ##
       # Allows customization for this type of Worker.
       # Legal options:
@@ -138,7 +142,6 @@ module Sidekiq
         hash = item.stringify_keys
         Sidekiq::Client.new(pool).push(hash)
       end
-
     end
   end
 end
