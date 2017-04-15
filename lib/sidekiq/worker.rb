@@ -29,13 +29,17 @@ module Sidekiq
       raise ArgumentError, "You cannot include Sidekiq::Worker in an ActiveJob: #{base.name}" if base.ancestors.any? {|c| c.name == 'ActiveJob::Base' }
 
       base.extend(ClassMethods)
+      base.extend(Logging)
+      base.send :include, Logging
       base.class_attribute :sidekiq_options_hash
       base.class_attribute :sidekiq_retry_in_block
       base.class_attribute :sidekiq_retries_exhausted_block
     end
 
-    def logger
-      Sidekiq.logger
+    module Logging
+      def logger
+        Sidekiq.logger
+      end
     end
 
     # This helper class encapsulates the set options for `set`, e.g.
