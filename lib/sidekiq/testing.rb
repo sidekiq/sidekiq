@@ -315,6 +315,25 @@ module Sidekiq
       end
     end
   end
+  
+  class ScheduledSet < SortedSet
+    def initialize
+      @jobs = Sidekiq::Worker.jobs
+    end
+
+    def each(&block)
+      @jobs.values.each do |job|
+        job.each do |element|
+          block.call SortedEntry.new(self, 1, Sidekiq.dump_json(element))
+        end
+      end
+    end
+
+    def size
+      @jobs.values.map(&:size).inject(:+)
+    end
+  end
+ 
 end
 
 if defined?(::Rails) && Rails.respond_to?(:env) && !Rails.env.test?
