@@ -4,8 +4,10 @@
     <span class="desc"><%= t('Processed') %></span>
   </li>
   <li class="failed col-sm-1">
-    <span class="count"><%= number_with_delimiter(stats.failed) %></span>
-    <span class="desc"><%= t('Failed') %></span>
+    <a href="<%= root_path %>failures">
+      <span class="count"><%= number_with_delimiter(stats.failed) %></span>
+      <span class="desc"><%= t('Failed') %></span>
+    </a>
   </li>
   <li class="busy col-sm-1">
     <a href="<%= root_path %>busy">
