@@ -99,6 +99,12 @@ module Sidekiq
       @launcher = Sidekiq::Launcher.new(options)
 
       begin
+        if options[:profile]
+          logger.info 'Profiling Sidekiq, hit Ctrl-C and check profile.html for results'
+          require 'ruby-prof'
+          RubyProf.start
+        end
+
         launcher.run
 
         while readable_io = IO.select([self_read])
@@ -136,6 +142,15 @@ module Sidekiq
       Sidekiq.logger.debug "Got #{sig} signal"
       case sig
       when 'INT'
+        # Finishes profiling
+        if Sidekiq.options[:profile]
+          result = RubyProf.stop
+          printer = RubyProf::GraphHtmlPrinter.new(result)
+          File.open("profile.html", 'w') do |f|
+            printer.print(f, :min_percent => 1)
+          end
+        end
+
         # Handle Ctrl-C in JRuby like MRI
         # http://jira.codehaus.org/browse/JRUBY-4637
         raise Interrupt
@@ -339,6 +354,10 @@ module Sidekiq
 
         o.on '-L', '--logfile PATH', "path to writable logfile" do |arg|
           opts[:logfile] = arg
+        end
+
+        o.on '-p', '--profile', "Profile sidekiq execution" do |arg|
+          opts[:profile] = true
         end
 
         o.on '-P', '--pidfile PATH', "path to pidfile" do |arg|
