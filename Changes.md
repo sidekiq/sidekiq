@@ -19,6 +19,8 @@ Sidekiq::Middleware::Server::Logging -> Sidekiq::JobLogging
 - The Web UI is now BiDi and can render RTL languages like Arabic, Farsi and Hebrew.
 - Rails 3.2 and Ruby 2.0 and 2.1 are no longer supported.
 - The `SomeWorker.set(options)` API was re-written to avoid thread-local state. [#2152]
+- Sidekiq Enterprise's encrypted jobs now display "[encrypted data]" in the Web UI instead
+  of random hex bytes.
 - Please see the [5.0 Upgrade notes](5.0-Upgrade.md) for more detail.
 
 4.2.10

@@ -344,6 +344,10 @@ module Sidekiq
                     job_args
                   end
                 else
+                  if self['encrypt'.freeze]
+                    # no point in showing 150+ bytes of random garbage
+                    args[-1] = '[encrypted data]'.freeze
+                  end
                   args
                 end
     end
