@@ -338,10 +338,10 @@ module Sidekiq
                 when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
                   job_args = self['wrapped'] ? args[0]["arguments"] : []
                   if 'ActionMailer::DeliveryJob' == (self['wrapped'] || args[0])
-                   # remove MailerClass, mailer_method and 'deliver_now'
-                   job_args.drop(3)
+                    # remove MailerClass, mailer_method and 'deliver_now'
+                    job_args.drop(3)
                   else
-                   job_args
+                    job_args
                   end
                 else
                   args
