@@ -22,13 +22,13 @@
       <tr>
         <td><%= h(msg.display_class) %></td>
         <td>
-          <% a = msg.display_args.inspect %>
-          <% if a.size > 100 %>
-            <span class="worker_<%= index %>"><%= h(msg.display_args.inspect[0..100]) + "... " %></span>
+          <% a = msg.display_args %>
+          <% if a.inspect.size > 100 %>
+            <span class="worker_<%= index %>"><%= h(a.inspect[0..100]) + "... " %></span>
             <button data-toggle="collapse" data-target=".worker_<%= index %>" class="btn btn-default btn-xs"><%= t('ShowAll') %></button>
-            <div class="toggle worker_<%= index %>"><%= h(msg.display_args) %></div>
+            <div class="toggle worker_<%= index %>"><%= display_args(a) %></div>
           <% else %>
-            <%= h(msg.display_args) %>
+            <%= display_args(msg.display_args) %>
           <% end %>
         </td>
         <td>
