@@ -15,7 +15,7 @@ Gem::Specification.new do |gem|
   gem.name          = "sidekiq"
   gem.require_paths = ["lib"]
   gem.version       = Sidekiq::VERSION
-  gem.add_dependency                  'redis', '~> 3.2', '>= 3.2.1'
+  gem.add_dependency                  'redis', '~> 3.3', '>= 3.3.3'
   gem.add_dependency                  'connection_pool', '~> 2.2', '>= 2.2.0'
   gem.add_dependency                  'concurrent-ruby', '~> 1.0'
   gem.add_dependency                  'rack-protection', '>= 1.5.0'
