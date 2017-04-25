@@ -161,7 +161,7 @@ class TestWeb < Sidekiq::Test
 
       it 'can delete a queue' do
         Sidekiq.redis do |conn|
-          conn.rpush('queue:foo', '{}')
+          conn.rpush('queue:foo', '{\"args\":[]}')
           conn.sadd('queues', 'foo')
         end
 
@@ -179,9 +179,9 @@ class TestWeb < Sidekiq::Test
 
       it 'can delete a job' do
         Sidekiq.redis do |conn|
-          conn.rpush('queue:foo', "{}")
-          conn.rpush('queue:foo', "{\"foo\":\"bar\"}")
-          conn.rpush('queue:foo', "{\"foo2\":\"bar2\"}")
+          conn.rpush('queue:foo', "{\"args\":[]}")
+          conn.rpush('queue:foo', "{\"foo\":\"bar\",\"args\":[]}")
+          conn.rpush('queue:foo', "{\"foo2\":\"bar2\",\"args\":[]}")
         end
 
         get '/queues/foo'
