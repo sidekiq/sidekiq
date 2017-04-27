@@ -4,9 +4,11 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+3.5.0
 ---------
 
+- Add queue pause/unpause endpoints for scripting via curl [#3445]
+- Change how super\_fetch names private queues to avoid hostname/queue clashes. [#3443]
 - Re-implement `Sidekiq::Queue#delete_job` to avoid O(n) runtime [#3408]
 - Batch page displays Pending JIDs if less than 10 [#3130]
 - Batch page has a Search button to find associated Retries [#3130]
