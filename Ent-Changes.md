@@ -4,6 +4,11 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+-------------
+
+- Remove dependency on the algorithms gem [#3446]
+
 1.5.2
 -------------
 
