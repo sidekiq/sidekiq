@@ -78,20 +78,29 @@ module Sidekiq
       text_direction == 'rtl'
     end
 
-    # Given a browser request Accept-Language header like
-    # "fr-FR,fr;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2", this function
-    # will return "fr" since that's the first code with a matching
-    # locale in web/locales
+    def user_preferred_languages
+      languages = env['HTTP_ACCEPT_LANGUAGE'.freeze]
+      languages.to_s.downcase.gsub(/\s+/, '').split(',').map do |language|
+        locale, quality = language.split(';q=', 2)
+        locale  = nil if locale == '*' # Ignore wildcards
+        quality = quality ? quality.to_f : 1.0
+        [locale, quality]
+      end.sort_by(&:last).reverse.map(&:first).compact
+    end
+
     def locale
       @locale ||= begin
-        locale = 'en'.freeze
-        languages = env['HTTP_ACCEPT_LANGUAGE'.freeze] || 'en'.freeze
+        matched_locale = user_preferred_languages.map do |preferred|
+          preferred_language = preferred.split('-', 2).first
 
-        # Put our default locale in front, since '*' is going to match
-        # the first locale in our list.
-        locales = (available_locales - [locale]).unshift(locale)
+          lang_group = available_locales.select do |available|
+            preferred_language == available.split('-', 2).first
+          end
 
-        ::Rack::Utils.best_q_match(languages.downcase, locales) || locale
+          lang_group.find { |lang| lang == preferred } || lang_group.first
+        end.compact.first
+
+        matched_locale || 'en'
       end
     end
 
