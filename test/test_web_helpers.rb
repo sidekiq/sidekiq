@@ -54,4 +54,14 @@ class TestWebHelpers < Sidekiq::Test
     obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => '*')
     assert_equal 'en', obj.locale
   end
+
+  def test_available_locales
+    obj = Helpers.new
+    expected = %w(
+      ar cs da de el en es fa fr he hi it ja
+      ko nb nl pl pt-br pt ru sv ta uk ur
+      zh-cn zh-tw
+    )
+    assert_equal expected, obj.available_locales
+  end
 end
