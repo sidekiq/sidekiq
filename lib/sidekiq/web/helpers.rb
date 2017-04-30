@@ -78,6 +78,7 @@ module Sidekiq
       text_direction == 'rtl'
     end
 
+    # See https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.4
     def user_preferred_languages
       languages = env['HTTP_ACCEPT_LANGUAGE'.freeze]
       languages.to_s.downcase.gsub(/\s+/, '').split(',').map do |language|
@@ -88,6 +89,10 @@ module Sidekiq
       end.sort_by(&:last).reverse.map(&:first).compact
     end
 
+    # Given an Accept-Language header like "fr-FR,fr;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2"
+    # this method will try to best match the available locales to the user's preferred languages.
+    #
+    # Inspiration taken from https://github.com/iain/http_accept_language/blob/master/lib/http_accept_language/parser.rb
     def locale
       @locale ||= begin
         matched_locale = user_preferred_languages.map do |preferred|
