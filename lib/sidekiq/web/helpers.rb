@@ -85,7 +85,12 @@ module Sidekiq
       @locale ||= begin
         locale = 'en'.freeze
         languages = env['HTTP_ACCEPT_LANGUAGE'.freeze] || 'en'.freeze
-        ::Rack::Utils.best_q_match(languages.downcase, available_locales) || locale
+
+        # Put our default locale in front, since '*' is going to match
+        # the first locale in our list.
+        locales = (available_locales - [locale]).unshift(locale)
+
+        ::Rack::Utils.best_q_match(languages.downcase, locales) || locale
       end
     end
 
