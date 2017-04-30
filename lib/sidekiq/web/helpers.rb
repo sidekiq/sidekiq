@@ -102,7 +102,7 @@ module Sidekiq
             preferred_language == available.split('-', 2).first
           end
 
-          lang_group.find { |lang| lang == preferred } || lang_group.first
+          lang_group.find { |lang| lang == preferred } || lang_group.min_by(&:length)
         end.compact.first
 
         matched_locale || 'en'
