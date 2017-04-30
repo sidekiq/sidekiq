@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require_relative 'helper'
+require 'sidekiq/web'
 
 class TestWebHelpers < Sidekiq::Test
 
