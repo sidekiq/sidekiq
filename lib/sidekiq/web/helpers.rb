@@ -32,6 +32,10 @@ module Sidekiq
       end
     end
 
+    def available_locales
+      @@available_locales ||= locale_files.map { |path| File.basename(path, '.yml') }
+    end
+
     def find_locale_files(lang)
       locale_files.select { |file| file =~ /\/#{lang}\.yml$/ }
     end
@@ -81,11 +85,7 @@ module Sidekiq
       @locale ||= begin
         locale = 'en'.freeze
         languages = env['HTTP_ACCEPT_LANGUAGE'.freeze] || 'en'.freeze
-        ::Rack::Utils.q_values(languages.downcase).map(&:first).each do |lang|
-          next if lang == '*'.freeze
-          break locale = lang if find_locale_files(lang).any?
-        end
-        locale
+        ::Rack::Utils.best_q_match(languages.downcase, available_locales) || locale
       end
     end
 
