@@ -86,7 +86,9 @@ module Sidekiq
         locale  = nil if locale == '*' # Ignore wildcards
         quality = quality ? quality.to_f : 1.0
         [locale, quality]
-      end.sort_by(&:last).reverse.map(&:first).compact
+      end.sort do |(_, left), (_, right)|
+        right <=> left
+      end.map(&:first).compact
     end
 
     # Given an Accept-Language header like "fr-FR,fr;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2"
