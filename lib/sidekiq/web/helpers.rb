@@ -81,9 +81,8 @@ module Sidekiq
       @locale ||= begin
         locale = 'en'.freeze
         languages = env['HTTP_ACCEPT_LANGUAGE'.freeze] || 'en'.freeze
-        languages.downcase.split(','.freeze).each do |lang|
+        ::Rack::Utils.q_values(languages.downcase).map(&:first).each do |lang|
           next if lang == '*'.freeze
-          lang = lang.split(';'.freeze)[0]
           break locale = lang if find_locale_files(lang).any?
         end
         locale
