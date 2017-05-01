@@ -2,6 +2,13 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
+HEAD
+-----------
+
+- Reimplement Web UI's HTTP\_ACCEPT\_LANGUAGE parsing because the spec is utterly
+  incomprehensible for various edge cases. [johanlunds, natematykiewicz, #3449]
+- Update `class_attribute` core extension to avoid warnings
+
 5.0.0
 -----------
 
