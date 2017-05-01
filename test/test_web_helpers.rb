@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require_relative 'helper'
+require 'sidekiq/web'
 
 class TestWebHelpers < Sidekiq::Test
 
@@ -42,13 +43,56 @@ class TestWebHelpers < Sidekiq::Test
     obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2')
     assert_equal 'zh-cn', obj.locale
 
+    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'en-US,sv-SE;q=0.8,sv;q=0.6,en;q=0.4')
+    assert_equal 'en', obj.locale
+
     obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'nb-NO,nb;q=0.2')
     assert_equal 'nb', obj.locale
+
+    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'en-us')
+    assert_equal 'en', obj.locale
+
+    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'sv-se')
+    assert_equal 'sv', obj.locale
+
+    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4')
+    assert_equal 'pt-br', obj.locale
+
+    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'pt-PT,pt;q=0.8,en-US;q=0.6,en;q=0.4')
+    assert_equal 'pt', obj.locale
+
+    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'pt-br')
+    assert_equal 'pt-br', obj.locale
+
+    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'pt-pt')
+    assert_equal 'pt', obj.locale
+
+    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'pt')
+    assert_equal 'pt', obj.locale
 
     obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'en-us; *')
     assert_equal 'en', obj.locale
 
+    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.8')
+    assert_equal 'en', obj.locale
+
+    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'en-GB,en-US;q=0.8,en;q=0.6')
+    assert_equal 'en', obj.locale
+
+    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'ru,en')
+    assert_equal 'ru', obj.locale
+
     obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => '*')
     assert_equal 'en', obj.locale
+  end
+
+  def test_available_locales
+    obj = Helpers.new
+    expected = %w(
+      ar cs da de el en es fa fr he hi it ja
+      ko nb nl pl pt-br pt ru sv ta uk ur
+      zh-cn zh-tw
+    )
+    assert_equal expected, obj.available_locales
   end
 end
