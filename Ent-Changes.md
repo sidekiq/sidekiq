@@ -8,6 +8,9 @@ HEAD
 -------------
 
 - Remove dependency on the algorithms gem [#3446]
+- Allow user to specify max memory in megabytes with SIDEKIQ\_MAXMEM\_MB [#3451]
+- Implement logic to detect app startup failure, sidekiqswarm will exit
+  rather than try to restart the app forever [#3450]
 
 1.5.2
 -------------
