@@ -725,6 +725,11 @@ module Sidekiq
         end
 
         result.each do |info, busy, at_s, quiet|
+          # If a process is stopped between when we query Redis for `procs` and
+          # when we query for `result`, we will have an item in `result` that is
+          # composed of `nil` values.
+          next if info.nil?
+
           hash = Sidekiq.load_json(info)
           yield Process.new(hash.merge('busy' => busy.to_i, 'beat' => at_s.to_f, 'quiet' => quiet))
         end
