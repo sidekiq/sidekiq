@@ -53,6 +53,17 @@ class TestScheduling < Sidekiq::Test
       assert job['created_at']
       refute job['enqueued_at']
     end
+
+    it 'schedules a job only once' do
+      job = Minitest::Mock.new
+      def job.klass; 'TestScheduling::ScheduledWorker'; end
+      def job.score; Time.utc(2013, 9, 25, 5).to_f end
+      def job.args; ['vlad']; end
+      Sidekiq::ScheduledSet.stub :new, [job] do
+        ScheduledWorker.perform_once_in(Time.utc(2013, 9, 25, 5), 'vlad')
+      end
+      @redis.verify
+    end
   end
 
 end
