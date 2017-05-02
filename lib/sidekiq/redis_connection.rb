@@ -91,7 +91,7 @@ module Sidekiq
           scrubbed_options[:password] = redacted
         end
         if Sidekiq.server?
-          Sidekiq.logger.info("Booting Sidekiq #{Sidekiq::VERSION} with redis options #{scrubbed_options}")
+          Sidekiq.logger.debug("Booting Sidekiq #{Sidekiq::VERSION} with redis options #{scrubbed_options}")
         else
           Sidekiq.logger.debug("#{Sidekiq::NAME} client with redis options #{scrubbed_options}")
         end
