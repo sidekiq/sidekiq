@@ -4,13 +4,14 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+1.5.3
 -------------
 
 - Remove dependency on the algorithms gem [#3446]
 - Allow user to specify max memory in megabytes with SIDEKIQ\_MAXMEM\_MB [#3451]
 - Implement logic to detect app startup failure, sidekiqswarm will exit
   rather than try to restart the app forever [#3450]
+- Another fix for doubly-encrypted arguments [#3368]
 
 1.5.2
 -------------
