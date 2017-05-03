@@ -266,31 +266,6 @@ table .table-checkbox label {
   display: none;
 }
 
-.navbar-footer .navbar ul.nav {
-  text-align: center;
-  float: none;
-}
-.navbar-footer .navbar ul.nav a {
-  font-weight: 700;
-  font-size: 16px;
-  padding: 15px;
-}
-
-.navbar-footer .navbar ul.nav a.navbar-brand {
-  font-weight: 400;
-  padding: 0 15px 0 0;
-}
-
-.navbar-footer .navbar ul.nav li {
-  display: inline-block;
-  float: none;
-}
-.navbar-footer .navbar.affix {
-  top: 0;
-  width: 100%;
-  z-index: 10;
-}
-
 img.smallogo {
   width: 30px;
   margin: 0 0 6px 0;
@@ -1044,6 +1019,11 @@ div.interval-slider input {
   .navbar-fixed-top, .navbar-fixed-bottom {
     position: relative;
     top: auto;
+  }
+}
+@media (min-width: 768px) {
+  .navbar-fixed-bottom {
+    max-height: 50px;
   }
 }
 
