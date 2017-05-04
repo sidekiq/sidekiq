@@ -4,14 +4,10 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+1.5.4
 -------------
 
-- Fix broken Cron page in Web UI, add this to your initializer to work
-  around [#3458]:
-```
-require 'sidekiq-ent/periodic/cron'`
-```
+- Fix broken Cron page in Web UI [#3458]
 
 1.5.3
 -------------
