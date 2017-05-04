@@ -80,7 +80,6 @@ Useful resources:
 
 * Product documentation is in the [wiki](https://github.com/mperham/sidekiq/wiki).
 * Release announcements are made to the [@sidekiq](https://twitter.com/sidekiq) Twitter account.
-* Here's a [Reddit forum](https://reddit.com/r/sidekiq) dedicated to Sidekiq discussion
 * The [Sidekiq tag](https://stackoverflow.com/questions/tagged/sidekiq) on Stack Overflow has lots of useful Q &amp; A.
 
 **No support via Twitter, 140 characters is not enough.**
