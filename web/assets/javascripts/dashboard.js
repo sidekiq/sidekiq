@@ -111,8 +111,11 @@ var realtimeGraph = function(updatePath) {
 
       updateStatsSummary(data.sidekiq);
       updateRedisStats(data.redis);
+      updateFooterUTCTime(data.server_utc_time)
+
       pulseBeacon();
     });
+
     i++;
   }, timeInterval);
 }
@@ -222,6 +225,10 @@ var updateRedisStats = function(data) {
   $('.stat h3.connected_clients').html(data.connected_clients)
   $('.stat h3.used_memory_human').html(data.used_memory_human)
   $('.stat h3.used_memory_peak_human').html(data.used_memory_peak_human)
+}
+
+var updateFooterUTCTime = function(time) {
+  $('.navbar-fixed-bottom .navbar-inner .server-utc-time').html(time)
 }
 
 var pulseBeacon = function(){
