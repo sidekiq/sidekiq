@@ -234,7 +234,6 @@ module Sidekiq
     get '/stats' do
       sidekiq_stats = Sidekiq::Stats.new
       redis_stats   = redis_info.select { |k, v| REDIS_KEYS.include? k }
-
       json(
         sidekiq: {
           processed:       sidekiq_stats.processed,
@@ -247,7 +246,8 @@ module Sidekiq
           dead:            sidekiq_stats.dead_size,
           default_latency: sidekiq_stats.default_queue_latency
         },
-        redis: redis_stats
+        redis: redis_stats,
+        server_utc_time: server_utc_time
       )
     end
 

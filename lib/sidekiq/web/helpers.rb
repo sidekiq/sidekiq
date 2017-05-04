@@ -279,6 +279,10 @@ module Sidekiq
       "Sidekiq v#{Sidekiq::VERSION}"
     end
 
+    def server_utc_time
+      Time.now.utc.strftime('%H:%M:%S UTC')
+    end
+
     def redis_connection_and_namespace
       @redis_connection_and_namespace ||= begin
         namespace_suffix = namespace == nil ? '' : "##{namespace}"

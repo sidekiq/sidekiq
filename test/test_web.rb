@@ -480,6 +480,7 @@ class TestWeb < Sidekiq::Test
       it 'works' do
         get '/stats'
         @response = Sidekiq.load_json(last_response.body)
+
         assert_equal 200, last_response.status
         assert_includes @response.keys, "sidekiq"
         assert_equal 5, @response["sidekiq"]["processed"]
@@ -495,6 +496,7 @@ class TestWeb < Sidekiq::Test
         assert_includes @response["redis"].keys, "connected_clients"
         assert_includes @response["redis"].keys, "used_memory_human"
         assert_includes @response["redis"].keys, "used_memory_peak_human"
+        assert_includes @response.keys, "server_utc_time"
       end
     end
 
