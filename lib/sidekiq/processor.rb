@@ -119,21 +119,13 @@ module Sidekiq
       nil
     end
 
-    def log_context(job_hash)
-      # If we're using a wrapper class, like ActiveJob, use the "wrapped"
-      # attribute to expose the underlying thing.
-      klass = job_hash['wrapped'.freeze] || job_hash["class".freeze]
-      bid = job_hash['bid'.freeze]
-      "#{klass} JID-#{job_hash['jid'.freeze]}#{" BID-#{bid}" if bid}"
-    end
-
     def dispatch(job_hash, queue)
       # since middleware can mutate the job hash
       # we clone here so we report the original
       # job structure to the Web UI
       pristine = cloned(job_hash)
 
-      Sidekiq::Logging.with_context(log_context(job_hash)) do
+      Sidekiq::Logging.with_job_hash_context(job_hash) do
         @retrier.global(job_hash, queue) do
           @logging.call(job_hash, queue) do
             stats(pristine, queue) do

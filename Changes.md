@@ -8,6 +8,7 @@ HEAD
 - Reimplement Web UI's HTTP\_ACCEPT\_LANGUAGE parsing because the spec is utterly
   incomprehensible for various edge cases. [johanlunds, natematykiewicz, #3449]
 - Update `class_attribute` core extension to avoid warnings
+- Expose `job_hash_context` from `Sidekiq::Logging` to support log customization
 
 5.0.0
 -----------
