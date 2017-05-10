@@ -125,12 +125,7 @@ module Sidekiq
       # job structure to the Web UI
       pristine = cloned(job_hash)
 
-      # If we're using a wrapper class, like ActiveJob, use the "wrapped"
-      # attribute to expose the underlying thing.
-      klass = job_hash['wrapped'.freeze] || job_hash["class".freeze]
-      ctx = "#{klass} JID-#{job_hash['jid'.freeze]}#{" BID-#{job_hash['bid'.freeze]}" if job_hash['bid'.freeze]}"
-
-      Sidekiq::Logging.with_context(ctx) do
+      Sidekiq::Logging.with_job_hash_context(job_hash) do
         @retrier.global(job_hash, queue) do
           @logging.call(job_hash, queue) do
             stats(pristine, queue) do
