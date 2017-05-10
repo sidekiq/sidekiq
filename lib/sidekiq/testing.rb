@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require 'securerandom'
 require 'sidekiq'
+require 'sidekiq/util'
 
 module Sidekiq
 
@@ -246,6 +247,7 @@ module Sidekiq
     #   Then I should receive a welcome email to "foo@example.com"
     #
     module ClassMethods
+      include Sidekiq::Util
 
       # Queue for this worker
       def queue
@@ -284,7 +286,12 @@ module Sidekiq
         worker.jid = job['jid']
         worker.bid = job['bid'] if worker.respond_to?(:bid=)
         Sidekiq::Testing.server_middleware.invoke(worker, job, job['queue']) do
-          execute_job(worker, job['args'])
+          begin
+            execute_job(worker, job['args'])
+          rescue Exception => ex
+            handle_exception(ex, job || { :job => Sidekiq.dump_json(job) })
+            raise
+          end
         end
       end
 
