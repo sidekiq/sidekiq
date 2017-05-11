@@ -19,7 +19,7 @@ HEAD
   commonly used public APIs so this shouldn't impact most users.
 ```
 Sidekiq::Middleware::Server::RetryJobs -> Sidekiq::JobRetry
-Sidekiq::Middleware::Server::Logging -> Sidekiq::JobLogging
+Sidekiq::Middleware::Server::Logging -> Sidekiq::JobLogger
 ```
 - Quieting Sidekiq is now done via the TSTP signal, the USR1 signal is deprecated.
 - The `delay` extension APIs are no longer available by default, you
