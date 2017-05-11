@@ -267,6 +267,54 @@ class TestFake < Sidekiq::Test
       assert_equal 0, AltQueueWorker.jobs.size
     end
 
+    class OrderedWorker
+      include Sidekiq::Worker
+      @@ran = []
+
+      def perform
+        @@ran << name
+      end
+
+      def name
+        'base'
+      end
+
+      def self.clear
+        @@ran = []
+      end
+
+      def self.ran
+        @@ran
+      end
+    end
+
+    class OrderedWorkerA < OrderedWorker
+      def name
+        'a'
+      end
+    end
+
+    class OrderedWorkerB < OrderedWorker
+      def name
+        'b'
+      end
+    end
+
+    it 'drains jobs in enqueued order' do
+      Sidekiq::Worker.jobs.clear
+      OrderedWorker.clear
+
+      assert_equal [], OrderedWorker.ran
+
+      OrderedWorkerB.perform_async
+      OrderedWorkerA.perform_async
+      OrderedWorkerB.perform_async
+
+      Sidekiq::Worker.drain_all
+
+      assert_equal %w(b a b), OrderedWorker.ran
+    end
+
     it 'can execute a job' do
       DirectWorker.execute_job(DirectWorker.new, [2, 3])
     end
