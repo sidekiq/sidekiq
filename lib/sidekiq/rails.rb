@@ -28,7 +28,6 @@ module Sidekiq
       Sidekiq.configure_server do |_|
         if ::Rails::VERSION::MAJOR >= 5
           Sidekiq.options[:reloader] = Sidekiq::Rails::Reloader.new
-          Psych::Visitors::ToRuby.prepend(Sidekiq::Rails::PsychAutoload)
         end
       end
     end
@@ -46,14 +45,6 @@ module Sidekiq
 
       def inspect
         "#<Sidekiq::Rails::Reloader @app=#{@app.class.name}>"
-      end
-    end
-
-    module PsychAutoload
-      def resolve_class(klass_name)
-        klass_name && klass_name.constantize
-      rescue NameError
-        super
       end
     end
   end if defined?(::Rails)
