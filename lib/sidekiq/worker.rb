@@ -118,7 +118,12 @@ module Sidekiq
       # In practice, any option is allowed.  This is the main mechanism to configure the
       # options for a specific job.
       def sidekiq_options(opts={})
-        self.sidekiq_options_hash = get_sidekiq_options.merge(opts.stringify_keys)
+        # stringify
+        opts.keys.each do |key|
+          opts[key.to_s] = opts.delete(key)
+        end
+
+        self.sidekiq_options_hash = get_sidekiq_options.merge(opts)
       end
 
       def sidekiq_retry_in(&block)
@@ -135,8 +140,12 @@ module Sidekiq
 
       def client_push(item) # :nodoc:
         pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options['pool'.freeze] || Sidekiq.redis_pool
-        hash = item.stringify_keys
-        Sidekiq::Client.new(pool).push(hash)
+        # stringify
+        item.keys.each do |key|
+          item[key.to_s] = item.delete(key)
+        end
+
+        Sidekiq::Client.new(pool).push(item)
       end
 
     end

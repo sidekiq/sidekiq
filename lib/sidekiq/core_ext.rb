@@ -73,24 +73,3 @@ rescue LoadError
 
   end
 end
-
-begin
-  require 'active_support/core_ext/hash/keys'
-rescue LoadError
-  class Hash
-    def stringify_keys
-      keys.each do |key|
-        self[key.to_s] = delete(key)
-      end
-      self
-    end if !{}.respond_to?(:stringify_keys)
-
-    def symbolize_keys
-      keys.each do |key|
-        self[(key.to_sym rescue key) || key] = delete(key)
-      end
-      self
-    end if !{}.respond_to?(:symbolize_keys)
-
-  end
-end

@@ -8,7 +8,9 @@ module Sidekiq
     class << self
 
       def create(options={})
-        options = options.symbolize_keys
+        options.keys.each do |key|
+          options[key.to_sym] = options.delete(key)
+        end
 
         options[:url] ||= determine_redis_provider
 
