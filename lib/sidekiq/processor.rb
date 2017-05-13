@@ -134,7 +134,7 @@ module Sidekiq
               # the Reloader.  It handles code loading, db connection management, etc.
               # Effectively this block denotes a "unit of work" to Rails.
               @reloader.call do
-                klass  = Sidekiq::Util.constantize(job_hash['class'.freeze])
+                klass  = Sidekiq.constantize(job_hash['class'.freeze])
                 worker = klass.new
                 worker.jid = job_hash['jid'.freeze]
                 @retrier.local(worker, job_hash, queue) do

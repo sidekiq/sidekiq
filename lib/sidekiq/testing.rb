@@ -76,7 +76,7 @@ module Sidekiq
         true
       elsif Sidekiq::Testing.inline?
         payloads.each do |job|
-          klass = Sidekiq::Util.constantize(job['class'])
+          klass = Sidekiq.constantize(job['class'])
           job['id'] ||= SecureRandom.hex(12)
           job_hash = Sidekiq.load_json(Sidekiq.dump_json(job))
           klass.process_job(job_hash)
@@ -309,7 +309,7 @@ module Sidekiq
           worker_classes = jobs.map { |job| job["class"] }.uniq
 
           worker_classes.each do |worker_class|
-            Sidekiq::Util.constantize(worker_class).drain
+            Sidekiq.constantize(worker_class).drain
           end
         end
       end
