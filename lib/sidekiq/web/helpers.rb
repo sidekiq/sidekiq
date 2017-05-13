@@ -15,7 +15,7 @@ module Sidekiq
         settings.locales.each_with_object({}) do |path, global|
           find_locale_files(lang).each do |file|
             strs = YAML.load(File.open(file))
-            global.deep_merge!(strs[lang])
+            global.merge!(strs[lang])
           end
         end
       end
