@@ -127,18 +127,3 @@ rescue LoadError
     end
   end if !"".respond_to?(:constantize)
 end
-
-
-begin
-  require 'active_support/core_ext/kernel/reporting'
-rescue LoadError
-  module Kernel
-    module_function
-    def silence_warnings
-      old_verbose, $VERBOSE = $VERBOSE, nil
-      yield
-    ensure
-      $VERBOSE = old_verbose
-    end
-  end
-end
