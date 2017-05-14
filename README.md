@@ -1,4 +1,5 @@
 Sidekiq
+1
 ==============
 
 [![Gem Version](https://badge.fury.io/rb/sidekiq.svg)](https://rubygems.org/gems/sidekiq)
