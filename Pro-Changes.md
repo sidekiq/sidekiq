@@ -117,7 +117,7 @@ end
 - Fix edge case where a parent batch could expire before a child batch
   was finished processing, leading to missing batches [#2889]
 
-2.1.5
+3.1.5
 ---------
 
 - Fix edge case where a parent batch could expire before a child batch
