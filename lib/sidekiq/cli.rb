@@ -163,6 +163,7 @@ module Sidekiq
             Sidekiq.logger.warn "<no backtrace available>"
           end
         end
+        fire_event(:status)
       end
     end
 

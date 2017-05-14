@@ -28,6 +28,7 @@ module Sidekiq
     lifecycle_events: {
       startup: [],
       quiet: [],
+      status: [],
       shutdown: [],
       heartbeat: [],
     },
