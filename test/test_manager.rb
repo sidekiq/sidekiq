@@ -42,6 +42,13 @@ class TestManager < Sidekiq::Test
       assert_raises(ArgumentError) { new_manager(concurrency: -1) }
     end
 
+    class CustomFetch < Sidekiq::BasicFetch; end
+
+    it 'returns a strategy class' do
+      assert_equal Sidekiq::BasicFetch, new_manager(options).strategy
+      assert_equal CustomFetch, new_manager(options.merge(:fetch => 'TestManager::CustomFetch')).strategy
+    end
+
     def options
       { :concurrency => 3, :queues => ['default'] }
     end

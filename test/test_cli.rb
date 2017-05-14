@@ -113,6 +113,11 @@ class TestCli < Sidekiq::Test
       Sidekiq.logger.level = old
     end
 
+    it 'sets custom fetch class' do
+      @cli.parse(['sidekiq', '--fetch', 'FakeApp::FakeFetch'])
+      assert_equal 'FakeApp::FakeFetch', Sidekiq.options[:fetch]
+    end
+
     describe 'with logfile' do
       before do
         @old_logger = Sidekiq.logger

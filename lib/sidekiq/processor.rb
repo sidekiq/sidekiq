@@ -37,7 +37,7 @@ module Sidekiq
       @done = false
       @job = nil
       @thread = nil
-      @strategy = (mgr.options[:fetch] || Sidekiq::BasicFetch).new(mgr.options)
+      @strategy = mgr.strategy.new(mgr.options)
       @reloader = Sidekiq.options[:reloader]
       @logging = Sidekiq::JobLogger.new
       @retrier = Sidekiq::JobRetry.new

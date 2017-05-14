@@ -49,8 +49,7 @@ module Sidekiq
 
       # Requeue everything in case there was a worker who grabbed work while stopped
       # This call is a no-op in Sidekiq but necessary for Sidekiq Pro.
-      strategy = (@options[:fetch] || Sidekiq::BasicFetch)
-      strategy.bulk_requeue([], @options)
+      @manager.strategy.bulk_requeue([], @options)
 
       clear_heartbeat
     end

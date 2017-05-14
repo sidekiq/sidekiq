@@ -308,6 +308,10 @@ module Sidekiq
           opts[:environment] = arg
         end
 
+        o.on '--fetch FETCH', 'Custom fetch strategy class to use for picking up jobs from queues' do |arg|
+          opts[:fetch] = arg
+        end
+
         o.on '-g', '--tag TAG', "Process tag for procline" do |arg|
           opts[:tag] = arg
         end
