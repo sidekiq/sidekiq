@@ -149,11 +149,12 @@ module Sidekiq
   end
 
   def self.default_worker_options=(hash)
+    h = hash.dup
     # stringify
-    hash.keys.each do |key|
-      hash[key.to_s] = hash.delete(key)
+    h.keys.each do |key|
+      h[key.to_s] = h.delete(key)
     end
-    @default_worker_options = default_worker_options.merge(hash)
+    @default_worker_options = default_worker_options.merge(h)
   end
   def self.default_worker_options
     defined?(@default_worker_options) ? @default_worker_options : DEFAULT_WORKER_OPTIONS
