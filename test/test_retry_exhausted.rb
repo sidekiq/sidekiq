@@ -64,7 +64,7 @@ class TestRetryExhausted < Sidekiq::Test
         # successful
       end
 
-      refute NewWorker.exhausted_called?
+      refute NewWorker.exhausted_called
     end
 
     it 'does not run exhausted block when job successful on last retry' do
@@ -72,7 +72,7 @@ class TestRetryExhausted < Sidekiq::Test
         # successful
       end
 
-      refute NewWorker.exhausted_called?
+      refute NewWorker.exhausted_called
     end
 
     it 'does not run exhausted block when retries not exhausted yet' do
@@ -82,7 +82,7 @@ class TestRetryExhausted < Sidekiq::Test
         end
       end
 
-      refute NewWorker.exhausted_called?
+      refute NewWorker.exhausted_called
     end
 
     it 'runs exhausted block when retries exhausted' do
@@ -92,7 +92,7 @@ class TestRetryExhausted < Sidekiq::Test
         end
       end
 
-      assert NewWorker.exhausted_called?
+      assert NewWorker.exhausted_called
     end
 
 
@@ -104,7 +104,7 @@ class TestRetryExhausted < Sidekiq::Test
       end
       raised_error = raised_error.cause
 
-      assert new_worker.exhausted_called?
+      assert new_worker.exhausted_called
       assert_equal raised_error.message, new_worker.exhausted_job['error_message']
       assert_equal raised_error, new_worker.exhausted_exception
     end
@@ -117,7 +117,7 @@ class TestRetryExhausted < Sidekiq::Test
       end
       raised_error = raised_error.cause
 
-      assert old_worker.exhausted_called?
+      assert old_worker.exhausted_called
       assert_equal raised_error.message, old_worker.exhausted_job['error_message']
       assert_nil new_worker.exhausted_exception
     end

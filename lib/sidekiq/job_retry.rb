@@ -203,7 +203,7 @@ module Sidekiq
     end
 
     def delay_for(worker, count, exception)
-      worker && worker.sidekiq_retry_in_block? && retry_in(worker, count, exception) || seconds_to_delay(count)
+      worker && worker.sidekiq_retry_in_block && retry_in(worker, count, exception) || seconds_to_delay(count)
     end
 
     # delayed_job uses the same basic formula
