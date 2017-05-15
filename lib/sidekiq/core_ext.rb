@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 begin
+  require 'active_support/core_ext/object'
+rescue LoadError
+  # Shouldn't sidekiq depend on active_support?
+end
+
+begin
   require 'active_support/core_ext/class/attribute'
 rescue LoadError
   # A dumbed down version of ActiveSupport 5.1.0's
