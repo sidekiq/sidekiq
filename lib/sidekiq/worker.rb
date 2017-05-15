@@ -117,13 +117,8 @@ module Sidekiq
       # In practice, any option is allowed.  This is the main mechanism to configure the
       # options for a specific job.
       def sidekiq_options(opts={})
-        h = opts.dup
         # stringify
-        h.keys.each do |key|
-          h[key.to_s] = h.delete(key)
-        end
-
-        self.sidekiq_options_hash = get_sidekiq_options.merge(h)
+        self.sidekiq_options_hash = get_sidekiq_options.merge(Hash[opts.map{|k, v| [k.to_s, v]}])
       end
 
       def sidekiq_retry_in(&block)
