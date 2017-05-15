@@ -134,7 +134,7 @@ module Sidekiq
               # the Reloader.  It handles code loading, db connection management, etc.
               # Effectively this block denotes a "unit of work" to Rails.
               @reloader.call do
-                klass  = Sidekiq.constantize(job_hash['class'.freeze])
+                klass  = constantize(job_hash['class'.freeze])
                 worker = klass.new
                 worker.jid = job_hash['jid'.freeze]
                 @retrier.local(worker, job_hash, queue) do
@@ -227,6 +227,15 @@ module Sidekiq
     # been mutated by the worker.
     def cloned(thing)
       Marshal.load(Marshal.dump(thing))
+    end
+
+    def constantize(str)
+      names = str.split('::')
+      names.shift if names.empty? || names.first.empty?
+
+      names.inject(Object) do |constant, name|
+        constant.const_defined?(name) ? constant.const_get(name) : constant.const_missing(name)
+      end
     end
 
   end
