@@ -5,6 +5,7 @@
 HEAD
 -----------
 
+- Remove core extensions, Sidekiq is now monkeypatch-free! [#3474]
 - Reimplement Web UI's HTTP\_ACCEPT\_LANGUAGE parsing because the spec is utterly
   incomprehensible for various edge cases. [johanlunds, natematykiewicz, #3449]
 - Update `class_attribute` core extension to avoid warnings
