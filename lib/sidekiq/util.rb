@@ -59,6 +59,5 @@ module Sidekiq
       end
       arr.clear
     end
-
   end
 end
