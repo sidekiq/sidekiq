@@ -4,6 +4,11 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+-------------
+
+- Implement new `unique_util: 'start'` policy option. [#3471]
+
 1.5.4
 -------------
 
