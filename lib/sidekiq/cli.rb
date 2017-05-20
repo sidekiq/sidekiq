@@ -31,6 +31,8 @@ module Sidekiq
 
     def initialize
       @code = nil
+
+      generate_restart_data
     end
 
     def parse(args=ARGV)
@@ -181,6 +183,15 @@ module Sidekiq
       return unless options[:daemon]
 
       raise ArgumentError, "You really should set a logfile if you're going to daemonize" unless options[:logfile]
+
+      if defined?(JRUBY_VERSION)
+        daemonize_jruby
+      else
+        daemonize_process
+      end
+    end
+
+    def daemonize_process
       files_to_reopen = []
       ObjectSpace.each_object(File) do |file|
         files_to_reopen << file unless file.closed?
@@ -207,12 +218,80 @@ module Sidekiq
       initialize_logger
     end
 
+    def daemonize_jruby
+      require 'sidekiq/jruby_restart'
+      already_daemon = false
+      already_daemon = JRubyRestart.daemon_init
+      if already_daemon
+        JRubyRestart.perm_daemonize
+      else
+        pid = nil
+
+        Signal.trap "SIGUSR2" do
+          logger.info "Started new sidekiq process #{pid} as daemon..."
+
+          # Must use exit! so we don't unwind and run the ensures
+          # that will be run by the new child (such as deleting the
+          # pidfile)
+          exit!(true)
+        end
+
+        Signal.trap "SIGCHLD" do
+          logger.info "Error starting new sidekiq process as daemon, exitting"
+          exit 1
+        end
+
+        pid = JRubyRestart.daemon_start(@restart_dir, @restart_argv)
+        sleep
+      end
+    end
+
     def set_environment(cli_env)
       @environment = cli_env || ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
     end
 
     alias_method :die, :exit
     alias_method :☠, :exit
+
+    def generate_restart_data
+      # Use the same trick as unicorn, namely favor PWD because
+      # it will contain an unresolved symlink, useful for when
+      # the pwd is /data/releases/current.
+      if dir = ENV['PWD']
+        s_env = File.stat(dir)
+        s_pwd = File.stat(Dir.pwd)
+
+        if s_env.ino == s_pwd.ino and s_env.dev == s_pwd.dev
+          @restart_dir = dir
+        end
+      end
+
+      @restart_dir ||= Dir.pwd
+
+      @original_argv = ARGV.dup
+
+      if defined? Rubinius::OS_ARGV
+        @restart_argv = Rubinius::OS_ARGV
+      else
+        require 'rubygems'
+
+        # if $0 is a file in the current directory, then restart
+        # it the same, otherwise add -S on there because it was
+        # picked up in PATH.
+        #
+        if File.exists?($0)
+          arg0 = [Gem.ruby, $0]
+        else
+          arg0 = [Gem.ruby, "-S", $0]
+        end
+
+        # Detect and reinject -Ilib from the command line
+        lib = File.expand_path "lib"
+        arg0[1,0] = ["-I", lib] if $:[0] == lib
+
+        @restart_argv = arg0 + ARGV
+      end
+    end
 
     def setup_options(args)
       opts = parse_options(args)
