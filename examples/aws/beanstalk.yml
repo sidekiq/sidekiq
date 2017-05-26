@@ -1,0 +1,71 @@
+# In order to make Sidekiq to run along your web service in AWS Beanstalk,
+# create a folder named ```.ebextensions``` inside the root of your app
+# and add a file whose name should match your expectation for its order of
+# execution, which is given alphabeticaly.
+# Example: ```___APP_ROOT___/.ebextensions/00_sidekiq.config```
+
+
+# It is MANDATORY to change the file extension from ```.yml``` to ```.config```.
+
+
+# Despite the official advice to not run Sidekiq in daemon mode, I do so, here,
+# because it is beyond my knowledge to adapt ```/examples/upstart/sidekiq.conf```
+# and ```/examples/upstart/workers.conf``` to properly work with AWS Beanstalk.
+# My main doubts about these examples regard how the application code would be
+# reloaded when of redeploying it.
+
+
+files:
+  # It shall created a file whose path is given below.
+  # Scripts added to the folder ```/opt/elasticbeanstalk/hooks/pre/``` are the
+  # first to run in AWS Beanstalk's planned deployment lifecycle.
+  "/opt/elasticbeanstalk/hooks/appdeploy/pre/00_send_usr1_to_sidekiq.sh":
+    mode: "000777"
+    content: |
+      EB_SCRIPT_DIR=$(/opt/elasticbeanstalk/bin/get-config container -k script_dir)
+      EB_SUPPORT_DIR=$(/opt/elasticbeanstalk/bin/get-config container -k support_dir)
+      EB_APP_PIDS_DIR=$(/opt/elasticbeanstalk/bin/get-config container -k app_pid_dir)
+      SIDEKIQ_PID="$EB_APP_PIDS_DIR/sidekiq.pid"
+
+      # Setting up correct environment and ruby version so that bundle can load all gems
+      . "$EB_SUPPORT_DIR/envvars"
+      . "$EB_SCRIPT_DIR/use-app-ruby.sh"
+
+      if [ -f $SIDEKIQ_PID ]
+      then
+        # Send a USR1 signal to prevent Sidekiq to pulling more jobs.
+        kill -USR1 $("cat $SIDEKIQ_PID")
+      fi
+
+  # It shall created a file whose path is given below.
+  # Scripts added to the folder ```/opt/elasticbeanstalk/hooks/post/``` are the
+  # last to run in AWS Beanstalk's planned deployment lifecycle.
+  "/opt/elasticbeanstalk/hooks/appdeploy/post/99_restart_sidekiq.sh":
+    mode: "000777"
+    owner: root
+    group: root
+    content: |
+      EB_SCRIPT_DIR=$(/opt/elasticbeanstalk/bin/get-config container -k script_dir)
+      EB_SUPPORT_DIR=$(/opt/elasticbeanstalk/bin/get-config container -k support_dir)
+      EB_APP_CURRENT_DIR=$(/opt/elasticbeanstalk/bin/get-config container -k app_deploy_dir)
+      EB_APP_PIDS_DIR=$(/opt/elasticbeanstalk/bin/get-config container -k app_pid_dir)
+      SIDEKIQ_PID="$EB_APP_PIDS_DIR/sidekiq.pid"
+      SIDEKIQ_YML="$EB_APP_CURRENT_DIR/config/sidekiq.yml"
+      SIDEKIQ_LOG="$EB_APP_CURRENT_DIR/log/sidekiq.log" # You may think of a better place.
+
+      # Setting up correct environment and ruby version so that bundle can load all gems
+      . "$EB_SUPPORT_DIR/envvars"
+      . "$EB_SCRIPT_DIR/use-app-ruby.sh"
+
+      cd $EB_APP_CURRENT_DIR
+
+      if [ -f $SIDEKIQ_PID ]
+      then
+        # Send TERM signal to kill workers after they are done with their current jobs.
+        kill -TERM $(cat $SIDEKIQ_PID)
+        rm -rf $SIDEKIQ_PID
+      fi
+
+      sleep 10 # You may adjust this to better suit your needs.
+
+      bundle exec sidekiq -e $RACK_ENV -P $SIDEKIQ_PID -C $SIDEKIQ_YML -L $SIDEKIQ_LOG -d
