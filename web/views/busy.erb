@@ -22,7 +22,8 @@
       <th><%= t('Busy') %></th>
       <th>&nbsp;</th>
     </thead>
-    <% processes.each do |process,leader| %>
+    <% lead = processes.leader %>
+    <% processes.each do |process| %>
       <tr>
         <td class="box">
           <%= "#{process['hostname']}:#{process['pid']}" %>
@@ -33,7 +34,7 @@
           <% if process.stopping? %>
             <span class="label label-danger">quiet</span>
           <% end %>
-          <% if process.identity == leader %>
+          <% if process.identity == lead %>
             <span class="label label-warning">leader</span>
           <% end %>
           <br>

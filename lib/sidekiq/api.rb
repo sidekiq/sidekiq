@@ -731,7 +731,7 @@ module Sidekiq
           next if info.nil?
 
           hash = Sidekiq.load_json(info)
-          yield Process.new(hash.merge('busy' => busy.to_i, 'beat' => at_s.to_f, 'quiet' => quiet)), leader
+          yield Process.new(hash.merge('busy' => busy.to_i, 'beat' => at_s.to_f, 'quiet' => quiet))
         end
       end
 
