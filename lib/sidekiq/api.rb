@@ -731,7 +731,7 @@ module Sidekiq
           next if info.nil?
 
           hash = Sidekiq.load_json(info)
-          yield Process.new(hash.merge('busy' => busy.to_i, 'beat' => at_s.to_f, 'quiet' => quiet))
+          yield Process.new(hash.merge('busy' => busy.to_i, 'beat' => at_s.to_f, 'quiet' => quiet)), leader
         end
       end
 
@@ -744,6 +744,18 @@ module Sidekiq
     # 60 seconds.
     def size
       Sidekiq.redis { |conn| conn.scard('processes') }
+    end
+
+    # Returns the identity of the current cluster leader or "" if no leader.
+    # This is a Sidekiq Enterprise feature, will always return "" in Sidekiq
+    # or Sidekiq Pro.
+    def leader
+      @leader ||= begin
+        x = Sidekiq.redis {|c| c.get("dear-leader") }
+        # need a non-falsy value so we can memoize
+        x = "" unless x
+        x
+      end
     end
   end
 
@@ -779,6 +791,10 @@ module Sidekiq
       @attribs[key]
     end
 
+    def identity
+      self['identity']
+    end
+
     def quiet!
       signal('TSTP')
     end
@@ -807,9 +823,6 @@ module Sidekiq
       end
     end
 
-    def identity
-      self['identity']
-    end
   end
 
   ##
