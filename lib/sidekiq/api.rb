@@ -146,11 +146,11 @@ module Sidekiq
       end
 
       def processed
-        date_stat_hash("processed")
+        @processed ||= date_stat_hash("processed")
       end
 
       def failed
-        date_stat_hash("failed")
+        @failed ||= date_stat_hash("failed")
       end
 
       private
@@ -169,10 +169,15 @@ module Sidekiq
           i += 1
         end
 
-        Sidekiq.redis do |conn|
-          conn.mget(keys).each_with_index do |value, idx|
-            stat_hash[dates[idx]] = value ? value.to_i : 0
+        begin
+          Sidekiq.redis do |conn|
+            conn.mget(keys).each_with_index do |value, idx|
+              stat_hash[dates[idx]] = value ? value.to_i : 0
+            end
           end
+        rescue Redis::CommandError
+          # mget will trigger a CROSSSLOT error when run against a Cluster
+          # TODO Someone want to add Cluster support?
         end
 
         stat_hash
