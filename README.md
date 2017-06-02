@@ -28,6 +28,7 @@ Sidekiq 3.5.1    | 22ms	| 1257 MB | 125 sec | 800 jobs/sec
 Resque 1.25.2    |  -	  | -       | 420 sec | 240 jobs/sec
 DelayedJob 4.1.1 |  -   | -       | 465 sec | 215 jobs/sec
 
+<small>This benchmark can be found in `bin/sidekiqload`.</small>
 
 Requirements
 -----------------
