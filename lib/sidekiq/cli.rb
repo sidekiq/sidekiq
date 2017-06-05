@@ -82,7 +82,7 @@ module Sidekiq
       raise "You are using Redis v#{ver}, Sidekiq requires Redis v2.8.0 or greater" if ver < '2.8'
 
       # cache process identity
-      opts[:identity] = identity
+      Sidekiq.options[:identity] = identity
 
       # Touch middleware so it isn't lazy loaded by multiple threads, #3043
       Sidekiq.server_middleware
