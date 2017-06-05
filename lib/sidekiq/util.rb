@@ -2,7 +2,6 @@
 require 'socket'
 require 'securerandom'
 require 'sidekiq/exception_handler'
-require 'sidekiq/core_ext'
 
 module Sidekiq
   ##

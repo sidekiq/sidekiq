@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 require 'sidekiq/client'
-require 'sidekiq/core_ext'
 
 module Sidekiq
 
