@@ -40,6 +40,8 @@ module Sidekiq
       initialize_logger
       validate!
       daemonize
+      # Cache identity *after* daemonization since identity is tied to PID.
+      options[:identity] ||= identity
       write_pid
     end
 
@@ -213,7 +215,6 @@ module Sidekiq
 
       opts[:strict] = true if opts[:strict].nil?
       opts[:concurrency] = Integer(ENV["RAILS_MAX_THREADS"]) if !opts[:concurrency] && ENV["RAILS_MAX_THREADS"]
-      opts[:identity] = identity
 
       options.merge!(opts)
     end
