@@ -81,6 +81,9 @@ module Sidekiq
       ver = Sidekiq.redis_info['redis_version']
       raise "You are using Redis v#{ver}, Sidekiq requires Redis v2.8.0 or greater" if ver < '2.8'
 
+      # cache process identity
+      opts[:identity] = identity
+
       # Touch middleware so it isn't lazy loaded by multiple threads, #3043
       Sidekiq.server_middleware
 
@@ -223,7 +226,6 @@ module Sidekiq
 
       opts[:strict] = true if opts[:strict].nil?
       opts[:concurrency] = Integer(ENV["RAILS_MAX_THREADS"]) if !opts[:concurrency] && ENV["RAILS_MAX_THREADS"]
-      opts[:identity] = identity
 
       options.merge!(opts)
     end

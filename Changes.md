@@ -5,6 +5,7 @@
 HEAD
 -----------
 
+- Fix incorrect server identity when daemonizing [jwilm, #3496]
 - Work around error running Web UI against Redis Cluster [#3492]
 - Remove core extensions, Sidekiq is now monkeypatch-free! [#3474]
 - Reimplement Web UI's HTTP\_ACCEPT\_LANGUAGE parsing because the spec is utterly
