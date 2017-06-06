@@ -7,7 +7,7 @@ class TestRetryExhausted < Sidekiq::Test
     class NewWorker
       include Sidekiq::Worker
 
-      class_attribute :exhausted_called, :exhausted_job, :exhausted_exception
+      sidekiq_class_attribute :exhausted_called, :exhausted_job, :exhausted_exception
 
       sidekiq_retries_exhausted do |job, e|
         self.exhausted_called = true
@@ -19,7 +19,7 @@ class TestRetryExhausted < Sidekiq::Test
     class OldWorker
       include Sidekiq::Worker
 
-      class_attribute :exhausted_called, :exhausted_job, :exhausted_exception
+      sidekiq_class_attribute :exhausted_called, :exhausted_job, :exhausted_exception
 
       sidekiq_retries_exhausted do |job|
         self.exhausted_called = true

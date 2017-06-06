@@ -92,7 +92,7 @@ class TestTesting < Sidekiq::Test
 
     class AttributeWorker
       include Sidekiq::Worker
-      class_attribute :count
+      sidekiq_class_attribute :count
       self.count = 0
       attr_accessor :foo
 
