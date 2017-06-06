@@ -106,7 +106,7 @@ class TestFake < Sidekiq::Test
 
     class SpecificJidWorker
       include Sidekiq::Worker
-      class_attribute :count
+      sidekiq_class_attribute :count
       self.count = 0
       def perform(worker_jid)
         return unless worker_jid == self.jid
@@ -161,7 +161,7 @@ class TestFake < Sidekiq::Test
 
     class FirstWorker
       include Sidekiq::Worker
-      class_attribute :count
+      sidekiq_class_attribute :count
       self.count = 0
       def perform
         self.class.count += 1
@@ -170,7 +170,7 @@ class TestFake < Sidekiq::Test
 
     class SecondWorker
       include Sidekiq::Worker
-      class_attribute :count
+      sidekiq_class_attribute :count
       self.count = 0
       def perform
         self.class.count += 1
@@ -179,7 +179,7 @@ class TestFake < Sidekiq::Test
 
     class ThirdWorker
       include Sidekiq::Worker
-      class_attribute :count
+      sidekiq_class_attribute :count
       def perform
         FirstWorker.perform_async
         SecondWorker.perform_async
