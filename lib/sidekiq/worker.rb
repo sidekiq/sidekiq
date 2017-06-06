@@ -27,9 +27,7 @@ module Sidekiq
       raise ArgumentError, "You cannot include Sidekiq::Worker in an ActiveJob: #{base.name}" if base.ancestors.any? {|c| c.name == 'ActiveJob::Base' }
 
       base.extend(ClassMethods)
-      base.class_attribute :sidekiq_options_hash
-      base.class_attribute :sidekiq_retry_in_block
-      base.class_attribute :sidekiq_retries_exhausted_block
+      base.class_attribute [ :sidekiq_options_hash, :sidekiq_retry_in_block, :sidekiq_retries_exhausted_block ]
     end
 
     def logger
