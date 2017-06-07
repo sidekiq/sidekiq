@@ -4,7 +4,9 @@
 
 HEAD
 -----------
-- Fix overriding `class_attribute` core extension from ActiveSupport with Sidekiq one
+
+- Fix overriding `class_attribute` core extension from ActiveSupport with Sidekiq one [PikachuEXE, #3499]
+- Allow job logger to be overridden [AlfonsoUceda, #3502]
 
 5.0.2
 -----------

@@ -275,9 +275,9 @@ class TestProcessor < Sidekiq::Test
 
       before do
         @mgr = Minitest::Mock.new
-        @mgr.expect(:options, {:queues => ['default'], :job_logger_class => CustomJobLogger})
-        @mgr.expect(:options, {:queues => ['default'], :job_logger_class => CustomJobLogger})
-        @mgr.expect(:options, {:queues => ['default'], :job_logger_class => CustomJobLogger})
+        @mgr.expect(:options, {:queues => ['default'], :job_logger => CustomJobLogger})
+        @mgr.expect(:options, {:queues => ['default'], :job_logger => CustomJobLogger})
+        @mgr.expect(:options, {:queues => ['default'], :job_logger => CustomJobLogger})
         @processor = ::Sidekiq::Processor.new(@mgr)
       end
 
