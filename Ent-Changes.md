@@ -4,10 +4,10 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+1.6.0
 -------------
 
-- Show process "leader" tag on Busy page, requires Sidekiq 5.0.1 [#2867]
+- Show process "leader" tag on Busy page, requires Sidekiq 5.0.2 [#2867]
 - Capture custom metrics with the `save_history` API. [#2815]
 - Implement new `unique_util: 'start'` policy option. [#3471]
 
