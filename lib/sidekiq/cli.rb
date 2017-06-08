@@ -40,6 +40,8 @@ module Sidekiq
       initialize_logger
       validate!
       daemonize
+      # Cache identity *after* daemonization since identity is tied to PID.
+      options[:identity] ||= identity
       write_pid
     end
 
