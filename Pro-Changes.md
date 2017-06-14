@@ -4,6 +4,12 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+3.5.1
+---------
+
+- Work with Sidekiq 5.0.2+
+- Improve performance of super\_fetch with weighted queues [#3489]
+
 3.5.0
 ---------
 
