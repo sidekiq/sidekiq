@@ -8,6 +8,7 @@ class TestRedisConnection < Sidekiq::Test
     it "creates a pooled redis connection" do
       pool = Sidekiq::RedisConnection.create
       assert_equal Redis, pool.checkout.class
+      assert_equal "Sidekiq-server-PID-#{$$}", pool.checkout.client.id
     end
 
     describe "network_timeout" do
@@ -48,13 +49,15 @@ class TestRedisConnection < Sidekiq::Test
       it "uses a given :path" do
         pool = Sidekiq::RedisConnection.create(:path => "/var/run/redis.sock")
         assert_equal "unix", pool.checkout.client.scheme
-        assert_equal "redis:///var/run/redis.sock/0", pool.checkout.client.id
+        assert_equal "/var/run/redis.sock", pool.checkout.client.location
+        assert_equal 0, pool.checkout.client.db
       end
 
       it "uses a given :path and :db" do
         pool = Sidekiq::RedisConnection.create(:path => "/var/run/redis.sock", :db => 8)
         assert_equal "unix", pool.checkout.client.scheme
-        assert_equal "redis:///var/run/redis.sock/8", pool.checkout.client.id
+        assert_equal "/var/run/redis.sock", pool.checkout.client.location
+        assert_equal 8, pool.checkout.client.db
       end
     end
 
