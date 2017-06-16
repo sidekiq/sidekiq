@@ -2,11 +2,13 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
-HEAD
+5.0.3
 -----------
 
 - Fix overriding `class_attribute` core extension from ActiveSupport with Sidekiq one [PikachuEXE, #3499]
 - Allow job logger to be overridden [AlfonsoUceda, #3502]
+- Set a default Redis client identifier for debugging [#3516]
+- Fix "Uninitialized constant" errors on startup with the delayed extensions [#3509]
 
 5.0.2
 -----------
