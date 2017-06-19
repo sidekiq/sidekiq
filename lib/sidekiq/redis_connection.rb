@@ -101,7 +101,15 @@ module Sidekiq
       end
 
       def determine_redis_provider
-        ENV[ENV['REDIS_PROVIDER'] || 'REDIS_URL']
+        # If you have this in your environment:
+        # MY_REDIS_URL=redis://hostname.example.com:1238/4
+        # then set:
+        # REDIS_PROVIDER=MY_REDIS_URL
+        # and Sidekiq will find your custom URL variable with no custom
+        # initialization code at all.
+        ENV[
+          ENV['REDIS_PROVIDER'] || 'REDIS_URL'
+        ]
       end
 
     end
