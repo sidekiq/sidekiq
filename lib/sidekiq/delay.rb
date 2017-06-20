@@ -24,6 +24,7 @@ module Sidekiq
 
     module PsychAutoload
       def resolve_class(klass_name)
+        return klass_name unless klass_name
         # constantize
         names = klass_name.split('::')
         names.shift if names.empty? || names.first.empty?
