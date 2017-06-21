@@ -11,6 +11,12 @@ class TestRedisConnection < Sidekiq::Test
       assert_equal "Sidekiq-server-PID-#{$$}", pool.checkout.client.id
     end
 
+    it "disables client setname with nil id" do
+      pool = Sidekiq::RedisConnection.create(:id => nil)
+      assert_equal Redis, pool.checkout.class
+      assert_equal "redis://127.0.0.1:6379/0", pool.checkout.client.id
+    end
+
     describe "network_timeout" do
       it "sets a custom network_timeout if specified" do
         pool = Sidekiq::RedisConnection.create(:network_timeout => 8)

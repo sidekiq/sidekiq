@@ -12,7 +12,7 @@ module Sidekiq
           options[key.to_sym] = options.delete(key)
         end
 
-        options[:id] ||= "Sidekiq-#{Sidekiq.server? ? "server" : "client"}-PID-#{$$}"
+        options[:id] = "Sidekiq-#{Sidekiq.server? ? "server" : "client"}-PID-#{$$}" if !options.has_key?(:id)
         options[:url] ||= determine_redis_provider
 
         size = options[:size] || (Sidekiq.server? ? (Sidekiq.options[:concurrency] + 5) : 5)
