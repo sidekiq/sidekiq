@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'sidekiq/extensions/generic_proxy'
+require 'sidekiq/extensions/ar_proxy'
 
 module Sidekiq
   module Extensions
@@ -17,19 +17,22 @@ module Sidekiq
 
       def perform(yml)
         (target, method_name, args) = YAML.load(yml)
-        target.__send__(method_name, *args)
+        model_class, id = target
+        real_target = model_class.where(model_class.primary_key => id).first
+        return unless real_target
+        real_target.__send__(method_name, *args)
       end
     end
 
     module ActiveRecord
       def sidekiq_delay(options={})
-        Proxy.new(DelayedModel, self, options)
+        ArProxy.new(DelayedModel, self, options)
       end
       def sidekiq_delay_for(interval, options={})
-        Proxy.new(DelayedModel, self, options.merge('at' => Time.now.to_f + interval.to_f))
+        ArProxy.new(DelayedModel, self, options.merge('at' => Time.now.to_f + interval.to_f))
       end
       def sidekiq_delay_until(timestamp, options={})
-        Proxy.new(DelayedModel, self, options.merge('at' => timestamp.to_f))
+        ArProxy.new(DelayedModel, self, options.merge('at' => timestamp.to_f))
       end
       alias_method :delay, :sidekiq_delay
       alias_method :delay_for, :sidekiq_delay_for
