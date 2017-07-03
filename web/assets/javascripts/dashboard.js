@@ -89,6 +89,8 @@ var realtimeGraph = function(updatePath) {
 
   var i = 0;
   poller = setInterval(function() {
+    if (document.hidden) return;
+
     $.getJSON($("#history").data("update-url"), function(data) {
 
       if (i === 0) {
