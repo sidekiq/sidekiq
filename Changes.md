@@ -6,6 +6,7 @@
 -----------
 
 - Fix "slow startup" performance regression from 5.0.2. [#3525]
+- Allow users to disable ID generation since some redis providers disable the CLIENT command. [#3521]
 
 5.0.3
 -----------
