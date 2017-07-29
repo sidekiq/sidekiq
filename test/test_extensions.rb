@@ -110,6 +110,11 @@ class TestExtensions < Sidekiq::Test
       assert_equal 1, q.size
     end
 
+    it 'allows Psych to serialize anonymous structs' do
+      obj = Struct.new(:attribute).new(my: 'data')
+
+      assert_equal obj.attribute, Psych.load(Psych.dump(obj)).attribute
+    end
   end
 
 end
