@@ -4,7 +4,7 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+3.5.2
 ---------
 
 - Fix `Status#completed?` when run against a Batch that had succeeded
