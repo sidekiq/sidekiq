@@ -148,7 +148,7 @@ module Sidekiq
     end
 
     def redis_connection
-      Sidekiq.redis { |conn| conn.client.id }
+      Sidekiq.redis { |conn| "redis://#{conn.client.location}/#{conn.client.db}" }
     end
 
     def namespace
