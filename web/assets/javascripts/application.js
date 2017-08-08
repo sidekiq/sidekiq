@@ -56,6 +56,8 @@ function updateFuzzyTimes(locale) {
 
 function updatePage(url) {
   setInterval(function () {
+    if (document.hidden) return;
+
     $.ajax({
       url: url,
       dataType: 'html'
