@@ -6,7 +6,7 @@
 :verbose: false
 :concurrency: 10
 
-# Set timeout to 8 on Heroku, longer if you manage your own systems.
+# Set timeout to 28 on Heroku, longer if you manage your own systems.
 :timeout: 30
 
 # Sidekiq will run this file through ERB when reading it so you can

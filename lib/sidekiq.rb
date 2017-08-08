@@ -21,7 +21,7 @@ module Sidekiq
     concurrency: 25,
     require: '.',
     environment: nil,
-    timeout: 8,
+    timeout: 28,
     poll_interval_average: nil,
     average_scheduled_poll_interval: 15,
     error_handlers: [],
