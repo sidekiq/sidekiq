@@ -159,7 +159,7 @@ module Sidekiq
           job_hash = Sidekiq.load_json(jobstr)
         rescue => ex
           handle_exception(ex, { :context => "Invalid JSON for job", :jobstr => jobstr })
-          send_to_morgue(jobstr)
+          DeadSet.new.kill(jobstr)
           ack = true
           raise
         end
@@ -181,17 +181,6 @@ module Sidekiq
         raise e
       ensure
         work.acknowledge if ack
-      end
-    end
-
-    def send_to_morgue(msg)
-      now = Time.now.to_f
-      Sidekiq.redis do |conn|
-        conn.multi do
-          conn.zadd('dead', now, msg)
-          conn.zremrangebyscore('dead', '-inf', now - DeadSet.timeout)
-          conn.zremrangebyrank('dead', 0, -DeadSet.max_jobs)
-        end
       end
     end
 

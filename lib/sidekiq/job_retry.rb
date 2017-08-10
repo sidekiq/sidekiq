@@ -184,14 +184,7 @@ module Sidekiq
     def send_to_morgue(msg)
       Sidekiq.logger.info { "Adding dead #{msg['class']} job #{msg['jid']}" }
       payload = Sidekiq.dump_json(msg)
-      now = Time.now.to_f
-      Sidekiq.redis do |conn|
-        conn.multi do
-          conn.zadd('dead', now, payload)
-          conn.zremrangebyscore('dead', '-inf', now - DeadSet.timeout)
-          conn.zremrangebyrank('dead', 0, -DeadSet.max_jobs)
-        end
-      end
+      DeadSet.new.kill(payload)
     end
 
     def retry_attempts_from(msg_retry, default)
