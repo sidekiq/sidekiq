@@ -458,14 +458,7 @@ module Sidekiq
     # Place job in the dead set
     def kill
       remove_job do |message|
-        now = Time.now.to_f
-        Sidekiq.redis do |conn|
-          conn.multi do
-            conn.zadd('dead', now, message)
-            conn.zremrangebyscore('dead', '-inf', now - DeadSet.timeout)
-            conn.zremrangebyrank('dead', 0, - DeadSet.max_jobs)
-          end
-        end
+        DeadSet.new.kill(message)
       end
     end
 
@@ -661,6 +654,17 @@ module Sidekiq
   class DeadSet < JobSet
     def initialize
       super 'dead'
+    end
+
+    def kill(message)
+      now = Time.now.to_f
+      Sidekiq.redis do |conn|
+        conn.multi do
+          conn.zadd(name, now.to_s, message)
+          conn.zremrangebyscore(name, '-inf', now - self.class.timeout)
+          conn.zremrangebyrank(name, 0, - self.class.max_jobs)
+        end
+      end
     end
 
     def retry_all
