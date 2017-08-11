@@ -51,7 +51,10 @@ module Sidekiq
     #   at - timestamp to schedule the job (optional), must be Numeric (e.g. Time.now.to_f)
     #   retry - whether to retry this job if it fails, default true or an integer number of retries
     #   backtrace - whether to save any error backtrace, default false
-    # 
+    #
+    # If class is set to the class name, the jobs' options will be based on Sidekiq's default
+    # worker options. Otherwise, they will be based on the job class's options.
+    #
     # Any options valid for a worker class's sidekiq_options are also available here.
     #
     # All options must be strings, not symbols.  NB: because we are serializing to JSON, all
