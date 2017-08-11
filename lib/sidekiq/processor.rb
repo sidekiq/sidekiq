@@ -126,7 +126,7 @@ module Sidekiq
       pristine = cloned(job_hash)
 
       Sidekiq::Logging.with_job_hash_context(job_hash) do
-        @retrier.global(job_hash, queue) do
+        @retrier.global(pristine, queue) do
           @logging.call(job_hash, queue) do
             stats(pristine, queue) do
               # Rails 5 requires a Reloader to wrap code execution.  In order to
@@ -137,7 +137,7 @@ module Sidekiq
                 klass  = constantize(job_hash['class'.freeze])
                 worker = klass.new
                 worker.jid = job_hash['jid'.freeze]
-                @retrier.local(worker, job_hash, queue) do
+                @retrier.local(worker, pristine, queue) do
                   yield worker
                 end
               end

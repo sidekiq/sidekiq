@@ -21,7 +21,7 @@ class TestProcessor < Sidekiq::Test
     class MockWorker
       include Sidekiq::Worker
       def perform(args)
-        raise TEST_EXCEPTION if args == 'boom'
+        raise TEST_EXCEPTION if args.to_s == 'boom'
         args.pop if args.is_a? Array
         $invokes += 1
       end
@@ -220,6 +220,67 @@ class TestProcessor < Sidekiq::Test
           work.expect(:acknowledge, nil)
           @mgr.expect(:processor_done, nil, [@processor])
           @processor.process(work)
+        end
+      end
+    end
+
+    describe 'retry' do
+      class ArgsMutatingServerMiddleware
+        def call(worker, item, queue)
+          item['args'] = item['args'].map do |arg|
+            arg.to_sym if arg.is_a?(String)
+          end
+          yield
+        end
+      end
+
+      class ArgsMutatingClientMiddleware
+        def call(worker, item, queue, redis_pool)
+          item['args'] = item['args'].map do |arg|
+            arg.to_s if arg.is_a?(Symbol)
+          end
+          yield
+        end
+      end
+
+      before do
+        Sidekiq.server_middleware do |chain|
+          chain.prepend ArgsMutatingServerMiddleware
+        end
+        Sidekiq.client_middleware do |chain|
+          chain.prepend ArgsMutatingClientMiddleware
+        end
+      end
+
+      after do
+        Sidekiq.server_middleware do |chain|
+          chain.remove ArgsMutatingServerMiddleware
+        end
+        Sidekiq.client_middleware do |chain|
+          chain.remove ArgsMutatingClientMiddleware
+        end
+      end
+
+      describe 'middleware mutates the job args and then fails' do
+        it 'requeues with original arguments' do
+          job_data = { 'class' => MockWorker.to_s, 'args' => ['boom'] }
+
+          retry_stub_called = false
+          retry_stub = lambda { |worker, msg, queue, exception|
+            retry_stub_called = true
+            assert_equal 'boom', msg['args'].first
+          }
+
+          @processor.instance_variable_get('@retrier').stub(:attempt_retry, retry_stub) do
+            msg = Sidekiq.dump_json(job_data)
+            begin
+              @processor.process(work(msg))
+              flunk "Expected exception"
+            rescue TestException
+            end
+          end
+
+          assert retry_stub_called
         end
       end
     end
