@@ -34,6 +34,7 @@ module Sidekiq
     dead_timeout_in_seconds: 180 * 24 * 60 * 60, # 6 months
     reloader: proc { |&block| block.call },
     executor: proc { |&block| block.call },
+    heartbeat_expiration: 60,
   }
 
   DEFAULT_WORKER_OPTIONS = {
@@ -185,6 +186,10 @@ module Sidekiq
   end
   def self.logger=(log)
     Sidekiq::Logging.logger = log
+  end
+
+  def self.heartbeat_expiration=(timeout)
+    self.options[:heartbeat_expiration] = timeout
   end
 
   # How frequently Redis should be checked by a random Sidekiq process for
