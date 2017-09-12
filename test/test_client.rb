@@ -240,6 +240,19 @@ class TestClient < Sidekiq::Test
       Sidekiq.redis {|c| c.flushdb }
     end
 
+    it 'can be memoized' do
+      q = Sidekiq::Queue.new('bar')
+      assert_equal 0, q.size
+      set = SetWorker.set(queue: :bar, foo: 'qaaz')
+      set.perform_async(1)
+      set.perform_async(1)
+      set.perform_async(1)
+      set.perform_async(1)
+      assert_equal 4, q.size
+      assert_equal 4, q.map{|j| j['jid'] }.uniq.size
+      set.perform_in(10, 1)
+    end
+
     it 'allows option overrides' do
       q = Sidekiq::Queue.new('bar')
       assert_equal 0, q.size

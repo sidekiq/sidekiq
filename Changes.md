@@ -5,6 +5,7 @@
 HEAD
 -----------
 
+- Refactor Worker.set so it can be memoized [#3602]
 - Fix display of Redis URL in web footer, broken in 5.0.3 [#3560]
 
 5.0.4

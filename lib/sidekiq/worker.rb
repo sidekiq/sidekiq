@@ -41,12 +41,13 @@ module Sidekiq
     #     SomeWorker.set(queue: 'foo').perform_async(....)
     #
     class Setter
-      def initialize(opts)
+      def initialize(klass, opts)
+        @klass = klass
         @opts = opts
       end
 
       def perform_async(*args)
-        @opts['class'.freeze].client_push(@opts.merge!('args'.freeze => args))
+        @klass.client_push(@opts.merge('args'.freeze => args, 'class'.freeze => @klass))
       end
 
       # +interval+ must be a timestamp, numeric or something that acts
@@ -56,10 +57,10 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        @opts.merge! 'args'.freeze => args, 'at'.freeze => ts
+        payload = @opts.merge('class'.freeze => @klass, 'args'.freeze => args, 'at'.freeze => ts)
         # Optimization to enqueue something now that is scheduled to go out now or in the past
-        @opts.delete('at'.freeze) if ts <= now
-        @opts['class'.freeze].client_push(@opts)
+        payload.delete('at'.freeze) if ts <= now
+        @klass.client_push(payload)
       end
       alias_method :perform_at, :perform_in
     end
@@ -79,7 +80,7 @@ module Sidekiq
       end
 
       def set(options)
-        Setter.new(options.merge!('class'.freeze => self))
+        Setter.new(self, options)
       end
 
       def perform_async(*args)
