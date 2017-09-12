@@ -4,6 +4,13 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Restore error check for super\_fetch's job ack [#3601]
+- Trim error messages saved in Batch's failure hash, preventing huge
+  messages from bloating Redis. [#3570]
+
 3.5.2
 ---------
 
