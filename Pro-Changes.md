@@ -4,7 +4,7 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+3.5.3
 ---------
 
 - Restore error check for super\_fetch's job ack [#3601]

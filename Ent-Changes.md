@@ -4,6 +4,11 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+1.6.1
+-------------
+
+- Fix crash in rate limiter middleware when used with custom exceptions [#3604]
+
 1.6.0
 -------------
 
