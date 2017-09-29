@@ -8,6 +8,9 @@ gem 'minitest'
 #gem 'minitest-utils'
 gem 'toxiproxy'
 
+# For Redis 4.0 support. Unreleased 9cb81bf.
+gem 'redis-namespace', git: 'https://github.com/resque/redis-namespace'
+
 platforms :rbx do
   gem 'rubysl', '~> 2.0'         # if using anything in the ruby standard library
   gem 'psych'                    # if using yaml
