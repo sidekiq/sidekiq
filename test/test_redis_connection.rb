@@ -5,16 +5,25 @@ class TestRedisConnection < Sidekiq::Test
 
   describe ".create" do
 
+    # To support both redis-rb 3.3.x #client and 4.0.x #_client
+    def client_for(redis)
+      if redis.respond_to?(:_client)
+        redis._client
+      else
+        redis.client
+      end
+    end
+
     it "creates a pooled redis connection" do
       pool = Sidekiq::RedisConnection.create
       assert_equal Redis, pool.checkout.class
-      assert_equal "Sidekiq-server-PID-#{$$}", pool.checkout.client.id
+      assert_equal "Sidekiq-server-PID-#{$$}", pool.checkout.connection.fetch(:id)
     end
 
     it "disables client setname with nil id" do
       pool = Sidekiq::RedisConnection.create(:id => nil)
       assert_equal Redis, pool.checkout.class
-      assert_equal "redis://127.0.0.1:6379/0", pool.checkout.client.id
+      assert_equal "redis://127.0.0.1:6379/0", pool.checkout.connection.fetch(:id)
     end
 
     describe "network_timeout" do
@@ -22,14 +31,14 @@ class TestRedisConnection < Sidekiq::Test
         pool = Sidekiq::RedisConnection.create(:network_timeout => 8)
         redis = pool.checkout
 
-        assert_equal 8, redis.client.timeout
+        assert_equal 8, client_for(redis).timeout
       end
 
       it "uses the default network_timeout if none specified" do
         pool = Sidekiq::RedisConnection.create
         redis = pool.checkout
 
-        assert_equal 5, redis.client.timeout
+        assert_equal 5, client_for(redis).timeout
       end
     end
 
@@ -54,16 +63,16 @@ class TestRedisConnection < Sidekiq::Test
     describe "socket path" do
       it "uses a given :path" do
         pool = Sidekiq::RedisConnection.create(:path => "/var/run/redis.sock")
-        assert_equal "unix", pool.checkout.client.scheme
-        assert_equal "/var/run/redis.sock", pool.checkout.client.location
-        assert_equal 0, pool.checkout.client.db
+        assert_equal "unix", client_for(pool.checkout).scheme
+        assert_equal "/var/run/redis.sock", pool.checkout.connection.fetch(:location)
+        assert_equal 0, pool.checkout.connection.fetch(:db)
       end
 
       it "uses a given :path and :db" do
         pool = Sidekiq::RedisConnection.create(:path => "/var/run/redis.sock", :db => 8)
-        assert_equal "unix", pool.checkout.client.scheme
-        assert_equal "/var/run/redis.sock", pool.checkout.client.location
-        assert_equal 8, pool.checkout.client.db
+        assert_equal "unix", client_for(pool.checkout).scheme
+        assert_equal "/var/run/redis.sock", pool.checkout.connection.fetch(:location)
+        assert_equal 8, pool.checkout.connection.fetch(:db)
       end
     end
 
