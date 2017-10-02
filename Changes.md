@@ -2,12 +2,13 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
-HEAD
+5.0.5
 -----------
 
 - Update gemspec to allow newer versions of the Redis gem [#3617]
 - Refactor Worker.set so it can be memoized [#3602]
 - Fix display of Redis URL in web footer, broken in 5.0.3 [#3560]
+- Update `Sidekiq::Job#display_args` to avoid mutation [#3621]
 
 5.0.4
 -----------
