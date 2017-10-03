@@ -318,7 +318,7 @@ module Sidekiq
       @klass ||= case klass
                  when /\ASidekiq::Extensions::Delayed/
                    safe_load(args[0], klass) do |target, method, _|
-                     "#{target}.#{method}"
+                     "#{target}##{method}"
                    end
                  when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
                    job_class = @item['wrapped'] || args[0]
