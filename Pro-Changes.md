@@ -4,6 +4,13 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Fix edge case in Batch::Status#poll leading to premature completion [#3640]
+- Adjust scan API to check 100 elements at a time, to minimize network round trips
+  when scanning large sets.
+
 3.5.3
 ---------
 
