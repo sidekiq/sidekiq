@@ -6478,7 +6478,7 @@ footer {
     padding-bottom: 60px;
     margin: 0;
     text-align: left;
-    background-color: #555;
+    background-color: #777;
     box-shadow: none;
     background-image: url('../img/red-kicker.svg');
     background-size: auto 50px;
@@ -6495,10 +6495,10 @@ footer hr {
 footer a {
     font-family: "Montserrat", Helvetica, Arial, sans-serif;
     line-height: 2em;
-    color: #222
+    color: #111
 }
 footer a:hover {
-    color: #999;
+    color: #ccc;
     text-decoration: none
 }
 footer a .glyphicon {
@@ -6518,10 +6518,10 @@ footer .skq-footer-logo {
 }
 footer small {
     font-family: "Montserrat", Helvetica, Arial, sans-serif;
-    color: #999
+    color: #ccc
 }
 footer small a {
-    color: #999
+    color: #ccc
 }
 footer small a:hover {
     text-decoration: underline
