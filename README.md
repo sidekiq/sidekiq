@@ -77,6 +77,8 @@ Problems?
 If you have a problem, please review the [FAQ](https://github.com/mperham/sidekiq/wiki/FAQ) and [Troubleshooting](https://github.com/mperham/sidekiq/wiki/Problems-and-Troubleshooting) wiki pages.
 Searching the [issues](https://github.com/mperham/sidekiq/issues) for your problem is also a good idea.
 
+Sidekiq Pro and Sidekiq Enterprise customers get private email support.  You can purchase at http://sidekiq.org; email support@contribsys.com for help.
+
 Useful resources:
 
 * Product documentation is in the [wiki](https://github.com/mperham/sidekiq/wiki).
