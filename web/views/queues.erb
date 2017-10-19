@@ -5,6 +5,7 @@
     <thead>
       <th><%= t('Queue') %></th>
       <th><%= t('Size') %></th>
+      <th><%= t('Latency') %></th>
       <th><%= t('Actions') %></th>
     </thead>
     <% @queues.each do |queue| %>
@@ -16,6 +17,7 @@
           <% end %>
         </td>
         <td><%= number_with_delimiter(queue.size) %> </td>
+        <td><%= number_with_delimiter(queue.latency.round(2)) %> </td>
         <td class="delete-confirm">
           <form action="<%=root_path %>queues/<%= CGI.escape(queue.name) %>" method="post">
             <%= csrf_tag %>
