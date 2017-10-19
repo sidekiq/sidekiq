@@ -29,6 +29,7 @@ es:
   AreYouSureDeleteQueue: ¿Estás seguro de eliminar la fila  %{queue}?
   Queues: Filas
   Size: Tamaño
+  Latency: Latencia
   Actions: Acciones
   NextRetry: Siguiente Intento
   RetryCount: Numero de Reintentos
