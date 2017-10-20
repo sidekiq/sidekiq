@@ -6,7 +6,3 @@ Rake::TestTask.new(:test) do |test|
 end
 
 task :default => :test
-
-task :appraise do
-  exec("cd myapp && rake appraise")
-end
