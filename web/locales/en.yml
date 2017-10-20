@@ -29,7 +29,6 @@ en: # <---- change this to your locale code
   AreYouSureDeleteQueue: Are you sure you want to delete the %{queue} queue?
   Queues: Queues
   Size: Size
-  Latency: Latency
   Actions: Actions
   NextRetry: Next Retry
   RetryCount: Retry Count
@@ -78,3 +77,4 @@ en: # <---- change this to your locale code
   NotYetEnqueued: Not yet enqueued
   CreatedAt: Created At
   BackToApp: Back to App
+  Latency: Latency
