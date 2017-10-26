@@ -49,3 +49,9 @@ module Sidekiq
     end
   end if defined?(::Rails)
 end
+
+if defined?(::Rails) && ::Rails::VERSION::MAJOR < 4
+  $stderr.puts("**************************************************")
+  $stderr.puts("⛔️ WARNING: Sidekiq server is no longer supported by Rails 3.2 - please ensure your server/workers are updated")
+  $stderr.puts("**************************************************")
+end
