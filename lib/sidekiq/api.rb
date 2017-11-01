@@ -548,7 +548,7 @@ module Sidekiq
         end
         break if elements.empty?
         page -= 1
-        elements.each do |element, score|
+        elements.reverse.each do |element, score|
           yield SortedEntry.new(self, score, element)
         end
         offset_size = initial_size - @_size
