@@ -230,6 +230,16 @@ class TestApi < Sidekiq::Test
         assert_equal 0, q.size
       end
 
+      it 'enumerates jobs in descending score order' do
+        # We need to enqueue more than 50 items, which is the page size when retrieving
+        # from Redis to ensure everything is sorted: the pages and the items withing them.
+        51.times { ApiWorker.perform_in(100, 1, 'foo') }
+
+        set = Sidekiq::ScheduledSet.new.to_a
+
+        assert_equal set.sort_by { |job| -job.score }, set
+      end
+
       it 'has no enqueued_at time for jobs enqueued in the future' do
         job_id = ApiWorker.perform_in(100, 1, 'foo')
         job = Sidekiq::ScheduledSet.new.find_job(job_id)
