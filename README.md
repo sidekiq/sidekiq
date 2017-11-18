@@ -85,7 +85,7 @@ Useful resources:
 * Release announcements are made to the [@sidekiq](https://twitter.com/sidekiq) Twitter account.
 * The [Sidekiq tag](https://stackoverflow.com/questions/tagged/sidekiq) on Stack Overflow has lots of useful Q &amp; A.
 
-**No support via Twitter, 140 characters is not enough.**
+**No support via Twitter**
 
 Every Friday morning is Sidekiq happy hour: I video chat and answer questions.
 See the [Sidekiq support page](http://sidekiq.org/support.html) for details.
