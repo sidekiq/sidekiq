@@ -69,8 +69,8 @@ class TestProcessor < Sidekiq::Test
     describe 'exception handling' do
       let(:errors) { [] }
       let(:error_handler) do
-        proc do |exception, context|
-          errors << { exception: exception, context: context }
+        proc do |exception, context, options={}|
+          errors << { exception: exception, context: context, options: options }
         end
       end
 
@@ -127,6 +127,19 @@ class TestProcessor < Sidekiq::Test
         assert_instance_of TestException, errors.first[:exception]
         assert_equal msg, errors.first[:context][:jobstr]
         assert_equal job_hash, errors.first[:context][:job]
+      end
+
+      it 'handles exceptions raised during fetch' do
+        fetch_stub = lambda { raise StandardError, "fetch exception" }
+        # swallow logging because actually care about the added exception handler
+        capture_logging do
+          @processor.instance_variable_get('@strategy').stub(:retrieve_work, fetch_stub) do
+            @processor.process_one
+          end
+        end
+
+        assert_instance_of StandardError, errors.last[:exception]
+        assert_equal :error, errors.last[:options][:level]
       end
     end
 
