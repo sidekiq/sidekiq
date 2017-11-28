@@ -24,7 +24,13 @@ module Sidekiq
     def handle_exception(ex, ctxHash={}, options={})
       Sidekiq.error_handlers.each do |handler|
         begin
-          handler.call(ex, ctxHash, options)
+          arity = handler.method(:call).arity
+          # new-style three argument method or fully variable arguments
+          if arity == -3 || arity == -1
+            handler.call(ex, ctxHash, options)
+          else
+            handler.call(ex, ctxHash)
+          end
         rescue => ex
           Sidekiq.logger.error "!!! ERROR HANDLER THREW AN ERROR !!!"
           Sidekiq.logger.error ex
@@ -32,6 +38,5 @@ module Sidekiq
         end
       end
     end
-
   end
 end
