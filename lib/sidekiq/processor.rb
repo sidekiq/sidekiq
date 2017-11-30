@@ -111,7 +111,7 @@ module Sidekiq
       if !@down
         @down = Time.now
         logger.error("Error fetching job: #{ex}")
-        handle_exception(ex, {})
+        handle_exception(ex)
       end
       sleep(1)
       nil

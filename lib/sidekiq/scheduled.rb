@@ -79,7 +79,7 @@ module Sidekiq
           # Most likely a problem with redis networking.
           # Punt and try again at the next interval
           logger.error ex.message
-          handle_exception(ex, {})
+          handle_exception(ex)
         end
       end
 
@@ -93,7 +93,7 @@ module Sidekiq
         # if poll_interval_average hasn't been calculated yet, we can
         # raise an error trying to reach Redis.
         logger.error ex.message
-        handle_exception(ex, {})
+        handle_exception(ex)
         sleep 5
       end
 
