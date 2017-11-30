@@ -69,8 +69,8 @@ class TestProcessor < Sidekiq::Test
     describe 'exception handling' do
       let(:errors) { [] }
       let(:error_handler) do
-        proc do |exception, context, options={}|
-          errors << { exception: exception, context: context, options: options }
+        proc do |exception, context|
+          errors << { exception: exception, context: context }
         end
       end
 
@@ -139,35 +139,6 @@ class TestProcessor < Sidekiq::Test
         end
 
         assert_instance_of StandardError, errors.last[:exception]
-        assert_equal :error, errors.last[:options][:level]
-      end
-
-      class TestHandler
-        attr_reader :count
-
-        def initialize
-          @count = 0
-        end
-
-        def call(exc, ctx)
-          @count += 1
-        end
-      end
-
-      it 'can call two argument exception handlers' do
-        handler = TestHandler.new
-        Sidekiq.error_handlers << handler
-        job_hash = { 'class' => MockWorker.to_s, 'args' => ['boom'] }
-        msg = Sidekiq.dump_json(job_hash)
-        @processor.instance_variable_set(:'@reloader', proc { raise TEST_EXCEPTION })
-        job = work(msg)
-        begin
-          @processor.instance_variable_set(:'@job', job)
-          @processor.process(job)
-        rescue TestException
-        end
-        assert_equal 1, handler.count
-        Sidekiq.error_handlers.pop
       end
     end
 
