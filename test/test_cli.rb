@@ -194,6 +194,24 @@ class TestCli < Sidekiq::Test
       end
     end
 
+    describe 'with config file using string keys' do
+      before do
+        @cli.parse(['sidekiq', '-C', './test/string_config.yml'])
+      end
+
+      it 'parses as expected' do
+        assert_equal './test/string_config.yml', Sidekiq.options[:config_file]
+        refute Sidekiq.options[:verbose]
+        assert_equal './test/fake_env.rb', Sidekiq.options[:require]
+        assert_nil Sidekiq.options[:environment]
+        assert_equal 50, Sidekiq.options[:concurrency]
+        assert_equal '/tmp/sidekiq-config-test.pid', Sidekiq.options[:pidfile]
+        assert_equal '/tmp/sidekiq.log', Sidekiq.options[:logfile]
+        assert_equal 2, Sidekiq.options[:queues].count { |q| q == 'very_often' }
+        assert_equal 1, Sidekiq.options[:queues].count { |q| q == 'seldom' }
+      end
+    end
+
     describe 'with env based config file' do
       before do
         @cli.parse(['sidekiq', '-e', 'staging', '-C', './test/env_based_config.yml'])

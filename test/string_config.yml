@@ -1,0 +1,10 @@
+---
+verbose:      false
+require:      ./test/fake_env.rb
+pidfile:      /tmp/sidekiq-config-test.pid
+logfile:      /tmp/sidekiq.log
+concurrency:  50
+queues:
+  - [<%="very_"%>often, 2]
+  - [seldom, 1]
+
