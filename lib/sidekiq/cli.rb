@@ -214,6 +214,14 @@ module Sidekiq
       @environment = cli_env || ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
     end
 
+    def symbolize_keys_deep!(hash)
+      hash.keys.each do |k|
+        symkey = k.respond_to?(:to_sym) ? k.to_sym : k
+        hash[symkey] = hash.delete k
+        symbolize_keys_deep! hash[symkey] if hash[symkey].kind_of? Hash
+      end
+    end
+
     alias_method :die, :exit
     alias_method :☠, :exit
 
@@ -386,7 +394,14 @@ module Sidekiq
       opts = {}
       if File.exist?(cfile)
         opts = YAML.load(ERB.new(IO.read(cfile)).result) || opts
-        opts = opts.merge(opts.delete(environment) || {})
+
+        if opts.respond_to? :deep_symbolize_keys!
+          opts.deep_symbolize_keys!
+        else
+          symbolize_keys_deep!(opts)
+        end
+
+        opts = opts.merge(opts.delete(environment.to_sym) || {})
         parse_queues(opts, opts.delete(:queues) || [])
       else
         # allow a non-existent config file so Sidekiq
