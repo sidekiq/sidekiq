@@ -4,9 +4,11 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+3.5.4
 ---------
 
+- Fix case in SuperFetch where Redis downtime can lead to processor thread death [#3684]
+- Fix case where TimedFetch might not recover some pending jobs
 - Fix edge case in Batch::Status#poll leading to premature completion [#3640]
 - Adjust scan API to check 100 elements at a time, to minimize network round trips
   when scanning large sets.
