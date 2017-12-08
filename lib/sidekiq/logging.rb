@@ -12,8 +12,7 @@ module Sidekiq
       # Provide a call() method that returns the formatted message.
       def call(severity, time, program_name, message)
         pid = ::Process.pid
-        tid = Thread.current.object_id
-        "#{time.utc.iso8601(3)} #{pid} TID-#{(pid * tid).to_s(36)}#{context} #{severity}: #{message}\n"
+        "#{time.utc.iso8601(3)} #{pid} TID-#{tid(process_id: pid)}#{context} #{severity}: #{message}\n"
       end
 
       def context
@@ -25,8 +24,7 @@ module Sidekiq
     class WithoutTimestamp < Pretty
       def call(severity, time, program_name, message)
         pid = ::Process.pid
-        tid = Thread.current.object_id
-        "#{pid} TID-#{(pid * tid).to_s(36)}#{context} #{severity}: #{message}\n"
+        "#{pid} TID-#{tid(process_id: pid)}#{context} #{severity}: #{message}\n"
       end
     end
 
