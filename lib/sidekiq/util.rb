@@ -46,6 +46,11 @@ module Sidekiq
       @@identity ||= "#{hostname}:#{$$}:#{process_nonce}"
     end
 
+    def tid(thread_id: ::Thread.current.object_id, process_id: ::Process.pid)
+      # Make sure thread ids are unique across forked processes
+      (thread_id ^ process_id).to_s(36)
+    end
+
     def fire_event(event, reverse=false)
       arr = Sidekiq.options[:lifecycle_events][event]
       arr.reverse! if reverse
