@@ -186,16 +186,12 @@ module Sidekiq
       worker.perform(*cloned_args)
     end
 
-    def thread_identity
-      @str ||= Thread.current.object_id.to_s(36)
-    end
-
     WORKER_STATE = Concurrent::Map.new
     PROCESSED = Concurrent::AtomicFixnum.new
     FAILURE = Concurrent::AtomicFixnum.new
 
     def stats(job_hash, queue)
-      tid = thread_identity
+      tid = Sidekiq::Util.tid
       WORKER_STATE[tid] = {:queue => queue, :payload => job_hash, :run_at => Time.now.to_i }
 
       begin
