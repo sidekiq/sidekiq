@@ -4,6 +4,27 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+3.6.0
+---------
+
+This release overhauls the Statsd metrics support and adds more
+metrics for tracking Pro feature usage.  In your initializer:
+```ruby
+Sidekiq::Pro.statsd = ->{ ::Statsd.new("127.0.0.1", 8125) }
+```
+Sidekiq Pro will emit more metrics to Statsd:
+```
+jobs.expired - when a job is expired
+jobs.recovered.push - when a job is recovered by reliable_push after network outage
+jobs.recovered.fetch - when a job is recovered by super_fetch after process crash
+batch.created - when a batch is created
+batch.complete - when a batch is completed
+batch.success - when a batch is successful
+```
+Sidekiq Pro's existing Statsd middleware has been rewritten to leverage the new API.
+Everything should be backwards compatible with one deprecation notice.
+
+
 3.5.4
 ---------
 
