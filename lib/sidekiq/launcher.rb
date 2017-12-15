@@ -3,6 +3,7 @@
 require 'sidekiq/manager'
 require 'sidekiq/fetch'
 require 'sidekiq/scheduled'
+require 'sidekiq/cli'
 
 module Sidekiq
   # The Launcher is a very simple Actor whose job is to
