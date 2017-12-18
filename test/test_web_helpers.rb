@@ -90,9 +90,9 @@ class TestWebHelpers < Sidekiq::Test
     obj = Helpers.new
     expected = %w(
       ar cs da de el en es fa fr he hi it ja
-      ko nb nl pl pt-br pt ru sv ta uk ur
+      ko nb nl pl pt pt-br ru sv ta uk ur
       zh-cn zh-tw
     )
-    assert_equal expected, obj.available_locales
+    assert_equal expected, obj.available_locales.sort
   end
 end
