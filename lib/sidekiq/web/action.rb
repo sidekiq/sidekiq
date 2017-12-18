@@ -77,7 +77,7 @@ module Sidekiq
     private
 
     def _erb(file, locals)
-      locals.each {|k, v| define_singleton_method(k){ v } } if locals
+      locals.each {|k, v| define_singleton_method(k){ v } unless (singleton_methods.include? k)} if locals
 
       if file.kind_of?(String)
         ERB.new(file).result(binding)
