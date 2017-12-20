@@ -18,6 +18,8 @@ message format as Resque so it can integrate into an existing Resque processing 
 You can have Sidekiq and Resque run side-by-side at the same time and
 use the Resque client to enqueue jobs in Redis to be processed by Sidekiq.
 
+**Caveat emptor: Sidekiq expects Redis to be [configured as a persistent store](https://github.com/mperham/sidekiq/wiki/Using-Redis#memory).**
+
 Performance
 ---------------
 
