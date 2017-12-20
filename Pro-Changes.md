@@ -4,6 +4,16 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+3.6.1
+---------
+
+- Add support for Datadog::Statsd, it is the recommended Statsd client.  [#3699]
+```ruby
+Sidekiq::Pro.dogstatsd = ->{ Datadog::Statsd.new("metrics.example.com", 8125) }
+```
+- Size the statsd connection pool based on Sidekiq's concurrency [#3700]
+
+
 3.6.0
 ---------
 
