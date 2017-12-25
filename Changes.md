@@ -11,7 +11,7 @@ HEAD
 -----------
 
 - Update gemspec to allow newer versions of the Redis gem [#3617]
-- Refactor Worker.set so it can be memoized [#3602]
+- Refactor Worker.set so it can be memorized [#3602]
 - Fix display of Redis URL in web footer, broken in 5.0.3 [#3560]
 - Update `Sidekiq::Job#display_args` to avoid mutation [#3621]
 
