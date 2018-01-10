@@ -5,6 +5,8 @@
 HEAD
 -----------
 
+- Make `Sidekiq::Client.via` reentrant [#3715]
+- Fix use of Sidekiq logger outside of the server process [#3714]
 - Tweak `constantize` to better match Rails class lookup. [#3701, caffeinated-tech]
 
 5.0.5
