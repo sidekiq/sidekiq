@@ -119,11 +119,10 @@ module Sidekiq
     def self.via(pool)
       raise ArgumentError, "No pool given" if pool.nil?
       current_sidekiq_pool = Thread.current[:sidekiq_via_pool]
-      raise RuntimeError, "Sidekiq::Client.via is not re-entrant" if current_sidekiq_pool && current_sidekiq_pool != pool
       Thread.current[:sidekiq_via_pool] = pool
       yield
     ensure
-      Thread.current[:sidekiq_via_pool] = nil
+      Thread.current[:sidekiq_via_pool] = current_sidekiq_pool
     end
 
     class << self
