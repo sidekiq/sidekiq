@@ -191,7 +191,7 @@ module Sidekiq
     FAILURE = Concurrent::AtomicFixnum.new
 
     def stats(job_hash, queue)
-      tid = Sidekiq::Util.tid
+      tid = Sidekiq::Logging.tid
       WORKER_STATE[tid] = {:queue => queue, :payload => job_hash, :run_at => Time.now.to_i }
 
       begin
