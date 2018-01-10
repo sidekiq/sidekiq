@@ -4,6 +4,11 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+-------------
+
+- Adjust middleware so failed unique jobs don't affect batches [#3662]
+
 1.6.1
 -------------
 
