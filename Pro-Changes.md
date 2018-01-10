@@ -4,6 +4,13 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+3.7.0
+---------
+
+- Refactor batch job success/failure to gracefully handle several edge
+  cases with regard to Sidekiq::Shutdown.  This should greatly reduce
+  the chances of seeing the long-standing "negative pending count" problem. [#3710]
+
 3.6.1
 ---------
 
