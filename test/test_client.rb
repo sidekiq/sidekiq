@@ -202,7 +202,20 @@ class TestClient < Sidekiq::Test
       conn.verify
     end
 
-    it 'allows #via to point to different Redi' do
+    it '#via keeps Redis after inner #via' do
+      conn = MiniTest::Mock.new
+      conn.expect(:multi, [0, 1])
+      sharded_pool = ConnectionPool.new(size: 1) { conn }
+      Sidekiq::Client.via(sharded_pool) do
+        Sidekiq::Client.via(sharded_pool) do
+          # nothing
+        end
+        CWorker.perform_async(1,2,3)
+      end
+      conn.verify
+    end
+
+    it 'stops #via from pointing to different Redi' do
       conn = MiniTest::Mock.new
       conn.expect(:multi, [0, 1])
       default = Sidekiq::Client.new.redis_pool
