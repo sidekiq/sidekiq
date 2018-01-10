@@ -123,7 +123,7 @@ module Sidekiq
       Thread.current[:sidekiq_via_pool] = pool
       yield
     ensure
-      Thread.current[:sidekiq_via_pool] = nil
+      Thread.current[:sidekiq_via_pool] = nil unless current_sidekiq_pool
     end
 
     class << self
