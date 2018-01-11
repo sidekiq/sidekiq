@@ -5,6 +5,7 @@
 HEAD
 -----------
 
+- Exceptions during the :startup event will now kill the process [#3717]
 - Make `Sidekiq::Client.via` reentrant [#3715]
 - Fix use of Sidekiq logger outside of the server process [#3714]
 - Tweak `constantize` to better match Rails class lookup. [#3701, caffeinated-tech]
