@@ -9,10 +9,15 @@ module Sidekiq
     # class block. Definitely before config/environments/*.rb and
     # config/initializers/*.rb.
     config.before_configuration do
-      if ::Rails::VERSION::MAJOR < 5 && defined?(::ActiveRecord)
+      if defined?(::ActiveRecord)
         Sidekiq.server_middleware do |chain|
-          require 'sidekiq/middleware/server/active_record'
-          chain.add Sidekiq::Middleware::Server::ActiveRecord
+          if ::Rails::VERSION::MAJOR < 5
+            require 'sidekiq/middleware/server/active_record'
+            chain.add Sidekiq::Middleware::Server::ActiveRecord
+          end
+
+          require 'sidekiq/middleware/server/active_record_cache'
+          chain.add Sidekiq::Middleware::Server::ActiveRecordCache
         end
       end
     end
