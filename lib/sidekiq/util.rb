@@ -12,10 +12,6 @@ module Sidekiq
 
     EXPIRY = 60 * 60 * 24
 
-    def self.tid
-      Thread.current['sidekiq_tid'] ||= (Thread.current.object_id ^ ::Process.pid).to_s(36)
-    end
-
     def watchdog(last_words)
       yield
     rescue Exception => ex
