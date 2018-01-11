@@ -50,7 +50,10 @@ module Sidekiq
       @@identity ||= "#{hostname}:#{$$}:#{process_nonce}"
     end
 
-    def fire_event(event, reverse=false)
+    def fire_event(event, options={})
+      reverse = options[:reverse]
+      reraise = options[:reraise]
+
       arr = Sidekiq.options[:lifecycle_events][event]
       arr.reverse! if reverse
       arr.each do |block|
@@ -58,6 +61,7 @@ module Sidekiq
           block.call
         rescue => ex
           handle_exception(ex, { context: "Exception during Sidekiq lifecycle event.", event: event })
+          raise ex if reraise
         end
       end
       arr.clear

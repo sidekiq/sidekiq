@@ -7,15 +7,14 @@ class TestUtil < Sidekiq::Test
     include Sidekiq::Util
   end
 
-  def test_tid
-    x = Sidekiq::Util.tid
-    y = nil
-    t = Thread.new do
-      Sidekiq::Util.tid
+  def test_event_firing
+    Sidekiq.options[:lifecycle_events][:startup] = [proc { raise "boom" }]
+    h = Helpers.new
+    h.fire_event(:startup)
+
+    Sidekiq.options[:lifecycle_events][:startup] = [proc { raise "boom" }]
+    assert_raises RuntimeError do
+      h.fire_event(:startup, reraise: true)
     end
-    y = t.value
-    assert x
-    assert y
-    refute_equal x, y
   end
 end

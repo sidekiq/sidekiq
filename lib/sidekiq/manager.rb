@@ -54,7 +54,7 @@ module Sidekiq
 
       logger.info { "Terminating quiet workers" }
       @workers.each { |x| x.terminate }
-      fire_event(:quiet, true)
+      fire_event(:quiet, reverse: true)
     end
 
     # hack for quicker development / testing environment #2774
@@ -62,7 +62,7 @@ module Sidekiq
 
     def stop(deadline)
       quiet
-      fire_event(:shutdown, true)
+      fire_event(:shutdown, reverse: true)
 
       # some of the shutdown events can be async,
       # we don't have any way to know when they're done but

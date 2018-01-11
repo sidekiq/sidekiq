@@ -89,7 +89,7 @@ module Sidekiq
 
       # Before this point, the process is initializing with just the main thread.
       # Starting here the process will now have multiple threads running.
-      fire_event(:startup)
+      fire_event(:startup, reverse: false, reraise: true)
 
       logger.debug { "Client Middleware: #{Sidekiq.client_middleware.map(&:klass).join(', ')}" }
       logger.debug { "Server Middleware: #{Sidekiq.server_middleware.map(&:klass).join(', ')}" }
