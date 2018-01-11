@@ -148,8 +148,10 @@ module Sidekiq
     end
 
     def redis_connection
-      attrs = Sidekiq.redis { |conn| conn.connection }
-      "redis://#{attrs[:location]}/#{attrs[:db]}"
+      Sidekiq.redis do |conn|
+        c = conn._client
+        "redis://#{c.location}/#{c.db}"
+      end
     end
 
     def namespace
