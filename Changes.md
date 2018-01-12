@@ -2,9 +2,11 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
-HEAD
+5.1.0
 -----------
 
+- Enable ActiveRecord query cache within jobs by default [#3718, sobrinho]
+  See the issue for how to bypass the cache or disable it completely.
 - Exceptions during the :startup event will now kill the process [#3717]
 - Make `Sidekiq::Client.via` reentrant [#3715]
 - Fix use of Sidekiq logger outside of the server process [#3714]
