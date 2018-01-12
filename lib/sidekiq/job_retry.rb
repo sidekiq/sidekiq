@@ -172,10 +172,18 @@ module Sidekiq
     def retries_exhausted(worker, msg, exception)
       logger.debug { "Retries exhausted for job" }
       begin
-        block = worker && worker.sidekiq_retries_exhausted_block || Sidekiq.default_retries_exhausted
+        block = worker && worker.sidekiq_retries_exhausted_block
         block.call(msg, exception) if block
       rescue => e
-        handle_exception(e, { context: "Error calling retries_exhausted for #{msg['class']}", job: msg })
+        handle_exception(e, { context: "Error calling retries_exhausted", job: msg })
+      end
+
+      Sidekiq.failure_handlers.each do |handler|
+        begin
+          handler.call(msg, exception)
+        rescue => e
+          handle_exception(e, { context: "Error calling retries_exhausted", job: msg })
+        end
       end
 
       send_to_morgue(msg) unless msg['dead'] == false

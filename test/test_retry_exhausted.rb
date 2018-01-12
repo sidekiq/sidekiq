@@ -148,5 +148,33 @@ class TestRetryExhausted < Sidekiq::Test
         Sidekiq.default_retries_exhausted = nil
       end
     end
+
+    it 'allows global failure handlers' do
+      begin
+        class Foobar
+          include Sidekiq::Worker
+        end
+
+        exhausted_job = nil
+        exhausted_exception = nil
+        Sidekiq.failure_handlers.clear
+        Sidekiq.failure_handlers << proc do |job, ex|
+          exhausted_job = job
+          exhausted_exception = ex
+        end
+        f = Foobar.new
+        raised_error = assert_raises RuntimeError do
+          handler.local(f, job('retry_count' => 0, 'retry' => 1), 'default') do
+            raise 'kerblammo!'
+          end
+        end
+        raised_error = raised_error.cause
+
+        assert exhausted_job
+        assert_equal raised_error, exhausted_exception
+      ensure
+        Sidekiq.failure_handlers.clear
+      end
+    end
   end
 end

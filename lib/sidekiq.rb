@@ -25,6 +25,7 @@ module Sidekiq
     poll_interval_average: nil,
     average_scheduled_poll_interval: 15,
     error_handlers: [],
+    failure_handlers: [],
     lifecycle_events: {
       startup: [],
       quiet: [],
@@ -156,16 +157,22 @@ module Sidekiq
     defined?(@default_worker_options) ? @default_worker_options : DEFAULT_WORKER_OPTIONS
   end
 
+  def self.default_retries_exhausted=(prok)
+    logger.info { "default_retries_exhausted is deprecated, please use `config.failure_handlers << -> {|job, ex| }`" }
+    failure_handlers << prok
+  end
+
+  ##
+  # A failure handler is called when all retries for a job have been exhausted and
+  # the job must be killed or dropped.  It's the notification to your application
+  # that this job will not finish without manual intervention.
+  #
   # Sidekiq.configure_server do |config|
-  #   config.default_retries_exhausted = -> (job, ex) do
+  #   config.failure_handlers << -> (job, ex) do
   #   end
   # end
-  def self.default_retries_exhausted=(prok)
-    @default_retries_exhausted = prok
-  end
-  @default_retries_exhausted = ->(job, ex) { }
-  def self.default_retries_exhausted
-    @default_retries_exhausted
+  def self.failure_handlers
+    options[:failure_handlers]
   end
 
   def self.load_json(string)

@@ -5,7 +5,10 @@
 5.1.0
 -----------
 
-- Enable ActiveRecord query cache within jobs by default [#3718, sobrinho]
+- **NEW** Global failure handlers - called when your job exhausts all
+  retries and dies.  Now you can take action when a job fails permanently. [#3721]
+- **NEW** Enable ActiveRecord query cache within jobs by default [#3718, sobrinho]
+  This will prevent duplicate SELECTS; cache is cleared upon any UPDATE/INSERT/DELETE.
   See the issue for how to bypass the cache or disable it completely.
 - Exceptions during the :startup event will now kill the process [#3717]
 - Make `Sidekiq::Client.via` reentrant [#3715]
