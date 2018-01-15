@@ -656,7 +656,7 @@ module Sidekiq
       super 'dead'
     end
 
-    def kill(message)
+    def kill(message, opts={})
       now = Time.now.to_f
       Sidekiq.redis do |conn|
         conn.multi do
@@ -665,6 +665,16 @@ module Sidekiq
           conn.zremrangebyrank(name, 0, - self.class.max_jobs)
         end
       end
+
+      if opts[:notify_failure] != false
+        job = Sidekiq.load_json(message)
+        r = RuntimeError.new("Job killed by API")
+        r.set_backtrace(caller)
+        Sidekiq.failure_handlers.each do |handle|
+          handle.call(job, r)
+        end
+      end
+      true
     end
 
     def retry_all

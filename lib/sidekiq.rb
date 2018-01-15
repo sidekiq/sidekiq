@@ -159,6 +159,7 @@ module Sidekiq
 
   def self.default_retries_exhausted=(prok)
     logger.info { "default_retries_exhausted is deprecated, please use `config.failure_handlers << -> {|job, ex| }`" }
+    return nil unless prok
     failure_handlers << prok
   end
 

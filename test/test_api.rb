@@ -320,11 +320,11 @@ class TestApi < Sidekiq::Test
       end
 
       it 'can kill a scheduled job' do
-        job_id = ApiWorker.perform_in(100, 1, 'jason')
+        job_id = ApiWorker.perform_in(100, 1, '{"foo":123}')
         job = Sidekiq::ScheduledSet.new.find_job(job_id)
         ds = Sidekiq::DeadSet.new
         assert_equal 0, ds.size
-        refute_nil job.kill
+        job.kill
         assert_equal 1, ds.size
       end
 

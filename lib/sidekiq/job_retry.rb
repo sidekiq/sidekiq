@@ -192,7 +192,7 @@ module Sidekiq
     def send_to_morgue(msg)
       Sidekiq.logger.info { "Adding dead #{msg['class']} job #{msg['jid']}" }
       payload = Sidekiq.dump_json(msg)
-      DeadSet.new.kill(payload)
+      DeadSet.new.kill(payload, notify_failure: false)
     end
 
     def retry_attempts_from(msg_retry, default)
