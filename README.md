@@ -56,6 +56,8 @@ Sidekiq and see its features in action.  Here's the Web UI:
 
 ![Web UI](https://github.com/mperham/sidekiq/raw/master/examples/web-ui.png)
 
+`Sidekiq` is pronounced as if you are saying the word "sidekick."
+
 
 Want to Upgrade?
 -------------------
