@@ -23,7 +23,7 @@ module Sidekiq
     environment: nil,
     timeout: 8,
     poll_interval_average: nil,
-    average_scheduled_poll_interval: 15,
+    average_scheduled_poll_interval: 5,
     error_handlers: [],
     failure_handlers: [],
     lifecycle_events: {
