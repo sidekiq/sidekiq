@@ -10,6 +10,7 @@
 - **NEW** Enable ActiveRecord query cache within jobs by default [#3718, sobrinho]
   This will prevent duplicate SELECTS; cache is cleared upon any UPDATE/INSERT/DELETE.
   See the issue for how to bypass the cache or disable it completely.
+- Scheduler timing is now more accurate, 15 -> 5 seconds [#3734]
 - Exceptions during the :startup event will now kill the process [#3717]
 - Make `Sidekiq::Client.via` reentrant [#3715]
 - Fix use of Sidekiq logger outside of the server process [#3714]
