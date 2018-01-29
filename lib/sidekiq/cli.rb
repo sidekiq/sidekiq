@@ -135,29 +135,27 @@ module Sidekiq
 }
     end
 
-    def handle_signal(sig)
-      Sidekiq.logger.debug "Got #{sig} signal"
-      case sig
-      when 'INT'
-        # Handle Ctrl-C in JRuby like MRI
-        # http://jira.codehaus.org/browse/JRUBY-4637
-        raise Interrupt
-      when 'TERM'
-        # Heroku sends TERM and then waits 10 seconds for process to exit.
-        raise Interrupt
-      when 'USR1'
+    SIGNAL_HANDLERS = {
+      # Ctrl-C in terminal
+      'INT' => ->(cli) { raise Interrupt },
+      # TERM is the signal that Sidekiq must exit.
+      # Heroku sends TERM and then waits 30 seconds for process to exit.
+      'TERM' => ->(cli) { raise Interrupt },
+      'USR1' => ->(cli) {
         Sidekiq.logger.info "Received USR1, no longer accepting new work"
-        launcher.quiet
-      when 'TSTP'
-        # USR1 is not available on JVM, allow TSTP as an alternate signal
+        cli.launcher.quiet
+      },
+      'TSTP' => ->(cli) {
         Sidekiq.logger.info "Received TSTP, no longer accepting new work"
-        launcher.quiet
-      when 'USR2'
+        cli.launcher.quiet
+      },
+      'USR2' => ->(cli) {
         if Sidekiq.options[:logfile]
           Sidekiq.logger.info "Received USR2, reopening log file"
           Sidekiq::Logging.reopen_logs
         end
-      when 'TTIN'
+      },
+      'TTIN' => ->(cli) {
         Thread.list.each do |thread|
           Sidekiq.logger.warn "Thread TID-#{(thread.object_id ^ ::Process.pid).to_s(36)} #{thread['sidekiq_label']}"
           if thread.backtrace
@@ -166,6 +164,16 @@ module Sidekiq
             Sidekiq.logger.warn "<no backtrace available>"
           end
         end
+      },
+    }
+
+    def handle_signal(sig)
+      Sidekiq.logger.debug "Got #{sig} signal"
+      handy = SIGNAL_HANDLERS[sig]
+      if handy
+        handy.call(self)
+      else
+        Sidekiq.logger.info { "No signal handler for #{sig}" }
       end
     end
 
