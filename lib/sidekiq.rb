@@ -85,7 +85,7 @@ module Sidekiq
   end
 
   def self.server?
-    defined?(Sidekiq::CLI)
+    !!defined?(Sidekiq::CLI)
   end
 
   def self.redis
