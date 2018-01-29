@@ -44,7 +44,7 @@ module Sidekiq
     end
 
     def jruby?
-      defined?(::JRUBY_VERSION)
+      !!defined?(::JRUBY_VERSION)
     end
 
     # Code within this method is not tested because it alters
