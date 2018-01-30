@@ -87,21 +87,24 @@ module Sidekiq
         client_push('class'.freeze => self, 'args'.freeze => args)
       end
 
+      def perform_at(ts, *args)
+        item = { 'class'.freeze => self, 'args'.freeze => args, 'at'.freeze => ts }
+
+        # Optimization to enqueue something now that is scheduled to go out now or in the past
+        item.delete('at'.freeze) if ts <= Time.now.to_f
+
+        client_push(item)
+      end
+
       # +interval+ must be a timestamp, numeric or something that acts
       #   numeric (like an activesupport time interval).
       def perform_in(interval, *args)
         int = interval.to_f
         now = Time.now.to_f
-        ts = (int < 1_000_000_000 ? now + int : int)
+        ts = now + int
 
-        item = { 'class'.freeze => self, 'args'.freeze => args, 'at'.freeze => ts }
-
-        # Optimization to enqueue something now that is scheduled to go out now or in the past
-        item.delete('at'.freeze) if ts <= now
-
-        client_push(item)
+        perform_at(ts, args)
       end
-      alias_method :perform_at, :perform_in
 
       ##
       # Allows customization for this type of Worker.
