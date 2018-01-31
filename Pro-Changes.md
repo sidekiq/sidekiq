@@ -4,12 +4,28 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- See the [Sidekiq Pro 4.0](Pro-4.0-Upgrade.md) release notes.
+
+
+3.7.1
+---------
+
+- Deprecate timed\_fetch.  Switch to super\_fetch:
+```ruby
+config.super_fetch!
+```
+
+
 3.7.0
 ---------
 
 - Refactor batch job success/failure to gracefully handle several edge
   cases with regard to Sidekiq::Shutdown.  This should greatly reduce
   the chances of seeing the long-standing "negative pending count" problem. [#3710]
+
 
 3.6.1
 ---------
