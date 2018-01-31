@@ -157,8 +157,8 @@ class TestRetryExhausted < Sidekiq::Test
 
         exhausted_job = nil
         exhausted_exception = nil
-        Sidekiq.failure_handlers.clear
-        Sidekiq.failure_handlers << proc do |job, ex|
+        Sidekiq.death_handlers.clear
+        Sidekiq.death_handlers << proc do |job, ex|
           exhausted_job = job
           exhausted_exception = ex
         end
@@ -173,7 +173,7 @@ class TestRetryExhausted < Sidekiq::Test
         assert exhausted_job
         assert_equal raised_error, exhausted_exception
       ensure
-        Sidekiq.failure_handlers.clear
+        Sidekiq.death_handlers.clear
       end
     end
   end

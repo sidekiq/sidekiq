@@ -670,7 +670,7 @@ module Sidekiq
         job = Sidekiq.load_json(message)
         r = RuntimeError.new("Job killed by API")
         r.set_backtrace(caller)
-        Sidekiq.failure_handlers.each do |handle|
+        Sidekiq.death_handlers.each do |handle|
           handle.call(job, r)
         end
       end

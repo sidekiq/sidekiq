@@ -5,7 +5,7 @@
 5.1.0
 -----------
 
-- **NEW** Global failure handlers - called when your job exhausts all
+- **NEW** Global death handlers - called when your job exhausts all
   retries and dies.  Now you can take action when a job fails permanently. [#3721]
 - **NEW** Enable ActiveRecord query cache within jobs by default [#3718, sobrinho]
   This will prevent duplicate SELECTS; cache is cleared upon any UPDATE/INSERT/DELETE.

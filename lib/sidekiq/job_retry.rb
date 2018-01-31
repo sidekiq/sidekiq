@@ -178,11 +178,11 @@ module Sidekiq
         handle_exception(e, { context: "Error calling retries_exhausted", job: msg })
       end
 
-      Sidekiq.failure_handlers.each do |handler|
+      Sidekiq.death_handlers.each do |handler|
         begin
           handler.call(msg, exception)
         rescue => e
-          handle_exception(e, { context: "Error calling retries_exhausted", job: msg })
+          handle_exception(e, { context: "Error calling death handler", job: msg })
         end
       end
 
