@@ -7,6 +7,7 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 HEAD
 -------------
 
+- **NEW FEATURE** [Rolling restarts](https://github.com/mperham/sidekiq/wiki/Ent-Rolling-Restarts) - great for long running jobs!
 - Adjust middleware so failed unique jobs don't affect batches [#3662]
 
 1.6.1
