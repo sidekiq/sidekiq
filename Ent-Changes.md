@@ -9,6 +9,7 @@ HEAD
 
 - **NEW FEATURE** [Rolling restarts](https://github.com/mperham/sidekiq/wiki/Ent-Rolling-Restarts) - great for long running jobs!
 - Adjust middleware so failed unique jobs don't affect batches [#3662]
+- Add new unlimited rate limiter, useful for testing [#3743]
 
 1.6.1
 -------------
