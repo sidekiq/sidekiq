@@ -4,7 +4,7 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+4.0.0
 ---------
 
 - See the [Sidekiq Pro 4.0](Pro-4.0-Upgrade.md) release notes.

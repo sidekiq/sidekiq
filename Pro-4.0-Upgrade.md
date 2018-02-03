@@ -13,10 +13,13 @@ Sidekiq::Batch::DeadSet.new.each do |status|
   status.dead_jobs # => [...]
 end
 ```
+This API allows you to enumerate the batches which need help.
+If you fix the issue and the dead jobs succeed, the batch will succeed.
 * The older `reliable_fetch` and `timed_fetch` algorithms have been
   removed.  Only super\_fetch is available in 4.0.
 * The statsd middleware has been tweaked to remove support for legacy,
-  pre-3.6.0 configuration.
+  pre-3.6.0 configuration and add relevant tags.
+* Requires Sidekiq 5.0.5+.
 
 ## Upgrade
 
