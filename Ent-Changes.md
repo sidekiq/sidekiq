@@ -4,12 +4,15 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+1.7.0
 -------------
 
 - **NEW FEATURE** [Rolling restarts](https://github.com/mperham/sidekiq/wiki/Ent-Rolling-Restarts) - great for long running jobs!
-- Adjust middleware so failed unique jobs don't affect batches [#3662]
+- Adjust middleware so unique jobs that don't push aren't registered in a Batch [#3662]
 - Add new unlimited rate limiter, useful for testing [#3743]
+```ruby
+limiter = Sidekiq::Limiter.unlimited(...any args...)
+```
 
 1.6.1
 -------------
