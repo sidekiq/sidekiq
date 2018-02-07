@@ -2,10 +2,6 @@
 
 require 'sidekiq'
 
-redis = { :namespace => 'leak' }
-Sidekiq.configure_client { |config| config.redis = redis }
-Sidekiq.configure_server { |config| config.redis = redis }
-
 $c = 0
 $max = 10_000
 
