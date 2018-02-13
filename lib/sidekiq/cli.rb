@@ -330,6 +330,8 @@ module Sidekiq
           opts[:tag] = arg
         end
 
+        # this index remains here for backwards compatibility but none of the Sidekiq
+        # family use this value anymore.  it was used by Pro's original reliable_fetch.
         o.on '-i', '--index INT', "unique process index on this machine" do |arg|
           opts[:index] = Integer(arg.match(/\d+/)[0])
         end
