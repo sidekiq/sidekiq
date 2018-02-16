@@ -1,4 +1,3 @@
-# encoding: utf-8
 # frozen_string_literal: true
 require 'sidekiq/manager'
 require 'sidekiq/fetch'
@@ -76,13 +75,13 @@ module Sidekiq
         Processor::FAILURE.update {|curr| fails = curr; 0 }
         Processor::PROCESSED.update {|curr| procd = curr; 0 }
 
-        workers_key = "#{key}:workers".freeze
-        nowdate = Time.now.utc.strftime("%Y-%m-%d".freeze)
+        workers_key = "#{key}:workers"
+        nowdate = Time.now.utc.strftime("%Y-%m-%d")
         Sidekiq.redis do |conn|
           conn.multi do
-            conn.incrby("stat:processed".freeze, procd)
+            conn.incrby("stat:processed", procd)
             conn.incrby("stat:processed:#{nowdate}", procd)
-            conn.incrby("stat:failed".freeze, fails)
+            conn.incrby("stat:failed", fails)
             conn.incrby("stat:failed:#{nowdate}", fails)
             conn.del(workers_key)
             Processor::WORKER_STATE.each_pair do |tid, hash|

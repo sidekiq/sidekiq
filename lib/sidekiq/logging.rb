@@ -33,9 +33,9 @@ module Sidekiq
     def self.job_hash_context(job_hash)
       # If we're using a wrapper class, like ActiveJob, use the "wrapped"
       # attribute to expose the underlying thing.
-      klass = job_hash['wrapped'.freeze] || job_hash["class".freeze]
-      bid = job_hash['bid'.freeze]
-      "#{klass} JID-#{job_hash['jid'.freeze]}#{" BID-#{bid}" if bid}"
+      klass = job_hash['wrapped'] || job_hash["class"]
+      bid = job_hash['bid']
+      "#{klass} JID-#{job_hash['jid']}#{" BID-#{bid}" if bid}"
     end
 
     def self.with_job_hash_context(job_hash, &block)

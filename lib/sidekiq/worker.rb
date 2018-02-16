@@ -47,7 +47,7 @@ module Sidekiq
       end
 
       def perform_async(*args)
-        @klass.client_push(@opts.merge('args'.freeze => args, 'class'.freeze => @klass))
+        @klass.client_push(@opts.merge('args' => args, 'class' => @klass))
       end
 
       # +interval+ must be a timestamp, numeric or something that acts
@@ -57,9 +57,9 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        payload = @opts.merge('class'.freeze => @klass, 'args'.freeze => args, 'at'.freeze => ts)
+        payload = @opts.merge('class' => @klass, 'args' => args, 'at' => ts)
         # Optimization to enqueue something now that is scheduled to go out now or in the past
-        payload.delete('at'.freeze) if ts <= now
+        payload.delete('at') if ts <= now
         @klass.client_push(payload)
       end
       alias_method :perform_at, :perform_in
@@ -84,7 +84,7 @@ module Sidekiq
       end
 
       def perform_async(*args)
-        client_push('class'.freeze => self, 'args'.freeze => args)
+        client_push('class' => self, 'args' => args)
       end
 
       # +interval+ must be a timestamp, numeric or something that acts
@@ -94,10 +94,10 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        item = { 'class'.freeze => self, 'args'.freeze => args, 'at'.freeze => ts }
+        item = { 'class' => self, 'args' => args, 'at' => ts }
 
         # Optimization to enqueue something now that is scheduled to go out now or in the past
-        item.delete('at'.freeze) if ts <= now
+        item.delete('at') if ts <= now
 
         client_push(item)
       end
@@ -134,7 +134,7 @@ module Sidekiq
       end
 
       def client_push(item) # :nodoc:
-        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options['pool'.freeze] || Sidekiq.redis_pool
+        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options['pool'] || Sidekiq.redis_pool
         # stringify
         item.keys.each do |key|
           item[key.to_s] = item.delete(key)

@@ -1,4 +1,3 @@
-# encoding: utf-8
 # frozen_string_literal: true
 require 'sidekiq'
 
@@ -51,21 +50,21 @@ module Sidekiq
     def fetch_stats!
       pipe1_res = Sidekiq.redis do |conn|
         conn.pipelined do
-          conn.get('stat:processed'.freeze)
-          conn.get('stat:failed'.freeze)
-          conn.zcard('schedule'.freeze)
-          conn.zcard('retry'.freeze)
-          conn.zcard('dead'.freeze)
-          conn.scard('processes'.freeze)
-          conn.lrange('queue:default'.freeze, -1, -1)
-          conn.smembers('processes'.freeze)
-          conn.smembers('queues'.freeze)
+          conn.get('stat:processed')
+          conn.get('stat:failed')
+          conn.zcard('schedule')
+          conn.zcard('retry')
+          conn.zcard('dead')
+          conn.scard('processes')
+          conn.lrange('queue:default', -1, -1)
+          conn.smembers('processes')
+          conn.smembers('queues')
         end
       end
 
       pipe2_res = Sidekiq.redis do |conn|
         conn.pipelined do
-          pipe1_res[7].each {|key| conn.hget(key, 'busy'.freeze) }
+          pipe1_res[7].each {|key| conn.hget(key, 'busy') }
           pipe1_res[8].each {|queue| conn.llen("queue:#{queue}") }
         end
       end
@@ -77,7 +76,7 @@ module Sidekiq
       default_queue_latency = if (entry = pipe1_res[6].first)
                                 job = Sidekiq.load_json(entry) rescue {}
                                 now = Time.now.to_f
-                                thence = job['enqueued_at'.freeze] || now
+                                thence = job['enqueued_at'] || now
                                 now - thence
                               else
                                 0
@@ -119,7 +118,7 @@ module Sidekiq
     class Queues
       def lengths
         Sidekiq.redis do |conn|
-          queues = conn.smembers('queues'.freeze)
+          queues = conn.smembers('queues')
 
           lengths = conn.pipelined do
             queues.each do |queue|
@@ -163,7 +162,7 @@ module Sidekiq
 
         while i < @days_previous
           date = @start_date - i
-          datestr = date.strftime("%Y-%m-%d".freeze)
+          datestr = date.strftime("%Y-%m-%d")
           keys << "stat:#{stat}:#{datestr}"
           dates << datestr
           i += 1
@@ -204,7 +203,7 @@ module Sidekiq
     # Return all known queues within Redis.
     #
     def self.all
-      Sidekiq.redis { |c| c.smembers('queues'.freeze) }.sort.map { |q| Sidekiq::Queue.new(q) }
+      Sidekiq.redis { |c| c.smembers('queues') }.sort.map { |q| Sidekiq::Queue.new(q) }
     end
 
     attr_reader :name
@@ -273,7 +272,7 @@ module Sidekiq
       Sidekiq.redis do |conn|
         conn.multi do
           conn.del(@rname)
-          conn.srem("queues".freeze, name)
+          conn.srem("queues", name)
         end
       end
     end
@@ -349,9 +348,9 @@ module Sidekiq
                     job_args
                   end
                 else
-                  if self['encrypt'.freeze]
+                  if self['encrypt']
                     # no point in showing 150+ bytes of random garbage
-                    args[-1] = '[encrypted data]'.freeze
+                    args[-1] = '[encrypted data]'
                   end
                   args
                 end

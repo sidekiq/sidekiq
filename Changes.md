@@ -2,6 +2,12 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
+HEAD
+-----------
+
+- Remove `freeze` calls on String constants. This is superfluous with Ruby
+  2.3+ and `frozen_string_literal: true`. [#3759]
+
 5.1.1
 -----------
 

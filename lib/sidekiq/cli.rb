@@ -1,4 +1,3 @@
-# encoding: utf-8
 # frozen_string_literal: true
 $stdout.sync = true
 
@@ -17,7 +16,7 @@ module Sidekiq
     include Singleton unless $TESTING
 
     PROCTITLES = [
-      proc { 'sidekiq'.freeze },
+      proc { 'sidekiq' },
       proc { Sidekiq::VERSION },
       proc { |me, data| data['tag'] },
       proc { |me, data| "[#{Processor::WORKER_STATE.size} of #{data['concurrency']} busy]" },
