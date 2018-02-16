@@ -3,16 +3,16 @@ require 'rack'
 
 module Sidekiq
   module WebRouter
-    GET = 'GET'.freeze
-    DELETE = 'DELETE'.freeze
-    POST = 'POST'.freeze
-    PUT = 'PUT'.freeze
-    PATCH = 'PATCH'.freeze
-    HEAD = 'HEAD'.freeze
+    GET = 'GET'
+    DELETE = 'DELETE'
+    POST = 'POST'
+    PUT = 'PUT'
+    PATCH = 'PATCH'
+    HEAD = 'HEAD'
 
-    ROUTE_PARAMS = 'rack.route_params'.freeze
-    REQUEST_METHOD = 'REQUEST_METHOD'.freeze
-    PATH_INFO = 'PATH_INFO'.freeze
+    ROUTE_PARAMS = 'rack.route_params'
+    REQUEST_METHOD = 'REQUEST_METHOD'
+    PATH_INFO = 'PATH_INFO'
 
     def get(path, &block)
       route(GET, path, &block)
@@ -64,7 +64,7 @@ module Sidekiq
   class WebRoute
     attr_accessor :request_method, :pattern, :block, :name
 
-    NAMED_SEGMENTS_PATTERN = /\/([^\/]*):([^\.:$\/]+)/.freeze
+    NAMED_SEGMENTS_PATTERN = /\/([^\/]*):([^\.:$\/]+)/
 
     def initialize(request_method, pattern, block)
       @request_method = request_method

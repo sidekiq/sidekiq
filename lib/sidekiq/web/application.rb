@@ -4,8 +4,8 @@ module Sidekiq
   class WebApplication
     extend WebRouter
 
-    CONTENT_LENGTH = "Content-Length".freeze
-    CONTENT_TYPE = "Content-Type".freeze
+    CONTENT_LENGTH = "Content-Length"
+    CONTENT_TYPE = "Content-Type"
     REDIS_KEYS = %w(redis_version uptime_in_days connected_clients used_memory_human used_memory_peak_human)
 
     def initialize(klass)

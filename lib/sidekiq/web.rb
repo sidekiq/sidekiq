@@ -19,10 +19,10 @@ require 'rack/session/cookie'
 module Sidekiq
   class Web
     ROOT = File.expand_path("#{File.dirname(__FILE__)}/../../web")
-    VIEWS = "#{ROOT}/views".freeze
-    LOCALES = ["#{ROOT}/locales".freeze]
-    LAYOUT = "#{VIEWS}/layout.erb".freeze
-    ASSETS = "#{ROOT}/assets".freeze
+    VIEWS = "#{ROOT}/views"
+    LOCALES = ["#{ROOT}/locales"]
+    LAYOUT = "#{VIEWS}/layout.erb"
+    ASSETS = "#{ROOT}/assets"
 
     DEFAULT_TABS = {
       "Dashboard" => '',
