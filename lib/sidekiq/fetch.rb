@@ -13,7 +13,7 @@ module Sidekiq
       end
 
       def queue_name
-        queue.sub(/.*queue:/, ''.freeze)
+        queue.sub(/.*queue:/, '')
       end
 
       def requeue

@@ -1,4 +1,3 @@
-# encoding: utf-8
 # frozen_string_literal: true
 require 'sidekiq/version'
 fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 2.2.2." if RUBY_PLATFORM != 'java' && RUBY_VERSION < '2.2.2'
@@ -12,7 +11,7 @@ require 'sidekiq/delay'
 require 'json'
 
 module Sidekiq
-  NAME = 'Sidekiq'.freeze
+  NAME = 'Sidekiq'
   LICENSE = 'See LICENSE and the LGPL-3.0 for licensing details.'
 
   DEFAULTS = {
@@ -48,7 +47,7 @@ module Sidekiq
     "connected_clients" => "9999",
     "used_memory_human" => "9P",
     "used_memory_peak_human" => "9P"
-  }.freeze
+  }
 
   def self.❨╯°□°❩╯︵┻━┻
     puts "Calm down, yo."
