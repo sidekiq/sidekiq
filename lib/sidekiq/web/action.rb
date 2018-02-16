@@ -2,7 +2,7 @@
 
 module Sidekiq
   class WebAction
-    RACK_SESSION = 'rack.session'.freeze
+    RACK_SESSION = 'rack.session'
 
     attr_accessor :env, :block, :type
 

@@ -80,7 +80,7 @@ module Sidekiq
 
     # See https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.4
     def user_preferred_languages
-      languages = env['HTTP_ACCEPT_LANGUAGE'.freeze]
+      languages = env['HTTP_ACCEPT_LANGUAGE']
       languages.to_s.downcase.gsub(/\s+/, '').split(',').map do |language|
         locale, quality = language.split(';q=', 2)
         locale  = nil if locale == '*' # Ignore wildcards
