@@ -4,6 +4,11 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+4.0.1
+---------
+
+- Fix incompatibility with the statsd-ruby gem [#3740]
+
 4.0.0
 ---------
 
