@@ -64,7 +64,7 @@ module Sidekiq
       sigs.each do |sig|
         begin
           trap sig do
-            self_write.puts(sig)
+            self_write.write("#{sig}\n")
           end
         rescue ArgumentError
           puts "Signal #{sig} not supported"
