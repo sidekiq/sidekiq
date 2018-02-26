@@ -5,6 +5,7 @@
 HEAD
 -----------
 
+- Fix crash on Ctrl-C in Windows [#3775, Bernica]
 - Remove `freeze` calls on String constants. This is superfluous with Ruby
   2.3+ and `frozen_string_literal: true`. [#3759]
 
