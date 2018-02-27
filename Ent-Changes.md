@@ -8,6 +8,7 @@ HEAD
 -------------
 
 - Fix Lua error in concurrent rate limiter under heavy contention
+- Remove superfluous `freeze` calls on Strings [#3759]
 
 1.7.0
 -------------

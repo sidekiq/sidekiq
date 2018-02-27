@@ -4,6 +4,11 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Remove superfluous `freeze` calls on Strings [#3759]
+
 4.0.1
 ---------
 
