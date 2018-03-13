@@ -8,6 +8,7 @@ HEAD
 - Fix crash on Ctrl-C in Windows [#3775, Bernica]
 - Remove `freeze` calls on String constants. This is superfluous with Ruby
   2.3+ and `frozen_string_literal: true`. [#3759]
+- Fix use of AR middleware outside of Rails [#3787]
 
 5.1.1
 -----------
