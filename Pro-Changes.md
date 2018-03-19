@@ -7,6 +7,9 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 HEAD
 ---------
 
+- Remove super\_fetch edge case leading to an unnecessary `sleep(1)`
+  call and resulting latency [#3790]
+- Fix possible bad statsd metric call on super\_fetch startup
 - Remove superfluous `freeze` calls on Strings [#3759]
 
 4.0.1
