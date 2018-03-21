@@ -256,7 +256,7 @@ class TestRetry < Sidekiq::Test
         sidekiq_retry_in do |count, exception|
           case exception
           when SpecialError
-            nil
+            Sidekiq::JobRetry::USE_DEFAULT_RETRY_FORMULA
           when ArgumentError
             count * 4
           else
