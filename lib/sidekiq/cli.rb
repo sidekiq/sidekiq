@@ -218,7 +218,7 @@ module Sidekiq
     end
 
     def set_environment(cli_env)
-      @environment = cli_env || ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
+      @environment = cli_env || ::Rails.env
     end
 
     def symbolize_keys_deep!(hash)
