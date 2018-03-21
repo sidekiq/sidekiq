@@ -215,7 +215,8 @@ module Sidekiq
 
     def retry_in(worker, count, exception)
       begin
-        worker.sidekiq_retry_in_block.call(count, exception).to_i
+        custom_retry_in = worker.sidekiq_retry_in_block.call(count, exception)
+        custom_retry_in.nil? ? nil : custom_retry_in.to_i
       rescue Exception => e
         handle_exception(e, { context: "Failure scheduling retry using the defined `sidekiq_retry_in` in #{worker.class.name}, falling back to default" })
         nil

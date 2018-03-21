@@ -247,11 +247,16 @@ class TestRetry < Sidekiq::Test
         end
       end
 
+      class SpecialError < StandardError
+      end
+
       class CustomWorkerWithException
         include Sidekiq::Worker
 
         sidekiq_retry_in do |count, exception|
           case exception
+          when SpecialError
+            nil
           when ArgumentError
             count * 4
           else
@@ -278,6 +283,11 @@ class TestRetry < Sidekiq::Test
 
       it "retries with a custom delay and exception 2" do
         assert_equal 4, handler.__send__(:delay_for, CustomWorkerWithException, 2, StandardError.new)
+      end
+
+      it "retries with a default delay and exception in case of configured with nil" do
+        refute_equal 8, handler.__send__(:delay_for, CustomWorkerWithException, 2, SpecialError.new)
+        refute_equal 4, handler.__send__(:delay_for, CustomWorkerWithException, 2, SpecialError.new)
       end
 
       it "retries with a custom delay without exception" do
