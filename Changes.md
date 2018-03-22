@@ -9,6 +9,8 @@ HEAD
 - Remove `freeze` calls on String constants. This is superfluous with Ruby
   2.3+ and `frozen_string_literal: true`. [#3759]
 - Fix use of AR middleware outside of Rails [#3787]
+- Sidekiq::Worker `sidekiq_retry_in` block can now return nil or 0 to use
+  the default backoff delay [#3796, dsalahutdinov]
 
 5.1.1
 -----------

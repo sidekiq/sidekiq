@@ -61,7 +61,6 @@ module Sidekiq
     include Sidekiq::Util
 
     DEFAULT_MAX_RETRY_ATTEMPTS = 25
-    USE_DEFAULT_RETRY_FORMULA = 0
 
     def initialize(options = {})
       @max_retries = Sidekiq.options.merge(options).fetch(:max_retries, DEFAULT_MAX_RETRY_ATTEMPTS)
@@ -206,9 +205,9 @@ module Sidekiq
     end
 
     def delay_for(worker, count, exception)
-      if worker && worker.sidekiq_retry_in_block 
-        custom_retry_in = retry_in(worker, count, exception)
-        return custom_retry_in if custom_retry_in != USE_DEFAULT_RETRY_FORMULA
+      if worker && worker.sidekiq_retry_in_block
+        custom_retry_in = retry_in(worker, count, exception).to_i
+        return custom_retry_in if custom_retry_in > 0
       end
       seconds_to_delay(count)
     end
@@ -220,10 +219,10 @@ module Sidekiq
 
     def retry_in(worker, count, exception)
       begin
-        worker.sidekiq_retry_in_block.call(count, exception).to_i
+        worker.sidekiq_retry_in_block.call(count, exception)
       rescue Exception => e
         handle_exception(e, { context: "Failure scheduling retry using the defined `sidekiq_retry_in` in #{worker.class.name}, falling back to default" })
-        USE_DEFAULT_RETRY_FORMULA
+        nil
       end
     end
 
