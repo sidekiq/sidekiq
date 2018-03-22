@@ -71,7 +71,9 @@ module Sidekiq
       payload = process_single(item['class'], normed)
 
       if payload
-        raw_push([payload])
+        @redis_pool.with do |conn|
+          atomic_push(conn, [payload])
+        end
         payload['jid']
       end
     end
