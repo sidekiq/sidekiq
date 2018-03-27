@@ -15,7 +15,15 @@ module Sidekiq
         options[:id] = "Sidekiq-#{Sidekiq.server? ? "server" : "client"}-PID-#{$$}" if !options.has_key?(:id)
         options[:url] ||= determine_redis_provider
 
-        size = options[:size] || (Sidekiq.server? ? (Sidekiq.options[:concurrency] + 5) : 5)
+        size = if options[:size]
+                 options[:size]
+               elsif Sidekiq.server?
+                 Sidekiq.options[:concurrency] + 5
+               elsif ENV['RAILS_MAX_THREADS']
+                 Integer(ENV['RAILS_MAX_THREADS'])
+               else
+                 5
+               end
 
         verify_sizing(size, Sidekiq.options[:concurrency]) if Sidekiq.server?
 
