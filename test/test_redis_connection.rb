@@ -20,6 +20,61 @@ class TestRedisConnection < Sidekiq::Test
       assert_equal "Sidekiq-server-PID-#{$$}", pool.checkout.connection.fetch(:id)
     end
 
+    # Readers for these ivars should be available in the next release of
+    # `connection_pool`, until then we need to reach into the internal state to
+    # verify the setting.
+    describe "size" do
+      def client_connection(*args)
+        Sidekiq.stub(:server?, nil) do
+          Sidekiq::RedisConnection.create(*args)
+        end
+      end
+
+      def server_connection(*args)
+        Sidekiq.stub(:server?, "constant") do
+          Sidekiq::RedisConnection.create(*args)
+        end
+      end
+
+      it "uses the specified custom pool size" do
+        pool = client_connection(size: 42)
+        assert_equal 42, pool.instance_eval{ @size }
+        assert_equal 42, pool.instance_eval{ @available.length }
+
+        pool = server_connection(size: 42)
+        assert_equal 42, pool.instance_eval{ @size }
+        assert_equal 42, pool.instance_eval{ @available.length }
+      end
+
+      it "defaults server pool sizes based on concurrency with padding" do
+        _expected_padding = 5
+        Sidekiq.options[:concurrency] = 6
+        pool = server_connection
+
+        assert_equal 11, pool.instance_eval{ @size }
+        assert_equal 11, pool.instance_eval{ @available.length }
+      end
+
+      it "defaults client pool sizes to 5" do
+        pool = client_connection
+
+        assert_equal 5, pool.instance_eval{ @size }
+        assert_equal 5, pool.instance_eval{ @available.length }
+      end
+
+      it "changes client pool sizes with ENV" do
+        begin
+          ENV['RAILS_MAX_THREADS'] = '9'
+          pool = client_connection
+
+          assert_equal 9, pool.instance_eval{ @size }
+          assert_equal 9, pool.instance_eval{ @available.length }
+        ensure
+          ENV.delete('RAILS_MAX_THREADS')
+        end
+      end
+    end
+
     it "disables client setname with nil id" do
       pool = Sidekiq::RedisConnection.create(:id => nil)
       assert_equal Redis, pool.checkout.class
