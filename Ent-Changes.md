@@ -4,7 +4,7 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+1.7.1
 -------------
 
 - Fix Lua error in concurrent rate limiter under heavy contention
