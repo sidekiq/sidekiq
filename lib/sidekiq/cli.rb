@@ -385,7 +385,11 @@ module Sidekiq
     end
 
     def initialize_logger
-      Sidekiq::Logging.initialize_logger(options[:logfile]) if options[:logfile]
+      if path = options[:logfile]
+        logfile = File.expand_path(path)
+        mkdir_unless_exists_dir(logfile)
+        Sidekiq::Logging.initialize_logger(logfile)
+      end
 
       Sidekiq.logger.level = ::Logger::DEBUG if options[:verbose]
     end
@@ -393,6 +397,7 @@ module Sidekiq
     def write_pid
       if path = options[:pidfile]
         pidfile = File.expand_path(path)
+        mkdir_unless_exists_dir(pidfile)
         File.open(pidfile, 'w') do |f|
           f.puts ::Process.pid
         end
@@ -434,6 +439,11 @@ module Sidekiq
        (opts[:queues] ||= []) << q
       end
       opts[:strict] = false if weight.to_i > 0
+    end
+
+    def mkdir_unless_exists_dir(path)
+      dirname = File.dirname(path)
+      FileUtils.mkdir_p(dirname) unless File.exist?(dirname)
     end
   end
 end
