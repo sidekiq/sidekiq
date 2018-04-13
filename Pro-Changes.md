@@ -4,6 +4,11 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Add at\_exit handler to push any saved jobs in `reliable_push` when exiting. [#3823]
+
 4.0.2
 ---------
 
