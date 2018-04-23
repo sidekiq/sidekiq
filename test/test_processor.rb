@@ -312,9 +312,9 @@ class TestProcessor < Sidekiq::Test
         end
 
         it 'increments processed stat' do
-          Sidekiq::Processor::PROCESSED.value = 0
+          Sidekiq::Processor::PROCESSED.reset
           successful_job
-          assert_equal 1, Sidekiq::Processor::PROCESSED.value
+          assert_equal 1, Sidekiq::Processor::PROCESSED.reset
         end
       end
 
@@ -330,9 +330,9 @@ class TestProcessor < Sidekiq::Test
         end
 
         it 'increments failed stat' do
-          Sidekiq::Processor::FAILURE.value = 0
+          Sidekiq::Processor::FAILURE.reset
           failed_job
-          assert_equal 1, Sidekiq::Processor::FAILURE.value
+          assert_equal 1, Sidekiq::Processor::FAILURE.reset
         end
       end
     end

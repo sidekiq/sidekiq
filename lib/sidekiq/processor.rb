@@ -5,7 +5,6 @@ require 'sidekiq/job_logger'
 require 'sidekiq/job_retry'
 require 'thread'
 require 'concurrent/map'
-require 'concurrent/atomic/atomic_fixnum'
 
 module Sidekiq
   ##
@@ -187,9 +186,27 @@ module Sidekiq
       worker.perform(*cloned_args)
     end
 
+    # Ruby doesn't provide atomic counters out of the box so we'll
+    # implement something simple ourselves.
+    # https://bugs.ruby-lang.org/issues/14706
+    class Counter
+      def initialize
+        @value = 0
+        @lock = Mutex.new
+      end
+
+      def incr(amount=1)
+        @lock.synchronize { @value = @value + amount }
+      end
+
+      def reset
+        @lock.synchronize { val = @value; @value = 0; val }
+      end
+    end
+
+    PROCESSED = Counter.new
+    FAILURE = Counter.new
     WORKER_STATE = Concurrent::Map.new
-    PROCESSED = Concurrent::AtomicFixnum.new
-    FAILURE = Concurrent::AtomicFixnum.new
 
     def stats(job_hash, queue)
       tid = Sidekiq::Logging.tid
@@ -198,11 +215,11 @@ module Sidekiq
       begin
         yield
       rescue Exception
-        FAILURE.increment
+        FAILURE.incr
         raise
       ensure
         WORKER_STATE.delete(tid)
-        PROCESSED.increment
+        PROCESSED.incr
       end
     end
 

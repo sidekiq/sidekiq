@@ -72,8 +72,8 @@ module Sidekiq
       key = identity
       fails = procd = 0
       begin
-        Processor::FAILURE.update {|curr| fails = curr; 0 }
-        Processor::PROCESSED.update {|curr| procd = curr; 0 }
+        fails = Processor::FAILURE.reset
+        procd = Processor::PROCESSED.reset
 
         workers_key = "#{key}:workers"
         nowdate = Time.now.utc.strftime("%Y-%m-%d")
@@ -112,8 +112,8 @@ module Sidekiq
         # ignore all redis/network issues
         logger.error("heartbeat: #{e.message}")
         # don't lose the counts if there was a network issue
-        Processor::PROCESSED.increment(procd)
-        Processor::FAILURE.increment(fails)
+        Processor::PROCESSED.incr(procd)
+        Processor::FAILURE.incr(fails)
       end
     end
 
