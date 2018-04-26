@@ -17,12 +17,7 @@ Gem::Specification.new do |gem|
   gem.version       = Sidekiq::VERSION
   gem.required_ruby_version = ">= 2.2.2"
 
-  gem.add_dependency                  'redis', '>= 3.3.5', '< 5'
-  gem.add_dependency                  'connection_pool', '~> 2.2', '>= 2.2.0'
-  gem.add_dependency                  'concurrent-ruby', '~> 1.0'
-  gem.add_dependency                  'rack-protection', '>= 1.5.0'
-  gem.add_development_dependency      'redis-namespace', '~> 1.5', '>= 1.5.2'
-  gem.add_development_dependency      'minitest', '~> 5.10', '>= 5.10.1'
-  gem.add_development_dependency      'rake', '~> 10.0'
-  gem.add_development_dependency      'rails', '>= 3.2.0'
+  gem.add_dependency 'redis', '>= 3.3.5', '< 5'
+  gem.add_dependency 'connection_pool', '~> 2.2', '>= 2.2.0'
+  gem.add_dependency 'rack-protection', '>= 1.5.0'
 end

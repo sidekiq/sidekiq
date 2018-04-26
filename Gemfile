@@ -1,8 +1,14 @@
 source 'https://rubygems.org'
 gemspec
 
-gem 'rails', '>= 5.0.1'
+# load testing
 #gem "hiredis"
-gem 'simplecov'
-gem 'minitest'
 #gem 'toxiproxy'
+
+group :test do
+  gem 'rails', '>= 5.0.1'
+  gem 'minitest'
+  gem 'rake'
+  gem 'redis-namespace'
+  gem 'simplecov'
+end
