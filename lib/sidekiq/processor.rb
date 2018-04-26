@@ -4,7 +4,6 @@ require 'sidekiq/fetch'
 require 'sidekiq/job_logger'
 require 'sidekiq/job_retry'
 require 'thread'
-require 'concurrent/map'
 
 module Sidekiq
   ##
@@ -206,7 +205,9 @@ module Sidekiq
 
     PROCESSED = Counter.new
     FAILURE = Counter.new
-    WORKER_STATE = Concurrent::Map.new
+    # This is mutable global state but because each thread is storing
+    # its own unique key/value, there's no thread-safety issue AFAIK.
+    WORKER_STATE = {}
 
     def stats(job_hash, queue)
       tid = Sidekiq::Logging.tid

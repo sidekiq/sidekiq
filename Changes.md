@@ -2,6 +2,11 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
+HEAD
+-----------
+
+- Remove concurrent-ruby gem dependency [#3830]
+
 5.1.3
 -----------
 
