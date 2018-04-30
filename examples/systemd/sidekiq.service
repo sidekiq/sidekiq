@@ -33,6 +33,10 @@ User=deploy
 Group=deploy
 UMask=0002
 
+# Greatly reduce Ruby memory fragmentation and heap usage
+# https://www.mikeperham.com/2018/04/25/taming-rails-memory-bloat/
+Environment=MALLOC_ARENA_MAX=2
+
 # if we crash, restart
 RestartSec=1
 Restart=on-failure
