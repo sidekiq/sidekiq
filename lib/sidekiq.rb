@@ -93,6 +93,8 @@ module Sidekiq
       retryable = true
       begin
         yield conn
+      rescue Redis::BaseConnectionError
+        raise unless server? && Sidekiq::CLI.instance.launcher.stopping?
       rescue Redis::CommandError => ex
         #2550 Failover can cause the server to become a slave, need
         # to disconnect and reopen the socket to get back to the master.

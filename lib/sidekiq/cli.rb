@@ -13,7 +13,14 @@ require 'sidekiq/util'
 module Sidekiq
   class CLI
     include Util
-    include Singleton unless $TESTING
+
+    if $TESTING
+      def self.instance
+        new
+      end
+    else
+      include Singleton
+    end
 
     PROCTITLES = [
       proc { 'sidekiq' },
