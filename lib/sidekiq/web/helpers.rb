@@ -155,7 +155,7 @@ module Sidekiq
     end
 
     def namespace
-      @@ns ||= Sidekiq.redis { |conn| conn.respond_to?(:namespace) ? conn.namespace : nil }
+      @ns ||= Sidekiq.redis { |conn| conn.respond_to?(:namespace) ? conn.namespace : nil }
     end
 
     def redis_info
