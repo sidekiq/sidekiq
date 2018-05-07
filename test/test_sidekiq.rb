@@ -96,6 +96,32 @@ class TestSidekiq < Sidekiq::Test
       assert_equal 2, counts.size
       assert_equal counts[0] + 1, counts[1]
     end
+
+    it 'swallows connection errors only when the server is stopping' do
+      mock = MiniTest::Mock.new
+      cli = Sidekiq::CLI.new
+      cli.launcher = mock
+      mock.expect :stopping?, false
+
+      Sidekiq::CLI.stub :instance, cli do
+        assert_raises Redis::CannotConnectError do
+          Sidekiq.redis do |c|
+            raise Redis::CannotConnectError
+          end
+        end
+      end
+
+      mock.verify
+      mock.expect :stopping?, true
+
+      Sidekiq::CLI.stub :instance, cli do
+        Sidekiq.redis do |c|
+          raise Redis::CannotConnectError
+        end
+      end
+
+      mock.verify
+    end
   end
 
   describe 'redis info' do
