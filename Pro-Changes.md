@@ -8,6 +8,11 @@ HEAD
 ---------
 
 - Add at\_exit handler to push any saved jobs in `reliable_push` when exiting. [#3823]
+- Implement batch death callback.  This is fired the first time a job within a batch dies. [#3841]
+```ruby
+batch = Sidekiq::Batch.new
+batch.on(:death, ...)
+```
 
 4.0.2
 ---------
