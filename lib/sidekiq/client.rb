@@ -77,9 +77,10 @@ module Sidekiq
     end
 
     ##
-    # Push a large number of jobs to Redis.  In practice this method is only
-    # useful if you are pushing thousands of jobs or more.  This method
-    # cuts out the redis network round trip latency.
+    # Push a large number of jobs to Redis. This method cuts out the redis
+    # network round trip latency.  I wouldn't recommend pushing more than
+    # 1000 per call but YMMV based on network quality, size of job args, etc.
+    # A large number of jobs can cause a bit of Redis command processing latency.
     #
     # Takes the same arguments as #push except that args is expected to be
     # an Array of Arrays.  All other keys are duplicated for each job.  Each job
