@@ -57,8 +57,6 @@ module Sidekiq
           conn.zcard('dead')
           conn.scard('processes')
           conn.lrange('queue:default', -1, -1)
-          conn.smembers('processes')
-          conn.smembers('queues')
         end
       end
 
