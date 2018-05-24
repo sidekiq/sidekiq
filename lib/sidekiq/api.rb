@@ -62,14 +62,22 @@ module Sidekiq
         end
       end
 
+      processes = Sidekiq.redis do |conn|
+        Sidekiq.sscan(conn, 'processes')
+      end
+
+      queues = Sidekiq.redis do |conn|
+        Sidekiq.sscan(conn, 'queues')
+      end
+
       pipe2_res = Sidekiq.redis do |conn|
         conn.pipelined do
-          pipe1_res[7].each {|key| conn.hget(key, 'busy') }
-          pipe1_res[8].each {|queue| conn.llen("queue:#{queue}") }
+          processes.each {|key| conn.hget(key, 'busy') }
+          queues.each {|queue| conn.llen("queue:#{queue}") }
         end
       end
 
-      s = pipe1_res[7].size
+      s = processes.size
       workers_size = pipe2_res[0...s].map(&:to_i).inject(0, &:+)
       enqueued     = pipe2_res[s..-1].map(&:to_i).inject(0, &:+)
 
@@ -118,7 +126,7 @@ module Sidekiq
     class Queues
       def lengths
         Sidekiq.redis do |conn|
-          queues = conn.smembers('queues')
+          queues = Sidekiq.sscan(conn, 'queues')
 
           lengths = conn.pipelined do
             queues.each do |queue|
@@ -203,7 +211,7 @@ module Sidekiq
     # Return all known queues within Redis.
     #
     def self.all
-      Sidekiq.redis { |c| c.smembers('queues') }.sort.map { |q| Sidekiq::Queue.new(q) }
+      Sidekiq.redis { |c| Sidekiq.sscan(c, 'queues') }.sort.map { |q| Sidekiq::Queue.new(q) }
     end
 
     attr_reader :name
@@ -710,7 +718,7 @@ module Sidekiq
     def self.cleanup
       count = 0
       Sidekiq.redis do |conn|
-        procs = conn.smembers('processes').sort
+        procs = Sidekiq.sscan(conn, 'processes').sort
         heartbeats = conn.pipelined do
           procs.each do |key|
             conn.hget(key, 'info')
@@ -730,7 +738,7 @@ module Sidekiq
     end
 
     def each
-      procs = Sidekiq.redis { |conn| conn.smembers('processes') }.sort
+      procs = Sidekiq.redis { |conn| Sidekiq.sscan(conn, 'processes') }.sort
 
       Sidekiq.redis do |conn|
         # We're making a tradeoff here between consuming more memory instead of
@@ -868,7 +876,7 @@ module Sidekiq
 
     def each
       Sidekiq.redis do |conn|
-        procs = conn.smembers('processes')
+        procs = Sidekiq.sscan(conn, 'processes')
         procs.sort.each do |key|
           valid, workers = conn.pipelined do
             conn.exists(key)
@@ -890,7 +898,7 @@ module Sidekiq
     # which can easily get out of sync with crashy processes.
     def size
       Sidekiq.redis do |conn|
-        procs = conn.smembers('processes')
+        procs = Sidekiq.sscan(conn, 'processes')
         if procs.empty?
           0
         else
@@ -904,4 +912,14 @@ module Sidekiq
     end
   end
 
+  def self.sscan(conn, key)
+    cursor = '0'
+    result = []
+    loop do
+      cursor, values = conn.sscan(key, cursor)
+      result.push(*values)
+      break if cursor == '0'
+    end
+    result
+  end
 end
