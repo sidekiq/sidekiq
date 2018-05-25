@@ -209,7 +209,7 @@ module Sidekiq
   #
   class Queue
     include Enumerable
-    include RedisIterator
+    extend RedisIterator
 
     ##
     # Return all known queues within Redis.
