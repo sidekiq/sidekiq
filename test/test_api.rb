@@ -10,21 +10,6 @@ class TestApi < Sidekiq::Test
       Sidekiq.redis {|c| c.flushdb }
     end
 
-    describe '.sscan' do
-      include Sidekiq::RedisIterator
-      before do
-        50.times do |i|
-          Sidekiq.redis { |conn| conn.sadd('processes', "test-process-#{i}") }
-        end
-      end
-      it 'returns identical to smembers' do
-        sscan = Sidekiq.redis { |c| Sidekiq::Stats.new.sscan(c, 'processes') }.sort!
-        smembers = Sidekiq.redis { |c| c.smembers('processes') }.sort!
-        assert_equal sscan.size, 50
-        assert_equal sscan, smembers
-      end
-    end
-
     describe "stats" do
       it "is initially zero" do
         s = Sidekiq::Stats.new
