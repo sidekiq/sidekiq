@@ -5,6 +5,7 @@
 HEAD
 -----------
 
+- Switch Sidekiq::Testing impl from alias\_method to Module#prepend, for resiliency [#3852]
 - Remove concurrent-ruby gem dependency [#3830]
 
 5.1.3

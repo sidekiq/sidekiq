@@ -72,7 +72,7 @@ module Sidekiq
 
   class EmptyQueueError < RuntimeError; end
 
-  module ClientCoreExt
+  module TestingClient
     def raw_push(payloads)
       if Sidekiq::Testing.fake?
         payloads.each do |job|
@@ -95,7 +95,7 @@ module Sidekiq
     end
   end
 
-  Sidekiq::Client.prepend ClientCoreExt
+  Sidekiq::Client.prepend TestingClient
 
   module Queues
     ##
