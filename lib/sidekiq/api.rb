@@ -1,10 +1,23 @@
 # frozen_string_literal: true
 require 'sidekiq'
-require 'sidekiq/redis_iterator'
 
 module Sidekiq
+
+  module RedisScanner
+    def sscan(conn, key)
+      cursor = '0'
+      result = []
+      loop do
+        cursor, values = conn.sscan(key, cursor)
+        result.push(*values)
+        break if cursor == '0'
+      end
+      result
+    end
+  end
+
   class Stats
-    include RedisIterator
+    include RedisScanner
 
     def initialize
       fetch_stats!
@@ -125,7 +138,7 @@ module Sidekiq
     end
 
     class Queues
-      include RedisIterator
+      include RedisScanner
 
       def lengths
         Sidekiq.redis do |conn|
@@ -209,7 +222,7 @@ module Sidekiq
   #
   class Queue
     include Enumerable
-    extend RedisIterator
+    extend RedisScanner
 
     ##
     # Return all known queues within Redis.
@@ -712,15 +725,15 @@ module Sidekiq
   #
   class ProcessSet
     include Enumerable
-    extend RedisIterator
+    include RedisScanner
 
     def initialize(clean_plz=true)
-      self.class.cleanup if clean_plz
+      cleanup if clean_plz
     end
 
     # Cleans up dead processes recorded in Redis.
     # Returns the number of processes cleaned.
-    def self.cleanup
+    def cleanup
       count = 0
       Sidekiq.redis do |conn|
         procs = sscan(conn, 'processes').sort
@@ -743,7 +756,7 @@ module Sidekiq
     end
 
     def each
-      procs = Sidekiq.redis { |conn| self.class.sscan(conn, 'processes') }.sort
+      procs = Sidekiq.redis { |conn| sscan(conn, 'processes') }.sort
 
       Sidekiq.redis do |conn|
         # We're making a tradeoff here between consuming more memory instead of
@@ -878,7 +891,7 @@ module Sidekiq
   #
   class Workers
     include Enumerable
-    include RedisIterator
+    include RedisScanner
 
     def each
       Sidekiq.redis do |conn|
