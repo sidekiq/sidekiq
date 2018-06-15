@@ -5,6 +5,7 @@ Sidekiq
 [![Code Climate](https://codeclimate.com/github/mperham/sidekiq.svg)](https://codeclimate.com/github/mperham/sidekiq)
 [![Build Status](https://travis-ci.org/mperham/sidekiq.svg)](https://travis-ci.org/mperham/sidekiq)
 [![Gitter Chat](https://badges.gitter.im/mperham/sidekiq.svg)](https://gitter.im/mperham/sidekiq)
+[![SemVer](https://api.dependabot.com/badges/compatibility_score?dependency-name=sidekiq&package-manager=bundler&version-scheme=semver)](https://dependabot.com/compatibility-score.html?dependency-name=sidekiq&package-manager=bundler&version-scheme=semver)
 
 
 Simple, efficient background processing for Ruby.
