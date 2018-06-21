@@ -1,4 +1,4 @@
-Myapp::Application.routes.draw do
+Rails.application.routes.draw do
   mount Sidekiq::Web => '/sidekiq'
   get "work" => "work#index"
   get "work/email" => "work#email"
