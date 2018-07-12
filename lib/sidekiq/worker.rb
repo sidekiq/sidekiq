@@ -83,6 +83,10 @@ module Sidekiq
         Setter.new(self, options)
       end
 
+      def perform_now(*args)
+        self.new.perform(*args)
+      end
+
       def perform_async(*args)
         client_push('class' => self, 'args' => args)
       end
