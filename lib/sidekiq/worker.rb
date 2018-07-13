@@ -84,7 +84,7 @@ module Sidekiq
       end
 
       def perform_now(*args)
-        self.new.perform(*args)
+        new.perform(*args)
       end
 
       def perform_async(*args)
