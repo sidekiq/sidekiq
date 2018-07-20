@@ -5,6 +5,7 @@
 HEAD
 -----------
 
+- **Decrease default concurrency from 25 to 10** [#3892]
 - Smoother scheduling for large Sidekiq clusters [#3889]
 - Switch Sidekiq::Testing impl from alias\_method to Module#prepend, for resiliency [#3852]
 - Update Sidekiq APIs to use SCAN for scalability [#3848, ffiller]
