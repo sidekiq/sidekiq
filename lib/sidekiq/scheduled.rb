@@ -103,27 +103,27 @@ module Sidekiq
         #
         # So in N*M second timespan, we want each process to schedule once.  The basic loop is:
         #
-        # * sleep # a random amount within that N*M timespan
-        # * wake up, schedule
+        # * sleep a random amount within that N*M timespan
+        # * wake up and schedule
         #
-        # There are pathological edge cases:
-        #
-        # Imagine a set of 4 processes, scheduling every 5 seconds, so N*M = 20.  Each process
-        # decides to randomly sleep 18 seconds, now we've failed to meet that 5 second average.
-        # Thankfully each schedule cycle will sleep randomly so the next iteration could see each
-        # process sleep for 1 second, undercutting our average.
+        # We want to avoid one edge case: imagine a set of 2 processes, scheduling every 5 seconds,
+        # so N*M = 10.  Each process decides to randomly sleep 8 seconds, now we've failed to meet
+        # that 5 second average. Thankfully each schedule cycle will sleep randomly so the next
+        # iteration could see each process sleep for 1 second, undercutting our average.
         #
         # So below 10 processes, we special case and ensure the processes sleep closer to the average.
-        # As we run more processes, the scheduling interval average should approach the desired
-        # amount.
+        # In the example above, each process should schedule every 10 seconds on average. We special
+        # case smaller clusters to add 50% so they would sleep somewhere between 5 and 15 seconds.
+        # As we run more processes, the scheduling interval average will approach an even spread
+        # between 0 and poll interval so we don't need this artifical boost.
         #
         if process_count < 10
-          # For small clusters, # calculates a random interval that is ±50% the desired average.
+          # For small clusters, calculate a random interval that is ±50% the desired average.
           poll_interval_average * rand + poll_interval_average.to_f / 2
         else
           # With 10+ processes, we should have enough randomness to get decent polling
           # across the entire timespan
-          poll_interval_average * rand * 2
+          poll_interval_average * rand
         end
       end
 
