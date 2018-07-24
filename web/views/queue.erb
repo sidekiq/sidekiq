@@ -5,6 +5,7 @@
       <% if @queue.paused? %>
         <span class="label label-danger"><%= t('Paused') %></span>
       <% end %>
+      <span>(<%= number_with_delimiter(@queue.size) %>)</span>
     </h3>
   </div>
   <div class="col-sm-4 pull-right flip">
