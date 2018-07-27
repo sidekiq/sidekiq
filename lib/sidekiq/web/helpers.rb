@@ -184,7 +184,7 @@ module Sidekiq
     end
 
     def parse_params(params)
-      score, jid = params.split("-")
+      score, jid = params.split("-", 2)
       [score.to_f, jid]
     end
 
