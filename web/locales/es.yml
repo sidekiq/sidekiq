@@ -11,11 +11,11 @@ es:
   Failed: Fallidas
   Scheduled: Programadas
   Retries: Reintentos
-  Enqueued: En Fila
+  Enqueued: En Cola
   Worker: Trabajador
   LivePoll: Sondeo en Vivo
   StopPolling: Detener Sondeo
-  Queue: Fila
+  Queue: Cola
   Class: Clase
   Job: Trabajo
   Arguments: Argumentos
@@ -27,7 +27,7 @@ es:
   AddToQueue: Añadir a fila
   AreYouSureDeleteJob: ¿Estás seguro de eliminar este trabajo?
   AreYouSureDeleteQueue: ¿Estás seguro de eliminar la fila  %{queue}?
-  Queues: Filas
+  Queues: Colas
   Size: Tamaño
   Actions: Acciones
   NextRetry: Siguiente Intento

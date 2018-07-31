@@ -453,7 +453,7 @@ class TestWeb < Sidekiq::Test
 
         post "/morgue/#{score}-", 'delete' => 'Delete'
         assert_equal 302, last_response.status
-        assert_equal 0, s.size
+        assert_equal 1, s.size
       end
     end
 
@@ -515,6 +515,12 @@ class TestWeb < Sidekiq::Test
         post "/morgue/#{job_params(*params)}", 'retry' => 'Retry'
         assert_equal 302, last_response.status
         assert_equal 'http://example.org/morgue', last_response.header['Location']
+        assert_equal 0, Sidekiq::DeadSet.new.size
+
+        params = add_dead('jid-with-hyphen')
+        post "/morgue/#{job_params(*params)}", 'retry' => 'Retry'
+        assert_equal 302, last_response.status
+        assert_equal 0, Sidekiq::DeadSet.new.size
 
         get '/queues/foo'
         assert_equal 200, last_response.status
@@ -556,7 +562,7 @@ class TestWeb < Sidekiq::Test
       [msg, score]
     end
 
-    def add_dead
+    def add_dead(jid = SecureRandom.hex(12))
       msg = { 'class' => 'HardWorker',
               'args' => ['bob', 1, Time.now.to_f],
               'queue' => 'foo',
@@ -564,7 +570,7 @@ class TestWeb < Sidekiq::Test
               'error_class' => 'RuntimeError',
               'retry_count' => 0,
               'failed_at' => Time.now.utc,
-              'jid' => SecureRandom.hex(12) }
+              'jid' => jid }
       score = Time.now.to_f
       Sidekiq.redis do |conn|
         conn.zadd('dead', score, Sidekiq.dump_json(msg))
