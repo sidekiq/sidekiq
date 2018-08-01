@@ -234,7 +234,7 @@ module Sidekiq
     attr_reader :name
 
     def initialize(name="default")
-      @name = name
+      @name = name.to_s
       @rname = "queue:#{name}"
     end
 
