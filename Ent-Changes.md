@@ -4,6 +4,11 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+-------------
+
+- Add support for sidekiqswarm memory monitoring on FreeBSD [#3884]
+
 1.7.1
 -------------
 
