@@ -29,6 +29,7 @@ module Sidekiq
       base.extend(ClassMethods)
       base.sidekiq_class_attribute :sidekiq_options_hash
       base.sidekiq_class_attribute :sidekiq_retry_in_block
+      base.sidekiq_class_attribute :sidekiq_retry_in_duration
       base.sidekiq_class_attribute :sidekiq_retries_exhausted_block
     end
 
@@ -121,8 +122,20 @@ module Sidekiq
         self.sidekiq_options_hash = get_sidekiq_options.merge(Hash[opts.map{|k, v| [k.to_s, v]}])
       end
 
-      def sidekiq_retry_in(&block)
-        self.sidekiq_retry_in_block = block
+      def sidekiq_retry_in(duration = nil, &block)
+        if block && duration || !block && !duration
+          raise ArgumentError, "you should pass either block and duration"
+        end
+
+        if block
+          self.sidekiq_retry_in_block = block
+        else
+          begin
+            self.sidekiq_retry_in_duration = Integer(duration)
+          rescue
+            raise ArgumentError, "you should pass either date or integer"
+          end
+        end
       end
 
       def sidekiq_retries_exhausted(&block)

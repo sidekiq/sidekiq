@@ -273,6 +273,18 @@ class TestRetry < Sidekiq::Test
         end
       end
 
+      class CustomWorkerWithIntValue
+        include Sidekiq::Worker
+
+        sidekiq_retry_in(16)
+      end
+
+      class CustomWorkerWithDateValue
+        include Sidekiq::Worker
+
+        sidekiq_retry_in(5.minutes)
+      end
+
       it "retries with a default delay" do
         refute_equal 4, handler.__send__(:delay_for, worker, 2, StandardError.new)
       end
@@ -292,6 +304,34 @@ class TestRetry < Sidekiq::Test
 
       it "retries with a custom delay without exception" do
         assert_equal 4, handler.__send__(:delay_for, CustomWorkerWithoutException, 2, StandardError.new)
+      end
+
+      it "retries with a custom int value delay" do
+        assert_equal 16, handler.__send__(:delay_for, CustomWorkerWithIntValue, 2, StandardError.new)
+      end
+
+      it "retries with a custom date value delay" do
+        assert_equal 5.minutes.to_i, handler.__send__(:delay_for, CustomWorkerWithDateValue, 2, StandardError.new)
+      end
+
+      it "raises ArgumentError when block and value are passed" do
+        assert_raises ArgumentError do
+          Class.new do
+            include Sidekiq::Worker
+
+            sidekiq_retry_in(20) { |count| 24 }
+          end
+        end
+      end
+
+      it "raises ArgumentError when non-int value is passed" do
+        assert_raises ArgumentError do
+          Class.new do
+            include Sidekiq::Worker
+
+            sidekiq_retry_in('something')
+          end
+        end
       end
 
       it "falls back to the default retry on exception" do
