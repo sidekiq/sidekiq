@@ -205,7 +205,7 @@ module Sidekiq
     end
 
     def delay_for(worker, count, exception)
-      if worker && worker.sidekiq_retry_in_block
+      if worker && (worker.sidekiq_retry_in_block || worker.sidekiq_retry_in_duration)
         custom_retry_in = retry_in(worker, count, exception).to_i
         return custom_retry_in if custom_retry_in > 0
       end
@@ -218,6 +218,8 @@ module Sidekiq
     end
 
     def retry_in(worker, count, exception)
+      return worker.sidekiq_retry_in_duration if worker.sidekiq_retry_in_duration
+
       begin
         worker.sidekiq_retry_in_block.call(count, exception)
       rescue Exception => e

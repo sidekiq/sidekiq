@@ -10,6 +10,8 @@ HEAD
 - Switch Sidekiq::Testing impl from alias\_method to Module#prepend, for resiliency [#3852]
 - Update Sidekiq APIs to use SCAN for scalability [#3848, ffiller]
 - Remove concurrent-ruby gem dependency [#3830]
+- Sidekiq::Worker `sidekiq_retry_in` can accept plain value instead of block,
+  e.g. `sidekiq_retry_in(4)` or `sidekiq_retry_in(3.minutes)` [#3908, DmitryTsepelev]
 
 5.1.3
 -----------
