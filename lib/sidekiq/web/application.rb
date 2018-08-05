@@ -7,6 +7,21 @@ module Sidekiq
     CONTENT_LENGTH = "Content-Length"
     CONTENT_TYPE = "Content-Type"
     REDIS_KEYS = %w(redis_version uptime_in_days connected_clients used_memory_human used_memory_peak_human)
+    CSP_HEADER = [
+      "default-src 'self' https: http:",
+      "child-src 'self'",
+      "connect-src 'self' https: http: wss: ws:",
+      "font-src 'self' https: http:",
+      "frame-src 'self'",
+      "img-src 'self' https: http: data:",
+      "manifest-src 'self'",
+      "media-src 'self'",
+      "object-src 'none'",
+      "script-src 'self' https: http:",
+      "style-src 'self' https: http: 'unsafe-inline'",
+      "worker-src 'self'",
+      "base-uri 'self'"
+    ].join('; ').freeze
 
     def initialize(klass)
       @klass = klass
@@ -279,6 +294,7 @@ module Sidekiq
           "Content-Type" => "text/html",
           "Cache-Control" => "no-cache",
           "Content-Language" => action.locale,
+          "Content-Security-Policy" => CSP_HEADER
         }
 
         [200, headers, [resp]]
