@@ -12,6 +12,8 @@ module Sidekiq
     include Util
 
     attr_accessor :manager, :poller, :fetcher
+    
+    STATS_TTL = 5*365*24*60*60
 
     def initialize(options)
       @manager = Sidekiq::Manager.new(options)
@@ -81,8 +83,12 @@ module Sidekiq
           conn.multi do
             conn.incrby("stat:processed", procd)
             conn.incrby("stat:processed:#{nowdate}", procd)
+            conn.expire("stat:processed:#{nowdate}", STATS_TTL)
+            
             conn.incrby("stat:failed", fails)
             conn.incrby("stat:failed:#{nowdate}", fails)
+            conn.expire("stat:failed:#{nowdate}", STATS_TTL)
+            
             conn.del(workers_key)
             Processor::WORKER_STATE.each_pair do |tid, hash|
               conn.hset(workers_key, tid, Sidekiq.dump_json(hash))
