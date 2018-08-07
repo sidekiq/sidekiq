@@ -80,6 +80,12 @@ module Sidekiq
       ver = Sidekiq.redis_info['redis_version']
       raise "You are using Redis v#{ver}, Sidekiq requires Redis v2.8.0 or greater" if ver < '2.8'
 
+      # Since the user can pass us a connection pool explicitly in the initializer, we
+      # need to verify the size is large enough or else Sidekiq's performance is dramatically slowed.
+      cursize = Sidekiq.redis_pool.size
+      needed = Sidekiq.options[:concurrency] + 2
+      raise "Your pool of #{cursize} Redis connections is too small, please increase the size to at least #{needed}" if cursize < needed
+
       # cache process identity
       Sidekiq.options[:identity] = identity
 
