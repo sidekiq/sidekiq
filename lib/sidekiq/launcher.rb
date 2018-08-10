@@ -12,7 +12,7 @@ module Sidekiq
     include Util
 
     attr_accessor :manager, :poller, :fetcher
-    
+
     STATS_TTL = 5*365*24*60*60
 
     def initialize(options)
@@ -76,6 +76,7 @@ module Sidekiq
       begin
         fails = Processor::FAILURE.reset
         procd = Processor::PROCESSED.reset
+        curstate = Processor::WORKER_STATE.dup
 
         workers_key = "#{key}:workers"
         nowdate = Time.now.utc.strftime("%Y-%m-%d")
@@ -84,13 +85,13 @@ module Sidekiq
             conn.incrby("stat:processed", procd)
             conn.incrby("stat:processed:#{nowdate}", procd)
             conn.expire("stat:processed:#{nowdate}", STATS_TTL)
-            
+
             conn.incrby("stat:failed", fails)
             conn.incrby("stat:failed:#{nowdate}", fails)
             conn.expire("stat:failed:#{nowdate}", STATS_TTL)
-            
+
             conn.del(workers_key)
-            Processor::WORKER_STATE.each_pair do |tid, hash|
+            curstate.each_pair do |tid, hash|
               conn.hset(workers_key, tid, Sidekiq.dump_json(hash))
             end
             conn.expire(workers_key, 60)
@@ -102,7 +103,7 @@ module Sidekiq
           conn.multi do
             conn.sadd('processes', key)
             conn.exists(key)
-            conn.hmset(key, 'info', to_json, 'busy', Processor::WORKER_STATE.size, 'beat', Time.now.to_f, 'quiet', @done)
+            conn.hmset(key, 'info', to_json, 'busy', curstate.size, 'beat', Time.now.to_f, 'quiet', @done)
             conn.expire(key, 60)
             conn.rpop("#{key}-signals")
           end
