@@ -259,7 +259,7 @@ module Sidekiq
       return 0 unless entry
       job = Sidekiq.load_json(entry)
       now = Time.now.to_f
-      thence = job['enqueued_at'] || now
+      thence = job['enqueued_at'].to_f || now
       now - thence
     end
 
