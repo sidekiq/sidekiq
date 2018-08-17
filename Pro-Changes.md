@@ -4,6 +4,12 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Update Sidekiq::Client patches to work with new Module#prepend
+  mechanism in Sidekiq 5.2.0. [#3930]
+
 4.0.3
 ---------
 
