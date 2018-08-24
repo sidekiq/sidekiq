@@ -436,9 +436,9 @@ module Sidekiq
     end
 
     def parse_queue(opts, q, weight=nil)
-      [weight.to_i, 1].max.times do
-       (opts[:queues] ||= []) << q
-      end
+      opts[:queues] ||= []
+      raise ArgumentError, "queues: #{q} cannot be defined twice" if opts[:queues].include?(q)
+      [weight.to_i, 1].max.times { opts[:queues] << q }
       opts[:strict] = false if weight.to_i > 0
     end
   end

@@ -104,6 +104,11 @@ class TestCli < Sidekiq::Test
       assert_equal ['foo.bar'], Sidekiq.options[:queues]
     end
 
+    it 'raises an error for duplicate queue names' do
+      assert_raises(ArgumentError) { @cli.parse(['sidekiq', '-q', 'foo', '-q', 'foo', '-r', './test/fake_env.rb']) }
+      assert_raises(ArgumentError) { @cli.parse(['sidekiq', '-q', 'foo,3', '-q', 'foo,1', '-r', './test/fake_env.rb']) }
+    end
+
     it 'sets verbose' do
       old = Sidekiq.logger.level
       @cli.parse(['sidekiq', '-v', '-r', './test/fake_env.rb'])
