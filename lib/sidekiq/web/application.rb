@@ -196,6 +196,12 @@ module Sidekiq
       redirect "#{root_path}retries"
     end
 
+    post "/retries/all/kill" do
+      Sidekiq::RetrySet.new.kill_all
+
+      redirect "#{root_path}retries"
+    end
+
     post "/retries/:key" do
       job = Sidekiq::RetrySet.new.fetch(*parse_params(route_params[:key])).first
 

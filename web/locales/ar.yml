@@ -40,6 +40,7 @@ ar:
   AreYouSure: هل انت متأكد؟
   DeleteAll: حذف الكل
   RetryAll: إعادة المحاولة للكل
+  KillAll: إبطال الكل
   NoRetriesFound: لاتوجد أي إعادة محاولة
   Error: خطأ
   ErrorClass: نوع الخطأ

@@ -670,6 +670,12 @@ module Sidekiq
         each(&:retry)
       end
     end
+
+    def kill_all
+      while size > 0
+        each(&:kill)
+      end
+    end
   end
 
   ##
