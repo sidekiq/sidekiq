@@ -39,6 +39,7 @@ en: # <---- change this to your locale code
   AreYouSure: Are you sure?
   DeleteAll: Delete All
   RetryAll: Retry All
+  KillAll: Kill All
   NoRetriesFound: No retries were found
   Error: Error
   ErrorClass: Error Class
