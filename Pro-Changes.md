@@ -32,6 +32,7 @@ batch.on(:death, ...)
 ---------
 
 - Fix incompatibility with the statsd-ruby gem [#3740]
+- Add tags to Statsd metrics when using Datadog [#3744]
 
 4.0.0
 ---------
