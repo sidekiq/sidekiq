@@ -121,7 +121,7 @@ module Sidekiq
     end
 
     def t(msg, options={})
-      string = get_locale[msg] || msg
+      string = get_locale[msg] || strings('en')[msg] || msg
       if options.empty?
         string
       else
