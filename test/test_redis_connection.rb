@@ -144,6 +144,37 @@ class TestRedisConnection < Sidekiq::Test
         assert_equal 1, pool.instance_eval{ @timeout }
       end
     end
+
+    describe "driver" do
+      it "uses redis' ruby driver" do
+        pool = Sidekiq::RedisConnection.create
+        redis = pool.checkout
+
+        assert_equal Redis::Connection::Ruby, redis.instance_variable_get(:@client).driver
+      end
+
+      it "uses redis' default driver if there are many available" do
+        begin
+          redis_driver = Object.new
+          Redis::Connection.drivers << redis_driver
+
+          pool = Sidekiq::RedisConnection.create
+          redis = pool.checkout
+
+          assert_equal redis_driver, redis.instance_variable_get(:@client).driver
+        ensure
+          Redis::Connection.drivers.pop
+        end
+      end
+
+      it "uses a given :driver" do
+        redis_driver = Object.new
+        pool = Sidekiq::RedisConnection.create(:driver => redis_driver)
+        redis = pool.checkout
+
+        assert_equal redis_driver, redis.instance_variable_get(:@client).driver
+      end
+    end
   end
 
   describe ".determine_redis_provider" do
