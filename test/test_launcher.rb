@@ -20,7 +20,7 @@ class TestLauncher < Sidekiq::Test
         @launcher.manager = @mgr
         @id = @launcher.identity
 
-        Sidekiq::Processor::WORKER_STATE['a'] = {'b' => 1}
+        Sidekiq::Processor::WORKER_STATE.set('a', {'b' => 1})
 
         @proctitle = $0
       end
