@@ -203,15 +203,41 @@ module Sidekiq
       end
     end
 
+    # jruby's Hash implementation is not threadsafe, so we wrap it in a mutex here
+    class SharedWorkerState
+      def initialize
+        @worker_state = {}
+        @lock = Mutex.new
+      end
+
+      def set(tid, hash)
+        @lock.synchronize { @worker_state[tid] = hash }
+      end
+
+      def delete(tid)
+        @lock.synchronize { @worker_state.delete(tid) }
+      end
+
+      def dup
+        @lock.synchronize { @worker_state.dup }
+      end
+
+      def size
+        @lock.synchronize { @worker_state.size }
+      end
+
+      def clear
+        @lock.synchronize { @worker_state.clear }
+      end
+    end
+
     PROCESSED = Counter.new
     FAILURE = Counter.new
-    # This is mutable global state but because each thread is storing
-    # its own unique key/value, there's no thread-safety issue AFAIK.
-    WORKER_STATE = {}
+    WORKER_STATE = SharedWorkerState.new
 
     def stats(job_hash, queue)
       tid = Sidekiq::Logging.tid
-      WORKER_STATE[tid] = {:queue => queue, :payload => job_hash, :run_at => Time.now.to_i }
+      WORKER_STATE.set(tid, {:queue => queue, :payload => job_hash, :run_at => Time.now.to_i })
 
       begin
         yield
