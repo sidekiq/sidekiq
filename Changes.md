@@ -6,7 +6,8 @@ HEAD
 ---------
 
 - Raise error for duplicate queue names in config to avoid unexpected fetch algorithm change [#3911]
-- Wrap WORKER_STATE in a mutex since Hash is not threadsafe on jruby [#3958]
+- Fix concurrency bug on JRuby [#3958, mattbooks]
+- Add "Kill All" button to the retries page [#3938]
 
 5.2.1
 -----------
