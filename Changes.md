@@ -2,24 +2,6 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
-HEAD
----------
-
-This release has major breaking changes.  Read and test carefully in production.
-
-- **BREAKING CHANGE** Validate proper usage of the `REDIS_PROVIDER`
-  variable.  This variable is meant to hold the name of the environment
-variable which contains your Redis URL, so that you can switch Redis
-providers quickly and easily with a single variable change.  It is not
-meant to hold the actual Redis URL itself.  If you want to manually set
-the Redis URL (not recommended as it implies you have no failover),
-then you may set `REDIS_URL` directly. [#3969]
-- **BREAKING CHANGE** Increase default shutdown timeout from 8 seconds
-  to 25 seconds.  Both Heroku and ECS now use 30 second shutdown timeout
-by default and we want Sidekiq to take advantage of this time.  If you
-have deployment scripts which depend on the old default timeout, use `-t 8` to
-get the old behavior. [#3968]
-
 5.2.2
 ---------
 
