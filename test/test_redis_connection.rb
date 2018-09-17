@@ -218,9 +218,9 @@ class TestRedisConnection < Sidekiq::Test
 
         ENV['REDIS_PROVIDER'] = uri
 
-        #assert_raises RuntimeError do
+        assert_raises RuntimeError do
           Sidekiq::RedisConnection.__send__(:determine_redis_provider)
-        #end
+        end
 
         ENV['REDIS_PROVIDER'] = nil
       end
