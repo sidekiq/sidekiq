@@ -223,6 +223,18 @@ class TestRedisConnection < Minitest::Test
     end
 
     describe "with REDIS_PROVIDER set" do
+      it "rejects URLs in REDIS_PROVIDER" do
+        uri = 'redis://sidekiq-redis-provider:6379/0'
+
+        ENV['REDIS_PROVIDER'] = uri
+
+        #assert_raises RuntimeError do
+          Sidekiq::RedisConnection.__send__(:determine_redis_provider)
+        #end
+
+        ENV['REDIS_PROVIDER'] = nil
+      end
+
       it "sets connection URI to the provider" do
         uri = 'redis://sidekiq-redis-provider:6379/0'
         provider = 'SIDEKIQ_REDIS_PROVIDER'
