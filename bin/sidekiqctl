@@ -3,7 +3,7 @@
 require 'fileutils'
 
 class Sidekiqctl
-  DEFAULT_KILL_TIMEOUT = 10
+  DEFAULT_KILL_TIMEOUT = 30
 
   attr_reader :stage, :pidfile, :kill_timeout
 
