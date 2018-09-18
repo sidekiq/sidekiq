@@ -112,12 +112,11 @@ module Sidekiq
         # If you have this in your environment:
         # MY_REDIS_URL=redis://hostname.example.com:1238/4
         # then set:
-        # REDIS_PROVIDER=MY_REDIS_URL
+        # SIDEKIQ_REDIS_PROVIDER=MY_REDIS_URL
         # and Sidekiq will find your custom URL variable with no custom
         # initialization code at all.
-        ENV[
-          ENV['REDIS_PROVIDER'] || 'REDIS_URL'
-        ]
+        # @@deprecated REDIS_PROVIDER is deprecated and will be removed in the next major version of sidekiq
+        ENV.fetch((ENV['SIDEKIQ_REDIS_PROVIDER'] || ENV['REDIS_PROVIDER']).to_s, ENV['SIDEKIQ_REDIS_URL'] ||  ENV['REDIS_URL'])
       end
 
     end

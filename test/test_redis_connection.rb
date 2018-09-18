@@ -188,7 +188,7 @@ class TestRedisConnection < Sidekiq::Test
     end
 
     def with_env_var(var, uri, skip_provider=false)
-      vars = ['REDISTOGO_URL', 'REDIS_PROVIDER', 'REDIS_URL'] - [var]
+      vars = ['REDISTOGO_URL', 'REDIS_PROVIDER', 'REDIS_URL', 'SIDEKIQ_REDIS_URL'] - [var]
       vars.each do |v|
         next if skip_provider
         ENV[v] = nil
@@ -201,13 +201,16 @@ class TestRedisConnection < Sidekiq::Test
     describe "with REDISTOGO_URL and a parallel REDIS_PROVIDER set" do
       it "sets connection URI to the provider" do
         uri = 'redis://sidekiq-redis-provider:6379/0'
-        provider = 'SIDEKIQ_REDIS_PROVIDER'
+        provider = 'SIDEKIQ_REDIS_PROVIDER_VAR'
+        old_provider = ENV['SIDEKIQ_REDIS_PROVIDER']
 
-        ENV['REDIS_PROVIDER'] = provider
+        ENV['SIDEKIQ_REDIS_PROVIDER'] = provider
         ENV[provider] = uri
         ENV['REDISTOGO_URL'] = 'redis://redis-to-go:6379/0'
         with_env_var provider, uri, true
 
+        ENV['SIDEKIQ_REDIS_PROVIDER'] = old_provider
+        ENV['REDISTOGO_URL'] = nil
         ENV[provider] = nil
       end
     end
@@ -215,20 +218,22 @@ class TestRedisConnection < Sidekiq::Test
     describe "with REDIS_PROVIDER set" do
       it "sets connection URI to the provider" do
         uri = 'redis://sidekiq-redis-provider:6379/0'
-        provider = 'SIDEKIQ_REDIS_PROVIDER'
+        provider = 'SIDEKIQ_REDIS_PROVIDER_VAR'
+        old_provider = ENV['SIDEKIQ_REDIS_PROVIDER']
 
-        ENV['REDIS_PROVIDER'] = provider
+        ENV['SIDEKIQ_REDIS_PROVIDER'] = provider
         ENV[provider] = uri
 
         with_env_var provider, uri, true
 
+        ENV['SIDEKIQ_REDIS_PROVIDER'] = old_provider
         ENV[provider] = nil
       end
     end
 
     describe "with REDIS_URL set" do
       it "sets connection URI to custom uri" do
-        with_env_var 'REDIS_URL', 'redis://redis-uri:6379/0'
+        with_env_var 'SIDEKIQ_REDIS_URL', 'redis://redis-uri:6379/0'
       end
     end
 

@@ -43,7 +43,7 @@ Sidekiq.logger.level = Logger::ERROR
 Sidekiq::Test = Minitest::Test
 
 require 'sidekiq/redis_connection'
-REDIS_URL = ENV['REDIS_URL'] || 'redis://localhost/15'
+REDIS_URL = ENV.fetch('SIDEKIQ_REDIS_URL',ENV.fetch('REDIS_URL', 'redis://localhost/15'))
 REDIS = Sidekiq::RedisConnection.create(:url => REDIS_URL)
 
 Sidekiq.configure_client do |config|
