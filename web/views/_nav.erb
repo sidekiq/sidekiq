@@ -32,12 +32,6 @@
           <% end %>
         <% end %>
 
-        <li class="dropdown" data-navbar="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-            <%= t('Plugins') %> <span class="caret"></span>
-          </a>
-        </li>
-
         <% Sidekiq::Web.custom_tabs.each do |title, url| %>
           <li class="<%= current_path.start_with?(url) ? 'active' : '' %>" data-navbar="custom-tab">
             <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
