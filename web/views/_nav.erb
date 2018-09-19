@@ -36,13 +36,6 @@
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
             <%= t('Plugins') %> <span class="caret"></span>
           </a>
-          <ul class="dropdown-menu" role="menu">
-            <% Sidekiq::Web.custom_tabs.each do |title, url| %>
-              <li>
-                <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
-              </li>
-            <% end %>
-          </ul>
         </li>
 
         <% Sidekiq::Web.custom_tabs.each do |title, url| %>

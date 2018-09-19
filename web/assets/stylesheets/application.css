@@ -645,6 +645,10 @@ div.interval-slider input {
     margin-right: 0;
   }
 
+  .navbar #navbar-menu{
+  	display: none;
+  }
+
   .poll-wrapper {
     width: 100%;
     text-align: center;
