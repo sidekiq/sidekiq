@@ -126,7 +126,7 @@ header.row .pagination {
   text-align: center;
   width: 14%;
 }
-@media (max-width: 767px) and (min-width: 400px) {
+@media (max-width: 767px) and (min-width: 200px) {
   .summary_bar ul li {
     width: 100%;
   }
@@ -241,6 +241,11 @@ table .table-checkbox label {
   .navbar .nav a {
     text-align: center;
   }
+  
+  .poll-wrapper{
+	display: none;
+  }
+  
 }
 
 @media (width: 768px) {
