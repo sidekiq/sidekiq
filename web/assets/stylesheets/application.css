@@ -126,7 +126,7 @@ header.row .pagination {
   text-align: center;
   width: 14%;
 }
-@media (max-width: 767px) and (min-width: 400px) {
+@media (max-width: 767px) and (min-width: 200px) {
   .summary_bar ul li {
     width: 100%;
   }
@@ -219,6 +219,29 @@ table .table-checkbox label {
   color: #585454;
 }
 
+
+.nav.navbar-nav{
+  display: flex;
+  width: 100%;
+}
+
+.navbar-livereload{
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.navbar-livereload .poll-wrapper a:last-child{
+	margin-left: 8px;
+}
+
+.navbar-right{
+  margin-right: 0;
+}
+
+.navbar-collapse.collapse{
+  overflow-x: auto !important;
+}
+
 @media (max-width: 768px) {
   .navbar .navbar-header .navbar-livereload {
     border: none;
@@ -234,13 +257,19 @@ table .table-checkbox label {
     display: none;
   }
 
+  .nav.navbar-nav{
+  	display: block;
+  	width: auto;
+  }
+
   .navbar.navbar-fixed-top ul {
     margin-right: -15px!important;
   }
 
   .navbar .nav a {
     text-align: center;
-  }
+  }  
+
 }
 
 @media (width: 768px) {
@@ -643,6 +672,10 @@ div.interval-slider input {
 
   .navbar.navbar-fixed-top li {
     margin-right: 0;
+  }
+
+  .navbar #navbar-menu{
+  	display: none;
   }
 
   .poll-wrapper {
