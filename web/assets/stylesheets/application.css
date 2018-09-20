@@ -227,6 +227,11 @@ table .table-checkbox label {
 
 .navbar-livereload{
   margin-left: auto;
+  white-space: nowrap;
+}
+
+.navbar-livereload .poll-wrapper a:last-child{
+	margin-left: 8px;
 }
 
 .navbar-right{
