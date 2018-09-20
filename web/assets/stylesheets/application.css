@@ -265,9 +265,6 @@ table .table-checkbox label {
     text-align: center;
   }  
 
-  .poll-wrapper{
-	display: none;
-  }
 }
 
 @media (width: 768px) {
