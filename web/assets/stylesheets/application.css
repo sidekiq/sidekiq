@@ -219,6 +219,24 @@ table .table-checkbox label {
   color: #585454;
 }
 
+
+.nav.navbar-nav{
+  display: flex;
+  width: 100%;
+}
+
+.navbar-livereload{
+  margin-left: auto;
+}
+
+.navbar-right{
+  margin-right: 0;
+}
+
+.navbar-collapse.collapse{
+  overflow-x: auto !important;
+}
+
 @media (max-width: 768px) {
   .navbar .navbar-header .navbar-livereload {
     border: none;
@@ -234,18 +252,22 @@ table .table-checkbox label {
     display: none;
   }
 
+  .nav.navbar-nav{
+  	display: block;
+  	width: auto;
+  }
+
   .navbar.navbar-fixed-top ul {
     margin-right: -15px!important;
   }
 
   .navbar .nav a {
     text-align: center;
-  }
-  
+  }  
+
   .poll-wrapper{
 	display: none;
   }
-  
 }
 
 @media (width: 768px) {
