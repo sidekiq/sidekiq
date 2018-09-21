@@ -32,27 +32,13 @@
           <% end %>
         <% end %>
 
-        <li class="dropdown" data-navbar="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-            <%= t('Plugins') %> <span class="caret"></span>
-          </a>
-          <ul class="dropdown-menu" role="menu">
-            <% Sidekiq::Web.custom_tabs.each do |title, url| %>
-              <li>
-                <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
-              </li>
-            <% end %>
-          </ul>
-        </li>
-
         <% Sidekiq::Web.custom_tabs.each do |title, url| %>
           <li class="<%= current_path.start_with?(url) ? 'active' : '' %>" data-navbar="custom-tab">
             <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
           </li>
         <% end %>
-      </ul>
-      <ul class="nav navbar-nav navbar-right navbar-livereload" data-navbar="static">
-        <li>
+
+        <li class="navbar-livereload">
           <div class="poll-wrapper">
             <%= erb :_poll_link %>
             <% if Sidekiq::Web.app_url %>
