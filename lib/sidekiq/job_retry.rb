@@ -80,8 +80,18 @@ module Sidekiq
       # ignore, will be pushed back onto queue during hard_shutdown
       raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
 
-      raise e unless msg['retry']
-      attempt_retry(nil, msg, queue, e)
+      if msg['retry']
+        attempt_retry(nil, msg, queue, e)
+      else
+        Sidekiq.death_handlers.each do |handler|
+          begin
+            handler.call(msg, e)
+          rescue => handler_ex
+            handle_exception(handler_ex, { context: "Error calling death handler", job: msg })
+          end
+        end
+      end
+
       raise e
     end
 
