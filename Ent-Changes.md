@@ -7,6 +7,8 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 HEAD
 -------------
 
+- Fix edge case where flapping leadership would cause old periodic
+  jobs to be fired once [#3974]
 - Add support for sidekiqswarm memory monitoring on FreeBSD [#3884]
 
 1.7.1
