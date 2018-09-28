@@ -168,7 +168,8 @@ module Sidekiq
 
       if count < max_retry_attempts
         delay = delay_for(worker, count, exception)
-        logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
+        # Logging here can break retries if the logging device raises ENOSPC #3979
+        #logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
         retry_at = Time.now.to_f + delay
         payload = Sidekiq.dump_json(msg)
         Sidekiq.redis do |conn|
@@ -181,7 +182,6 @@ module Sidekiq
     end
 
     def retries_exhausted(worker, msg, exception)
-      logger.debug { "Retries exhausted for job" }
       begin
         block = worker && worker.sidekiq_retries_exhausted_block
         block.call(msg, exception) if block
@@ -201,7 +201,7 @@ module Sidekiq
     end
 
     def send_to_morgue(msg)
-      Sidekiq.logger.info { "Adding dead #{msg['class']} job #{msg['jid']}" }
+      logger.info { "Adding dead #{msg['class']} job #{msg['jid']}" }
       payload = Sidekiq.dump_json(msg)
       DeadSet.new.kill(payload, notify_failure: false)
     end
