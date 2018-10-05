@@ -4,6 +4,11 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Add Japanese and Russian translations, see [issue #3951](https://github.com/mperham/sidekiq/issues/3951) to add your own language
+
 4.0.4
 ---------
 
