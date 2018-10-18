@@ -66,6 +66,7 @@ module Sidekiq
     end
 
     module ClassMethods
+      ACCESSOR_MUTEX = Mutex.new
 
       def delay(*args)
         raise ArgumentError, "Do not call .delay on a Sidekiq::Worker class, call .perform_async"
@@ -148,10 +149,18 @@ module Sidekiq
         instance_writer = true
 
         attrs.each do |name|
+          synchronized_getter = "__synchronized_#{name}"
+
           singleton_class.instance_eval do
             undef_method(name) if method_defined?(name) || private_method_defined?(name)
           end
-          define_singleton_method(name) { nil }
+
+          define_singleton_method(synchronized_getter) { nil }
+          singleton_class.class_eval do
+            private(synchronized_getter)
+          end
+
+          define_singleton_method(name) { ACCESSOR_MUTEX.synchronize { send synchronized_getter } }
 
           ivar = "@#{name}"
 
@@ -161,8 +170,10 @@ module Sidekiq
           end
           define_singleton_method("#{name}=") do |val|
             singleton_class.class_eval do
-              undef_method(name) if method_defined?(name) || private_method_defined?(name)
-              define_method(name) { val }
+              ACCESSOR_MUTEX.synchronize do
+                undef_method(synchronized_getter) if method_defined?(synchronized_getter) || private_method_defined?(synchronized_getter)
+                define_method(synchronized_getter) { val }
+              end
             end
 
             if singleton_class?
