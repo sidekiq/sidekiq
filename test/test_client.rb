@@ -298,7 +298,7 @@ class TestClient < Sidekiq::Test
     }
 
     it 'does not explode when new initializing classes from multiple threads' do
-      10000.times do
+      100.times do
         klass = new_class.call
 
         t1 = Thread.new { klass.sidekiq_options({}) }

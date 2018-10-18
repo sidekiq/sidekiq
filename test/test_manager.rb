@@ -20,7 +20,7 @@ class TestManager < Sidekiq::Test
 
     it 'shuts down the system' do
       mgr = new_manager(options)
-      mgr.stop(Time.now)
+      mgr.stop(::Process.clock_gettime(::Process::CLOCK_MONOTONIC))
     end
 
     it 'throws away dead processors' do
