@@ -40,7 +40,7 @@ module Sidekiq
     # return until all work is complete and cleaned up.
     # It can take up to the timeout to complete.
     def stop
-      deadline = Time.now + @options[:timeout]
+      deadline = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) + @options[:timeout]
 
       @done = true
       @manager.quiet

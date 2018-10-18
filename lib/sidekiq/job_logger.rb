@@ -3,7 +3,7 @@ module Sidekiq
   class JobLogger
 
     def call(item, queue)
-      start = Time.now
+      start = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
       logger.info("start")
       yield
       logger.info("done: #{elapsed(start)} sec")
@@ -15,7 +15,7 @@ module Sidekiq
     private
 
     def elapsed(start)
-      (Time.now - start).round(3)
+      (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - start).round(3)
     end
 
     def logger

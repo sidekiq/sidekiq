@@ -87,7 +87,7 @@ module Sidekiq
     def get_one
       begin
         work = @strategy.retrieve_work
-        (logger.info { "Redis is online, #{Time.now - @down} sec downtime" }; @down = nil) if @down
+        (logger.info { "Redis is online, #{::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @down} sec downtime" }; @down = nil) if @down
         work
       rescue Sidekiq::Shutdown
       rescue => ex
@@ -107,7 +107,7 @@ module Sidekiq
 
     def handle_fetch_exception(ex)
       if !@down
-        @down = Time.now
+        @down = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
         logger.error("Error fetching job: #{ex}")
         handle_exception(ex)
       end

@@ -70,11 +70,11 @@ module Sidekiq
       return if @workers.empty?
 
       logger.info { "Pausing to allow workers to finish..." }
-      remaining = deadline - Time.now
+      remaining = deadline - ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
       while remaining > PAUSE_TIME
         return if @workers.empty?
         sleep PAUSE_TIME
-        remaining = deadline - Time.now
+        remaining = deadline - ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
       end
       return if @workers.empty?
 
