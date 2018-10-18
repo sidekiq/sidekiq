@@ -8,6 +8,7 @@ HEAD
 - Fix a few issues with mobile Web UI styling [#3973, navied]
 - Jobs with `retry: false` now go through the global `death_handlers`,
   meaning you can take action on failed ephemeral jobs. [#3980, Benjamin-Dobell]
+- Fix race condition in defining Workers. [#3997, mattbooks]
 
 5.2.2
 ---------
