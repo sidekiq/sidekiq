@@ -287,4 +287,25 @@ class TestClient < Sidekiq::Test
       assert_equal 12, job['retry']
     end
   end
+
+  describe 'class attribute race conditions' do
+    new_class = -> {
+      Class.new do
+        class_eval('include Sidekiq::Worker')
+
+        define_method(:foo) { get_sidekiq_options }
+      end
+    }
+
+    it 'does not explode when new initializing classes from multiple threads' do
+      10000.times do
+        klass = new_class.call
+
+        t1 = Thread.new { klass.sidekiq_options({}) }
+        t2 = Thread.new { klass.sidekiq_options({}) }
+        t1.join
+        t2.join
+      end
+    end
+  end
 end
