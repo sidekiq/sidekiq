@@ -9,7 +9,7 @@
       <div class="navbar-toggle collapsed navbar-livereload">
         <%= erb :_poll_link %>
         <% if Sidekiq::Web.app_url %>
-          <a class="btn btn-inverse" href="<%= Sidekiq::Web.app_url %>">Back to App</a>
+          <a class="btn btn-inverse" href="<%= Sidekiq::Web.app_url %>"><%= t('BackToApp') %></a>
         <% end %>
       </div>
       <a class="navbar-brand" href="<%= root_path %>">
