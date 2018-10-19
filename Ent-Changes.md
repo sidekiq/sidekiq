@@ -7,7 +7,7 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 HEAD
 -------------
 
-- Fix elapsed time calculations to use monotonic clock [#3999]
+- Fix elapsed time calculations to use monotonic clock [#4000, sj26]
 - Fix edge case where flapping leadership would cause old periodic
   jobs to be fired once [#3974]
 - Add support for sidekiqswarm memory monitoring on FreeBSD [#3884]
