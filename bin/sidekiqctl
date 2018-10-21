@@ -1,20 +1,26 @@
 #!/usr/bin/env ruby
 
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), *%w[.. lib])
 require 'fileutils'
+require 'sidekiq/status'
 
 class Sidekiqctl
   DEFAULT_KILL_TIMEOUT = 10
+  CMD = File.basename($0)
 
   attr_reader :stage, :pidfile, :kill_timeout
 
   def self.print_usage
-    puts "#{File.basename($0)} - stop a Sidekiq process from the command line."
+    puts "#{CMD} - control Sidekiq from the command line."
     puts
-    puts "Usage: #{File.basename($0)} <command> <pidfile> <kill_timeout>"
-    puts " where <command> is either 'quiet' or 'stop'"
+    puts "Usage: #{CMD} quiet <pidfile> <kill_timeout>"
+    puts "       #{CMD} stop <pidfile> <kill_timeout>"
+    puts "       #{CMD} status <section>"
+    puts
     puts "       <pidfile> is path to a pidfile"
     puts "       <kill_timeout> is number of seconds to wait until Sidekiq exits"
     puts "       (default: #{Sidekiqctl::DEFAULT_KILL_TIMEOUT}), after which Sidekiq will be KILL'd"
+    puts "       <section> (optional) view a specific section of the status output"
     puts
     puts "Be sure to set the kill_timeout LONGER than Sidekiq's -t timeout.  If you want"
     puts "to wait 60 seconds for jobs to finish, use `sidekiq -t 60` and `sidekiqctl stop"
@@ -85,6 +91,15 @@ class Sidekiqctl
     done 'Sidekiq shut down forcefully.'
   end
   alias_method :shutdown, :stop
+
+  def self.status(section)
+    Sidekiq::Status.new(section).output
+  end
+end
+
+if ARGV[0] == 'status'
+  Sidekiqctl.status(ARGV[1])
+  exit
 end
 
 if ARGV.length < 2
