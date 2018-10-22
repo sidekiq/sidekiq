@@ -93,7 +93,7 @@ class Sidekiqctl
   alias_method :shutdown, :stop
 
   def self.status(section)
-    Sidekiq::Status.new(section).output
+    Sidekiq::Status.new.display(section)
   end
 end
 

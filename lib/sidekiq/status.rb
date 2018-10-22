@@ -2,14 +2,9 @@ require 'sidekiq/api'
 
 module Sidekiq
   class Status
-    def initialize(section = nil)
-      @section = section || 'everything'
-    end
-
-    def output
-      send(@section)
-    rescue NoMethodError
-      puts "Don't know how to check the status of '#{@section}'!"
+    def display(section = nil)
+      section ||= 'everything'
+      send(section)
     end
 
     def everything
@@ -18,6 +13,7 @@ module Sidekiq
       overview
       puts
       workers
+      puts
       queues
     end
 
@@ -39,12 +35,12 @@ module Sidekiq
 
     def workers
       puts "---- Workers (#{process_set.size}) ----"
-      process_set.each do |process|
+      process_set.each_with_index do |process, index|
         puts "#{process['identity']} #{tags_for(process)}"
         puts "  Started: #{Time.at(process['started_at'])} (#{time_ago(process['started_at'])})"
         puts "  Threads: #{process['concurrency']} (#{process['busy']} busy)"
         puts "   Queues: #{split_multiline(process['queues'], pad: 11)}"
-        puts
+        puts '' unless (index+1) == process_set.size
       end
     end
 
