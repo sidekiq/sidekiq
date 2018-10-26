@@ -131,7 +131,7 @@ class Sidekiqctl
         puts "#{process['identity']} #{tags_for(process)}"
         puts "  Started: #{Time.at(process['started_at'])} (#{time_ago(process['started_at'])})"
         puts "  Threads: #{process['concurrency']} (#{process['busy']} busy)"
-        puts "   Queues: #{split_multiline(process['queues'], pad: 11)}"
+        puts "   Queues: #{split_multiline(process['queues'].sort, pad: 11)}"
         puts '' unless (index+1) == process_set.size
       end
     end
@@ -161,17 +161,13 @@ class Sidekiqctl
       pad = opts[:pad] || 0
       max_length = opts[:max_length] || (80 - pad)
       out = []
-      line_length = 0
       line = ''
       values.each do |value|
-        line_length += (value.length)
-        if line_length > max_length
+        if (line.length + value.length) > max_length
           out << line
           line = ' ' * pad
-          line_length = line.length
         end
-        line << value
-        line << ', '
+        line << value + ', '
       end
       out << line[0..-3]
       out.join("\n")
@@ -195,16 +191,15 @@ class Sidekiqctl
       "#{seconds.floor / 60 / 60} hours ago"
     end
 
-    def process_set
-      @process_set ||= Sidekiq::ProcessSet.new
+    QUEUE_STRUCT = Struct.new(:name, :size, :latency)
+    def queue_data
+      @queue_data ||= Sidekiq::Queue.all.map do |q|
+        QUEUE_STRUCT.new(q.name, q.size.to_s, sprintf('%#.2f', q.latency))
+      end
     end
 
-    def queue_data
-      return @queue_data if @queue_data
-      s = Struct.new(:name, :size, :latency)
-      @queue_data = Sidekiq::Queue.all.map do |q|
-        s.new(q.name, q.size.to_s, sprintf('%#.2f', q.latency))
-      end
+    def process_set
+      @process_set ||= Sidekiq::ProcessSet.new
     end
 
     def stats
