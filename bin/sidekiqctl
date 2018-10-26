@@ -104,7 +104,7 @@ class Sidekiqctl
       puts
       overview
       puts
-      workers
+      processes
       puts
       queues
     end
@@ -125,8 +125,8 @@ class Sidekiqctl
       puts "       Dead: #{stats.dead_size}"
     end
 
-    def workers
-      puts "---- Workers (#{process_set.size}) ----"
+    def processes
+      puts "---- Processes (#{process_set.size}) ----"
       process_set.each_with_index do |process, index|
         puts "#{process['identity']} #{tags_for(process)}"
         puts "  Started: #{Time.at(process['started_at'])} (#{time_ago(process['started_at'])})"
