@@ -93,11 +93,13 @@ class Sidekiqctl
 
   class Status
     def display(section = nil)
-      section ||= 'everything'
+      section ||= 'all'
       send(section)
+    rescue NoMethodError => e
+      puts "Couldn't get status of #{section}: #{e.message}"
     end
 
-    def everything
+    def all
       version
       puts
       overview
