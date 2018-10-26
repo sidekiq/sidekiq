@@ -136,25 +136,19 @@ class Sidekiqctl
       end
     end
 
+    COL_PAD = 2
     def queues
       puts "---- Queues (#{queue_data.size}) ----"
       columns = {
-        name: :ljust,
-        size: :rjust,
-        latency: :rjust
+        name: [:ljust, (['name'] + queue_data.map(&:name)).map(&:length).max + COL_PAD],
+        size: [:rjust, (['size'] + queue_data.map(&:size)).map(&:length).max + COL_PAD],
+        latency: [:rjust, (['latency'] + queue_data.map(&:latency)).map(&:length).max + COL_PAD]
       }
-      columns = columns.map do |(col, dir)|
-        width = queue_data.map { |q| q[col].to_s.length }.max + 2
-        width = col.length + 2 if width < col.length + 2
-        [col, [dir, width]]
-      end.to_h
-      columns.map do |col, (dir, width)|
-        print col.to_s.upcase.public_send(dir, width)
-      end
+      columns.each { |col, (dir, width)| print col.to_s.upcase.public_send(dir, width) }
       puts
-      queue_data.each do |queue|
+      queue_data.each do |q|
         columns.each do |col, (dir, width)|
-          print queue[col].to_s.public_send(dir, width)
+          print q.send(col).public_send(dir, width)
         end
         puts
       end
@@ -183,16 +177,6 @@ class Sidekiqctl
       out.join("\n")
     end
 
-    def queue_data
-      @queue_data ||= Sidekiq::Queue.all.map do |queue|
-        {
-          name: queue.name,
-          size: queue.size.to_s,
-          latency: sprintf('%#.2f', queue.latency)
-        }
-      end
-    end
-
     def tags_for(process)
       tags = [
         process['tag'],
@@ -213,6 +197,14 @@ class Sidekiqctl
 
     def process_set
       @process_set ||= Sidekiq::ProcessSet.new
+    end
+
+    def queue_data
+      return @queue_data if @queue_data
+      s = Struct.new(:name, :size, :latency)
+      @queue_data = Sidekiq::Queue.all.map do |q|
+        s.new(q.name, q.size.to_s, sprintf('%#.2f', q.latency))
+      end
     end
 
     def stats
