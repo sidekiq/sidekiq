@@ -19,7 +19,9 @@ class Sidekiqctl
     puts "       <pidfile> is path to a pidfile"
     puts "       <kill_timeout> is number of seconds to wait until Sidekiq exits"
     puts "       (default: #{Sidekiqctl::DEFAULT_KILL_TIMEOUT}), after which Sidekiq will be KILL'd"
+    puts 
     puts "       <section> (optional) view a specific section of the status output"
+    puts "       Valid sections are: #{Sidekiqctl::Status::VALID_SECTIONS.join(', ')}"
     puts
     puts "Be sure to set the kill_timeout LONGER than Sidekiq's -t timeout.  If you want"
     puts "to wait 60 seconds for jobs to finish, use `sidekiq -t 60` and `sidekiqctl stop"
@@ -92,11 +94,17 @@ class Sidekiqctl
   alias_method :shutdown, :stop
 
   class Status
+    VALID_SECTIONS = %w[all version overview processes queues]
     def display(section = nil)
       section ||= 'all'
+      unless VALID_SECTIONS.include? section
+        puts "I don't know how to check the status of '#{section}'!"
+        puts "Try one of these: #{VALID_SECTIONS.join(', ')}"
+        return
+      end
       send(section)
-    rescue NoMethodError => e
-      puts "Couldn't get status of #{section}: #{e.message}"
+    rescue StandardError => e
+      puts "Couldn't get status: #{e}"
     end
 
     def all
