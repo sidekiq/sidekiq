@@ -124,13 +124,13 @@ class Sidekiqctl
 
     def overview
       puts '---- Overview ----'
-      puts "  Processed: #{stats.processed}"
-      puts "     Failed: #{stats.failed}"
-      puts "       Busy: #{stats.workers_size}"
-      puts "   Enqueued: #{stats.enqueued}"
-      puts "    Retries: #{stats.retry_size}"
-      puts "  Scheduled: #{stats.scheduled_size}"
-      puts "       Dead: #{stats.dead_size}"
+      puts "  Processed: #{delimit stats.processed}"
+      puts "     Failed: #{delimit stats.failed}"
+      puts "       Busy: #{delimit stats.workers_size}"
+      puts "   Enqueued: #{delimit stats.enqueued}"
+      puts "    Retries: #{delimit stats.retry_size}"
+      puts "  Scheduled: #{delimit stats.scheduled_size}"
+      puts "       Dead: #{delimit stats.dead_size}"
     end
 
     def processes
@@ -163,6 +163,10 @@ class Sidekiqctl
     end
 
     private
+
+    def delimit(number)
+      number.to_s.reverse.scan(/.{1,3}/).join(',').reverse
+    end
 
     def split_multiline(values, opts = {})
       return 'none' unless values

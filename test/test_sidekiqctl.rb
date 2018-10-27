@@ -41,7 +41,7 @@ class TestSidekiqctl < Sidekiq::Test
 
       it 'displays the correct output' do
         mock_stats = OpenStruct.new(
-          processed: 420,
+          processed: 420710,
           failed: 12,
           workers_size: 34,
           enqueued: 56,
@@ -50,7 +50,7 @@ class TestSidekiqctl < Sidekiq::Test
           dead_size: 666
         )
         Sidekiq::Stats.stub(:new, mock_stats) do
-          assert_includes output, 'Processed: 420'
+          assert_includes output, 'Processed: 420,710'
           assert_includes output, 'Failed: 12'
           assert_includes output, 'Busy: 34'
           assert_includes output, 'Enqueued: 56'
