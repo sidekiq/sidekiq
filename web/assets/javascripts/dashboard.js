@@ -298,10 +298,10 @@ var debounce = function(fn, timeout)
   }
 };
 
-window.onresize = debounce(function() {
+window.onresize = function() {
   var prevWidth = window.innerWidth;
   
-  return function () {
+  return debounce(function () {
     var currWidth = window.innerWidth;
     
     if (prevWidth !== currWidth) {
@@ -311,5 +311,5 @@ window.onresize = debounce(function() {
       resetGraphs();
       renderGraphs();
     }
-  }
-}(), 125);
+  }, 125);
+}();
