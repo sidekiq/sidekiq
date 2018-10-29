@@ -299,7 +299,17 @@ var debounce = function(fn, timeout)
 };
 
 window.onresize = debounce(function() {
-    clearInterval(poller);
-    resetGraphs();
-    renderGraphs();
-}, 125);
+  var prevWidth = window.innerWidth;
+  
+  return function () {
+    var currWidth = window.innerWidth;
+    
+    if (prevWidth !== currWidth) {
+      prevWidth = currWidth
+      
+      clearInterval(poller);
+      resetGraphs();
+      renderGraphs();
+    }
+  }
+}(), 125);
