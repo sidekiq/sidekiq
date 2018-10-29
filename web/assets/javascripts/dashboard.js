@@ -305,7 +305,7 @@ window.onresize = function() {
     var currWidth = window.innerWidth;
     
     if (prevWidth !== currWidth) {
-      prevWidth = currWidth
+      prevWidth = currWidth;
       
       clearInterval(poller);
       resetGraphs();
