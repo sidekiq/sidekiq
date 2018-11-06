@@ -115,6 +115,25 @@ module Sidekiq
         # REDIS_PROVIDER=MY_REDIS_URL
         # and Sidekiq will find your custom URL variable with no custom
         # initialization code at all.
+        p = ENV['REDIS_PROVIDER']
+        if p && p =~ /\:/
+          Sidekiq.logger.error <<-EOM
+
+#################################################################################
+
+REDIS_PROVIDER should be set to the **name** of the variable which contains the Redis URL, not a URL itself.
+Platforms like Heroku sell addons that publish a *_URL variable.  You tell Sidekiq with REDIS_PROVIDER, e.g.:
+
+  REDIS_PROVIDER=REDISTOGO_URL
+  REDISTOGO_URL=redis://somehost.example.com:6379/4
+
+Use REDIS_URL if you wish to point Sidekiq to a URL directly.
+
+This configuration error will crash starting in Sidekiq 5.3.
+
+#################################################################################
+EOM
+        end
         ENV[
           ENV['REDIS_PROVIDER'] || 'REDIS_URL'
         ]
