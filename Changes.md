@@ -2,9 +2,10 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
-HEAD
+5.2.3
 ---------
 
+- Warning message on invalid REDIS\_PROVIDER [#3970]
 - Add `sidekiqctl status` command [#4003, dzunk]
 - Update elapsed time calculatons to use monotonic clock [#3999]
 - Fix a few issues with mobile Web UI styling [#3973, navied]
