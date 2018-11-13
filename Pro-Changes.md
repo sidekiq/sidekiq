@@ -7,7 +7,7 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 HEAD
 ---------
 
-- Add Japanese and Russian translations, see [issue #3951](https://github.com/mperham/sidekiq/issues/3951) to add your own language
+- Add PT, JA and RU translations, see issues [#3949](https://github.com/mperham/sidekiq/issues/3949) and [#3951](https://github.com/mperham/sidekiq/issues/3951) to add your own language.
 
 4.0.4
 ---------
