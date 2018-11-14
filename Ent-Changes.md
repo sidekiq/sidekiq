@@ -7,7 +7,7 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 HEAD
 -------------
 
-- Add JA translation, see issues [#3949](https://github.com/mperham/sidekiq/issues/3949) and [#3951](https://github.com/mperham/sidekiq/issues/3951) to add your own language.
+- Add PT and JA translations, see issues [#3949](https://github.com/mperham/sidekiq/issues/3949) and [#3951](https://github.com/mperham/sidekiq/issues/3951) to add your own language.
 - Fix elapsed time calculations to use monotonic clock [#4000, sj26]
 - Fix edge case where flapping leadership would cause old periodic
   jobs to be fired once [#3974]
