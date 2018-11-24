@@ -31,8 +31,6 @@ module Sidekiq
       setup_options(args)
       initialize_logger
       validate!
-      daemonize
-      write_pid
     end
 
     def jruby?
@@ -43,6 +41,8 @@ module Sidekiq
     # global process state irreversibly.  PRs which improve the
     # test coverage of Sidekiq::CLI are welcomed.
     def run
+      daemonize if options[:daemon]
+      write_pid
       boot_system
       print_banner
 
@@ -187,8 +187,6 @@ module Sidekiq
     end
 
     def daemonize
-      return unless options[:daemon]
-
       raise ArgumentError, "You really should set a logfile if you're going to daemonize" unless options[:logfile]
       files_to_reopen = []
       ObjectSpace.each_object(File) do |file|
