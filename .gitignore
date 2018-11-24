@@ -11,3 +11,4 @@ vendor/
 .sass-cache/
 tmp/
 pkg/*.gem
+.byebug_history

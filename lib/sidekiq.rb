@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'sidekiq/version'
 fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 2.2.2." if RUBY_PLATFORM != 'java' && Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.2.2')
 
@@ -56,6 +57,7 @@ module Sidekiq
   def self.options
     @options ||= DEFAULTS.dup
   end
+
   def self.options=(opts)
     @options = opts
   end
