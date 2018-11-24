@@ -233,6 +233,8 @@ module Sidekiq
       opts = parse_options(args)
       set_environment opts[:environment]
 
+      options[:queues] << 'default' if options[:queues].empty?
+
       cfile = opts[:config_file]
       opts = parse_config(cfile).merge(opts) if cfile
 
@@ -289,8 +291,6 @@ module Sidekiq
     end
 
     def validate!
-      options[:queues] << 'default' if options[:queues].empty?
-
       if !File.exist?(options[:require]) ||
          (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))
         logger.info "=================================================================="
