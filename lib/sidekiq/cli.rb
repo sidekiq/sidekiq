@@ -24,17 +24,10 @@ module Sidekiq
     ]
 
     # Used for CLI testing
-    attr_accessor :code
     attr_accessor :launcher
     attr_accessor :environment
 
-    def initialize
-      @code = nil
-    end
-
     def parse(args=ARGV)
-      @code = nil
-
       setup_options(args)
       initialize_logger
       validate!

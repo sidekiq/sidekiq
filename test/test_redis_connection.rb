@@ -1,9 +1,12 @@
 # frozen_string_literal: true
+
 require_relative 'helper'
 
 class TestRedisConnection < Sidekiq::Test
-
   describe ".create" do
+    before do
+      Sidekiq.options = Sidekiq::DEFAULTS.dup
+    end
 
     # To support both redis-rb 3.3.x #client and 4.0.x #_client
     def client_for(redis)
