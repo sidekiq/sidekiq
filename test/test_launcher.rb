@@ -50,7 +50,7 @@ class TestLauncher < Sidekiq::Test
         end
 
         it 'sets useful info to proctitle' do
-          assert_equal "sidekiq #{Sidekiq::VERSION} myapp [1 of 3 busy] xyz", $0
+          assert_equal "sidekiq #{Sidekiq::VERSION} [#{Sidekiq::Logging.tid}] myapp [1 of 3 busy] xyz", $0
         end
 
         it 'stores process info in redis' do
@@ -72,7 +72,7 @@ class TestLauncher < Sidekiq::Test
         #end
 
         it 'indicates stopping status in proctitle' do
-          assert_equal "sidekiq #{Sidekiq::VERSION} myapp [1 of 3 busy] stopping", $0
+          assert_equal "sidekiq #{Sidekiq::VERSION} [#{Sidekiq::Logging.tid}] myapp [1 of 3 busy] stopping", $0
         end
 
         it 'stores process info in redis' do

@@ -18,6 +18,7 @@ module Sidekiq
     PROCTITLES = [
       proc { 'sidekiq' },
       proc { Sidekiq::VERSION },
+      proc { |me, data| "[#{Sidekiq::Logging.tid}]" },
       proc { |me, data| data['tag'] },
       proc { |me, data| "[#{Processor::WORKER_STATE.size} of #{data['concurrency']} busy]" },
       proc { |me, data| "stopping" if me.stopping? },
