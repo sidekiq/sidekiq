@@ -17,7 +17,7 @@ module Sidekiq
       "manifest-src 'self'",
       "media-src 'self'",
       "object-src 'none'",
-      "script-src 'self' https: http:",
+      "script-src 'self' https: http: 'unsafe-inline'",
       "style-src 'self' https: http: 'unsafe-inline'",
       "worker-src 'self'",
       "base-uri 'self'"
