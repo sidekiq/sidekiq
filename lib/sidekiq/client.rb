@@ -64,7 +64,7 @@ module Sidekiq
     # Returns a unique Job ID.  If middleware stops the job, nil will be returned instead.
     #
     # Example:
-    #   push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
+    #   push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, bat: 'bar'])
     #
     def push(item)
       normed = normalize_item(item)
@@ -140,7 +140,7 @@ module Sidekiq
       # should go through Worker#client_push.
       #
       # Example usage:
-      #   Sidekiq::Client.enqueue(MyWorker, 'foo', 1, :bat => 'bar')
+      #   Sidekiq::Client.enqueue(MyWorker, 'foo', 1, bat: 'bar')
       #
       # Messages are enqueued to the 'default' queue.
       #
@@ -149,14 +149,14 @@ module Sidekiq
       end
 
       # Example usage:
-      #   Sidekiq::Client.enqueue_to(:queue_name, MyWorker, 'foo', 1, :bat => 'bar')
+      #   Sidekiq::Client.enqueue_to(:queue_name, MyWorker, 'foo', 1, bat: 'bar')
       #
       def enqueue_to(queue, klass, *args)
         klass.client_push('queue' => queue, 'class' => klass, 'args' => args)
       end
 
       # Example usage:
-      #   Sidekiq::Client.enqueue_to_in(:queue_name, 3.minutes, MyWorker, 'foo', 1, :bat => 'bar')
+      #   Sidekiq::Client.enqueue_to_in(:queue_name, 3.minutes, MyWorker, 'foo', 1, bat: 'bar')
       #
       def enqueue_to_in(queue, interval, klass, *args)
         int = interval.to_f
@@ -170,7 +170,7 @@ module Sidekiq
       end
 
       # Example usage:
-      #   Sidekiq::Client.enqueue_in(3.minutes, MyWorker, 'foo', 1, :bat => 'bar')
+      #   Sidekiq::Client.enqueue_in(3.minutes, MyWorker, 'foo', 1, bat: 'bar')
       #
       def enqueue_in(interval, klass, *args)
         klass.perform_in(interval, *args)
@@ -215,7 +215,7 @@ module Sidekiq
     end
 
     def normalize_item(item)
-      raise(ArgumentError, "Job must be a Hash with 'class' and 'args' keys: { 'class' => SomeWorker, 'args' => ['bob', 1, :foo => 'bar'] }") unless item.is_a?(Hash) && item.has_key?('class') && item.has_key?('args')
+      raise(ArgumentError, "Job must be a Hash with 'class' and 'args' keys: { 'class' => SomeWorker, 'args' => ['bob', 1, foo: 'bar'] }") unless item.is_a?(Hash) && item.has_key?('class') && item.has_key?('args')
       raise(ArgumentError, "Job args must be an Array") unless item['args'].is_a?(Array)
       raise(ArgumentError, "Job class must be either a Class or String representation of the class name") unless item['class'].is_a?(Class) || item['class'].is_a?(String)
       raise(ArgumentError, "Job 'at' must be a Numeric timestamp") if item.has_key?('at') && !item['at'].is_a?(Numeric)

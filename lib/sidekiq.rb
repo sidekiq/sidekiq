@@ -64,7 +64,7 @@ module Sidekiq
   # Configuration for Sidekiq server, use like:
   #
   #   Sidekiq.configure_server do |config|
-  #     config.redis = { :namespace => 'myapp', :size => 25, :url => 'redis://myhost:8877/0' }
+  #     config.redis = { namespace: 'myapp', size: 25, url: 'redis://myhost:8877/0' }
   #     config.server_middleware do |chain|
   #       chain.add MyServerHook
   #     end
@@ -77,7 +77,7 @@ module Sidekiq
   # Configuration for Sidekiq client, use like:
   #
   #   Sidekiq.configure_client do |config|
-  #     config.redis = { :namespace => 'myapp', :size => 1, :url => 'redis://myhost:8877/0' }
+  #     config.redis = { namespace: 'myapp', size: 1, url: 'redis://myhost:8877/0' }
   #   end
   def self.configure_client
     yield self unless server?

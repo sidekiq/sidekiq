@@ -85,7 +85,7 @@ class TestLauncher < Sidekiq::Test
     end
 
     def options
-      { :concurrency => 3, :queues => ['default'], :tag => 'myapp' }
+      { concurrency: 3, queues: ['default'], tag: 'myapp' }
     end
 
   end

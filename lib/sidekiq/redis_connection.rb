@@ -30,7 +30,7 @@ module Sidekiq
         pool_timeout = options[:pool_timeout] || 1
         log_info(options)
 
-        ConnectionPool.new(:timeout => pool_timeout, :size => size) do
+        ConnectionPool.new(timeout: pool_timeout, size: size) do
           build_client(options)
         end
       end
@@ -56,7 +56,7 @@ module Sidekiq
         if namespace
           begin
             require 'redis/namespace'
-            Redis::Namespace.new(namespace, :redis => client)
+            Redis::Namespace.new(namespace, redis: client)
           rescue LoadError
             Sidekiq.logger.error("Your Redis configuration uses the namespace '#{namespace}' but the redis-namespace gem is not included in the Gemfile." \
                                  "Add the gem to your Gemfile to continue using a namespace. Otherwise, remove the namespace parameter.")

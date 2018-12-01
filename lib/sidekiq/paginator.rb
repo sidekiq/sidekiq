@@ -19,9 +19,9 @@ module Sidekiq
           total_size, items = conn.multi do
             conn.zcard(key)
             if rev
-              conn.zrevrange(key, starting, ending, :with_scores => true)
+              conn.zrevrange(key, starting, ending, with_scores: true)
             else
-              conn.zrange(key, starting, ending, :with_scores => true)
+              conn.zrange(key, starting, ending, with_scores: true)
             end
           end
           [current_page, total_size, items]

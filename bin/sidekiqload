@@ -139,7 +139,7 @@ rescue SystemExit => e
   #Sidekiq.logger.error("Profiling...")
   #result = RubyProf.stop
   #printer = RubyProf::GraphHtmlPrinter.new(result)
-  #printer.print(File.new("output.html", "w"), :min_percent => 1)
+  #printer.print(File.new("output.html", "w"), min_percent: 1)
   # normal
 rescue => e
   raise e if $DEBUG

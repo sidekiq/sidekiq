@@ -71,7 +71,7 @@ class TestWeb < Sidekiq::Test
           conn.sadd('processes', 'foo:1234')
           conn.hmset('foo:1234', 'info', Sidekiq.dump_json('hostname' => 'foo', 'started_at' => Time.now.to_f, "queues" => []), 'at', Time.now.to_f, 'busy', 4)
           identity = 'foo:1234:workers'
-          hash = {:queue => 'critical', :payload => { 'class' => WebWorker.name, 'args' => [1,'abc'] }, :run_at => Time.now.to_i }
+          hash = {queue: 'critical', payload: { 'class' => WebWorker.name, 'args' => [1,'abc'] }, run_at: Time.now.to_i }
           conn.hmset(identity, 1001, Sidekiq.dump_json(hash))
         end
         assert_equal ['1001'], Sidekiq::Workers.new.map { |pid, tid, data| tid }
@@ -341,7 +341,7 @@ class TestWeb < Sidekiq::Test
         conn.sadd('processes', pro)
         conn.hmset(pro, 'info', Sidekiq.dump_json('started_at' => Time.now.to_f, 'labels' => ['frumduz'], 'queues' =>[]), 'busy', 1, 'beat', Time.now.to_f)
         identity = "#{pro}:workers"
-        hash = {:queue => 'critical', :payload => { 'class' => "FailWorker", 'args' => ["<a>hello</a>"] }, :run_at => Time.now.to_i }
+        hash = {queue: 'critical', payload: { 'class' => "FailWorker", 'args' => ["<a>hello</a>"] }, run_at: Time.now.to_i }
         conn.hmset(identity, 100001, Sidekiq.dump_json(hash))
         conn.incr('busy')
       end

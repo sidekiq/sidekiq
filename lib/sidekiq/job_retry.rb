@@ -52,7 +52,7 @@ module Sidekiq
   #
   #    class MyWorker
   #      include Sidekiq::Worker
-  #      sidekiq_options :retry => 10
+  #      sidekiq_options retry: 10
   #    end
   #
   class JobRetry

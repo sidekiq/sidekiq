@@ -154,7 +154,7 @@ module Sidekiq
         begin
           job_hash = Sidekiq.load_json(jobstr)
         rescue => ex
-          handle_exception(ex, { :context => "Invalid JSON for job", :jobstr => jobstr })
+          handle_exception(ex, { context: "Invalid JSON for job", jobstr: jobstr })
           # we can't notify because the job isn't a valid hash payload.
           DeadSet.new.kill(jobstr, notify_failure: false)
           ack = true
@@ -174,7 +174,7 @@ module Sidekiq
         ack = false
       rescue Exception => ex
         e = ex.is_a?(::Sidekiq::JobRetry::Skip) && ex.cause ? ex.cause : ex
-        handle_exception(e, { :context => "Job raised exception", :job => job_hash, :jobstr => jobstr })
+        handle_exception(e, { context: "Job raised exception", job: job_hash, jobstr: jobstr })
         raise e
       ensure
         work.acknowledge if ack
@@ -237,7 +237,7 @@ module Sidekiq
 
     def stats(job_hash, queue)
       tid = Sidekiq::Logging.tid
-      WORKER_STATE.set(tid, {:queue => queue, :payload => job_hash, :run_at => Time.now.to_i })
+      WORKER_STATE.set(tid, {queue: queue, payload: job_hash, run_at: Time.now.to_i })
 
       begin
         yield

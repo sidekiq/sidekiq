@@ -5,7 +5,7 @@ require 'sidekiq/fetch'
 class TestFetcher < Sidekiq::Test
   describe 'fetcher' do
     before do
-      Sidekiq.redis = { :url => REDIS_URL }
+      Sidekiq.redis = { url: REDIS_URL }
       Sidekiq.redis do |conn|
         conn.flushdb
         conn.rpush('queue:basic', 'msg')
@@ -17,7 +17,7 @@ class TestFetcher < Sidekiq::Test
     end
 
     it 'retrieves' do
-      fetch = Sidekiq::BasicFetch.new(:queues => ['basic', 'bar'])
+      fetch = Sidekiq::BasicFetch.new(queues: ['basic', 'bar'])
       uow = fetch.retrieve_work
       refute_nil uow
       assert_equal 'basic', uow.queue_name
@@ -30,7 +30,7 @@ class TestFetcher < Sidekiq::Test
     end
 
     it 'retrieves with strict setting' do
-      fetch = Sidekiq::BasicFetch.new(:queues => ['basic', 'bar', 'bar'], :strict => true)
+      fetch = Sidekiq::BasicFetch.new(queues: ['basic', 'bar', 'bar'], strict: true)
       cmd = fetch.queues_cmd
       assert_equal cmd, ['queue:basic', 'queue:bar', Sidekiq::BasicFetch::TIMEOUT]
     end
@@ -41,7 +41,7 @@ class TestFetcher < Sidekiq::Test
       assert_equal 0, q1.size
       assert_equal 0, q2.size
       uow = Sidekiq::BasicFetch::UnitOfWork
-      Sidekiq::BasicFetch.bulk_requeue([uow.new('fuzzy:queue:foo', 'bob'), uow.new('fuzzy:queue:foo', 'bar'), uow.new('fuzzy:queue:bar', 'widget')], {:queues => []})
+      Sidekiq::BasicFetch.bulk_requeue([uow.new('fuzzy:queue:foo', 'bob'), uow.new('fuzzy:queue:foo', 'bar'), uow.new('fuzzy:queue:bar', 'widget')], {queues: []})
       assert_equal 2, q1.size
       assert_equal 1, q2.size
     end

@@ -1,5 +1,5 @@
 Sidekiq.configure_client do |config|
-  config.redis = { :size => 2 }
+  config.redis = { size: 2 }
 end
 Sidekiq.configure_server do |config|
   config.on(:startup) { }
@@ -11,7 +11,7 @@ Sidekiq.configure_server do |config|
     ## Requires railsexpress patched MRI build
     # brew install qcachegrind
     #File.open("callgrind.profile", "w") do |f|
-      #RubyProf::CallTreePrinter.new(result).print(f, :min_percent => 1)
+      #RubyProf::CallTreePrinter.new(result).print(f, min_percent: 1)
     #end
   end
 end

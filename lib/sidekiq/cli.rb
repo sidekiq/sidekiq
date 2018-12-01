@@ -426,7 +426,7 @@ module Sidekiq
       if ns
         # logger hasn't been initialized yet, puts is all we have.
         puts("namespace should be set in your ruby initializer, is ignored in config file")
-        puts("config.redis = { :url => ..., :namespace => '#{ns}' }")
+        puts("config.redis = { url: ..., namespace: '#{ns}' }")
       end
       opts
     end

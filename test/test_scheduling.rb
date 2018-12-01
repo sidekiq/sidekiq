@@ -6,7 +6,7 @@ class TestScheduling < Sidekiq::Test
   describe 'middleware' do
     class ScheduledWorker
       include Sidekiq::Worker
-      sidekiq_options :queue => :custom_queue
+      sidekiq_options queue: :custom_queue
       def perform(x)
       end
     end

@@ -80,9 +80,9 @@ class TestMiddleware < Sidekiq::Test
       end
 
       boss = Minitest::Mock.new
-      boss.expect(:options, {:queues => ['default'] }, [])
-      boss.expect(:options, {:queues => ['default'] }, [])
-      boss.expect(:options, {:queues => ['default'] }, [])
+      boss.expect(:options, {queues: ['default'] }, [])
+      boss.expect(:options, {queues: ['default'] }, [])
+      boss.expect(:options, {queues: ['default'] }, [])
       processor = Sidekiq::Processor.new(boss)
       boss.expect(:processor_done, nil, [processor])
       processor.process(Sidekiq::BasicFetch::UnitOfWork.new('queue:default', msg))
@@ -92,7 +92,7 @@ class TestMiddleware < Sidekiq::Test
     it 'correctly replaces middleware when using middleware with options in the initializer' do
       chain = Sidekiq::Middleware::Chain.new
       chain.add NonYieldingMiddleware
-      chain.add NonYieldingMiddleware, {:foo => 5}
+      chain.add NonYieldingMiddleware, {foo: 5}
       assert_equal 1, chain.count
     end
 

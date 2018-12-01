@@ -43,7 +43,7 @@ class TestManager < Sidekiq::Test
     end
 
     def options
-      { :concurrency => 3, :queues => ['default'] }
+      { concurrency: 3, queues: ['default'] }
     end
 
   end

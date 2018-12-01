@@ -76,14 +76,14 @@ class TestRedisConnection < Sidekiq::Test
     end
 
     it "disables client setname with nil id" do
-      pool = Sidekiq::RedisConnection.create(:id => nil)
+      pool = Sidekiq::RedisConnection.create(id: nil)
       assert_equal Redis, pool.checkout.class
       assert_equal "redis://127.0.0.1:6379/0", pool.checkout.connection.fetch(:id)
     end
 
     describe "network_timeout" do
       it "sets a custom network_timeout if specified" do
-        pool = Sidekiq::RedisConnection.create(:network_timeout => 8)
+        pool = Sidekiq::RedisConnection.create(network_timeout: 8)
         redis = pool.checkout
 
         assert_equal 8, client_for(redis).timeout
@@ -99,7 +99,7 @@ class TestRedisConnection < Sidekiq::Test
 
     describe "namespace" do
       it "uses a given :namespace set by a symbol key" do
-        pool = Sidekiq::RedisConnection.create(:namespace => "xxx")
+        pool = Sidekiq::RedisConnection.create(namespace: "xxx")
         assert_equal "xxx", pool.checkout.namespace
       end
 
@@ -110,21 +110,21 @@ class TestRedisConnection < Sidekiq::Test
 
       it "uses given :namespace over :namespace from Sidekiq.options" do
         Sidekiq.options[:namespace] = "xxx"
-        pool = Sidekiq::RedisConnection.create(:namespace => "yyy")
+        pool = Sidekiq::RedisConnection.create(namespace: "yyy")
         assert_equal "yyy", pool.checkout.namespace
       end
     end
 
     describe "socket path" do
       it "uses a given :path" do
-        pool = Sidekiq::RedisConnection.create(:path => "/var/run/redis.sock")
+        pool = Sidekiq::RedisConnection.create(path: "/var/run/redis.sock")
         assert_equal "unix", client_for(pool.checkout).scheme
         assert_equal "/var/run/redis.sock", pool.checkout.connection.fetch(:location)
         assert_equal 0, pool.checkout.connection.fetch(:db)
       end
 
       it "uses a given :path and :db" do
-        pool = Sidekiq::RedisConnection.create(:path => "/var/run/redis.sock", :db => 8)
+        pool = Sidekiq::RedisConnection.create(path: "/var/run/redis.sock", db: 8)
         assert_equal "unix", client_for(pool.checkout).scheme
         assert_equal "/var/run/redis.sock", pool.checkout.connection.fetch(:location)
         assert_equal 8, pool.checkout.connection.fetch(:db)
@@ -133,7 +133,7 @@ class TestRedisConnection < Sidekiq::Test
 
     describe "pool_timeout" do
       it "uses a given :timeout over the default of 1" do
-        pool = Sidekiq::RedisConnection.create(:pool_timeout => 5)
+        pool = Sidekiq::RedisConnection.create(pool_timeout: 5)
 
         assert_equal 5, pool.instance_eval{ @timeout }
       end
@@ -169,7 +169,7 @@ class TestRedisConnection < Sidekiq::Test
 
       it "uses a given :driver" do
         redis_driver = Object.new
-        pool = Sidekiq::RedisConnection.create(:driver => redis_driver)
+        pool = Sidekiq::RedisConnection.create(driver: redis_driver)
         redis = pool.checkout
 
         assert_equal redis_driver, redis.instance_variable_get(:@client).driver
