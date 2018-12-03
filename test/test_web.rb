@@ -4,7 +4,7 @@ require_relative 'helper'
 require 'sidekiq/web'
 require 'rack/test'
 
-class TestWeb < Sidekiq::Test
+class TestWeb < Minitest::Test
   describe 'sidekiq web' do
     include Rack::Test::Methods
 

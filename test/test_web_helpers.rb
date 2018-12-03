@@ -2,7 +2,7 @@
 require_relative 'helper'
 require 'sidekiq/web'
 
-class TestWebHelpers < Sidekiq::Test
+class TestWebHelpers < Minitest::Test
 
   class Helpers
     include Sidekiq::WebHelpers

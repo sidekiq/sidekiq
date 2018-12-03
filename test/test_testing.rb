@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require_relative 'helper'
 
-class TestTesting < Sidekiq::Test
+class TestTesting < Minitest::Test
   describe 'sidekiq testing' do
     describe 'require/load sidekiq/testing.rb' do
       before do

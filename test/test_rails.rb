@@ -8,7 +8,7 @@ rescue LoadError
   $HAS_AJ = false
 end
 
-class TestRails < Sidekiq::Test
+class TestRails < Minitest::Test
 
   describe 'ActiveJob' do
     it 'does not allow Sidekiq::Worker in AJ::Base classes' do

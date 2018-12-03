@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require_relative 'helper'
 
-class TestClient < Sidekiq::Test
+class TestClient < Minitest::Test
   describe 'errors' do
     it 'raises ArgumentError with invalid params' do
       assert_raises ArgumentError do

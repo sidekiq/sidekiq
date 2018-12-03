@@ -5,7 +5,7 @@ require 'sidekiq/fetch'
 require 'sidekiq/scheduled'
 require 'sidekiq/processor'
 
-class TestActors < Sidekiq::Test
+class TestActors < Minitest::Test
   class JoeWorker
     include Sidekiq::Worker
     def perform(slp)

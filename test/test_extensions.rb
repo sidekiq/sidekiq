@@ -5,7 +5,7 @@ require 'active_record'
 require 'action_mailer'
 Sidekiq::Extensions.enable_delay!
 
-class TestExtensions < Sidekiq::Test
+class TestExtensions < Minitest::Test
   describe 'sidekiq extensions' do
     before do
       Sidekiq.redis = REDIS

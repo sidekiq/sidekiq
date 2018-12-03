@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 require_relative 'helper'
 
-class TestSidekiq < Sidekiq::Test
+class TestSidekiq < Minitest::Test
   describe 'json processing' do
     it 'handles json' do
       assert_equal({"foo" => "bar"}, Sidekiq.load_json("{\"foo\":\"bar\"}"))

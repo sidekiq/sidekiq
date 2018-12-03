@@ -4,7 +4,7 @@ require_relative 'helper'
 require 'sidekiq/scheduled'
 require 'sidekiq/job_retry'
 
-class TestRetry < Sidekiq::Test
+class TestRetry < Minitest::Test
   describe 'middleware' do
     class SomeWorker
       include Sidekiq::Worker

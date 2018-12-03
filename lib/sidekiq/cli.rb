@@ -9,6 +9,7 @@ require 'fileutils'
 
 require 'sidekiq'
 require 'sidekiq/util'
+require 'sidekiq/launcher'
 
 module Sidekiq
   class CLI
@@ -24,22 +25,13 @@ module Sidekiq
     ]
 
     # Used for CLI testing
-    attr_accessor :code
     attr_accessor :launcher
     attr_accessor :environment
 
-    def initialize
-      @code = nil
-    end
-
     def parse(args=ARGV)
-      @code = nil
-
       setup_options(args)
       initialize_logger
       validate!
-      daemonize
-      write_pid
     end
 
     def jruby?
@@ -50,6 +42,8 @@ module Sidekiq
     # global process state irreversibly.  PRs which improve the
     # test coverage of Sidekiq::CLI are welcomed.
     def run
+      daemonize if options[:daemon]
+      write_pid
       boot_system
       print_banner
 
@@ -103,7 +97,6 @@ module Sidekiq
         logger.info 'Starting processing, hit Ctrl-C to stop'
       end
 
-      require 'sidekiq/launcher'
       @launcher = Sidekiq::Launcher.new(options)
 
       begin
@@ -194,8 +187,6 @@ module Sidekiq
     end
 
     def daemonize
-      return unless options[:daemon]
-
       raise ArgumentError, "You really should set a logfile if you're going to daemonize" unless options[:logfile]
       files_to_reopen = []
       ObjectSpace.each_object(File) do |file|
@@ -241,6 +232,8 @@ module Sidekiq
     def setup_options(args)
       opts = parse_options(args)
       set_environment opts[:environment]
+
+      options[:queues] << 'default' if options[:queues].empty?
 
       cfile = opts[:config_file]
       opts = parse_config(cfile).merge(opts) if cfile
@@ -298,8 +291,6 @@ module Sidekiq
     end
 
     def validate!
-      options[:queues] << 'default' if options[:queues].empty?
-
       if !File.exist?(options[:require]) ||
          (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))
         logger.info "=================================================================="

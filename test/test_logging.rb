@@ -2,7 +2,7 @@
 require_relative 'helper'
 require 'sidekiq/logging'
 
-class TestLogging < Sidekiq::Test
+class TestLogging < Minitest::Test
   describe Sidekiq::Logging do
     describe "#with_context" do
       def ctx

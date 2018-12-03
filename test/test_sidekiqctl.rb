@@ -20,7 +20,7 @@ def output(section = 'all')
   end
 end
 
-class TestSidekiqctl < Sidekiq::Test
+class TestSidekiqctl < Minitest::Test
   describe 'sidekiqctl status' do
     describe 'version' do
       it 'displays the current Sidekiq version' do
