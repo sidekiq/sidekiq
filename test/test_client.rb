@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require_relative 'helper'
+require 'sidekiq/api'
 
 class TestClient < Minitest::Test
   describe 'errors' do
@@ -104,10 +105,10 @@ class TestClient < Minitest::Test
       assert Sidekiq::Client.enqueue(MyWorker, 1, 2)
       assert Sidekiq::Client.enqueue_to(:custom_queue, MyWorker, 1, 2)
       assert_equal 1, Sidekiq::Queue.new('custom_queue').size
-      assert Sidekiq::Client.enqueue_to_in(:custom_queue, 3.minutes, MyWorker, 1, 2)
-      assert Sidekiq::Client.enqueue_to_in(:custom_queue, -3.minutes, MyWorker, 1, 2)
+      assert Sidekiq::Client.enqueue_to_in(:custom_queue, 3, MyWorker, 1, 2)
+      assert Sidekiq::Client.enqueue_to_in(:custom_queue, -3, MyWorker, 1, 2)
       assert_equal 2, Sidekiq::Queue.new('custom_queue').size
-      assert Sidekiq::Client.enqueue_in(3.minutes, MyWorker, 1, 2)
+      assert Sidekiq::Client.enqueue_in(3, MyWorker, 1, 2)
       assert QueuedWorker.perform_async(1, 2)
       assert_equal 1, Sidekiq::Queue.new('flimflam').size
     end

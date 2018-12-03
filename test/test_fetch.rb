@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require_relative 'helper'
 require 'sidekiq/fetch'
+require 'sidekiq/api'
 
 class TestFetcher < Minitest::Test
   describe 'fetcher' do

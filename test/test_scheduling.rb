@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require_relative 'helper'
 require 'sidekiq/scheduled'
+require 'active_support/core_ext/integer/time'
 
 class TestScheduling < Minitest::Test
   describe 'middleware' do

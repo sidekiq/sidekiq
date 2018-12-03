@@ -1,6 +1,6 @@
 # frozen_string_literal: true
-
 require_relative 'helper'
+require 'sidekiq/cli'
 
 class TestRedisConnection < Minitest::Test
   describe ".create" do

@@ -1,6 +1,6 @@
-# encoding: utf-8
 # frozen_string_literal: true
 require_relative 'helper'
+require 'sidekiq/cli'
 
 class TestSidekiq < Minitest::Test
   describe 'json processing' do

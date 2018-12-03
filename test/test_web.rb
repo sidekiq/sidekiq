@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 require_relative 'helper'
 require 'sidekiq/web'
+require 'sidekiq/util'
 require 'rack/test'
 
 class TestWeb < Minitest::Test
@@ -59,7 +60,7 @@ class TestWeb < Minitest::Test
       policies = last_response.headers["Content-Security-Policy"].split('; ')
       assert_includes(policies, "connect-src 'self' https: http: wss: ws:")
       assert_includes(policies, "style-src 'self' https: http: 'unsafe-inline'")
-      assert_includes(policies, "script-src 'self' https: http:")
+      assert_includes(policies, "script-src 'self' https: http: 'unsafe-inline'")
       assert_includes(policies, "object-src 'none'")
     end
 
