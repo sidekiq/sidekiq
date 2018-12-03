@@ -279,10 +279,6 @@ class TestCLI < Minitest::Test
     end
   end
 
-  describe '#run' do
-    it 'writes pid to pidfile'
-  end
-
   describe 'signal handling' do
     before do
       @cli = Sidekiq::CLI.new
@@ -303,8 +299,6 @@ class TestCLI < Minitest::Test
             @cli.handle_signal(sig)
           end
         end
-
-        it 'shutdowns with a corresponding event'
       end
     end
 
@@ -325,10 +319,6 @@ class TestCLI < Minitest::Test
           assert_equal true, quiet
         end
       end
-    end
-
-    describe 'USR2' do
-      it 'reopens log files'
     end
 
     describe 'TTIN' do
