@@ -4,7 +4,7 @@ require 'sidekiq/api'
 require 'active_job'
 require 'action_mailer'
 
-class TestApi < Sidekiq::Test
+class TestApi < Minitest::Test
   describe 'api' do
     before do
       Sidekiq.redis {|c| c.flushdb }

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require_relative 'helper'
 
-class TestFake < Sidekiq::Test
+class TestFake < Minitest::Test
   describe 'sidekiq testing' do
     class PerformError < RuntimeError; end
 

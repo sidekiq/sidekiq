@@ -38,8 +38,6 @@ require 'minitest/autorun'
 
 Sidekiq.logger.level = Logger::ERROR
 
-Sidekiq::Test = Minitest::Test
-
 REDIS_URL = ENV['REDIS_URL'] || 'redis://localhost/15'
 REDIS = Sidekiq::RedisConnection.create(:url => REDIS_URL)
 

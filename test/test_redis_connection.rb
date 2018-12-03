@@ -2,7 +2,7 @@
 
 require_relative 'helper'
 
-class TestRedisConnection < Sidekiq::Test
+class TestRedisConnection < Minitest::Test
   describe ".create" do
     before do
       Sidekiq.options = Sidekiq::DEFAULTS.dup

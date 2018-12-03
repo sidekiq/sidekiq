@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require_relative 'helper'
 
-class TestUtil < Sidekiq::Test
+class TestUtil < Minitest::Test
 
   class Helpers
     include Sidekiq::Util

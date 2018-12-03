@@ -4,7 +4,7 @@ require 'sidekiq/fetch'
 require 'sidekiq/cli'
 require 'sidekiq/processor'
 
-class TestProcessor < Sidekiq::Test
+class TestProcessor < Minitest::Test
   TestException = Class.new(StandardError)
   TEST_EXCEPTION = TestException.new("kerboom!")
 

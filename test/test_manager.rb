@@ -2,7 +2,7 @@
 require_relative 'helper'
 require 'sidekiq/manager'
 
-class TestManager < Sidekiq::Test
+class TestManager < Minitest::Test
 
   describe 'manager' do
     before do

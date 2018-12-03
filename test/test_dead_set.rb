@@ -2,7 +2,7 @@
 require_relative 'helper'
 require 'sidekiq/api'
 
-class TestDeadSet < Sidekiq::Test
+class TestDeadSet < Minitest::Test
   describe 'dead_set' do
     describe 'zomg' do
       def dead_set

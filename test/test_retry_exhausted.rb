@@ -2,7 +2,7 @@
 require_relative 'helper'
 require 'sidekiq/job_retry'
 
-class TestRetryExhausted < Sidekiq::Test
+class TestRetryExhausted < Minitest::Test
   describe 'sidekiq_retries_exhausted' do
     class NewWorker
       include Sidekiq::Worker

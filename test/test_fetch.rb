@@ -2,7 +2,7 @@
 require_relative 'helper'
 require 'sidekiq/fetch'
 
-class TestFetcher < Sidekiq::Test
+class TestFetcher < Minitest::Test
   describe 'fetcher' do
     before do
       Sidekiq.redis = { :url => REDIS_URL }

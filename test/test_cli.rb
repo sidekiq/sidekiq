@@ -5,7 +5,7 @@ require 'sidekiq/cli'
 require 'sidekiq/launcher'
 require 'tempfile'
 
-class TestCLI < Sidekiq::Test
+class TestCLI < Minitest::Test
   describe '#parse' do
     before do
       @cli = Sidekiq::CLI.new

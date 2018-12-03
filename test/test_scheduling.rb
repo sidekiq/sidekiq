@@ -2,7 +2,7 @@
 require_relative 'helper'
 require 'sidekiq/scheduled'
 
-class TestScheduling < Sidekiq::Test
+class TestScheduling < Minitest::Test
   describe 'middleware' do
     class ScheduledWorker
       include Sidekiq::Worker

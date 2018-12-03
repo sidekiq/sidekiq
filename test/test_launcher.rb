@@ -2,7 +2,7 @@
 require_relative 'helper'
 require 'sidekiq/launcher'
 
-class TestLauncher < Sidekiq::Test
+class TestLauncher < Minitest::Test
 
   describe 'launcher' do
     before do
