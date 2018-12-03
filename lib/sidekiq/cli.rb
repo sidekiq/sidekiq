@@ -9,6 +9,7 @@ require 'fileutils'
 
 require 'sidekiq'
 require 'sidekiq/util'
+require 'sidekiq/launcher'
 
 module Sidekiq
   class CLI
@@ -96,7 +97,6 @@ module Sidekiq
         logger.info 'Starting processing, hit Ctrl-C to stop'
       end
 
-      require 'sidekiq/launcher'
       @launcher = Sidekiq::Launcher.new(options)
 
       begin

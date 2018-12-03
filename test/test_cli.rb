@@ -2,7 +2,6 @@
 
 require_relative 'helper'
 require 'sidekiq/cli'
-require 'sidekiq/launcher'
 require 'tempfile'
 
 class TestCLI < Minitest::Test
