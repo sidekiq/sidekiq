@@ -24,7 +24,6 @@ module Sidekiq
       proc { |me, data| "stopping" if me.stopping? },
     ]
 
-    # Used for CLI testing
     attr_accessor :launcher
     attr_accessor :environment
 
@@ -45,7 +44,7 @@ module Sidekiq
       daemonize if options[:daemon]
       write_pid
       boot_system
-      print_banner
+      print_banner if environment == 'development' && $stdout.tty?
 
       self_read, self_write = IO.pipe
       sigs = %w(INT TERM TTIN TSTP)
@@ -93,6 +92,10 @@ module Sidekiq
       logger.debug { "Client Middleware: #{Sidekiq.client_middleware.map(&:klass).join(', ')}" }
       logger.debug { "Server Middleware: #{Sidekiq.server_middleware.map(&:klass).join(', ')}" }
 
+      launch(self_read)
+    end
+
+    def launch(self_read)
       if !options[:daemon]
         logger.info 'Starting processing, hit Ctrl-C to stop'
       end
@@ -178,21 +181,16 @@ module Sidekiq
     private
 
     def print_banner
-      # Print logo and banner for development
-      if environment == 'development' && $stdout.tty?
-        puts "\e[#{31}m"
-        puts Sidekiq::CLI.banner
-        puts "\e[0m"
-      end
+      puts "\e[#{31}m"
+      puts Sidekiq::CLI.banner
+      puts "\e[0m"
     end
 
     def daemonize
       raise ArgumentError, "You really should set a logfile if you're going to daemonize" unless options[:logfile]
-      files_to_reopen = []
-      ObjectSpace.each_object(File) do |file|
-        files_to_reopen << file unless file.closed?
-      end
 
+      files_to_reopen = ObjectSpace.each_object(File).reject { |f| f.closed? }
+      
       ::Process.daemon(true, true)
 
       files_to_reopen.each do |file|
@@ -251,8 +249,6 @@ module Sidekiq
     def boot_system
       ENV['RACK_ENV'] = ENV['RAILS_ENV'] = environment
 
-      raise ArgumentError, "#{options[:require]} does not exist" unless File.exist?(options[:require])
-
       if File.directory?(options[:require])
         require 'rails'
         if ::Rails::VERSION::MAJOR < 4
@@ -272,10 +268,7 @@ module Sidekiq
         end
         options[:tag] ||= default_tag
       else
-        not_required_message = "#{options[:require]} was not required, you should use an explicit path: " +
-            "./#{options[:require]} or /path/to/#{options[:require]}"
-
-        require(options[:require]) || raise(ArgumentError, not_required_message)
+        require options[:require]
       end
     end
 
