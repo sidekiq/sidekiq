@@ -8,7 +8,6 @@ Sidekiq::Extensions.enable_delay!
 class TestExtensions < Minitest::Test
   describe 'sidekiq extensions' do
     before do
-      Sidekiq.redis = REDIS
       Sidekiq.redis {|c| c.flushdb }
     end
 
