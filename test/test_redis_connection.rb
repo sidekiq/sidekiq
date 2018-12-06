@@ -7,6 +7,12 @@ class TestRedisConnection < Minitest::Test
   describe ".create" do
     before do
       Sidekiq.options = Sidekiq::DEFAULTS.dup
+      @old = ENV['REDIS_URL']
+      ENV['REDIS_URL'] = 'redis://localhost/15'
+    end
+
+    after do
+      ENV['REDIS_URL'] = @old
     end
 
     # To support both redis-rb 3.3.x #client and 4.0.x #_client
@@ -82,7 +88,7 @@ class TestRedisConnection < Minitest::Test
     it "disables client setname with nil id" do
       pool = Sidekiq::RedisConnection.create(:id => nil)
       assert_equal Redis, pool.checkout.class
-      assert_equal "redis://127.0.0.1:6379/0", pool.checkout.connection.fetch(:id)
+      assert_equal "redis://localhost:6379/15", pool.checkout.connection.fetch(:id)
     end
 
     describe "network_timeout" do
@@ -124,7 +130,7 @@ class TestRedisConnection < Minitest::Test
         pool = Sidekiq::RedisConnection.create(:path => "/var/run/redis.sock")
         assert_equal "unix", client_for(pool.checkout).scheme
         assert_equal "/var/run/redis.sock", pool.checkout.connection.fetch(:location)
-        assert_equal 0, pool.checkout.connection.fetch(:db)
+        assert_equal 15, pool.checkout.connection.fetch(:db)
       end
 
       it "uses a given :path and :db" do

@@ -20,6 +20,8 @@ if ENV["COVERAGE"]
   end
 end
 
+ENV['REDIS_URL'] ||= 'redis://localhost/15'
+
 Sidekiq.logger.level = Logger::ERROR
 
 def capture_logging(lvl=Logger::INFO)
