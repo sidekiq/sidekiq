@@ -10,14 +10,17 @@ gem "activerecord-jdbcsqlite3-adapter", ">= 50", platforms: :jruby
 
 group :development do
   gem "appraisal"
-  gem "pry-byebug", platforms: :mri
-  gem "minitest-focus"
 end
 
 group :test do
   gem "minitest"
+  gem "minitest-focus"
   gem "minitest-reporters"
   gem "simplecov"
+end
+
+group :development, :test do
+  gem "pry-byebug", platforms: :mri
 end
 
 group :load_test do
