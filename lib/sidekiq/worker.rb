@@ -7,13 +7,13 @@ module Sidekiq
   # Include this module in your worker class and you can easily create
   # asynchronous jobs:
   #
-  # class HardWorker
-  #   include Sidekiq::Worker
+  #   class HardWorker
+  #     include Sidekiq::Worker
   #
-  #   def perform(*args)
-  #     # do some work
+  #     def perform(*args)
+  #       # do some work
+  #     end
   #   end
-  # end
   #
   # Then in your Rails app, you can do this:
   #
