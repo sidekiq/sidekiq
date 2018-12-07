@@ -190,7 +190,6 @@ module Sidekiq
       raise ArgumentError, "You really should set a logfile if you're going to daemonize" unless options[:logfile]
 
       files_to_reopen = ObjectSpace.each_object(File).reject { |f| f.closed? }
-      
       ::Process.daemon(true, true)
 
       files_to_reopen.each do |file|
@@ -309,6 +308,7 @@ module Sidekiq
 
         o.on '-d', '--daemon', "Daemonize process" do |arg|
           opts[:daemon] = arg
+          puts "WARNING: Daemonization mode will be removed in Sidekiq 6.0, please use a proper process supervisor to start and manage your services"
         end
 
         o.on '-e', '--environment ENV', "Application environment" do |arg|
@@ -348,10 +348,12 @@ module Sidekiq
 
         o.on '-L', '--logfile PATH', "path to writable logfile" do |arg|
           opts[:logfile] = arg
+          puts "WARNING: Logfile redirection will be removed in Sidekiq 6.0, Sidekiq will only log to STDOUT"
         end
 
         o.on '-P', '--pidfile PATH', "path to pidfile" do |arg|
           opts[:pidfile] = arg
+          puts "WARNING: PID file creation will be removed in Sidekiq 6.0, please use a proper process supervisor to start and manage your services"
         end
 
         o.on '-V', '--version', "Print version and exit" do |arg|
