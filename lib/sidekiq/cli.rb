@@ -41,8 +41,6 @@ module Sidekiq
     # global process state irreversibly.  PRs which improve the
     # test coverage of Sidekiq::CLI are welcomed.
     def run
-      daemonize if options[:daemon]
-      write_pid
       boot_system
       print_banner if environment == 'development' && $stdout.tty?
 
@@ -96,7 +94,7 @@ module Sidekiq
     end
 
     def launch(self_read)
-      if !options[:daemon]
+      if environment == 'development' && $stdout.tty?
         logger.info 'Starting processing, hit Ctrl-C to stop'
       end
 
@@ -150,12 +148,6 @@ module Sidekiq
         Sidekiq.logger.info "Received TSTP, no longer accepting new work"
         cli.launcher.quiet
       },
-      'USR2' => ->(cli) {
-        if Sidekiq.options[:logfile]
-          Sidekiq.logger.info "Received USR2, reopening log file"
-          Sidekiq::Logging.reopen_logs
-        end
-      },
       'TTIN' => ->(cli) {
         Thread.list.each do |thread|
           Sidekiq.logger.warn "Thread TID-#{(thread.object_id ^ ::Process.pid).to_s(36)} #{thread['sidekiq_label']}"
@@ -184,31 +176,6 @@ module Sidekiq
       puts "\e[#{31}m"
       puts Sidekiq::CLI.banner
       puts "\e[0m"
-    end
-
-    def daemonize
-      raise ArgumentError, "You really should set a logfile if you're going to daemonize" unless options[:logfile]
-
-      files_to_reopen = ObjectSpace.each_object(File).reject { |f| f.closed? }
-      ::Process.daemon(true, true)
-
-      files_to_reopen.each do |file|
-        begin
-          file.reopen file.path, "a+"
-          file.sync = true
-        rescue ::Exception
-        end
-      end
-
-      [$stdout, $stderr].each do |io|
-        File.open(options[:logfile], 'ab') do |f|
-          io.reopen(f)
-        end
-        io.sync = true
-      end
-      $stdin.reopen('/dev/null')
-
-      initialize_logger
     end
 
     def set_environment(cli_env)
@@ -307,8 +274,7 @@ module Sidekiq
         end
 
         o.on '-d', '--daemon', "Daemonize process" do |arg|
-          opts[:daemon] = arg
-          puts "WARNING: Daemonization mode will be removed in Sidekiq 6.0, please use a proper process supervisor to start and manage your services"
+          puts "WARNING: Daemonization mode was removed in Sidekiq 6.0, please use a proper process supervisor to start and manage your services"
         end
 
         o.on '-e', '--environment ENV', "Application environment" do |arg|
@@ -317,12 +283,6 @@ module Sidekiq
 
         o.on '-g', '--tag TAG', "Process tag for procline" do |arg|
           opts[:tag] = arg
-        end
-
-        # this index remains here for backwards compatibility but none of the Sidekiq
-        # family use this value anymore.  it was used by Pro's original reliable_fetch.
-        o.on '-i', '--index INT', "unique process index on this machine" do |arg|
-          opts[:index] = Integer(arg.match(/\d+/)[0])
         end
 
         o.on "-q", "--queue QUEUE[,WEIGHT]", "Queues to process with optional weights" do |arg|
@@ -347,13 +307,11 @@ module Sidekiq
         end
 
         o.on '-L', '--logfile PATH', "path to writable logfile" do |arg|
-          opts[:logfile] = arg
-          puts "WARNING: Logfile redirection will be removed in Sidekiq 6.0, Sidekiq will only log to STDOUT"
+          puts "WARNING: Logfile redirection was removed in Sidekiq 6.0, Sidekiq will only log to STDOUT"
         end
 
         o.on '-P', '--pidfile PATH', "path to pidfile" do |arg|
-          opts[:pidfile] = arg
-          puts "WARNING: PID file creation will be removed in Sidekiq 6.0, please use a proper process supervisor to start and manage your services"
+          puts "WARNING: PID file creation was removed in Sidekiq 6.0, please use a proper process supervisor to start and manage your services"
         end
 
         o.on '-V', '--version', "Print version and exit" do |arg|
@@ -377,18 +335,9 @@ module Sidekiq
     end
 
     def initialize_logger
-      Sidekiq::Logging.initialize_logger(options[:logfile]) if options[:logfile]
+      Sidekiq::Logging.initialize_logger
 
       Sidekiq.logger.level = ::Logger::DEBUG if options[:verbose]
-    end
-
-    def write_pid
-      if path = options[:pidfile]
-        pidfile = File.expand_path(path)
-        File.open(pidfile, 'w') do |f|
-          f.puts ::Process.pid
-        end
-      end
     end
 
     def parse_config(cfile)

@@ -235,7 +235,6 @@ class TestRetry < Minitest::Test
 
       after do
         Sidekiq.logger = @old_logger
-        Sidekiq.options.delete(:logfile)
         File.unlink @tmp_log_path if File.exist?(@tmp_log_path)
       end
 

@@ -119,20 +119,6 @@ class TestCLI < Minitest::Test
         end
       end
 
-      describe 'process index' do
-        it 'accepts with -i' do
-          @cli.parse(%w[sidekiq -i 7 -r ./test/fake_env.rb])
-
-          assert_equal 7, Sidekiq.options[:index]
-        end
-
-        it 'accepts stringy value' do
-          @cli.parse(%w[sidekiq -i worker.7 -r ./test/fake_env.rb])
-
-          assert_equal 7, Sidekiq.options[:index]
-        end
-      end
-
       describe 'timeout' do
         it 'accepts with -t' do
           @cli.parse(%w[sidekiq -t 30 -r ./test/fake_env.rb])
@@ -141,27 +127,11 @@ class TestCLI < Minitest::Test
         end
       end
 
-      describe 'logfile' do
-        it 'accepts wiht -L' do
-          @cli.parse(%w[sidekiq -L /tmp/sidekiq.log -r ./test/fake_env.rb])
-
-          assert_equal '/tmp/sidekiq.log', Sidekiq.options[:logfile]
-        end
-      end
-
       describe 'verbose' do
         it 'accepts with -v' do
           @cli.parse(%w[sidekiq -v -r ./test/fake_env.rb])
 
           assert_equal Logger::DEBUG, Sidekiq.logger.level
-        end
-      end
-
-      describe 'pidfile' do
-        it 'accepts with -P' do
-          @cli.parse(%w[sidekiq -P /tmp/sidekiq.pid -r ./test/fake_env.rb])
-
-          assert_equal '/tmp/sidekiq.pid', Sidekiq.options[:pidfile]
         end
       end
 
@@ -174,8 +144,6 @@ class TestCLI < Minitest::Test
           assert_equal './test/fake_env.rb', Sidekiq.options[:require]
           assert_nil Sidekiq.options[:environment]
           assert_equal 50, Sidekiq.options[:concurrency]
-          assert_equal '/tmp/sidekiq-config-test.pid', Sidekiq.options[:pidfile]
-          assert_equal '/tmp/sidekiq.log', Sidekiq.options[:logfile]
           assert_equal 2, Sidekiq.options[:queues].count { |q| q == 'very_often' }
           assert_equal 1, Sidekiq.options[:queues].count { |q| q == 'seldom' }
         end
@@ -188,8 +156,6 @@ class TestCLI < Minitest::Test
           assert_equal './test/fake_env.rb', Sidekiq.options[:require]
           assert_nil Sidekiq.options[:environment]
           assert_equal 50, Sidekiq.options[:concurrency]
-          assert_equal '/tmp/sidekiq-config-test.pid', Sidekiq.options[:pidfile]
-          assert_equal '/tmp/sidekiq.log', Sidekiq.options[:logfile]
           assert_equal 2, Sidekiq.options[:queues].count { |q| q == 'very_often' }
           assert_equal 1, Sidekiq.options[:queues].count { |q| q == 'seldom' }
         end
@@ -202,8 +168,6 @@ class TestCLI < Minitest::Test
           assert_equal './test/fake_env.rb', Sidekiq.options[:require]
           assert_equal 'staging', Sidekiq.options[:environment]
           assert_equal 50, Sidekiq.options[:concurrency]
-          assert_equal '/tmp/sidekiq-config-test.pid', Sidekiq.options[:pidfile]
-          assert_equal '/tmp/sidekiq.log', Sidekiq.options[:logfile]
           assert_equal 2, Sidekiq.options[:queues].count { |q| q == 'very_often' }
           assert_equal 1, Sidekiq.options[:queues].count { |q| q == 'seldom' }
         end
@@ -217,8 +181,6 @@ class TestCLI < Minitest::Test
             assert_equal './test/fake_env.rb', Sidekiq.options[:require]
             assert_nil Sidekiq.options[:environment]
             assert_equal 10, Sidekiq.options[:concurrency]
-            assert_nil Sidekiq.options[:pidfile]
-            assert_nil Sidekiq.options[:logfile]
             assert_equal ['default'], Sidekiq.options[:queues]
           end
         end
@@ -229,7 +191,6 @@ class TestCLI < Minitest::Test
                                   -e snoop
                                   -c 100
                                   -r ./test/fake_env.rb
-                                  -P /tmp/sidekiq.pid
                                   -q often,7
                                   -q seldom,3])
 
@@ -238,8 +199,6 @@ class TestCLI < Minitest::Test
             assert_equal './test/fake_env.rb', Sidekiq.options[:require]
             assert_equal 'snoop', Sidekiq.options[:environment]
             assert_equal 100, Sidekiq.options[:concurrency]
-            assert_equal '/tmp/sidekiq.pid', Sidekiq.options[:pidfile]
-            assert_equal '/tmp/sidekiq.log', Sidekiq.options[:logfile]
             assert_equal 7, Sidekiq.options[:queues].count { |q| q == 'often' }
             assert_equal 3, Sidekiq.options[:queues].count { |q| q == 'seldom' }
           end
@@ -276,17 +235,6 @@ class TestCLI < Minitest::Test
 
     after do
       Sidekiq.logger = @logger
-    end
-    
-    describe 'pidfile' do
-      it 'writes process pid to file' do
-        Sidekiq.options[:pidfile] = '/tmp/sidekiq.pid'
-        @cli.stub(:launch, nil) do
-          @cli.run
-        end
-
-        assert_equal Process.pid, File.read('/tmp/sidekiq.pid').chop.to_i
-      end
     end
 
     describe 'require workers' do
@@ -365,7 +313,7 @@ class TestCLI < Minitest::Test
 
     %w(TSTP USR1).each do |sig|
       describe sig do
-        it 'quites with a corresponding event' do
+        it 'quiets with a corresponding event' do
           quiet = false
 
           Sidekiq.on(:quiet) do
