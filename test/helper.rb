@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
-require "bundler/setup"
-Bundler.require
+require 'bundler/setup'
+Bundler.require(:default, :test)
+
+require 'minitest/reporters'
+require 'minitest/autorun'
+
+MiniTest::Reporters.use! Minitest::Reporters::DefaultReporter.new
 
 $TESTING = true
 # disable minitest/parallel threads
@@ -15,35 +20,9 @@ if ENV["COVERAGE"]
   end
 end
 
-ENV['RACK_ENV'] = ENV['RAILS_ENV'] = 'test'
-
-trap 'TSTP' do
-  threads = Thread.list
-
-  puts
-  puts "=" * 80
-  puts "Received TSTP signal; printing all #{threads.count} thread backtraces."
-
-  threads.each do |thr|
-    description = thr == Thread.main ? "Main thread" : thr.inspect
-    puts
-    puts "#{description} backtrace: "
-    puts thr.backtrace.join("\n")
-  end
-
-  puts "=" * 80
-end
-
-require 'minitest/autorun'
+ENV['REDIS_URL'] ||= 'redis://localhost/15'
 
 Sidekiq.logger.level = Logger::ERROR
-
-REDIS_URL = ENV['REDIS_URL'] || 'redis://localhost/15'
-REDIS = Sidekiq::RedisConnection.create(:url => REDIS_URL)
-
-Sidekiq.configure_client do |config|
-  config.redis = { :url => REDIS_URL }
-end
 
 def capture_logging(lvl=Logger::INFO)
   old = Sidekiq.logger

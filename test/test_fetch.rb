@@ -6,15 +6,10 @@ require 'sidekiq/api'
 class TestFetcher < Minitest::Test
   describe 'fetcher' do
     before do
-      Sidekiq.redis = { :url => REDIS_URL }
       Sidekiq.redis do |conn|
         conn.flushdb
         conn.rpush('queue:basic', 'msg')
       end
-    end
-
-    after do
-      Sidekiq.redis = REDIS
     end
 
     it 'retrieves' do

@@ -7,7 +7,6 @@ class TestMiddleware < Minitest::Test
   describe 'middleware chain' do
     before do
       $errors = []
-      Sidekiq.redis = REDIS
     end
 
     class CustomMiddleware

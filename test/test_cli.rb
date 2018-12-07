@@ -2,16 +2,15 @@
 
 require_relative 'helper'
 require 'sidekiq/cli'
-require 'tempfile'
 
 class TestCLI < Minitest::Test
   describe '#parse' do
     before do
-      @cli = Sidekiq::CLI.new
       Sidekiq.options = Sidekiq::DEFAULTS.dup
       @logger = Sidekiq.logger
       @logdev = StringIO.new
       Sidekiq.logger = Logger.new(@logdev)
+      @cli = Sidekiq::CLI.new
     end
 
     after do
@@ -263,19 +262,81 @@ class TestCLI < Minitest::Test
         end
       end
     end
+  end
 
-    it 'does not require the specified Ruby code' do
-      @cli.parse(%w[sidekiq -r ./test/fake_env.rb])
-
-      refute($LOADED_FEATURES.any? { |x| x =~ /fake_env/ })
+  describe '#run' do
+    before do
+      Sidekiq.options = Sidekiq::DEFAULTS.dup
+      Sidekiq.options[:require] = './test/fake_env.rb'
+      @logger = Sidekiq.logger
+      @logdev = StringIO.new
+      Sidekiq.logger = Logger.new(@logdev)
+      @cli = Sidekiq::CLI.new
     end
 
-    it 'does not boot rails' do
-      refute defined?(::Rails::Application)
+    after do
+      Sidekiq.logger = @logger
+    end
+    
+    describe 'pidfile' do
+      it 'writes process pid to file' do
+        Sidekiq.options[:pidfile] = '/tmp/sidekiq.pid'
+        @cli.stub(:launch, nil) do
+          @cli.run
+        end
 
-      @cli.parse(%w[sidekiq -r ./myapp])
+        assert_equal Process.pid, File.read('/tmp/sidekiq.pid').chop.to_i
+      end
+    end
 
-      refute defined?(::Rails::Application)
+    describe 'require workers' do
+      describe 'when path is a rails directory' do
+        before do
+          Sidekiq.options[:require] = './test/dummy'
+          @cli.environment = 'test'
+        end
+
+        it 'requires sidekiq railtie and rails application with environment' do
+          @cli.stub(:launch, nil) do
+            @cli.run
+          end
+
+          assert defined?(Sidekiq::Rails)
+          assert defined?(Dummy::Application)
+        end
+
+        it 'tags with the app directory name' do
+          @cli.stub(:launch, nil) do
+            @cli.run
+          end
+
+          assert_equal 'dummy', Sidekiq.options[:tag]
+        end
+      end
+
+      describe 'when path is file' do
+        it 'requires application' do
+          @cli.stub(:launch, nil) do
+            @cli.run
+          end
+
+          assert $LOADED_FEATURES.any? { |x| x =~ /test\/fake_env/ }
+        end
+      end
+    end
+
+    describe 'when development environment and stdout tty' do
+      it 'prints banner' do
+        @cli.stub(:environment, 'development') do
+          assert_output(/#{Regexp.escape(Sidekiq::CLI.banner)}/) do
+            $stdout.stub(:tty?, true) do
+              @cli.stub(:launch, nil) do
+                @cli.run
+              end
+            end
+          end
+        end
+      end
     end
   end
 

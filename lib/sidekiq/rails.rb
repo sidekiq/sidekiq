@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Sidekiq
   class Rails < ::Rails::Engine
     # We need to setup this up before any application configuration which might
