@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 require 'time'
 require 'logger'
-require 'fcntl'
 
 module Sidekiq
   module Logging
