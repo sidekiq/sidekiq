@@ -343,6 +343,9 @@ module Sidekiq
         end
 
         o.on '-C', '--config PATH', "path to YAML config file" do |arg|
+          if !File.exist?(arg)
+            raise ArgumentError, "can't find config file #{arg}"
+          end
           opts[:config_file] = arg
         end
 
