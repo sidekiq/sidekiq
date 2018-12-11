@@ -260,6 +260,14 @@ class TestCLI < Minitest::Test
           exit = assert_raises(SystemExit) { @cli.parse(%w[sidekiq -r ./test/fixtures]) }
           assert_equal 1, exit.status
         end
+
+        describe 'when config file path does not exist' do
+          it 'raises argument error' do
+            assert_raises(ArgumentError) do
+              @cli.parse(%w[sidekiq -r ./test/fake_env.rb -C /non/existent/path])
+            end
+          end
+        end
       end
     end
   end

@@ -293,6 +293,10 @@ module Sidekiq
         die(1)
       end
 
+      if options[:config_file] && !File.exist?(options[:config_file])
+        raise ArgumentError, "No such file #{options[:config_file]}"
+      end
+
       [:concurrency, :timeout].each do |opt|
         raise ArgumentError, "#{opt}: #{options[opt]} is not a valid value" if options.has_key?(opt) && options[opt].to_i <= 0
       end
