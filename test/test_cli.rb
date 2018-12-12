@@ -244,6 +244,18 @@ class TestCLI < Minitest::Test
             assert_equal 3, Sidekiq.options[:queues].count { |q| q == 'seldom' }
           end
         end
+
+        describe 'default config file' do
+          describe 'when required path is a directory' do
+            focus
+            it 'tries config/sidekiq.yml' do
+              @cli.parse(%w[sidekiq -r ./test/dummy])
+
+              assert_equal 'sidekiq.yml', File.basename(Sidekiq.options[:config_file])
+              assert_equal 25, Sidekiq.options[:concurrency]
+            end
+          end
+        end
       end
     end
 
@@ -285,7 +297,7 @@ class TestCLI < Minitest::Test
     after do
       Sidekiq.logger = @logger
     end
-    
+
     describe 'pidfile' do
       it 'writes process pid to file' do
         Sidekiq.options[:pidfile] = '/tmp/sidekiq.pid'

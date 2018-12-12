@@ -238,8 +238,11 @@ module Sidekiq
           raise ArgumentError, "No such file #{opts[:config_file]}"
         end
       else
-        %w[config/sidekiq.yml config/sidekiq.yml.erb].each do |filename|
-          opts[:config_file] ||= filename if File.exist?(filename)
+        if File.directory?(opts[:require])
+          %w[config/sidekiq.yml config/sidekiq.yml.erb].each do |filename|
+            path = File.expand_path(filename, opts[:require])
+            opts[:config_file] ||= path if File.exist?(path)
+          end
         end
       end
 
@@ -401,8 +404,8 @@ module Sidekiq
       end
     end
 
-    def parse_config(cfile)
-      opts = YAML.load(ERB.new(IO.read(cfile)).result) || {}
+    def parse_config(path)
+      opts = YAML.load(ERB.new(File.read(path)).result) || {}
 
       if opts.respond_to? :deep_symbolize_keys!
         opts.deep_symbolize_keys!
