@@ -247,7 +247,6 @@ class TestCLI < Minitest::Test
 
         describe 'default config file' do
           describe 'when required path is a directory' do
-            focus
             it 'tries config/sidekiq.yml' do
               @cli.parse(%w[sidekiq -r ./test/dummy])
 

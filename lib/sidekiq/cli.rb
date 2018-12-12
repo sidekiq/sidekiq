@@ -251,7 +251,7 @@ module Sidekiq
 
       opts[:queues] = Array(opts[:queues]) << 'default' if opts[:queues].nil? || opts[:queues].empty?
       opts[:strict] = true if opts[:strict].nil?
-      opts[:concurrency] = Integer(ENV["RAILS_MAX_THREADS"]) if !opts[:concurrency] && ENV["RAILS_MAX_THREADS"]
+      opts[:concurrency] = Integer(ENV["RAILS_MAX_THREADS"]) if opts[:concurrency].nil? && ENV["RAILS_MAX_THREADS"]
 
       # merge with defaults
       options.merge!(opts)
@@ -429,10 +429,10 @@ module Sidekiq
       queues_and_weights.each { |queue_and_weight| parse_queue(opts, *queue_and_weight) }
     end
 
-    def parse_queue(opts, q, weight=nil)
+    def parse_queue(opts, queue, weight = nil)
       opts[:queues] ||= []
-      raise ArgumentError, "queues: #{q} cannot be defined twice" if opts[:queues].include?(q)
-      [weight.to_i, 1].max.times { opts[:queues] << q }
+      raise ArgumentError, "queues: #{queue} cannot be defined twice" if opts[:queues].include?(queue)
+      [weight.to_i, 1].max.times { opts[:queues] << queue }
       opts[:strict] = false if weight.to_i > 0
     end
   end
