@@ -344,11 +344,8 @@ module Sidekiq
       Sidekiq.logger.level = ::Logger::DEBUG if options[:verbose]
     end
 
-    def parse_config(cfile)
-      opts = {}
-      if File.exist?(cfile)
-        opts = YAML.load(ERB.new(IO.read(cfile)).result) || opts
-      end
+    def parse_config(path)
+      opts = YAML.load(ERB.new(File.read(path)).result) || {}
 
       if opts.respond_to? :deep_symbolize_keys!
         opts.deep_symbolize_keys!
