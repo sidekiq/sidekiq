@@ -27,7 +27,7 @@ module Sidekiq
     attr_accessor :launcher
     attr_accessor :environment
 
-    def parse(args=ARGV)
+    def parse(args = ARGV)
       setup_options(args)
       initialize_logger
       validate!
@@ -227,17 +227,33 @@ module Sidekiq
     alias_method :☠, :exit
 
     def setup_options(args)
+      # parse CLI options
       opts = parse_options(args)
+
       set_environment opts[:environment]
 
-      options[:queues] << 'default' if options[:queues].empty?
+      # check config file presence
+      if opts[:config_file]
+        if opts[:config_file] && !File.exist?(opts[:config_file])
+          raise ArgumentError, "No such file #{opts[:config_file]}"
+        end
+      else
+        if File.directory?(opts[:require])
+          %w[config/sidekiq.yml config/sidekiq.yml.erb].each do |filename|
+            path = File.expand_path(filename, opts[:require])
+            opts[:config_file] ||= path if File.exist?(path)
+          end
+        end
+      end
 
-      cfile = opts[:config_file]
-      opts = parse_config(cfile).merge(opts) if cfile
+      # parse config file options
+      opts = parse_config(opts[:config_file]).merge(opts) if opts[:config_file]
 
+      opts[:queues] = Array(opts[:queues]) << 'default' if opts[:queues].nil? || opts[:queues].empty?
       opts[:strict] = true if opts[:strict].nil?
-      opts[:concurrency] = Integer(ENV["RAILS_MAX_THREADS"]) if !opts[:concurrency] && ENV["RAILS_MAX_THREADS"]
+      opts[:concurrency] = Integer(ENV["RAILS_MAX_THREADS"]) if opts[:concurrency].nil? && ENV["RAILS_MAX_THREADS"]
 
+      # merge with defaults
       options.merge!(opts)
     end
 
@@ -367,11 +383,8 @@ module Sidekiq
         logger.info @parser
         die 1
       end
-      @parser.parse!(argv)
 
-      %w[config/sidekiq.yml config/sidekiq.yml.erb].each do |filename|
-        opts[:config_file] ||= filename if File.exist?(filename)
-      end
+      @parser.parse!(argv)
 
       opts
     end
@@ -391,23 +404,18 @@ module Sidekiq
       end
     end
 
-    def parse_config(cfile)
-      opts = {}
-      if File.exist?(cfile)
-        opts = YAML.load(ERB.new(IO.read(cfile)).result) || opts
+    def parse_config(path)
+      opts = YAML.load(ERB.new(File.read(path)).result) || {}
 
-        if opts.respond_to? :deep_symbolize_keys!
-          opts.deep_symbolize_keys!
-        else
-          symbolize_keys_deep!(opts)
-        end
-
-        opts = opts.merge(opts.delete(environment.to_sym) || {})
-        parse_queues(opts, opts.delete(:queues) || [])
+      if opts.respond_to? :deep_symbolize_keys!
+        opts.deep_symbolize_keys!
       else
-        # allow a non-existent config file so Sidekiq
-        # can be deployed by cap with just the defaults.
+        symbolize_keys_deep!(opts)
       end
+
+      opts = opts.merge(opts.delete(environment.to_sym) || {})
+      parse_queues(opts, opts.delete(:queues) || [])
+
       ns = opts.delete(:namespace)
       if ns
         # logger hasn't been initialized yet, puts is all we have.
@@ -421,10 +429,10 @@ module Sidekiq
       queues_and_weights.each { |queue_and_weight| parse_queue(opts, *queue_and_weight) }
     end
 
-    def parse_queue(opts, q, weight=nil)
+    def parse_queue(opts, queue, weight = nil)
       opts[:queues] ||= []
-      raise ArgumentError, "queues: #{q} cannot be defined twice" if opts[:queues].include?(q)
-      [weight.to_i, 1].max.times { opts[:queues] << q }
+      raise ArgumentError, "queues: #{queue} cannot be defined twice" if opts[:queues].include?(queue)
+      [weight.to_i, 1].max.times { opts[:queues] << queue }
       opts[:strict] = false if weight.to_i > 0
     end
   end
