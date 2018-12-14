@@ -83,6 +83,12 @@ class TestRedisConnection < Minitest::Test
           ENV.delete('RAILS_MAX_THREADS')
         end
       end
+
+      it "raises if the server pool size is too small to support other features" do
+        Sidekiq.options[:concurrency] = 6
+
+        assert_raises(ArgumentError) { server_connection(size: 10) }
+      end
     end
 
     it "disables client setname with nil id" do
