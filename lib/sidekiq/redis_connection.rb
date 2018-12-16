@@ -18,9 +18,11 @@ module Sidekiq
         size = if options[:size]
                  options[:size]
                elsif Sidekiq.server?
+                 # Give ourselves plenty of connections.  pool is lazy
+                 # so we won't create them until we need them.
                  Sidekiq.options[:concurrency] + 5
                elsif ENV['RAILS_MAX_THREADS']
-                 Integer(ENV['RAILS_MAX_THREADS'])
+                 Integer(ENV['RAILS_MAX_THREADS']) + 5
                else
                  5
                end
@@ -46,7 +48,7 @@ module Sidekiq
       #   - enterprise's leader election
       #   - enterprise's cron support
       def verify_sizing(size, concurrency)
-        raise ArgumentError, "Your Redis connection pool is too small for Sidekiq to work. Your pool has #{size} connections but must have at least #{concurrency + 2}" if size <= concurrency
+        raise ArgumentError, "Your Redis connection pool is too small for Sidekiq to work. Your pool has #{size} connections but must have at least #{concurrency + 2}" if size < (concurrency+2)
       end
 
       def build_client(options)
