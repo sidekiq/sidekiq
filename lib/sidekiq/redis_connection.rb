@@ -22,7 +22,7 @@ module Sidekiq
                  # so we won't create them until we need them.
                  Sidekiq.options[:concurrency] + 5
                elsif ENV['RAILS_MAX_THREADS']
-                 Integer(ENV['RAILS_MAX_THREADS']) + 5
+                 Integer(ENV['RAILS_MAX_THREADS'])
                else
                  5
                end
