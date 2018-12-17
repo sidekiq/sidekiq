@@ -4,6 +4,9 @@ require 'logger'
 
 module Sidekiq
   module Logging
+    $stderr.puts("**************************************************")
+    $stderr.puts("⛔️ WARNING: Sidekiq::Logging module will be refactored to Sidekiq::Logger class and Sidekiq::Logging.job_hash_context will be moved to Sidekiq::JobLogger in Sidekiq 6.0. Please ensure your logging customizations are updated accordingly. ")
+    $stderr.puts("**************************************************")
 
     class Pretty < Logger::Formatter
       def call(severity, time, program_name, message)
