@@ -19,16 +19,12 @@ class TestLogging < Minitest::Test
       subject { Sidekiq::Logging.tid }
 
       describe 'default' do
-        around do |test|
+        it 'returns formatted thread id' do
           Thread.current.stub :object_id, 70286338772540 do
             Process.stub :pid, 6363 do
-              test.call
+              assert_equal 'owx3jd7mv', subject
             end
           end
-        end
-
-        it 'returns formatted thread id' do
-          assert_equal 'owx3jd7mv', subject
         end
       end
 
@@ -38,7 +34,11 @@ class TestLogging < Minitest::Test
         end
 
         it 'current thread :sidekiq_tid attribute reference' do
-          assert_equal 'abcdefjhi', subject
+          Thread.current.stub :object_id, 70286338772540 do
+            Process.stub :pid, 6363 do
+              assert_equal 'abcdefjhi', subject
+            end
+          end
         end
       end
     end
