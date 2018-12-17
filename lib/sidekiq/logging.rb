@@ -36,6 +36,10 @@ module Sidekiq
       end
     end
 
+    def self.tid
+      Thread.current['sidekiq_tid'] ||= (Thread.current.object_id ^ ::Process.pid).to_s(36)
+    end
+
     def self.context
       Thread.current[:sidekiq_context] ||= []
     end
@@ -45,10 +49,6 @@ module Sidekiq
       yield
     ensure
       context.pop
-    end
-
-    def self.tid
-      Thread.current['sidekiq_tid'] ||= (Thread.current.object_id ^ ::Process.pid).to_s(36)
     end
 
     def self.job_hash_context(job_hash)

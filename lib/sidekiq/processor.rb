@@ -267,6 +267,5 @@ module Sidekiq
         constant.const_defined?(name, false) ? constant.const_get(name, false) : constant.const_missing(name)
       end
     end
-
   end
 end

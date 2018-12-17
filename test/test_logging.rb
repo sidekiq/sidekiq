@@ -7,6 +7,35 @@ class TestLogging < Minitest::Test
   describe Sidekiq::Logging do
     after do
       Thread.current[:sidekiq_context] = nil
+      Thread.current[:sidekiq_tid] = nil
+    end
+
+    describe '.tid' do
+      subject { Sidekiq::Logging.tid }
+
+      describe 'default' do
+        around do |test|
+          Thread.current.stub :object_id, 70286338772540 do
+            Process.stub :pid, 6363 do
+              test.call
+            end
+          end
+        end
+
+        it 'returns formatted thread id' do
+          assert_equal 'owx3jd7mv', subject
+        end
+      end
+
+      describe 'memoization' do
+        before do
+          Thread.current[:sidekiq_tid] = 'abcdefjhi'
+        end
+
+        it 'current thread :sidekiq_tid attribute reference' do
+          assert_equal 'abcdefjhi', subject
+        end
+      end
     end
 
     describe '.context' do
