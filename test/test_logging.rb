@@ -5,6 +5,11 @@ require 'sidekiq/logging'
 
 class TestLogging < Minitest::Test
   describe Sidekiq::Logging do
+    before do
+      Thread.current[:sidekiq_context] = nil
+      Thread.current[:sidekiq_tid] = nil
+    end
+
     after do
       Thread.current[:sidekiq_context] = nil
       Thread.current[:sidekiq_tid] = nil
