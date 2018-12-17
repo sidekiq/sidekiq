@@ -1,25 +1,38 @@
 # frozen_string_literal: true
+
 module Sidekiq
   class JobLogger
 
     def call(item, queue)
       start = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
-      logger.info("start")
+
+      Sidekiq.logger.info("start")
+
       yield
-      logger.info("done: #{elapsed(start)} sec")
+
+      with_elapsed_time_context(start) do
+        Sidekiq.logger.info("done")
+      end
     rescue Exception
-      logger.info("fail: #{elapsed(start)} sec")
+      with_elapsed_time_context(start) do
+        Sidekiq.logger.info("fail")
+      end
+
       raise
     end
 
     private
 
-    def elapsed(start)
-      (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - start).round(3)
+    def with_elapsed_time_context(start, &block)
+      Sidekiq::Logging.with_context(elapsed_time_context(start), &block)
     end
 
-    def logger
-      Sidekiq.logger
+    def elapsed_time_context(start)
+      "elapsed: #{elapsed(start)} sec"
+    end
+
+    def elapsed(start)
+      (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - start).round(3)
     end
   end
 end
