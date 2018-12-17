@@ -6,23 +6,32 @@ module Sidekiq
   module Logging
 
     class Pretty < Logger::Formatter
-      SPACE = " "
-
-      # Provide a call() method that returns the formatted message.
       def call(severity, time, program_name, message)
-        "#{time.utc.iso8601(3)} #{::Process.pid} TID-#{Sidekiq::Logging.tid}#{context} #{severity}: #{message}\n"
+        "#{time.utc.iso8601(3)} #{::Process.pid} TID-#{Sidekiq::Logging.tid}#{format_context(Sidekiq::Logging.context)} #{severity}: #{message}\n"
       end
 
-      def context
-        c = Thread.current[:sidekiq_context]
-        " #{c.join(SPACE)}" if c && c.any?
+      private
+
+      def format_context(context)
+        ' ' + context.join(' ') if context.any?
       end
     end
 
     class WithoutTimestamp < Pretty
       def call(severity, time, program_name, message)
-        "#{::Process.pid} TID-#{Sidekiq::Logging.tid}#{context} #{severity}: #{message}\n"
+        "#{::Process.pid} TID-#{Sidekiq::Logging.tid}#{format_context(Sidekiq::Logging.context)} #{severity}: #{message}\n"
       end
+    end
+
+    def self.context
+      Thread.current[:sidekiq_context] ||= []
+    end
+
+    def self.with_context(msg)
+      context << msg
+      yield
+    ensure
+      context.pop
     end
 
     def self.tid
@@ -41,17 +50,9 @@ module Sidekiq
       with_context(job_hash_context(job_hash), &block)
     end
 
-    def self.with_context(msg)
-      Thread.current[:sidekiq_context] ||= []
-      Thread.current[:sidekiq_context] << msg
-      yield
-    ensure
-      Thread.current[:sidekiq_context].pop
-    end
-
-    def self.initialize_logger
-      return @logger if defined?(@logger)
-      @logger = Logger.new(STDOUT)
+    def self.initialize_logger(log_target = STDOUT)
+      oldlogger = defined?(@logger) ? @logger : nil
+      @logger = Logger.new(log_target)
       @logger.level = Logger::INFO
       @logger.formatter = ENV['DYNO'] ? WithoutTimestamp.new : Pretty.new
       @logger
