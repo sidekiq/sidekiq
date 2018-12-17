@@ -23,6 +23,19 @@ module Sidekiq
       end
     end
 
+    class JSON < Pretty
+      def call(severity, time, program_name, message)
+        Sidekiq.dump_json(
+          timestamp: time.utc.iso8601(3),
+          pid: ::Process.pid,
+          tid: Sidekiq::Logging.tid,
+          context: Sidekiq::Logging.context,
+          severity: severity,
+          message: message
+        )
+      end
+    end
+
     def self.context
       Thread.current[:sidekiq_context] ||= []
     end

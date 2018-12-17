@@ -111,6 +111,25 @@ class TestLogging < Minitest::Test
           end
         end
       end
+
+      describe Sidekiq::Logging::JSON do
+        describe '#call' do
+          subject { Sidekiq::Logging::JSON.new.call(severity, utc_time, prg, msg) }
+
+          it 'formats with pid, tid, severity, message' do
+            assert_equal %q|{"timestamp":"2020-01-01T00:00:00.000Z","pid":4710,"tid":"ouy7z76mx","context":[],"severity":"INFO","message":"Old pond frog jumps in sound of water"}|, subject
+          end
+
+          describe 'with context' do
+            around do |test|
+              Sidekiq::Logging.stub :context, ['HaikuWorker', 'JID-dac39c70844dc0ee3f157ced'] do
+                test.call
+              end
+            end
+
+            it 'formats with pid, tid, context, severity, message' do
+              assert_equal %q|{"timestamp":"2020-01-01T00:00:00.000Z","pid":4710,"tid":"ouy7z76mx","context":["HaikuWorker","JID-dac39c70844dc0ee3f157ced"],"severity":"INFO","message":"Old pond frog jumps in sound of water"}|, subject
+            end
           end
         end
       end
