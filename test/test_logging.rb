@@ -15,6 +15,44 @@ class TestLogging < Minitest::Test
       Thread.current[:sidekiq_tid] = nil
     end
 
+    describe 'initialization' do
+      describe 'formatter' do
+        let(:logdev) { StringIO.new }
+
+        subject { Sidekiq::Logging.initialize_logger(logdev).formatter }
+
+        describe 'default formatter' do
+          it 'sets pretty formatter' do
+            assert_kind_of Sidekiq::Logging::Pretty, subject
+          end
+        end
+
+        describe 'when DYNO env var is present' do
+          around do |test|
+            ENV['DYNO'] = 'dyno identifier'
+            test.call
+            ENV['DYNO'] = nil
+          end
+
+          it 'sets without timestamp formatter' do
+            assert_kind_of Sidekiq::Logging::WithoutTimestamp, subject
+          end
+        end
+
+        describe 'when logger formatter :json' do
+          around do |test|
+            Sidekiq.stub :logger_formatter, :json do
+              test.call
+            end
+          end
+
+          it 'sets json formatter' do
+            assert_kind_of Sidekiq::Logging::JSON, subject
+          end
+        end
+      end
+    end
+
     describe '.tid' do
       subject { Sidekiq::Logging.tid }
 

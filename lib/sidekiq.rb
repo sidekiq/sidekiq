@@ -178,9 +178,14 @@ module Sidekiq
     JSON.generate(object)
   end
 
+  class << self
+    attr_accessor :logger_formatter
+  end
+
   def self.logger
     Sidekiq::Logging.logger
   end
+
   def self.logger=(log)
     Sidekiq::Logging.logger = log
   end

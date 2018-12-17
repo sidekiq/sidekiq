@@ -67,10 +67,17 @@ module Sidekiq
     end
 
     def self.initialize_logger(log_target = STDOUT)
-      oldlogger = defined?(@logger) ? @logger : nil
       @logger = Logger.new(log_target)
       @logger.level = Logger::INFO
-      @logger.formatter = ENV['DYNO'] ? WithoutTimestamp.new : Pretty.new
+
+      formatter_class = case Sidekiq.logger_formatter
+      when :json
+        JSON
+      else
+        ENV['DYNO'] ? WithoutTimestamp : Pretty
+      end
+
+      @logger.formatter = formatter_class.new
       @logger
     end
 
