@@ -37,7 +37,7 @@ module Sidekiq
       @thread = nil
       @strategy = (mgr.options[:fetch] || Sidekiq::BasicFetch).new(mgr.options)
       @reloader = Sidekiq.options[:reloader]
-      @logging = (mgr.options[:job_logger] || Sidekiq::JobLogger).new
+      @job_logger = (mgr.options[:job_logger] || Sidekiq::JobLogger).new
       @retrier = Sidekiq::JobRetry.new
     end
 
@@ -123,7 +123,7 @@ module Sidekiq
 
       Sidekiq::Logging.with_job_hash_context(job_hash) do
         @retrier.global(pristine, queue) do
-          @logging.call(job_hash, queue) do
+          @job_logger.call(job_hash, queue) do
             stats(pristine, queue) do
               # Rails 5 requires a Reloader to wrap code execution.  In order to
               # constantize the worker and instantiate an instance, we have to call
