@@ -29,12 +29,12 @@ module Sidekiq
     class JSON < Pretty
       def call(severity, time, program_name, message)
         Sidekiq.dump_json(
-          timestamp: time.utc.iso8601(3),
+          ts: time.utc.iso8601(3),
           pid: ::Process.pid,
           tid: Sidekiq::Logging.tid,
-          context: Sidekiq::Logging.context,
-          severity: severity,
-          message: message
+          ctx: Sidekiq::Logging.context,
+          sev: severity,
+          msg: message
         )
       end
     end

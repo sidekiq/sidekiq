@@ -151,7 +151,7 @@ class TestLogging < Minitest::Test
           subject { Sidekiq::Logging::JSON.new.call(severity, utc_time, prg, msg) }
 
           it 'formats with pid, tid, severity, message' do
-            assert_equal %q|{"timestamp":"2020-01-01T00:00:00.000Z","pid":4710,"tid":"ouy7z76mx","context":[],"severity":"INFO","message":"Old pond frog jumps in sound of water"}|, subject
+            assert_equal %q|{"ts":"2020-01-01T00:00:00.000Z","pid":4710,"tid":"ouy7z76mx","ctx":[],"sev":"INFO","msg":"Old pond frog jumps in sound of water"}|, subject
           end
 
           describe 'with context' do
@@ -162,7 +162,7 @@ class TestLogging < Minitest::Test
             end
 
             it 'formats with pid, tid, context, severity, message' do
-              assert_equal %q|{"timestamp":"2020-01-01T00:00:00.000Z","pid":4710,"tid":"ouy7z76mx","context":["HaikuWorker","JID-dac39c70844dc0ee3f157ced"],"severity":"INFO","message":"Old pond frog jumps in sound of water"}|, subject
+              assert_equal %q|{"ts":"2020-01-01T00:00:00.000Z","pid":4710,"tid":"ouy7z76mx","ctx":["HaikuWorker","JID-dac39c70844dc0ee3f157ced"],"sev":"INFO","msg":"Old pond frog jumps in sound of water"}|, subject
             end
           end
         end

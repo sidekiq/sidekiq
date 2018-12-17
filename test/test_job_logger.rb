@@ -47,8 +47,8 @@ class TestJobLogger < Minitest::Test
         it 'logs elapsed time as context' do
           subject.call('item', 'queue') {}
 
-          assert_match(/{.+context.+\[\].+message.+start.+}/, logdev.string)
-          assert_match(/{.+context.+\[.+elapsed:.+sec.+\].+message.+done.+}/, logdev.string)
+          assert_match(/{.+ctx.+\[\].+msg.+start.+}/, logdev.string)
+          assert_match(/{.+ctx.+\[.+elapsed:.+sec.+\].+msg.+done.+}/, logdev.string)
         end
       end
     end
