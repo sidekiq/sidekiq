@@ -3,7 +3,7 @@
 require_relative 'helper'
 require 'sidekiq/job_logger'
 
-class TesJobLogger < Minitest::Test
+class TestJobLogger < Minitest::Test
   describe Sidekiq::JobLogger do
     subject { Sidekiq::JobLogger.new }
 
