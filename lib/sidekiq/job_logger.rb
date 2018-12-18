@@ -28,7 +28,7 @@ module Sidekiq
     end
 
     def elapsed_time_context(start)
-      "elapsed: #{elapsed(start)} sec"
+      { elapsed: "#{elapsed(start)} sec" }
     end
 
     def elapsed(start)

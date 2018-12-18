@@ -35,7 +35,7 @@ class TestJobLogger < Minitest::Test
           subject.call('item', 'queue') {}
 
           assert_match(/2020-01-01T00:00:00\.000Z 4710 TID-ouy7z76mx INFO: start/, logdev.string)
-          assert_match(/2020-01-01T00:00:00\.000Z 4710 TID-ouy7z76mx elapsed: .+ sec INFO: done/, logdev.string)
+          assert_match(/2020-01-01T00:00:00\.000Z 4710 TID-ouy7z76mx ELAPSED=.+ sec INFO: done/, logdev.string)
         end
       end
 
@@ -47,8 +47,8 @@ class TestJobLogger < Minitest::Test
         it 'logs elapsed time as context' do
           subject.call('item', 'queue') {}
 
-          assert_match(/{.+ctx.+\[\].+msg.+start.+}/, logdev.string)
-          assert_match(/{.+ctx.+\[.+elapsed:.+sec.+\].+msg.+done.+}/, logdev.string)
+          assert_match(/ctx.+msg.+start/, logdev.string)
+          assert_match(/ctx.+elapsed.+sec.+msg.+done/, logdev.string)
         end
       end
     end

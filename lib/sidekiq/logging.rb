@@ -16,7 +16,7 @@ module Sidekiq
       private
 
       def format_context(context)
-        ' ' + context.join(' ') if context.any?
+        ' ' + context.compact.map { |k, v| "#{k.upcase}=#{v}" }.join(' ') if context.any?
       end
     end
 
@@ -26,7 +26,7 @@ module Sidekiq
       end
     end
 
-    class JSON < Pretty
+    class JSON < Logger::Formatter
       def call(severity, time, program_name, message)
         Sidekiq.dump_json(
           ts: time.utc.iso8601(3),
@@ -44,22 +44,24 @@ module Sidekiq
     end
 
     def self.context
-      Thread.current[:sidekiq_context] ||= []
+      Thread.current[:sidekiq_context] ||= {}
     end
 
-    def self.with_context(msg)
-      context << msg
+    def self.with_context(hash)
+      context.merge!(hash)
       yield
     ensure
-      context.pop
+      hash.keys.each { |key| context.delete(key) }
     end
 
     def self.job_hash_context(job_hash)
       # If we're using a wrapper class, like ActiveJob, use the "wrapped"
       # attribute to expose the underlying thing.
-      klass = job_hash['wrapped'] || job_hash["class"]
-      bid = job_hash['bid']
-      "#{klass} JID-#{job_hash['jid']}#{" BID-#{bid}" if bid}"
+      {
+        class: job_hash['wrapped'] || job_hash["class"],
+        jid: job_hash['jid'],
+        bid: job_hash['bid']
+      }
     end
 
     def self.with_job_hash_context(job_hash, &block)

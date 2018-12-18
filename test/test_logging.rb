@@ -85,43 +85,50 @@ class TestLogging < Minitest::Test
       subject { Sidekiq::Logging.context }
 
       describe 'default' do
-        it 'returns empty array' do
-          assert_equal [], subject
+        it 'returns empty hash' do
+          assert_equal({}, subject)
         end
       end
 
       describe 'memoization' do
         before do
-          Thread.current[:sidekiq_context] = 'context'
+          Thread.current[:sidekiq_context] = { a: 1 }
         end
 
         it 'returns current thread :sidekiq_context attribute reference' do
-          assert_equal 'context', subject
+          assert_equal({ a: 1 }, subject)
         end
       end
     end
 
-    describe ".with_context" do
+    describe '.with_context' do
       subject { Sidekiq::Logging.context }
 
-      it "adds context to the current thread" do
-        Sidekiq::Logging.with_context('A') do
-          assert_includes subject, 'A'
+      it 'adds context to the current thread' do
+        assert_equal({}, subject)
+
+        Sidekiq::Logging.with_context(a: 1) do
+          assert_equal({ a: 1 }, subject)
         end
 
-        assert_empty subject
+        assert_equal({}, subject)
       end
 
       describe 'nested contexts' do
-        it "adds multiple contexts to the current thread" do
-          Sidekiq::Logging.with_context('A') do
-            assert_equal ['A'], subject
-            Sidekiq::Logging.with_context('B') do
-              assert_equal ['A', 'B'], subject
+        it 'adds multiple contexts to the current thread' do
+          assert_equal({}, subject)
+
+          Sidekiq::Logging.with_context(a: 1) do
+            assert_equal({ a: 1 }, subject)
+
+            Sidekiq::Logging.with_context(b: 2, c: 3) do
+              assert_equal({ a: 1, b: 2, c: 3 }, subject)
             end
-            assert_equal ['A'], subject
+
+            assert_equal({ a: 1 }, subject)
           end
-          assert_empty subject
+
+          assert_equal({}, subject)
         end
       end
     end
@@ -140,6 +147,22 @@ class TestLogging < Minitest::Test
         end
       end
 
+      describe 'with context' do
+        subject { Sidekiq::Logging::Pretty.new.call(severity, utc_time, prg, msg) }
+
+        let(:context) { { class: 'HaikuWorker', bid: nil } }
+
+        around do |test|
+          Sidekiq::Logging.stub :context, context do
+            test.call
+          end
+        end
+
+        it 'skips context with nil values' do
+          assert_equal "2020-01-01T00:00:00.000Z 4710 TID-ouy7z76mx CLASS=HaikuWorker INFO: Old pond frog jumps in sound of water\n", subject
+        end
+      end
+
       describe Sidekiq::Logging::Pretty do
         describe '#call' do
           subject { Sidekiq::Logging::Pretty.new.call(severity, utc_time, prg, msg) }
@@ -149,14 +172,16 @@ class TestLogging < Minitest::Test
           end
 
           describe 'with context' do
+            let(:context) { { class: 'HaikuWorker', jid: 'dac39c70844dc0ee3f157ced' } }
+
             around do |test|
-              Sidekiq::Logging.stub :context, ['HaikuWorker', 'JID-dac39c70844dc0ee3f157ced'] do
+              Sidekiq::Logging.stub :context, context do
                 test.call
               end
             end
 
             it 'formats with timestamp, pid, tid, context, severity, message' do
-              assert_equal "2020-01-01T00:00:00.000Z 4710 TID-ouy7z76mx HaikuWorker JID-dac39c70844dc0ee3f157ced INFO: Old pond frog jumps in sound of water\n", subject
+              assert_equal "2020-01-01T00:00:00.000Z 4710 TID-ouy7z76mx CLASS=HaikuWorker JID=dac39c70844dc0ee3f157ced INFO: Old pond frog jumps in sound of water\n", subject
             end
           end
         end
@@ -171,14 +196,16 @@ class TestLogging < Minitest::Test
           end
 
           describe 'with context' do
+            let(:context) { { class: 'HaikuWorker', jid: 'dac39c70844dc0ee3f157ced' } }
+
             around do |test|
-              Sidekiq::Logging.stub :context, ['HaikuWorker', 'JID-dac39c70844dc0ee3f157ced'] do
+              Sidekiq::Logging.stub :context, context do
                 test.call
               end
             end
 
             it 'formats with pid, tid, context, severity, message' do
-              assert_equal "4710 TID-ouy7z76mx HaikuWorker JID-dac39c70844dc0ee3f157ced INFO: Old pond frog jumps in sound of water\n", subject
+              assert_equal "4710 TID-ouy7z76mx CLASS=HaikuWorker JID=dac39c70844dc0ee3f157ced INFO: Old pond frog jumps in sound of water\n", subject
             end
           end
         end
@@ -189,18 +216,20 @@ class TestLogging < Minitest::Test
           subject { Sidekiq::Logging::JSON.new.call(severity, utc_time, prg, msg) }
 
           it 'formats with pid, tid, severity, message' do
-            assert_equal %q|{"ts":"2020-01-01T00:00:00.000Z","pid":4710,"tid":"ouy7z76mx","ctx":[],"sev":"INFO","msg":"Old pond frog jumps in sound of water"}|, subject
+            assert_equal %q|{"ts":"2020-01-01T00:00:00.000Z","pid":4710,"tid":"ouy7z76mx","ctx":{},"sev":"INFO","msg":"Old pond frog jumps in sound of water"}|, subject
           end
 
           describe 'with context' do
+            let(:context) { { class: 'HaikuWorker', jid: 'dac39c70844dc0ee3f157ced' } }
+
             around do |test|
-              Sidekiq::Logging.stub :context, ['HaikuWorker', 'JID-dac39c70844dc0ee3f157ced'] do
+              Sidekiq::Logging.stub :context, context do
                 test.call
               end
             end
 
             it 'formats with pid, tid, context, severity, message' do
-              assert_equal %q|{"ts":"2020-01-01T00:00:00.000Z","pid":4710,"tid":"ouy7z76mx","ctx":["HaikuWorker","JID-dac39c70844dc0ee3f157ced"],"sev":"INFO","msg":"Old pond frog jumps in sound of water"}|, subject
+              assert_equal %q|{"ts":"2020-01-01T00:00:00.000Z","pid":4710,"tid":"ouy7z76mx","ctx":{"class":"HaikuWorker","jid":"dac39c70844dc0ee3f157ced"},"sev":"INFO","msg":"Old pond frog jumps in sound of water"}|, subject
             end
           end
         end
