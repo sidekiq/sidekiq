@@ -5,7 +5,7 @@ require 'logger'
 module Sidekiq
   module Logging
     $stderr.puts("**************************************************")
-    $stderr.puts("⛔️ WARNING: Sidekiq::Logging module will be refactored to Sidekiq::Logger class and Sidekiq::Logging.job_hash_context will be moved to Sidekiq::JobLogger in Sidekiq 6.0. Please ensure your logging customizations are updated accordingly. ")
+    $stderr.puts("⛔️ WARNING: Sidekiq 6.0 changes Sidekiq::Logging context from array of strings to hash type. Please ensure your logging customizations are updated accordingly, particularly JobLogger.\nSidekiq::Logging module will be refactored to Sidekiq::Logger class and Sidekiq::Logging.job_hash_context will be moved to Sidekiq::JobLogger in Sidekiq 6.0.")
     $stderr.puts("**************************************************")
 
     class Pretty < Logger::Formatter
