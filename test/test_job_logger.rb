@@ -28,7 +28,7 @@ class TestJobLogger < Minitest::Test
     describe '#call' do
       describe 'when pretty formatter' do
         before do
-          Sidekiq.logger.formatter = Sidekiq::Logging::Pretty.new
+          Sidekiq.logger.formatter = Sidekiq::Logging::PrettyFormatter.new
         end
 
         it 'logs elapsed time as context' do
@@ -41,7 +41,7 @@ class TestJobLogger < Minitest::Test
 
       describe 'when json formatter' do
         before do
-          Sidekiq.logger.formatter = Sidekiq::Logging::JSON.new
+          Sidekiq.logger.formatter = Sidekiq::Logging::JSONFormatter.new
         end
 
         it 'logs elapsed time as context' do

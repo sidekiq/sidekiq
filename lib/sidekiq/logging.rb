@@ -8,7 +8,7 @@ module Sidekiq
     $stderr.puts("⛔️ WARNING: Sidekiq 6.0 changes Sidekiq::Logging context from array of strings to hash type. Please ensure your logging customizations are updated accordingly, particularly JobLogger.\nSidekiq::Logging module will be refactored to Sidekiq::Logger class and Sidekiq::Logging.job_hash_context will be moved to Sidekiq::JobLogger in Sidekiq 6.0.")
     $stderr.puts("**************************************************")
 
-    class Pretty < Logger::Formatter
+    class PrettyFormatter < Logger::Formatter
       def call(severity, time, program_name, message)
         "#{time.utc.iso8601(3)} #{::Process.pid} TID-#{Sidekiq::Logging.tid}#{format_context(Sidekiq::Logging.context)} #{severity}: #{message}\n"
       end
@@ -20,13 +20,13 @@ module Sidekiq
       end
     end
 
-    class WithoutTimestamp < Pretty
+    class WithoutTimestampFormatter < PrettyFormatter
       def call(severity, time, program_name, message)
         "#{::Process.pid} TID-#{Sidekiq::Logging.tid}#{format_context(Sidekiq::Logging.context)} #{severity}: #{message}\n"
       end
     end
 
-    class JSON < Logger::Formatter
+    class JSONFormatter < Logger::Formatter
       def call(severity, time, program_name, message)
         Sidekiq.dump_json(
           ts: time.utc.iso8601(3),
@@ -74,9 +74,9 @@ module Sidekiq
 
       formatter_class = case Sidekiq.logger_formatter
       when :json
-        JSON
+        JSONFormatter
       else
-        ENV['DYNO'] ? WithoutTimestamp : Pretty
+        ENV['DYNO'] ? WithoutTimestampFormatter : PrettyFormatter
       end
 
       @logger.formatter = formatter_class.new
