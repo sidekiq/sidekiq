@@ -339,8 +339,6 @@ module Sidekiq
     end
 
     def initialize_logger
-      Sidekiq::Logging.initialize_logger
-
       Sidekiq.logger.level = ::Logger::DEBUG if options[:verbose]
     end
 
