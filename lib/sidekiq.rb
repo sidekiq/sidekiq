@@ -3,7 +3,7 @@
 require 'sidekiq/version'
 fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 2.4.0." if RUBY_PLATFORM != 'java' && Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.4.0')
 
-require 'sidekiq/logging'
+require 'sidekiq/logger'
 require 'sidekiq/client'
 require 'sidekiq/worker'
 require 'sidekiq/redis_connection'
@@ -183,11 +183,11 @@ module Sidekiq
   end
 
   def self.logger
-    Sidekiq::Logging.logger
+    @logger ||= Sidekiq::Logger.new(STDOUT, level: Logger::INFO)
   end
 
-  def self.logger=(log)
-    Sidekiq::Logging.logger = log
+  def self.logger=(logger)
+    @logger = logger
   end
 
   # How frequently Redis should be checked by a random Sidekiq process for

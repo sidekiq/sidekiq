@@ -121,7 +121,7 @@ module Sidekiq
       # job structure to the Web UI
       pristine = cloned(job_hash)
 
-      Sidekiq::Logging.with_job_hash_context(job_hash) do
+      @job_logger.with_job_hash_context(job_hash) do
         @retrier.global(pristine, queue) do
           @job_logger.call(job_hash, queue) do
             stats(pristine, queue) do
@@ -236,7 +236,8 @@ module Sidekiq
     WORKER_STATE = SharedWorkerState.new
 
     def stats(job_hash, queue)
-      tid = Sidekiq::Logging.tid
+      tid = Sidekiq.logger.tid
+
       WORKER_STATE.set(tid, {:queue => queue, :payload => job_hash, :run_at => Time.now.to_i })
 
       begin

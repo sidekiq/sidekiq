@@ -9,14 +9,12 @@ class TestCLI < Minitest::Test
 
     let(:logdev) { StringIO.new }
 
-    before do
-      Sidekiq.options = Sidekiq::DEFAULTS.dup
-      Sidekiq.logger = Logger.new(logdev)
-    end
-
-    after do
-      Sidekiq.options = nil
-      Sidekiq.logger = nil
+    around do |test|
+      Sidekiq.stub :options, Sidekiq::DEFAULTS.dup do
+        Sidekiq.stub :logger, Sidekiq::Logger.new(logdev) do
+          test.call
+        end
+      end
     end
 
     describe '#parse' do

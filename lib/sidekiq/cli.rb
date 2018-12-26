@@ -8,8 +8,8 @@ require 'erb'
 require 'fileutils'
 
 require 'sidekiq'
-require 'sidekiq/util'
 require 'sidekiq/launcher'
+require 'sidekiq/util'
 
 module Sidekiq
   class CLI

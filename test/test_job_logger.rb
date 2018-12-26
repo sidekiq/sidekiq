@@ -10,9 +10,9 @@ class TestJobLogger < Minitest::Test
     let(:logdev) { StringIO.new }
 
     around do |test|
-      Sidekiq.stub :logger, Sidekiq::Logging.initialize_logger(logdev) do
-        Process.stub :pid, 4710 do
-          Sidekiq::Logging.stub :tid, 'ouy7z76mx' do
+      Sidekiq.stub :logger, Sidekiq::Logger.new(logdev) do
+        Sidekiq.logger.stub :tid, 'ouy7z76mx' do
+          Process.stub :pid, 4710 do
             Time.stub :now, Time.utc(2020, 1, 1) do
               test.call
             end
@@ -28,7 +28,7 @@ class TestJobLogger < Minitest::Test
     describe '#call' do
       describe 'when pretty formatter' do
         before do
-          Sidekiq.logger.formatter = Sidekiq::Logging::PrettyFormatter.new
+          Sidekiq.logger.formatter = Sidekiq::Logger::PrettyFormatter.new
         end
 
         it 'logs elapsed time as context' do
@@ -41,7 +41,7 @@ class TestJobLogger < Minitest::Test
 
       describe 'when json formatter' do
         before do
-          Sidekiq.logger.formatter = Sidekiq::Logging::JSONFormatter.new
+          Sidekiq.logger.formatter = Sidekiq::Logger::JSONFormatter.new
         end
 
         it 'logs elapsed time as context' do
