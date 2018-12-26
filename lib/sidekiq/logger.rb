@@ -11,9 +11,9 @@ module Sidekiq
 
       formatter_class = case Sidekiq.logger_formatter
       when :json
-        JSONFormatter
+        Formatters::JSON
       else
-        ENV['DYNO'] ? WithoutTimestampFormatter : PrettyFormatter
+        ENV['DYNO'] ? Formatters::WithoutTimestamp : Formatters::Pretty
       end
 
       self.formatter = formatter_class.new
@@ -34,34 +34,36 @@ module Sidekiq
       hash.keys.each { |key| context.delete(key) }
     end
 
-    class PrettyFormatter < Logger::Formatter
-      def call(severity, time, program_name, message)
-        "#{time.utc.iso8601(3)} #{::Process.pid} TID-#{Sidekiq.logger.tid}#{format_context(Sidekiq.logger.context)} #{severity}: #{message}\n"
+    module Formatters
+      class Pretty < Logger::Formatter
+        def call(severity, time, program_name, message)
+          "#{time.utc.iso8601(3)} #{::Process.pid} TID-#{Sidekiq.logger.tid}#{format_context(Sidekiq.logger.context)} #{severity}: #{message}\n"
+        end
+
+        private
+
+        def format_context(context)
+          ' ' + context.compact.map { |k, v| "#{k.upcase}=#{v}" }.join(' ') if context.any?
+        end
       end
 
-      private
-
-      def format_context(context)
-        ' ' + context.compact.map { |k, v| "#{k.upcase}=#{v}" }.join(' ') if context.any?
+      class WithoutTimestamp < Pretty
+        def call(severity, time, program_name, message)
+          "#{::Process.pid} TID-#{Sidekiq.logger.tid}#{format_context(Sidekiq.logger.context)} #{severity}: #{message}\n"
+        end
       end
-    end
 
-    class WithoutTimestampFormatter < PrettyFormatter
-      def call(severity, time, program_name, message)
-        "#{::Process.pid} TID-#{Sidekiq.logger.tid}#{format_context(Sidekiq.logger.context)} #{severity}: #{message}\n"
-      end
-    end
-
-    class JSONFormatter < Logger::Formatter
-      def call(severity, time, program_name, message)
-        Sidekiq.dump_json(
-          ts: time.utc.iso8601(3),
-          pid: ::Process.pid,
-          tid: Sidekiq.logger.tid,
-          ctx: Sidekiq.logger.context,
-          sev: severity,
-          msg: message
-        )
+      class JSON < Logger::Formatter
+        def call(severity, time, program_name, message)
+          Sidekiq.dump_json(
+            ts: time.utc.iso8601(3),
+            pid: ::Process.pid,
+            tid: Sidekiq.logger.tid,
+            ctx: Sidekiq.logger.context,
+            sev: severity,
+            msg: message
+          )
+        end
       end
     end
   end

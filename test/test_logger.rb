@@ -25,7 +25,7 @@ class TestLogger < Minitest::Test
 
         describe 'default formatter' do
           it 'sets pretty formatter' do
-            assert_kind_of Sidekiq::Logger::PrettyFormatter, subject
+            assert_kind_of Sidekiq::Logger::Formatters::Pretty, subject
           end
         end
 
@@ -37,7 +37,7 @@ class TestLogger < Minitest::Test
           end
 
           it 'sets without timestamp formatter' do
-            assert_kind_of Sidekiq::Logger::WithoutTimestampFormatter, subject
+            assert_kind_of Sidekiq::Logger::Formatters::WithoutTimestamp, subject
           end
         end
 
@@ -49,7 +49,7 @@ class TestLogger < Minitest::Test
           end
 
           it 'sets json formatter' do
-            assert_kind_of Sidekiq::Logger::JSONFormatter, subject
+            assert_kind_of Sidekiq::Logger::Formatters::JSON, subject
           end
         end
       end
@@ -144,7 +144,7 @@ class TestLogger < Minitest::Test
       end
 
       describe 'with context' do
-        subject { Sidekiq::Logger::PrettyFormatter.new.call(severity, utc_time, prg, msg) }
+        subject { Sidekiq::Logger::Formatters::Pretty.new.call(severity, utc_time, prg, msg) }
 
         let(:context) { { class: 'HaikuWorker', bid: nil } }
 
@@ -159,9 +159,9 @@ class TestLogger < Minitest::Test
         end
       end
 
-      describe Sidekiq::Logger::PrettyFormatter do
+      describe Sidekiq::Logger::Formatters::Pretty do
         describe '#call' do
-          subject { Sidekiq::Logger::PrettyFormatter.new.call(severity, utc_time, prg, msg) }
+          subject { Sidekiq::Logger::Formatters::Pretty.new.call(severity, utc_time, prg, msg) }
 
           it 'formats with timestamp, pid, tid, severity, message' do
             assert_equal "2020-01-01T00:00:00.000Z 4710 TID-ouy7z76mx INFO: Old pond frog jumps in sound of water\n", subject
@@ -183,9 +183,9 @@ class TestLogger < Minitest::Test
         end
       end
 
-      describe Sidekiq::Logger::WithoutTimestampFormatter do
+      describe Sidekiq::Logger::Formatters::WithoutTimestamp do
         describe '#call' do
-          subject { Sidekiq::Logger::WithoutTimestampFormatter.new.call(severity, utc_time, prg, msg) }
+          subject { Sidekiq::Logger::Formatters::WithoutTimestamp.new.call(severity, utc_time, prg, msg) }
 
           it 'formats with pid, tid, severity, message' do
             assert_equal "4710 TID-ouy7z76mx INFO: Old pond frog jumps in sound of water\n", subject
@@ -207,9 +207,9 @@ class TestLogger < Minitest::Test
         end
       end
 
-      describe Sidekiq::Logger::JSONFormatter do
+      describe Sidekiq::Logger::Formatters::JSON do
         describe '#call' do
-          subject { Sidekiq::Logger::JSONFormatter.new.call(severity, utc_time, prg, msg) }
+          subject { Sidekiq::Logger::Formatters::JSON.new.call(severity, utc_time, prg, msg) }
 
           it 'formats with pid, tid, severity, message' do
             assert_equal %q|{"ts":"2020-01-01T00:00:00.000Z","pid":4710,"tid":"ouy7z76mx","ctx":{},"sev":"INFO","msg":"Old pond frog jumps in sound of water"}|, subject
