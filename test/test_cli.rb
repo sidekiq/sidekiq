@@ -203,6 +203,17 @@ class TestCLI < Minitest::Test
             assert_equal 3, Sidekiq.options[:queues].count { |q| q == 'seldom' }
           end
         end
+
+        describe 'default config file' do
+          describe 'when required path is a directory' do
+            it 'tries config/sidekiq.yml' do
+              @cli.parse(%w[sidekiq -r ./test/dummy])
+
+              assert_equal 'sidekiq.yml', File.basename(Sidekiq.options[:config_file])
+              assert_equal 25, Sidekiq.options[:concurrency]
+            end
+          end
+        end
       end
     end
 
@@ -218,6 +229,14 @@ class TestCLI < Minitest::Test
         it 'exits with status 1' do
           exit = assert_raises(SystemExit) { @cli.parse(%w[sidekiq -r ./test/fixtures]) }
           assert_equal 1, exit.status
+        end
+
+        describe 'when config file path does not exist' do
+          it 'raises argument error' do
+            assert_raises(ArgumentError) do
+              @cli.parse(%w[sidekiq -r ./test/fake_env.rb -C /non/existent/path])
+            end
+          end
         end
       end
     end

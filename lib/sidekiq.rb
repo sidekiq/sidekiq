@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'sidekiq/version'
-fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 2.2.2." if RUBY_PLATFORM != 'java' && Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.2.2')
+fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 2.4.0." if RUBY_PLATFORM != 'java' && Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.4.0')
 
 require 'sidekiq/logging'
 require 'sidekiq/client'
@@ -96,8 +96,8 @@ module Sidekiq
       begin
         yield conn
       rescue Redis::CommandError => ex
-        #2550 Failover can cause the server to become a slave, need
-        # to disconnect and reopen the socket to get back to the master.
+        #2550 Failover can cause the server to become a replica, need
+        # to disconnect and reopen the socket to get back to the primary.
         (conn.disconnect!; retryable = false; retry) if retryable && ex.message =~ /READONLY/
         raise
       end
@@ -156,12 +156,6 @@ module Sidekiq
   end
   def self.default_worker_options
     defined?(@default_worker_options) ? @default_worker_options : DEFAULT_WORKER_OPTIONS
-  end
-
-  def self.default_retries_exhausted=(prok)
-    logger.info { "default_retries_exhausted is deprecated, please use `config.death_handlers << -> {|job, ex| }`" }
-    return nil unless prok
-    death_handlers << prok
   end
 
   ##
