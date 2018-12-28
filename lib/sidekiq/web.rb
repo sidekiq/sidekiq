@@ -198,16 +198,3 @@ module Sidekiq
 
   Sidekiq::WebAction.class_eval "def _render\n#{ERB.new(File.read(Web::LAYOUT)).src}\nend"
 end
-
-if defined?(::ActionDispatch::Request::Session) &&
-    !::ActionDispatch::Request::Session.method_defined?(:each)
-  # mperham/sidekiq#2460
-  # Rack apps can't reuse the Rails session store without
-  # this monkeypatch, fixed in Rails 5.
-  class ActionDispatch::Request::Session
-    def each(&block)
-      hash = self.to_hash
-      hash.each(&block)
-    end
-  end
-end
