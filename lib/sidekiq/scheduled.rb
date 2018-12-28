@@ -24,7 +24,7 @@ module Sidekiq
               # next one.
               if conn.zrem(sorted_set, job)
                 Sidekiq::Client.push(Sidekiq.load_json(job))
-                Sidekiq::Logging.logger.debug { "enqueued #{sorted_set}: #{job}" }
+                Sidekiq.logger.debug { "enqueued #{sorted_set}: #{job}" }
               end
             end
           end

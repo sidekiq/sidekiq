@@ -338,7 +338,7 @@ class TestProcessor < Minitest::Test
     end
 
     describe 'custom job logger class' do
-      class CustomJobLogger
+      class CustomJobLogger < Sidekiq::JobLogger
         def call(item, queue)
           yield
         rescue Exception
@@ -348,9 +348,9 @@ class TestProcessor < Minitest::Test
 
       before do
         @mgr = Minitest::Mock.new
-        @mgr.expect(:options, {:queues => ['default'], :job_logger => CustomJobLogger})
-        @mgr.expect(:options, {:queues => ['default'], :job_logger => CustomJobLogger})
-        @mgr.expect(:options, {:queues => ['default'], :job_logger => CustomJobLogger})
+        @mgr.expect(:options, {:queues => ['default'], job_logger: CustomJobLogger})
+        @mgr.expect(:options, {:queues => ['default'], job_logger: CustomJobLogger})
+        @mgr.expect(:options, {:queues => ['default'], job_logger: CustomJobLogger})
         @processor = ::Sidekiq::Processor.new(@mgr)
       end
 
