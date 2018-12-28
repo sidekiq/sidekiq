@@ -3,15 +3,11 @@ sudo: false
 cache: bundler
 services:
   - redis-server
-before_install:
-  - gem update --system
 gemfile:
-  - gemfiles/rails_4.gemfile
   - gemfiles/rails_5.gemfile
 bundler_args: --without development load_test
 rvm:
-  - 2.2.10
-  - 2.3.7
   - 2.4.4
   - 2.5.1
+  - 2.6.0
   - jruby-9.1.17.0
