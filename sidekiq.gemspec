@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
   gem.files         = `git ls-files | grep -Ev '^(test|myapp|examples)'`.split("\n")
   gem.name          = "sidekiq"
   gem.version       = Sidekiq::VERSION
-  gem.required_ruby_version = ">= 2.2.2"
+  gem.required_ruby_version = ">= 2.4.0"
 
   gem.add_dependency 'redis', '>= 3.3.5', '< 5'
   gem.add_dependency 'connection_pool', '~> 2.2', '>= 2.2.2'

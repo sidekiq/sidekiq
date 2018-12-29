@@ -4,53 +4,63 @@ require_relative 'helper'
 require 'sidekiq/job_logger'
 
 class TestJobLogger < Minitest::Test
-  describe Sidekiq::JobLogger do
-    subject { Sidekiq::JobLogger.new }
+  def setup
+    @old = Sidekiq.logger
+    @output = StringIO.new
+    @logger = Sidekiq::Logger.new(@output)
 
-    let(:logdev) { StringIO.new }
+    Thread.current[:sidekiq_context] = nil
+    Thread.current[:sidekiq_tid] = nil
+  end
 
-    around do |test|
-      Sidekiq.stub :logger, Sidekiq::Logger.new(logdev) do
-        Sidekiq.logger.stub :tid, 'ouy7z76mx' do
-          Process.stub :pid, 4710 do
-            Time.stub :now, Time.utc(2020, 1, 1) do
-              test.call
-            end
-          end
-        end
-      end
+  def teardown
+    Thread.current[:sidekiq_context] = nil
+    Thread.current[:sidekiq_tid] = nil
+  end
+
+
+  def test_pretty_output
+    jl = Sidekiq::JobLogger.new(@logger)
+
+    # pretty
+    p = @logger.formatter = Sidekiq::Logger::Formatters::Pretty.new
+    job = {"jid"=>"1234abc", "wrapped"=>"FooWorker", "class"=>"Wrapper"}
+    # this mocks what Processor does
+    jl.with_job_hash_context(job) do
+      jl.call(job, 'queue') {}
     end
 
-    after do
-      Thread.current[:sidekiq_context] = nil
+    a, b = @output.string.lines
+    assert a
+    assert b
+
+    expected = /pid=#{$$} tid=#{p.tid} class=FooWorker jid=1234abc/
+    assert_match(expected, a)
+    assert_match(expected, b)
+    assert_match(/#{Time.now.utc.to_date}.+Z pid=#{$$} tid=#{p.tid} .+INFO: done/, b)
+  end
+
+  def test_json_output
+    # json
+    @logger.formatter = Sidekiq::Logger::Formatters::JSON.new
+    jl = Sidekiq::JobLogger.new(@logger)
+    job = {"jid"=>"1234abc", "wrapped"=>"Wrapper", "class"=>"FooWorker", "bid"=>"b-xyz"}
+    # this mocks what Processor does
+    jl.with_job_hash_context(job) do
+      jl.call(job, 'queue') {}
     end
+    a, b = @output.string.lines
+    assert a
+    assert b
+    hsh = JSON.parse(a)
+    keys = hsh.keys.sort
+    assert_equal(["ctx", "lvl", "msg", "pid", "tid", "ts"], keys)
+    keys = hsh["ctx"].keys.sort
+    assert_equal(["bid", "class", "jid"], keys)
+  end
 
-    describe '#call' do
-      describe 'when pretty formatter' do
-        before do
-          Sidekiq.logger.formatter = Sidekiq::Logger::Formatters::Pretty.new
-        end
-
-        it 'logs elapsed time as context' do
-          subject.call('item', 'queue') {}
-
-          assert_match(/2020-01-01T00:00:00\.000Z 4710 TID-ouy7z76mx INFO: start/, logdev.string)
-          assert_match(/2020-01-01T00:00:00\.000Z 4710 TID-ouy7z76mx ELAPSED=.+ sec INFO: done/, logdev.string)
-        end
-      end
-
-      describe 'when json formatter' do
-        before do
-          Sidekiq.logger.formatter = Sidekiq::Logger::Formatters::JSON.new
-        end
-
-        it 'logs elapsed time as context' do
-          subject.call('item', 'queue') {}
-
-          assert_match(/ctx.+msg.+start/, logdev.string)
-          assert_match(/ctx.+elapsed.+sec.+msg.+done/, logdev.string)
-        end
-      end
-    end
+  def reset(io)
+    io.truncate(0)
+    io.rewind
   end
 end

@@ -23,7 +23,6 @@ module Sidekiq
   # to replace itself and exits.
   #
   class Processor
-
     include Util
 
     attr_reader :thread
@@ -236,8 +235,6 @@ module Sidekiq
     WORKER_STATE = SharedWorkerState.new
 
     def stats(job_hash, queue)
-      tid = Sidekiq.logger.tid
-
       WORKER_STATE.set(tid, {:queue => queue, :payload => job_hash, :run_at => Time.now.to_i })
 
       begin

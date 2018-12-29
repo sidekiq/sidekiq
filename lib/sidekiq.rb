@@ -179,7 +179,7 @@ module Sidekiq
   end
 
   class << self
-    attr_accessor :logger_formatter
+    attr_accessor :log_format
   end
 
   def self.logger

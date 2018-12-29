@@ -42,7 +42,7 @@ module Sidekiq
     # test coverage of Sidekiq::CLI are welcomed.
     def run
       boot_system
-      print_banner if environment == 'development' && $stdout.tty?
+      print_banner if environment == 'development' && $stdout.tty? && Sidekiq.log_format == nil
 
       self_read, self_write = IO.pipe
       sigs = %w(INT TERM TTIN TSTP)

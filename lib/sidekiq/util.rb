@@ -34,6 +34,10 @@ module Sidekiq
       Sidekiq.redis(&block)
     end
 
+    def tid
+      Thread.current['sidekiq_tid'] ||= (Thread.current.object_id ^ ::Process.pid).to_s(36)
+    end
+
     def hostname
       ENV['DYNO'] || Socket.gethostname
     end
