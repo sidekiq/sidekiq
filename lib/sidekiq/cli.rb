@@ -16,14 +16,6 @@ module Sidekiq
     include Util
     include Singleton unless $TESTING
 
-    PROCTITLES = [
-      proc { 'sidekiq' },
-      proc { Sidekiq::VERSION },
-      proc { |me, data| data['tag'] },
-      proc { |me, data| "[#{Processor::WORKER_STATE.size} of #{data['concurrency']} busy]" },
-      proc { |me, data| "stopping" if me.stopping? },
-    ]
-
     attr_accessor :launcher
     attr_accessor :environment
 
