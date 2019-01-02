@@ -4,7 +4,7 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+1.7.2
 -------------
 
 - Add PT and JA translations, see issues [#3949](https://github.com/mperham/sidekiq/issues/3949) and [#3951](https://github.com/mperham/sidekiq/issues/3951) to add your own language.
