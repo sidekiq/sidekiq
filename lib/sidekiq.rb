@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'sidekiq/version'
-fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 2.4.0." if RUBY_PLATFORM != 'java' && Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.4.0')
+fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 2.5.0." if RUBY_PLATFORM != 'java' && Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.5.0')
 
 require 'sidekiq/logger'
 require 'sidekiq/client'
