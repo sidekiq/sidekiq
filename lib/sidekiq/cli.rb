@@ -72,6 +72,7 @@ module Sidekiq
       # fire startup and start multithreading.
       ver = Sidekiq.redis_info['redis_version']
       raise "You are using Redis v#{ver}, Sidekiq requires Redis v2.8.0 or greater" if ver < '2.8'
+      logger.warn "Sidekiq 6.0 will require Redis 4.0+, you are using Redis v#{ver}" if ver < '4'
 
       # Since the user can pass us a connection pool explicitly in the initializer, we
       # need to verify the size is large enough or else Sidekiq's performance is dramatically slowed.
@@ -324,7 +325,7 @@ module Sidekiq
 
         o.on '-d', '--daemon', "Daemonize process" do |arg|
           opts[:daemon] = arg
-          puts "WARNING: Daemonization mode will be removed in Sidekiq 6.0, please use a proper process supervisor to start and manage your services"
+          puts "WARNING: Daemonization mode will be removed in Sidekiq 6.0, see #4045. Please use a proper process supervisor to start and manage your services"
         end
 
         o.on '-e', '--environment ENV', "Application environment" do |arg|
@@ -364,12 +365,12 @@ module Sidekiq
 
         o.on '-L', '--logfile PATH', "path to writable logfile" do |arg|
           opts[:logfile] = arg
-          puts "WARNING: Logfile redirection will be removed in Sidekiq 6.0, Sidekiq will only log to STDOUT"
+          puts "WARNING: Logfile redirection will be removed in Sidekiq 6.0, see #4045. Sidekiq will only log to STDOUT"
         end
 
         o.on '-P', '--pidfile PATH', "path to pidfile" do |arg|
           opts[:pidfile] = arg
-          puts "WARNING: PID file creation will be removed in Sidekiq 6.0, please use a proper process supervisor to start and manage your services"
+          puts "WARNING: PID file creation will be removed in Sidekiq 6.0, see #4045. Please use a proper process supervisor to start and manage your services"
         end
 
         o.on '-V', '--version', "Print version and exit" do |arg|
