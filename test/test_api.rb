@@ -285,6 +285,17 @@ class TestApi < Minitest::Test
         assert_equal [1,2,3], x.display_args
       end
 
+      it 'unwraps ActionMailer jobs with additional params' do
+        ApiMailer.test_email(1, 2, 3).deliver_later
+        q = Sidekiq::Queue.new('mailers')
+        x = q.first
+        x.item['args'].unshift('foo' => 'bar')
+
+        assert_equal x.item['args'].first, {'foo' => 'bar'}
+        assert_equal "TestApi::ApiMailer#test_email", x.display_class
+        assert_equal [1,2,3], x.display_args
+      end
+
       it 'has no enqueued_at time for jobs enqueued in the future' do
         job_id = ApiWorker.perform_in(100, 1, 'foo')
         job = Sidekiq::ScheduledSet.new.find_job(job_id)

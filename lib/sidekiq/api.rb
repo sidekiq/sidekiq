@@ -348,7 +348,7 @@ module Sidekiq
                    job_class = @item['wrapped'] || args[0]
                    if 'ActionMailer::DeliveryJob' == job_class
                      # MailerClass#mailer_method
-                     args[0]['arguments'][0..1].join('#')
+                     job_class_args[0..1].join('#')
                    else
                     job_class
                    end
@@ -365,7 +365,7 @@ module Sidekiq
                     arg
                   end
                 when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
-                  job_args = self['wrapped'] ? args[0]["arguments"] : []
+                  job_args = self['wrapped'] ? job_class_args : []
                   if 'ActionMailer::DeliveryJob' == (self['wrapped'] || args[0])
                     # remove MailerClass, mailer_method and 'deliver_now'
                     job_args.drop(3)
@@ -383,6 +383,11 @@ module Sidekiq
 
     def args
       @args || @item['args']
+    end
+
+    def job_class_args
+      h = args.detect { |args| args.is_a?(Hash) && args.has_key?('job_class') } || {}
+      h['arguments']
     end
 
     def jid
