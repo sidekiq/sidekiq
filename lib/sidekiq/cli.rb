@@ -238,12 +238,14 @@ module Sidekiq
         if opts[:config_file] && !File.exist?(opts[:config_file])
           raise ArgumentError, "No such file #{opts[:config_file]}"
         end
+      elsif opts[:require] && File.directory?(opts[:require])
+        %w[config/sidekiq.yml config/sidekiq.yml.erb].each do |filename|
+          path = File.expand_path(filename, opts[:require])
+          opts[:config_file] ||= path if File.exist?(path)
+        end
       else
-        if opts[:require] && File.directory?(opts[:require])
-          %w[config/sidekiq.yml config/sidekiq.yml.erb].each do |filename|
-            path = File.expand_path(filename, opts[:require])
-            opts[:config_file] ||= path if File.exist?(path)
-          end
+        %w[config/sidekiq.yml config/sidekiq.yml.erb].each do |filename|
+          opts[:config_file] ||= filename if File.exist?(filename)
         end
       end
 

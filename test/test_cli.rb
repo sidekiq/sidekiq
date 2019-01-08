@@ -254,6 +254,15 @@ class TestCLI < Minitest::Test
               assert_equal 25, Sidekiq.options[:concurrency]
             end
           end
+
+          describe 'when no requirement path is provided' do
+            it 'tries ./config/sidekiq.yml' do
+              Dir.chdir("test/dummy") do
+                @cli.parse(%w[sidekiq])
+                assert_equal 'config/sidekiq.yml', Sidekiq.options[:config_file]
+              end
+            end
+          end
         end
       end
     end
