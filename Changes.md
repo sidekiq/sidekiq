@@ -2,6 +2,11 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
+5.2.5
+---------
+
+- Fix default usage of `config/sidekiq.yml` [#4077, Tensho]
+
 5.2.4
 ---------
 
