@@ -96,8 +96,8 @@ module Sidekiq
       begin
         yield conn
       rescue Redis::CommandError => ex
-        #2550 Failover can cause the server to become a slave, need
-        # to disconnect and reopen the socket to get back to the master.
+        #2550 Failover can cause the server to become a replica, need
+        # to disconnect and reopen the socket to get back to the primary.
         (conn.disconnect!; retryable = false; retry) if retryable && ex.message =~ /READONLY/
         raise
       end
