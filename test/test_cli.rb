@@ -247,10 +247,32 @@ class TestCLI < Minitest::Test
 
         describe 'default config file' do
           describe 'when required path is a directory' do
-            it 'tries config/sidekiq.yml' do
+            it 'tries config/sidekiq.yml from required diretory' do
               @cli.parse(%w[sidekiq -r ./test/dummy])
 
-              assert_equal 'sidekiq.yml', File.basename(Sidekiq.options[:config_file])
+              assert_equal './test/dummy/config/sidekiq.yml', Sidekiq.options[:config_file]
+              assert_equal 25, Sidekiq.options[:concurrency]
+            end
+          end
+
+          describe 'when required path is a file' do
+            it 'tries config/sidekiq.yml from current diretory' do
+              Sidekiq.options[:require] = './test/dummy' # stub current dir – ./
+
+              @cli.parse(%w[sidekiq -r ./test/fake_env.rb])
+
+              assert_equal './test/dummy/config/sidekiq.yml', Sidekiq.options[:config_file]
+              assert_equal 25, Sidekiq.options[:concurrency]
+            end
+          end
+
+          describe 'without any required path' do
+            it 'tries config/sidekiq.yml from current diretory' do
+              Sidekiq.options[:require] = './test/dummy' # stub current dir – ./
+
+              @cli.parse(%w[sidekiq])
+
+              assert_equal './test/dummy/config/sidekiq.yml', Sidekiq.options[:config_file]
               assert_equal 25, Sidekiq.options[:concurrency]
             end
           end
