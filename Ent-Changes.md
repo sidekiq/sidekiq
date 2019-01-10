@@ -7,7 +7,9 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 HEAD
 -------------
 
-- Add a gauge to the historical metrics for `default` queue latency [#4079]
+- Require Sidekiq Pro 4.0 and Sidekiq 5.2.
+- Refactor historical metrics API to use revamped Statsd support in Sidekiq Pro
+- Add a gauge to historical metrics for `default` queue latency [#4079]
 
 1.7.2
 -------------
