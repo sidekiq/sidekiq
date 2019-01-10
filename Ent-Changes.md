@@ -4,6 +4,11 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+-------------
+
+- Add a gauge to the historical metrics for `default` queue latency [#4079]
+
 1.7.2
 -------------
 
