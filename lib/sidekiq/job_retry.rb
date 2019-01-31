@@ -252,7 +252,7 @@ module Sidekiq
         exception.message.to_s[0, 10_000]
       rescue StandardError => e
         # If the message raises a StandardError, set a default
-        "!!! ERROR HANDLER THREW AN ERROR !!!"
+        "!!! ERROR MESSAGE THREW AN ERROR !!!"
       end
     end
 
