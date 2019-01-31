@@ -140,9 +140,7 @@ module Sidekiq
         queue
       end
 
-      # App code can stuff all sorts of crazy binary data into the error message
-      # that won't convert to JSON.
-      m = exception.message.to_s[0, 10_000] rescue nil
+      m = exception_message(exception).dup
       if m.respond_to?(:scrub!)
         m.force_encoding("utf-8")
         m.scrub!
@@ -245,6 +243,17 @@ module Sidekiq
 
       e.cause.instance_of?(Sidekiq::Shutdown) ||
         exception_caused_by_shutdown?(e.cause, checked_causes)
+    end
+
+    def exception_message(exception)
+      begin
+        # App code can stuff all sorts of crazy binary data into the error message
+        # that won't convert to JSON.
+        exception.message.to_s[0, 10_000]
+      rescue StandardError => e
+        # If the message raises a StandardError, set a default
+        "!!! ERROR HANDLER THREW AN ERROR !!!"
+      end
     end
 
   end
