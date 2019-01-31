@@ -140,7 +140,7 @@ module Sidekiq
         queue
       end
 
-      m = exception_message(exception).dup
+      m = exception_message(exception)
       if m.respond_to?(:scrub!)
         m.force_encoding("utf-8")
         m.scrub!
@@ -252,8 +252,8 @@ module Sidekiq
         # App code can stuff all sorts of crazy binary data into the error message
         # that won't convert to JSON.
         exception.message.to_s[0, 10_000]
-      rescue StandardError => e
-        "!!! ERROR MESSAGE THREW AN ERROR !!!"
+      rescue
+        "!!! ERROR MESSAGE THREW AN ERROR !!!".dup
       end
     end
 
