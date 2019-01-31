@@ -10,6 +10,12 @@ class TestRetry < Minitest::Test
       include Sidekiq::Worker
     end
 
+    class BadErrorMessage < StandardError
+      def message
+        raise "Ahhh, this isn't supposed to happen"
+      end
+    end
+
     before do
       Sidekiq.redis {|c| c.flushdb }
     end
@@ -75,6 +81,18 @@ class TestRetry < Minitest::Test
       assert_equal "kerblammo! �", job["error_message"]
     end
 
+    # In the rare event that an error message raises an error itself,
+    # allow the job to retry. This will likely only happen for custom
+    # error classes.
+    it 'handles error message that raises an error' do
+      assert_raises RuntimeError do
+        handler.local(worker, job, 'default') do
+          raise BadErrorMessage.new
+        end
+      end
+      assert_equal 1, Sidekiq::RetrySet.new.size
+      assert_nil job["error_message"]
+    end
 
     it 'allows a max_retries option in initializer' do
       max_retries = 7

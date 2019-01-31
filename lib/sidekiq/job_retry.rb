@@ -142,7 +142,7 @@ module Sidekiq
 
       # App code can stuff all sorts of crazy binary data into the error message
       # that won't convert to JSON.
-      m = exception.message.to_s[0, 10_000]
+      m = exception.message.to_s[0, 10_000] rescue nil
       if m.respond_to?(:scrub!)
         m.force_encoding("utf-8")
         m.scrub!
