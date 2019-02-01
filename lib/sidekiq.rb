@@ -174,12 +174,21 @@ module Sidekiq
   def self.load_json(string)
     JSON.parse(string)
   end
+
   def self.dump_json(object)
     JSON.generate(object)
   end
 
-  class << self
-    attr_accessor :log_formatter
+  def self.log_formatter
+    @log_formatter ||= if ENV['DYNO']
+      Sidekiq::Logger::Formatters::WithoutTimestamp.new
+    else
+      Sidekiq::Logger::Formatters::Pretty.new
+    end
+  end
+
+  def self.log_formatter=(log_formatter)
+    @log_formatter = log_formatter
   end
 
   def self.logger

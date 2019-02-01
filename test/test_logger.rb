@@ -8,30 +8,34 @@ class TestLogger < Minitest::Test
     @output = StringIO.new
     @logger = Sidekiq::Logger.new(@output)
 
+    Sidekiq.log_formatter = nil
     Thread.current[:sidekiq_context] = nil
     Thread.current[:sidekiq_tid] = nil
   end
 
   def teardown
+    Sidekiq.log_formatter = nil
     Thread.current[:sidekiq_context] = nil
     Thread.current[:sidekiq_tid] = nil
   end
 
-  def test_format_selection
-    assert_kind_of Sidekiq::Logger::Formatters::Pretty, Sidekiq::Logger.new(STDOUT).formatter
+  def test_default_log_formatter
+    assert_kind_of Sidekiq::Logger::Formatters::Pretty, Sidekiq::Logger.new(@output).formatter
+  end
+
+  def test_heroku_log_formatter
     begin
       ENV['DYNO'] = 'dyno identifier'
-      assert_kind_of Sidekiq::Logger::Formatters::WithoutTimestamp, Sidekiq::Logger.new(STDOUT).formatter
+      assert_kind_of Sidekiq::Logger::Formatters::WithoutTimestamp, Sidekiq::Logger.new(@output).formatter
     ensure
       ENV['DYNO'] = nil
     end
+  end
 
-    begin
-      Sidekiq.log_formatter = :json
-      assert_kind_of Sidekiq::Logger::Formatters::JSON, Sidekiq::Logger.new(STDOUT).formatter
-    ensure
-      Sidekiq.log_formatter = nil
-    end
+  def test_json_log_formatter
+    Sidekiq.log_formatter = Sidekiq::Logger::Formatters::JSON.new
+
+    assert_kind_of Sidekiq::Logger::Formatters::JSON, Sidekiq::Logger.new(@output).formatter
   end
 
   def test_with_context

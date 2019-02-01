@@ -34,7 +34,9 @@ module Sidekiq
     # test coverage of Sidekiq::CLI are welcomed.
     def run
       boot_system
-      print_banner if environment == 'development' && $stdout.tty? && Sidekiq.log_formatter == nil
+      if environment == 'development' && $stdout.tty? && Sidekiq.log_formatter.is_a?(Sidekiq::Logger::Formatters::Pretty)
+        print_banner
+      end
 
       self_read, self_write = IO.pipe
       sigs = %w(INT TERM TTIN TSTP)

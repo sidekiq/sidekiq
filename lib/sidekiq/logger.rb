@@ -9,14 +9,7 @@ module Sidekiq
     def initialize(*args)
       super
 
-      formatter_class = case Sidekiq.log_formatter
-      when :json
-        Formatters::JSON
-      else
-        ENV['DYNO'] ? Formatters::WithoutTimestamp : Formatters::Pretty
-      end
-
-      self.formatter = formatter_class.new
+      self.formatter = Sidekiq.log_formatter
     end
 
     def with_context(hash)
