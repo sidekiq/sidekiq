@@ -9,7 +9,7 @@ module Sidekiq
     def initialize(*args)
       super
 
-      formatter_class = case Sidekiq.log_format
+      formatter_class = case Sidekiq.log_formatter
       when :json
         Formatters::JSON
       else

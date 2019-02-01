@@ -27,10 +27,10 @@ class TestLogger < Minitest::Test
     end
 
     begin
-      Sidekiq.log_format = :json
+      Sidekiq.log_formatter = :json
       assert_kind_of Sidekiq::Logger::Formatters::JSON, Sidekiq::Logger.new(STDOUT).formatter
     ensure
-      Sidekiq.log_format = nil
+      Sidekiq.log_formatter = nil
     end
   end
 
