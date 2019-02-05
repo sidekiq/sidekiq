@@ -3,10 +3,7 @@
 require 'bundler/setup'
 Bundler.require(:default, :test)
 
-require 'minitest/reporters'
 require 'minitest/autorun'
-
-MiniTest::Reporters.use! Minitest::Reporters::DefaultReporter.new
 
 $TESTING = true
 # disable minitest/parallel threads
