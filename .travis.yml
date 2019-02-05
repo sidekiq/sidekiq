@@ -3,12 +3,6 @@ sudo: false
 cache: bundler
 services:
   - redis-server
-before_install:
-  - gem install bundler -v '< 2'
-gemfile:
-  - gemfiles/rails_4.gemfile
-  - gemfiles/rails_5.gemfile
-bundler_args: --without development load_test
 rvm:
   - 2.3.7
   - 2.4.4
