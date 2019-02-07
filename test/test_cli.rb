@@ -5,16 +5,18 @@ require 'sidekiq/cli'
 
 class TestCLI < Minitest::Test
   describe Sidekiq::CLI do
-    subject { Sidekiq::CLI.new }
 
-    let(:logdev) { StringIO.new }
+    def subject
+      @cli ||= Sidekiq::CLI.new
+    end
 
-    around do |test|
-      Sidekiq.stub :options, Sidekiq::DEFAULTS.dup do
-        Sidekiq.stub :logger, Sidekiq::Logger.new(logdev) do
-          test.call
-        end
-      end
+    def logdev
+      @logdev ||= StringIO.new
+    end
+
+    def setup
+      Sidekiq.options = Sidekiq::DEFAULTS.dup
+      Sidekiq.logger = Sidekiq::Logger.new(logdev)
     end
 
     describe '#parse' do
@@ -172,17 +174,37 @@ class TestCLI < Minitest::Test
             assert_equal 2, Sidekiq.options[:queues].count { |q| q == 'very_often' }
             assert_equal 1, Sidekiq.options[:queues].count { |q| q == 'seldom' }
           end
+        end
 
-          describe 'when config file is empty' do
-            it 'sets default options' do
-              subject.parse(%w[sidekiq -C ./test/config_empty.yml -r ./test/fake_env.rb])
+        describe 'default config file' do
+          describe 'when required path is a directory' do
+            it 'tries config/sidekiq.yml from required diretory' do
+              subject.parse(%w[sidekiq -r ./test/dummy])
 
-              assert_equal './test/config_empty.yml', Sidekiq.options[:config_file]
-              refute Sidekiq.options[:verbose]
-              assert_equal './test/fake_env.rb', Sidekiq.options[:require]
-              assert_nil Sidekiq.options[:environment]
-              assert_equal 10, Sidekiq.options[:concurrency]
-              assert_equal ['default'], Sidekiq.options[:queues]
+              assert_equal './test/dummy/config/sidekiq.yml', Sidekiq.options[:config_file]
+              assert_equal 25, Sidekiq.options[:concurrency]
+            end
+          end
+
+          describe 'when required path is a file' do
+            it 'tries config/sidekiq.yml from current diretory' do
+              Sidekiq.options[:require] = './test/dummy' # stub current dir – ./
+
+              subject.parse(%w[sidekiq -r ./test/fake_env.rb])
+
+              assert_equal './test/dummy/config/sidekiq.yml', Sidekiq.options[:config_file]
+              assert_equal 25, Sidekiq.options[:concurrency]
+            end
+          end
+
+          describe 'without any required path' do
+            it 'tries config/sidekiq.yml from current diretory' do
+              Sidekiq.options[:require] = './test/dummy' # stub current dir – ./
+
+              subject.parse(%w[sidekiq])
+
+              assert_equal './test/dummy/config/sidekiq.yml', Sidekiq.options[:config_file]
+              assert_equal 25, Sidekiq.options[:concurrency]
             end
           end
 

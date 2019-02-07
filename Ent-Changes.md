@@ -7,6 +7,13 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 HEAD
 -------------
 
+- Require Sidekiq Pro 4.0 and Sidekiq 5.2.
+- Refactor historical metrics API to use revamped Statsd support in Sidekiq Pro
+- Add a gauge to historical metrics for `default` queue latency [#4079]
+
+1.7.2
+-------------
+
 - Add PT and JA translations, see issues [#3949](https://github.com/mperham/sidekiq/issues/3949) and [#3951](https://github.com/mperham/sidekiq/issues/3951) to add your own language.
 - Fix elapsed time calculations to use monotonic clock [#4000, sj26]
 - Fix edge case where flapping leadership would cause old periodic

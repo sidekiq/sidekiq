@@ -62,6 +62,7 @@ module Sidekiq
       # fire startup and start multithreading.
       ver = Sidekiq.redis_info['redis_version']
       raise "You are using Redis v#{ver}, Sidekiq requires Redis v2.8.0 or greater" if ver < '2.8'
+      logger.warn "Sidekiq 6.0 will require Redis 4.0+, you are using Redis v#{ver}" if ver < '4'
 
       # Since the user can pass us a connection pool explicitly in the initializer, we
       # need to verify the size is large enough or else Sidekiq's performance is dramatically slowed.
@@ -197,17 +198,22 @@ module Sidekiq
           raise ArgumentError, "No such file #{opts[:config_file]}"
         end
       else
-        if opts[:require] && File.directory?(opts[:require])
-          %w[config/sidekiq.yml config/sidekiq.yml.erb].each do |filename|
-            path = File.expand_path(filename, opts[:require])
-            opts[:config_file] ||= path if File.exist?(path)
-          end
+        config_dir = if File.directory?(opts[:require].to_s)
+          File.join(opts[:require], 'config')
+        else
+          File.join(options[:require], 'config')
+        end
+
+        %w[sidekiq.yml sidekiq.yml.erb].each do |config_file|
+          path = File.join(config_dir, config_file)
+          opts[:config_file] ||= path if File.exist?(path)
         end
       end
 
       # parse config file options
       opts = parse_config(opts[:config_file]).merge(opts) if opts[:config_file]
 
+      # set defaults
       opts[:queues] = Array(opts[:queues]) << 'default' if opts[:queues].nil? || opts[:queues].empty?
       opts[:strict] = true if opts[:strict].nil?
       opts[:concurrency] = Integer(ENV["RAILS_MAX_THREADS"]) if opts[:concurrency].nil? && ENV["RAILS_MAX_THREADS"]

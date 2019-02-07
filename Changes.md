@@ -2,7 +2,7 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
-HEAD
+6.0
 ---------
 
 This release has major breaking changes.  Read and test carefully in production.
@@ -23,9 +23,16 @@ get the old behavior. [#3968]
   arguments to Sidekiq. Use a proper process supervisor (e.g. systemd or
 foreman) to manage Sidekiq.
 
+5.2.5
+---------
+
+- Fix default usage of `config/sidekiq.yml` [#4077, Tensho]
+
 5.2.4
 ---------
 
+- Add warnings for various deprecations and changes coming in Sidekiq 6.0.
+  See the 6-0 branch. [#4056]
 - Various improvements to the Sidekiq test suite and coverage [#4026, #4039, Tensho]
 
 5.2.3

@@ -7,6 +7,8 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 HEAD
 ---------
 
+- Increase super\_fetch retriever thread count from 1 to 2 to make it
+  less sensitive to Redis latency.
 - Better handling of invalid job JSON by reliable scheduler [#4053]
 - Added ZH, PT, JA and RU translations, see issues [#3949](https://github.com/mperham/sidekiq/issues/3949) and [#3951](https://github.com/mperham/sidekiq/issues/3951) to add your own language.
 
