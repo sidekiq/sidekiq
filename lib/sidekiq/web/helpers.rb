@@ -207,9 +207,16 @@ module Sidekiq
     end
 
     def display_args(args, truncate_after_chars = 2000)
-      args.map do |arg|
-        h(truncate(to_display(arg), truncate_after_chars))
-      end.join(", ")
+      return "Invalid job payload, args is nil" if args == nil
+      return "Invalid job payload, args must be an Array, not #{args.class.name}" if !args.is_a?(Array)
+
+      begin
+        args.map do |arg|
+          h(truncate(to_display(arg), truncate_after_chars))
+        end.join(", ")
+      rescue
+        "Illegal job arguments: #{h args.inspect}"
+      end
     end
 
     def csrf_tag

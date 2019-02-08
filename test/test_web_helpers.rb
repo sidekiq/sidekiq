@@ -95,4 +95,16 @@ class TestWebHelpers < Minitest::Test
     )
     assert_equal expected, obj.available_locales.sort
   end
+
+  def test_display_illegal_args
+    o = Helpers.new
+    s = o.display_args([1,2,3])
+    assert_equal "1, 2, 3", s
+    s = o.display_args(["<html>", 12])
+    assert_equal "&quot;&lt;html&gt;&quot;, 12", s
+    s = o.display_args("<html>")
+    assert_equal "Invalid job payload, args must be an Array, not String", s
+    s = o.display_args(nil)
+    assert_equal "Invalid job payload, args is nil", s
+  end
 end
