@@ -4,7 +4,7 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+4.0.5
 ---------
 
 - Increase super\_fetch retriever thread count from 1 to 2 to make it

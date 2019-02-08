@@ -4,7 +4,7 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+1.8.0
 -------------
 
 - Require Sidekiq Pro 4.0 and Sidekiq 5.2.
