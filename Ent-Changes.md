@@ -4,6 +4,11 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+-------------
+
+- Add ES translations, see issues [#3949](https://github.com/mperham/sidekiq/issues/3949) and [#3951](https://github.com/mperham/sidekiq/issues/3951) to add your own language.
+
 1.8.0
 -------------
 
@@ -14,7 +19,7 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 1.7.2
 -------------
 
-- Add PT and JA translations, see issues [#3949](https://github.com/mperham/sidekiq/issues/3949) and [#3951](https://github.com/mperham/sidekiq/issues/3951) to add your own language.
+- Add PT and JA translations
 - Fix elapsed time calculations to use monotonic clock [#4000, sj26]
 - Fix edge case where flapping leadership would cause old periodic
   jobs to be fired once [#3974]
