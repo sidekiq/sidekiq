@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require_relative 'helper'
+require 'sidekiq/ctl'
 
 def capture_stdout
   $stdout = StringIO.new
@@ -9,18 +10,13 @@ ensure
   $stdout = STDOUT
 end
 
-capture_stdout do
-  ARGV = %w[status]
-  load 'bin/sidekiqctl'
-end
-
 def output(section = 'all')
   capture_stdout do
-    Sidekiqctl::Status.new.display(section)
+    Sidekiq::Ctl::Status.new.display(section)
   end
 end
 
-describe Sidekiqctl do
+describe Sidekiq::Ctl do
   describe 'status' do
     describe 'version' do
       it 'displays the current Sidekiq version' do
