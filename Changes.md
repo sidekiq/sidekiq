@@ -24,6 +24,7 @@ This release has major breaking changes.  Read and test carefully in production.
   foreman) to manage Sidekiq.  See the Deployment wiki page for links to
   more resources.
 
+<<<<<<< HEAD
 HEAD
 ---------
 
@@ -31,6 +32,8 @@ HEAD
 - Restore bootstap's dropdown css component [#4099, urkle]
 - Allow `Sidekiq::Worker#set` to be chained
 
+=======
+>>>>>>> WIP
 5.2.5
 ---------
 
@@ -100,6 +103,7 @@ HEAD
 
 5.1.0
 -----------
+<<<<<<< HEAD
 
 - **NEW** Global death handlers - called when your job exhausts all
   retries and dies.  Now you can take action when a job fails permanently. [#3721]
@@ -120,6 +124,28 @@ HEAD
 - Fix display of Redis URL in web footer, broken in 5.0.3 [#3560]
 - Update `Sidekiq::Job#display_args` to avoid mutation [#3621]
 
+=======
+
+- **NEW** Global death handlers - called when your job exhausts all
+  retries and dies.  Now you can take action when a job fails permanently. [#3721]
+- **NEW** Enable ActiveRecord query cache within jobs by default [#3718, sobrinho]
+  This will prevent duplicate SELECTS; cache is cleared upon any UPDATE/INSERT/DELETE.
+  See the issue for how to bypass the cache or disable it completely.
+- Scheduler timing is now more accurate, 15 -> 5 seconds [#3734]
+- Exceptions during the :startup event will now kill the process [#3717]
+- Make `Sidekiq::Client.via` reentrant [#3715]
+- Fix use of Sidekiq logger outside of the server process [#3714]
+- Tweak `constantize` to better match Rails class lookup. [#3701, caffeinated-tech]
+
+5.0.5
+-----------
+
+- Update gemspec to allow newer versions of the Redis gem [#3617]
+- Refactor Worker.set so it can be memoized [#3602]
+- Fix display of Redis URL in web footer, broken in 5.0.3 [#3560]
+- Update `Sidekiq::Job#display_args` to avoid mutation [#3621]
+
+>>>>>>> WIP
 5.0.4
 -----------
 
@@ -333,6 +359,7 @@ end
 
 4.1.0
 -----------
+<<<<<<< HEAD
 
 - Tag quiet processes in the Web UI [#2757, jcarlson]
 - Pass last exception to sidekiq\_retries\_exhausted block [#2787, Nowaker]
@@ -877,6 +904,552 @@ Sidekiq.configure_server do |config|
 end
 ```
 
+=======
+
+- Tag quiet processes in the Web UI [#2757, jcarlson]
+- Pass last exception to sidekiq\_retries\_exhausted block [#2787, Nowaker]
+```ruby
+class MyWorker
+  include Sidekiq::Worker
+  sidekiq_retries_exhausted do |job, exception|
+  end
+end
+```
+- Add native support for ActiveJob's `set(options)` method allowing
+you to override worker options dynamically.  This should make it
+even easier to switch between ActiveJob and Sidekiq's native APIs [#2780]
+```ruby
+class MyWorker
+  include Sidekiq::Worker
+  sidekiq_options queue: 'default', retry: true
+
+  def perform(*args)
+    # do something
+  end
+end
+
+MyWorker.set(queue: 'high', retry: false).perform_async(1)
+```
+
+4.0.2
+-----------
+
+- Better Japanese translations
+- Remove `json` gem dependency from gemspec. [#2743]
+- There's a new testing API based off the `Sidekiq::Queues` namespace. All
+  assertions made against the Worker class still work as expected.
+  [#2676, brandonhilkert]
+```ruby
+assert_equal 0, Sidekiq::Queues["default"].size
+HardWorker.perform_async("log")
+assert_equal 1, Sidekiq::Queues["default"].size
+assert_equal "log", Sidekiq::Queues["default"].first['args'][0]
+Sidekiq::Queues.clear_all
+```
+
+4.0.1
+-----------
+
+- Yank new queue-based testing API [#2663]
+- Fix invalid constant reference in heartbeat
+
+4.0.0
+-----------
+
+- Sidekiq's internals have been completely overhauled for performance
+  and to remove dependencies.  This has resulted in major speedups, as
+  [detailed on my blog](http://www.mikeperham.com/2015/10/14/optimizing-sidekiq/).
+- See the [4.0 upgrade notes](4.0-Upgrade.md) for more detail.
+
+3.5.4
+-----------
+
+- Ensure exception message is a string [#2707]
+- Revert racy Process.kill usage in sidekiqctl
+
+3.5.3
+-----------
+
+- Adjust shutdown event to run in parallel with the rest of system shutdown. [#2635]
+
+3.5.2
+-----------
+
+- **Sidekiq 3 is now in maintenance mode**, only major bugs will be fixed.
+- The exception triggering a retry is now passed into `sidekiq_retry_in`,
+  allowing you to retry more frequently for certain types of errors.
+  [#2619, kreynolds]
+```ruby
+  sidekiq_retry_in do |count, ex|
+    case ex
+    when RuntimeError
+      5 * count
+    else
+      10 * count
+    end
+  end
+```
+
+3.5.1
+-----------
+
+- **FIX MEMORY LEAK** Under rare conditions, threads may leak [#2598, gazay]
+- Add Ukrainian locale [#2561, elrakita]
+- Disconnect and retry Redis operations if we see a READONLY error [#2550]
+- Add server middleware testing harness; see [wiki](https://github.com/mperham/sidekiq/wiki/Testing#testing-server-middleware) [#2534, ryansch]
+
+3.5.0
+-----------
+
+- Polished new banner! [#2522, firedev]
+- Upgrade to Celluloid 0.17. [#2420, digitalextremist]
+- Activate sessions in Sinatra for CSRF protection, requires Rails
+  monkeypatch due to rails/rails#15843. [#2460, jc00ke]
+
+3.4.2
+-----------
+
+- Don't allow `Sidekiq::Worker` in ActiveJob::Base classes. [#2424]
+- Safer display of job data in Web UI [#2405]
+- Fix CSRF vulnerability in Web UI, thanks to Egor Homakov for
+  reporting. [#2422] If you are running the Web UI as a standalone Rack app,
+  ensure you have a [session middleware
+configured](https://github.com/mperham/sidekiq/wiki/Monitoring#standalone):
+```ruby
+use Rack::Session::Cookie, :secret => "some unique secret string here"
+```
+
+3.4.1
+-----------
+
+- Lock to Celluloid 0.16
+
+
+3.4.0
+-----------
+
+- Set a `created_at` attribute when jobs are created, set `enqueued_at` only
+  when they go into a queue. Fixes invalid latency calculations with scheduled jobs.
+  [#2373, mrsimo]
+- Don't log timestamp on Heroku [#2343]
+- Run `shutdown` event handlers in reverse order of definition [#2374]
+- Rename and rework `poll_interval` to be simpler, more predictable [#2317, cainlevy]
+  The new setting is `average_scheduled_poll_interval`.  To configure
+  Sidekiq to look for scheduled jobs every 5 seconds, just set it to 5.
+```ruby
+Sidekiq.configure_server do |config|
+  config.average_scheduled_poll_interval = 5
+end
+```
+
+3.3.4
+-----------
+
+- **Improved ActiveJob integration** - Web UI now shows ActiveJobs in a
+  nicer format and job logging shows the actual class name, requires
+  Rails 4.2.2+ [#2248, #2259]
+- Add Sidekiq::Process#dump\_threads API to trigger TTIN output [#2247]
+- Web UI polling now uses Ajax to avoid page reload [#2266, davydovanton]
+- Several Web UI styling improvements [davydovanton]
+- Add Tamil, Hindi translations for Web UI [ferdinandrosario, tejasbubane]
+- Fix Web UI to work with country-specific locales [#2243]
+- Handle circular error causes [#2285,  eugenk]
+
+3.3.3
+-----------
+
+- Fix crash on exit when Redis is down [#2235]
+- Fix duplicate logging on startup
+- Undeprecate delay extension for ActionMailer 4.2+ . [#2186]
+
+3.3.2
+-----------
+
+- Add Sidekiq::Stats#queues back
+- Allows configuration of dead job set size and timeout [#2173, jonhyman]
+- Refactor scheduler enqueuing so Sidekiq Pro can override it. [#2159]
+
+3.3.1
+-----------
+
+- Dumb down ActionMailer integration so it tries to deliver if possible [#2149]
+- Stringify Sidekiq.default\_worker\_options's keys [#2126]
+- Add random integer to process identity [#2113, michaeldiscala]
+- Log Sidekiq Pro's Batch ID if available [#2076]
+- Refactor Processor Redis usage to avoid redis/redis-rb#490 [#2094]
+- Move /dashboard/stats to /stats.  Add /stats/queues. [moserke, #2099]
+- Add processes count to /stats [ismaelga, #2141]
+- Greatly improve speed of Sidekiq::Stats [ismaelga, #2142]
+- Add better usage text for `sidekiqctl`.
+- `Sidekiq::Logging.with_context` is now a stack so you can set your
+  own job context for logging purposes [grosser, #2110]
+- Remove usage of Google Fonts in Web UI so it loads in China [#2144]
+
+3.3.0
+-----------
+
+- Upgrade to Celluloid 0.16 [#2056]
+- Fix typo for generator test file name [dlackty, #2016]
+- Add Sidekiq::Middleware::Chain#prepend [seuros, #2029]
+
+3.2.6
+-----------
+
+- Deprecate delay extension for ActionMailer 4.2+ . [seuros, #1933]
+- Poll interval tuning now accounts for dead processes [epchris, #1984]
+- Add non-production environment to Web UI page titles [JacobEvelyn, #2004]
+
+3.2.5
+-----------
+
+- Lock Celluloid to 0.15.2 due to bugs in 0.16.0.  This prevents the
+  "hang on shutdown" problem with Celluloid 0.16.0.
+
+3.2.4
+-----------
+
+- Fix issue preventing ActionMailer sends working in some cases with
+  Rails 4. [pbhogan, #1923]
+
+3.2.3
+-----------
+
+- Clean invalid bytes from error message before converting to JSON (requires Ruby 2.1+) [#1705]
+- Add queues list for each process to the Busy page. [davetoxa, #1897]
+- Fix for crash caused by empty config file. [jordan0day, #1901]
+- Add Rails Worker generator, `rails g sidekiq:worker User` will create `app/workers/user_worker.rb`. [seuros, #1909]
+- Fix Web UI rendering with huge job arguments [jhass, #1918]
+- Minor refactoring of Sidekiq::Client internals, for Sidekiq Pro. [#1919]
+
+3.2.2
+-----------
+
+- **This version of Sidekiq will no longer start on Ruby 1.9.**  Sidekiq
+  3 does not support MRI 1.9 but we've allowed it to run before now.
+- Fix issue which could cause Sidekiq workers to disappear from the Busy
+  tab while still being active [#1884]
+- Add "Back to App" button in Web UI.  You can set the button link via
+  `Sidekiq::Web.app_url = 'http://www.mysite.com'` [#1875, seuros]
+- Add process tag (`-g tag`) to the Busy page so you can differentiate processes at a glance. [seuros, #1878]
+- Add "Kill" button to move retries directly to the DJQ so they don't retry. [seuros, #1867]
+
+3.2.1
+-----------
+
+- Revert eager loading change for Rails 3.x apps, as it broke a few edge
+  cases.
+
+3.2.0
+-----------
+
+- **Fix issue which caused duplicate job execution in Rails 3.x**
+  This issue is caused by [improper exception handling in ActiveRecord](https://github.com/rails/rails/blob/3-2-stable/activerecord/lib/active_record/connection_adapters/abstract_adapter.rb#L281) which changes Sidekiq's Shutdown exception into a database
+  error, making Sidekiq think the job needs to be retried. **The fix requires Ruby 2.1**. [#1805]
+- Update how Sidekiq eager loads Rails application code [#1791, jonleighton]
+- Change logging timestamp to show milliseconds.
+- Reverse sorting of Dead tab so newer jobs are listed first [#1802]
+
+3.1.4
+-----------
+
+- Happy π release!
+- Self-tuning Scheduler polling, we use heartbeat info to better tune poll\_interval [#1630]
+- Remove all table column width rules, hopefully get better column formatting [#1747]
+- Handle edge case where YAML can't be decoded in dev mode [#1761]
+- Fix lingering jobs in Busy page on Heroku [#1764]
+
+3.1.3
+-----------
+
+- Use ENV['DYNO'] on Heroku for hostname display, rather than an ugly UUID. [#1742]
+- Show per-process labels on the Busy page, for feature tagging [#1673]
+
+
+3.1.2
+-----------
+
+- Suitably chastised, @mperham reverts the Bundler change.
+
+
+3.1.1
+-----------
+
+- Sidekiq::CLI now runs `Bundler.require(:default, environment)` to boot all gems
+  before loading any app code.
+- Sort queues by name in Web UI [#1734]
+
+
+3.1.0
+-----------
+
+- New **remote control** feature: you can remotely trigger Sidekiq to quiet
+  or terminate via API, without signals.  This is most useful on JRuby
+  or Heroku which does not support the USR1 'quiet' signal.  Now you can
+  run a rake task like this at the start of your deploy to quiet your
+  set of Sidekiq processes. [#1703]
+```ruby
+namespace :sidekiq do
+  task :quiet => :environment do
+    Sidekiq::ProcessSet.new.each(&:quiet!)
+  end
+end
+```
+- The Web UI can use the API to quiet or stop all processes via the Busy page.
+- The Web UI understands and hides the `Sidekiq::Extensions::Delay*`
+  classes, instead showing `Class.method` as the Job. [#1718]
+- Polish the Dashboard graphs a bit, update Rickshaw [brandonhilkert, #1725]
+- The poll interval is now configurable in the Web UI [madebydna, #1713]
+- Delay extensions can be removed so they don't conflict with
+  DelayedJob: put `Sidekiq.remove_delay!` in your initializer. [devaroop, #1674]
+
+
+3.0.2
+-----------
+
+- Revert gemfile requirement of Ruby 2.0.  JRuby 1.7 calls itself Ruby
+  1.9.3 and broke with this requirement.
+
+3.0.1
+-----------
+
+- Revert pidfile behavior from 2.17.5: Sidekiq will no longer remove its own pidfile
+  as this is a race condition when restarting. [#1470, #1677]
+- Show warning on the Queues page if a queue is paused [#1672]
+- Only activate the ActiveRecord middleware if ActiveRecord::Base is defined on boot. [#1666]
+- Add ability to disable jobs going to the DJQ with the `dead` option.
+```ruby
+sidekiq_options :dead => false, :retry => 5
+```
+- Minor fixes
+
+
+3.0.0
+-----------
+
+Please see [3.0-Upgrade.md](3.0-Upgrade.md) for more comprehensive upgrade notes.
+
+- **Dead Job Queue** - jobs which run out of retries are now moved to a dead
+  job queue.  These jobs must be retried manually or they will expire
+  after 6 months or 10,000 jobs.  The Web UI contains a "Dead" tab
+  exposing these jobs.  Use `sidekiq_options :retry => false` if you
+don't wish jobs to be retried or put in the DJQ.  Use
+`sidekiq_options :retry => 0` if you don't want jobs to retry but go
+straight to the DJQ.
+- **Process Lifecycle Events** - you can now register blocks to run at
+  certain points during the Sidekiq process lifecycle: startup, quiet and
+  shutdown.
+```ruby
+Sidekiq.configure_server do |config|
+  config.on(:startup) do
+    # do something
+  end
+end
+```
+- **Global Error Handlers** - blocks of code which handle errors that
+  occur anywhere within Sidekiq, not just within middleware.
+```ruby
+Sidekiq.configure_server do |config|
+  config.error_handlers << proc {|ex,ctx| ... }
+end
+```
+- **Process Heartbeat** - each Sidekiq process will ping Redis every 5
+  seconds to give a summary of the Sidekiq population at work.
+- The Workers tab is now renamed to Busy and contains a list of live
+  Sidekiq processes and jobs in progress based on the heartbeat.
+- **Shardable Client** - Sidekiq::Client instances can use a custom
+  Redis connection pool, allowing very large Sidekiq installations to scale by
+  sharding: sending different jobs to different Redis instances.
+```ruby
+client = Sidekiq::Client.new(ConnectionPool.new { Redis.new })
+client.push(...)
+```
+```ruby
+Sidekiq::Client.via(ConnectionPool.new { Redis.new }) do
+  FooWorker.perform_async
+  BarWorker.perform_async
+end
+```
+  **Sharding support does require a breaking change to client-side
+middleware, see 3.0-Upgrade.md.**
+- New Chinese, Greek, Swedish and Czech translations for the Web UI.
+- Updated most languages translations for the new UI features.
+- **Remove official Capistrano integration** - this integration has been
+  moved into the [capistrano-sidekiq](https://github.com/seuros/capistrano-sidekiq) gem.
+- **Remove official support for MRI 1.9** - Things still might work but
+  I no longer actively test on it.
+- **Remove built-in support for Redis-to-Go**.
+  Heroku users: `heroku config:set REDIS_PROVIDER=REDISTOGO_URL`
+- **Remove built-in error integration for Airbrake, Honeybadger, ExceptionNotifier and Exceptional**.
+  Each error gem should provide its own Sidekiq integration.  Update your error gem to the latest
+  version to pick up Sidekiq support.
+- Upgrade to connection\_pool 2.0 which now creates connections lazily.
+- Remove deprecated Sidekiq::Client.registered\_\* APIs
+- Remove deprecated support for the old Sidekiq::Worker#retries\_exhausted method.
+- Removed 'sidekiq/yaml\_patch', this was never documented or recommended.
+- Removed --profile option, #1592
+- Remove usage of the term 'Worker' in the UI for clarity.  Users would call both threads and
+  processes 'workers'.  Instead, use "Thread", "Process" or "Job".
+
+2.17.7
+-----------
+
+- Auto-prune jobs older than one hour from the Workers page [#1508]
+- Add Sidekiq::Workers#prune which can perform the auto-pruning.
+- Fix issue where a job could be lost when an exception occurs updating
+  Redis stats before the job executes [#1511]
+
+2.17.6
+-----------
+
+- Fix capistrano integration due to missing pidfile. [#1490]
+
+2.17.5
+-----------
+
+- Automatically use the config file found at `config/sidekiq.yml`, if not passed `-C`. [#1481]
+- Store 'retried\_at' and 'failed\_at' timestamps as Floats, not Strings. [#1473]
+- A `USR2` signal will now reopen _all_ logs, using IO#reopen. Thus, instead of creating a new Logger object,
+  Sidekiq will now just update the existing Logger's file descriptor [#1163].
+- Remove pidfile when shutting down if started with `-P` [#1470]
+
+2.17.4
+-----------
+
+- Fix JID support in inline testing, #1454
+- Polish worker arguments display in UI, #1453
+- Marshal arguments fully to avoid worker mutation, #1452
+- Support reverse paging sorted sets, #1098
+
+
+2.17.3
+-----------
+
+- Synchronously terminates the poller and fetcher to fix a race condition in bulk requeue during shutdown [#1406]
+
+2.17.2
+-----------
+
+- Fix bug where strictly prioritized queues might be processed out of
+  order [#1408]. A side effect of this change is that it breaks a queue
+  declaration syntax that worked, although only because of a bug—it was
+  never intended to work and never supported. If you were declaring your
+  queues as a  comma-separated list, e.g. `sidekiq -q critical,default,low`,
+  you must now use the `-q` flag before each queue, e.g.
+  `sidekiq -q critical -q default -q low`.
+
+2.17.1
+-----------
+
+- Expose `delay` extension as `sidekiq_delay` also.  This allows you to
+  run Delayed::Job and Sidekiq in the same process, selectively porting
+  `delay` calls to `sidekiq_delay`.  You just need to ensure that
+  Sidekiq is required **before** Delayed::Job in your Gemfile. [#1393]
+- Bump redis client required version to 3.0.6
+- Minor CSS fixes for Web UI
+
+2.17.0
+-----------
+
+- Change `Sidekiq::Client#push_bulk` to return an array of pushed `jid`s. [#1315, barelyknown]
+- Web UI refactoring to use more API internally (yummy dogfood!)
+- Much faster Sidekiq::Job#delete performance for larger queue sizes
+- Further capistrano 3 fixes
+- Many misc minor fixes
+
+2.16.1
+-----------
+
+- Revert usage of `resolv-replace`.  MRI's native DNS lookup releases the GIL.
+- Fix several Capistrano 3 issues
+- Escaping dynamic data like job args and error messages in Sidekiq Web UI. [#1299, lian]
+
+2.16.0
+-----------
+
+- Deprecate `Sidekiq::Client.registered_workers` and `Sidekiq::Client.registered_queues`
+- Refactor Sidekiq::Client to be instance-based [#1279]
+- Pass all Redis options to the Redis driver so Unix sockets
+  can be fully configured. [#1270, salimane]
+- Allow sidekiq-web extensions to add locale paths so extensions
+  can be localized. [#1261, ondrejbartas]
+- Capistrano 3 support [#1254, phallstrom]
+- Use Ruby's `resolv-replace` to enable pure Ruby DNS lookups.
+  This ensures that any DNS resolution that takes place in worker
+  threads won't lock up the entire VM on MRI. [#1258]
+
+2.15.2
+-----------
+
+- Iterating over Sidekiq::Queue and Sidekiq::SortedSet will now work as
+  intended when jobs are deleted [#866, aackerman]
+- A few more minor Web UI fixes [#1247]
+
+2.15.1
+-----------
+
+- Fix several Web UI issues with the Bootstrap 3 upgrade.
+
+2.15.0
+-----------
+
+- The Core Sidekiq actors are now monitored.  If any crash, the
+  Sidekiq process logs the error and exits immediately.  This is to
+  help prevent "stuck" Sidekiq processes which are running but don't
+  appear to be doing any work. [#1194]
+- Sidekiq's testing behavior is now dynamic.  You can choose between
+  `inline` and `fake` behavior in your tests. See
+[Testing](https://github.com/mperham/sidekiq/wiki/Testing) for detail. [#1193]
+- The Retries table has a new column for the error message.
+- The Web UI topbar now contains the status and live poll button.
+- Orphaned worker records are now auto-vacuumed when you visit the
+  Workers page in the Web UI.
+- Sidekiq.default\_worker\_options allows you to configure default
+  options for all Sidekiq worker types.
+
+```ruby
+Sidekiq.default_worker_options = { 'queue' => 'default', 'backtrace' => true }
+```
+- Added two Sidekiq::Client class methods for compatibility with resque-scheduler:
+  `enqueue_to_in` and `enqueue_in` [#1212]
+- Upgrade Web UI to Bootstrap 3.0. [#1211, jeffboek]
+
+2.14.1
+-----------
+
+- Fix misc Web UI issues due to ERB conversion.
+- Bump redis-namespace version due to security issue.
+
+2.14.0
+-----------
+
+- Removed slim gem dependency, Web UI now uses ERB [Locke23rus, #1120]
+- Fix more race conditions in Web UI actions
+- Don't reset Job enqueued\_at when retrying
+- Timestamp tooltips in the Web UI should use UTC
+- Fix invalid usage of handle\_exception causing issues in Airbrake
+  [#1134]
+
+
+2.13.1
+-----------
+
+- Make Sidekiq::Middleware::Chain Enumerable
+- Make summary bar and graphs responsive [manishval, #1025]
+- Adds a job status page for scheduled jobs [jonhyman]
+- Handle race condition in retrying and deleting jobs in the Web UI
+- The Web UI relative times are now i18n. [MadRabbit, #1088]
+- Allow for default number of retry attempts to be set for
+  `Sidekiq::Middleware::Server::RetryJobs` middleware. [czarneckid] [#1091]
+
+```ruby
+Sidekiq.configure_server do |config|
+  config.server_middleware do |chain|
+    chain.add Sidekiq::Middleware::Server::RetryJobs, :max_retries => 10
+  end
+end
+```
+
+>>>>>>> WIP
 
 2.13.0
 -----------
