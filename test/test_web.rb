@@ -17,7 +17,9 @@ describe Sidekiq::Web do
   end
 
   before do
+    ENV["RACK_ENV"] = "test"
     Sidekiq.redis {|c| c.flushdb }
+    Sidekiq::Web.middlewares.clear
   end
 
   class WebWorker
@@ -634,110 +636,108 @@ describe Sidekiq::Web do
       end
     end
   end
-end
 
-describe 'sidekiq web with basic auth' do
-  include Rack::Test::Methods
-
-  def app
-    app = Sidekiq::Web.new
-    app.use(Rack::Auth::Basic) { |user, pass| user == "a" && pass == "b" }
-
-    app
-  end
-
-  it 'requires basic authentication' do
-    get '/'
-
-    assert_equal 401, last_response.status
-    refute_nil last_response.header["WWW-Authenticate"]
-  end
-
-  it 'authenticates successfuly' do
-    basic_authorize 'a', 'b'
-
-    get '/'
-
-    assert_equal 200, last_response.status
-  end
-end
-
-describe 'sidekiq web with custom session' do
-  include Rack::Test::Methods
-
-  def app
-    app = Sidekiq::Web.new
-
-    app.use Rack::Session::Cookie, secret: 'v3rys3cr31', host: 'nicehost.org'
-
-    app
-  end
-
-  it 'requires basic authentication' do
-    get '/'
-
-    session_options = last_request.env['rack.session'].options
-
-    assert_equal 'v3rys3cr31', session_options[:secret]
-    assert_equal 'nicehost.org', session_options[:host]
-  end
-
-  describe 'sessions options' do
+  describe 'basic auth' do
     include Rack::Test::Methods
 
-    describe 'using #disable' do
-      def app
-        app = Sidekiq::Web.new
-        app.disable(:sessions)
-        app
-      end
+    def app
+      app = Sidekiq::Web.new
+      app.use(Rack::Auth::Basic) { |user, pass| user == "a" && pass == "b" }
 
-      it "doesn't create sessions" do
-        get '/'
-        assert_nil last_request.env['rack.session']
-      end
+      app
     end
 
-    describe 'using #set with false argument' do
-      def app
-        app = Sidekiq::Web.new
-        app.set(:sessions, false)
-        app
-      end
+    it 'requires basic authentication' do
+      get '/'
 
-      it "doesn't create sessions" do
-        get '/'
-        assert_nil last_request.env['rack.session']
-      end
+      assert_equal 401, last_response.status
+      refute_nil last_response.header["WWW-Authenticate"]
     end
 
-    describe 'using #set with an hash' do
-      def app
-        app = Sidekiq::Web.new
-        app.set(:sessions, { domain: :all })
-        app
-      end
+    it 'authenticates successfuly' do
+      basic_authorize 'a', 'b'
 
-      it "creates sessions" do
-        get '/'
-        refute_nil   last_request.env['rack.session']
-        refute_empty last_request.env['rack.session'].options
-        assert_equal :all, last_request.env['rack.session'].options[:domain]
-      end
+      get '/'
+
+      assert_equal 200, last_response.status
+    end
+  end
+
+  describe 'custom session' do
+    include Rack::Test::Methods
+
+    def app
+      app = Sidekiq::Web.new
+      app.use Rack::Session::Cookie, secret: 'v3rys3cr31', host: 'nicehost.org'
+      app
     end
 
-    describe 'using #enable' do
-      def app
-        app = Sidekiq::Web.new
-        app.enable(:sessions)
-        app
+    it 'requires basic authentication' do
+      get '/'
+
+      session_options = last_request.env['rack.session'].options
+
+      assert_equal 'v3rys3cr31', session_options[:secret]
+      assert_equal 'nicehost.org', session_options[:host]
+    end
+
+    describe 'sessions options' do
+      include Rack::Test::Methods
+
+      describe 'using #disable' do
+        def app
+          app = Sidekiq::Web.new
+          app.disable(:sessions)
+          app
+        end
+
+        it "doesn't create sessions" do
+          get '/'
+          assert_nil last_request.env['rack.session']
+        end
       end
 
-      it "creates sessions" do
-        get '/'
-        refute_nil   last_request.env['rack.session']
-        refute_empty last_request.env['rack.session'].options
-        refute_nil   last_request.env['rack.session'].options[:secret]
+      describe 'using #set with false argument' do
+        def app
+          app = Sidekiq::Web.new
+          app.set(:sessions, false)
+          app
+        end
+
+        it "doesn't create sessions" do
+          get '/'
+          assert_nil last_request.env['rack.session']
+        end
+      end
+
+      describe 'using #set with an hash' do
+        def app
+          app = Sidekiq::Web.new
+          app.set(:sessions, { domain: :all })
+          app
+        end
+
+        it "creates sessions" do
+          get '/'
+          refute_nil   last_request.env['rack.session']
+          refute_empty last_request.env['rack.session'].options
+          assert_equal :all, last_request.env['rack.session'].options[:domain]
+        end
+      end
+
+      describe 'using #enable' do
+        def app
+          app = Sidekiq::Web.new
+          app.enable(:sessions)
+          app
+        end
+
+        it "creates sessions" do
+          get '/'
+          refute_nil   last_request.env['rack.session']
+          refute_empty last_request.env['rack.session'].options
+          refute_nil   last_request.env['rack.session'].options[:secret]
+        end
       end
     end
   end
