@@ -15,6 +15,7 @@ end
 
 group :development, :test do
   gem 'pry-byebug', platforms: :mri
+  gem "standard"
 end
 
 group :load_test do
