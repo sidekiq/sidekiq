@@ -17,7 +17,7 @@
           <% end %>
         </td>
         <td><%= number_with_delimiter(queue.size) %> </td>
-        <td><% queue_latency = queue.latency %><%= number_with_delimiter(queue_latency.round(2)) %><%= (queue_latency < 60) ? '' : " (#{relative_time(Time.at(queue_latency.seconds.ago))})" %> </td>
+        <td><% queue_latency = queue.latency %><%= number_with_delimiter(queue_latency.round(2)) %><%= (queue_latency < 60) ? '' : " (#{relative_time(Time.at(Time.now.to_f - queue_latency))})" %> </td>
         <td class="delete-confirm">
           <form action="<%=root_path %>queues/<%= CGI.escape(queue.name) %>" method="post">
             <%= csrf_tag %>
