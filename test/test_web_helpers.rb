@@ -3,7 +3,7 @@ require_relative 'helper'
 require 'sidekiq/web'
 
 class TestWebHelpers < Minitest::Test
-
+raise 'boom'
   class Helpers
     include Sidekiq::WebHelpers
 

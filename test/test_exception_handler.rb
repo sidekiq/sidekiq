@@ -17,7 +17,7 @@ class Component
   end
 end
 
-class TestExceptionHandler < Minitest::Test
+describe Sidekiq::ExceptionHandler do
   describe "with mock logger" do
     before do
       @old_logger = Sidekiq.logger

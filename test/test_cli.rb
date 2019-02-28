@@ -3,7 +3,7 @@
 require_relative 'helper'
 require 'sidekiq/cli'
 
-class TestCLI < Minitest::Test
+describe Sidekiq::CLI do
   describe '#parse' do
     before do
       Sidekiq.options = Sidekiq::DEFAULTS.dup

@@ -2,7 +2,7 @@
 require_relative 'helper'
 require 'sidekiq/api'
 
-class TestClient < Minitest::Test
+describe Sidekiq::Client do
   describe 'errors' do
     it 'raises ArgumentError with invalid params' do
       assert_raises ArgumentError do

@@ -2,7 +2,7 @@
 require_relative 'helper'
 require 'sidekiq/cli'
 
-class TestSidekiq < Minitest::Test
+describe Sidekiq do
   describe 'json processing' do
     it 'handles json' do
       assert_equal({"foo" => "bar"}, Sidekiq.load_json("{\"foo\":\"bar\"}"))

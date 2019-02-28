@@ -20,8 +20,8 @@ def output(section = 'all')
   end
 end
 
-class TestSidekiqctl < Minitest::Test
-  describe 'sidekiqctl status' do
+describe Sidekiqctl do
+  describe 'status' do
     describe 'version' do
       it 'displays the current Sidekiq version' do
         assert_includes output, "Sidekiq #{Sidekiq::VERSION}"

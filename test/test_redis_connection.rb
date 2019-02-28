@@ -3,8 +3,8 @@
 require_relative 'helper'
 require 'sidekiq/cli'
 
-class TestRedisConnection < Minitest::Test
-  describe ".create" do
+describe Sidekiq::RedisConnection do
+  describe "create" do
     before do
       Sidekiq.options = Sidekiq::DEFAULTS.dup
       @old = ENV['REDIS_URL']
