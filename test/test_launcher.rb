@@ -92,7 +92,6 @@ describe Sidekiq::Launcher do
           assert_in_delta 60000, expires, 50
         end
       end
-    end
 
     it 'fires new heartbeat events' do
       i = 0
@@ -124,6 +123,7 @@ describe Sidekiq::Launcher do
         assert_in_delta 60000, expires, 500
       end
     end
+  end
 
     describe 'when manager is stopped' do
       before do
@@ -151,4 +151,5 @@ describe Sidekiq::Launcher do
   def options
     { :concurrency => 3, :queues => ['default'], :tag => 'myapp' }
   end
+
 end

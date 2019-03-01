@@ -17,6 +17,10 @@ def output(section = 'all')
 end
 
 describe Sidekiq::Ctl do
+  before do
+    Sidekiq.redis {|c| c.flushdb}
+  end
+
   describe 'status' do
     describe 'version' do
       it 'displays the current Sidekiq version' do
