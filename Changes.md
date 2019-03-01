@@ -23,6 +23,12 @@ get the old behavior. [#3968]
   arguments to Sidekiq. Use a proper process supervisor (e.g. systemd or
 foreman) to manage Sidekiq.
 
+HEAD
+---------
+
+- Better handling of malformed job arguments in payload [#4095]
+- add back in bootstap's dropdown css component [#4099, urkle]
+
 5.2.5
 ---------
 

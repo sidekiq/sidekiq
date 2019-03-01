@@ -1,83 +1,81 @@
 # frozen_string_literal: true
 require_relative 'helper'
 
-class TestTesting < Minitest::Test
-  describe 'sidekiq testing' do
-    describe 'require/load sidekiq/testing.rb' do
-      before do
-        require 'sidekiq/testing'
-      end
-
-      after do
-        Sidekiq::Testing.disable!
-      end
-
-      it 'enables fake testing' do
-        Sidekiq::Testing.fake!
-        assert Sidekiq::Testing.enabled?
-        assert Sidekiq::Testing.fake?
-        refute Sidekiq::Testing.inline?
-      end
-
-      it 'enables fake testing in a block' do
-        Sidekiq::Testing.disable!
-        assert Sidekiq::Testing.disabled?
-        refute Sidekiq::Testing.fake?
-
-        Sidekiq::Testing.fake! do
-          assert Sidekiq::Testing.enabled?
-          assert Sidekiq::Testing.fake?
-          refute Sidekiq::Testing.inline?
-        end
-
-        refute Sidekiq::Testing.enabled?
-        refute Sidekiq::Testing.fake?
-      end
-
-      it 'disables testing in a block' do
-        Sidekiq::Testing.fake!
-        assert Sidekiq::Testing.fake?
-
-        Sidekiq::Testing.disable! do
-          refute Sidekiq::Testing.fake?
-          assert Sidekiq::Testing.disabled?
-        end
-
-        assert Sidekiq::Testing.fake?
-        assert Sidekiq::Testing.enabled?
-      end
+describe 'Sidekiq::Testing' do
+  describe 'require/load sidekiq/testing.rb' do
+    before do
+      require 'sidekiq/testing'
     end
 
-    describe 'require/load sidekiq/testing/inline.rb' do
-      before do
-        require 'sidekiq/testing/inline'
+    after do
+      Sidekiq::Testing.disable!
+    end
+
+    it 'enables fake testing' do
+      Sidekiq::Testing.fake!
+      assert Sidekiq::Testing.enabled?
+      assert Sidekiq::Testing.fake?
+      refute Sidekiq::Testing.inline?
+    end
+
+    it 'enables fake testing in a block' do
+      Sidekiq::Testing.disable!
+      assert Sidekiq::Testing.disabled?
+      refute Sidekiq::Testing.fake?
+
+      Sidekiq::Testing.fake! do
+        assert Sidekiq::Testing.enabled?
+        assert Sidekiq::Testing.fake?
+        refute Sidekiq::Testing.inline?
       end
 
-      after do
-        Sidekiq::Testing.disable!
+      refute Sidekiq::Testing.enabled?
+      refute Sidekiq::Testing.fake?
+    end
+
+    it 'disables testing in a block' do
+      Sidekiq::Testing.fake!
+      assert Sidekiq::Testing.fake?
+
+      Sidekiq::Testing.disable! do
+        refute Sidekiq::Testing.fake?
+        assert Sidekiq::Testing.disabled?
       end
 
-      it 'enables inline testing' do
-        Sidekiq::Testing.inline!
+      assert Sidekiq::Testing.fake?
+      assert Sidekiq::Testing.enabled?
+    end
+  end
+
+  describe 'require/load sidekiq/testing/inline.rb' do
+    before do
+      require 'sidekiq/testing/inline'
+    end
+
+    after do
+      Sidekiq::Testing.disable!
+    end
+
+    it 'enables inline testing' do
+      Sidekiq::Testing.inline!
+      assert Sidekiq::Testing.enabled?
+      assert Sidekiq::Testing.inline?
+      refute Sidekiq::Testing.fake?
+    end
+
+    it 'enables inline testing in a block' do
+      Sidekiq::Testing.disable!
+      assert Sidekiq::Testing.disabled?
+      refute Sidekiq::Testing.fake?
+
+      Sidekiq::Testing.inline! do
         assert Sidekiq::Testing.enabled?
         assert Sidekiq::Testing.inline?
-        refute Sidekiq::Testing.fake?
       end
 
-      it 'enables inline testing in a block' do
-        Sidekiq::Testing.disable!
-        assert Sidekiq::Testing.disabled?
-        refute Sidekiq::Testing.fake?
-
-        Sidekiq::Testing.inline! do
-          assert Sidekiq::Testing.enabled?
-          assert Sidekiq::Testing.inline?
-        end
-
-        refute Sidekiq::Testing.enabled?
-        refute Sidekiq::Testing.inline?
-        refute Sidekiq::Testing.fake?
-      end
+      refute Sidekiq::Testing.enabled?
+      refute Sidekiq::Testing.inline?
+      refute Sidekiq::Testing.fake?
     end
   end
 

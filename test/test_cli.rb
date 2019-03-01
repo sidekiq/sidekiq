@@ -3,20 +3,23 @@
 require_relative 'helper'
 require 'sidekiq/cli'
 
-class TestCLI < Minitest::Test
-  describe Sidekiq::CLI do
-
-    def subject
-      @cli ||= Sidekiq::CLI.new
+describe Sidekiq::CLI do
+  describe '#parse' do
+    before do
+      Sidekiq.options = Sidekiq::DEFAULTS.dup
+      @logger = Sidekiq.logger
+      @logdev = StringIO.new
+      Sidekiq.logger = Logger.new(@logdev)
     end
+
+    after do
+      Sidekiq.logger = @logger
+    end
+
+    subject { Sidekiq::CLI.new }
 
     def logdev
       @logdev ||= StringIO.new
-    end
-
-    def setup
-      Sidekiq.options = Sidekiq::DEFAULTS.dup
-      Sidekiq.logger = Sidekiq::Logger.new(logdev)
     end
 
     describe '#parse' do
