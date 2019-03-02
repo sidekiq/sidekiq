@@ -2,8 +2,7 @@
 
 module Sidekiq
   class JobLogger
-
-    def initialize(logger=Sidekiq.logger)
+    def initialize(logger = Sidekiq.logger)
       @logger = logger
     end
 
@@ -32,10 +31,10 @@ module Sidekiq
       # If we're using a wrapper class, like ActiveJob, use the "wrapped"
       # attribute to expose the underlying thing.
       h = {
-        class: job_hash['wrapped'] || job_hash["class"],
-        jid: job_hash['jid'],
+        class: job_hash["wrapped"] || job_hash["class"],
+        jid: job_hash["jid"],
       }
-      h[:bid] = job_hash['bid'] if job_hash['bid']
+      h[:bid] = job_hash["bid"] if job_hash["bid"]
       h
     end
 
@@ -44,7 +43,7 @@ module Sidekiq
     end
 
     def elapsed_time_context(start)
-      { elapsed: "#{elapsed(start)}" }
+      {elapsed: elapsed(start).to_s}
     end
 
     private
