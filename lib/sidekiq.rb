@@ -1,25 +1,25 @@
 # frozen_string_literal: true
 
-require 'sidekiq/version'
-fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 2.5.0." if RUBY_PLATFORM != 'java' && Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.5.0')
+require "sidekiq/version"
+fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 2.5.0." if RUBY_PLATFORM != "java" && Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.5.0")
 
-require 'sidekiq/logger'
-require 'sidekiq/client'
-require 'sidekiq/worker'
-require 'sidekiq/redis_connection'
-require 'sidekiq/delay'
+require "sidekiq/logger"
+require "sidekiq/client"
+require "sidekiq/worker"
+require "sidekiq/redis_connection"
+require "sidekiq/delay"
 
-require 'json'
+require "json"
 
 module Sidekiq
-  NAME = 'Sidekiq'
-  LICENSE = 'See LICENSE and the LGPL-3.0 for licensing details.'
+  NAME = "Sidekiq"
+  LICENSE = "See LICENSE and the LGPL-3.0 for licensing details."
 
   DEFAULTS = {
     queues: [],
     labels: [],
     concurrency: 10,
-    require: '.',
+    require: ".",
     environment: nil,
     timeout: 25,
     poll_interval_average: nil,
@@ -38,8 +38,8 @@ module Sidekiq
   }
 
   DEFAULT_WORKER_OPTIONS = {
-    'retry' => true,
-    'queue' => 'default'
+    "retry" => true,
+    "queue" => "default",
   }
 
   FAKE_INFO = {
@@ -47,7 +47,7 @@ module Sidekiq
     "uptime_in_days" => "9999",
     "connected_clients" => "9999",
     "used_memory_human" => "9P",
-    "used_memory_peak_human" => "9P"
+    "used_memory_peak_human" => "9P",
   }
 
   def self.❨╯°□°❩╯︵┻━┻
@@ -96,7 +96,7 @@ module Sidekiq
       begin
         yield conn
       rescue Redis::CommandError => ex
-        #2550 Failover can cause the server to become a replica, need
+        # 2550 Failover can cause the server to become a replica, need
         # to disconnect and reopen the socket to get back to the primary.
         (conn.disconnect!; retryable = false; retry) if retryable && ex.message =~ /READONLY/
         raise
@@ -106,19 +106,17 @@ module Sidekiq
 
   def self.redis_info
     redis do |conn|
-      begin
-        # admin commands can't go through redis-namespace starting
-        # in redis-namespace 2.0
-        if conn.respond_to?(:namespace)
-          conn.redis.info
-        else
-          conn.info
-        end
-      rescue Redis::CommandError => ex
-        #2850 return fake version when INFO command has (probably) been renamed
-        raise unless ex.message =~ /unknown command/
-        FAKE_INFO
+      # admin commands can't go through redis-namespace starting
+      # in redis-namespace 2.0
+      if conn.respond_to?(:namespace)
+        conn.redis.info
+      else
+        conn.info
       end
+    rescue Redis::CommandError => ex
+      # 2850 return fake version when INFO command has (probably) been renamed
+      raise unless ex.message =~ /unknown command/
+      FAKE_INFO
     end
   end
 
@@ -152,8 +150,9 @@ module Sidekiq
 
   def self.default_worker_options=(hash)
     # stringify
-    @default_worker_options = default_worker_options.merge(Hash[hash.map{|k, v| [k.to_s, v]}])
+    @default_worker_options = default_worker_options.merge(Hash[hash.map {|k, v| [k.to_s, v]}])
   end
+
   def self.default_worker_options
     defined?(@default_worker_options) ? @default_worker_options : DEFAULT_WORKER_OPTIONS
   end
@@ -180,7 +179,7 @@ module Sidekiq
   end
 
   def self.log_formatter
-    @log_formatter ||= if ENV['DYNO']
+    @log_formatter ||= if ENV["DYNO"]
       Sidekiq::Logger::Formatters::WithoutTimestamp.new
     else
       Sidekiq::Logger::Formatters::Pretty.new
@@ -205,7 +204,7 @@ module Sidekiq
   #
   # See sidekiq/scheduled.rb for an in-depth explanation of this value
   def self.average_scheduled_poll_interval=(interval)
-    self.options[:average_scheduled_poll_interval] = interval
+    options[:average_scheduled_poll_interval] = interval
   end
 
   # Register a proc to handle any error which occurs within the Sidekiq process.
@@ -216,7 +215,7 @@ module Sidekiq
   #
   # The default error handler logs errors to Sidekiq.logger.
   def self.error_handlers
-    self.options[:error_handlers]
+    options[:error_handlers]
   end
 
   # Register a block to run at a point in the Sidekiq lifecycle.
@@ -239,7 +238,7 @@ module Sidekiq
   # timeout limit.  This is needed to rollback db transactions,
   # otherwise Ruby's Thread#kill will commit.  See #377.
   # DO NOT RESCUE THIS ERROR IN YOUR WORKERS
-  class Shutdown < Interrupt; end
+  class Shutdown < RuntimeError; end
 end
 
-require 'sidekiq/rails' if defined?(::Rails::Engine)
+require "sidekiq/rails" if defined?(::Rails::Engine)
