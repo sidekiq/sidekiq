@@ -1,12 +1,13 @@
 # frozen_string_literal: true
-require 'yaml'
+
+require "yaml"
 
 module Sidekiq
   module Extensions
     SIZE_LIMIT = 8_192
 
     class Proxy < BasicObject
-      def initialize(performable, target, options={})
+      def initialize(performable, target, options = {})
         @performable = performable
         @target = target
         @opts = options
@@ -23,9 +24,8 @@ module Sidekiq
         if marshalled.size > SIZE_LIMIT
           ::Sidekiq.logger.warn { "#{@target}.#{name} job argument is #{marshalled.bytesize} bytes, you should refactor it to reduce the size" }
         end
-        @performable.client_push({ 'class' => @performable, 'args' => [marshalled] }.merge(@opts))
+        @performable.client_push({"class" => @performable, "args" => [marshalled]}.merge(@opts))
       end
     end
-
   end
 end
