@@ -1,14 +1,15 @@
 # frozen_string_literal: true
-require 'sidekiq'
-require 'sidekiq/util'
-require 'sidekiq/api'
+
+require "sidekiq"
+require "sidekiq/util"
+require "sidekiq/api"
 
 module Sidekiq
   module Scheduled
-    SETS = %w(retry schedule)
+    SETS = %w[retry schedule]
 
     class Enq
-      def enqueue_jobs(now=Time.now.to_f.to_s, sorted_sets=SETS)
+      def enqueue_jobs(now = Time.now.to_f.to_s, sorted_sets = SETS)
         # A job's "score" in Redis is the time at which it should be processed.
         # Just check Redis for the set of jobs with a timestamp before now.
         Sidekiq.redis do |conn|
@@ -17,7 +18,7 @@ module Sidekiq
             # We need to go through the list one at a time to reduce the risk of something
             # going wrong between the time jobs are popped from the scheduled queue and when
             # they are pushed onto a work queue and losing the jobs.
-            while job = conn.zrangebyscore(sorted_set, '-inf', now, :limit => [0, 1]).first do
+            while job = conn.zrangebyscore(sorted_set, "-inf", now, limit: [0, 1]).first
 
               # Pop item off the queue and add it to the work queue. If the job can't be popped from
               # the queue, it's because another process already popped it so we can move on to the
@@ -61,26 +62,24 @@ module Sidekiq
       end
 
       def start
-        @thread ||= safe_thread("scheduler") do
+        @thread ||= safe_thread("scheduler") {
           initial_wait
 
-          while !@done
+          until @done
             enqueue
             wait
           end
           Sidekiq.logger.info("Scheduler exiting...")
-        end
+        }
       end
 
       def enqueue
-        begin
-          @enq.enqueue_jobs
-        rescue => ex
-          # Most likely a problem with redis networking.
-          # Punt and try again at the next interval
-          logger.error ex.message
-          handle_exception(ex)
-        end
+        @enq.enqueue_jobs
+      rescue => ex
+        # Most likely a problem with redis networking.
+        # Punt and try again at the next interval
+        logger.error ex.message
+        handle_exception(ex)
       end
 
       private
@@ -168,7 +167,6 @@ module Sidekiq
         @sleeper.pop(total)
       rescue Timeout::Error
       end
-
     end
   end
 end
