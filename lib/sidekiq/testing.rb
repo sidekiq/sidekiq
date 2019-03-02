@@ -1,16 +1,16 @@
 # frozen_string_literal: true
-require 'securerandom'
-require 'sidekiq'
+
+require "securerandom"
+require "sidekiq"
 
 module Sidekiq
-
   class Testing
     class << self
       attr_accessor :__test_mode
 
       def __set_test_mode(mode)
         if block_given?
-          current_mode = self.__test_mode
+          current_mode = __test_mode
           begin
             self.__test_mode = mode
             yield
@@ -35,19 +35,19 @@ module Sidekiq
       end
 
       def enabled?
-        self.__test_mode != :disable
+        __test_mode != :disable
       end
 
       def disabled?
-        self.__test_mode == :disable
+        __test_mode == :disable
       end
 
       def fake?
-        self.__test_mode == :fake
+        __test_mode == :fake
       end
 
       def inline?
-        self.__test_mode == :inline
+        __test_mode == :inline
       end
 
       def server_middleware
@@ -57,7 +57,7 @@ module Sidekiq
       end
 
       def constantize(str)
-        names = str.split('::')
+        names = str.split("::")
         names.shift if names.empty? || names.first.empty?
 
         names.inject(Object) do |constant, name|
@@ -77,14 +77,14 @@ module Sidekiq
       if Sidekiq::Testing.fake?
         payloads.each do |job|
           job = Sidekiq.load_json(Sidekiq.dump_json(job))
-          job.merge!('enqueued_at' => Time.now.to_f) unless job['at']
-          Queues.push(job['queue'], job['class'], job)
+          job["enqueued_at"] = Time.now.to_f unless job["at"]
+          Queues.push(job["queue"], job["class"], job)
         end
         true
       elsif Sidekiq::Testing.inline?
         payloads.each do |job|
-          klass = Sidekiq::Testing.constantize(job['class'])
-          job['id'] ||= SecureRandom.hex(12)
+          klass = Sidekiq::Testing.constantize(job["class"])
+          job["id"] ||= SecureRandom.hex(12)
           job_hash = Sidekiq.load_json(Sidekiq.dump_json(job))
           klass.process_job(job_hash)
         end
@@ -255,27 +255,26 @@ module Sidekiq
     #   Then I should receive a welcome email to "foo@example.com"
     #
     module ClassMethods
-
       # Queue for this worker
       def queue
-        self.sidekiq_options["queue"]
+        sidekiq_options["queue"]
       end
 
       # Jobs queued for this worker
       def jobs
-        Queues.jobs_by_worker[self.to_s]
+        Queues.jobs_by_worker[to_s]
       end
 
       # Clear all jobs for this worker
       def clear
-        Queues.clear_for(queue, self.to_s)
+        Queues.clear_for(queue, to_s)
       end
 
       # Drain and run all jobs for this worker
       def drain
         while jobs.any?
           next_job = jobs.first
-          Queues.delete_for(next_job["jid"], next_job["queue"], self.to_s)
+          Queues.delete_for(next_job["jid"], next_job["queue"], to_s)
           process_job(next_job)
         end
       end
@@ -284,16 +283,16 @@ module Sidekiq
       def perform_one
         raise(EmptyQueueError, "perform_one called with empty job queue") if jobs.empty?
         next_job = jobs.first
-        Queues.delete_for(next_job["jid"], queue, self.to_s)
+        Queues.delete_for(next_job["jid"], queue, to_s)
         process_job(next_job)
       end
 
       def process_job(job)
         worker = new
-        worker.jid = job['jid']
-        worker.bid = job['bid'] if worker.respond_to?(:bid=)
-        Sidekiq::Testing.server_middleware.invoke(worker, job, job['queue']) do
-          execute_job(worker, job['args'])
+        worker.jid = job["jid"]
+        worker.bid = job["bid"] if worker.respond_to?(:bid=)
+        Sidekiq::Testing.server_middleware.invoke(worker, job, job["queue"]) do
+          execute_job(worker, job["args"])
         end
       end
 
