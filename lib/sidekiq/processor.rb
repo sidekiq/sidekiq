@@ -1,10 +1,9 @@
 # frozen_string_literal: true
-require 'sidekiq/util'
-require 'sidekiq/fetch'
-require 'sidekiq/job_logger'
-require 'sidekiq/job_retry'
-require 'thread'
 
+require "sidekiq/util"
+require "sidekiq/fetch"
+require "sidekiq/job_logger"
+require "sidekiq/job_retry"
 module Sidekiq
   ##
   # The Processor is a standalone thread which:
@@ -40,15 +39,15 @@ module Sidekiq
       @retrier = Sidekiq::JobRetry.new
     end
 
-    def terminate(wait=false)
+    def terminate(wait = false)
       @done = true
-      return if !@thread
+      return unless @thread
       @thread.value if wait
     end
 
-    def kill(wait=false)
+    def kill(wait = false)
       @done = true
-      return if !@thread
+      return unless @thread
       # unlike the other actors, terminate does not wait
       # for the thread to finish because we don't know how
       # long the job will take to finish.  Instead we
@@ -65,16 +64,12 @@ module Sidekiq
     private unless $TESTING
 
     def run
-      begin
-        while !@done
-          process_one
-        end
-        @mgr.processor_stopped(self)
-      rescue Sidekiq::Shutdown
-        @mgr.processor_stopped(self)
-      rescue Exception => ex
-        @mgr.processor_died(self, ex)
-      end
+      process_one until @done
+      @mgr.processor_stopped(self)
+    rescue Sidekiq::Shutdown
+      @mgr.processor_stopped(self)
+    rescue Exception => ex
+      @mgr.processor_died(self, ex)
     end
 
     def process_one
@@ -84,14 +79,12 @@ module Sidekiq
     end
 
     def get_one
-      begin
-        work = @strategy.retrieve_work
-        (logger.info { "Redis is online, #{::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @down} sec downtime" }; @down = nil) if @down
-        work
-      rescue Sidekiq::Shutdown
-      rescue => ex
-        handle_fetch_exception(ex)
-      end
+      work = @strategy.retrieve_work
+      (logger.info { "Redis is online, #{::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @down} sec downtime" }; @down = nil) if @down
+      work
+    rescue Sidekiq::Shutdown
+    rescue => ex
+      handle_fetch_exception(ex)
     end
 
     def fetch
@@ -105,7 +98,7 @@ module Sidekiq
     end
 
     def handle_fetch_exception(ex)
-      if !@down
+      unless @down
         @down = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
         logger.error("Error fetching job: #{ex}")
         handle_exception(ex)
@@ -129,9 +122,9 @@ module Sidekiq
               # the Reloader.  It handles code loading, db connection management, etc.
               # Effectively this block denotes a "unit of work" to Rails.
               @reloader.call do
-                klass  = constantize(job_hash['class'])
+                klass  = constantize(job_hash["class"])
                 worker = klass.new
-                worker.jid = job_hash['jid']
+                worker.jid = job_hash["jid"]
                 @retrier.local(worker, pristine, queue) do
                   yield worker
                 end
@@ -153,7 +146,7 @@ module Sidekiq
         begin
           job_hash = Sidekiq.load_json(jobstr)
         rescue => ex
-          handle_exception(ex, { :context => "Invalid JSON for job", :jobstr => jobstr })
+          handle_exception(ex, {context: "Invalid JSON for job", jobstr: jobstr})
           # we can't notify because the job isn't a valid hash payload.
           DeadSet.new.kill(jobstr, notify_failure: false)
           ack = true
@@ -163,7 +156,7 @@ module Sidekiq
         ack = true
         dispatch(job_hash, queue) do |worker|
           Sidekiq.server_middleware.invoke(worker, job_hash, queue) do
-            execute_job(worker, cloned(job_hash['args']))
+            execute_job(worker, cloned(job_hash["args"]))
           end
         end
       rescue Sidekiq::Shutdown
@@ -173,7 +166,7 @@ module Sidekiq
         ack = false
       rescue Exception => ex
         e = ex.is_a?(::Sidekiq::JobRetry::Skip) && ex.cause ? ex.cause : ex
-        handle_exception(e, { :context => "Job raised exception", :job => job_hash, :jobstr => jobstr })
+        handle_exception(e, {context: "Job raised exception", job: job_hash, jobstr: jobstr})
         raise e
       ensure
         work.acknowledge if ack
@@ -193,8 +186,8 @@ module Sidekiq
         @lock = Mutex.new
       end
 
-      def incr(amount=1)
-        @lock.synchronize { @value = @value + amount }
+      def incr(amount = 1)
+        @lock.synchronize { @value += amount }
       end
 
       def reset
@@ -235,7 +228,7 @@ module Sidekiq
     WORKER_STATE = SharedWorkerState.new
 
     def stats(job_hash, queue)
-      WORKER_STATE.set(tid, {:queue => queue, :payload => job_hash, :run_at => Time.now.to_i })
+      WORKER_STATE.set(tid, {queue: queue, payload: job_hash, run_at: Time.now.to_i})
 
       begin
         yield
@@ -256,7 +249,7 @@ module Sidekiq
     end
 
     def constantize(str)
-      names = str.split('::')
+      names = str.split("::")
       names.shift if names.empty? || names.first.empty?
 
       names.inject(Object) do |constant, name|
