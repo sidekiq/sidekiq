@@ -1,7 +1,8 @@
 # frozen_string_literal: true
-require 'sidekiq/manager'
-require 'sidekiq/fetch'
-require 'sidekiq/scheduled'
+
+require "sidekiq/manager"
+require "sidekiq/fetch"
+require "sidekiq/scheduled"
 
 module Sidekiq
   # The Launcher is a very simple Actor whose job is to
@@ -11,13 +12,13 @@ module Sidekiq
   class Launcher
     include Util
 
-    STATS_TTL = 5*365*24*60*60 # 5 years
+    STATS_TTL = 5 * 365 * 24 * 60 * 60 # 5 years
 
     PROCTITLES = [
-      proc { 'sidekiq' },
+      proc { "sidekiq" },
       proc { Sidekiq::VERSION },
-      proc { |me, data| data['tag'] },
-      proc { |me, data| "[#{Processor::WORKER_STATE.size} of #{data['concurrency']} busy]" },
+      proc { |me, data| data["tag"] },
+      proc { |me, data| "[#{Processor::WORKER_STATE.size} of #{data["concurrency"]} busy]" },
       proc { |me, data| "stopping" if me.stopping? },
     ]
 
@@ -71,7 +72,7 @@ module Sidekiq
     private unless $TESTING
 
     def start_heartbeat
-      while true
+      loop do
         heartbeat
         sleep 5
       end
@@ -84,7 +85,7 @@ module Sidekiq
       # doesn't actually exit, it'll reappear in the Web UI.
       Sidekiq.redis do |conn|
         conn.pipelined do
-          conn.srem('processes', identity)
+          conn.srem("processes", identity)
           conn.del("#{identity}:workers")
         end
       end
@@ -93,7 +94,7 @@ module Sidekiq
     end
 
     def heartbeat
-      $0 = PROCTITLES.map { |proc| proc.call(self, to_data) }.compact.join(' ')
+      $0 = PROCTITLES.map { |proc| proc.call(self, to_data) }.compact.join(" ")
 
       ❤
     end
@@ -130,20 +131,20 @@ module Sidekiq
 
         fails = procd = 0
 
-        _, exists, _, _, msg = Sidekiq.redis do |conn|
-          res = conn.multi do
-            conn.sadd('processes', key)
+        _, exists, _, _, msg = Sidekiq.redis { |conn|
+          res = conn.multi {
+            conn.sadd("processes", key)
             conn.exists(key)
-            conn.hmset(key, 'info', to_json, 'busy', curstate.size, 'beat', Time.now.to_f, 'quiet', @done)
+            conn.hmset(key, "info", to_json, "busy", curstate.size, "beat", Time.now.to_f, "quiet", @done)
             conn.expire(key, 60)
             conn.rpop("#{key}-signals")
-          end
+          }
 
           res
-        end
+        }
 
         # first heartbeat or recovering from an outage and need to reestablish our heartbeat
-        fire_event(:heartbeat) if !exists
+        fire_event(:heartbeat) unless exists
 
         return unless msg
 
@@ -160,14 +161,14 @@ module Sidekiq
     def to_data
       @data ||= begin
         {
-          'hostname' => hostname,
-          'started_at' => Time.now.to_f,
-          'pid' => $$,
-          'tag' => @options[:tag] || '',
-          'concurrency' => @options[:concurrency],
-          'queues' => @options[:queues].uniq,
-          'labels' => @options[:labels],
-          'identity' => identity,
+          "hostname" => hostname,
+          "started_at" => Time.now.to_f,
+          "pid" => $$,
+          "tag" => @options[:tag] || "",
+          "concurrency" => @options[:concurrency],
+          "queues" => @options[:queues].uniq,
+          "labels" => @options[:labels],
+          "identity" => identity,
         }
       end
     end
