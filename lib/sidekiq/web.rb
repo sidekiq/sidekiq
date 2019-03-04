@@ -1,20 +1,21 @@
 # frozen_string_literal: true
-require 'erb'
 
-require 'sidekiq'
-require 'sidekiq/api'
-require 'sidekiq/paginator'
-require 'sidekiq/web/helpers'
+require "erb"
 
-require 'sidekiq/web/router'
-require 'sidekiq/web/action'
-require 'sidekiq/web/application'
+require "sidekiq"
+require "sidekiq/api"
+require "sidekiq/paginator"
+require "sidekiq/web/helpers"
 
-require 'rack/protection'
+require "sidekiq/web/router"
+require "sidekiq/web/action"
+require "sidekiq/web/application"
 
-require 'rack/builder'
-require 'rack/file'
-require 'rack/session/cookie'
+require "rack/protection"
+
+require "rack/builder"
+require "rack/file"
+require "rack/session/cookie"
 
 module Sidekiq
   class Web
@@ -25,12 +26,12 @@ module Sidekiq
     ASSETS = "#{ROOT}/assets"
 
     DEFAULT_TABS = {
-      "Dashboard" => '',
-      "Busy"      => 'busy',
-      "Queues"    => 'queues',
-      "Retries"   => 'retries',
-      "Scheduled" => 'scheduled',
-      "Dead"      => 'morgue',
+      "Dashboard" => "",
+      "Busy" => "busy",
+      "Queues" => "queues",
+      "Retries" => "retries",
+      "Scheduled" => "scheduled",
+      "Dead" => "morgue",
     }
 
     class << self
@@ -53,7 +54,7 @@ module Sidekiq
       def custom_tabs
         @custom_tabs ||= {}
       end
-      alias_method :tabs, :custom_tabs
+      alias tabs custom_tabs
 
       def locales
         @locales ||= LOCALES
@@ -81,10 +82,10 @@ module Sidekiq
     end
 
     def self.inherited(child)
-      child.app_url = self.app_url
-      child.session_secret = self.session_secret
-      child.redis_pool = self.redis_pool
-      child.sessions = self.sessions
+      child.app_url = app_url
+      child.session_secret = session_secret
+      child.redis_pool = redis_pool
+      child.sessions = sessions
     end
 
     def settings
@@ -145,16 +146,16 @@ module Sidekiq
     private
 
     def using?(middleware)
-      middlewares.any? do |(m,_)|
-        m.kind_of?(Array) && (m[0] == middleware || m[0].kind_of?(middleware))
+      middlewares.any? do |(m, _)|
+        m.is_a?(Array) && (m[0] == middleware || m[0].is_a?(middleware))
       end
     end
 
     def build_sessions
       middlewares = self.middlewares
 
-      unless using?(::Rack::Protection) || ENV['RACK_ENV'] == 'test'
-        middlewares.unshift [[::Rack::Protection, { use: :authenticity_token }], nil]
+      unless using?(::Rack::Protection) || ENV["RACK_ENV"] == "test"
+        middlewares.unshift [[::Rack::Protection, {use: :authenticity_token}], nil]
       end
 
       s = sessions
@@ -162,11 +163,11 @@ module Sidekiq
 
       unless using? ::Rack::Session::Cookie
         unless secret = Web.session_secret
-          require 'securerandom'
+          require "securerandom"
           secret = SecureRandom.hex(64)
         end
 
-        options = { secret: secret }
+        options = {secret: secret}
         options = options.merge(s.to_hash) if s.respond_to? :to_hash
 
         middlewares.unshift [[::Rack::Session::Cookie, options], nil]
@@ -180,9 +181,9 @@ module Sidekiq
       klass = self.class
 
       ::Rack::Builder.new do
-        %w(stylesheets javascripts images).each do |asset_dir|
+        %w[stylesheets javascripts images].each do |asset_dir|
           map "/#{asset_dir}" do
-            run ::Rack::File.new("#{ASSETS}/#{asset_dir}", { 'Cache-Control' => 'public, max-age=86400' })
+            run ::Rack::File.new("#{ASSETS}/#{asset_dir}", {"Cache-Control" => "public, max-age=86400"})
           end
         end
 
