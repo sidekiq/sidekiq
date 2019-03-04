@@ -6,7 +6,7 @@ module Sidekiq
 
     CONTENT_LENGTH = "Content-Length"
     CONTENT_TYPE = "Content-Type"
-    REDIS_KEYS = %w(redis_version uptime_in_days connected_clients used_memory_human used_memory_peak_human)
+    REDIS_KEYS = %w[redis_version uptime_in_days connected_clients used_memory_human used_memory_peak_human]
     CSP_HEADER = [
       "default-src 'self' https: http:",
       "child-src 'self'",
@@ -20,8 +20,8 @@ module Sidekiq
       "script-src 'self' https: http: 'unsafe-inline'",
       "style-src 'self' https: http: 'unsafe-inline'",
       "worker-src 'self'",
-      "base-uri 'self'"
-    ].join('; ').freeze
+      "base-uri 'self'",
+    ].join("; ").freeze
 
     def initialize(klass)
       @klass = klass
@@ -44,8 +44,8 @@ module Sidekiq
     end
 
     get "/" do
-      @redis_info = redis_info.select{ |k, v| REDIS_KEYS.include? k }
-      stats_history = Sidekiq::Stats::History.new((params['days'] || 30).to_i)
+      @redis_info = redis_info.select { |k, v| REDIS_KEYS.include? k }
+      stats_history = Sidekiq::Stats::History.new((params["days"] || 30).to_i)
       @processed_history = stats_history.processed
       @failed_history = stats_history.failed
 
@@ -57,14 +57,14 @@ module Sidekiq
     end
 
     post "/busy" do
-      if params['identity']
-        p = Sidekiq::Process.new('identity' => params['identity'])
-        p.quiet! if params['quiet']
-        p.stop! if params['stop']
+      if params["identity"]
+        p = Sidekiq::Process.new("identity" => params["identity"])
+        p.quiet! if params["quiet"]
+        p.stop! if params["stop"]
       else
         processes.each do |pro|
-          pro.quiet! if params['quiet']
-          pro.stop! if params['stop']
+          pro.quiet! if params["quiet"]
+          pro.stop! if params["stop"]
         end
       end
 
@@ -82,9 +82,9 @@ module Sidekiq
 
       halt(404) unless @name
 
-      @count = (params['count'] || 25).to_i
+      @count = (params["count"] || 25).to_i
       @queue = Sidekiq::Queue.new(@name)
-      (@current_page, @total_size, @messages) = page("queue:#{@name}", params['page'], @count)
+      (@current_page, @total_size, @messages) = page("queue:#{@name}", params["page"], @count)
       @messages = @messages.map { |msg| Sidekiq::Job.new(msg, @name) }
 
       erb(:queue)
@@ -98,14 +98,14 @@ module Sidekiq
 
     post "/queues/:name/delete" do
       name = route_params[:name]
-      Sidekiq::Job.new(params['key_val'], name).delete
+      Sidekiq::Job.new(params["key_val"], name).delete
 
       redirect_with_query("#{root_path}queues/#{CGI.escape(name)}")
     end
 
-    get '/morgue' do
-      @count = (params['count'] || 25).to_i
-      (@current_page, @total_size, @dead) = page("dead", params['page'], @count, reverse: true)
+    get "/morgue" do
+      @count = (params["count"] || 25).to_i
+      (@current_page, @total_size, @dead) = page("dead", params["page"], @count, reverse: true)
       @dead = @dead.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
 
       erb(:morgue)
@@ -123,10 +123,10 @@ module Sidekiq
       end
     end
 
-    post '/morgue' do
-      redirect(request.path) unless params['key']
+    post "/morgue" do
+      redirect(request.path) unless params["key"]
 
-      params['key'].each do |key|
+      params["key"].each do |key|
         job = Sidekiq::DeadSet.new.fetch(*parse_params(key)).first
         retry_or_delete_or_kill job, params if job
       end
@@ -155,9 +155,9 @@ module Sidekiq
       redirect_with_query("#{root_path}morgue")
     end
 
-    get '/retries' do
-      @count = (params['count'] || 25).to_i
-      (@current_page, @total_size, @retries) = page("retry", params['page'], @count)
+    get "/retries" do
+      @count = (params["count"] || 25).to_i
+      (@current_page, @total_size, @retries) = page("retry", params["page"], @count)
       @retries = @retries.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
 
       erb(:retries)
@@ -173,10 +173,10 @@ module Sidekiq
       end
     end
 
-    post '/retries' do
-      redirect(request.path) unless params['key']
+    post "/retries" do
+      redirect(request.path) unless params["key"]
 
-      params['key'].each do |key|
+      params["key"].each do |key|
         job = Sidekiq::RetrySet.new.fetch(*parse_params(key)).first
         retry_or_delete_or_kill job, params if job
       end
@@ -210,9 +210,9 @@ module Sidekiq
       redirect_with_query("#{root_path}retries")
     end
 
-    get '/scheduled' do
-      @count = (params['count'] || 25).to_i
-      (@current_page, @total_size, @scheduled) = page("schedule", params['page'], @count)
+    get "/scheduled" do
+      @count = (params["count"] || 25).to_i
+      (@current_page, @total_size, @scheduled) = page("schedule", params["page"], @count)
       @scheduled = @scheduled.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
 
       erb(:scheduled)
@@ -228,10 +228,10 @@ module Sidekiq
       end
     end
 
-    post '/scheduled' do
-      redirect(request.path) unless params['key']
+    post "/scheduled" do
+      redirect(request.path) unless params["key"]
 
-      params['key'].each do |key|
+      params["key"].each do |key|
         job = Sidekiq::ScheduledSet.new.fetch(*parse_params(key)).first
         delete_or_add_queue job, params if job
       end
@@ -248,39 +248,39 @@ module Sidekiq
       redirect_with_query("#{root_path}scheduled")
     end
 
-    get '/dashboard/stats' do
+    get "/dashboard/stats" do
       redirect "#{root_path}stats"
     end
 
-    get '/stats' do
+    get "/stats" do
       sidekiq_stats = Sidekiq::Stats.new
       redis_stats   = redis_info.select { |k, v| REDIS_KEYS.include? k }
       json(
         sidekiq: {
-          processed:       sidekiq_stats.processed,
-          failed:          sidekiq_stats.failed,
-          busy:            sidekiq_stats.workers_size,
-          processes:       sidekiq_stats.processes_size,
-          enqueued:        sidekiq_stats.enqueued,
-          scheduled:       sidekiq_stats.scheduled_size,
-          retries:         sidekiq_stats.retry_size,
-          dead:            sidekiq_stats.dead_size,
-          default_latency: sidekiq_stats.default_queue_latency
+          processed: sidekiq_stats.processed,
+          failed: sidekiq_stats.failed,
+          busy: sidekiq_stats.workers_size,
+          processes: sidekiq_stats.processes_size,
+          enqueued: sidekiq_stats.enqueued,
+          scheduled: sidekiq_stats.scheduled_size,
+          retries: sidekiq_stats.retry_size,
+          dead: sidekiq_stats.dead_size,
+          default_latency: sidekiq_stats.default_queue_latency,
         },
         redis: redis_stats,
         server_utc_time: server_utc_time
       )
     end
 
-    get '/stats/queues' do
+    get "/stats/queues" do
       json Sidekiq::Stats::Queues.new.lengths
     end
 
     def call(env)
       action = self.class.match(env)
-      return [404, {"Content-Type" => "text/plain", "X-Cascade" => "pass" }, ["Not Found"]] unless action
+      return [404, {"Content-Type" => "text/plain", "X-Cascade" => "pass"}, ["Not Found"]] unless action
 
-      resp = catch(:halt) do
+      resp = catch(:halt) {
         app = @klass
         self.class.run_befores(app, action)
         begin
@@ -290,7 +290,7 @@ module Sidekiq
         end
 
         resp
-      end
+      }
 
       resp = case resp
       when Array
@@ -300,7 +300,7 @@ module Sidekiq
           "Content-Type" => "text/html",
           "Cache-Control" => "no-cache",
           "Content-Language" => action.locale,
-          "Content-Security-Policy" => CSP_HEADER
+          "Content-Security-Policy" => CSP_HEADER,
         }
 
         [200, headers, [resp]]
@@ -313,7 +313,7 @@ module Sidekiq
       resp
     end
 
-    def self.helpers(mod=nil, &block)
+    def self.helpers(mod = nil, &block)
       if block_given?
         WebAction.class_eval(&block)
       else
@@ -321,11 +321,11 @@ module Sidekiq
       end
     end
 
-    def self.before(path=nil, &block)
+    def self.before(path = nil, &block)
       befores << [path && Regexp.new("\\A#{path.gsub("*", ".*")}\\z"), block]
     end
 
-    def self.after(path=nil, &block)
+    def self.after(path = nil, &block)
       afters << [path && Regexp.new("\\A#{path.gsub("*", ".*")}\\z"), block]
     end
 
@@ -338,8 +338,8 @@ module Sidekiq
     end
 
     def self.run_hooks(hooks, app, action)
-      hooks.select { |p,_| !p || p =~ action.env[WebRouter::PATH_INFO] }.
-            each {|_,b| action.instance_exec(action.env, app, &b) }
+      hooks.select { |p, _| !p || p =~ action.env[WebRouter::PATH_INFO] }
+        .each {|_, b| action.instance_exec(action.env, app, &b) }
     end
 
     def self.befores
