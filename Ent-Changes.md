@@ -4,7 +4,7 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+1.8.1
 -------------
 
 - Fix excessive lock reclaims with concurrent limiter [#4105]
