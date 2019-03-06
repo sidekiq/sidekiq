@@ -46,6 +46,11 @@ module Sidekiq
         @opts = opts
       end
 
+      def set(options)
+        @opts.merge!(options)
+        self
+      end
+
       def perform_async(*args)
         @klass.client_push(@opts.merge('args' => args, 'class' => @klass))
       end

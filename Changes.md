@@ -27,7 +27,8 @@ HEAD
 ---------
 
 - Better handling of malformed job arguments in payload [#4095]
-- add back in bootstap's dropdown css component [#4099, urkle]
+- Restore bootstap's dropdown css component [#4099, urkle]
+- Allow `Sidekiq::Worker#set` to be chained
 
 5.2.5
 ---------

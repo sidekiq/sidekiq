@@ -65,7 +65,7 @@ def handle_signal(launcher, sig)
     # http://jira.codehaus.org/browse/JRUBY-4637
     raise Interrupt
   when 'TERM'
-    # Heroku sends TERM and then waits 10 seconds for process to exit.
+    # Heroku sends TERM and then waits 30 seconds for process to exit.
     raise Interrupt
   when 'TSTP'
     Sidekiq.logger.info "Received TSTP, no longer accepting new work"
