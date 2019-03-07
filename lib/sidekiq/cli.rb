@@ -263,7 +263,8 @@ module Sidekiq
     def default_tag
       dir = ::Rails.root
       name = File.basename(dir)
-      if name.to_i != 0 && prevdir = File.dirname(dir) # Capistrano release directory?
+      prevdir = File.dirname(dir) # Capistrano release directory?
+      if name.to_i != 0 && prevdir
         if File.basename(prevdir) == "releases"
           return File.basename(File.dirname(prevdir))
         end
