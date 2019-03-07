@@ -98,7 +98,11 @@ module Sidekiq
       rescue Redis::CommandError => ex
         # 2550 Failover can cause the server to become a replica, need
         # to disconnect and reopen the socket to get back to the primary.
-        (conn.disconnect!; retryable = false; retry) if retryable && ex.message =~ /READONLY/
+        if retryable && ex.message =~ /READONLY/
+          conn.disconnect!
+          retryable = false
+          retry
+        end
         raise
       end
     end
