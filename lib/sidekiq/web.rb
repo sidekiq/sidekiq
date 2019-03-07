@@ -162,7 +162,7 @@ module Sidekiq
       return unless s
 
       unless using? ::Rack::Session::Cookie
-        unless secret = Web.session_secret
+        unless (secret = Web.session_secret)
           require "securerandom"
           secret = SecureRandom.hex(64)
         end

@@ -112,7 +112,8 @@ module Sidekiq
     end
 
     get "/morgue/:key" do
-      halt(404) unless key = route_params[:key]
+      key = route_params[:key]
+      halt(404) unless key
 
       @dead = Sidekiq::DeadSet.new.fetch(*parse_params(key)).first
 
@@ -147,7 +148,8 @@ module Sidekiq
     end
 
     post "/morgue/:key" do
-      halt(404) unless key = route_params[:key]
+      key = route_params[:key]
+      halt(404) unless key
 
       job = Sidekiq::DeadSet.new.fetch(*parse_params(key)).first
       retry_or_delete_or_kill job, params if job
@@ -240,7 +242,8 @@ module Sidekiq
     end
 
     post "/scheduled/:key" do
-      halt(404) unless key = route_params[:key]
+      key = route_params[:key]
+      halt(404) unless key
 
       job = Sidekiq::ScheduledSet.new.fetch(*parse_params(key)).first
       delete_or_add_queue job, params if job

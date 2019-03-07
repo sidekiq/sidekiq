@@ -51,7 +51,8 @@ module Sidekiq
       path_info = "/" if path_info == ""
 
       @routes[request_method].each do |route|
-        if params = route.match(request_method, path_info)
+        params = route.match(request_method, path_info)
+        if params
           env[ROUTE_PARAMS] = params
 
           return WebAction.new(env, route.block)
@@ -92,7 +93,8 @@ module Sidekiq
       when String
         {} if path == matcher
       else
-        if path_match = path.match(matcher)
+        path_match = path.match(matcher)
+        if path_match
           Hash[path_match.names.map(&:to_sym).zip(path_match.captures)]
         end
       end

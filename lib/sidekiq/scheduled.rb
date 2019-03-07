@@ -18,7 +18,7 @@ module Sidekiq
             # We need to go through the list one at a time to reduce the risk of something
             # going wrong between the time jobs are popped from the scheduled queue and when
             # they are pushed onto a work queue and losing the jobs.
-            while job = conn.zrangebyscore(sorted_set, "-inf", now, limit: [0, 1]).first
+            while (job = conn.zrangebyscore(sorted_set, "-inf", now, limit: [0, 1]).first)
 
               # Pop item off the queue and add it to the work queue. If the job can't be popped from
               # the queue, it's because another process already popped it so we can move on to the
