@@ -9,8 +9,8 @@ module Sidekiq
   # This is not a public API
   module WebHelpers
     def strings(lang)
-      @@strings ||= {}
-      @@strings[lang] ||= begin
+      @strings ||= {}
+      @strings[lang] ||= begin
         # Allow sidekiq-web extensions to add locale paths
         # so extensions can be localized
         settings.locales.each_with_object({}) do |path, global|
@@ -23,19 +23,19 @@ module Sidekiq
     end
 
     def clear_caches
-      @@strings = nil
-      @@locale_files = nil
-      @@available_locales = nil
+      @strings = nil
+      @locale_files = nil
+      @available_locales = nil
     end
 
     def locale_files
-      @@locale_files ||= settings.locales.flat_map { |path|
+      @locale_files ||= settings.locales.flat_map { |path|
         Dir["#{path}/*.yml"]
       }
     end
 
     def available_locales
-      @@available_locales ||= locale_files.map { |path| File.basename(path, ".yml") }.uniq
+      @available_locales ||= locale_files.map { |path| File.basename(path, ".yml") }.uniq
     end
 
     def find_locale_files(lang)

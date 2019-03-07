@@ -71,7 +71,7 @@ module Sidekiq
       @_erb = false
       @env = env
       @block = block
-      @@files ||= {}
+      @files ||= {}
     end
 
     private
