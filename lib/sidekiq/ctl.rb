@@ -4,7 +4,7 @@ require "fileutils"
 require "sidekiq/api"
 
 class Sidekiq::Ctl
-  CMD = File.basename($0)
+  CMD = File.basename($PROGRAM_NAME)
 
   attr_reader :stage
 
