@@ -80,7 +80,10 @@ module Sidekiq
 
     def get_one
       work = @strategy.retrieve_work
-      (logger.info { "Redis is online, #{::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @down} sec downtime" }; @down = nil) if @down
+      if @down
+        logger.info { "Redis is online, #{::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @down} sec downtime" }
+        @down = nil
+      end
       work
     rescue Sidekiq::Shutdown
     rescue => ex
@@ -191,7 +194,11 @@ module Sidekiq
       end
 
       def reset
-        @lock.synchronize { val = @value; @value = 0; val }
+        @lock.synchronize {
+          val = @value
+          @value = 0
+          val
+        }
       end
     end
 
