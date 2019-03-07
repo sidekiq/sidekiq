@@ -618,7 +618,6 @@ module Sidekiq
             @_size -= 1 if ret
             break ret
           end
-          false
         end
       end
     end
