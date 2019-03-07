@@ -97,7 +97,7 @@ module Sidekiq
       begin
         launcher.run
 
-        while readable_io = IO.select([self_read])
+        while (readable_io = IO.select([self_read]))
           signal = readable_io.first[0].gets.strip
           handle_signal(signal)
         end
