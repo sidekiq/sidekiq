@@ -5,9 +5,13 @@ ignore:
   - test/**/*
   - examples/**/*
   - myapp/**/*
+  - 'lib/sidekiq/extensions/**/*':
+    - Style/MethodMissingSuper
+    - Style/MissingRespondToMissing
   - 'lib/**/*':
     - Naming/AsciiIdentifiers
     - Lint/RescueException
     - Security/YAMLLoad
     - Naming/AccessorMethodName
     - Naming/MethodName
+    - Style/GlobalVars
