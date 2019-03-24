@@ -242,7 +242,7 @@ module Sidekiq
       # that won't convert to JSON.
       exception.message.to_s[0, 10_000]
     rescue
-      "!!! ERROR MESSAGE THREW AN ERROR !!!".dup
+      +"!!! ERROR MESSAGE THREW AN ERROR !!!"
     end
   end
 end
