@@ -197,5 +197,9 @@ module Sidekiq
   Sidekiq::WebApplication.helpers WebHelpers
   Sidekiq::WebApplication.helpers Sidekiq::Paginator
 
-  Sidekiq::WebAction.class_eval "def _render\n#{ERB.new(File.read(Web::LAYOUT)).src}\nend"
+  Sidekiq::WebAction.class_eval <<-RUBY, __FILE__, __LINE__ + 1
+    def _render
+      #{ERB.new(File.read(Web::LAYOUT)).src}
+    end
+  RUBY
 end
