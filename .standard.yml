@@ -1,0 +1,13 @@
+ruby_version: 2.5.0
+fix: true
+parallel: true
+ignore:
+  - test/**/*
+  - examples/**/*
+  - myapp/**/*
+  - 'lib/**/*':
+    - Naming/AsciiIdentifiers
+    - Lint/RescueException
+    - Security/YAMLLoad
+    - Naming/AccessorMethodName
+    - Naming/MethodName
