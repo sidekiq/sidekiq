@@ -7,4 +7,4 @@ bundler_args: --without development load_test
 rvm:
   - 2.5.1
   - 2.6.0
-  - jruby-9.2.5.0
+  - jruby-9.2.6.0
