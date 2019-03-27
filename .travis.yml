@@ -11,4 +11,4 @@ rvm:
 
 script:
   - bundle exec rake test
-  - bundle exec standardrb lib/**/*.rb
+  - bundle exec standardrb
