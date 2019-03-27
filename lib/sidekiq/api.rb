@@ -97,10 +97,10 @@ module Sidekiq
 
       default_queue_latency = if (entry = pipe1_res[6].first)
         job = begin
-                                        Sidekiq.load_json(entry)
+                Sidekiq.load_json(entry)
               rescue
                 {}
-                                      end
+              end
         now = Time.now.to_f
         thence = job["enqueued_at"] || now
         now - thence
