@@ -200,8 +200,8 @@ module Sidekiq
       end
     end
 
-    alias die exit
-    alias ☠ exit
+    alias_method :die, :exit
+    alias_method :☠, :exit
 
     def setup_options(args)
       # parse CLI options

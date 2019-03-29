@@ -39,9 +39,9 @@ module Sidekiq
       def sidekiq_delay_until(timestamp, options = {})
         Proxy.new(DelayedMailer, self, options.merge("at" => timestamp.to_f))
       end
-      alias delay sidekiq_delay
-      alias delay_for sidekiq_delay_for
-      alias delay_until sidekiq_delay_until
+      alias_method :delay, :sidekiq_delay
+      alias_method :delay_for, :sidekiq_delay_for
+      alias_method :delay_until, :sidekiq_delay_until
     end
   end
 end

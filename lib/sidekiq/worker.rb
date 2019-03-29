@@ -67,7 +67,7 @@ module Sidekiq
         payload.delete("at") if ts <= now
         @klass.client_push(payload)
       end
-      alias perform_at perform_in
+      alias_method :perform_at, :perform_in
     end
 
     module ClassMethods
@@ -107,7 +107,7 @@ module Sidekiq
 
         client_push(item)
       end
-      alias perform_at perform_in
+      alias_method :perform_at, :perform_in
 
       ##
       # Allows customization for this type of Worker.

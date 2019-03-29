@@ -1,5 +1,5 @@
 ruby_version: 2.5.0
-fix: true
+fix: false
 parallel: true
 ignore:
   - test/**/*
@@ -15,3 +15,4 @@ ignore:
     - Naming/AccessorMethodName
     - Naming/MethodName
     - Style/GlobalVars
+    - Style/Alias

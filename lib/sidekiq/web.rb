@@ -54,7 +54,7 @@ module Sidekiq
       def custom_tabs
         @custom_tabs ||= {}
       end
-      alias tabs custom_tabs
+      alias_method :tabs, :custom_tabs
 
       def locales
         @locales ||= LOCALES

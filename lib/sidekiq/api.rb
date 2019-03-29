@@ -304,7 +304,7 @@ module Sidekiq
         end
       end
     end
-    alias 💣 clear
+    alias_method :💣, :clear
   end
 
   ##
@@ -545,7 +545,7 @@ module Sidekiq
         conn.del(name)
       end
     end
-    alias 💣 clear
+    alias_method :💣, :clear
   end
 
   class JobSet < SortedSet
@@ -622,7 +622,7 @@ module Sidekiq
       end
     end
 
-    alias delete delete_by_jid
+    alias_method :delete, :delete_by_jid
   end
 
   ##
