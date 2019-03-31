@@ -5,6 +5,8 @@ ignore:
   - test/**/*
   - examples/**/*
   - myapp/**/*
+  - 'lib/sidekiq.rb':
+    - Lint/InheritException
   - 'lib/sidekiq/extensions/**/*':
     - Style/MethodMissingSuper
     - Style/MissingRespondToMissing

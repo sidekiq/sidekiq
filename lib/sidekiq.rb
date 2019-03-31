@@ -242,7 +242,7 @@ module Sidekiq
   # timeout limit.  This is needed to rollback db transactions,
   # otherwise Ruby's Thread#kill will commit.  See #377.
   # DO NOT RESCUE THIS ERROR IN YOUR WORKERS
-  class Shutdown < RuntimeError; end
+  class Shutdown < Interrupt; end
 end
 
 require "sidekiq/rails" if defined?(::Rails::Engine)
