@@ -4,8 +4,8 @@ gemspec
 
 gem "rake"
 gem "redis-namespace"
-gem "rails", "~> 5.2"
-gem "sqlite3", "~> 1.3.6", platforms: :ruby
+gem "rails"
+gem "sqlite3"
 gem "activerecord-jdbcsqlite3-adapter", platforms: :jruby
 
 group :test do
