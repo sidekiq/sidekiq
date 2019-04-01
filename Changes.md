@@ -23,6 +23,8 @@ This release has major breaking changes.  Read and test carefully in production.
   arguments to Sidekiq. Use a proper process supervisor (e.g. systemd or
   foreman) to manage Sidekiq.  See the Deployment wiki page for links to
   more resources.
+- Integrate the StandardRB code formatter to ensure consistent code
+  styling. [#4114, gearnode]
 
 HEAD
 ---------
