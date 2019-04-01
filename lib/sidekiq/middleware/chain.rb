@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Sidekiq
   # Middleware is code configured to run before/after
   # a message is processed.  It is patterned after Rack
@@ -106,7 +107,7 @@ module Sidekiq
         i = entries.index { |entry| entry.klass == newklass }
         new_entry = i.nil? ? Entry.new(newklass, *args) : entries.delete_at(i)
         i = entries.index { |entry| entry.klass == oldklass } || entries.count - 1
-        entries.insert(i+1, new_entry)
+        entries.insert(i + 1, new_entry)
       end
 
       def exists?(klass)

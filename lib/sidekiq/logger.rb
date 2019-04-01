@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
-require 'logger'
-require 'time'
+require "logger"
+require "time"
 
 module Sidekiq
   class Logger < ::Logger
-
     def initialize(*args)
       super
 
@@ -26,7 +25,7 @@ module Sidekiq
     module Formatters
       class Base < ::Logger::Formatter
         def tid
-          Thread.current['sidekiq_tid'] ||= (Thread.current.object_id ^ ::Process.pid).to_s(36)
+          Thread.current["sidekiq_tid"] ||= (Thread.current.object_id ^ ::Process.pid).to_s(36)
         end
 
         def ctx
@@ -34,7 +33,7 @@ module Sidekiq
         end
 
         def format_context
-          ' ' + ctx.compact.map { |k, v| "#{k}=#{v}" }.join(' ') if ctx.any?
+          " " + ctx.compact.map { |k, v| "#{k}=#{v}" }.join(" ") if ctx.any?
         end
       end
 
@@ -57,7 +56,7 @@ module Sidekiq
             pid: ::Process.pid,
             tid: tid,
             lvl: severity,
-            msg: message
+            msg: message,
           }
           c = ctx
           hash["ctx"] = c unless c.empty?

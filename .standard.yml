@@ -1,0 +1,20 @@
+ruby_version: 2.5.0
+fix: false
+parallel: true
+ignore:
+  - test/**/*
+  - examples/**/*
+  - myapp/**/*
+  - 'lib/sidekiq.rb':
+    - Lint/InheritException
+  - 'lib/sidekiq/extensions/**/*':
+    - Style/MethodMissingSuper
+    - Style/MissingRespondToMissing
+  - 'lib/**/*':
+    - Naming/AsciiIdentifiers
+    - Lint/RescueException
+    - Security/YAMLLoad
+    - Naming/AccessorMethodName
+    - Naming/MethodName
+    - Style/GlobalVars
+    - Style/Alias
