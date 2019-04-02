@@ -14,7 +14,7 @@ class Sidekiq::Ctl
     puts "Usage: #{CMD} status <section>"
     puts
     puts "       <section> (optional) view a specific section of the status output"
-    puts "       Valid sections are: #{Sidekiqctl::Status::VALID_SECTIONS.join(", ")}"
+    puts "       Valid sections are: #{Sidekiq::Ctl::Status::VALID_SECTIONS.join(", ")}"
     puts
   end
 
