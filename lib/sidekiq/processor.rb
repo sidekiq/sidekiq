@@ -142,21 +142,19 @@ module Sidekiq
       jobstr = work.job
       queue = work.queue_name
 
-      ack = false
+      # Treat malformed JSON as a special case: job goes straight to the morgue.
+      job_hash = nil
       begin
-        # Treat malformed JSON as a special case: job goes straight to the morgue.
-        job_hash = nil
-        begin
-          job_hash = Sidekiq.load_json(jobstr)
-        rescue => ex
-          handle_exception(ex, {context: "Invalid JSON for job", jobstr: jobstr})
-          # we can't notify because the job isn't a valid hash payload.
-          DeadSet.new.kill(jobstr, notify_failure: false)
-          ack = true
-          raise
-        end
+        job_hash = Sidekiq.load_json(jobstr)
+      rescue => ex
+        handle_exception(ex, {context: "Invalid JSON for job", jobstr: jobstr})
+        # we can't notify because the job isn't a valid hash payload.
+        DeadSet.new.kill(jobstr, notify_failure: false)
+        return work.acknowledge
+      end
 
-        ack = true
+      ack = true
+      begin
         dispatch(job_hash, queue) do |worker|
           Sidekiq.server_middleware.invoke(worker, job_hash, queue) do
             execute_job(worker, cloned(job_hash["args"]))
@@ -167,9 +165,18 @@ module Sidekiq
         # within the timeout.  Don't acknowledge the work since
         # we didn't properly finish it.
         ack = false
-      rescue Exception => ex
-        e = ex.is_a?(::Sidekiq::JobRetry::Skip) && ex.cause ? ex.cause : ex
+      rescue Sidekiq::JobRetry::Handled => h
+        # this is the common case: job raised error and Sidekiq::JobRetry::Handled
+        # signals that we created a retry successfully.  We can acknowlege the job.
+        e = h.cause || h
         handle_exception(e, {context: "Job raised exception", job: job_hash, jobstr: jobstr})
+        raise e
+      rescue Exception => ex
+        # Unexpected error!  This is very bad and indicates an exception that got past
+        # the retry subsystem (e.g. network partition).  We won't acknowledge the job
+        # so it can be rescued when using Sidekiq Pro.
+        ack = false
+        handle_exception(ex, {context: "Internal exception!", job: job_hash, jobstr: jobstr})
         raise e
       ensure
         work.acknowledge if ack

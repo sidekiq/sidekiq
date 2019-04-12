@@ -57,7 +57,8 @@ module Sidekiq
   #    end
   #
   class JobRetry
-    class Skip < ::RuntimeError; end
+    class Handled < ::RuntimeError; end
+    class Skip < Handled; end
 
     include Sidekiq::Util
 
@@ -72,7 +73,7 @@ module Sidekiq
     # require the worker to be instantiated.
     def global(msg, queue)
       yield
-    rescue Skip => ex
+    rescue Handled => ex
       raise ex
     rescue Sidekiq::Shutdown => ey
       # ignore, will be pushed back onto queue during hard_shutdown
@@ -91,7 +92,7 @@ module Sidekiq
         end
       end
 
-      raise e
+      raise Handled
     end
 
     # The local retry support means that any errors that occur within
@@ -104,7 +105,7 @@ module Sidekiq
     # calling the handle_exception handlers.
     def local(worker, msg, queue)
       yield
-    rescue Skip => ex
+    rescue Handled => ex
       raise ex
     rescue Sidekiq::Shutdown => ey
       # ignore, will be pushed back onto queue during hard_shutdown
