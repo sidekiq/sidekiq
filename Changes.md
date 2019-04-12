@@ -5,6 +5,7 @@
 HEAD
 ---------
 
+- Fix edge case where a job failure during Redis outage could result in a lost job [#4141]
 - Better handling of malformed job arguments in payload [#4095]
 - Restore bootstap's dropdown css component [#4099, urkle]
 - Allow `Sidekiq::Worker#set` to be chained
