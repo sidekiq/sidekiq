@@ -225,7 +225,7 @@ module Sidekiq
 
     def to_display(arg)
       begin
-        arg.inspect
+        filtered_arguments(arg).inspect
       rescue
         begin
           arg.to_s
@@ -233,6 +233,12 @@ module Sidekiq
           "Cannot display argument: [#{ex.class.name}] #{ex.message}"
         end
       end
+    end
+
+    def filtered_arguments(arg)
+      return arg unless arg.is_a?(Hash)
+
+      arg.merge(arg.select { |key, _| key.to_s =~ /password/i }.transform_values { '[FILTERED]' })
     end
 
     RETRY_JOB_KEYS = Set.new(%w(
