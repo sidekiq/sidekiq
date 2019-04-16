@@ -198,7 +198,7 @@ module Sidekiq
         q = payloads.first['queue']
         now = Time.now.to_f
         to_push = payloads.map do |entry|
-          entry['enqueued_at'] ||= now
+          entry['enqueued_at'] = now
           Sidekiq.dump_json(entry)
         end
         conn.sadd('queues', q)
