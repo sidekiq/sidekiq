@@ -29,9 +29,15 @@ This release has major breaking changes.  Read and test carefully in production.
 HEAD
 ---------
 
+- Fix stale `enqueued_at` when retrying [#4149]
+
+5.2.6
+---------
+
 - Fix edge case where a job failure during Redis outage could result in a lost job [#4141]
 - Better handling of malformed job arguments in payload [#4095]
 - Restore bootstap's dropdown css component [#4099, urkle]
+- Display human-friendly time diff for longer queue latencies [#4111, interlinked]
 - Allow `Sidekiq::Worker#set` to be chained
 
 5.2.5

@@ -113,15 +113,19 @@ describe Sidekiq::Web do
     assert_equal 200, last_response.status
     assert_match(/foo/, last_response.body)
     refute_match(/HardWorker/, last_response.body)
+    assert_match(/0.0/, last_response.body)
     refute_match(/datetime/, last_response.body)
     Sidekiq::Queue.new("foo").clear
 
-    assert Sidekiq::Client.push('queue' => :foo, 'class' => WebWorker, 'args' => [1, 3], 'enqueued_at' => Time.now.to_f - 65)
+    Time.stub(:now, Time.now - 65) do
+      assert Sidekiq::Client.push('queue' => :foo, 'class' => WebWorker, 'args' => [1, 3])
+    end
 
     get '/queues'
     assert_equal 200, last_response.status
     assert_match(/foo/, last_response.body)
-    refute_match(/WebWorker/, last_response.body)
+    refute_match(/HardWorker/, last_response.body)
+    assert_match(/65.0/, last_response.body)
     assert_match(/datetime/, last_response.body)
   end
 
