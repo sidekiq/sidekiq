@@ -9,12 +9,21 @@ jobs:
   "ruby-2.5":
     docker:
       - image: circleci/ruby:2.5
+      - image: circleci/redis:4.0
     steps:
       - checkout
       - <<: *unit
   "ruby-2.6":
     docker:
       - image: circleci/ruby:2.6
+      - image: circleci/redis:4.0
+    steps:
+      - checkout
+      - <<: *unit
+  "jruby":
+    docker:
+      - image: circleci/jruby:latest
+      - image: circleci/redis:4.0
     steps:
       - checkout
       - <<: *unit
@@ -25,3 +34,4 @@ workflows:
     jobs:
       - "ruby-2.5"
       - "ruby-2.6"
+      - "jruby"
