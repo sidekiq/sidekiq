@@ -1,0 +1,27 @@
+version: 2
+references:
+  unit: &unit
+    run:
+      name: Run test suite
+      command: bundle exec rake
+
+jobs:
+  "ruby-2.5":
+    docker:
+      - image: circleci/ruby:2.5
+    steps:
+      - checkout
+      - <<: *unit
+  "ruby-2.6":
+    docker:
+      - image: circleci/ruby:2.6
+    steps:
+      - checkout
+      - <<: *unit
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - "ruby-2.5"
+      - "ruby-2.6"
