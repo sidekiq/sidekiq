@@ -5,6 +5,23 @@ references:
       name: Run test suite
       command: bundle exec rake
 
+   # Download and cache dependencies
+  restore: &restore
+    keys:
+      - v1-dependencies-{{ checksum "Gemfile.lock" }}
+      # fallback to using the latest cache if no exact match is found
+      - v1-dependencies-
+
+  bundle: &bundle
+    name: install dependencies
+    command: |
+      bundle install --jobs=4 --retry=3 --path vendor/bundle
+
+  save: &save
+    paths:
+      - ./vendor/bundle
+    key: v1-dependencies-{{ checksum "Gemfile.lock" }}
+
 jobs:
   "ruby-2.5":
     docker:
@@ -12,6 +29,9 @@ jobs:
       - image: circleci/redis:4.0
     steps:
       - checkout
+      - restore
+      - bundle
+      - save
       - <<: *unit
   "ruby-2.6":
     docker:
@@ -19,6 +39,9 @@ jobs:
       - image: circleci/redis:4.0
     steps:
       - checkout
+      - restore
+      - bundle
+      - save
       - <<: *unit
   "jruby":
     docker:
@@ -26,6 +49,9 @@ jobs:
       - image: circleci/redis:4.0
     steps:
       - checkout
+      - restore
+      - bundle
+      - save
       - <<: *unit
 
 workflows:
