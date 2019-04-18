@@ -6,6 +6,7 @@ HEAD
 ---------
 
 - Fix stale `enqueued_at` when retrying [#4149]
+- Build has moved to Circle CI.
 
 5.2.6
 ---------

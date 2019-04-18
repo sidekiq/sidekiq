@@ -3,7 +3,7 @@ Sidekiq
 
 [![Gem Version](https://badge.fury.io/rb/sidekiq.svg)](https://rubygems.org/gems/sidekiq)
 [![Code Climate](https://codeclimate.com/github/mperham/sidekiq.svg)](https://codeclimate.com/github/mperham/sidekiq)
-[![Build Status](https://travis-ci.org/mperham/sidekiq.svg)](https://travis-ci.org/mperham/sidekiq)
+[![Build Status](https://circleci.com/gh/mperham/sidekiq/tree/master.svg?style=svg)](https://circleci.com/gh/mperham/sidekiq/tree/master)
 [![Gitter Chat](https://badges.gitter.im/mperham/sidekiq.svg)](https://gitter.im/mperham/sidekiq)
 
 
