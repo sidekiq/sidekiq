@@ -26,10 +26,11 @@ This release has major breaking changes.  Read and test carefully in production.
 - Integrate the StandardRB code formatter to ensure consistent code
   styling. [#4114, gearnode]
 
-HEAD
+5.2.7
 ---------
 
 - Fix stale `enqueued_at` when retrying [#4149]
+- Move build to [Circle CI](https://circleci.com/gh/mperham/sidekiq) [#4120]
 
 5.2.6
 ---------
