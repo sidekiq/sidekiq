@@ -2,11 +2,11 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
-HEAD
+5.2.7
 ---------
 
 - Fix stale `enqueued_at` when retrying [#4149]
-- Build has moved to Circle CI.
+- Move build to [Circle CI](https://circleci.com/gh/mperham/sidekiq) [#4120]
 
 5.2.6
 ---------
