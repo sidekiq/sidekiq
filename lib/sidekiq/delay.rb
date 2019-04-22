@@ -1,11 +1,11 @@
 # frozen_string_literal: true
+
 module Sidekiq
   module Extensions
-
     def self.enable_delay!
       if defined?(::ActiveSupport)
-        require 'sidekiq/extensions/active_record'
-        require 'sidekiq/extensions/action_mailer'
+        require "sidekiq/extensions/active_record"
+        require "sidekiq/extensions/action_mailer"
 
         # Need to patch Psych so it can autoload classes whose names are serialized
         # in the delayed YAML.
@@ -19,7 +19,7 @@ module Sidekiq
         end
       end
 
-      require 'sidekiq/extensions/class_methods'
+      require "sidekiq/extensions/class_methods"
       Module.__send__(:include, Sidekiq::Extensions::Klass)
     end
 
@@ -27,7 +27,7 @@ module Sidekiq
       def resolve_class(klass_name)
         return nil if !klass_name || klass_name.empty?
         # constantize
-        names = klass_name.split('::')
+        names = klass_name.split("::")
         names.shift if names.empty? || names.first.empty?
 
         names.inject(Object) do |constant, name|
@@ -39,4 +39,3 @@ module Sidekiq
     end
   end
 end
-

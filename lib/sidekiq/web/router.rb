@@ -1,18 +1,19 @@
 # frozen_string_literal: true
-require 'rack'
+
+require "rack"
 
 module Sidekiq
   module WebRouter
-    GET = 'GET'
-    DELETE = 'DELETE'
-    POST = 'POST'
-    PUT = 'PUT'
-    PATCH = 'PATCH'
-    HEAD = 'HEAD'
+    GET = "GET"
+    DELETE = "DELETE"
+    POST = "POST"
+    PUT = "PUT"
+    PATCH = "PATCH"
+    HEAD = "HEAD"
 
-    ROUTE_PARAMS = 'rack.route_params'
-    REQUEST_METHOD = 'REQUEST_METHOD'
-    PATH_INFO = 'PATH_INFO'
+    ROUTE_PARAMS = "rack.route_params"
+    REQUEST_METHOD = "REQUEST_METHOD"
+    PATH_INFO = "PATH_INFO"
 
     def get(path, &block)
       route(GET, path, &block)
@@ -35,7 +36,7 @@ module Sidekiq
     end
 
     def route(method, path, &block)
-      @routes ||= { GET => [], POST => [], PUT => [], PATCH => [], DELETE => [], HEAD => [] }
+      @routes ||= {GET => [], POST => [], PUT => [], PATCH => [], DELETE => [], HEAD => []}
 
       @routes[method] << WebRoute.new(method, path, block)
       @routes[HEAD] << WebRoute.new(method, path, block) if method == GET
@@ -50,7 +51,8 @@ module Sidekiq
       path_info = "/" if path_info == ""
 
       @routes[request_method].each do |route|
-        if params = route.match(request_method, path_info)
+        params = route.match(request_method, path_info)
+        if params
           env[ROUTE_PARAMS] = params
 
           return WebAction.new(env, route.block)
@@ -77,7 +79,7 @@ module Sidekiq
     end
 
     def compile
-      if pattern.match(NAMED_SEGMENTS_PATTERN)
+      if pattern.match?(NAMED_SEGMENTS_PATTERN)
         p = pattern.gsub(NAMED_SEGMENTS_PATTERN, '/\1(?<\2>[^$/]+)')
 
         Regexp.new("\\A#{p}\\Z")
@@ -91,7 +93,8 @@ module Sidekiq
       when String
         {} if path == matcher
       else
-        if path_match = path.match(matcher)
+        path_match = path.match(matcher)
+        if path_match
           Hash[path_match.names.map(&:to_sym).zip(path_match.captures)]
         end
       end

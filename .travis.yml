@@ -3,9 +3,12 @@ sudo: false
 cache: bundler
 services:
   - redis-server
+bundler_args: --without development load_test
 rvm:
-  - 2.3.7
-  - 2.4.4
   - 2.5.1
   - 2.6.0
   - jruby-9.2.6.0
+
+script:
+  - bundle exec rake test
+  - bundle exec rake standard

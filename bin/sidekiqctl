@@ -7,14 +7,5 @@ require 'sidekiq/ctl'
 if ARGV[0] == 'status'
   Sidekiq::Ctl::Status.new.display(ARGV[1])
 else
-  if ARGV.length < 2
-    Sidekiq::Ctl.print_usage
-  else
-    stage = ARGV[0]
-    pidfile = ARGV[1]
-    timeout = ARGV[2].to_i
-    timeout = Sidekiq::Ctl::DEFAULT_KILL_TIMEOUT if timeout == 0
-
-    Sidekiq::Ctl.new(stage, pidfile, timeout)
-  end
+  Sidekiq::Ctl.print_usage
 end

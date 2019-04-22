@@ -1,9 +1,10 @@
 # frozen_string_literal: true
+
 require_relative 'helper'
 require 'sidekiq/launcher'
-require 'sidekiq/cli'
 
 describe Sidekiq::Launcher do
+  subject { Sidekiq::Launcher.new(options) }
   before do
     Sidekiq.redis {|c| c.flushdb }
   end
@@ -29,6 +30,69 @@ describe Sidekiq::Launcher do
       $0 = @proctitle
     end
 
+    describe '#heartbeat' do
+      describe 'run' do
+        it 'sets sidekiq version, tag and the number of busy workers to proctitle' do
+          subject.heartbeat
+
+          assert_equal "sidekiq #{Sidekiq::VERSION} myapp [1 of 3 busy]", $0
+        end
+
+        it 'stores process info in redis' do
+          subject.heartbeat
+
+          workers = Sidekiq.redis { |c| c.hmget(subject.identity, 'busy') }
+
+          assert_equal ["1"], workers
+
+          expires = Sidekiq.redis { |c| c.pttl(subject.identity) }
+
+          assert_in_delta 60000, expires, 500
+        end
+
+        describe 'events' do
+          before do
+            @cnt = 0
+
+            Sidekiq.on(:heartbeat) do
+              @cnt += 1
+            end
+          end
+
+          it 'fires start heartbeat event only once' do
+            assert_equal 0, @cnt
+            subject.heartbeat
+            assert_equal 1, @cnt
+            subject.heartbeat
+            assert_equal 1, @cnt
+          end
+        end
+      end
+
+      describe 'quiet' do
+        before do
+          subject.quiet
+        end
+
+        it 'sets stopping proctitle' do
+          subject.heartbeat
+
+          assert_equal "sidekiq #{Sidekiq::VERSION} myapp [1 of 3 busy] stopping", $0
+        end
+
+        it 'stores process info in redis' do
+          subject.heartbeat
+
+          info = Sidekiq.redis { |c| c.hmget(subject.identity, 'busy') }
+
+          assert_equal ["1"], info
+
+          expires = Sidekiq.redis { |c| c.pttl(subject.identity) }
+
+          assert_in_delta 60000, expires, 50
+        end
+      end
+
     it 'fires new heartbeat events' do
       i = 0
       Sidekiq.on(:heartbeat) do
@@ -43,9 +107,9 @@ describe Sidekiq::Launcher do
 
     describe 'when manager is active' do
       before do
-        Sidekiq::CLI::PROCTITLES << proc { "xyz" }
+        Sidekiq::Launcher::PROCTITLES << proc { "xyz" }
         @launcher.heartbeat
-        Sidekiq::CLI::PROCTITLES.pop
+        Sidekiq::Launcher::PROCTITLES.pop
       end
 
       it 'sets useful info to proctitle' do
@@ -59,6 +123,7 @@ describe Sidekiq::Launcher do
         assert_in_delta 60000, expires, 500
       end
     end
+  end
 
     describe 'when manager is stopped' do
       before do

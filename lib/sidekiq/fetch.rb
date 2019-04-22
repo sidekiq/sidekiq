@@ -1,5 +1,6 @@
 # frozen_string_literal: true
-require 'sidekiq'
+
+require "sidekiq"
 
 module Sidekiq
   class BasicFetch
@@ -7,13 +8,13 @@ module Sidekiq
     # can check if the process is shutting down.
     TIMEOUT = 2
 
-    UnitOfWork = Struct.new(:queue, :job) do
+    UnitOfWork = Struct.new(:queue, :job) {
       def acknowledge
         # nothing to do
       end
 
       def queue_name
-        queue.sub(/.*queue:/, '')
+        queue.sub(/.*queue:/, "")
       end
 
       def requeue
@@ -21,7 +22,7 @@ module Sidekiq
           conn.rpush("queue:#{queue_name}", job)
         end
       end
-    end
+    }
 
     def initialize(options)
       @strictly_ordered_queues = !!options[:strict]
@@ -52,7 +53,6 @@ module Sidekiq
       end
     end
 
-
     # By leaving this as a class method, it can be pluggable and used by the Manager actor. Making it
     # an instance method will make it async to the Fetcher actor
     def self.bulk_requeue(inprogress, options)
@@ -76,6 +76,5 @@ module Sidekiq
     rescue => ex
       Sidekiq.logger.warn("Failed to requeue #{inprogress.size} jobs: #{ex.message}")
     end
-
   end
 end

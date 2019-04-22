@@ -1,7 +1,8 @@
 # frozen_string_literal: true
-require 'socket'
-require 'securerandom'
-require 'sidekiq/exception_handler'
+
+require "socket"
+require "securerandom"
+require "sidekiq/exception_handler"
 
 module Sidekiq
   ##
@@ -15,13 +16,13 @@ module Sidekiq
     def watchdog(last_words)
       yield
     rescue Exception => ex
-      handle_exception(ex, { context: last_words })
+      handle_exception(ex, {context: last_words})
       raise ex
     end
 
     def safe_thread(name, &block)
       Thread.new do
-        Thread.current['sidekiq_label'] = name
+        Thread.current["sidekiq_label"] = name
         watchdog(name, &block)
       end
     end
@@ -34,31 +35,33 @@ module Sidekiq
       Sidekiq.redis(&block)
     end
 
+    def tid
+      Thread.current["sidekiq_tid"] ||= (Thread.current.object_id ^ ::Process.pid).to_s(36)
+    end
+
     def hostname
-      ENV['DYNO'] || Socket.gethostname
+      ENV["DYNO"] || Socket.gethostname
     end
 
     def process_nonce
-      @@process_nonce ||= SecureRandom.hex(6)
+      @process_nonce ||= SecureRandom.hex(6)
     end
 
     def identity
-      @@identity ||= "#{hostname}:#{$$}:#{process_nonce}"
+      @identity ||= "#{hostname}:#{$PID}:#{process_nonce}"
     end
 
-    def fire_event(event, options={})
+    def fire_event(event, options = {})
       reverse = options[:reverse]
       reraise = options[:reraise]
 
       arr = Sidekiq.options[:lifecycle_events][event]
       arr.reverse! if reverse
       arr.each do |block|
-        begin
-          block.call
-        rescue => ex
-          handle_exception(ex, { context: "Exception during Sidekiq lifecycle event.", event: event })
-          raise ex if reraise
-        end
+        block.call
+      rescue => ex
+        handle_exception(ex, {context: "Exception during Sidekiq lifecycle event.", event: event})
+        raise ex if reraise
       end
       arr.clear
     end

@@ -317,34 +317,52 @@ describe Sidekiq::Processor do
       end
     end
 
-    describe 'when failed' do
-      let(:failed_today_key) { "stat:failed:#{Time.now.utc.strftime("%Y-%m-%d")}" }
-
-      def failed_job
-        msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'] })
-        begin
-          @processor.process(work(msg))
-        rescue TestProcessorException
+    describe 'custom job logger class' do
+      class CustomJobLogger < Sidekiq::JobLogger
+        def call(item, queue)
+          yield
+        rescue Exception
+          raise
         end
       end
 
-      it 'increments failed stat' do
-        Sidekiq::Processor::FAILURE.reset
-        failed_job
-        assert_equal 1, Sidekiq::Processor::FAILURE.reset
+      before do
+        @mgr = Minitest::Mock.new
+        @mgr.expect(:options, {:queues => ['default'], job_logger: CustomJobLogger})
+        @mgr.expect(:options, {:queues => ['default'], job_logger: CustomJobLogger})
+        @mgr.expect(:options, {:queues => ['default'], job_logger: CustomJobLogger})
+        @processor = ::Sidekiq::Processor.new(@mgr)
       end
     end
   end
 
-  describe 'custom job logger class' do
-    class CustomJobLogger
-      def call(item, queue)
-        yield
-      rescue Exception
-        raise
+  describe 'stats' do
+    before do
+      Sidekiq.redis {|c| c.flushdb }
+    end
+
+    def failed_job
+      msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'] })
+      begin
+        @processor.process(work(msg))
+      rescue TestProcessorException
       end
     end
 
+    def successful_job
+      msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
+      @mgr.expect(:processor_done, nil, [@processor])
+      @processor.process(work(msg))
+    end
+
+    it 'increments processed stat' do
+      Sidekiq::Processor::PROCESSED.reset
+      successful_job
+      assert_equal 1, Sidekiq::Processor::PROCESSED.reset
+    end
+  end
+
+  describe 'custom job logger class' do
     before do
       @mgr = Minitest::Mock.new
       @mgr.expect(:options, {:queues => ['default'], :job_logger => CustomJobLogger})
