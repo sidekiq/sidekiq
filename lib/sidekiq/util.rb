@@ -44,11 +44,11 @@ module Sidekiq
     end
 
     def process_nonce
-      @process_nonce ||= SecureRandom.hex(6)
+      @@process_nonce ||= SecureRandom.hex(6)
     end
 
     def identity
-      @identity ||= "#{hostname}:#{::Process.pid}:#{process_nonce}"
+      @@identity ||= "#{hostname}:#{::Process.pid}:#{process_nonce}"
     end
 
     def fire_event(event, options = {})
