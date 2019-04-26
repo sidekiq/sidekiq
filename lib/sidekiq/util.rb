@@ -48,7 +48,7 @@ module Sidekiq
     end
 
     def identity
-      @identity ||= "#{hostname}:#{$PID}:#{process_nonce}"
+      @identity ||= "#{hostname}:#{::Process.pid}:#{process_nonce}"
     end
 
     def fire_event(event, options = {})

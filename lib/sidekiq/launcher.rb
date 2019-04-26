@@ -148,7 +148,7 @@ module Sidekiq
 
         return unless msg
 
-        ::Process.kill(msg, $PID)
+        ::Process.kill(msg, ::Process.pid)
       rescue => e
         # ignore all redis/network issues
         logger.error("heartbeat: #{e.message}")
@@ -163,7 +163,7 @@ module Sidekiq
         {
           "hostname" => hostname,
           "started_at" => Time.now.to_f,
-          "pid" => $PID,
+          "pid" => ::Process.pid,
           "tag" => @options[:tag] || "",
           "concurrency" => @options[:concurrency],
           "queues" => @options[:queues].uniq,
