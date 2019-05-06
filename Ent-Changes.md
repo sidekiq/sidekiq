@@ -4,6 +4,12 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+-------------
+
+- Changes for forward-compatibility with Sidekiq 6.0.
+- Add death handler to remove any lingering unique locks [#4162]
+
 1.8.1
 -------------
 
