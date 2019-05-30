@@ -65,11 +65,11 @@ module Sidekiq
       end
 
       def enable(*opts)
-        opts.each {|key| set(key, true) }
+        opts.each { |key| set(key, true) }
       end
 
       def disable(*opts)
-        opts.each {|key| set(key, false) }
+        opts.each { |key| set(key, false) }
       end
 
       # Helper for the Sinatra syntax: Sidekiq::Web.set(:session_secret, Rails.application.secrets...)
@@ -114,11 +114,11 @@ module Sidekiq
     end
 
     def enable(*opts)
-      opts.each {|key| set(key, true) }
+      opts.each { |key| set(key, true) }
     end
 
     def disable(*opts)
-      opts.each {|key| set(key, false) }
+      opts.each { |key| set(key, false) }
     end
 
     def set(attribute, value)
@@ -187,7 +187,7 @@ module Sidekiq
           end
         end
 
-        middlewares.each {|middleware, block| use(*middleware, &block) }
+        middlewares.each { |middleware, block| use(*middleware, &block) }
 
         run WebApplication.new(klass)
       end

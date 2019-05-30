@@ -23,10 +23,10 @@ module Sidekiq
     end
 
     def params
-      indifferent_hash = Hash.new {|hash, key| hash[key.to_s] if Symbol === key }
+      indifferent_hash = Hash.new { |hash, key| hash[key.to_s] if Symbol === key }
 
       indifferent_hash.merge! request.params
-      route_params.each {|k, v| indifferent_hash[k.to_s] = v }
+      route_params.each { |k, v| indifferent_hash[k.to_s] = v }
 
       indifferent_hash
     end
@@ -81,7 +81,7 @@ module Sidekiq
     private
 
     def _erb(file, locals)
-      locals&.each {|k, v| define_singleton_method(k) { v } unless singleton_methods.include? k}
+      locals&.each { |k, v| define_singleton_method(k) { v } unless singleton_methods.include? k }
 
       if file.is_a?(String)
         ERB.new(file).result(binding)

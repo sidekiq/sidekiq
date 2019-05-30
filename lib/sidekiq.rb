@@ -154,7 +154,7 @@ module Sidekiq
 
   def self.default_worker_options=(hash)
     # stringify
-    @default_worker_options = default_worker_options.merge(Hash[hash.map {|k, v| [k.to_s, v]}])
+    @default_worker_options = default_worker_options.merge(Hash[hash.map { |k, v| [k.to_s, v] }])
   end
 
   def self.default_worker_options

@@ -342,7 +342,7 @@ module Sidekiq
 
     def self.run_hooks(hooks, app, action)
       hooks.select { |p, _| !p || p =~ action.env[WebRouter::PATH_INFO] }
-        .each {|_, b| action.instance_exec(action.env, app, &b) }
+        .each { |_, b| action.instance_exec(action.env, app, &b) }
     end
 
     def self.befores

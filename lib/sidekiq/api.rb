@@ -86,8 +86,8 @@ module Sidekiq
 
       pipe2_res = Sidekiq.redis { |conn|
         conn.pipelined do
-          processes.each {|key| conn.hget(key, "busy") }
-          queues.each {|queue| conn.llen("queue:#{queue}") }
+          processes.each { |key| conn.hget(key, "busy") }
+          queues.each { |queue| conn.llen("queue:#{queue}") }
         end
       }
 
@@ -790,7 +790,7 @@ module Sidekiq
     # or Sidekiq Pro.
     def leader
       @leader ||= begin
-        x = Sidekiq.redis {|c| c.get("dear-leader") }
+        x = Sidekiq.redis { |c| c.get("dear-leader") }
         # need a non-falsy value so we can memoize
         x ||= ""
         x

@@ -112,7 +112,7 @@ module Sidekiq
       end
 
       if cleanup.size > 0
-        jobs = cleanup.map {|p| p.job }.compact
+        jobs = cleanup.map { |p| p.job }.compact
 
         logger.warn { "Terminating #{cleanup.size} busy worker threads" }
         logger.warn { "Work still in progress #{jobs.inspect}" }

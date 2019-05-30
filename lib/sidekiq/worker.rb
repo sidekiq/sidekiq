@@ -24,7 +24,7 @@ module Sidekiq
     attr_accessor :jid
 
     def self.included(base)
-      raise ArgumentError, "You cannot include Sidekiq::Worker in an ActiveJob: #{base.name}" if base.ancestors.any? {|c| c.name == "ActiveJob::Base" }
+      raise ArgumentError, "You cannot include Sidekiq::Worker in an ActiveJob: #{base.name}" if base.ancestors.any? { |c| c.name == "ActiveJob::Base" }
 
       base.extend(ClassMethods)
       base.sidekiq_class_attribute :sidekiq_options_hash
@@ -124,7 +124,7 @@ module Sidekiq
       # options for a specific job.
       def sidekiq_options(opts = {})
         # stringify
-        self.sidekiq_options_hash = get_sidekiq_options.merge(Hash[opts.map {|k, v| [k.to_s, v]}])
+        self.sidekiq_options_hash = get_sidekiq_options.merge(Hash[opts.map { |k, v| [k.to_s, v] }])
       end
 
       def sidekiq_retry_in(&block)
