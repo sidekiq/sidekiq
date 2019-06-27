@@ -221,7 +221,7 @@ module Sidekiq
       # raise(ArgumentError, "Arguments must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices") unless JSON.load(JSON.dump(item['args'])) == item['args']
 
       normalized_hash(item["class"])
-        .each { |key, value| item[key] = value if item[key].nil? }
+        .each { |key, value| item[key] = value if !item.key?(key) && item[key].nil? }
 
       item["class"] = item["class"].to_s
       item["queue"] = item["queue"].to_s

@@ -89,6 +89,12 @@ describe Sidekiq::Client do
       assert_equal pre + 1, q.size
     end
 
+    it 'pushes nil keys if present' do
+      q = Sidekiq::Queue.new('default')
+      Sidekiq::Client.push('class' => 'MyWorker', 'args' => [1, 2], 'retry' => nil)
+      assert_nil q.first.item['retry']
+    end
+
     class MyWorker
       include Sidekiq::Worker
     end
