@@ -1,5 +1,6 @@
 # frozen_string_literal: true
-require 'sidekiq/testing'
+
+require "sidekiq/testing"
 
 ##
 # The Sidekiq inline infrastructure overrides perform_async so that it

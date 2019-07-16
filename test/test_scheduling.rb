@@ -3,9 +3,9 @@ require_relative 'helper'
 require 'sidekiq/scheduled'
 require 'active_support/core_ext/integer/time'
 
-class TestScheduling < Minitest::Test
+describe 'job scheduling' do
   describe 'middleware' do
-    class ScheduledWorker
+    class SomeScheduledWorker
       include Sidekiq::Worker
       sidekiq_options :queue => :custom_queue
       def perform(x)
@@ -23,25 +23,25 @@ class TestScheduling < Minitest::Test
 
       assert_equal 0, ss.size
 
-      assert ScheduledWorker.perform_in(600, 'mike')
+      assert SomeScheduledWorker.perform_in(600, 'mike')
       assert_equal 1, ss.size
 
-      assert ScheduledWorker.perform_in(1.month, 'mike')
+      assert SomeScheduledWorker.perform_in(1.month, 'mike')
       assert_equal 2, ss.size
 
-      assert ScheduledWorker.perform_in(5.days.from_now, 'mike')
+      assert SomeScheduledWorker.perform_in(5.days.from_now, 'mike')
       assert_equal 3, ss.size
 
       q = Sidekiq::Queue.new("custom_queue")
       qs = q.size
-      assert ScheduledWorker.perform_in(-300, 'mike')
+      assert SomeScheduledWorker.perform_in(-300, 'mike')
       assert_equal 3, ss.size
       assert_equal qs+1, q.size
 
-      assert Sidekiq::Client.push_bulk('class' => ScheduledWorker, 'args' => [['mike'], ['mike']], 'at' => 600)
+      assert Sidekiq::Client.push_bulk('class' => SomeScheduledWorker, 'args' => [['mike'], ['mike']], 'at' => 600)
       assert_equal 5, ss.size
 
-      assert ScheduledWorker.perform_in(TimeDuck.new, 'samwise')
+      assert SomeScheduledWorker.perform_in(TimeDuck.new, 'samwise')
       assert_equal 6, ss.size
     end
 
@@ -49,7 +49,7 @@ class TestScheduling < Minitest::Test
       ss = Sidekiq::ScheduledSet.new
       ss.clear
 
-      assert ScheduledWorker.perform_in(1.month, 'mike')
+      assert SomeScheduledWorker.perform_in(1.month, 'mike')
       job = ss.first
       assert job['created_at']
       refute job['enqueued_at']

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Sidekiq
-  VERSION = "5.2.5"
+  VERSION = "6.0.0.pre1"
 end

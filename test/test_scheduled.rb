@@ -2,7 +2,7 @@
 require_relative 'helper'
 require 'sidekiq/scheduled'
 
-class TestScheduled < Minitest::Test
+describe Sidekiq::Scheduled do
   class ScheduledWorker
     include Sidekiq::Worker
     def perform(x)
@@ -24,14 +24,14 @@ class TestScheduled < Minitest::Test
       @poller = Sidekiq::Scheduled::Poller.new
     end
 
-    class Stopper
+    class MyStopper
       def call(worker_class, job, queue, r)
         yield if job['args'].first.odd?
       end
     end
 
     it 'executes client middleware' do
-      Sidekiq.client_middleware.add Stopper
+      Sidekiq.client_middleware.add MyStopper
       begin
         @retry.schedule (Time.now - 60).to_f, @error_1
         @retry.schedule (Time.now - 60).to_f, @error_2
@@ -45,7 +45,7 @@ class TestScheduled < Minitest::Test
         assert_equal 0, Sidekiq::Queue.new("queue_5").size
         assert_equal 1, Sidekiq::Queue.new("queue_6").size
       ensure
-        Sidekiq.client_middleware.remove Stopper
+        Sidekiq.client_middleware.remove MyStopper
       end
     end
 

@@ -4,10 +4,16 @@ require_relative 'helper'
 require 'sidekiq/scheduled'
 require 'sidekiq/job_retry'
 
-class TestRetry < Minitest::Test
+describe Sidekiq::JobRetry do
   describe 'middleware' do
     class SomeWorker
       include Sidekiq::Worker
+    end
+
+    class BadErrorMessage < StandardError
+      def message
+        raise "Ahhh, this isn't supposed to happen"
+      end
     end
 
     before do
@@ -75,6 +81,19 @@ class TestRetry < Minitest::Test
       assert_equal "kerblammo! �", job["error_message"]
     end
 
+    # In the rare event that an error message raises an error itself,
+    # allow the job to retry. This will likely only happen for custom
+    # error classes that override #message
+    it 'handles error message that raises an error' do
+      assert_raises RuntimeError do
+        handler.local(worker, job, 'default') do
+          raise BadErrorMessage.new
+        end
+      end
+
+      assert_equal 1, Sidekiq::RetrySet.new.size
+      refute_nil job["error_message"]
+    end
 
     it 'allows a max_retries option in initializer' do
       max_retries = 7
@@ -235,7 +254,6 @@ class TestRetry < Minitest::Test
 
       after do
         Sidekiq.logger = @old_logger
-        Sidekiq.options.delete(:logfile)
         File.unlink @tmp_log_path if File.exist?(@tmp_log_path)
       end
 

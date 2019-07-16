@@ -1,20 +1,21 @@
 # frozen_string_literal: true
-require 'erb'
 
-require 'sidekiq'
-require 'sidekiq/api'
-require 'sidekiq/paginator'
-require 'sidekiq/web/helpers'
+require "erb"
 
-require 'sidekiq/web/router'
-require 'sidekiq/web/action'
-require 'sidekiq/web/application'
+require "sidekiq"
+require "sidekiq/api"
+require "sidekiq/paginator"
+require "sidekiq/web/helpers"
 
-require 'rack/protection'
+require "sidekiq/web/router"
+require "sidekiq/web/action"
+require "sidekiq/web/application"
 
-require 'rack/builder'
-require 'rack/file'
-require 'rack/session/cookie'
+require "rack/protection"
+
+require "rack/builder"
+require "rack/file"
+require "rack/session/cookie"
 
 module Sidekiq
   class Web
@@ -25,12 +26,12 @@ module Sidekiq
     ASSETS = "#{ROOT}/assets"
 
     DEFAULT_TABS = {
-      "Dashboard" => '',
-      "Busy"      => 'busy',
-      "Queues"    => 'queues',
-      "Retries"   => 'retries',
-      "Scheduled" => 'scheduled',
-      "Dead"      => 'morgue',
+      "Dashboard" => "",
+      "Busy" => "busy",
+      "Queues" => "queues",
+      "Retries" => "retries",
+      "Scheduled" => "scheduled",
+      "Dead" => "morgue",
     }
 
     class << self
@@ -64,11 +65,11 @@ module Sidekiq
       end
 
       def enable(*opts)
-        opts.each {|key| set(key, true) }
+        opts.each { |key| set(key, true) }
       end
 
       def disable(*opts)
-        opts.each {|key| set(key, false) }
+        opts.each { |key| set(key, false) }
       end
 
       # Helper for the Sinatra syntax: Sidekiq::Web.set(:session_secret, Rails.application.secrets...)
@@ -81,10 +82,10 @@ module Sidekiq
     end
 
     def self.inherited(child)
-      child.app_url = self.app_url
-      child.session_secret = self.session_secret
-      child.redis_pool = self.redis_pool
-      child.sessions = self.sessions
+      child.app_url = app_url
+      child.session_secret = session_secret
+      child.redis_pool = redis_pool
+      child.sessions = sessions
     end
 
     def settings
@@ -113,11 +114,11 @@ module Sidekiq
     end
 
     def enable(*opts)
-      opts.each {|key| set(key, true) }
+      opts.each { |key| set(key, true) }
     end
 
     def disable(*opts)
-      opts.each {|key| set(key, false) }
+      opts.each { |key| set(key, false) }
     end
 
     def set(attribute, value)
@@ -145,28 +146,28 @@ module Sidekiq
     private
 
     def using?(middleware)
-      middlewares.any? do |(m,_)|
-        m.kind_of?(Array) && (m[0] == middleware || m[0].kind_of?(middleware))
+      middlewares.any? do |(m, _)|
+        m.is_a?(Array) && (m[0] == middleware || m[0].is_a?(middleware))
       end
     end
 
     def build_sessions
       middlewares = self.middlewares
 
-      unless using?(::Rack::Protection) || ENV['RACK_ENV'] == 'test'
-        middlewares.unshift [[::Rack::Protection, { use: :authenticity_token }], nil]
+      unless using?(::Rack::Protection) || ENV["RACK_ENV"] == "test"
+        middlewares.unshift [[::Rack::Protection, {use: :authenticity_token}], nil]
       end
 
       s = sessions
       return unless s
 
       unless using? ::Rack::Session::Cookie
-        unless secret = Web.session_secret
-          require 'securerandom'
+        unless (secret = Web.session_secret)
+          require "securerandom"
           secret = SecureRandom.hex(64)
         end
 
-        options = { secret: secret }
+        options = {secret: secret}
         options = options.merge(s.to_hash) if s.respond_to? :to_hash
 
         middlewares.unshift [[::Rack::Session::Cookie, options], nil]
@@ -180,13 +181,13 @@ module Sidekiq
       klass = self.class
 
       ::Rack::Builder.new do
-        %w(stylesheets javascripts images).each do |asset_dir|
+        %w[stylesheets javascripts images].each do |asset_dir|
           map "/#{asset_dir}" do
-            run ::Rack::File.new("#{ASSETS}/#{asset_dir}", { 'Cache-Control' => 'public, max-age=86400' })
+            run ::Rack::File.new("#{ASSETS}/#{asset_dir}", {"Cache-Control" => "public, max-age=86400"})
           end
         end
 
-        middlewares.each {|middleware, block| use(*middleware, &block) }
+        middlewares.each { |middleware, block| use(*middleware, &block) }
 
         run WebApplication.new(klass)
       end
@@ -196,18 +197,9 @@ module Sidekiq
   Sidekiq::WebApplication.helpers WebHelpers
   Sidekiq::WebApplication.helpers Sidekiq::Paginator
 
-  Sidekiq::WebAction.class_eval "def _render\n#{ERB.new(File.read(Web::LAYOUT)).src}\nend"
-end
-
-if defined?(::ActionDispatch::Request::Session) &&
-    !::ActionDispatch::Request::Session.method_defined?(:each)
-  # mperham/sidekiq#2460
-  # Rack apps can't reuse the Rails session store without
-  # this monkeypatch, fixed in Rails 5.
-  class ActionDispatch::Request::Session
-    def each(&block)
-      hash = self.to_hash
-      hash.each(&block)
+  Sidekiq::WebAction.class_eval <<-RUBY, __FILE__, __LINE__ + 1
+    def _render
+      #{ERB.new(File.read(Web::LAYOUT)).src}
     end
-  end
+  RUBY
 end

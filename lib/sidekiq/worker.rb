@@ -1,8 +1,8 @@
 # frozen_string_literal: true
-require 'sidekiq/client'
+
+require "sidekiq/client"
 
 module Sidekiq
-
   ##
   # Include this module in your worker class and you can easily create
   # asynchronous jobs:
@@ -24,7 +24,7 @@ module Sidekiq
     attr_accessor :jid
 
     def self.included(base)
-      raise ArgumentError, "You cannot include Sidekiq::Worker in an ActiveJob: #{base.name}" if base.ancestors.any? {|c| c.name == 'ActiveJob::Base' }
+      raise ArgumentError, "You cannot include Sidekiq::Worker in an ActiveJob: #{base.name}" if base.ancestors.any? { |c| c.name == "ActiveJob::Base" }
 
       base.extend(ClassMethods)
       base.sidekiq_class_attribute :sidekiq_options_hash
@@ -46,8 +46,13 @@ module Sidekiq
         @opts = opts
       end
 
+      def set(options)
+        @opts.merge!(options)
+        self
+      end
+
       def perform_async(*args)
-        @klass.client_push(@opts.merge('args' => args, 'class' => @klass))
+        @klass.client_push(@opts.merge("args" => args, "class" => @klass))
       end
 
       # +interval+ must be a timestamp, numeric or something that acts
@@ -57,9 +62,9 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        payload = @opts.merge('class' => @klass, 'args' => args, 'at' => ts)
+        payload = @opts.merge("class" => @klass, "args" => args, "at" => ts)
         # Optimization to enqueue something now that is scheduled to go out now or in the past
-        payload.delete('at') if ts <= now
+        payload.delete("at") if ts <= now
         @klass.client_push(payload)
       end
       alias_method :perform_at, :perform_in
@@ -85,7 +90,7 @@ module Sidekiq
       end
 
       def perform_async(*args)
-        client_push('class' => self, 'args' => args)
+        client_push("class" => self, "args" => args)
       end
 
       # +interval+ must be a timestamp, numeric or something that acts
@@ -95,10 +100,10 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        item = { 'class' => self, 'args' => args, 'at' => ts }
+        item = {"class" => self, "args" => args, "at" => ts}
 
         # Optimization to enqueue something now that is scheduled to go out now or in the past
-        item.delete('at') if ts <= now
+        item.delete("at") if ts <= now
 
         client_push(item)
       end
@@ -117,9 +122,9 @@ module Sidekiq
       #
       # In practice, any option is allowed.  This is the main mechanism to configure the
       # options for a specific job.
-      def sidekiq_options(opts={})
+      def sidekiq_options(opts = {})
         # stringify
-        self.sidekiq_options_hash = get_sidekiq_options.merge(Hash[opts.map{|k, v| [k.to_s, v]}])
+        self.sidekiq_options_hash = get_sidekiq_options.merge(Hash[opts.map { |k, v| [k.to_s, v] }])
       end
 
       def sidekiq_retry_in(&block)
@@ -135,7 +140,7 @@ module Sidekiq
       end
 
       def client_push(item) # :nodoc:
-        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options['pool'] || Sidekiq.redis_pool
+        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options["pool"] || Sidekiq.redis_pool
         # stringify
         item.keys.each do |key|
           item[key.to_s] = item.delete(key)
@@ -209,7 +214,6 @@ module Sidekiq
           end
         end
       end
-
     end
   end
 end

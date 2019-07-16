@@ -1,12 +1,11 @@
 # frozen_string_literal: true
-require 'sidekiq/util'
-require 'sidekiq/processor'
-require 'sidekiq/fetch'
-require 'thread'
-require 'set'
+
+require "sidekiq/util"
+require "sidekiq/processor"
+require "sidekiq/fetch"
+require "set"
 
 module Sidekiq
-
   ##
   # The Manager is the central coordination point in Sidekiq, controlling
   # the lifecycle of the Processors.
@@ -27,7 +26,7 @@ module Sidekiq
     attr_reader :workers
     attr_reader :options
 
-    def initialize(options={})
+    def initialize(options = {})
       logger.debug { options.inspect }
       @options = options
       @count = options[:concurrency] || 10
@@ -113,7 +112,7 @@ module Sidekiq
       end
 
       if cleanup.size > 0
-        jobs = cleanup.map {|p| p.job }.compact
+        jobs = cleanup.map { |p| p.job }.compact
 
         logger.warn { "Terminating #{cleanup.size} busy worker threads" }
         logger.warn { "Work still in progress #{jobs.inspect}" }
@@ -132,6 +131,5 @@ module Sidekiq
         processor.kill
       end
     end
-
   end
 end

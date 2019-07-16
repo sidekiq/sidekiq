@@ -1,29 +1,24 @@
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
 gemspec
 
-gem 'rake'
-gem 'redis-namespace'
-gem 'rails', '~> 5.2'
-gem 'sqlite3', platforms: :ruby
-gem 'activerecord-jdbcsqlite3-adapter', platforms: :jruby
-
-group :development do
-  gem 'appraisal'
-end
+gem "rake"
+gem "redis-namespace"
+gem "rails"
+gem "sqlite3", platforms: :ruby
+gem "activerecord-jdbcsqlite3-adapter", platforms: :jruby
 
 group :test do
-  gem 'minitest'
-  gem 'minitest-focus'
-  gem 'minitest-reporters'
-  gem 'simplecov'
+  gem "minitest"
+  gem "simplecov"
 end
 
 group :development, :test do
-  gem 'pry-byebug', platforms: :mri
+  gem "pry-byebug", platforms: :mri
+  gem "standard"
 end
 
 group :load_test do
-  gem 'hiredis'
-  gem 'toxiproxy'
+  gem "hiredis"
+  gem "toxiproxy"
 end

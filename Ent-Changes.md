@@ -7,6 +7,19 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 HEAD
 -------------
 
+- Call `GC.compact` if possible in sidekiqswarm before forking [#4181]
+- Changes for forward-compatibility with Sidekiq 6.0.
+- Add death handler to remove any lingering unique locks [#4162]
+
+1.8.1
+-------------
+
+- Fix excessive lock reclaims with concurrent limiter [#4105]
+- Add ES translations, see issues [#3949](https://github.com/mperham/sidekiq/issues/3949) and [#3951](https://github.com/mperham/sidekiq/issues/3951) to add your own language.
+
+1.8.0
+-------------
+
 - Require Sidekiq Pro 4.0 and Sidekiq 5.2.
 - Refactor historical metrics API to use revamped Statsd support in Sidekiq Pro
 - Add a gauge to historical metrics for `default` queue latency [#4079]
@@ -14,7 +27,7 @@ HEAD
 1.7.2
 -------------
 
-- Add PT and JA translations, see issues [#3949](https://github.com/mperham/sidekiq/issues/3949) and [#3951](https://github.com/mperham/sidekiq/issues/3951) to add your own language.
+- Add PT and JA translations
 - Fix elapsed time calculations to use monotonic clock [#4000, sj26]
 - Fix edge case where flapping leadership would cause old periodic
   jobs to be fired once [#3974]

@@ -33,11 +33,13 @@ ja:
   NextRetry: 再試行
   RetryCount: 再試行
   RetryNow: 今すぐ再試行
+  Kill: 強制終了
   LastRetry: 再試行履歴
   OriginallyFailed: 失敗
   AreYouSure: よろしいですか？
   DeleteAll: 全て削除
   RetryAll: 全て再試行
+  KillAll: 全て強制終了
   NoRetriesFound: 再試行するジョブはありません
   Error: エラー
   ErrorClass: エラークラス
@@ -58,7 +60,6 @@ ja:
   OneMonth: 1 ヶ月
   ThreeMonths: 3 ヶ月
   SixMonths: 6 ヶ月
-  Batches: バッチ
   Failures: 失敗
   DeadJobs: デッドジョブ
   NoDeadJobsFound: デッドジョブはありません
