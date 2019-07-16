@@ -153,21 +153,22 @@ module Sidekiq
         return work.acknowledge
       end
 
-      ack = true
+      ack = false
       begin
         dispatch(job_hash, queue) do |worker|
           Sidekiq.server_middleware.invoke(worker, job_hash, queue) do
             execute_job(worker, cloned(job_hash["args"]))
           end
         end
+        ack = true
       rescue Sidekiq::Shutdown
         # Had to force kill this job because it didn't finish
         # within the timeout.  Don't acknowledge the work since
         # we didn't properly finish it.
-        ack = false
       rescue Sidekiq::JobRetry::Handled => h
         # this is the common case: job raised error and Sidekiq::JobRetry::Handled
         # signals that we created a retry successfully.  We can acknowlege the job.
+        ack = true
         e = h.cause || h
         handle_exception(e, {context: "Job raised exception", job: job_hash, jobstr: jobstr})
         raise e
@@ -175,7 +176,6 @@ module Sidekiq
         # Unexpected error!  This is very bad and indicates an exception that got past
         # the retry subsystem (e.g. network partition).  We won't acknowledge the job
         # so it can be rescued when using Sidekiq Pro.
-        ack = false
         handle_exception(ex, {context: "Internal exception!", job: job_hash, jobstr: jobstr})
         raise e
       ensure
