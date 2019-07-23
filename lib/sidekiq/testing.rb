@@ -257,7 +257,7 @@ module Sidekiq
     module ClassMethods
       # Queue for this worker
       def queue
-        sidekiq_options["queue"]
+        get_sidekiq_options["queue"]
       end
 
       # Jobs queued for this worker
