@@ -8,7 +8,7 @@
 This release has major breaking changes.  Read and test carefully in production.
 
 - ActiveJobs can now use `sidekiq_options` directly to configure Sidekiq
-  features/internals like the retry subsystem.
+  features/internals like the retry subsystem. [#4213, pirj]
 ```ruby
 class MyJob < ActiveJob::Base
   queue_as :myqueue
