@@ -7,6 +7,16 @@
 
 This release has major breaking changes.  Read and test carefully in production.
 
+- ActiveJobs can now use `sidekiq_options` directly to configure Sidekiq
+  features/internals like the retry subsystem.
+```ruby
+class MyJob < ActiveJob::Base
+  queue_as :myqueue
+  sidekiq_options retry: 10, backtrace: 20
+  def perform(...)
+  end
+end
+```
 - **BREAKING CHANGE** Validate proper usage of the `REDIS_PROVIDER`
   variable.  This variable is meant to hold the name of the environment
   variable which contains your Redis URL, so that you can switch Redis
