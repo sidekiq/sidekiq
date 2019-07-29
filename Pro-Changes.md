@@ -7,6 +7,10 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 HEAD
 ---------
 
+- Fix lingering "b-XXX-died" elements in Redis which could cause
+  excessive memory usage. [#4217]
+- **BREAKING CHANGE** Remove the `Sidekiq::Batch::Status#dead_jobs` API in favor of
+  `Sidekiq::Batch::Status#dead_jids`. [#4217]
 - Add ES translations, see issues [#3949](https://github.com/mperham/sidekiq/issues/3949) and [#3951](https://github.com/mperham/sidekiq/issues/3951) to add your own language.
 
 4.0.5
