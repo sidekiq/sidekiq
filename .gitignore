@@ -1,7 +1,6 @@
 .rvmrc
 .ruby-version
 tags
-Gemfile.lock
 gemfiles/*.lock
 *.swp
 dump.rdb
