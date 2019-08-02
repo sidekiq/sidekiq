@@ -335,21 +335,19 @@ describe Sidekiq::CLI do
         end
       end
 
-      %w(TSTP USR1).each do |sig|
-        describe sig do
-          it 'quiets with a corresponding event' do
-            quiet = false
+      describe "TSTP" do
+        it 'quiets with a corresponding event' do
+          quiet = false
 
-            Sidekiq.on(:quiet) do
-              quiet = true
-            end
-
-            subject.launcher = Sidekiq::Launcher.new(Sidekiq.options)
-            subject.handle_signal(sig)
-
-            assert_match(/Got #{sig} signal/, logdev.string)
-            assert_equal true, quiet
+          Sidekiq.on(:quiet) do
+            quiet = true
           end
+
+          subject.launcher = Sidekiq::Launcher.new(Sidekiq.options)
+          subject.handle_signal("TSTP")
+
+          assert_match(/Got TSTP signal/, logdev.string)
+          assert_equal true, quiet
         end
       end
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 require_relative 'helper'
-require 'sidekiq/ctl'
+require 'sidekiq/monitor'
 
 def capture_stdout
   $stdout = StringIO.new
@@ -12,11 +12,11 @@ end
 
 def output(section = 'all')
   capture_stdout do
-    Sidekiq::Ctl::Status.new.display(section)
+    Sidekiq::Monitor::Status.new.display(section)
   end
 end
 
-describe Sidekiq::Ctl do
+describe Sidekiq::Monitor do
   before do
     Sidekiq.redis {|c| c.flushdb}
   end
