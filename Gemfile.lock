@@ -3,9 +3,9 @@ PATH
   specs:
     sidekiq (6.0.0.pre2)
       connection_pool (>= 2.2.2)
-      rack (>= 1.5.0)
-      rack-protection (>= 1.5.0)
-      redis (>= 4.0.2)
+      rack (>= 2.0.0)
+      rack-protection (>= 2.0.0)
+      redis (>= 4.1.0)
 
 GEM
   remote: https://rubygems.org/
