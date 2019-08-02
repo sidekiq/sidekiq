@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+require 'sidekiq/monitor'
+
+if ARGV[0] == 'status'
+  Sidekiq::Monitor::Status.new.display(ARGV[1])
+else
+  Sidekiq::Monitor.print_usage
+end

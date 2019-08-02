@@ -3,19 +3,20 @@
 require "fileutils"
 require "sidekiq/api"
 
-class Sidekiq::Ctl
+class Sidekiq::Monitor
   CMD = File.basename($PROGRAM_NAME)
 
   attr_reader :stage
 
   def self.print_usage
-    puts "#{CMD} - control Sidekiq from the command line."
+    puts "#{CMD} - monitor Sidekiq from the command line."
     puts
     puts "Usage: #{CMD} status <section>"
     puts
     puts "       <section> (optional) view a specific section of the status output"
-    puts "       Valid sections are: #{Sidekiq::Ctl::Status::VALID_SECTIONS.join(", ")}"
+    puts "       Valid sections are: #{Sidekiq::Monitor::Status::VALID_SECTIONS.join(", ")}"
     puts
+    puts "Set REDIS_URL to the location of your Redis server if not monitoring localhost."
   end
 
   class Status
