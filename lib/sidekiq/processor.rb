@@ -4,6 +4,7 @@ require "sidekiq/util"
 require "sidekiq/fetch"
 require "sidekiq/job_logger"
 require "sidekiq/job_retry"
+
 module Sidekiq
   ##
   # The Processor is a standalone thread which:
