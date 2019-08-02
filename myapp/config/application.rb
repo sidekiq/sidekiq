@@ -8,8 +8,9 @@ Bundler.require(*Rails.groups)
 
 module Myapp
   class Application < Rails::Application
-    # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 5.2
+    # Load the defaults for whichever Rails version we are using, we need to
+    # ensure we work with all defaults.
+    config.load_defaults "#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}"
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration can go into files in config/initializers
