@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.homepage      = "http://sidekiq.org"
   gem.license       = "LGPL-3.0"
 
-  gem.executables   = ["sidekiq", "sidekiqctl"]
+  gem.executables   = ["sidekiq"]
   gem.files         = `git ls-files | grep -Ev '^(test|myapp|examples)'`.split("\n")
   gem.name          = "sidekiq"
   gem.version       = Sidekiq::VERSION
