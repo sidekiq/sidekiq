@@ -1,0 +1,84 @@
+@media (prefers-color-scheme: dark) {
+
+  body {
+    background-color: #111;
+    color: #fff;
+  }
+
+  a,
+  .title,
+  .summary_bar ul .count,
+  .navbar .navbar-brand {
+    color: #af0014;
+  }
+
+  table.table-white {
+    background-color: hsl(0, 0%, 21%);
+  }
+
+  .table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: hsl(0, 0%, 13%);
+  }
+
+  .table-bordered,
+  .table-bordered > tbody > tr > td,
+  .table-bordered > tbody > tr > th,
+  .table-bordered > tfoot > tr > td,
+  .table-bordered > tfoot > tr > th,
+  .table-bordered > thead > tr > td,
+  .table-bordered > thead > tr > th {
+    border: 1px solid hsl(0, 0%, 24%);
+  }
+
+  .table-hover > tbody > tr:hover {
+    background-color: hsl(217, 15%, 34%);
+  }
+
+  .alert-success {
+    background-color: black;
+  }
+
+  a:link,
+  a:active,
+  a:hover,
+  a:visited {
+    color: hsl(208, 29%, 55%);
+  }
+
+  .summary_bar .summary {
+    background-color: hsl(0, 0%, 16%);
+  }
+
+  .navbar-default {
+    background-color: hsl(0, 0%, 13%);
+    border-color: hsl(0, 0%, 24%);
+  }
+
+  .navbar-default .navbar-nav > .active > a,
+  .navbar-default .navbar-nav > .active > a:focus,
+  .navbar-default .navbar-nav > .active > a:hover {
+    color: hsl(0, 0%, 100%);
+    background-color: hsl(0, 0%, 16%);
+  }
+
+  .pagination > li > a,
+  .pagination > li > span {
+    color: hsl(0, 0%, 100%);
+    background-color: hsl(0, 0%, 16%);
+    border-color: hsl(0, 0%, 21%);
+  }
+  .pagination > .disabled > a,
+  .pagination > .disabled > a:focus,
+  .pagination > .disabled > a:hover,
+  .pagination > .disabled > span,
+  .pagination > .disabled > span:focus,
+  .pagination > .disabled > span:hover {
+    color: hsl(0, 0%, 65%);
+    background-color: hsl(0, 0%, 16%);
+    border-color: hsl(0, 0%, 21%);
+  }
+
+  .stat {
+    border: 1px solid hsla(0, 0%, 100%, 0.1);
+  }
+}
