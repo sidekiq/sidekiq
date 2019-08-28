@@ -28,7 +28,8 @@ class LoadWorker
     1
   end
 
-  def perform(idx)
+  def perform(idx, ts=nil)
+    puts(Time.now.to_f - ts) if ts != nil
     #raise idx.to_s if idx % 100 == 1
   end
 end
@@ -111,7 +112,13 @@ Monitoring = Thread.new do
       total = qsize
       Sidekiq.logger.error("RSS: #{Process.rss} Pending: #{total}")
       if total == 0
-        Sidekiq.logger.error("Done")
+        Sidekiq.logger.error("Done, now here's the latency for three jobs")
+
+        LoadWorker.perform_async(1, Time.now.to_f)
+        LoadWorker.perform_async(2, Time.now.to_f)
+        LoadWorker.perform_async(3, Time.now.to_f)
+
+        sleep 0.2
         exit(0)
       end
     end

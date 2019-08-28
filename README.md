@@ -16,14 +16,17 @@ Rails to make background processing dead simple.
 Performance
 ---------------
 
-Version |	Latency | Garbage created for 10,000 jobs	| Time to process 100,000 jobs |	Throughput
+Version |	Latency | Garbage created for 10,000 jobs	| Time to process 100,000 jobs |	Throughput | Ruby
 -----------------|------|---------|---------|------------------------
-Sidekiq 4.0.0    | 10ms	| 151 MB  | 22 sec  | **4500 jobs/sec**
-Sidekiq 3.5.1    | 22ms	| 1257 MB | 125 sec | 800 jobs/sec
-Resque 1.25.2    |  -	  | -       | 420 sec | 240 jobs/sec
-DelayedJob 4.1.1 |  -   | -       | 465 sec | 215 jobs/sec
+Sidekiq 6.0.0    | 3 ms	| 156 MB  | 19 sec  | **5200 jobs/sec** | MRI 2.6.3
+Sidekiq 4.0.0    | 10 ms	| 151 MB  | 22 sec  | **4500 jobs/sec** |
+Sidekiq 3.5.1    | 22 ms	| 1257 MB | 125 sec | 800 jobs/sec |
+Resque 1.25.2    |  -	  | -       | 420 sec | 240 jobs/sec |
+DelayedJob 4.1.1 |  -   | -       | 465 sec | 215 jobs/sec |
 
 <small>This benchmark can be found in `bin/sidekiqload`.</small>
+
+Benchmarks assume a Redis network latency of 1ms.
 
 Requirements
 -----------------
