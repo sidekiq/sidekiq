@@ -140,7 +140,7 @@ module Sidekiq
 
       def initialize(klass, *args)
         @klass = klass
-        @args  = args
+        @args = args
       end
 
       def make_new

@@ -257,7 +257,7 @@ module Sidekiq
 
     get "/stats" do
       sidekiq_stats = Sidekiq::Stats.new
-      redis_stats   = redis_info.select { |k, v| REDIS_KEYS.include? k }
+      redis_stats = redis_info.select { |k, v| REDIS_KEYS.include? k }
       json(
         sidekiq: {
           processed: sidekiq_stats.processed,

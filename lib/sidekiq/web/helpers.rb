@@ -84,7 +84,7 @@ module Sidekiq
       languages = env["HTTP_ACCEPT_LANGUAGE"]
       languages.to_s.downcase.gsub(/\s+/, "").split(",").map { |language|
         locale, quality = language.split(";q=", 2)
-        locale  = nil if locale == "*" # Ignore wildcards
+        locale = nil if locale == "*" # Ignore wildcards
         quality = quality ? quality.to_f : 1.0
         [locale, quality]
       }.sort { |(_, left), (_, right)|

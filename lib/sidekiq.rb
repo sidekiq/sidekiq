@@ -119,7 +119,7 @@ module Sidekiq
       end
     rescue Redis::CommandError => ex
       # 2850 return fake version when INFO command has (probably) been renamed
-      raise unless ex.message =~ /unknown command/
+      raise unless /unknown command/.match?(ex.message)
       FAKE_INFO
     end
   end

@@ -93,7 +93,7 @@ module Sidekiq
 
       s = processes.size
       workers_size = pipe2_res[0...s].map(&:to_i).inject(0, &:+)
-      enqueued     = pipe2_res[s..-1].map(&:to_i).inject(0, &:+)
+      enqueued = pipe2_res[s..-1].map(&:to_i).inject(0, &:+)
 
       default_queue_latency = if (entry = pipe1_res[6].first)
         job = begin
@@ -122,7 +122,7 @@ module Sidekiq
     end
 
     def reset(*stats)
-      all   = %w[failed processed]
+      all = %w[failed processed]
       stats = stats.empty? ? all : all & stats.flatten.compact.map(&:to_s)
 
       mset_args = []
@@ -274,7 +274,7 @@ module Sidekiq
 
       loop do
         range_start = page * page_size - deleted_size
-        range_end   = range_start + page_size - 1
+        range_end = range_start + page_size - 1
         entries = Sidekiq.redis { |conn|
           conn.lrange @rname, range_start, range_end
         }
@@ -563,7 +563,7 @@ module Sidekiq
 
       loop do
         range_start = page * page_size + offset_size
-        range_end   = range_start + page_size - 1
+        range_end = range_start + page_size - 1
         elements = Sidekiq.redis { |conn|
           conn.zrange name, range_start, range_end, with_scores: true
         }
