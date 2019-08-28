@@ -5,10 +5,7 @@ require "sidekiq/fetch"
 require "sidekiq/scheduled"
 
 module Sidekiq
-  # The Launcher is a very simple Actor whose job is to
-  # start, monitor and stop the core Actors in Sidekiq.
-  # If any of these actors die, the Sidekiq process exits
-  # immediately.
+  # The Launcher starts the Manager and Poller threads and provides the process heartbeat.
   class Launcher
     include Util
 

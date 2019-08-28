@@ -39,8 +39,9 @@ module Sidekiq
         # Allows customization for this type of Worker.
         # Legal options:
         #
-        #   retry - enable the RetryJobs middleware for this Worker, *true* to use the default
-        #      or *Integer* count
+        #   queue - name of queue to use for this job type, default *default*
+        #   retry - enable retries for this Worker in case of error during execution,
+        #      *true* to use the default or *Integer* count
         #   backtrace - whether to save any error backtrace in the retry payload to display in web UI,
         #      can be true, false or an integer number of lines to save, default *false*
         #

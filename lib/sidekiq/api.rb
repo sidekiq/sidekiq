@@ -713,7 +713,7 @@ module Sidekiq
 
   ##
   # Enumerates the set of Sidekiq processes which are actively working
-  # right now.  Each process send a heartbeat to Redis every 5 seconds
+  # right now.  Each process sends a heartbeat to Redis every 5 seconds
   # so this set should be relatively accurate, barring network partitions.
   #
   # Yields a Sidekiq::Process.
