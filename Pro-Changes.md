@@ -4,13 +4,18 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+5.0.0
 ---------
 
-- Fix lingering "b-XXX-died" elements in Redis which could cause
-  excessive memory usage. [#4217]
+- There is no significant migration from Sidekiq Pro 4.0 to 5.0
+  but make sure you read the [update notes for Sidekiq
+6.0](/mperham/sidekiq/blob/master/6.0-Upgrade.md).
+- Removed various deprecated APIs and associated warnings.
 - **BREAKING CHANGE** Remove the `Sidekiq::Batch::Status#dead_jobs` API in favor of
   `Sidekiq::Batch::Status#dead_jids`. [#4217]
+- Update Sidekiq Pro codebase to use StandardRB formatting
+- Fix lingering "b-XXX-died" elements in Redis which could cause
+  excessive memory usage. [#4217]
 - Add ES translations, see issues [#3949](https://github.com/mperham/sidekiq/issues/3949) and [#3951](https://github.com/mperham/sidekiq/issues/3951) to add your own language.
 
 4.0.5

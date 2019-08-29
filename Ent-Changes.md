@@ -4,13 +4,17 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+2.0.0
 -------------
 
+- Except for the [newly required credentials](/mperham/sidekiq/issue/4232), Sidekiq Enterprise 2.0 does
+  not have any significant migration steps.
+- Sidekiq Enterprise must now be started with valid license credentials. [#4232]
 - Call `GC.compact` if possible in sidekiqswarm before forking [#4181]
 - Changes for forward-compatibility with Sidekiq 6.0.
 - Add death handler to remove any lingering unique locks [#4162]
 - Backoff can now be customized per rate limiter [#4219]
+- Code formatting changes for StandardRB
 
 1.8.1
 -------------
