@@ -17,6 +17,13 @@ class MyJob < ActiveJob::Base
   end
 end
 ```
+- Logging has been redesigned to allow for pluggable log formatters:
+```ruby
+Sidekiq.configure_server do |config|
+  config.log_formatter = Sidekiq::Logger::Formatters::JSON.new
+end
+```
+See the [Logging wiki page](https://github.com/mperham/sidekiq/wiki/Logging) for more details.
 - **BREAKING CHANGE** Validate proper usage of the `REDIS_PROVIDER`
   variable.  This variable is meant to hold the name of the environment
   variable which contains your Redis URL, so that you can switch Redis
