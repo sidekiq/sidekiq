@@ -19,13 +19,14 @@ end
 
 ENV['REDIS_URL'] ||= 'redis://localhost/15'
 
+Sidekiq.logger = ::Logger.new(STDOUT)
 Sidekiq.logger.level = Logger::ERROR
 
 def capture_logging(lvl=Logger::INFO)
   old = Sidekiq.logger
   begin
     out = StringIO.new
-    logger = Logger.new(out)
+    logger = ::Logger.new(out)
     logger.level = lvl
     Sidekiq.logger = logger
     yield

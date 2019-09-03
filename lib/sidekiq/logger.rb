@@ -4,13 +4,7 @@ require "logger"
 require "time"
 
 module Sidekiq
-  class Logger < ::Logger
-    def initialize(*args)
-      super
-
-      self.formatter = Sidekiq.log_formatter
-    end
-
+  module LogContext
     def with_context(hash)
       ctx.merge!(hash)
       yield
@@ -20,6 +14,15 @@ module Sidekiq
 
     def ctx
       Thread.current[:sidekiq_context] ||= {}
+    end
+  end
+
+  class Logger < ::Logger
+    include LogContext
+
+    def initialize(*args)
+      super
+      self.formatter = Sidekiq.log_formatter
     end
 
     module Formatters

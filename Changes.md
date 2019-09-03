@@ -6,6 +6,7 @@ HEAD
 ---------
 
 - Gracefully handle `Sidekiq.logger = nil` [#4240]
+- Inject Sidekiq::LogContext module if user-supplied logger does not include it [#4239]
 
 6.0
 ---------

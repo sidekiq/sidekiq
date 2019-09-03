@@ -203,6 +203,11 @@ module Sidekiq
       self.logger.level = Logger::FATAL
       return self.logger
     end
+
+    unless logger.is_a?(Sidekiq::LogContext)
+      logger.class.send(:include, Sidekiq::LogContext)
+    end
+
     @logger = logger
   end
 
