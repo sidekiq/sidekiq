@@ -5,6 +5,10 @@
 HEAD
 ---------
 
+- Support `Client.push_bulk` with different delays [#4243]
+```ruby
+Sidekiq::Client.push_bulk("class" => FooJob, "args" => [[1], [2]], "at" => [1.minute.from_now.to_f, 5.minutes.from_now.to_f])
+```
 - Add `sidekiqmon` to gemspec executables [#4242]
 - Gracefully handle `Sidekiq.logger = nil` [#4240]
 - Inject Sidekiq::LogContext module if user-supplied logger does not include it [#4239]
