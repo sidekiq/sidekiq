@@ -5,6 +5,7 @@
 HEAD
 ---------
 
+- Add `sidekiqmon` to gemspec executables [#4242]
 - Gracefully handle `Sidekiq.logger = nil` [#4240]
 - Inject Sidekiq::LogContext module if user-supplied logger does not include it [#4239]
 
