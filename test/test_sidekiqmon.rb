@@ -29,7 +29,7 @@ describe Sidekiq::Monitor do
 
       it 'displays the current time' do
         Time.stub(:now, Time.at(0)) do
-          assert_includes output, Time.at(0).to_s
+          assert_includes output, Time.at(0).utc.to_s
         end
       end
     end
