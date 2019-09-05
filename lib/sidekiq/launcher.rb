@@ -69,7 +69,7 @@ module Sidekiq
     private unless $TESTING
 
     def start_heartbeat
-      loop do
+      until @done
         heartbeat
         sleep 5
       end
