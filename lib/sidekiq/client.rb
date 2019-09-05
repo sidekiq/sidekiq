@@ -94,9 +94,14 @@ module Sidekiq
       return [] unless arg # no jobs to push
       raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" unless arg.is_a?(Array)
 
+      at = items.delete("at")
+      raise ArgumentError, "Job 'at' must be a Numeric or an Array of Numeric timestamps" if at && (Array(at).empty? || !Array(at).all?(Numeric))
+
       normed = normalize_item(items)
-      payloads = items["args"].map { |args|
-        copy = normed.merge("args" => args, "jid" => SecureRandom.hex(12), "enqueued_at" => Time.now.to_f)
+      payloads = items["args"].map.with_index { |args, index|
+        single_at = at.is_a?(Array) ? at[index] : at
+        copy = normed.merge("args" => args, "jid" => SecureRandom.hex(12), "at" => single_at, "enqueued_at" => Time.now.to_f)
+
         result = process_single(items["class"], copy)
         result || nil
       }.compact
