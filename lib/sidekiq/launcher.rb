@@ -129,15 +129,13 @@ module Sidekiq
         fails = procd = 0
 
         _, exists, _, _, msg = Sidekiq.redis { |conn|
-          res = conn.multi {
+          conn.multi {
             conn.sadd("processes", key)
             conn.exists(key)
             conn.hmset(key, "info", to_json, "busy", curstate.size, "beat", Time.now.to_f, "quiet", @done)
             conn.expire(key, 60)
             conn.rpop("#{key}-signals")
           }
-
-          res
         }
 
         # first heartbeat or recovering from an outage and need to reestablish our heartbeat

@@ -171,9 +171,9 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        payload = @opts.merge("class" => @klass, "args" => args, "at" => ts)
+        payload = @opts.merge("class" => @klass, "args" => args)
         # Optimization to enqueue something now that is scheduled to go out now or in the past
-        payload.delete("at") if ts <= now
+        payload["at"] = ts if ts > now
         @klass.client_push(payload)
       end
       alias_method :perform_at, :perform_in
@@ -207,10 +207,10 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        item = {"class" => self, "args" => args, "at" => ts}
+        item = {"class" => self, "args" => args}
 
         # Optimization to enqueue something now that is scheduled to go out now or in the past
-        item.delete("at") if ts <= now
+        item["at"] = ts if ts > now
 
         client_push(item)
       end
