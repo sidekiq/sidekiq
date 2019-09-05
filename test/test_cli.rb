@@ -366,7 +366,7 @@ describe Sidekiq::CLI do
           subject.handle_signal('UNKNOWN')
 
           assert_match(/Got UNKNOWN signal/, logdev.string)
-          assert_match(/No signal handler for UNKNOWN/, logdev.string)
+          assert_match(/No signal handler registered/, logdev.string)
         end
       end
     end

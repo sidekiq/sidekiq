@@ -43,7 +43,7 @@ module Sidekiq
       sigs = %w[INT TERM TTIN TSTP]
       sigs.each do |sig|
         trap sig do
-          self_write.write("#{sig}\n")
+          self_write.puts(sig)
         end
       rescue ArgumentError
         puts "Signal #{sig} not supported"
@@ -162,15 +162,12 @@ module Sidekiq
         end
       },
     }
+    UNHANDLED_SIGNAL_HANDLER = ->(cli) { Sidekiq.logger.info "No signal handler registered, ignoring" }
+    SIGNAL_HANDLERS.default = UNHANDLED_SIGNAL_HANDLER
 
     def handle_signal(sig)
       Sidekiq.logger.debug "Got #{sig} signal"
-      handy = SIGNAL_HANDLERS[sig]
-      if handy
-        handy.call(self)
-      else
-        Sidekiq.logger.info { "No signal handler for #{sig}" }
-      end
+      SIGNAL_HANDLERS[sig].call(self)
     end
 
     private
@@ -204,7 +201,7 @@ module Sidekiq
 
       # check config file presence
       if opts[:config_file]
-        if opts[:config_file] && !File.exist?(opts[:config_file])
+        unless File.exist?(opts[:config_file])
           raise ArgumentError, "No such file #{opts[:config_file]}"
         end
       else
@@ -224,7 +221,7 @@ module Sidekiq
       opts = parse_config(opts[:config_file]).merge(opts) if opts[:config_file]
 
       # set defaults
-      opts[:queues] = Array(opts[:queues]) << "default" if opts[:queues].nil? || opts[:queues].empty?
+      opts[:queues] = ["default"] if opts[:queues].nil? || opts[:queues].empty?
       opts[:strict] = true if opts[:strict].nil?
       opts[:concurrency] = Integer(ENV["RAILS_MAX_THREADS"]) if opts[:concurrency].nil? && ENV["RAILS_MAX_THREADS"]
 
