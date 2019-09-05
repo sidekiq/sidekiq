@@ -192,6 +192,7 @@ module Sidekiq
 
   def self.log_formatter=(log_formatter)
     @log_formatter = log_formatter
+    @logger = nil
   end
 
   def self.logger
