@@ -205,7 +205,7 @@ module Sidekiq
     end
 
     unless logger.is_a?(Sidekiq::LogContext)
-      logger.class.send(:include, Sidekiq::LogContext)
+      logger.extend(Sidekiq::LogContext)
     end
 
     @logger = logger
