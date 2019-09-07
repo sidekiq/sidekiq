@@ -134,9 +134,25 @@ describe Sidekiq::Web do
     assert_equal 200, last_response.status
   end
 
+  it 'can sort on enqueued_at column' do
+    Sidekiq.redis do |conn|
+      (1000..1005).each do |i|
+        conn.lpush('queue:default', Sidekiq.dump_json(args: [i], enqueued_at: Time.now.to_i + i))
+      end
+    end
+
+    get '/queues/default?count=3' # direction is 'desc' by default
+    assert_match(/1005/, last_response.body)
+    refute_match(/1002/, last_response.body)
+
+    get '/queues/default?count=3&direction=asc'
+    assert_match(/1000/, last_response.body)
+    refute_match(/1003/, last_response.body)
+  end
+
   it 'can delete a queue' do
     Sidekiq.redis do |conn|
-      conn.rpush('queue:foo', '{\"args\":[]}')
+      conn.rpush('queue:foo', "{\"args\":[],\"enqueued_at\":1567894960}")
       conn.sadd('queues', 'foo')
     end
 
@@ -154,9 +170,9 @@ describe Sidekiq::Web do
 
   it 'can delete a job' do
     Sidekiq.redis do |conn|
-      conn.rpush('queue:foo', "{\"args\":[]}")
-      conn.rpush('queue:foo', "{\"foo\":\"bar\",\"args\":[]}")
-      conn.rpush('queue:foo', "{\"foo2\":\"bar2\",\"args\":[]}")
+      conn.rpush('queue:foo', '{"args":[],"enqueued_at":1567894960}')
+      conn.rpush('queue:foo', '{"foo":"bar","args":[],"enqueued_at":1567894960}')
+      conn.rpush('queue:foo', '{"foo2":"bar2","args":[],"enqueued_at":1567894960}')
     end
 
     get '/queues/foo'
