@@ -12,10 +12,10 @@ module Sidekiq
 
       Sidekiq.redis do |conn|
         type = conn.type(key)
+        rev = opts && opts[:reverse]
 
         case type
         when "zset"
-          rev = opts && opts[:reverse]
           total_size, items = conn.multi {
             conn.zcard(key)
             if rev
@@ -28,8 +28,13 @@ module Sidekiq
         when "list"
           total_size, items = conn.multi {
             conn.llen(key)
-            conn.lrange(key, starting, ending)
+            if rev
+              conn.lrange(key, -ending - 1, -starting - 1)
+            else
+              conn.lrange(key, starting, ending)
+            end
           }
+          items.reverse! if rev
           [current_page, total_size, items]
         when "none"
           [1, 0, []]

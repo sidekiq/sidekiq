@@ -17,6 +17,8 @@
     <thead>
       <th><%= t('Job') %></th>
       <th><%= t('Arguments') %></th>
+      <th>
+        <a href="<%= url %>?direction=<%= params[:direction] == 'asc' ? 'desc' : 'asc' %>"><%= t('EnqueuedAt') %> <%= sort_direction_label %></th></a>
       <th></th>
     </thead>
     <% @messages.each_with_index do |msg, index| %>
@@ -31,6 +33,9 @@
           <% else %>
             <%= display_args(msg.display_args) %>
           <% end %>
+        </td>
+        <td>
+          <%= relative_time(msg.enqueued_at) %>
         </td>
         <td>
           <form action="<%= root_path %>queues/<%= CGI.escape(@name) %>/delete" method="post">

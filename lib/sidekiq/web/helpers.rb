@@ -130,6 +130,10 @@ module Sidekiq
       end
     end
 
+    def sort_direction_label
+      params[:direction] == "asc" ? "&uarr;" : "&darr;"
+    end
+
     def workers
       @workers ||= Sidekiq::Workers.new
     end
@@ -189,7 +193,7 @@ module Sidekiq
       [score.to_f, jid]
     end
 
-    SAFE_QPARAMS = %w[page poll]
+    SAFE_QPARAMS = %w[page poll direction]
 
     # Merge options with current params, filter safe params, and stringify to query string
     def qparams(options)
