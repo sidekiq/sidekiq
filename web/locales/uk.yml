@@ -16,6 +16,7 @@ uk:
   StopPolling: Зупинити опитування
   Queue: Черга
   Class: Клас
+  Position: Позиція
   Job: Задача
   Arguments: Аргументи
   Extras: Додатково
@@ -74,4 +75,3 @@ uk:
   PollingInterval: Інтервал опитування
   Plugins: Плагіни
   NotYetEnqueued: Ще не в черзі
-  EnqueuedAt: Відправлено до черги

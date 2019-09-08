@@ -17,6 +17,7 @@ en: # <---- change this to your locale code
   StopPolling: Stop Polling
   Queue: Queue
   Class: Class
+  Position: Position
   Job: Job
   Arguments: Arguments
   Extras: Extras
@@ -77,6 +78,5 @@ en: # <---- change this to your locale code
   Plugins: Plugins
   NotYetEnqueued: Not yet enqueued
   CreatedAt: Created At
-  EnqueuedAt: Enqueued At
   BackToApp: Back to App
   Latency: Latency
