@@ -65,7 +65,10 @@ module Sidekiq
 
     def poll_path
       if current_path != "" && params["poll"]
-        root_path + current_path
+        path = root_path + current_path
+        query_string = to_query_string(params.slice(*params.keys - %w[page poll]))
+        path += "?#{query_string}" unless query_string.empty?
+        path
       else
         ""
       end
@@ -202,7 +205,11 @@ module Sidekiq
         options[key.to_s] = options.delete(key)
       end
 
-      params.merge(options).map { |key, value|
+      to_query_string(params.merge(options))
+    end
+
+    def to_query_string(params)
+      params.map { |key, value|
         SAFE_QPARAMS.include?(key) ? "#{key}=#{CGI.escape(value.to_s)}" : next
       }.compact.join("&")
     end

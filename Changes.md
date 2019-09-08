@@ -5,7 +5,7 @@
 HEAD
 ---------
 
-- Add ability to sort 'Enqueued' page on Web UI by enqueued_at time [#4248]
+- Add ability to sort 'Enqueued' page on Web UI by position in the queue [#4248]
 - Support `Client.push_bulk` with different delays [#4243]
 ```ruby
 Sidekiq::Client.push_bulk("class" => FooJob, "args" => [[1], [2]], "at" => [1.minute.from_now.to_f, 5.minutes.from_now.to_f])

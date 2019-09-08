@@ -15,14 +15,18 @@
 <div class="table_container">
   <table class="queue table table-hover table-bordered table-striped">
     <thead>
+      <th><a href="<%= url %>?direction=<%= params[:direction] == 'asc' ? 'desc' : 'asc' %>"><%= t('Position') %> <%= sort_direction_label %></a></th>
       <th><%= t('Job') %></th>
       <th><%= t('Arguments') %></th>
-      <th>
-        <a href="<%= url %>?direction=<%= params[:direction] == 'asc' ? 'desc' : 'asc' %>"><%= t('EnqueuedAt') %> <%= sort_direction_label %></th></a>
       <th></th>
     </thead>
     <% @messages.each_with_index do |msg, index| %>
       <tr>
+        <% if params[:direction] == 'asc' %>
+          <td><%= @count * (@current_page - 1) + index + 1 %></td>
+        <% else %>
+          <td><%= @total_size - (@count * (@current_page - 1) + index) %></td>
+        <% end %>
         <td><%= h(msg.display_class) %></td>
         <td>
           <% a = msg.display_args %>
@@ -33,9 +37,6 @@
           <% else %>
             <%= display_args(msg.display_args) %>
           <% end %>
-        </td>
-        <td>
-          <%= relative_time(msg.enqueued_at) %>
         </td>
         <td>
           <form action="<%= root_path %>queues/<%= CGI.escape(@name) %>/delete" method="post">

@@ -16,6 +16,7 @@ ru:
   StopPolling: Остановить опрос
   Queue: Очередь
   Class: Класс
+  Position: Позиция
   Job: Задача
   Arguments: Аргументы
   Extras: Дополнительно
@@ -75,5 +76,4 @@ ru:
   Plugins: Плагины
   NotYetEnqueued: Пока не в очереди
   CreatedAt: Создан
-  EnqueuedAt: Поставлен в очередь
   BackToApp: Назад
