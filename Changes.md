@@ -5,6 +5,7 @@
 HEAD
 ---------
 
+- Respect rails' generators `test_framework` option and gracefully handle extra `worker` suffix on generator [#4256]
 - Add ability to sort 'Enqueued' page on Web UI by position in the queue [#4248]
 - Support `Client.push_bulk` with different delays [#4243]
 ```ruby
