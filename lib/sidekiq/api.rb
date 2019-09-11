@@ -14,6 +14,17 @@ module Sidekiq
       end
       result
     end
+
+    def zscan(conn, key, match: nil)
+      cursor = "0"
+      result = []
+      loop do
+        cursor, values = conn.zscan(key, cursor, match: match)
+        result.push(*values)
+        break if cursor == "0"
+      end
+      result
+    end
   end
 
   class Stats
@@ -528,6 +539,7 @@ module Sidekiq
 
   class SortedSet
     include Enumerable
+    include RedisScanner
 
     attr_reader :name
 
@@ -597,7 +609,14 @@ module Sidekiq
     # This is a slow, inefficient operation.  Do not use under
     # normal conditions.  Sidekiq Pro contains a faster version.
     def find_job(jid)
-      detect { |j| j.jid == jid }
+      Sidekiq.redis do |conn|
+        elements = zscan(conn, @name, match: "*\"jid\":\"#{jid}\"*")
+        elements.each do |element, score|
+          job = SortedEntry.new(self, score, element)
+          return job if job.jid == jid
+        end
+      end
+      nil
     end
 
     def delete_by_value(name, value)
