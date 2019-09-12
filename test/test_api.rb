@@ -468,6 +468,15 @@ describe 'API' do
       assert_equal 0, r.size
     end
 
+    it 'can scan retries' do
+      add_retry
+      add_retry('test')
+      r = Sidekiq::RetrySet.new
+      assert_instance_of Enumerator, r.scan('Worker')
+      assert_equal 2, r.scan('ApiWorker').to_a.size
+      assert_equal 1, r.scan('*test*').to_a.size
+    end
+
     it 'can enumerate processes' do
       identity_string = "identity_string"
       odata = {

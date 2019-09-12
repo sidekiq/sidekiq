@@ -540,6 +540,17 @@ module Sidekiq
       Sidekiq.redis { |c| c.zcard(name) }
     end
 
+    def scan(match, count: 100)
+      return to_enum(:scan, match) unless block_given?
+
+      match = "*#{match}*" unless match.include?("*")
+      Sidekiq.redis do |conn|
+        conn.zscan_each(name, match: match, count: count) do |entry, score|
+          yield SortedEntry.new(self, score, entry)
+        end
+      end
+    end
+
     def clear
       Sidekiq.redis do |conn|
         conn.del(name)
