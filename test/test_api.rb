@@ -254,20 +254,33 @@ describe 'API' do
       assert_equal [1,2,3], x.display_args
     end
 
-    it 'unwraps ActiveJob jobs' do
-      ApiJob.perform_later(1, 2, 3)
-      q = Sidekiq::Queue.new
-      x = q.first
-      assert_equal ApiJob.name, x.display_class
-      assert_equal [1,2,3], x.display_args
-    end
+    describe "Rails unwrapping" do
+      SERIALIZED_JOBS = {
+        "5.x" => [
+          '{"class":"ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper","wrapped":"ApiJob","queue":"default","args":[{"job_class":"ApiJob","job_id":"f1bde53f-3852-4ae4-a879-c12eacebbbb0","provider_job_id":null,"queue_name":"default","priority":null,"arguments":[1,2,3],"executions":0,"locale":"en"}],"retry":true,"jid":"099eee72911085a511d0e312","created_at":1568305542.339916,"enqueued_at":1568305542.339947}',
+          '{"class":"ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper","wrapped":"ActionMailer::DeliveryJob","queue":"mailers","args":[{"job_class":"ActionMailer::DeliveryJob","job_id":"19cc0115-3d1c-4bbe-a51e-bfa1385895d1","provider_job_id":null,"queue_name":"mailers","priority":null,"arguments":["ApiMailer","test_email","deliver_now",1,2,3],"executions":0,"locale":"en"}],"retry":true,"jid":"37436e5504936400e8cf98db","created_at":1568305542.370133,"enqueued_at":1568305542.370241}',
+        ],
+        "6.x" => [
+          '{"class":"ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper","wrapped":"ApiJob","queue":"default","args":[{"job_class":"ApiJob","job_id":"ff2b48d4-bdce-4825-af6b-ef8c11ab651e","provider_job_id":null,"queue_name":"default","priority":null,"arguments":[1,2,3],"executions":0,"exception_executions":{},"locale":"en","timezone":"UTC","enqueued_at":"2019-09-12T16:28:37Z"}],"retry":true,"jid":"ce121bf77b37ae81fe61b6dc","created_at":1568305717.9469702,"enqueued_at":1568305717.947005}',
+          '{"class":"ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper","wrapped":"ActionMailer::MailDeliveryJob","queue":"mailers","args":[{"job_class":"ActionMailer::MailDeliveryJob","job_id":"2f967da1-a389-479c-9a4e-5cc059e6d65c","provider_job_id":null,"queue_name":"mailers","priority":null,"arguments":["ApiMailer","test_email","deliver_now",{"args":[1,2,3],"_aj_symbol_keys":["args"]}],"executions":0,"exception_executions":{},"locale":"en","timezone":"UTC","enqueued_at":"2019-09-12T16:28:37Z"}],"retry":true,"jid":"469979df52bb9ef9f48b49e1","created_at":1568305717.9457421,"enqueued_at":1568305717.9457731}',
+        ],
+      }.each_pair do |ver,jobs|
+        it "unwraps ActiveJob #{ver} jobs" do
+          #ApiJob.perform_later(1,2,3)
+          #puts Sidekiq::Queue.new.first.value
+          x = Sidekiq::Job.new(jobs[0], "default")
+          assert_equal ApiJob.name, x.display_class
+          assert_equal [1,2,3], x.display_args
+        end
 
-    it 'unwraps ActionMailer jobs' do
-      ApiMailer.test_email(1, 2, 3).deliver_later
-      q = Sidekiq::Queue.new('mailers')
-      x = q.first
-      assert_equal "#{ApiMailer.name}#test_email", x.display_class
-      assert_equal [1,2,3], x.display_args
+        it "unwraps ActionMailer #{ver} jobs" do
+          #ApiMailer.test_email(1,2,3).deliver_later
+          #puts Sidekiq::Queue.new("mailers").first.value
+          x = Sidekiq::Job.new(jobs[1], "mailers")
+          assert_equal "#{ApiMailer.name}#test_email", x.display_class
+          assert_equal [1,2,3], x.display_args
+        end
+      end
     end
 
     it 'has no enqueued_at time for jobs enqueued in the future' do

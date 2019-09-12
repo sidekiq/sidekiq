@@ -5,6 +5,7 @@
 HEAD
 ---------
 
+- Support display of ActiveJob 6.0 payloads in the Web UI [#4263]
 - Add `SortedSet#scan` for pattern based scanning. For large sets this API will be **MUCH** faster
   than standard iteration using each.
 ```ruby
@@ -12,7 +13,6 @@ HEAD
     job.retry
   end
 ```
-
 - Dramatically speed up SortedSet#find\_job(jid) by using Redis's ZSCAN
   support, approx 10x faster. [#4259]
 ```
