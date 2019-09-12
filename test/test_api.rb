@@ -9,20 +9,6 @@ describe 'API' do
     Sidekiq.redis {|c| c.flushdb }
   end
 
-  describe 'RedisScanner' do
-    it 'returns identical to smembers' do
-      test_obj = Object.new
-      test_obj.extend(Sidekiq::RedisScanner)
-      50.times do |i|
-        Sidekiq.redis { |conn| conn.sadd('processes', "test-process-#{i}") }
-      end
-      sscan = Sidekiq.redis { |c| test_obj.sscan(c, 'processes') }.sort!
-      smembers = Sidekiq.redis { |c| c.smembers('processes') }.sort!
-      assert_equal sscan.size, 50
-      assert_equal sscan, smembers
-    end
-  end
-
   describe "stats" do
     it "is initially zero" do
       s = Sidekiq::Stats.new
@@ -466,6 +452,15 @@ describe 'API' do
       assert_equal 2, r.size
       r.clear
       assert_equal 0, r.size
+    end
+
+    it 'can scan retries' do
+      add_retry
+      add_retry('test')
+      r = Sidekiq::RetrySet.new
+      assert_instance_of Enumerator, r.scan('Worker')
+      assert_equal 2, r.scan('ApiWorker').to_a.size
+      assert_equal 1, r.scan('*test*').to_a.size
     end
 
     it 'can enumerate processes' do

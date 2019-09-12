@@ -3,22 +3,7 @@
 require "sidekiq"
 
 module Sidekiq
-  module RedisScanner
-    def sscan(conn, key)
-      cursor = "0"
-      result = []
-      loop do
-        cursor, values = conn.sscan(key, cursor)
-        result.push(*values)
-        break if cursor == "0"
-      end
-      result
-    end
-  end
-
   class Stats
-    include RedisScanner
-
     def initialize
       fetch_stats!
     end
@@ -77,11 +62,11 @@ module Sidekiq
       }
 
       processes = Sidekiq.redis { |conn|
-        sscan(conn, "processes")
+        conn.sscan_each("processes").to_a
       }
 
       queues = Sidekiq.redis { |conn|
-        sscan(conn, "queues")
+        conn.sscan_each("queues").to_a
       }
 
       pipe2_res = Sidekiq.redis { |conn|
@@ -142,11 +127,9 @@ module Sidekiq
     end
 
     class Queues
-      include RedisScanner
-
       def lengths
         Sidekiq.redis do |conn|
-          queues = sscan(conn, "queues")
+          queues = conn.sscan_each("queues").to_a
 
           lengths = conn.pipelined {
             queues.each do |queue|
@@ -225,13 +208,12 @@ module Sidekiq
   #
   class Queue
     include Enumerable
-    extend RedisScanner
 
     ##
     # Return all known queues within Redis.
     #
     def self.all
-      Sidekiq.redis { |c| sscan(c, "queues") }.sort.map { |q| Sidekiq::Queue.new(q) }
+      Sidekiq.redis { |c| c.sscan_each("queues").to_a }.sort.map { |q| Sidekiq::Queue.new(q) }
     end
 
     attr_reader :name
@@ -540,6 +522,17 @@ module Sidekiq
       Sidekiq.redis { |c| c.zcard(name) }
     end
 
+    def scan(match, count: 100)
+      return to_enum(:scan, match) unless block_given?
+
+      match = "*#{match}*" unless match.include?("*")
+      Sidekiq.redis do |conn|
+        conn.zscan_each(name, match: match, count: count) do |entry, score|
+          yield SortedEntry.new(self, score, entry)
+        end
+      end
+    end
+
     def clear
       Sidekiq.redis do |conn|
         conn.del(name)
@@ -725,7 +718,6 @@ module Sidekiq
   #
   class ProcessSet
     include Enumerable
-    include RedisScanner
 
     def initialize(clean_plz = true)
       cleanup if clean_plz
@@ -736,7 +728,7 @@ module Sidekiq
     def cleanup
       count = 0
       Sidekiq.redis do |conn|
-        procs = sscan(conn, "processes").sort
+        procs = conn.sscan_each("processes").to_a.sort
         heartbeats = conn.pipelined {
           procs.each do |key|
             conn.hget(key, "info")
@@ -756,7 +748,7 @@ module Sidekiq
     end
 
     def each
-      procs = Sidekiq.redis { |conn| sscan(conn, "processes") }.sort
+      procs = Sidekiq.redis { |conn| conn.sscan_each("processes").to_a }.sort
 
       Sidekiq.redis do |conn|
         # We're making a tradeoff here between consuming more memory instead of
@@ -890,11 +882,10 @@ module Sidekiq
   #
   class Workers
     include Enumerable
-    include RedisScanner
 
     def each
       Sidekiq.redis do |conn|
-        procs = sscan(conn, "processes")
+        procs = conn.sscan_each("processes").to_a
         procs.sort.each do |key|
           valid, workers = conn.pipelined {
             conn.exists(key)
@@ -916,7 +907,7 @@ module Sidekiq
     # which can easily get out of sync with crashy processes.
     def size
       Sidekiq.redis do |conn|
-        procs = sscan(conn, "processes")
+        procs = conn.sscan_each("processes").to_a
         if procs.empty?
           0
         else

@@ -5,6 +5,14 @@
 HEAD
 ---------
 
+- Add `SortedSet#scan` for pattern based scanning. For large sets this API will be **MUCH** faster
+  than standard iteration using each.
+```ruby
+  Sidekiq::DeadSet.new.scan("UnreliableApi") do |job|
+    job.retry
+  end
+```
+
 - Dramatically speed up SortedSet#find\_job(jid) by using Redis's ZSCAN
   support, approx 10x faster. [#4259]
 ```
