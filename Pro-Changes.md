@@ -4,6 +4,11 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+5.0.1
+---------
+
+- Sidekiq::JobSet#scan and #find_job APIs have been promoted to Sidekiq OSS. [#4259]
+
 5.0.0
 ---------
 

@@ -525,7 +525,7 @@ module Sidekiq
       Sidekiq.redis { |c| c.zcard(name) }
     end
 
-    def scan(match, count: 100)
+    def scan(match, count = 100)
       return to_enum(:scan, match) unless block_given?
 
       match = "*#{match}*" unless match.include?("*")
