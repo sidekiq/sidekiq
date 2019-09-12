@@ -5,6 +5,12 @@
 HEAD
 ---------
 
+- Dramatically speed up SortedSet#find\_job(jid) by using Redis's ZSCAN
+  support, approx 10x faster. [#4259]
+```
+zscan   0.179366   0.047727   0.227093 (  1.161376)
+enum    8.522311   0.419826   8.942137 (  9.785079)
+```
 - Respect rails' generators `test_framework` option and gracefully handle extra `worker` suffix on generator [#4256]
 - Add ability to sort 'Enqueued' page on Web UI by position in the queue [#4248]
 - Support `Client.push_bulk` with different delays [#4243]

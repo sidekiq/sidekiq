@@ -341,6 +341,19 @@ describe 'API' do
       assert_equal 1, ds.size
     end
 
+    it 'can find a scheduled job by jid' do
+      10.times do |idx|
+        ApiWorker.perform_in(idx, 1)
+      end
+
+      job_id = ApiWorker.perform_in(5, 1)
+      job = Sidekiq::ScheduledSet.new.find_job(job_id)
+      assert_equal job_id, job.jid
+
+      ApiWorker.perform_in(100, 1, 'jid' => 'jid_in_args')
+      assert_nil Sidekiq::ScheduledSet.new.find_job('jid_in_args')
+    end
+
     it 'can remove jobs when iterating over a sorted set' do
       # scheduled jobs must be greater than SortedSet#each underlying page size
       51.times do

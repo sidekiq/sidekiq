@@ -593,11 +593,16 @@ module Sidekiq
 
     ##
     # Find the job with the given JID within this sorted set.
-    #
-    # This is a slow, inefficient operation.  Do not use under
-    # normal conditions.  Sidekiq Pro contains a faster version.
+    # This is a slower O(n) operation.  Do not use for app logic.
     def find_job(jid)
-      detect { |j| j.jid == jid }
+      Sidekiq.redis do |conn|
+        conn.zscan_each(name, match: "*#{jid}*", count: 100) do |entry, score|
+          job = JSON.parse(entry)
+          matched = job["jid"] == jid
+          return SortedEntry.new(self, score, entry) if matched
+        end
+      end
+      nil
     end
 
     def delete_by_value(name, value)
