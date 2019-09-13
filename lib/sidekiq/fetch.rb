@@ -28,7 +28,7 @@ module Sidekiq
       @strictly_ordered_queues = !!options[:strict]
       @queues = options[:queues].map { |q| "queue:#{q}" }
       if @strictly_ordered_queues
-        @queues = @queues.uniq
+        @queues.uniq!
         @queues << TIMEOUT
       end
     end
@@ -47,7 +47,7 @@ module Sidekiq
       if @strictly_ordered_queues
         @queues
       else
-        queues = @queues.shuffle.uniq
+        queues = @queues.shuffle!.uniq
         queues << TIMEOUT
         queues
       end
