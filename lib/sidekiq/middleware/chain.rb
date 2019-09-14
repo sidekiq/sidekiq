@@ -67,7 +67,6 @@ module Sidekiq
   module Middleware
     class Chain
       include Enumerable
-      attr_reader :entries
 
       def initialize_copy(copy)
         copy.instance_variable_set(:@entries, entries.dup)
@@ -78,8 +77,12 @@ module Sidekiq
       end
 
       def initialize
-        @entries = []
+        @entries = nil
         yield self if block_given?
+      end
+
+      def entries
+        @entries ||= []
       end
 
       def remove(klass)
@@ -114,6 +117,10 @@ module Sidekiq
         any? { |entry| entry.klass == klass }
       end
 
+      def empty?
+        @entries.nil? || @entries.empty?
+      end
+
       def retrieve
         map(&:make_new)
       end
@@ -123,6 +130,8 @@ module Sidekiq
       end
 
       def invoke(*args)
+        return yield if empty?
+
         chain = retrieve.dup
         traverse_chain = lambda do
           if chain.empty?
