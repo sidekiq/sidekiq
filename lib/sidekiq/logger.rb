@@ -9,7 +9,7 @@ module Sidekiq
       ctx.merge!(hash)
       yield
     ensure
-      hash.keys.each { |key| ctx.delete(key) }
+      hash.each_key { |key| ctx.delete(key) }
     end
 
     def ctx

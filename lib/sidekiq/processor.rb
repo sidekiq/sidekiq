@@ -269,13 +269,15 @@ module Sidekiq
     end
 
     def constantize(str)
+      return Object.const_get(str) unless str.include?("::")
+
       names = str.split("::")
       names.shift if names.empty? || names.first.empty?
 
       names.inject(Object) do |constant, name|
         # the false flag limits search for name to under the constant namespace
         #   which mimics Rails' behaviour
-        constant.const_defined?(name, false) ? constant.const_get(name, false) : constant.const_missing(name)
+        constant.const_get(name, false)
       end
     end
   end
