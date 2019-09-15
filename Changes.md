@@ -5,6 +5,7 @@
 HEAD
 ---------
 
+- Compress jobs backtraces before pushing into Redis [#4272]
 - Support display of ActiveJob 6.0 payloads in the Web UI [#4263]
 - Add `SortedSet#scan` for pattern based scanning. For large sets this API will be **MUCH** faster
   than standard iteration using each.

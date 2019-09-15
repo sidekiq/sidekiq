@@ -2,6 +2,9 @@
 
 require "sidekiq"
 
+require "zlib"
+require "base64"
+
 module Sidekiq
   class Stats
     def initialize
@@ -385,6 +388,16 @@ module Sidekiq
       Time.at(self["created_at"] || self["enqueued_at"] || 0).utc
     end
 
+    def error_backtrace
+      # Cache nil values
+      if defined?(@error_backtrace)
+        @error_backtrace
+      else
+        value = self["error_backtrace"]
+        @error_backtrace = value && uncompress_backtrace(value)
+      end
+    end
+
     attr_reader :queue
 
     def latency
@@ -417,6 +430,17 @@ module Sidekiq
       # memory yet so the YAML can't be loaded.
       Sidekiq.logger.warn "Unable to load YAML: #{ex.message}" unless Sidekiq.options[:environment] == "development"
       default
+    end
+
+    def uncompress_backtrace(backtrace)
+      if backtrace.is_a?(Array)
+        # Handle old jobs with previous backtrace format
+        backtrace
+      else
+        decoded = Base64.decode64(backtrace)
+        uncompressed = Zlib::Inflate.inflate(decoded)
+        Marshal.load(uncompressed)
+      end
     end
   end
 
