@@ -254,6 +254,12 @@ describe 'API' do
       assert_equal [1,2,3], x.display_args
     end
 
+    it 'handles old jobs error_backtrace format' do
+      add_retry
+      job = Sidekiq::RetrySet.new.first
+      assert_equal ['line1', 'line2'], job.error_backtrace
+    end
+
     describe "Rails unwrapping" do
       SERIALIZED_JOBS = {
         "5.x" => [
@@ -587,7 +593,7 @@ describe 'API' do
     end
 
     def add_retry(jid = 'bob', at = Time.now.to_f)
-      payload = Sidekiq.dump_json('class' => 'ApiWorker', 'args' => [1, 'mike'], 'queue' => 'default', 'jid' => jid, 'retry_count' => 2, 'failed_at' => Time.now.to_f)
+      payload = Sidekiq.dump_json('class' => 'ApiWorker', 'args' => [1, 'mike'], 'queue' => 'default', 'jid' => jid, 'retry_count' => 2, 'failed_at' => Time.now.to_f, 'error_backtrace' => ['line1', 'line2'])
       Sidekiq.redis do |conn|
         conn.zadd('retry', at.to_s, payload)
       end

@@ -3,6 +3,7 @@
 require_relative 'helper'
 require 'sidekiq/scheduled'
 require 'sidekiq/job_retry'
+require 'sidekiq/api'
 
 describe Sidekiq::JobRetry do
   describe 'middleware' do
@@ -116,8 +117,10 @@ describe Sidekiq::JobRetry do
           c = caller(0); raise "kerblammo!"
         end
       end
-      assert job["error_backtrace"]
-      assert_equal c[0], job["error_backtrace"][0]
+
+      job = Sidekiq::RetrySet.new.first
+      assert job.error_backtrace
+      assert_equal c[0], job.error_backtrace[0]
     end
 
     it 'saves partial backtraces' do
@@ -127,8 +130,10 @@ describe Sidekiq::JobRetry do
           c = caller(0)[0...3]; raise "kerblammo!"
         end
       end
-      assert job["error_backtrace"]
-      assert_equal c, job["error_backtrace"]
+
+      job = Sidekiq::RetrySet.new.first
+      assert job.error_backtrace
+      assert_equal c, job.error_backtrace
       assert_equal 3, c.size
     end
 
