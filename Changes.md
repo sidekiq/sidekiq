@@ -5,7 +5,14 @@
 HEAD
 ---------
 
-- Compress jobs backtraces before pushing into Redis [#4272]
+- Compress error backtraces before pushing into Redis, if you are
+  storing error backtraces, this will halve the size of your RetrySet
+  in Redis [fatkodima, #4272]
+```
+RetrySet with 100,000 jobs
+Before: 261 MB
+After:  129 MB
+```
 - Support display of ActiveJob 6.0 payloads in the Web UI [#4263]
 - Add `SortedSet#scan` for pattern based scanning. For large sets this API will be **MUCH** faster
   than standard iteration using each.
@@ -15,14 +22,14 @@ HEAD
   end
 ```
 - Dramatically speed up SortedSet#find\_job(jid) by using Redis's ZSCAN
-  support, approx 10x faster. [#4259]
+  support, approx 10x faster. [fatkodima, #4259]
 ```
 zscan   0.179366   0.047727   0.227093 (  1.161376)
 enum    8.522311   0.419826   8.942137 (  9.785079)
 ```
-- Respect rails' generators `test_framework` option and gracefully handle extra `worker` suffix on generator [#4256]
-- Add ability to sort 'Enqueued' page on Web UI by position in the queue [#4248]
-- Support `Client.push_bulk` with different delays [#4243]
+- Respect rails' generators `test_framework` option and gracefully handle extra `worker` suffix on generator [fatkodima, #4256]
+- Add ability to sort 'Enqueued' page on Web UI by position in the queue [fatkodima, #4248]
+- Support `Client.push_bulk` with different delays [fatkodima, #4243]
 ```ruby
 Sidekiq::Client.push_bulk("class" => FooJob, "args" => [[1], [2]], "at" => [1.minute.from_now.to_f, 5.minutes.from_now.to_f])
 ```
