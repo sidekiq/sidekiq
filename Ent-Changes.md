@@ -4,6 +4,12 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
+HEAD
+-------------
+
+- Periodic job registration API adjusted to avoid loading classes in
+  initializer [#4271]
+
 2.0.0
 -------------
 
