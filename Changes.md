@@ -5,6 +5,13 @@
 HEAD
 ---------
 
+- Get scheduled jobs in batches before pushing into specific queues.
+  This will decrease enqueueing time of scheduled jobs by a third. [fatkodima, #4273]
+```
+ScheduledSet with 10,000 jobs
+Before: 56.6 seconds
+After:  39.2 seconds
+```
 - Compress error backtraces before pushing into Redis, if you are
   storing error backtraces, this will halve the size of your RetrySet
   in Redis [fatkodima, #4272]
@@ -15,7 +22,7 @@ After:  129 MB
 ```
 - Support display of ActiveJob 6.0 payloads in the Web UI [#4263]
 - Add `SortedSet#scan` for pattern based scanning. For large sets this API will be **MUCH** faster
-  than standard iteration using each.
+  than standard iteration using each. [fatkodima, #4262]
 ```ruby
   Sidekiq::DeadSet.new.scan("UnreliableApi") do |job|
     job.retry
