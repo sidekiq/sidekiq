@@ -212,6 +212,11 @@ describe 'API' do
       include Sidekiq::Worker
     end
 
+    class WorkerWithTags
+      include Sidekiq::Worker
+      sidekiq_options tags: ['foo']
+    end
+
     it 'can enumerate jobs' do
       q = Sidekiq::Queue.new
       Time.stub(:now, Time.new(2012, 12, 26)) do
@@ -293,6 +298,14 @@ describe 'API' do
       job_id = ApiWorker.perform_in(100, 1, 'foo')
       job = Sidekiq::ScheduledSet.new.find_job(job_id)
       assert_nil job.enqueued_at
+    end
+
+    it 'returns tags field for jobs' do
+      job_id = ApiWorker.perform_async
+      assert_equal [], Sidekiq::Queue.new.find_job(job_id).tags
+
+      job_id = WorkerWithTags.perform_async
+      assert_equal ['foo'], Sidekiq::Queue.new.find_job(job_id).tags
     end
 
     it 'can delete jobs' do

@@ -5,6 +5,17 @@
 HEAD
 ---------
 
+- Support ad-hoc job tags. You can tag your jobs with, for example, subdomain, tenant, country, locale, application,
+  version, user/client, "alpha/beta/pro/ent", types of jobs, teams/people responsible for jobs,
+  additional metadata, etc.
+  Tags are shown on different pages with job listings [fatkodima, #4280]
+```ruby
+class MyWorker
+  include Sidekiq::Worker
+  sidekiq_options tags: ['foo', 'bar']
+  ...
+end
+```
 - Get scheduled jobs in batches before pushing into specific queues.
   This will decrease enqueueing time of scheduled jobs by a third. [fatkodima, #4273]
 ```

@@ -36,7 +36,16 @@ module Sidekiq
         end
 
         def format_context
-          " " + ctx.compact.map { |k, v| "#{k}=#{v}" }.join(" ") if ctx.any?
+          if ctx.any?
+            " " + ctx.compact.map { |k, v|
+              case v
+              when Array
+                "#{k}=#{v.join(",")}"
+              else
+                "#{k}=#{v}"
+              end
+            }.join(" ")
+          end
         end
       end
 

@@ -279,6 +279,13 @@ describe Sidekiq::Web do
     assert_match(/HardWorker/, last_response.body)
   end
 
+  it 'can display a single scheduled job tags' do
+    params = add_scheduled
+    get "/scheduled/#{job_params(*params)}"
+    assert_match(/tag1/, last_response.body)
+    assert_match(/tag2/, last_response.body)
+  end
+
   it 'handles missing scheduled job' do
     get "/scheduled/0-shouldntexist"
     assert_equal 302, last_response.status
@@ -579,7 +586,8 @@ describe Sidekiq::Web do
     score = Time.now.to_f
     msg = { 'class' => 'HardWorker',
             'args' => ['bob', 1, Time.now.to_f],
-            'jid' => SecureRandom.hex(12) }
+            'jid' => SecureRandom.hex(12),
+            'tags' => ['tag1', 'tag2'], }
     Sidekiq.redis do |conn|
       conn.zadd('schedule', score, Sidekiq.dump_json(msg))
     end

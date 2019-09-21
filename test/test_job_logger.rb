@@ -24,7 +24,7 @@ class TestJobLogger < Minitest::Test
 
     # pretty
     p = @logger.formatter = Sidekiq::Logger::Formatters::Pretty.new
-    job = {"jid"=>"1234abc", "wrapped"=>"FooWorker", "class"=>"Wrapper"}
+    job = {"jid"=>"1234abc", "wrapped"=>"FooWorker", "class"=>"Wrapper", "tags" => ["bar", "baz"]}
     # this mocks what Processor does
     jl.with_job_hash_context(job) do
       jl.call(job, 'queue') {}
@@ -34,7 +34,7 @@ class TestJobLogger < Minitest::Test
     assert a
     assert b
 
-    expected = /pid=#{$$} tid=#{p.tid} class=FooWorker jid=1234abc/
+    expected = /pid=#{$$} tid=#{p.tid} class=FooWorker jid=1234abc tags=bar,baz/
     assert_match(expected, a)
     assert_match(expected, b)
     assert_match(/#{Time.now.utc.to_date}.+Z pid=#{$$} tid=#{p.tid} .+INFO: done/, b)
@@ -44,7 +44,7 @@ class TestJobLogger < Minitest::Test
     # json
     @logger.formatter = Sidekiq::Logger::Formatters::JSON.new
     jl = Sidekiq::JobLogger.new(@logger)
-    job = {"jid"=>"1234abc", "wrapped"=>"Wrapper", "class"=>"FooWorker", "bid"=>"b-xyz"}
+    job = {"jid"=>"1234abc", "wrapped"=>"Wrapper", "class"=>"FooWorker", "bid"=>"b-xyz", "tags" => ["bar", "baz"]}
     # this mocks what Processor does
     jl.with_job_hash_context(job) do
       jl.call(job, 'queue') {}
@@ -56,7 +56,7 @@ class TestJobLogger < Minitest::Test
     keys = hsh.keys.sort
     assert_equal(["ctx", "lvl", "msg", "pid", "tid", "ts"], keys)
     keys = hsh["ctx"].keys.sort
-    assert_equal(["bid", "class", "jid"], keys)
+    assert_equal(["bid", "class", "jid", "tags"], keys)
   end
 
   def reset(io)
