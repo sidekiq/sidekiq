@@ -38,7 +38,12 @@
             <td>
               <a href="<%= root_path %>queues/<%= entry.queue %>"><%= entry.queue %></a>
             </td>
-            <td><%= entry.display_class %></td>
+            <td>
+              <%= entry.display_class %>
+              <% entry.tags.each do |tag| %>
+                <span class="label label-info"><%= tag %></span>
+              <% end %>
+            </td>
             <td>
                <div class="args"><%= display_args(entry.display_args) %></div>
             </td>

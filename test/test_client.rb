@@ -32,6 +32,10 @@ describe Sidekiq::Client do
       assert_raises ArgumentError do
         Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1, 2], 'at' => [Time.now.to_f, :not_a_numeric])
       end
+
+      assert_raises ArgumentError do
+        Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1], 'tags' => :not_an_array)
+      end
     end
   end
 

@@ -388,6 +388,10 @@ module Sidekiq
       Time.at(self["created_at"] || self["enqueued_at"] || 0).utc
     end
 
+    def tags
+      self["tags"] || []
+    end
+
     def error_backtrace
       # Cache nil values
       if defined?(@error_backtrace)
