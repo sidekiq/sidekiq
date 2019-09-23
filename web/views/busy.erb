@@ -89,9 +89,7 @@
         </td>
         <td>
           <%= job.display_class %>
-          <% job.tags.each do |tag| %>
-            <span class="label label-info"><%= tag %></span>
-          <% end %>
+          <%= display_tags(job, nil) %>
         </td>
         <td>
           <div class="args"><%= display_args(job.display_args) %></div>

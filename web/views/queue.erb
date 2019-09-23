@@ -29,9 +29,7 @@
         <% end %>
         <td>
           <%= h(msg.display_class) %>
-          <% msg.tags.each do |tag| %>
-            <span class="label label-info"><%= tag %></span>
-          <% end %>
+          <%= display_tags(msg, nil) %>
         </td>
         <td>
           <% a = msg.display_args %>

@@ -5,14 +5,15 @@
 HEAD
 ---------
 
-- Support ad-hoc job tags. You can tag your jobs with, for example, subdomain, tenant, country, locale, application,
-  version, user/client, "alpha/beta/pro/ent", types of jobs, teams/people responsible for jobs,
-  additional metadata, etc.
-  Tags are shown on different pages with job listings [fatkodima, #4280]
+- Support ad-hoc job tags. You can tag your jobs with, e.g, subdomain, tenant, country,
+  locale, application, version, user/client, "alpha/beta/pro/ent", types of jobs,
+  teams/people responsible for jobs, additional metadata, etc.
+  Tags are shown on different pages with job listings. Sidekiq Pro users
+  can filter based on them [fatkodima, #4280]
 ```ruby
 class MyWorker
   include Sidekiq::Worker
-  sidekiq_options tags: ['foo', 'bar']
+  sidekiq_options tags: ['bank-ops', 'alpha']
   ...
 end
 ```

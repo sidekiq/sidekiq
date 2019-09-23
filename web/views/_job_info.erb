@@ -14,12 +14,8 @@
       <tr>
         <th><%= t('Job') %></th>
         <td>
-          <code>
-            <%= job.display_class %>
-            <% job.tags.each do |tag| %>
-              <span class="label label-info"><%= tag %></span>
-            <% end %>
-          </code>
+          <%= job.display_class %>
+          <%= display_tags(job) %>
         </td>
       </tr>
       <tr>

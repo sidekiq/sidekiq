@@ -115,6 +115,12 @@ module Sidekiq
       end
     end
 
+    def display_tags(job)
+      job.tags.map { |tag|
+        "<span class='jobtag label label-info'>#{::Rack::Utils.escape_html(tag)}</span>"
+      }.join(" ")
+    end
+
     # mperham/sidekiq#3243
     def unfiltered?
       yield unless env["PATH_INFO"].start_with?("/filter/")
