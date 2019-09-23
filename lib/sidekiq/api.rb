@@ -596,18 +596,25 @@ module Sidekiq
       end
     end
 
+    ##
+    # Fetch jobs that match a given time or Range. Job ID is an
+    # optional second argument.
     def fetch(score, jid = nil)
+      begin_score, end_score =
+        if score.is_a?(Range)
+          [score.first, score.last]
+        else
+          [score, score]
+        end
+
       elements = Sidekiq.redis { |conn|
-        conn.zrangebyscore(name, score, score)
+        conn.zrangebyscore(name, begin_score, end_score, with_scores: true)
       }
 
       elements.each_with_object([]) do |element, result|
-        entry = SortedEntry.new(self, score, element)
-        if jid
-          result << entry if entry.jid == jid
-        else
-          result << entry
-        end
+        data, job_score = element
+        entry = SortedEntry.new(self, job_score, data)
+        result << entry if jid.nil? || entry.jid == jid
       end
     end
 
