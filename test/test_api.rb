@@ -414,6 +414,28 @@ describe 'API' do
       assert_equal 1, r.fetch(same_time, 'bob1').size
     end
 
+    it 'can fetch by score range' do
+      same_time = Time.now.to_f
+      add_retry('bob1', same_time)
+      add_retry('bob2', same_time + 1)
+      add_retry('bob3', same_time + 2)
+      r = Sidekiq::RetrySet.new
+      range = (same_time..(same_time + 1))
+      assert_equal 2, r.fetch(range).size
+    end
+
+    it 'can fetch by score range and jid' do
+      same_time = Time.now.to_f
+      add_retry('bob1', same_time)
+      add_retry('bob2', same_time + 1)
+      add_retry('bob3', same_time + 2)
+      r = Sidekiq::RetrySet.new
+      range = (same_time..(same_time + 1))
+      jobs = r.fetch(range, 'bob2')
+      assert_equal 1, jobs.size
+      assert_equal jobs[0].jid, 'bob2'
+    end
+
     it 'shows empty retries' do
       r = Sidekiq::RetrySet.new
       assert_equal 0, r.size
