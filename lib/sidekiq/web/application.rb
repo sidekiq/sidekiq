@@ -283,17 +283,13 @@ module Sidekiq
       action = self.class.match(env)
       return [404, {"Content-Type" => "text/plain", "X-Cascade" => "pass"}, ["Not Found"]] unless action
 
-      resp = catch(:halt) {
-        app = @klass
+      app = @klass
+      resp = catch(:halt) do
         self.class.run_befores(app, action)
-        begin
-          resp = action.instance_exec env, &action.block
-        ensure
-          self.class.run_afters(app, action)
-        end
-
-        resp
-      }
+        action.instance_exec env, &action.block
+      ensure
+        self.class.run_afters(app, action)
+      end
 
       resp = case resp
       when Array
