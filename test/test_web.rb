@@ -769,4 +769,28 @@ describe Sidekiq::Web do
       end
     end
   end
+
+  describe "redirecting in before" do
+    include Rack::Test::Methods
+
+    before do
+      Sidekiq::WebApplication.before { Thread.current[:some_setting] = :before }
+      Sidekiq::WebApplication.before { redirect '/' }
+      Sidekiq::WebApplication.after { Thread.current[:some_setting] = :after }
+    end
+
+    after do
+      Sidekiq::WebApplication.remove_instance_variable(:@befores)
+      Sidekiq::WebApplication.remove_instance_variable(:@afters)
+    end
+
+    def app
+      Sidekiq::Web.new
+    end
+
+    it "allows afters to run" do
+      get '/'
+      assert_equal :after, Thread.current[:some_setting]
+    end
+  end
 end
