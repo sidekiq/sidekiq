@@ -115,7 +115,8 @@ module Sidekiq
       end
     end
 
-    def display_tags(job)
+    # within is used by Sidekiq Pro
+    def display_tags(job, within = nil)
       job.tags.map { |tag|
         "<span class='jobtag label label-info'>#{::Rack::Utils.escape_html(tag)}</span>"
       }.join(" ")
