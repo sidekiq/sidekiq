@@ -61,7 +61,7 @@ Sidekiq::Client.push_bulk("class" => FooJob, "args" => [[1], [2]], "at" => [1.mi
 
 This release has major breaking changes.  Read and test carefully in production.
 
-- ActiveJobs can now use `sidekiq_options` directly to configure Sidekiq
+- With Rails 6.0.1+, ActiveJobs can now use `sidekiq_options` directly to configure Sidekiq
   features/internals like the retry subsystem. [#4213, pirj]
 ```ruby
 class MyJob < ActiveJob::Base
