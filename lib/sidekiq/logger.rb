@@ -4,7 +4,7 @@ require "logger"
 require "time"
 
 module Sidekiq
-  module LogContext
+  module LoggingUtils
     def with_context(hash)
       ctx.merge!(hash)
       yield
@@ -15,19 +15,37 @@ module Sidekiq
     def ctx
       Thread.current[:sidekiq_context] ||= {}
     end
-  end
 
-  module LoggerThreadSafeLevel
-    LOG_LEVEL_MAP = Hash[Logger::Severity.constants.map { |c| [c.to_s, Logger::Severity.const_get(c)] }]
-    LOG_LEVEL_MAP.default_proc = proc do |_, level|
-      Sidekiq.logger.info("Invalid log level: #{level.inspect}")
+    LEVELS = {
+      "debug" => 0,
+      "info" => 1,
+      "warn" => 2,
+      "error" => 3,
+      "fatal" => 4,
+    }
+    LEVELS.default_proc = proc do |_, level|
+      Sidekiq.logger.warn("Invalid log level: #{level.inspect}")
       nil
     end
 
-    Logger::Severity.constants.each do |severity|
-      define_method("#{severity.downcase}?") do
-        Logger.const_get(severity) >= level
-      end
+    def debug?
+      level >= 0
+    end
+
+    def info?
+      level >= 1
+    end
+
+    def warn?
+      level >= 2
+    end
+
+    def error?
+      level >= 3
+    end
+
+    def fatal?
+      level >= 4
     end
 
     def local_level
@@ -39,7 +57,7 @@ module Sidekiq
       when Integer
         Thread.current[:sidekiq_log_level] = level
       when Symbol, String
-        Thread.current[:sidekiq_log_level] = LOG_LEVEL_MAP[level.to_s.upcase]
+        Thread.current[:sidekiq_log_level] = LEVELS[level.to_s]
       when nil
         Thread.current[:sidekiq_log_level] = nil
       else
@@ -77,14 +95,12 @@ module Sidekiq
         end
       end
 
-      @logdev.write \
-        format_message(format_severity(severity), Time.now, progname, message)
+      @logdev.write format_message(format_severity(severity), Time.now, progname, message)
     end
   end
 
   class Logger < ::Logger
-    include LogContext
-    include LoggerThreadSafeLevel
+    include LoggingUtils
 
     def initialize(*args)
       super

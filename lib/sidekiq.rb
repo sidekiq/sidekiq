@@ -205,8 +205,7 @@ module Sidekiq
       return self.logger
     end
 
-    logger.extend(Sidekiq::LogContext)
-    logger.extend(Sidekiq::LoggerThreadSafeLevel)
+    logger.extend(Sidekiq::LoggingUtils)
 
     @logger = logger
   end
