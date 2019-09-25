@@ -283,8 +283,13 @@ module Sidekiq
 
     def parse_options(argv)
       opts = {}
+      @parser = option_parser(opts)
+      @parser.parse!(argv)
+      opts
+    end
 
-      @parser = OptionParser.new { |o|
+    def option_parser(opts)
+      parser = OptionParser.new { |o|
         o.on "-c", "--concurrency INT", "processor threads to use" do |arg|
           opts[:concurrency] = Integer(arg)
         end
@@ -336,15 +341,13 @@ module Sidekiq
         end
       }
 
-      @parser.banner = "sidekiq [options]"
-      @parser.on_tail "-h", "--help", "Show help" do
-        logger.info @parser
+      parser.banner = "sidekiq [options]"
+      parser.on_tail "-h", "--help", "Show help" do
+        logger.info parser
         die 1
       end
 
-      @parser.parse!(argv)
-
-      opts
+      parser
     end
 
     def initialize_logger
