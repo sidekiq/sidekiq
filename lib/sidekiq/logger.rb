@@ -17,8 +17,74 @@ module Sidekiq
     end
   end
 
+  module LoggerThreadSafeLevel
+    LOG_LEVEL_MAP = Hash[Logger::Severity.constants.map { |c| [c.to_s, Logger::Severity.const_get(c)] }]
+    LOG_LEVEL_MAP.default_proc = proc do |_, level|
+      Sidekiq.logger.info("Invalid log level: #{level.inspect}")
+      nil
+    end
+
+    Logger::Severity.constants.each do |severity|
+      define_method("#{severity.downcase}?") do
+        Logger.const_get(severity) >= level
+      end
+    end
+
+    def local_level
+      Thread.current[:sidekiq_log_level]
+    end
+
+    def local_level=(level)
+      case level
+      when Integer
+        Thread.current[:sidekiq_log_level] = level
+      when Symbol, String
+        Thread.current[:sidekiq_log_level] = LOG_LEVEL_MAP[level.to_s.upcase]
+      when nil
+        Thread.current[:sidekiq_log_level] = nil
+      else
+        raise ArgumentError, "Invalid log level: #{level.inspect}"
+      end
+    end
+
+    def level
+      local_level || super
+    end
+
+    # Change the thread-local level for the duration of the given block.
+    def log_at(level)
+      old_local_level = local_level
+      self.local_level = level
+      yield
+    ensure
+      self.local_level = old_local_level
+    end
+
+    # Redefined to check severity against #level, and thus the thread-local level, rather than +@level+.
+    # FIXME: Remove when the minimum Ruby version supports overriding Logger#level.
+    def add(severity, message = nil, progname = nil, &block)
+      severity ||= UNKNOWN
+      progname ||= @progname
+
+      return true if @logdev.nil? || severity < level
+
+      if message.nil?
+        if block_given?
+          message = yield
+        else
+          message = progname
+          progname = @progname
+        end
+      end
+
+      @logdev.write \
+        format_message(format_severity(severity), Time.now, progname, message)
+    end
+  end
+
   class Logger < ::Logger
     include LogContext
+    include LoggerThreadSafeLevel
 
     def initialize(*args)
       super

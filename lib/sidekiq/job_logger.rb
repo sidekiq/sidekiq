@@ -23,8 +23,15 @@ module Sidekiq
       raise
     end
 
-    def with_job_hash_context(job_hash, &block)
-      @logger.with_context(job_hash_context(job_hash), &block)
+    def with_job_hash_context_and_log_level(job_hash, &block)
+      level = job_hash["log_level"]
+      if level
+        @logger.log_at(level) do
+          @logger.with_context(job_hash_context(job_hash), &block)
+        end
+      else
+        @logger.with_context(job_hash_context(job_hash), &block)
+      end
     end
 
     def job_hash_context(job_hash)

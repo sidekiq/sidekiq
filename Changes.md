@@ -5,6 +5,11 @@
 HEAD
 ---------
 
+- Support job-specific log levels. This will allow you to turn on debugging for
+  problematic workers. [fatkodima, #4287]
+```ruby
+MyWorker.set(log_level: :debug).perform_async(...)
+```
 - Support ad-hoc job tags. You can tag your jobs with, e.g, subdomain, tenant, country,
   locale, application, version, user/client, "alpha/beta/pro/ent", types of jobs,
   teams/people responsible for jobs, additional metadata, etc.
