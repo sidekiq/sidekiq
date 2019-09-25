@@ -117,7 +117,7 @@ module Sidekiq
       # job structure to the Web UI
       pristine = cloned(job_hash)
 
-      @job_logger.with_job_hash_context_and_log_level(job_hash) do
+      @job_logger.prepare(job_hash) do
         @retrier.global(pristine, queue) do
           @job_logger.call(job_hash, queue) do
             stats(pristine, queue) do

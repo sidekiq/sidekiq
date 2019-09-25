@@ -27,7 +27,7 @@ class TestJobLogger < Minitest::Test
     p = @logger.formatter = Sidekiq::Logger::Formatters::Pretty.new
     job = {"jid"=>"1234abc", "wrapped"=>"FooWorker", "class"=>"Wrapper", "tags" => ["bar", "baz"]}
     # this mocks what Processor does
-    jl.with_job_hash_context_and_log_level(job) do
+    jl.prepare(job) do
       jl.call(job, 'queue') {}
     end
 
@@ -47,7 +47,7 @@ class TestJobLogger < Minitest::Test
     jl = Sidekiq::JobLogger.new(@logger)
     job = {"jid"=>"1234abc", "wrapped"=>"Wrapper", "class"=>"FooWorker", "bid"=>"b-xyz", "tags" => ["bar", "baz"]}
     # this mocks what Processor does
-    jl.with_job_hash_context_and_log_level(job) do
+    jl.prepare(job) do
       jl.call(job, 'queue') {}
     end
     a, b = @output.string.lines
@@ -65,7 +65,7 @@ class TestJobLogger < Minitest::Test
     job = {"class"=>"FooWorker", "log_level"=>"debug"}
 
     assert @logger.info?
-    jl.with_job_hash_context_and_log_level(job) do
+    jl.prepare(job) do
       jl.call(job, "queue") do
         assert @logger.debug?
         @logger.debug("debug message")
@@ -84,7 +84,7 @@ class TestJobLogger < Minitest::Test
     job = {"class"=>"FooWorker", "log_level"=>"non_existent"}
 
     assert @logger.info?
-    jl.with_job_hash_context_and_log_level(job) do
+    jl.prepare(job) do
       jl.call(job, "queue") do
         assert @logger.info?
       end
