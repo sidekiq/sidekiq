@@ -117,7 +117,7 @@ module Sidekiq
       # job structure to the Web UI
       pristine = cloned(job_hash)
 
-      @job_logger.with_job_hash_context(job_hash) do
+      @job_logger.prepare(job_hash) do
         @retrier.global(pristine, queue) do
           @job_logger.call(job_hash, queue) do
             stats(pristine, queue) do
@@ -126,7 +126,7 @@ module Sidekiq
               # the Reloader.  It handles code loading, db connection management, etc.
               # Effectively this block denotes a "unit of work" to Rails.
               @reloader.call do
-                klass  = constantize(job_hash["class"])
+                klass = constantize(job_hash["class"])
                 worker = klass.new
                 worker.jid = job_hash["jid"]
                 @retrier.local(worker, pristine, queue) do
@@ -269,13 +269,15 @@ module Sidekiq
     end
 
     def constantize(str)
+      return Object.const_get(str) unless str.include?("::")
+
       names = str.split("::")
       names.shift if names.empty? || names.first.empty?
 
       names.inject(Object) do |constant, name|
         # the false flag limits search for name to under the constant namespace
         #   which mimics Rails' behaviour
-        constant.const_defined?(name, false) ? constant.const_get(name, false) : constant.const_missing(name)
+        constant.const_get(name, false)
       end
     end
   end

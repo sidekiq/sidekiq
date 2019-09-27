@@ -84,7 +84,7 @@ module Sidekiq
 
       @count = (params["count"] || 25).to_i
       @queue = Sidekiq::Queue.new(@name)
-      (@current_page, @total_size, @messages) = page("queue:#{@name}", params["page"], @count)
+      (@current_page, @total_size, @messages) = page("queue:#{@name}", params["page"], @count, reverse: params["direction"] == "asc")
       @messages = @messages.map { |msg| Sidekiq::Job.new(msg, @name) }
 
       erb(:queue)
@@ -257,7 +257,7 @@ module Sidekiq
 
     get "/stats" do
       sidekiq_stats = Sidekiq::Stats.new
-      redis_stats   = redis_info.select { |k, v| REDIS_KEYS.include? k }
+      redis_stats = redis_info.select { |k, v| REDIS_KEYS.include? k }
       json(
         sidekiq: {
           processed: sidekiq_stats.processed,

@@ -119,7 +119,7 @@ module Sidekiq
       end
     rescue Redis::CommandError => ex
       # 2850 return fake version when INFO command has (probably) been renamed
-      raise unless ex.message =~ /unknown command/
+      raise unless /unknown command/.match?(ex.message)
       FAKE_INFO
     end
   end
@@ -192,6 +192,7 @@ module Sidekiq
 
   def self.log_formatter=(log_formatter)
     @log_formatter = log_formatter
+    logger.formatter = log_formatter
   end
 
   def self.logger
@@ -199,6 +200,13 @@ module Sidekiq
   end
 
   def self.logger=(logger)
+    if logger.nil?
+      self.logger.level = Logger::FATAL
+      return self.logger
+    end
+
+    logger.extend(Sidekiq::LoggingUtils)
+
     @logger = logger
   end
 

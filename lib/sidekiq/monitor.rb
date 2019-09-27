@@ -11,7 +11,7 @@ class Sidekiq::Monitor
   def self.print_usage
     puts "#{CMD} - monitor Sidekiq from the command line."
     puts
-    puts "Usage: #{CMD} status <section>"
+    puts "Usage: #{CMD} <section>"
     puts
     puts "       <section> (optional) view a specific section of the status output"
     puts "       Valid sections are: #{Sidekiq::Monitor::Status::VALID_SECTIONS.join(", ")}"
@@ -47,7 +47,7 @@ class Sidekiq::Monitor
 
     def version
       puts "Sidekiq #{Sidekiq::VERSION}"
-      puts Time.now
+      puts Time.now.utc
     end
 
     def overview

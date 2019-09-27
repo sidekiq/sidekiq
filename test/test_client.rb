@@ -28,6 +28,14 @@ describe Sidekiq::Client do
       assert_raises ArgumentError do
         Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1], 'at' => Time.now)
       end
+
+      assert_raises ArgumentError do
+        Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1, 2], 'at' => [Time.now.to_f, :not_a_numeric])
+      end
+
+      assert_raises ArgumentError do
+        Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1], 'tags' => :not_an_array)
+      end
     end
   end
 
@@ -118,19 +126,32 @@ describe Sidekiq::Client do
     after do
       Sidekiq::Queue.new.clear
     end
+
     it 'can push a large set of jobs at once' do
       jids = Sidekiq::Client.push_bulk('class' => QueuedWorker, 'args' => (1..1_000).to_a.map { |x| Array(x) })
       assert_equal 1_000, jids.size
     end
+
     it 'can push a large set of jobs at once using a String class' do
       jids = Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => (1..1_000).to_a.map { |x| Array(x) })
       assert_equal 1_000, jids.size
     end
+
+    it 'can push jobs scheduled at different times' do
+      first_at = Time.new(2019, 1, 1)
+      second_at = Time.new(2019, 1, 2)
+      jids = Sidekiq::Client.push_bulk('class' => QueuedWorker, 'args' => [[1], [2]], 'at' => [first_at.to_f, second_at.to_f])
+      (first_jid, second_jid) = jids
+      assert_equal first_at, Sidekiq::ScheduledSet.new.find_job(first_jid).at
+      assert_equal second_at, Sidekiq::ScheduledSet.new.find_job(second_jid).at
+    end
+
     it 'returns the jids for the jobs' do
       Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => (1..2).to_a.map { |x| Array(x) }).each do |jid|
         assert_match(/[0-9a-f]{12}/, jid)
       end
     end
+
     it 'handles no jobs' do
       result = Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => [])
       assert_equal 0, result.size

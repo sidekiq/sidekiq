@@ -13,32 +13,26 @@ Sidekiq uses threads to handle many jobs at the same time in the
 same process.  It does not require Rails but will integrate tightly with
 Rails to make background processing dead simple.
 
-Sidekiq is compatible with Resque.  It uses the exact same
-message format as Resque so it can integrate into an existing Resque processing farm.
-You can have Sidekiq and Resque run side-by-side at the same time and
-use the Resque client to enqueue jobs in Redis to be processed by Sidekiq.
-
 Performance
 ---------------
 
-Version |	Latency | Garbage created for 10,000 jobs	| Time to process 100,000 jobs |	Throughput
------------------|------|---------|---------|------------------------
-Sidekiq 4.0.0    | 10ms	| 151 MB  | 22 sec  | **4500 jobs/sec**
-Sidekiq 3.5.1    | 22ms	| 1257 MB | 125 sec | 800 jobs/sec
-Resque 1.25.2    |  -	  | -       | 420 sec | 240 jobs/sec
-DelayedJob 4.1.1 |  -   | -       | 465 sec | 215 jobs/sec
+Version |	Latency | Garbage created for 10k jobs	| Time to process 100k jobs |	Throughput | Ruby
+-----------------|------|---------|---------|------------------------|-----
+Sidekiq 6.0.0    | 3 ms	| 156 MB  | 19 sec  | **5200 jobs/sec** | MRI 2.6.3
+Sidekiq 4.0.0    | 10 ms	| 151 MB  | 22 sec  | 4500 jobs/sec |
+Sidekiq 3.5.1    | 22 ms	| 1257 MB | 125 sec | 800 jobs/sec |
+Resque 1.25.2    |  -	  | -       | 420 sec | 240 jobs/sec |
+DelayedJob 4.1.1 |  -   | -       | 465 sec | 215 jobs/sec |
 
-<small>This benchmark can be found in `bin/sidekiqload`.</small>
+This benchmark can be found in `bin/sidekiqload` and assumes a Redis network latency of 1ms.
 
 Requirements
 -----------------
 
-Sidekiq supports CRuby 2.2.2+ and JRuby 9k.
+- Redis: 4.0+
+- Ruby: MRI 2.5+ or JRuby 9.2+.
 
-All Rails releases >= 4.0 are officially supported.
-
-Redis 2.8 or greater is required.  3.0.3+ is recommended for large
-installations with thousands of worker threads.
+Sidekiq 6.0 supports Rails 5.0+ but does not require it.
 
 
 Installation

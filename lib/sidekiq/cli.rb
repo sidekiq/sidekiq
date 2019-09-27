@@ -56,8 +56,7 @@ module Sidekiq
       # touch the connection pool so it is created before we
       # fire startup and start multithreading.
       ver = Sidekiq.redis_info["redis_version"]
-      raise "You are using Redis v#{ver}, Sidekiq requires Redis v2.8.0 or greater" if ver < "2.8"
-      logger.warn "Sidekiq 6.0 requires Redis 4.0+, you are using Redis v#{ver}" if ver < "4"
+      raise "You are using Redis v#{ver}, Sidekiq requires Redis v4.0.0 or greater" if ver < "4"
 
       # Since the user can pass us a connection pool explicitly in the initializer, we
       # need to verify the size is large enough or else Sidekiq's performance is dramatically slowed.
@@ -98,9 +97,13 @@ module Sidekiq
       rescue Interrupt
         logger.info "Shutting down"
         launcher.stop
-        # Explicitly exit so busy Processor threads can't block
-        # process shutdown.
         logger.info "Bye!"
+
+        # Explicitly exit so busy Processor threads won't block process shutdown.
+        #
+        # NB: slow at_exit handlers will prevent a timely exit if they take
+        # a while to run. If Sidekiq is getting here but the process isn't exiting,
+        # use the TTIN signal to determine where things are stuck.
         exit(0)
       end
     end
@@ -266,7 +269,7 @@ module Sidekiq
       if !File.exist?(options[:require]) ||
           (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))
         logger.info "=================================================================="
-        logger.info "  Please point sidekiq to a Rails 4/5 application or a Ruby file  "
+        logger.info "  Please point Sidekiq to a Rails application or a Ruby file  "
         logger.info "  to load your worker classes with -r [DIR|FILE]."
         logger.info "=================================================================="
         logger.info @parser
@@ -280,14 +283,19 @@ module Sidekiq
 
     def parse_options(argv)
       opts = {}
+      @parser = option_parser(opts)
+      @parser.parse!(argv)
+      opts
+    end
 
-      @parser = OptionParser.new { |o|
+    def option_parser(opts)
+      parser = OptionParser.new { |o|
         o.on "-c", "--concurrency INT", "processor threads to use" do |arg|
           opts[:concurrency] = Integer(arg)
         end
 
         o.on "-d", "--daemon", "Daemonize process" do |arg|
-          puts "WARNING: Daemonization mode was removed in Sidekiq 6.0, please use a proper process supervisor to start and manage your services"
+          puts "ERROR: Daemonization mode was removed in Sidekiq 6.0, please use a proper process supervisor to start and manage your services"
         end
 
         o.on "-e", "--environment ENV", "Application environment" do |arg|
@@ -320,11 +328,11 @@ module Sidekiq
         end
 
         o.on "-L", "--logfile PATH", "path to writable logfile" do |arg|
-          puts "WARNING: Logfile redirection was removed in Sidekiq 6.0, Sidekiq will only log to STDOUT"
+          puts "ERROR: Logfile redirection was removed in Sidekiq 6.0, Sidekiq will only log to STDOUT"
         end
 
         o.on "-P", "--pidfile PATH", "path to pidfile" do |arg|
-          puts "WARNING: PID file creation was removed in Sidekiq 6.0, please use a proper process supervisor to start and manage your services"
+          puts "ERROR: PID file creation was removed in Sidekiq 6.0, please use a proper process supervisor to start and manage your services"
         end
 
         o.on "-V", "--version", "Print version and exit" do |arg|
@@ -333,15 +341,13 @@ module Sidekiq
         end
       }
 
-      @parser.banner = "sidekiq [options]"
-      @parser.on_tail "-h", "--help", "Show help" do
-        logger.info @parser
+      parser.banner = "sidekiq [options]"
+      parser.on_tail "-h", "--help", "Show help" do
+        logger.info parser
         die 1
       end
 
-      @parser.parse!(argv)
-
-      opts
+      parser
     end
 
     def initialize_logger
@@ -360,12 +366,6 @@ module Sidekiq
       opts = opts.merge(opts.delete(environment.to_sym) || {})
       parse_queues(opts, opts.delete(:queues) || [])
 
-      ns = opts.delete(:namespace)
-      if ns
-        # logger hasn't been initialized yet, puts is all we have.
-        puts("namespace should be set in your ruby initializer, is ignored in config file")
-        puts("config.redis = { :url => ..., :namespace => '#{ns}' }")
-      end
       opts
     end
 

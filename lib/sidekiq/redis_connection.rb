@@ -124,8 +124,8 @@ module Sidekiq
             REDIS_PROVIDER should be set to the name of the variable which contains the Redis URL, not a URL itself.
             Platforms like Heroku will sell addons that publish a *_URL variable.  You need to tell Sidekiq with REDIS_PROVIDER, e.g.:
 
-            REDIS_PROVIDER=REDISTOGO_URL
             REDISTOGO_URL=redis://somehost.example.com:6379/4
+            REDIS_PROVIDER=REDISTOGO_URL
           EOM
         end
 

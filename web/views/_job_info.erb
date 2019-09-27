@@ -14,7 +14,8 @@
       <tr>
         <th><%= t('Job') %></th>
         <td>
-          <code><%= job.display_class %></code>
+          <%= job.display_class %>
+          <%= display_tags(job) %>
         </td>
       </tr>
       <tr>

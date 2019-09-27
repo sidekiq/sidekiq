@@ -3,6 +3,9 @@
 require "sidekiq/scheduled"
 require "sidekiq/api"
 
+require "zlib"
+require "base64"
+
 module Sidekiq
   ##
   # Automatically retry jobs that fail in Sidekiq.
@@ -151,12 +154,14 @@ module Sidekiq
         msg["retry_count"] = 0
       end
 
-      if msg["backtrace"] == true
-        msg["error_backtrace"] = exception.backtrace
-      elsif !msg["backtrace"]
-        # do nothing
-      elsif msg["backtrace"].to_i != 0
-        msg["error_backtrace"] = exception.backtrace[0...msg["backtrace"].to_i]
+      if msg["backtrace"]
+        lines = if msg["backtrace"] == true
+          exception.backtrace
+        else
+          exception.backtrace[0...msg["backtrace"].to_i]
+        end
+
+        msg["error_backtrace"] = compress_backtrace(lines)
       end
 
       if count < max_retry_attempts
@@ -244,6 +249,12 @@ module Sidekiq
       exception.message.to_s[0, 10_000]
     rescue
       +"!!! ERROR MESSAGE THREW AN ERROR !!!"
+    end
+
+    def compress_backtrace(backtrace)
+      serialized = Marshal.dump(backtrace)
+      compressed = Zlib::Deflate.deflate(serialized)
+      Base64.encode64(compressed)
     end
   end
 end

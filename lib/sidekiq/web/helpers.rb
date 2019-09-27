@@ -65,7 +65,10 @@ module Sidekiq
 
     def poll_path
       if current_path != "" && params["poll"]
-        root_path + current_path
+        path = root_path + current_path
+        query_string = to_query_string(params.slice(*params.keys - %w[page poll]))
+        path += "?#{query_string}" unless query_string.empty?
+        path
       else
         ""
       end
@@ -84,7 +87,7 @@ module Sidekiq
       languages = env["HTTP_ACCEPT_LANGUAGE"]
       languages.to_s.downcase.gsub(/\s+/, "").split(",").map { |language|
         locale, quality = language.split(";q=", 2)
-        locale  = nil if locale == "*" # Ignore wildcards
+        locale = nil if locale == "*" # Ignore wildcards
         quality = quality ? quality.to_f : 1.0
         [locale, quality]
       }.sort { |(_, left), (_, right)|
@@ -112,6 +115,13 @@ module Sidekiq
       end
     end
 
+    # within is used by Sidekiq Pro
+    def display_tags(job, within = nil)
+      job.tags.map { |tag|
+        "<span class='jobtag label label-info'>#{::Rack::Utils.escape_html(tag)}</span>"
+      }.join(" ")
+    end
+
     # mperham/sidekiq#3243
     def unfiltered?
       yield unless env["PATH_INFO"].start_with?("/filter/")
@@ -128,6 +138,10 @@ module Sidekiq
       else
         string % options
       end
+    end
+
+    def sort_direction_label
+      params[:direction] == "asc" ? "&uarr;" : "&darr;"
     end
 
     def workers
@@ -189,7 +203,7 @@ module Sidekiq
       [score.to_f, jid]
     end
 
-    SAFE_QPARAMS = %w[page poll]
+    SAFE_QPARAMS = %w[page poll direction]
 
     # Merge options with current params, filter safe params, and stringify to query string
     def qparams(options)
@@ -198,7 +212,11 @@ module Sidekiq
         options[key.to_s] = options.delete(key)
       end
 
-      params.merge(options).map { |key, value|
+      to_query_string(params.merge(options))
+    end
+
+    def to_query_string(params)
+      params.map { |key, value|
         SAFE_QPARAMS.include?(key) ? "#{key}=#{CGI.escape(value.to_s)}" : next
       }.compact.join("&")
     end
@@ -238,7 +256,7 @@ module Sidekiq
       queue class args retry_count retried_at failed_at
       jid error_message error_class backtrace
       error_backtrace enqueued_at retry wrapped
-      created_at
+      created_at tags
     ])
 
     def retry_extra_items(retry_job)

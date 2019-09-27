@@ -87,7 +87,10 @@
         <td>
           <a href="<%= root_path %>queues/<%= msg['queue'] %>"><%= msg['queue'] %></a>
         </td>
-        <td><%= job.display_class %></td>
+        <td>
+          <%= job.display_class %>
+          <%= display_tags(job, nil) %>
+        </td>
         <td>
           <div class="args"><%= display_args(job.display_args) %></div>
         </td>

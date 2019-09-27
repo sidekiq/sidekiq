@@ -9,20 +9,6 @@ describe 'API' do
     Sidekiq.redis {|c| c.flushdb }
   end
 
-  describe 'RedisScanner' do
-    it 'returns identical to smembers' do
-      test_obj = Object.new
-      test_obj.extend(Sidekiq::RedisScanner)
-      50.times do |i|
-        Sidekiq.redis { |conn| conn.sadd('processes', "test-process-#{i}") }
-      end
-      sscan = Sidekiq.redis { |c| test_obj.sscan(c, 'processes') }.sort!
-      smembers = Sidekiq.redis { |c| c.smembers('processes') }.sort!
-      assert_equal sscan.size, 50
-      assert_equal sscan, smembers
-    end
-  end
-
   describe "stats" do
     it "is initially zero" do
       s = Sidekiq::Stats.new
@@ -226,6 +212,11 @@ describe 'API' do
       include Sidekiq::Worker
     end
 
+    class WorkerWithTags
+      include Sidekiq::Worker
+      sidekiq_options tags: ['foo']
+    end
+
     it 'can enumerate jobs' do
       q = Sidekiq::Queue.new
       Time.stub(:now, Time.new(2012, 12, 26)) do
@@ -268,26 +259,53 @@ describe 'API' do
       assert_equal [1,2,3], x.display_args
     end
 
-    it 'unwraps ActiveJob jobs' do
-      ApiJob.perform_later(1, 2, 3)
-      q = Sidekiq::Queue.new
-      x = q.first
-      assert_equal ApiJob.name, x.display_class
-      assert_equal [1,2,3], x.display_args
+    it 'handles old jobs error_backtrace format' do
+      add_retry
+      job = Sidekiq::RetrySet.new.first
+      assert_equal ['line1', 'line2'], job.error_backtrace
     end
 
-    it 'unwraps ActionMailer jobs' do
-      ApiMailer.test_email(1, 2, 3).deliver_later
-      q = Sidekiq::Queue.new('mailers')
-      x = q.first
-      assert_equal "#{ApiMailer.name}#test_email", x.display_class
-      assert_equal [1,2,3], x.display_args
+    describe "Rails unwrapping" do
+      SERIALIZED_JOBS = {
+        "5.x" => [
+          '{"class":"ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper","wrapped":"ApiJob","queue":"default","args":[{"job_class":"ApiJob","job_id":"f1bde53f-3852-4ae4-a879-c12eacebbbb0","provider_job_id":null,"queue_name":"default","priority":null,"arguments":[1,2,3],"executions":0,"locale":"en"}],"retry":true,"jid":"099eee72911085a511d0e312","created_at":1568305542.339916,"enqueued_at":1568305542.339947}',
+          '{"class":"ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper","wrapped":"ActionMailer::DeliveryJob","queue":"mailers","args":[{"job_class":"ActionMailer::DeliveryJob","job_id":"19cc0115-3d1c-4bbe-a51e-bfa1385895d1","provider_job_id":null,"queue_name":"mailers","priority":null,"arguments":["ApiMailer","test_email","deliver_now",1,2,3],"executions":0,"locale":"en"}],"retry":true,"jid":"37436e5504936400e8cf98db","created_at":1568305542.370133,"enqueued_at":1568305542.370241}',
+        ],
+        "6.x" => [
+          '{"class":"ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper","wrapped":"ApiJob","queue":"default","args":[{"job_class":"ApiJob","job_id":"ff2b48d4-bdce-4825-af6b-ef8c11ab651e","provider_job_id":null,"queue_name":"default","priority":null,"arguments":[1,2,3],"executions":0,"exception_executions":{},"locale":"en","timezone":"UTC","enqueued_at":"2019-09-12T16:28:37Z"}],"retry":true,"jid":"ce121bf77b37ae81fe61b6dc","created_at":1568305717.9469702,"enqueued_at":1568305717.947005}',
+          '{"class":"ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper","wrapped":"ActionMailer::MailDeliveryJob","queue":"mailers","args":[{"job_class":"ActionMailer::MailDeliveryJob","job_id":"2f967da1-a389-479c-9a4e-5cc059e6d65c","provider_job_id":null,"queue_name":"mailers","priority":null,"arguments":["ApiMailer","test_email","deliver_now",{"args":[1,2,3],"_aj_symbol_keys":["args"]}],"executions":0,"exception_executions":{},"locale":"en","timezone":"UTC","enqueued_at":"2019-09-12T16:28:37Z"}],"retry":true,"jid":"469979df52bb9ef9f48b49e1","created_at":1568305717.9457421,"enqueued_at":1568305717.9457731}',
+        ],
+      }.each_pair do |ver,jobs|
+        it "unwraps ActiveJob #{ver} jobs" do
+          #ApiJob.perform_later(1,2,3)
+          #puts Sidekiq::Queue.new.first.value
+          x = Sidekiq::Job.new(jobs[0], "default")
+          assert_equal ApiJob.name, x.display_class
+          assert_equal [1,2,3], x.display_args
+        end
+
+        it "unwraps ActionMailer #{ver} jobs" do
+          #ApiMailer.test_email(1,2,3).deliver_later
+          #puts Sidekiq::Queue.new("mailers").first.value
+          x = Sidekiq::Job.new(jobs[1], "mailers")
+          assert_equal "#{ApiMailer.name}#test_email", x.display_class
+          assert_equal [1,2,3], x.display_args
+        end
+      end
     end
 
     it 'has no enqueued_at time for jobs enqueued in the future' do
       job_id = ApiWorker.perform_in(100, 1, 'foo')
       job = Sidekiq::ScheduledSet.new.find_job(job_id)
       assert_nil job.enqueued_at
+    end
+
+    it 'returns tags field for jobs' do
+      job_id = ApiWorker.perform_async
+      assert_equal [], Sidekiq::Queue.new.find_job(job_id).tags
+
+      job_id = WorkerWithTags.perform_async
+      assert_equal ['foo'], Sidekiq::Queue.new.find_job(job_id).tags
     end
 
     it 'can delete jobs' do
@@ -339,6 +357,19 @@ describe 'API' do
       assert_equal 0, ds.size
       job.kill
       assert_equal 1, ds.size
+    end
+
+    it 'can find a scheduled job by jid' do
+      10.times do |idx|
+        ApiWorker.perform_in(idx, 1)
+      end
+
+      job_id = ApiWorker.perform_in(5, 1)
+      job = Sidekiq::ScheduledSet.new.find_job(job_id)
+      assert_equal job_id, job.jid
+
+      ApiWorker.perform_in(100, 1, 'jid' => 'jid_in_args')
+      assert_nil Sidekiq::ScheduledSet.new.find_job('jid_in_args')
     end
 
     it 'can remove jobs when iterating over a sorted set' do
@@ -394,6 +425,28 @@ describe 'API' do
       add_retry('bob2', same_time)
       r = Sidekiq::RetrySet.new
       assert_equal 1, r.fetch(same_time, 'bob1').size
+    end
+
+    it 'can fetch by score range' do
+      same_time = Time.now.to_f
+      add_retry('bob1', same_time)
+      add_retry('bob2', same_time + 1)
+      add_retry('bob3', same_time + 2)
+      r = Sidekiq::RetrySet.new
+      range = (same_time..(same_time + 1))
+      assert_equal 2, r.fetch(range).size
+    end
+
+    it 'can fetch by score range and jid' do
+      same_time = Time.now.to_f
+      add_retry('bob1', same_time)
+      add_retry('bob2', same_time + 1)
+      add_retry('bob3', same_time + 2)
+      r = Sidekiq::RetrySet.new
+      range = (same_time..(same_time + 1))
+      jobs = r.fetch(range, 'bob2')
+      assert_equal 1, jobs.size
+      assert_equal jobs[0].jid, 'bob2'
     end
 
     it 'shows empty retries' do
@@ -453,6 +506,15 @@ describe 'API' do
       assert_equal 2, r.size
       r.clear
       assert_equal 0, r.size
+    end
+
+    it 'can scan retries' do
+      add_retry
+      add_retry('test')
+      r = Sidekiq::RetrySet.new
+      assert_instance_of Enumerator, r.scan('Worker')
+      assert_equal 2, r.scan('ApiWorker').to_a.size
+      assert_equal 1, r.scan('*test*').to_a.size
     end
 
     it 'can enumerate processes' do
@@ -566,7 +628,7 @@ describe 'API' do
     end
 
     def add_retry(jid = 'bob', at = Time.now.to_f)
-      payload = Sidekiq.dump_json('class' => 'ApiWorker', 'args' => [1, 'mike'], 'queue' => 'default', 'jid' => jid, 'retry_count' => 2, 'failed_at' => Time.now.to_f)
+      payload = Sidekiq.dump_json('class' => 'ApiWorker', 'args' => [1, 'mike'], 'queue' => 'default', 'jid' => jid, 'retry_count' => 2, 'failed_at' => Time.now.to_f, 'error_backtrace' => ['line1', 'line2'])
       Sidekiq.redis do |conn|
         conn.zadd('retry', at.to_s, payload)
       end

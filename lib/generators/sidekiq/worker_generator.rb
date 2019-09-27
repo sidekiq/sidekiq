@@ -16,6 +16,8 @@ module Sidekiq
       end
 
       def create_test_file
+        return unless test_framework
+
         if defined?(RSpec)
           create_worker_spec
         else
@@ -41,6 +43,14 @@ module Sidekiq
           "#{file_name}_worker_test.rb"
         )
         template "worker_test.rb.erb", template_file
+      end
+
+      def file_name
+        @_file_name ||= super.sub(/_?worker\z/i, "")
+      end
+
+      def test_framework
+        ::Rails.application.config.generators.options[:rails][:test_framework]
       end
     end
   end

@@ -38,7 +38,10 @@
             <td>
               <a href="<%= root_path %>queues/<%= entry.queue %>"><%= entry.queue %></a>
             </td>
-            <td><%= entry.display_class %></td>
+            <td>
+              <%= entry.display_class %>
+              <%= display_tags(entry, "scheduled") %>
+            </td>
             <td>
                <div class="args"><%= display_args(entry.display_args) %></div>
             </td>

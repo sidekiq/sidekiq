@@ -15,13 +15,22 @@
 <div class="table_container">
   <table class="queue table table-hover table-bordered table-striped">
     <thead>
+      <th><a href="<%= url %>?direction=<%= params[:direction] == 'asc' ? 'desc' : 'asc' %>"># <%= sort_direction_label %></a></th>
       <th><%= t('Job') %></th>
       <th><%= t('Arguments') %></th>
       <th></th>
     </thead>
     <% @messages.each_with_index do |msg, index| %>
       <tr>
-        <td><%= h(msg.display_class) %></td>
+        <% if params[:direction] == 'asc' %>
+          <td><%= @count * (@current_page - 1) + index + 1 %></td>
+        <% else %>
+          <td><%= @total_size - (@count * (@current_page - 1) + index) %></td>
+        <% end %>
+        <td>
+          <%= h(msg.display_class) %>
+          <%= display_tags(msg, nil) %>
+        </td>
         <td>
           <% a = msg.display_args %>
           <% if a.inspect.size > 100 %>

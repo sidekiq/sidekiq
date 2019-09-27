@@ -2,12 +2,71 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
+HEAD
+---------
+
+- Support job-specific log levels. This will allow you to turn on debugging for
+  problematic workers. [fatkodima, #4287]
+```ruby
+MyWorker.set(log_level: :debug).perform_async(...)
+```
+- Support ad-hoc job tags. You can tag your jobs with, e.g, subdomain, tenant, country,
+  locale, application, version, user/client, "alpha/beta/pro/ent", types of jobs,
+  teams/people responsible for jobs, additional metadata, etc.
+  Tags are shown on different pages with job listings. Sidekiq Pro users
+  can filter based on them [fatkodima, #4280]
+```ruby
+class MyWorker
+  include Sidekiq::Worker
+  sidekiq_options tags: ['bank-ops', 'alpha']
+  ...
+end
+```
+- Get scheduled jobs in batches before pushing into specific queues.
+  This will decrease enqueueing time of scheduled jobs by a third. [fatkodima, #4273]
+```
+ScheduledSet with 10,000 jobs
+Before: 56.6 seconds
+After:  39.2 seconds
+```
+- Compress error backtraces before pushing into Redis, if you are
+  storing error backtraces, this will halve the size of your RetrySet
+  in Redis [fatkodima, #4272]
+```
+RetrySet with 100,000 jobs
+Before: 261 MB
+After:  129 MB
+```
+- Support display of ActiveJob 6.0 payloads in the Web UI [#4263]
+- Add `SortedSet#scan` for pattern based scanning. For large sets this API will be **MUCH** faster
+  than standard iteration using each. [fatkodima, #4262]
+```ruby
+  Sidekiq::DeadSet.new.scan("UnreliableApi") do |job|
+    job.retry
+  end
+```
+- Dramatically speed up SortedSet#find\_job(jid) by using Redis's ZSCAN
+  support, approx 10x faster. [fatkodima, #4259]
+```
+zscan   0.179366   0.047727   0.227093 (  1.161376)
+enum    8.522311   0.419826   8.942137 (  9.785079)
+```
+- Respect rails' generators `test_framework` option and gracefully handle extra `worker` suffix on generator [fatkodima, #4256]
+- Add ability to sort 'Enqueued' page on Web UI by position in the queue [fatkodima, #4248]
+- Support `Client.push_bulk` with different delays [fatkodima, #4243]
+```ruby
+Sidekiq::Client.push_bulk("class" => FooJob, "args" => [[1], [2]], "at" => [1.minute.from_now.to_f, 5.minutes.from_now.to_f])
+```
+- Add `sidekiqmon` to gemspec executables [#4242]
+- Gracefully handle `Sidekiq.logger = nil` [#4240]
+- Inject Sidekiq::LogContext module if user-supplied logger does not include it [#4239]
+
 6.0
 ---------
 
 This release has major breaking changes.  Read and test carefully in production.
 
-- ActiveJobs can now use `sidekiq_options` directly to configure Sidekiq
+- With Rails 6.0.1+, ActiveJobs can now use `sidekiq_options` directly to configure Sidekiq
   features/internals like the retry subsystem. [#4213, pirj]
 ```ruby
 class MyJob < ActiveJob::Base
@@ -17,6 +76,13 @@ class MyJob < ActiveJob::Base
   end
 end
 ```
+- Logging has been redesigned to allow for pluggable log formatters:
+```ruby
+Sidekiq.configure_server do |config|
+  config.log_formatter = Sidekiq::Logger::Formatters::JSON.new
+end
+```
+See the [Logging wiki page](https://github.com/mperham/sidekiq/wiki/Logging) for more details.
 - **BREAKING CHANGE** Validate proper usage of the `REDIS_PROVIDER`
   variable.  This variable is meant to hold the name of the environment
   variable which contains your Redis URL, so that you can switch Redis
