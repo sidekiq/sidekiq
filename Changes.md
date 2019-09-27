@@ -5,12 +5,14 @@
 HEAD
 ---------
 
-- Support job-specific log levels. This will allow you to turn on debugging for
+- **Dark Mode support in Web UI** (further design polish welcome!) [#4227, mperham,
+  fatkodima, silent-e]
+- **Job-specific log levels**, allowing you to turn on debugging for
   problematic workers. [fatkodima, #4287]
 ```ruby
 MyWorker.set(log_level: :debug).perform_async(...)
 ```
-- Support ad-hoc job tags. You can tag your jobs with, e.g, subdomain, tenant, country,
+- **Ad-hoc job tags**. You can tag your jobs with, e.g, subdomain, tenant, country,
   locale, application, version, user/client, "alpha/beta/pro/ent", types of jobs,
   teams/people responsible for jobs, additional metadata, etc.
   Tags are shown on different pages with job listings. Sidekiq Pro users
@@ -22,7 +24,7 @@ class MyWorker
   ...
 end
 ```
-- Get scheduled jobs in batches before pushing into specific queues.
+- Fetch scheduled jobs in batches before pushing into specific queues.
   This will decrease enqueueing time of scheduled jobs by a third. [fatkodima, #4273]
 ```
 ScheduledSet with 10,000 jobs
