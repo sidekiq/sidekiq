@@ -1,8 +1,8 @@
 @media (prefers-color-scheme: dark) {
 
   body {
-    background-color: #111;
-    color: #fff;
+    background-color: #000;
+    color: #ccc;
   }
 
   a,
@@ -13,11 +13,11 @@
   }
 
   .navbar .navbar-brand:hover {
-    color: #fff;
+    color: #ccc;
   }
 
   .navbar .navbar-brand .status {
-    color: #fff;
+    color: #ccc;
   }
 
   table.table-white {
@@ -44,7 +44,7 @@
 
   .alert {
     border: none;
-    color: #fff;
+    color: #ccc;
   }
 
   .alert-success {
@@ -74,17 +74,17 @@
   .navbar-default .navbar-nav > .active > a,
   .navbar-default .navbar-nav > .active > a:focus,
   .navbar-default .navbar-nav > .active > a:hover {
-    color: #fff;
+    color: #ccc;
     background-color: #282828;
   }
 
   .navbar-default .navbar-nav > li > a:hover {
-    color: #fff;
+    color: #ccc;
   }
 
   .pagination > li > a,
   .pagination > li > span {
-    color: #fff;
+    color: #ccc;
     background-color: #282828;
     border-color: #353535;
   }
@@ -104,7 +104,7 @@
   }
 
   #live-poll {
-    color: #fff;
+    color: #ccc;
   }
 
   .btn-warn {
@@ -112,7 +112,7 @@
   }
 
   .rickshaw_graph .y_ticks.glow text {
-    fill: #fff;
-    color: #fff;
+    fill: #ccc;
+    color: #ccc;
   }
 }
