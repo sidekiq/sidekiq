@@ -12,12 +12,20 @@
     color: #af0014;
   }
 
+  .navbar .navbar-brand:hover {
+    color: #fff;
+  }
+
+  .navbar .navbar-brand .status {
+    color: #fff;
+  }
+
   table.table-white {
-    background-color: hsl(0, 0%, 21%);
+    background-color: #353535;
   }
 
   .table-striped > tbody > tr:nth-of-type(odd) {
-    background-color: hsl(0, 0%, 13%);
+    background-color: #212121;
   }
 
   .table-bordered,
@@ -27,45 +35,58 @@
   .table-bordered > tfoot > tr > th,
   .table-bordered > thead > tr > td,
   .table-bordered > thead > tr > th {
-    border: 1px solid hsl(0, 0%, 24%);
+    border: 1px solid #3d3d3d;
   }
 
   .table-hover > tbody > tr:hover {
-    background-color: hsl(217, 15%, 34%);
+    background-color: #232323;
+  }
+
+  .alert {
+    border: none;
+    color: #fff;
   }
 
   .alert-success {
-    background-color: black;
+    background-color: #000;
   }
 
   a:link,
   a:active,
   a:hover,
   a:visited {
-    color: hsl(208, 29%, 55%);
+    color: #63798c;
+  }
+
+  a.btn {
+    color: #000;
   }
 
   .summary_bar .summary {
-    background-color: hsl(0, 0%, 16%);
+    background-color: #282828;
   }
 
   .navbar-default {
-    background-color: hsl(0, 0%, 13%);
-    border-color: hsl(0, 0%, 24%);
+    background-color: #212121;
+    border-color: #3d3d3d;
   }
 
   .navbar-default .navbar-nav > .active > a,
   .navbar-default .navbar-nav > .active > a:focus,
   .navbar-default .navbar-nav > .active > a:hover {
-    color: hsl(0, 0%, 100%);
-    background-color: hsl(0, 0%, 16%);
+    color: #fff;
+    background-color: #282828;
+  }
+
+  .navbar-default .navbar-nav > li > a:hover {
+    color: #fff;
   }
 
   .pagination > li > a,
   .pagination > li > span {
-    color: hsl(0, 0%, 100%);
-    background-color: hsl(0, 0%, 16%);
-    border-color: hsl(0, 0%, 21%);
+    color: #fff;
+    background-color: #282828;
+    border-color: #353535;
   }
   .pagination > .disabled > a,
   .pagination > .disabled > a:focus,
@@ -73,12 +94,25 @@
   .pagination > .disabled > span,
   .pagination > .disabled > span:focus,
   .pagination > .disabled > span:hover {
-    color: hsl(0, 0%, 65%);
-    background-color: hsl(0, 0%, 16%);
-    border-color: hsl(0, 0%, 21%);
+    color: #a5a5a5;
+    background-color: #282828;
+    border-color: #353535;
   }
 
   .stat {
-    border: 1px solid hsla(0, 0%, 100%, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  #live-poll {
+    color: #fff;
+  }
+
+  .btn-warn {
+    color: #333;
+  }
+
+  .rickshaw_graph .y_ticks.glow text {
+    fill: #fff;
+    color: #fff;
   }
 }
