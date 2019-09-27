@@ -21,11 +21,11 @@
   }
 
   table.table-white {
-    background-color: #353535;
+    background-color: #383838;
   }
 
   .table-striped > tbody > tr:nth-of-type(odd) {
-    background-color: #212121;
+    background-color: #222;
   }
 
   .table-bordered,
@@ -35,11 +35,11 @@
   .table-bordered > tfoot > tr > th,
   .table-bordered > thead > tr > td,
   .table-bordered > thead > tr > th {
-    border: 1px solid #3d3d3d;
+    border: 1px solid #333;
   }
 
   .table-hover > tbody > tr:hover {
-    background-color: #232323;
+    background-color: #282828;
   }
 
   .alert {
@@ -63,11 +63,12 @@
   }
 
   .summary_bar .summary {
-    background-color: #282828;
+    background-color: #000;
+    border: 1px solid #333;
   }
 
   .navbar-default {
-    background-color: #212121;
+    background-color: #000;
     border-color: #3d3d3d;
   }
 
