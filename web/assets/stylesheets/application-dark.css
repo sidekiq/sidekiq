@@ -20,8 +20,13 @@
     color: #ccc;
   }
 
+  .navbar-inverse {
+    background-color: #000;
+    border-color: #333;
+  }
+
   table.table-white {
-    background-color: #383838;
+    background-color: #111;
   }
 
   .table-striped > tbody > tr:nth-of-type(odd) {
@@ -39,7 +44,7 @@
   }
 
   .table-hover > tbody > tr:hover {
-    background-color: #282828;
+    background-color: #333;
   }
 
   .alert {
@@ -84,6 +89,7 @@
   }
 
   .pagination > li > a,
+  .pagination > li > a:hover,
   .pagination > li > span {
     color: #ccc;
     background-color: #282828;
