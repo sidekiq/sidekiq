@@ -78,6 +78,21 @@ describe 'Sidekiq::Testing.fake' do
       Something.delay.foo(Date.today)
       assert_equal 1, Sidekiq::Extensions::DelayedClass.jobs.size
     end
+
+    class BarMailer < ActionMailer::Base
+      def foo(str)
+        str
+      end
+    end
+
+    it 'returns enqueued jobs for specific classes' do
+      assert_equal 0, Sidekiq::Extensions::DelayedClass.jobs.size
+      FooMailer.delay.bar('hello!')
+      BarMailer.delay.foo('hello!')
+      assert_equal 2, Sidekiq::Extensions::DelayedMailer.jobs.size
+      assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs_for(FooMailer).size
+      assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs_for(BarMailer).size
+    end
   end
 
   it 'stubs the enqueue call' do
