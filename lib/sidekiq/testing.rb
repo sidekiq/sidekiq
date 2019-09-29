@@ -323,6 +323,18 @@ module Sidekiq
       end
     end
   end
+
+  module TestingExtensions
+    def jobs_for(klass)
+      jobs.select do |job|
+        marshalled = job["args"][0]
+        marshalled.index(klass.to_s) && YAML.load(marshalled)[0] == klass
+      end
+    end
+  end
+
+  Sidekiq::Extensions::DelayedMailer.extend(TestingExtensions)
+  Sidekiq::Extensions::DelayedModel.extend(TestingExtensions)
 end
 
 if defined?(::Rails) && Rails.respond_to?(:env) && !Rails.env.test?

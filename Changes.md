@@ -5,6 +5,11 @@
 HEAD
 ---------
 
+- Easier way to test enqueuing specific ActionMailer and ActiveRecord delayed jobs. Instead of manually
+  parsing embedded class, you can now test by fetching jobs for specific classes. [fatkodima, #4292]
+```ruby
+assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs_for(FooMailer).size
+```
 - **Dark Mode support in Web UI** (further design polish welcome!) [#4227, mperham,
   fatkodima, silent-e]
 - **Job-specific log levels**, allowing you to turn on debugging for
