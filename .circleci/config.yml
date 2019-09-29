@@ -34,7 +34,7 @@ jobs:
   "ruby-2.6":
     environment:
       COVERAGE: true
-      CC_TEST_REPORTER_ID: #MISSING_ID_HERE
+      CC_TEST_REPORTER_ID: 003c3033501d70a2653bd887ff9a8b2884a263e6a4e27f2ba68748e15530918d
     docker:
       - image: circleci/ruby:2.6
       - image: circleci/redis:4.0
