@@ -32,6 +32,9 @@ jobs:
       - <<: *save
       - <<: *unit
   "ruby-2.6":
+    environment:
+      COVERAGE: true
+      CC_TEST_REPORTER_ID: #MISSING_ID_HERE
     docker:
       - image: circleci/ruby:2.6
       - image: circleci/redis:4.0
@@ -40,7 +43,25 @@ jobs:
       - <<: *restore
       - <<: *bundle
       - <<: *save
+
+      - run:
+          name: Setup Code Climate test-reporter
+          command: |
+            # download test reporter as a static binary
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            chmod +x ./cc-test-reporter
+
+      - run:
+        name: Code Climate before-build
+        command: |
+          ./cc-test-reporter before-build
+
       - <<: *unit
+
+      - run:
+        name: Report code coverage to Code Climate
+        command: |
+          ./cc-test-reporter after-build -t simplecov --exit-code $?
   "jruby":
     docker:
       - image: circleci/jruby:latest
