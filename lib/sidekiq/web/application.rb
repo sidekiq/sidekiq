@@ -284,7 +284,7 @@ module Sidekiq
       return [404, {"Content-Type" => "text/plain", "X-Cascade" => "pass"}, ["Not Found"]] unless action
 
       app = @klass
-      resp = catch(:halt) do
+      resp = catch(:halt) do # rubocop:disable Standard/SemanticBlocks
         self.class.run_befores(app, action)
         action.instance_exec env, &action.block
       ensure
