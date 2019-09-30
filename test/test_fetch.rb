@@ -5,10 +5,16 @@ require 'sidekiq/api'
 
 describe Sidekiq::BasicFetch do
   before do
+    @prev_redis = Sidekiq.instance_variable_get(:@redis)
+    Sidekiq.redis = { :namespace => 'fuzzy' }
     Sidekiq.redis do |conn|
-      conn.flushdb
+      conn.redis.flushdb
       conn.rpush('queue:basic', 'msg')
     end
+  end
+
+  after do
+    Sidekiq.redis = @prev_redis
   end
 
   it 'retrieves' do
@@ -31,12 +37,22 @@ describe Sidekiq::BasicFetch do
   end
 
   it 'bulk requeues' do
+    Sidekiq.redis do |conn|
+      conn.rpush('queue:foo', ['bob', 'bar'])
+      conn.rpush('queue:bar', 'widget')
+    end
+
     q1 = Sidekiq::Queue.new('foo')
     q2 = Sidekiq::Queue.new('bar')
+    assert_equal 2, q1.size
+    assert_equal 1, q2.size
+
+    fetch = Sidekiq::BasicFetch.new(:queues => ['foo', 'bar'])
+    works = 3.times.map { fetch.retrieve_work }
     assert_equal 0, q1.size
     assert_equal 0, q2.size
-    uow = Sidekiq::BasicFetch::UnitOfWork
-    Sidekiq::BasicFetch.bulk_requeue([uow.new('fuzzy:queue:foo', 'bob'), uow.new('fuzzy:queue:foo', 'bar'), uow.new('fuzzy:queue:bar', 'widget')], {:queues => []})
+
+    Sidekiq::BasicFetch.bulk_requeue(works, {:queues => []})
     assert_equal 2, q1.size
     assert_equal 1, q2.size
   end
