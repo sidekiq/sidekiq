@@ -14,12 +14,12 @@ module Sidekiq
       end
 
       def queue_name
-        queue.sub(/.*queue:/, "")
+        queue.delete_prefix("queue:")
       end
 
       def requeue
         Sidekiq.redis do |conn|
-          conn.rpush("queue:#{queue_name}", job)
+          conn.rpush(queue, job)
         end
       end
     }
@@ -61,14 +61,14 @@ module Sidekiq
       Sidekiq.logger.debug { "Re-queueing terminated jobs" }
       jobs_to_requeue = {}
       inprogress.each do |unit_of_work|
-        jobs_to_requeue[unit_of_work.queue_name] ||= []
-        jobs_to_requeue[unit_of_work.queue_name] << unit_of_work.job
+        jobs_to_requeue[unit_of_work.queue] ||= []
+        jobs_to_requeue[unit_of_work.queue] << unit_of_work.job
       end
 
       Sidekiq.redis do |conn|
         conn.pipelined do
           jobs_to_requeue.each do |queue, jobs|
-            conn.rpush("queue:#{queue}", jobs)
+            conn.rpush(queue, jobs)
           end
         end
       end
