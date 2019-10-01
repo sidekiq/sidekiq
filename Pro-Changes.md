@@ -15,7 +15,7 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 
 - There is no significant migration from Sidekiq Pro 4.0 to 5.0
   but make sure you read the [update notes for Sidekiq
-6.0](/mperham/sidekiq/blob/master/6.0-Upgrade.md).
+6.0](https://github.com/mperham/sidekiq/blob/master/6.0-Upgrade.md).
 - Removed various deprecated APIs and associated warnings.
 - **BREAKING CHANGE** Remove the `Sidekiq::Batch::Status#dead_jobs` API in favor of
   `Sidekiq::Batch::Status#dead_jids`. [#4217]
