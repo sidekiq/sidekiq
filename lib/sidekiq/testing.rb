@@ -333,8 +333,8 @@ module Sidekiq
     end
   end
 
-  Sidekiq::Extensions::DelayedMailer.extend(TestingExtensions)
-  Sidekiq::Extensions::DelayedModel.extend(TestingExtensions)
+  Sidekiq::Extensions::DelayedMailer.extend(TestingExtensions) if defined?(Sidekiq::Extensions::DelayedMailer)
+  Sidekiq::Extensions::DelayedModel.extend(TestingExtensions) if defined?(Sidekiq::Extensions::DelayedModel)
 end
 
 if defined?(::Rails) && Rails.respond_to?(:env) && !Rails.env.test?
