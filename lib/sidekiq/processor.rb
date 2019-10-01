@@ -265,7 +265,7 @@ module Sidekiq
     # the job fails, what is pushed back onto Redis hasn't
     # been mutated by the worker.
     def cloned(thing)
-      Marshal.load(Marshal.dump(thing))
+      deep_dup(thing)
     end
 
     def constantize(str)
@@ -279,6 +279,28 @@ module Sidekiq
         #   which mimics Rails' behaviour
         constant.const_get(name, false)
       end
+    end
+
+    def deep_dup(obj)
+      if Integer === obj || Float === obj || TrueClass === obj || FalseClass === obj || NilClass === obj
+        return obj
+      elsif String === obj
+        return obj.dup
+      elsif Array === obj
+        duped = Array.new(obj.size)
+        obj.each_with_index do |value, index|
+          duped[index] = deep_dup(value)
+        end
+      elsif Hash === obj
+        duped = obj.dup
+        duped.each_pair do |key, value|
+          duped[key] = deep_dup(value)
+        end
+      else
+        duped = obj.dup
+      end
+
+      duped
     end
   end
 end
