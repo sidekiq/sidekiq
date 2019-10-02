@@ -103,17 +103,20 @@ iter.times do
 end
 Sidekiq.logger.error "Created #{count*iter} jobs"
 
+start = Time.now
+
 Monitoring = Thread.new do
   watchdog("monitor thread") do
     while true
-      sleep 0.5
+      sleep 0.2
       qsize = Sidekiq.redis do |conn|
         conn.llen "queue:default"
       end
       total = qsize
-      Sidekiq.logger.error("RSS: #{Process.rss} Pending: #{total}")
+      #Sidekiq.logger.error("RSS: #{Process.rss} Pending: #{total}")
       if total == 0
-        Sidekiq.logger.error("Done, now here's the latency for three jobs")
+        Sidekiq.logger.error("Done, #{iter * count} jobs in #{Time.now - start} sec")
+        Sidekiq.logger.error("Now here's the latency for three jobs")
 
         LoadWorker.perform_async(1, Time.now.to_f)
         LoadWorker.perform_async(2, Time.now.to_f)
