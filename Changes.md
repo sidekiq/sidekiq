@@ -5,11 +5,8 @@
 HEAD
 ---------
 
-- Easier way to test enqueuing specific ActionMailer and ActiveRecord delayed jobs. Instead of manually
-  parsing embedded class, you can now test by fetching jobs for specific classes. [fatkodima, #4292]
-```ruby
-assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs_for(FooMailer).size
-```
+- **Performance tuning**, Sidekiq should be 10-15% faster now [#4303, 4299,
+  4269, fatkodima]
 - **Dark Mode support in Web UI** (further design polish welcome!) [#4227, mperham,
   fatkodima, silent-e]
 - **Job-specific log levels**, allowing you to turn on debugging for
@@ -63,6 +60,11 @@ enum    8.522311   0.419826   8.942137 (  9.785079)
 - Support `Client.push_bulk` with different delays [fatkodima, #4243]
 ```ruby
 Sidekiq::Client.push_bulk("class" => FooJob, "args" => [[1], [2]], "at" => [1.minute.from_now.to_f, 5.minutes.from_now.to_f])
+```
+- Easier way to test enqueuing specific ActionMailer and ActiveRecord delayed jobs. Instead of manually
+  parsing embedded class, you can now test by fetching jobs for specific classes. [fatkodima, #4292]
+```ruby
+assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs_for(FooMailer).size
 ```
 - Add `sidekiqmon` to gemspec executables [#4242]
 - Gracefully handle `Sidekiq.logger = nil` [#4240]
