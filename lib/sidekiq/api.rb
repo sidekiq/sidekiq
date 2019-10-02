@@ -471,8 +471,9 @@ module Sidekiq
     end
 
     def reschedule(at)
-      delete
-      @parent.schedule(at, item)
+      Sidekiq.redis do |conn|
+        conn.zincrby(@parent.name, at - @score, Sidekiq.dump_json(@item))
+      end
     end
 
     def add_to_queue
