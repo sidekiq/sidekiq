@@ -7,6 +7,7 @@ Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how t
 5.0.1
 ---------
 
+- Rejigger batch failures UI to add direct links to retries and scheduled jobs [#4209]
 - Delete batch data with `UNLINK` [#4155]
 - Fix bug where a scheduled job can lose its scheduled time when using reliable push [#4267]
 - Sidekiq::JobSet#scan and #find_job APIs have been promoted to Sidekiq OSS. [#4259]
