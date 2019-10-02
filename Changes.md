@@ -2,7 +2,7 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
-HEAD
+6.0.1
 ---------
 
 - **Performance tuning**, Sidekiq should be 10-15% faster now [#4303, 4299,
