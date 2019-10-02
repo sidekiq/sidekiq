@@ -39,31 +39,31 @@ class TestLogger < Minitest::Test
   end
 
   def test_with_context
-    subject = @logger
-    assert_equal({}, subject.ctx)
+    subject = Sidekiq::Context
+    assert_equal({}, subject.current)
 
-    subject.with_context(a: 1) do
-      assert_equal({ a: 1 }, subject.ctx)
+    subject.with(a: 1) do
+      assert_equal({ a: 1 }, subject.current)
     end
 
-    assert_equal({}, subject.ctx)
+    assert_equal({}, subject.current)
   end
 
   def test_nested_contexts
-    subject = @logger
-    assert_equal({}, subject.ctx)
+    subject = Sidekiq::Context
+    assert_equal({}, subject.current)
 
-    subject.with_context(a: 1) do
-      assert_equal({ a: 1 }, subject.ctx)
+    subject.with(a: 1) do
+      assert_equal({ a: 1 }, subject.current)
 
-      subject.with_context(b: 2, c: 3) do
-        assert_equal({ a: 1, b: 2, c: 3 }, subject.ctx)
+      subject.with(b: 2, c: 3) do
+        assert_equal({ a: 1, b: 2, c: 3 }, subject.current)
       end
 
-      assert_equal({ a: 1 }, subject.ctx)
+      assert_equal({ a: 1 }, subject.current)
     end
 
-    assert_equal({}, subject.ctx)
+    assert_equal({}, subject.current)
   end
 
   def test_formatted_output
@@ -76,7 +76,7 @@ class TestLogger < Minitest::Test
                 Sidekiq::Logger::Formatters::JSON, ]
     formats.each do |fmt|
       @logger.formatter = fmt.new
-      @logger.with_context(class: 'HaikuWorker', bid: 'b-1234abc') do
+      Sidekiq::Context.with(class: 'HaikuWorker', bid: 'b-1234abc') do
         @logger.info("hello context")
       end
       assert_match(/INFO/, @output.string)
@@ -90,7 +90,7 @@ class TestLogger < Minitest::Test
     @logger.formatter = Sidekiq::Logger::Formatters::JSON.new
 
     @logger.debug("boom")
-    @logger.with_context(class: 'HaikuWorker', jid: '1234abc') do
+    Sidekiq::Context.with(class: 'HaikuWorker', jid: '1234abc') do
       @logger.info("json format")
     end
     a, b = @output.string.lines

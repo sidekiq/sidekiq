@@ -27,10 +27,10 @@ module Sidekiq
       level = job_hash["log_level"]
       if level
         @logger.log_at(level) do
-          @logger.with_context(job_hash_context(job_hash), &block)
+          Sidekiq::Context.with(job_hash_context(job_hash), &block)
         end
       else
-        @logger.with_context(job_hash_context(job_hash), &block)
+        Sidekiq::Context.with(job_hash_context(job_hash), &block)
       end
     end
 
@@ -47,7 +47,7 @@ module Sidekiq
     end
 
     def with_elapsed_time_context(start, &block)
-      @logger.with_context(elapsed_time_context(start), &block)
+      Sidekiq::Context.with(elapsed_time_context(start), &block)
     end
 
     def elapsed_time_context(start)

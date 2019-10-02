@@ -4,18 +4,20 @@ require "logger"
 require "time"
 
 module Sidekiq
-  module LoggingUtils
-    def with_context(hash)
-      ctx.merge!(hash)
+  module Context
+    def self.with(hash)
+      current.merge!(hash)
       yield
     ensure
-      hash.each_key { |key| ctx.delete(key) }
+      hash.each_key { |key| current.delete(key) }
     end
 
-    def ctx
+    def self.current
       Thread.current[:sidekiq_context] ||= {}
     end
+  end
 
+  module LoggingUtils
     LEVELS = {
       "debug" => 0,
       "info" => 1,
@@ -114,7 +116,7 @@ module Sidekiq
         end
 
         def ctx
-          Thread.current[:sidekiq_context] ||= {}
+          Sidekiq::Context.current
         end
 
         def format_context
