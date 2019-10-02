@@ -13,7 +13,7 @@ de:
   Retries: Versuche
   Enqueued: In der Warteschlange
   Worker: Arbeiter
-  LivePoll: Live Poll
+  LivePoll: Echtzeitabfrage
   StopPolling: Abfrage stoppen
   Queue: Warteschlange
   Class: Klasse
@@ -33,12 +33,13 @@ de:
   NextRetry: Nächster Versuch
   RetryCount: Anzahl der Versuche
   RetryNow: Jetzt erneut versuchen
-  Kill: Töten
+  Kill: Vernichten
   LastRetry: Letzter Versuch
   OriginallyFailed: Ursprünglich fehlgeschlagen
   AreYouSure: Bist du sicher?
   DeleteAll: Alle löschen
   RetryAll: Alle erneut versuchen
+  KillAll: Alle vernichten
   NoRetriesFound: Keine erneuten Versuche gefunden
   Error: Fehler
   ErrorClass: Fehlerklasse
@@ -67,3 +68,14 @@ de:
   Thread: Thread
   Threads: Threads
   Jobs: Jobs
+  Paused: Pausiert
+  Stop: Stopp
+  Quiet: Leise
+  StopAll: Alle stoppen
+  QuietAll: Alle leise
+  PollingInterval: Abfrageintervall
+  Plugins: Erweiterungen
+  NotYetEnqueued: Noch nicht in der Warteschlange
+  CreatedAt: Erstellt
+  BackToApp: Zurück zur Anwendung
+  Latency: Latenz
