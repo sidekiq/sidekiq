@@ -279,24 +279,20 @@ module Sidekiq
     # been mutated by the worker.
     def json_clone(obj)
       if Integer === obj || Float === obj || TrueClass === obj || FalseClass === obj || NilClass === obj
-        return obj
+        obj
       elsif String === obj
-        return obj.dup
+        obj.dup
       elsif Array === obj
-        duped = Array.new(obj.size)
-        obj.each_with_index do |value, index|
-          duped[index] = json_clone(value)
-        end
+        obj.map { |e| json_clone(e) }
       elsif Hash === obj
         duped = obj.dup
         duped.each_pair do |key, value|
           duped[key] = json_clone(value)
         end
+        duped
       else
-        duped = obj.dup
+        obj.dup
       end
-
-      duped
     end
   end
 end
