@@ -285,8 +285,8 @@ module Sidekiq
       elsif Array === obj
         obj.map { |e| json_clone(e) }
       elsif Hash === obj
-        duped = obj.dup
-        duped.each_pair do |key, value|
+        duped = {}
+        obj.each_pair do |key, value|
           duped[key] = json_clone(value)
         end
         duped
