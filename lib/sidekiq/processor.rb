@@ -283,10 +283,7 @@ module Sidekiq
       elsif String === obj
         return obj.dup
       elsif Array === obj
-        duped = Array.new(obj.size)
-        obj.each_with_index do |value, index|
-          duped[index] = json_clone(value)
-        end
+        obj.map { |e| json_clone(e) }
       elsif Hash === obj
         duped = obj.dup
         duped.each_pair do |key, value|
