@@ -278,10 +278,10 @@ module Sidekiq
     # the job fails, what is pushed back onto Redis hasn't
     # been mutated by the worker.
     def json_clone(obj)
-      if Integer === obj || Float === obj || TrueClass === obj || FalseClass === obj || NilClass === obj
-        obj
-      elsif String === obj
+      if String === obj
         obj.dup
+      elsif Integer === obj || Float === obj || TrueClass === obj || FalseClass === obj || NilClass === obj
+        obj
       elsif Array === obj
         obj.map { |e| json_clone(e) }
       elsif Hash === obj
