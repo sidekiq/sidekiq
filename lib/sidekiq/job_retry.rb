@@ -254,7 +254,7 @@ module Sidekiq
     end
 
     def compress_backtrace(backtrace)
-      serialized = Marshal.dump(backtrace)
+      serialized = Sidekiq.dump_json(backtrace)
       compressed = Zlib::Deflate.deflate(serialized)
       Base64.encode64(compressed)
     end
