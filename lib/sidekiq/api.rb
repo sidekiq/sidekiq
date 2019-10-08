@@ -438,12 +438,18 @@ module Sidekiq
 
     def uncompress_backtrace(backtrace)
       if backtrace.is_a?(Array)
-        # Handle old jobs with previous backtrace format
+        # Handle old jobs with raw Array backtrace format
         backtrace
       else
         decoded = Base64.decode64(backtrace)
         uncompressed = Zlib::Inflate.inflate(decoded)
-        Marshal.load(uncompressed)
+        begin
+          Sidekiq.load_json(uncompressed)
+        rescue
+          # Handle old jobs with marshalled backtrace format
+          # TODO Remove in 7.x
+          Marshal.load(uncompressed)
+        end
       end
     end
   end
