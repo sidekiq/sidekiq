@@ -93,9 +93,4 @@ class TestJobLogger < Minitest::Test
     log_level_warning = @output.string.lines[0]
     assert_match(/WARN: Invalid log level/, log_level_warning)
   end
-
-  def reset(io)
-    io.truncate(0)
-    io.rewind
-  end
 end
