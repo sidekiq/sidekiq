@@ -74,7 +74,7 @@ module Sidekiq
     # The global retry handler requires only the barest of data.
     # We want to be able to retry as much as possible so we don't
     # require the worker to be instantiated.
-    def global(msg, queue)
+    def global(jobstr, queue)
       yield
     rescue Handled => ex
       raise ex
@@ -85,6 +85,7 @@ module Sidekiq
       # ignore, will be pushed back onto queue during hard_shutdown
       raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
 
+      msg = Sidekiq.load_json(jobstr)
       if msg["retry"]
         attempt_retry(nil, msg, queue, e)
       else
@@ -106,7 +107,7 @@ module Sidekiq
     # exception so the global block does not reprocess the error.  The
     # Skip exception is unwrapped within Sidekiq::Processor#process before
     # calling the handle_exception handlers.
-    def local(worker, msg, queue)
+    def local(worker, jobstr, queue)
       yield
     rescue Handled => ex
       raise ex
@@ -117,6 +118,7 @@ module Sidekiq
       # ignore, will be pushed back onto queue during hard_shutdown
       raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
 
+      msg = Sidekiq.load_json(jobstr)
       if msg["retry"].nil?
         msg["retry"] = worker.class.get_sidekiq_options["retry"]
       end

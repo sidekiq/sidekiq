@@ -111,16 +111,19 @@ module Sidekiq
       nil
     end
 
-    def dispatch(job_hash, queue)
+    def dispatch(job_hash, queue, jobstr)
       # since middleware can mutate the job hash
-      # we clone here so we report the original
+      # we need to clone it to report the original
       # job structure to the Web UI
-      pristine = json_clone(job_hash)
+      # or to push back to redis when retrying.
+      # To avoid costly and, most of the time, useless cloning here,
+      # we pass original String of JSON to respected methods
+      # to re-parse it there if we need access to the original, untouched job
 
       @job_logger.prepare(job_hash) do
-        @retrier.global(pristine, queue) do
+        @retrier.global(jobstr, queue) do
           @job_logger.call(job_hash, queue) do
-            stats(pristine, queue) do
+            stats(jobstr, queue) do
               # Rails 5 requires a Reloader to wrap code execution.  In order to
               # constantize the worker and instantiate an instance, we have to call
               # the Reloader.  It handles code loading, db connection management, etc.
@@ -129,7 +132,7 @@ module Sidekiq
                 klass = constantize(job_hash["class"])
                 worker = klass.new
                 worker.jid = job_hash["jid"]
-                @retrier.local(worker, pristine, queue) do
+                @retrier.local(worker, jobstr, queue) do
                   yield worker
                 end
               end
@@ -156,7 +159,7 @@ module Sidekiq
 
       ack = false
       begin
-        dispatch(job_hash, queue) do |worker|
+        dispatch(job_hash, queue, jobstr) do |worker|
           Sidekiq.server_middleware.invoke(worker, job_hash, queue) do
             execute_job(worker, job_hash["args"])
           end
@@ -247,8 +250,8 @@ module Sidekiq
     FAILURE = Counter.new
     WORKER_STATE = SharedWorkerState.new
 
-    def stats(job_hash, queue)
-      WORKER_STATE.set(tid, {queue: queue, payload: job_hash, run_at: Time.now.to_i})
+    def stats(jobstr, queue)
+      WORKER_STATE.set(tid, {queue: queue, payload: jobstr, run_at: Time.now.to_i})
 
       begin
         yield
@@ -271,27 +274,6 @@ module Sidekiq
         # the false flag limits search for name to under the constant namespace
         #   which mimics Rails' behaviour
         constant.const_get(name, false)
-      end
-    end
-
-    # Deep clone the arguments passed to the worker so that if
-    # the job fails, what is pushed back onto Redis hasn't
-    # been mutated by the worker.
-    def json_clone(obj)
-      if String === obj
-        obj.dup
-      elsif Integer === obj || Float === obj || TrueClass === obj || FalseClass === obj || NilClass === obj
-        obj
-      elsif Array === obj
-        obj.map { |e| json_clone(e) }
-      elsif Hash === obj
-        duped = {}
-        obj.each_pair do |key, value|
-          duped[key] = json_clone(value)
-        end
-        duped
-      else
-        obj.dup
       end
     end
   end
