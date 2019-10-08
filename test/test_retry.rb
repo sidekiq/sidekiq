@@ -29,13 +29,17 @@ describe Sidekiq::JobRetry do
       @handler ||= Sidekiq::JobRetry.new(options)
     end
 
-    def job(options={})
-      @job ||= { 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }.merge(options)
+    def jobstr(options={})
+      Sidekiq.dump_json({ 'class' => 'Bob', 'args' => [1,2,'foo'], 'retry' => true }.merge(options))
+    end
+
+    def job
+      Sidekiq::RetrySet.new.first
     end
 
     it 'retries with a nil worker' do
       assert_raises RuntimeError do
-        handler.global(job, 'default') do
+        handler.global(jobstr, 'default') do
           raise "boom"
         end
       end
@@ -44,7 +48,7 @@ describe Sidekiq::JobRetry do
 
     it 'allows disabling retry' do
       assert_raises RuntimeError do
-        handler.local(worker, job('retry' => false), 'default') do
+        handler.local(worker, jobstr('retry' => false), 'default') do
           raise "kerblammo!"
         end
       end
@@ -53,7 +57,7 @@ describe Sidekiq::JobRetry do
 
     it 'allows a numeric retry' do
       assert_raises RuntimeError do
-        handler.local(worker, job('retry' => 2), 'default') do
+        handler.local(worker, jobstr('retry' => 2), 'default') do
           raise "kerblammo!"
         end
       end
@@ -63,7 +67,7 @@ describe Sidekiq::JobRetry do
 
     it 'allows 0 retry => no retry and dead queue' do
       assert_raises RuntimeError do
-        handler.local(worker, job('retry' => 0), 'default') do
+        handler.local(worker, jobstr('retry' => 0), 'default') do
           raise "kerblammo!"
         end
       end
@@ -75,7 +79,7 @@ describe Sidekiq::JobRetry do
       skip 'skipped! test requires ruby 2.1+' if RUBY_VERSION <= '2.1.0'
 
       assert_raises RuntimeError do
-        handler.local(worker, job, 'default') do
+        handler.local(worker, jobstr, 'default') do
           raise "kerblammo! #{195.chr}"
         end
       end
@@ -87,7 +91,7 @@ describe Sidekiq::JobRetry do
     # error classes that override #message
     it 'handles error message that raises an error' do
       assert_raises RuntimeError do
-        handler.local(worker, job, 'default') do
+        handler.local(worker, jobstr, 'default') do
           raise BadErrorMessage.new
         end
       end
@@ -98,8 +102,9 @@ describe Sidekiq::JobRetry do
 
     it 'allows a max_retries option in initializer' do
       max_retries = 7
-      1.upto(max_retries + 1) do
+      1.upto(max_retries + 1) do |i|
         assert_raises RuntimeError do
+          job = i > 1 ? jobstr('retry_count' => i - 2) : jobstr
           handler(:max_retries => max_retries).local(worker, job, 'default') do
             raise "kerblammo!"
           end
@@ -113,7 +118,7 @@ describe Sidekiq::JobRetry do
     it 'saves backtraces' do
       c = nil
       assert_raises RuntimeError do
-        handler.local(worker, job('backtrace' => true), 'default') do
+        handler.local(worker, jobstr('backtrace' => true), 'default') do
           c = caller(0); raise "kerblammo!"
         end
       end
@@ -126,7 +131,7 @@ describe Sidekiq::JobRetry do
     it 'saves partial backtraces' do
       c = nil
       assert_raises RuntimeError do
-        handler.local(worker, job('backtrace' => 3), 'default') do
+        handler.local(worker, jobstr('backtrace' => 3), 'default') do
           c = caller(0)[0...3]; raise "kerblammo!"
         end
       end
@@ -139,7 +144,7 @@ describe Sidekiq::JobRetry do
 
     it 'handles a new failed message' do
       assert_raises RuntimeError do
-        handler.local(worker, job, 'default') do
+        handler.local(worker, jobstr, 'default') do
           raise "kerblammo!"
         end
       end
@@ -187,7 +192,7 @@ describe Sidekiq::JobRetry do
       rs = Sidekiq::RetrySet.new
       assert_equal 0, rs.size
       assert_raises Sidekiq::Shutdown do
-        handler.local(worker, job, 'default') do
+        handler.local(worker, jobstr, 'default') do
           begin
             raise Sidekiq::Shutdown
           rescue Interrupt
@@ -204,7 +209,7 @@ describe Sidekiq::JobRetry do
 
     it 'allows a retry queue' do
       assert_raises RuntimeError do
-        handler.local(worker, job("retry_queue" => 'retryx'), 'default') do
+        handler.local(worker, jobstr("retry_queue" => 'retryx'), 'default') do
           raise "kerblammo!"
         end
       end
@@ -220,7 +225,7 @@ describe Sidekiq::JobRetry do
       now = Time.now.to_f
       msg = {"queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>10}
       assert_raises RuntimeError do
-        handler.local(worker, job(msg), 'default') do
+        handler.local(worker, jobstr(msg), 'default') do
           raise "kerblammo!"
         end
       end
@@ -241,7 +246,7 @@ describe Sidekiq::JobRetry do
       now = Time.now.to_f
       msg = {"queue"=>"default", "error_message"=>"kerblammo!", "error_class"=>"RuntimeError", "failed_at"=>now, "retry_count"=>25}
       assert_raises RuntimeError do
-        handler.local(worker, job(msg), 'default') do
+        handler.local(worker, jobstr(msg), 'default') do
           raise "kerblammo!"
         end
       end

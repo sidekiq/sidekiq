@@ -55,7 +55,7 @@ describe 'sidekiq_retries_exhausted' do
   end
 
   def job(options={})
-    @job ||= {'class' => 'Bob', 'args' => [1, 2, 'foo']}.merge(options)
+    @job ||= Sidekiq.dump_json({'class' => 'Bob', 'args' => [1, 2, 'foo']}.merge(options))
   end
 
   it 'does not run exhausted block when job successful on first run' do
