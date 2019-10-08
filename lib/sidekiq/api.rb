@@ -80,8 +80,8 @@ module Sidekiq
       }
 
       s = processes.size
-      workers_size = pipe2_res[0...s].map(&:to_i).inject(0, &:+)
-      enqueued = pipe2_res[s..-1].map(&:to_i).inject(0, &:+)
+      workers_size = pipe2_res[0...s].sum(&:to_i)
+      enqueued = pipe2_res[s..-1].sum(&:to_i)
 
       default_queue_latency = if (entry = pipe1_res[6].first)
         job = begin
@@ -960,7 +960,7 @@ module Sidekiq
             procs.each do |key|
               conn.hget(key, "busy")
             end
-          }.map(&:to_i).inject(:+)
+          }.sum(&:to_i)
         end
       end
     end

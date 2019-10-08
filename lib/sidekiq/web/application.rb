@@ -307,7 +307,7 @@ module Sidekiq
 
       resp[1] = resp[1].dup
 
-      resp[1][CONTENT_LENGTH] = resp[2].inject(0) { |l, p| l + p.bytesize }.to_s
+      resp[1][CONTENT_LENGTH] = resp[2].sum(&:bytesize).to_s
 
       resp
     end
