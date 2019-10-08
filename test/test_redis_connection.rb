@@ -58,11 +58,14 @@ describe Sidekiq::RedisConnection do
 
       it "defaults server pool sizes based on concurrency with padding" do
         _expected_padding = 5
+        prev_concurrency = Sidekiq.options[:concurrency]
         Sidekiq.options[:concurrency] = 6
         pool = server_connection
 
         assert_equal 11, pool.instance_eval{ @size }
         assert_equal 11, pool.instance_eval{ @available.length }
+      ensure
+        Sidekiq.options[:concurrency] = prev_concurrency
       end
 
       it "defaults client pool sizes to 5" do
