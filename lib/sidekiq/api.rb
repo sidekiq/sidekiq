@@ -561,7 +561,7 @@ module Sidekiq
     end
 
     def scan(match, count = 100)
-      return to_enum(:scan, match) unless block_given?
+      return to_enum(:scan, match, count) unless block_given?
 
       match = "*#{match}*" unless match.include?("*")
       Sidekiq.redis do |conn|
