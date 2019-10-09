@@ -655,11 +655,13 @@ module Sidekiq
       Sidekiq.redis do |conn|
         elements = conn.zrangebyscore(name, score, score)
         elements.each do |element|
-          message = Sidekiq.load_json(element)
-          if message["jid"] == jid
-            ret = conn.zrem(name, element)
-            @_size -= 1 if ret
-            break ret
+          if element.index(jid)
+            message = Sidekiq.load_json(element)
+            if message["jid"] == jid
+              ret = conn.zrem(name, element)
+              @_size -= 1 if ret
+              break ret
+            end
           end
         end
       end
