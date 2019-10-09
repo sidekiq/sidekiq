@@ -5,7 +5,6 @@ module Sidekiq
     extend WebRouter
 
     CONTENT_LENGTH = "Content-Length"
-    CONTENT_TYPE = "Content-Type"
     REDIS_KEYS = %w[redis_version uptime_in_days connected_clients used_memory_human used_memory_peak_human]
     CSP_HEADER = [
       "default-src 'self' https: http:",

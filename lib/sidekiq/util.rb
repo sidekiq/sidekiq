@@ -11,8 +11,6 @@ module Sidekiq
   module Util
     include ExceptionHandler
 
-    EXPIRY = 60 * 60 * 24
-
     def watchdog(last_words)
       yield
     rescue Exception => ex

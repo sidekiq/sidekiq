@@ -341,14 +341,6 @@ describe Sidekiq::Processor do
       Sidekiq.redis {|c| c.flushdb }
     end
 
-    def failed_job
-      msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['boom'] })
-      begin
-        @processor.process(work(msg))
-      rescue TestProcessorException
-      end
-    end
-
     def successful_job
       msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
       @mgr.expect(:processor_done, nil, [@processor])
