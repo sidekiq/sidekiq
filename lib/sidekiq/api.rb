@@ -793,30 +793,28 @@ module Sidekiq
     end
 
     def each
-      procs = Sidekiq.redis { |conn| conn.sscan_each("processes").to_a }.sort
+      result = Sidekiq.redis { |conn|
+        procs = conn.sscan_each("processes").to_a.sort
 
-      Sidekiq.redis do |conn|
         # We're making a tradeoff here between consuming more memory instead of
         # making more roundtrips to Redis, but if you have hundreds or thousands of workers,
         # you'll be happier this way
-        result = conn.pipelined {
+        conn.pipelined do
           procs.each do |key|
             conn.hmget(key, "info", "busy", "beat", "quiet")
           end
-        }
-
-        result.each do |info, busy, at_s, quiet|
-          # If a process is stopped between when we query Redis for `procs` and
-          # when we query for `result`, we will have an item in `result` that is
-          # composed of `nil` values.
-          next if info.nil?
-
-          hash = Sidekiq.load_json(info)
-          yield Process.new(hash.merge("busy" => busy.to_i, "beat" => at_s.to_f, "quiet" => quiet))
         end
-      end
+      }
 
-      nil
+      result.each do |info, busy, at_s, quiet|
+        # If a process is stopped between when we query Redis for `procs` and
+        # when we query for `result`, we will have an item in `result` that is
+        # composed of `nil` values.
+        next if info.nil?
+
+        hash = Sidekiq.load_json(info)
+        yield Process.new(hash.merge("busy" => busy.to_i, "beat" => at_s.to_f, "quiet" => quiet))
+      end
     end
 
     # This method is not guaranteed accurate since it does not prune the set
