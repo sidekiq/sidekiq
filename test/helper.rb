@@ -36,13 +36,3 @@ def capture_logging(lvl=Logger::INFO)
     Sidekiq.logger = old
   end
 end
-
-def with_logging(lvl=Logger::DEBUG)
-  old = Sidekiq.logger.level
-  begin
-    Sidekiq.logger.level = lvl
-    yield
-  ensure
-    Sidekiq.logger.level = old
-  end
-end

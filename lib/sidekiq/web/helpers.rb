@@ -156,12 +156,6 @@ module Sidekiq
       @stats ||= Sidekiq::Stats.new
     end
 
-    def retries_with_score(score)
-      Sidekiq.redis { |conn|
-        conn.zrangebyscore("retry", score, score)
-      }.map { |msg| Sidekiq.load_json(msg) }
-    end
-
     def redis_connection
       Sidekiq.redis do |conn|
         c = conn.connection
