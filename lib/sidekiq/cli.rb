@@ -41,6 +41,8 @@ module Sidekiq
 
       self_read, self_write = IO.pipe
       sigs = %w[INT TERM TTIN TSTP]
+      # USR1 and USR2 don't work on the JVM
+      sigs << "USR2" unless jruby?
       sigs.each do |sig|
         trap sig do
           self_write.puts(sig)
