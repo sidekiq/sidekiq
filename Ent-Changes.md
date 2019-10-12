@@ -4,11 +4,11 @@
 
 Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
 
-HEAD
+2.0.1
 -------------
 
-- Periodic job registration API adjusted to avoid loading classes in
-  initializer [#4271]
+- Periodic job registration API adjusted to avoid loading classes in initializer [#4271]
+- Remove support for deprecated ENV variables (COUNT, MAXMEM\_MB, INDEX) in swarm code
 
 2.0.0
 -------------
