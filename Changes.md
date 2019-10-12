@@ -2,10 +2,11 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
-HEAD
+6.0.2
 ---------
 
 - Fix Sidekiq Enterprise's rolling restart functionality, broken by refactoring in 6.0.0. [#4334]
+- More internal refactoring and performance tuning [fatkodima]
 
 6.0.1
 ---------
