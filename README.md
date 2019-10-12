@@ -20,7 +20,7 @@ Performance
 Version |	Latency | Garbage created for 10k jobs	| Time to process 100k jobs |	Throughput | Ruby
 -----------------|------|---------|---------|------------------------|-----
 Sidekiq 6.0.2    | 3 ms	| 156 MB  | 14.0 sec| **7100 jobs/sec** | MRI 2.6.3
-Sidekiq 6.0.0    | 3 ms	| 156 MB  | 19 sec  | **5200 jobs/sec** | MRI 2.6.3
+Sidekiq 6.0.0    | 3 ms	| 156 MB  | 19 sec  | 5200 jobs/sec | MRI 2.6.3
 Sidekiq 4.0.0    | 10 ms	| 151 MB  | 22 sec  | 4500 jobs/sec |
 Sidekiq 3.5.1    | 22 ms	| 1257 MB | 125 sec | 800 jobs/sec |
 Resque 1.25.2    |  -	  | -       | 420 sec | 240 jobs/sec |
