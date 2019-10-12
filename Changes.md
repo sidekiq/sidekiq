@@ -5,7 +5,7 @@
 HEAD
 ---------
 
-- Fix rolling restart functionality, broken by refactoring in 6.0.0. [#4334]
+- Fix Sidekiq Enterprise's rolling restart functionality, broken by refactoring in 6.0.0. [#4334]
 
 6.0.1
 ---------
