@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    sidekiq (6.0.1)
+    sidekiq (6.0.2)
       connection_pool (>= 2.2.2)
       rack (>= 2.0.0)
       rack-protection (>= 2.0.0)
