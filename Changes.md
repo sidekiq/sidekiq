@@ -2,6 +2,12 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
+HEAD
+---------
+
+- Fix `Sidekiq::Client.push_bulk` API which was erroneously putting
+  invalid `at` values in the job payloads [#4321]
+
 6.0.2
 ---------
 

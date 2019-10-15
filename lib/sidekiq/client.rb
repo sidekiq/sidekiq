@@ -99,8 +99,8 @@ module Sidekiq
 
       normed = normalize_item(items)
       payloads = items["args"].map.with_index { |args, index|
-        single_at = at.is_a?(Array) ? at[index] : at
-        copy = normed.merge("args" => args, "jid" => SecureRandom.hex(12), "at" => single_at, "enqueued_at" => Time.now.to_f)
+        copy = normed.merge("args" => args, "jid" => SecureRandom.hex(12), "enqueued_at" => Time.now.to_f)
+        copy["at"] = (at.is_a?(Array) ? at[index] : at) if at
 
         result = process_single(items["class"], copy)
         result || nil
@@ -193,7 +193,7 @@ module Sidekiq
     end
 
     def atomic_push(conn, payloads)
-      if payloads.first["at"]
+      if payloads.first.key?("at")
         conn.zadd("schedule", payloads.map { |hash|
           at = hash.delete("at").to_s
           [at, Sidekiq.dump_json(hash)]
