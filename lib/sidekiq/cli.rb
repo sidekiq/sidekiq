@@ -58,7 +58,7 @@ module Sidekiq
       # touch the connection pool so it is created before we
       # fire startup and start multithreading.
       ver = Sidekiq.redis_info["redis_version"]
-      raise "You are using Redis v#{ver}, Sidekiq requires Redis v4.0.0 or greater" if ver < "4"
+      raise "You are connecting to Redis v#{ver}, Sidekiq requires Redis v4.0.0 or greater" if ver < "4"
 
       # Since the user can pass us a connection pool explicitly in the initializer, we
       # need to verify the size is large enough or else Sidekiq's performance is dramatically slowed.
