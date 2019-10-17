@@ -467,7 +467,7 @@ module Sidekiq
 
     def reschedule(at)
       Sidekiq.redis do |conn|
-        conn.zincrby(@parent.name, at - @score, Sidekiq.dump_json(@item))
+        conn.zincrby(@parent.name, at.to_f - @score, Sidekiq.dump_json(@item))
       end
     end
 
