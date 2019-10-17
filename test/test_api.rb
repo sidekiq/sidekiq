@@ -613,11 +613,13 @@ describe 'API' do
       refute(retries.map { |r| r.score > (Time.now.to_f + 9) }.any?)
 
       retries.each do |retri|
+        retri.reschedule(Time.now + 15) if retri.jid == 'foo1'
         retri.reschedule(Time.now.to_f + 10) if retri.jid == 'foo2'
       end
 
       assert_equal 2, retries.size
       assert(retries.map { |r| r.score > (Time.now.to_f + 9) }.any?)
+      assert(retries.map { |r| r.score > (Time.now.to_f + 14) }.any?)
     end
 
     it 'prunes processes which have died' do
