@@ -193,6 +193,12 @@ module Sidekiq
     end
 
     def atomic_push(conn, payloads)
+      # 6.0.0 push_bulk bug, #4321
+      # TODO Remove in 6.1.0
+      payloads.each do |hash|
+        hash.delete("at") if hash.key?("at") && hash["at"].nil?
+      end
+
       if payloads.first.key?("at")
         conn.zadd("schedule", payloads.map { |hash|
           at = hash.delete("at").to_s
