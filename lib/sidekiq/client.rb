@@ -193,12 +193,6 @@ module Sidekiq
     end
 
     def atomic_push(conn, payloads)
-      # 6.0.0 push_bulk bug, #4321
-      # TODO Remove in 6.1.0
-      payloads.each do |hash|
-        hash.delete("at") if hash.key?("at") && hash["at"].nil?
-      end
-
       if payloads.first.key?("at")
         conn.zadd("schedule", payloads.map { |hash|
           at = hash.delete("at").to_s
@@ -225,6 +219,10 @@ module Sidekiq
     end
 
     def normalize_item(item)
+      # 6.0.0 push_bulk bug, #4321
+      # TODO Remove after a while...
+      item.delete("at") if item.key?("at") && item["at"].nil?
+
       raise(ArgumentError, "Job must be a Hash with 'class' and 'args' keys: { 'class' => SomeWorker, 'args' => ['bob', 1, :foo => 'bar'] }") unless item.is_a?(Hash) && item.key?("class") && item.key?("args")
       raise(ArgumentError, "Job args must be an Array") unless item["args"].is_a?(Array)
       raise(ArgumentError, "Job class must be either a Class or String representation of the class name") unless item["class"].is_a?(Class) || item["class"].is_a?(String)
