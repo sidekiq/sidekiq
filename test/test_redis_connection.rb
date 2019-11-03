@@ -188,6 +188,28 @@ describe Sidekiq::RedisConnection do
         assert_equal redis_driver, redis.instance_variable_get(:@client).driver
       end
     end
+
+    describe 'logging redis options' do
+      it 'redacts credentials' do
+        output = capture_logging do
+          Sidekiq::RedisConnection.create(
+            role: 'master',
+            master_name: 'mymaster',
+            sentinels: [
+              { host: 'host1', port: 26379, password: 'secret'},
+              { host: 'host2', port: 26379, password: 'secret'},
+              { host: 'host3', port: 26379, password: 'secret'},
+             ],
+             password: 'secret'
+           )
+        end
+
+        assert_includes(output, ':host=>"host1", :port=>26379, :password=>"REDACTED"')
+        assert_includes(output, ':host=>"host2", :port=>26379, :password=>"REDACTED"')
+        assert_includes(output, ':host=>"host3", :port=>26379, :password=>"REDACTED"')
+        assert_includes(output, ':password=>"REDACTED", :id=>')
+      end
+    end
   end
 
   describe ".determine_redis_provider" do
