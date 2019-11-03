@@ -105,7 +105,7 @@ module Sidekiq
         end
         if scrubbed_options[:sentinels]
           scrubbed_options[:sentinels].each do |sentinel|
-            sentinel[:password] = redacted if scrubbed_options[:password]
+            sentinel[:password] = redacted if sentinel[:password]
           end
         end
         if Sidekiq.server?
