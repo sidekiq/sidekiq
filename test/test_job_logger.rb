@@ -53,7 +53,7 @@ class TestJobLogger < Minitest::Test
     a, b = @output.string.lines
     assert a
     assert b
-    hsh = JSON.parse(a)
+    hsh = MultiJson.load(a)
     keys = hsh.keys.sort
     assert_equal(["ctx", "lvl", "msg", "pid", "tid", "ts"], keys)
     keys = hsh["ctx"].keys.sort

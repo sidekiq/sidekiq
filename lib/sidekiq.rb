@@ -175,11 +175,11 @@ module Sidekiq
   end
 
   def self.load_json(string)
-    JSON.parse(string)
+    MultiJson.load(string)
   end
 
   def self.dump_json(object)
-    JSON.generate(object)
+    MultiJson.dump(object)
   end
 
   def self.log_formatter

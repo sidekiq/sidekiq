@@ -94,13 +94,13 @@ class TestLogger < Minitest::Test
       @logger.info("json format")
     end
     a, b = @output.string.lines
-    hash = JSON.parse(a)
+    hash = MultiJson.load(a)
     keys = hash.keys.sort
     assert_equal ["lvl", "msg", "pid", "tid", "ts"], keys
     assert_nil hash["ctx"]
     assert_equal hash["lvl"], "DEBUG"
 
-    hash = JSON.parse(b)
+    hash = MultiJson.load(b)
     keys = hash.keys.sort
     assert_equal ["ctx", "lvl", "msg", "pid", "tid", "ts"], keys
     refute_nil hash["ctx"]

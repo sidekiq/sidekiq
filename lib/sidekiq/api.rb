@@ -624,7 +624,7 @@ module Sidekiq
     def find_job(jid)
       Sidekiq.redis do |conn|
         conn.zscan_each(name, match: "*#{jid}*", count: 100) do |entry, score|
-          job = JSON.parse(entry)
+          job = MultiJson.load(entry)
           matched = job["jid"] == jid
           return SortedEntry.new(self, score, entry) if matched
         end
@@ -645,7 +645,7 @@ module Sidekiq
         elements = conn.zrangebyscore(name, score, score)
         elements.each do |element|
           if element.index(jid)
-            message = Sidekiq.load_json(element)
+            message = MultiJson.load(element)
             if message["jid"] == jid
               ret = conn.zrem(name, element)
               @_size -= 1 if ret

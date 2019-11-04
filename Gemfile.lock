@@ -1,8 +1,9 @@
 PATH
   remote: .
   specs:
-    sidekiq (6.0.2)
+    sidekiq (6.0.3)
       connection_pool (>= 2.2.2)
+      multi_json
       rack (>= 2.0.0)
       rack-protection (>= 2.0.0)
       redis (>= 4.1.0)
@@ -93,6 +94,7 @@ GEM
     mini_mime (1.0.2)
     mini_portile2 (2.4.0)
     minitest (5.11.3)
+    multi_json (1.14.1)
     nio4r (2.5.1)
     nokogiri (1.10.4)
       mini_portile2 (~> 2.4.0)
@@ -194,3 +196,6 @@ DEPENDENCIES
   sqlite3
   standard
   toxiproxy
+
+BUNDLED WITH
+   2.0.2
