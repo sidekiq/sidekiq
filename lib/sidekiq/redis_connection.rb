@@ -103,10 +103,8 @@ module Sidekiq
         if scrubbed_options[:password]
           scrubbed_options[:password] = redacted
         end
-        if scrubbed_options[:sentinels]
-          scrubbed_options[:sentinels].each do |sentinel|
-            sentinel[:password] = redacted if sentinel[:password]
-          end
+        scrubbed_options[:sentinels]&.each do |sentinel|
+          sentinel[:password] = redacted if sentinel[:password]
         end
         if Sidekiq.server?
           Sidekiq.logger.info("Booting Sidekiq #{Sidekiq::VERSION} with redis options #{scrubbed_options}")
