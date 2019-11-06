@@ -189,13 +189,13 @@ module Sidekiq
         handle_exception(e, {context: "Error calling retries_exhausted", job: msg})
       end
 
+      send_to_morgue(msg) unless msg["dead"] == false
+
       Sidekiq.death_handlers.each do |handler|
         handler.call(msg, exception)
       rescue => e
         handle_exception(e, {context: "Error calling death handler", job: msg})
       end
-
-      send_to_morgue(msg) unless msg["dead"] == false
     end
 
     def send_to_morgue(msg)
