@@ -38,4 +38,19 @@ class WorkerGeneratorTest < Rails::Generators::TestCase
       g.test_framework :test_case
     end
   end
+
+  test 'respects rails config test_framework option for rspec' do
+    Rails.application.config.generators do |g|
+      g.test_framework :rspec
+    end
+
+    run_generator ['foo']
+
+    assert_file 'app/workers/foo_worker.rb'
+    assert_file 'spec/workers/foo_worker_spec.rb'
+  ensure
+    Rails.application.config.generators do |g|
+      g.test_framework :test_case
+    end
+  end
 end
