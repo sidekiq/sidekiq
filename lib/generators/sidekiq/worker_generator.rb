@@ -18,7 +18,7 @@ module Sidekiq
       def create_test_file
         return unless test_framework
 
-        if defined?(RSpec)
+        if test_framework == :rspec
           create_worker_spec
         else
           create_worker_test
