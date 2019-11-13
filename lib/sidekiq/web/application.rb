@@ -91,7 +91,13 @@ module Sidekiq
     end
 
     post "/queues/:name" do
-      Sidekiq::Queue.new(route_params[:name]).clear
+      if params['pause']
+        Sidekiq::Queue.new(route_params[:name]).pause!
+      elsif params['unpause']
+        Sidekiq::Queue.new(route_params[:name]).unpause!
+      else
+        Sidekiq::Queue.new(route_params[:name]).clear
+      end
 
       redirect "#{root_path}queues"
     end
