@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    sidekiq (6.0.2)
+    sidekiq (6.0.3)
       connection_pool (>= 2.2.2)
       rack (>= 2.0.0)
       rack-protection (>= 2.0.0)
@@ -79,7 +79,7 @@ GEM
     hiredis (0.6.3)
     i18n (1.6.0)
       concurrent-ruby (~> 1.0)
-    jaro_winkler (1.5.3)
+    jaro_winkler (1.5.4)
     json (2.2.0)
     loofah (2.2.3)
       crass (~> 1.0.2)
@@ -96,8 +96,8 @@ GEM
     nio4r (2.5.1)
     nokogiri (1.10.4)
       mini_portile2 (~> 2.4.0)
-    parallel (1.17.0)
-    parser (2.6.4.1)
+    parallel (1.19.0)
+    parser (2.6.5.0)
       ast (~> 2.4.0)
     pry (0.12.2)
       coderay (~> 1.1.0)
@@ -141,14 +141,14 @@ GEM
     redis (4.1.2)
     redis-namespace (1.6.0)
       redis (>= 3.0.4)
-    rubocop (0.72.0)
+    rubocop (0.75.1)
       jaro_winkler (~> 1.5.1)
       parallel (~> 1.10)
       parser (>= 2.6)
       rainbow (>= 2.2.2, < 4.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 1.4.0, < 1.7)
-    rubocop-performance (1.4.1)
+    rubocop-performance (1.5.1)
       rubocop (>= 0.71.0)
     ruby-progressbar (1.10.1)
     simplecov (0.17.0)
@@ -164,9 +164,9 @@ GEM
       activesupport (>= 4.0)
       sprockets (>= 3.0.0)
     sqlite3 (1.4.1)
-    standard (0.1.4)
-      rubocop (~> 0.72.0)
-      rubocop-performance (~> 1.4.0)
+    standard (0.1.6)
+      rubocop (~> 0.75.0)
+      rubocop-performance (~> 1.5.0)
     thor (0.20.3)
     thread_safe (0.3.6)
     toxiproxy (1.0.3)
@@ -194,3 +194,6 @@ DEPENDENCIES
   sqlite3
   standard
   toxiproxy
+
+BUNDLED WITH
+   1.17.2
