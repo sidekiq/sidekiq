@@ -5,6 +5,7 @@ require 'sidekiq/web'
 class TestWebHelpers < Minitest::Test
   class Helpers
     include Sidekiq::WebHelpers
+    attr_accessor :dark_mode
 
     def initialize(params={})
       @thehash = default.merge(params)
@@ -105,5 +106,17 @@ class TestWebHelpers < Minitest::Test
     assert_equal "Invalid job payload, args must be an Array, not String", s
     s = o.display_args(nil)
     assert_equal "Invalid job payload, args is nil", s
+  end
+
+  def test_dark_mode?
+    o = Helpers.new
+
+    assert o.dark_mode?
+
+    o.dark_mode = false
+    assert !o.dark_mode?
+
+    o.dark_mode = true
+    assert o.dark_mode?
   end
 end

@@ -77,7 +77,7 @@ module Sidekiq
         send(:"#{attribute}=", value)
       end
 
-      attr_accessor :app_url, :session_secret, :redis_pool, :sessions
+      attr_accessor :app_url, :session_secret, :redis_pool, :sessions, :dark_mode
       attr_writer :locales, :views
     end
 
@@ -86,6 +86,7 @@ module Sidekiq
       child.session_secret = session_secret
       child.redis_pool = redis_pool
       child.sessions = sessions
+      child.dark_mode = dark_mode
     end
 
     def settings

@@ -665,6 +665,54 @@ describe Sidekiq::Web do
     end
   end
 
+  describe 'dark_mode enabled by default' do
+    def app
+      app = Sidekiq::Web.new
+
+      app
+    end
+
+    it do
+      get '/'
+
+      assert_match(/stylesheets\/application\-dark\.css/, last_response.body)
+    end
+  end
+
+  describe 'dark_mode disabled' do
+    def app
+      Sidekiq::Web.dark_mode = false
+      app = Sidekiq::Web.new
+
+      app
+    end
+
+    after { Sidekiq::Web.dark_mode = nil }
+
+    it do
+      get '/'
+
+      refute_match(/stylesheets\/application\-dark\.css/, last_response.body)
+    end
+  end
+
+  describe 'dark_mode enabled' do
+    def app
+      Sidekiq::Web.dark_mode = true
+      app = Sidekiq::Web.new
+
+      app
+    end
+
+    after { Sidekiq::Web.dark_mode = nil }
+
+    it do
+      get '/'
+
+      assert_match(/stylesheets\/application\-dark\.css/, last_response.body)
+    end
+  end
+
   describe 'basic auth' do
     include Rack::Test::Methods
 

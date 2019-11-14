@@ -78,6 +78,10 @@ module Sidekiq
       get_locale["TextDirection"] || "ltr"
     end
 
+    def dark_mode?
+      settings.dark_mode.nil? ? true : settings.dark_mode
+    end
+
     def rtl?
       text_direction == "rtl"
     end
