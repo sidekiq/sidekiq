@@ -242,17 +242,9 @@ module Sidekiq
       Sidekiq.redis { |con| con.llen(@rname) }
     end
 
-    # Sidekiq Pro overrides pause?, pause! and unpause! functions
+    # Sidekiq Pro overrides this
     def paused?
       false
-    end
-
-    def pause!
-      nil
-    end
-
-    def unpause!
-      nil
     end
 
     ##

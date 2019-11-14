@@ -23,10 +23,12 @@
             <%= csrf_tag %>
             <input class="btn btn-danger btn-xs" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSureDeleteQueue', :queue => h(queue.name)) %>" />
 
-            <% if queue.paused? %>
-              <input class="btn btn-danger btn-xs" type="submit" name="unpause" value="<%= t('Unpause') %>" />
-            <% else %>
-              <input class="btn btn-danger btn-xs" type="submit" name="pause" value="<%= t('Pause') %>" />
+            <% if Sidekiq.pro? %>
+              <% if queue.paused? %>
+                <input class="btn btn-danger btn-xs" type="submit" name="unpause" value="<%= t('Unpause') %>" />
+              <% else %>
+                <input class="btn btn-danger btn-xs" type="submit" name="pause" value="<%= t('Pause') %>" />
+              <% end %>
             <% end %>
           </form>
         </td>
