@@ -92,9 +92,9 @@ module Sidekiq
     post "/queues/:name" do
       queue = Sidekiq::Queue.new(route_params[:name])
 
-      if Sidekiq.pro? && params['pause']
+      if Sidekiq.pro? && params["pause"]
         queue.pause!
-      elsif Sidekiq.pro? && params['unpause']
+      elsif Sidekiq.pro? && params["unpause"]
         queue.unpause!
       else
         queue.clear
