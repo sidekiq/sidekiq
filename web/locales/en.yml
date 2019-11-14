@@ -79,3 +79,5 @@ en: # <---- change this to your locale code
   CreatedAt: Created At
   BackToApp: Back to App
   Latency: Latency
+  Pause: Pause
+  Unpause: Unpause

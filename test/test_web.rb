@@ -168,6 +168,78 @@ describe Sidekiq::Web do
     end
   end
 
+  it 'can attempt to pause a queue' do
+    Sidekiq.stub(:pro?, true) do
+      mock = Minitest::Mock.new
+      mock.expect :pause!, true
+
+      stub = lambda do |queue_name|
+        assert_equal 'foo', queue_name
+        mock
+      end
+
+      Sidekiq::Queue.stub :new, stub do
+        post '/queues/foo', 'pause' => 'pause'
+        assert_equal 302, last_response.status
+      end
+
+      assert_mock mock
+    end
+  end
+
+  it 'can attempt to unpause a queue' do
+    Sidekiq.stub(:pro?, true) do
+      mock = Minitest::Mock.new
+      mock.expect :unpause!, true
+
+      stub = lambda do |queue_name|
+        assert_equal 'foo', queue_name
+        mock
+      end
+
+      Sidekiq::Queue.stub :new, stub do
+        post '/queues/foo', 'unpause' => 'unpause'
+        assert_equal 302, last_response.status
+      end
+
+      assert_mock mock
+    end
+  end
+
+  it 'ignores to attempt to pause a queue with pro disabled' do
+    mock = Minitest::Mock.new
+    mock.expect :clear, true
+
+    stub = lambda do |queue_name|
+      assert_equal 'foo', queue_name
+      mock
+    end
+
+    Sidekiq::Queue.stub :new, stub do
+      post '/queues/foo', 'pause' => 'pause'
+      assert_equal 302, last_response.status
+    end
+
+    assert_mock mock
+  end
+
+  it 'ignores to attempt to unpause a queue with pro disabled' do
+    mock = Minitest::Mock.new
+    mock.expect :clear, true
+
+    stub = lambda do |queue_name|
+      assert_equal 'foo', queue_name
+      mock
+    end
+
+    Sidekiq::Queue.stub :new, stub do
+      post '/queues/foo', 'unpause' => 'unpause'
+      assert_equal 302, last_response.status
+    end
+
+    assert_mock mock
+  end
+
   it 'can delete a job' do
     Sidekiq.redis do |conn|
       conn.rpush('queue:foo', '{"args":[],"enqueued_at":1567894960}')
