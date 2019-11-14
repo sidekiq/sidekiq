@@ -2,6 +2,13 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
+HEAD
+---------
+
+- Sidekiq Pro users will now see a Pause button next to each queue in
+  the Web UI, allowing them to pause queues manually [#4374, shayonj]
+
+
 6.0.3
 ---------
 
