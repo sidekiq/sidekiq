@@ -24,9 +24,9 @@
             <input class="btn btn-danger btn-xs" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSureDeleteQueue', :queue => h(queue.name)) %>" />
 
             <% if queue.paused? %>
-              <input class="btn btn-danger btn-xs" type="submit" name="unpause" value="<%= t('Unpause') %>" data-confirm="<%= t('AreYouSureUnpauseQueue', :queue => h(queue.name)) %>" />
+              <input class="btn btn-danger btn-xs" type="submit" name="unpause" value="<%= t('Unpause') %>" />
             <% else %>
-              <input class="btn btn-danger btn-xs" type="submit" name="pause" value="<%= t('Pause') %>" data-confirm="<%= t('AreYouSurePauseQueue', :queue => h(queue.name)) %>" />
+              <input class="btn btn-danger btn-xs" type="submit" name="pause" value="<%= t('Pause') %>" />
             <% end %>
           </form>
         </td>
