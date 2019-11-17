@@ -322,6 +322,15 @@ describe Sidekiq::CLI do
           end
         end
       end
+
+      it 'prints rails info' do
+        subject.stub(:environment, 'production') do
+          subject.stub(:launch, nil) do
+            subject.run
+          end
+          assert_includes @logdev.string, "Booted Rails #{::Rails.version} application in production environment"
+        end
+      end
     end
 
     describe 'signal handling' do
