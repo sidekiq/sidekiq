@@ -38,6 +38,7 @@ module Sidekiq
       if environment == "development" && $stdout.tty? && Sidekiq.log_formatter.is_a?(Sidekiq::Logger::Formatters::Pretty)
         print_banner
       end
+      logger.info "Booted Rails #{::Rails.version} application in #{environment} environment" if rails_app?
 
       self_read, self_write = IO.pipe
       sigs = %w[INT TERM TTIN TSTP]
@@ -377,6 +378,10 @@ module Sidekiq
       raise ArgumentError, "queues: #{queue} cannot be defined twice" if opts[:queues].include?(queue)
       [weight.to_i, 1].max.times { opts[:queues] << queue }
       opts[:strict] = false if weight.to_i > 0
+    end
+
+    def rails_app?
+      defined?(::Rails)
     end
   end
 end
