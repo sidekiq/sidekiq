@@ -926,7 +926,11 @@ module Sidekiq
           }
           next unless valid
           workers.each_pair do |tid, json|
-            yield key, tid, Sidekiq.load_json(json)
+            hsh = Sidekiq.load_json(json)
+            p = hsh["payload"]
+            # avoid breaking API, this is a side effect of the JSON optimization in #4316
+            hsh["payload"] = Sidekiq.load_json(p) if p.is_a?(String)
+            yield key, tid, hsh
           end
         end
       end

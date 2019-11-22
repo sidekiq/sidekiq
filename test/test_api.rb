@@ -580,7 +580,7 @@ describe 'API' do
       end
 
       s = "#{key}:workers"
-      data = Sidekiq.dump_json({ 'payload' => {}, 'queue' => 'default', 'run_at' => Time.now.to_i })
+      data = Sidekiq.dump_json({ 'payload' => "{}", 'queue' => 'default', 'run_at' => Time.now.to_i })
       Sidekiq.redis do |c|
         c.hmset(s, '1234', data)
       end
@@ -589,6 +589,7 @@ describe 'API' do
         assert_equal key, p
         assert_equal "1234", x
         assert_equal 'default', y['queue']
+        assert_equal({}, y['payload'])
         assert_equal Time.now.year, Time.at(y['run_at']).year
       end
 

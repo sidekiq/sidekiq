@@ -7,6 +7,7 @@ HEAD
 
 - Sidekiq Pro users will now see a Pause button next to each queue in
   the Web UI, allowing them to pause queues manually [#4374, shayonj]
+- Fix Sidekiq::Workers API unintentional change in 6.0.2 [#4387]
 
 
 6.0.3
