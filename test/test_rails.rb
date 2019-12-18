@@ -24,7 +24,7 @@ describe 'ActiveJob' do
   it 'loads Sidekiq::Worker::Options in AJ::Base classes' do
     aj = Class.new(ActiveJob::Base) do
       queue_as :bar
-      sidekiq_options retry: 4, queue: 'foo'
+      sidekiq_options retry: 4, queue: 'foo', backtrace: 5
       sidekiq_retry_in { |count, _exception| count * 10 }
       sidekiq_retries_exhausted do |msg, _exception|
         Sidekiq.logger.warn "Failed #{msg['class']} with #{msg['args']}: #{msg['error_message']}"
@@ -41,5 +41,9 @@ describe 'ActiveJob' do
     q = Sidekiq::Queue.new("bar")
     assert_equal 1, q.size
     assert_equal 24, instance.provider_job_id.size
+
+    job = q.first
+    assert_equal 4, job["retry"]
+    assert_equal 5, job["backtrace"]
   end
 end

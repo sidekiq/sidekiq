@@ -230,13 +230,17 @@ module Sidekiq
       raise(ArgumentError, "Job tags must be an Array") if item["tags"] && !item["tags"].is_a?(Array)
       # raise(ArgumentError, "Arguments must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices") unless JSON.load(JSON.dump(item['args'])) == item['args']
 
-      normalized_hash(item["class"])
-        .each { |key, value| item[key] = value if item[key].nil? }
+      # merge in the default sidekiq_options for the item's class and/or wrapped element
+      # this allows ActiveJobs to control sidekiq_options too.
+      defaults = normalized_hash(item["class"])
+      defaults = defaults.merge(item["wrapped"].get_sidekiq_options) if item["wrapped"].respond_to?("get_sidekiq_options")
+      item = defaults.merge(item)
 
       item["class"] = item["class"].to_s
       item["queue"] = item["queue"].to_s
       item["jid"] ||= SecureRandom.hex(12)
       item["created_at"] ||= Time.now.to_f
+
       item
     end
 
