@@ -45,5 +45,7 @@ describe 'ActiveJob' do
     job = q.first
     assert_equal 4, job["retry"]
     assert_equal 5, job["backtrace"]
+    # AJ's queue_as should take precedence over Sidekiq's queue option
+    assert_equal "bar", job["queue"]
   end
 end
