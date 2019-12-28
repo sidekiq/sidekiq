@@ -19,7 +19,7 @@ module Sidekiq
       proc { |me, data| "stopping" if me.stopping? },
     ]
 
-    attr_accessor :manager, :poller, :fetcher
+    attr_accessor :manager, :poller
 
     def initialize(options)
       @manager = Sidekiq::Manager.new(options)
