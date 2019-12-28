@@ -97,10 +97,6 @@ module Sidekiq
       end
     end
 
-    def stopped?
-      @done
-    end
-
     private
 
     def hard_shutdown
