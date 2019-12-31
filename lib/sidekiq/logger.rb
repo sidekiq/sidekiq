@@ -104,7 +104,7 @@ module Sidekiq
   class Logger < ::Logger
     include LoggingUtils
 
-    def initialize(*args)
+    def initialize(*args, **kwargs)
       super
       self.formatter = Sidekiq.log_formatter
     end
