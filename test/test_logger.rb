@@ -108,6 +108,14 @@ class TestLogger < Minitest::Test
     assert_equal "INFO", hash["lvl"]
   end
 
+  def test_forwards_logger_kwargs
+    assert_silent do
+      logger = Sidekiq::Logger.new('/dev/null', level: Logger::INFO)
+
+      assert_equal Logger::INFO, logger.level
+    end
+  end
+
   def reset(io)
     io.truncate(0)
     io.rewind
