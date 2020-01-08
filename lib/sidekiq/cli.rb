@@ -381,7 +381,7 @@ module Sidekiq
     end
 
     def rails_app?
-      defined?(::Rails)
+      defined?(::Rails) && ::Rails.respond_to?(:application)
     end
   end
 end
