@@ -14,7 +14,7 @@ require "sidekiq/web/application"
 require "rack/protection"
 
 require "rack/builder"
-require "rack/file"
+require "rack/files"
 require "rack/session/cookie"
 
 module Sidekiq
@@ -183,7 +183,7 @@ module Sidekiq
       ::Rack::Builder.new do
         %w[stylesheets javascripts images].each do |asset_dir|
           map "/#{asset_dir}" do
-            run ::Rack::File.new("#{ASSETS}/#{asset_dir}", {"Cache-Control" => "public, max-age=86400"})
+            run ::Rack::Files.new("#{ASSETS}/#{asset_dir}", {"Cache-Control" => "public, max-age=86400"})
           end
         end
 
