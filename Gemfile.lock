@@ -3,7 +3,7 @@ PATH
   specs:
     sidekiq (6.0.4)
       connection_pool (>= 2.2.2)
-      rack (>= 2.0.0)
+      rack (~> 2.0.8)
       rack-protection (>= 2.0.0)
       redis (>= 4.1.0)
 
@@ -105,8 +105,8 @@ GEM
     pry-byebug (3.7.0)
       byebug (~> 11.0)
       pry (~> 0.10)
-    rack (2.0.7)
-    rack-protection (2.0.7)
+    rack (2.0.8)
+    rack-protection (2.0.8.1)
       rack
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
