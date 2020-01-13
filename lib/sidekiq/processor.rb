@@ -181,7 +181,7 @@ module Sidekiq
         # the retry subsystem (e.g. network partition).  We won't acknowledge the job
         # so it can be rescued when using Sidekiq Pro.
         handle_exception(ex, {context: "Internal exception!", job: job_hash, jobstr: jobstr})
-        raise e
+        raise ex
       ensure
         if ack
           # We don't want a shutdown signal to interrupt job acknowledgment.

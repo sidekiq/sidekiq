@@ -83,7 +83,7 @@ module Sidekiq
     # Redefined to check severity against #level, and thus the thread-local level, rather than +@level+.
     # FIXME: Remove when the minimum Ruby version supports overriding Logger#level.
     def add(severity, message = nil, progname = nil, &block)
-      severity ||= UNKNOWN
+      severity ||= ::Logger::UNKNOWN
       progname ||= @progname
 
       return true if @logdev.nil? || severity < level
