@@ -295,7 +295,7 @@ module Sidekiq
     end
 
     def environment_title_prefix
-      environment = Sidekiq.options[:environment] || ENV["RAILS_ENV"] || ENV["RACK_ENV"] || "development"
+      environment = Sidekiq.options[:environment] || ENV["APP_ENV"] || ENV["RAILS_ENV"] || ENV["RACK_ENV"] || "development"
 
       "[#{environment.upcase}] " unless environment == "production"
     end
