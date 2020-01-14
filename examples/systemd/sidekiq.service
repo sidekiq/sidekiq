@@ -25,6 +25,14 @@ After=syslog.target network.target
 # times! systemd is a critical tool for all developers to know and understand.
 #
 [Service]
+# You may want to use
+# Type=notify
+# to ensure service is not marked as started before it actually did.
+# Include sd_notify gem to send a message on sidekiq startup like
+#   Sidekiq.configure_server do |config|
+#     config.on(:startup) { SdNotify.ready }
+#   end
+# to let systemd know when the service is actually started.
 Type=simple
 WorkingDirectory=/opt/myapp/current
 # If you use rbenv:
