@@ -300,21 +300,19 @@ module Sidekiq
 
       resp = case resp
       when Array
+        # redirects go here
         resp
       else
+        # rendered content goes here
         headers = {
           "Content-Type" => "text/html",
           "Cache-Control" => "no-cache",
           "Content-Language" => action.locale,
           "Content-Security-Policy" => CSP_HEADER,
         }
-
+        # we'll let Rack calculate Content-Length for us.
         [200, headers, [resp]]
       end
-
-      resp[1] = resp[1].dup
-
-      resp[1][CONTENT_LENGTH] = resp[2].sum(&:bytesize).to_s
 
       resp
     end
