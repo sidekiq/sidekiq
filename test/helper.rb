@@ -13,6 +13,7 @@ ENV["N"] = "0"
 if ENV["COVERAGE"]
   require 'simplecov'
   SimpleCov.start do
+    enable_coverage :branch
     add_filter "/test/"
     add_filter "/myapp/"
   end
