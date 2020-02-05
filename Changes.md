@@ -6,6 +6,7 @@ HEAD
 ---------
 
 - Fix broken Web UI response when using NewRelic and Rack 2.1.2+. [#4440]
+- Update APIs to use `UNLINK`, not `DEL`. [#4449]
 
 6.0.4
 ---------
