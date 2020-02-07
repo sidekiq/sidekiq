@@ -8,3 +8,4 @@ staging:
   :queues:
     - [<%="very_"%>often, 2]
     - [seldom, 1]
+  :web_theme: "dark"

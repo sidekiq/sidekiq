@@ -152,6 +152,7 @@ describe Sidekiq::CLI do
             assert_equal 50, Sidekiq.options[:concurrency]
             assert_equal 2, Sidekiq.options[:queues].count { |q| q == 'very_often' }
             assert_equal 1, Sidekiq.options[:queues].count { |q| q == 'seldom' }
+            assert_equal "dark", Sidekiq.options[:web_theme]
           end
 
           it 'accepts stringy keys' do
@@ -164,6 +165,7 @@ describe Sidekiq::CLI do
             assert_equal 50, Sidekiq.options[:concurrency]
             assert_equal 2, Sidekiq.options[:queues].count { |q| q == 'very_often' }
             assert_equal 1, Sidekiq.options[:queues].count { |q| q == 'seldom' }
+            assert_equal "dark", Sidekiq.options[:web_theme]
           end
 
           it 'accepts environment specific config' do
@@ -176,6 +178,7 @@ describe Sidekiq::CLI do
             assert_equal 50, Sidekiq.options[:concurrency]
             assert_equal 2, Sidekiq.options[:queues].count { |q| q == 'very_often' }
             assert_equal 1, Sidekiq.options[:queues].count { |q| q == 'seldom' }
+            assert_equal "dark", Sidekiq.options[:web_theme]
           end
         end
 
@@ -227,6 +230,7 @@ describe Sidekiq::CLI do
               assert_equal 100, Sidekiq.options[:concurrency]
               assert_equal 7, Sidekiq.options[:queues].count { |q| q == 'often' }
               assert_equal 3, Sidekiq.options[:queues].count { |q| q == 'seldom' }
+              assert_equal "dark", Sidekiq.options[:web_theme]
             end
           end
 
