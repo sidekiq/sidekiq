@@ -1,0 +1,123 @@
+body {
+    background-color: #000;
+    color: #ccc;
+}
+
+a,
+.title,
+.summary_bar ul .count,
+.navbar .navbar-brand {
+    color: #af0014;
+}
+
+.navbar .navbar-brand:hover {
+    color: #ccc;
+}
+
+.navbar .navbar-brand .status {
+    color: #ccc;
+}
+
+.navbar-inverse {
+    background-color: #000;
+    border-color: #333;
+}
+
+table.table-white {
+    background-color: #111;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #222;
+}
+
+.table-bordered,
+.table-bordered > tbody > tr > td,
+.table-bordered > tbody > tr > th,
+.table-bordered > tfoot > tr > td,
+.table-bordered > tfoot > tr > th,
+.table-bordered > thead > tr > td,
+.table-bordered > thead > tr > th {
+    border: 1px solid #333;
+}
+
+.table-hover > tbody > tr:hover {
+    background-color: #333;
+}
+
+.alert {
+    border: none;
+    color: #ccc;
+}
+
+.alert-success {
+    background-color: #000;
+}
+
+a:link,
+a:active,
+a:hover,
+a:visited {
+    color: #63798c;
+}
+
+a.btn {
+    color: #000;
+}
+
+.summary_bar .summary {
+    background-color: #000;
+    border: 1px solid #333;
+}
+
+.navbar-default {
+    background-color: #000;
+    border-color: #3d3d3d;
+}
+
+.navbar-default .navbar-nav > .active > a,
+.navbar-default .navbar-nav > .active > a:focus,
+.navbar-default .navbar-nav > .active > a:hover {
+    color: #ccc;
+    background-color: #282828;
+}
+
+.navbar-default .navbar-nav > li > a:hover {
+    color: #ccc;
+}
+
+.pagination > li > a,
+.pagination > li > a:hover,
+.pagination > li > span {
+    color: #ccc;
+    background-color: #282828;
+    border-color: #353535;
+}
+
+.pagination > .disabled > a,
+.pagination > .disabled > a:focus,
+.pagination > .disabled > a:hover,
+.pagination > .disabled > span,
+.pagination > .disabled > span:focus,
+.pagination > .disabled > span:hover {
+    color: #a5a5a5;
+    background-color: #282828;
+    border-color: #353535;
+}
+
+.stat {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#live-poll {
+    color: #ccc;
+}
+
+.btn-warn {
+    color: #333;
+}
+
+.rickshaw_graph .y_ticks.glow text {
+    fill: #ccc;
+    color: #ccc;
+}

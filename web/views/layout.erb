@@ -10,8 +10,16 @@
     <link href="<%= root_path %>stylesheets/bootstrap-rtl.min.css" media="screen" rel="stylesheet" type="text/css"/>
     <% end %>
 
-    <link href="<%= root_path %>stylesheets/application.css" media="screen" rel="stylesheet" type="text/css" />
-    <link href="<%= root_path %>stylesheets/application-dark.css" media="screen" rel="stylesheet" type="text/css" />
+    <% if Sidekiq.options[:web_theme] %>>
+      <link href="<%= root_path %>stylesheets/application.css" media="screen" rel="stylesheet" type="text/css" />
+      <% if Sidekiq.options[:web_theme] == 'dark' %>>
+        <link href="<%= root_path %>stylesheets/application-dark_base.css" media="screen" rel="stylesheet" type="text/css" />
+      <% end %>>
+    <% else %>>
+      <link href="<%= root_path %>stylesheets/application.css" media="screen" rel="stylesheet" type="text/css" />
+      <link href="<%= root_path %>stylesheets/application-dark.css" media="screen" rel="stylesheet" type="text/css" />
+    <% end %>>
+
     <% if rtl? %>
     <link href="<%= root_path %>stylesheets/application-rtl.css" media="screen" rel="stylesheet" type="text/css" />
     <% end %>
