@@ -10,7 +10,7 @@ module Sidekiq
       "default-src 'self' https: http:",
       "child-src 'self'",
       "connect-src 'self' https: http: wss: ws:",
-      "font-src 'self' https: http:",
+      "font-src 'self' https: http: data:",
       "frame-src 'self'",
       "img-src 'self' https: http: data:",
       "manifest-src 'self'",
