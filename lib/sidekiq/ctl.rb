@@ -18,10 +18,10 @@ class Sidekiq::Ctl
     puts
     puts "       <pidfile> is path to a pidfile"
     puts "       <kill_timeout> is number of seconds to wait until Sidekiq exits"
-    puts "       (default: #{Sidekiqctl::DEFAULT_KILL_TIMEOUT}), after which Sidekiq will be KILL'd"
+    puts "       (default: #{Sidekiq::Ctl::DEFAULT_KILL_TIMEOUT}), after which Sidekiq will be KILL'd"
     puts
     puts "       <section> (optional) view a specific section of the status output"
-    puts "       Valid sections are: #{Sidekiqctl::Status::VALID_SECTIONS.join(', ')}"
+    puts "       Valid sections are: #{Sidekiq::Ctl::Status::VALID_SECTIONS.join(', ')}"
     puts
     puts "Be sure to set the kill_timeout LONGER than Sidekiq's -t timeout.  If you want"
     puts "to wait 60 seconds for jobs to finish, use `sidekiq -t 60` and `sidekiqctl stop"
