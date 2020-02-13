@@ -2,6 +2,12 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
+5.2.8
+---------
+
+- Lock to Rack 2.0.x to prevent future incompatibilities
+- Fix invalid reference in `sidekiqctl`
+
 5.2.7
 ---------
 
