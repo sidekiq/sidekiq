@@ -138,6 +138,12 @@ See the [Logging wiki page](https://github.com/mperham/sidekiq/wiki/Logging) for
 - Integrate the StandardRB code formatter to ensure consistent code
   styling. [#4114, gearnode]
 
+5.2.8
+---------
+
+- Lock to Rack 2.0.x to prevent future incompatibilities
+- Fix invalid reference in `sidekiqctl`
+
 5.2.7
 ---------
 
