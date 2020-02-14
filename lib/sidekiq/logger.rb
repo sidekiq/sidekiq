@@ -31,23 +31,23 @@ module Sidekiq
     end
 
     def debug?
-      level >= 0
+      level <= 0
     end
 
     def info?
-      level >= 1
+      level <= 1
     end
 
     def warn?
-      level >= 2
+      level <= 2
     end
 
     def error?
-      level >= 3
+      level <= 3
     end
 
     def fatal?
-      level >= 4
+      level <= 4
     end
 
     def local_level

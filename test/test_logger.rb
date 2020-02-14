@@ -116,6 +116,18 @@ class TestLogger < Minitest::Test
     end
   end
 
+  def test_log_level_query_methods
+    logger = Sidekiq::Logger.new('/dev/null', level: Logger::INFO)
+
+    refute_predicate logger, :debug?
+    assert_predicate logger, :info?
+    assert_predicate logger, :warn?
+
+    logger.level = Logger::WARN
+    refute_predicate logger, :info?
+    assert_predicate logger, :warn?
+  end
+
   def reset(io)
     io.truncate(0)
     io.rewind
