@@ -236,6 +236,8 @@ module Sidekiq
       defaults = defaults.merge(item["wrapped"].get_sidekiq_options) if item["wrapped"].respond_to?("get_sidekiq_options")
       item = defaults.merge(item)
 
+      raise(ArgumentError, "Job must include a valid queue name") if item["queue"].nil? || item["queue"] == ""
+
       item["class"] = item["class"].to_s
       item["queue"] = item["queue"].to_s
       item["jid"] ||= SecureRandom.hex(12)

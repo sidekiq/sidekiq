@@ -40,6 +40,12 @@ describe Sidekiq::Client do
   end
 
   describe 'as instance' do
+    it 'handles nil queue' do
+      assert_raises ArgumentError do
+        Sidekiq::Client.push('class' => 'Blah', 'args' => [1,2,3], 'queue' => "")
+      end
+    end
+
     it 'can push' do
       client = Sidekiq::Client.new
       jid = client.push('class' => 'Blah', 'args' => [1,2,3])
