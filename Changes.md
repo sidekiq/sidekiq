@@ -13,6 +13,7 @@ HEAD
 - Fix broken Web UI response when using NewRelic and Rack 2.1.2+. [#4440]
 - Update APIs to use `UNLINK`, not `DEL`. [#4449]
 - Fix Ruby 2.7 warnings [#4412]
+- Add support for `APP_ENV` [[95fa5d9]](https://github.com/mperham/sidekiq/commit/95fa5d90192148026e52ca2902f1b83c70858ce8)
 
 6.0.4
 ---------
