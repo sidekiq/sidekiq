@@ -19,7 +19,8 @@ Sidekiq = {};
 $(function() {
   var pollpath = $('body').data('poll-path');
   if (pollpath != "") {
-    updatePage(pollpath);
+    var ti = parseInt(localStorage.timeInterval) || 2000;
+    setTimeout(function(){updatePage(pollpath)}, ti);
   }
 
   $(document).on('click', '.check_all', function() {
@@ -55,25 +56,24 @@ function updateFuzzyTimes(locale) {
 }
 
 function updatePage(url) {
-  setInterval(function () {
-    $.ajax({
-      url: url,
-      dataType: 'html'
-    }).done(function (data) {
-      $data = $(data)
+  $.ajax({
+    url: url,
+    dataType: 'html'
+  }).done(function (data) {
+    $data = $(data)
 
-      var $page = $data.filter('#page')
-      $('#page').replaceWith($page)
+    var $page = $data.filter('#page')
+    $('#page').replaceWith($page)
 
-      var $header_status = $data.find('.status')
-      $('.status').replaceWith($header_status)
+    var $header_status = $data.find('.status')
+    $('.status').replaceWith($header_status)
 
-      updateFuzzyTimes($('body').data('locale'));
-    })
-  }, parseInt(localStorage.timeInterval) || 2000);
+    updateFuzzyTimes($('body').data('locale'));
+
+    var ti = parseInt(localStorage.timeInterval) || 2000;
+    setTimeout(function(){updatePage(url)}, ti)
+  })
 }
-
-
 
 $(function() {
   'use strict';
