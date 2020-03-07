@@ -59,7 +59,7 @@ function updatePage(url) {
   $.ajax({
     url: url,
     dataType: 'html'
-  }).done(function (data) {
+  }).done(function(data) {
     $data = $(data)
 
     var $page = $data.filter('#page')
@@ -70,6 +70,9 @@ function updatePage(url) {
 
     updateFuzzyTimes($('body').data('locale'));
 
+    var ti = parseInt(localStorage.timeInterval) || 2000;
+    setTimeout(function(){updatePage(url)}, ti)
+  }).fail(function() {
     var ti = parseInt(localStorage.timeInterval) || 2000;
     setTimeout(function(){updatePage(url)}, ti)
   })
