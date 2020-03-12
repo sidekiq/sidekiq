@@ -103,8 +103,31 @@ describe Sidekiq::Client do
       assert_equal pre + 1, q.size
     end
 
+
+    it 'wrapper options passed' do
+      q = Sidekiq::Queue.new('foo')
+      jid = Sidekiq::Client.push('class'=> 'MyWorker', 'queue' => 'foo', 'wrapped' => MyRailsWorker, 'args' => [1, 2])
+      assert jid
+      added_job = q.find_job(jid)
+      assert_equal "merged_payload", added_job.item["backtrace"]
+    end
+
+    it 'wrapper option passed old school (rails 5)' do
+      q = Sidekiq::Queue.new('foo')
+      jid = Sidekiq::Client.push('class'=> 'MyWorker', 'queue' => 'foo', 'wrapped' => "MyRailsWorker", 'args' => [1, 2])
+      assert jid
+      added_job = q.find_job(jid)
+      assert_equal "merged_payload", added_job.item["backtrace"]
+    end
+
     class MyWorker
       include Sidekiq::Worker
+    end
+    class MyRailsWorker
+      def self.get_sidekiq_options
+        {backtrace: "merged_payload"}
+      end
+      
     end
 
     class QueuedWorker
