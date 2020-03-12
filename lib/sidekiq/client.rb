@@ -233,6 +233,9 @@ module Sidekiq
       # merge in the default sidekiq_options for the item's class and/or wrapped element
       # this allows ActiveJobs to control sidekiq_options too.
       defaults = normalized_hash(item["class"])
+      if item["wrapped"].is_a?(String)
+        item["wrapped"] = item["wrapped"].constantize
+      end
       defaults = defaults.merge(item["wrapped"].get_sidekiq_options) if item["wrapped"].respond_to?("get_sidekiq_options")
       item = defaults.merge(item)
 
