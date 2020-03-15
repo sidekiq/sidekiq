@@ -95,7 +95,7 @@ module Sidekiq
       else
         path_match = path.match(matcher)
         if path_match
-          Hash[path_match.names.map(&:to_sym).zip(path_match.captures)]
+          path_match.named_captures.transform_keys(&:to_sym)
         end
       end
     end
