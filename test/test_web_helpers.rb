@@ -81,6 +81,9 @@ class TestWebHelpers < Minitest::Test
     obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'ru,en')
     assert_equal 'ru', obj.locale
 
+    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'lt')
+    assert_equal 'lt', obj.locale
+
     obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => '*')
     assert_equal 'en', obj.locale
   end
@@ -89,7 +92,7 @@ class TestWebHelpers < Minitest::Test
     obj = Helpers.new
     expected = %w(
       ar cs da de el en es fa fr he hi it ja
-      ko nb nl pl pt pt-br ru sv ta uk ur
+      ko lt nb nl pl pt pt-br ru sv ta uk ur
       zh-cn zh-tw
     )
     assert_equal expected, obj.available_locales.sort
