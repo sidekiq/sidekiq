@@ -48,8 +48,8 @@ module Sidekiq
         # In practice, any option is allowed.  This is the main mechanism to configure the
         # options for a specific job.
         def sidekiq_options(opts = {})
-          opts = Hash[opts.map { |k, v| [k.to_s, v] }] # stringify
-          self.sidekiq_options_hash = get_sidekiq_options.merge(Hash[opts.map { |k, v| [k.to_s, v] }])
+          opts = opts.transform_keys(&:to_s) # stringify
+          self.sidekiq_options_hash = get_sidekiq_options.merge(opts)
         end
 
         def sidekiq_retry_in(&block)
