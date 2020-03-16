@@ -185,8 +185,8 @@ module Sidekiq
       # See #984 for discussion.
       # APP_ENV is now the preferred ENV term since it is not tech-specific.
       # Both Sinatra 2.0+ and Sidekiq support this term.
-      # RACK_ENV and RAILS_ENV are there for legacy support.
-      @environment = cli_env || ENV["APP_ENV"] || ENV["RACK_ENV"] || ENV["RAILS_ENV"] || "development"
+      # RAILS_ENV and RACK_ENV are there for legacy support.
+      @environment = cli_env || ENV["APP_ENV"] || ENV["RAILS_ENV"] || ENV["RACK_ENV"] || "development"
     end
 
     def symbolize_keys_deep!(hash)
