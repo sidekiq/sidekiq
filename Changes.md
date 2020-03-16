@@ -5,6 +5,8 @@
 HEAD
 ---------
 
+- Integrate with systemd's watchdog and notification features [#4488]
+  See `Type=notify` in [systemd.service](https://www.freedesktop.org/software/systemd/man/systemd.service.html#Options)
 - Fix edge case where a job can be pushed without a queue.
 
 6.0.5
