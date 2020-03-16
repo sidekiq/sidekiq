@@ -14,8 +14,10 @@ module Sidekiq
     # to the service manager every half of the time returned here."
     ping_f = sec_f / 2
     Thread.new do
-      Sidekiq::SdNotify.watchdog
-      sleep ping_f
+      loop do
+        Sidekiq::SdNotify.watchdog
+        sleep ping_f
+      end
     end
   end
 end
