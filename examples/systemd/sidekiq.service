@@ -1,14 +1,16 @@
 #
-# systemd unit file for CentOS 7+, Ubuntu 15.04+
+# This file tells systemd how to run Sidekiq as a 24/7 long-running daemon.
 #
 # Customize this file based on your bundler location, app directory, etc.
-# Put this in /usr/lib/systemd/system (CentOS) or /lib/systemd/system (Ubuntu).
-# Run:
+# Customize and copy this into /usr/lib/systemd/system (CentOS) or /lib/systemd/system (Ubuntu).
+# Then run:
 #   - systemctl enable sidekiq
 #   - systemctl {start,stop,restart,reload} sidekiq
 #
 # This file corresponds to a single Sidekiq process.  Add multiple copies
 # to run multiple processes (sidekiq-1, sidekiq-2, etc).
+#
+# Use `journalctl -u sidekiq -rn 100` to view the last 100 lines of log output.
 #
 [Unit]
 Description=sidekiq
@@ -25,20 +27,23 @@ After=syslog.target network.target
 # times! systemd is a critical tool for all developers to know and understand.
 #
 [Service]
-# You may want to use
-# Type=notify
-# to ensure service is not marked as started before it actually did.
-# Include sd_notify gem to send a message on sidekiq startup like
-#   Sidekiq.configure_server do |config|
-#     config.on(:startup) { SdNotify.ready }
-#   end
-# to let systemd know when the service is actually started.
-Type=simple
+#
+#      WARNING  WARNING  WARNING
+#
+# As of v6.0.6, Sidekiq automatically supports systemd's `notify` service
+# monitoring. If you are using an earlier version, change this to `Type=simple`.
+#
+#      WARNING  WARNING  WARNING
+#
+Type=notify
+WatchdogSec=5
+
 WorkingDirectory=/opt/myapp/current
 # If you use rbenv:
 # ExecStart=/bin/bash -lc 'exec /home/deploy/.rbenv/shims/bundle exec sidekiq -e production'
 # If you use the system's ruby:
 ExecStart=/usr/local/bin/bundle exec sidekiq -e production
+# If you use rvm in production, don't.
 
 # use `systemctl reload sidekiq` to send the quiet signal to Sidekiq
 # at the start of your deploy process.

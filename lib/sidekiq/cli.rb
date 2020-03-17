@@ -389,3 +389,5 @@ module Sidekiq
     end
   end
 end
+
+require "sidekiq/systemd"

@@ -13,6 +13,7 @@ module Sidekiq
     # "It is recommended that a daemon sends a keep-alive notification message
     # to the service manager every half of the time returned here."
     ping_f = sec_f / 2
+    Sidekiq.logger.info "Pinging systemd watchdog every #{ping_f.round(1)} sec"
     Thread.new do
       loop do
         Sidekiq::SdNotify.watchdog
@@ -24,11 +25,12 @@ end
 
 if ENV["NOTIFY_SOCKET"]
   Sidekiq.configure_server do |config|
+    Sidekiq.logger.info "Enabling systemd notification integration"
     require "sidekiq/sd_notify"
     config.on(:startup) do
       Sidekiq::SdNotify.ready
     end
-    config.on(:terminate) do
+    config.on(:shutdown) do
       Sidekiq::SdNotify.stopping
     end
     Sidekiq.start_watchdog if Sidekiq::SdNotify.watchdog?
