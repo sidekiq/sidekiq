@@ -5,10 +5,12 @@
 HEAD
 ---------
 
+- Use `setTimeout` rather than `setInterval` to avoid thundering herd [#4480]
 - Integrate with systemd's watchdog and notification features [#4488]
-  See `Type=notify` in [systemd.service](https://www.freedesktop.org/software/systemd/man/systemd.service.html#Options)
+  See `Type=notify` in [systemd.service](https://www.freedesktop.org/software/systemd/man/systemd.service.html#Options). The integration works automatically.
 - Fix edge case where a job can be pushed without a queue.
-- Check RAILS_ENV before RACK_ENV. [#4493]
+- Check RAILS_ENV before RACK_ENV [#4493]
+- Add Lithuanian locale [#4476]
 
 6.0.5
 ---------
