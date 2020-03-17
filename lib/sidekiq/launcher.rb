@@ -16,7 +16,7 @@ module Sidekiq
       proc { Sidekiq::VERSION },
       proc { |me, data| data["tag"] },
       proc { |me, data| "[#{Processor::WORKER_STATE.size} of #{data["concurrency"]} busy]" },
-      proc { |me, data| "stopping" if me.stopping? },
+      proc { |me, data| "stopping" if me.stopping? }
     ]
 
     attr_accessor :manager, :poller, :fetcher
@@ -163,7 +163,7 @@ module Sidekiq
           "concurrency" => @options[:concurrency],
           "queues" => @options[:queues].uniq,
           "labels" => @options[:labels],
-          "identity" => identity,
+          "identity" => identity
         }
       end
     end

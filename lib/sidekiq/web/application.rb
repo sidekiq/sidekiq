@@ -19,7 +19,7 @@ module Sidekiq
       "script-src 'self' https: http: 'unsafe-inline'",
       "style-src 'self' https: http: 'unsafe-inline'",
       "worker-src 'self'",
-      "base-uri 'self'",
+      "base-uri 'self'"
     ].join("; ").freeze
 
     def initialize(klass)
@@ -275,7 +275,7 @@ module Sidekiq
           scheduled: sidekiq_stats.scheduled_size,
           retries: sidekiq_stats.retry_size,
           dead: sidekiq_stats.dead_size,
-          default_latency: sidekiq_stats.default_queue_latency,
+          default_latency: sidekiq_stats.default_queue_latency
         },
         redis: redis_stats,
         server_utc_time: server_utc_time
@@ -308,7 +308,7 @@ module Sidekiq
           "Content-Type" => "text/html",
           "Cache-Control" => "no-cache",
           "Content-Language" => action.locale,
-          "Content-Security-Policy" => CSP_HEADER,
+          "Content-Security-Policy" => CSP_HEADER
         }
         # we'll let Rack calculate Content-Length for us.
         [200, headers, [resp]]

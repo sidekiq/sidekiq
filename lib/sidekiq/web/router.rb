@@ -94,9 +94,7 @@ module Sidekiq
         {} if path == matcher
       else
         path_match = path.match(matcher)
-        if path_match
-          path_match.named_captures.transform_keys(&:to_sym)
-        end
+        path_match&.named_captures&.transform_keys(&:to_sym)
       end
     end
   end

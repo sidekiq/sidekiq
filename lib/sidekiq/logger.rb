@@ -23,7 +23,7 @@ module Sidekiq
       "info" => 1,
       "warn" => 2,
       "error" => 3,
-      "fatal" => 4,
+      "fatal" => 4
     }
     LEVELS.default_proc = proc do |_, level|
       Sidekiq.logger.warn("Invalid log level: #{level.inspect}")
@@ -152,7 +152,7 @@ module Sidekiq
             pid: ::Process.pid,
             tid: tid,
             lvl: severity,
-            msg: message,
+            msg: message
           }
           c = ctx
           hash["ctx"] = c unless c.empty?

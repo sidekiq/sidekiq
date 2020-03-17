@@ -39,7 +39,7 @@ module Sidekiq
       # attribute to expose the underlying thing.
       h = {
         class: job_hash["wrapped"] || job_hash["class"],
-        jid: job_hash["jid"],
+        jid: job_hash["jid"]
       }
       h[:bid] = job_hash["bid"] if job_hash["bid"]
       h[:tags] = job_hash["tags"] if job_hash["tags"]

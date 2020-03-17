@@ -105,7 +105,7 @@ module Sidekiq
 
         default_queue_latency: default_queue_latency,
         workers_size: workers_size,
-        enqueued: enqueued,
+        enqueued: enqueued
       }
     end
 

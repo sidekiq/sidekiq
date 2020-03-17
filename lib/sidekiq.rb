@@ -30,16 +30,16 @@ module Sidekiq
       startup: [],
       quiet: [],
       shutdown: [],
-      heartbeat: [],
+      heartbeat: []
     },
     dead_max_jobs: 10_000,
     dead_timeout_in_seconds: 180 * 24 * 60 * 60, # 6 months
-    reloader: proc { |&block| block.call },
+    reloader: proc { |&block| block.call }
   }
 
   DEFAULT_WORKER_OPTIONS = {
     "retry" => true,
-    "queue" => "default",
+    "queue" => "default"
   }
 
   FAKE_INFO = {
@@ -47,7 +47,7 @@ module Sidekiq
     "uptime_in_days" => "9999",
     "connected_clients" => "9999",
     "used_memory_human" => "9P",
-    "used_memory_peak_human" => "9P",
+    "used_memory_peak_human" => "9P"
   }
 
   def self.❨╯°□°❩╯︵┻━┻

@@ -62,7 +62,7 @@ class Sidekiq::Monitor
       columns = {
         name: [:ljust, (["name"] + queue_data.map(&:name)).map(&:length).max + COL_PAD],
         size: [:rjust, (["size"] + queue_data.map(&:size)).map(&:length).max + COL_PAD],
-        latency: [:rjust, (["latency"] + queue_data.map(&:latency)).map(&:length).max + COL_PAD],
+        latency: [:rjust, (["latency"] + queue_data.map(&:latency)).map(&:length).max + COL_PAD]
       }
       columns.each { |col, (dir, width)| print col.to_s.upcase.public_send(dir, width) }
       puts
@@ -101,7 +101,7 @@ class Sidekiq::Monitor
       tags = [
         process["tag"],
         process["labels"],
-        (process["quiet"] == "true" ? "quiet" : nil),
+        (process["quiet"] == "true" ? "quiet" : nil)
       ].flatten.compact
       tags.any? ? "[#{tags.join("] [")}]" : nil
     end

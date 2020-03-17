@@ -163,7 +163,7 @@ module Sidekiq
             Sidekiq.logger.warn "<no backtrace available>"
           end
         end
-      },
+      }
     }
     UNHANDLED_SIGNAL_HANDLER = ->(cli) { Sidekiq.logger.info "No signal handler registered, ignoring" }
     SIGNAL_HANDLERS.default = UNHANDLED_SIGNAL_HANDLER
