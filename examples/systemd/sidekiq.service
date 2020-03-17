@@ -28,14 +28,15 @@ After=syslog.target network.target
 #
 [Service]
 #
-#      WARNING  WARNING  WARNING
+#      !!!!  !!!!  !!!!
 #
-# As of v6.0.6, Sidekiq automatically supports systemd's `notify` service
-# monitoring. If you are using an earlier version, change this to `Type=simple`.
+# As of v6.0.6, Sidekiq automatically supports systemd's `Type=notify` and watchdog service
+# monitoring. If you are using an earlier version of Sidekiq, change this to `Type=simple`.
 #
-#      WARNING  WARNING  WARNING
+#      !!!!  !!!!  !!!!
 #
 Type=notify
+# If your Sidekiq process locks up, systemd's watchdog will restart it within seconds.
 WatchdogSec=5
 
 WorkingDirectory=/opt/myapp/current

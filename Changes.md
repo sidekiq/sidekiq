@@ -5,9 +5,9 @@
 HEAD
 ---------
 
+- **Integrate with systemd's watchdog and notification features** [#4488]
+  Set `Type=notify` in [sidekiq.service](https://github.com/mperham/sidekiq/blob/4b8a8bd3ae42f6e48ae1fdaf95ed7d7af18ed8bb/examples/systemd/sidekiq.service#L30-L39). The integration works automatically.
 - Use `setTimeout` rather than `setInterval` to avoid thundering herd [#4480]
-- Integrate with systemd's watchdog and notification features [#4488]
-  See `Type=notify` in [systemd.service](https://www.freedesktop.org/software/systemd/man/systemd.service.html#Options). The integration works automatically.
 - Fix edge case where a job can be pushed without a queue.
 - Check RAILS_ENV before RACK_ENV [#4493]
 - Add Lithuanian locale [#4476]
