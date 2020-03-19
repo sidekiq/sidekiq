@@ -9,6 +9,7 @@ HEAD
   Set `Type=notify` in [sidekiq.service](https://github.com/mperham/sidekiq/blob/4b8a8bd3ae42f6e48ae1fdaf95ed7d7af18ed8bb/examples/systemd/sidekiq.service#L30-L39). The integration works automatically.
 - Use `setTimeout` rather than `setInterval` to avoid thundering herd [#4480]
 - Fix edge case where a job can be pushed without a queue.
+- Flush job stats at exit [#4498]
 - Check RAILS_ENV before RACK_ENV [#4493]
 - Add Lithuanian locale [#4476]
 
