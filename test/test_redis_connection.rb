@@ -27,7 +27,6 @@ describe Sidekiq::RedisConnection do
     it "creates a pooled redis connection" do
       pool = Sidekiq::RedisConnection.create
       assert_equal Redis, pool.checkout.class
-      assert_equal "Sidekiq-server-PID-#{$$}", pool.checkout.connection.fetch(:id)
     end
 
     # Readers for these ivars should be available in the next release of
@@ -207,7 +206,7 @@ describe Sidekiq::RedisConnection do
         assert_includes(output, ':host=>"host1", :port=>26379, :password=>"REDACTED"')
         assert_includes(output, ':host=>"host2", :port=>26379, :password=>"REDACTED"')
         assert_includes(output, ':host=>"host3", :port=>26379, :password=>"REDACTED"')
-        assert_includes(output, ':password=>"REDACTED", :id=>')
+        assert_includes(output, ':password=>"REDACTED"')
       end
     end
   end
