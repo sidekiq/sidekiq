@@ -100,15 +100,17 @@ module Sidekiq
       nowdate = Time.now.utc.strftime("%Y-%m-%d")
       fails = Processor::FAILURE.reset
       procd = Processor::PROCESSED.reset
-      Sidekiq.redis do |conn|
-        conn.pipelined do
-          conn.incrby("stat:processed", procd)
-          conn.incrby("stat:processed:#{nowdate}", procd)
-          conn.expire("stat:processed:#{nowdate}", STATS_TTL)
+      if fails + procd > 0
+        Sidekiq.redis do |conn|
+          conn.pipelined do
+            conn.incrby("stat:processed", procd)
+            conn.incrby("stat:processed:#{nowdate}", procd)
+            conn.expire("stat:processed:#{nowdate}", STATS_TTL)
 
-          conn.incrby("stat:failed", fails)
-          conn.incrby("stat:failed:#{nowdate}", fails)
-          conn.expire("stat:failed:#{nowdate}", STATS_TTL)
+            conn.incrby("stat:failed", fails)
+            conn.incrby("stat:failed:#{nowdate}", fails)
+            conn.expire("stat:failed:#{nowdate}", STATS_TTL)
+          end
         end
       end
     end
