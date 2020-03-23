@@ -12,7 +12,9 @@ module Sidekiq
           options[key.to_sym] = options.delete(key)
         end
 
-        options[:url] ||= determine_redis_provider
+        if !options[:url] && (u = determine_redis_provider)
+          options[:url] = u
+        end
 
         size = if options[:size]
           options[:size]
