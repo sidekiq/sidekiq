@@ -31,7 +31,8 @@ After=syslog.target network.target
 #      !!!!  !!!!  !!!!
 #
 # As of v6.0.6, Sidekiq automatically supports systemd's `Type=notify` and watchdog service
-# monitoring. If you are using an earlier version of Sidekiq, change this to `Type=simple`.
+# monitoring. If you are using an earlier version of Sidekiq, change this to `Type=simple`
+# and remove the `WatchdogSec=5` line.
 #
 #      !!!!  !!!!  !!!!
 #
