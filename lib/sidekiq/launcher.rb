@@ -97,10 +97,12 @@ module Sidekiq
     end
 
     def self.flush_stats
-      nowdate = Time.now.utc.strftime("%Y-%m-%d")
       fails = Processor::FAILURE.reset
       procd = Processor::PROCESSED.reset
-      if fails + procd > 0
+      return if fails + procd == 0
+
+      nowdate = Time.now.utc.strftime("%Y-%m-%d")
+      begin
         Sidekiq.redis do |conn|
           conn.pipelined do
             conn.incrby("stat:processed", procd)
@@ -112,6 +114,10 @@ module Sidekiq
             conn.expire("stat:failed:#{nowdate}", STATS_TTL)
           end
         end
+      rescue => ex
+        # we're exiting the process, things might be shut down so don't
+        # try to handle the exception
+        Sidekiq.logger.warn("Unable to flush stats: #{ex}")
       end
     end
     at_exit(&method(:flush_stats))
@@ -166,7 +172,7 @@ module Sidekiq
         ::Process.kill(msg, ::Process.pid)
       rescue => e
         # ignore all redis/network issues
-        logger.error("heartbeat: #{e.message}")
+        logger.error("heartbeat: #{e}")
         # don't lose the counts if there was a network issue
         Processor::PROCESSED.incr(procd)
         Processor::FAILURE.incr(fails)
