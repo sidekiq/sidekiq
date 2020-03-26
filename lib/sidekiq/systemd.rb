@@ -16,23 +16,9 @@ module Sidekiq
     Sidekiq.logger.info "Pinging systemd watchdog every #{ping_f.round(1)} sec"
     Thread.new do
       loop do
-        Sidekiq::SdNotify.watchdog
         sleep ping_f
+        Sidekiq::SdNotify.watchdog
       end
     end
-  end
-end
-
-if ENV["NOTIFY_SOCKET"]
-  Sidekiq.configure_server do |config|
-    Sidekiq.logger.info "Enabling systemd notification integration"
-    require "sidekiq/sd_notify"
-    config.on(:startup) do
-      Sidekiq::SdNotify.ready
-    end
-    config.on(:shutdown) do
-      Sidekiq::SdNotify.stopping
-    end
-    Sidekiq.start_watchdog if Sidekiq::SdNotify.watchdog?
   end
 end

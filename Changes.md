@@ -6,6 +6,7 @@ HEAD
 ---------
 
 - Fix: Do not connect to redis at ruby vm exit when not needed. [#4502] 
+- Refactor systemd integration to work better with custom binaries [#4511]
 - Remove Redis connection naming [#4479]
 
 6.0.6
