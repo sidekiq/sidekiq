@@ -4,6 +4,8 @@ gem 'sidekiq', :path => '..'
 gem 'rails'
 gem 'puma'
 
+# Ubuntu required packages to install rails
+# apt-get install build-essential patch ruby-dev zlib1g-dev liblzma-dev libsqlite3-dev
 platforms :ruby do
   gem 'sqlite3'
 end
