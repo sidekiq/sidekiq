@@ -190,19 +190,22 @@ describe Sidekiq::RedisConnection do
 
     describe 'logging redis options' do
       it 'redacts credentials' do
+        options = {
+          role: 'master',
+          master_name: 'mymaster',
+          sentinels: [
+            { host: 'host1', port: 26379, password: 'secret'},
+            { host: 'host2', port: 26379, password: 'secret'},
+            { host: 'host3', port: 26379, password: 'secret'},
+           ],
+           password: 'secret'
+        }
+
         output = capture_logging do
-          Sidekiq::RedisConnection.create(
-            role: 'master',
-            master_name: 'mymaster',
-            sentinels: [
-              { host: 'host1', port: 26379, password: 'secret'},
-              { host: 'host2', port: 26379, password: 'secret'},
-              { host: 'host3', port: 26379, password: 'secret'},
-             ],
-             password: 'secret'
-           )
+          Sidekiq::RedisConnection.create(options)
         end
 
+        refute_includes(options.inspect, "REDACTED")
         assert_includes(output, ':host=>"host1", :port=>26379, :password=>"REDACTED"')
         assert_includes(output, ':host=>"host2", :port=>26379, :password=>"REDACTED"')
         assert_includes(output, ':host=>"host3", :port=>26379, :password=>"REDACTED"')

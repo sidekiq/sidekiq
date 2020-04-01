@@ -94,9 +94,10 @@ module Sidekiq
       end
 
       def log_info(options)
-        # Don't log Redis AUTH password
         redacted = "REDACTED"
-        scrubbed_options = options.dup
+
+        # deep clone so we can muck with these options all we want
+        scrubbed_options = Marshal.load(Marshal.dump(options))
         if scrubbed_options[:url] && (uri = URI.parse(scrubbed_options[:url])) && uri.password
           uri.password = redacted
           scrubbed_options[:url] = uri.to_s

@@ -8,6 +8,7 @@ HEAD
 - Refactor systemd integration to work better with custom binaries [#4511]
 - Don't connect to Redis at process exit if not needed [#4502]
 - Remove Redis connection naming [#4479]
+- Fix Redis Sentinel password redaction [#4499]
 
 6.0.6
 ---------
