@@ -5,7 +5,7 @@
 # Customize and copy this into /usr/lib/systemd/system (CentOS) or /lib/systemd/system (Ubuntu).
 # Then run:
 #   - systemctl enable sidekiq
-#   - systemctl {start,stop,restart,reload} sidekiq
+#   - systemctl {start,stop,restart} sidekiq
 #
 # This file corresponds to a single Sidekiq process.  Add multiple copies
 # to run multiple processes (sidekiq-1, sidekiq-2, etc).
@@ -38,7 +38,7 @@ After=syslog.target network.target
 #
 Type=notify
 # If your Sidekiq process locks up, systemd's watchdog will restart it within seconds.
-WatchdogSec=5
+WatchdogSec=10
 
 WorkingDirectory=/opt/myapp/current
 # If you use rbenv:
@@ -49,6 +49,7 @@ ExecStart=/usr/local/bin/bundle exec sidekiq -e production
 
 # use `systemctl reload sidekiq` to send the quiet signal to Sidekiq
 # at the start of your deploy process.
+# Or you can use `systemctl kill -s TSTP sidekiq`
 ExecReload=/usr/bin/kill -TSTP $MAINPID
 
 User=deploy
