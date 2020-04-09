@@ -69,9 +69,9 @@ fr:
   Jobs: Tâches
   Paused: Mise en pause
   Stop: Arrêter
-  Quiet: Clôturer
+  Quiet: Clore
   StopAll: Tout arrêter
-  QuietAll: Tout clôturer
+  QuietAll: Tout clore
   PollingInterval: Interval de rafraîchissement
   Plugins: Plugins
   NotYetEnqueued: Pas encore en file d'attente
