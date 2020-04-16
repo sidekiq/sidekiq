@@ -9,6 +9,7 @@ HEAD
 - Don't connect to Redis at process exit if not needed [#4502]
 - Remove Redis connection naming [#4479]
 - Fix Redis Sentinel password redaction [#4499]
+- Add Vietnamese locale (vi) [#4528]
 
 6.0.6
 ---------
