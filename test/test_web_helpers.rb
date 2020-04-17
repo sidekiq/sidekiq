@@ -93,7 +93,7 @@ class TestWebHelpers < Minitest::Test
     expected = %w(
       ar cs da de el en es fa fr he hi it ja
       ko lt nb nl pl pt pt-br ru sv ta uk ur
-      zh-cn zh-tw
+      vi zh-cn zh-tw
     )
     assert_equal expected, obj.available_locales.sort
   end
