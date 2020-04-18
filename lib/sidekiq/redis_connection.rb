@@ -97,7 +97,7 @@ module Sidekiq
         redacted = "REDACTED"
 
         # deep clone so we can muck with these options all we want
-        scrubbed_options = Marshal.load(Marshal.dump(options))
+        scrubbed_options = Marshal.load(Marshal.dump(options.except(:ssl_params)))
         if scrubbed_options[:url] && (uri = URI.parse(scrubbed_options[:url])) && uri.password
           uri.password = redacted
           scrubbed_options[:url] = uri.to_s
