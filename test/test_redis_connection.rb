@@ -197,8 +197,8 @@ describe Sidekiq::RedisConnection do
             { host: 'host1', port: 26379, password: 'secret'},
             { host: 'host2', port: 26379, password: 'secret'},
             { host: 'host3', port: 26379, password: 'secret'},
-           ],
-           password: 'secret'
+          ],
+          password: 'secret'
         }
 
         output = capture_logging do
@@ -210,6 +210,21 @@ describe Sidekiq::RedisConnection do
         assert_includes(output, ':host=>"host2", :port=>26379, :password=>"REDACTED"')
         assert_includes(output, ':host=>"host3", :port=>26379, :password=>"REDACTED"')
         assert_includes(output, ':password=>"REDACTED"')
+      end
+
+      it 'prunes SSL parameters from the logging' do
+        options = {
+          ssl_params: {
+            cert_store: OpenSSL::X509::Store.new
+          }
+        }
+
+        output = capture_logging do
+          Sidekiq::RedisConnection.create(options)
+        end
+
+        assert_includes(options.inspect, "ssl_params")
+        refute_includes(output, "ssl_params")
       end
     end
   end
