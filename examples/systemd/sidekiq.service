@@ -32,7 +32,7 @@ After=syslog.target network.target
 #
 # As of v6.0.6, Sidekiq automatically supports systemd's `Type=notify` and watchdog service
 # monitoring. If you are using an earlier version of Sidekiq, change this to `Type=simple`
-# and remove the `WatchdogSec=5` line.
+# and remove the `WatchdogSec` line.
 #
 #      !!!!  !!!!  !!!!
 #
@@ -50,8 +50,9 @@ ExecStart=/usr/local/bin/bundle exec sidekiq -e production
 # use `systemctl reload sidekiq` to send the quiet signal to Sidekiq
 # at the start of your deploy process.
 # Or you can use `systemctl kill -s TSTP sidekiq`
-ExecReload=/usr/bin/kill -TSTP $MAINPID
+#ExecReload=/usr/bin/kill -TSTP $MAINPID
 
+# !!! Change this to your deploy user account !!!
 User=deploy
 Group=deploy
 UMask=0002
