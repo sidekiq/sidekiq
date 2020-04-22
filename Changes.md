@@ -5,6 +5,7 @@
 Unreleased
 ---------
 
+- Ensure `Rack::ContentLength` is loaded as middleware for correct Web UI responses [#4541]
 - Avoid exception dumping SSL store in Redis connection logging [#4532]
 
 6.0.7

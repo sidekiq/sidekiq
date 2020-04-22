@@ -12,6 +12,7 @@ require "sidekiq/web/action"
 require "sidekiq/web/application"
 
 require "rack/protection"
+require "rack/content_length"
 
 require "rack/builder"
 require "rack/file"
@@ -171,6 +172,13 @@ module Sidekiq
         options = options.merge(s.to_hash) if s.respond_to? :to_hash
 
         middlewares.unshift [[::Rack::Session::Cookie, options], nil]
+      end
+
+      # Since Sidekiq::WebApplication no longer calculates its own
+      # Content-Length response header, we must ensure that the Rack middleware
+      # that does this is loaded
+      unless using? ::Rack::ContentLength
+        middlewares.unshift [[::Rack::ContentLength], nil]
       end
     end
 
