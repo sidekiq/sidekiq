@@ -1,5 +1,5 @@
-body {
-  background-color: #000;
+html, body {
+  background-color: #070707 !important;
   color: #ccc;
 }
 
@@ -51,7 +51,7 @@ table.table-white {
 }
 
 .alert-success {
-  background-color: #000;
+  background-color: #182d11;
 }
 
 a:link,
@@ -66,8 +66,12 @@ a.btn {
 }
 
 .summary_bar .summary {
-  background-color: #000;
+  background-color: #111;
   border: 1px solid #333;
+
+  -webkit-box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+  -moz-box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
 }
 
 .navbar-default {
@@ -114,6 +118,13 @@ a.btn {
 
 .btn-warn {
   color: #333;
+}
+
+.rickshaw_graph .detail {
+  background: rgba(255, 255, 255, .1)
+}
+.rickshaw_graph .x_tick {
+  border-color: rgba(255, 255, 255, .2);
 }
 
 .rickshaw_graph .y_ticks.glow text {
