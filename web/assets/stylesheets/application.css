@@ -469,6 +469,11 @@ span.current-interval {
 
 div.interval-slider input {
   width: 160px;
+  -webkit-appearance: none;
+  height: 3px;
+  margin-top: 5px;
+  border-radius: 2px;
+  background: currentcolor;
 }
 
 #realtime-legend,
