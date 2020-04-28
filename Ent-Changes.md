@@ -2,7 +2,14 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
-Please see [http://sidekiq.org/](http://sidekiq.org/) for more details and how to buy.
+Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
+
+HEAD
+-------------
+
+- Add systemd `Type=notify` support for swarm [#4511]
+- Length swarm's boot timeout to 60 sec [#4544]
+- Add NL locale
 
 2.0.1
 -------------
