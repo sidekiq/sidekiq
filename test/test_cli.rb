@@ -265,6 +265,42 @@ describe Sidekiq::CLI do
             end
           end
         end
+
+        describe 'when concurrency is not valid' do
+          describe 'when set to 0' do
+            it 'raises argument error' do
+              assert_raises(ArgumentError) do
+                subject.parse(%w[sidekiq -r ./test/fake_env.rb -c 0])
+              end
+            end
+          end
+
+          describe 'when set to a negative number' do
+            it 'raises argument error' do
+              assert_raises(ArgumentError) do
+                subject.parse(%w[sidekiq -r ./test/fake_env.rb -c -2])
+              end
+            end
+          end
+        end
+
+        describe 'when timeout is not valid' do
+          describe 'when set to 0' do
+            it 'raises argument error' do
+              assert_raises(ArgumentError) do
+                subject.parse(%w[sidekiq -r ./test/fake_env.rb -t 0])
+              end
+            end
+          end
+
+          describe 'when set to a negative number' do
+            it 'raises argument error' do
+              assert_raises(ArgumentError) do
+                subject.parse(%w[sidekiq -r ./test/fake_env.rb -t -2])
+              end
+            end
+          end
+        end
       end
     end
 
