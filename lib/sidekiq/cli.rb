@@ -228,7 +228,7 @@ module Sidekiq
       opts = parse_config(opts[:config_file]).merge(opts) if opts[:config_file]
 
       # set defaults
-      opts[:queues] = ["default"] if opts[:queues].nil? || opts[:queues].empty?
+      opts[:queues] = ["default"] if opts[:queues].nil?
       opts[:strict] = true if opts[:strict].nil?
       opts[:concurrency] = Integer(ENV["RAILS_MAX_THREADS"]) if opts[:concurrency].nil? && ENV["RAILS_MAX_THREADS"]
 
