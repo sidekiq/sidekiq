@@ -10,6 +10,7 @@ Unreleased
 - Avoid exception dumping SSL store in Redis connection logging [#4532]
 - Better error messages in Sidekiq::Client [#4549]
 - Ensure `strict` order is followed when queues without weights are specified via the `-q` option [#4554]
+- Refactor `Sidekiq::CLI` to remove a redundant `.empty?` method call [#4552]
 
 6.0.7
 ---------

@@ -117,10 +117,20 @@ describe Sidekiq::CLI do
           end
 
           describe 'when queues are empty' do
-            it "sets 'default' queue" do
-              subject.parse(%w[sidekiq -r ./test/fake_env.rb])
+            describe 'when no queues are specified via -q' do
+              it "sets 'default' queue" do
+                subject.parse(%w[sidekiq -r ./test/fake_env.rb])
 
-              assert_equal ['default'], Sidekiq.options[:queues]
+                assert_equal ['default'], Sidekiq.options[:queues]
+              end
+            end
+
+            describe 'when no queues are specified via the config file' do
+              it "sets 'default' queue" do
+                subject.parse(%w[sidekiq -C ./test/config_empty.yml -r ./test/fake_env.rb])
+
+                assert_equal ['default'], Sidekiq.options[:queues]
+              end
             end
           end
         end
