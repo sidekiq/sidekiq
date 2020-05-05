@@ -2,15 +2,13 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
-Unreleased
+HEAD
 ---------
 
 - Web UI - Dark Mode fixes [#4543, natematykiewicz]
 - Ensure `Rack::ContentLength` is loaded as middleware for correct Web UI responses [#4541]
 - Avoid exception dumping SSL store in Redis connection logging [#4532]
 - Better error messages in Sidekiq::Client [#4549]
-- Ensure `strict` order is followed when queues without weights are specified via the `-q` option [#4554]
-- Refactor `Sidekiq::CLI` to remove a redundant `.empty?` method call [#4552]
 
 6.0.7
 ---------
