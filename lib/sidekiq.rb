@@ -20,6 +20,7 @@ module Sidekiq
     labels: [],
     concurrency: 10,
     require: ".",
+    strict: true,
     environment: nil,
     timeout: 25,
     poll_interval_average: nil,

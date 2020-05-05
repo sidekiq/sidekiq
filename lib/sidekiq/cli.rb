@@ -229,7 +229,6 @@ module Sidekiq
 
       # set defaults
       opts[:queues] = ["default"] if opts[:queues].nil?
-      opts[:strict] = true if opts[:strict].nil?
       opts[:concurrency] = Integer(ENV["RAILS_MAX_THREADS"]) if opts[:concurrency].nil? && ENV["RAILS_MAX_THREADS"]
 
       # merge with defaults
@@ -379,6 +378,7 @@ module Sidekiq
 
     def parse_queue(opts, queue, weight = nil)
       opts[:queues] ||= []
+      opts[:strict] = true if opts[:strict].nil?
       raise ArgumentError, "queues: #{queue} cannot be defined twice" if opts[:queues].include?(queue)
       [weight.to_i, 1].max.times { opts[:queues] << queue }
       opts[:strict] = false if weight.to_i > 0

@@ -238,6 +238,99 @@ describe Sidekiq::CLI do
               assert_equal 7, Sidekiq.options[:queues].count { |q| q == 'often' }
               assert_equal 3, Sidekiq.options[:queues].count { |q| q == 'seldom' }
             end
+
+            describe 'when the config file specifies queues with weights' do
+              describe 'when -q specifies queues without weights' do
+                it 'sets strictly ordered queues' do
+                  subject.parse(%w[sidekiq -C ./test/config.yml
+                                        -r ./test/fake_env.rb
+                                        -q foo -q bar])
+
+                  assert_equal true, !!Sidekiq.options[:strict]
+                end
+              end
+
+              describe 'when -q specifies no queues' do
+                it 'does not set strictly ordered queues' do
+                  subject.parse(%w[sidekiq -C ./test/config.yml
+                                        -r ./test/fake_env.rb])
+
+                  assert_equal false, !!Sidekiq.options[:strict]
+                end
+              end
+
+              describe 'when -q specifies queues with weights' do
+                it 'does not set strictly ordered queues' do
+                  subject.parse(%w[sidekiq -C ./test/config.yml
+                                        -r ./test/fake_env.rb
+                                        -q foo,2 -q bar,3])
+
+                  assert_equal false, !!Sidekiq.options[:strict]
+                end
+              end
+            end
+
+            describe 'when the config file specifies queues without weights' do
+              describe 'when -q specifies queues without weights' do
+                it 'sets strictly ordered queues' do
+                  subject.parse(%w[sidekiq -C ./test/config_queues_without_weights.yml
+                                        -r ./test/fake_env.rb
+                                        -q foo -q bar])
+
+                  assert_equal true, !!Sidekiq.options[:strict]
+                end
+              end
+
+              describe 'when -q specifies no queues' do
+                it 'sets strictly ordered queues' do
+                  subject.parse(%w[sidekiq -C ./test/config_queues_without_weights.yml
+                                        -r ./test/fake_env.rb])
+
+                  assert_equal true, !!Sidekiq.options[:strict]
+                end
+              end
+
+              describe 'when -q specifies queues with weights' do
+                it 'does not set strictly ordered queues' do
+                  subject.parse(%w[sidekiq -C ./test/config_queues_without_weights.yml
+                                        -r ./test/fake_env.rb
+                                        -q foo,2 -q bar,3])
+
+                  assert_equal false, !!Sidekiq.options[:strict]
+                end
+              end
+            end
+
+            describe 'when the config file specifies no queues' do
+              describe 'when -q specifies queues without weights' do
+                it 'sets strictly ordered queues' do
+                  subject.parse(%w[sidekiq -C ./test/config_empty.yml
+                                        -r ./test/fake_env.rb
+                                        -q foo -q bar])
+
+                  assert_equal true, !!Sidekiq.options[:strict]
+                end
+              end
+
+              describe 'when -q specifies no queues' do
+                it 'sets strictly ordered queues' do
+                  subject.parse(%w[sidekiq -C ./test/config_empty.yml
+                                        -r ./test/fake_env.rb])
+
+                  assert_equal true, !!Sidekiq.options[:strict]
+                end
+              end
+
+              describe 'when -q specifies queues with weights' do
+                it 'does not set strictly ordered queues' do
+                  subject.parse(%w[sidekiq -C ./test/config_empty.yml
+                                        -r ./test/fake_env.rb
+                                        -q foo,2 -q bar,3])
+
+                  assert_equal false, !!Sidekiq.options[:strict]
+                end
+              end
+            end
           end
 
           describe 'default config file' do
