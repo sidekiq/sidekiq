@@ -234,6 +234,17 @@ describe 'API' do
       assert_equal 0, q.size
     end
 
+    it 'can delete jobs by klass' do
+      q = Sidekiq::Queue.new
+      Time.stub(:now, Time.new(2012, 12, 26)) do
+        10.times { ApiWorker.perform_async(1, 'mike') }
+        assert_equal 10, q.size
+
+        q.delete_jobs_from('ApiWorker')
+        assert_equal 0, q.size
+      end
+    end
+
     it 'enumerates jobs in descending score order' do
       # We need to enqueue more than 50 items, which is the page size when retrieving
       # from Redis to ensure everything is sorted: the pages and the items withing them.

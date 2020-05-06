@@ -261,6 +261,12 @@ module Sidekiq
       end
     end
 
+    def delete_jobs_from(klass)
+      each do |job|
+        job.delete if job.klass == klass
+      end
+    end
+
     ##
     # Find the job with the given JID within this queue.
     #
