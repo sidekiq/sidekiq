@@ -62,6 +62,16 @@ describe Sidekiq::CLI do
           end
         end
 
+        describe 'setting internal options via the config file' do
+          describe 'setting the `strict` option via the config file' do
+            it 'discards the `strict` option specified via the config file' do
+              subject.parse(%w[sidekiq -C ./test/config_with_internal_options.yml])
+
+              assert_equal true, !!Sidekiq.options[:strict]
+            end
+          end
+        end
+
         describe 'queues' do
           it 'accepts with -q' do
             subject.parse(%w[sidekiq -q foo -r ./test/fake_env.rb])
