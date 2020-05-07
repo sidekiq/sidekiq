@@ -27,14 +27,11 @@ module Sidekiq
     def initialize(options)
       @strictly_ordered_queues = !!options[:strict]
       @queues = options[:queues].map { |q| "queue:#{q}" }
-      if @strictly_ordered_queues
-        @queues.uniq!
-        @queues << TIMEOUT
-      end
+      @queues.uniq! if @strictly_ordered_queues
     end
 
     def retrieve_work
-      work = Sidekiq.redis { |conn| conn.brpop(*queues_cmd) }
+      work = Sidekiq.redis { |conn| conn.brpop(*queues_cmd, timeout: TIMEOUT) }
       UnitOfWork.new(*work) if work
     end
 
@@ -47,9 +44,7 @@ module Sidekiq
       if @strictly_ordered_queues
         @queues
       else
-        queues = @queues.shuffle!.uniq
-        queues << TIMEOUT
-        queues
+        @queues.shuffle!.uniq
       end
     end
 

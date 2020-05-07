@@ -30,10 +30,23 @@ describe Sidekiq::BasicFetch do
     assert_nil uow.acknowledge
   end
 
-  it 'retrieves with strict setting' do
-    fetch = Sidekiq::BasicFetch.new(:queues => ['basic', 'bar', 'bar'], :strict => true)
-    cmd = fetch.queues_cmd
-    assert_equal cmd, ['queue:basic', 'queue:bar', Sidekiq::BasicFetch::TIMEOUT]
+  describe 'retrieves with strict setting' do
+    describe 'with strict: true' do
+      it 'fetches queues in strict order' do
+        fetch = Sidekiq::BasicFetch.new(:queues => ['basic', 'bar', 'bar'], strict: true)
+        queues = fetch.queues_cmd
+        assert_equal queues, ['queue:basic', 'queue:bar']
+      end
+    end
+
+    describe 'with strict: false' do
+      it 'fetches queues in shuffled order' do
+        fetch = Sidekiq::BasicFetch.new(:queues => ['basic', 'bar', 'bar'], strict: false)
+        queues = fetch.queues_cmd
+        assert_includes queues, 'queue:basic'
+        assert_includes queues, 'queue:bar'
+      end
+    end
   end
 
   it 'bulk requeues' do
