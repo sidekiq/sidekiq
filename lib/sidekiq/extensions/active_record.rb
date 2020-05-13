@@ -6,9 +6,10 @@ module Sidekiq
   module Extensions
     ##
     # Adds 'delay', 'delay_for' and `delay_until` methods to ActiveRecord to offload instance method
-    # execution to Sidekiq.  Examples:
+    # execution to Sidekiq.
     #
-    # User.recent_signups.each { |user| user.delay.mark_as_awesome }
+    # @example
+    #   User.recent_signups.each { |user| user.delay.mark_as_awesome }
     #
     # Please note, this is not recommended as this will serialize the entire
     # object to Redis.  Your Sidekiq jobs should pass IDs, not entire instances.
