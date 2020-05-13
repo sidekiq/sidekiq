@@ -5,11 +5,12 @@ require "sidekiq/extensions/generic_proxy"
 module Sidekiq
   module Extensions
     ##
-    # Adds 'delay', 'delay_for' and `delay_until` methods to all Classes to offload class method
-    # execution to Sidekiq.  Examples:
+    # Adds `delay`, `delay_for` and `delay_until` methods to all Classes to offload class method
+    # execution to Sidekiq.
     #
-    # User.delay.delete_inactive
-    # Wikipedia.delay.download_changes_for(Date.today)
+    # @example
+    #   User.delay.delete_inactive
+    #   Wikipedia.delay.download_changes_for(Date.today)
     #
     class DelayedClass
       include Sidekiq::Worker
