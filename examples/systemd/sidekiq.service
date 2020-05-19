@@ -47,10 +47,7 @@ WorkingDirectory=/opt/myapp/current
 ExecStart=/usr/local/bin/bundle exec sidekiq -e production
 # If you use rvm in production, don't.
 
-# use `systemctl reload sidekiq` to send the quiet signal to Sidekiq
-# at the start of your deploy process.
-# Or you can use `systemctl kill -s TSTP sidekiq`
-#ExecReload=/usr/bin/kill -TSTP $MAINPID
+# Use `systemctl kill -s TSTP sidekiq` to quiet the Sidekiq process
 
 # !!! Change this to your deploy user account !!!
 User=deploy
