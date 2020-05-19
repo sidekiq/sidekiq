@@ -50,6 +50,9 @@ ExecStart=/usr/local/bin/bundle exec sidekiq -e production
 # use `systemctl reload sidekiq` to send the quiet signal to Sidekiq
 # at the start of your deploy process.
 # Or you can use `systemctl kill -s TSTP sidekiq`
+# once a worker is in quiet mode it will not accept new jobs
+# use `systemctl restart sidekiq` to launch a new worker accepting
+# a new job
 #ExecReload=/usr/bin/kill -TSTP $MAINPID
 
 # !!! Change this to your deploy user account !!!
