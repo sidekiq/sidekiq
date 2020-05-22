@@ -235,12 +235,9 @@ module Sidekiq
 
       def client_push(item) # :nodoc:
         pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options["pool"] || Sidekiq.redis_pool
-        # stringify
-        item.keys.each do |key|
-          item[key.to_s] = item.delete(key)
-        end
+        stringified_item = item.transform_keys(&:to_s)
 
-        Sidekiq::Client.new(pool).push(item)
+        Sidekiq::Client.new(pool).push(stringified_item)
       end
     end
   end
