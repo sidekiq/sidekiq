@@ -30,7 +30,7 @@ pl:
   Size: Rozmiar
   Actions: Akcje
   NextRetry: Następne ponowienie
-  RetryCount: Liczba ponowień
+  RetryCount: Ilość ponowień
   RetryNow: Ponów teraz
   LastRetry: Ostatnie ponowienie
   OriginallyFailed: Ostatnio nieudane
