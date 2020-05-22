@@ -10,7 +10,8 @@ gem "activerecord-jdbcsqlite3-adapter", platforms: :jruby
 
 group :test do
   gem "minitest"
-  gem "simplecov"
+  # https://github.com/codeclimate/test-reporter/issues/413
+  gem "simplecov", "~> 0.17.1"
 end
 
 group :development, :test do
