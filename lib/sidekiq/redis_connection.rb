@@ -8,16 +8,14 @@ module Sidekiq
   class RedisConnection
     class << self
       def create(options = {})
-        options.keys.each do |key|
-          options[key.to_sym] = options.delete(key)
+        symbolized_options = options.transform_keys(&:to_sym)
+
+        if !symbolized_options[:url] && (u = determine_redis_provider)
+          symbolized_options[:url] = u
         end
 
-        if !options[:url] && (u = determine_redis_provider)
-          options[:url] = u
-        end
-
-        size = if options[:size]
-          options[:size]
+        size = if symbolized_options[:size]
+          symbolized_options[:size]
         elsif Sidekiq.server?
           # Give ourselves plenty of connections.  pool is lazy
           # so we won't create them until we need them.
@@ -30,11 +28,11 @@ module Sidekiq
 
         verify_sizing(size, Sidekiq.options[:concurrency]) if Sidekiq.server?
 
-        pool_timeout = options[:pool_timeout] || 1
-        log_info(options)
+        pool_timeout = symbolized_options[:pool_timeout] || 1
+        log_info(symbolized_options)
 
         ConnectionPool.new(timeout: pool_timeout, size: size) do
-          build_client(options)
+          build_client(symbolized_options)
         end
       end
 
