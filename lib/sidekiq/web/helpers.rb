@@ -201,12 +201,9 @@ module Sidekiq
 
     # Merge options with current params, filter safe params, and stringify to query string
     def qparams(options)
-      # stringify
-      options.keys.each do |key|
-        options[key.to_s] = options.delete(key)
-      end
+      stringified_options = options.transform_keys(&:to_s)
 
-      to_query_string(params.merge(options))
+      to_query_string(params.merge(stringified_options))
     end
 
     def to_query_string(params)
