@@ -10,7 +10,7 @@ pl:
   Processed: Ukończone
   Failed: Nieudane
   Scheduled: Zaplanowane
-  Retries: Prób
+  Retries: Do ponowienia
   Enqueued: Zakolejkowane
   Worker: Worker
   LivePoll: Wczytuj na żywo
@@ -29,15 +29,15 @@ pl:
   Queues: Kolejki
   Size: Rozmiar
   Actions: Akcje
-  NextRetry: Kolejna próba
-  RetryCount: Liczba prób
+  NextRetry: Następne ponowienie
+  RetryCount: Liczba ponowień
   RetryNow: Ponów teraz
   LastRetry: Ostatnie ponowienie
   OriginallyFailed: Ostatnio nieudane
   AreYouSure: Na pewno?
   DeleteAll: Usuń wszystko
   RetryAll: Powtórz wszystko
-  NoRetriesFound: Brak powtórzeń
+  NoRetriesFound: Brak zadań do ponowienia
   Error: Błąd
   ErrorClass: Klasa błędu
   ErrorMessage: Wiadomosć błędu
