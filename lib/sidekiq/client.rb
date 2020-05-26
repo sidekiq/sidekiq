@@ -90,16 +90,16 @@ module Sidekiq
     # Returns an array of the of pushed jobs' jids.  The number of jobs pushed can be less
     # than the number given if the middleware stopped processing for one or more jobs.
     def push_bulk(items)
-      arg = items["args"].first
-      return [] unless arg # no jobs to push
-      raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" unless arg.is_a?(Array)
+      args = items["args"]
+      raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" unless (args.is_a?(Array) && args.all?(Array))
+      return [] if args.empty? # no jobs to push
 
       at = items.delete("at")
       raise ArgumentError, "Job 'at' must be a Numeric or an Array of Numeric timestamps" if at && (Array(at).empty? || !Array(at).all?(Numeric))
 
       normed = normalize_item(items)
-      payloads = items["args"].map.with_index { |args, index|
-        copy = normed.merge("args" => args, "jid" => SecureRandom.hex(12), "enqueued_at" => Time.now.to_f)
+      payloads = args.map.with_index { |job_args, index|
+        copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12), "enqueued_at" => Time.now.to_f)
         copy["at"] = (at.is_a?(Array) ? at[index] : at) if at
 
         result = process_single(items["class"], copy)
