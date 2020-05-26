@@ -22,15 +22,11 @@ describe Sidekiq::Client do
       end
 
       assert_raises ArgumentError do
-        Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => 1)
+        Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => :not_an_array)
       end
 
       assert_raises ArgumentError do
-        Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1], 'at' => Time.now)
-      end
-
-      assert_raises ArgumentError do
-        Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1, 2], 'at' => [Time.now.to_f, :not_a_numeric])
+        Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1], 'at' => :not_a_numeric)
       end
 
       assert_raises ArgumentError do
@@ -167,6 +163,10 @@ describe Sidekiq::Client do
       it 'raises ArgumentError with invalid params' do
         assert_raises ArgumentError do
           Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => [[1], 2])
+        end
+
+        assert_raises ArgumentError do
+          Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => [[1], [2]], 'at' => [Time.now.to_f, :not_a_numeric])
         end
       end
     end
