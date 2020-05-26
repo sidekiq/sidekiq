@@ -91,7 +91,7 @@ module Sidekiq
     # than the number given if the middleware stopped processing for one or more jobs.
     def push_bulk(items)
       args = items["args"]
-      raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" unless (args.is_a?(Array) && args.all?(Array))
+      raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" unless args.is_a?(Array) && args.all?(Array)
       return [] if args.empty? # no jobs to push
 
       at = items.delete("at")
