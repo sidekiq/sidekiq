@@ -162,6 +162,14 @@ describe Sidekiq::Client do
       result = Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => [])
       assert_equal 0, result.size
     end
+
+    describe 'errors' do
+      it 'raises ArgumentError with invalid params' do
+        assert_raises ArgumentError do
+          Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => [[1], 2])
+        end
+      end
+    end
   end
 
   class BaseWorker
