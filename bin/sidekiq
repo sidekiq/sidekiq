@@ -31,7 +31,7 @@ begin
   cli.run
 rescue => e
   raise e if $DEBUG
-  if Sidekiq.error_handlers.length === 0
+  if Sidekiq.error_handlers.length == 0
     STDERR.puts e.message
     STDERR.puts e.backtrace.join("\n")
   else
