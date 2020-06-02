@@ -2,13 +2,13 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
-Please see [http://sidekiq.org](http://sidekiq.org) for more details and how to buy.
+Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
 HEAD
 ---------
 
+- Remove `concurrent-ruby` gem dependency [#4586]
 - Update `constantize` for batch callbacks. [#4469]
-
 
 5.0.1
 ---------

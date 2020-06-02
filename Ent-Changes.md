@@ -7,6 +7,7 @@ Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 HEAD
 -------------
 
+- Remove `concurrent-ruby` gem dependency [#4586]
 - Add systemd `Type=notify` support for swarm [#4511]
 - Length swarm's boot timeout to 60 sec [#4544]
 - Add NL locale
