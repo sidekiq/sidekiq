@@ -34,7 +34,17 @@ jobs:
   "ruby-2.6":
     docker:
       - image: circleci/ruby:2.6
-      - image: circleci/redis:4.0
+      - image: circleci/redis:5.0
+    steps:
+      - checkout
+      - <<: *restore
+      - <<: *bundle
+      - <<: *save
+      - <<: *unit
+  "ruby-2.7":
+    docker:
+      - image: circleci/ruby:2.7
+      - image: circleci/redis:6.0
     steps:
       - checkout
       - <<: *restore
@@ -58,3 +68,4 @@ workflows:
     jobs:
       - "ruby-2.5"
       - "ruby-2.6"
+      - "ruby-2.7"
