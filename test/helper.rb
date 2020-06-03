@@ -9,6 +9,8 @@ require 'minitest/autorun'
 $TESTING = true
 # disable minitest/parallel threads
 ENV["N"] = "0"
+# Disable any stupid backtrace cleansers
+ENV["BACKTRACE"] = "1"
 
 if ENV["COVERAGE"]
   require 'simplecov'
