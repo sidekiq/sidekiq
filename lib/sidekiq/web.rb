@@ -10,8 +10,8 @@ require "sidekiq/web/helpers"
 require "sidekiq/web/router"
 require "sidekiq/web/action"
 require "sidekiq/web/application"
+require "sidekiq/web/authenticity_token"
 
-require "rack/protection"
 require "rack/content_length"
 
 require "rack/builder"
@@ -155,8 +155,8 @@ module Sidekiq
     def build_sessions
       middlewares = self.middlewares
 
-      unless using?(::Rack::Protection) || ENV["RACK_ENV"] == "test"
-        middlewares.unshift [[::Rack::Protection, {use: :authenticity_token}], nil]
+      unless using?(AuthenticityToken) || ENV["RACK_ENV"] == "test"
+        middlewares.unshift [[AuthenticityToken], nil]
       end
 
       s = sessions

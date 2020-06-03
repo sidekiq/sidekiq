@@ -9,6 +9,7 @@ HEAD
 - Ensure `Rack::ContentLength` is loaded as middleware for correct Web UI responses [#4541]
 - Avoid exception dumping SSL store in Redis connection logging [#4532]
 - Better error messages in Sidekiq::Client [#4549]
+- Vendor rack-protection/authenticity_token middleware [#4588]
 
 6.0.7
 ---------
