@@ -155,11 +155,12 @@ module Sidekiq
     def build_sessions
       middlewares = self.middlewares
 
-      unless using?(CsrfProtection) || ENV["RACK_ENV"] == "test"
+      s = sessions
+
+      # turn on CSRF protection if sessions are enabled and this is not the test env
+      if s && !using?(CsrfProtection) && ENV["RACK_ENV"] != "test"
         middlewares.unshift [[CsrfProtection], nil]
       end
-
-      s = sessions
 
       if s && !using?(::Rack::Session::Cookie)
         unless (secret = Web.session_secret)
