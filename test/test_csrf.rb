@@ -6,16 +6,16 @@ class TestCsrf < Minitest::Test
     @session ||= {}
   end
 
-  def env(opts={})
-    imp =  StringIO.new("")
+  def env(method=:get, form_hash={})
+    imp = StringIO.new("")
     {
-      "REQUEST_METHOD" => "GET",
+      "REQUEST_METHOD" => method.to_s.upcase,
       "rack.session" => session,
       "rack.logger" => ::Logger.new(@logio ||= StringIO.new("")),
       "rack.input" => imp,
       "rack.request.form_input" => imp,
-      "rack.request.form_hash" => {},
-    }.merge(opts)
+      "rack.request.form_hash" => form_hash,
+    }
   end
 
   def call(env, &block)
@@ -47,7 +47,7 @@ class TestCsrf < Minitest::Test
   end
 
   def test_bad_post
-    result = call(env("REQUEST_METHOD" => "POST")) do
+    result = call(env(:post)) do
       raise "Shouldnt be called"
     end
     refute_nil result
@@ -67,11 +67,7 @@ class TestCsrf < Minitest::Test
     assert goodtoken
 
     # Make a POST with the known good token
-    result = call(
-      env({
-        "REQUEST_METHOD" => "POST",
-        "rack.request.form_hash" => { "authenticity_token"=>goodtoken }
-      })) do
+    result = call(env(:post, "authenticity_token" => goodtoken)) do
       [200, {}, ["OK"]]
     end
     refute_nil result
@@ -79,11 +75,7 @@ class TestCsrf < Minitest::Test
     assert_equal ["OK"], result[2]
 
     # Make a POST with a known bad token
-    result = call(
-      env({
-        "REQUEST_METHOD" => "POST",
-        "rack.request.form_hash" => { "authenticity_token"=>"N0QRBD34tU61d7fi+0ZaF/35JLW/9K+8kk8dc1TZoK/0pTl7GIHap5gy7BWGsoKlzbMLRp1yaDpCDFwTJtxWAg==", },
-      })) do
+    result = call(env(:post, "authenticity_token"=>"N0QRBD34tU61d7fi+0ZaF/35JLW/9K+8kk8dc1TZoK/0pTl7GIHap5gy7BWGsoKlzbMLRp1yaDpCDFwTJtxWAg==")) do
       raise "shouldnt be called"
     end
     refute_nil result
