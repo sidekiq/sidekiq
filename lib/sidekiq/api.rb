@@ -921,7 +921,7 @@ module Sidekiq
         procs = conn.sscan_each("processes").to_a
         procs.sort.each do |key|
           valid, workers = conn.pipelined {
-            conn.exists(key)
+            conn.exists?(key)
             conn.hgetall("#{key}:workers")
           }
           next unless valid
