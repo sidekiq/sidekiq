@@ -11,6 +11,7 @@ HEAD
 - Better error messages in Sidekiq::Client [#4549]
 - Remove rack-protection, reimplement CSRF protection [#4588]
 - Require redis-rb 4.2.0 [#4591]
+- Update to jquery 1.12.4 [#4593]
 
 6.0.7
 ---------
