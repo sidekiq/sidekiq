@@ -13,10 +13,6 @@ group :test do
   gem 'simplecov'
 end
 
-group :development, :test do
-  gem 'pry-byebug', platforms: :mri
-end
-
 group :load_test do
   gem 'hiredis'
   gem 'toxiproxy'
