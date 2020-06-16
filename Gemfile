@@ -15,7 +15,6 @@ group :test do
 end
 
 group :development, :test do
-  gem "pry-byebug", platforms: :mri
   gem "standard"
 end
 
