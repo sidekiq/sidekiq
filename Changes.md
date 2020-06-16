@@ -10,7 +10,7 @@ HEAD
 - Avoid exception dumping SSL store in Redis connection logging [#4532]
 - Better error messages in Sidekiq::Client [#4549]
 - Remove rack-protection, reimplement CSRF protection [#4588]
-- Require redis-rb 4.2.0 [#4591]
+- Require redis-rb 4.2.1 [#4599]
 - Update to jquery 1.12.4 [#4593]
 
 6.0.7
