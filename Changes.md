@@ -10,7 +10,7 @@ HEAD
 - Avoid exception dumping SSL store in Redis connection logging [#4532]
 - Better error messages in Sidekiq::Client [#4549]
 - Remove rack-protection, reimplement CSRF protection [#4588]
-- Require redis-rb 4.2.0 [#4591]
+- Require redis-rb 4.2 [#4591]
 - Update to jquery 1.12.4 [#4593]
 
 6.0.7
@@ -170,6 +170,12 @@ See the [Logging wiki page](https://github.com/mperham/sidekiq/wiki/Logging) for
   more resources.
 - Integrate the StandardRB code formatter to ensure consistent code
   styling. [#4114, gearnode]
+
+5.2.9
+---------
+
+- Release Rack lock due to a cascade of CVEs. [#4566]
+  Pro-tip: don't lock Rack.
 
 5.2.8
 ---------
