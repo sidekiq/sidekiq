@@ -2,6 +2,12 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
+5.2.9
+---------
+
+- Release Rack lock due to a cascade of CVEs. [#4566]
+  Pro-tip: don't lock Rack.
+
 5.2.8
 ---------
 
