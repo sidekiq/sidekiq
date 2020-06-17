@@ -11,10 +11,9 @@ describe Sidekiq::Processor do
   before do
     $invokes = 0
     @mgr = Minitest::Mock.new
-    @mgr.expect(:options, {:queues => ['default']})
-    @mgr.expect(:options, {:queues => ['default']})
-    @mgr.expect(:options, {:queues => ['default']})
-    @processor = ::Sidekiq::Processor.new(@mgr)
+    opts = {:queues => ['default']}
+    opts[:fetch] = Sidekiq::BasicFetch.new(opts)
+    @processor = ::Sidekiq::Processor.new(@mgr, opts)
   end
 
   class MockWorker
@@ -327,11 +326,9 @@ describe Sidekiq::Processor do
       end
 
       before do
+        opts = {:queues => ['default'], job_logger: CustomJobLogger}
         @mgr = Minitest::Mock.new
-        @mgr.expect(:options, {:queues => ['default'], job_logger: CustomJobLogger})
-        @mgr.expect(:options, {:queues => ['default'], job_logger: CustomJobLogger})
-        @mgr.expect(:options, {:queues => ['default'], job_logger: CustomJobLogger})
-        @processor = ::Sidekiq::Processor.new(@mgr)
+        @processor = ::Sidekiq::Processor.new(@mgr, opts)
       end
     end
   end
@@ -356,18 +353,15 @@ describe Sidekiq::Processor do
 
   describe 'custom job logger class' do
     before do
-      @mgr = Minitest::Mock.new
-      @mgr.expect(:options, {:queues => ['default'], :job_logger => CustomJobLogger})
-      @mgr.expect(:options, {:queues => ['default'], :job_logger => CustomJobLogger})
-      @mgr.expect(:options, {:queues => ['default'], :job_logger => CustomJobLogger})
-      @processor = ::Sidekiq::Processor.new(@mgr)
+      opts = {:queues => ['default'], :job_logger => CustomJobLogger}
+      opts[:fetch] = Sidekiq::BasicFetch.new(opts)
+      @processor = ::Sidekiq::Processor.new(nil, opts)
     end
 
     it 'is called instead default Sidekiq::JobLogger' do
       msg = Sidekiq.dump_json({ 'class' => MockWorker.to_s, 'args' => ['myarg'] })
       @processor.process(work(msg))
       assert_equal 1, $invokes
-      @mgr.verify
     end
   end
 end

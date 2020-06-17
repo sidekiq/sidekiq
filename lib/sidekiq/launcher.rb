@@ -22,6 +22,7 @@ module Sidekiq
     attr_accessor :manager, :poller, :fetcher
 
     def initialize(options)
+      options[:fetch] ||= BasicFetch.new(options)
       @manager = Sidekiq::Manager.new(options)
       @poller = Sidekiq::Scheduled::Poller.new
       @done = false
@@ -56,7 +57,7 @@ module Sidekiq
 
       # Requeue everything in case there was a worker who grabbed work while stopped
       # This call is a no-op in Sidekiq but necessary for Sidekiq Pro.
-      strategy = (@options[:fetch] || Sidekiq::BasicFetch)
+      strategy = @options[:fetch]
       strategy.bulk_requeue([], @options)
 
       clear_heartbeat

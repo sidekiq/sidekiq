@@ -78,10 +78,8 @@ describe Sidekiq::Middleware do
     end
 
     boss = Minitest::Mock.new
-    boss.expect(:options, {:queues => ['default'] }, [])
-    boss.expect(:options, {:queues => ['default'] }, [])
-    boss.expect(:options, {:queues => ['default'] }, [])
-    processor = Sidekiq::Processor.new(boss)
+    opts = {:queues => ['default'] }
+    processor = Sidekiq::Processor.new(boss, opts)
     boss.expect(:processor_done, nil, [processor])
     processor.process(Sidekiq::BasicFetch::UnitOfWork.new('queue:default', msg))
     assert_equal %w(2 before 3 before 1 before work_performed 1 after 3 after 2 after), $recorder.flatten
