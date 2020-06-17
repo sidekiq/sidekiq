@@ -127,7 +127,7 @@ module Sidekiq
         # initialization code at all.
         #
         p = ENV["REDIS_PROVIDER"]
-        if p && p =~ /\:/
+        if p && p =~ /:/
           raise <<~EOM
             REDIS_PROVIDER should be set to the name of the variable which contains the Redis URL, not a URL itself.
             Platforms like Heroku will sell addons that publish a *_URL variable.  You need to tell Sidekiq with REDIS_PROVIDER, e.g.:
