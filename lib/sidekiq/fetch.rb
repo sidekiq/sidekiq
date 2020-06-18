@@ -26,8 +26,9 @@ module Sidekiq
 
     def initialize(options)
       raise ArgumentError, "missing queue list" unless options[:queues]
-      @strictly_ordered_queues = !!options[:strict]
-      @queues = options[:queues].map { |q| "queue:#{q}" }
+      @options = options
+      @strictly_ordered_queues = !!@options[:strict]
+      @queues = @options[:queues].map { |q| "queue:#{q}" }
       if @strictly_ordered_queues
         @queues.uniq!
         @queues << TIMEOUT
