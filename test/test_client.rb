@@ -168,6 +168,14 @@ describe Sidekiq::Client do
         assert_raises ArgumentError do
           Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => [[1], [2]], 'at' => [Time.now.to_f, :not_a_numeric])
         end
+
+        assert_raises ArgumentError do
+          Sidekiq::Client.push_bulk('class' => QueuedWorker, 'args' => [[1], [2]], 'at' => [Time.now.to_f])
+        end
+
+        assert_raises ArgumentError do
+          Sidekiq::Client.push_bulk('class' => QueuedWorker, 'args' => [[1]], 'at' => [Time.now.to_f, Time.now.to_f])
+        end
       end
     end
   end
