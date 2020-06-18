@@ -419,6 +419,7 @@ describe Sidekiq::CLI do
 
     describe '#run' do
       before do
+        Sidekiq.options[:concurrency] = 2
         Sidekiq.options[:require] = './test/fake_env.rb'
       end
 
