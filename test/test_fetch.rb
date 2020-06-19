@@ -52,7 +52,7 @@ describe Sidekiq::BasicFetch do
     assert_equal 0, q1.size
     assert_equal 0, q2.size
 
-    Sidekiq::BasicFetch.bulk_requeue(works, {:queues => []})
+    fetch.bulk_requeue(works, {:queues => []})
     assert_equal 2, q1.size
     assert_equal 1, q2.size
   end

@@ -50,7 +50,8 @@ describe 'Actors' do
     end
 
     it 'can start and stop' do
-      f = Sidekiq::Processor.new(Mgr.new)
+      m = Mgr.new
+      f = Sidekiq::Processor.new(m, m.options)
       f.terminate
     end
 
@@ -74,14 +75,16 @@ describe 'Actors' do
         end
       end
       def options
-        { :concurrency => 3, :queues => ['default'] }
+        opts = { :concurrency => 3, :queues => ['default'] }
+        opts[:fetch] = Sidekiq::BasicFetch.new(opts)
+        opts
       end
     end
 
     it 'can process' do
       mgr = Mgr.new
 
-      p = Sidekiq::Processor.new(mgr)
+      p = Sidekiq::Processor.new(mgr, mgr.options)
       JoeWorker.perform_async(0)
 
       a = $count
@@ -93,7 +96,7 @@ describe 'Actors' do
     it 'deals with errors' do
       mgr = Mgr.new
 
-      p = Sidekiq::Processor.new(mgr)
+      p = Sidekiq::Processor.new(mgr, mgr.options)
       JoeWorker.perform_async("boom")
       q = Sidekiq::Queue.new
       assert_equal 1, q.size
@@ -116,7 +119,7 @@ describe 'Actors' do
     it 'gracefully kills' do
       mgr = Mgr.new
 
-      p = Sidekiq::Processor.new(mgr)
+      p = Sidekiq::Processor.new(mgr, mgr.options)
       JoeWorker.perform_async(1)
       q = Sidekiq::Queue.new
       assert_equal 1, q.size

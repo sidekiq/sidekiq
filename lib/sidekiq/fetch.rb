@@ -25,8 +25,10 @@ module Sidekiq
     }
 
     def initialize(options)
-      @strictly_ordered_queues = !!options[:strict]
-      @queues = options[:queues].map { |q| "queue:#{q}" }
+      raise ArgumentError, "missing queue list" unless options[:queues]
+      @options = options
+      @strictly_ordered_queues = !!@options[:strict]
+      @queues = @options[:queues].map { |q| "queue:#{q}" }
       if @strictly_ordered_queues
         @queues.uniq!
         @queues << TIMEOUT
@@ -38,24 +40,9 @@ module Sidekiq
       UnitOfWork.new(*work) if work
     end
 
-    # Creating the Redis#brpop command takes into account any
-    # configured queue weights. By default Redis#brpop returns
-    # data from the first queue that has pending elements. We
-    # recreate the queue command each time we invoke Redis#brpop
-    # to honor weights and avoid queue starvation.
-    def queues_cmd
-      if @strictly_ordered_queues
-        @queues
-      else
-        queues = @queues.shuffle!.uniq
-        queues << TIMEOUT
-        queues
-      end
-    end
-
     # By leaving this as a class method, it can be pluggable and used by the Manager actor. Making it
     # an instance method will make it async to the Fetcher actor
-    def self.bulk_requeue(inprogress, options)
+    def bulk_requeue(inprogress, options)
       return if inprogress.empty?
 
       Sidekiq.logger.debug { "Re-queueing terminated jobs" }
@@ -75,6 +62,21 @@ module Sidekiq
       Sidekiq.logger.info("Pushed #{inprogress.size} jobs back to Redis")
     rescue => ex
       Sidekiq.logger.warn("Failed to requeue #{inprogress.size} jobs: #{ex.message}")
+    end
+
+    # Creating the Redis#brpop command takes into account any
+    # configured queue weights. By default Redis#brpop returns
+    # data from the first queue that has pending elements. We
+    # recreate the queue command each time we invoke Redis#brpop
+    # to honor weights and avoid queue starvation.
+    def queues_cmd
+      if @strictly_ordered_queues
+        @queues
+      else
+        queues = @queues.shuffle!.uniq
+        queues << TIMEOUT
+        queues
+      end
     end
   end
 end

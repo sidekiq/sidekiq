@@ -8,7 +8,7 @@ describe Sidekiq::Manager do
   end
 
   def new_manager(opts)
-    Sidekiq::Manager.new(opts)
+    Sidekiq::Manager.new(opts.merge(fetch: Sidekiq::BasicFetch.new(opts)))
   end
 
   it 'creates N processor instances' do

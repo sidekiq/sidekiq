@@ -10,6 +10,7 @@ HEAD
 - Remove `concurrent-ruby` gem dependency [#4586]
 - Update `constantize` for batch callbacks. [#4469]
 - Add queue tag to `jobs.recovered.fetch` metric [#4594]
+- Refactor Pro's fetch infrastructure [#4602]
 
 5.0.1
 ---------

@@ -35,7 +35,7 @@ module Sidekiq
       @done = false
       @workers = Set.new
       @count.times do
-        @workers << Processor.new(self)
+        @workers << Processor.new(self, options)
       end
       @plock = Mutex.new
     end
@@ -90,7 +90,7 @@ module Sidekiq
       @plock.synchronize do
         @workers.delete(processor)
         unless @done
-          p = Processor.new(self)
+          p = Processor.new(self, options)
           @workers << p
           p.start
         end
@@ -123,7 +123,7 @@ module Sidekiq
         # contract says that jobs are run AT LEAST once. Process termination
         # is delayed until we're certain the jobs are back in Redis because
         # it is worse to lose a job than to run it twice.
-        strategy = (@options[:fetch] || Sidekiq::BasicFetch)
+        strategy = @options[:fetch]
         strategy.bulk_requeue(jobs, @options)
       end
 

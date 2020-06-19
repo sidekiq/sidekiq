@@ -12,6 +12,7 @@ HEAD
 - Remove rack-protection, reimplement CSRF protection [#4588]
 - Require redis-rb 4.2 [#4591]
 - Update to jquery 1.12.4 [#4593]
+- Refactor internal fetch logic and API [#4602]
 
 6.0.7
 ---------
