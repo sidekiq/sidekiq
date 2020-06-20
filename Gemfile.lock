@@ -206,6 +206,3 @@ DEPENDENCIES
   sqlite3
   standard
   toxiproxy
-
-BUNDLED WITH
-   2.1.4
