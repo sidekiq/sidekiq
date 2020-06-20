@@ -11,7 +11,7 @@ gem "activerecord-jdbcsqlite3-adapter", platforms: :jruby
 group :test do
   gem "minitest"
   gem "simplecov"
-  gem 'codecov', require: false
+  gem "codecov", require: false
 end
 
 group :development, :test do
