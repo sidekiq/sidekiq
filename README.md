@@ -2,11 +2,8 @@ Sidekiq
 ==============
 
 [![Gem Version](https://badge.fury.io/rb/sidekiq.svg)](https://rubygems.org/gems/sidekiq)
-[![Code Climate](https://codeclimate.com/github/mperham/sidekiq.svg)](https://codeclimate.com/github/mperham/sidekiq)
-[![Test Coverage](https://codeclimate.com/github/mperham/sidekiq/badges/coverage.svg)](https://codeclimate.com/github/mperham/sidekiq/coverage)
+[![Codecov](https://codecov.io/gh/mperham/sidekiq/branch/master/graph/badge.svg)](https://codecov.io/gh/mperham/sidekiq)
 [![Build Status](https://circleci.com/gh/mperham/sidekiq/tree/master.svg?style=svg)](https://circleci.com/gh/mperham/sidekiq/tree/master)
-[![Gitter Chat](https://badges.gitter.im/mperham/sidekiq.svg)](https://gitter.im/mperham/sidekiq)
-
 
 Simple, efficient background processing for Ruby.
 
