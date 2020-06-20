@@ -3,7 +3,7 @@ references:
   unit: &unit
     run:
       name: Run test suite
-      command: bundle exec rake
+      command: bundle exec rake COVERAGE=1
   restore: &restore
     restore_cache:
       keys:

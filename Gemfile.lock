@@ -71,6 +71,10 @@ GEM
       zeitwerk (~> 2.2, >= 2.2.2)
     ast (2.4.1)
     builder (3.2.4)
+    codecov (0.1.17)
+      json
+      simplecov
+      url
     concurrent-ruby (1.1.6)
     connection_pool (2.2.3)
     crass (1.0.6)
@@ -178,6 +182,7 @@ GEM
     tzinfo (1.2.7)
       thread_safe (~> 0.1)
     unicode-display_width (1.7.0)
+    url (0.3.2)
     websocket-driver (0.7.2)
       websocket-extensions (>= 0.1.0)
     websocket-driver (0.7.2-java)
@@ -191,13 +196,17 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord-jdbcsqlite3-adapter
+  codecov
   hiredis
   minitest
   rails (>= 6.0.2)
   rake
   redis-namespace
   sidekiq!
-  simplecov (~> 0.17.1)
+  simplecov
   sqlite3
   standard
   toxiproxy
+
+BUNDLED WITH
+   2.1.4

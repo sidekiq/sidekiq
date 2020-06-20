@@ -19,6 +19,10 @@ if ENV["COVERAGE"]
     add_filter "/test/"
     add_filter "/myapp/"
   end
+  if ENV['CI']
+    require 'codecov'
+    SimpleCov.formatter = SimpleCov::Formatter::Codecov
+  end
 end
 
 ENV['REDIS_URL'] ||= 'redis://localhost/15'
