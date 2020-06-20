@@ -91,4 +91,4 @@ Please see [LICENSE](https://github.com/mperham/sidekiq/blob/master/LICENSE) for
 Author
 -----------------
 
-Mike Perham, [@mperham@mastodon.xyz](https://mastodon.xyz/@mperham) / [@sidekiq](https://twitter.com/sidekiq), [https://www.mikeperham.com](https://www.mikeperham.com) / [https://www.contribsys.com](https://www.contribsys.com)
+Mike Perham, [@getajobmike](https://twitter.com/getajobmike) / [@sidekiq](https://twitter.com/sidekiq), [https://www.mikeperham.com](https://www.mikeperham.com) / [https://www.contribsys.com](https://www.contribsys.com)
