@@ -4,9 +4,14 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-HEAD
+2.1.0
 -------------
 
+- Move historical metrics to use tags rather than interpolating name [#4377]
+```
+sidekiq.enqueued.#{name} -> sidekiq.queue.size with tag queue:#{name}
+sidekiq.latency.#{name} -> sidekiq.queue.latency with tag queue:#{name}
+```
 - Remove `concurrent-ruby` gem dependency [#4586]
 - Add systemd `Type=notify` support for swarm [#4511]
 - Length swarm's boot timeout to 60 sec [#4544]

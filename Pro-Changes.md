@@ -4,9 +4,15 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+5.1.0
 ---------
 
+- Remove old Statsd metrics with `WorkerName` in the name [#4377]
+```
+job.WorkerName.count -> job.count with tag worker:WorkerName
+job.WorkerName.perform -> job.perform with tag worker:WorkerName
+job.WorkerName.failure -> job.failure with tag worker:WorkerName
+```
 - Remove `concurrent-ruby` gem dependency [#4586]
 - Update `constantize` for batch callbacks. [#4469]
 - Add queue tag to `jobs.recovered.fetch` metric [#4594]
