@@ -24,12 +24,7 @@ $(function() {
   }
 
   $(document).on('click', '.check_all', function() {
-    var checked = $(this).attr('checked');
-    if (checked == 'checked') {
-      $('input[type=checkbox]', $(this).closest('table')).attr('checked', checked);
-    } else {
-      $('input[type=checkbox]', $(this).closest('table')).removeAttr('checked');
-    }
+    $('input[type=checkbox]', $(this).closest('table')).prop('checked', this.checked);
   });
 
   $(document).on("click", "[data-confirm]", function() {
