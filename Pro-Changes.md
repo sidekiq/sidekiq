@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+5.1.1
+---------
+
+- Fix broken basic fetcher [#4616]
+
 5.1.0
 ---------
 
