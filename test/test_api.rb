@@ -602,7 +602,7 @@ describe 'API' do
         end
       end
 
-      assert_equal ['1234', '5678'], w.map { |_, tid, _| tid }
+      assert_equal ['5678', '1234'], w.map { |_, tid, _| tid }
     end
 
     it 'can reschedule jobs' do

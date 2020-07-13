@@ -916,7 +916,8 @@ module Sidekiq
   class Workers
     include Enumerable
 
-    def each
+    def each(&block)
+      results = []
       Sidekiq.redis do |conn|
         procs = conn.sscan_each("processes").to_a
         procs.sort.each do |key|
@@ -930,10 +931,12 @@ module Sidekiq
             p = hsh["payload"]
             # avoid breaking API, this is a side effect of the JSON optimization in #4316
             hsh["payload"] = Sidekiq.load_json(p) if p.is_a?(String)
-            yield key, tid, hsh
+            results << [key, tid, hsh]
           end
         end
       end
+
+      results.sort_by { |(_, _, hsh)| hsh["run_at"] }.each(&block)
     end
 
     # Note that #size is only as accurate as Sidekiq's heartbeat,
