@@ -357,12 +357,6 @@ module Sidekiq
       Sidekiq.logger.level = ::Logger::DEBUG if options[:verbose]
     end
 
-    INTERNAL_OPTIONS = [
-      # These are options that are set internally and cannot be
-      # set via the config file or command line arguments.
-      :strict
-    ]
-
     def parse_config(path)
       opts = YAML.load(ERB.new(File.read(path)).result) || {}
 
@@ -373,7 +367,7 @@ module Sidekiq
       end
 
       opts = opts.merge(opts.delete(environment.to_sym) || {})
-      opts.delete(*INTERNAL_OPTIONS)
+      opts.delete(:strict)
 
       parse_queues(opts, opts.delete(:queues) || [])
 
