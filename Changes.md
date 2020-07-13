@@ -5,6 +5,7 @@
 HEAD
 ---------
 
+- Jobs are now sorted by age in the Busy Workers table. [#4641]
 - Fix "check all" JS logic in Web UI [#4619]
 
 6.1.0
