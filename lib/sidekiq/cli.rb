@@ -33,8 +33,9 @@ module Sidekiq
     # Code within this method is not tested because it alters
     # global process state irreversibly.  PRs which improve the
     # test coverage of Sidekiq::CLI are welcomed.
-    def run
-      boot_system
+    def run(boot_app: true)
+      boot_application if boot_app
+
       if environment == "development" && $stdout.tty? && Sidekiq.log_formatter.is_a?(Sidekiq::Logger::Formatters::Pretty)
         print_banner
       end
@@ -239,7 +240,7 @@ module Sidekiq
       Sidekiq.options
     end
 
-    def boot_system
+    def boot_application
       ENV["RACK_ENV"] = ENV["RAILS_ENV"] = environment
 
       if File.directory?(options[:require])
