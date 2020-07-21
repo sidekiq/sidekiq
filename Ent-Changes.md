@@ -4,9 +4,10 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-HEAD
+2.1.1
 -------------
 
+- Add optional **app preload** in swarm, saves even more memory [#4646]
 - Fix incorrect queue tags in historical metrics [#4377]
 
 2.1.0
