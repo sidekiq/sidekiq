@@ -72,7 +72,7 @@ module Sidekiq
       def accept?(env)
         return true if safe?(env)
 
-        giventoken = Rack::Request.new(env).params["authenticity_token"]
+        giventoken = ::Rack::Request.new(env).params["authenticity_token"]
         valid_token?(env, giventoken)
       end
 
@@ -138,7 +138,7 @@ module Sidekiq
       end
 
       def compare_with_real_token(token, local)
-        Rack::Utils.secure_compare(token.to_s, decode_token(local).to_s)
+        ::Rack::Utils.secure_compare(token.to_s, decode_token(local).to_s)
       end
 
       def decode_token(token)
