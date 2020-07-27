@@ -4,6 +4,13 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Gracefully handle poison pill jobs [#4633]
+- Remove support for multi-shard batches [#4642]
+- Rename `Sidekiq::Rack::BatchStatus` to `Sidekiq::Pro::BatchStatus` [#4655]
+
 5.1.1
 ---------
 
