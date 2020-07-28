@@ -148,11 +148,11 @@ module Sidekiq
       class JSON < Base
         def call(severity, time, program_name, message)
           hash = {
-            ts: time.utc.iso8601(3),
+            "@timestamp" => time.utc.iso8601(3),
             pid: ::Process.pid,
             tid: tid,
-            lvl: severity,
-            msg: message
+            severity: severity,
+            message: message
           }
           c = ctx
           hash["ctx"] = c unless c.empty?
