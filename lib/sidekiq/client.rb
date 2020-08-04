@@ -67,12 +67,14 @@ module Sidekiq
     #   push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
     #
     def push(item)
-      normed = normalize_item(item)
-      payload = process_single(item["class"], normed)
+      after_commit do
+        normed = normalize_item(item)
+        payload = process_single(item["class"], normed)
 
-      if payload
-        raw_push([payload])
-        payload["jid"]
+        if payload
+          raw_push([payload])
+          payload["jid"]
+        end
       end
     end
 
@@ -98,17 +100,19 @@ module Sidekiq
       raise ArgumentError, "Job 'at' must be a Numeric or an Array of Numeric timestamps" if at && (Array(at).empty? || !Array(at).all?(Numeric))
       raise ArgumentError, "Job 'at' Array must have same size as 'args' Array" if at.is_a?(Array) && at.size != args.size
 
-      normed = normalize_item(items)
-      payloads = args.map.with_index { |job_args, index|
-        copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12), "enqueued_at" => Time.now.to_f)
-        copy["at"] = (at.is_a?(Array) ? at[index] : at) if at
+      after_commit do
+        normed = normalize_item(items)
+        payloads = args.map.with_index { |job_args, index|
+          copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12), "enqueued_at" => Time.now.to_f)
+          copy["at"] = (at.is_a?(Array) ? at[index] : at) if at
 
-        result = process_single(items["class"], copy)
-        result || nil
-      }.compact
+          result = process_single(items["class"], copy)
+          result || nil
+        }.compact
 
-      raw_push(payloads) unless payloads.empty?
-      payloads.collect { |payload| payload["jid"] }
+        raw_push(payloads) unless payloads.empty?
+        payloads.collect { |payload| payload["jid"] }
+      end
     end
 
     # Allows sharding of jobs across any number of Redis instances.  All jobs
@@ -257,6 +261,56 @@ module Sidekiq
         item_class.get_sidekiq_options
       else
         Sidekiq.default_worker_options
+      end
+    end
+
+    def after_commit(&blk)
+      connection = defined?(ActiveRecord) ? ActiveRecord::Base.connection : nil
+
+      if in_transaction?(connection)
+        register_after_commit_callback(connection, &blk)
+      else
+        blk.call
+      end
+    end
+
+    def in_transaction?(connection)
+      return false if connection.nil?
+
+      # service transactions (tests and database_cleaner) are not joinable
+      connection.transaction_open? && connection.current_transaction.joinable?
+    end
+
+    def register_after_commit_callback(connection, &blk)
+      connection.add_transaction_record(AfterCommitCallback.new(blk))
+      nil
+    end
+
+    class AfterCommitCallback
+      def initialize(callback)
+        @callback = callback
+      end
+
+      def has_transactional_callbacks?
+        true
+      end
+
+      def trigger_transactional_callbacks?
+        true
+      end
+
+      def committed!(*)
+        @callback.call
+      end
+
+      def rolledback!(*)
+      end
+
+      def before_committed!(*)
+      end
+
+      def add_to_transaction(*)
+        ActiveRecord::Base.connection.add_transaction_record(self)
       end
     end
   end

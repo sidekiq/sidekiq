@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require_relative 'helper'
+require 'active_record'
 require 'sidekiq/api'
 
 describe Sidekiq::Client do
@@ -299,6 +300,46 @@ describe Sidekiq::Client do
         t1.join
         t2.join
       end
+    end
+  end
+
+  describe 'push jobs after commit' do
+    it 'pushes a job if it was not in a transaction' do
+      q = Sidekiq::Queue.new('foo')
+      pre = q.size
+      jid = Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1, 2])
+
+      assert jid
+      assert_equal 24, jid.size
+      assert_equal pre + 1, q.size
+    end
+
+    it 'pushes job if the parent transaction succeed' do
+      q = Sidekiq::Queue.new('foo')
+      pre = q.size
+      jid = nil
+
+      ActiveRecord::Base.transaction do
+        jid = Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1, 2])
+      end
+
+      assert_nil jid
+      assert_equal pre + 1, q.size
+    end
+
+    it 'cancels the pushing if the parent transaction failed' do
+      q = Sidekiq::Queue.new('foo')
+      pre = q.size
+      jid = nil
+
+      ActiveRecord::Base.transaction do
+        jid = Sidekiq::Client.push('queue' => 'foo', 'class' => MyWorker, 'args' => [1, 2])
+
+        raise ActiveRecord::Rollback
+      end
+
+      assert_nil jid
+      assert_equal pre, q.size
     end
   end
 end
