@@ -25,6 +25,7 @@
             <th><%= t('Queue') %></th>
             <th><%= t('Job') %></th>
             <th><%= t('Arguments') %></th>
+            <th><%= t('JID') %><th>
           </tr>
         </thead>
         <% @scheduled.each do |entry| %>
@@ -44,6 +45,9 @@
             </td>
             <td>
                <div class="args"><%= display_args(entry.display_args) %></div>
+            </td>
+            <td>
+              <%= entry.jid %>
             </td>
           </tr>
         <% end %>
