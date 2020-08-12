@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+HEAD
+-------------
+
+- Now that ActiveJobs support `sidekiq_options`, add support for uniqueness in AJs [#4667]
+
 2.1.1
 -------------
 
