@@ -90,6 +90,11 @@ module Sidekiq
         end
 
         sess = session(env)
+
+        # Checks that Rack::Session::Cookie did not return empty session
+        # object in case the digest verification failed
+        return false if sess.empty?
+
         localtoken = sess[:csrf]
 
         # Rotate the session token after every use
