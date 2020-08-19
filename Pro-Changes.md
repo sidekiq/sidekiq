@@ -7,6 +7,7 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 HEAD
 ---------
 
+- Fix issue with reliable push and multiple shards [#4669]
 - Fix Pro memory leak due to fetch refactoring in Sidekiq 6.1 [#4652]
 - Gracefully handle poison pill jobs [#4633]
 - Remove support for multi-shard batches [#4642]
