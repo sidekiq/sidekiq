@@ -6,11 +6,11 @@ class TestCsrf < Minitest::Test
     @session ||= {}
   end
 
-  def env(method=:get, form_hash={})
+  def env(method=:get, form_hash={}, rack_session=session)
     imp = StringIO.new("")
     {
       "REQUEST_METHOD" => method.to_s.upcase,
-      "rack.session" => session,
+      "rack.session" => rack_session,
       "rack.logger" => ::Logger.new(@logio ||= StringIO.new("")),
       "rack.input" => imp,
       "rack.request.form_input" => imp,
@@ -59,7 +59,6 @@ class TestCsrf < Minitest::Test
   end
 
   def test_good_and_bad_posts
-    goodtoken = nil
     # Make a GET to set up the session with a good token
     goodtoken = call(env) do |envy|
       envy[:csrf_token]
@@ -76,6 +75,22 @@ class TestCsrf < Minitest::Test
 
     # Make a POST with a known bad token
     result = call(env(:post, "authenticity_token"=>"N0QRBD34tU61d7fi+0ZaF/35JLW/9K+8kk8dc1TZoK/0pTl7GIHap5gy7BWGsoKlzbMLRp1yaDpCDFwTJtxWAg==")) do
+      raise "shouldnt be called"
+    end
+    refute_nil result
+    assert_equal 403, result[0]
+    assert_equal ["Forbidden"], result[2]
+  end
+
+  def test_empty_session_post
+    # Make a GET to set up the session with a good token
+    goodtoken = call(env) do |envy|
+      envy[:csrf_token]
+    end
+    assert goodtoken
+
+    # Make a POST with an empty session data and good token
+    result = call(env(:post, { "authenticity_token" => goodtoken }, {})) do
       raise "shouldnt be called"
     end
     refute_nil result
