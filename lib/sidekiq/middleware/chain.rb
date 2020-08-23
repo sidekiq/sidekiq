@@ -133,7 +133,7 @@ module Sidekiq
         return yield if empty?
 
         chain = retrieve.dup
-        traverse_chain = lambda do
+        traverse_chain = proc do
           if chain.empty?
             yield
           else
