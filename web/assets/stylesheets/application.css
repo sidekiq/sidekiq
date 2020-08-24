@@ -177,10 +177,6 @@ header.row .pagination {
   overflow: overlay;
 }
 
-table.table-white {
-  background-color: #fff;
-}
-
 .queues form {
   margin: 0;
 }
