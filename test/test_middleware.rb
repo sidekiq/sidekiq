@@ -41,6 +41,12 @@ describe Sidekiq::Middleware do
     end
   end
 
+  class ArgumentYieldingMiddleware
+    def call(*args)
+      yield 1
+    end
+  end
+
   class AnotherCustomMiddleware
     def initialize(name, recorder)
       @name = name
@@ -111,6 +117,15 @@ describe Sidekiq::Middleware do
     chain.invoke { final_action = true }
     assert_nil final_action
     assert_equal [], recorder
+  end
+
+  it 'allows middleware to yield arguments' do
+    chain = Sidekiq::Middleware::Chain.new
+    chain.add ArgumentYieldingMiddleware
+
+    final_action = nil
+    chain.invoke { final_action = true }
+    assert_equal true, final_action
   end
 
   describe 'I18n' do

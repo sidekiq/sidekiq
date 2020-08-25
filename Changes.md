@@ -6,6 +6,7 @@ HEAD
 ---------
 
 - Fix Web UI crash with corrupt session [#4672]
+- Allow middleware to yield arguments [#4673, @eugeneius]
 
 6.1.1
 ---------
