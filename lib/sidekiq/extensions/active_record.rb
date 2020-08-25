@@ -5,7 +5,7 @@ require "sidekiq/extensions/generic_proxy"
 module Sidekiq
   module Extensions
     ##
-    # Adds 'delay', 'delay_for' and `delay_until` methods to ActiveRecord to offload instance method
+    # Adds +delay+, +delay_for+ and +delay_until+ methods to ActiveRecord to offload instance method
     # execution to Sidekiq.
     #
     # @example
