@@ -38,7 +38,7 @@ table {
 }
 
 .table-striped > tbody > tr:nth-of-type(odd) {
-  background-color: #444;
+  background-color: #333;
 }
 
 .table-bordered,
@@ -52,7 +52,7 @@ table {
 }
 
 .table-hover > tbody > tr:hover {
-  background-color: #555;
+  background-color: #444;
 }
 
 .alert {
