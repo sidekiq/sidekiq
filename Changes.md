@@ -5,6 +5,7 @@
 HEAD
 ---------
 
+- Improve contrast in dark mode Web UI
 - Fix Web UI crash with corrupt session [#4672]
 - Allow middleware to yield arguments [#4673, @eugeneius]
 

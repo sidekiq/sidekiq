@@ -1,34 +1,44 @@
 html, body {
-  background-color: #070707 !important;
-  color: #ccc;
+  background-color: #333 !important;
+  color: #ddd;
 }
 
 a,
 .title,
 .summary_bar ul .count,
+span.current-interval,
 .navbar .navbar-brand {
-  color: #af0014;
+  color: #c04;
+}
+
+.history-graph + .active,
+.beacon .dot {
+  background-color: #c04;
 }
 
 .navbar .navbar-brand:hover {
-  color: #ccc;
+  color: #ddd;
 }
 
 .navbar .navbar-brand .status {
-  color: #ccc;
+  color: #ddd;
+}
+
+.navbar-default .navbar-nav > li > a {
+  color: #ddd;
 }
 
 .navbar-inverse {
-  background-color: #000;
-  border-color: #333;
+  background-color: #222;
+  border-color: #555;
 }
 
-table.table-white {
-  background-color: #111;
+table {
+  background-color: #282828;
 }
 
 .table-striped > tbody > tr:nth-of-type(odd) {
-  background-color: #222;
+  background-color: #333;
 }
 
 .table-bordered,
@@ -38,27 +48,27 @@ table.table-white {
 .table-bordered > tfoot > tr > th,
 .table-bordered > thead > tr > td,
 .table-bordered > thead > tr > th {
-  border: 1px solid #333;
+  border: 1px solid #555;
 }
 
 .table-hover > tbody > tr:hover {
-  background-color: #333;
+  background-color: #444;
 }
 
 .alert {
   border: none;
-  color: #ccc;
+  color: #ddd;
 }
 
 .alert-success {
-  background-color: #182d11;
+  background-color: #484;
 }
 
 a:link,
 a:active,
 a:hover,
 a:visited {
-  color: #63798c;
+  color: #ddd;
 }
 
 a.btn {
@@ -66,8 +76,8 @@ a.btn {
 }
 
 .summary_bar .summary {
-  background-color: #111;
-  border: 1px solid #333;
+  background-color: #222;
+  border: 1px solid #555;
 
   -webkit-box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
   -moz-box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
@@ -75,27 +85,27 @@ a.btn {
 }
 
 .navbar-default {
-  background-color: #000;
-  border-color: #3d3d3d;
+  background-color: #222;
+  border-color: #555;
 }
 
 .navbar-default .navbar-nav > .active > a,
 .navbar-default .navbar-nav > .active > a:focus,
 .navbar-default .navbar-nav > .active > a:hover {
-  color: #ccc;
-  background-color: #282828;
+  color: #ddd;
+  background-color: #333;
 }
 
 .navbar-default .navbar-nav > li > a:hover {
-  color: #ccc;
+  color: #ddd;
 }
 
 .pagination > li > a,
 .pagination > li > a:hover,
 .pagination > li > span {
-  color: #ccc;
-  background-color: #282828;
-  border-color: #353535;
+  color: #ddd;
+  background-color: #333;
+  border-color: #555;
 }
 .pagination > .disabled > a,
 .pagination > .disabled > a:focus,
@@ -103,9 +113,9 @@ a.btn {
 .pagination > .disabled > span,
 .pagination > .disabled > span:focus,
 .pagination > .disabled > span:hover {
-  color: #a5a5a5;
-  background-color: #282828;
-  border-color: #353535;
+  color: #ddd;
+  background-color: #333;
+  border-color: #555;
 }
 
 .stat {
@@ -113,11 +123,11 @@ a.btn {
 }
 
 #live-poll {
-  color: #ccc;
+  color: #ddd;
 }
 
 .btn-warn {
-  color: #333;
+  color: #444;
 }
 
 .rickshaw_graph .detail {
@@ -128,6 +138,6 @@ a.btn {
 }
 
 .rickshaw_graph .y_ticks.glow text {
-  fill: #ccc;
-  color: #ccc;
+  fill: #ddd;
+  color: #ddd;
 }

@@ -177,10 +177,6 @@ header.row .pagination {
   overflow: overlay;
 }
 
-table.table-white {
-  background-color: #fff;
-}
-
 .queues form {
   margin: 0;
 }
@@ -762,7 +758,7 @@ div.interval-slider input {
     font-family: Arial, sans-serif;
     border-radius: 3px;
     padding: 6px;
-    opacity: .5;
+    opacity: .7;
     border: 1px solid #e0e0e0;
     font-size: 12px;
     position: absolute;
@@ -977,7 +973,7 @@ div.interval-slider input {
 }
 .rickshaw_graph .y_ticks text,
 .rickshaw_graph .x_ticks_d3 text {
-    opacity: .5;
+    opacity: .7;
     font-size: 12px;
     pointer-events: none
 }
