@@ -38,6 +38,7 @@ ru:
   AreYouSure: Вы уверены?
   DeleteAll: Удалить все
   RetryAll: Повторить все
+  KillAll: Убить всё
   NoRetriesFound: Нет попыток
   Error: Ошибка
   ErrorClass: Класс ошибки
@@ -76,3 +77,6 @@ ru:
   NotYetEnqueued: Пока не в очереди
   CreatedAt: Создан
   BackToApp: Назад
+  Latency: Задержка
+  Pause: Пауза
+  Unpause: Возобновить
