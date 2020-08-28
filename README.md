@@ -3,7 +3,7 @@ Sidekiq
 
 [![Gem Version](https://badge.fury.io/rb/sidekiq.svg)](https://rubygems.org/gems/sidekiq)
 [![Codecov](https://codecov.io/gh/mperham/sidekiq/branch/master/graph/badge.svg)](https://codecov.io/gh/mperham/sidekiq)
-[![Build Status](https://circleci.com/gh/mperham/sidekiq/tree/master.svg?style=svg)](https://circleci.com/gh/mperham/sidekiq/tree/master)
+![Build](https://github.com/mperham/sidekiq/workflows/CI/badge.svg)
 
 Simple, efficient background processing for Ruby.
 
