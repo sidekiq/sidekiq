@@ -11,6 +11,10 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: [2.5, 2.6, 2.7]
     services:
       redis:
         image: redis
@@ -29,7 +33,8 @@ jobs:
     # change this to (see https://github.com/ruby/setup-ruby#versioning):
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: [2.5, 2.6, 2.7]
+        bundler-cache: true
+        ruby-version: ${{ matrix.ruby }}
     - name: Install dependencies
       run: bundle install
     - name: Run tests
