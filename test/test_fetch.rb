@@ -5,7 +5,7 @@ require 'sidekiq/api'
 
 describe Sidekiq::BasicFetch do
   before do
-    @prev_redis = Sidekiq.instance_variable_get(:@redis)
+    @prev_redis = Sidekiq.instance_variable_get(:@redis) || {}
     Sidekiq.redis = { :namespace => 'fuzzy' }
     Sidekiq.redis do |conn|
       conn.redis.flushdb
