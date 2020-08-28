@@ -298,7 +298,7 @@ module Sidekiq
         self.class.run_afters(app, action)
       end
 
-      resp = case resp
+      case resp
       when Array
         # redirects go here
         resp
@@ -313,8 +313,6 @@ module Sidekiq
         # we'll let Rack calculate Content-Length for us.
         [200, headers, [resp]]
       end
-
-      resp
     end
 
     def self.helpers(mod = nil, &block)

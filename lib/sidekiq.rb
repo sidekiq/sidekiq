@@ -198,7 +198,7 @@ module Sidekiq
   end
 
   def self.logger
-    @logger ||= Sidekiq::Logger.new(STDOUT, level: Logger::INFO)
+    @logger ||= Sidekiq::Logger.new($stdout, level: Logger::INFO)
   end
 
   def self.logger=(logger)
