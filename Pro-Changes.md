@@ -4,9 +4,10 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+5.2.0
 ---------
 
+- The Sidekiq Pro and Enterprise gem servers now `bundle install` much faster with **Bundler 2.2+** [#4158]
 - Fix issue with reliable push and multiple shards [#4669]
 - Fix Pro memory leak due to fetch refactoring in Sidekiq 6.1 [#4652]
 - Gracefully handle poison pill jobs [#4633]

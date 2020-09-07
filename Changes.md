@@ -2,10 +2,10 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
-HEAD
+6.1.2
 ---------
 
-- Improve contrast in dark mode Web UI [#4674]
+- Improve readability in dark mode Web UI [#4674]
 - Fix Web UI crash with corrupt session [#4672]
 - Allow middleware to yield arguments [#4673, @eugeneius]
 - Migrate CI from CircleCI to GitHub Actions [#4677]

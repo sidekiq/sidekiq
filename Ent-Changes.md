@@ -4,9 +4,10 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-HEAD
+2.1.2
 -------------
 
+- The Sidekiq Pro and Enterprise gem servers now `bundle install` much faster with **Bundler 2.2+** [#4158]
 - Now that ActiveJobs support `sidekiq_options`, add support for uniqueness in AJs [#4667]
 
 2.1.1
