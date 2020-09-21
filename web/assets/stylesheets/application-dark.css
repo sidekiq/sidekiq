@@ -75,6 +75,12 @@ a.btn {
   color: #000;
 }
 
+input {
+  background-color: #444;
+  color: #ccc;
+  padding: 3px;
+}
+
 .summary_bar .summary {
   background-color: #222;
   border: 1px solid #555;
