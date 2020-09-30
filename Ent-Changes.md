@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+HEAD
+-------------
+
+- Allow filtering by name on the Rate Limiter UI [#4695]
+- Add IT locale
+
 2.1.2
 -------------
 
