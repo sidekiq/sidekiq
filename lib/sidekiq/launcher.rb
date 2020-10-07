@@ -188,6 +188,7 @@ module Sidekiq
           "pid" => ::Process.pid,
           "tag" => @options[:tag] || "",
           "concurrency" => @options[:concurrency],
+          "timeout" => @options[:timeout],
           "queues" => @options[:queues].uniq,
           "labels" => @options[:labels],
           "identity" => identity
