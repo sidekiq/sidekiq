@@ -154,12 +154,17 @@ module Sidekiq
         end
 
         fails = procd = 0
+        kb = memory_usage(::Process.pid)
 
         _, exists, _, _, msg = Sidekiq.redis { |conn|
           conn.multi {
             conn.sadd("processes", key)
             conn.exists?(key)
-            conn.hmset(key, "info", to_json, "busy", curstate.size, "beat", Time.now.to_f, "quiet", @done)
+            conn.hmset(key, "info", to_json,
+              "busy", curstate.size,
+              "beat", Time.now.to_f,
+              "quiet", @done,
+              "rss", kb)
             conn.expire(key, 60)
             conn.rpop("#{key}-signals")
           }
@@ -178,6 +183,26 @@ module Sidekiq
         Processor::PROCESSED.incr(procd)
         Processor::FAILURE.incr(fails)
       end
+    end
+
+    MEMORY_GRABBER = case RUBY_PLATFORM
+    when /linux/
+      ->(pid) {
+        IO.readlines("/proc/#{$$}/status").each do |line|
+          next unless line.start_with?("VmRSS:")
+          break line.split[1].to_i
+        end
+      }
+    when /darwin|bsd/
+      ->(pid) {
+        `ps -o pid,rss -p #{pid}`.lines.last.split.last.to_i
+      }
+    else
+      ->(pid) { 0 }
+    end
+
+    def memory_usage(pid)
+      MEMORY_GRABBER.call(pid)
     end
 
     def to_data

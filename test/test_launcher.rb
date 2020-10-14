@@ -13,6 +13,14 @@ describe Sidekiq::Launcher do
     Sidekiq::Manager.new(opts)
   end
 
+  describe 'memory collection' do
+    it 'works in any test environment' do
+      kb = Sidekiq::Launcher::MEMORY_GRABBER.call($$)
+      refute_nil kb
+      assert kb > 0
+    end
+  end
+
   describe 'heartbeat' do
     before do
       @mgr = new_manager(options)

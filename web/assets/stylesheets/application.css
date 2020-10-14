@@ -1152,3 +1152,15 @@ div.interval-slider input {
 .delete-confirm {
   width: 20%;
 }
+
+.circled {
+  border-color: #333;
+  color: #eee;
+  background-color: #b1003e;
+  border-radius: 50%;
+  text-align: center;
+  vertical-align: middle;
+  padding: 3px 7px;
+  font-size: 0.7em;
+  margin-left: 5px;
+}

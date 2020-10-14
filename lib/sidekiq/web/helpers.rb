@@ -258,7 +258,19 @@ module Sidekiq
       end
     end
 
+    def format_memory(rss_kb)
+      return "" if rss_kb.nil? || rss_kb == 0
+
+      if rss_kb < 100_000
+        "#{number_with_delimiter(rss_kb)} KB"
+      else
+        "#{number_with_delimiter((rss_kb / 1024.0).to_i)} MB"
+      end
+    end
+
     def number_with_delimiter(number)
+      return "" if number.nil?
+
       begin
         Float(number)
       rescue ArgumentError, TypeError
