@@ -72,7 +72,7 @@ fr:
   Quiet: Clore
   StopAll: Tout arrêter
   QuietAll: Tout clore
-  PollingInterval: Interval de rafraîchissement
+  PollingInterval: Intervalle de rafraîchissement
   Plugins: Plugins
   NotYetEnqueued: Pas encore en file d'attente
   CreatedAt: Créée le
