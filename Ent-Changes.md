@@ -7,7 +7,12 @@ Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 HEAD
 -------------
 
-- Allow filtering by name on the Rate Limiter UI [#4695]
+- Rate limiters may now customize their retry count [#4725]
+  To disable rate limit retries, use `retry: 0`.
+```ruby
+Sidekiq::Limiter.concurrent("somename", 5, retry: 0)
+```
+- Allow filtering by name in the Rate Limiter UI [#4695]
 - Add IT locale
 
 2.1.2
