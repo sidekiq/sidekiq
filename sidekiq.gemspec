@@ -5,7 +5,7 @@ Gem::Specification.new do |gem|
   gem.email = ["mperham@gmail.com"]
   gem.summary = "Simple, efficient background processing for Ruby"
   gem.description = "Simple, efficient background processing for Ruby."
-  gem.homepage = "http://sidekiq.org"
+  gem.homepage = "https://sidekiq.org"
   gem.license = "LGPL-3.0"
 
   gem.executables = ["sidekiq", "sidekiqmon"]
