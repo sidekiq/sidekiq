@@ -155,7 +155,7 @@ assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs_for(FooMailer).size
 
 This release has major breaking changes.  Read and test carefully in production.
 
-- With Rails 6.0.1+, ActiveJobs can now use `sidekiq_options` directly to configure Sidekiq
+- With Rails 6.0.2+, ActiveJobs can now use `sidekiq_options` directly to configure Sidekiq
   features/internals like the retry subsystem. [#4213, pirj]
 ```ruby
 class MyJob < ActiveJob::Base
