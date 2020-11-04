@@ -7,6 +7,17 @@ Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 HEAD
 -------------
 
+- Add new **leaky bucket** rate limiter [#4414]
+  This allows clients to burst up to X calls before throttling
+  back to X calls per Y seconds. To limit the user to 60 calls
+  per minute:
+```ruby
+leaker = Sidekiq::Limiter.leaky("shopify", 60, :minute)
+leaker.within_limit do
+  ...
+end
+```
+  See the Rate Limiting wiki page for more detail.
 - Rate limiters may now customize their retry count [#4725]
   To disable rate limit retries, use `retry: 0`.
 ```ruby
