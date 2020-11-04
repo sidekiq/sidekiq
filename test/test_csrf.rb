@@ -97,4 +97,19 @@ class TestCsrf < Minitest::Test
     assert_equal 403, result[0]
     assert_equal ["Forbidden"], result[2]
   end
+
+  def test_empty_csrf_session_post
+    goodtoken = call(env) do |envy|
+      envy[:csrf_token]
+    end
+    assert goodtoken
+
+    # Make a POST without csrf session data and good token
+    result = call(env(:post, { "authenticity_token" => goodtoken }, { 'session_id' => 'foo' })) do
+      raise "shouldnt be called"
+    end
+    refute_nil result
+    assert_equal 403, result[0]
+    assert_equal ["Forbidden"], result[2]
+  end
 end
