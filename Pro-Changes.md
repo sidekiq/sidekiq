@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Fix disappearing processes in Busy due to super_fetch initialization when used in
+  tandem with `SIDEKIQ_PRELOAD_APP=1` in `sidekiqswarm`. [#4733]
+
 5.2.0
 ---------
 
