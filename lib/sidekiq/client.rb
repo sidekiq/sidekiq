@@ -243,6 +243,9 @@ module Sidekiq
 
       raise(ArgumentError, "Job must include a valid queue name") if item["queue"].nil? || item["queue"] == ""
 
+      # ensure the wrapped class, if exists, is serialized as its name
+      item["wrapped"] = item["wrapped"].name if item["wrapped"].respond_to?("name")
+
       item["class"] = item["class"].to_s
       item["queue"] = item["queue"].to_s
       item["jid"] ||= SecureRandom.hex(12)

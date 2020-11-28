@@ -2,6 +2,8 @@
 require_relative 'helper'
 require 'sidekiq/rails'
 require 'sidekiq/api'
+require 'active_job'
+
 
 describe 'ActiveJob' do
   before do
@@ -48,4 +50,29 @@ describe 'ActiveJob' do
     # AJ's queue_as should take precedence over Sidekiq's queue option
     assert_equal "bar", job["queue"]
   end
+
+
+  class SampleJob < ActiveJob::Base
+    queue_as :bar
+    def perform(arg_number, arg_string)
+      # noop
+    end
+  end
+
+
+  it "enqueues and serializes an ActiveJob class" do
+    SampleJob.perform_later(42, "Universe")
+
+    q = Sidekiq::Queue.new("bar")
+    job = q.first
+
+    assert_equal ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper.name, job["class"]
+    assert_equal SampleJob.name, job["wrapped"]
+    assert_equal "bar", job["queue"]
+
+    job_args = job["args"][0]
+    assert_equal 42, job_args["arguments"][0]
+    assert_equal "Universe", job_args["arguments"][1]
+  end
+
 end
