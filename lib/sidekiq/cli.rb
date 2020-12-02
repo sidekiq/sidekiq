@@ -62,6 +62,11 @@ module Sidekiq
       ver = Sidekiq.redis_info["redis_version"]
       raise "You are connecting to Redis v#{ver}, Sidekiq requires Redis v4.0.0 or greater" if ver < "4"
 
+      maxmemory_policy = Sidekiq.redis_info["maxmemory_policy"]
+      if maxmemory_policy != "noeviction"
+        logger.warn "'noeviction' maxmemory policy is recommended (current policy: '#{maxmemory_policy}'). See: https://github.com/mperham/sidekiq/wiki/Using-Redis#memory"
+      end
+
       # Since the user can pass us a connection pool explicitly in the initializer, we
       # need to verify the size is large enough or else Sidekiq's performance is dramatically slowed.
       cursize = Sidekiq.redis_pool.size
