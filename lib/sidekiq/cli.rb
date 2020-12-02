@@ -59,12 +59,20 @@ module Sidekiq
 
       # touch the connection pool so it is created before we
       # fire startup and start multithreading.
-      ver = Sidekiq.redis_info["redis_version"]
+      info = Sidekiq.redis_info
+      ver = info["redis_version"]
       raise "You are connecting to Redis v#{ver}, Sidekiq requires Redis v4.0.0 or greater" if ver < "4"
 
-      maxmemory_policy = Sidekiq.redis_info["maxmemory_policy"]
+      maxmemory_policy = info["maxmemory_policy"]
       if maxmemory_policy != "noeviction"
-        logger.warn "'noeviction' maxmemory policy is recommended (current policy: '#{maxmemory_policy}'). See: https://github.com/mperham/sidekiq/wiki/Using-Redis#memory"
+        logger.warn <<~EOM
+
+
+          WARNING: Your Redis instance will evict Sidekiq data under heavy load.
+          The 'noeviction' maxmemory policy is recommended (current policy: '#{maxmemory_policy}').
+          See: https://github.com/mperham/sidekiq/wiki/Using-Redis#memory
+
+        EOM
       end
 
       # Since the user can pass us a connection pool explicitly in the initializer, we

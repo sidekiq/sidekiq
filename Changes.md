@@ -5,6 +5,7 @@
 HEAD
 ---------
 
+- Warn if Redis is configured to evict data under memory pressure [#4752]
 - Add process RSS on the Busy page [#4717]
 
 6.1.2

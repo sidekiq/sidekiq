@@ -492,7 +492,7 @@ describe Sidekiq::CLI do
             end
           end
 
-          assert_includes @logdev.string, "'noeviction' maxmemory policy is recommended (current policy: 'allkeys-lru')"
+          assert_includes @logdev.string, "allkeys-lru"
         end
 
         it 'silent if the policy is noeviction' do
@@ -504,7 +504,7 @@ describe Sidekiq::CLI do
             end
           end
 
-          refute_includes @logdev.string, "'noeviction' maxmemory policy is recommended"
+          refute_includes @logdev.string, "noeviction"
         end
       end
     end
