@@ -481,6 +481,32 @@ describe Sidekiq::CLI do
           assert_includes @logdev.string, "Booted Rails #{::Rails.version} application in production environment"
         end
       end
+
+      describe 'checking maxmemory policy' do
+        it 'warns if the policy is not noeviction' do
+          redis_info = { "maxmemory_policy" => "allkeys-lru", "redis_version" => "6" }
+
+          Sidekiq.stub(:redis_info, redis_info) do
+            subject.stub(:launch, nil) do
+              subject.run
+            end
+          end
+
+          assert_includes @logdev.string, "'noeviction' maxmemory policy is recommended (current policy: 'allkeys-lru')"
+        end
+
+        it 'silent if the policy is noeviction' do
+          redis_info = { "maxmemory_policy" => "noeviction", "redis_version" => "6" }
+
+          Sidekiq.stub(:redis_info, redis_info) do
+            subject.stub(:launch, nil) do
+              subject.run
+            end
+          end
+
+          refute_includes @logdev.string, "'noeviction' maxmemory policy is recommended"
+        end
+      end
     end
 
     describe 'signal handling' do
