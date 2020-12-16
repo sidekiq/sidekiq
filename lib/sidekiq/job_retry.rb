@@ -61,6 +61,7 @@ module Sidekiq
   #
   class JobRetry
     class Handled < ::RuntimeError; end
+
     class Skip < Handled; end
 
     include Sidekiq::Util

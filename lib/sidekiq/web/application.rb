@@ -316,7 +316,7 @@ module Sidekiq
     end
 
     def self.helpers(mod = nil, &block)
-      if block_given?
+      if block
         WebAction.class_eval(&block)
       else
         WebAction.send(:include, mod)

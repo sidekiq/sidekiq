@@ -19,7 +19,7 @@ module Sidekiq
     #
     def middleware(&block)
       @chain ||= Sidekiq.client_middleware
-      if block_given?
+      if block
         @chain = @chain.dup
         yield @chain
       end

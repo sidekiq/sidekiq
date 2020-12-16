@@ -89,7 +89,7 @@ module Sidekiq
       return true if @logdev.nil? || severity < level
 
       if message.nil?
-        if block_given?
+        if block
           message = yield
         else
           message = progname
