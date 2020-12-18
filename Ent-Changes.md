@@ -8,6 +8,7 @@ HEAD
 -------------
 
 - Support configurable timezones for periodic jobs [#4749]
+- Handle edge case leading to negative expiry in uniqueness [#4763]
 
 2.2.0
 -------------
