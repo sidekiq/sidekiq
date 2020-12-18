@@ -61,7 +61,7 @@ module Sidekiq
         end
 
         def get_sidekiq_options # :nodoc:
-          self.sidekiq_options_hash ||= Sidekiq.default_worker_options
+          self.sidekiq_options_hash ||= Sidekiq::Client::DEFAULT_WORKER_OPTIONS
         end
 
         def sidekiq_class_attribute(*attrs)
@@ -180,18 +180,6 @@ module Sidekiq
     end
 
     module ClassMethods
-      def delay(*args)
-        raise ArgumentError, "Do not call .delay on a Sidekiq::Worker class, call .perform_async"
-      end
-
-      def delay_for(*args)
-        raise ArgumentError, "Do not call .delay_for on a Sidekiq::Worker class, call .perform_in"
-      end
-
-      def delay_until(*args)
-        raise ArgumentError, "Do not call .delay_until on a Sidekiq::Worker class, call .perform_at"
-      end
-
       def set(options)
         Setter.new(self, options)
       end
@@ -234,10 +222,14 @@ module Sidekiq
       end
 
       def client_push(item) # :nodoc:
-        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options["pool"] || Sidekiq.redis_pool
+        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options["pool"]
         stringified_item = item.transform_keys(&:to_s)
 
-        Sidekiq::Client.new(pool).push(stringified_item)
+        if pool
+          Sidekiq::Client.new(pool).push(stringified_item)
+        else
+          Sidekiq::Client.default_client.push(stringified_item)
+        end
       end
     end
   end

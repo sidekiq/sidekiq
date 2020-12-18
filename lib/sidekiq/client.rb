@@ -2,44 +2,48 @@
 
 require "securerandom"
 require "sidekiq/middleware/chain"
+require "redis"
+require "connection_pool"
 
 module Sidekiq
   class Client
+    DEFAULT_WORKER_OPTIONS = {
+      "retry" => true,
+      "queue" => "default"
+    }
+
     ##
     # Define client-side middleware:
     #
-    #   client = Sidekiq::Client.new
+    #   client = Sidekiq::Client.new(pool)
     #   client.middleware do |chain|
     #     chain.use MyClientMiddleware
     #   end
     #   client.push('class' => 'SomeWorker', 'args' => [1,2,3])
     #
-    # All client instances default to the globally-defined
-    # Sidekiq.client_middleware but you can change as necessary.
-    #
-    def middleware(&block)
-      @chain ||= Sidekiq.client_middleware
-      if block_given?
-        @chain = @chain.dup
-        yield @chain
-      end
-      @chain
+    def middleware
+      yield @chain
     end
 
-    attr_accessor :redis_pool
+    attr_accessor :pool
 
-    # Sidekiq::Client normally uses the default Redis pool but you may
-    # pass a custom ConnectionPool if you want to shard your
-    # Sidekiq jobs across several Redis instances (for scalability
-    # reasons, e.g.)
-    #
-    #   Sidekiq::Client.new(ConnectionPool.new { Redis.new })
-    #
-    # Generally this is only needed for very large Sidekiq installs processing
-    # thousands of jobs per second.  I don't recommend sharding unless you
-    # cannot scale any other way (e.g. splitting your app into smaller apps).
-    def initialize(redis_pool = nil)
-      @redis_pool = redis_pool || Thread.current[:sidekiq_via_pool] || Sidekiq.redis_pool
+    def initialize(pool, middleware = Middleware::Chain.new)
+      @pool = pool
+      @chain = middleware
+    end
+
+    class << self
+      def apply(cfg)
+        cfg.freeze!
+
+        @default_client = Sidekiq::Client.new(cfg.pool, cfg.client_middleware)
+      end
+
+      def default_client
+        @default_client ||= Sidekiq::Client.new(ConnectionPool.new {
+          Redis.new(url: ENV[(ENV["REDIS_PROVIDER"] || "REDIS_URL")] || "redis://localhost:6379/0")
+        })
+      end
     end
 
     ##
@@ -111,81 +115,10 @@ module Sidekiq
       payloads.collect { |payload| payload["jid"] }
     end
 
-    # Allows sharding of jobs across any number of Redis instances.  All jobs
-    # defined within the block will use the given Redis connection pool.
-    #
-    #   pool = ConnectionPool.new { Redis.new }
-    #   Sidekiq::Client.via(pool) do
-    #     SomeWorker.perform_async(1,2,3)
-    #     SomeOtherWorker.perform_async(1,2,3)
-    #   end
-    #
-    # Generally this is only needed for very large Sidekiq installs processing
-    # thousands of jobs per second.  I do not recommend sharding unless
-    # you cannot scale any other way (e.g. splitting your app into smaller apps).
-    def self.via(pool)
-      raise ArgumentError, "No pool given" if pool.nil?
-      current_sidekiq_pool = Thread.current[:sidekiq_via_pool]
-      Thread.current[:sidekiq_via_pool] = pool
-      yield
-    ensure
-      Thread.current[:sidekiq_via_pool] = current_sidekiq_pool
-    end
-
-    class << self
-      def push(item)
-        new.push(item)
-      end
-
-      def push_bulk(items)
-        new.push_bulk(items)
-      end
-
-      # Resque compatibility helpers.  Note all helpers
-      # should go through Worker#client_push.
-      #
-      # Example usage:
-      #   Sidekiq::Client.enqueue(MyWorker, 'foo', 1, :bat => 'bar')
-      #
-      # Messages are enqueued to the 'default' queue.
-      #
-      def enqueue(klass, *args)
-        klass.client_push("class" => klass, "args" => args)
-      end
-
-      # Example usage:
-      #   Sidekiq::Client.enqueue_to(:queue_name, MyWorker, 'foo', 1, :bat => 'bar')
-      #
-      def enqueue_to(queue, klass, *args)
-        klass.client_push("queue" => queue, "class" => klass, "args" => args)
-      end
-
-      # Example usage:
-      #   Sidekiq::Client.enqueue_to_in(:queue_name, 3.minutes, MyWorker, 'foo', 1, :bat => 'bar')
-      #
-      def enqueue_to_in(queue, interval, klass, *args)
-        int = interval.to_f
-        now = Time.now.to_f
-        ts = (int < 1_000_000_000 ? now + int : int)
-
-        item = {"class" => klass, "args" => args, "at" => ts, "queue" => queue}
-        item.delete("at") if ts <= now
-
-        klass.client_push(item)
-      end
-
-      # Example usage:
-      #   Sidekiq::Client.enqueue_in(3.minutes, MyWorker, 'foo', 1, :bat => 'bar')
-      #
-      def enqueue_in(interval, klass, *args)
-        klass.perform_in(interval, *args)
-      end
-    end
-
     private
 
     def raw_push(payloads)
-      @redis_pool.with do |conn|
+      @pool.with do |conn|
         conn.multi do
           atomic_push(conn, payloads)
         end
@@ -214,7 +147,7 @@ module Sidekiq
     def process_single(worker_class, item)
       queue = item["queue"]
 
-      middleware.invoke(worker_class, item, queue, @redis_pool) do
+      @chain.invoke(worker_class, item, queue, @pool) do
         item
       end
     end
@@ -228,12 +161,7 @@ module Sidekiq
     end
 
     def normalize_item(item)
-      # 6.0.0 push_bulk bug, #4321
-      # TODO Remove after a while...
-      item.delete("at") if item.key?("at") && item["at"].nil?
-
       validate(item)
-      # raise(ArgumentError, "Arguments must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices") unless JSON.load(JSON.dump(item['args'])) == item['args']
 
       # merge in the default sidekiq_options for the item's class and/or wrapped element
       # this allows ActiveJobs to control sidekiq_options too.
@@ -253,7 +181,7 @@ module Sidekiq
 
     def normalized_hash(item_class)
       if item_class.is_a?(Class)
-        raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item_class.ancestors.inspect}") unless item_class.respond_to?("get_sidekiq_options")
+        raise(ArgumentError, "Job class '#{item_class.name}' must include Sidekiq::Worker") unless item_class.respond_to?("get_sidekiq_options")
         item_class.get_sidekiq_options
       else
         Sidekiq.default_worker_options

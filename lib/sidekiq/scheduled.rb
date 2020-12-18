@@ -9,10 +9,12 @@ module Sidekiq
     SETS = %w[retry schedule]
 
     class Enq
-      def enqueue_jobs(now = Time.now.to_f.to_s, sorted_sets = SETS)
+      include Loggable
+
+      def enqueue_jobs(client, now = Time.now.to_f.to_s, sorted_sets = SETS)
         # A job's "score" in Redis is the time at which it should be processed.
         # Just check Redis for the set of jobs with a timestamp before now.
-        Sidekiq.redis do |conn|
+        client.pool.with do |conn|
           sorted_sets.each do |sorted_set|
             # Get next items in the queue with scores (time to execute) <= now.
             until (jobs = conn.zrangebyscore(sorted_set, "-inf", now, limit: [0, 100])).empty?
@@ -24,8 +26,8 @@ module Sidekiq
                 # the queue, it's because another process already popped it so we can move on to the
                 # next one.
                 if conn.zrem(sorted_set, job)
-                  Sidekiq::Client.push(Sidekiq.load_json(job))
-                  Sidekiq.logger.debug { "enqueued #{sorted_set}: #{job}" }
+                  client.push(Sidekiq.load_json(job))
+                  debug { "enqueued #{sorted_set}: #{job}" }
                 end
               end
             end
@@ -40,15 +42,18 @@ module Sidekiq
     # just pops the job back onto its original queue so the
     # workers can pick it up like any other job.
     class Poller
+      include Loggable
       include Util
 
       INITIAL_WAIT = 10
 
-      def initialize
-        @enq = (Sidekiq.options[:scheduled_enq] || Sidekiq::Scheduled::Enq).new
+      def initialize(options)
         @sleeper = ConnectionPool::TimedStack.new
         @done = false
         @thread = nil
+        @pollavg = options[:average_scheduled_poll_interval]
+        @calcavg = options[:poll_interval_average]
+        @enq = nil
       end
 
       # Shut down this instance, will pause until the thread is dead.
@@ -62,7 +67,16 @@ module Sidekiq
         end
       end
 
+      def default_enqueuer
+        Sidekiq::Scheduled::Enq.new.tap do |e|
+          e.logger = self.logger
+        end
+      end
+
       def start
+        @client ||= Sidekiq::Client.new
+        @enq ||= default_enqueuer
+
         @thread ||= safe_thread("scheduler") {
           initial_wait
 
@@ -141,14 +155,14 @@ module Sidekiq
       #
       # We only do this if poll_interval_average is unset (the default).
       def poll_interval_average
-        Sidekiq.options[:poll_interval_average] ||= scaled_poll_interval
+        @calcavg ||= scaled_poll_interval
       end
 
       # Calculates an average poll interval based on the number of known Sidekiq processes.
       # This minimizes a single point of failure by dispersing check-ins but without taxing
       # Redis if you run many Sidekiq processes.
       def scaled_poll_interval
-        process_count * Sidekiq.options[:average_scheduled_poll_interval]
+        process_count * @pollavg
       end
 
       def process_count
@@ -162,7 +176,7 @@ module Sidekiq
         # to give time for the heartbeat to register (if the poll interval is going to be calculated by the number
         # of workers), and 5 random seconds to ensure they don't all hit Redis at the same time.
         total = 0
-        total += INITIAL_WAIT unless Sidekiq.options[:poll_interval_average]
+        total += INITIAL_WAIT unless @calcavg
         total += (5 * rand)
 
         @sleeper.pop(total)

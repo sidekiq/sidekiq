@@ -19,6 +19,11 @@ module Sidekiq
 
     attr_accessor :launcher
     attr_accessor :environment
+    attr_reader :configuration
+
+    def initialize
+      @configuration = Sidekiq::Configuration.new
+    end
 
     def parse(args = ARGV)
       setup_options(args)
