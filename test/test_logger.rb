@@ -49,6 +49,18 @@ class TestLogger < Minitest::Test
     assert_equal({}, subject.current)
   end
 
+  def test_with_overlapping_context
+    subject = Sidekiq::Context
+    subject.current.merge!({ foo: 'bar' })
+    assert_equal({ foo: 'bar' }, subject.current)
+
+    subject.with(foo: 'bingo') do
+      assert_equal({ foo: 'bingo' }, subject.current)
+    end
+
+    assert_equal({ foo: 'bar' }, subject.current)
+  end
+
   def test_nested_contexts
     subject = Sidekiq::Context
     assert_equal({}, subject.current)
