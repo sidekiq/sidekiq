@@ -6,10 +6,11 @@ require "time"
 module Sidekiq
   module Context
     def self.with(hash)
+      orig_context = current.dup
       current.merge!(hash)
       yield
     ensure
-      hash.each_key { |key| current.delete(key) }
+      Thread.current[:sidekiq_context] = orig_context
     end
 
     def self.current
