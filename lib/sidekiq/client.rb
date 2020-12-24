@@ -32,20 +32,6 @@ module Sidekiq
       @chain = middleware
     end
 
-    class << self
-      def apply(cfg)
-        cfg.freeze!
-
-        @default_client = Sidekiq::Client.new(cfg.pool, cfg.client_middleware)
-      end
-
-      def default_client
-        @default_client ||= Sidekiq::Client.new(ConnectionPool.new {
-          Redis.new(url: ENV[(ENV["REDIS_PROVIDER"] || "REDIS_URL")] || "redis://localhost:6379/0")
-        })
-      end
-    end
-
     ##
     # The main method used to push a job to Redis.  Accepts a number of options:
     #

@@ -1,4 +1,5 @@
 require "logger"
+
 module Sidekiq
   class Configuration
     attr_accessor :concurrency
@@ -12,10 +13,16 @@ module Sidekiq
     attr_accessor :logger
     attr_accessor :log_level
     attr_accessor :redis
+    attr_accessor :queues
     attr_reader :default_worker_options
     attr_reader :pool
 
+    # an arbitrary set of entries
+    attr_reader :labels
+    attr_accessor :tag
+
     def initialize
+      @queues = ["default"]
       @concurrency = 10
       @shutdown_timeout = 25
       @logger = ::Logger.new($stdout)
@@ -37,6 +44,15 @@ module Sidekiq
         @logger.warn("#{ex.class.name}: #{ex.message}")
         @logger.warn(ex.backtrace.join("\n")) unless ex.backtrace.nil?
       }]
+      @labels = Set.new
+      @tag = ""
+      @components = []
+    end
+
+    # components will be called back when the configuration is
+    # finalized so they can pull config'd items like logger, pool, etc.
+    def register_component(comp)
+      @components << comp
     end
 
     def on(event, &block)
@@ -53,45 +69,14 @@ module Sidekiq
       end
     end
 
-    def freeze!
-      @pool = ConnectionPool.new(size: @concurrency + 2, timeout: 5) { Redis.new(@redis) }
-    end
+    def finalize
+      @pool ||= ConnectionPool.new(size: concurrency + 2, timeout: 5) { Redis.new(redis) }
 
-    private
-
-    def boot
-      # @runner = Sidekiq::Runner.new(self)
-
-      # fire_event(:startup)
-    end
-
-    def fire_event(event, options = {})
-      reverse = options[:reverse]
-      reraise = options[:reraise]
-
-      arr = @event_hooks[event]
-      arr.reverse! if reverse
-      arr.each do |block|
-        if block.arity == 0
-          block.call
-        else
-          block.call(@runner)
-        end
-      rescue => ex
-        handle_exception(ex, {context: "Exception during Sidekiq lifecycle event.", event: event})
-        raise ex if reraise
+      @components.each do |comp|
+        comp.finalize(self)
       end
-      arr.clear
+      @components = nil
     end
 
-    def handle_exception(ex, ctx = {})
-      error_handlers.each do |handler|
-        handler.call(ex, ctx)
-      rescue => ex
-        logger.error "!!! ERROR HANDLER THREW AN ERROR !!!"
-        logger.error ex
-        logger.error ex.backtrace.join("\n") unless ex.backtrace.nil?
-      end
-    end
   end
 end

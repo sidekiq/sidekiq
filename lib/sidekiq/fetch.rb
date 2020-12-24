@@ -4,62 +4,68 @@ require "sidekiq"
 
 module Sidekiq
   class BasicFetch
+    include Loggable
+
     # We want the fetch operation to timeout every few seconds so the thread
     # can check if the process is shutting down.
     TIMEOUT = 2
 
     UnitOfWork = Struct.new(:queue, :job) {
-      def acknowledge
-        # nothing to do
-      end
-
       def queue_name
         queue.delete_prefix("queue:")
       end
-
-      def requeue
-        Sidekiq.redis do |conn|
-          conn.rpush(queue, job)
-        end
-      end
     }
 
-    def initialize(options)
-      raise ArgumentError, "missing queue list" unless options[:queues]
-      @options = options
-      @strictly_ordered_queues = !!@options[:strict]
-      @queues = @options[:queues].map { |q| "queue:#{q}" }
-      if @strictly_ordered_queues
-        @queues.uniq!
-        @queues << TIMEOUT
+    def initialize(cfg)
+      raise ArgumentError, "missing queue list" unless cfg.queues
+
+      qs = cfg.queues
+      cfg.register_component(self)
+      @strict = qs.size == qs.uniq.size
+      @timeout = { timeout: TIMEOUT }
+      @queues = qs.map { |q| "queue:#{q}" }
+    end
+
+    def finalize(cfg)
+      @pool = cfg.pool
+      @logger = cfg.logger
+    end
+
+    def acknowledge(uow)
+      # nothing to do
+    end
+
+    def requeue(uow)
+      @pool.with do |conn|
+        conn.rpush(uow.queue, uow.job)
       end
     end
 
     def retrieve_work
-      work = Sidekiq.redis { |conn| conn.brpop(*queues_cmd) }
+      work = @pool.with { |conn| conn.brpop(*queues_cmd, @timeout) }
       UnitOfWork.new(*work) if work
     end
 
-    def bulk_requeue(inprogress, options)
+    def bulk_requeue(inprogress)
       return if inprogress.empty?
 
-      Sidekiq.logger.debug { "Re-queueing terminated jobs" }
+      debug { "Re-queueing terminated jobs" }
       jobs_to_requeue = {}
       inprogress.each do |unit_of_work|
         jobs_to_requeue[unit_of_work.queue] ||= []
         jobs_to_requeue[unit_of_work.queue] << unit_of_work.job
       end
 
-      Sidekiq.redis do |conn|
+      @pool.with do |conn|
         conn.pipelined do
           jobs_to_requeue.each do |queue, jobs|
             conn.rpush(queue, jobs)
           end
         end
       end
-      Sidekiq.logger.info("Pushed #{inprogress.size} jobs back to Redis")
+      info("Pushed #{inprogress.size} jobs back to Redis")
     rescue => ex
-      Sidekiq.logger.warn("Failed to requeue #{inprogress.size} jobs: #{ex.message}")
+      warn("Failed to requeue #{inprogress.size} jobs: #{ex.message}")
     end
 
     # Creating the Redis#brpop command takes into account any
@@ -68,12 +74,10 @@ module Sidekiq
     # recreate the queue command each time we invoke Redis#brpop
     # to honor weights and avoid queue starvation.
     def queues_cmd
-      if @strictly_ordered_queues
+      if @strict
         @queues
       else
-        queues = @queues.shuffle!.uniq
-        queues << TIMEOUT
-        queues
+        @queues.shuffle!.uniq
       end
     end
   end

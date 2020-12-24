@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "sidekiq/loggable"
 require "sidekiq/manager"
 require "sidekiq/fetch"
 require "sidekiq/scheduled"
@@ -10,36 +11,44 @@ module Sidekiq
 
     STATS_TTL = 5 * 365 * 24 * 60 * 60 # 5 years
 
-    attr_accessor :manager, :poller, :fetcher
+    attr_reader :manager, :poller, :fetcher
 
-    def initialize
-      @concurrency = 10
-      @shutdown_timeout = 25
-      @environment = "development"
-      @middleware = Sidekiq::Middleware::Chain.new
-      @event_hooks = {
-        startup: [],
-        quiet: [],
-        shutdown: [],
-        heartbeat: []
-      }
-      @death_handlers = []
-      @error_handlers = [->(ex, ctx) {
-        @logger.warn(Sidekiq.dump_json(ctx)) unless ctx.empty?
-        @logger.warn("#{ex.class.name}: #{ex.message}")
-        @logger.warn(ex.backtrace.join("\n")) unless ex.backtrace.nil?
-      }]
-
+    def initialize(cfg)
+      @config = cfg
       @done = false
     end
 
-    def run
-      @manager = Sidekiq::Manager.new
-      @poller = Sidekiq::Scheduled::Poller.new
-      @fetcher ||= BasicFetch.new
+    # Run Sidekiq. If `install_signals` is true, this method does not return.
+    # If false, you are responsible for hooking into the process signals and
+    # calling `stop` to shut down the Sidekiq processor threads.
+    def run(install_signals: true)
+      @manager = Sidekiq::Manager.new(@config)
+      @poller = Sidekiq::Scheduled::Poller.new(@config)
+      @fetcher ||= BasicFetch.new(@config)
       @thread = safe_thread("heartbeat", &method(:start_heartbeat))
       @poller.start
       @manager.start
+
+      if install_signals
+        self_read = hook
+        begin
+          loop do
+            readable_io = IO.select([self_read])
+            signal = readable_io.first[0].gets.strip
+            handle_signal(signal)
+          end
+        rescue Interrupt
+          logger.info "Shutting down"
+          stop
+          logger.info "Bye!"
+          # Explicitly exit so busy Processor threads won't block process shutdown.
+          #
+          # NB: slow at_exit handlers will prevent a timely exit if they take
+          # a while to run. If Sidekiq is getting here but the process isn't exiting,
+          # use the TTIN signal to determine where things are stuck.
+          exit(0)
+        end
+      end
     end
 
     # Stops this instance from processing any more jobs,
@@ -54,17 +63,17 @@ module Sidekiq
     # return until all work is complete and cleaned up.
     # It can take up to the timeout to complete.
     def stop
-      deadline = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) + @options[:timeout]
+      deadline = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) + @config.shutdown_timeout
 
       @done = true
       @manager.quiet
       @poller.terminate
 
-      @manager.stop(deadline)
+      @manager.stop(deadline, @fetcher)
 
       # Requeue everything in case there was a worker who grabbed work while stopped
       # This call is a no-op in Sidekiq but necessary for Sidekiq Pro.
-      @fetcher.bulk_requeue
+      @fetcher.bulk_requeue({})
 
       clear_heartbeat
     end
@@ -74,6 +83,21 @@ module Sidekiq
     end
 
     private unless $TESTING
+
+    def hook
+      self_read, self_write = IO.pipe
+      sigs = %w[INT TERM TTIN TSTP]
+      # USR1 and USR2 don't work on the JVM
+      sigs << "USR2" if Sidekiq.pro? && !defined?(::JRUBY_VERSION)
+      sigs.each do |sig|
+        trap sig do
+          self_write.puts(sig)
+        end
+      rescue ArgumentError
+        puts "Signal #{sig} not supported"
+      end
+      self_read
+    end
 
     def start_heartbeat
       loop do
@@ -211,10 +235,10 @@ module Sidekiq
           "hostname" => hostname,
           "started_at" => Time.now.to_f,
           "pid" => ::Process.pid,
-          "tag" => @options[:tag] || "",
-          "concurrency" => @options[:concurrency],
-          "queues" => @options[:queues].uniq,
-          "labels" => @options[:labels],
+          "tag" => @config.tag,
+          "concurrency" => @config.concurrency,
+          "queues" => @config.queues.uniq,
+          "labels" => @config.labels.to_a,
           "identity" => identity
         }
       end

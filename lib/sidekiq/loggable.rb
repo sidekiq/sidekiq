@@ -1,12 +1,10 @@
 module Loggable
-  attr_accessor :logger
-
   def info(*args)
-    @logger.debug(*args)
+    @logger.info(*args)
   end
 
   def warn(*args)
-    @logger.debug(*args)
+    @logger.warn(*args)
   end
 
   def debug(*args)

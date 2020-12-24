@@ -28,15 +28,16 @@ module Sidekiq
     attr_reader :thread
     attr_reader :job
 
-    def initialize(mgr, options)
+    def initialize(mgr, cfg)
       @mgr = mgr
       @down = false
       @done = false
       @job = nil
       @thread = nil
-      @strategy = options[:fetch]
-      @reloader = options[:reloader] || proc { |&block| block.call }
-      @job_logger = (options[:job_logger] || Sidekiq::JobLogger).new
+
+      @strategy = Sidekiq::BasicFetch.new(cfg)
+      @reloader = proc { |&block| block.call }
+      @job_logger = Sidekiq::JobLogger.new(cfg.logger)
       @retrier = Sidekiq::JobRetry.new
     end
 

@@ -14,12 +14,8 @@ module Sidekiq
   LICENSE = "See LICENSE and the LGPL-3.0 for licensing details."
 
   DEFAULTS = {
-    labels: [],
-    poll_interval_average: nil,
-    average_scheduled_poll_interval: 5,
     dead_max_jobs: 10_000,
     dead_timeout_in_seconds: 180 * 24 * 60 * 60, # 6 months
-    reloader: proc { |&block| block.call }
   }
 
   ##
@@ -45,12 +41,13 @@ module Sidekiq
   end
 
   def self.configure
-    cfg = Configuration.new
-    yield cfg
+    yield DEFAULT_CONFIG
+    DEFAULT_CONFIG.freeze!
+
     if server?
-      Sidekiq::CLI.instance.apply(cfg)
+      Sidekiq::CLI.instance.apply(DEFAULT_CONFIG)
     else
-      Sidekiq::Client.apply(cfg)
+      Sidekiq::Client.apply(DEFAULT_CONFIG)
     end
   end
 

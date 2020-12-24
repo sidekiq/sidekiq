@@ -68,7 +68,7 @@ module Sidekiq
     DEFAULT_MAX_RETRY_ATTEMPTS = 25
 
     def initialize(options = {})
-      @max_retries = Sidekiq.options.merge(options).fetch(:max_retries, DEFAULT_MAX_RETRY_ATTEMPTS)
+      @max_retries = options.fetch(:max_retries, DEFAULT_MAX_RETRY_ATTEMPTS)
     end
 
     # The global retry handler requires only the barest of data.

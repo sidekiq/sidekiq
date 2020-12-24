@@ -47,13 +47,14 @@ module Sidekiq
 
       INITIAL_WAIT = 10
 
-      def initialize(options)
+      def initialize(cfg)
         @sleeper = ConnectionPool::TimedStack.new
         @done = false
         @thread = nil
-        @pollavg = options[:average_scheduled_poll_interval]
-        @calcavg = options[:poll_interval_average]
+        @pollavg = 5
+        @calcavg = nil
         @enq = nil
+        @logger = cfg.logger
       end
 
       # Shut down this instance, will pause until the thread is dead.
@@ -84,7 +85,7 @@ module Sidekiq
             enqueue
             wait
           end
-          Sidekiq.logger.info("Scheduler exiting...")
+          info("Scheduler exiting...")
         }
       end
 
@@ -93,7 +94,7 @@ module Sidekiq
       rescue => ex
         # Most likely a problem with redis networking.
         # Punt and try again at the next interval
-        logger.error ex.message
+        error { ex.message }
         handle_exception(ex)
       end
 
@@ -106,7 +107,7 @@ module Sidekiq
       rescue => ex
         # if poll_interval_average hasn't been calculated yet, we can
         # raise an error trying to reach Redis.
-        logger.error ex.message
+        error { ex.message }
         handle_exception(ex)
         sleep 5
       end

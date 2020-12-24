@@ -18,24 +18,22 @@ module Sidekiq
   # 5. stop: hard stop the Processors by deadline.
   #
   # Note that only the last task requires its own Thread since it has to monitor
-  # the shutdown process.  The other tasks are performed by other threads.
-  #
+  # the shutdown process. The other tasks are performed by other threads.
   class Manager
     include Util
+    include Loggable
 
     attr_reader :workers
-    attr_reader :options
 
-    def initialize(options = {})
-      logger.debug { options.inspect }
-      @options = options
-      @count = options[:concurrency] || 10
+    def initialize(cfg)
+      @count = cfg.concurrency || 10
       raise ArgumentError, "Concurrency of #{@count} is not supported" if @count < 1
 
+      @logger = cfg.logger
       @done = false
       @workers = Set.new
       @count.times do
-        @workers << Processor.new(self, options)
+        @workers << Processor.new(self, cfg)
       end
       @plock = Mutex.new
     end
@@ -50,7 +48,7 @@ module Sidekiq
       return if @done
       @done = true
 
-      logger.info { "Terminating quiet workers" }
+      info { "Terminating quiet workers" }
       @workers.each { |x| x.terminate }
       fire_event(:quiet, reverse: true)
     end
@@ -58,7 +56,7 @@ module Sidekiq
     # hack for quicker development / testing environment #2774
     PAUSE_TIME = $stdout.tty? ? 0.1 : 0.5
 
-    def stop(deadline)
+    def stop(deadline, fetcher)
       quiet
       fire_event(:shutdown, reverse: true)
 
@@ -68,7 +66,7 @@ module Sidekiq
       sleep PAUSE_TIME
       return if @workers.empty?
 
-      logger.info { "Pausing to allow workers to finish..." }
+      info { "Pausing to allow workers to finish..." }
       remaining = deadline - ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
       while remaining > PAUSE_TIME
         return if @workers.empty?
@@ -77,7 +75,7 @@ module Sidekiq
       end
       return if @workers.empty?
 
-      hard_shutdown
+      hard_shutdown(fetcher)
     end
 
     def processor_stopped(processor)
@@ -90,7 +88,7 @@ module Sidekiq
       @plock.synchronize do
         @workers.delete(processor)
         unless @done
-          p = Processor.new(self, options)
+          p = Processor.new(self, cfg)
           @workers << p
           p.start
         end
@@ -103,7 +101,7 @@ module Sidekiq
 
     private
 
-    def hard_shutdown
+    def hard_shutdown(fetcher)
       # We've reached the timeout and we still have busy workers.
       # They must die but their jobs shall live on.
       cleanup = nil
@@ -114,8 +112,8 @@ module Sidekiq
       if cleanup.size > 0
         jobs = cleanup.map { |p| p.job }.compact
 
-        logger.warn { "Terminating #{cleanup.size} busy worker threads" }
-        logger.warn { "Work still in progress #{jobs.inspect}" }
+        warn { "Terminating #{cleanup.size} busy worker threads" }
+        warn { "Work still in progress #{jobs.inspect}" }
 
         # Re-enqueue unfinished jobs
         # NOTE: You may notice that we may push a job back to redis before
@@ -123,8 +121,7 @@ module Sidekiq
         # contract says that jobs are run AT LEAST once. Process termination
         # is delayed until we're certain the jobs are back in Redis because
         # it is worse to lose a job than to run it twice.
-        strategy = @options[:fetch]
-        strategy.bulk_requeue(jobs, @options)
+        fetcher.bulk_requeue(jobs)
       end
 
       cleanup.each do |processor|
