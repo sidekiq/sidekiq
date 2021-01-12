@@ -7,6 +7,7 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 HEAD
 ---------
 
+- Propagate death callbacks to parent batches [#4774]
 - Allow customization of Batch linger to quickly reclaim memory in Redis [#4772]
 - Fix disappearing processes in Busy due to super_fetch initialization when used in
   tandem with `SIDEKIQ_PRELOAD_APP=1` in `sidekiqswarm`. [#4733]
