@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-HEAD
+2.2.1
 -------------
 
 - Support configurable timezones for periodic jobs [#4749]

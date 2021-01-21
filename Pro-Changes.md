@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+5.2.1
 ---------
 
 - Propagate death callbacks to parent batches [#4774]
