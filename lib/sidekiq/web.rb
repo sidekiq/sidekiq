@@ -78,15 +78,27 @@ module Sidekiq
         send(:"#{attribute}=", value)
       end
 
-      attr_accessor :app_url, :session_secret, :redis_pool, :sessions
+      def sessions=(val)
+        raise <<~EOM
+          Warning: disabling sessions opens your Sidekiq UI up to CSRF attacks. You may
+          disable them by setting `SIDEKIQ_DISABLE_SESSIONS_THIS_IS_A_BAD_IDEA=true`.
+        EOM
+      end
+
+      def session_secret=(val)
+        raise <<~EOM
+          Sidekiq no longer allows setting the session secret directly. Either configure
+          your session middleware directly or allow Sidekiq to reuse the Rails session.
+        EOM
+      end
+
+      attr_accessor :app_url, :redis_pool
       attr_writer :locales, :views
     end
 
     def self.inherited(child)
       child.app_url = app_url
-      child.session_secret = session_secret
       child.redis_pool = redis_pool
-      child.sessions = sessions
     end
 
     def settings
@@ -126,18 +138,11 @@ module Sidekiq
       send(:"#{attribute}=", value)
     end
 
-    # Default values
-    set :sessions, true
-
-    attr_writer :sessions
-
-    def sessions
-      unless instance_variable_defined?("@sessions")
-        @sessions = self.class.sessions
-        @sessions = @sessions.to_hash.dup if @sessions.respond_to?(:to_hash)
-      end
-
-      @sessions
+    def sessions=(val)
+      raise <<~EOM
+        Sidekiq no longer allows configuring the session via Sidekiq::Web. Either configure
+        your session middleware directly or allow Sidekiq to reuse the Rails session.
+      EOM
     end
 
     def self.register(extension)
@@ -153,32 +158,11 @@ module Sidekiq
     end
 
     def build_sessions
-      middlewares = self.middlewares
-
-      s = sessions
+      disable_sessions = ENV["SIDEKIQ_DISABLE_SESSIONS_THIS_IS_A_BAD_IDEA"] == "true" || ENV["RACK_ENV"] == "test"
 
       # turn on CSRF protection if sessions are enabled and this is not the test env
-      if s && !using?(CsrfProtection) && ENV["RACK_ENV"] != "test"
+      unless disable_sessions || using?(CsrfProtection)
         middlewares.unshift [[CsrfProtection], nil]
-      end
-
-      if s && !using?(::Rack::Session::Cookie)
-        unless (secret = Web.session_secret)
-          require "securerandom"
-          secret = SecureRandom.hex(64)
-        end
-
-        options = {secret: secret}
-        options = options.merge(s.to_hash) if s.respond_to? :to_hash
-
-        middlewares.unshift [[::Rack::Session::Cookie, options], nil]
-      end
-
-      # Since Sidekiq::WebApplication no longer calculates its own
-      # Content-Length response header, we must ensure that the Rack middleware
-      # that does this is loaded
-      unless using? ::Rack::ContentLength
-        middlewares.unshift [[::Rack::ContentLength], nil]
       end
     end
 

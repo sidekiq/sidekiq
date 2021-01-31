@@ -11,4 +11,11 @@ end
 Sidekiq::Client.push('class' => "HardWorker", 'args' => [])
 
 require 'sidekiq/web'
+
+# In a multi-process deployment, all Web UI instances should share
+# this secret key so they can all decode the encrypted browser cookies
+# and provide a working session.
+# Rails does this in /config/initializers/secret_token.rb
+secret_key = SecureRandom.hex(32)
+use Rack::Session::Cookie, secret: secret_key
 run Sidekiq::Web
