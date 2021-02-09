@@ -18,7 +18,7 @@ describe Sidekiq::Web do
 
   before do
     Sidekiq.redis {|c| c.flushdb }
-    app.default_middleware.clear
+    app.default_middlewares.clear
   end
 
   class WebWorker
