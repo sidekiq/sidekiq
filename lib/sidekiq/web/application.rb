@@ -42,6 +42,13 @@ module Sidekiq
       # nothing, backwards compatibility
     end
 
+    head "/" do
+      # HEAD / is the cheapest heartbeat possible,
+      # it hits Redis to ensure connectivity
+      Sidekiq.redis {|c| c.llen("queue:default") }
+      ""
+    end
+
     get "/" do
       @redis_info = redis_info.select { |k, v| REDIS_KEYS.include? k }
       stats_history = Sidekiq::Stats::History.new((params["days"] || 30).to_i)
