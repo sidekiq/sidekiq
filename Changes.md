@@ -5,7 +5,7 @@
 HEAD
 ---------
 
-- Add process/thread count summary to Busy page [#]
+- Add process/thread count summary to Busy page [#4806]
 
 6.1.3
 ---------
