@@ -22,6 +22,14 @@ module Sidekiq
       end
     end
 
+    def singularize(str, count)
+      if count == 1 && str.respond_to?(:singularize) # rails
+        str.singularize
+      else
+        str
+      end
+    end
+
     def clear_caches
       @strings = nil
       @locale_files = nil
