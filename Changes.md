@@ -2,7 +2,34 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
-6.1.3
+HEAD
+---------
+
+- Refactor Web UI session usage.
+  Numerous people have hit "Forbidden" errors and struggled with Sidekiq's
+  Web UI session requirement. If you have code in your initializer for
+  Web sessions, it's quite possible it will need to be removed. Here's
+  an overview:
+```
+  Sidekiq::Web needs a valid Rack session for CSRF protection. If this is a Rails app,
+  make sure you mount Sidekiq::Web *inside* your routes in `config/routes.rb`:
+
+  Rails.application.routes.draw do
+    mount Sidekiq::Web => "/sidekiq"
+    ....
+  end
+
+  If this is a bare Rack app, use a session middleware before Sidekiq::Web:
+
+  # first, use IRB to create a shared secret key for sessions and commit it
+  require 'securerandom'; File.open(".session.key", "w") {|f| f.write(SecureRandom.hex(32)) }
+
+  # now, update your Rack app to include the secret with a session cookie middleware
+  use Rack::Session::Cookie, secret: File.read(".session.key"), same_site: true, max_age: 86400
+  run Sidekiq::Web
+```
+
+  6.1.3
 ---------
 
 - Warn if Redis is configured to evict data under memory pressure [#4752]

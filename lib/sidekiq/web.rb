@@ -13,10 +13,8 @@ require "sidekiq/web/application"
 require "sidekiq/web/csrf_protection"
 
 require "rack/content_length"
-
 require "rack/builder"
 require "rack/file"
-require "rack/session/cookie"
 
 module Sidekiq
   class Web
@@ -38,14 +36,6 @@ module Sidekiq
     class << self
       def settings
         self
-      end
-
-      def middlewares
-        @middlewares ||= []
-      end
-
-      def use(*middleware_args, &block)
-        middlewares << [middleware_args, block]
       end
 
       def default_tabs
@@ -73,23 +63,16 @@ module Sidekiq
         opts.each { |key| set(key, false) }
       end
 
-      # Helper for the Sinatra syntax: Sidekiq::Web.set(:session_secret, Rails.application.secrets...)
       def set(attribute, value)
         send(:"#{attribute}=", value)
       end
 
       def sessions=(val)
-        raise <<~EOM
-          Warning: disabling sessions opens your Sidekiq UI up to CSRF attacks. You may
-          disable them by setting `SIDEKIQ_DISABLE_SESSIONS_THIS_IS_A_BAD_IDEA=true`.
-        EOM
+        puts "Sidekiq::Web.sessions= is no longer relevant and will be removed in Sidekiq 7.0. #{caller[2..2].first}"
       end
 
       def session_secret=(val)
-        raise <<~EOM
-          Sidekiq no longer allows setting the session secret directly. Either configure
-          your session middleware directly or allow Sidekiq to reuse the Rails session.
-        EOM
+        puts "Sidekiq::Web.session_secret= is no longer relevant and will be removed in Sidekiq 7.0. #{caller[2..2].first}"
       end
 
       attr_accessor :app_url, :redis_pool
@@ -105,12 +88,12 @@ module Sidekiq
       self.class.settings
     end
 
-    def use(*middleware_args, &block)
-      middlewares << [middleware_args, block]
+    def middlewares
+      @middlewares ||= []
     end
 
-    def middlewares
-      @middlewares ||= Web.middlewares.dup
+    def use(*args, &block)
+      middlewares << [args, block]
     end
 
     def call(env)
@@ -139,38 +122,25 @@ module Sidekiq
     end
 
     def sessions=(val)
-      raise <<~EOM
-        Sidekiq no longer allows configuring the session via Sidekiq::Web. Either configure
-        your session middleware directly or allow Sidekiq to reuse the Rails session.
-      EOM
+      puts "Sidekiq::Web#sessions= is no longer relevant and will be removed in Sidekiq 7.0. #{caller[2..2].first}"
     end
 
     def self.register(extension)
       extension.registered(WebApplication)
     end
 
+    def default_middlewares
+      @default ||= [
+        [[Sidekiq::Web::CsrfProtection]],
+        [[Rack::ContentLength]]
+      ]
+    end
+
     private
 
-    def using?(middleware)
-      middlewares.any? do |(m, _)|
-        m.is_a?(Array) && (m[0] == middleware || m[0].is_a?(middleware))
-      end
-    end
-
-    def build_sessions
-      disable_sessions = ENV["SIDEKIQ_DISABLE_SESSIONS_THIS_IS_A_BAD_IDEA"] == "true" || ENV["RACK_ENV"] == "test"
-
-      # turn on CSRF protection if sessions are enabled and this is not the test env
-      unless disable_sessions || using?(CsrfProtection)
-        middlewares.unshift [[CsrfProtection], nil]
-      end
-    end
-
     def build
-      build_sessions
-
-      middlewares = self.middlewares
       klass = self.class
+      m = middlewares + default_middlewares
 
       ::Rack::Builder.new do
         %w[stylesheets javascripts images].each do |asset_dir|
@@ -179,7 +149,7 @@ module Sidekiq
           end
         end
 
-        middlewares.each { |middleware, block| use(*middleware, &block) }
+        m.each { |middleware, block| use(*middleware, &block) }
 
         run WebApplication.new(klass)
       end

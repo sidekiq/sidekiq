@@ -4,7 +4,6 @@ module Sidekiq
   class WebApplication
     extend WebRouter
 
-    CONTENT_LENGTH = "Content-Length"
     REDIS_KEYS = %w[redis_version uptime_in_days connected_clients used_memory_human used_memory_peak_human]
     CSP_HEADER = [
       "default-src 'self' https: http:",
@@ -45,7 +44,7 @@ module Sidekiq
     head "/" do
       # HEAD / is the cheapest heartbeat possible,
       # it hits Redis to ensure connectivity
-      Sidekiq.redis {|c| c.llen("queue:default") }
+      Sidekiq.redis { |c| c.llen("queue:default") }
       ""
     end
 
