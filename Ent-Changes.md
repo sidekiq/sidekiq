@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+2.2.2
+-------------
+
+- Periodic job timezone fix [#4796]
+
 2.2.1
 -------------
 
