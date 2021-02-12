@@ -68,11 +68,11 @@ module Sidekiq
       end
 
       def sessions=(val)
-        puts "Sidekiq::Web.sessions= is no longer relevant and will be removed in Sidekiq 7.0. #{caller[2..2].first}"
+        puts "WARNING: Sidekiq::Web.sessions= is no longer relevant and will be removed in Sidekiq 7.0. #{caller(1..1).first}"
       end
 
       def session_secret=(val)
-        puts "Sidekiq::Web.session_secret= is no longer relevant and will be removed in Sidekiq 7.0. #{caller[2..2].first}"
+        puts "WARNING: Sidekiq::Web.session_secret= is no longer relevant and will be removed in Sidekiq 7.0. #{caller(1..1).first}"
       end
 
       attr_accessor :app_url, :redis_pool

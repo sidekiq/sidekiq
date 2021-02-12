@@ -11,15 +11,16 @@ HEAD
   Web sessions, it's quite possible it will need to be removed. Here's
   an overview:
 ```
-  Sidekiq::Web needs a valid Rack session for CSRF protection. If this is a Rails app,
-  make sure you mount Sidekiq::Web *inside* your routes in `config/routes.rb`:
+Sidekiq::Web needs a valid Rack session for CSRF protection. If this is a Rails app,
+make sure you mount Sidekiq::Web *inside* your routes in `config/routes.rb` so
+Sidekiq can reuse the Rails session:
 
   Rails.application.routes.draw do
     mount Sidekiq::Web => "/sidekiq"
     ....
   end
 
-  If this is a bare Rack app, use a session middleware before Sidekiq::Web:
+If this is a bare Rack app, use a session middleware before Sidekiq::Web:
 
   # first, use IRB to create a shared secret key for sessions and commit it
   require 'securerandom'; File.open(".session.key", "w") {|f| f.write(SecureRandom.hex(32)) }
