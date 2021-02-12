@@ -66,7 +66,28 @@ module Sidekiq
       end
 
       def session(env)
-        env["rack.session"] || fail("you need to set up a session middleware *before* #{self.class}")
+        env["rack.session"] || fail(<<~EOM)
+          Sidekiq::Web needs a valid Rack session for CSRF protection. If this is a Rails app,
+          make sure you mount Sidekiq::Web *inside* your application routes:
+
+
+          Rails.application.routes.draw do
+            mount Sidekiq::Web => "/sidekiq"
+            ....
+          end
+
+
+          If this is a bare Rack app, use a session middleware before Sidekiq::Web:
+
+
+          # first, use IRB to create a shared secret key for sessions and commit it
+          require 'securerandom'; File.open(".session.key", "w") {|f| f.write(SecureRandom.hex(32)) }
+
+
+          # now use the secret with a session cookie middleware
+          use Rack::Session::Cookie, secret: File.read(".session.key"), same_site: true, max_age: 86400
+          run Sidekiq::Web
+        EOM
       end
 
       def accept?(env)
