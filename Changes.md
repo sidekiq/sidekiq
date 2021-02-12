@@ -5,7 +5,7 @@
 HEAD
 ---------
 
-- Refactor Web UI session usage.
+- Refactor Web UI session usage. [#4804]
   Numerous people have hit "Forbidden" errors and struggled with Sidekiq's
   Web UI session requirement. If you have code in your initializer for
   Web sessions, it's quite possible it will need to be removed. Here's
