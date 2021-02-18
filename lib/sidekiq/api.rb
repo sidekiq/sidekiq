@@ -818,6 +818,13 @@ module Sidekiq
       Sidekiq.redis { |conn| conn.scard("processes") }
     end
 
+    # Total number of threads available to execute jobs.
+    # For Sidekiq Enterprise customers this number (in production) must be
+    # less than or equal to your licensed concurrency.
+    def total_concurrency
+      self.sum {|x| x["concurrency"] }
+    end
+
     # Returns the identity of the current cluster leader or "" if no leader.
     # This is a Sidekiq Enterprise feature, will always return "" in Sidekiq
     # or Sidekiq Pro.

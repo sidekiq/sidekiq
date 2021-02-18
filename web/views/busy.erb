@@ -1,5 +1,32 @@
 <div class="row header">
   <div class="col-sm-4 pull-left flip">
+    <h3><%= t('Status') %></h3>
+  </div>
+</div>
+
+<div class="table_container">
+  <div class="stats-container">
+    <div class="stat">
+      <h3><%= s = processes.size; number_with_delimiter(s) %></h3>
+      <p><%= t('Processes') %></p>
+    </div>
+    <div class="stat">
+      <h3><%= x = processes.total_concurrency; number_with_delimiter(x) %></h3>
+      <p><%= t('Threads') %></p>
+    </div>
+    <div class="stat">
+      <h3><%= ws = workers.size; number_with_delimiter(ws) %></h3>
+      <p><%= t('Busy') %></p>
+    </div>
+    <div class="stat">
+      <h3><%= x == 0 ? 0 : ((ws / x.to_f) * 100).round(0) %>%</h3>
+      <p><%= t('Utilization') %></p>
+    </div>
+  </div>
+</div>
+
+<div class="row header">
+  <div class="col-sm-4 pull-left flip">
     <h3><%= t('Processes') %></h3>
   </div>
   <div class="col-sm-3 pull-right flip">
@@ -11,16 +38,7 @@
       </div>
     </form>
   </div>
-  <!-- behold: mperham's design skills, TODO: someone fix this disaster? -->
-  <div class="col-sm-5 pull-right flip">
-    <p style="font-size: 120%; font-weight: bold; margin-top: 2em; text-align: right">
-      <%= s = processes.size %> <%= singularize(t('Processes'), s) %>
-      <%= x = processes.sum {|x| x['concurrency'] } %> <%= singularize(t('Threads'), x) %>
-      <%= processes.sum {|x| x['busy'] } %> <%= t('Busy') %>
-    </p>
-  </div>
 </div>
-
 <div class="table_container">
   <table class="processes table table-hover table-bordered table-striped">
     <thead>
