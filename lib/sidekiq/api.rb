@@ -822,7 +822,7 @@ module Sidekiq
     # For Sidekiq Enterprise customers this number (in production) must be
     # less than or equal to your licensed concurrency.
     def total_concurrency
-      self.sum {|x| x["concurrency"] }
+      sum { |x| x["concurrency"] }
     end
 
     # Returns the identity of the current cluster leader or "" if no leader.
