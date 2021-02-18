@@ -9,7 +9,7 @@ describe Sidekiq::Web do
   include Rack::Test::Methods
 
   def app
-    Sidekiq::Web
+    @app ||= Sidekiq::Web.new
   end
 
   def job_params(job, score)
@@ -17,9 +17,8 @@ describe Sidekiq::Web do
   end
 
   before do
-    ENV["RACK_ENV"] = "test"
     Sidekiq.redis {|c| c.flushdb }
-    Sidekiq::Web.middlewares.clear
+    app.default_middlewares.clear
   end
 
   class WebWorker
@@ -28,11 +27,6 @@ describe Sidekiq::Web do
     def perform(a, b)
       a + b
     end
-  end
-
-  it 'can configure via set() syntax' do
-    app.set(:session_secret, "foo")
-    assert_equal "foo", app.session_secret
   end
 
   it 'can show text with any locales' do
@@ -743,6 +737,7 @@ describe Sidekiq::Web do
     def app
       app = Sidekiq::Web.new
       app.use(Rack::Auth::Basic) { |user, pass| user == "a" && pass == "b" }
+      app.use(Rack::Session::Cookie, secret: SecureRandom.hex(32))
 
       app
     end
@@ -780,66 +775,6 @@ describe Sidekiq::Web do
       assert_equal 'v3rys3cr31', session_options[:secret]
       assert_equal 'nicehost.org', session_options[:host]
     end
-
-    describe 'sessions options' do
-      include Rack::Test::Methods
-
-      describe 'using #disable' do
-        def app
-          app = Sidekiq::Web.new
-          app.disable(:sessions)
-          app
-        end
-
-        it "doesn't create sessions" do
-          get '/'
-          assert_nil last_request.env['rack.session']
-        end
-      end
-
-      describe 'using #set with false argument' do
-        def app
-          app = Sidekiq::Web.new
-          app.set(:sessions, false)
-          app
-        end
-
-        it "doesn't create sessions" do
-          get '/'
-          assert_nil last_request.env['rack.session']
-        end
-      end
-
-      describe 'using #set with an hash' do
-        def app
-          app = Sidekiq::Web.new
-          app.set(:sessions, { domain: :all })
-          app
-        end
-
-        it "creates sessions" do
-          get '/'
-          refute_nil   last_request.env['rack.session']
-          refute_empty last_request.env['rack.session'].options
-          assert_equal :all, last_request.env['rack.session'].options[:domain]
-        end
-      end
-
-      describe 'using #enable' do
-        def app
-          app = Sidekiq::Web.new
-          app.enable(:sessions)
-          app
-        end
-
-        it "creates sessions" do
-          get '/'
-          refute_nil   last_request.env['rack.session']
-          refute_empty last_request.env['rack.session'].options
-          refute_nil   last_request.env['rack.session'].options[:secret]
-        end
-      end
-    end
   end
 
   describe "redirecting in before" do
@@ -857,7 +792,9 @@ describe Sidekiq::Web do
     end
 
     def app
-      Sidekiq::Web.new
+      app = Sidekiq::Web.new
+      app.use Rack::Session::Cookie, secret: 'v3rys3cr31', host: 'nicehost.org'
+      app
     end
 
     it "allows afters to run" do

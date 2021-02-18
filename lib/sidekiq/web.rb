@@ -13,10 +13,8 @@ require "sidekiq/web/application"
 require "sidekiq/web/csrf_protection"
 
 require "rack/content_length"
-
 require "rack/builder"
 require "rack/file"
-require "rack/session/cookie"
 
 module Sidekiq
   class Web
@@ -38,14 +36,6 @@ module Sidekiq
     class << self
       def settings
         self
-      end
-
-      def middlewares
-        @middlewares ||= []
-      end
-
-      def use(*middleware_args, &block)
-        middlewares << [middleware_args, block]
       end
 
       def default_tabs
@@ -73,32 +63,37 @@ module Sidekiq
         opts.each { |key| set(key, false) }
       end
 
-      # Helper for the Sinatra syntax: Sidekiq::Web.set(:session_secret, Rails.application.secrets...)
       def set(attribute, value)
         send(:"#{attribute}=", value)
       end
 
-      attr_accessor :app_url, :session_secret, :redis_pool, :sessions
+      def sessions=(val)
+        puts "WARNING: Sidekiq::Web.sessions= is no longer relevant and will be removed in Sidekiq 7.0. #{caller(1..1).first}"
+      end
+
+      def session_secret=(val)
+        puts "WARNING: Sidekiq::Web.session_secret= is no longer relevant and will be removed in Sidekiq 7.0. #{caller(1..1).first}"
+      end
+
+      attr_accessor :app_url, :redis_pool
       attr_writer :locales, :views
     end
 
     def self.inherited(child)
       child.app_url = app_url
-      child.session_secret = session_secret
       child.redis_pool = redis_pool
-      child.sessions = sessions
     end
 
     def settings
       self.class.settings
     end
 
-    def use(*middleware_args, &block)
-      middlewares << [middleware_args, block]
+    def middlewares
+      @middlewares ||= []
     end
 
-    def middlewares
-      @middlewares ||= Web.middlewares.dup
+    def use(*args, &block)
+      middlewares << [args, block]
     end
 
     def call(env)
@@ -126,67 +121,26 @@ module Sidekiq
       send(:"#{attribute}=", value)
     end
 
-    # Default values
-    set :sessions, true
-
-    attr_writer :sessions
-
-    def sessions
-      unless instance_variable_defined?("@sessions")
-        @sessions = self.class.sessions
-        @sessions = @sessions.to_hash.dup if @sessions.respond_to?(:to_hash)
-      end
-
-      @sessions
+    def sessions=(val)
+      puts "Sidekiq::Web#sessions= is no longer relevant and will be removed in Sidekiq 7.0. #{caller[2..2].first}"
     end
 
     def self.register(extension)
       extension.registered(WebApplication)
     end
 
+    def default_middlewares
+      @default ||= [
+        [[Sidekiq::Web::CsrfProtection]],
+        [[Rack::ContentLength]]
+      ]
+    end
+
     private
 
-    def using?(middleware)
-      middlewares.any? do |(m, _)|
-        m.is_a?(Array) && (m[0] == middleware || m[0].is_a?(middleware))
-      end
-    end
-
-    def build_sessions
-      middlewares = self.middlewares
-
-      s = sessions
-
-      # turn on CSRF protection if sessions are enabled and this is not the test env
-      if s && !using?(CsrfProtection) && ENV["RACK_ENV"] != "test"
-        middlewares.unshift [[CsrfProtection], nil]
-      end
-
-      if s && !using?(::Rack::Session::Cookie)
-        unless (secret = Web.session_secret)
-          require "securerandom"
-          secret = SecureRandom.hex(64)
-        end
-
-        options = {secret: secret}
-        options = options.merge(s.to_hash) if s.respond_to? :to_hash
-
-        middlewares.unshift [[::Rack::Session::Cookie, options], nil]
-      end
-
-      # Since Sidekiq::WebApplication no longer calculates its own
-      # Content-Length response header, we must ensure that the Rack middleware
-      # that does this is loaded
-      unless using? ::Rack::ContentLength
-        middlewares.unshift [[::Rack::ContentLength], nil]
-      end
-    end
-
     def build
-      build_sessions
-
-      middlewares = self.middlewares
       klass = self.class
+      m = middlewares + default_middlewares
 
       ::Rack::Builder.new do
         %w[stylesheets javascripts images].each do |asset_dir|
@@ -195,7 +149,7 @@ module Sidekiq
           end
         end
 
-        middlewares.each { |middleware, block| use(*middleware, &block) }
+        m.each { |middleware, block| use(*middleware, &block) }
 
         run WebApplication.new(klass)
       end

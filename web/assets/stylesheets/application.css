@@ -1153,10 +1153,9 @@ div.interval-slider input {
   width: 20%;
 }
 
-.circled {
-  border-color: #333;
-  color: #eee;
-  background-color: #b1003e;
+.info-circle {
+  color: #f3f3f3;
+  background-color: #dddddd;
   border-radius: 50%;
   text-align: center;
   vertical-align: middle;
