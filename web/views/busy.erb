@@ -22,6 +22,10 @@
       <h3><%= x == 0 ? 0 : ((ws / x.to_f) * 100).round(0) %>%</h3>
       <p><%= t('Utilization') %></p>
     </div>
+    <div class="stat">
+      <h3><%= format_memory(processes.total_rss) %></h3>
+      <p><%= t('RSS') %></p>
+    </div>
   </div>
 </div>
 
