@@ -29,6 +29,7 @@ If this is a bare Rack app, use a session middleware before Sidekiq::Web:
   use Rack::Session::Cookie, secret: File.read(".session.key"), same_site: true, max_age: 86400
   run Sidekiq::Web
 ```
+- Add process/thread count summary to Busy page [#4806]
 
   6.1.3
 ---------

@@ -806,7 +806,7 @@ module Sidekiq
         yield Process.new(hash.merge("busy" => busy.to_i,
                                      "beat" => at_s.to_f,
                                      "quiet" => quiet,
-                                     "rss" => rss))
+                                     "rss" => rss.to_i))
       end
     end
 
@@ -816,6 +816,17 @@ module Sidekiq
     # 60 seconds.
     def size
       Sidekiq.redis { |conn| conn.scard("processes") }
+    end
+
+    # Total number of threads available to execute jobs.
+    # For Sidekiq Enterprise customers this number (in production) must be
+    # less than or equal to your licensed concurrency.
+    def total_concurrency
+      sum { |x| x["concurrency"] }
+    end
+
+    def total_rss
+      sum { |x| x["rss"] || 0 }
     end
 
     # Returns the identity of the current cluster leader or "" if no leader.

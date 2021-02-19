@@ -22,6 +22,14 @@ module Sidekiq
       end
     end
 
+    def singularize(str, count)
+      if count == 1 && str.respond_to?(:singularize) # rails
+        str.singularize
+      else
+        str
+      end
+    end
+
     def clear_caches
       @strings = nil
       @locale_files = nil
@@ -263,8 +271,10 @@ module Sidekiq
 
       if rss_kb < 100_000
         "#{number_with_delimiter(rss_kb)} KB"
-      else
+      elsif rss_kb < 10_000_000
         "#{number_with_delimiter((rss_kb / 1024.0).to_i)} MB"
+      else
+        "#{number_with_delimiter((rss_kb / (1024.0 * 1024.0)).round(1))} GB"
       end
     end
 
