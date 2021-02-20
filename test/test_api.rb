@@ -481,7 +481,7 @@ describe 'API' do
       assert_equal 'ApiWorker', retri.klass
       assert_equal 'default', retri.queue
       assert_equal 'bob', retri.jid
-      assert_in_delta Time.now.to_f, retri.at.to_f, 0.02
+      assert_in_delta Time.now.to_f, retri.at.to_f, 0.11
     end
 
     it 'requires a jid to delete an entry' do

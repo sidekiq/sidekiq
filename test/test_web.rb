@@ -107,8 +107,11 @@ describe Sidekiq::Web do
     assert_equal 200, last_response.status
     assert_match(/foo/, last_response.body)
     refute_match(/HardWorker/, last_response.body)
-    assert_match(/0.0/, last_response.body)
     refute_match(/datetime/, last_response.body)
+
+    last_response.body =~ /(0\.[0-9]{1,3})/i
+    initial_latency = Float($1)
+
     Sidekiq::Queue.new("foo").clear
 
     Time.stub(:now, Time.now - 65) do
@@ -119,8 +122,12 @@ describe Sidekiq::Web do
     assert_equal 200, last_response.status
     assert_match(/foo/, last_response.body)
     refute_match(/HardWorker/, last_response.body)
-    assert_match(/65.0/, last_response.body)
     assert_match(/datetime/, last_response.body)
+
+    last_response.body =~ /(65\.[0-9]{1,3})/i
+    expected_latency = Float($1) - initial_latency
+
+    assert_in_delta 65, expected_latency, 0.011
   end
 
   it 'handles queue view' do
