@@ -63,6 +63,14 @@ module Sidekiq
         opts.each { |key| set(key, false) }
       end
 
+      def middlewares
+        @middlewares ||= []
+      end
+
+      def use(*args, &block)
+        middlewares << [args, block]
+      end
+
       def set(attribute, value)
         send(:"#{attribute}=", value)
       end
@@ -89,7 +97,7 @@ module Sidekiq
     end
 
     def middlewares
-      @middlewares ||= []
+      @middlewares ||= self.class.middlewares
     end
 
     def use(*args, &block)
@@ -129,18 +137,11 @@ module Sidekiq
       extension.registered(WebApplication)
     end
 
-    def default_middlewares
-      @default ||= [
-        [[Sidekiq::Web::CsrfProtection]],
-        [[Rack::ContentLength]]
-      ]
-    end
-
     private
 
     def build
       klass = self.class
-      m = middlewares + default_middlewares
+      m = middlewares
 
       ::Rack::Builder.new do
         %w[stylesheets javascripts images].each do |asset_dir|
@@ -150,7 +151,7 @@ module Sidekiq
         end
 
         m.each { |middleware, block| use(*middleware, &block) }
-
+        use Sidekiq::Web::CsrfProtection unless $TESTING
         run WebApplication.new(klass)
       end
     end

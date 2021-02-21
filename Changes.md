@@ -5,6 +5,7 @@
 HEAD
 ---------
 
+- Add process/thread stats to Busy page [#4806]
 - Refactor Web UI session usage. [#4804]
   Numerous people have hit "Forbidden" errors and struggled with Sidekiq's
   Web UI session requirement. If you have code in your initializer for
@@ -29,9 +30,8 @@ If this is a bare Rack app, use a session middleware before Sidekiq::Web:
   use Rack::Session::Cookie, secret: File.read(".session.key"), same_site: true, max_age: 86400
   run Sidekiq::Web
 ```
-- Add process/thread count summary to Busy page [#4806]
 
-  6.1.3
+6.1.3
 ---------
 
 - Warn if Redis is configured to evict data under memory pressure [#4752]

@@ -18,7 +18,7 @@ describe Sidekiq::Web do
 
   before do
     Sidekiq.redis {|c| c.flushdb }
-    app.default_middlewares.clear
+    app.middlewares.clear
   end
 
   class WebWorker
@@ -767,7 +767,7 @@ describe Sidekiq::Web do
       app
     end
 
-    it 'requires basic authentication' do
+    it 'requires uses session options' do
       get '/'
 
       session_options = last_request.env['rack.session'].options
