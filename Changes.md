@@ -5,6 +5,7 @@
 HEAD
 ---------
 
+- Store Redis RTT and log if poor [#4824]
 - Add process/thread stats to Busy page [#4806]
 - Refactor Web UI session usage. [#4804]
   Numerous people have hit "Forbidden" errors and struggled with Sidekiq's

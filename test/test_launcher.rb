@@ -49,9 +49,11 @@ describe Sidekiq::Launcher do
         it 'stores process info in redis' do
           subject.heartbeat
 
-          workers = Sidekiq.redis { |c| c.hmget(subject.identity, 'busy') }
+          workers, rtt = Sidekiq.redis { |c| c.hmget(subject.identity, 'busy', 'rtt_us') }
 
-          assert_equal ["1"], workers
+          assert_equal "1", workers
+          refute_nil rtt
+          assert_in_delta 1000, rtt.to_i, 1000
 
           expires = Sidekiq.redis { |c| c.pttl(subject.identity) }
 

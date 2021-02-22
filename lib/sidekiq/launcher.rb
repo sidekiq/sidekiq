@@ -153,6 +153,8 @@ module Sidekiq
           end
         end
 
+        rtt = check_rtt
+
         fails = procd = 0
         kb = memory_usage(::Process.pid)
 
@@ -163,6 +165,7 @@ module Sidekiq
             conn.hmset(key, "info", to_json,
               "busy", curstate.size,
               "beat", Time.now.to_f,
+              "rtt_us", rtt,
               "quiet", @done,
               "rss", kb)
             conn.expire(key, 60)
@@ -183,6 +186,29 @@ module Sidekiq
         Processor::PROCESSED.incr(procd)
         Processor::FAILURE.incr(fails)
       end
+    end
+
+    RTT_WARNING_LEVEL = 50_000
+
+    def check_rtt
+      a = b = 0
+      Sidekiq.redis do |x|
+        a = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :microsecond)
+        x.ping
+        b = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :microsecond)
+      end
+      rtt = b - a
+      # Ideal RTT for Redis is < 1000µs
+      # Workable is < 10,000µs
+      # Log a warning if it's a disaster.
+      if rtt > RTT_WARNING_LEVEL
+        Sidekiq.logger.warn <<-EOM
+          Your Redis network connection is performing extremely poorly.
+          Current RTT is #{rtt} µs, ideally this should be < 1000.
+          Ensure Redis is running in the same AZ or datacenter as Sidekiq.
+        EOM
+      end
+      rtt
     end
 
     MEMORY_GRABBER = case RUBY_PLATFORM

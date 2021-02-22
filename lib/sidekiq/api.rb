@@ -791,12 +791,12 @@ module Sidekiq
         # you'll be happier this way
         conn.pipelined do
           procs.each do |key|
-            conn.hmget(key, "info", "busy", "beat", "quiet", "rss")
+            conn.hmget(key, "info", "busy", "beat", "quiet", "rss", "rtt_us")
           end
         end
       }
 
-      result.each do |info, busy, at_s, quiet, rss|
+      result.each do |info, busy, at_s, quiet, rss, rtt|
         # If a process is stopped between when we query Redis for `procs` and
         # when we query for `result`, we will have an item in `result` that is
         # composed of `nil` values.
@@ -806,7 +806,8 @@ module Sidekiq
         yield Process.new(hash.merge("busy" => busy.to_i,
                                      "beat" => at_s.to_f,
                                      "quiet" => quiet,
-                                     "rss" => rss.to_i))
+                                     "rss" => rss.to_i,
+                                     "rtt_us" => rtt.to_i))
       end
     end
 
