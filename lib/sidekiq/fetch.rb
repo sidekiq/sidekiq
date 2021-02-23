@@ -36,7 +36,15 @@ module Sidekiq
     end
 
     def retrieve_work
-      work = Sidekiq.redis { |conn| conn.brpop(*queues_cmd) }
+      qs = queues_cmd
+      # 4825 Sidekiq Pro with all queues paused will return an
+      # empty set of queues with a trailing TIMEOUT value.
+      if qs.size <= 1
+        sleep(2)
+        return nil
+      end
+
+      work = Sidekiq.redis { |conn| conn.brpop(*qs) }
       UnitOfWork.new(*work) if work
     end
 
