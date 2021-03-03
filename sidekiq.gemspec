@@ -19,7 +19,7 @@ Gem::Specification.new do |gem|
     "bug_tracker_uri" => "https://github.com/mperham/sidekiq/issues",
     "documentation_uri" => "https://github.com/mperham/sidekiq/wiki",
     "changelog_uri" => "https://github.com/mperham/sidekiq/blob/master/Changes.md",
-    "source_code_uri" => "https://github.com/mperham/sidekiq",
+    "source_code_uri" => "https://github.com/mperham/sidekiq"
   }
 
   gem.add_dependency "redis", ">= 4.2.0"
