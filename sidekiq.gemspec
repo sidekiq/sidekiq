@@ -9,7 +9,7 @@ Gem::Specification.new do |gem|
   gem.license = "LGPL-3.0"
 
   gem.executables = ["sidekiq", "sidekiqmon"]
-  gem.files = `git ls-files | grep -Ev '^(test|myapp|examples)'`.split("\n")
+  gem.files = ["sidekiq.gemspec", "README.md", "Changes.md", "LICENSE"] + `git ls-files | grep -E '^(bin|lib|web)'`.split("\n")
   gem.name = "sidekiq"
   gem.version = Sidekiq::VERSION
   gem.required_ruby_version = ">= 2.5.0"
