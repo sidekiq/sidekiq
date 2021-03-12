@@ -1,9 +1,9 @@
 GIT
   remote: https://github.com/resque/redis-namespace.git
-  revision: c31e63dc3cd5e59ef5ea394d4d46ac60d1e6f82e
+  revision: 6f1bb31bbddd2efc9e16c53759d986b29206a12e
   branch: master
   specs:
-    redis-namespace (1.8.0)
+    redis-namespace (1.8.1)
       redis (>= 3.0.4)
 
 PATH
@@ -99,7 +99,7 @@ GEM
     mimemagic (0.3.5)
     mini_mime (1.0.2)
     mini_portile2 (2.4.0)
-    minitest (5.14.3)
+    minitest (5.14.4)
     nio4r (2.5.2)
     nokogiri (1.10.10)
       mini_portile2 (~> 2.4.0)
@@ -167,7 +167,7 @@ GEM
       activesupport (>= 4.0)
       sprockets (>= 3.0.0)
     sqlite3 (1.4.2)
-    standard (1.0.1)
+    standard (1.0.4)
       rubocop (= 1.11.0)
       rubocop-performance (= 1.10.1)
     thor (1.0.1)
