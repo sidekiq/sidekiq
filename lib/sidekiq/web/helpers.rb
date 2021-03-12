@@ -166,8 +166,7 @@ module Sidekiq
 
     def redis_connection
       Sidekiq.redis do |conn|
-        c = conn.connection
-        "redis://#{c[:location]}/#{c[:db]}"
+        conn.connection[:id]
       end
     end
 
