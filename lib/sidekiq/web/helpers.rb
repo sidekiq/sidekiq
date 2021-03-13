@@ -266,7 +266,7 @@ module Sidekiq
     end
 
     def format_memory(rss_kb)
-      return "" if rss_kb.nil? || rss_kb == 0
+      return "0" if rss_kb.nil? || rss_kb == 0
 
       if rss_kb < 100_000
         "#{number_with_delimiter(rss_kb)} KB"

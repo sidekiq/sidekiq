@@ -14,7 +14,7 @@ require "sidekiq/web/csrf_protection"
 
 require "rack/content_length"
 require "rack/builder"
-require "rack/file"
+require "rack/static"
 
 module Sidekiq
   class Web
@@ -144,12 +144,12 @@ module Sidekiq
       m = middlewares
 
       ::Rack::Builder.new do
-        %w[stylesheets javascripts images].each do |asset_dir|
-          map "/#{asset_dir}" do
-            run ::Rack::File.new("#{ASSETS}/#{asset_dir}", {"Cache-Control" => "public, max-age=86400"})
-          end
-        end
-
+        use Rack::Static, :urls => ["/stylesheets", "/images", "/javascripts"],
+                          :root => ASSETS,
+                          :cascade => true,
+                          :header_rules => [
+                            [:all, {'Cache-Control' => 'public, max-age=86400'}],
+                          ]
         m.each { |middleware, block| use(*middleware, &block) }
         use Sidekiq::Web::CsrfProtection unless $TESTING
         run WebApplication.new(klass)
