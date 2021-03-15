@@ -2,13 +2,13 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
-HEAD
+6.2.0
 ---------
 
 - Store Redis RTT and log if poor [#4824]
 - Add process/thread stats to Busy page [#4806]
 - Improve Web UI on mobile devices [#4840]
-- Refactor Web UI session usage. [#4804]
+- **Refactor Web UI session usage** [#4804]
   Numerous people have hit "Forbidden" errors and struggled with Sidekiq's
   Web UI session requirement. If you have code in your initializer for
   Web sessions, it's quite possible it will need to be removed. Here's
