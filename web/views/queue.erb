@@ -52,4 +52,4 @@
     <% end %>
   </table>
 </div>
-<%= erb :_paging, locals: { url: "#{root_path}queues/#{@name}" } %>
+<%= erb :_paging, locals: { url: "#{root_path}queues/#{CGI.escape(@name)}" } %>
