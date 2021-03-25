@@ -15,7 +15,7 @@ module Sidekiq
     end
 
     def halt(res)
-      throw :halt, res
+      throw :halt, [res, {"Content-Type" => "text/plain"}, [res.to_s]]
     end
 
     def redirect(location)

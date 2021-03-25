@@ -124,6 +124,13 @@ describe Sidekiq::Web do
   end
 
   it 'handles queue view' do
+    get '/queues/onmouseover=alert()'
+    assert_equal 404, last_response.status
+
+    get '/queues/foo_bar:123-wow.'
+    assert_equal 200, last_response.status
+    assert_match(/foo_bar:123-wow\./, last_response.body)
+
     get '/queues/default'
     assert_equal 200, last_response.status
   end
