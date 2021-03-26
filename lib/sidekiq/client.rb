@@ -228,10 +228,6 @@ module Sidekiq
     end
 
     def normalize_item(item)
-      # 6.0.0 push_bulk bug, #4321
-      # TODO Remove after a while...
-      item.delete("at") if item.key?("at") && item["at"].nil?
-
       validate(item)
       # raise(ArgumentError, "Arguments must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices") unless JSON.load(JSON.dump(item['args'])) == item['args']
 
