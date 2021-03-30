@@ -15,7 +15,7 @@ module Sidekiq
     extend Forwardable
     def_delegators :@buf, :[], :each, :size
 
-    def initialize(size, default=0)
+    def initialize(size, default = 0)
       @size = size
       @buf = Array.new(size, default)
       @index = 0
@@ -31,7 +31,7 @@ module Sidekiq
       @buf
     end
 
-    def reset(default=0)
+    def reset(default = 0)
       @buf.fill(default)
     end
   end
