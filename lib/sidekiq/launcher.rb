@@ -188,6 +188,10 @@ module Sidekiq
       end
     end
 
+    # We run the heartbeat every five seconds.
+    # Capture five samples of RTT, log a warning if each sample
+    # is above our warning threshold.
+    RTT_READINGS = RingBuffer.new(5)
     RTT_WARNING_LEVEL = 50_000
 
     def check_rtt
@@ -198,15 +202,17 @@ module Sidekiq
         b = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :microsecond)
       end
       rtt = b - a
+      RTT_READINGS << rtt
       # Ideal RTT for Redis is < 1000µs
       # Workable is < 10,000µs
       # Log a warning if it's a disaster.
-      if rtt > RTT_WARNING_LEVEL
-        Sidekiq.logger.warn <<-EOM
+      if RTT_READINGS.all? { |x| x > RTT_WARNING_LEVEL }
+        Sidekiq.logger.warn <<~EOM
           Your Redis network connection is performing extremely poorly.
-          Current RTT is #{rtt} µs, ideally this should be < 1000.
+          Last RTT readings were #{RTT_READINGS.buffer.inspect}, ideally these should be < 1000.
           Ensure Redis is running in the same AZ or datacenter as Sidekiq.
         EOM
+        RTT_READINGS.reset
       end
       rtt
     end
