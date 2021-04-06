@@ -6,6 +6,8 @@ HEAD
 ---------
 
 - Update RTT warning logic to handle transient RTT spikes [#4851]
+- Fix very low priority CVE on unescaped queue name [#4852]
+- Add note about sessions and Rails apps in API mode
 
 6.2.0
 ---------
@@ -36,6 +38,10 @@ If this is a bare Rack app, use a session middleware before Sidekiq::Web:
   # now, update your Rack app to include the secret with a session cookie middleware
   use Rack::Session::Cookie, secret: File.read(".session.key"), same_site: true, max_age: 86400
   run Sidekiq::Web
+
+If this is a Rails app in API mode, you need to enable sessions.
+
+  https://guides.rubyonrails.org/api_app.html#using-session-middlewares
 ```
 
 6.1.3
