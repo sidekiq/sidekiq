@@ -7,7 +7,8 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 HEAD
 ---------
 
-- Add a custom type for batch error [#4845]
+- Include poison pill info in super_fetch's orphan handler [#4859]
+- Add Sidekiq::Batch::Immutable error so race conditions can easily be caught [#4845]
 - Fix sharded UI not using middleware in Sidekiq 6.2 [#4843]
 
 5.2.1
