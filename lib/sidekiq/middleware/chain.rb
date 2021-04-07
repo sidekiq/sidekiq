@@ -77,6 +77,7 @@ module Sidekiq
       end
 
       def initialize
+        @entries = nil
         yield self if block_given?
       end
 
@@ -117,7 +118,7 @@ module Sidekiq
       end
 
       def empty?
-        !instance_variable_defined?(:@entries) || entries.empty?
+        @entries.nil? || @entries.empty?
       end
 
       def retrieve
