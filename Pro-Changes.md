@@ -4,12 +4,13 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+5.2.2
 ---------
 
 - Include poison pill info in super_fetch's orphan handler [#4859]
-- Add Sidekiq::Batch::Immutable error so race conditions can easily be caught [#4845]
+- Use Sidekiq::Batch::Immutable error so race conditions can easily be caught [#4845]
 - Fix sharded UI not using middleware in Sidekiq 6.2 [#4843]
+- Compatibility with dogstatsd-ruby 4.x and 5.x [#4863]
 
 5.2.1
 ---------
