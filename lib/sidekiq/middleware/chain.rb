@@ -77,7 +77,6 @@ module Sidekiq
       end
 
       def initialize
-        @entries = nil
         yield self if block_given?
       end
 
@@ -90,12 +89,12 @@ module Sidekiq
       end
 
       def add(klass, *args)
-        remove(klass) if exists?(klass)
+        remove(klass)
         entries << Entry.new(klass, *args)
       end
 
       def prepend(klass, *args)
-        remove(klass) if exists?(klass)
+        remove(klass)
         entries.insert(0, Entry.new(klass, *args))
       end
 
@@ -118,7 +117,7 @@ module Sidekiq
       end
 
       def empty?
-        @entries.nil? || @entries.empty?
+        !instance_variable_defined?(:@entries) || entries.empty?
       end
 
       def retrieve
@@ -132,7 +131,7 @@ module Sidekiq
       def invoke(*args)
         return yield if empty?
 
-        chain = retrieve.dup
+        chain = retrieve
         traverse_chain = proc do
           if chain.empty?
             yield
@@ -143,6 +142,8 @@ module Sidekiq
         traverse_chain.call
       end
     end
+
+    private
 
     class Entry
       attr_reader :klass
