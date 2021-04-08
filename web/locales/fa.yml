@@ -78,3 +78,4 @@ fa: # <---- change this to your locale code
   NotYetEnqueued: بدون صف بندی
   CreatedAt: ساخته شده در
   BackToApp: برگشت به برنامه
+  Redis: Redis

@@ -66,3 +66,4 @@ sv: # <---- change this to your locale code
   Thread: Tråd
   Threads: Trådar
   Jobs: Jobb
+  Redis: Redis

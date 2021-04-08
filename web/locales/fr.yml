@@ -76,3 +76,4 @@ fr:
   Plugins: Plugins
   NotYetEnqueued: Pas encore en file d'attente
   CreatedAt: Créée le
+  Redis: Redis

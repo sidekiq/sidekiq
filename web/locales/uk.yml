@@ -74,3 +74,4 @@ uk:
   PollingInterval: Інтервал опитування
   Plugins: Плагіни
   NotYetEnqueued: Ще не в черзі
+  Redis: Redis

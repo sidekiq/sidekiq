@@ -81,3 +81,4 @@ en: # <---- change this to your locale code
   Latency: Latency
   Pause: Pause
   Unpause: Unpause
+  Redis: Redis
