@@ -277,7 +277,7 @@ table .table-checkbox label {
 
   .navbar .nav a {
     text-align: center;
-  }  
+  }
 
 }
 
@@ -400,7 +400,7 @@ img.smallogo {
   padding: 10px 0;
 }
 
-.redis-wrapper {
+.stats-wrapper {
   width: 100%;
   text-align: center;
 }
