@@ -66,4 +66,3 @@ zh-tw: # <---- change this to your locale code
   Thread: 執行緒
   Threads: 執行緒
   Jobs: 工作
-  Redis: Redis

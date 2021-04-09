@@ -75,4 +75,3 @@ nb:
   PollingInterval: Oppdateringsintervall
   Plugins: Innstikk
   NotYetEnqueued: Ikke køet enda
-  Redis: Redis

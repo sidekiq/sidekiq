@@ -73,4 +73,3 @@ ta: # <---- change this to your locale code
   StopAll: நிறுத்து அனைத்து
   QuietAll: அமைதியான அனைத்து
   PollingInterval: வாக்குப்பதிவு இடைவெளி
-  Redis: Redis

@@ -66,4 +66,3 @@ el: # <---- change this to your locale code
   Thread: Νήμα
   Threads: Νήματα
   Jobs: Εργασίες
-  Redis: Redis
