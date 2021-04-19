@@ -826,9 +826,10 @@ module Sidekiq
       sum { |x| x["concurrency"] }
     end
 
-    def total_rss
+    def total_rss_in_kb
       sum { |x| x["rss"] || 0 }
     end
+    alias_method :total_rss, :total_rss_in_kb
 
     # Returns the identity of the current cluster leader or "" if no leader.
     # This is a Sidekiq Enterprise feature, will always return "" in Sidekiq
@@ -909,8 +910,8 @@ module Sidekiq
   end
 
   ##
-  # A worker is a thread that is currently processing a job.
-  # Programmatic access to the current active worker set.
+  # The WorkSet is stores the work being done by this Sidekiq cluster.
+  # It tracks the process and thread working on each job.
   #
   # WARNING WARNING WARNING
   #
@@ -918,17 +919,17 @@ module Sidekiq
   # If you call #size => 5 and then expect #each to be
   # called 5 times, you're going to have a bad time.
   #
-  #    workers = Sidekiq::Workers.new
-  #    workers.size => 2
-  #    workers.each do |process_id, thread_id, work|
+  #    works = Sidekiq::WorkSet.new
+  #    works.size => 2
+  #    works.each do |process_id, thread_id, work|
   #      # process_id is a unique identifier per Sidekiq process
   #      # thread_id is a unique identifier per thread
   #      # work is a Hash which looks like:
-  #      # { 'queue' => name, 'run_at' => timestamp, 'payload' => msg }
+  #      # { 'queue' => name, 'run_at' => timestamp, 'payload' => job_hash }
   #      # run_at is an epoch Integer.
   #    end
   #
-  class Workers
+  class WorkSet
     include Enumerable
 
     def each(&block)
@@ -975,4 +976,8 @@ module Sidekiq
       end
     end
   end
+  # Since "worker" is a nebulous term, we've deprecated the use of this class name.
+  # Is "worker" a process, a type of job, a thread? Undefined!
+  # WorkSet better describes the data.
+  Workers = WorkSet
 end
