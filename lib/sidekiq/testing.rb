@@ -338,7 +338,7 @@ module Sidekiq
 end
 
 if defined?(::Rails) && Rails.respond_to?(:env) && !Rails.env.test? && !$TESTING
-  warn("**************************************************")
-  warn("⛔️ WARNING: Sidekiq testing API enabled, but this is not the test environment.  Your jobs will not go to Redis.")
-  warn("**************************************************")
+  warn("**************************************************", uplevel: 1)
+  warn("⛔️ WARNING: Sidekiq testing API enabled, but this is not the test environment.  Your jobs will not go to Redis.", uplevel: 1)
+  warn("**************************************************", uplevel: 1)
 end
