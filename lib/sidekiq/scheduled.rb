@@ -117,7 +117,10 @@ module Sidekiq
         # As we run more processes, the scheduling interval average will approach an even spread
         # between 0 and poll interval so we don't need this artifical boost.
         #
-        if process_count < 10
+        # Memoize the process count to avoid calling SCARD/HGET on all the processes everytime #wait is called
+        # since there may be a lot of processes online.
+        @process_count ||= process_count
+        if @process_count < 10
           # For small clusters, calculate a random interval that is ±50% the desired average.
           poll_interval_average * rand + poll_interval_average.to_f / 2
         else
