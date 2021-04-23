@@ -39,6 +39,7 @@ es:
   AreYouSure: ¿Estás seguro?
   DeleteAll: Borrar Todo
   RetryAll: Reintentar Todo
+  KillAll: Matar Todo
   NoRetriesFound: No se encontraron reintentos
   Error: Error
   ErrorClass: Clase del Error
@@ -67,4 +68,16 @@ es:
   Thread: Hilo
   Threads: Hilos
   Jobs: Trabajos
+  Paused: Pausado
+  Stop: Detener
+  Quiet: Silenciar
+  StopAll: Detener Todo
+  QuietAll: Silenciar Todo
+  PollingInterval: Intervalo de Sondeo
+  Plugins: Plugins
+  NotYetEnqueued: Aún no en cola
+  CreatedAt: Creado en
+  BackToApp: Volver a la Aplicación
   Latency: Latencia
+  Pause: Pausar
+  Unpause: Reanudar
