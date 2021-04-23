@@ -67,6 +67,7 @@ es:
   Dead: Muerto
   Process: Proceso
   Processes: Procesos
+  Name: Nombre
   Thread: Hilo
   Threads: Hilos
   Jobs: Trabajos
