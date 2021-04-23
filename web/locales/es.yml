@@ -7,6 +7,7 @@ es:
   Realtime: Tiempo Real
   History: Historial
   Busy: Ocupado
+  Utilization: Utilización
   Processed: Procesadas
   Failed: Fallidas
   Scheduled: Programadas
@@ -24,9 +25,9 @@ es:
   ShowAll: Mostrar Todo
   CurrentMessagesInQueue: Mensajes actualmente en <span class='title'>%{queue}</span>
   Delete: Eliminar
-  AddToQueue: Añadir a fila
+  AddToQueue: Añadir a la cola
   AreYouSureDeleteJob: ¿Estás seguro de eliminar este trabajo?
-  AreYouSureDeleteQueue: ¿Estás seguro de eliminar la fila  %{queue}?
+  AreYouSureDeleteQueue: ¿Estás seguro de eliminar la cola %{queue}?
   Queues: Colas
   Size: Tamaño
   Actions: Acciones
@@ -64,6 +65,7 @@ es:
   DeadJobs: Trabajos muertos
   NoDeadJobsFound: No hay trabajos muertos
   Dead: Muerto
+  Process: Proceso
   Processes: Procesos
   Thread: Hilo
   Threads: Hilos
