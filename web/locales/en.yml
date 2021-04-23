@@ -7,6 +7,7 @@ en: # <---- change this to your locale code
   Realtime: Real-time
   History: History
   Busy: Busy
+  Utilization: Utilization
   Processed: Processed
   Failed: Failed
   Scheduled: Scheduled
@@ -64,7 +65,9 @@ en: # <---- change this to your locale code
   DeadJobs: Dead Jobs
   NoDeadJobsFound: No dead jobs were found
   Dead: Dead
+  Process: Process
   Processes: Processes
+  Name: Name
   Thread: Thread
   Threads: Threads
   Jobs: Jobs
