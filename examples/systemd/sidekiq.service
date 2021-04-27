@@ -42,13 +42,19 @@ WatchdogSec=10
 
 WorkingDirectory=/opt/myapp/current
 # If you use rbenv:
-# ExecStart=/bin/bash -lc 'exec /home/deploy/.rbenv/shims/bundle exec sidekiq -e production'
+# ExecStart=/bin/bash -lc 'exec /home/deploy/.rbenv/shims/bundle exec sidekiq -e production' -C config/sidekiq.yml
 # If you use the system's ruby:
-# ExecStart=/usr/local/bin/bundle exec sidekiq -e production
+# ExecStart=/usr/local/bin/bundle exec sidekiq -e production -C config/sidekiq.yml
 # If you use rvm in production without gemset and your ruby version is 2.6.5
-# ExecStart=/home/deploy/.rvm/gems/ruby-2.6.5/wrappers/bundle exec sidekiq -e production
+# ExecStart=/home/deploy/.rvm/gems/ruby-2.6.5/wrappers/bundle exec sidekiq -e production -C config/sidekiq.yml
 # If you use rvm in production with gemset and your ruby version is 2.6.5
-ExecStart=/home/deploy/.rvm/gems/ruby-2.6.5@gemset-name/wrappers/bundle exec sidekiq -e production
+ExecStart=/home/deploy/.rvm/gems/ruby-2.6.5@gemset-name/wrappers/bundle exec sidekiq -e production -C config/sidekiq.yml
+
+# To work with the gem 'capistrano/sidekiq'
+# If you are not using this gem, just remove the two lines just below
+# although it will not have any effect on the service if you keep these two lines
+ExecReload=/bin/kill -TSTP $MAINPID
+ExecStop=/bin/kill -TERM $MAINPID
 
 # Use `systemctl kill -s TSTP sidekiq` to quiet the Sidekiq process
 
