@@ -7,6 +7,7 @@ fr:
   Realtime: Temps réel
   History: Historique
   Busy: En cours
+  Utilization: Utilisation
   Processed: Traitées
   Failed: Échouées
   Scheduled: Planifiées
@@ -39,6 +40,7 @@ fr:
   AreYouSure: Êtes-vous certain ?
   DeleteAll: Tout supprimer
   RetryAll: Tout réessayer
+  KillAll: Tout tuer
   NoRetriesFound: Aucune tâche à réessayer n’a été trouvée
   Error: Erreur
   ErrorClass: Classe d’erreur
@@ -63,6 +65,7 @@ fr:
   DeadJobs: Tâches mortes
   NoDeadJobsFound: Aucune tâche morte n'a été trouvée
   Dead: Mortes
+  Process: Processus
   Processes: Processus
   Thread: Thread
   Threads: Threads
@@ -76,3 +79,7 @@ fr:
   Plugins: Plugins
   NotYetEnqueued: Pas encore en file d'attente
   CreatedAt: Créée le
+  Back to App: Retour à l'application
+  Latency: Latence
+  Pause: Pause
+  Unpause: Unpause
