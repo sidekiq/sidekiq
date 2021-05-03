@@ -2,6 +2,11 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
+HEAD
+---------
+
+- Minimize scheduler load on Redis at scale [#4882]
+
 6.2.1
 ---------
 
