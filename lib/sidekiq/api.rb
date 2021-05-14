@@ -910,7 +910,7 @@ module Sidekiq
   end
 
   ##
-  # The WorkSet is stores the work being done by this Sidekiq cluster.
+  # The WorkSet stores the work being done by this Sidekiq cluster.
   # It tracks the process and thread working on each job.
   #
   # WARNING WARNING WARNING
