@@ -6,6 +6,7 @@ HEAD
 ---------
 
 - Minimize scheduler load on Redis at scale [#4882]
+- Better format class in `JobLogger` [#4904]
 
 6.2.1
 ---------

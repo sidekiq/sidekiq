@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "api"
+
 module Sidekiq
   class JobLogger
     def initialize(logger = Sidekiq.logger)
@@ -35,10 +37,9 @@ module Sidekiq
     end
 
     def job_hash_context(job_hash)
-      # If we're using a wrapper class, like ActiveJob, use the "wrapped"
-      # attribute to expose the underlying thing.
       h = {
-        class: job_hash["wrapped"] || job_hash["class"],
+        # Expose the display class as in web ui for better end user lisibility.
+        class: ::Sidekiq::Job.new(job_hash).display_class,
         jid: job_hash["jid"]
       }
       h[:bid] = job_hash["bid"] if job_hash["bid"]

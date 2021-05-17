@@ -4,6 +4,7 @@ require_relative 'helper'
 require 'sidekiq/job_logger'
 
 class TestJobLogger < Minitest::Test
+  Foo = Class.new
   def setup
     @old = Sidekiq.logger
     @output = StringIO.new
@@ -23,9 +24,8 @@ class TestJobLogger < Minitest::Test
   def test_pretty_output
     jl = Sidekiq::JobLogger.new(@logger)
 
-    # pretty
-    p = @logger.formatter = Sidekiq::Logger::Formatters::Pretty.new
-    job = {"jid"=>"1234abc", "wrapped"=>"FooWorker", "class"=>"Wrapper", "tags" => ["bar", "baz"]}
+    pretty = @logger.formatter = Sidekiq::Logger::Formatters::Pretty.new
+    job = {"jid"=>"1234abc", "wrapped"=>"FooWorker", "class"=>"ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper", "tags" => ["bar", "baz"]}
     # this mocks what Processor does
     jl.prepare(job) do
       jl.call(job, 'queue') {}
@@ -35,10 +35,26 @@ class TestJobLogger < Minitest::Test
     assert a
     assert b
 
-    expected = /pid=#{$$} tid=#{p.tid} class=FooWorker jid=1234abc tags=bar,baz/
+    expected = /pid=#{$$} tid=#{pretty.tid} class=FooWorker jid=1234abc tags=bar,baz/
     assert_match(expected, a)
     assert_match(expected, b)
-    assert_match(/#{Time.now.utc.to_date}.+Z pid=#{$$} tid=#{p.tid} .+INFO: done/, b)
+    assert_match(/#{Time.now.utc.to_date}.+Z pid=#{$$} tid=#{pretty.tid} .+INFO: done/, b)
+  end
+
+  def test_delayed_extension
+    jl = Sidekiq::JobLogger.new(@logger)
+    job = {"class"=>"Sidekiq::Extensions::DelayedClass", "args"=>["---\n- !ruby/class 'TestJobLogger::Foo'\n- :call\n- - bar\n"], "jid"=>"a"}
+    jl.prepare(job) do
+      jl.call(job, 'queue') {}
+    end
+
+    start, done = @output.string.lines
+    assert start
+    assert done
+
+    expected = /class=TestJobLogger::Foo.call/
+    assert_match(expected, start)
+    assert_match(expected, done)
   end
 
   def test_json_output
