@@ -48,7 +48,10 @@ WorkingDirectory=/opt/myapp/current
 # If you use rvm in production without gemset and your ruby version is 2.6.5
 # ExecStart=/home/deploy/.rvm/gems/ruby-2.6.5/wrappers/bundle exec sidekiq -e production
 # If you use rvm in production with gemset and your ruby version is 2.6.5
-ExecStart=/home/deploy/.rvm/gems/ruby-2.6.5@gemset-name/wrappers/bundle exec sidekiq -e production
+# ExecStart=/home/deploy/.rvm/gems/ruby-2.6.5@gemset-name/wrappers/bundle exec sidekiq -e production
+# If you use rvm in production with gemset and ruby version/gemset is specified in .ruby-version,
+# .ruby-gemsetor or .rvmrc file in the working directory
+ExecStart=/home/deploy/.rvm/bin/rvm in /opt/myapp/current do bundle exec sidekiq -e production
 
 # Use `systemctl kill -s TSTP sidekiq` to quiet the Sidekiq process
 
