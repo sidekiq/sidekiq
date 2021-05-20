@@ -264,7 +264,7 @@ module Sidekiq
     ##
     # Find the job with the given JID within this queue.
     #
-    # This is a slow, inefficient operation.  Do not use under
+    # This is a slow, inefficient operation. Do not use under
     # normal conditions.
     def find_job(jid)
       detect { |j| j.jid == jid }
