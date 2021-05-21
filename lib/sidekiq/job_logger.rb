@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "api"
+require_relative "api/job"
 
 module Sidekiq
   class JobLogger
