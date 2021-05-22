@@ -2,7 +2,10 @@
 
 require "sidekiq"
 
-require_relative "api/job"
+require "zlib"
+require "base64"
+
+require_relative "job_utils"
 
 module Sidekiq
   class Stats
@@ -278,6 +281,119 @@ module Sidekiq
       end
     end
     alias_method :💣, :clear
+  end
+
+  ##
+  # Encapsulates a pending job within a Sidekiq queue or
+  # sorted set.
+  #
+  # The job should be considered immutable but may be
+  # removed from the queue via Job#delete.
+  #
+  class Job
+    attr_reader :item
+    attr_reader :value
+
+    def initialize(item, queue_name = nil)
+      @value = item
+      @item = item.is_a?(Hash) ? item : parse(item)
+      @queue = queue_name || @item["queue"]
+    end
+
+    def parse(item)
+      Sidekiq.load_json(item)
+    rescue JSON::ParserError
+      # If the job payload in Redis is invalid JSON, we'll load
+      # the item as an empty hash and store the invalid JSON as
+      # the job 'args' for display in the Web UI.
+      {"args" => [item]}
+    end
+
+    def klass
+      self["class"]
+    end
+
+    # Unwrap known wrappers so they show up in a human-friendly manner in the Web UI
+    def display_class
+      @display_class ||= ::Sidekiq::JobUtils.display_class(@item)
+    end
+
+    # Unwrap known wrappers so they show up in a human-friendly manner in the Web UI
+    def display_args
+      @display_args ||= ::Sidekiq::JobUtils.display_args(@item)
+    end
+
+    def args
+      self["args"]
+    end
+
+    def jid
+      self["jid"]
+    end
+
+    def enqueued_at
+      self["enqueued_at"] ? Time.at(self["enqueued_at"]).utc : nil
+    end
+
+    def created_at
+      Time.at(self["created_at"] || self["enqueued_at"] || 0).utc
+    end
+
+    def tags
+      self["tags"] || []
+    end
+
+    def error_backtrace
+      # Cache nil values
+      if defined?(@error_backtrace)
+        @error_backtrace
+      else
+        value = self["error_backtrace"]
+        @error_backtrace = value && uncompress_backtrace(value)
+      end
+    end
+
+    attr_reader :queue
+
+    def latency
+      now = Time.now.to_f
+      now - (@item["enqueued_at"] || @item["created_at"] || now)
+    end
+
+    ##
+    # Remove this job from the queue.
+    def delete
+      count = Sidekiq.redis { |conn|
+        conn.lrem("queue:#{@queue}", 1, @value)
+      }
+      count != 0
+    end
+
+    def [](name)
+      # nil will happen if the JSON fails to parse.
+      # We don't guarantee Sidekiq will work with bad job JSON but we should
+      # make a best effort to minimize the damage.
+      @item[name]
+    end
+
+    private
+
+    def uncompress_backtrace(backtrace)
+      if backtrace.is_a?(Array)
+        # Handle old jobs with raw Array backtrace format
+        backtrace
+      else
+        decoded = Base64.decode64(backtrace)
+        uncompressed = Zlib::Inflate.inflate(decoded)
+        begin
+          Sidekiq.load_json(uncompressed)
+        rescue
+          # Handle old jobs with marshalled backtrace format
+          # TODO Remove in 7.x
+          Marshal.load(uncompressed)
+        end
+      end
+    end
   end
 
   class SortedEntry < Job

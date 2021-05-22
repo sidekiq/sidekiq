@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "api/job"
+require_relative "job_utils"
 
 module Sidekiq
   class JobLogger
@@ -39,7 +39,7 @@ module Sidekiq
     def job_hash_context(job_hash)
       h = {
         # Expose the display class as in web ui for better end user lisibility.
-        class: ::Sidekiq::Job.new(job_hash).display_class,
+        class: ::Sidekiq::JobUtils.display_class(job_hash),
         jid: job_hash["jid"]
       }
       h[:bid] = job_hash["bid"] if job_hash["bid"]

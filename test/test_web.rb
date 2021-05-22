@@ -569,7 +569,7 @@ describe Sidekiq::Web do
       get '/morgue'
       assert_equal 200, last_response.status
       assert_match(/#{score.to_i}/, last_response.body)
-      assert_match("something bad", last_response.body)
+      assert_match(/something bad/, last_response.body)
       assert_equal 1, s.size
 
       post "/morgue/#{score}-", 'delete' => 'Delete'
