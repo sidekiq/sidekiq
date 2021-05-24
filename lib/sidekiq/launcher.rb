@@ -238,26 +238,22 @@ module Sidekiq
     end
 
     def to_data
-      @data ||= begin
-        {
-          "hostname" => hostname,
-          "started_at" => Time.now.to_f,
-          "pid" => ::Process.pid,
-          "tag" => @options[:tag] || "",
-          "concurrency" => @options[:concurrency],
-          "queues" => @options[:queues].uniq,
-          "labels" => @options[:labels],
-          "identity" => identity
-        }
-      end
+      @data ||= {
+        "hostname" => hostname,
+        "started_at" => Time.now.to_f,
+        "pid" => ::Process.pid,
+        "tag" => @options[:tag] || "",
+        "concurrency" => @options[:concurrency],
+        "queues" => @options[:queues].uniq,
+        "labels" => @options[:labels],
+        "identity" => identity
+      }
     end
 
     def to_json
-      @json ||= begin
-        # this data changes infrequently so dump it to a string
-        # now so we don't need to dump it every heartbeat.
-        Sidekiq.dump_json(to_data)
-      end
+      # this data changes infrequently so dump it to a string
+      # now so we don't need to dump it every heartbeat.
+      @json ||= Sidekiq.dump_json(to_data)
     end
   end
 end
