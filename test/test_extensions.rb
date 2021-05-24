@@ -31,6 +31,7 @@ describe Sidekiq::Extensions do
     assert_equal 0, q.size
     MyModel.delay(queue: :notdefault).long_class_method
     assert_equal ['notdefault'], Sidekiq::Queue.all.map(&:name)
+    assert_equal ['MyModel.long_class_method'], q.map(&:display_class)
     assert_equal 1, q.size
   end
 

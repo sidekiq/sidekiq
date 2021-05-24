@@ -316,21 +316,23 @@ module Sidekiq
 
     def display_class
       # Unwrap known wrappers so they show up in a human-friendly manner in the Web UI
-      @klass ||= case klass
-                 when /\ASidekiq::Extensions::Delayed/
-                   safe_load(args[0], klass) do |target, method, _|
-                     "#{target}.#{method}"
-                   end
-                 when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
-                   job_class = @item["wrapped"] || args[0]
-                   if job_class == "ActionMailer::DeliveryJob" || job_class == "ActionMailer::MailDeliveryJob"
-                     # MailerClass#mailer_method
-                     args[0]["arguments"][0..1].join("#")
-                   else
-                     job_class
-                   end
-                 else
-                   klass
+      @klass ||= self["display_class"] || begin
+        case klass
+        when /\ASidekiq::Extensions::Delayed/
+          safe_load(args[0], klass) do |target, method, _|
+            "#{target}.#{method}"
+          end
+        when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
+          job_class = @item["wrapped"] || args[0]
+          if job_class == "ActionMailer::DeliveryJob" || job_class == "ActionMailer::MailDeliveryJob"
+            # MailerClass#mailer_method
+            args[0]["arguments"][0..1].join("#")
+          else
+            job_class
+          end
+        else
+          klass
+        end
       end
     end
 

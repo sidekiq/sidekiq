@@ -38,7 +38,7 @@ module Sidekiq
       # If we're using a wrapper class, like ActiveJob, use the "wrapped"
       # attribute to expose the underlying thing.
       h = {
-        class: job_hash["wrapped"] || job_hash["class"],
+        class: job_hash["display_class"] || job_hash["wrapped"] || job_hash["class"],
         jid: job_hash["jid"]
       }
       h[:bid] = job_hash["bid"] if job_hash["bid"]

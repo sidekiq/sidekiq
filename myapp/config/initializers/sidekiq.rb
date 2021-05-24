@@ -33,3 +33,4 @@ class TimedWorker
 end
 
 Sidekiq::Extensions.enable_delay!
+Post.delay.testing

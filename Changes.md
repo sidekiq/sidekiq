@@ -6,6 +6,7 @@ HEAD
 ---------
 
 - Minimize scheduler load on Redis at scale [#4882]
+- Improve logging of delay jobs [#4904, BuonOno]
 
 6.2.1
 ---------
