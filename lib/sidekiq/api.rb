@@ -141,7 +141,7 @@ module Sidekiq
           }
 
           array_of_arrays = queues.zip(lengths).sort_by { |_, size| -size }
-          Hash[array_of_arrays]
+          array_of_arrays.to_h
         end
       end
     end
