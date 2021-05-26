@@ -64,6 +64,14 @@ table {
   background-color: #484;
 }
 
+.alert-danger {
+  background-color: #980035;
+}
+
+.alert-info {
+  background-color: #31708f;
+}
+
 a:link,
 a:active,
 a:hover,
