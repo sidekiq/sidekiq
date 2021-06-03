@@ -882,6 +882,10 @@ module Sidekiq
       self["identity"]
     end
 
+    def queues
+      self["queues"]
+    end
+
     def quiet!
       signal("TSTP")
     end
