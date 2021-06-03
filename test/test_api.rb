@@ -540,6 +540,7 @@ describe 'API' do
         'key' => identity_string,
         'identity' => identity_string,
         'started_at' => Time.now.to_f - 15,
+        'queues' => ['foo', 'bar']
       }
 
       time = Time.now.to_f
@@ -557,6 +558,7 @@ describe 'API' do
       assert_equal 10, data['busy']
       assert_equal time, data['beat']
       assert_equal 123, data['pid']
+      assert_equal ['foo', 'bar'], data.queues
       data.quiet!
       data.stop!
       signals_string = "#{odata['key']}-signals"

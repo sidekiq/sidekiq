@@ -70,7 +70,7 @@
           <% end %>
           <br>
           <b><%= "#{t('Queues')}: " %></b>
-          <%= process['queues'] * ", " %>
+          <%= process.queues.join(", ") %>
         </td>
         <td><%= relative_time(Time.at(process['started_at'])) %></td>
         <td><%= format_memory(process['rss'].to_i) %></td>
