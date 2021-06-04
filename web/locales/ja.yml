@@ -7,6 +7,7 @@ ja:
   Realtime: リアルタイム
   History: 履歴
   Busy: 実行中
+  Utilization: 使用率
   Processed: 完了
   Failed: 失敗
   Scheduled: 予定
@@ -64,7 +65,9 @@ ja:
   DeadJobs: デッドジョブ
   NoDeadJobsFound: デッドジョブはありません
   Dead: デッド
+  Process: プロセス
   Processes: プロセス
+  Name: 名前
   Thread: スレッド
   Threads: スレッド
   Jobs: ジョブ
