@@ -21,14 +21,8 @@ body {
 a {
   color: #b1003e;
 }
-a:active, a:hover, a:visited {
+a:active, a:hover {
   color: #4b001a;
-}
-a.btn {
-  color: #585454;
-}
-a.btn-primary {
-  color: white;
 }
 
 h1, h2, h3, h4, h5, h6, strong {
@@ -107,6 +101,9 @@ header.row .pagination {
 #live-poll.active {
   background-color: #009300;
 }
+#live-poll.active:hover {
+  background-color: #777;
+}
 .summary_bar ul {
   margin: 0 0 38px 0;
 }
@@ -146,16 +143,6 @@ header.row .pagination {
     width: 96px !important;
   }
 }
-/*@media (max-width: 1199px) and (min-width: 980px) {
-  .summary_bar ul li.col-sm-2 {
-    width: 130px !important;
-  }
-}
-@media (min-width: 1200px) {
-  .summary_bar ul li.col-sm-2 {
-    width: 154px !important;
-  }
-}*/
 .summary_bar ul .desc {
   display: block;
   font-size: 1em;
@@ -272,8 +259,7 @@ table .table-checkbox label {
 
   .navbar .nav a {
     text-align: center;
-  }  
-
+  }
 }
 
 @media (width: 768px) {
@@ -353,22 +339,14 @@ img.smallogo {
   border: none;
   border-radius: 3px;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
+  background-image: linear-gradient(#b1003e, #980035);
+  background-color: #980035;
+  color: #ddd;
+}
 .btn:hover {
-  background-color: #ededed;
-}
-
-.btn-primary {
-  background-image: linear-gradient(#b1003e, #980035);
-}
-.btn-primary:hover {
-  background-color: #980035;
-}
-
-.btn-danger {
-  background-image: linear-gradient(#b1003e, #980035);
-}
-.btn-danger:hover {
-  background-color: #980035;
+  color: #000;
+  background-image: none;
+  background-color: #ddd;
 }
 
 .poll-status {
@@ -1070,8 +1048,8 @@ div.interval-slider input {
 }
 
 .info-circle {
-  color: #f3f3f3;
-  background-color: #dddddd;
+  color: #888;
+  background-color: #222;
   border-radius: 50%;
   text-align: center;
   vertical-align: middle;
