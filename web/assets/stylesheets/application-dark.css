@@ -93,8 +93,6 @@ input {
   background-color: #222;
   border: 1px solid #555;
 
-  -webkit-box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
-  -moz-box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
   box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
 }
 
