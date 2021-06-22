@@ -183,13 +183,8 @@ td form {
   padding: 0;
 }
 
-.jobtag a {
-  color: white;
-}
-
-.jobtag a:hover {
-  color: white;
-  text-decoration: underline;
+.jobtag, .jobtag a {
+  color: black;
 }
 
 table .table-checkbox label {
