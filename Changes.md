@@ -7,6 +7,7 @@ HEAD
 
 - Minimize scheduler load on Redis at scale [#4882]
 - Improve logging of delay jobs [#4904, BuonOno]
+- Minor CSS improvements for buttons and tables, design PRs always welcome!
 
 6.2.1
 ---------

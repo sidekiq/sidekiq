@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Display dead JIDs on Batch details page [#4926]
+
 5.2.2
 ---------
 
