@@ -1,3 +1,6 @@
+# turns off browser asset caching so we can test CSS changes quickly
+ENV['SIDEKIQ_WEB_TESTING'] = '1'
+
 require 'sidekiq/web'
 Sidekiq::Web.app_url = '/'
 

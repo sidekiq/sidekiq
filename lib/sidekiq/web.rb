@@ -143,13 +143,14 @@ module Sidekiq
       klass = self.class
       m = middlewares
 
+      rules = []
+      rules = [[:all, {"Cache-Control" => "public, max-age=86400"}]] unless ENV['SIDEKIQ_WEB_TESTING']
+
       ::Rack::Builder.new do
         use Rack::Static, urls: ["/stylesheets", "/images", "/javascripts"],
                           root: ASSETS,
                           cascade: true,
-                          header_rules: [
-                            [:all, {"Cache-Control" => "public, max-age=86400"}]
-                          ]
+                          header_rules: rules
         m.each { |middleware, block| use(*middleware, &block) }
         use Sidekiq::Web::CsrfProtection unless $TESTING
         run WebApplication.new(klass)
