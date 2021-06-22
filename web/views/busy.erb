@@ -82,8 +82,8 @@
             <input type="hidden" name="identity" value="<%= process['identity'] %>"/>
 
             <div class="btn-group pull-right flip">
-              <% unless process.stopping? %><button class="btn btn-warn" type="submit" name="quiet" value="1"><%= t('Quiet') %></button><% end %>
-              <button class="btn btn-danger" type="submit" name="stop" value="1"><%= t('Stop') %></button>
+              <% unless process.stopping? %><button class="btn btn-xs btn-warn" type="submit" name="quiet" value="1"><%= t('Quiet') %></button><% end %>
+              <button class="btn btn-xs btn-danger" type="submit" name="stop" value="1"><%= t('Stop') %></button>
             </div>
           </form>
         </td>

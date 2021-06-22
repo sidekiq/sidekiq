@@ -21,13 +21,13 @@
         <td class="delete-confirm">
           <form action="<%=root_path %>queues/<%= CGI.escape(queue.name) %>" method="post">
             <%= csrf_tag %>
-            <input class="btn btn-danger btn-xs" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSureDeleteQueue', :queue => h(queue.name)) %>" />
+            <input class="btn btn-danger" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSureDeleteQueue', :queue => h(queue.name)) %>" />
 
             <% if Sidekiq.pro? %>
               <% if queue.paused? %>
-                <input class="btn btn-danger btn-xs" type="submit" name="unpause" value="<%= t('Unpause') %>" />
+                <input class="btn btn-danger" type="submit" name="unpause" value="<%= t('Unpause') %>" />
               <% else %>
-                <input class="btn btn-danger btn-xs" type="submit" name="pause" value="<%= t('Pause') %>" />
+                <input class="btn btn-danger" type="submit" name="pause" value="<%= t('Pause') %>" />
               <% end %>
             <% end %>
           </form>

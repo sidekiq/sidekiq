@@ -58,18 +58,18 @@
         <% end %>
       </table>
     </div>
-    <input class="btn btn-primary btn-xs pull-left flip" type="submit" name="retry" value="<%= t('RetryNow') %>" />
-    <input class="btn btn-danger btn-xs pull-left flip" type="submit" name="delete" value="<%= t('Delete') %>" />
+    <input class="btn btn-primary pull-left flip" type="submit" name="retry" value="<%= t('RetryNow') %>" />
+    <input class="btn btn-danger pull-left flip" type="submit" name="delete" value="<%= t('Delete') %>" />
   </form>
 
   <% unfiltered? do %>
     <form action="<%= root_path %>morgue/all/delete" method="post">
       <%= csrf_tag %>
-      <input class="btn btn-danger btn-xs pull-right flip" type="submit" name="delete" value="<%= t('DeleteAll') %>" data-confirm="<%= t('AreYouSure') %>" />
+      <input class="btn btn-danger pull-right flip" type="submit" name="delete" value="<%= t('DeleteAll') %>" data-confirm="<%= t('AreYouSure') %>" />
     </form>
     <form action="<%= root_path %>morgue/all/retry" method="post">
       <%= csrf_tag %>
-      <input class="btn btn-danger btn-xs pull-right flip" type="submit" name="retry" value="<%= t('RetryAll') %>" data-confirm="<%= t('AreYouSure') %>" />
+      <input class="btn btn-danger pull-right flip" type="submit" name="retry" value="<%= t('RetryAll') %>" data-confirm="<%= t('AreYouSure') %>" />
     </form>
   <% end %>
 
