@@ -196,6 +196,17 @@ describe 'API' do
         s = Sidekiq::Stats.new
         assert_equal 3, s.workers_size
       end
+
+      it 'returns null workers_size if the stats object is initialized with skip_workers' do
+        Sidekiq.redis do |c|
+          c.sadd("processes", "process_1")
+          c.sadd("processes", "process_2")
+          c.hset("process_1", "busy", 1)
+          c.hset("process_2", "busy", 2)
+        end
+        s = Sidekiq::Stats.new(skip_workers: true)
+        assert_nil s.workers_size
+      end
     end
   end
 

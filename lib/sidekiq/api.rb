@@ -7,8 +7,8 @@ require "base64"
 
 module Sidekiq
   class Stats
-    def initialize
-      fetch_stats!
+    def initialize(skip_workers: false)
+      fetch_stats!(skip_workers: skip_workers)
     end
 
     def processed
@@ -51,7 +51,7 @@ module Sidekiq
       Sidekiq::Stats::Queues.new.lengths
     end
 
-    def fetch_stats!
+    def fetch_stats!(skip_workers: false)
       pipe1_res = Sidekiq.redis { |conn|
         conn.pipelined do
           conn.get("stat:processed")
@@ -63,25 +63,6 @@ module Sidekiq
           conn.lrange("queue:default", -1, -1)
         end
       }
-
-      processes = Sidekiq.redis { |conn|
-        conn.sscan_each("processes").to_a
-      }
-
-      queues = Sidekiq.redis { |conn|
-        conn.sscan_each("queues").to_a
-      }
-
-      pipe2_res = Sidekiq.redis { |conn|
-        conn.pipelined do
-          processes.each { |key| conn.hget(key, "busy") }
-          queues.each { |queue| conn.llen("queue:#{queue}") }
-        end
-      }
-
-      s = processes.size
-      workers_size = pipe2_res[0...s].sum(&:to_i)
-      enqueued = pipe2_res[s..-1].sum(&:to_i)
 
       default_queue_latency = if (entry = pipe1_res[6].first)
         job = begin
@@ -104,9 +85,7 @@ module Sidekiq
         processes_size: pipe1_res[5],
 
         default_queue_latency: default_queue_latency,
-        workers_size: workers_size,
-        enqueued: enqueued
-      }
+      }.merge(pipeline_2_stats(skip_workers))
     end
 
     def reset(*stats)
@@ -124,6 +103,33 @@ module Sidekiq
     end
 
     private
+
+    def pipeline_2_stats(skip_workers=false)
+      processes = if skip_workers
+                    []
+                  else
+                    Sidekiq.redis { |conn|
+                      conn.sscan_each("processes").to_a
+                    }
+                  end
+
+      queues = Sidekiq.redis { |conn|
+        conn.sscan_each("queues").to_a
+      }
+
+      pipe2_res = Sidekiq.redis { |conn|
+        conn.pipelined do
+          processes.each { |key| conn.hget(key, "busy") } unless skip_workers
+          queues.each { |queue| conn.llen("queue:#{queue}") }
+        end
+      }
+
+      s = processes.size
+      workers_size = pipe2_res[0...s].sum(&:to_i) unless skip_workers
+      enqueued = pipe2_res[s..-1].sum(&:to_i)
+
+      { workers_size: workers_size, enqueued: enqueued }
+    end
 
     def stat(s)
       @stats[s]
