@@ -32,7 +32,6 @@ module Sidekiq
     end
 
     def enqueued
-      maybe_fetch_stats_slow!
       stat :enqueued
     end
 
@@ -41,7 +40,6 @@ module Sidekiq
     end
 
     def workers_size
-      maybe_fetch_stats_slow!
       stat :workers_size
     end
 
@@ -139,13 +137,11 @@ module Sidekiq
 
     private
 
-    def maybe_fetch_stats_slow!
-      return unless stat(:enqueued).nil? || stat(:workers_size).nil?
-
-      fetch_stats_slow!
-    end
-
     def stat(s)
+      if (s == :enqueued || s == :workers_size) &&
+         @stats.present? && @stats[s].nil?
+        fetch_stats_slow!
+      end
       @stats[s]
     end
 
