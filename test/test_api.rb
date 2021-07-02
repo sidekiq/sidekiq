@@ -16,6 +16,7 @@ describe 'API' do
       assert_equal 0, s.failed
       assert_equal 0, s.enqueued
       assert_equal 0, s.default_queue_latency
+      assert_equal 0, s.workers_size
     end
 
     describe "processed" do
@@ -68,6 +69,19 @@ describe 'API' do
         s = Sidekiq::Stats.new
         assert_equal 0, s.failed
         assert_equal 5, s.processed
+      end
+    end
+
+    describe "workers_size" do
+      it 'retrieves the number of busy workers' do
+        Sidekiq.redis do |c|
+          c.sadd("processes", "process_1")
+          c.sadd("processes", "process_2")
+          c.hset("process_1", "busy", 1)
+          c.hset("process_2", "busy", 2)
+        end
+        s = Sidekiq::Stats.new
+        assert_equal 3, s.workers_size
       end
     end
 
