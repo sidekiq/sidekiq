@@ -65,13 +65,12 @@ module Sidekiq
         end
       }
 
-
       default_queue_latency = if (entry = pipe1_res[6].first)
         job = begin
-                Sidekiq.load_json(entry)
-              rescue
-                {}
-              end
+          Sidekiq.load_json(entry)
+        rescue
+          {}
+        end
         now = Time.now.to_f
         thence = job["enqueued_at"] || now
         now - thence
@@ -138,11 +137,8 @@ module Sidekiq
     private
 
     def stat(s)
-      if (s == :enqueued || s == :workers_size) &&
-         @stats.present? && @stats[s].nil?
-        fetch_stats_slow!
-      end
-      @stats[s]
+      fetch_stats_slow! if @stats[s].nil?
+      @stats[s] || raise(ArgumentError, "Unknown stat #{s}")
     end
 
     class Queues
