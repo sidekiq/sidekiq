@@ -2,6 +2,14 @@
 # This file tells systemd how to run Sidekiq as a 24/7 long-running daemon.
 #
 # Customize this file based on your bundler location, app directory, etc.
+#
+# If you are going to run this as a user service (or you are going to use capistrano-sidekiq)
+# Customize and copy this to ~/.config/systemd/user
+# Then run:
+#   - systemctl --user enable sidekiq
+#   - systemctl --user {start,stop,restart} sidekiq
+#
+# If you are going to run this as a system service
 # Customize and copy this into /usr/lib/systemd/system (CentOS) or /lib/systemd/system (Ubuntu).
 # Then run:
 #   - systemctl enable sidekiq
@@ -55,10 +63,12 @@ ExecStart=/home/deploy/.rvm/bin/rvm in /opt/myapp/current do bundle exec sidekiq
 
 # Use `systemctl kill -s TSTP sidekiq` to quiet the Sidekiq process
 
-# !!! Change this to your deploy user account !!!
-User=deploy
-Group=deploy
-UMask=0002
+# Uncomment this if you are going to use this as a system service
+# if using as a user service then leave commented out, or you will get an error trying to start the service
+# !!! Change this to your deploy user account if you are using this as a system service !!!
+# User=deploy
+# Group=deploy
+# UMask=0002
 
 # Greatly reduce Ruby memory fragmentation and heap usage
 # https://www.mikeperham.com/2018/04/25/taming-rails-memory-bloat/
