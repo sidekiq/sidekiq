@@ -178,7 +178,7 @@ module Sidekiq
     end
 
     def root_path
-      "localhost/creators/sidekiq"
+      "/creators/"
     end
 
     def current_path
