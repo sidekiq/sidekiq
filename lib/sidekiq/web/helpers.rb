@@ -178,7 +178,7 @@ module Sidekiq
     end
 
     def root_path
-      "#{env["SCRIPT_NAME"]}"
+      "/creators/#{env["SCRIPT_NAME"]}"
     end
 
     def current_path
