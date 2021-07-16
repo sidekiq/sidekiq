@@ -84,11 +84,13 @@ module Sidekiq
       end
 
       attr_accessor :app_url, :redis_pool
+      attr_accessor :redirect_path, :redis_pool
       attr_writer :locales, :views
     end
 
     def self.inherited(child)
       child.app_url = app_url
+      child.redirect_path = redirect_path
       child.redis_pool = redis_pool
     end
 
