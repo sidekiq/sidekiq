@@ -8,6 +8,7 @@ ar:
   Realtime: الزمن الفعلي
   History: تاريخ
   Busy: مشغول
+  Utilization: الاستخدام
   Processed: تمت المعالجة
   Failed: فشل
   Scheduled: مجدول
@@ -65,11 +66,13 @@ ar:
   DeadJobs: وظائف ميتة
   NoDeadJobsFound: لاتوجد وظائف ميتة
   Dead: ميتة
+  Process: عملية
   Processes: عمليات
+  Name: الاسم
   Thread: نيسب
   Threads: نياسب
   Jobs: وظائف
-  Paused: إيقاف مؤقت
+  Paused: موقفة مؤقتاً
   Stop: إيقاف
   Quiet: هدوء
   StopAll: إيقاف الكل
@@ -79,3 +82,6 @@ ar:
   NotYetEnqueued: لم تدخل الرتل بعد
   CreatedAt: أنشئت في
   BackToApp: العودة إلى التطبيق
+  Latency: زمن الانتظار
+  Pause: إيقاف مؤقت
+  Unpause: متابعة
