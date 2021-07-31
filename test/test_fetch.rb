@@ -57,4 +57,11 @@ describe Sidekiq::BasicFetch do
     assert_equal 1, q2.size
   end
 
+  it 'sleeps when no queues are active' do
+    fetch = Sidekiq::BasicFetch.new(:queues => [])
+    mock = Minitest::Mock.new
+    mock.expect(:call, nil, [Sidekiq::BasicFetch::TIMEOUT])
+    fetch.stub(:sleep, mock) { assert_nil fetch.retrieve_work }
+    mock.verify
+  end
 end
