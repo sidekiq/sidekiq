@@ -40,7 +40,7 @@ module Sidekiq
       # 4825 Sidekiq Pro with all queues paused will return an
       # empty set of queues with a trailing TIMEOUT value.
       if qs.size <= 1
-        sleep(2)
+        sleep(TIMEOUT)
         return nil
       end
 
