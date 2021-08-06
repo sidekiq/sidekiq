@@ -308,7 +308,7 @@ describe 'API' do
         it "unwraps ActiveJob #{ver} jobs" do
           #ApiJob.perform_later(1,2,3)
           #puts Sidekiq::Queue.new.first.value
-          x = Sidekiq::Job.new(jobs[0], "default")
+          x = Sidekiq::JobRecord.new(jobs[0], "default")
           assert_equal ApiJob.name, x.display_class
           assert_equal [1,2,3], x.display_args
         end
@@ -316,7 +316,7 @@ describe 'API' do
         it "unwraps ActionMailer #{ver} jobs" do
           #ApiMailer.test_email(1,2,3).deliver_later
           #puts Sidekiq::Queue.new("mailers").first.value
-          x = Sidekiq::Job.new(jobs[1], "mailers")
+          x = Sidekiq::JobRecord.new(jobs[1], "mailers")
           assert_equal "#{ApiMailer.name}#test_email", x.display_class
           assert_equal [1,2,3], x.display_args
         end

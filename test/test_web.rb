@@ -22,7 +22,7 @@ describe Sidekiq::Web do
   end
 
   class WebWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
 
     def perform(a, b)
       a + b

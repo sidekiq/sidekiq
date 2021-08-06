@@ -5,21 +5,21 @@ describe 'Sidekiq::Testing.fake' do
   class PerformError < RuntimeError; end
 
   class DirectWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     def perform(a, b)
       a + b
     end
   end
 
   class EnqueuedWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     def perform(a, b)
       a + b
     end
   end
 
   class StoredWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     def perform(error)
       raise PerformError if error
     end
@@ -119,7 +119,7 @@ describe 'Sidekiq::Testing.fake' do
   end
 
   class SpecificJidWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     sidekiq_class_attribute :count
     self.count = 0
     def perform(worker_jid)
@@ -174,7 +174,7 @@ describe 'Sidekiq::Testing.fake' do
   end
 
   class FirstWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     sidekiq_class_attribute :count
     self.count = 0
     def perform
@@ -183,7 +183,7 @@ describe 'Sidekiq::Testing.fake' do
   end
 
   class SecondWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     sidekiq_class_attribute :count
     self.count = 0
     def perform
@@ -192,7 +192,7 @@ describe 'Sidekiq::Testing.fake' do
   end
 
   class ThirdWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     sidekiq_class_attribute :count
     def perform
       FirstWorker.perform_async
@@ -297,14 +297,14 @@ describe 'Sidekiq::Testing.fake' do
     end
 
     class QueueWorker
-      include Sidekiq::Worker
+      include Sidekiq::Job
       def perform(a, b)
         a + b
       end
     end
 
     class AltQueueWorker
-      include Sidekiq::Worker
+      include Sidekiq::Job
       sidekiq_options queue: :alt
       def perform(a, b)
         a + b

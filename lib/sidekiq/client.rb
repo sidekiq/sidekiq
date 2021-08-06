@@ -12,7 +12,7 @@ module Sidekiq
     #   client.middleware do |chain|
     #     chain.use MyClientMiddleware
     #   end
-    #   client.push('class' => 'SomeWorker', 'args' => [1,2,3])
+    #   client.push('class' => 'SomeJob', 'args' => [1,2,3])
     #
     # All client instances default to the globally-defined
     # Sidekiq.client_middleware but you can change as necessary.
@@ -64,7 +64,7 @@ module Sidekiq
     # Returns a unique Job ID.  If middleware stops the job, nil will be returned instead.
     #
     # Example:
-    #   push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
+    #   push('queue' => 'my_queue', 'class' => MyJob, 'args' => ['foo', 1, :bat => 'bar'])
     #
     def push(item)
       normed = normalize_item(item)
@@ -116,8 +116,8 @@ module Sidekiq
     #
     #   pool = ConnectionPool.new { Redis.new }
     #   Sidekiq::Client.via(pool) do
-    #     SomeWorker.perform_async(1,2,3)
-    #     SomeOtherWorker.perform_async(1,2,3)
+    #     SomeJob.perform_async(1,2,3)
+    #     SomeOtherJob.perform_async(1,2,3)
     #   end
     #
     # Generally this is only needed for very large Sidekiq installs processing
@@ -142,10 +142,10 @@ module Sidekiq
       end
 
       # Resque compatibility helpers.  Note all helpers
-      # should go through Worker#client_push.
+      # should go through Job#client_push.
       #
       # Example usage:
-      #   Sidekiq::Client.enqueue(MyWorker, 'foo', 1, :bat => 'bar')
+      #   Sidekiq::Client.enqueue(MyJob, 'foo', 1, :bat => 'bar')
       #
       # Messages are enqueued to the 'default' queue.
       #
@@ -154,14 +154,14 @@ module Sidekiq
       end
 
       # Example usage:
-      #   Sidekiq::Client.enqueue_to(:queue_name, MyWorker, 'foo', 1, :bat => 'bar')
+      #   Sidekiq::Client.enqueue_to(:queue_name, MyJob, 'foo', 1, :bat => 'bar')
       #
       def enqueue_to(queue, klass, *args)
         klass.client_push("queue" => queue, "class" => klass, "args" => args)
       end
 
       # Example usage:
-      #   Sidekiq::Client.enqueue_to_in(:queue_name, 3.minutes, MyWorker, 'foo', 1, :bat => 'bar')
+      #   Sidekiq::Client.enqueue_to_in(:queue_name, 3.minutes, MyJob, 'foo', 1, :bat => 'bar')
       #
       def enqueue_to_in(queue, interval, klass, *args)
         int = interval.to_f
@@ -175,7 +175,7 @@ module Sidekiq
       end
 
       # Example usage:
-      #   Sidekiq::Client.enqueue_in(3.minutes, MyWorker, 'foo', 1, :bat => 'bar')
+      #   Sidekiq::Client.enqueue_in(3.minutes, MyJob, 'foo', 1, :bat => 'bar')
       #
       def enqueue_in(interval, klass, *args)
         klass.perform_in(interval, *args)
@@ -249,7 +249,7 @@ module Sidekiq
 
     def normalized_hash(item_class)
       if item_class.is_a?(Class)
-        raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item_class.ancestors.inspect}") unless item_class.respond_to?("get_sidekiq_options")
+        raise(ArgumentError, "Message must include a Sidekiq::Job class, not class name: #{item_class.ancestors.inspect}") unless item_class.respond_to?("get_sidekiq_options")
         item_class.get_sidekiq_options
       else
         Sidekiq.default_worker_options

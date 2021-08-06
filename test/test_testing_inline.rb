@@ -6,7 +6,7 @@ describe 'Sidekiq::Testing.inline' do
   class ParameterIsNotString < RuntimeError; end
 
   class InlineWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     def perform(pass)
       raise ArgumentError, "no jid" unless jid
       raise InlineError unless pass
@@ -14,7 +14,7 @@ describe 'Sidekiq::Testing.inline' do
   end
 
   class InlineWorkerWithTimeParam
-    include Sidekiq::Worker
+    include Sidekiq::Job
     def perform(time)
       raise ParameterIsNotString unless time.is_a?(String) || time.is_a?(Numeric)
     end

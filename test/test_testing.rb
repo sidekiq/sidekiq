@@ -89,7 +89,7 @@ describe 'Sidekiq::Testing' do
     end
 
     class AttributeWorker
-      include Sidekiq::Worker
+      include Sidekiq::Job
       sidekiq_class_attribute :count
       self.count = 0
       attr_accessor :foo

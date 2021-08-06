@@ -15,7 +15,7 @@ module Sidekiq
     # object to Redis.  Your Sidekiq jobs should pass IDs, not entire instances.
     # This is here for backwards compatibility with Delayed::Job only.
     class DelayedModel
-      include Sidekiq::Worker
+      include Sidekiq::Job
 
       def perform(yml)
         (target, method_name, args) = YAML.load(yml)

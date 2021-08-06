@@ -13,7 +13,7 @@ module Sidekiq
     #    UserMailer.delay_for(5.days).send_welcome_email(new_user)
     #    UserMailer.delay_until(5.days.from_now).send_welcome_email(new_user)
     class DelayedMailer
-      include Sidekiq::Worker
+      include Sidekiq::Job
 
       def perform(yml)
         (target, method_name, args) = YAML.load(yml)

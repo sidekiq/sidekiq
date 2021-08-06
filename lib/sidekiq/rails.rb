@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "sidekiq/worker"
+require "sidekiq/job"
 
 module Sidekiq
   class Rails < ::Rails::Engine
@@ -33,7 +33,7 @@ module Sidekiq
     #   end
     initializer "sidekiq.active_job_integration" do
       ActiveSupport.on_load(:active_job) do
-        include ::Sidekiq::Worker::Options unless respond_to?(:sidekiq_options)
+        include ::Sidekiq::Job::Options unless respond_to?(:sidekiq_options)
       end
     end
 

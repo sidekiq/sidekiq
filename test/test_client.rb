@@ -100,11 +100,11 @@ describe Sidekiq::Client do
     end
 
     class MyWorker
-      include Sidekiq::Worker
+      include Sidekiq::Job
     end
 
     class QueuedWorker
-      include Sidekiq::Worker
+      include Sidekiq::Job
       sidekiq_options :queue => :flimflam
     end
 
@@ -181,7 +181,7 @@ describe Sidekiq::Client do
   end
 
   class BaseWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     sidekiq_options 'retry' => 'base'
   end
   class AWorker < BaseWorker
@@ -284,7 +284,7 @@ describe Sidekiq::Client do
   describe 'class attribute race conditions' do
     new_class = -> {
       Class.new do
-        class_eval('include Sidekiq::Worker')
+        class_eval('include Sidekiq::Job')
 
         define_method(:foo) { get_sidekiq_options }
       end

@@ -4,7 +4,7 @@ describe Sidekiq::Worker do
   describe '#set' do
 
     class SetWorker
-      include Sidekiq::Worker
+      include Sidekiq::Job
       sidekiq_options :queue => :foo, 'retry' => 12
     end
 
