@@ -5,6 +5,7 @@
 HEAD
 ---------
 
+- Sidekiq::Worker `sidekiq_retry_in` block can now return a range [#4957]
 - Minimize scheduler load on Redis at scale [#4882]
 - Improve logging of delay jobs [#4904, BuonOno]
 - Minor CSS improvements for buttons and tables, design PRs always welcome!

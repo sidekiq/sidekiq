@@ -215,7 +215,12 @@ module Sidekiq
 
     def delay_for(worker, count, exception)
       if worker&.sidekiq_retry_in_block
-        custom_retry_in = retry_in(worker, count, exception).to_i
+        range_or_interval = retry_in(worker, count, exception)
+        custom_retry_in = if range_or_interval.is_a?(Range)
+          rand(range_or_interval)
+        else
+          range_or_interval
+        end.to_i
         return custom_retry_in if custom_retry_in > 0
       end
       seconds_to_delay(count)

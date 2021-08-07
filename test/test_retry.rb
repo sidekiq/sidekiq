@@ -287,6 +287,8 @@ describe Sidekiq::JobRetry do
             Sidekiq::JobRetry::USE_DEFAULT_RETRY_FORMULA
           when ArgumentError
             count * 4
+          when ZeroDivisionError
+            (count..count * 2)
           else
             count * 2
           end
@@ -311,6 +313,10 @@ describe Sidekiq::JobRetry do
 
       it "retries with a custom delay and exception 2" do
         assert_equal 4, handler.__send__(:delay_for, CustomWorkerWithException, 2, StandardError.new)
+      end
+
+      it "retries with a custom delay and exception 3" do
+        assert_includes 2..4, handler.__send__(:delay_for, CustomWorkerWithException, 2, ZeroDivisionError.new)
       end
 
       it "retries with a default delay and exception in case of configured with nil" do
