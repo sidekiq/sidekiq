@@ -38,7 +38,9 @@ module Sidekiq
     reloader: proc { |&block| block.call }
   }
 
-  DEFAULT_WORKER_OPTIONS = {
+  # Do not use this constant, use:
+  # Sidekiq.default_job_options = { ...options... }
+  DEFAULT_JOB_OPTIONS = {
     "retry" => true,
     "queue" => "default"
   }
@@ -154,13 +156,13 @@ module Sidekiq
     Middleware::Chain.new
   end
 
-  def self.default_worker_options=(hash)
+  def self.default_job_options=(hash)
     # stringify
-    @default_worker_options = default_worker_options.merge(hash.transform_keys(&:to_s))
+    @default_job_options = default_job_options.merge(hash.transform_keys(&:to_s))
   end
 
-  def self.default_worker_options
-    defined?(@default_worker_options) ? @default_worker_options : DEFAULT_WORKER_OPTIONS
+  def self.default_job_options
+    defined?(@default_job_options) ? @default_job_options : DEFAULT_JOB_OPTIONS
   end
 
   ##
@@ -252,10 +254,10 @@ module Sidekiq
 
   # We are shutting down Sidekiq but what about workers that
   # are working on some long job?  This error is
-  # raised in workers that have not finished within the hard
+  # raised in jobs that have not finished within the hard
   # timeout limit.  This is needed to rollback db transactions,
   # otherwise Ruby's Thread#kill will commit.  See #377.
-  # DO NOT RESCUE THIS ERROR IN YOUR WORKERS
+  # DO NOT RESCUE THIS ERROR IN YOUR JOBS
   class Shutdown < Interrupt; end
 end
 

@@ -110,7 +110,7 @@ describe Sidekiq::Client do
 
     it 'enqueues' do
       Sidekiq.redis {|c| c.flushdb }
-      assert_equal Sidekiq.default_worker_options, MyWorker.get_sidekiq_options
+      assert_equal Sidekiq.default_job_options, MyWorker.get_sidekiq_options
       assert MyWorker.perform_async(1, 2)
       assert Sidekiq::Client.enqueue(MyWorker, 1, 2)
       assert Sidekiq::Client.enqueue_to(:custom_queue, MyWorker, 1, 2)

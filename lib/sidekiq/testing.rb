@@ -179,7 +179,7 @@ module Sidekiq
       end
 
       def jobs_by_type
-        @jobs_by_worker ||= Hash.new { |hash, key| hash[key] = [] }
+        @jobs_by_type ||= Hash.new { |hash, key| hash[key] = [] }
       end
       alias_method :jobs_by_worker, :jobs_by_type
 
@@ -289,17 +289,17 @@ module Sidekiq
         process_job(next_job)
       end
 
-      def process_job(job)
-        worker = new
-        worker.jid = job["jid"]
-        worker.bid = job["bid"] if worker.respond_to?(:bid=)
-        Sidekiq::Testing.server_middleware.invoke(worker, job, job["queue"]) do
-          execute_job(worker, job["args"])
+      def process_job(job_hash)
+        job = new
+        job.jid = job_hash["jid"]
+        job.bid = job_hash["bid"] if job.respond_to?(:bid=)
+        Sidekiq::Testing.server_middleware.invoke(job, job_hash, job_hash["queue"]) do
+          execute_job(job, job_hash["args"])
         end
       end
 
-      def execute_job(worker, args)
-        worker.perform(*args)
+      def execute_job(job, args)
+        job.perform(*args)
       end
     end
 
@@ -316,10 +316,10 @@ module Sidekiq
       # Drain all queued jobs across all job types
       def drain_all
         while jobs.any?
-          worker_classes = jobs.map { |job| job["class"] }.uniq
+          job_classes = jobs.map { |job| job["class"] }.uniq
 
-          worker_classes.each do |worker_class|
-            Sidekiq::Testing.constantize(worker_class).drain
+          job_classes.each do |job_class|
+            Sidekiq::Testing.constantize(job_class).drain
           end
         end
       end

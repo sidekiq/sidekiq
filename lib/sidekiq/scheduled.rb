@@ -38,7 +38,7 @@ module Sidekiq
     # The Poller checks Redis every N seconds for jobs in the retry or scheduled
     # set have passed their timestamp and should be enqueued.  If so, it
     # just pops the job back onto its original queue so the
-    # workers can pick it up like any other job.
+    # threads can pick it up like any other job.
     class Poller
       include Util
 
@@ -164,9 +164,9 @@ module Sidekiq
       end
 
       def initial_wait
-        # Have all processes sleep between 5-15 seconds.  10 seconds
-        # to give time for the heartbeat to register (if the poll interval is going to be calculated by the number
-        # of workers), and 5 random seconds to ensure they don't all hit Redis at the same time.
+        # Have all processes sleep between 5-15 seconds. 10 seconds to give time
+        # for the heartbeat to register (if the poll interval is going to be calculated by the number
+        # of threads), and 5 random seconds to ensure they don't all hit Redis at the same time.
         total = 0
         total += INITIAL_WAIT unless Sidekiq.options[:poll_interval_average]
         total += (5 * rand)

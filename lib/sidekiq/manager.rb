@@ -50,7 +50,7 @@ module Sidekiq
       return if @done
       @done = true
 
-      logger.info { "Terminating quiet workers" }
+      logger.info { "Terminating quiet threads" }
       @workers.each { |x| x.terminate }
       fire_event(:quiet, reverse: true)
     end
@@ -68,7 +68,7 @@ module Sidekiq
       sleep PAUSE_TIME
       return if @workers.empty?
 
-      logger.info { "Pausing to allow workers to finish..." }
+      logger.info { "Pausing to allow jobs to finish..." }
       remaining = deadline - ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
       while remaining > PAUSE_TIME
         return if @workers.empty?
@@ -104,7 +104,7 @@ module Sidekiq
     private
 
     def hard_shutdown
-      # We've reached the timeout and we still have busy workers.
+      # We've reached the timeout and we still have busy threads.
       # They must die but their jobs shall live on.
       cleanup = nil
       @plock.synchronize do
@@ -114,12 +114,12 @@ module Sidekiq
       if cleanup.size > 0
         jobs = cleanup.map { |p| p.job }.compact
 
-        logger.warn { "Terminating #{cleanup.size} busy worker threads" }
+        logger.warn { "Terminating #{cleanup.size} busy processor threads" }
         logger.warn { "Work still in progress #{jobs.inspect}" }
 
         # Re-enqueue unfinished jobs
         # NOTE: You may notice that we may push a job back to redis before
-        # the worker thread is terminated. This is ok because Sidekiq's
+        # the thread is terminated. This is ok because Sidekiq's
         # contract says that jobs are run AT LEAST once. Process termination
         # is delayed until we're certain the jobs are back in Redis because
         # it is worse to lose a job than to run it twice.

@@ -11,7 +11,7 @@ module Sidekiq
   #
   # 1. fetches a job from Redis
   # 2. executes the job
-  #   a. instantiate the Worker
+  #   a. instantiate the job
   #   b. run the middleware chain
   #   c. call #perform
   #
@@ -125,15 +125,15 @@ module Sidekiq
           @job_logger.call(job_hash, queue) do
             stats(jobstr, queue) do
               # Rails 5 requires a Reloader to wrap code execution.  In order to
-              # constantize the worker and instantiate an instance, we have to call
+              # constantize the job class and instantiate an instance, we have to call
               # the Reloader.  It handles code loading, db connection management, etc.
               # Effectively this block denotes a "unit of work" to Rails.
               @reloader.call do
                 klass = constantize(job_hash["class"])
-                worker = klass.new
-                worker.jid = job_hash["jid"]
-                @retrier.local(worker, jobstr, queue) do
-                  yield worker
+                job = klass.new
+                job.jid = job_hash["jid"]
+                @retrier.local(job, jobstr, queue) do
+                  yield job
                 end
               end
             end
@@ -159,9 +159,9 @@ module Sidekiq
 
       ack = false
       begin
-        dispatch(job_hash, queue, jobstr) do |worker|
-          Sidekiq.server_middleware.invoke(worker, job_hash, queue) do
-            execute_job(worker, job_hash["args"])
+        dispatch(job_hash, queue, jobstr) do |job|
+          Sidekiq.server_middleware.invoke(job, job_hash, queue) do
+            execute_job(job, job_hash["args"])
           end
         end
         ack = true
@@ -192,8 +192,8 @@ module Sidekiq
       end
     end
 
-    def execute_job(worker, cloned_args)
-      worker.perform(*cloned_args)
+    def execute_job(job, cloned_args)
+      job.perform(*cloned_args)
     end
 
     # Ruby doesn't provide atomic counters out of the box so we'll

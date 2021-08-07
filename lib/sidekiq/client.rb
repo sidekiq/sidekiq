@@ -46,16 +46,16 @@ module Sidekiq
     # The main method used to push a job to Redis.  Accepts a number of options:
     #
     #   queue - the named queue to use, default 'default'
-    #   class - the worker class to call, required
+    #   class - the job class to call, required
     #   args - an array of simple arguments to the perform method, must be JSON-serializable
     #   at - timestamp to schedule the job (optional), must be Numeric (e.g. Time.now.to_f)
     #   retry - whether to retry this job if it fails, default true or an integer number of retries
     #   backtrace - whether to save any error backtrace, default false
     #
     # If class is set to the class name, the jobs' options will be based on Sidekiq's default
-    # worker options. Otherwise, they will be based on the job class's options.
+    # job options. Otherwise, they will be based on the job class's options.
     #
-    # Any options valid for a worker class's sidekiq_options are also available here.
+    # Any options valid for a job class's sidekiq_options are also available here.
     #
     # All options must be strings, not symbols.  NB: because we are serializing to JSON, all
     # symbols in 'args' will be converted to strings.  Note that +backtrace: true+ can take quite a bit of
@@ -211,10 +211,10 @@ module Sidekiq
       end
     end
 
-    def process_single(worker_class, item)
+    def process_single(job_class, item)
       queue = item["queue"]
 
-      middleware.invoke(worker_class, item, queue, @redis_pool) do
+      middleware.invoke(job_class, item, queue, @redis_pool) do
         item
       end
     end
@@ -252,7 +252,7 @@ module Sidekiq
         raise(ArgumentError, "Message must include a Sidekiq::Job class, not class name: #{item_class.ancestors.inspect}") unless item_class.respond_to?("get_sidekiq_options")
         item_class.get_sidekiq_options
       else
-        Sidekiq.default_worker_options
+        Sidekiq.default_job_options
       end
     end
   end

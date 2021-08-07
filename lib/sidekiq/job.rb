@@ -4,7 +4,7 @@ require "sidekiq/client"
 
 module Sidekiq
   ##
-  # Include this module in your worker class and you can easily create
+  # Include this module in your job class and you can easily create
   # asynchronous jobs:
   #
   #   class HardJob
@@ -61,7 +61,7 @@ module Sidekiq
         end
 
         def get_sidekiq_options # :nodoc:
-          self.sidekiq_options_hash ||= Sidekiq.default_worker_options
+          self.sidekiq_options_hash ||= Sidekiq.default_job_options
         end
 
         def sidekiq_class_attribute(*attrs)
