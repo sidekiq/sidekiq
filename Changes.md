@@ -5,6 +5,15 @@
 HEAD
 ---------
 
+- Add `Sidekiq::Job` alias for `Sidekiq::Worker` [#4995]
+  `Sidekiq::Job` is recommended for future code; it is functionally
+  identical to `Sidekiq::Worker` but better reflects current terminology.
+  There is no plan to deprecate `Sidekiq::Worker` at this time.
+```ruby
+class MyJob
+  include Sidekiq::Job
+  sidekiq_options ...
+```
 - Minimize scheduler load on Redis at scale [#4882]
 - Improve logging of delay jobs [#4904, BuonOno]
 - Minor CSS improvements for buttons and tables, design PRs always welcome!
