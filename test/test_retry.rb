@@ -284,7 +284,7 @@ describe Sidekiq::JobRetry do
         sidekiq_retry_in do |count, exception|
           case exception
           when SpecialError
-            Sidekiq::JobRetry::USE_DEFAULT_RETRY_FORMULA
+            nil
           when ArgumentError
             count * 4
           else
@@ -306,11 +306,11 @@ describe Sidekiq::JobRetry do
       end
 
       it "retries with a custom delay and exception 1" do
-        assert_equal 8, handler.__send__(:delay_for, CustomWorkerWithException, 2, ArgumentError.new)
+        assert_includes 4..35, handler.__send__(:delay_for, CustomWorkerWithException, 2, ArgumentError.new)
       end
 
       it "retries with a custom delay and exception 2" do
-        assert_equal 4, handler.__send__(:delay_for, CustomWorkerWithException, 2, StandardError.new)
+        assert_includes 4..35, handler.__send__(:delay_for, CustomWorkerWithException, 2, StandardError.new)
       end
 
       it "retries with a default delay and exception in case of configured with nil" do
@@ -319,7 +319,7 @@ describe Sidekiq::JobRetry do
       end
 
       it "retries with a custom delay without exception" do
-        assert_equal 4, handler.__send__(:delay_for, CustomWorkerWithoutException, 2, StandardError.new)
+        assert_includes 4..35, handler.__send__(:delay_for, CustomWorkerWithoutException, 2, StandardError.new)
       end
 
       it "falls back to the default retry on exception" do

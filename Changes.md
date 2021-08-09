@@ -5,6 +5,7 @@
 HEAD
 ---------
 
+- Reduce retry jitter, add jitter to `sidekiq_retry_in` values [#4957]
 - Minimize scheduler load on Redis at scale [#4882]
 - Improve logging of delay jobs [#4904, BuonOno]
 - Minor CSS improvements for buttons and tables, design PRs always welcome!

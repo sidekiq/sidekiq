@@ -214,16 +214,12 @@ module Sidekiq
     end
 
     def delay_for(worker, count, exception)
+      jitter = rand(10) * (count + 1)
       if worker&.sidekiq_retry_in_block
         custom_retry_in = retry_in(worker, count, exception).to_i
-        return custom_retry_in if custom_retry_in > 0
+        return custom_retry_in + jitter if custom_retry_in > 0
       end
-      seconds_to_delay(count)
-    end
-
-    # delayed_job uses the same basic formula
-    def seconds_to_delay(count)
-      (count**4) + 15 + (rand(30) * (count + 1))
+      (count**4) + 15 + jitter
     end
 
     def retry_in(worker, count, exception)
