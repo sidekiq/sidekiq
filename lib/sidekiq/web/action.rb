@@ -68,7 +68,7 @@ module Sidekiq
     end
 
     def json(payload)
-      [200, {"Content-Type" => "application/json", "Cache-Control" => "no-store"}, [Sidekiq.dump_json(payload)]]
+      [200, {"Content-Type" => "application/json", "Cache-Control" => "private, no-store"}, [Sidekiq.dump_json(payload)]]
     end
 
     def initialize(env, block)
