@@ -314,7 +314,7 @@ module Sidekiq
         # rendered content goes here
         headers = {
           "Content-Type" => "text/html",
-          "Cache-Control" => "no-store",
+          "Cache-Control" => "private, no-store",
           "Content-Language" => action.locale,
           "Content-Security-Policy" => CSP_HEADER
         }
