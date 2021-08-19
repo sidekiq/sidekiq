@@ -9,7 +9,7 @@ GIT
 PATH
   remote: .
   specs:
-    sidekiq (6.2.1)
+    sidekiq (6.2.2)
       connection_pool (>= 2.2.2)
       rack (~> 2.0)
       redis (>= 4.2.0)
@@ -82,7 +82,7 @@ GEM
       json
       simplecov
     concurrent-ruby (1.1.8)
-    connection_pool (2.2.3)
+    connection_pool (2.2.5)
     crass (1.0.6)
     docile (1.3.2)
     erubi (1.10.0)

@@ -2,13 +2,14 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
-HEAD
+6.2.2
 ---------
 
 - Reduce retry jitter, add jitter to `sidekiq_retry_in` values [#4957]
 - Minimize scheduler load on Redis at scale [#4882]
 - Improve logging of delay jobs [#4904, BuonOno]
 - Minor CSS improvements for buttons and tables, design PRs always welcome!
+- Tweak Web UI `Cache-Control` header [#4966]
 
 6.2.1
 ---------

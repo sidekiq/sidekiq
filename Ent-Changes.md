@@ -4,6 +4,14 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+2.2.3
+-------------
+
+- Fixes for leaky and unlimited limiters [#4809, #4869]
+- Invalid leaders now immediately step down [#4950]
+- Web UI now displays "next run time" in the specified timezone [#4833]
+- Fix swarm memory monitoring on BSDs
+
 2.2.2
 -------------
 

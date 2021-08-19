@@ -4,9 +4,10 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+5.2.3
 ---------
 
+- Reduce superfluous logging of Redis errors [#4969]
 - Display dead JIDs on Batch details page [#4926]
 
 5.2.2
