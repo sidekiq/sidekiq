@@ -267,7 +267,7 @@ module Sidekiq
         break if entries.empty?
         page += 1
         entries.each do |entry|
-          yield Job.new(entry, @name)
+          yield JobRecord.new(entry, @name)
         end
         deleted_size = initial_size - size
       end
@@ -298,9 +298,9 @@ module Sidekiq
   # sorted set.
   #
   # The job should be considered immutable but may be
-  # removed from the queue via Job#delete.
+  # removed from the queue via JobRecord#delete.
   #
-  class Job
+  class JobRecord
     attr_reader :item
     attr_reader :value
 
@@ -457,7 +457,7 @@ module Sidekiq
     end
   end
 
-  class SortedEntry < Job
+  class SortedEntry < JobRecord
     attr_reader :score
     attr_reader :parent
 
@@ -837,11 +837,11 @@ module Sidekiq
     # For Sidekiq Enterprise customers this number (in production) must be
     # less than or equal to your licensed concurrency.
     def total_concurrency
-      sum { |x| x["concurrency"] }
+      sum { |x| x["concurrency"].to_i }
     end
 
     def total_rss_in_kb
-      sum { |x| x["rss"] || 0 }
+      sum { |x| x["rss"].to_i }
     end
     alias_method :total_rss, :total_rss_in_kb
 

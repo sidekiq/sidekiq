@@ -10,6 +10,7 @@
 - Improve logging of delay jobs [#4904, BuonOno]
 - Minor CSS improvements for buttons and tables, design PRs always welcome!
 - Tweak Web UI `Cache-Control` header [#4966]
+- Rename internal API class `Sidekiq::Job` to `Sidekiq::JobRecord` [#4955]
 
 6.2.1
 ---------
