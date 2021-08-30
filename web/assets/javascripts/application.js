@@ -35,12 +35,12 @@ $(function() {
 
   if ($(".live-poll").length > 0) { // set up live poll only when button is present
     $(document).on("click", ".live-poll", function() {
-      if (localStorage.livePoll == "enabled") {
-        localStorage.livePoll = "disabled";
+      if (localStorage.sidekiqLivePoll == "enabled") {
+        localStorage.sidekiqLivePoll = "disabled";
         clearTimeout(livePollTimer);
         livePollTimer = null;
       } else {
-        localStorage.livePoll = "enabled";
+        localStorage.sidekiqLivePoll = "enabled";
         livePollCallback();
       }
 
@@ -48,7 +48,7 @@ $(function() {
     });
 
     updateLivePollButton();
-    if (localStorage.livePoll == "enabled") {
+    if (localStorage.sidekiqLivePoll == "enabled") {
       scheduleLivePoll();
     }
   }
@@ -67,7 +67,7 @@ function updateFuzzyTimes(locale) {
 }
 
 function updateLivePollButton() {
-  if (localStorage.livePoll == "enabled") {
+  if (localStorage.sidekiqLivePoll == "enabled") {
     $('.live-poll-stop').show();
     $('.live-poll-start').hide();
   } else {
@@ -90,7 +90,7 @@ function livePollCallback() {
 }
 
 function scheduleLivePoll() {
-  let ti = parseInt(localStorage.timeInterval) || 5000;
+  let ti = parseInt(localStorage.sidekiqTimeInterval) || 5000;
   livePollTimer = setTimeout(livePollCallback, ti);
 }
 

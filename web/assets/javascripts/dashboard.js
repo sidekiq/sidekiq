@@ -17,7 +17,7 @@ var nodes=vis.selectAll("path").data(series.stack.filter(function(d){return d.y!
 
 var poller;
 var realtimeGraph = function(updatePath) {
-  var timeInterval = parseInt(localStorage.timeInterval || '5000');
+  var timeInterval = parseInt(localStorage.sidekiqTimeInterval || '5000');
   var graphElement = document.getElementById("realtime");
 
   var graph = new Rickshaw.Graph( {
@@ -246,14 +246,14 @@ var setSliderLabel = function(val) {
 $(function(){
   renderGraphs();
 
-  if (typeof localStorage.timeInterval !== 'undefined'){
-    $('div.interval-slider input').val(localStorage.timeInterval);
-    setSliderLabel(localStorage.timeInterval);
+  if (typeof localStorage.sidekiqTimeInterval !== 'undefined'){
+    $('div.interval-slider input').val(localStorage.sidekiqTimeInterval);
+    setSliderLabel(localStorage.sidekiqTimeInterval);
   }
 
   $(document).on('change', 'div.interval-slider input', function(){
     clearInterval(poller);
-    localStorage.timeInterval = $(this).val();
+    localStorage.sidekiqTimeInterval = $(this).val();
     setSliderLabel($(this).val());
     resetGraphs();
     renderGraphs();
