@@ -70,17 +70,6 @@ module Sidekiq
       @head_html.join if defined?(@head_html)
     end
 
-    def poll_path
-      if current_path != "" && params["poll"]
-        path = root_path + current_path
-        query_string = to_query_string(params.slice(*params.keys - %w[page poll]))
-        path += "?#{query_string}" unless query_string.empty?
-        path
-      else
-        ""
-      end
-    end
-
     def text_direction
       get_locale["TextDirection"] || "ltr"
     end
@@ -203,7 +192,7 @@ module Sidekiq
       [score.to_f, jid]
     end
 
-    SAFE_QPARAMS = %w[page poll direction]
+    SAFE_QPARAMS = %w[page direction]
 
     # Merge options with current params, filter safe params, and stringify to query string
     def qparams(options)

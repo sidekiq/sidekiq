@@ -428,12 +428,6 @@ describe Sidekiq::Web do
     assert_match(/#{msg['args'][2]}/, last_response.body)
   end
 
-  it 'calls updatePage() once when polling' do
-    get '/busy?poll=true'
-    assert_equal 200, last_response.status
-    assert_equal 1, last_response.body.scan('data-poll-path="/busy').count
-  end
-
   it 'escape job args and error messages' do
     # on /retries page
     params = add_xss_retry
@@ -646,12 +640,6 @@ describe Sidekiq::Web do
       get '/queues/foo'
       assert_equal 200, last_response.status
       assert_match(/#{params.first['args'][2]}/, last_response.body)
-    end
-
-    it 'handles bad query input' do
-      get '/queues/foo?page=B<H'
-      assert_equal 200, last_response.status
-      assert_match(/B%3CH/, last_response.body)
     end
   end
 

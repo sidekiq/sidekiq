@@ -16,13 +16,9 @@
 
 Sidekiq = {};
 
-$(function() {
-  var pollpath = $('body').data('poll-path');
-  if (pollpath != "") {
-    var ti = parseInt(localStorage.timeInterval) || 2000;
-    setTimeout(function(){updatePage(pollpath)}, ti);
-  }
+var livePollTimer = null;
 
+$(function() {
   $(document).on('click', '.check_all', function() {
     $('input[type=checkbox]', $(this).closest('table')).prop('checked', this.checked);
   });
@@ -36,6 +32,26 @@ $(function() {
   });
 
   updateFuzzyTimes($('body').data('locale'));
+
+  if ($(".live-poll").length > 0) { // set up live poll only when button is present
+    $(document).on("click", ".live-poll", function() {
+      if (localStorage.sidekiqLivePoll == "enabled") {
+        localStorage.sidekiqLivePoll = "disabled";
+        clearTimeout(livePollTimer);
+        livePollTimer = null;
+      } else {
+        localStorage.sidekiqLivePoll = "enabled";
+        livePollCallback();
+      }
+
+      updateLivePollButton();
+    });
+
+    updateLivePollButton();
+    if (localStorage.sidekiqLivePoll == "enabled") {
+      scheduleLivePoll();
+    }
+  }
 });
 
 function updateFuzzyTimes(locale) {
@@ -50,27 +66,44 @@ function updateFuzzyTimes(locale) {
   t.cancel();
 }
 
-function updatePage(url) {
+function updateLivePollButton() {
+  if (localStorage.sidekiqLivePoll == "enabled") {
+    $('.live-poll-stop').show();
+    $('.live-poll-start').hide();
+  } else {
+    $('.live-poll-start').show();
+    $('.live-poll-stop').hide();
+  }
+}
+
+function livePollCallback() {
+  clearTimeout(livePollTimer);
+
   $.ajax({
-    url: url,
+    url: document.url,
     dataType: 'html'
-  }).done(function(data) {
-    $data = $(data)
+  }).done(
+    replacePage
+  ).complete(
+    scheduleLivePoll
+  )
+}
 
-    var $page = $data.filter('#page')
-    $('#page').replaceWith($page)
+function scheduleLivePoll() {
+  let ti = parseInt(localStorage.sidekiqTimeInterval) || 5000;
+  livePollTimer = setTimeout(livePollCallback, ti);
+}
 
-    var $header_status = $data.find('.status')
-    $('.status').replaceWith($header_status)
+function replacePage(data) {
+  $data = $(data)
 
-    updateFuzzyTimes($('body').data('locale'));
+  var $page = $data.filter('#page')
+  $('#page').replaceWith($page)
 
-    var ti = parseInt(localStorage.timeInterval) || 2000;
-    setTimeout(function(){updatePage(url)}, ti)
-  }).fail(function() {
-    var ti = parseInt(localStorage.timeInterval) || 2000;
-    setTimeout(function(){updatePage(url)}, ti)
-  })
+  var $header_status = $data.find('.status')
+  $('.status').replaceWith($header_status)
+
+  updateFuzzyTimes($('body').data('locale'));
 }
 
 $(function() {

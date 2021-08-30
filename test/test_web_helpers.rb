@@ -109,4 +109,19 @@ class TestWebHelpers < Minitest::Test
     s = o.display_args(nil)
     assert_equal "Invalid job payload, args is nil", s
   end
+
+  def test_to_query_string_escapes_bad_query_input
+    obj = Helpers.new
+    assert_equal "page=B%3CH", obj.to_query_string("page" => "B<H")
+  end
+
+  def test_qparams_string_escapes_bad_query_input
+    obj = Helpers.new
+    obj.instance_eval do
+      def params
+        { "direction" => "H>B" }
+      end
+    end
+    assert_equal "direction=H%3EB&page=B%3CH", obj.qparams("page" => "B<H")
+  end
 end
