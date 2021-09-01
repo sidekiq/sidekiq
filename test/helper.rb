@@ -8,7 +8,7 @@ require 'minitest/autorun'
 
 $TESTING = true
 # disable minitest/parallel threads
-ENV["MT_CPU"] = 0
+ENV["MT_CPU"] = "0"
 ENV["N"] = "0"
 # Disable any stupid backtrace cleansers
 ENV["BACKTRACE"] = "1"
