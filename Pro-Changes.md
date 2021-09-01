@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+5.2.4
+---------
+
+- Initialize paused queue set before allowing jobs to be fetched [#4975]
+
 5.2.3
 ---------
 

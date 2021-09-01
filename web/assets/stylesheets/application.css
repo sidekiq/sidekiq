@@ -98,10 +98,10 @@ header.row .pagination {
 .poll-wrapper {
     margin: 9px;
 }
-#live-poll.active {
+.live-poll.active {
   background-color: #009300;
 }
-#live-poll.active:hover {
+.live-poll.active:hover {
   background-color: #777;
 }
 .summary_bar ul {
