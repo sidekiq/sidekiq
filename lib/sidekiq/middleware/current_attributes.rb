@@ -1,12 +1,17 @@
 require "active_support/current_attributes"
 
 module Sidekiq
+  ##
   # Automatically save and load any current attributes in the execution context
-  # so the context "flows" from a Rails controller into any associated job execution.
-  # See ActiveSupport::CurrentAttributes. Usage:
+  # so context attributes "flow" from Rails actions into any associated jobs.
+  # This can be useful for multi-tenancy, i18n locale, timezone, any implicit
+  # per-request attribute. See +ActiveSupport::CurrentAttributes+.
   #
-  # require "sidekiq/middleware/context"
-  # Sidekiq::CurrentAttributes.persist(Myapp::Current)
+  # @example
+  #
+  #   # in your initializer
+  #   require "sidekiq/middleware/current_attributes"
+  #   Sidekiq::CurrentAttributes.persist(Myapp::Current)
   #
   module CurrentAttributes
     class Save
@@ -25,7 +30,7 @@ module Sidekiq
         @klass = with
       end
 
-      def call(_, job, _, _, &block)
+      def call(_, job, _, &block)
         @klass.set(job["ctx"], &block)
       end
     end
