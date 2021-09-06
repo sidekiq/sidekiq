@@ -96,6 +96,16 @@ describe Sidekiq do
       assert_equal 2, counts.size
       assert_equal counts[0] + 1, counts[1]
     end
+
+    it 'reconnects if instance state changed' do
+      counts = []
+      Sidekiq.redis do |c|
+        counts << c.info['total_connections_received'].to_i
+        raise Redis::CommandError, "UNBLOCKED force unblock from blocking operation, instance state changed (master -> replica?)" if counts.size == 1
+      end
+      assert_equal 2, counts.size
+      assert_equal counts[0] + 1, counts[1]
+    end
   end
 
   describe 'redis info' do

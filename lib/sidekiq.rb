@@ -100,7 +100,8 @@ module Sidekiq
         # 2550 Failover can cause the server to become a replica, need
         # to disconnect and reopen the socket to get back to the primary.
         # 4495 Use the same logic if we have a "Not enough replicas" error from the primary
-        if retryable && ex.message =~ /READONLY|NOREPLICAS/
+        # 4985 Use the same logic when a blocking command is force-unblocked
+        if retryable && ex.message =~ /READONLY|NOREPLICAS|UNBLOCKED/
           conn.disconnect!
           retryable = false
           retry
