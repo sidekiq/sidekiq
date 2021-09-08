@@ -2,6 +2,17 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
+HEAD
+---------
+
+- **FEATURE**: Support for serializing ActiveSupport::CurrentAttributes into each job. [#4982]
+```ruby
+# config/initializers/sidekiq.rb
+require "sidekiq/middleware/current_attributes"
+Sidekiq::CurrentAttributes.persist(Myapp::Current) # Your AS:CurrentAttributes singleton
+```
+- Retry Redis operation if we get an `UNBLOCKED` Redis error. [#4985]
+
 6.2.2
 ---------
 
