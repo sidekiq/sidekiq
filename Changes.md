@@ -5,6 +5,16 @@
 HEAD
 ---------
 
+- **FEATURE**: Add `Sidekiq::Job` alias for `Sidekiq::Worker`, to better
+  reflect industry standard terminology. You can now do this:
+```ruby
+class MyJob
+  include Sidekiq::Job
+  sidekiq_options ...
+  def perform(args)
+  end
+end
+```
 - **FEATURE**: Support for serializing ActiveSupport::CurrentAttributes into each job. [#4982]
 ```ruby
 # config/initializers/sidekiq.rb
