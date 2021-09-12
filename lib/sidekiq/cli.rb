@@ -48,7 +48,11 @@ module Sidekiq
       sigs.each do |sig|
         old_handler = Signal.trap(sig) do
           if old_handler.respond_to?(:call)
-            old_handler.call
+            begin
+              old_handler.call
+            rescue Exception
+              puts $!.inspect
+            end
           end
           self_write.puts(sig)
         end
