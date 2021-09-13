@@ -50,8 +50,9 @@ module Sidekiq
           if old_handler.respond_to?(:call)
             begin
               old_handler.call
-            rescue Exception
-              puts $!.inspect
+            rescue Exception => exc
+              # signal handlers can't use Logger so puts only
+              puts ["Error in #{sig} handler", exc].inspect
             end
           end
           self_write.puts(sig)
