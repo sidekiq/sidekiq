@@ -46,7 +46,14 @@ module Sidekiq
       # USR1 and USR2 don't work on the JVM
       sigs << "USR2" if Sidekiq.pro? && !jruby?
       sigs.each do |sig|
-        trap sig do
+        old_handler = Signal.trap(sig) do
+          if old_handler.respond_to?(:call)
+            begin
+              old_handler.call
+            rescue Exception
+              puts $!.inspect
+            end
+          end
           self_write.puts(sig)
         end
       rescue ArgumentError

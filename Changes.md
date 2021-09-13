@@ -22,6 +22,8 @@ require "sidekiq/middleware/current_attributes"
 Sidekiq::CurrentAttributes.persist(Myapp::Current) # Your AS:CurrentAttributes singleton
 ```
 - Retry Redis operation if we get an `UNBLOCKED` Redis error. [#4985]
+- **BREAKING CHANGE** Run existing signal-handling code, if there is any, before running sidekiq's
+  signal-handling code. [#4991]
 
 6.2.2
 ---------
