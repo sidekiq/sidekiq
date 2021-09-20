@@ -26,7 +26,17 @@ module Sidekiq
           5
         end
 
-        verify_sizing(size, Sidekiq.options[:concurrency]) if Sidekiq.server?
+        if Sidekiq.server?
+          verify_sizing(size, Sidekiq.options[:concurrency])
+        elsif !ENV["RAILS_MAX_THREADS"]
+          Sidekiq.logger.warn <<~WARN
+            Sidekiq uses the RAILS_MAX_THREADS envvar to set the size of its
+            Redis connection pool to match your concurrency.
+            Without this envvar Sidekiq defaults to a pool of 5 connections,
+            which may not be adequate if your webserver is configured to use
+            more than 5 threads.
+          WARN
+        end
 
         pool_timeout = symbolized_options[:pool_timeout] || 1
         log_info(symbolized_options)
