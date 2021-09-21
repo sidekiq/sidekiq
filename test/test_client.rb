@@ -148,6 +148,11 @@ describe Sidekiq::Client do
       assert_equal second_at, Sidekiq::ScheduledSet.new.find_job(second_jid).at
     end
 
+    it 'can push jobs scheduled using ActiveSupport::Duration' do
+      jids = Sidekiq::Client.push_bulk('class' => QueuedWorker, 'args' => [[1], [2]], 'at' => [1.seconds, 111.seconds])
+      assert_equal 2, jids.size
+    end
+
     it 'returns the jids for the jobs' do
       Sidekiq::Client.push_bulk('class' => 'QueuedWorker', 'args' => (1..2).to_a.map { |x| Array(x) }).each do |jid|
         assert_match(/[0-9a-f]{12}/, jid)
