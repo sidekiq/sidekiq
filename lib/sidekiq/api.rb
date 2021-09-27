@@ -113,6 +113,7 @@ module Sidekiq
 
       @stats[:workers_size] = workers_size
       @stats[:enqueued] = enqueued
+      @stats
     end
 
     def fetch_stats!
