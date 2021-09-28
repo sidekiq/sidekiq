@@ -9,6 +9,7 @@ module Sidekiq
   #
   #   class HardWorker
   #     include Sidekiq::Worker
+  #     sidekiq_options queue: 'critical', retry: 5
   #
   #     def perform(*args)
   #       # do some work
@@ -20,6 +21,24 @@ module Sidekiq
   #   HardWorker.perform_async(1, 2, 3)
   #
   # Note that perform_async is a class method, perform is an instance method.
+  #
+  # Sidekiq::Worker also includes several APIs to provide compatibility with
+  # ActiveJob.
+  #
+  #   class SomeWorker
+  #     include Sidekiq::Worker
+  #     queue_as :critical
+  #
+  #     def perform(...)
+  #     end
+  #   end
+  #
+  #   SomeWorker.set(wait_until: 1.hour).perform_later(123)
+  #
+  # Note that arguments passed to the job must still obey Sidekiq's
+  # best practice for simple, JSON-native data types. Sidekiq will not
+  # implement ActiveJob's more complex argument serialization.
+  #
   module Worker
     ##
     # The Options module is extracted so we can include it in ActiveJob::Base
@@ -199,6 +218,10 @@ module Sidekiq
 
       def delay_until(*args)
         raise ArgumentError, "Do not call .delay_until on a Sidekiq::Worker class, call .perform_at"
+      end
+
+      def queue_as(q)
+        sidekiq_options("queue" => q.to_s)
       end
 
       def set(options)
