@@ -33,11 +33,13 @@ module Sidekiq
   #     end
   #   end
   #
-  #   SomeWorker.set(wait_until: 1.hour).perform_later(123)
+  #   SomeWorker.set(wait_until: 1.hour).perform_async(123)
   #
   # Note that arguments passed to the job must still obey Sidekiq's
   # best practice for simple, JSON-native data types. Sidekiq will not
-  # implement ActiveJob's more complex argument serialization.
+  # implement ActiveJob's more complex argument serialization. For
+  # this reason, we don't implement `perform_later` as our call semantics
+  # are very different.
   #
   module Worker
     ##
