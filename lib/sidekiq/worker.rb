@@ -153,10 +153,16 @@ module Sidekiq
       def initialize(klass, opts)
         @klass = klass
         @opts = opts
+
+        # ActiveJob compatibility
+        interval = @opts.delete(:wait_until)
+        at(interval) if interval
       end
 
       def set(options)
+        interval = options.delete(:wait_until)
         @opts.merge!(options)
+        at(interval) if interval
         self
       end
 
@@ -167,16 +173,19 @@ module Sidekiq
       # +interval+ must be a timestamp, numeric or something that acts
       #   numeric (like an activesupport time interval).
       def perform_in(interval, *args)
+        at(interval).perform_async(*args)
+      end
+      alias_method :perform_at, :perform_in
+
+      private
+
+      def at(interval)
         int = interval.to_f
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
-
-        payload = @opts.merge("class" => @klass, "args" => args)
-        # Optimization to enqueue something now that is scheduled to go out now or in the past
-        payload["at"] = ts if ts > now
-        @klass.client_push(payload)
+        @opts["at"] = ts if ts > now
+        self
       end
-      alias_method :perform_at, :perform_in
     end
 
     module ClassMethods

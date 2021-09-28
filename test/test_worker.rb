@@ -12,6 +12,14 @@ describe Sidekiq::Worker do
       Sidekiq.redis {|c| c.flushdb }
     end
 
+    it "provides basic ActiveJob compatibilility" do
+      q = Sidekiq::ScheduledSet.new
+      assert_equal 0, q.size
+      jid = SetWorker.set(wait_until: 1.hour).perform_later(123)
+      assert jid
+      assert_equal 1, q.size
+    end
+
     it 'can be memoized' do
       q = Sidekiq::Queue.new('bar')
       assert_equal 0, q.size
