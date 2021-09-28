@@ -5,11 +5,28 @@ describe Sidekiq::Worker do
 
     class SetWorker
       include Sidekiq::Worker
-      sidekiq_options :queue => :foo, 'retry' => 12
+      queue_as :foo
+      sidekiq_options 'retry' => 12
     end
 
     def setup
       Sidekiq.redis {|c| c.flushdb }
+    end
+
+    it "provides basic ActiveJob compatibilility" do
+      q = Sidekiq::ScheduledSet.new
+      assert_equal 0, q.size
+      jid = SetWorker.set(wait_until: 1.hour).perform_async(123)
+      assert jid
+      assert_equal 1, q.size
+
+      q = Sidekiq::Queue.new("foo")
+      assert_equal 0, q.size
+      SetWorker.perform_async
+      assert_equal 1, q.size
+
+      SetWorker.set(queue: 'xyz').perform_async
+      assert_equal 1, Sidekiq::Queue.new("xyz").size
     end
 
     it 'can be memoized' do

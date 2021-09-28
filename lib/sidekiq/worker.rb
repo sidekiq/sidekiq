@@ -9,6 +9,7 @@ module Sidekiq
   #
   #   class HardWorker
   #     include Sidekiq::Worker
+  #     sidekiq_options queue: 'critical', retry: 5
   #
   #     def perform(*args)
   #       # do some work
@@ -20,6 +21,26 @@ module Sidekiq
   #   HardWorker.perform_async(1, 2, 3)
   #
   # Note that perform_async is a class method, perform is an instance method.
+  #
+  # Sidekiq::Worker also includes several APIs to provide compatibility with
+  # ActiveJob.
+  #
+  #   class SomeWorker
+  #     include Sidekiq::Worker
+  #     queue_as :critical
+  #
+  #     def perform(...)
+  #     end
+  #   end
+  #
+  #   SomeWorker.set(wait_until: 1.hour).perform_async(123)
+  #
+  # Note that arguments passed to the job must still obey Sidekiq's
+  # best practice for simple, JSON-native data types. Sidekiq will not
+  # implement ActiveJob's more complex argument serialization. For
+  # this reason, we don't implement `perform_later` as our call semantics
+  # are very different.
+  #
   module Worker
     ##
     # The Options module is extracted so we can include it in ActiveJob::Base
@@ -153,10 +174,16 @@ module Sidekiq
       def initialize(klass, opts)
         @klass = klass
         @opts = opts
+
+        # ActiveJob compatibility
+        interval = @opts.delete(:wait_until)
+        at(interval) if interval
       end
 
       def set(options)
+        interval = options.delete(:wait_until)
         @opts.merge!(options)
+        at(interval) if interval
         self
       end
 
@@ -167,16 +194,19 @@ module Sidekiq
       # +interval+ must be a timestamp, numeric or something that acts
       #   numeric (like an activesupport time interval).
       def perform_in(interval, *args)
+        at(interval).perform_async(*args)
+      end
+      alias_method :perform_at, :perform_in
+
+      private
+
+      def at(interval)
         int = interval.to_f
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
-
-        payload = @opts.merge("class" => @klass, "args" => args)
-        # Optimization to enqueue something now that is scheduled to go out now or in the past
-        payload["at"] = ts if ts > now
-        @klass.client_push(payload)
+        @opts["at"] = ts if ts > now
+        self
       end
-      alias_method :perform_at, :perform_in
     end
 
     module ClassMethods
@@ -190,6 +220,10 @@ module Sidekiq
 
       def delay_until(*args)
         raise ArgumentError, "Do not call .delay_until on a Sidekiq::Worker class, call .perform_at"
+      end
+
+      def queue_as(q)
+        sidekiq_options("queue" => q.to_s)
       end
 
       def set(options)
