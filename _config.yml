@@ -1,0 +1,3 @@
+url: "https://sidekiq.org"
+plugins:
+  - jekyll-sitemap
