@@ -404,7 +404,7 @@ module Sidekiq
       opts[:queues] ||= []
       opts[:strict] = true if opts[:strict].nil?
       raise ArgumentError, "queues: #{queue} cannot be defined twice" if opts[:queues].include?(queue)
-      [weight.to_i, 1].max.times { opts[:queues] << queue }
+      [weight.to_i, 1].max.times { opts[:queues] << queue.to_s }
       opts[:strict] = false if weight.to_i > 0
     end
 
