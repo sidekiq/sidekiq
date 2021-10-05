@@ -176,12 +176,12 @@ module Sidekiq
         @opts = opts
 
         # ActiveJob compatibility
-        interval = @opts.delete(:wait_until)
+        interval = @opts.delete(:wait_until) || @opts.delete(:wait)
         at(interval) if interval
       end
 
       def set(options)
-        interval = options.delete(:wait_until)
+        interval = options.delete(:wait_until) || options.delete(:wait)
         @opts.merge!(options)
         at(interval) if interval
         self
@@ -204,6 +204,7 @@ module Sidekiq
         int = interval.to_f
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
+        # Optimization to enqueue something now that is scheduled to go out now or in the past
         @opts["at"] = ts if ts > now
         self
       end

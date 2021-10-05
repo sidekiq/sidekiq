@@ -16,9 +16,12 @@ describe Sidekiq::Worker do
     it "provides basic ActiveJob compatibilility" do
       q = Sidekiq::ScheduledSet.new
       assert_equal 0, q.size
-      jid = SetWorker.set(wait_until: 1.hour).perform_async(123)
+      jid = SetWorker.set(wait_until: 1.hour.from_now).perform_async(123)
       assert jid
       assert_equal 1, q.size
+      jid = SetWorker.set(wait: 1.hour).perform_async(123)
+      assert jid
+      assert_equal 2, q.size
 
       q = Sidekiq::Queue.new("foo")
       assert_equal 0, q.size

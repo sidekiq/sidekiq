@@ -21,7 +21,7 @@ end
 require "sidekiq/middleware/current_attributes"
 Sidekiq::CurrentAttributes.persist(Myapp::Current) # Your AS::CurrentAttributes singleton
 ```
-- Implement `queue_as` and `wait_until` for ActiveJob compatibility [#5003]
+- Implement `queue_as`, `wait` and `wait_until` for ActiveJob compatibility [#5003]
 - Retry Redis operation if we get an `UNBLOCKED` Redis error. [#4985]
 - Run existing signal traps, if any, before running Sidekiq's trap. [#4991]
 
