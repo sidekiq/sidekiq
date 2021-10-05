@@ -95,7 +95,7 @@ module Sidekiq
       return [] if args.empty? # no jobs to push
 
       at = items.delete("at")
-      raise ArgumentError, "Job 'at' must be a Numeric or an Array of Numeric timestamps" if at && (Array(at).empty? || !Array(at).all?{|entry| entry.is_a?(Numeric) })
+      raise ArgumentError, "Job 'at' must be a Numeric or an Array of Numeric timestamps" if at && (Array(at).empty? || !Array(at).all? { |entry| entry.is_a?(Numeric) })
       raise ArgumentError, "Job 'at' Array must have same size as 'args' Array" if at.is_a?(Array) && at.size != args.size
 
       normed = normalize_item(items)
