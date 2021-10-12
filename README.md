@@ -84,7 +84,7 @@ See the [Sidekiq support page](https://sidekiq.org/support.html) for details.
 License
 -----------------
 
-Please see [LICENSE](https://github.com/mperham/sidekiq/blob/master/LICENSE) for licensing details.
+Please see [LICENSE](https://github.com/mperham/sidekiq/blob/main/LICENSE) for licensing details.
 
 
 Author

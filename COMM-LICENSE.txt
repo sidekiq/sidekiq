@@ -76,7 +76,7 @@ In no event will Contributed Systems' liability exceed the Software license pric
 
 13.1 Entire Agreement. This Agreement sets forth our entire agreement with respect to the Software and the subject matter hereof and supersedes all prior and contemporaneous understandings and agreements whether written or oral.
 
-13.2 Amendment. Contributed Systems reserves the right, in its sole discretion, to amend this Agreement from time. Amendments to this Agreement can be located at: https://github.com/mperham/sidekiq/blob/master/COMM-LICENSE.
+13.2 Amendment. Contributed Systems reserves the right, in its sole discretion, to amend this Agreement from time. Amendments to this Agreement can be located at: https://github.com/mperham/sidekiq/blob/main/COMM-LICENSE.
 
 13.3 Assignment. You may not assign this Agreement or any of its rights under this Agreement without the prior written consent of Contributed Systems and any attempted assignment without such consent shall be void.
 
