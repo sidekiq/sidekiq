@@ -46,7 +46,7 @@ See the [Getting Started wiki page](https://github.com/mperham/sidekiq/wiki/Gett
 You can watch [this Youtube playlist](https://www.youtube.com/playlist?list=PLjeHh2LSCFrWGT5uVjUuFKAcrcj5kSai1) to learn all about
 Sidekiq and see its features in action.  Here's the Web UI:
 
-![Web UI](https://github.com/mperham/sidekiq/raw/master/examples/web-ui.png)
+![Web UI](https://github.com/mperham/sidekiq/raw/main/examples/web-ui.png)
 
 
 Want to Upgrade?
