@@ -42,7 +42,7 @@ module Sidekiq
         # This is the integration code necessary so that if code uses `Rails.logger.info "Hello"`,
         # it will appear in the Sidekiq console with all of the job context. See #5021 and
         # https://github.com/rails/rails/blob/b5f2b550f69a99336482739000c58e4e04e033aa/railties/lib/rails/commands/server/server_command.rb#L82-L84
-        unless ::ActiveSupport::Logger.logger_outputs_to?(::Rails.logger, STDOUT)
+        unless ::ActiveSupport::Logger.logger_outputs_to?(::Rails.logger, $stdout)
           ::Rails.logger.extend(::ActiveSupport::Logger.broadcast(::Sidekiq.logger))
         end
       end
