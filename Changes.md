@@ -5,6 +5,9 @@
 HEAD
 ---------
 
+- **FEATURE**: Sidekiq.logger has been enhanced so any `Rails.logger`
+  output in jobs now shows up in the Sidekiq console. Remove any logger
+  hacks in your initializer and see if it Just Works™ now. [#5021]
 - **FEATURE**: Add `Sidekiq::Job` alias for `Sidekiq::Worker`, to better
   reflect industry standard terminology. You can now do this:
 ```ruby
