@@ -94,12 +94,10 @@ module Sidekiq
       def log_info(options)
         redacted = "REDACTED"
 
-        # deep clone so we can muck with these options all we want
-        #
-        # exclude SSL params from dump-and-load because some information isn't
-        # safely dumpable in current Rubies
-        keys = options.keys
-        keys.delete(:ssl_params)
+        # Deep clone so we can muck with these options all we want and exclude
+        # params from dump-and-load that may contain objects that Marshal is
+        # unable to safely dump.
+        keys = options.keys - [:logger, :ssl_params]
         scrubbed_options = Marshal.load(Marshal.dump(options.slice(*keys)))
         if scrubbed_options[:url] && (uri = URI.parse(scrubbed_options[:url])) && uri.password
           uri.password = redacted
