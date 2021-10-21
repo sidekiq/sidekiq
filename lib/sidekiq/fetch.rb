@@ -79,9 +79,10 @@ module Sidekiq
       if @strictly_ordered_queues
         @queues
       else
-        queues = @queues.shuffle!.uniq
-        queues << TIMEOUT
-        queues
+        permute = @queues.shuffle
+        permute.uniq!
+        permute << TIMEOUT
+        permute
       end
     end
   end
