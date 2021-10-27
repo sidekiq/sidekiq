@@ -266,18 +266,6 @@ table .table-checkbox label {
   .navbar .poll-wrapper {
     margin: 4px 4px 0 0;
   }
-
-  .navbar .dropdown-menu {
-    min-width: 120px;
-  }
-
-  .navbar .dropdown-menu a {
-    text-align: left;
-  }
-}
-
-.nav .dropdown {
-  display: none;
 }
 
 .navbar-footer .navbar ul.nav {

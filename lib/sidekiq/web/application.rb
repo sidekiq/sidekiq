@@ -91,8 +91,8 @@ module Sidekiq
 
       @count = (params["count"] || 25).to_i
       @queue = Sidekiq::Queue.new(@name)
-      (@current_page, @total_size, @messages) = page("queue:#{@name}", params["page"], @count, reverse: params["direction"] == "asc")
-      @messages = @messages.map { |msg| Sidekiq::JobRecord.new(msg, @name) }
+      (@current_page, @total_size, @jobs) = page("queue:#{@name}", params["page"], @count, reverse: params["direction"] == "asc")
+      @jobs = @jobs.map { |msg| Sidekiq::JobRecord.new(msg, @name) }
 
       erb(:queue)
     end
