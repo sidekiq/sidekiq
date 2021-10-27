@@ -41,24 +41,27 @@ ready(() => {
 
   updateFuzzyTimes();
 
-  document.querySelectorAll(".live-poll").forEach(node => {
-    node.addEventListener("click", event => {
-      if (localStorage.sidekiqLivePoll == "enabled") {
-        localStorage.sidekiqLivePoll = "disabled";
-        clearTimeout(livePollTimer);
-        livePollTimer = null;
-      } else {
-        localStorage.sidekiqLivePoll = "enabled";
-        livePollCallback();
-      }
+  var buttons = document.querySelectorAll(".live-poll");
+  if (buttons.length > 0) {
+    buttons.forEach(node => {
+      node.addEventListener("click", event => {
+        if (localStorage.sidekiqLivePoll == "enabled") {
+          localStorage.sidekiqLivePoll = "disabled";
+          clearTimeout(livePollTimer);
+          livePollTimer = null;
+        } else {
+          localStorage.sidekiqLivePoll = "enabled";
+          livePollCallback();
+        }
 
-      updateLivePollButton();
-    })
-  });
+        updateLivePollButton();
+      })
+    });
 
-  updateLivePollButton();
-  if (localStorage.sidekiqLivePoll == "enabled") {
-    scheduleLivePoll();
+    updateLivePollButton();
+    if (localStorage.sidekiqLivePoll == "enabled") {
+      scheduleLivePoll();
+    }
   }
 })
 
