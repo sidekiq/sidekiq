@@ -222,10 +222,8 @@ var updateFooterUTCTime = function(time) {
 }
 
 var pulseBeacon = function() {
-  //document.getElementById('beacon').classList.add('pulse');
-    //.delay(1000).queue(function(){
-    //$(this).removeClass('pulse').dequeue();
-  //});
+  document.getElementById('beacon').classList.add('pulse');
+  window.setTimeout(() => { document.getElementById('beacon').classList.remove('pulse'); }, 1000);
 }
 
 Number.prototype.numberWithDelimiter = function(delimiter) {
