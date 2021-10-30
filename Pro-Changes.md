@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Fix thread-safety issue with Sidekiq::Pro::Config
+- Allow job-specific options in Statsd metrics [#5037]
+
 5.2.4
 ---------
 
