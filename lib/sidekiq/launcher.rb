@@ -211,6 +211,8 @@ module Sidekiq
           Your Redis network connection is performing extremely poorly.
           Last RTT readings were #{RTT_READINGS.buffer.inspect}, ideally these should be < 1000.
           Ensure Redis is running in the same AZ or datacenter as Sidekiq.
+          If these values are close to 100,000, that means your Sidekiq process may be
+          CPU overloaded; see https://github.com/mperham/sidekiq/discussions/5039
         EOM
         RTT_READINGS.reset
       end
