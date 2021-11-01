@@ -46,10 +46,6 @@ form .btn-group .btn {
   .navbar .poll-wrapper {
     margin: 4px 0 0 4px;
   }
-
-  .navbar .dropdown-menu a {
-    text-align: right;
-  }
 }
 
 .navbar-footer .navbar ul.nav a.navbar-brand {
