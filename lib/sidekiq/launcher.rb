@@ -69,10 +69,12 @@ module Sidekiq
 
     private unless $TESTING
 
+    BEAT_PAUSE = 5
+
     def start_heartbeat
       loop do
         heartbeat
-        sleep 5
+        sleep BEAT_PAUSE
       end
       Sidekiq.logger.info("Heartbeat stopping...")
     end
