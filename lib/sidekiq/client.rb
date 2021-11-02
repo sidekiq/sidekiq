@@ -186,7 +186,7 @@ module Sidekiq
 
     def raw_push(payloads)
       @redis_pool.with do |conn|
-        conn.multi do
+        conn.pipelined do
           atomic_push(conn, payloads)
         end
       end
