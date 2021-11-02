@@ -241,6 +241,26 @@ module Sidekiq
         client_push("class" => self, "args" => args)
       end
 
+      ##
+      # Push a large number of jobs to Redis, while limiting the batch of
+      # each job payload to 1,000. This method helps cut down on the number
+      # of round trips to Redis, which can increase the performance of enqueueing
+      # large numbers of jobs.
+      #
+      # +items+ must be an Array of Arrays.
+      #
+      # For finer-grained control, use `Sidekiq::Client.push_bulk` directly.
+      #
+      # Example (3 Redis round trips):
+      #
+      #     SomeWorker.perform_async(1)
+      #     SomeWorker.perform_async(2)
+      #     SomeWorker.perform_async(3)
+      #
+      # Would instead become (1 Redis round trip):
+      #
+      #     SomeWorker.perform_bulk([[1], [2], [3]])
+      #
       def perform_bulk(items, batch_size: 1_000)
         items.each_slice(batch_size).flat_map do |slice|
           Sidekiq::Client.push_bulk("class" => self, "args" => slice)
