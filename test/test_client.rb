@@ -190,6 +190,11 @@ describe Sidekiq::Client do
         assert_equal 1_001, jids.size
       end
 
+      it 'pushes a large set of jobs with a different batch size' do
+        jids = MyWorker.perform_bulk((1..1_001).to_a.map { |x| Array(x) }, batch_size: 100)
+        assert_equal 1_001, jids.size
+      end
+
       it 'handles no jobs' do
         jids = MyWorker.perform_bulk([])
         assert_equal 0, jids.size

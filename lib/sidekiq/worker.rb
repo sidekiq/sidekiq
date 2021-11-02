@@ -235,8 +235,8 @@ module Sidekiq
         client_push("class" => self, "args" => args)
       end
 
-      def perform_bulk(items)
-        items.each_slice(1_000).flat_map do |slice|
+      def perform_bulk(items, batch_size: 1_000)
+        items.each_slice(batch_size).flat_map do |slice|
           Sidekiq::Client.push_bulk("class" => self, "args" => slice)
         end
       end
