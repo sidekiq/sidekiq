@@ -183,6 +183,26 @@ describe Sidekiq::Client do
         end
       end
     end
+
+    describe '.perform_bulk' do
+      it 'pushes a large set of jobs' do
+        jids = MyWorker.perform_bulk((1..1_001).to_a.map { |x| Array(x) })
+        assert_equal 1_001, jids.size
+      end
+
+      it 'handles no jobs' do
+        jids = MyWorker.perform_bulk([])
+        assert_equal 0, jids.size
+      end
+
+      describe 'errors' do
+        it 'raises ArgumentError with invalid params' do
+          assert_raises ArgumentError do
+            Sidekiq::Client.push_bulk('class' => 'MyWorker', 'args' => [[1], 2])
+          end
+        end
+      end
+    end
   end
 
   class BaseWorker
