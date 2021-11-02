@@ -80,5 +80,16 @@ describe Sidekiq::Worker do
       assert_equal 'foo', job['queue']
       assert_equal 'xyz', job['bar']
     end
+
+    it 'works with .perform_bulk' do
+      q = Sidekiq::Queue.new('bar')
+      assert_equal 0, q.size
+
+      set = SetWorker.set('queue' => 'bar')
+      jids = set.perform_bulk((1..1_001).to_a.map { |x| Array(x) })
+
+      assert_equal 1_001, q.size
+      assert_equal 1_001, jids.size
+    end
   end
 end
