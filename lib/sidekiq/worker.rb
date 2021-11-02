@@ -191,6 +191,12 @@ module Sidekiq
         @klass.client_push(@opts.merge("args" => args, "class" => @klass))
       end
 
+      def perform_bulk(args, batch_size: 1_000)
+        args.each_slice(batch_size).flat_map do |slice|
+          Sidekiq::Client.push_bulk(@opts.merge("class" => @klass, "args" => slice))
+        end
+      end
+
       # +interval+ must be a timestamp, numeric or something that acts
       #   numeric (like an activesupport time interval).
       def perform_in(interval, *args)
