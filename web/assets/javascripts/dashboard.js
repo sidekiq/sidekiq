@@ -228,16 +228,6 @@ var pulseBeacon = function() {
   window.setTimeout(() => { document.getElementById('beacon').classList.remove('pulse'); }, 1000);
 }
 
-Number.prototype.numberWithDelimiter = function(delimiter) {
-  var number = this + '', delimiter = delimiter || ',';
-  var split = number.split('.');
-  split[0] = split[0].replace(
-      /(\d)(?=(\d\d\d)+(?!\d))/g,
-      '$1' + delimiter
-  );
-  return split.join('.');
-};
-
 // Render graphs
 var renderGraphs = function() {
   realtimeGraph();

@@ -5,6 +5,8 @@
 HEAD
 ---------
 
+- **BREAK**: The Web UI has been refactored to remove jQuery. Any UI extensions
+  which use jQuery will break.
 - **FEATURE**: Sidekiq.logger has been enhanced so any `Rails.logger`
   output in jobs now shows up in the Sidekiq console. Remove any logger
   hacks in your initializer and see if it Just Works™ now. [#5021]
