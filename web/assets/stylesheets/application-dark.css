@@ -8,12 +8,12 @@ a,
 .summary_bar ul .count,
 span.current-interval,
 .navbar .navbar-brand {
-  color: #c04;
+  color: #d04;
 }
 
-.history-graph + .active,
+.history-graph.active,
 .beacon .dot {
-  background-color: #c04;
+  background-color: #d04;
 }
 
 .navbar .navbar-brand:hover {
@@ -88,7 +88,7 @@ input {
   background-color: #222;
   border: 1px solid #555;
 
-  box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 5px rgba(255, 255, 255, .5);
 }
 
 .navbar-default {
@@ -126,14 +126,14 @@ input {
 }
 
 .stat {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #888;
 }
 
 .rickshaw_graph .detail {
-  background: rgba(255, 255, 255, .1)
+  background: #888;
 }
 .rickshaw_graph .x_tick {
-  border-color: rgba(255, 255, 255, .2);
+  border-color: #888;
 }
 
 .rickshaw_graph .y_ticks.glow text {
