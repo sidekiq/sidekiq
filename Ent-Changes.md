@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+HEAD
+-------------
+
+- Remove jQuery usage in UI tabs
+- Pass exception to rate limiter backoff proc [#5024]
+
 2.2.3
 -------------
 
