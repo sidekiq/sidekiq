@@ -24,15 +24,10 @@ end
 require "sidekiq/middleware/current_attributes"
 Sidekiq::CurrentAttributes.persist(Myapp::Current) # Your AS::CurrentAttributes singleton
 ```
-- **FEATURE**: Introduce new method, `.perform_bulk` on `Sidekiq::Worker` that makes enqueuing
-  jobs in bulk adhere to Redis best practices by enqueuing 1,000 jobs per round trip. This
-  shares a similar args syntax to `Sidekiq::Client.push_bulk`. Batch sizes can be configured
-  with the optional `batch_size:` keyword argument.
+- **FEATURE**: Add `Sidekiq::Worker.perform_bulk` for enqueuing jobs in bulk,
+  similar to `Sidekiq::Client.push_bulk` [#5042]
 ```ruby
 MyJob.perform_bulk([[1], [2], [3]])
-
-# With a batch size provided:
-MyJob.perform_bulk([[1], [2], [3]], batch_size: 100)
 ```
 - Implement `queue_as`, `wait` and `wait_until` for ActiveJob compatibility [#5003]
 - Retry Redis operation if we get an `UNBLOCKED` Redis error. [#4985]
