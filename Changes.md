@@ -32,8 +32,9 @@ Sidekiq::CurrentAttributes.persist(Myapp::Current) # Your AS::CurrentAttributes 
 MyJob.perform_bulk([[1], [2], [3]])
 ```
 - Implement `queue_as`, `wait` and `wait_until` for ActiveJob compatibility [#5003]
-- Retry Redis operation if we get an `UNBLOCKED` Redis error. [#4985]
-- Run existing signal traps, if any, before running Sidekiq's trap. [#4991]
+- Scheduler now uses Lua to reduce Redis load and network roundtrips [#5044]
+- Retry Redis operation if we get an `UNBLOCKED` Redis error [#4985]
+- Run existing signal traps, if any, before running Sidekiq's trap [#4991]
 - Fix fetch bug when using weighted queues which caused Sidekiq to stop
   processing queues randomly [#5031]
 
