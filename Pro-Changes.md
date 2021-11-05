@@ -9,6 +9,14 @@ HEAD
 
 - Fix thread-safety issue with Sidekiq::Pro::Config
 - Allow job-specific options in Statsd metrics [#5037]
+```ruby
+# add to your initializer
+Sidekiq::Server::Middleware::Statsd.options = ->(klass, job, q) do
+  {tags: ["worker:#{klass}", "queue:#{q}"]}.tap do |h|
+    h[:tags] << "tenant:#{job['tenant_id']}" if job["tenant_id"]
+  end
+end
+```
 
 5.2.4
 ---------
