@@ -21,7 +21,7 @@
         <td class="delete-confirm">
           <form action="<%=root_path %>queues/<%= CGI.escape(queue.name) %>" method="post">
             <%= csrf_tag %>
-            <input class="btn btn-danger" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSureDeleteQueue', :queue => h(queue.name)) %>" />
+            <input class="btn btn-danger" type="submit" name="delete" title="This will delete all jobs within the queue, it will reappear if you push more jobs to it in the future." value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSureDeleteQueue', :queue => h(queue.name)) %>" />
 
             <% if Sidekiq.pro? %>
               <% if queue.paused? %>
