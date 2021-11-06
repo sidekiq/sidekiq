@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+5.3.0
 ---------
 
 - Fix thread-safety issue with Sidekiq::Pro::Config

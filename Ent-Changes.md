@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-HEAD
+2.3.0
 -------------
 
 - Remove jQuery usage in UI tabs
