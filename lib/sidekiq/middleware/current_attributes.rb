@@ -15,33 +15,37 @@ module Sidekiq
   #
   module CurrentAttributes
     class Save
-      def initialize(with:)
-        @klass = with
+      def initialize(cattr)
+        @klass = cattr
       end
 
       def call(_, job, _, _)
-        job["ctx"] = @klass.attributes
+        job["cattr"] = @klass.attributes
         yield
       end
     end
 
     class Load
-      def initialize(with:)
-        @klass = with
+      def initialize(cattr)
+        @klass = cattr
       end
 
       def call(_, job, _, &block)
-        @klass.set(job["ctx"], &block)
+        if job.has_key?("cattr")
+          @klass.set(job["cattr"], &block)
+        else
+          yield
+        end
       end
     end
 
     def self.persist(klass)
       Sidekiq.configure_client do |config|
-        config.client_middleware.add Save, with: klass
+        config.client_middleware.add Save, klass
       end
       Sidekiq.configure_server do |config|
-        config.client_middleware.add Save, with: klass
-        config.server_middleware.add Load, with: klass
+        config.client_middleware.add Save, klass
+        config.server_middleware.add Load, klass
       end
     end
   end

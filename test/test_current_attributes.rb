@@ -9,19 +9,19 @@ end
 
 class TestCurrentAttributes < Minitest::Test
   def test_save
-    cm = Sidekiq::CurrentAttributes::Save.new(with: Myapp::Current)
+    cm = Sidekiq::CurrentAttributes::Save.new(Myapp::Current)
     job = {}
     with_context(:user_id, 123) do
       cm.call(nil, job, nil, nil) do
-        assert_equal 123, job["ctx"][:user_id]
+        assert_equal 123, job["cattr"][:user_id]
       end
     end
   end
 
   def test_load
-    cm = Sidekiq::CurrentAttributes::Load.new(with: Myapp::Current)
+    cm = Sidekiq::CurrentAttributes::Load.new(Myapp::Current)
 
-    job = { "ctx" => { "user_id" => 123 } }
+    job = { "cattr" => { "user_id" => 123 } }
     assert_nil Myapp::Current.user_id
     cm.call(nil, job, nil) do
       assert_equal 123, Myapp::Current.user_id
@@ -32,18 +32,16 @@ class TestCurrentAttributes < Minitest::Test
   def test_persist
     begin
       Sidekiq::CurrentAttributes.persist(Myapp::Current)
-      Myapp::Current.user_id = 16
-
       job_hash = {}
-      Sidekiq.client_middleware.invoke(nil, job_hash, nil, nil) do
-        assert_equal 16, job_hash["ctx"][:user_id]
+      with_context(:user_id, 16) do
+        Sidekiq.client_middleware.invoke(nil, job_hash, nil, nil) do
+          assert_equal 16, job_hash["cattr"][:user_id]
+        end
       end
-
-      Myapp::Current.reset_all
 
       assert_nil Myapp::Current.user_id
       Sidekiq.server_middleware.invoke(nil, job_hash, nil) do
-        assert_equal 16, job_hash["ctx"][:user_id]
+        assert_equal 16, job_hash["cattr"][:user_id]
         assert_equal 16, Myapp::Current.user_id
       end
       assert_nil Myapp::Current.user_id

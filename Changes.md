@@ -5,6 +5,11 @@
 HEAD
 ---------
 
+- Fix keyword arguments error with CurrentAttributes on Ruby 3.0 [#5048]
+
+6.3.0
+---------
+
 - **BREAK**: The Web UI has been refactored to remove jQuery. Any UI extensions
   which use jQuery will break.
 - **FEATURE**: Sidekiq.logger has been enhanced so any `Rails.logger`
