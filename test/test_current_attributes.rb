@@ -32,6 +32,21 @@ class TestCurrentAttributes < Minitest::Test
   def test_persist
     begin
       Sidekiq::CurrentAttributes.persist(Myapp::Current)
+      Myapp::Current.user_id = 16
+
+      job_hash = {}
+      Sidekiq.client_middleware.invoke(nil, job_hash, nil, nil) do
+        assert_equal 16, job_hash["ctx"][:user_id]
+      end
+
+      Myapp::Current.reset_all
+
+      assert_nil Myapp::Current.user_id
+      Sidekiq.server_middleware.invoke(nil, job_hash, nil) do
+        assert_equal 16, job_hash["ctx"][:user_id]
+        assert_equal 16, Myapp::Current.user_id
+      end
+      assert_nil Myapp::Current.user_id
     ensure
       Sidekiq.client_middleware.clear
       Sidekiq.server_middleware.clear
