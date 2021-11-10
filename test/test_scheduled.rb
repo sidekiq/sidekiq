@@ -79,6 +79,30 @@ describe Sidekiq::Scheduled do
       end
     end
 
+    it 'should not enqueue jobs when terminate has been called' do
+      created_time  = Time.new(2013, 2, 3)
+      enqueued_time = Time.new(2013, 2, 4)
+
+      Time.stub(:now, created_time) do
+        @retry.schedule (enqueued_time - 60).to_f, @error_1.merge!('created_at' => created_time.to_f)
+        @scheduled.schedule (enqueued_time - 60).to_f, @future_1.merge!('created_at' => created_time.to_f)
+      end
+
+      Time.stub(:now, enqueued_time) do
+        @poller.terminate
+        @poller.enqueue
+
+        Sidekiq.redis do |conn|
+          %w(queue:queue_1 queue:queue_4).each do |queue_name|
+            assert_equal 0, conn.llen(queue_name)
+          end
+        end
+
+        assert_equal 1, @retry.size
+        assert_equal 1, @scheduled.size
+      end
+    end
+
     def with_sidekiq_option(name, value)
       _original, Sidekiq.options[name] = Sidekiq.options[name], value
       begin

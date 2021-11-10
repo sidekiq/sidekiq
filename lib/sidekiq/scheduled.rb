@@ -19,10 +19,11 @@ module Sidekiq
       LUA
 
       def initialize
+        @done = false
         @lua_zpopbyscore_sha = nil
       end
 
-      def enqueue_jobs(now = Time.now.to_f.to_s, sorted_sets = SETS)
+      def enqueue_jobs(sorted_sets = SETS)
         # A job's "score" in Redis is the time at which it should be processed.
         # Just check Redis for the set of jobs with a timestamp before now.
         Sidekiq.redis do |conn|
@@ -31,12 +32,16 @@ module Sidekiq
             # We need to go through the list one at a time to reduce the risk of something
             # going wrong between the time jobs are popped from the scheduled queue and when
             # they are pushed onto a work queue and losing the jobs.
-            while (job = zpopbyscore(conn, keys: [sorted_set], argv: [now]))
+            while !@done && (job = zpopbyscore(conn, keys: [sorted_set], argv: [Time.now.to_f.to_s]))
               Sidekiq::Client.push(Sidekiq.load_json(job))
               Sidekiq.logger.debug { "enqueued #{sorted_set}: #{job}" }
             end
           end
         end
+      end
+
+      def terminate
+        @done = true
       end
 
       private
@@ -74,6 +79,8 @@ module Sidekiq
       # Shut down this instance, will pause until the thread is dead.
       def terminate
         @done = true
+        @enq.terminate if @enq.respond_to?(:terminate)
+
         if @thread
           t = @thread
           @thread = nil
