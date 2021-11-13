@@ -192,6 +192,7 @@ module Sidekiq
       end
 
       def perform_bulk(args, batch_size: 1_000)
+        args = args.force if args.is_a?(Enumerator::Lazy)
         args.each_slice(batch_size).flat_map do |slice|
           Sidekiq::Client.push_bulk(@opts.merge("class" => @klass, "args" => slice))
         end
@@ -262,6 +263,7 @@ module Sidekiq
       #     SomeWorker.perform_bulk([[1], [2], [3]])
       #
       def perform_bulk(items, batch_size: 1_000)
+        items = items.force if items.is_a?(Enumerator::Lazy)
         items.each_slice(batch_size).flat_map do |slice|
           Sidekiq::Client.push_bulk("class" => self, "args" => slice)
         end
