@@ -207,6 +207,14 @@ describe Sidekiq::Client do
           end
         end
       end
+
+      describe 'lazy enumerator' do
+        it 'enqueues the jobs by evaluating the enumerator' do
+          lazy_array = (1..1_001).to_a.map { |x| Array(x) }.lazy
+          jids = MyWorker.perform_bulk(lazy_array)
+          assert_equal 1_001, jids.size
+        end
+      end
     end
   end
 
