@@ -92,4 +92,43 @@ describe Sidekiq::Worker do
       assert_equal 1_001, jids.size
     end
   end
+
+  describe '#perform_inline' do
+    $my_recorder = []
+
+    class MyCustomWorker
+      include Sidekiq::Worker
+
+      def perform(recorder)
+        $my_recorder << ['work_performed']
+      end
+    end
+
+    class MyCustomMiddleware
+      def initialize(name, recorder)
+        @name = name
+        @recorder = recorder
+      end
+  
+      def call(*args)
+        @recorder << "#{@name}-before"
+        response = yield
+        @recorder << "#{@name}-after"
+        return response
+      end
+    end
+
+    it 'executes middleware & runs job inline' do
+      server_chain = Sidekiq::Middleware::Chain.new
+      server_chain.add MyCustomMiddleware, "1-server", $my_recorder
+      client_chain = Sidekiq::Middleware::Chain.new
+      client_chain.add MyCustomMiddleware, "1-client", $my_recorder
+      Sidekiq.stub(:server_middleware, server_chain) do
+        Sidekiq.stub(:client_middleware, client_chain) do
+          MyCustomWorker.perform_inline($my_recorder)
+          assert_equal $my_recorder.flatten, %w(1-client-before 1-client-after 1-server-before work_performed 1-server-after)
+        end
+      end
+    end
+  end
 end

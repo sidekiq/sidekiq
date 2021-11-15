@@ -191,6 +191,22 @@ module Sidekiq
         @klass.client_push(@opts.merge("args" => args, "class" => @klass))
       end
 
+      # Inline execution of job's perform method after passing through Sidekiq.client_middleware and Sidekiq.server_middleware
+      def perform_inline(*args)
+        item = @opts.merge('args' => args, 'class' => @klass).transform_keys(&:to_s)
+        payload = Sidekiq::Client.new.payload_for_push(item)
+
+        msg = Sidekiq.load_json(Sidekiq.dump_json(payload))
+        klass = msg['class'].constantize
+        job = klass.new
+        job.jid = msg['jid']
+        msg['id'] ||= SecureRandom.hex(12)
+
+        Sidekiq.server_middleware.invoke(job, msg, msg['queue']) do
+          job.perform(*msg['args'])
+        end
+      end
+
       def perform_bulk(args, batch_size: 1_000)
         args.each_slice(batch_size).flat_map do |slice|
           Sidekiq::Client.push_bulk(@opts.merge("class" => @klass, "args" => slice))
@@ -239,6 +255,11 @@ module Sidekiq
 
       def perform_async(*args)
         client_push("class" => self, "args" => args)
+      end
+
+      # Inline execution of job's perform method after passing through Sidekiq.client_middleware and Sidekiq.server_middleware
+      def perform_inline(*args)
+        set({}).perform_inline(*args)
       end
 
       ##

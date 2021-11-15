@@ -67,13 +67,17 @@ module Sidekiq
     #   push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
     #
     def push(item)
-      normed = normalize_item(item)
-      payload = process_single(item["class"], normed)
+      payload = payload_for_push(item)
 
       if payload
         raw_push([payload])
         payload["jid"]
       end
+    end
+
+    def payload_for_push(item)
+      normed = normalize_item(item)
+      process_single(item["class"], normed)
     end
 
     ##
