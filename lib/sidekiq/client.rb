@@ -67,7 +67,8 @@ module Sidekiq
     #   push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
     #
     def push(item)
-      payload = payload_for_push(item)
+      normed = normalize_item(item)
+      payload = process_single(item["class"], normed)
 
       if payload
         raw_push([payload])
@@ -75,9 +76,19 @@ module Sidekiq
       end
     end
 
-    def payload_for_push(item)
+    def perform_inline(item)
       normed = normalize_item(item)
-      process_single(item["class"], normed)
+      payload = process_single(item["class"], normed)
+
+      msg = Sidekiq.load_json(Sidekiq.dump_json(payload))
+      klass = msg['class'].constantize
+      job = klass.new
+      job.jid = msg['jid']
+      msg['id'] ||= SecureRandom.hex(12)
+
+      Sidekiq.server_middleware.invoke(job, msg, msg['queue']) do
+        job.perform(*msg['args'])
+      end
     end
 
     ##
