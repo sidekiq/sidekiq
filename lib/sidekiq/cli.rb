@@ -380,7 +380,9 @@ module Sidekiq
     end
 
     def parse_config(path)
-      opts = YAML.load(ERB.new(File.read(path)).result) || {}
+      erb = ERB.new(File.read(path))
+      erb.filename = File.expand_path(path)
+      opts = YAML.load(erb.result) || {}
 
       if opts.respond_to? :deep_symbolize_keys!
         opts.deep_symbolize_keys!
