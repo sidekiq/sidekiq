@@ -198,10 +198,11 @@ describe Sidekiq::CLI do
             assert_equal 1, Sidekiq.options[:queues].count { |q| q == 'seldom' }
           end
 
-          it 'exposes ERB default __FILE__ and __dir__' do
+          it 'exposes ERB expected __FILE__ and __dir__' do
             given_path = './test/config__FILE__and__dir__.yml'
-            expected_file = '(erb)'
-            expected_dir = '.'
+            expected_file = File.expand_path(given_path)
+            # As per Ruby's Kernel module docs, __dir__ is equivalent to File.dirname(File.realpath(__FILE__))
+            expected_dir = File.dirname(File.realpath(expected_file))
 
             subject.parse(%W[sidekiq -C #{given_path}])
 
