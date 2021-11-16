@@ -190,7 +190,11 @@ module Sidekiq
       end
 
       def perform_async(*args)
-        @klass.client_push(@opts.merge("args" => args, "class" => @klass))
+        if @opts["sync"] == true
+          perform_inline(*args)
+        else
+          @klass.client_push(@opts.merge("args" => args, "class" => @klass))
+        end
       end
 
       # Explicit inline execution of a job. Returns nil if the job did not
@@ -228,6 +232,7 @@ module Sidekiq
         # modified state.
         true
       end
+      alias_method :perform_sync, :perform_inline
 
       def perform_bulk(args, batch_size: 1_000)
         result = args.each_slice(batch_size).flat_map do |slice|
@@ -278,7 +283,7 @@ module Sidekiq
       end
 
       def perform_async(*args)
-        client_push("class" => self, "args" => args)
+        Setter.new(self, {}).perform_async(*args)
       end
 
       # Inline execution of job's perform method after passing through Sidekiq.client_middleware and Sidekiq.server_middleware

@@ -2,6 +2,20 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
+HEAD
+---------
+
+- Add `perform_{inline,sync}` in Sidekiq::Job to run a job synchronously [#5061, hasan-ally]
+```ruby
+SomeJob.perform_async(args...)
+SomeJob.perform_sync(args...)
+SomeJob.perform_inline(args...)
+```
+  You can also dynamically redirect a job to run synchronously:
+```ruby
+SomeJob.set("sync": true).perform_async(args...) # will run via perform_inline
+```
+
 6.3.1
 ---------
 
