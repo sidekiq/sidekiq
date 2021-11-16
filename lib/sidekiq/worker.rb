@@ -171,6 +171,8 @@ module Sidekiq
     #     SomeWorker.set(queue: 'foo').perform_async(....)
     #
     class Setter
+      include Sidekiq::JobUtil
+
       def initialize(klass, opts)
         @klass = klass
         @opts = opts
@@ -191,10 +193,40 @@ module Sidekiq
         @klass.client_push(@opts.merge("args" => args, "class" => @klass))
       end
 
-      # Inline execution of job's perform method after passing through Sidekiq.client_middleware and Sidekiq.server_middleware
+      # Explicit inline execution of a job. Returns nil if the job did not
+      # execute, true otherwise.
       def perform_inline(*args)
-        item = @opts.merge('args' => args, 'class' => @klass).transform_keys(&:to_s)
-        Sidekiq::Client.new.perform_inline(item)
+        raw = @opts.merge("args" => args, "class" => @klass).transform_keys(&:to_s)
+
+        # validate and normalize payload
+        item = normalize_item(raw)
+        queue = item["queue"]
+
+        # run client-side middleware
+        result = Sidekiq.client_middleware.invoke(item["class"], item, queue, Sidekiq.redis_pool) do
+          item
+        end
+        return nil unless result
+
+        # round-trip the payload via JSON
+        msg = Sidekiq.load_json(Sidekiq.dump_json(item))
+
+        # prepare the job instance
+        klass = msg["class"].constantize
+        job = klass.new
+        job.jid = msg["jid"]
+        job.bid = msg["bid"] if job.respond_to?(:bid)
+
+        # run the job through server-side middleware
+        result = Sidekiq.server_middleware.invoke(job, msg, msg["queue"]) do
+          # perform it
+          job.perform(*msg["args"])
+          true
+        end
+        return nil unless result
+        # jobs do not return a result. they should store any
+        # modified state.
+        true
       end
 
       def perform_bulk(args, batch_size: 1_000)
@@ -249,8 +281,7 @@ module Sidekiq
 
       # Inline execution of job's perform method after passing through Sidekiq.client_middleware and Sidekiq.server_middleware
       def perform_inline(*args)
-        item = {"class" => self, "args" => args }
-        Sidekiq::Client.new.perform_inline(item)
+        Setter.new(self, {}).perform_inline(*args)
       end
 
       ##
