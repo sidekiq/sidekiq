@@ -15,6 +15,10 @@ SomeJob.perform_inline(args...)
 ```ruby
 SomeJob.set("sync": true).perform_async(args...) # will run via perform_inline
 ```
+- Replace Sidekiq::Worker `app/workers` generator with Sidekiq::Job `app/sidekiq` generator [#5055]
+```
+bin/rails generate sidekiq:job ProcessOrderJob
+```
 
 6.3.1
 ---------
