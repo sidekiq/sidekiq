@@ -2,26 +2,26 @@
 require_relative 'helper'
 require_relative 'dummy/config/environment'
 require 'rails/generators/test_case'
-require 'generators/sidekiq/worker_generator'
+require 'generators/sidekiq/job_generator'
 
-class WorkerGeneratorTest < Rails::Generators::TestCase
-  tests Sidekiq::Generators::WorkerGenerator
+class JobGeneratorTest < Rails::Generators::TestCase
+  tests Sidekiq::Generators::JobGenerator
   destination File.expand_path('../../tmp', __FILE__)
   setup :prepare_destination
 
   test 'all files are properly created' do
     run_generator ['foo']
-    assert_file 'app/workers/foo_worker.rb'
-    assert_file 'test/workers/foo_worker_test.rb'
+    assert_file 'app/sidekiq/foo_job.rb'
+    assert_file 'test/sidekiq/foo_job_test.rb'
   end
 
-  test 'gracefully handles extra worker suffix' do
-    run_generator ['foo_worker']
-    assert_no_file 'app/workers/foo_worker_worker.rb'
-    assert_no_file 'test/workers/foo_worker_worker_test.rb'
+  test 'gracefully handles extra job suffix' do
+    run_generator ['foo_job']
+    assert_no_file 'app/sidekiq/foo_job_job.rb'
+    assert_no_file 'test/sidekiq/foo_job_job_test.rb'
 
-    assert_file 'app/workers/foo_worker.rb'
-    assert_file 'test/workers/foo_worker_test.rb'
+    assert_file 'app/sidekiq/foo_job.rb'
+    assert_file 'test/sidekiq/foo_job_test.rb'
   end
 
   test 'respects rails config test_framework option' do
@@ -31,8 +31,8 @@ class WorkerGeneratorTest < Rails::Generators::TestCase
 
     run_generator ['foo']
 
-    assert_file 'app/workers/foo_worker.rb'
-    assert_no_file 'test/workers/foo_worker_test.rb'
+    assert_file 'app/sidekiq/foo_job.rb'
+    assert_no_file 'test/sidekiq/foo_job_test.rb'
   ensure
     Rails.application.config.generators do |g|
       g.test_framework :test_case
@@ -46,8 +46,8 @@ class WorkerGeneratorTest < Rails::Generators::TestCase
 
     run_generator ['foo']
 
-    assert_file 'app/workers/foo_worker.rb'
-    assert_file 'spec/workers/foo_worker_spec.rb'
+    assert_file 'app/sidekiq/foo_job.rb'
+    assert_file 'spec/sidekiq/foo_job_spec.rb'
   ensure
     Rails.application.config.generators do |g|
       g.test_framework :test_case
