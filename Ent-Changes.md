@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+HEAD
+-------------
+
+- Fix periodic jobs missing the "fallback" hour during DST changeover [#5049]
+
 2.3.0
 -------------
 
