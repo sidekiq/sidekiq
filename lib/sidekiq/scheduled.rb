@@ -47,7 +47,10 @@ module Sidekiq
       private
 
       def zpopbyscore(conn, keys: nil, argv: nil)
-        @lua_zpopbyscore_sha = conn.script(:load, LUA_ZPOPBYSCORE) if @lua_zpopbyscore_sha.nil?
+        if @lua_zpopbyscore_sha.nil?
+          raw_conn = conn.respond_to?(:redis) ? conn.redis : conn
+          @lua_zpopbyscore_sha = raw_conn.script(:load, LUA_ZPOPBYSCORE)
+        end
 
         conn.evalsha(@lua_zpopbyscore_sha, keys: keys, argv: argv)
       rescue Redis::CommandError => e
