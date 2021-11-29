@@ -6,6 +6,8 @@ module Sidekiq
     # These functions encapsulate various job utilities.
     # They must be simple and free from side effects.
 
+    JSON_SERIALIZABLE_TYPES = [String, Numeric, TrueClass, FalseClass, NilClass].freeze
+
     def validate(item)
       raise(ArgumentError, "Job must be a Hash with 'class' and 'args' keys: `#{item}`") unless item.is_a?(Hash) && item.key?("class") && item.key?("args")
       raise(ArgumentError, "Job args must be an Array: `#{item}`") unless item["args"].is_a?(Array)
@@ -14,9 +16,8 @@ module Sidekiq
       raise(ArgumentError, "Job tags must be an Array: `#{item}`") if item["tags"] && !item["tags"].is_a?(Array)
 
       if Sidekiq.options[:raise_on_complex_arguments]
-        klasses = [String, Numeric, TrueClass, FalseClass, NilClass]
         item["args"].each do |arg|
-          if klasses.none? { |klass| arg.is_a?(klass)}
+          if JSON_SERIALIZABLE_TYPES.none? { |klass| arg.is_a?(klass)}
             raise ArgumentError, 'Out of luck!'
           end
         end
