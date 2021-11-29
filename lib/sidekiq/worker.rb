@@ -283,6 +283,14 @@ module Sidekiq
       end
 
       def perform_async(*args)
+        if Sidekiq.options[:raise_on_complex_arguments]
+          klasses = [String, Numeric, TrueClass, FalseClass, NilClass]
+          args.each do |arg|
+            if klasses.none? { |klass| arg.is_a?(klass)}
+              raise ArgumentError, 'Out of luck!'
+            end
+          end
+        end
         Setter.new(self, {}).perform_async(*args)
       end
 

@@ -127,12 +127,13 @@ describe Sidekiq::Client do
       class InterestingWorker
         include Sidekiq::Worker
 
-        def perform(a_date, a_hash, a_struct)
+        def perform(a_symbol, a_date, a_hash, a_struct)
         end
       end
 
       it 'enqueues jobs with interesting arguments' do
         MyWorker.perform_async(
+          :symbol,
           Date.new(2021, 1, 1),
           { some: 'hash', 'with' => 'different_keys' },
           Struct.new(:x, :y).new(0, 0)
@@ -140,9 +141,14 @@ describe Sidekiq::Client do
       end
 
       describe 'config flag is set to strict' do
+        before do
+          Sidekiq.options[:raise_on_complex_arguments] = true
+        end
+
         it 'raises an error' do
           assert_raises ArgumentError do
             MyWorker.perform_async(
+              :symbol,
               Date.new(2021, 1, 1),
               { some: 'hash', 'with' => 'different_keys' },
               Struct.new(:x, :y).new(0, 0)
