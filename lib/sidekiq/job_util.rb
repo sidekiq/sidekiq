@@ -18,7 +18,7 @@ module Sidekiq
       if Sidekiq.options[:raise_on_complex_arguments]
         item["args"].each do |arg|
           if JSON_SERIALIZABLE_TYPES.none? { |klass| arg.is_a?(klass)}
-            raise ArgumentError, 'Out of luck!'
+            raise(ArgumentError, "Job argument must be a type safe to serialize to JSON, i.e. String, Numeric, TrueClass, FalseClass, NilClass")
           end
         end
       end
