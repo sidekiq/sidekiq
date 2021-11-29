@@ -12,6 +12,15 @@ module Sidekiq
       raise(ArgumentError, "Job class must be either a Class or String representation of the class name: `#{item}`") unless item["class"].is_a?(Class) || item["class"].is_a?(String)
       raise(ArgumentError, "Job 'at' must be a Numeric timestamp: `#{item}`") if item.key?("at") && !item["at"].is_a?(Numeric)
       raise(ArgumentError, "Job tags must be an Array: `#{item}`") if item["tags"] && !item["tags"].is_a?(Array)
+
+      if Sidekiq.options[:raise_on_complex_arguments]
+        klasses = [String, Numeric, TrueClass, FalseClass, NilClass]
+        item["args"].each do |arg|
+          if klasses.none? { |klass| arg.is_a?(klass)}
+            raise ArgumentError, 'Out of luck!'
+          end
+        end
+      end
     end
 
     def normalize_item(item)
