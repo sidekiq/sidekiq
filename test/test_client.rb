@@ -122,6 +122,35 @@ describe Sidekiq::Client do
       assert QueuedWorker.perform_async(1, 2)
       assert_equal 1, Sidekiq::Queue.new('flimflam').size
     end
+
+    describe 'argument checking' do
+      class InterestingWorker
+        include Sidekiq::Worker
+
+        def perform(a_date, a_hash, a_struct)
+        end
+      end
+
+      it 'enqueues jobs with interesting arguments' do
+        MyWorker.perform_async(
+          Date.new(2021, 1, 1),
+          { some: 'hash', 'with' => 'different_keys' },
+          Struct.new(:x, :y).new(0, 0)
+        )
+      end
+
+      describe 'config flag is set to strict' do
+        it 'raises an error' do
+          assert_raises ArgumentError do
+            MyWorker.perform_async(
+              Date.new(2021, 1, 1),
+              { some: 'hash', 'with' => 'different_keys' },
+              Struct.new(:x, :y).new(0, 0)
+            )
+          end
+        end
+      end
+    end
   end
 
   describe 'bulk' do
