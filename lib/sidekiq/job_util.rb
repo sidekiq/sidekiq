@@ -14,7 +14,7 @@ module Sidekiq
       raise(ArgumentError, "Job tags must be an Array: `#{item}`") if item["tags"] && !item["tags"].is_a?(Array)
 
       if Sidekiq.options[:raise_on_complex_arguments]
-        raise(ArgumentError, "Arguments must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices") unless JSON.load(JSON.dump(item['args'])) == item['args']
+        raise(ArgumentError, "Arguments must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices") unless JSON.parse(JSON.dump(item['args'])) == item['args']
       end
     end
 
