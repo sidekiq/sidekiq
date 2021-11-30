@@ -131,12 +131,28 @@ describe Sidekiq::Client do
         end
       end
 
+      class InterestingDeepWorker
+        include Sidekiq::Worker
+
+        def perform(a_deep_structure)
+        end
+      end
+
       it 'enqueues jobs with interesting arguments' do
-        MyWorker.perform_async(
+        InterestingWorker.perform_async(
           :symbol,
           Date.new(2021, 1, 1),
           { some: 'hash', 'with' => 'different_keys' },
           Struct.new(:x, :y).new(0, 0)
+        )
+      end
+
+      it 'works with a JSON-friendly deep, nested structure' do
+        InterestingDeepWorker.perform_async(
+          {
+            'foo' => ['a', 'b', 'c'],
+            'bar' => ['x', 'y', 'z']
+          }
         )
       end
 
@@ -147,12 +163,34 @@ describe Sidekiq::Client do
 
         it 'raises an error' do
           assert_raises ArgumentError do
-            MyWorker.perform_async(
+            InterestingWorker.perform_async(
               :symbol,
               Date.new(2021, 1, 1),
               { some: 'hash', 'with' => 'different_keys' },
               Struct.new(:x, :y).new(0, 0)
             )
+          end
+        end
+
+        it 'works with a JSON-friendly deep, nested structure' do
+          InterestingDeepWorker.perform_async(
+            {
+              'foo' => ['a', 'b', 'c'],
+              'bar' => ['x', 'y', 'z']
+            }
+          )
+        end
+
+        describe 'worker that takes deep, nested structures' do
+          it 'raises an error' do
+            assert_raises ArgumentError do
+              InterestingDeepWorker.perform_async(
+                {
+                  'foo' => [:a, :b, :c],
+                  bar: ['x', 'y', 'z']
+                }
+              )
+            end
           end
         end
       end
