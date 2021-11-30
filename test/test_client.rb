@@ -182,7 +182,7 @@ describe Sidekiq::Client do
         end
 
         describe 'worker that takes deep, nested structures' do
-          it 'raises an error' do
+          it 'raises an error on JSON-unfriendly structures' do
             assert_raises ArgumentError do
               InterestingDeepWorker.perform_async(
                 {
