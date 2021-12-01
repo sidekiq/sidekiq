@@ -24,7 +24,7 @@ module Sidekiq
         Sidekiq.logger.warn <<~EOM
           Job arguments do not serialize to JSON safely. This will raise an error in Sidekiq 7.0.
 
-          see https://github.com/mperham/sidekiq/wiki/Best-Practices or raise the error today
+          See https://github.com/mperham/sidekiq/wiki/Best-Practices or raise the error today
           by calling `Sidekiq.strict_mode!` during Sidekiq initialization.
         EOM
       end
