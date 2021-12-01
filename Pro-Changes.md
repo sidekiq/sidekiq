@@ -11,7 +11,7 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 - Allow job-specific options in Statsd metrics [#5037]
 ```ruby
 # add to your initializer
-Sidekiq::Server::Middleware::Statsd.options = ->(klass, job, q) do
+Sidekiq::Middleware::Server::Statsd.options = ->(klass, job, q) do
   {tags: ["worker:#{klass}", "queue:#{q}"]}.tap do |h|
     h[:tags] << "tenant:#{job['tenant_id']}" if job["tenant_id"]
   end
