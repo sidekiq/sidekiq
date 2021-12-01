@@ -161,6 +161,10 @@ describe Sidekiq::Client do
           Sidekiq.strict_mode!
         end
 
+        after do
+          Sidekiq.strict_mode!(false)
+        end
+
         it 'raises an error' do
           assert_raises ArgumentError do
             InterestingWorker.perform_async(

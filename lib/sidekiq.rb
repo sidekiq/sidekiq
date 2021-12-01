@@ -252,8 +252,8 @@ module Sidekiq
     options[:lifecycle_events][event] << block
   end
 
-  def self.strict_mode!
-    options[:raise_on_complex_arguments] = true
+  def self.strict_mode!(val = true)
+    options[:raise_on_complex_arguments] = val
   end
 
   # We are shutting down Sidekiq but what about workers that
