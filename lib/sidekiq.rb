@@ -252,6 +252,10 @@ module Sidekiq
     options[:lifecycle_events][event] << block
   end
 
+  def self.strict_mode!
+    options[:raise_on_complex_arguments] = true
+  end
+
   # We are shutting down Sidekiq but what about workers that
   # are working on some long job?  This error is
   # raised in workers that have not finished within the hard

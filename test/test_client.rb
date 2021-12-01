@@ -156,9 +156,9 @@ describe Sidekiq::Client do
         )
       end
 
-      describe 'config flag is set to strict' do
+      describe 'strict mode is enabled' do
         before do
-          Sidekiq.options[:raise_on_complex_arguments] = true
+          Sidekiq.strict_mode!
         end
 
         it 'raises an error' do
