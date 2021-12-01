@@ -14,7 +14,12 @@ module Sidekiq
       raise(ArgumentError, "Job tags must be an Array: `#{item}`") if item["tags"] && !item["tags"].is_a?(Array)
 
       if Sidekiq.options[:raise_on_complex_arguments] && !job_is_json_safe(item)
-        raise(ArgumentError, "Arguments must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices. To disable this error, remove Sidekiq.strict_mode! from your initializer.")
+        msg = <<~EOM
+          Arguments must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices.
+
+          To disable this error, remove `Sidekiq.strict_mode!` from your initializer.
+        EOM
+        raise(ArgumentError, msg)
       elsif Sidekiq.options[:environment] == "development" && !job_is_json_safe(item)
         Sidekiq.logger.warn <<~EOM
           Job arguments do not serialize to JSON safely. This will raise an error in Sidekiq 7.0.
