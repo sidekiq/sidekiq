@@ -13,14 +13,14 @@ module Sidekiq
       raise(ArgumentError, "Job 'at' must be a Numeric timestamp: `#{item}`") if item.key?("at") && !item["at"].is_a?(Numeric)
       raise(ArgumentError, "Job tags must be an Array: `#{item}`") if item["tags"] && !item["tags"].is_a?(Array)
 
-      if Sidekiq.options[:raise_on_complex_arguments] && !job_is_json_safe(item)
+      if Sidekiq.options[:raise_on_complex_arguments] && !json_safe?(item)
         msg = <<~EOM
           Arguments must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices.
 
           To disable this error, remove `Sidekiq.strict_mode!` from your initializer.
         EOM
         raise(ArgumentError, msg)
-      elsif Sidekiq.options[:environment] == "development" && !job_is_json_safe(item)
+      elsif Sidekiq.options[:environment] == "development" && !json_safe?(item)
         Sidekiq.logger.warn <<~EOM
           Job arguments do not serialize to JSON safely. This will raise an error in Sidekiq 7.0.
 
@@ -60,7 +60,7 @@ module Sidekiq
 
     private
 
-    def job_is_json_safe(item)
+    def json_safe?(item)
       JSON.parse(JSON.dump(item['args'])) == item['args']
     end
   end
