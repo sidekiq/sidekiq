@@ -173,12 +173,33 @@ describe Sidekiq::Client do
           Sidekiq.strict_mode!(false)
         end
 
-        it 'raises an error' do
+        it 'raises an error when using a symbol as an argument' do
           assert_raises ArgumentError do
             InterestingWorker.perform_async(
-              :symbol,
-              Date.new(2021, 1, 1),
-              { some: 'hash', 'with' => 'different_keys' },
+              :symbol
+            )
+          end
+        end
+
+        it 'raises an error when using a Date as an argument' do
+          assert_raises ArgumentError do
+            InterestingWorker.perform_async(
+              Date.new(2021, 1, 1)
+            )
+          end
+        end
+
+        it 'raises an error when using a Hash with symbols and string as keys as an argument' do
+          assert_raises ArgumentError do
+            InterestingWorker.perform_async(
+              { some: 'hash', 'with' => 'different_keys' }
+            )
+          end
+        end
+
+        it 'raises an error when using a Struct as an argument' do
+          assert_raises ArgumentError do
+            InterestingWorker.perform_async(
               Struct.new(:x, :y).new(0, 0)
             )
           end
