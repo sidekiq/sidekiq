@@ -127,28 +127,36 @@ describe Sidekiq::Client do
       class InterestingWorker
         include Sidekiq::Worker
 
-        def perform(a_symbol, a_date, a_hash, a_struct)
+        def perform(an_argument)
         end
       end
 
-      class InterestingDeepWorker
-        include Sidekiq::Worker
-
-        def perform(a_deep_structure)
-        end
-      end
-
-      it 'enqueues jobs with interesting arguments' do
+      it 'enqueues jobs with a symbol as an argument' do
         InterestingWorker.perform_async(
-          :symbol,
-          Date.new(2021, 1, 1),
-          { some: 'hash', 'with' => 'different_keys' },
+          :symbol
+        )
+      end
+
+      it 'enqueues jobs with a Date as an argument' do
+        InterestingWorker.perform_async(
+          Date.new(2021, 1, 1)
+        )
+      end
+
+      it 'enqueues jobs with a Hash with symbols and string as keys as an argument' do
+        InterestingWorker.perform_async(
+          { some: 'hash', 'with' => 'different_keys' }
+        )
+      end
+
+      it 'enqueues jobs with a Struct as an argument' do
+        InterestingWorker.perform_async(
           Struct.new(:x, :y).new(0, 0)
         )
       end
 
       it 'works with a JSON-friendly deep, nested structure' do
-        InterestingDeepWorker.perform_async(
+        InterestingWorker.perform_async(
           {
             'foo' => ['a', 'b', 'c'],
             'bar' => ['x', 'y', 'z']
@@ -177,7 +185,7 @@ describe Sidekiq::Client do
         end
 
         it 'works with a JSON-friendly deep, nested structure' do
-          InterestingDeepWorker.perform_async(
+          InterestingWorker.perform_async(
             {
               'foo' => ['a', 'b', 'c'],
               'bar' => ['x', 'y', 'z']
@@ -188,7 +196,7 @@ describe Sidekiq::Client do
         describe 'worker that takes deep, nested structures' do
           it 'raises an error on JSON-unfriendly structures' do
             assert_raises ArgumentError do
-              InterestingDeepWorker.perform_async(
+              InterestingWorker.perform_async(
                 {
                   'foo' => [:a, :b, :c],
                   bar: ['x', 'y', 'z']
