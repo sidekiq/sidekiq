@@ -132,20 +132,19 @@ describe Sidekiq::Client do
       end
 
       it 'enqueues jobs with a symbol as an argument' do
-        InterestingWorker.perform_async(
-          :symbol
-        )
+        InterestingWorker.perform_async(:symbol)
       end
 
       it 'enqueues jobs with a Date as an argument' do
-        InterestingWorker.perform_async(
-          Date.new(2021, 1, 1)
-        )
+        InterestingWorker.perform_async(Date.new(2021, 1, 1))
       end
 
       it 'enqueues jobs with a Hash with symbols and string as keys as an argument' do
         InterestingWorker.perform_async(
-          { some: 'hash', 'with' => 'different_keys' }
+          {
+            some: 'hash',
+            'with' => 'different_keys'
+          }
         )
       end
 
@@ -175,24 +174,23 @@ describe Sidekiq::Client do
 
         it 'raises an error when using a symbol as an argument' do
           assert_raises ArgumentError do
-            InterestingWorker.perform_async(
-              :symbol
-            )
+            InterestingWorker.perform_async(:symbol)
           end
         end
 
         it 'raises an error when using a Date as an argument' do
           assert_raises ArgumentError do
-            InterestingWorker.perform_async(
-              Date.new(2021, 1, 1)
-            )
+            InterestingWorker.perform_async(Date.new(2021, 1, 1))
           end
         end
 
         it 'raises an error when using a Hash with symbols and string as keys as an argument' do
           assert_raises ArgumentError do
             InterestingWorker.perform_async(
-              { some: 'hash', 'with' => 'different_keys' }
+              {
+                some: 'hash',
+                'with' => 'different_keys'
+              }
             )
           end
         end
