@@ -20,7 +20,7 @@ module Sidekiq
           To disable this error, remove `Sidekiq.strict_mode!` from your initializer.
         EOM
         raise(ArgumentError, msg)
-      elsif Sidekiq.options[:environment] == "development" && !json_safe?(item)
+      elsif !Sidekiq.options[:disable_complex_argument_warning] && Sidekiq.options[:environment] == "development" && !json_safe?(item)
         Sidekiq.logger.warn <<~EOM
           Job arguments do not serialize to JSON safely. This will raise an error in Sidekiq 7.0.
 
