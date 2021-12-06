@@ -266,7 +266,7 @@ module Sidekiq
 
       if File.directory?(options[:require])
         require "rails"
-        if ::Rails::VERSION::MAJOR < 5
+        if ::Rails::VERSION::MAJOR < 6
           raise "Sidekiq no longer supports this version of Rails"
         else
           require "sidekiq/rails"

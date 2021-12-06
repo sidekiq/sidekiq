@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
   gem.files = ["sidekiq.gemspec", "README.md", "Changes.md", "LICENSE"] + `git ls-files | grep -E '^(bin|lib|web)'`.split("\n")
   gem.name = "sidekiq"
   gem.version = Sidekiq::VERSION
-  gem.required_ruby_version = ">= 2.5.0"
+  gem.required_ruby_version = ">= 2.7.0"
 
   gem.metadata = {
     "homepage_uri" => "https://sidekiq.org",
@@ -22,7 +22,7 @@ Gem::Specification.new do |gem|
     "source_code_uri" => "https://github.com/mperham/sidekiq"
   }
 
-  gem.add_dependency "redis", ">= 4.2.0"
-  gem.add_dependency "connection_pool", ">= 2.2.2"
-  gem.add_dependency "rack", "~> 2.0"
+  gem.add_dependency "redis", ">= 4.5.0"
+  gem.add_dependency "connection_pool", ">= 2.2.5"
+  gem.add_dependency "rack", "~> 2.2"
 end
