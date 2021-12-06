@@ -5,6 +5,7 @@
 HEAD
 ---------
 
+- Note that Delayed Extensions will be removed in Sidekiq 7.0 [#5076]
 - Add `perform_{inline,sync}` in Sidekiq::Job to run a job synchronously [#5061, hasan-ally]
 ```ruby
 SomeJob.perform_async(args...)
