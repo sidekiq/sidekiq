@@ -347,22 +347,22 @@ module Sidekiq
     def display_args
       # Unwrap known wrappers so they show up in a human-friendly manner in the Web UI
       @display_args ||= if klass == "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
-                  job_args = self["wrapped"] ? args[0]["arguments"] : []
-                  if (self["wrapped"] || args[0]) == "ActionMailer::DeliveryJob"
-                    # remove MailerClass, mailer_method and 'deliver_now'
-                    job_args.drop(3)
-                  elsif (self["wrapped"] || args[0]) == "ActionMailer::MailDeliveryJob"
-                    # remove MailerClass, mailer_method and 'deliver_now'
-                    job_args.drop(3).first["args"]
-                  else
-                    job_args
-                  end
-                else
-                  if self["encrypt"]
-                    # no point in showing 150+ bytes of random garbage
-                    args[-1] = "[encrypted data]"
-                  end
-                  args
+        job_args = self["wrapped"] ? args[0]["arguments"] : []
+        if (self["wrapped"] || args[0]) == "ActionMailer::DeliveryJob"
+          # remove MailerClass, mailer_method and 'deliver_now'
+          job_args.drop(3)
+        elsif (self["wrapped"] || args[0]) == "ActionMailer::MailDeliveryJob"
+          # remove MailerClass, mailer_method and 'deliver_now'
+          job_args.drop(3).first["args"]
+        else
+          job_args
+        end
+      else
+        if self["encrypt"]
+          # no point in showing 150+ bytes of random garbage
+          args[-1] = "[encrypted data]"
+        end
+        args
       end
     end
 
