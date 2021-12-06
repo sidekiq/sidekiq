@@ -50,51 +50,6 @@ describe 'Sidekiq::Testing.fake' do
     assert_in_delta 10.seconds.from_now.to_f, DirectWorker.jobs.last['at'], 0.1
   end
 
-  describe 'delayed' do
-    require 'action_mailer'
-    class FooMailer < ActionMailer::Base
-      def bar(str)
-        str
-      end
-    end
-
-    before do
-      Sidekiq::Extensions.enable_delay!
-    end
-
-    it 'stubs the delay call on mailers' do
-      assert_equal 0, Sidekiq::Extensions::DelayedMailer.jobs.size
-      FooMailer.delay.bar('hello!')
-      assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs.size
-    end
-
-    class Something
-      def self.foo(x)
-      end
-    end
-
-    it 'stubs the delay call on classes' do
-      assert_equal 0, Sidekiq::Extensions::DelayedClass.jobs.size
-      Something.delay.foo(Date.today)
-      assert_equal 1, Sidekiq::Extensions::DelayedClass.jobs.size
-    end
-
-    class BarMailer < ActionMailer::Base
-      def foo(str)
-        str
-      end
-    end
-
-    it 'returns enqueued jobs for specific classes' do
-      assert_equal 0, Sidekiq::Extensions::DelayedClass.jobs.size
-      FooMailer.delay.bar('hello!')
-      BarMailer.delay.foo('hello!')
-      assert_equal 2, Sidekiq::Extensions::DelayedMailer.jobs.size
-      assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs_for(FooMailer).size
-      assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs_for(BarMailer).size
-    end
-  end
-
   it 'stubs the enqueue call' do
     assert_equal 0, EnqueuedWorker.jobs.size
     assert Sidekiq::Client.enqueue(EnqueuedWorker, 1, 2)

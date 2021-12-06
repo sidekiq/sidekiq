@@ -216,26 +216,11 @@ module Sidekiq
     #   HardWorker.perform_async(:something)
     #   assert_equal 1, HardWorker.jobs.size
     #   assert_equal :something, HardWorker.jobs[0]['args'][0]
-    #
-    #   assert_equal 0, Sidekiq::Extensions::DelayedMailer.jobs.size
-    #   MyMailer.delay.send_welcome_email('foo@example.com')
-    #   assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs.size
+    #   HardWorker.jobs.clear
     #
     # You can also clear and drain all workers' jobs:
     #
-    #   assert_equal 0, Sidekiq::Extensions::DelayedMailer.jobs.size
-    #   assert_equal 0, Sidekiq::Extensions::DelayedModel.jobs.size
-    #
-    #   MyMailer.delay.send_welcome_email('foo@example.com')
-    #   MyModel.delay.do_something_hard
-    #
-    #   assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs.size
-    #   assert_equal 1, Sidekiq::Extensions::DelayedModel.jobs.size
-    #
     #   Sidekiq::Worker.clear_all # or .drain_all
-    #
-    #   assert_equal 0, Sidekiq::Extensions::DelayedMailer.jobs.size
-    #   assert_equal 0, Sidekiq::Extensions::DelayedModel.jobs.size
     #
     # This can be useful to make sure jobs don't linger between tests:
     #
@@ -332,9 +317,6 @@ module Sidekiq
       end
     end
   end
-
-  Sidekiq::Extensions::DelayedMailer.extend(TestingExtensions) if defined?(Sidekiq::Extensions::DelayedMailer)
-  Sidekiq::Extensions::DelayedModel.extend(TestingExtensions) if defined?(Sidekiq::Extensions::DelayedModel)
 end
 
 if defined?(::Rails) && Rails.respond_to?(:env) && !Rails.env.test? && !$TESTING

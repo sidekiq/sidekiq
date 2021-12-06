@@ -330,12 +330,7 @@ module Sidekiq
     def display_class
       # Unwrap known wrappers so they show up in a human-friendly manner in the Web UI
       @klass ||= self["display_class"] || begin
-        case klass
-        when /\ASidekiq::Extensions::Delayed/
-          safe_load(args[0], klass) do |target, method, _|
-            "#{target}.#{method}"
-          end
-        when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
+        if klass == "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
           job_class = @item["wrapped"] || args[0]
           if job_class == "ActionMailer::DeliveryJob" || job_class == "ActionMailer::MailDeliveryJob"
             # MailerClass#mailer_method
@@ -351,12 +346,7 @@ module Sidekiq
 
     def display_args
       # Unwrap known wrappers so they show up in a human-friendly manner in the Web UI
-      @display_args ||= case klass
-                when /\ASidekiq::Extensions::Delayed/
-                  safe_load(args[0], args) do |_, _, arg|
-                    arg
-                  end
-                when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
+      @display_args ||= if klass == "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
                   job_args = self["wrapped"] ? args[0]["arguments"] : []
                   if (self["wrapped"] || args[0]) == "ActionMailer::DeliveryJob"
                     # remove MailerClass, mailer_method and 'deliver_now'
@@ -680,12 +670,8 @@ module Sidekiq
   # example where I'm selecting all jobs of a certain type
   # and deleting them from the schedule queue.
   #
-  #   r = Sidekiq::ScheduledSet.new
-  #   r.select do |scheduled|
-  #     scheduled.klass == 'Sidekiq::Extensions::DelayedClass' &&
-  #     scheduled.args[0] == 'User' &&
-  #     scheduled.args[1] == 'setup_new_subscriber'
-  #   end.map(&:delete)
+  # See the API wiki page for usage notes and examples.
+  #
   class ScheduledSet < JobSet
     def initialize
       super "schedule"
@@ -698,12 +684,8 @@ module Sidekiq
   # example where I'm selecting all jobs of a certain type
   # and deleting them from the retry queue.
   #
-  #   r = Sidekiq::RetrySet.new
-  #   r.select do |retri|
-  #     retri.klass == 'Sidekiq::Extensions::DelayedClass' &&
-  #     retri.args[0] == 'User' &&
-  #     retri.args[1] == 'setup_new_subscriber'
-  #   end.map(&:delete)
+  # See the API wiki page for usage notes and examples.
+  #
   class RetrySet < JobSet
     def initialize
       super "retry"
