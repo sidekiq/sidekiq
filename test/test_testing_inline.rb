@@ -39,38 +39,7 @@ describe "Sidekiq::Testing.inline" do
     end
   end
 
-  describe "delay" do
-    require "action_mailer"
-    class InlineFooMailer < ActionMailer::Base
-      def bar(str)
-        raise InlineError
-      end
-    end
-
-    class InlineFooModel
-      def self.bar(str)
-        raise InlineError
-      end
-    end
-
-    before do
-      Sidekiq::Extensions.enable_delay!
-    end
-
-    it "stubs the delay call on mailers" do
-      assert_raises InlineError do
-        InlineFooMailer.delay.bar("three")
-      end
-    end
-
-    it "stubs the delay call on models" do
-      assert_raises InlineError do
-        InlineFooModel.delay.bar("three")
-      end
-    end
-  end
-
-  it "stubs the enqueue call when in testing mode" do
+  it 'stubs the enqueue call when in testing mode' do
     assert Sidekiq::Client.enqueue(InlineWorker, true)
 
     assert_raises InlineError do

@@ -274,16 +274,7 @@ describe "API" do
       assert_nil job.enqueued_at
     end
 
-    it "unwraps delayed jobs" do
-      Sidekiq::Extensions.enable_delay!
-      Sidekiq::Queue.delay.foo(1, 2, 3)
-      q = Sidekiq::Queue.new
-      x = q.first
-      assert_equal "Sidekiq::Queue.foo", x.display_class
-      assert_equal [1, 2, 3], x.display_args
-    end
-
-    it "handles previous (raw Array) error_backtrace format" do
+    it 'handles previous (raw Array) error_backtrace format' do
       add_retry
       job = Sidekiq::RetrySet.new.first
       assert_equal ["line1", "line2"], job.error_backtrace
