@@ -19,18 +19,8 @@ describe Sidekiq do
     end
   end
 
-  describe "❨╯°□°❩╯︵┻━┻" do
-    before { $stdout = StringIO.new }
-    after { $stdout = STDOUT }
-
-    it "allows angry developers to express their emotional constitution and remedies it" do
-      Sidekiq.❨╯°□°❩╯︵┻━┻
-      assert_equal "Calm down, yo.\n", $stdout.string
-    end
-  end
-
-  describe "lifecycle events" do
-    it "handles invalid input" do
+  describe 'lifecycle events' do
+    it 'handles invalid input' do
       Sidekiq.options[:lifecycle_events][:startup].clear
 
       e = assert_raises ArgumentError do
