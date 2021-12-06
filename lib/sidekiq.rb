@@ -52,7 +52,7 @@ module Sidekiq
   }
 
   def self.❨╯°□°❩╯︵┻━┻
-    puts "Calm down, yo."
+    puts "Take a deep breath and count to ten..."
   end
 
   def self.options
