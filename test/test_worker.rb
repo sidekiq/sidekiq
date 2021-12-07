@@ -85,7 +85,7 @@ describe Sidekiq::Worker do
       q = Sidekiq::Queue.new('bar')
       assert_equal 0, q.size
 
-      set = SetWorker.set('queue' => 'bar')
+      set = SetWorker.set(queue: 'bar')
       jids = set.perform_bulk((1..1_001).to_a.map { |x| Array(x) })
 
       assert_equal 1_001, q.size
@@ -123,7 +123,7 @@ describe Sidekiq::Worker do
         @name = name
         @recorder = recorder
       end
-  
+
       def call(*args)
         @recorder << "#{@name}-before"
         response = yield
