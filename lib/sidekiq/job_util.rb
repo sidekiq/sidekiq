@@ -12,11 +12,26 @@ module Sidekiq
       raise(ArgumentError, "Job class must be either a Class or String representation of the class name: `#{item}`") unless item["class"].is_a?(Class) || item["class"].is_a?(String)
       raise(ArgumentError, "Job 'at' must be a Numeric timestamp: `#{item}`") if item.key?("at") && !item["at"].is_a?(Numeric)
       raise(ArgumentError, "Job tags must be an Array: `#{item}`") if item["tags"] && !item["tags"].is_a?(Array)
+
+      if Sidekiq.options[:raise_on_complex_arguments] && !json_safe?(item)
+        msg = <<~EOM
+          Arguments must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices.
+
+          To disable this error, remove `Sidekiq.strict_mode!` from your initializer.
+        EOM
+        raise(ArgumentError, msg)
+      elsif !Sidekiq.options[:disable_complex_argument_warning] && Sidekiq.options[:environment] == "development" && !json_safe?(item)
+        Sidekiq.logger.warn <<~EOM
+          Job arguments do not serialize to JSON safely. This will raise an error in Sidekiq 7.0.
+
+          See https://github.com/mperham/sidekiq/wiki/Best-Practices or raise the error today
+          by calling `Sidekiq.strict_mode!` during Sidekiq initialization.
+        EOM
+      end
     end
 
     def normalize_item(item)
       validate(item)
-      # raise(ArgumentError, "Arguments must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices") unless JSON.load(JSON.dump(item['args'])) == item['args']
 
       # merge in the default sidekiq_options for the item's class and/or wrapped element
       # this allows ActiveJobs to control sidekiq_options too.
@@ -41,6 +56,12 @@ module Sidekiq
       else
         Sidekiq.default_worker_options
       end
+    end
+
+    private
+
+    def json_safe?(item)
+      JSON.parse(JSON.dump(item['args'])) == item['args']
     end
   end
 end
