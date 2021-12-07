@@ -26,6 +26,7 @@ module Sidekiq
     timeout: 25,
     poll_interval_average: nil,
     average_scheduled_poll_interval: 5,
+    on_complex_arguments: :warn,
     error_handlers: [],
     death_handlers: [],
     lifecycle_events: {
@@ -252,8 +253,8 @@ module Sidekiq
     options[:lifecycle_events][event] << block
   end
 
-  def self.strict_mode!(val = true)
-    options[:raise_on_complex_arguments] = val
+  def self.strict_mode!(mode = :raise)
+    options[:on_complex_arguments] = mode
   end
 
   # We are shutting down Sidekiq but what about workers that
