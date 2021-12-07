@@ -5,6 +5,10 @@
 HEAD
 ---------
 
+- Add **strict argument checking** [#5071]
+  Sidekiq will now log a warning if JSON-unsafe arguments are passed to `perform_async`.
+  Add `Sidekiq.strict_mode!(false)` to your initializer to disable this warning.
+  This warning will switch to an exception in Sidekiq 7.0.
 - Note that Delayed Extensions will be removed in Sidekiq 7.0 [#5076]
 - Add `perform_{inline,sync}` in Sidekiq::Job to run a job synchronously [#5061, hasan-ally]
 ```ruby
