@@ -24,6 +24,7 @@ SomeJob.set("sync": true).perform_async(args...) # will run via perform_inline
 ```
 bin/rails generate sidekiq:job ProcessOrderJob
 ```
+- Fix job retries losing CurrentAttributes [#5090]
 
 6.3.1
 ---------
