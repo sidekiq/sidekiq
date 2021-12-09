@@ -34,9 +34,10 @@ module Sidekiq
   # The job will be retried this number of times before giving up. (If simply
   # 'true', Sidekiq retries 25 times)
   #
-  # We'll add a bit more data to the job to support retries:
+  # Relevant options for job retries:
   #
-  #  * 'queue' - the queue to use
+  #  * 'queue' - the queue for the initial job
+  #  * 'retry_queue' - if job retries should be pushed to a different (e.g. lower priority) queue
   #  * 'retry_count' - number of times we've retried so far.
   #  * 'error_message' - the message from the exception
   #  * 'error_class' - the exception class
@@ -52,11 +53,12 @@ module Sidekiq
   #
   #   Sidekiq.options[:max_retries] = 7
   #
-  # or limit the number of retries for a particular worker with:
+  # or limit the number of retries for a particular worker and send retries to
+  # a low priority queue with:
   #
   #    class MyWorker
   #      include Sidekiq::Worker
-  #      sidekiq_options :retry => 10
+  #      sidekiq_options retry: 10, retry_queue: 'low'
   #    end
   #
   class JobRetry
