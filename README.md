@@ -43,7 +43,7 @@ Getting Started
 -----------------
 
 See the [Getting Started wiki page](https://github.com/mperham/sidekiq/wiki/Getting-Started) and follow the simple setup process.
-You can watch [this Youtube playlist](https://www.youtube.com/playlist?list=PLjeHh2LSCFrWGT5uVjUuFKAcrcj5kSai1) to learn all about
+You can watch [this YouTube playlist](https://www.youtube.com/playlist?list=PLjeHh2LSCFrWGT5uVjUuFKAcrcj5kSai1) to learn all about
 Sidekiq and see its features in action.  Here's the Web UI:
 
 ![Web UI](https://github.com/mperham/sidekiq/raw/main/examples/web-ui.png)
