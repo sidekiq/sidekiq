@@ -252,7 +252,7 @@ module Sidekiq
     options[:lifecycle_events][event] << block
   end
 
-  def self.strict_mode!(mode = :raise)
+  def self.strict_args!(mode = :raise)
     options[:on_complex_arguments] = mode
   end
 
