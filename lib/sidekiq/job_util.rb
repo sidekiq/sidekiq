@@ -34,7 +34,7 @@ module Sidekiq
       # merge in the default sidekiq_options for the item's class and/or wrapped element
       # this allows ActiveJobs to control sidekiq_options too.
       defaults = normalized_hash(item["class"])
-      defaults = defaults.merge(item["wrapped"].get_sidekiq_options) if item["wrapped"].respond_to?("get_sidekiq_options")
+      defaults = defaults.merge(item["wrapped"].get_sidekiq_options) if item["wrapped"].respond_to?(:get_sidekiq_options)
       item = defaults.merge(item)
 
       raise(ArgumentError, "Job must include a valid queue name") if item["queue"].nil? || item["queue"] == ""
@@ -49,7 +49,7 @@ module Sidekiq
 
     def normalized_hash(item_class)
       if item_class.is_a?(Class)
-        raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item_class.ancestors.inspect}") unless item_class.respond_to?("get_sidekiq_options")
+        raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item_class.ancestors.inspect}") unless item_class.respond_to?(:get_sidekiq_options)
         item_class.get_sidekiq_options
       else
         Sidekiq.default_worker_options
