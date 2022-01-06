@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'sidekiq', :path => '..'
-gem 'rails'
+gem 'rails', "~> 6.1"
 gem 'puma'
 
 gem "redis-client"
