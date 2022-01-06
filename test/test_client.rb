@@ -163,13 +163,13 @@ describe Sidekiq::Client do
         )
       end
 
-      describe 'strict mode is enabled' do
+      describe 'strict args is enabled' do
         before do
-          Sidekiq.strict_mode!
+          Sidekiq.strict_args!
         end
 
         after do
-          Sidekiq.strict_mode!(false)
+          Sidekiq.strict_args!(false)
         end
 
         it 'raises an error when using a symbol as an argument' do
