@@ -9,7 +9,7 @@ GIT
 PATH
   remote: .
   specs:
-    sidekiq (6.3.1)
+    sidekiq (6.3.2)
       connection_pool (>= 2.2.5)
       rack (~> 2.2)
       redis (>= 4.5.1)
