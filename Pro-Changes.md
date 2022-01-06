@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Fix namespace issue with dogstatsd-ruby in Ruby 3+ [#5094]
+
 5.3.0
 ---------
 

@@ -122,6 +122,110 @@ describe Sidekiq::Client do
       assert QueuedWorker.perform_async(1, 2)
       assert_equal 1, Sidekiq::Queue.new('flimflam').size
     end
+
+    describe 'argument checking' do
+      class InterestingWorker
+        include Sidekiq::Worker
+
+        def perform(an_argument)
+        end
+      end
+
+      it 'enqueues jobs with a symbol as an argument' do
+        InterestingWorker.perform_async(:symbol)
+      end
+
+      it 'enqueues jobs with a Date as an argument' do
+        InterestingWorker.perform_async(Date.new(2021, 1, 1))
+      end
+
+      it 'enqueues jobs with a Hash with symbols and string as keys as an argument' do
+        InterestingWorker.perform_async(
+          {
+            some: 'hash',
+            'with' => 'different_keys'
+          }
+        )
+      end
+
+      it 'enqueues jobs with a Struct as an argument' do
+        InterestingWorker.perform_async(
+          Struct.new(:x, :y).new(0, 0)
+        )
+      end
+
+      it 'works with a JSON-friendly deep, nested structure' do
+        InterestingWorker.perform_async(
+          {
+            'foo' => ['a', 'b', 'c'],
+            'bar' => ['x', 'y', 'z']
+          }
+        )
+      end
+
+      describe 'strict mode is enabled' do
+        before do
+          Sidekiq.strict_mode!
+        end
+
+        after do
+          Sidekiq.strict_mode!(false)
+        end
+
+        it 'raises an error when using a symbol as an argument' do
+          assert_raises ArgumentError do
+            InterestingWorker.perform_async(:symbol)
+          end
+        end
+
+        it 'raises an error when using a Date as an argument' do
+          assert_raises ArgumentError do
+            InterestingWorker.perform_async(Date.new(2021, 1, 1))
+          end
+        end
+
+        it 'raises an error when using a Hash with symbols and string as keys as an argument' do
+          assert_raises ArgumentError do
+            InterestingWorker.perform_async(
+              {
+                some: 'hash',
+                'with' => 'different_keys'
+              }
+            )
+          end
+        end
+
+        it 'raises an error when using a Struct as an argument' do
+          assert_raises ArgumentError do
+            InterestingWorker.perform_async(
+              Struct.new(:x, :y).new(0, 0)
+            )
+          end
+        end
+
+        it 'works with a JSON-friendly deep, nested structure' do
+          InterestingWorker.perform_async(
+            {
+              'foo' => ['a', 'b', 'c'],
+              'bar' => ['x', 'y', 'z']
+            }
+          )
+        end
+
+        describe 'worker that takes deep, nested structures' do
+          it 'raises an error on JSON-unfriendly structures' do
+            assert_raises ArgumentError do
+              InterestingWorker.perform_async(
+                {
+                  'foo' => [:a, :b, :c],
+                  bar: ['x', 'y', 'z']
+                }
+              )
+            end
+          end
+        end
+      end
+    end
   end
 
   describe 'bulk' do

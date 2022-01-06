@@ -55,9 +55,6 @@ module Sidekiq
       fire_event(:quiet, reverse: true)
     end
 
-    # hack for quicker development / testing environment #2774
-    PAUSE_TIME = $stdout.tty? ? 0.1 : 0.5
-
     def stop(deadline)
       quiet
       fire_event(:shutdown, reverse: true)
@@ -69,12 +66,7 @@ module Sidekiq
       return if @workers.empty?
 
       logger.info { "Pausing to allow workers to finish..." }
-      remaining = deadline - ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
-      while remaining > PAUSE_TIME
-        return if @workers.empty?
-        sleep PAUSE_TIME
-        remaining = deadline - ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
-      end
+      wait_for(deadline) { @workers.empty? }
       return if @workers.empty?
 
       hard_shutdown
@@ -130,6 +122,12 @@ module Sidekiq
       cleanup.each do |processor|
         processor.kill
       end
+
+      # when this method returns, we immediately call `exit` which may not give
+      # the remaining threads time to run `ensure` blocks, etc. We pause here up
+      # to 3 seconds to give threads a minimal amount of time to run `ensure` blocks.
+      deadline = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) + 3
+      wait_for(deadline) { @workers.empty? }
     end
   end
 end

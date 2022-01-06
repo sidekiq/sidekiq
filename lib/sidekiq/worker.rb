@@ -235,8 +235,9 @@ module Sidekiq
       alias_method :perform_sync, :perform_inline
 
       def perform_bulk(args, batch_size: 1_000)
+        hash = @opts.transform_keys(&:to_s)
         result = args.each_slice(batch_size).flat_map do |slice|
-          Sidekiq::Client.push_bulk(@opts.merge("class" => @klass, "args" => slice))
+          Sidekiq::Client.push_bulk(hash.merge("class" => @klass, "args" => slice))
         end
 
         result.is_a?(Enumerator::Lazy) ? result.force : result

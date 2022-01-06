@@ -20,7 +20,12 @@ module Sidekiq
       end
 
       def call(_, job, _, _)
-        job["cattr"] = @klass.attributes
+        attrs = @klass.attributes
+        if job.has_key?("cattr")
+          job["cattr"].merge!(attrs)
+        else
+          job["cattr"] = attrs
+        end
         yield
       end
     end
