@@ -22,3 +22,7 @@ group :load_test do
   gem "hiredis"
   gem "toxiproxy"
 end
+
+gem "net-smtp", require: false
+gem "net-imap", require: false
+gem "net-pop", require: false
