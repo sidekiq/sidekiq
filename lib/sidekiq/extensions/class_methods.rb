@@ -16,8 +16,8 @@ module Sidekiq
       include Sidekiq::Worker
 
       def perform(yml)
-        (target, method_name, args) = YAML.load(yml)
-        target.__send__(method_name, *args)
+        (target, method_name, args, kwargs) = YAML.load(yml)
+        target.__send__(method_name, *args, **kwargs)
       end
     end
 

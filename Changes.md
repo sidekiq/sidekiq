@@ -26,6 +26,7 @@ bin/rails generate sidekiq:job ProcessOrderJob
 ```
 - Fix job retries losing CurrentAttributes [#5090]
 - Tweak shutdown to give long-running threads time to cleanup [#5095]
+- Add keyword arguments support in extensions
 
 6.3.1
 ---------

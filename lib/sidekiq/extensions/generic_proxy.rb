@@ -13,13 +13,13 @@ module Sidekiq
         @opts = options
       end
 
-      def method_missing(name, *args)
+      def method_missing(name, *args, **kwargs)
         # Sidekiq has a limitation in that its message must be JSON.
         # JSON can't round trip real Ruby objects so we use YAML to
         # serialize the objects to a String.  The YAML will be converted
         # to JSON and then deserialized on the other side back into a
         # Ruby object.
-        obj = [@target, name, args]
+        obj = [@target, name, args, kwargs]
         marshalled = ::YAML.dump(obj)
         if marshalled.size > SIZE_LIMIT
           ::Sidekiq.logger.warn { "#{@target}.#{name} job argument is #{marshalled.bytesize} bytes, you should refactor it to reduce the size" }
