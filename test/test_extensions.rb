@@ -16,7 +16,7 @@ describe Sidekiq::Extensions do
     end
 
     def self.long_class_method_with_optional_args(*arg, **kwargs)
-      raise "Should not be called!"
+      kwargs
     end
   end
 
@@ -38,6 +38,12 @@ describe Sidekiq::Extensions do
     assert_equal 1, q.size
     obj = YAML.load q.first['args'].first
     assert_equal({ with: :keywords }, obj.last)
+  end
+
+  it 'forwards the keyword arguments to perform' do
+    yml = "---\n- !ruby/class 'MyModel'\n- :long_class_method_with_optional_args\n- []\n- :with: :keywords\n"
+    result = Sidekiq::Extensions::DelayedClass.new.perform(yml)
+    assert_equal({ with: :keywords }, result)
   end
 
   it 'uses and stringifies specified options' do
@@ -70,7 +76,6 @@ describe Sidekiq::Extensions do
     end
 
     def greetings_with_optional_args(*arg, **kwargs)
-      raise "Should not be called!"
     end
   end
 
@@ -113,6 +118,7 @@ describe Sidekiq::Extensions do
     end
 
     def self.doit_with_optional_args(*arg, **kwargs)
+      kwargs
     end
   end
 
@@ -132,11 +138,18 @@ describe Sidekiq::Extensions do
     assert_equal({ with: :keywords }, obj.last)
   end
 
+  it 'forwards the keyword arguments to perform' do
+    yml = "---\n- !ruby/class 'SomeClass'\n- :doit_with_optional_args\n- []\n- :with: :keywords\n"
+    result = Sidekiq::Extensions::DelayedClass.new.perform(yml)
+    assert_equal({ with: :keywords }, result)
+  end
+
   module SomeModule
     def self.doit(arg)
     end
 
     def self.doit_with_optional_args(*arg, **kwargs)
+      kwargs
     end
   end
 
@@ -161,5 +174,11 @@ describe Sidekiq::Extensions do
     assert_equal 1, q.size
     obj = YAML.load q.first['args'].first
     assert_equal({ with: :keywords }, obj.last)
+  end
+
+  it 'forwards the keyword arguments to perform' do
+    yml = "---\n- !ruby/class 'SomeModule'\n- :doit_with_optional_args\n- []\n- :with: :keywords\n"
+    result = Sidekiq::Extensions::DelayedClass.new.perform(yml)
+    assert_equal({ with: :keywords }, result)
   end
 end
