@@ -36,6 +36,8 @@ describe Sidekiq::Extensions do
     MyModel.delay.long_class_method_with_optional_args(with: :keywords)
     assert_equal ['default'], Sidekiq::Queue.all.map(&:name)
     assert_equal 1, q.size
+    obj = YAML.load q.first['args'].first
+    assert_equal({ with: :keywords }, obj.last)
   end
 
   it 'uses and stringifies specified options' do
@@ -88,6 +90,8 @@ describe Sidekiq::Extensions do
     UserMailer.delay.greetings_with_optional_args(with: :keywords)
     assert_equal ['default'], Sidekiq::Queue.all.map(&:name)
     assert_equal 1, q.size
+    obj = YAML.load q.first['args'].first
+    assert_equal({ with: :keywords }, obj.last)
   end
 
   it 'allows delayed scheduling of AM mails' do
@@ -124,6 +128,8 @@ describe Sidekiq::Extensions do
     assert_equal 0, q.size
     SomeClass.delay.doit_with_optional_args(with: :keywords)
     assert_equal 1, q.size
+    obj = YAML.load q.first['args'].first
+    assert_equal({ with: :keywords }, obj.last)
   end
 
   module SomeModule
@@ -153,5 +159,7 @@ describe Sidekiq::Extensions do
     assert_equal 0, q.size
     SomeModule.delay.doit_with_optional_args(with: :keywords)
     assert_equal 1, q.size
+    obj = YAML.load q.first['args'].first
+    assert_equal({ with: :keywords }, obj.last)
   end
 end
