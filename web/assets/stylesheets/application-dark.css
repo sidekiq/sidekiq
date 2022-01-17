@@ -1,6 +1,6 @@
 html, body {
-  background-color: #333 !important;
-  color: #ddd;
+  background-color: #171717 !important;
+  color: #DEDEDE;
 }
 
 a,
@@ -30,15 +30,15 @@ span.current-interval,
 
 .navbar-inverse {
   background-color: #222;
-  border-color: #555;
+  border-color: #444;
 }
 
 table {
-  background-color: #282828;
+  background-color: #1D1D1D;
 }
 
 .table-striped > tbody > tr:nth-of-type(odd) {
-  background-color: #333;
+  background-color: #2E2E2E;
 }
 
 .table-bordered,
@@ -48,7 +48,7 @@ table {
 .table-bordered > tfoot > tr > th,
 .table-bordered > thead > tr > td,
 .table-bordered > thead > tr > th {
-  border: 1px solid #555;
+  border: 1px solid #444;
 }
 
 .table-hover > tbody > tr:hover {
@@ -72,9 +72,7 @@ table {
   background-color: #31708f;
 }
 
-a:link,
-a:active,
-a:hover {
+a:link, a:active, a:hover, a:visited {
   color: #ddd;
 }
 
@@ -85,15 +83,13 @@ input {
 }
 
 .summary_bar .summary {
-  background-color: #222;
-  border: 1px solid #555;
-
-  box-shadow: 0 0 5px rgba(255, 255, 255, .5);
+  background-color: #232323;
+  border: 1px solid #444;
 }
 
 .navbar-default {
-  background-color: #222;
-  border-color: #555;
+  background-color: #0F0F0F;
+  border-color: #444;
 }
 
 .navbar-default .navbar-nav > .active > a,
@@ -112,7 +108,7 @@ input {
 .pagination > li > span {
   color: #ddd;
   background-color: #333;
-  border-color: #555;
+  border-color: #444;
 }
 .pagination > .disabled > a,
 .pagination > .disabled > a:focus,
@@ -122,7 +118,7 @@ input {
 .pagination > .disabled > span:hover {
   color: #ddd;
   background-color: #333;
-  border-color: #555;
+  border-color: #444;
 }
 
 .stat {
