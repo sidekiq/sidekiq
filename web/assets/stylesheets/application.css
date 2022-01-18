@@ -265,18 +265,6 @@ table .table-checkbox label {
   .navbar .poll-wrapper {
     margin: 4px 4px 0 0;
   }
-
-  .navbar .dropdown-menu {
-    min-width: 120px;
-  }
-
-  .navbar .dropdown-menu a {
-    text-align: left;
-  }
-}
-
-.nav .dropdown {
-  display: none;
 }
 
 .navbar-footer .navbar ul.nav {
@@ -500,7 +488,7 @@ div.interval-slider input {
 
 @keyframes beacon-dot-pulse {
   from {
-    background-color: #80002d;
+    background-color: #50002d;
     box-shadow: 0 0 9px #666;
   }
   50% {
@@ -508,7 +496,7 @@ div.interval-slider input {
     box-shadow: 0 0 18px #666;
   }
   to {
-    background-color: #80002d;
+    background-color: #50002d;
     box-shadow: 0 0 9px #666;
   }
 }
@@ -547,7 +535,6 @@ div.interval-slider input {
 }
 
 .history-graph {
-  font-size: 0.8em;
   padding: 3px;
   border-radius: 3px;
 }
@@ -631,7 +618,7 @@ div.interval-slider input {
     position: absolute;
     top: 0;
     z-index: 2;
-    background: rgba(0, 0, 0, .1);
+    background: rgba(0, 0, 0, .9);
     bottom: 0;
     width: 1px;
     transition: opacity .25s linear;
@@ -737,95 +724,15 @@ div.interval-slider input {
     top: 0;
     bottom: 0;
     width: 0;
-    border-left: 1px dotted rgba(0, 0, 0, .2);
+    border-left: 1px dotted rgba(0, 0, 0, .5);
     pointer-events: none
 }
 .rickshaw_graph .x_tick .title {
     position: absolute;
-    font-size: 12px;
     font-family: Arial, sans-serif;
-    opacity: .5;
     white-space: nowrap;
     margin-left: 3px;
     bottom: 1px
-}
-.rickshaw_annotation_timeline {
-    height: 1px;
-    border-top: 1px solid #e0e0e0;
-    margin-top: 10px;
-    position: relative
-}
-.rickshaw_annotation_timeline .annotation {
-    position: absolute;
-    height: 6px;
-    width: 6px;
-    margin-left: -2px;
-    top: -3px;
-    border-radius: 5px;
-    background-color: rgba(0, 0, 0, .25)
-}
-.rickshaw_graph .annotation_line {
-    position: absolute;
-    top: 0;
-    bottom: -6px;
-    width: 0;
-    border-left: 2px solid rgba(0, 0, 0, .3);
-    display: none
-}
-.rickshaw_graph .annotation_line.active {
-    display: block
-}
-.rickshaw_graph .annotation_range {
-    background: rgba(0, 0, 0, .1);
-    display: none;
-    position: absolute;
-    top: 0;
-    bottom: -6px
-}
-.rickshaw_graph .annotation_range.active {
-    display: block
-}
-.rickshaw_graph .annotation_range.active.offscreen {
-    display: none
-}
-.rickshaw_annotation_timeline .annotation .content {
-    background: #fff;
-    color: #000;
-    opacity: .9;
-    padding: 5px;
-    box-shadow: 0 0 2px rgba(0, 0, 0, .8);
-    border-radius: 3px;
-    position: relative;
-    z-index: 20;
-    font-size: 12px;
-    padding: 6px 8px 8px;
-    top: 18px;
-    left: -11px;
-    width: 160px;
-    display: none;
-    cursor: pointer
-}
-.rickshaw_annotation_timeline .annotation .content:before {
-    content: "\25b2";
-    position: absolute;
-    top: -11px;
-    color: #fff;
-    text-shadow: 0 -1px 1px rgba(0, 0, 0, .8)
-}
-.rickshaw_annotation_timeline .annotation.active,
-.rickshaw_annotation_timeline .annotation:hover {
-    background-color: rgba(0, 0, 0, .8);
-    cursor: none
-}
-.rickshaw_annotation_timeline .annotation .content:hover {
-    z-index: 50
-}
-.rickshaw_annotation_timeline .annotation.active .content {
-    display: block
-}
-.rickshaw_annotation_timeline .annotation:hover .content {
-    display: block;
-    z-index: 50
 }
 .rickshaw_graph .y_axis,
 .rickshaw_graph .x_axis_d3 {
@@ -878,7 +785,6 @@ div.interval-slider input {
 }
 .rickshaw_legend {
     font-family: Arial;
-    font-size: 12px;
     color: #fff;
     background: #404040;
     display: inline-block;
@@ -921,10 +827,8 @@ div.interval-slider input {
 }
 .rickshaw_legend .action {
     margin-right: .2em;
-    font-size: 10px;
-    opacity: .2;
+    opacity: .5;
     cursor: pointer;
-    font-size: 14px
 }
 .rickshaw_legend .line.disabled {
     opacity: .4

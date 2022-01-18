@@ -3,10 +3,13 @@ source "https://rubygems.org"
 gemspec
 
 gem "rake"
-gem "redis-namespace", github: "resque/redis-namespace", branch: :master
+gem "redis-namespace"
 gem "rails", ">= 6.0.2"
 gem "sqlite3", platforms: :ruby
 gem "activerecord-jdbcsqlite3-adapter", platforms: :jruby
+
+# mail dependencies
+gem "net-smtp", platforms: :mri, require: false
 
 group :test do
   gem "minitest"
@@ -15,7 +18,7 @@ group :test do
 end
 
 group :development, :test do
-  gem "standard"
+  gem "standard", require: false
 end
 
 group :load_test do

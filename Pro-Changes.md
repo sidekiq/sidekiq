@@ -1,8 +1,27 @@
 # Sidekiq Pro Changelog
 
-[Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
+[Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
+
+HEAD
+---------
+
+- Fix namespace issue with dogstatsd-ruby in Ruby 3+ [#5094]
+
+5.3.0
+---------
+
+- Fix thread-safety issue with Sidekiq::Pro::Config
+- Allow job-specific options in Statsd metrics [#5037]
+```ruby
+# add to your initializer
+Sidekiq::Middleware::Server::Statsd.options = ->(klass, job, q) do
+  {tags: ["worker:#{klass}", "queue:#{q}"]}.tap do |h|
+    h[:tags] << "tenant:#{job['tenant_id']}" if job["tenant_id"]
+  end
+end
+```
 
 5.2.4
 ---------

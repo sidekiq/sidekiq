@@ -5,11 +5,31 @@ describe Sidekiq::Worker do
 
     class SetWorker
       include Sidekiq::Worker
-      sidekiq_options :queue => :foo, 'retry' => 12
+      queue_as :foo
+      sidekiq_options 'retry' => 12
     end
 
     def setup
       Sidekiq.redis {|c| c.flushdb }
+    end
+
+    it "provides basic ActiveJob compatibilility" do
+      q = Sidekiq::ScheduledSet.new
+      assert_equal 0, q.size
+      jid = SetWorker.set(wait_until: 1.hour.from_now).perform_async(123)
+      assert jid
+      assert_equal 1, q.size
+      jid = SetWorker.set(wait: 1.hour).perform_async(123)
+      assert jid
+      assert_equal 2, q.size
+
+      q = Sidekiq::Queue.new("foo")
+      assert_equal 0, q.size
+      SetWorker.perform_async
+      assert_equal 1, q.size
+
+      SetWorker.set(queue: 'xyz').perform_async
+      assert_equal 1, Sidekiq::Queue.new("xyz").size
     end
 
     it 'can be memoized' do
@@ -59,6 +79,70 @@ describe Sidekiq::Worker do
       job = q.first
       assert_equal 'foo', job['queue']
       assert_equal 'xyz', job['bar']
+    end
+
+    it 'works with .perform_bulk' do
+      q = Sidekiq::Queue.new('bar')
+      assert_equal 0, q.size
+
+      set = SetWorker.set(queue: 'bar')
+      jids = set.perform_bulk((1..1_001).to_a.map { |x| Array(x) })
+
+      assert_equal 1_001, q.size
+      assert_equal 1_001, jids.size
+    end
+
+    describe '.perform_bulk and lazy enumerators' do
+      it 'evaluates lazy enumerators' do
+        q = Sidekiq::Queue.new('bar')
+        assert_equal 0, q.size
+
+        set = SetWorker.set('queue' => 'bar')
+        lazy_args = (1..1_001).to_a.map { |x| Array(x) }.lazy
+        jids = set.perform_bulk(lazy_args)
+
+        assert_equal 1_001, q.size
+        assert_equal 1_001, jids.size
+      end
+    end
+  end
+
+  describe '#perform_inline' do
+    $my_recorder = []
+
+    class MyCustomWorker
+      include Sidekiq::Worker
+
+      def perform(recorder)
+        $my_recorder << ['work_performed']
+      end
+    end
+
+    class MyCustomMiddleware
+      def initialize(name, recorder)
+        @name = name
+        @recorder = recorder
+      end
+
+      def call(*args)
+        @recorder << "#{@name}-before"
+        response = yield
+        @recorder << "#{@name}-after"
+        return response
+      end
+    end
+
+    it 'executes middleware & runs job inline' do
+      server_chain = Sidekiq::Middleware::Chain.new
+      server_chain.add MyCustomMiddleware, "1-server", $my_recorder
+      client_chain = Sidekiq::Middleware::Chain.new
+      client_chain.add MyCustomMiddleware, "1-client", $my_recorder
+      Sidekiq.stub(:server_middleware, server_chain) do
+        Sidekiq.stub(:client_middleware, client_chain) do
+          MyCustomWorker.perform_inline($my_recorder)
+          assert_equal $my_recorder.flatten, %w(1-client-before 1-client-after 1-server-before work_performed 1-server-after)
+        end
+      end
     end
   end
 end

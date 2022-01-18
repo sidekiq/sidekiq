@@ -113,6 +113,7 @@ module Sidekiq
 
       @stats[:workers_size] = workers_size
       @stats[:enqueued] = enqueued
+      @stats
     end
 
     def fetch_stats!
@@ -818,10 +819,10 @@ module Sidekiq
 
         hash = Sidekiq.load_json(info)
         yield Process.new(hash.merge("busy" => busy.to_i,
-                                     "beat" => at_s.to_f,
-                                     "quiet" => quiet,
-                                     "rss" => rss.to_i,
-                                     "rtt_us" => rtt.to_i))
+          "beat" => at_s.to_f,
+          "quiet" => quiet,
+          "rss" => rss.to_i,
+          "rtt_us" => rtt.to_i))
       end
     end
 

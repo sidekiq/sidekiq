@@ -18,7 +18,7 @@ Gem::Specification.new do |gem|
     "homepage_uri" => "https://sidekiq.org",
     "bug_tracker_uri" => "https://github.com/mperham/sidekiq/issues",
     "documentation_uri" => "https://github.com/mperham/sidekiq/wiki",
-    "changelog_uri" => "https://github.com/mperham/sidekiq/blob/master/Changes.md",
+    "changelog_uri" => "https://github.com/mperham/sidekiq/blob/main/Changes.md",
     "source_code_uri" => "https://github.com/mperham/sidekiq"
   }
 

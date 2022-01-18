@@ -1,8 +1,19 @@
 # Sidekiq Enterprise Changelog
 
-[Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
+[Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
+
+HEAD
+-------------
+
+- Fix periodic jobs missing the "fallback" hour during DST changeover [#5049]
+
+2.3.0
+-------------
+
+- Remove jQuery usage in UI tabs
+- Pass exception to rate limiter backoff proc [#5024]
 
 2.2.3
 -------------

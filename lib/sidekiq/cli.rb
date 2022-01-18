@@ -380,7 +380,9 @@ module Sidekiq
     end
 
     def parse_config(path)
-      opts = YAML.load(ERB.new(File.read(path)).result) || {}
+      erb = ERB.new(File.read(path))
+      erb.filename = File.expand_path(path)
+      opts = YAML.load(erb.result) || {}
 
       if opts.respond_to? :deep_symbolize_keys!
         opts.deep_symbolize_keys!
@@ -404,7 +406,7 @@ module Sidekiq
       opts[:queues] ||= []
       opts[:strict] = true if opts[:strict].nil?
       raise ArgumentError, "queues: #{queue} cannot be defined twice" if opts[:queues].include?(queue)
-      [weight.to_i, 1].max.times { opts[:queues] << queue }
+      [weight.to_i, 1].max.times { opts[:queues] << queue.to_s }
       opts[:strict] = false if weight.to_i > 0
     end
 

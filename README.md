@@ -43,10 +43,10 @@ Getting Started
 -----------------
 
 See the [Getting Started wiki page](https://github.com/mperham/sidekiq/wiki/Getting-Started) and follow the simple setup process.
-You can watch [this Youtube playlist](https://www.youtube.com/playlist?list=PLjeHh2LSCFrWGT5uVjUuFKAcrcj5kSai1) to learn all about
+You can watch [this YouTube playlist](https://www.youtube.com/playlist?list=PLjeHh2LSCFrWGT5uVjUuFKAcrcj5kSai1) to learn all about
 Sidekiq and see its features in action.  Here's the Web UI:
 
-![Web UI](https://github.com/mperham/sidekiq/raw/master/examples/web-ui.png)
+![Web UI](https://github.com/mperham/sidekiq/raw/main/examples/web-ui.png)
 
 
 Want to Upgrade?
@@ -84,7 +84,7 @@ See the [Sidekiq support page](https://sidekiq.org/support.html) for details.
 License
 -----------------
 
-Please see [LICENSE](https://github.com/mperham/sidekiq/blob/master/LICENSE) for licensing details.
+Please see [LICENSE](https://github.com/mperham/sidekiq/blob/main/LICENSE) for licensing details.
 
 
 Author

@@ -39,6 +39,19 @@ module Sidekiq
   module Util
     include ExceptionHandler
 
+    # hack for quicker development / testing environment #2774
+    PAUSE_TIME = $stdout.tty? ? 0.1 : 0.5
+
+    # Wait for the orblock to be true or the deadline passed.
+    def wait_for(deadline, &condblock)
+      remaining = deadline - ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+      while remaining > PAUSE_TIME
+        return if condblock.call
+        sleep PAUSE_TIME
+        remaining = deadline - ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+      end
+    end
+
     def watchdog(last_words)
       yield
     rescue Exception => ex

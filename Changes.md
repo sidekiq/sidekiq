@@ -1,10 +1,45 @@
 # Sidekiq Changes
 
-[Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
+[Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
 HEAD
 ---------
 
+- Add **strict argument checking** [#5071]
+  Sidekiq will now log a warning if JSON-unsafe arguments are passed to `perform_async`.
+  Add `Sidekiq.strict_args!(false)` to your initializer to disable this warning.
+  This warning will switch to an exception in Sidekiq 7.0.
+- Note that Delayed Extensions will be removed in Sidekiq 7.0 [#5076]
+- Add `perform_{inline,sync}` in Sidekiq::Job to run a job synchronously [#5061, hasan-ally]
+```ruby
+SomeJob.perform_async(args...)
+SomeJob.perform_sync(args...)
+SomeJob.perform_inline(args...)
+```
+  You can also dynamically redirect a job to run synchronously:
+```ruby
+SomeJob.set("sync": true).perform_async(args...) # will run via perform_inline
+```
+- Replace Sidekiq::Worker `app/workers` generator with Sidekiq::Job `app/sidekiq` generator [#5055]
+```
+bin/rails generate sidekiq:job ProcessOrderJob
+```
+- Fix job retries losing CurrentAttributes [#5090]
+- Tweak shutdown to give long-running threads time to cleanup [#5095]
+
+6.3.1
+---------
+
+- Fix keyword arguments error with CurrentAttributes on Ruby 3.0 [#5048]
+
+6.3.0
+---------
+
+- **BREAK**: The Web UI has been refactored to remove jQuery. Any UI extensions
+  which use jQuery will break.
+- **FEATURE**: Sidekiq.logger has been enhanced so any `Rails.logger`
+  output in jobs now shows up in the Sidekiq console. Remove any logger
+  hacks in your initializer and see if it Just Works™ now. [#5021]
 - **FEATURE**: Add `Sidekiq::Job` alias for `Sidekiq::Worker`, to better
   reflect industry standard terminology. You can now do this:
 ```ruby
@@ -19,10 +54,19 @@ end
 ```ruby
 # config/initializers/sidekiq.rb
 require "sidekiq/middleware/current_attributes"
-Sidekiq::CurrentAttributes.persist(Myapp::Current) # Your AS:CurrentAttributes singleton
+Sidekiq::CurrentAttributes.persist(Myapp::Current) # Your AS::CurrentAttributes singleton
 ```
-- Retry Redis operation if we get an `UNBLOCKED` Redis error. [#4985]
-- Run existing signal traps, if any, before running Sidekiq's trap. [#4991]
+- **FEATURE**: Add `Sidekiq::Worker.perform_bulk` for enqueuing jobs in bulk,
+  similar to `Sidekiq::Client.push_bulk` [#5042]
+```ruby
+MyJob.perform_bulk([[1], [2], [3]])
+```
+- Implement `queue_as`, `wait` and `wait_until` for ActiveJob compatibility [#5003]
+- Scheduler now uses Lua to reduce Redis load and network roundtrips [#5044]
+- Retry Redis operation if we get an `UNBLOCKED` Redis error [#4985]
+- Run existing signal traps, if any, before running Sidekiq's trap [#4991]
+- Fix fetch bug when using weighted queues which caused Sidekiq to stop
+  processing queues randomly [#5031]
 
 6.2.2
 ---------

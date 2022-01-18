@@ -91,8 +91,8 @@ module Sidekiq
 
       @count = (params["count"] || 25).to_i
       @queue = Sidekiq::Queue.new(@name)
-      (@current_page, @total_size, @messages) = page("queue:#{@name}", params["page"], @count, reverse: params["direction"] == "asc")
-      @messages = @messages.map { |msg| Sidekiq::JobRecord.new(msg, @name) }
+      (@current_page, @total_size, @jobs) = page("queue:#{@name}", params["page"], @count, reverse: params["direction"] == "asc")
+      @jobs = @jobs.map { |msg| Sidekiq::JobRecord.new(msg, @name) }
 
       erb(:queue)
     end
@@ -299,7 +299,7 @@ module Sidekiq
       return [404, {"Content-Type" => "text/plain", "X-Cascade" => "pass"}, ["Not Found"]] unless action
 
       app = @klass
-      resp = catch(:halt) do # rubocop:disable Standard/SemanticBlocks
+      resp = catch(:halt) do
         self.class.run_befores(app, action)
         action.instance_exec env, &action.block
       ensure

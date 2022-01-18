@@ -122,6 +122,110 @@ describe Sidekiq::Client do
       assert QueuedWorker.perform_async(1, 2)
       assert_equal 1, Sidekiq::Queue.new('flimflam').size
     end
+
+    describe 'argument checking' do
+      class InterestingWorker
+        include Sidekiq::Worker
+
+        def perform(an_argument)
+        end
+      end
+
+      it 'enqueues jobs with a symbol as an argument' do
+        InterestingWorker.perform_async(:symbol)
+      end
+
+      it 'enqueues jobs with a Date as an argument' do
+        InterestingWorker.perform_async(Date.new(2021, 1, 1))
+      end
+
+      it 'enqueues jobs with a Hash with symbols and string as keys as an argument' do
+        InterestingWorker.perform_async(
+          {
+            some: 'hash',
+            'with' => 'different_keys'
+          }
+        )
+      end
+
+      it 'enqueues jobs with a Struct as an argument' do
+        InterestingWorker.perform_async(
+          Struct.new(:x, :y).new(0, 0)
+        )
+      end
+
+      it 'works with a JSON-friendly deep, nested structure' do
+        InterestingWorker.perform_async(
+          {
+            'foo' => ['a', 'b', 'c'],
+            'bar' => ['x', 'y', 'z']
+          }
+        )
+      end
+
+      describe 'strict args is enabled' do
+        before do
+          Sidekiq.strict_args!
+        end
+
+        after do
+          Sidekiq.strict_args!(false)
+        end
+
+        it 'raises an error when using a symbol as an argument' do
+          assert_raises ArgumentError do
+            InterestingWorker.perform_async(:symbol)
+          end
+        end
+
+        it 'raises an error when using a Date as an argument' do
+          assert_raises ArgumentError do
+            InterestingWorker.perform_async(Date.new(2021, 1, 1))
+          end
+        end
+
+        it 'raises an error when using a Hash with symbols and string as keys as an argument' do
+          assert_raises ArgumentError do
+            InterestingWorker.perform_async(
+              {
+                some: 'hash',
+                'with' => 'different_keys'
+              }
+            )
+          end
+        end
+
+        it 'raises an error when using a Struct as an argument' do
+          assert_raises ArgumentError do
+            InterestingWorker.perform_async(
+              Struct.new(:x, :y).new(0, 0)
+            )
+          end
+        end
+
+        it 'works with a JSON-friendly deep, nested structure' do
+          InterestingWorker.perform_async(
+            {
+              'foo' => ['a', 'b', 'c'],
+              'bar' => ['x', 'y', 'z']
+            }
+          )
+        end
+
+        describe 'worker that takes deep, nested structures' do
+          it 'raises an error on JSON-unfriendly structures' do
+            assert_raises ArgumentError do
+              InterestingWorker.perform_async(
+                {
+                  'foo' => [:a, :b, :c],
+                  bar: ['x', 'y', 'z']
+                }
+              )
+            end
+          end
+        end
+      end
+    end
   end
 
   describe 'bulk' do
@@ -146,6 +250,11 @@ describe Sidekiq::Client do
       (first_jid, second_jid) = jids
       assert_equal first_at, Sidekiq::ScheduledSet.new.find_job(first_jid).at
       assert_equal second_at, Sidekiq::ScheduledSet.new.find_job(second_jid).at
+    end
+
+    it 'can push jobs scheduled using ActiveSupport::Duration' do
+      jids = Sidekiq::Client.push_bulk('class' => QueuedWorker, 'args' => [[1], [2]], 'at' => [1.seconds, 111.seconds])
+      assert_equal 2, jids.size
     end
 
     it 'returns the jids for the jobs' do
@@ -175,6 +284,39 @@ describe Sidekiq::Client do
 
         assert_raises ArgumentError do
           Sidekiq::Client.push_bulk('class' => QueuedWorker, 'args' => [[1]], 'at' => [Time.now.to_f, Time.now.to_f])
+        end
+      end
+    end
+
+    describe '.perform_bulk' do
+      it 'pushes a large set of jobs' do
+        jids = MyWorker.perform_bulk((1..1_001).to_a.map { |x| Array(x) })
+        assert_equal 1_001, jids.size
+      end
+
+      it 'pushes a large set of jobs with a different batch size' do
+        jids = MyWorker.perform_bulk((1..1_001).to_a.map { |x| Array(x) }, batch_size: 100)
+        assert_equal 1_001, jids.size
+      end
+
+      it 'handles no jobs' do
+        jids = MyWorker.perform_bulk([])
+        assert_equal 0, jids.size
+      end
+
+      describe 'errors' do
+        it 'raises ArgumentError with invalid params' do
+          assert_raises ArgumentError do
+            Sidekiq::Client.push_bulk('class' => 'MyWorker', 'args' => [[1], 2])
+          end
+        end
+      end
+
+      describe 'lazy enumerator' do
+        it 'enqueues the jobs by evaluating the enumerator' do
+          lazy_array = (1..1_001).to_a.map { |x| Array(x) }.lazy
+          jids = MyWorker.perform_bulk(lazy_array)
+          assert_equal 1_001, jids.size
         end
       end
     end
@@ -228,7 +370,7 @@ describe Sidekiq::Client do
 
     it 'allows sidekiq_options to point to different Redi' do
       conn = MiniTest::Mock.new
-      conn.expect(:multi, [0, 1])
+      conn.expect(:pipelined, [0, 1])
       DWorker.sidekiq_options('pool' => ConnectionPool.new(size: 1) { conn })
       DWorker.perform_async(1,2,3)
       conn.verify
@@ -236,7 +378,7 @@ describe Sidekiq::Client do
 
     it 'allows #via to point to same Redi' do
       conn = MiniTest::Mock.new
-      conn.expect(:multi, [0, 1])
+      conn.expect(:pipelined, [0, 1])
       sharded_pool = ConnectionPool.new(size: 1) { conn }
       Sidekiq::Client.via(sharded_pool) do
         Sidekiq::Client.via(sharded_pool) do
@@ -250,11 +392,11 @@ describe Sidekiq::Client do
       default = Sidekiq::Client.new.redis_pool
 
       moo = MiniTest::Mock.new
-      moo.expect(:multi, [0, 1])
+      moo.expect(:pipelined, [0, 1])
       beef = ConnectionPool.new(size: 1) { moo }
 
       oink = MiniTest::Mock.new
-      oink.expect(:multi, [0, 1])
+      oink.expect(:pipelined, [0, 1])
       pork = ConnectionPool.new(size: 1) { oink }
 
       Sidekiq::Client.via(beef) do
@@ -273,7 +415,7 @@ describe Sidekiq::Client do
 
     it 'allows Resque helpers to point to different Redi' do
       conn = MiniTest::Mock.new
-      conn.expect(:multi, []) { |*args, &block| block.call }
+      conn.expect(:pipelined, []) { |*args, &block| block.call }
       conn.expect(:zadd, 1, [String, Array])
       DWorker.sidekiq_options('pool' => ConnectionPool.new(size: 1) { conn })
       Sidekiq::Client.enqueue_in(10, DWorker, 3)

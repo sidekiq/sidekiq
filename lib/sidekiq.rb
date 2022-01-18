@@ -26,6 +26,7 @@ module Sidekiq
     timeout: 25,
     poll_interval_average: nil,
     average_scheduled_poll_interval: 5,
+    on_complex_arguments: :warn,
     error_handlers: [],
     death_handlers: [],
     lifecycle_events: {
@@ -250,6 +251,10 @@ module Sidekiq
     raise ArgumentError, "Symbols only please: #{event}" unless event.is_a?(Symbol)
     raise ArgumentError, "Invalid event name: #{event}" unless options[:lifecycle_events].key?(event)
     options[:lifecycle_events][event] << block
+  end
+
+  def self.strict_args!(mode = :raise)
+    options[:on_complex_arguments] = mode
   end
 
   # We are shutting down Sidekiq but what about workers that
