@@ -87,8 +87,6 @@ input {
 .summary_bar .summary {
   background-color: #222;
   border: 1px solid #555;
-
-  box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
 }
 
 .navbar-default {
