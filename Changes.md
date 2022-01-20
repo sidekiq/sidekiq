@@ -2,9 +2,10 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+6.4.0
 ---------
 
+- **SECURITY**: Validate input to avoid possible DoS in Web UI.
 - Add **strict argument checking** [#5071]
   Sidekiq will now log a warning if JSON-unsafe arguments are passed to `perform_async`.
   Add `Sidekiq.strict_args!(false)` to your initializer to disable this warning.
