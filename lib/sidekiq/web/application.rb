@@ -50,7 +50,10 @@ module Sidekiq
 
     get "/" do
       @redis_info = redis_info.select { |k, v| REDIS_KEYS.include? k }
-      stats_history = Sidekiq::Stats::History.new((params["days"] || 30).to_i)
+      days = (params["days"] || 30).to_i
+      return halt(401) if days < 1 || days > 180
+
+      stats_history = Sidekiq::Stats::History.new(days)
       @processed_history = stats_history.processed
       @failed_history = stats_history.failed
 

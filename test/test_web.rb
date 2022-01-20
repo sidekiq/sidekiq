@@ -748,8 +748,9 @@ describe Sidekiq::Web do
       basic_authorize 'a', 'b'
 
       get '/'
-
       assert_equal 200, last_response.status
+      get '/?days=1000000'
+      assert_equal 401, last_response.status
     end
   end
 

@@ -161,6 +161,8 @@ module Sidekiq
 
     class History
       def initialize(days_previous, start_date = nil)
+        # we only store five years of data in Redis
+        raise ArgumentError if days_previous < 1 || days_previous > (5 * 365)
         @days_previous = days_previous
         @start_date = start_date || Time.now.utc.to_date
       end
