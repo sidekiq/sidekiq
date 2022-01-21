@@ -314,8 +314,8 @@ module Sidekiq
       #
       #     SomeWorker.perform_bulk([[1], [2], [3]])
       #
-      def perform_bulk(*args)
-        Setter.new(self, {}).perform_bulk(*args)
+      def perform_bulk(*args, **kwargs)
+        Setter.new(self, {}).perform_bulk(*args, **kwargs)
       end
 
       # +interval+ must be a timestamp, numeric or something that acts
