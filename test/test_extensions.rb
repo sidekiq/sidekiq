@@ -33,11 +33,12 @@ describe Sidekiq::Extensions do
     assert_equal [], Sidekiq::Queue.all.map(&:name)
     q = Sidekiq::Queue.new
     assert_equal 0, q.size
-    MyModel.delay.long_class_method_with_optional_args(with: :keywords)
+    MyModel.delay.long_class_method_with_optional_args("argument_a", "argument_b", with: :keywords)
     assert_equal ['default'], Sidekiq::Queue.all.map(&:name)
     assert_equal 1, q.size
     obj = YAML.load q.first['args'].first
     assert_equal({ with: :keywords }, obj.last)
+    assert_equal([["argument_a", "argument_b"], { with: :keywords }], q.first.display_args)
   end
 
   it 'forwards the keyword arguments to perform' do
@@ -92,11 +93,12 @@ describe Sidekiq::Extensions do
     assert_equal [], Sidekiq::Queue.all.map(&:name)
     q = Sidekiq::Queue.new
     assert_equal 0, q.size
-    UserMailer.delay.greetings_with_optional_args(with: :keywords)
+    UserMailer.delay.greetings_with_optional_args("argument_a", "argument_b", with: :keywords)
     assert_equal ['default'], Sidekiq::Queue.all.map(&:name)
     assert_equal 1, q.size
     obj = YAML.load q.first['args'].first
     assert_equal({ with: :keywords }, obj.last)
+    assert_equal([["argument_a", "argument_b"], { with: :keywords }], q.first.display_args)
   end
 
   it 'allows delayed scheduling of AM mails' do
@@ -132,10 +134,11 @@ describe Sidekiq::Extensions do
   it 'allows delay of any ole class method with optional arguments' do
     q = Sidekiq::Queue.new
     assert_equal 0, q.size
-    SomeClass.delay.doit_with_optional_args(with: :keywords)
+    SomeClass.delay.doit_with_optional_args("argument_a", "argument_b", with: :keywords)
     assert_equal 1, q.size
     obj = YAML.load q.first['args'].first
     assert_equal({ with: :keywords }, obj.last)
+    assert_equal([["argument_a", "argument_b"], { with: :keywords }], q.first.display_args)
   end
 
   it 'forwards the keyword arguments to perform' do
@@ -170,10 +173,11 @@ describe Sidekiq::Extensions do
   it 'allows delay of any module class method with optional arguments' do
     q = Sidekiq::Queue.new
     assert_equal 0, q.size
-    SomeModule.delay.doit_with_optional_args(with: :keywords)
+    SomeModule.delay.doit_with_optional_args("argument_a", "argument_b", with: :keywords)
     assert_equal 1, q.size
     obj = YAML.load q.first['args'].first
     assert_equal({ with: :keywords }, obj.last)
+    assert_equal([["argument_a", "argument_b"], { with: :keywords }], q.first.display_args)
   end
 
   it 'forwards the keyword arguments to perform' do
