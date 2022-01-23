@@ -102,7 +102,7 @@ module Sidekiq
         _, exists, _, _, msg = Sidekiq.redis do |conn|
           conn.multi do
             conn.sadd('processes', key)
-            conn.exists(key)
+            conn.exists?(key)
             conn.hmset(key, 'info', to_json, 'busy', curstate.size, 'beat', Time.now.to_f, 'quiet', @done)
             conn.expire(key, 60)
             conn.rpop("#{key}-signals")
