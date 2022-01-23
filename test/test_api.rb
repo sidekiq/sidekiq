@@ -376,7 +376,7 @@ describe 'API' do
 
       Sidekiq.redis do |conn|
         refute conn.smembers('queues').include?('foo')
-        refute conn.exists('queue:foo')
+        refute conn.exists?('queue:foo')
       end
     end
 
