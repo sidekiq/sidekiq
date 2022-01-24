@@ -198,6 +198,26 @@ describe Sidekiq::CLI do
             assert_equal 1, Sidekiq.options[:queues].count { |q| q == 'seldom' }
           end
 
+          it 'accepts environment specific config with alias' do
+            subject.parse(%w[sidekiq -e staging -C ./test/config_with_alias.yml])
+            assert_equal './test/config_with_alias.yml', Sidekiq.options[:config_file]
+            refute Sidekiq.options[:verbose]
+            assert_equal './test/fake_env.rb', Sidekiq.options[:require]
+            assert_equal 'staging', Sidekiq.options[:environment]
+            assert_equal 50, Sidekiq.options[:concurrency]
+            assert_equal 2, Sidekiq.options[:queues].count { |q| q == 'very_often' }
+            assert_equal 1, Sidekiq.options[:queues].count { |q| q == 'seldom' }
+
+            subject.parse(%w[sidekiq -e production -C ./test/config_with_alias.yml])
+            assert_equal './test/config_with_alias.yml', Sidekiq.options[:config_file]
+            assert Sidekiq.options[:verbose]
+            assert_equal './test/fake_env.rb', Sidekiq.options[:require]
+            assert_equal 'production', Sidekiq.options[:environment]
+            assert_equal 50, Sidekiq.options[:concurrency]
+            assert_equal 2, Sidekiq.options[:queues].count { |q| q == 'very_often' }
+            assert_equal 1, Sidekiq.options[:queues].count { |q| q == 'seldom' }
+          end
+
           it 'exposes ERB expected __FILE__ and __dir__' do
             given_path = './test/config__FILE__and__dir__.yml'
             expected_file = File.expand_path(given_path)
