@@ -59,9 +59,9 @@ module Sidekiq
       end
 
       Sidekiq.redis do |conn|
-        conn.pipelined do
+        conn.pipelined do |pipeline|
           jobs_to_requeue.each do |queue, jobs|
-            conn.rpush(queue, jobs)
+            pipeline.rpush(queue, jobs)
           end
         end
       end
