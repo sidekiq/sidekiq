@@ -37,7 +37,6 @@ end
 
 # brew tap shopify/shopify
 # brew install toxiproxy
-# gem install toxiproxy
 # run `toxiproxy-server` in a separate terminal window.
 require 'toxiproxy'
 # simulate a non-localhost network for realer-world conditions.
