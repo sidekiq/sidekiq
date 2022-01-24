@@ -718,10 +718,10 @@ describe Sidekiq::Web do
     key = "#{hostname}:#{$$}"
     msg = "{\"queue\":\"default\",\"payload\":{\"retry\":true,\"queue\":\"default\",\"timeout\":20,\"backtrace\":5,\"class\":\"HardWorker\",\"args\":[\"bob\",10,5],\"jid\":\"2b5ad2b016f5e063a1c62872\"},\"run_at\":1361208995}"
     Sidekiq.redis do |conn|
-      conn.multi do
-        conn.sadd("processes", key)
-        conn.hmset(key, 'info', Sidekiq.dump_json('hostname' => 'foo', 'started_at' => Time.now.to_f, "queues" => []), 'at', Time.now.to_f, 'busy', 4)
-        conn.hmset("#{key}:workers", Time.now.to_f, msg)
+      conn.multi do |transaction|
+        transaction.sadd("processes", key)
+        transaction.hmset(key, 'info', Sidekiq.dump_json('hostname' => 'foo', 'started_at' => Time.now.to_f, "queues" => []), 'at', Time.now.to_f, 'busy', 4)
+        transaction.hmset("#{key}:workers", Time.now.to_f, msg)
       end
     end
   end
