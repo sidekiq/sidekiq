@@ -152,7 +152,7 @@ module Sidekiq
         # value and decrypt it
         token_length = masked_token.length / 2
         one_time_pad = masked_token[0...token_length]
-        encrypted_token = masked_token[token_length..-1]
+        encrypted_token = masked_token[token_length..]
         xor_byte_strings(one_time_pad, encrypted_token)
       end
 

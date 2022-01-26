@@ -109,7 +109,7 @@ module Sidekiq
 
       s = processes.size
       workers_size = pipe2_res[0...s].sum(&:to_i)
-      enqueued = pipe2_res[s..-1].sum(&:to_i)
+      enqueued = pipe2_res[s..].sum(&:to_i)
 
       @stats[:workers_size] = workers_size
       @stats[:enqueued] = enqueued
