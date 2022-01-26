@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "sidekiq/client"
+require "sidekiq/job_util"
 
 module Sidekiq
   ##
@@ -366,8 +367,14 @@ module Sidekiq
       @args = args
     end
     ruby2_keywords(:initialize)
+
     def serialize
-      @args.to_h.transform_keys(&:to_s)
+      item = @args.to_h.transform_keys(&:to_s)
+      normalize_item(item).merge("normalized" => true)
     end
+    
+    private
+    
+      include Sidekiq::JobUtil
   end
 end

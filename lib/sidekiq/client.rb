@@ -70,7 +70,7 @@ module Sidekiq
     #   push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
     #
     def push(item)
-      normed = normalize_item(item)
+      normed = item.key?("normalized") ? item : normalize_item(item)
       payload = process_single(item["class"], normed)
 
       if payload
