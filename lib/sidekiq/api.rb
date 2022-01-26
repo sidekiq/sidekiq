@@ -356,10 +356,10 @@ module Sidekiq
       @display_args ||= case klass
                 when /\ASidekiq::Extensions::Delayed/
                   safe_load(args[0], args) do |_, _, arg, kwarg|
-                    if kwarg.present?
-                      [arg, kwarg]
-                    else
+                    if !kwarg || kwarg.empty?
                       arg
+                    else
+                      [arg, kwarg]
                     end
                   end
                 when "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
