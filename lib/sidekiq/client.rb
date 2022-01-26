@@ -101,7 +101,7 @@ module Sidekiq
       raise ArgumentError, "Job 'at' must be a Numeric or an Array of Numeric timestamps" if at && (Array(at).empty? || !Array(at).all? { |entry| entry.is_a?(Numeric) })
       raise ArgumentError, "Job 'at' Array must have same size as 'args' Array" if at.is_a?(Array) && at.size != args.size
 
-      normed = normalize_item(items)
+      normed = items.key?("normalized") ? items : normalize_item(items)
       payloads = args.map.with_index { |job_args, index|
         copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12), "enqueued_at" => Time.now.to_f)
         copy["at"] = (at.is_a?(Array) ? at[index] : at) if at

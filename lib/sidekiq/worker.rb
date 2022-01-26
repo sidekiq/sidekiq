@@ -194,17 +194,14 @@ module Sidekiq
         if @opts["sync"] == true
           perform_inline(*args)
         else
-          @klass.client_push(@opts.merge("args" => args, "class" => @klass))
+          @klass.client_push(@klass.serialize(@opts, args))
         end
       end
 
       # Explicit inline execution of a job. Returns nil if the job did not
       # execute, true otherwise.
       def perform_inline(*args)
-        raw = @opts.merge("args" => args, "class" => @klass).transform_keys(&:to_s)
-
-        # validate and normalize payload
-        item = normalize_item(raw)
+        item = @klass.serialize(@opts, args)
         queue = item["queue"]
 
         # run client-side middleware
@@ -236,11 +233,10 @@ module Sidekiq
       alias_method :perform_sync, :perform_inline
 
       def perform_bulk(args, batch_size: 1_000)
-        hash = @opts.transform_keys(&:to_s)
         pool = Thread.current[:sidekiq_via_pool] || @klass.get_sidekiq_options["pool"] || Sidekiq.redis_pool
         client = Sidekiq::Client.new(pool)
         result = args.each_slice(batch_size).flat_map do |slice|
-          client.push_bulk(hash.merge("class" => @klass, "args" => slice))
+          client.push_bulk(@klass.serialize(@opts, slice))
         end
 
         result.is_a?(Enumerator::Lazy) ? result.force : result
@@ -326,12 +322,11 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        item = {"class" => self, "args" => args}
-
         # Optimization to enqueue something now that is scheduled to go out now or in the past
-        item["at"] = ts if ts > now
+        opts = {}
+        opts["at"] = ts if ts > now
 
-        client_push(item)
+        client_push(serialize(opts, args))
       end
       alias_method :perform_at, :perform_in
 
@@ -352,12 +347,14 @@ module Sidekiq
         super
       end
 
-      def client_push(item) # :nodoc:
+      def client_push(stringified_item) # :nodoc:
         pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options["pool"] || Sidekiq.redis_pool
-        job = new(*item)
-        stringified_item = job.serialize
 
         Sidekiq::Client.new(pool).push(stringified_item)
+      end
+
+      def serialize(opts, args)
+        new(*opts.merge("args" => args)).serialize
       end
     end
 
@@ -369,12 +366,12 @@ module Sidekiq
     ruby2_keywords(:initialize)
 
     def serialize
-      item = @args.to_h.transform_keys(&:to_s)
+      item = @args.to_h.transform_keys(&:to_s).merge("class" => self.class)
       normalize_item(item).merge("normalized" => true)
     end
-    
+
     private
-    
-      include Sidekiq::JobUtil
+
+    include Sidekiq::JobUtil
   end
 end
