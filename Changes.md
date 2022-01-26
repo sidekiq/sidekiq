@@ -477,7 +477,7 @@ Sidekiq::Middleware::Server::Logging -> Sidekiq::JobLogger
 - The `SomeWorker.set(options)` API was re-written to avoid thread-local state. [#2152]
 - Sidekiq Enterprise's encrypted jobs now display "[encrypted data]" in the Web UI instead
   of random hex bytes.
-- Please see the [5.0 Upgrade notes](5.0-Upgrade.md) for more detail.
+- Please see the [5.0 Upgrade notes](docs/5.0-Upgrade.md) for more detail.
 
 4.2.10
 -----------
@@ -695,7 +695,7 @@ Sidekiq::Queues.clear_all
 - Sidekiq's internals have been completely overhauled for performance
   and to remove dependencies.  This has resulted in major speedups, as
   [detailed on my blog](http://www.mikeperham.com/2015/10/14/optimizing-sidekiq/).
-- See the [4.0 upgrade notes](4.0-Upgrade.md) for more detail.
+- See the [4.0 upgrade notes](docs/4.0-Upgrade.md) for more detail.
 
 3.5.4
 -----------
@@ -962,7 +962,7 @@ sidekiq_options :dead => false, :retry => 5
 3.0.0
 -----------
 
-Please see [3.0-Upgrade.md](3.0-Upgrade.md) for more comprehensive upgrade notes.
+Please see [3.0-Upgrade.md](docs/3.0-Upgrade.md) for more comprehensive upgrade notes.
 
 - **Dead Job Queue** - jobs which run out of retries are now moved to a dead
   job queue.  These jobs must be retried manually or they will expire
@@ -1006,7 +1006,7 @@ Sidekiq::Client.via(ConnectionPool.new { Redis.new }) do
 end
 ```
   **Sharding support does require a breaking change to client-side
-middleware, see 3.0-Upgrade.md.**
+middleware, see docs/3.0-Upgrade.md.**
 - New Chinese, Greek, Swedish and Czech translations for the Web UI.
 - Updated most languages translations for the new UI features.
 - **Remove official Capistrano integration** - this integration has been

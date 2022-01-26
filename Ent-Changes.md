@@ -90,8 +90,7 @@ sidekiq.latency.#{name} -> sidekiq.queue.latency with tag queue:#{name}
 2.0.0
 -------------
 
-- Except for the [newly required credentials](https://github.com/mperham/sidekiq/issues/4232), Sidekiq Enterprise 2.0 does
-  not have any significant migration steps.
+- Except for the [newly required credentials](https://github.com/mperham/sidekiq/issues/4232), Sidekiq Enterprise 2.0 does not have any significant migration steps.
 - Sidekiq Enterprise must now be started with valid license credentials. [#4232]
 - Call `GC.compact` if possible in sidekiqswarm before forking [#4181]
 - Changes for forward-compatibility with Sidekiq 6.0.
