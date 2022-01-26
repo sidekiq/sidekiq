@@ -415,7 +415,7 @@ describe Sidekiq::Client do
 
     it 'allows Resque helpers to point to different Redi' do
       conn = MiniTest::Mock.new
-      conn.expect(:pipelined, []) { |*args, &block| block.call }
+      conn.expect(:pipelined, []) { |*args, &block| block.call(conn) }
       conn.expect(:zadd, 1, [String, Array])
       DWorker.sidekiq_options('pool' => ConnectionPool.new(size: 1) { conn })
       Sidekiq::Client.enqueue_in(10, DWorker, 3)

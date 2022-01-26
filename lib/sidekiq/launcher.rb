@@ -84,9 +84,9 @@ module Sidekiq
       # Note we don't stop the heartbeat thread; if the process
       # doesn't actually exit, it'll reappear in the Web UI.
       Sidekiq.redis do |conn|
-        conn.pipelined do
-          conn.srem("processes", identity)
-          conn.unlink("#{identity}:workers")
+        conn.pipelined do |pipeline|
+          pipeline.srem("processes", identity)
+          pipeline.unlink("#{identity}:workers")
         end
       end
     rescue
@@ -107,14 +107,14 @@ module Sidekiq
       nowdate = Time.now.utc.strftime("%Y-%m-%d")
       begin
         Sidekiq.redis do |conn|
-          conn.pipelined do
-            conn.incrby("stat:processed", procd)
-            conn.incrby("stat:processed:#{nowdate}", procd)
-            conn.expire("stat:processed:#{nowdate}", STATS_TTL)
+          conn.pipelined do |pipeline|
+            pipeline.incrby("stat:processed", procd)
+            pipeline.incrby("stat:processed:#{nowdate}", procd)
+            pipeline.expire("stat:processed:#{nowdate}", STATS_TTL)
 
-            conn.incrby("stat:failed", fails)
-            conn.incrby("stat:failed:#{nowdate}", fails)
-            conn.expire("stat:failed:#{nowdate}", STATS_TTL)
+            pipeline.incrby("stat:failed", fails)
+            pipeline.incrby("stat:failed:#{nowdate}", fails)
+            pipeline.expire("stat:failed:#{nowdate}", STATS_TTL)
           end
         end
       rescue => ex
@@ -138,16 +138,16 @@ module Sidekiq
         nowdate = Time.now.utc.strftime("%Y-%m-%d")
 
         Sidekiq.redis do |conn|
-          conn.multi do
-            conn.incrby("stat:processed", procd)
-            conn.incrby("stat:processed:#{nowdate}", procd)
-            conn.expire("stat:processed:#{nowdate}", STATS_TTL)
+          conn.multi do |transaction|
+            transaction.incrby("stat:processed", procd)
+            transaction.incrby("stat:processed:#{nowdate}", procd)
+            transaction.expire("stat:processed:#{nowdate}", STATS_TTL)
 
-            conn.incrby("stat:failed", fails)
-            conn.incrby("stat:failed:#{nowdate}", fails)
-            conn.expire("stat:failed:#{nowdate}", STATS_TTL)
+            transaction.incrby("stat:failed", fails)
+            transaction.incrby("stat:failed:#{nowdate}", fails)
+            transaction.expire("stat:failed:#{nowdate}", STATS_TTL)
 
-            conn.unlink(workers_key)
+            transaction.unlink(workers_key)
             curstate.each_pair do |tid, hash|
               conn.hset(workers_key, tid, Sidekiq.dump_json(hash))
             end
@@ -161,17 +161,17 @@ module Sidekiq
         kb = memory_usage(::Process.pid)
 
         _, exists, _, _, msg = Sidekiq.redis { |conn|
-          conn.multi {
-            conn.sadd("processes", key)
-            conn.exists?(key)
-            conn.hmset(key, "info", to_json,
+          conn.multi { |transaction|
+            transaction.sadd("processes", key)
+            transaction.exists?(key)
+            transaction.hmset(key, "info", to_json,
               "busy", curstate.size,
               "beat", Time.now.to_f,
               "rtt_us", rtt,
               "quiet", @done,
               "rss", kb)
-            conn.expire(key, 60)
-            conn.rpop("#{key}-signals")
+            transaction.expire(key, 60)
+            transaction.rpop("#{key}-signals")
           }
         }
 

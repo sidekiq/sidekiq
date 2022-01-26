@@ -236,8 +236,10 @@ module Sidekiq
 
       def perform_bulk(args, batch_size: 1_000)
         hash = @opts.transform_keys(&:to_s)
+        pool = Thread.current[:sidekiq_via_pool] || @klass.get_sidekiq_options["pool"] || Sidekiq.redis_pool
+        client = Sidekiq::Client.new(pool)
         result = args.each_slice(batch_size).flat_map do |slice|
-          Sidekiq::Client.push_bulk(hash.merge("class" => @klass, "args" => slice))
+          client.push_bulk(hash.merge("class" => @klass, "args" => slice))
         end
 
         result.is_a?(Enumerator::Lazy) ? result.force : result
@@ -312,12 +314,8 @@ module Sidekiq
       #
       #     SomeWorker.perform_bulk([[1], [2], [3]])
       #
-      def perform_bulk(items, batch_size: 1_000)
-        result = items.each_slice(batch_size).flat_map do |slice|
-          Sidekiq::Client.push_bulk("class" => self, "args" => slice)
-        end
-
-        result.is_a?(Enumerator::Lazy) ? result.force : result
+      def perform_bulk(*args, **kwargs)
+        Setter.new(self, {}).perform_bulk(*args, **kwargs)
       end
 
       # +interval+ must be a timestamp, numeric or something that acts

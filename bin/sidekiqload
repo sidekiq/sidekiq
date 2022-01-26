@@ -11,11 +11,10 @@ Bundler.require(:default, :load_test)
 require_relative '../lib/sidekiq/cli'
 require_relative '../lib/sidekiq/launcher'
 
-include Sidekiq::Util
-
 Sidekiq.configure_server do |config|
   config.options[:concurrency] = 10
-  config.redis = { db: 13, port: 6380, driver: :hiredis }
+  config.redis = { db: 13, port: 6380}
+  #config.redis = { db: 13, port: 6380, driver: :hiredis}
   config.options[:queues] << 'default'
   config.logger.level = Logger::ERROR
   config.average_scheduled_poll_interval = 2
@@ -106,7 +105,6 @@ Sidekiq.logger.error "Created #{count*iter} jobs"
 start = Time.now
 
 Monitoring = Thread.new do
-  watchdog("monitor thread") do
     while true
       sleep 0.2
       qsize = Sidekiq.redis do |conn|
@@ -126,13 +124,15 @@ Monitoring = Thread.new do
         exit(0)
       end
     end
-  end
 end
 
 begin
   #RubyProf::exclude_threads = [ Monitoring ]
   #RubyProf.start
-  fire_event(:startup)
+  events = Sidekiq.options[:lifecycle_events][:startup]
+  events.each(&:call)
+  events.clear
+
   Sidekiq.logger.error "Simulating 1ms of latency between Sidekiq and redis"
   Toxiproxy[:redis].downstream(:latency, latency: 1).apply do
     launcher = Sidekiq::Launcher.new(Sidekiq.options)

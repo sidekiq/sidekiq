@@ -3,7 +3,7 @@ source "https://rubygems.org"
 gemspec
 
 gem "rake"
-gem "redis-namespace", github: "resque/redis-namespace", branch: :master
+gem "redis-namespace"
 gem "rails", "~> 7.0"
 
 # Required for Ruby 3.1

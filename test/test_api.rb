@@ -156,6 +156,15 @@ describe 'API' do
         Time::DATE_FORMATS[:default] = @before
       end
 
+      describe "history" do
+        it "does not allow invalid input" do
+          assert_raises(ArgumentError) { Sidekiq::Stats::History.new(-1) }
+          assert_raises(ArgumentError) { Sidekiq::Stats::History.new(0) }
+          assert_raises(ArgumentError) { Sidekiq::Stats::History.new(2000) }
+          assert Sidekiq::Stats::History.new(200)
+        end
+      end
+
       describe "processed" do
         it 'retrieves hash of dates' do
           Sidekiq.redis do |c|
@@ -550,10 +559,10 @@ describe 'API' do
 
       time = Time.now.to_f
       Sidekiq.redis do |conn|
-        conn.multi do
-          conn.sadd('processes', odata['key'])
-          conn.hmset(odata['key'], 'info', Sidekiq.dump_json(odata), 'busy', 10, 'beat', time)
-          conn.sadd('processes', 'fake:pid')
+        conn.multi do |transaction|
+          transaction.sadd('processes', odata['key'])
+          transaction.hmset(odata['key'], 'info', Sidekiq.dump_json(odata), 'busy', 10, 'beat', time)
+          transaction.sadd('processes', 'fake:pid')
         end
       end
 
@@ -603,9 +612,9 @@ describe 'API' do
       s = "#{key}:workers"
       data = Sidekiq.dump_json({ 'payload' => {}, 'queue' => 'default', 'run_at' => (Time.now.to_i - 2*60*60) })
       Sidekiq.redis do |c|
-        c.multi do
-          c.hmset(s, '5678', data)
-          c.hmset("b#{s}", '5678', data)
+        c.multi do |transaction|
+          transaction.hmset(s, '5678', data)
+          transaction.hmset("b#{s}", '5678', data)
         end
       end
 

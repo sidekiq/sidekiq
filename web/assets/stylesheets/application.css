@@ -21,7 +21,7 @@ body {
 a {
   color: #b1003e;
 }
-a:active, a:hover {
+a:active, a:hover, a:focus {
   color: #4b001a;
 }
 
@@ -89,11 +89,10 @@ header.row .pagination {
 .summary_bar .summary {
   margin-top: 12px;
   background-color: #fff;
-  box-shadow: 0 0 5px rgba(50, 50, 50, 0.25);
   border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   padding: 8px;
   margin-bottom: 10px;
-  border-width: 0;
 }
 .poll-wrapper {
     margin: 9px;
@@ -350,6 +349,7 @@ img.smallogo {
   text-align: center;
   margin-right: 20px;
   border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
   padding: 5px;
   width: 150px;
   margin-bottom: 20px;
@@ -405,8 +405,6 @@ span.current-interval {
 
 div.interval-slider input {
   width: 160px;
-  height: 3px;
-  margin-top: 5px;
   border-radius: 2px;
   background: currentcolor;
 }
