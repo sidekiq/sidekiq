@@ -353,10 +353,21 @@ module Sidekiq
 
       def client_push(item) # :nodoc:
         pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options["pool"] || Sidekiq.redis_pool
-        stringified_item = item.transform_keys(&:to_s)
+        job = new(*item)
+        stringified_item = job.serialize
 
         Sidekiq::Client.new(pool).push(stringified_item)
       end
+    end
+
+    # Creates a new job instance. Takes the arguments that will be
+    # passed to the perform method.
+    def initialize(*args)
+      @args = args
+    end
+    ruby2_keywords(:initialize)
+    def serialize
+      @args.to_h.transform_keys(&:to_s)
     end
   end
 end
