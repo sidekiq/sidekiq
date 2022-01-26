@@ -145,4 +145,30 @@ describe Sidekiq::Worker do
       end
     end
   end
+  
+  describe '#serialize' do
+    class SerializableWorker
+      include Sidekiq::Worker
+      sidekiq_options queue: 'some_queue', retry_queue: 'retry_queue', retry: 5, backtrace: 10, tags: ['alpha', '🥇']
+      
+      def perform(required_positional,
+                  optional_positional = "OPTIONAL POSITIONAL",
+                  *splat_args)
+        
+      end
+    end
+      
+    it 'serializes full job info' do
+      serialized_job = SerializableWorker.new('required positional argument').serialize
+      
+      assert_equal "SerializableWorker", serialized_job['class']
+      assert_equal ["required positional argument"], serialized_job['args']
+      assert_equal 5, serialized_job['retry']
+      assert_equal 'some_queue', serialized_job['queue']
+      assert_equal 'retry_queue', serialized_job['retry_queue']
+      assert_equal 10, serialized_job['backtrace']
+      assert_equal ["alpha", "🥇"], serialized_job['tags']
+      assert_equal true, serialized_job['normalized']
+    end
+  end
 end
