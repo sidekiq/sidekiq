@@ -273,27 +273,6 @@ describe 'API' do
       assert_nil job.enqueued_at
     end
 
-    it 'handles previous (raw Array) error_backtrace format' do
-      add_retry
-      job = Sidekiq::RetrySet.new.first
-      assert_equal ['line1', 'line2'], job.error_backtrace
-    end
-
-    it 'handles previous (marshalled Array) error_backtrace format' do
-      backtrace = ['line1', 'line2']
-      serialized = Marshal.dump(backtrace)
-      compressed = Zlib::Deflate.deflate(serialized)
-      encoded = Base64.encode64(compressed)
-
-      payload = Sidekiq.dump_json('class' => 'ApiWorker', 'args' => [1], 'queue' => 'default', 'jid' => 'jid', 'error_backtrace' => encoded)
-      Sidekiq.redis do |conn|
-        conn.zadd('retry', Time.now.to_f.to_s, payload)
-      end
-
-      job = Sidekiq::RetrySet.new.first
-      assert_equal backtrace, job.error_backtrace
-    end
-
     describe "Rails unwrapping" do
       SERIALIZED_JOBS = {
         "5.x" => [
