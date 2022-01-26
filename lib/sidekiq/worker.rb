@@ -349,24 +349,24 @@ module Sidekiq
 
       def client_push(stringified_item) # :nodoc:
         pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options["pool"] || Sidekiq.redis_pool
-
         Sidekiq::Client.new(pool).push(stringified_item)
       end
 
-      def serialize(opts, args)
-        new(*opts.merge("args" => args)).serialize
+      def serialize(opts = {}, args = [])
+        new(opts, *args).serialize
       end
     end
 
     # Creates a new job instance. Takes the arguments that will be
     # passed to the perform method.
-    def initialize(*args)
-      @args = args
+    def initialize(opts_or_args = {}, *args)
+      @opts = opts_or_args.is_a?(Hash) ? opts_or_args : {}
+      @args = opts_or_args.is_a?(Hash) ? args : Array[opts_or_args]
     end
     ruby2_keywords(:initialize)
 
     def serialize
-      item = @args.to_h.transform_keys(&:to_s).merge("class" => self.class)
+      item = @opts.transform_keys(&:to_s).merge("class" => self.class, "args" => @args)
       normalize_item(item).merge("normalized" => true)
     end
 
