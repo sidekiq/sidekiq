@@ -2,6 +2,13 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
+HEAD
+---------
+
+- Fix sidekiq.yml YAML load errors on Ruby 3.1 [#5141]
+- Sharding support for `perform_bulk` [#5129]
+- Refactor job logger for SPEEEEEEED
+
 6.4.0
 ---------
 
