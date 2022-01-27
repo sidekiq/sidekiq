@@ -86,7 +86,7 @@ def Process.rss
   `ps -o rss= -p #{Process.pid}`.chomp.to_i
 end
 
-iter = 10
+iter = 50
 count = 10_000
 
 iter.times do

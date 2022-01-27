@@ -12,46 +12,34 @@ module Sidekiq
 
       yield
 
-      with_elapsed_time_context(start) do
-        @logger.info("done")
-      end
+      Sidekiq::Context.add(:elapsed, elapsed(start))
+      @logger.info("done")
     rescue Exception
-      with_elapsed_time_context(start) do
-        @logger.info("fail")
-      end
+      Sidekiq::Context.add(:elapsed, elapsed(start))
+      @logger.info("fail")
 
       raise
     end
 
     def prepare(job_hash, &block)
-      level = job_hash["log_level"]
-      if level
-        @logger.log_at(level) do
-          Sidekiq::Context.with(job_hash_context(job_hash), &block)
-        end
-      else
-        Sidekiq::Context.with(job_hash_context(job_hash), &block)
-      end
-    end
-
-    def job_hash_context(job_hash)
       # If we're using a wrapper class, like ActiveJob, use the "wrapped"
       # attribute to expose the underlying thing.
       h = {
         class: job_hash["display_class"] || job_hash["wrapped"] || job_hash["class"],
         jid: job_hash["jid"]
       }
-      h[:bid] = job_hash["bid"] if job_hash["bid"]
-      h[:tags] = job_hash["tags"] if job_hash["tags"]
-      h
-    end
+      h[:bid] = job_hash["bid"] if job_hash.has_key?("bid")
+      h[:tags] = job_hash["tags"] if job_hash.has_key?("tags")
 
-    def with_elapsed_time_context(start, &block)
-      Sidekiq::Context.with(elapsed_time_context(start), &block)
-    end
-
-    def elapsed_time_context(start)
-      {elapsed: elapsed(start).to_s}
+      Thread.current[:sidekiq_context] = h
+      level = job_hash["log_level"]
+      if level
+        @logger.log_at(level, &block)
+      else
+        yield
+      end
+    ensure
+      Thread.current[:sidekiq_context] = nil
     end
 
     private
