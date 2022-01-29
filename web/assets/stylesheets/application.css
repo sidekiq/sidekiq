@@ -202,6 +202,8 @@ table .table-checkbox label {
 
 .navbar .navbar-brand .status {
   color: #585454;
+  display: inline-block;
+  width: 75px;
 }
 
 
