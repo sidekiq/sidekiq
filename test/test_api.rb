@@ -156,6 +156,15 @@ describe 'API' do
         Time::DATE_FORMATS[:default] = @before
       end
 
+      describe "histoy" do
+        it "does not allow invalid input" do
+          assert_raises(ArgumentError) { Sidekiq::Stats::History.new(-1) }
+          assert_raises(ArgumentError) { Sidekiq::Stats::History.new(0) }
+          assert_raises(ArgumentError) { Sidekiq::Stats::History.new(2000) }
+          assert Sidekiq::Stats::History.new(200)
+        end
+      end
+
       describe "processed" do
         it 'retrieves hash of dates' do
           Sidekiq.redis do |c|
