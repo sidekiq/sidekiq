@@ -664,6 +664,8 @@ describe Sidekiq::Web do
       get '/'
 
       assert_equal 200, last_response.status
+      get '/?days=100000000'
+      assert_equal 401, last_response.status
     end
   end
 
