@@ -29,6 +29,18 @@ describe Sidekiq::Extensions do
     assert_equal 1, q.size
   end
 
+  it 'allows delayed execution of ActiveRecord class methods with empty hash argument' do
+    assert_equal [], Sidekiq::Queue.all.map(&:name)
+    q = Sidekiq::Queue.new
+    assert_equal 0, q.size
+    MyModel.delay.long_class_method_with_optional_args({})
+    assert_equal ['default'], Sidekiq::Queue.all.map(&:name)
+    assert_equal 1, q.size
+    obj = YAML.load q.first['args'].first
+    assert_equal([{}], obj[2])
+    assert_equal({}, obj.last)
+  end
+
   it 'allows delayed execution of ActiveRecord class methods with optional arguments' do
     assert_equal [], Sidekiq::Queue.all.map(&:name)
     q = Sidekiq::Queue.new
@@ -89,6 +101,18 @@ describe Sidekiq::Extensions do
     assert_equal 1, q.size
   end
 
+  it 'allows delayed delivery of ActionMailer mails with empty hash argument' do
+    assert_equal [], Sidekiq::Queue.all.map(&:name)
+    q = Sidekiq::Queue.new
+    assert_equal 0, q.size
+    UserMailer.delay.greetings_with_optional_args({})
+    assert_equal ['default'], Sidekiq::Queue.all.map(&:name)
+    assert_equal 1, q.size
+    obj = YAML.load q.first['args'].first
+    assert_equal([{}], obj[2])
+    assert_equal({}, obj.last)
+  end
+
   it 'allows delayed delivery of ActionMailer mails with optional arguments' do
     assert_equal [], Sidekiq::Queue.all.map(&:name)
     q = Sidekiq::Queue.new
@@ -129,6 +153,16 @@ describe Sidekiq::Extensions do
     assert_equal 0, q.size
     SomeClass.delay.doit(Date.today)
     assert_equal 1, q.size
+  end
+
+  it 'allows delay of any ole class method with empty hash argument' do
+    q = Sidekiq::Queue.new
+    assert_equal 0, q.size
+    SomeClass.delay.doit_with_optional_args({})
+    assert_equal 1, q.size
+    obj = YAML.load q.first['args'].first
+    assert_equal([{}], obj[2])
+    assert_equal({}, obj.last)
   end
 
   it 'allows delay of any ole class method with optional arguments' do

@@ -13,12 +13,19 @@ module Sidekiq
         @opts = options
       end
 
-      def method_missing(name, *args, **kwargs)
+      def method_missing(name, *args)
         # Sidekiq has a limitation in that its message must be JSON.
         # JSON can't round trip real Ruby objects so we use YAML to
         # serialize the objects to a String.  The YAML will be converted
         # to JSON and then deserialized on the other side back into a
         # Ruby object.
+        kwargs = {}
+        if args.length == 1 && args.first.is_a?(::Hash) && !args.first.empty?
+          kwargs, args = args, []
+        elsif args.length > 1 && args.last.is_a?(::Hash)
+          kwargs, args = args.last, args[0..-2]
+        end
+
         obj = [@target, name, args, kwargs]
         marshalled = ::YAML.dump(obj)
         if marshalled.size > SIZE_LIMIT
