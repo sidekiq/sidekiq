@@ -236,10 +236,9 @@ module Sidekiq
 
       def perform_bulk(args, batch_size: 1_000)
         hash = @opts.transform_keys(&:to_s)
-        pool = Thread.current[:sidekiq_via_pool] || @klass.get_sidekiq_options["pool"] || Sidekiq.redis_pool
-        client = Sidekiq::Client.new(pool)
+
         result = args.each_slice(batch_size).flat_map do |slice|
-          client.push_bulk(hash.merge("class" => @klass, "args" => slice))
+          @klass.build_client.push_bulk(hash.merge("class" => @klass, "args" => slice))
         end
 
         result.is_a?(Enumerator::Lazy) ? result.force : result
@@ -352,10 +351,14 @@ module Sidekiq
       end
 
       def client_push(item) # :nodoc:
-        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options["pool"] || Sidekiq.redis_pool
         stringified_item = item.transform_keys(&:to_s)
+        build_client.push_bulk(stringified_item.merge("args" => [stringified_item["args"]])).first
+      end
 
-        Sidekiq::Client.new(pool).push(stringified_item)
+      def build_client # :nodoc:
+        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options["pool"] || Sidekiq.redis_pool
+        client_class = get_sidekiq_options["client_class"] || Sidekiq::Client
+        client_class.new(pool)
       end
     end
   end

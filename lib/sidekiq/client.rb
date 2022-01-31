@@ -70,13 +70,7 @@ module Sidekiq
     #   push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
     #
     def push(item)
-      normed = normalize_item(item)
-      payload = process_single(item["class"], normed)
-
-      if payload
-        raw_push([payload])
-        payload["jid"]
-      end
+      push_bulk(item.merge("args" => [item["args"]])).first
     end
 
     ##
