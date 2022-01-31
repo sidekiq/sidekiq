@@ -54,6 +54,16 @@ describe 'job scheduling' do
       assert job['created_at']
       refute job['enqueued_at']
     end
+
+    it 'removes the enqueued_at field when scheduling in bulk' do
+      ss = Sidekiq::ScheduledSet.new
+      ss.clear
+
+      assert Sidekiq::Client.push_bulk('class' => SomeScheduledWorker, 'args' => [['mike'], ['mike']], 'at' => 600)
+      job = ss.first
+      assert job['created_at']
+      refute job['enqueued_at']
+    end
   end
 
 end
