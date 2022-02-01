@@ -17,6 +17,21 @@ fix or new functionality.  Functionality must meet my design goals and
 vision for the project to be accepted; I would be happy to discuss how
 your idea can best fit into Sidekiq.
 
+### Local development setup
+
+You need Redis installed and a Ruby version that fulfills the requirements in
+`sidekiq.gemspec`. Then:
+
+```
+bundle install
+```
+
+And in order to run the tests and linter checks:
+
+```
+bundle exec rake
+```
+
 ## Legal
 
 By submitting a Pull Request, you disavow any rights or claims to any changes

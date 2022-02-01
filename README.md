@@ -80,6 +80,11 @@ Useful resources:
 Every Friday morning is Sidekiq happy hour: I video chat and answer questions.
 See the [Sidekiq support page](https://sidekiq.org/support.html) for details.
 
+Contributing
+-----------------
+
+Please see [the contributing guidelines](https://github.com/mperham/sidekiq/blob/main/.github/contributing.md).
+
 
 License
 -----------------
