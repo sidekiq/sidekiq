@@ -2,6 +2,13 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
+5.2.10
+---------
+
+- Backport fix for CVE-2022-23837.
+- Migrate to `exists?` for redis-rb.
+- Lock redis-rb to <4.6 to avoid deprecations.
+
 5.2.9
 ---------
 
