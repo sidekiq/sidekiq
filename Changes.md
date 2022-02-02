@@ -5,6 +5,7 @@
 HEAD
 ---------
 
+- Fix pipeline/multi deprecations in redis-rb 4.6
 - Fix sidekiq.yml YAML load errors on Ruby 3.1 [#5141]
 - Sharding support for `perform_bulk` [#5129]
 - Refactor job logger for SPEEEEEEED
