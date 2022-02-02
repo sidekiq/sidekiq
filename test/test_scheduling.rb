@@ -38,7 +38,7 @@ describe 'job scheduling' do
       assert_equal 3, ss.size
       assert_equal qs+1, q.size
 
-      assert Sidekiq::Client.push_bulk('class' => SomeScheduledWorker, 'args' => [['mike'], ['mike']], 'at' => 600)
+      assert Sidekiq::Client.push_bulk('class' => SomeScheduledWorker, 'args' => [['mike'], ['mike']], 'at' => Time.now.to_f + 100)
       assert_equal 5, ss.size
 
       assert SomeScheduledWorker.perform_in(TimeDuck.new, 'samwise')
@@ -59,7 +59,7 @@ describe 'job scheduling' do
       ss = Sidekiq::ScheduledSet.new
       ss.clear
 
-      assert Sidekiq::Client.push_bulk('class' => SomeScheduledWorker, 'args' => [['mike'], ['mike']], 'at' => 600)
+      assert Sidekiq::Client.push_bulk('class' => SomeScheduledWorker, 'args' => [['mike'], ['mike']], 'at' => Time.now.to_f + 100)
       job = ss.first
       assert job['created_at']
       refute job['enqueued_at']
