@@ -103,7 +103,7 @@ module Sidekiq
 
       normed = normalize_item(items)
       payloads = args.map.with_index { |job_args, index|
-        copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12), "enqueued_at" => Time.now.to_f)
+        copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12))
         copy["at"] = (at.is_a?(Array) ? at[index] : at) if at
 
         result = process_single(items["class"], copy)
