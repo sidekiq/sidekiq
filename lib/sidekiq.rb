@@ -103,6 +103,7 @@ module Sidekiq
         # to disconnect and reopen the socket to get back to the primary.
         # 4495 Use the same logic if we have a "Not enough replicas" error from the primary
         # 4985 Use the same logic when a blocking command is force-unblocked
+        # The same retry logic is also used in client.rb
         if retryable && ex.message =~ /READONLY|NOREPLICAS|UNBLOCKED/
           conn.disconnect!
           retryable = false
