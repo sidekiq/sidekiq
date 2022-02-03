@@ -149,9 +149,9 @@ module Sidekiq
 
             transaction.unlink(workers_key)
             curstate.each_pair do |tid, hash|
-              conn.hset(workers_key, tid, Sidekiq.dump_json(hash))
+              transaction.hset(workers_key, tid, Sidekiq.dump_json(hash))
             end
-            conn.expire(workers_key, 60)
+            transaction.expire(workers_key, 60)
           end
         end
 
