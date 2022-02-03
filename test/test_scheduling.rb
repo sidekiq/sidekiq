@@ -65,6 +65,17 @@ describe 'job scheduling' do
       refute job['enqueued_at']
     end
 
+    it 'enqueues jobs when scheduling and the schedule time is in the past' do
+      ss = Sidekiq::ScheduledSet.new
+      q = Sidekiq::Queue.new("custom_queue")
+      ss.clear
+      q.clear
+
+      assert Sidekiq::Client.push('class' => SomeScheduledWorker, 'args' => ['mike'], 'at' => Time.now.to_f - 100)
+      assert_equal 0, ss.size
+      assert_equal 1, q.size
+    end
+
     it 'enqueues jobs when scheduling in bulk and the schedule time is in the past' do
       ss = Sidekiq::ScheduledSet.new
       q = Sidekiq::Queue.new("custom_queue")
