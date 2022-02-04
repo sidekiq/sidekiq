@@ -125,6 +125,7 @@ module Sidekiq
     end
     at_exit(&method(:flush_stats))
 
+    # heartbeat
     def ❤
       key = identity
       fails = procd = 0
