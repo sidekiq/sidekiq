@@ -10,6 +10,8 @@ services:
       - bundle:/bundle
     depends_on:
       - redis
+    environment:
+      - REDIS_URL=redis://redis:6379/1
   redis:
     image: "redis:6-alpine"
     command: redis-server
