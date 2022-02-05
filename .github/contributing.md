@@ -32,6 +32,22 @@ And in order to run the tests and linter checks:
 bundle exec rake
 ```
 
+#### Docker for development
+
+Alternatively you can use Docker for the development setup. This requires Docker
+and Docker Compose installed.
+
+```
+make build
+make bundle
+```
+
+And in order to run the tests and linter checks:
+
+```
+make test
+```
+
 ## Legal
 
 By submitting a Pull Request, you disavow any rights or claims to any changes

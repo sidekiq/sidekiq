@@ -1,0 +1,20 @@
+version: "3.9"
+services:
+  library:
+    build:
+      context: .
+    stdin_open: true
+    tty: true
+    volumes:
+      - ".:/library"
+      - bundle:/bundle
+    depends_on:
+      - redis
+  redis:
+    image: "redis:6-alpine"
+    command: redis-server
+    volumes:
+      - "redis:/data"
+volumes:
+  bundle:
+  redis:
