@@ -204,6 +204,7 @@ module Sidekiq
 
         # validate and normalize payload
         item = normalize_item(raw)
+        item["jid"] ||= generate_jid
         queue = item["queue"]
 
         # run client-side middleware

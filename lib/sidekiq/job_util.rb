@@ -41,7 +41,6 @@ module Sidekiq
 
       item["class"] = item["class"].to_s
       item["queue"] = item["queue"].to_s
-      item["jid"] ||= SecureRandom.hex(12)
       item["created_at"] ||= Time.now.to_f
 
       item
@@ -54,6 +53,10 @@ module Sidekiq
       else
         Sidekiq.default_worker_options
       end
+    end
+
+    def generate_jid
+      SecureRandom.hex(12)
     end
 
     private
