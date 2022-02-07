@@ -116,7 +116,7 @@ module Sidekiq
         launcher.run
 
         while (readable_io = self_read.wait_readable)
-          signal = readable_io.first[0].gets.strip
+          signal = readable_io.gets.strip
           handle_signal(signal)
         end
       rescue Interrupt
