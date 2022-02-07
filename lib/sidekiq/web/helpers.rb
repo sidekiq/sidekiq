@@ -242,7 +242,7 @@ module Sidekiq
       queue class args retry_count retried_at failed_at
       jid error_message error_class backtrace
       error_backtrace enqueued_at retry wrapped
-      created_at tags
+      created_at tags display_class
     ])
 
     def retry_extra_items(retry_job)

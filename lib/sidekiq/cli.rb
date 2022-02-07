@@ -115,8 +115,8 @@ module Sidekiq
       begin
         launcher.run
 
-        while (readable_io = IO.select([self_read]))
-          signal = readable_io.first[0].gets.strip
+        while (readable_io = self_read.wait_readable)
+          signal = readable_io.gets.strip
           handle_signal(signal)
         end
       rescue Interrupt
@@ -382,7 +382,7 @@ module Sidekiq
     def parse_config(path)
       erb = ERB.new(File.read(path))
       erb.filename = File.expand_path(path)
-      opts = YAML.load(erb.result) || {}
+      opts = load_yaml(erb.result) || {}
 
       if opts.respond_to? :deep_symbolize_keys!
         opts.deep_symbolize_keys!
@@ -396,6 +396,14 @@ module Sidekiq
       parse_queues(opts, opts.delete(:queues) || [])
 
       opts
+    end
+
+    def load_yaml(src)
+      if Psych::VERSION > "4.0"
+        YAML.safe_load(src, permitted_classes: [Symbol], aliases: true)
+      else
+        YAML.load(src)
+      end
     end
 
     def parse_queues(opts, queues_and_weights)

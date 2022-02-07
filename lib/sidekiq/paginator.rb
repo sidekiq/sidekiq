@@ -16,22 +16,22 @@ module Sidekiq
 
         case type
         when "zset"
-          total_size, items = conn.multi {
-            conn.zcard(key)
+          total_size, items = conn.multi { |transaction|
+            transaction.zcard(key)
             if rev
-              conn.zrevrange(key, starting, ending, with_scores: true)
+              transaction.zrevrange(key, starting, ending, with_scores: true)
             else
-              conn.zrange(key, starting, ending, with_scores: true)
+              transaction.zrange(key, starting, ending, with_scores: true)
             end
           }
           [current_page, total_size, items]
         when "list"
-          total_size, items = conn.multi {
-            conn.llen(key)
+          total_size, items = conn.multi { |transaction|
+            transaction.llen(key)
             if rev
-              conn.lrange(key, -ending - 1, -starting - 1)
+              transaction.lrange(key, -ending - 1, -starting - 1)
             else
-              conn.lrange(key, starting, ending)
+              transaction.lrange(key, starting, ending)
             end
           }
           items.reverse! if rev

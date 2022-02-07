@@ -103,7 +103,7 @@ module Sidekiq
 
       normed = normalize_item(items)
       payloads = args.map.with_index { |job_args, index|
-        copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12), "enqueued_at" => Time.now.to_f)
+        copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12))
         copy["at"] = (at.is_a?(Array) ? at[index] : at) if at
 
         result = process_single(items["class"], copy)
@@ -189,8 +189,23 @@ module Sidekiq
 
     def raw_push(payloads)
       @redis_pool.with do |conn|
-        conn.pipelined do
-          atomic_push(conn, payloads)
+        retryable = true
+        begin
+          conn.pipelined do |pipeline|
+            atomic_push(pipeline, payloads)
+          end
+        rescue Redis::BaseError => ex
+          # 2550 Failover can cause the server to become a replica, need
+          # to disconnect and reopen the socket to get back to the primary.
+          # 4495 Use the same logic if we have a "Not enough replicas" error from the primary
+          # 4985 Use the same logic when a blocking command is force-unblocked
+          # The retry logic is copied from sidekiq.rb
+          if retryable && ex.message =~ /READONLY|NOREPLICAS|UNBLOCKED/
+            conn.disconnect!
+            retryable = false
+            retry
+          end
+          raise
         end
       end
       true

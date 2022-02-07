@@ -3,7 +3,7 @@
 module Sidekiq
   module Extensions
     def self.enable_delay!
-      Sidekiq.logger.error "Sidekiq's Delayed Extensions will be removed in Sidekiq 7.0. #{caller(1..1).first}"
+      warn "Sidekiq's Delayed Extensions will be removed in Sidekiq 7.0", uplevel: 1
 
       if defined?(::ActiveSupport)
         require "sidekiq/extensions/active_record"

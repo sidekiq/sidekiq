@@ -568,10 +568,10 @@ describe 'API' do
 
       time = Time.now.to_f
       Sidekiq.redis do |conn|
-        conn.multi do
-          conn.sadd('processes', odata['key'])
-          conn.hmset(odata['key'], 'info', Sidekiq.dump_json(odata), 'busy', 10, 'beat', time)
-          conn.sadd('processes', 'fake:pid')
+        conn.multi do |transaction|
+          transaction.sadd('processes', odata['key'])
+          transaction.hmset(odata['key'], 'info', Sidekiq.dump_json(odata), 'busy', 10, 'beat', time)
+          transaction.sadd('processes', 'fake:pid')
         end
       end
 
@@ -621,9 +621,9 @@ describe 'API' do
       s = "#{key}:workers"
       data = Sidekiq.dump_json({ 'payload' => {}, 'queue' => 'default', 'run_at' => (Time.now.to_i - 2*60*60) })
       Sidekiq.redis do |c|
-        c.multi do
-          c.hmset(s, '5678', data)
-          c.hmset("b#{s}", '5678', data)
+        c.multi do |transaction|
+          transaction.hmset(s, '5678', data)
+          transaction.hmset("b#{s}", '5678', data)
         end
       end
 
