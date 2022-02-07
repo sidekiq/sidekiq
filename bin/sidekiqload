@@ -36,7 +36,6 @@ end
 
 # brew tap shopify/shopify
 # brew install toxiproxy
-# gem install toxiproxy
 # run `toxiproxy-server` in a separate terminal window.
 require "toxiproxy"
 # simulate a non-localhost network for realer-world conditions.
@@ -90,12 +89,7 @@ iter = 50
 count = 10_000
 
 iter.times do
-  arr = Array.new(count) do
-    []
-  end
-  count.times do |idx|
-    arr[idx][0] = idx
-  end
+  arr = Array.new(count) { |idx| [idx] }
   Sidekiq::Client.push_bulk("class" => LoadWorker, "args" => arr)
 end
 Sidekiq.logger.error "Created #{count * iter} jobs"
