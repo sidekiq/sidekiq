@@ -190,7 +190,9 @@ module Sidekiq
       end
 
       def perform_async(*args)
-        if @opts["sync"] == true
+        hash = @opts.transform_keys(&:to_s)
+
+        if hash["sync"] == true
           perform_inline(*args)
         else
           @klass.client_push(@opts.merge("args" => args, "class" => @klass))
