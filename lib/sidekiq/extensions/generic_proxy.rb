@@ -10,7 +10,7 @@ module Sidekiq
       def initialize(performable, target, options = {})
         @performable = performable
         @target = target
-        @opts = options
+        @opts = options.transform_keys(&:to_s)
       end
 
       def method_missing(name, *args)
