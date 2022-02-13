@@ -55,14 +55,14 @@ module Sidekiq
       end
     end
 
-    def generate_jid
-      SecureRandom.hex(12)
-    end
-
     private
 
     def json_safe?(item)
       JSON.parse(JSON.dump(item["args"])) == item["args"]
+    end
+
+    def generate_jid
+      SecureRandom.hex(12)
     end
   end
 end
