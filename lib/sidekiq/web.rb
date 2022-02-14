@@ -148,9 +148,9 @@ module Sidekiq
 
       ::Rack::Builder.new do
         use Rack::Static, urls: ["/stylesheets", "/images", "/javascripts"],
-                          root: ASSETS,
-                          cascade: true,
-                          header_rules: rules
+          root: ASSETS,
+          cascade: true,
+          header_rules: rules
         m.each { |middleware, block| use(*middleware, &block) }
         use Sidekiq::Web::CsrfProtection unless $TESTING
         run WebApplication.new(klass)

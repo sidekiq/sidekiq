@@ -4,9 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-HEAD
+2.3.1
 -------------
 
+- Fix multi/pipe deprecation in redis-rb 4.6
+- Leader now elects more often, to minimize missed cron jobs
 - Fix periodic jobs missing the "fallback" hour during DST changeover [#5049]
 
 2.3.0

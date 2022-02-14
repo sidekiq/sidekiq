@@ -16,6 +16,10 @@ module Sidekiq
     def self.current
       Thread.current[:sidekiq_context] ||= {}
     end
+
+    def self.add(k, v)
+      Thread.current[:sidekiq_context][k] = v
+    end
   end
 
   module LoggingUtils

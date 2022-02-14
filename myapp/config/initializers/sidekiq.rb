@@ -40,5 +40,3 @@ end
 
 require "sidekiq/middleware/current_attributes"
 Sidekiq::CurrentAttributes.persist(Myapp::Current) # Your AS::CurrentAttributes singleton
-
-Post.delay.testing
