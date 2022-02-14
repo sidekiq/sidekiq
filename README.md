@@ -27,10 +27,10 @@ This benchmark can be found in `bin/sidekiqload` and assumes a Redis network lat
 Requirements
 -----------------
 
-- Redis: 4.0+
-- Ruby: MRI 2.5+ or JRuby 9.2+.
+- Redis: 6.0+
+- Ruby: MRI 2.7+ or JRuby 9.3+.
 
-Sidekiq 6.0 supports Rails 5.0+ but does not require it.
+Sidekiq 7.0 supports Rails 6.0+ but does not require it.
 
 
 Installation
