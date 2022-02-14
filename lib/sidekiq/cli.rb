@@ -11,7 +11,6 @@ require "fileutils"
 require "sidekiq"
 require "sidekiq/launcher"
 require "sidekiq/util"
-require "gem/version"
 
 module Sidekiq
   class CLI

@@ -52,6 +52,8 @@ Sidekiq and see its features in action.  Here's the Web UI:
 Want to Upgrade?
 -------------------
 
+Upgrade notes between each major version can be found in the `docs/` directory.
+
 I also sell Sidekiq Pro and Sidekiq Enterprise, extensions to Sidekiq which provide more
 features, a commercial-friendly license and allow you to support high
 quality open source development all at the same time.  Please see the
