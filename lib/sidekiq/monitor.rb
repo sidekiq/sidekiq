@@ -17,8 +17,7 @@ class Sidekiq::Monitor
       end
       send(section)
     rescue => e
-      puts "Couldn't get status: #{e}"
-      exit 1
+      abort "Couldn't get status: #{e}"
     end
 
     def all
