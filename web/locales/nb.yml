@@ -1,77 +1,76 @@
-# elements like %{queue} are variables and should not be translated
 nb:
-  Dashboard: Oversikt
-  Status: Status
-  Time: Tid
-  Namespace: Navnerom
-  Realtime: Sanntid
-  History: Historikk
-  Busy: Opptatt
-  Processed: Prosessert
-  Failed: Mislykket
-  Scheduled: Planlagt
-  Retries: Forsøk
-  Enqueued: I kø
-  Worker: Arbeider
-  LivePoll: Automatisk oppdatering
-  StopPolling: Stopp automatisk oppdatering
-  Queue: Kø
-  Class: Klasse
-  Job: Jobb
-  Arguments: Argumenter
-  Extras: Ekstra
-  Started: Startet
-  ShowAll: Vis alle
-  CurrentMessagesInQueue: Nåværende melding i <span class='title'>%{queue}</span>
-  Delete: Slett
+  Actions: Handlinger
   AddToQueue: Legg til i kø
+  AreYouSure: Er du sikker?
   AreYouSureDeleteJob: Er du sikker på at du vil slette denne jobben?
   AreYouSureDeleteQueue: Er du sikker på at du vil slette køen %{queue}?
-  Queues: Køer
-  Size: Størrelse
-  Actions: Handlinger
-  NextRetry: Neste forsøk
-  RetryCount: Antall forsøk
-  RetryNow: Forsøk igjen nå
-  Kill: Kill
-  LastRetry: Forrige forsøk
-  OriginallyFailed: Feilet opprinnelig
-  AreYouSure: Er du sikker?
+  Arguments: Argumenter
+  Busy: Opptatt
+  Class: Klasse
+  Connections: Tilkoblinger
+  CurrentMessagesInQueue: Nåværende melding i <span class='title'>%{queue}</span>
+  Dashboard: Oversikt
+  Dead: Død
+  DeadJobs: Døde jobber
+  Delete: Slett
   DeleteAll: Slett alle
-  RetryAll: Forsøk alle på nytt
-  NoRetriesFound: Ingen forsøk funnet
+  Enqueued: I kø
   Error: Feil
+  ErrorBacktrace: Feilbakgrunn
   ErrorClass: Feilklasse
   ErrorMessage: Feilmelding
-  ErrorBacktrace: Feilbakgrunn
-  GoBack: ← Tilbake
-  NoScheduledFound: Ingen planlagte jobber funnet
-  When: Når
-  ScheduledJobs: Planlagte jobber
-  idle: uvirksom
-  active: aktiv
-  Version: Versjon
-  Connections: Tilkoblinger
-  MemoryUsage: Minneforbruk
-  PeakMemoryUsage: Høyeste minneforbruk
-  Uptime: Oppetid (dager)
-  OneWeek: 1 uke
-  OneMonth: 1 måned
-  ThreeMonths: 3 måneder
-  SixMonths: 6 måneder
+  Extras: Ekstra
+  Failed: Mislykket
   Failures: Feil
-  DeadJobs: Døde jobber
+  GoBack: ← Tilbake
+  History: Historikk
+  Job: Jobb
+  Jobs: Jobber
+  Kill: Kill
+  LastRetry: Forrige forsøk
+  LivePoll: Automatisk oppdatering
+  MemoryUsage: Minneforbruk
+  Namespace: Navnerom
+  NextRetry: Neste forsøk
   NoDeadJobsFound: Ingen døde jobber funnet
-  Dead: Død
+  NoRetriesFound: Ingen forsøk funnet
+  NoScheduledFound: Ingen planlagte jobber funnet
+  NotYetEnqueued: Ikke køet enda
+  OneMonth: 1 måned
+  OneWeek: 1 uke
+  OriginallyFailed: Feilet opprinnelig
+  Paused: Pauset
+  PeakMemoryUsage: Høyeste minneforbruk
+  Plugins: Innstikk
+  PollingInterval: Oppdateringsintervall
+  Processed: Prosessert
   Processes: Prosesser
+  Queue: Kø
+  Queues: Køer
+  Quiet: Demp
+  QuietAll: Demp alle
+  Realtime: Sanntid
+  Retries: Forsøk
+  RetryAll: Forsøk alle på nytt
+  RetryCount: Antall forsøk
+  RetryNow: Forsøk igjen nå
+  Scheduled: Planlagt
+  ScheduledJobs: Planlagte jobber
+  ShowAll: Vis alle
+  SixMonths: 6 måneder
+  Size: Størrelse
+  Started: Startet
+  Status: Status
+  Stop: Stopp
+  StopAll: Stopp alle
+  StopPolling: Stopp automatisk oppdatering
   Thread: Tråd
   Threads: Tråder
-  Jobs: Jobber
-  Paused: Pauset
-  Stop: Stopp
-  Quiet: Demp
-  StopAll: Stopp alle
-  QuietAll: Demp alle
-  PollingInterval: Oppdateringsintervall
-  Plugins: Innstikk
-  NotYetEnqueued: Ikke køet enda
+  ThreeMonths: 3 måneder
+  Time: Tid
+  Uptime: Oppetid (dager)
+  Version: Versjon
+  When: Når
+  Worker: Arbeider
+  active: aktiv
+  idle: uvirksom

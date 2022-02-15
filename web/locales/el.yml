@@ -1,68 +1,67 @@
-# elements like %{queue} are variables and should not be translated
-el: # <---- change this to your locale code
-  Dashboard: Πίνακας Ελέγχου
-  Status: Κατάσταση
-  Time: Χρόνος
-  Namespace: Namespace
-  Realtime: Τρέχουσα Κατάσταση
-  History: Ιστορικό
-  Busy: Απασχολημένο
-  Processed: Επεξεργάστηκε
-  Failed: Απέτυχε
-  Scheduled: Προγραματίστηκε
-  Retries: Προσπάθειες
-  Enqueued: Μπήκαν στην στοίβα
-  Worker: Εργάτης
-  LivePoll: Τρέχουσα Κατάσταση
-  StopPolling: Διακοπή Τρέχουσας Κατάστασης
-  Queue: Στοίβα
-  Class: Κλάση
-  Job: Εργασία
-  Arguments: Ορίσματα
-  Extras: Extras
-  Started: Ξεκίνησαν
-  ShowAll: Εμφάνιση Όλων
-  CurrentMessagesInQueue: Τρέχουσες εργασίες <span class='title'>%{queue}</span>
-  Delete: Διαγραφή
+el:
+  Actions: Ενέργειες
   AddToQueue: Προσθήκη στην στοίβα
+  AreYouSure: Είστε σίγουρος?
   AreYouSureDeleteJob: Θέλετε να διαγράψετε την εργασία αυτη;
   AreYouSureDeleteQueue: Θέλετε να διαγράψετε την %{queue} στοίβα?
-  Queues: Στοίβες
-  Size: Μέγεθος
-  Actions: Ενέργειες
-  NextRetry: Επόμενη προσπάθεια
-  RetryCount: Αριθμός προσπαθειών
-  RetryNow: Προσπάθησε τώρα
-  LastRetry: Τελευταία προσπάθεια
-  OriginallyFailed: Αρχικές Αποτυχίες
-  AreYouSure: Είστε σίγουρος?
+  Arguments: Ορίσματα
+  Busy: Απασχολημένο
+  Class: Κλάση
+  Connections: Συνδέσεις
+  CurrentMessagesInQueue: Τρέχουσες εργασίες <span class='title'>%{queue}</span>
+  Dashboard: Πίνακας Ελέγχου
+  Dead: Αδρανείς
+  DeadJobs: Αδρανείς Εργασίες
+  Delete: Διαγραφή
   DeleteAll: Διαγραφή όλων
-  RetryAll: Επανάληψη Όλων
-  NoRetriesFound: Δεν βρέθηκαν προσπάθειες
+  Enqueued: Μπήκαν στην στοίβα
   Error: Σφάλμα
+  ErrorBacktrace: Σφάλμα Backtrace
   ErrorClass: Κλάση σφάλματος
   ErrorMessage: Μήνυμα Σφάλματος
-  ErrorBacktrace: Σφάλμα Backtrace
-  GoBack: ← Πίσω
-  NoScheduledFound: Δεν βρέθηκαν προγραμματισμένες εργασίες
-  When: Πότε
-  ScheduledJobs: Προγραμματισμένες Εργασίες
-  idle: αδρανής
-  active: ενεργή
-  Version: Έκδοση
-  Connections: Συνδέσεις
-  MemoryUsage: Χρήση Μνήμης
-  PeakMemoryUsage: Μέγιστη Χρήση Μνήμης
-  Uptime: Διάρκεια Λειτουργείας (ημέρες)
-  OneWeek: 1 εβδομάδα
-  OneMonth: 1 μήνας
-  ThreeMonths: 3 μήνες
-  SixMonths: 6 μήνες
+  Extras: Extras
+  Failed: Απέτυχε
   Failures: Αποτυχίες
-  DeadJobs: Αδρανείς Εργασίες
+  GoBack: ← Πίσω
+  History: Ιστορικό
+  Job: Εργασία
+  Jobs: Εργασίες
+  LastRetry: Τελευταία προσπάθεια
+  LivePoll: Τρέχουσα Κατάσταση
+  MemoryUsage: Χρήση Μνήμης
+  Namespace: Namespace
+  NextRetry: Επόμενη προσπάθεια
   NoDeadJobsFound: Δεν βρέθηκαν αδρανείς εργασίες
-  Dead: Αδρανείς
+  NoRetriesFound: Δεν βρέθηκαν προσπάθειες
+  NoScheduledFound: Δεν βρέθηκαν προγραμματισμένες εργασίες
+  OneMonth: 1 μήνας
+  OneWeek: 1 εβδομάδα
+  OriginallyFailed: Αρχικές Αποτυχίες
+  PeakMemoryUsage: Μέγιστη Χρήση Μνήμης
+  Processed: Επεξεργάστηκε
   Processes: Διεργασίες
+  Queue: Στοίβα
+  Queues: Στοίβες
+  Realtime: Τρέχουσα Κατάσταση
+  Retries: Προσπάθειες
+  RetryAll: Επανάληψη Όλων
+  RetryCount: Αριθμός προσπαθειών
+  RetryNow: Προσπάθησε τώρα
+  Scheduled: Προγραματίστηκε
+  ScheduledJobs: Προγραμματισμένες Εργασίες
+  ShowAll: Εμφάνιση Όλων
+  SixMonths: 6 μήνες
+  Size: Μέγεθος
+  Started: Ξεκίνησαν
+  Status: Κατάσταση
+  StopPolling: Διακοπή Τρέχουσας Κατάστασης
   Thread: Νήμα
   Threads: Νήματα
-  Jobs: Εργασίες
+  ThreeMonths: 3 μήνες
+  Time: Χρόνος
+  Uptime: Διάρκεια Λειτουργείας (ημέρες)
+  Version: Έκδοση
+  When: Πότε
+  Worker: Εργάτης
+  active: ενεργή
+  idle: αδρανής

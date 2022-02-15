@@ -1,87 +1,86 @@
-# elements like %{queue} are variables and should not be translated
 ar:
-  TextDirection: 'rtl'
-  Dashboard: لوحة التحكم
-  Status: حالة
-  Time: وقت
-  Namespace: مساحة الاسم
-  Realtime: الزمن الفعلي
-  History: تاريخ
-  Busy: مشغول
-  Utilization: الاستخدام
-  Processed: تمت المعالجة
-  Failed: فشل
-  Scheduled: مجدول
-  Retries: إعادة محاولة
-  Enqueued: في الرتل
-  Worker: عامل
-  LivePoll: استعلام مباشر
-  StopPolling: إيقاف الاستعلامات
-  Queue: رتل
-  Class: نوع
-  Job: وظيفة
-  Arguments: مدخلات
-  Extras: إضافات
-  Started: بدأت
-  ShowAll: عرض الكل
-  CurrentMessagesInQueue:  الرسائل الحالية في الرتل <span class='title'>%{queue}</span>
+  Actions: إجراءات
   AddToQueue: إضافة إلى الرتل
+  AreYouSure: هل انت متأكد؟
   AreYouSureDeleteJob: هل أنت متأكد من حذف الوظيفة؟
   AreYouSureDeleteQueue: هل أنت متأكد من حذف الرتل %{queue}؟
+  Arguments: مدخلات
+  BackToApp: العودة إلى التطبيق
+  Busy: مشغول
+  Class: نوع
+  Connections: اتصالات
+  CreatedAt: أنشئت في
+  CurrentMessagesInQueue: الرسائل الحالية في الرتل <span class='title'>%{queue}</span>
+  Dashboard: لوحة التحكم
+  Dead: ميتة
+  DeadJobs: وظائف ميتة
   Delete: حذف
-  Queues: أرتال
-  Size: حجم
-  Actions: إجراءات
-  NextRetry: إعادة المحاولة القادمة
-  RetryCount: عدد مرات إعادة المحاولة
-  RetryNow: إعادة المحاولة الآن
-  Kill: إبطال
-  LastRetry: إعادة المحاولة الأخيرة
-  OriginallyFailed: فشل أصلا
-  AreYouSure: هل انت متأكد؟
   DeleteAll: حذف الكل
-  RetryAll: إعادة المحاولة للكل
-  KillAll: إبطال الكل
-  NoRetriesFound: لاتوجد أي إعادة محاولة
+  Enqueued: في الرتل
   Error: خطأ
+  ErrorBacktrace: تتبع الخطأ
   ErrorClass: نوع الخطأ
   ErrorMessage: رسالة الخطأ
-  ErrorBacktrace: تتبع الخطأ
-  GoBack: إلى الخلف
-  NoScheduledFound: لايوجد وظائف مجدولة
-  When: متى
-  ScheduledJobs: وظائف مجدولة
-  idle: خامل
-  active: نشيط
-  Version: إصدار
-  Connections: اتصالات
-  MemoryUsage: استخدام الذاكرة
-  PeakMemoryUsage: ذروة استخدام الذاكرة
-  Uptime: زمن العمل
-  OneWeek: أسبوع
-  OneMonth: شهر
-  ThreeMonths: ثلاثة أشهر
-  SixMonths: ستة أشهر
+  Extras: إضافات
+  Failed: فشل
   Failures: فشل
-  DeadJobs: وظائف ميتة
-  NoDeadJobsFound: لاتوجد وظائف ميتة
-  Dead: ميتة
-  Process: عملية
-  Processes: عمليات
+  GoBack: إلى الخلف
+  History: تاريخ
+  Job: وظيفة
+  Jobs: وظائف
+  Kill: إبطال
+  KillAll: إبطال الكل
+  LastRetry: إعادة المحاولة الأخيرة
+  Latency: زمن الانتظار
+  LivePoll: استعلام مباشر
+  MemoryUsage: استخدام الذاكرة
   Name: الاسم
+  Namespace: مساحة الاسم
+  NextRetry: إعادة المحاولة القادمة
+  NoDeadJobsFound: لاتوجد وظائف ميتة
+  NoRetriesFound: لاتوجد أي إعادة محاولة
+  NoScheduledFound: لايوجد وظائف مجدولة
+  NotYetEnqueued: لم تدخل الرتل بعد
+  OneMonth: شهر
+  OneWeek: أسبوع
+  OriginallyFailed: فشل أصلا
+  Pause: إيقاف مؤقت
+  Paused: موقفة مؤقتاً
+  PeakMemoryUsage: ذروة استخدام الذاكرة
+  Plugins: الإضافات
+  PollingInterval: الفاصل الزمني بين الاستعلامات
+  Process: عملية
+  Processed: تمت المعالجة
+  Processes: عمليات
+  Queue: رتل
+  Queues: أرتال
+  Quiet: هدوء
+  QuietAll: هدوء الكل
+  Realtime: الزمن الفعلي
+  Retries: إعادة محاولة
+  RetryAll: إعادة المحاولة للكل
+  RetryCount: عدد مرات إعادة المحاولة
+  RetryNow: إعادة المحاولة الآن
+  Scheduled: مجدول
+  ScheduledJobs: وظائف مجدولة
+  ShowAll: عرض الكل
+  SixMonths: ستة أشهر
+  Size: حجم
+  Started: بدأت
+  Status: حالة
+  Stop: إيقاف
+  StopAll: إيقاف الكل
+  StopPolling: إيقاف الاستعلامات
+  TextDirection: 'rtl'
   Thread: نيسب
   Threads: نياسب
-  Jobs: وظائف
-  Paused: موقفة مؤقتاً
-  Stop: إيقاف
-  Quiet: هدوء
-  StopAll: إيقاف الكل
-  QuietAll: هدوء الكل
-  PollingInterval: الفاصل الزمني بين الاستعلامات
-  Plugins: الإضافات
-  NotYetEnqueued: لم تدخل الرتل بعد
-  CreatedAt: أنشئت في
-  BackToApp: العودة إلى التطبيق
-  Latency: زمن الانتظار
-  Pause: إيقاف مؤقت
+  ThreeMonths: ثلاثة أشهر
+  Time: وقت
   Unpause: متابعة
+  Uptime: زمن العمل
+  Utilization: الاستخدام
+  Version: إصدار
+  When: متى
+  Worker: عامل
+  active: نشيط
+  idle: خامل

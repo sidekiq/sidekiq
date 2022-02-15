@@ -1,85 +1,84 @@
-# elements like %{queue} are variables and should not be translated
 fr:
-  Dashboard: Tableau de Bord
-  Status: État
-  Time: Heure
-  Namespace: Namespace
-  Realtime: Temps réel
-  History: Historique
-  Busy: En cours
-  Utilization: Utilisation
-  Processed: Traitées
-  Failed: Échouées
-  Scheduled: Planifiées
-  Retries: Tentatives
-  Enqueued: En attente
-  Worker: Travailleur
-  LivePoll: Temps réel
-  StopPolling: Arrêt du temps réel
-  Queue: Queue
-  Class: Classe
-  Job: Tâche
-  Arguments: Arguments
-  Extras: Extras
-  Started: Démarrée
-  ShowAll: Tout montrer
-  CurrentMessagesInQueue: Messages actuellement dans <span class='title'>%{queue}</span>
-  Delete: Supprimer
+  Actions: Actions
   AddToQueue: Ajouter à la queue
+  AreYouSure: Êtes-vous certain ?
   AreYouSureDeleteJob: Êtes-vous certain de vouloir supprimer cette tâche ?
   AreYouSureDeleteQueue: Êtes-vous certain de vouloir supprimer la queue %{queue} ?
-  Queues: Queues
-  Size: Taille
-  Actions: Actions
-  NextRetry: Prochain essai
-  RetryCount: Nombre d'essais
-  RetryNow: Réessayer maintenant
-  Kill: Tuer
-  LastRetry: Dernier essai
-  OriginallyFailed: Échec initial
-  AreYouSure: Êtes-vous certain ?
+  Arguments: Arguments
+  Back to App: Retour à l'application
+  Busy: En cours
+  Class: Classe
+  Connections: Connexions
+  CreatedAt: Créée le
+  CurrentMessagesInQueue: Messages actuellement dans <span class='title'>%{queue}</span>
+  Dashboard: Tableau de Bord
+  Dead: Mortes
+  DeadJobs: Tâches mortes
+  Delete: Supprimer
   DeleteAll: Tout supprimer
-  RetryAll: Tout réessayer
-  KillAll: Tout tuer
-  NoRetriesFound: Aucune tâche à réessayer n’a été trouvée
+  Enqueued: En attente
   Error: Erreur
+  ErrorBacktrace: Backtrace d’erreur
   ErrorClass: Classe d’erreur
   ErrorMessage: Message d’erreur
-  ErrorBacktrace: Backtrace d’erreur
-  GoBack: ← Retour
-  NoScheduledFound: Aucune tâche planifiée n'a été trouvée
-  When: Quand
-  ScheduledJobs: Tâches planifiées
-  idle: inactif
-  active: actif
-  Version: Version
-  Connections: Connexions
-  MemoryUsage: Mémoire utilisée
-  PeakMemoryUsage: Mémoire utilisée (max.)
-  Uptime: Uptime (jours)
-  OneWeek: 1 semaine
-  OneMonth: 1 mois
-  ThreeMonths: 3 mois
-  SixMonths: 6 mois
+  Extras: Extras
+  Failed: Échouées
   Failures: Echecs
-  DeadJobs: Tâches mortes
+  GoBack: ← Retour
+  History: Historique
+  Job: Tâche
+  Jobs: Tâches
+  Kill: Tuer
+  KillAll: Tout tuer
+  LastRetry: Dernier essai
+  Latency: Latence
+  LivePoll: Temps réel
+  MemoryUsage: Mémoire utilisée
+  Namespace: Namespace
+  NextRetry: Prochain essai
   NoDeadJobsFound: Aucune tâche morte n'a été trouvée
-  Dead: Mortes
+  NoRetriesFound: Aucune tâche à réessayer n’a été trouvée
+  NoScheduledFound: Aucune tâche planifiée n'a été trouvée
+  NotYetEnqueued: Pas encore en file d'attente
+  OneMonth: 1 mois
+  OneWeek: 1 semaine
+  OriginallyFailed: Échec initial
+  Pause: Pause
+  Paused: Mise en pause
+  PeakMemoryUsage: Mémoire utilisée (max.)
+  Plugins: Plugins
+  PollingInterval: Intervalle de rafraîchissement
   Process: Processus
+  Processed: Traitées
   Processes: Processus
+  Queue: Queue
+  Queues: Queues
+  Quiet: Clore
+  QuietAll: Tout clore
+  Realtime: Temps réel
+  Retries: Tentatives
+  RetryAll: Tout réessayer
+  RetryCount: Nombre d'essais
+  RetryNow: Réessayer maintenant
+  Scheduled: Planifiées
+  ScheduledJobs: Tâches planifiées
+  ShowAll: Tout montrer
+  SixMonths: 6 mois
+  Size: Taille
+  Started: Démarrée
+  Status: État
+  Stop: Arrêter
+  StopAll: Tout arrêter
+  StopPolling: Arrêt du temps réel
   Thread: Thread
   Threads: Threads
-  Jobs: Tâches
-  Paused: Mise en pause
-  Stop: Arrêter
-  Quiet: Clore
-  StopAll: Tout arrêter
-  QuietAll: Tout clore
-  PollingInterval: Intervalle de rafraîchissement
-  Plugins: Plugins
-  NotYetEnqueued: Pas encore en file d'attente
-  CreatedAt: Créée le
-  Back to App: Retour à l'application
-  Latency: Latence
-  Pause: Pause
+  ThreeMonths: 3 mois
+  Time: Heure
   Unpause: Unpause
+  Uptime: Uptime (jours)
+  Utilization: Utilisation
+  Version: Version
+  When: Quand
+  Worker: Travailleur
+  active: actif
+  idle: inactif
