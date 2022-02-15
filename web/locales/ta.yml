@@ -1,3 +1,4 @@
+# elements like %{queue} are variables and should not be translated
 ta:
   Actions: செயல்கள்
   AddToQueue: வரிசையில் சேர்

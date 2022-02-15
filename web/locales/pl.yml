@@ -1,3 +1,4 @@
+# elements like %{queue} are variables and should not be translated
 pl:
   Actions: Akcje
   AddToQueue: dodaj do kolejki

@@ -1,3 +1,4 @@
+# elements like %{queue} are variables and should not be translated
 zh-tw:
   Actions: 動作
   AddToQueue: 增加至佇列
