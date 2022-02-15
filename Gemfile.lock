@@ -194,6 +194,7 @@ GEM
     websocket-driver (0.7.5)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
+    yalphabetize (0.6.2)
     zeitwerk (2.5.4)
 
 PLATFORMS
@@ -213,6 +214,7 @@ DEPENDENCIES
   sqlite3
   standard
   toxiproxy
+  yalphabetize
 
 BUNDLED WITH
    2.2.32
