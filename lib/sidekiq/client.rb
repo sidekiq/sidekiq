@@ -54,6 +54,7 @@ module Sidekiq
     #   at - timestamp to schedule the job (optional), must be Numeric (e.g. Time.now.to_f)
     #   retry - whether to retry this job if it fails, default true or an integer number of retries
     #   backtrace - whether to save any error backtrace, default false
+    #   jid - job ID when retrying a job, will be automatically generated otherwise
     #
     # If class is set to the class name, the jobs' options will be based on Sidekiq's default
     # worker options. Otherwise, they will be based on the job class's options.
@@ -70,13 +71,7 @@ module Sidekiq
     #   push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
     #
     def push(item)
-      normed = normalize_item(item)
-      payload = process_single(item["class"], normed)
-
-      if payload
-        raw_push([payload])
-        payload["jid"]
-      end
+      push_bulk(item.merge("args" => [item["args"]])).first
     end
 
     ##
@@ -101,9 +96,12 @@ module Sidekiq
       raise ArgumentError, "Job 'at' must be a Numeric or an Array of Numeric timestamps" if at && (Array(at).empty? || !Array(at).all? { |entry| entry.is_a?(Numeric) })
       raise ArgumentError, "Job 'at' Array must have same size as 'args' Array" if at.is_a?(Array) && at.size != args.size
 
+      jid = items.delete("jid")
+      raise ArgumentError, "Explicitly passing 'jid' when pushing more than one job is not supported" if jid && args.size > 1
+
       normed = normalize_item(items)
       payloads = args.map.with_index { |job_args, index|
-        copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12))
+        copy = normed.merge("args" => job_args, "jid" => jid || generate_jid)
         copy["at"] = (at.is_a?(Array) ? at[index] : at) if at
 
         result = process_single(items["class"], copy)

@@ -41,7 +41,6 @@ module Sidekiq
 
       item["class"] = item["class"].to_s
       item["queue"] = item["queue"].to_s
-      item["jid"] ||= SecureRandom.hex(12)
       item["created_at"] ||= Time.now.to_f
 
       item
@@ -60,6 +59,10 @@ module Sidekiq
 
     def json_safe?(item)
       JSON.parse(JSON.dump(item["args"])) == item["args"]
+    end
+
+    def generate_jid
+      SecureRandom.hex(12)
     end
   end
 end
