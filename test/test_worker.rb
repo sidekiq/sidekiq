@@ -144,5 +144,9 @@ describe Sidekiq::Worker do
         end
       end
     end
+
+    it 'has the alias #perform_sync' do
+      assert_equal MyCustomWorker.method(:perform_inline), MyCustomWorker.method(:perform_sync)
+    end
   end
 end
