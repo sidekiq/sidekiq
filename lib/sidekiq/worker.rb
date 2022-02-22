@@ -294,6 +294,7 @@ module Sidekiq
       def perform_inline(*args)
         Setter.new(self, {}).perform_inline(*args)
       end
+      alias_method :perform_sync, :perform_inline
 
       ##
       # Push a large number of jobs to Redis, while limiting the batch of

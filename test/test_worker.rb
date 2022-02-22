@@ -7,6 +7,8 @@ describe Sidekiq::Worker do
       include Sidekiq::Worker
       queue_as :foo
       sidekiq_options 'retry' => 12
+      def perform
+      end
     end
 
     def setup
@@ -26,6 +28,8 @@ describe Sidekiq::Worker do
       q = Sidekiq::Queue.new("foo")
       assert_equal 0, q.size
       SetWorker.perform_async
+      SetWorker.perform_inline
+      SetWorker.perform_sync
       assert_equal 1, q.size
 
       SetWorker.set(queue: 'xyz').perform_async
