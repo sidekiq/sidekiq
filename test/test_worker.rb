@@ -145,4 +145,17 @@ describe Sidekiq::Worker do
       end
     end
   end
+
+  describe '#perform_sync' do
+    class MyCustomWorker2
+      include Sidekiq::Worker
+
+      def perform
+      end
+    end
+
+    it 'is an alias for #perform_inline' do
+      MyCustomWorker2.perform_sync
+    end
+  end
 end
