@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Added `error_type` tag for `job.failures` metrics [#5211]
+
 5.3.1
 ---------
 
