@@ -30,7 +30,7 @@ Requirements
 - Redis: 4.0+
 - Ruby: MRI 2.5+ or JRuby 9.2+.
 
-Sidekiq 6.0 supports Rails 5.0+ but does not require it.
+Sidekiq 6.0 supports Rails 5.0+ but you can also use it without Rails in any Ruby application.
 
 
 Installation
