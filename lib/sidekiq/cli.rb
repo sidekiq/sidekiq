@@ -20,7 +20,7 @@ module Sidekiq
     attr_accessor :launcher
     attr_accessor :environment
 
-    def parse(args = ARGV)
+    def parse(args = ARGV.dup)
       setup_options(args)
       initialize_logger
       validate!
