@@ -12,3 +12,6 @@ tmp/
 pkg/*.gem
 .byebug_history
 development.log
+/Dockerfile
+/Makefile
+/docker-compose.yml
