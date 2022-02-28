@@ -1,83 +1,83 @@
 # elements like %{queue} are variables and should not be translated
 lt:
-  Dashboard: Valdymo skydas
-  Status: Būsena
-  Time: Laikas
-  Namespace: Vardų erdvė
-  Realtime: Realiu laiku
-  History: Istorija
-  Busy: Užimti
-  Processed: Įvykdyti
-  Failed: Nepavykę
-  Scheduled: Suplanuoti
-  Retries: Kartojami
-  Enqueued: Eilėje
-  Worker: Darbuotojas
-  LivePoll: Užklausti gyvai
-  StopPolling: Stabdyti užklausas
-  Queue: Eilė
-  Class: Klasė
-  Job: Darbas
-  Arguments: Parametrai
-  Extras: Papildomi
-  Started: Pradėti
-  ShowAll: Rodyti Visus
-  CurrentMessagesInQueue: Esami darbai eilėje <span class='title'>%{queue}</span>
-  Delete: Pašalinti
+  Actions: Veiksmai
   AddToQueue: Pridėti į eilę
+  AreYouSure: Ar jūs įsitikinę?
   AreYouSureDeleteJob: Ar tikrai norite pašalinti šį darbą?
   AreYouSureDeleteQueue: Ar tikrai norite pašalinti šią eilę %{queue}?
-  Queues: Eilės
-  Size: Dydis
-  Actions: Veiksmai
-  NextRetry: Sekantis Kartojimas
-  RetryCount: Kartojimų Skaičius
-  RetryNow: Kartoti Dabar
-  Kill: Priverstinai Nutraukti
-  LastRetry: Paskutinis Kartojimas
-  OriginallyFailed: Iš pradžių Nepavykę
-  AreYouSure: Ar jūs įsitikinę?
+  Arguments: Parametrai
+  BackToApp: Atgal į Aplikaciją
+  Busy: Užimti
+  Class: Klasė
+  Connections: Ryšiai
+  CreatedAt: Sukurta
+  CurrentMessagesInQueue: Esami darbai eilėje <span class='title'>%{queue}</span>
+  Dashboard: Valdymo skydas
+  Dead: Negyvi
+  DeadJobs: Negyvi Darbai
+  Delete: Pašalinti
   DeleteAll: Pašalinti Visus
-  RetryAll: Kartoti Visus
-  KillAll: Priverstinai Nutraukti Visus
-  NoRetriesFound: Nerasta kartojimų
+  Enqueued: Eilėje
   Error: Klaida
+  ErrorBacktrace: Klaidos Pėdsakai
   ErrorClass: Klaidos Klasė
   ErrorMessage: Klaidos Žinutė
-  ErrorBacktrace: Klaidos Pėdsakai
-  GoBack: ← Atgal
-  NoScheduledFound: Planuojamų darbų nerasta
-  When: Kada
-  ScheduledJobs: Planuojami Darbai
-  idle: neveiksnus
-  active: aktyvus
-  Version: Versija
-  Connections: Ryšiai
-  MemoryUsage: Atminties Vartojimas
-  PeakMemoryUsage: Atminties Vartojimo Pikas
-  Uptime: Gyvavimo laikas (dienomis)
-  OneWeek: 1 savaitė
-  OneMonth: 1 mėnuo
-  ThreeMonths: 3 mėnesiai
-  SixMonths: 6 mėnesiai
+  Extras: Papildomi
+  Failed: Nepavykę
   Failures: Nesėkmingi vykdymai
-  DeadJobs: Negyvi Darbai
+  GoBack: ← Atgal
+  History: Istorija
+  Job: Darbas
+  Jobs: Darbai
+  Kill: Priverstinai Nutraukti
+  KillAll: Priverstinai Nutraukti Visus
+  LastRetry: Paskutinis Kartojimas
+  Latency: Vėlavimas
+  LivePoll: Užklausti gyvai
+  MemoryUsage: Atminties Vartojimas
+  Namespace: Vardų erdvė
+  NextRetry: Sekantis Kartojimas
   NoDeadJobsFound: Negyvų darbų nerasta
-  Dead: Negyvi
+  NoRetriesFound: Nerasta kartojimų
+  NoScheduledFound: Planuojamų darbų nerasta
+  NotYetEnqueued: Dar neįtraukti į eilę
+  OneMonth: 1 mėnuo
+  OneWeek: 1 savaitė
+  OriginallyFailed: Iš pradžių Nepavykę
+  Pause: Pristabdyti
+  Paused: Pristabdytas
+  PeakMemoryUsage: Atminties Vartojimo Pikas
+  Plugins: Įskiepiai
+  PollingInterval: Užklausimų intervalas
+  Processed: Įvykdyti
   Processes: Procesai
+  Queue: Eilė
+  Queues: Eilės
+  Quiet: Nutildyti
+  QuietAll: Nutildyti Visus
+  Realtime: Realiu laiku
+  Retries: Kartojami
+  RetryAll: Kartoti Visus
+  RetryCount: Kartojimų Skaičius
+  RetryNow: Kartoti Dabar
+  Scheduled: Suplanuoti
+  ScheduledJobs: Planuojami Darbai
+  ShowAll: Rodyti Visus
+  SixMonths: 6 mėnesiai
+  Size: Dydis
+  Started: Pradėti
+  Status: Būsena
+  Stop: Sustabdyti
+  StopAll: Sustabdyti Visus
+  StopPolling: Stabdyti užklausas
   Thread: Gija
   Threads: Gijos
-  Jobs: Darbai
-  Paused: Pristabdytas
-  Stop: Sustabdyti
-  Quiet: Nutildyti
-  StopAll: Sustabdyti Visus
-  QuietAll: Nutildyti Visus
-  PollingInterval: Užklausimų intervalas
-  Plugins: Įskiepiai
-  NotYetEnqueued: Dar neįtraukti į eilę
-  CreatedAt: Sukurta
-  BackToApp: Atgal į Aplikaciją
-  Latency: Vėlavimas
-  Pause: Pristabdyti
+  ThreeMonths: 3 mėnesiai
+  Time: Laikas
   Unpause: Pratęsti
+  Uptime: Gyvavimo laikas (dienomis)
+  Version: Versija
+  When: Kada
+  Worker: Darbuotojas
+  active: aktyvus
+  idle: neveiksnus

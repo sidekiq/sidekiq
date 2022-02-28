@@ -1,68 +1,68 @@
 # elements like %{queue} are variables and should not be translated
 da:
-  Dashboard: Instrumentbræt
-  Status: Status
-  Time: Tid
-  Namespace: Namespace
-  Realtime: Real-time
-  History: Historik
-  Busy: Travl
-  Processed: Processeret
-  Failed: Fejlet
-  Scheduled: Planlagt
-  Retries: Forsøg
-  Enqueued: I kø
-  Worker: Arbejder
-  LivePoll: Live Poll
-  StopPolling: Stop Polling
-  Queue: Kø
-  Class: Klasse
-  Job: Job
-  Arguments: Argumenter
-  Extras: Ekstra
-  Started: Startet
-  ShowAll: Vis alle
-  CurrentMessagesInQueue: Nuværende beskeder i <span class='title'>%{queue}</span>
-  Delete: Slet
+  Actions: Actions
   AddToQueue: Tilføj til kø
+  AreYouSure: Er du sikker?
   AreYouSureDeleteJob: Er du sikker på at du vil slette dette job?
   AreYouSureDeleteQueue: Er du sikker på at du vil slette %{queue} køen?
-  Queues: Køer
-  Size: Størrelse
-  Actions: Actions
-  NextRetry: Næste forsøg
-  RetryCount: Antal forsøg
-  RetryNow: Prøv igen nu
-  LastRetry: Sidste forsøg
-  OriginallyFailed: Oprindeligt fejlet
-  AreYouSure: Er du sikker?
+  Arguments: Argumenter
+  Busy: Travl
+  Class: Klasse
+  Connections: Forbindelser
+  CurrentMessagesInQueue: Nuværende beskeder i <span class='title'>%{queue}</span>
+  Dashboard: Instrumentbræt
+  Dead: Død
+  DeadJobs: Døde jobs
+  Delete: Slet
   DeleteAll: Slet alle
-  RetryAll: Forsøg alle
-  NoRetriesFound: Ingen gen-forsøg var fundet
+  Enqueued: I kø
   Error: Fejl
+  ErrorBacktrace: Fejl backtrace
   ErrorClass: Fejl klasse
   ErrorMessage: Fejl besked
-  ErrorBacktrace: Fejl backtrace
-  GoBack: ← Tilbage
-  NoScheduledFound: Ingen jobs i kø fundet
-  When: Når
-  ScheduledJobs: Jobs i kø
-  idle: idle
-  active: aktiv
-  Version: Version
-  Connections: Forbindelser
-  MemoryUsage: RAM forbrug
-  PeakMemoryUsage: Peak RAM forbrug
-  Uptime: Oppetid (dage)
-  OneWeek: 1 uge
-  OneMonth: 1 måned
-  ThreeMonths: 3 måneder
-  SixMonths: 6 måneder
+  Extras: Ekstra
+  Failed: Fejlet
   Failures: Fejl
-  DeadJobs: Døde jobs
+  GoBack: ← Tilbage
+  History: Historik
+  Job: Job
+  Jobs: Jobs
+  LastRetry: Sidste forsøg
+  LivePoll: Live Poll
+  MemoryUsage: RAM forbrug
+  Namespace: Namespace
+  NextRetry: Næste forsøg
   NoDeadJobsFound: Ingen døde jobs fundet
-  Dead: Død
+  NoRetriesFound: Ingen gen-forsøg var fundet
+  NoScheduledFound: Ingen jobs i kø fundet
+  OneMonth: 1 måned
+  OneWeek: 1 uge
+  OriginallyFailed: Oprindeligt fejlet
+  PeakMemoryUsage: Peak RAM forbrug
+  Processed: Processeret
   Processes: Processer
+  Queue: Kø
+  Queues: Køer
+  Realtime: Real-time
+  Retries: Forsøg
+  RetryAll: Forsøg alle
+  RetryCount: Antal forsøg
+  RetryNow: Prøv igen nu
+  Scheduled: Planlagt
+  ScheduledJobs: Jobs i kø
+  ShowAll: Vis alle
+  SixMonths: 6 måneder
+  Size: Størrelse
+  Started: Startet
+  Status: Status
+  StopPolling: Stop Polling
   Thread: Tråd
   Threads: Tråde
-  Jobs: Jobs
+  ThreeMonths: 3 måneder
+  Time: Tid
+  Uptime: Oppetid (dage)
+  Version: Version
+  When: Når
+  Worker: Arbejder
+  active: aktiv
+  idle: idle

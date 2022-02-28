@@ -21,6 +21,7 @@ end
 
 group :development, :test do
   gem "standard", require: false
+  gem "yalphabetize", require: false
 end
 
 group :load_test do

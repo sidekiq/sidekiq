@@ -7,4 +7,8 @@ Rake::TestTask.new(:test) do |test|
   test.pattern = "test/**/test_*.rb"
 end
 
-task default: [:standard, :test]
+task :yalphabetize do
+  system "bundle exec yalphabetize"
+end
+
+task default: [:standard, :yalphabetize, :test]
