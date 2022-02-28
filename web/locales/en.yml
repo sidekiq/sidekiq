@@ -1,86 +1,86 @@
 # elements like %{queue} are variables and should not be translated
-en: # <---- change this to your locale code
-  Dashboard: Dashboard
-  Status: Status
-  Time: Time
-  Namespace: Namespace
-  Realtime: Real-time
-  History: History
-  Busy: Busy
-  Utilization: Utilization
-  Processed: Processed
-  Failed: Failed
-  Scheduled: Scheduled
-  Retries: Retries
-  Enqueued: Enqueued
-  Worker: Worker
-  LivePoll: Live Poll
-  StopPolling: Stop Polling
-  Queue: Queue
-  Class: Class
-  Job: Job
-  Arguments: Arguments
-  Extras: Extras
-  Started: Started
-  ShowAll: Show All
-  CurrentMessagesInQueue: Current jobs in <span class='title'>%{queue}</span>
-  Delete: Delete
+en:
+  Actions: Actions
   AddToQueue: Add to queue
+  AreYouSure: Are you sure?
   AreYouSureDeleteJob: Are you sure you want to delete this job?
   AreYouSureDeleteQueue: Are you sure you want to delete the %{queue} queue? This will delete all jobs within the queue, it will reappear if you push more jobs to it in the future.
-  Queues: Queues
-  Size: Size
-  Actions: Actions
-  NextRetry: Next Retry
-  RetryCount: Retry Count
-  RetryNow: Retry Now
-  Kill: Kill
-  LastRetry: Last Retry
-  OriginallyFailed: Originally Failed
-  AreYouSure: Are you sure?
+  Arguments: Arguments
+  BackToApp: Back to App
+  Busy: Busy
+  Class: Class
+  Connections: Connections
+  CreatedAt: Created At
+  CurrentMessagesInQueue: Current jobs in <span class='title'>%{queue}</span>
+  Dashboard: Dashboard
+  Dead: Dead
+  DeadJobs: Dead Jobs
+  Delete: Delete
   DeleteAll: Delete All
-  RetryAll: Retry All
-  KillAll: Kill All
-  NoRetriesFound: No retries were found
+  Enqueued: Enqueued
   Error: Error
+  ErrorBacktrace: Error Backtrace
   ErrorClass: Error Class
   ErrorMessage: Error Message
-  ErrorBacktrace: Error Backtrace
-  GoBack: ← Back
-  NoScheduledFound: No scheduled jobs were found
-  When: When
-  ScheduledJobs: Scheduled Jobs
-  idle: idle
-  active: active
-  Version: Version
-  Connections: Connections
-  MemoryUsage: Memory Usage
-  PeakMemoryUsage: Peak Memory Usage
-  Uptime: Uptime (days)
-  OneWeek: 1 week
-  OneMonth: 1 month
-  ThreeMonths: 3 months
-  SixMonths: 6 months
+  Extras: Extras
+  Failed: Failed
   Failures: Failures
-  DeadJobs: Dead Jobs
-  NoDeadJobsFound: No dead jobs were found
-  Dead: Dead
-  Process: Process
-  Processes: Processes
+  GoBack: ← Back
+  History: History
+  Job: Job
+  Jobs: Jobs
+  Kill: Kill
+  KillAll: Kill All
+  LastRetry: Last Retry
+  Latency: Latency
+  LivePoll: Live Poll
+  MemoryUsage: Memory Usage
   Name: Name
+  Namespace: Namespace
+  NextRetry: Next Retry
+  NoDeadJobsFound: No dead jobs were found
+  NoRetriesFound: No retries were found
+  NoScheduledFound: No scheduled jobs were found
+  NotYetEnqueued: Not yet enqueued
+  OneMonth: 1 month
+  OneWeek: 1 week
+  OriginallyFailed: Originally Failed
+  Pause: Pause
+  Paused: Paused
+  PeakMemoryUsage: Peak Memory Usage
+  Plugins: Plugins
+  PollingInterval: Polling interval
+  Process: Process
+  Processed: Processed
+  Processes: Processes
+  Queue: Queue
+  Queues: Queues
+  Quiet: Quiet
+  QuietAll: Quiet All
+  Realtime: Real-time
+  Retries: Retries
+  RetryAll: Retry All
+  RetryCount: Retry Count
+  RetryNow: Retry Now
+  Scheduled: Scheduled
+  ScheduledJobs: Scheduled Jobs
+  ShowAll: Show All
+  SixMonths: 6 months
+  Size: Size
+  Started: Started
+  Status: Status
+  Stop: Stop
+  StopAll: Stop All
+  StopPolling: Stop Polling
   Thread: Thread
   Threads: Threads
-  Jobs: Jobs
-  Paused: Paused
-  Stop: Stop
-  Quiet: Quiet
-  StopAll: Stop All
-  QuietAll: Quiet All
-  PollingInterval: Polling interval
-  Plugins: Plugins
-  NotYetEnqueued: Not yet enqueued
-  CreatedAt: Created At
-  BackToApp: Back to App
-  Latency: Latency
-  Pause: Pause
+  ThreeMonths: 3 months
+  Time: Time
   Unpause: Unpause
+  Uptime: Uptime (days)
+  Utilization: Utilization
+  Version: Version
+  When: When
+  Worker: Worker
+  active: active
+  idle: idle

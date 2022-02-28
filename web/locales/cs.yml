@@ -1,78 +1,78 @@
 # elements like %{queue} are variables and should not be translated
 cs:
-  Dashboard: Kontrolní panel
-  Status: Stav
-  Time: Čas
-  Namespace: Jmenný prostor
-  Realtime: V reálném čase
-  History: Historie
-  Busy: Zaneprázdněné
-  Processed: Zpracované
-  Failed: Nezdařené
-  Scheduled: Naplánované
-  Retries: Opakování
-  Enqueued: Zařazené
-  Worker: Worker
-  LivePoll: Průběžně aktualizovat
-  StopPolling: Zastavit průběžnou aktualizaci
-  Queue: Fronta
-  Class: Třída
-  Job: Úkol
-  Arguments: Argumenty
-  Extras: Doplňky
-  Started: Začal
-  ShowAll: Ukázat všechny
-  CurrentMessagesInQueue: Aktuální úkoly ve frontě <span class='title'>%{queue}</span>
-  Delete: Odstranit
+  Actions: Akce
   AddToQueue: Přidat do fronty
+  AreYouSure: Jste si jisti?
   AreYouSureDeleteJob: Jste si jisti, že chcete odstranit tento úkol?
   AreYouSureDeleteQueue: Jste si jisti, že chcete odstranit frontu %{queue}?
-  Queues: Fronty
-  Size: Velikost
-  Actions: Akce
-  NextRetry: Další opakování
-  RetryCount: Počet opakování
-  RetryNow: Opakovat teď
-  Kill: Zabít
-  LastRetry: Poslední opakování
-  OriginallyFailed: Původně se nezdařilo
-  AreYouSure: Jste si jisti?
+  Arguments: Argumenty
+  Busy: Zaneprázdněné
+  Class: Třída
+  Connections: Připojení
+  CreatedAt: Vytvořeno
+  CurrentMessagesInQueue: Aktuální úkoly ve frontě <span class='title'>%{queue}</span>
+  Dashboard: Kontrolní panel
+  Dead: Mrtvé
+  DeadJobs: Mrtvé úkoly
+  Delete: Odstranit
   DeleteAll: Odstranit vše
-  RetryAll: Opakovat vše
-  NoRetriesFound: Nebyla nalezena žádná opakování
+  Enqueued: Zařazené
   Error: Chyba
+  ErrorBacktrace: Chybový výstup
   ErrorClass: Třída chyby
   ErrorMessage: Chybová zpráva
-  ErrorBacktrace: Chybový výstup
-  GoBack: ← Zpět
-  NoScheduledFound: Nebyly nalezeny žádné naplánované úkoly
-  When: Kdy
-  ScheduledJobs: Naplánované úkoly
-  idle: nečinný
-  active: aktivní
-  Version: Verze
-  Connections: Připojení
-  MemoryUsage: Využití paměti
-  PeakMemoryUsage: Nejvyšší využití paměti
-  Uptime: Uptime (dny)
-  OneWeek: 1 týden
-  OneMonth: 1 měsíc
-  ThreeMonths: 3 měsíce
-  SixMonths: 6 měsíců
+  Extras: Doplňky
+  Failed: Nezdařené
   Failures: Selhání
-  DeadJobs: Mrtvé úkoly
+  GoBack: ← Zpět
+  History: Historie
+  Job: Úkol
+  Jobs: Úkoly
+  Kill: Zabít
+  LastRetry: Poslední opakování
+  LivePoll: Průběžně aktualizovat
+  MemoryUsage: Využití paměti
+  Namespace: Jmenný prostor
+  NextRetry: Další opakování
   NoDeadJobsFound: Nebyly nalezeny žádné mrtvé úkoly
-  Dead: Mrtvé
+  NoRetriesFound: Nebyla nalezena žádná opakování
+  NoScheduledFound: Nebyly nalezeny žádné naplánované úkoly
+  NotYetEnqueued: Ještě nezařazeno
+  OneMonth: 1 měsíc
+  OneWeek: 1 týden
+  OriginallyFailed: Původně se nezdařilo
+  Paused: Pozastavené
+  PeakMemoryUsage: Nejvyšší využití paměti
+  Plugins: Doplňky
+  PollingInterval: Interval obnovení
+  Processed: Zpracované
   Processes: Procesy
+  Queue: Fronta
+  Queues: Fronty
+  Quiet: Ztišit
+  QuietAll: Ztišit vše
+  Realtime: V reálném čase
+  Retries: Opakování
+  RetryAll: Opakovat vše
+  RetryCount: Počet opakování
+  RetryNow: Opakovat teď
+  Scheduled: Naplánované
+  ScheduledJobs: Naplánované úkoly
+  ShowAll: Ukázat všechny
+  SixMonths: 6 měsíců
+  Size: Velikost
+  Started: Začal
+  Status: Stav
+  Stop: Zastavit
+  StopAll: Zastavit vše
+  StopPolling: Zastavit průběžnou aktualizaci
   Thread: Vlákno
   Threads: Vlákna
-  Jobs: Úkoly
-  Paused: Pozastavené
-  Stop: Zastavit
-  Quiet: Ztišit
-  StopAll: Zastavit vše
-  QuietAll: Ztišit vše
-  PollingInterval: Interval obnovení
-  Plugins: Doplňky
-  NotYetEnqueued: Ještě nezařazeno
-  CreatedAt: Vytvořeno
+  ThreeMonths: 3 měsíce
+  Time: Čas
+  Uptime: Uptime (dny)
+  Version: Verze
+  When: Kdy
+  Worker: Worker
+  active: aktivní
+  idle: nečinný

@@ -1,76 +1,77 @@
+# elements like %{queue} are variables and should not be translated
 uk:
-  Dashboard: Панель керування
-  Status: Статус
-  Time: Час
-  Namespace: Простір імен
-  Realtime: Зараз
-  History: Історія
-  Busy: Зайнятих
-  Processed: Опрацьовано
-  Failed: Невдалих
-  Scheduled: Заплановано
-  Retries: Спроби
-  Enqueued: У черзі
-  Worker: Обробник
-  LivePoll: Постійне опитування
-  StopPolling: Зупинити опитування
-  Queue: Черга
-  Class: Клас
-  Job: Задача
-  Arguments: Аргументи
-  Extras: Додатково
-  Started: Запущено
-  ShowAll: Відобразити усі
-  CurrentMessagesInQueue: Поточні задачі у черзі <span class='title'>%{queue}</span>
-  Delete: Видалити
+  Actions: Дії
   AddToQueue: Додати до черги
+  AreYouSure: Ви впевнені?
   AreYouSureDeleteJob: Ви впевнені у тому, що хочете видалити задачу?
   AreYouSureDeleteQueue: Ви впевнені у тому, що хочете видалити чергу %{queue}?
-  Queues: Черги
-  Size: Розмір
-  Actions: Дії
-  NextRetry: Наступна спроба
-  RetryCount: Кількість спроб
-  RetryNow: Повторити зараз
-  Kill: Вбиваємо
-  LastRetry: Остання спроба
-  OriginallyFailed: Перша невдала спроба
-  AreYouSure: Ви впевнені?
+  Arguments: Аргументи
+  Busy: Зайнятих
+  Class: Клас
+  Connections: З'єднань
+  CurrentMessagesInQueue: Поточні задачі у черзі <span class='title'>%{queue}</span>
+  Dashboard: Панель керування
+  Dead: Вбитих
+  DeadJobs: Вбиті задачі
+  Delete: Видалити
   DeleteAll: Видалити усі
-  RetryAll: Повторити усі
-  NoRetriesFound: Спроб не знайдено
+  Enqueued: У черзі
   Error: Помилка
+  ErrorBacktrace: Трасування помилки
   ErrorClass: Клас помилки
   ErrorMessage: Повідомлення про помилку
-  ErrorBacktrace: Трасування помилки
-  GoBack: ← Назад
-  NoScheduledFound: Запланованих задач не знайдено
-  When: Коли
-  ScheduledJobs: Заплановані задачі
-  idle: незайнятий
-  active: активний
-  Version: Версія
-  Connections: З'єднань
-  MemoryUsage: Використання пам'яті
-  PeakMemoryUsage: Максимальне використання пам'яті
-  Uptime: Днів безперебійної роботи
-  OneWeek: 1 тиждень
-  OneMonth: 1 місяць
-  ThreeMonths: 3 місяці
-  SixMonths: 6 місяців
+  Extras: Додатково
+  Failed: Невдалих
   Failures: Невдачі
-  DeadJobs: Вбиті задачі
+  GoBack: ← Назад
+  History: Історія
+  Job: Задача
+  Jobs: Задачі
+  Kill: Вбиваємо
+  LastRetry: Остання спроба
+  LivePoll: Постійне опитування
+  MemoryUsage: Використання пам'яті
+  Namespace: Простір імен
+  NextRetry: Наступна спроба
   NoDeadJobsFound: Вбитих задач не знайдено
-  Dead: Вбитих
+  NoRetriesFound: Спроб не знайдено
+  NoScheduledFound: Запланованих задач не знайдено
+  NotYetEnqueued: Ще не в черзі
+  OneMonth: 1 місяць
+  OneWeek: 1 тиждень
+  OriginallyFailed: Перша невдала спроба
+  Paused: Призупинено
+  PeakMemoryUsage: Максимальне використання пам'яті
+  Plugins: Плагіни
+  PollingInterval: Інтервал опитування
+  Processed: Опрацьовано
   Processes: Процеси
+  Queue: Черга
+  Queues: Черги
+  Quiet: Призупинити
+  QuietAll: Призупинити усі
+  Realtime: Зараз
+  Retries: Спроби
+  RetryAll: Повторити усі
+  RetryCount: Кількість спроб
+  RetryNow: Повторити зараз
+  Scheduled: Заплановано
+  ScheduledJobs: Заплановані задачі
+  ShowAll: Відобразити усі
+  SixMonths: 6 місяців
+  Size: Розмір
+  Started: Запущено
+  Status: Статус
+  Stop: Зупинити
+  StopAll: Зупинити усі
+  StopPolling: Зупинити опитування
   Thread: Потік
   Threads: Потоки
-  Jobs: Задачі
-  Paused: Призупинено
-  Stop: Зупинити
-  Quiet: Призупинити
-  StopAll: Зупинити усі
-  QuietAll: Призупинити усі
-  PollingInterval: Інтервал опитування
-  Plugins: Плагіни
-  NotYetEnqueued: Ще не в черзі
+  ThreeMonths: 3 місяці
+  Time: Час
+  Uptime: Днів безперебійної роботи
+  Version: Версія
+  When: Коли
+  Worker: Обробник
+  active: активний
+  idle: незайнятий
