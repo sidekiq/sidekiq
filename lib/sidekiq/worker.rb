@@ -370,7 +370,6 @@ module Sidekiq
       @args = args
       @opts = opts
     end
-    ruby2_keywords(:initialize)
 
     def serialize
       item = @opts.transform_keys(&:to_s).merge("class" => self.class, "args" => @args)
@@ -379,6 +378,6 @@ module Sidekiq
 
     private
 
-      include Sidekiq::JobUtil
+    include Sidekiq::JobUtil
   end
 end

@@ -24,7 +24,7 @@ module Sidekiq
         if marshalled.size > SIZE_LIMIT
           ::Sidekiq.logger.warn { "#{@target}.#{name} job argument is #{marshalled.bytesize} bytes, you should refactor it to reduce the size" }
         end
-        item = @performable.serialize(*[marshalled], **{"display_class" => "#{@target}.#{name}"}.merge(@opts))
+        item = @performable.serialize(marshalled, **{"display_class" => "#{@target}.#{name}"}.merge(@opts))
         @performable.client_push(item)
       end
     end
