@@ -7,6 +7,13 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 HEAD
 ---------
 
+- Added `error_type` tag for `job.failures` metrics [#5211]
+
+5.3.1
+---------
+
+- Ensure sidekiq-pro/web pulls in sharding support [#5153]
+- Fix pipeline/multi deprecation in redis-rb 4.6.
 - Fix namespace issue with dogstatsd-ruby in Ruby 3+ [#5094]
 
 5.3.0

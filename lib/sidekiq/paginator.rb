@@ -27,7 +27,7 @@ module Sidekiq
           [current_page, total_size, items]
         when "list"
           total_size, items = conn.multi { |transaction|
-            conn.llen(key)
+            transaction.llen(key)
             if rev
               transaction.lrange(key, -ending - 1, -starting - 1)
             else

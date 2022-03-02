@@ -20,7 +20,7 @@ module Sidekiq
     attr_accessor :launcher
     attr_accessor :environment
 
-    def parse(args = ARGV)
+    def parse(args = ARGV.dup)
       setup_options(args)
       initialize_logger
       validate!
@@ -115,8 +115,8 @@ module Sidekiq
       begin
         launcher.run
 
-        while (readable_io = IO.select([self_read]))
-          signal = readable_io.first[0].gets.strip
+        while self_read.wait_readable
+          signal = self_read.gets.strip
           handle_signal(signal)
         end
       rescue Interrupt

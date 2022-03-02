@@ -70,13 +70,7 @@ module Sidekiq
     #   push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
     #
     def push(item)
-      normed = item.key?("normalized") ? item : normalize_item(item)
-      payload = process_single(item["class"], normed)
-
-      if payload
-        raw_push([payload])
-        payload["jid"]
-      end
+      push_bulk(item.merge("args" => [item["args"]])).first
     end
 
     ##
@@ -101,9 +95,12 @@ module Sidekiq
       raise ArgumentError, "Job 'at' must be a Numeric or an Array of Numeric timestamps" if at && (Array(at).empty? || !Array(at).all? { |entry| entry.is_a?(Numeric) })
       raise ArgumentError, "Job 'at' Array must have same size as 'args' Array" if at.is_a?(Array) && at.size != args.size
 
+      jid = items.delete("jid")
+      raise ArgumentError, "Explicitly passing 'jid' when pushing more than one job is not supported" if jid && args.size > 1
+
       normed = items.key?("normalized") ? items : normalize_item(items)
       payloads = args.map.with_index { |job_args, index|
-        copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12), "enqueued_at" => Time.now.to_f)
+        copy = normed.merge("args" => job_args, "jid" => jid || generate_jid)
         copy["at"] = (at.is_a?(Array) ? at[index] : at) if at
 
         result = process_single(items["class"], copy)
@@ -189,8 +186,23 @@ module Sidekiq
 
     def raw_push(payloads)
       @redis_pool.with do |conn|
-        conn.pipelined do |pipeline|
-          atomic_push(pipeline, payloads)
+        retryable = true
+        begin
+          conn.pipelined do |pipeline|
+            atomic_push(pipeline, payloads)
+          end
+        rescue Redis::BaseError => ex
+          # 2550 Failover can cause the server to become a replica, need
+          # to disconnect and reopen the socket to get back to the primary.
+          # 4495 Use the same logic if we have a "Not enough replicas" error from the primary
+          # 4985 Use the same logic when a blocking command is force-unblocked
+          # The retry logic is copied from sidekiq.rb
+          if retryable && ex.message =~ /READONLY|NOREPLICAS|UNBLOCKED/
+            conn.disconnect!
+            retryable = false
+            retry
+          end
+          raise
         end
       end
       true

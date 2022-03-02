@@ -176,16 +176,18 @@ module Sidekiq
 
       def initialize(klass, opts)
         @klass = klass
-        @opts = opts
+        # NB: the internal hash always has stringified keys
+        @opts = opts.transform_keys(&:to_s)
 
         # ActiveJob compatibility
-        interval = @opts.delete(:wait_until) || @opts.delete(:wait)
+        interval = @opts.delete("wait_until") || @opts.delete("wait")
         at(interval) if interval
       end
 
       def set(options)
-        interval = options.delete(:wait_until) || options.delete(:wait)
-        @opts.merge!(options)
+        hash = options.transform_keys(&:to_s)
+        interval = hash.delete("wait_until") || @opts.delete("wait")
+        @opts.merge!(hash)
         at(interval) if interval
         self
       end
@@ -194,14 +196,14 @@ module Sidekiq
         if @opts["sync"] == true
           perform_inline(*args)
         else
-          @klass.client_push(@klass.serialize(@opts, args))
+          @klass.client_push(@klass.serialize(*args, **@opts))
         end
       end
 
       # Explicit inline execution of a job. Returns nil if the job did not
       # execute, true otherwise.
       def perform_inline(*args)
-        item = @klass.serialize(@opts, args)
+        item = @klass.serialize(*args, **@opts)
         queue = item["queue"]
 
         # run client-side middleware
@@ -233,10 +235,9 @@ module Sidekiq
       alias_method :perform_sync, :perform_inline
 
       def perform_bulk(args, batch_size: 1_000)
-        pool = Thread.current[:sidekiq_via_pool] || @klass.get_sidekiq_options["pool"] || Sidekiq.redis_pool
-        client = Sidekiq::Client.new(pool)
+        client = @klass.build_client
         result = args.each_slice(batch_size).flat_map do |slice|
-          client.push_bulk(@klass.serialize(@opts, slice))
+          client.push_bulk(@klass.serialize(*slice, **@opts))
         end
 
         result.is_a?(Enumerator::Lazy) ? result.force : result
@@ -290,6 +291,7 @@ module Sidekiq
       def perform_inline(*args)
         Setter.new(self, {}).perform_inline(*args)
       end
+      alias_method :perform_sync, :perform_inline
 
       ##
       # Push a large number of jobs to Redis, while limiting the batch of
@@ -322,11 +324,11 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        # Optimization to enqueue something now that is scheduled to go out now or in the past
         opts = {}
+        # Optimization to enqueue something now that is scheduled to go out now or in the past
         opts["at"] = ts if ts > now
 
-        client_push(serialize(opts, args))
+        client_push(serialize(*args, **opts))
       end
       alias_method :perform_at, :perform_in
 
@@ -347,21 +349,26 @@ module Sidekiq
         super
       end
 
-      def client_push(stringified_item) # :nodoc:
-        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options["pool"] || Sidekiq.redis_pool
-        Sidekiq::Client.new(pool).push(stringified_item)
+      def client_push(item) # :nodoc:
+        raise ArgumentError, "Job payloads should contain no Symbols: #{item}" if item.any? { |k, v| k.is_a?(::Symbol) }
+        build_client.push(item)
       end
 
-      def serialize(opts = {}, args = [])
-        new(opts, *args).serialize
+      def build_client # :nodoc:
+        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options["pool"] || Sidekiq.redis_pool
+        Sidekiq::Client.new(pool)
+      end
+
+      def serialize(*args, **opts)
+        new(*args, **opts).serialize
       end
     end
 
     # Creates a new job instance. Takes the arguments that will be
     # passed to the perform method.
-    def initialize(opts_or_args = {}, *args)
-      @opts = opts_or_args.is_a?(Hash) ? opts_or_args : {}
-      @args = opts_or_args.is_a?(Hash) ? args : Array[opts_or_args]
+    def initialize(*args, **opts)
+      @args = args
+      @opts = opts
     end
     ruby2_keywords(:initialize)
 
@@ -372,6 +379,6 @@ module Sidekiq
 
     private
 
-    include Sidekiq::JobUtil
+      include Sidekiq::JobUtil
   end
 end
