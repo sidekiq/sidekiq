@@ -359,18 +359,26 @@ module Sidekiq
         Sidekiq::Client.new(pool)
       end
 
+      ##
+      # Returns the hash that will be pushed to Redis when this job is enqueued
+      # +args+ are the arguments, if any, that will be passed to the perform method
+      # +opts+ are any options to configure the job
       def serialize(*args, **opts)
         new(*args, **opts).serialize
       end
     end
 
-    # Creates a new job instance. Takes the arguments that will be
-    # passed to the perform method.
+    ##
+    # Creates a new job instance. 
+    # +args+ are the arguments, if any, that will be passed to the perform method
+    # +opts+ are any options to configure the job
     def initialize(*args, **opts)
       @args = args
       @opts = opts
     end
 
+    ##
+    # Returns the hash that will be pushed to Redis when this job is enqueued
     def serialize
       item = @opts.transform_keys(&:to_s).merge("class" => self.class, "args" => @args)
       normalize_item(item).merge("normalized" => true)
