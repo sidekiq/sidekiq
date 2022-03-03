@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative 'helper'
-require 'sidekiq/job_logger'
+require_relative "helper"
+require "sidekiq/job_logger"
 
 class TestJobLogger < Minitest::Test
   def setup
@@ -25,10 +25,10 @@ class TestJobLogger < Minitest::Test
 
     # pretty
     p = @logger.formatter = Sidekiq::Logger::Formatters::Pretty.new
-    job = {"jid"=>"1234abc", "wrapped"=>"FooWorker", "class"=>"Wrapper", "tags" => ["bar", "baz"]}
+    job = {"jid" => "1234abc", "wrapped" => "FooWorker", "class" => "Wrapper", "tags" => ["bar", "baz"]}
     # this mocks what Processor does
     jl.prepare(job) do
-      jl.call(job, 'queue') {}
+      jl.call(job, "queue") {}
     end
 
     a, b = @output.string.lines
@@ -45,10 +45,10 @@ class TestJobLogger < Minitest::Test
     # json
     @logger.formatter = Sidekiq::Logger::Formatters::JSON.new
     jl = Sidekiq::JobLogger.new(@logger)
-    job = {"jid"=>"1234abc", "wrapped"=>"Wrapper", "class"=>"FooWorker", "bid"=>"b-xyz", "tags" => ["bar", "baz"]}
+    job = {"jid" => "1234abc", "wrapped" => "Wrapper", "class" => "FooWorker", "bid" => "b-xyz", "tags" => ["bar", "baz"]}
     # this mocks what Processor does
     jl.prepare(job) do
-      jl.call(job, 'queue') {}
+      jl.call(job, "queue") {}
     end
     a, b = @output.string.lines
     assert a
@@ -62,7 +62,7 @@ class TestJobLogger < Minitest::Test
 
   def test_custom_log_level
     jl = Sidekiq::JobLogger.new(@logger)
-    job = {"class"=>"FooWorker", "log_level"=>"debug"}
+    job = {"class" => "FooWorker", "log_level" => "debug"}
 
     assert @logger.info?
     jl.prepare(job) do
@@ -81,7 +81,7 @@ class TestJobLogger < Minitest::Test
 
   def test_custom_log_level_uses_default_log_level_for_invalid_value
     jl = Sidekiq::JobLogger.new(@logger)
-    job = {"class"=>"FooWorker", "log_level"=>"non_existent"}
+    job = {"class" => "FooWorker", "log_level" => "non_existent"}
 
     assert @logger.info?
     jl.prepare(job) do

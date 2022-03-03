@@ -1,8 +1,10 @@
 # frozen_string_literal: true
-require_relative 'helper'
 
-describe 'Sidekiq::Testing.inline' do
+require_relative "helper"
+
+describe "Sidekiq::Testing.inline" do
   class InlineError < RuntimeError; end
+
   class ParameterIsNotString < RuntimeError; end
 
   class InlineWorker
@@ -21,7 +23,7 @@ describe 'Sidekiq::Testing.inline' do
   end
 
   before do
-    require 'sidekiq/testing/inline'
+    require "sidekiq/testing/inline"
     Sidekiq::Testing.inline!
   end
 
@@ -29,7 +31,7 @@ describe 'Sidekiq::Testing.inline' do
     Sidekiq::Testing.disable!
   end
 
-  it 'stubs the async call when in testing mode' do
+  it "stubs the async call when in testing mode" do
     assert InlineWorker.perform_async(true)
 
     assert_raises InlineError do
@@ -37,8 +39,8 @@ describe 'Sidekiq::Testing.inline' do
     end
   end
 
-  describe 'delay' do
-    require 'action_mailer'
+  describe "delay" do
+    require "action_mailer"
     class InlineFooMailer < ActionMailer::Base
       def bar(str)
         raise InlineError
@@ -55,20 +57,20 @@ describe 'Sidekiq::Testing.inline' do
       Sidekiq::Extensions.enable_delay!
     end
 
-    it 'stubs the delay call on mailers' do
+    it "stubs the delay call on mailers" do
       assert_raises InlineError do
-        InlineFooMailer.delay.bar('three')
+        InlineFooMailer.delay.bar("three")
       end
     end
 
-    it 'stubs the delay call on models' do
+    it "stubs the delay call on models" do
       assert_raises InlineError do
-        InlineFooModel.delay.bar('three')
+        InlineFooModel.delay.bar("three")
       end
     end
   end
 
-  it 'stubs the enqueue call when in testing mode' do
+  it "stubs the enqueue call when in testing mode" do
     assert Sidekiq::Client.enqueue(InlineWorker, true)
 
     assert_raises InlineError do
@@ -76,16 +78,15 @@ describe 'Sidekiq::Testing.inline' do
     end
   end
 
-  it 'stubs the push_bulk call when in testing mode' do
-    assert Sidekiq::Client.push_bulk({'class' => InlineWorker, 'args' => [[true], [true]]})
+  it "stubs the push_bulk call when in testing mode" do
+    assert Sidekiq::Client.push_bulk({"class" => InlineWorker, "args" => [[true], [true]]})
 
     assert_raises InlineError do
-      Sidekiq::Client.push_bulk({'class' => InlineWorker, 'args' => [[true], [false]]})
+      Sidekiq::Client.push_bulk({"class" => InlineWorker, "args" => [[true], [false]]})
     end
   end
 
-  it 'should relay parameters through json' do
+  it "should relay parameters through json" do
     assert Sidekiq::Client.enqueue(InlineWorkerWithTimeParam, Time.now.to_f)
   end
-
 end

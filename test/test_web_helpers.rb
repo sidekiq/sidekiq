@@ -1,12 +1,13 @@
 # frozen_string_literal: true
-require_relative 'helper'
-require 'sidekiq/web'
+
+require_relative "helper"
+require "sidekiq/web"
 
 class TestWebHelpers < Minitest::Test
   class Helpers
     include Sidekiq::WebHelpers
 
-    def initialize(params={})
+    def initialize(params = {})
       @thehash = default.merge(params)
     end
 
@@ -19,7 +20,7 @@ class TestWebHelpers < Minitest::Test
     end
 
     def locales
-      ['web/locales']
+      ["web/locales"]
     end
 
     def env
@@ -34,73 +35,73 @@ class TestWebHelpers < Minitest::Test
 
   def test_locale_determination
     obj = Helpers.new
-    assert_equal 'en', obj.locale
+    assert_equal "en", obj.locale
 
-    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'fr-FR,fr;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2')
-    assert_equal 'fr', obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "fr-FR,fr;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2")
+    assert_equal "fr", obj.locale
 
-    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2')
-    assert_equal 'zh-cn', obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2")
+    assert_equal "zh-cn", obj.locale
 
-    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'en-US,sv-SE;q=0.8,sv;q=0.6,en;q=0.4')
-    assert_equal 'en', obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "en-US,sv-SE;q=0.8,sv;q=0.6,en;q=0.4")
+    assert_equal "en", obj.locale
 
-    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'nb-NO,nb;q=0.2')
-    assert_equal 'nb', obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "nb-NO,nb;q=0.2")
+    assert_equal "nb", obj.locale
 
-    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'en-us')
-    assert_equal 'en', obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "en-us")
+    assert_equal "en", obj.locale
 
-    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'sv-se')
-    assert_equal 'sv', obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "sv-se")
+    assert_equal "sv", obj.locale
 
-    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4')
-    assert_equal 'pt-br', obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4")
+    assert_equal "pt-br", obj.locale
 
-    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'pt-PT,pt;q=0.8,en-US;q=0.6,en;q=0.4')
-    assert_equal 'pt', obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "pt-PT,pt;q=0.8,en-US;q=0.6,en;q=0.4")
+    assert_equal "pt", obj.locale
 
-    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'pt-br')
-    assert_equal 'pt-br', obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "pt-br")
+    assert_equal "pt-br", obj.locale
 
-    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'pt-pt')
-    assert_equal 'pt', obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "pt-pt")
+    assert_equal "pt", obj.locale
 
-    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'pt')
-    assert_equal 'pt', obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "pt")
+    assert_equal "pt", obj.locale
 
-    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'en-us; *')
-    assert_equal 'en', obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "en-us; *")
+    assert_equal "en", obj.locale
 
-    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.8')
-    assert_equal 'en', obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "en-US,en;q=0.8")
+    assert_equal "en", obj.locale
 
-    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'en-GB,en-US;q=0.8,en;q=0.6')
-    assert_equal 'en', obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "en-GB,en-US;q=0.8,en;q=0.6")
+    assert_equal "en", obj.locale
 
-    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'ru,en')
-    assert_equal 'ru', obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "ru,en")
+    assert_equal "ru", obj.locale
 
-    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => 'lt')
-    assert_equal 'lt', obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "lt")
+    assert_equal "lt", obj.locale
 
-    obj = Helpers.new('HTTP_ACCEPT_LANGUAGE' => '*')
-    assert_equal 'en', obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "*")
+    assert_equal "en", obj.locale
   end
 
   def test_available_locales
     obj = Helpers.new
-    expected = %w(
+    expected = %w[
       ar cs da de el en es fa fr he hi it ja
       ko lt nb nl pl pt pt-br ru sv ta uk ur
       vi zh-cn zh-tw
-    )
+    ]
     assert_equal expected, obj.available_locales.sort
   end
 
   def test_display_illegal_args
     o = Helpers.new
-    s = o.display_args([1,2,3])
+    s = o.display_args([1, 2, 3])
     assert_equal "1, 2, 3", s
     s = o.display_args(["<html>", 12])
     assert_equal "&quot;&lt;html&gt;&quot;, 12", s
@@ -119,7 +120,7 @@ class TestWebHelpers < Minitest::Test
     obj = Helpers.new
     obj.instance_eval do
       def params
-        { "direction" => "H>B" }
+        {"direction" => "H>B"}
       end
     end
     assert_equal "direction=H%3EB&page=B%3CH", obj.qparams("page" => "B<H")

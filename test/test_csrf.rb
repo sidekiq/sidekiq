@@ -1,12 +1,12 @@
-require_relative './helper'
-require 'sidekiq/web/csrf_protection'
+require_relative "./helper"
+require "sidekiq/web/csrf_protection"
 
 class TestCsrf < Minitest::Test
   def session
     @session ||= {}
   end
 
-  def env(method=:get, form_hash={}, rack_session=session)
+  def env(method = :get, form_hash = {}, rack_session = session)
     imp = StringIO.new("")
     {
       "REQUEST_METHOD" => method.to_s.upcase,
@@ -14,7 +14,7 @@ class TestCsrf < Minitest::Test
       "rack.logger" => ::Logger.new(@logio ||= StringIO.new("")),
       "rack.input" => imp,
       "rack.request.form_input" => imp,
-      "rack.request.form_hash" => form_hash,
+      "rack.request.form_hash" => form_hash
     }
   end
 
@@ -74,7 +74,7 @@ class TestCsrf < Minitest::Test
     assert_equal ["OK"], result[2]
 
     # Make a POST with a known bad token
-    result = call(env(:post, "authenticity_token"=>"N0QRBD34tU61d7fi+0ZaF/35JLW/9K+8kk8dc1TZoK/0pTl7GIHap5gy7BWGsoKlzbMLRp1yaDpCDFwTJtxWAg==")) do
+    result = call(env(:post, "authenticity_token" => "N0QRBD34tU61d7fi+0ZaF/35JLW/9K+8kk8dc1TZoK/0pTl7GIHap5gy7BWGsoKlzbMLRp1yaDpCDFwTJtxWAg==")) do
       raise "shouldnt be called"
     end
     refute_nil result
@@ -90,7 +90,7 @@ class TestCsrf < Minitest::Test
     assert goodtoken
 
     # Make a POST with an empty session data and good token
-    result = call(env(:post, { "authenticity_token" => goodtoken }, {})) do
+    result = call(env(:post, {"authenticity_token" => goodtoken}, {})) do
       raise "shouldnt be called"
     end
     refute_nil result
@@ -105,7 +105,7 @@ class TestCsrf < Minitest::Test
     assert goodtoken
 
     # Make a POST without csrf session data and good token
-    result = call(env(:post, { "authenticity_token" => goodtoken }, { 'session_id' => 'foo' })) do
+    result = call(env(:post, {"authenticity_token" => goodtoken}, {"session_id" => "foo"})) do
       raise "shouldnt be called"
     end
     refute_nil result
