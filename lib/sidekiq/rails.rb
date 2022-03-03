@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "sidekiq/worker"
+require "sidekiq/job"
 
 module Sidekiq
   class Rails < ::Rails::Engine
@@ -33,19 +33,26 @@ module Sidekiq
     #   end
     initializer "sidekiq.active_job_integration" do
       ActiveSupport.on_load(:active_job) do
-        include ::Sidekiq::Worker::Options unless respond_to?(:sidekiq_options)
+        include ::Sidekiq::Job::Options unless respond_to?(:sidekiq_options)
       end
     end
 
     initializer "sidekiq.rails_logger" do
       Sidekiq.configure_server do |_|
-        # This is the integration code necessary so that if code uses `Rails.logger.info "Hello"`,
+        # This is the integration code necessary so that if a job uses `Rails.logger.info "Hello"`,
         # it will appear in the Sidekiq console with all of the job context. See #5021 and
         # https://github.com/rails/rails/blob/b5f2b550f69a99336482739000c58e4e04e033aa/railties/lib/rails/commands/server/server_command.rb#L82-L84
         unless ::Rails.logger == ::Sidekiq.logger || ::ActiveSupport::Logger.logger_outputs_to?(::Rails.logger, $stdout)
           ::Rails.logger.extend(::ActiveSupport::Logger.broadcast(::Sidekiq.logger))
         end
       end
+    end
+
+    config.before_configuration do
+      dep = ActiveSupport::Deprecation.new("7.0", "Sidekiq")
+      dep.deprecate_methods(Sidekiq.singleton_class,
+        default_worker_options: :default_job_options,
+        "default_worker_options=": :default_job_options=)
     end
 
     # This hook happens after all initializers are run, just before returning

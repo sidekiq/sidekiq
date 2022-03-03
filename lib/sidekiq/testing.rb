@@ -101,20 +101,20 @@ module Sidekiq
     ##
     # The Queues class is only for testing the fake queue implementation.
     # There are 2 data structures involved in tandem. This is due to the
-    # Rspec syntax of change(QueueWorker.jobs, :size). It keeps a reference
+    # Rspec syntax of change(HardJob.jobs, :size). It keeps a reference
     # to the array. Because the array was dervied from a filter of the total
     # jobs enqueued, it appeared as though the array didn't change.
     #
     # To solve this, we'll keep 2 hashes containing the jobs. One with keys based
-    # on the queue, and another with keys of the worker names, so the array for
-    # QueueWorker.jobs is a straight reference to a real array.
+    # on the queue, and another with keys of the job type, so the array for
+    # HardJob.jobs is a straight reference to a real array.
     #
     # Queue-based hash:
     #
     # {
     #   "default"=>[
     #     {
-    #       "class"=>"TestTesting::QueueWorker",
+    #       "class"=>"TestTesting::HardJob",
     #       "args"=>[1, 2],
     #       "retry"=>true,
     #       "queue"=>"default",
@@ -124,12 +124,12 @@ module Sidekiq
     #   ]
     # }
     #
-    # Worker-based hash:
+    # Job-based hash:
     #
     # {
-    #   "TestTesting::QueueWorker"=>[
+    #   "TestTesting::HardJob"=>[
     #     {
-    #       "class"=>"TestTesting::QueueWorker",
+    #       "class"=>"TestTesting::HardJob",
     #       "args"=>[1, 2],
     #       "retry"=>true,
     #       "queue"=>"default",
@@ -144,14 +144,14 @@ module Sidekiq
     #   require 'sidekiq/testing'
     #
     #   assert_equal 0, Sidekiq::Queues["default"].size
-    #   HardWorker.perform_async(:something)
+    #   HardJob.perform_async(:something)
     #   assert_equal 1, Sidekiq::Queues["default"].size
     #   assert_equal :something, Sidekiq::Queues["default"].first['args'][0]
     #
-    # You can also clear all workers' jobs:
+    # You can also clear all jobs:
     #
     #   assert_equal 0, Sidekiq::Queues["default"].size
-    #   HardWorker.perform_async(:something)
+    #   HardJob.perform_async(:something)
     #   Sidekiq::Queues.clear_all
     #   assert_equal 0, Sidekiq::Queues["default"].size
     #
@@ -170,35 +170,36 @@ module Sidekiq
 
       def push(queue, klass, job)
         jobs_by_queue[queue] << job
-        jobs_by_worker[klass] << job
+        jobs_by_class[klass] << job
       end
 
       def jobs_by_queue
         @jobs_by_queue ||= Hash.new { |hash, key| hash[key] = [] }
       end
 
-      def jobs_by_worker
-        @jobs_by_worker ||= Hash.new { |hash, key| hash[key] = [] }
+      def jobs_by_class
+        @jobs_by_class ||= Hash.new { |hash, key| hash[key] = [] }
       end
+      alias_method :jobs_by_worker, :jobs_by_class
 
       def delete_for(jid, queue, klass)
         jobs_by_queue[queue.to_s].delete_if { |job| job["jid"] == jid }
-        jobs_by_worker[klass].delete_if { |job| job["jid"] == jid }
+        jobs_by_class[klass].delete_if { |job| job["jid"] == jid }
       end
 
       def clear_for(queue, klass)
         jobs_by_queue[queue].clear
-        jobs_by_worker[klass].clear
+        jobs_by_class[klass].clear
       end
 
       def clear_all
         jobs_by_queue.clear
-        jobs_by_worker.clear
+        jobs_by_class.clear
       end
     end
   end
 
-  module Worker
+  module Job
     ##
     # The Sidekiq testing infrastructure overrides perform_async
     # so that it does not actually touch the network.  Instead it
@@ -212,16 +213,16 @@ module Sidekiq
     #
     #   require 'sidekiq/testing'
     #
-    #   assert_equal 0, HardWorker.jobs.size
-    #   HardWorker.perform_async(:something)
-    #   assert_equal 1, HardWorker.jobs.size
-    #   assert_equal :something, HardWorker.jobs[0]['args'][0]
+    #   assert_equal 0, HardJob.jobs.size
+    #   HardJob.perform_async(:something)
+    #   assert_equal 1, HardJob.jobs.size
+    #   assert_equal :something, HardJob.jobs[0]['args'][0]
     #
     #   assert_equal 0, Sidekiq::Extensions::DelayedMailer.jobs.size
     #   MyMailer.delay.send_welcome_email('foo@example.com')
     #   assert_equal 1, Sidekiq::Extensions::DelayedMailer.jobs.size
     #
-    # You can also clear and drain all workers' jobs:
+    # You can also clear and drain all job types:
     #
     #   assert_equal 0, Sidekiq::Extensions::DelayedMailer.jobs.size
     #   assert_equal 0, Sidekiq::Extensions::DelayedModel.jobs.size
@@ -241,14 +242,14 @@ module Sidekiq
     #
     #   RSpec.configure do |config|
     #     config.before(:each) do
-    #       Sidekiq::Worker.clear_all
+    #       Sidekiq::Job.clear_all
     #     end
     #   end
     #
     # or for acceptance testing, i.e. with cucumber:
     #
     #   AfterStep do
-    #     Sidekiq::Worker.drain_all
+    #     Sidekiq::Job.drain_all
     #   end
     #
     #   When I sign up as "foo@example.com"
@@ -262,7 +263,7 @@ module Sidekiq
 
       # Jobs queued for this worker
       def jobs
-        Queues.jobs_by_worker[to_s]
+        Queues.jobs_by_class[to_s]
       end
 
       # Clear all jobs for this worker
@@ -288,11 +289,11 @@ module Sidekiq
       end
 
       def process_job(job)
-        worker = new
-        worker.jid = job["jid"]
-        worker.bid = job["bid"] if worker.respond_to?(:bid=)
-        Sidekiq::Testing.server_middleware.invoke(worker, job, job["queue"]) do
-          execute_job(worker, job["args"])
+        inst = new
+        inst.jid = job["jid"]
+        inst.bid = job["bid"] if inst.respond_to?(:bid=)
+        Sidekiq::Testing.server_middleware.invoke(inst, job, job["queue"]) do
+          execute_job(inst, job["args"])
         end
       end
 
@@ -306,18 +307,18 @@ module Sidekiq
         Queues.jobs_by_queue.values.flatten
       end
 
-      # Clear all queued jobs across all workers
+      # Clear all queued jobs
       def clear_all
         Queues.clear_all
       end
 
-      # Drain all queued jobs across all workers
+      # Drain (execute) all queued jobs
       def drain_all
         while jobs.any?
-          worker_classes = jobs.map { |job| job["class"] }.uniq
+          job_classes = jobs.map { |job| job["class"] }.uniq
 
-          worker_classes.each do |worker_class|
-            Sidekiq::Testing.constantize(worker_class).drain
+          job_classes.each do |job_class|
+            Sidekiq::Testing.constantize(job_class).drain
           end
         end
       end

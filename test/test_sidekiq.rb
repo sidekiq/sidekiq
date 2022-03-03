@@ -48,14 +48,14 @@ describe Sidekiq do
     end
   end
 
-  describe 'default_worker_options' do
+  describe 'default_job_options' do
     it 'stringifies keys' do
-      @old_options = Sidekiq.default_worker_options
+      @old_options = Sidekiq.default_job_options
       begin
-        Sidekiq.default_worker_options = { queue: 'cat'}
-        assert_equal 'cat', Sidekiq.default_worker_options['queue']
+        Sidekiq.default_job_options = { queue: 'cat'}
+        assert_equal 'cat', Sidekiq.default_job_options['queue']
       ensure
-        Sidekiq.default_worker_options = @old_options
+        Sidekiq.default_job_options = @old_options
       end
     end
   end

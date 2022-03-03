@@ -11,7 +11,7 @@ module Sidekiq
   #
   # 1. fetches a job from Redis
   # 2. executes the job
-  #   a. instantiate the Worker
+  #   a. instantiate the job class
   #   b. run the middleware chain
   #   c. call #perform
   #
@@ -80,12 +80,12 @@ module Sidekiq
     end
 
     def get_one
-      work = @strategy.retrieve_work
+      uow = @strategy.retrieve_work
       if @down
         logger.info { "Redis is online, #{::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @down} sec downtime" }
         @down = nil
       end
-      work
+      uow
     rescue Sidekiq::Shutdown
     rescue => ex
       handle_fetch_exception(ex)
@@ -130,10 +130,10 @@ module Sidekiq
               # Effectively this block denotes a "unit of work" to Rails.
               @reloader.call do
                 klass = constantize(job_hash["class"])
-                worker = klass.new
-                worker.jid = job_hash["jid"]
-                @retrier.local(worker, jobstr, queue) do
-                  yield worker
+                inst = klass.new
+                inst.jid = job_hash["jid"]
+                @retrier.local(inst, jobstr, queue) do
+                  yield inst
                 end
               end
             end
@@ -142,9 +142,9 @@ module Sidekiq
       end
     end
 
-    def process(work)
-      jobstr = work.job
-      queue = work.queue_name
+    def process(uow)
+      jobstr = uow.job
+      queue = uow.queue_name
 
       # Treat malformed JSON as a special case: job goes straight to the morgue.
       job_hash = nil
@@ -154,14 +154,14 @@ module Sidekiq
         handle_exception(ex, {context: "Invalid JSON for job", jobstr: jobstr})
         # we can't notify because the job isn't a valid hash payload.
         DeadSet.new.kill(jobstr, notify_failure: false)
-        return work.acknowledge
+        return uow.acknowledge
       end
 
       ack = false
       begin
-        dispatch(job_hash, queue, jobstr) do |worker|
-          Sidekiq.server_middleware.invoke(worker, job_hash, queue) do
-            execute_job(worker, job_hash["args"])
+        dispatch(job_hash, queue, jobstr) do |inst|
+          Sidekiq.server_middleware.invoke(inst, job_hash, queue) do
+            execute_job(inst, job_hash["args"])
           end
         end
         ack = true
@@ -186,14 +186,14 @@ module Sidekiq
         if ack
           # We don't want a shutdown signal to interrupt job acknowledgment.
           Thread.handle_interrupt(Sidekiq::Shutdown => :never) do
-            work.acknowledge
+            uow.acknowledge
           end
         end
       end
     end
 
-    def execute_job(worker, cloned_args)
-      worker.perform(*cloned_args)
+    def execute_job(inst, cloned_args)
+      inst.perform(*cloned_args)
     end
 
     # Ruby doesn't provide atomic counters out of the box so we'll
@@ -219,39 +219,39 @@ module Sidekiq
     end
 
     # jruby's Hash implementation is not threadsafe, so we wrap it in a mutex here
-    class SharedWorkerState
+    class SharedWorkState
       def initialize
-        @worker_state = {}
+        @work_state = {}
         @lock = Mutex.new
       end
 
       def set(tid, hash)
-        @lock.synchronize { @worker_state[tid] = hash }
+        @lock.synchronize { @work_state[tid] = hash }
       end
 
       def delete(tid)
-        @lock.synchronize { @worker_state.delete(tid) }
+        @lock.synchronize { @work_state.delete(tid) }
       end
 
       def dup
-        @lock.synchronize { @worker_state.dup }
+        @lock.synchronize { @work_state.dup }
       end
 
       def size
-        @lock.synchronize { @worker_state.size }
+        @lock.synchronize { @work_state.size }
       end
 
       def clear
-        @lock.synchronize { @worker_state.clear }
+        @lock.synchronize { @work_state.clear }
       end
     end
 
     PROCESSED = Counter.new
     FAILURE = Counter.new
-    WORKER_STATE = SharedWorkerState.new
+    WORK_STATE = SharedWorkState.new
 
     def stats(jobstr, queue)
-      WORKER_STATE.set(tid, {queue: queue, payload: jobstr, run_at: Time.now.to_i})
+      WORK_STATE.set(tid, {queue: queue, payload: jobstr, run_at: Time.now.to_i})
 
       begin
         yield
@@ -259,7 +259,7 @@ module Sidekiq
         FAILURE.incr
         raise
       ensure
-        WORKER_STATE.delete(tid)
+        WORK_STATE.delete(tid)
         PROCESSED.incr
       end
     end

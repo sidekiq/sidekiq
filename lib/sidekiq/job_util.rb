@@ -48,10 +48,10 @@ module Sidekiq
 
     def normalized_hash(item_class)
       if item_class.is_a?(Class)
-        raise(ArgumentError, "Message must include a Sidekiq::Worker class, not class name: #{item_class.ancestors.inspect}") unless item_class.respond_to?(:get_sidekiq_options)
+        raise(ArgumentError, "Message must include a Sidekiq::Job class, not class name: #{item_class.ancestors.inspect}") unless item_class.respond_to?(:get_sidekiq_options)
         item_class.get_sidekiq_options
       else
-        Sidekiq.default_worker_options
+        Sidekiq.default_job_options
       end
     end
 

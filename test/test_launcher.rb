@@ -28,13 +28,13 @@ describe Sidekiq::Launcher do
       @launcher.manager = @mgr
       @id = @launcher.identity
 
-      Sidekiq::Processor::WORKER_STATE.set('a', {'b' => 1})
+      Sidekiq::Processor::WORK_STATE.set('a', {'b' => 1})
 
       @proctitle = $0
     end
 
     after do
-      Sidekiq::Processor::WORKER_STATE.clear
+      Sidekiq::Processor::WORK_STATE.clear
       $0 = @proctitle
     end
 

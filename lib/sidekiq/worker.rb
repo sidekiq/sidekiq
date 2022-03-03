@@ -82,7 +82,7 @@ module Sidekiq
         end
 
         def get_sidekiq_options # :nodoc:
-          self.sidekiq_options_hash ||= Sidekiq.default_worker_options
+          self.sidekiq_options_hash ||= Sidekiq.default_job_options
         end
 
         def sidekiq_class_attribute(*attrs)
