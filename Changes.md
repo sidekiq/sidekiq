@@ -5,10 +5,11 @@
 HEAD
 ---------
 
+- Fix page events with live polling [#5184]
 - Many under-the-hood changes to remove all usage of the term "worker"
-  from the Sidekiq codebase and APIs. This mostly involved RDoc and local variable
-  names but a few constants and public APIs were changed. The old APIs will be removed
-  in Sidekiq 7.0.
+  from the Sidekiq codebase and APIs. This mostly involved RDoc and local
+  variable names but a few constants and public APIs were changed. The old
+  APIs will be removed in Sidekiq 7.0.
 ```
 Sidekiq::DEFAULT_WORKER_OPTIONS -> Sidekiq.default_job_options
 Sidekiq.default_worker_options -> Sidekiq.default_job_options
