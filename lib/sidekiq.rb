@@ -222,6 +222,10 @@ module Sidekiq
     defined?(Sidekiq::Pro)
   end
 
+  def self.ent?
+    defined?(Sidekiq::Enterprise)
+  end
+
   # How frequently Redis should be checked by a random Sidekiq process for
   # scheduled and retriable jobs. Each individual process will take turns by
   # waiting some multiple of this value.
