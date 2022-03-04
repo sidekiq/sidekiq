@@ -109,6 +109,5 @@ function replacePage(text) {
   var header_status = doc.querySelector('.status')
   document.querySelector('.status').replaceWith(header_status)
 
-  updateFuzzyTimes();
   addListeners();
 }
