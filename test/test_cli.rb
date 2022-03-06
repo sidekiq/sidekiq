@@ -2,11 +2,12 @@
 
 require_relative 'helper'
 require 'sidekiq/cli'
+require 'sidekiq/config'
 
 describe Sidekiq::CLI do
   describe '#parse' do
     before do
-      Sidekiq.options = Sidekiq::DEFAULTS.dup
+      Sidekiq.options = Sidekiq::Config::DEFAULTS.dup
       @logger = Sidekiq.logger
       @logdev = StringIO.new
       Sidekiq.logger = Logger.new(@logdev)

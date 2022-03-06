@@ -2,11 +2,12 @@
 
 require_relative 'helper'
 require 'sidekiq/cli'
+require 'sidekiq/config'
 
 describe Sidekiq::RedisConnection do
   describe "create" do
     before do
-      Sidekiq.options = Sidekiq::DEFAULTS.dup
+      Sidekiq.options = Sidekiq::Config::DEFAULTS.dup
       @old = ENV['REDIS_URL']
       ENV['REDIS_URL'] = 'redis://localhost/15'
     end

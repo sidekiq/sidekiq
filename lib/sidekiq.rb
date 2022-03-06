@@ -5,6 +5,7 @@ fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 2.7.0." i
 
 require "sidekiq/logger"
 require "sidekiq/client"
+require "sidekiq/config"
 require "sidekiq/worker"
 require "sidekiq/job"
 require "sidekiq/redis_connection"
@@ -14,35 +15,6 @@ require "json"
 module Sidekiq
   NAME = "Sidekiq"
   LICENSE = "See LICENSE and the LGPL-3.0 for licensing details."
-
-  DEFAULTS = {
-    queues: [],
-    labels: [],
-    concurrency: 10,
-    require: ".",
-    strict: true,
-    environment: nil,
-    timeout: 25,
-    poll_interval_average: nil,
-    average_scheduled_poll_interval: 5,
-    on_complex_arguments: :warn,
-    error_handlers: [],
-    death_handlers: [],
-    lifecycle_events: {
-      startup: [],
-      quiet: [],
-      shutdown: [],
-      heartbeat: []
-    },
-    dead_max_jobs: 10_000,
-    dead_timeout_in_seconds: 180 * 24 * 60 * 60, # 6 months
-    reloader: proc { |&block| block.call }
-  }
-
-  DEFAULT_WORKER_OPTIONS = {
-    "retry" => true,
-    "queue" => "default"
-  }
 
   FAKE_INFO = {
     "redis_version" => "9.9.9",
@@ -57,11 +29,15 @@ module Sidekiq
   end
 
   def self.options
-    @options ||= DEFAULTS.dup
+    global_config.options
   end
 
   def self.options=(opts)
-    @options = opts
+    global_config.options = opts
+  end
+
+  def self.global_config
+    @global_config ||= Config.new
   end
 
   ##
@@ -158,12 +134,11 @@ module Sidekiq
   end
 
   def self.default_worker_options=(hash)
-    # stringify
-    @default_worker_options = default_worker_options.merge(hash.transform_keys(&:to_s))
+    global_config.merge_default_worker_options(hash)
   end
 
   def self.default_worker_options
-    defined?(@default_worker_options) ? @default_worker_options : DEFAULT_WORKER_OPTIONS
+    global_config.default_worker_options
   end
 
   ##
