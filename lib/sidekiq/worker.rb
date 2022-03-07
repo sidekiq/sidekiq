@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "sidekiq/client"
+require "sidekiq/job_util"
 
 module Sidekiq
   ##
@@ -195,17 +196,14 @@ module Sidekiq
         if @opts["sync"] == true
           perform_inline(*args)
         else
-          @klass.client_push(@opts.merge("args" => args, "class" => @klass))
+          @klass.client_push(@klass.serialize(*args, **@opts))
         end
       end
 
       # Explicit inline execution of a job. Returns nil if the job did not
       # execute, true otherwise.
       def perform_inline(*args)
-        raw = @opts.merge("args" => args, "class" => @klass)
-
-        # validate and normalize payload
-        item = normalize_item(raw)
+        item = @klass.serialize(*args, **@opts)
         queue = item["queue"]
 
         # run client-side middleware
@@ -240,7 +238,7 @@ module Sidekiq
         pool = Thread.current[:sidekiq_via_pool] || @klass.get_sidekiq_options["pool"] || Sidekiq.redis_pool
         client = Sidekiq::Client.new(pool)
         result = args.each_slice(batch_size).flat_map do |slice|
-          client.push_bulk(@opts.merge("class" => @klass, "args" => slice))
+          client.push_bulk(@klass.serialize(*slice, **@opts))
         end
 
         result.is_a?(Enumerator::Lazy) ? result.force : result
@@ -326,12 +324,12 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        item = {"class" => self, "args" => args}
+        opts = {}
 
         # Optimization to enqueue something now that is scheduled to go out now or in the past
-        item["at"] = ts if ts > now
+        opts["at"] = ts if ts > now
 
-        client_push(item)
+        client_push(serialize(*args, **opts))
       end
       alias_method :perform_at, :perform_in
 
@@ -358,6 +356,34 @@ module Sidekiq
 
         Sidekiq::Client.new(pool).push(item)
       end
+
+      ##
+      # Returns the hash that will be pushed to Redis when this job is enqueued
+      # +args+ are the arguments, if any, that will be passed to the perform method
+      # +opts+ are any options to configure the job
+      def serialize(*args, **opts)
+        new(*args, **opts).serialize
+      end
     end
+
+    ##
+    # Creates a new job instance.
+    # +args+ are the arguments, if any, that will be passed to the perform method
+    # +opts+ are any options to configure the job
+    def initialize(*args, **opts)
+      @args = args
+      @opts = opts
+    end
+
+    ##
+    # Returns the hash that will be pushed to Redis when this job is enqueued
+    def serialize
+      item = @opts.transform_keys(&:to_s).merge("class" => self.class, "args" => @args)
+      normalize_item(item).merge("normalized" => true)
+    end
+
+    private
+
+    include Sidekiq::JobUtil
   end
 end

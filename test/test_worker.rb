@@ -145,4 +145,94 @@ describe Sidekiq::Worker do
       end
     end
   end
+  
+  describe '#serialize' do
+    class SerializableWorker
+      include Sidekiq::Worker
+      sidekiq_options queue: 'some_queue', retry_queue: 'retry_queue', retry: 5, backtrace: 10, tags: ['alpha', '🥇']
+  
+      def perform(required_positional,
+                  optional_positional = "OPTIONAL POSITIONAL",
+                  *splat_args)
+      end
+    end
+  
+    it 'serializes full job info without any options or arguments' do
+      serialized_job = SerializableWorker.serialize()
+  
+      assert_equal "SerializableWorker", serialized_job['class']
+      assert_equal [], serialized_job['args']
+      assert_equal 5, serialized_job['retry']
+      assert_equal 'some_queue', serialized_job['queue']
+      assert_equal 'retry_queue', serialized_job['retry_queue']
+      assert_equal 10, serialized_job['backtrace']
+      assert_equal ["alpha", "🥇"], serialized_job['tags']
+      assert_equal true, serialized_job['normalized']
+    end
+  
+    it 'serializes full job info without options but with one argument' do
+      serialized_job = SerializableWorker.serialize('required positional argument')
+      
+      assert_equal "SerializableWorker", serialized_job['class']
+      assert_equal ["required positional argument"], serialized_job['args']
+      assert_equal 5, serialized_job['retry']
+      assert_equal 'some_queue', serialized_job['queue']
+      assert_equal 'retry_queue', serialized_job['retry_queue']
+      assert_equal 10, serialized_job['backtrace']
+      assert_equal ["alpha", "🥇"], serialized_job['tags']
+      assert_equal true, serialized_job['normalized']
+    end
+  
+    it 'serializes full job info without options but with multiple arguments' do
+      serialized_job = SerializableWorker.serialize('required positional argument', 'optional positional argument')
+      
+      assert_equal "SerializableWorker", serialized_job['class']
+      assert_equal ["required positional argument", "optional positional argument"], serialized_job['args']
+      assert_equal 5, serialized_job['retry']
+      assert_equal 'some_queue', serialized_job['queue']
+      assert_equal 'retry_queue', serialized_job['retry_queue']
+      assert_equal 10, serialized_job['backtrace']
+      assert_equal ["alpha", "🥇"], serialized_job['tags']
+      assert_equal true, serialized_job['normalized']
+    end
+  
+    it 'serializes full job info with options but without arguments' do
+      serialized_job = SerializableWorker.serialize(queue: "a_different_queue")
+      
+      assert_equal "SerializableWorker", serialized_job['class']
+      assert_equal [], serialized_job['args']
+      assert_equal 5, serialized_job['retry']
+      assert_equal 'a_different_queue', serialized_job['queue']
+      assert_equal 'retry_queue', serialized_job['retry_queue']
+      assert_equal 10, serialized_job['backtrace']
+      assert_equal ["alpha", "🥇"], serialized_job['tags']
+      assert_equal true, serialized_job['normalized']
+    end
+  
+    it 'serializes full job info with options and with one argument' do
+      serialized_job = SerializableWorker.serialize('required positional argument', queue: "a_different_queue")
+      
+      assert_equal "SerializableWorker", serialized_job['class']
+      assert_equal ["required positional argument"], serialized_job['args']
+      assert_equal 5, serialized_job['retry']
+      assert_equal 'a_different_queue', serialized_job['queue']
+      assert_equal 'retry_queue', serialized_job['retry_queue']
+      assert_equal 10, serialized_job['backtrace']
+      assert_equal ["alpha", "🥇"], serialized_job['tags']
+      assert_equal true, serialized_job['normalized']
+    end
+  
+    it 'serializes full job info with options and with multiple arguments' do
+      serialized_job = SerializableWorker.serialize('required positional argument', 'optional positional argument', queue: "a_different_queue")
+      
+      assert_equal "SerializableWorker", serialized_job['class']
+      assert_equal ["required positional argument", "optional positional argument"], serialized_job['args']
+      assert_equal 5, serialized_job['retry']
+      assert_equal 'a_different_queue', serialized_job['queue']
+      assert_equal 'retry_queue', serialized_job['retry_queue']
+      assert_equal 10, serialized_job['backtrace']
+      assert_equal ["alpha", "🥇"], serialized_job['tags']
+      assert_equal true, serialized_job['normalized']
+    end
+  end
 end
