@@ -1,7 +1,8 @@
 # frozen_string_literal: true
-require_relative 'helper'
-require 'sidekiq/middleware/chain'
-require 'sidekiq/processor'
+
+require_relative "helper"
+require "sidekiq/middleware/chain"
+require "sidekiq/processor"
 
 describe Sidekiq::Middleware do
   before do
@@ -15,13 +16,13 @@ describe Sidekiq::Middleware do
     end
 
     def call(*args)
-      @recorder << [@name, 'before']
+      @recorder << [@name, "before"]
       yield
-      @recorder << [@name, 'after']
+      @recorder << [@name, "after"]
     end
   end
 
-  it 'supports custom middleware' do
+  it "supports custom middleware" do
     chain = Sidekiq::Middleware::Chain.new
     chain.add CustomMiddleware, 1, []
 
@@ -32,7 +33,7 @@ describe Sidekiq::Middleware do
     $recorder = []
     include Sidekiq::Worker
     def perform(recorder)
-      $recorder << ['work_performed']
+      $recorder << ["work_performed"]
     end
   end
 
@@ -54,9 +55,9 @@ describe Sidekiq::Middleware do
     end
 
     def call(*args)
-      @recorder << [@name, 'before']
+      @recorder << [@name, "before"]
       yield
-      @recorder << [@name, 'after']
+      @recorder << [@name, "after"]
     end
   end
 
@@ -67,38 +68,38 @@ describe Sidekiq::Middleware do
     end
 
     def call(*args)
-      @recorder << [@name, 'before']
+      @recorder << [@name, "before"]
       yield
-      @recorder << [@name, 'after']
+      @recorder << [@name, "after"]
     end
   end
 
-  it 'executes middleware in the proper order' do
-    msg = Sidekiq.dump_json({ 'class' => CustomWorker.to_s, 'args' => [$recorder] })
+  it "executes middleware in the proper order" do
+    msg = Sidekiq.dump_json({"class" => CustomWorker.to_s, "args" => [$recorder]})
 
     Sidekiq.server_middleware do |chain|
       # should only add once, second should replace the first
       2.times { |i| chain.add CustomMiddleware, i.to_s, $recorder }
-      chain.insert_before CustomMiddleware, AnotherCustomMiddleware, '2', $recorder
-      chain.insert_after AnotherCustomMiddleware, YetAnotherCustomMiddleware, '3', $recorder
+      chain.insert_before CustomMiddleware, AnotherCustomMiddleware, "2", $recorder
+      chain.insert_after AnotherCustomMiddleware, YetAnotherCustomMiddleware, "3", $recorder
     end
 
     boss = Minitest::Mock.new
-    opts = {:queues => ['default'] }
+    opts = {queues: ["default"]}
     processor = Sidekiq::Processor.new(boss, opts)
     boss.expect(:processor_done, nil, [processor])
-    processor.process(Sidekiq::BasicFetch::UnitOfWork.new('queue:default', msg))
-    assert_equal %w(2 before 3 before 1 before work_performed 1 after 3 after 2 after), $recorder.flatten
+    processor.process(Sidekiq::BasicFetch::UnitOfWork.new("queue:default", msg))
+    assert_equal %w[2 before 3 before 1 before work_performed 1 after 3 after 2 after], $recorder.flatten
   end
 
-  it 'correctly replaces middleware when using middleware with options in the initializer' do
+  it "correctly replaces middleware when using middleware with options in the initializer" do
     chain = Sidekiq::Middleware::Chain.new
     chain.add NonYieldingMiddleware
-    chain.add NonYieldingMiddleware, {:foo => 5}
+    chain.add NonYieldingMiddleware, {foo: 5}
     assert_equal 1, chain.count
   end
 
-  it 'correctly prepends middleware' do
+  it "correctly prepends middleware" do
     chain = Sidekiq::Middleware::Chain.new
     chain_entries = chain.entries
     chain.add CustomMiddleware
@@ -107,7 +108,7 @@ describe Sidekiq::Middleware do
     assert_equal CustomMiddleware, chain_entries.last.klass
   end
 
-  it 'allows middleware to abruptly stop processing rest of chain' do
+  it "allows middleware to abruptly stop processing rest of chain" do
     recorder = []
     chain = Sidekiq::Middleware::Chain.new
     chain.add NonYieldingMiddleware
@@ -119,7 +120,7 @@ describe Sidekiq::Middleware do
     assert_equal [], recorder
   end
 
-  it 'allows middleware to yield arguments' do
+  it "allows middleware to yield arguments" do
     chain = Sidekiq::Middleware::Chain.new
     chain.add ArgumentYieldingMiddleware
 
@@ -128,21 +129,21 @@ describe Sidekiq::Middleware do
     assert_equal true, final_action
   end
 
-  describe 'I18n' do
+  describe "I18n" do
     before do
-      require 'i18n'
+      require "i18n"
       I18n.enforce_available_locales = false
-      require 'sidekiq/middleware/i18n'
+      require "sidekiq/middleware/i18n"
     end
 
-    it 'saves and restores locale' do
-      I18n.locale = 'fr'
+    it "saves and restores locale" do
+      I18n.locale = "fr"
       msg = {}
       mw = Sidekiq::Middleware::I18n::Client.new
-      mw.call(nil, msg, nil, nil) { }
-      assert_equal :fr, msg['locale']
+      mw.call(nil, msg, nil, nil) {}
+      assert_equal :fr, msg["locale"]
 
-      msg['locale'] = 'jp'
+      msg["locale"] = "jp"
       I18n.locale = I18n.default_locale
       assert_equal :en, I18n.locale
       mw = Sidekiq::Middleware::I18n::Server.new
@@ -152,11 +153,11 @@ describe Sidekiq::Middleware do
       assert_equal :en, I18n.locale
     end
 
-    it 'supports I18n.enforce_available_locales = true' do
+    it "supports I18n.enforce_available_locales = true" do
       I18n.enforce_available_locales = true
       I18n.available_locales = [:en, :jp]
 
-      msg = { 'locale' => 'jp' }
+      msg = {"locale" => "jp"}
       mw = Sidekiq::Middleware::I18n::Server.new
       mw.call(nil, msg, nil) do
         assert_equal :jp, I18n.locale

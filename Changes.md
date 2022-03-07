@@ -2,6 +2,20 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
+HEAD
+---------
+
+- Fix page events with live polling [#5184]
+- Many under-the-hood changes to remove all usage of the term "worker"
+  from the Sidekiq codebase and APIs. This mostly involved RDoc and local
+  variable names but a few constants and public APIs were changed. The old
+  APIs will be removed in Sidekiq 7.0.
+```
+Sidekiq::DEFAULT_WORKER_OPTIONS -> Sidekiq.default_job_options
+Sidekiq.default_worker_options -> Sidekiq.default_job_options
+Sidekiq::Queues["default"].jobs_by_worker(HardJob) -> Sidekiq::Queues["default"].jobs_by_class(HardJob)
+```
+
 6.4.1
 ---------
 

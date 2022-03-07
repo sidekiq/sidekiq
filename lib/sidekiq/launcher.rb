@@ -15,7 +15,7 @@ module Sidekiq
       proc { "sidekiq" },
       proc { Sidekiq::VERSION },
       proc { |me, data| data["tag"] },
-      proc { |me, data| "[#{Processor::WORKER_STATE.size} of #{data["concurrency"]} busy]" },
+      proc { |me, data| "[#{Processor::WORK_STATE.size} of #{data["concurrency"]} busy]" },
       proc { |me, data| "stopping" if me.stopping? }
     ]
 
@@ -43,9 +43,7 @@ module Sidekiq
       @poller.terminate
     end
 
-    # Shuts down the process.  This method does not
-    # return until all work is complete and cleaned up.
-    # It can take up to the timeout to complete.
+    # Shuts down this Sidekiq instance. Waits up to the deadline for all jobs to complete.
     def stop
       deadline = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) + @options[:timeout]
 
@@ -55,7 +53,7 @@ module Sidekiq
 
       @manager.stop(deadline)
 
-      # Requeue everything in case there was a worker who grabbed work while stopped
+      # Requeue everything in case there was a thread which fetched a job while the process was stopped.
       # This call is a no-op in Sidekiq but necessary for Sidekiq Pro.
       strategy = @options[:fetch]
       strategy.bulk_requeue([], @options)
@@ -86,7 +84,7 @@ module Sidekiq
       Sidekiq.redis do |conn|
         conn.pipelined do |pipeline|
           pipeline.srem("processes", identity)
-          pipeline.unlink("#{identity}:workers")
+          pipeline.unlink("#{identity}:work")
         end
       end
     rescue
@@ -132,9 +130,8 @@ module Sidekiq
       begin
         fails = Processor::FAILURE.reset
         procd = Processor::PROCESSED.reset
-        curstate = Processor::WORKER_STATE.dup
+        curstate = Processor::WORK_STATE.dup
 
-        workers_key = "#{key}:workers"
         nowdate = Time.now.utc.strftime("%Y-%m-%d")
 
         Sidekiq.redis do |conn|
@@ -146,12 +143,16 @@ module Sidekiq
             transaction.incrby("stat:failed", fails)
             transaction.incrby("stat:failed:#{nowdate}", fails)
             transaction.expire("stat:failed:#{nowdate}", STATS_TTL)
+          end
 
-            transaction.unlink(workers_key)
+          # work is the current set of executing jobs
+          work_key = "#{key}:work"
+          conn.pipelined do |transaction|
+            transaction.unlink(work_key)
             curstate.each_pair do |tid, hash|
-              transaction.hset(workers_key, tid, Sidekiq.dump_json(hash))
+              transaction.hset(work_key, tid, Sidekiq.dump_json(hash))
             end
-            transaction.expire(workers_key, 60)
+            transaction.expire(work_key, 60)
           end
         end
 
@@ -214,7 +215,7 @@ module Sidekiq
           Last RTT readings were #{RTT_READINGS.buffer.inspect}, ideally these should be < 1000.
           Ensure Redis is running in the same AZ or datacenter as Sidekiq.
           If these values are close to 100,000, that means your Sidekiq process may be
-          CPU overloaded; see https://github.com/mperham/sidekiq/discussions/5039
+          CPU-saturated; reduce your concurrency and/or see https://github.com/mperham/sidekiq/discussions/5039
         EOM
         RTT_READINGS.reset
       end

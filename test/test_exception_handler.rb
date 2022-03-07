@@ -1,8 +1,9 @@
 # frozen_string_literal: true
-require_relative 'helper'
-require 'sidekiq/exception_handler'
-require 'stringio'
-require 'logger'
+
+require_relative "helper"
+require "sidekiq/exception_handler"
+require "stringio"
+require "logger"
 
 ExceptionHandlerTestException = Class.new(StandardError)
 TEST_EXCEPTION = ExceptionHandlerTestException.new("Something didn't work!")
@@ -13,7 +14,7 @@ class Component
   def invoke_exception(args)
     raise TEST_EXCEPTION
   rescue ExceptionHandlerTestException => e
-    handle_exception(e,args)
+    handle_exception(e, args)
   end
 end
 
@@ -30,7 +31,7 @@ describe Sidekiq::ExceptionHandler do
     end
 
     it "logs the exception to Sidekiq.logger" do
-      Component.new.invoke_exception(:a => 1)
+      Component.new.invoke_exception(a: 1)
       @str_logger.rewind
       log = @str_logger.readlines
       assert_match(/"a":1/, log[0], "didn't include the context")
@@ -46,11 +47,10 @@ describe Sidekiq::ExceptionHandler do
         begin
           Component.new.handle_exception exception
           pass
-        rescue StandardError
+        rescue
           flunk "failed handling a nil backtrace"
         end
       end
     end
   end
-
 end

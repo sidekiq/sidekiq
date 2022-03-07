@@ -25,11 +25,11 @@ module Sidekiq
   #
   # A job looks like:
   #
-  #     { 'class' => 'HardWorker', 'args' => [1, 2, 'foo'], 'retry' => true }
+  #     { 'class' => 'HardJob', 'args' => [1, 2, 'foo'], 'retry' => true }
   #
   # The 'retry' option also accepts a number (in place of 'true'):
   #
-  #     { 'class' => 'HardWorker', 'args' => [1, 2, 'foo'], 'retry' => 5 }
+  #     { 'class' => 'HardJob', 'args' => [1, 2, 'foo'], 'retry' => 5 }
   #
   # The job will be retried this number of times before giving up. (If simply
   # 'true', Sidekiq retries 25 times)
@@ -53,11 +53,11 @@ module Sidekiq
   #
   #   Sidekiq.options[:max_retries] = 7
   #
-  # or limit the number of retries for a particular worker and send retries to
+  # or limit the number of retries for a particular job and send retries to
   # a low priority queue with:
   #
-  #    class MyWorker
-  #      include Sidekiq::Worker
+  #    class MyJob
+  #      include Sidekiq::Job
   #      sidekiq_options retry: 10, retry_queue: 'low'
   #    end
   #
@@ -76,7 +76,7 @@ module Sidekiq
 
     # The global retry handler requires only the barest of data.
     # We want to be able to retry as much as possible so we don't
-    # require the worker to be instantiated.
+    # require the job to be instantiated.
     def global(jobstr, queue)
       yield
     rescue Handled => ex
@@ -103,14 +103,14 @@ module Sidekiq
     end
 
     # The local retry support means that any errors that occur within
-    # this block can be associated with the given worker instance.
+    # this block can be associated with the given job instance.
     # This is required to support the `sidekiq_retries_exhausted` block.
     #
     # Note that any exception from the block is wrapped in the Skip
     # exception so the global block does not reprocess the error.  The
     # Skip exception is unwrapped within Sidekiq::Processor#process before
     # calling the handle_exception handlers.
-    def local(worker, jobstr, queue)
+    def local(jobinst, jobstr, queue)
       yield
     rescue Handled => ex
       raise ex
@@ -123,11 +123,11 @@ module Sidekiq
 
       msg = Sidekiq.load_json(jobstr)
       if msg["retry"].nil?
-        msg["retry"] = worker.class.get_sidekiq_options["retry"]
+        msg["retry"] = jobinst.class.get_sidekiq_options["retry"]
       end
 
       raise e unless msg["retry"]
-      attempt_retry(worker, msg, queue, e)
+      attempt_retry(jobinst, msg, queue, e)
       # We've handled this error associated with this job, don't
       # need to handle it at the global level
       raise Skip
@@ -135,10 +135,10 @@ module Sidekiq
 
     private
 
-    # Note that +worker+ can be nil here if an error is raised before we can
-    # instantiate the worker instance.  All access must be guarded and
+    # Note that +jobinst+ can be nil here if an error is raised before we can
+    # instantiate the job instance.  All access must be guarded and
     # best effort.
-    def attempt_retry(worker, msg, queue, exception)
+    def attempt_retry(jobinst, msg, queue, exception)
       max_retry_attempts = retry_attempts_from(msg["retry"], @max_retries)
 
       msg["queue"] = (msg["retry_queue"] || queue)
@@ -170,7 +170,7 @@ module Sidekiq
       end
 
       if count < max_retry_attempts
-        delay = delay_for(worker, count, exception)
+        delay = delay_for(jobinst, count, exception)
         # Logging here can break retries if the logging device raises ENOSPC #3979
         # logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
         retry_at = Time.now.to_f + delay
@@ -180,13 +180,13 @@ module Sidekiq
         end
       else
         # Goodbye dear message, you (re)tried your best I'm sure.
-        retries_exhausted(worker, msg, exception)
+        retries_exhausted(jobinst, msg, exception)
       end
     end
 
-    def retries_exhausted(worker, msg, exception)
+    def retries_exhausted(jobinst, msg, exception)
       begin
-        block = worker&.sidekiq_retries_exhausted_block
+        block = jobinst&.sidekiq_retries_exhausted_block
         block&.call(msg, exception)
       rescue => e
         handle_exception(e, {context: "Error calling retries_exhausted", job: msg})
@@ -215,19 +215,19 @@ module Sidekiq
       end
     end
 
-    def delay_for(worker, count, exception)
+    def delay_for(jobinst, count, exception)
       jitter = rand(10) * (count + 1)
-      if worker&.sidekiq_retry_in_block
-        custom_retry_in = retry_in(worker, count, exception).to_i
+      if jobinst&.sidekiq_retry_in_block
+        custom_retry_in = retry_in(jobinst, count, exception).to_i
         return custom_retry_in + jitter if custom_retry_in > 0
       end
       (count**4) + 15 + jitter
     end
 
-    def retry_in(worker, count, exception)
-      worker.sidekiq_retry_in_block.call(count, exception)
+    def retry_in(jobinst, count, exception)
+      jobinst.sidekiq_retry_in_block.call(count, exception)
     rescue Exception => e
-      handle_exception(e, {context: "Failure scheduling retry using the defined `sidekiq_retry_in` in #{worker.class.name}, falling back to default"})
+      handle_exception(e, {context: "Failure scheduling retry using the defined `sidekiq_retry_in` in #{jobinst.class.name}, falling back to default"})
       nil
     end
 

@@ -1,24 +1,25 @@
 # frozen_string_literal: true
-require_relative 'helper'
 
-describe 'Sidekiq::Testing' do
-  describe 'require/load sidekiq/testing.rb' do
+require_relative "helper"
+
+describe "Sidekiq::Testing" do
+  describe "require/load sidekiq/testing.rb" do
     before do
-      require 'sidekiq/testing'
+      require "sidekiq/testing"
     end
 
     after do
       Sidekiq::Testing.disable!
     end
 
-    it 'enables fake testing' do
+    it "enables fake testing" do
       Sidekiq::Testing.fake!
       assert Sidekiq::Testing.enabled?
       assert Sidekiq::Testing.fake?
       refute Sidekiq::Testing.inline?
     end
 
-    it 'enables fake testing in a block' do
+    it "enables fake testing in a block" do
       Sidekiq::Testing.disable!
       assert Sidekiq::Testing.disabled?
       refute Sidekiq::Testing.fake?
@@ -33,7 +34,7 @@ describe 'Sidekiq::Testing' do
       refute Sidekiq::Testing.fake?
     end
 
-    it 'disables testing in a block' do
+    it "disables testing in a block" do
       Sidekiq::Testing.fake!
       assert Sidekiq::Testing.fake?
 
@@ -47,23 +48,23 @@ describe 'Sidekiq::Testing' do
     end
   end
 
-  describe 'require/load sidekiq/testing/inline.rb' do
+  describe "require/load sidekiq/testing/inline.rb" do
     before do
-      require 'sidekiq/testing/inline'
+      require "sidekiq/testing/inline"
     end
 
     after do
       Sidekiq::Testing.disable!
     end
 
-    it 'enables inline testing' do
+    it "enables inline testing" do
       Sidekiq::Testing.inline!
       assert Sidekiq::Testing.enabled?
       assert Sidekiq::Testing.inline?
       refute Sidekiq::Testing.fake?
     end
 
-    it 'enables inline testing in a block' do
+    it "enables inline testing in a block" do
       Sidekiq::Testing.disable!
       assert Sidekiq::Testing.disabled?
       refute Sidekiq::Testing.fake?
@@ -79,9 +80,9 @@ describe 'Sidekiq::Testing' do
     end
   end
 
-  describe 'with middleware' do
+  describe "with middleware" do
     before do
-      require 'sidekiq/testing'
+      require "sidekiq/testing"
     end
 
     after do
@@ -106,7 +107,7 @@ describe 'Sidekiq::Testing' do
       end
     end
 
-    it 'wraps the inlined worker with middleware' do
+    it "wraps the inlined worker with middleware" do
       Sidekiq::Testing.server_middleware do |chain|
         chain.add AttributeMiddleware
       end
@@ -129,5 +130,4 @@ describe 'Sidekiq::Testing' do
       end
     end
   end
-
 end

@@ -82,7 +82,7 @@ module Sidekiq
         end
 
         def get_sidekiq_options # :nodoc:
-          self.sidekiq_options_hash ||= Sidekiq.default_worker_options
+          self.sidekiq_options_hash ||= Sidekiq.default_job_options
         end
 
         def sidekiq_class_attribute(*attrs)
@@ -206,6 +206,7 @@ module Sidekiq
 
         # validate and normalize payload
         item = normalize_item(raw)
+        item["jid"] ||= generate_jid
         queue = item["queue"]
 
         # run client-side middleware
@@ -237,8 +238,7 @@ module Sidekiq
       alias_method :perform_sync, :perform_inline
 
       def perform_bulk(args, batch_size: 1_000)
-        pool = Thread.current[:sidekiq_via_pool] || @klass.get_sidekiq_options["pool"] || Sidekiq.redis_pool
-        client = Sidekiq::Client.new(pool)
+        client = @klass.build_client
         result = args.each_slice(batch_size).flat_map do |slice|
           client.push_bulk(@opts.merge("class" => @klass, "args" => slice))
         end
@@ -294,6 +294,7 @@ module Sidekiq
       def perform_inline(*args)
         Setter.new(self, {}).perform_inline(*args)
       end
+      alias_method :perform_sync, :perform_inline
 
       ##
       # Push a large number of jobs to Redis, while limiting the batch of
@@ -353,10 +354,13 @@ module Sidekiq
       end
 
       def client_push(item) # :nodoc:
-        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options["pool"] || Sidekiq.redis_pool
         raise ArgumentError, "Job payloads should contain no Symbols: #{item}" if item.any? { |k, v| k.is_a?(::Symbol) }
+        build_client.push_bulk(item.merge("args" => [item["args"]])).first
+      end
 
-        Sidekiq::Client.new(pool).push(item)
+      def build_client # :nodoc:
+        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options["pool"] || Sidekiq.redis_pool
+        Sidekiq::Client.new(pool)
       end
     end
   end

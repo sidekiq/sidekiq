@@ -15,7 +15,7 @@
       <p><%= t('Threads') %></p>
     </div>
     <div class="stat">
-      <h3><%= ws = workers.size; number_with_delimiter(ws) %></h3>
+      <h3><%= ws = workset.size; number_with_delimiter(ws) %></h3>
       <p><%= t('Busy') %></p>
     </div>
     <div class="stat">
@@ -109,7 +109,7 @@
       <th><%= t('Arguments') %></th>
       <th><%= t('Started') %></th>
     </thead>
-    <% workers.each do |process, thread, msg| %>
+    <% workset.each do |process, thread, msg| %>
       <% job = Sidekiq::JobRecord.new(msg['payload']) %>
       <tr>
         <td><%= process %></td>

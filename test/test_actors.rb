@@ -1,11 +1,12 @@
 # frozen_string_literal: true
-require_relative 'helper'
-require 'sidekiq/cli'
-require 'sidekiq/fetch'
-require 'sidekiq/scheduled'
-require 'sidekiq/processor'
 
-describe 'Actors' do
+require_relative "helper"
+require "sidekiq/cli"
+require "sidekiq/fetch"
+require "sidekiq/scheduled"
+require "sidekiq/processor"
+
+describe "Actors" do
   class JoeWorker
     include Sidekiq::Worker
     def perform(slp)
@@ -16,17 +17,17 @@ describe 'Actors' do
   end
 
   before do
-    Sidekiq.redis {|c| c.flushdb}
+    Sidekiq.redis { |c| c.flushdb }
   end
 
-  describe 'scheduler' do
-    it 'can start and stop' do
+  describe "scheduler" do
+    it "can start and stop" do
       f = Sidekiq::Scheduled::Poller.new
       f.start
       f.terminate
     end
 
-    it 'can schedule' do
+    it "can schedule" do
       ss = Sidekiq::ScheduledSet.new
       q = Sidekiq::Queue.new
 
@@ -44,12 +45,12 @@ describe 'Actors' do
     end
   end
 
-  describe 'processor' do
+  describe "processor" do
     before do
       $count = 0
     end
 
-    it 'can start and stop' do
+    it "can start and stop" do
       m = Mgr.new
       f = Sidekiq::Processor.new(m, m.options)
       f.terminate
@@ -63,25 +64,28 @@ describe 'Actors' do
         @mutex = ::Mutex.new
         @cond = ::ConditionVariable.new
       end
+
       def processor_died(inst, err)
         @latest_error = err
         @mutex.synchronize do
           @cond.signal
         end
       end
+
       def processor_stopped(inst)
         @mutex.synchronize do
           @cond.signal
         end
       end
+
       def options
-        opts = { :concurrency => 3, :queues => ['default'] }
+        opts = {concurrency: 3, queues: ["default"]}
         opts[:fetch] = Sidekiq::BasicFetch.new(opts)
         opts
       end
     end
 
-    it 'can process' do
+    it "can process" do
       mgr = Mgr.new
 
       p = Sidekiq::Processor.new(mgr, mgr.options)
@@ -93,7 +97,7 @@ describe 'Actors' do
       assert_equal a + 1, b
     end
 
-    it 'deals with errors' do
+    it "deals with errors" do
       mgr = Mgr.new
 
       p = Sidekiq::Processor.new(mgr, mgr.options)
@@ -116,7 +120,7 @@ describe 'Actors' do
       assert_equal RuntimeError, mgr.latest_error.class
     end
 
-    it 'gracefully kills' do
+    it "gracefully kills" do
       mgr = Mgr.new
 
       p = Sidekiq::Processor.new(mgr, mgr.options)

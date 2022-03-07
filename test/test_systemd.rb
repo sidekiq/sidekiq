@@ -1,6 +1,6 @@
-require_relative 'helper'
+require_relative "helper"
 require "sidekiq/sd_notify"
-require 'sidekiq/systemd'
+require "sidekiq/systemd"
 
 class TestSystemd < Minitest::Test
   def setup
