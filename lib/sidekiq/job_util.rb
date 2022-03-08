@@ -13,9 +13,7 @@ module Sidekiq
       raise(ArgumentError, "Job 'at' must be a Numeric timestamp: `#{item}`") if item.key?("at") && !item["at"].is_a?(Numeric)
       raise(ArgumentError, "Job tags must be an Array: `#{item}`") if item["tags"] && !item["tags"].is_a?(Array)
 
-      # If we're using a wrapper class, like ActiveJob, use the "wrapped"
-      # attribute to expose the underlying class.
-      job_class = item["display_class"] || item["wrapped"] || item["class"]
+      job_class = item["wrapped"] || item["class"]
       if Sidekiq.options[:on_complex_arguments] == :raise
         msg = <<~EOM
           Job arguments to #{job_class} must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices.
