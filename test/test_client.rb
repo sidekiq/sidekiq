@@ -2,6 +2,7 @@
 
 require_relative "helper"
 require "sidekiq/api"
+require "sidekiq/rails"
 
 describe Sidekiq::Client do
   describe "errors" do
@@ -220,7 +221,7 @@ describe Sidekiq::Client do
 
         describe "worker that takes deep, nested structures" do
           it "raises an error on JSON-unfriendly structures" do
-            assert_raises ArgumentError do
+            error = assert_raises ArgumentError do
               InterestingWorker.perform_async(
                 {
                   "foo" => [:a, :b, :c],
@@ -228,6 +229,26 @@ describe Sidekiq::Client do
                 }
               )
             end
+            assert_match /Job arguments to InterestingWorker/, error.message
+          end
+        end
+
+        describe 'ActiveJob with non-native json types' do
+          before do
+            ActiveJob::Base.queue_adapter = :sidekiq
+            ActiveJob::Base.logger = nil
+          end
+
+          class TestActiveJob < ActiveJob::Base
+            def perform(arg)
+            end
+          end
+
+          it 'raises error with correct class name' do
+            error = assert_raises ArgumentError do
+              TestActiveJob.perform_later({:x => 1})
+            end
+            assert_match /Job arguments to TestActiveJob/, error.message
           end
         end
       end
