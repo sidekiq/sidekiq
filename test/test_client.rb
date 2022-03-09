@@ -246,7 +246,7 @@ describe Sidekiq::Client do
 
           it 'raises error with correct class name' do
             error = assert_raises ArgumentError do
-              TestActiveJob.perform_later({:x => 1})
+              TestActiveJob.perform_later(1.1212.to_d)
             end
             assert_match /Job arguments to TestActiveJob/, error.message
           end
