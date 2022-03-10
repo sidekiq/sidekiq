@@ -35,24 +35,10 @@ module Sidekiq
       nil
     end
 
-    def debug?
-      level <= 0
-    end
-
-    def info?
-      level <= 1
-    end
-
-    def warn?
-      level <= 2
-    end
-
-    def error?
-      level <= 3
-    end
-
-    def fatal?
-      level <= 4
+    LEVELS.each do |level, numeric_level|
+      define_method("#{level}?") do
+        local_level.nil? ? super() : local_level <= numeric_level
+      end
     end
 
     def local_level
