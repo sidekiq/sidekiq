@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+Sidekiq.default_job_options = { queue: "something" }
+>>>>>>> 9baf9070 (Fix API change)
 Sidekiq.configure_client do |config|
   config.redis = { :size => 2 }
 end
