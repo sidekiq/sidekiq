@@ -280,6 +280,7 @@ describe Sidekiq::Client do
     end
 
     it "can push jobs scheduled using ActiveSupport::Duration" do
+      require 'active_support/core_ext/integer/time'
       jids = Sidekiq::Client.push_bulk("class" => QueuedWorker, "args" => [[1], [2]], "at" => [1.seconds, 111.seconds])
       assert_equal 2, jids.size
     end
