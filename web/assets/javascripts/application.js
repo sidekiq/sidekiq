@@ -91,7 +91,19 @@ function updateLivePollButton() {
 function livePollCallback() {
   clearTimeout(livePollTimer);
 
-  fetch(window.location.href).then(resp => resp.text()).then(replacePage).finally(scheduleLivePoll)
+  fetch(window.location.href)
+  .then(checkResponse)
+  .then(resp => resp.text())
+  .then(replacePage)
+  .catch(showError)
+  .finally(scheduleLivePoll)
+}
+
+function checkResponse(resp) {
+  if (!resp.ok) {
+    throw response.error();
+  }
+  return resp
 }
 
 function scheduleLivePoll() {
@@ -110,4 +122,8 @@ function replacePage(text) {
   document.querySelector('.status').replaceWith(header_status)
 
   addListeners();
+}
+
+function showError(error) {
+  console.error(error)
 }

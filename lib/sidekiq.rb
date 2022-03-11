@@ -195,12 +195,12 @@ module Sidekiq
   end
 
   def self.logger
-    @logger ||= Sidekiq::Logger.new($stdout, level: Logger::INFO)
+    @logger ||= Sidekiq::Logger.new($stdout, level: :info)
   end
 
   def self.logger=(logger)
     if logger.nil?
-      self.logger.level = Logger::FATAL
+      self.logger.fatal!
       return self.logger
     end
 
