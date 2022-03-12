@@ -15,7 +15,7 @@ module Sidekiq
     #   client.middleware do |chain|
     #     chain.use MyClientMiddleware
     #   end
-    #   client.push('class' => 'SomeWorker', 'args' => [1,2,3])
+    #   client.push('class' => 'SomeJob', 'args' => [1,2,3])
     #
     # All client instances default to the globally-defined
     # Sidekiq.client_middleware but you can change as necessary.
@@ -49,16 +49,16 @@ module Sidekiq
     # The main method used to push a job to Redis.  Accepts a number of options:
     #
     #   queue - the named queue to use, default 'default'
-    #   class - the worker class to call, required
+    #   class - the job class to call, required
     #   args - an array of simple arguments to the perform method, must be JSON-serializable
     #   at - timestamp to schedule the job (optional), must be Numeric (e.g. Time.now.to_f)
     #   retry - whether to retry this job if it fails, default true or an integer number of retries
     #   backtrace - whether to save any error backtrace, default false
     #
     # If class is set to the class name, the jobs' options will be based on Sidekiq's default
-    # worker options. Otherwise, they will be based on the job class's options.
+    # job options. Otherwise, they will be based on the job class's options.
     #
-    # Any options valid for a worker class's sidekiq_options are also available here.
+    # Any options valid for a job class's sidekiq_options are also available here.
     #
     # All options must be strings, not symbols.  NB: because we are serializing to JSON, all
     # symbols in 'args' will be converted to strings.  Note that +backtrace: true+ can take quite a bit of
@@ -67,16 +67,10 @@ module Sidekiq
     # Returns a unique Job ID.  If middleware stops the job, nil will be returned instead.
     #
     # Example:
-    #   push('queue' => 'my_queue', 'class' => MyWorker, 'args' => ['foo', 1, :bat => 'bar'])
+    #   push('queue' => 'my_queue', 'class' => MyJob, 'args' => ['foo', 1, :bat => 'bar'])
     #
     def push(item)
-      normed = item.key?("normalized") ? item : normalize_item(item)
-      payload = process_single(item["class"], normed)
-
-      if payload
-        raw_push([payload])
-        payload["jid"]
-      end
+      push_bulk(item.merge("args" => [item["args"]])).first
     end
 
     ##
@@ -101,9 +95,12 @@ module Sidekiq
       raise ArgumentError, "Job 'at' must be a Numeric or an Array of Numeric timestamps" if at && (Array(at).empty? || !Array(at).all? { |entry| entry.is_a?(Numeric) })
       raise ArgumentError, "Job 'at' Array must have same size as 'args' Array" if at.is_a?(Array) && at.size != args.size
 
-      normed = items.key?("normalized") ? items : normalize_item(items)
+      jid = items.delete("jid")
+      raise ArgumentError, "Explicitly passing 'jid' when pushing more than one job is not supported" if jid && args.size > 1
+
+      normed = normalize_item(items)
       payloads = args.map.with_index { |job_args, index|
-        copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12))
+        copy = normed.merge("args" => job_args, "jid" => jid || generate_jid)
         copy["at"] = (at.is_a?(Array) ? at[index] : at) if at
 
         result = process_single(items["class"], copy)
@@ -119,8 +116,8 @@ module Sidekiq
     #
     #   pool = ConnectionPool.new { Redis.new }
     #   Sidekiq::Client.via(pool) do
-    #     SomeWorker.perform_async(1,2,3)
-    #     SomeOtherWorker.perform_async(1,2,3)
+    #     SomeJob.perform_async(1,2,3)
+    #     SomeOtherJob.perform_async(1,2,3)
     #   end
     #
     # Generally this is only needed for very large Sidekiq installs processing
@@ -145,10 +142,10 @@ module Sidekiq
       end
 
       # Resque compatibility helpers.  Note all helpers
-      # should go through Worker#client_push.
+      # should go through Sidekiq::Job#client_push.
       #
       # Example usage:
-      #   Sidekiq::Client.enqueue(MyWorker, 'foo', 1, :bat => 'bar')
+      #   Sidekiq::Client.enqueue(MyJob, 'foo', 1, :bat => 'bar')
       #
       # Messages are enqueued to the 'default' queue.
       #
@@ -157,14 +154,14 @@ module Sidekiq
       end
 
       # Example usage:
-      #   Sidekiq::Client.enqueue_to(:queue_name, MyWorker, 'foo', 1, :bat => 'bar')
+      #   Sidekiq::Client.enqueue_to(:queue_name, MyJob, 'foo', 1, :bat => 'bar')
       #
       def enqueue_to(queue, klass, *args)
         klass.client_push("queue" => queue, "class" => klass, "args" => args)
       end
 
       # Example usage:
-      #   Sidekiq::Client.enqueue_to_in(:queue_name, 3.minutes, MyWorker, 'foo', 1, :bat => 'bar')
+      #   Sidekiq::Client.enqueue_to_in(:queue_name, 3.minutes, MyJob, 'foo', 1, :bat => 'bar')
       #
       def enqueue_to_in(queue, interval, klass, *args)
         int = interval.to_f
@@ -178,7 +175,7 @@ module Sidekiq
       end
 
       # Example usage:
-      #   Sidekiq::Client.enqueue_in(3.minutes, MyWorker, 'foo', 1, :bat => 'bar')
+      #   Sidekiq::Client.enqueue_in(3.minutes, MyJob, 'foo', 1, :bat => 'bar')
       #
       def enqueue_in(interval, klass, *args)
         klass.perform_in(interval, *args)
@@ -229,10 +226,10 @@ module Sidekiq
       end
     end
 
-    def process_single(worker_class, item)
+    def process_single(job_class, item)
       queue = item["queue"]
 
-      middleware.invoke(worker_class, item, queue, @redis_pool) do
+      middleware.invoke(job_class, item, queue, @redis_pool) do
         item
       end
     end

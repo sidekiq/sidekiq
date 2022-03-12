@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "sidekiq/client"
-require "sidekiq/job_util"
 
 module Sidekiq
   ##
@@ -83,7 +82,7 @@ module Sidekiq
         end
 
         def get_sidekiq_options # :nodoc:
-          self.sidekiq_options_hash ||= Sidekiq.default_worker_options
+          self.sidekiq_options_hash ||= Sidekiq.default_job_options
         end
 
         def sidekiq_class_attribute(*attrs)
@@ -196,14 +195,18 @@ module Sidekiq
         if @opts["sync"] == true
           perform_inline(*args)
         else
-          @klass.client_push(@klass.serialize(*args, **@opts))
+          @klass.client_push(@opts.merge("args" => args, "class" => @klass))
         end
       end
 
       # Explicit inline execution of a job. Returns nil if the job did not
       # execute, true otherwise.
       def perform_inline(*args)
-        item = @klass.serialize(*args, **@opts)
+        raw = @opts.merge("args" => args, "class" => @klass)
+
+        # validate and normalize payload
+        item = normalize_item(raw)
+        item["jid"] ||= generate_jid
         queue = item["queue"]
 
         # run client-side middleware
@@ -235,10 +238,9 @@ module Sidekiq
       alias_method :perform_sync, :perform_inline
 
       def perform_bulk(args, batch_size: 1_000)
-        pool = Thread.current[:sidekiq_via_pool] || @klass.get_sidekiq_options["pool"] || Sidekiq.redis_pool
-        client = Sidekiq::Client.new(pool)
+        client = @klass.build_client
         result = args.each_slice(batch_size).flat_map do |slice|
-          client.push_bulk(@klass.serialize(*slice, **@opts))
+          client.push_bulk(@opts.merge("class" => @klass, "args" => slice))
         end
 
         result.is_a?(Enumerator::Lazy) ? result.force : result
@@ -292,6 +294,7 @@ module Sidekiq
       def perform_inline(*args)
         Setter.new(self, {}).perform_inline(*args)
       end
+      alias_method :perform_sync, :perform_inline
 
       ##
       # Push a large number of jobs to Redis, while limiting the batch of
@@ -324,12 +327,12 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        opts = {}
+        item = {"class" => self, "args" => args}
 
         # Optimization to enqueue something now that is scheduled to go out now or in the past
-        opts["at"] = ts if ts > now
+        item["at"] = ts if ts > now
 
-        client_push(serialize(*args, **opts))
+        client_push(item)
       end
       alias_method :perform_at, :perform_in
 
@@ -351,39 +354,14 @@ module Sidekiq
       end
 
       def client_push(item) # :nodoc:
-        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options["pool"] || Sidekiq.redis_pool
         raise ArgumentError, "Job payloads should contain no Symbols: #{item}" if item.any? { |k, v| k.is_a?(::Symbol) }
-
-        Sidekiq::Client.new(pool).push(item)
+        build_client.push_bulk(item.merge("args" => [item["args"]])).first
       end
 
-      ##
-      # Returns the hash that will be pushed to Redis when this job is enqueued
-      # +args+ are the arguments, if any, that will be passed to the perform method
-      # +opts+ are any options to configure the job
-      def serialize(*args, **opts)
-        new(*args, **opts).serialize
+      def build_client # :nodoc:
+        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options["pool"] || Sidekiq.redis_pool
+        Sidekiq::Client.new(pool)
       end
     end
-
-    ##
-    # Creates a new job instance.
-    # +args+ are the arguments, if any, that will be passed to the perform method
-    # +opts+ are any options to configure the job
-    def initialize(*args, **opts)
-      @args = args
-      @opts = opts
-    end
-
-    ##
-    # Returns the hash that will be pushed to Redis when this job is enqueued
-    def serialize
-      item = @opts.transform_keys(&:to_s).merge("class" => self.class, "args" => @args)
-      normalize_item(item).merge("normalized" => true)
-    end
-
-    private
-
-    include Sidekiq::JobUtil
   end
 end

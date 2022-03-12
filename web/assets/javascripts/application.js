@@ -9,7 +9,9 @@ var ready = (callback) => {
   else document.addEventListener("DOMContentLoaded", callback);
 }
 
-ready(() => {
+ready(addListeners)
+
+function addListeners() {
   document.querySelectorAll(".check_all").forEach(node => {
     node.addEventListener("click", event => {
       node.closest('table').querySelectorAll('input[type=checkbox]').forEach(inp => { inp.checked = !!node.checked; });
@@ -61,7 +63,7 @@ ready(() => {
       scheduleLivePoll();
     }
   }
-})
+}
 
 function updateFuzzyTimes() {
   var locale = document.body.getAttribute("data-locale");
@@ -89,7 +91,19 @@ function updateLivePollButton() {
 function livePollCallback() {
   clearTimeout(livePollTimer);
 
-  fetch(window.location.href).then(resp => resp.text()).then(replacePage).finally(scheduleLivePoll)
+  fetch(window.location.href)
+  .then(checkResponse)
+  .then(resp => resp.text())
+  .then(replacePage)
+  .catch(showError)
+  .finally(scheduleLivePoll)
+}
+
+function checkResponse(resp) {
+  if (!resp.ok) {
+    throw response.error();
+  }
+  return resp
 }
 
 function scheduleLivePoll() {
@@ -107,5 +121,9 @@ function replacePage(text) {
   var header_status = doc.querySelector('.status')
   document.querySelector('.status').replaceWith(header_status)
 
-  updateFuzzyTimes();
+  addListeners();
+}
+
+function showError(error) {
+  console.error(error)
 }

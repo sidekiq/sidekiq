@@ -1,3 +1,4 @@
+Sidekiq.default_job_options = { queue: "something" }
 Sidekiq.configure_client do |config|
   config.redis = { :size => 2 }
 end

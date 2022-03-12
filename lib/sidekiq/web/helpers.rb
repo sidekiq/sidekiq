@@ -140,8 +140,8 @@ module Sidekiq
       params[:direction] == "asc" ? "&uarr;" : "&darr;"
     end
 
-    def workers
-      @workers ||= Sidekiq::Workers.new
+    def workset
+      @work ||= Sidekiq::WorkSet.new
     end
 
     def processes
@@ -175,7 +175,7 @@ module Sidekiq
     end
 
     def current_status
-      workers.size == 0 ? "idle" : "active"
+      workset.size == 0 ? "idle" : "active"
     end
 
     def relative_time(time)

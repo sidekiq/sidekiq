@@ -922,7 +922,7 @@ module Sidekiq
         procs.sort.each do |key|
           valid, workers = conn.pipelined { |pipeline|
             pipeline.exists?(key)
-            pipeline.hgetall("#{key}:workers")
+            pipeline.hgetall("#{key}:work")
           }
           next unless valid
           workers.each_pair do |tid, json|

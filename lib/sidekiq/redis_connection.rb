@@ -38,7 +38,7 @@ module Sidekiq
 
       private
 
-      # Sidekiq needs a lot of concurrent Redis connections.
+      # Sidekiq needs many concurrent Redis connections.
       #
       # We need a connection for each Processor.
       # We need a connection for Pro's real-time change listener
@@ -47,7 +47,7 @@ module Sidekiq
       #   - enterprise's leader election
       #   - enterprise's cron support
       def verify_sizing(size, concurrency)
-        raise ArgumentError, "Your Redis connection pool is too small for Sidekiq to work. Your pool has #{size} connections but must have at least #{concurrency + 2}" if size < (concurrency + 2)
+        raise ArgumentError, "Your Redis connection pool is too small for Sidekiq. Your pool has #{size} connections but must have at least #{concurrency + 2}" if size < (concurrency + 2)
       end
 
       def build_client(options)

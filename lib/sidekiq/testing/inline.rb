@@ -4,7 +4,7 @@ require "sidekiq/testing"
 
 ##
 # The Sidekiq inline infrastructure overrides perform_async so that it
-# actually calls perform instead. This allows workers to be run inline in a
+# actually calls perform instead. This allows jobs to be run inline in a
 # testing environment.
 #
 # This is similar to `Resque.inline = true` functionality.
@@ -15,8 +15,8 @@ require "sidekiq/testing"
 #
 #   $external_variable = 0
 #
-#   class ExternalWorker
-#     include Sidekiq::Worker
+#   class ExternalJob
+#     include Sidekiq::Job
 #
 #     def perform
 #       $external_variable = 1
@@ -24,7 +24,7 @@ require "sidekiq/testing"
 #   end
 #
 #   assert_equal 0, $external_variable
-#   ExternalWorker.perform_async
+#   ExternalJob.perform_async
 #   assert_equal 1, $external_variable
 #
 Sidekiq::Testing.inline!
