@@ -98,7 +98,7 @@ module Sidekiq
       jid = items.delete("jid")
       raise ArgumentError, "Explicitly passing 'jid' when pushing more than one job is not supported" if jid && args.size > 1
 
-      normed = normalize_item(items)
+      normed = items.key?("normalized") ? items : normalize_item(items)
       payloads = args.map.with_index { |job_args, index|
         copy = normed.merge("args" => job_args, "jid" => jid || generate_jid)
         copy["at"] = (at.is_a?(Array) ? at[index] : at) if at
