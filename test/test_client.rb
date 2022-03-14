@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "helper"
+require "active_job"
 require "sidekiq/api"
 require "sidekiq/rails"
 
@@ -229,11 +230,11 @@ describe Sidekiq::Client do
                 }
               )
             end
-            assert_match /Job arguments to InterestingWorker/, error.message
+            assert_match(/Job arguments to InterestingWorker/, error.message)
           end
         end
 
-        describe 'ActiveJob with non-native json types' do
+        describe "ActiveJob with non-native json types" do
           before do
             ActiveJob::Base.queue_adapter = :sidekiq
             ActiveJob::Base.logger = nil
@@ -244,11 +245,11 @@ describe Sidekiq::Client do
             end
           end
 
-          it 'raises error with correct class name' do
+          it "raises error with correct class name" do
             error = assert_raises ArgumentError do
-              TestActiveJob.perform_later(1.1212.to_d)
+              TestActiveJob.perform_later(BigDecimal("1.1212"))
             end
-            assert_match /Job arguments to TestActiveJob/, error.message
+            assert_match(/Job arguments to TestActiveJob/, error.message)
           end
         end
       end
@@ -280,7 +281,7 @@ describe Sidekiq::Client do
     end
 
     it "can push jobs scheduled using ActiveSupport::Duration" do
-      require 'active_support/core_ext/integer/time'
+      require "active_support/core_ext/integer/time"
       jids = Sidekiq::Client.push_bulk("class" => QueuedWorker, "args" => [[1], [2]], "at" => [1.seconds, 111.seconds])
       assert_equal 2, jids.size
     end
