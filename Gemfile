@@ -19,6 +19,7 @@ end
 
 group :development, :test do
   gem "standard", require: false
+  gem "pry"
 end
 
 group :load_test do
