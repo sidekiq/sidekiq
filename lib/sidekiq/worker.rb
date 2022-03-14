@@ -206,7 +206,6 @@ module Sidekiq
 
         # validate and normalize payload
         item = normalize_item(raw)
-        item["jid"] ||= generate_jid
         queue = item["queue"]
 
         # run client-side middleware
@@ -355,7 +354,7 @@ module Sidekiq
 
       def client_push(item) # :nodoc:
         raise ArgumentError, "Job payloads should contain no Symbols: #{item}" if item.any? { |k, v| k.is_a?(::Symbol) }
-        build_client.push_bulk(item.merge("args" => [item["args"]])).first
+        build_client.push(item)
       end
 
       def build_client # :nodoc:
