@@ -12,7 +12,9 @@ module Sidekiq
       raise(ArgumentError, "Job class must be either a Class or String representation of the class name: `#{item}`") unless item["class"].is_a?(Class) || item["class"].is_a?(String)
       raise(ArgumentError, "Job 'at' must be a Numeric timestamp: `#{item}`") if item.key?("at") && !item["at"].is_a?(Numeric)
       raise(ArgumentError, "Job tags must be an Array: `#{item}`") if item["tags"] && !item["tags"].is_a?(Array)
+    end
 
+    def verify_json(item)
       job_class = item["wrapped"] || item["class"]
       if Sidekiq.options[:on_complex_arguments] == :raise
         msg = <<~EOM

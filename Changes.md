@@ -5,6 +5,7 @@
 HEAD
 ---------
 
+- Strict argument checking now runs after client-side middleware [#5246]
 - Fix page events with live polling [#5184]
 - Many under-the-hood changes to remove all usage of the term "worker"
   from the Sidekiq codebase and APIs. This mostly involved RDoc and local
