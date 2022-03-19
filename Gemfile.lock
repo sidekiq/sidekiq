@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     sidekiq (7.0.0)
+      after_commit_everywhere
       connection_pool (>= 2.2.5)
       rack (~> 2.2)
       redis (>= 4.5.1)
@@ -74,6 +75,9 @@ GEM
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
       tzinfo (~> 2.0)
+    after_commit_everywhere (1.2.0)
+      activerecord (>= 4.2)
+      activesupport
     ast (2.4.2)
     builder (3.2.4)
     codecov (0.6.0)
