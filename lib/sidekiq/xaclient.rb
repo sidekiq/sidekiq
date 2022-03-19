@@ -19,9 +19,9 @@ module Sidekiq
     #   * nil or false means enqueue the job immediately, Sidekiq's default behavior
     def push(item)
       # Sidekiq::Job does not merge sidekiq_options so we need to fallback
-      policy = item.delete("xa") {
+      policy = item.fetch("xa") { |key|
         kl = item["class"]
-        kl.is_a?(Sidekiq::Job) ? kl.get_sidekiq_options["xa"] : nil
+        kl.respond_to?(:get_sidekiq_options) ? kl.get_sidekiq_options[key] : nil
       }
       if policy == "commit" || policy == true
         after_commit { super }

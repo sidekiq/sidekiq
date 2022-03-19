@@ -4,7 +4,7 @@ require_relative "helper"
 require "sidekiq/api"
 require "sidekiq/rails"
 require "sidekiq/xaclient"
-Sidekiq.transactional!
+Sidekiq.transactional_push!
 
 require_relative "./dummy/config/environment"
 
