@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     sidekiq (6.4.2)
+      after_commit_everywhere
       connection_pool (>= 2.2.2)
       rack (~> 2.0)
       redis (>= 4.2.0)
@@ -73,6 +74,9 @@ GEM
       minitest (>= 5.1)
       tzinfo (~> 2.0)
       zeitwerk (~> 2.3)
+    after_commit_everywhere (1.1.0)
+      activerecord (>= 4.2)
+      activesupport
     ast (2.4.2)
     builder (3.2.4)
     codecov (0.6.0)
@@ -232,3 +236,4 @@ DEPENDENCIES
   sqlite3
   standard
   toxiproxy
+
