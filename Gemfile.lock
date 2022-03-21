@@ -2,7 +2,6 @@ PATH
   remote: .
   specs:
     sidekiq (7.0.0)
-      after_commit_everywhere
       connection_pool (>= 2.2.5)
       rack (~> 2.2)
       redis (>= 4.5.1)
@@ -206,6 +205,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord-jdbcsqlite3-adapter
+  after_commit_everywhere
   codecov
   hiredis
   minitest

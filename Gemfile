@@ -5,13 +5,13 @@ gemspec
 gem "rake"
 gem "redis-namespace"
 gem "rails", "~> 7.0"
+gem "sqlite3", platforms: :ruby
+gem "activerecord-jdbcsqlite3-adapter", platforms: :jruby
+gem "after_commit_everywhere"
 
 # Required for Ruby 3.1
 # https://github.com/mikel/mail/pull/1439
 gem "net-smtp", platforms: :mri, require: false
-
-gem "sqlite3", platforms: :ruby
-gem "activerecord-jdbcsqlite3-adapter", platforms: :jruby
 
 group :test do
   gem "minitest"

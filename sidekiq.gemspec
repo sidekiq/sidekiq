@@ -25,5 +25,4 @@ Gem::Specification.new do |gem|
   gem.add_dependency "redis", ">= 4.5.1"
   gem.add_dependency "connection_pool", ">= 2.2.5"
   gem.add_dependency "rack", "~> 2.2"
-  gem.add_dependency "after_commit_everywhere"
 end
