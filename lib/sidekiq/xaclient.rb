@@ -8,7 +8,7 @@ rescue LoadError
 end
 
 module Sidekiq
-  module XAClient
+  module TransactionAwareClient
     include AfterCommitEverywhere
 
     ##
@@ -46,7 +46,7 @@ end
 # Use `Sidekiq.transactional_push!` in your sidekiq.rb initializer
 module Sidekiq
   def self.transactional_push!(policy: "commit") # TODO: is this knob really necessary?
-    Sidekiq::Client.prepend(Sidekiq::XAClient)
+    Sidekiq::Client.prepend(Sidekiq::TransactionAwareClient)
     default_job_options["xa"] = policy
   end
 end
