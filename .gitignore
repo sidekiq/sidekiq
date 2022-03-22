@@ -15,3 +15,5 @@ development.log
 /Dockerfile
 /Makefile
 /docker-compose.yml
+Gemfile.lock
+

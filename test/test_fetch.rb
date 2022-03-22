@@ -7,10 +7,9 @@ require "sidekiq/api"
 describe Sidekiq::BasicFetch do
   before do
     @prev_redis = Sidekiq.instance_variable_get(:@redis) || {}
-    Sidekiq.redis = {namespace: "fuzzy"}
     Sidekiq.redis do |conn|
-      conn.redis.flushdb
-      conn.rpush("queue:basic", "msg")
+      conn.call("FLUSHDB")
+      conn.call("RPUSH","queue:basic", "msg")
     end
   end
 
@@ -39,8 +38,8 @@ describe Sidekiq::BasicFetch do
 
   it "bulk requeues" do
     Sidekiq.redis do |conn|
-      conn.rpush("queue:foo", ["bob", "bar"])
-      conn.rpush("queue:bar", "widget")
+      conn.call("RPUSH", "queue:foo", ["bob", "bar"])
+      conn.call("RPUSH", "queue:bar", "widget")
     end
 
     q1 = Sidekiq::Queue.new("foo")

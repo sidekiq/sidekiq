@@ -19,7 +19,7 @@ end
 
 describe Sidekiq::Monitor do
   before do
-    Sidekiq.redis { |c| c.flushdb }
+    Sidekiq.redis { |c| c.call("FLUSHDB") }
   end
 
   describe "status" do

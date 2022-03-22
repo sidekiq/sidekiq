@@ -7,7 +7,7 @@ require "action_mailer"
 
 describe "API" do
   before do
-    Sidekiq.redis { |c| c.flushdb }
+    Sidekiq.redis { |c| c.call("FLUSHDB") }
   end
 
   describe "stats" do
@@ -22,7 +22,7 @@ describe "API" do
 
     describe "processed" do
       it "returns number of processed jobs" do
-        Sidekiq.redis { |conn| conn.set("stat:processed", 5) }
+        Sidekiq.redis { |conn| conn.call("SET", "stat:processed", 5) }
         s = Sidekiq::Stats.new
         assert_equal 5, s.processed
       end
@@ -30,7 +30,7 @@ describe "API" do
 
     describe "failed" do
       it "returns number of failed jobs" do
-        Sidekiq.redis { |conn| conn.set("stat:failed", 5) }
+        Sidekiq.redis { |conn| conn.call("SET", "stat:failed", 5) }
         s = Sidekiq::Stats.new
         assert_equal 5, s.failed
       end
@@ -39,8 +39,8 @@ describe "API" do
     describe "reset" do
       before do
         Sidekiq.redis do |conn|
-          conn.set("stat:processed", 5)
-          conn.set("stat:failed", 10)
+          conn.call("SET", "stat:processed", 5)
+          conn.call("SET", "stat:failed", 10)
         end
       end
 
@@ -76,10 +76,10 @@ describe "API" do
     describe "workers_size" do
       it "retrieves the number of busy workers" do
         Sidekiq.redis do |c|
-          c.sadd("processes", "process_1")
-          c.sadd("processes", "process_2")
-          c.hset("process_1", "busy", 1)
-          c.hset("process_2", "busy", 2)
+          c.call("SADD", "processes", "process_1")
+          c.call("SADD", "processes", "process_2")
+          c.call("HSET", "process_1", "busy", 1)
+          c.call("HSET", "process_2", "busy", 2)
         end
         s = Sidekiq::Stats.new
         assert_equal 3, s.workers_size
@@ -94,11 +94,11 @@ describe "API" do
 
       it "returns a hash of queue and size in order" do
         Sidekiq.redis do |conn|
-          conn.rpush "queue:foo", "{}"
-          conn.sadd "queues", "foo"
+          conn.call "RPUSH", "queue:foo", "{}"
+          conn.call "SADD", "queues", "foo"
 
-          3.times { conn.rpush "queue:bar", "{}" }
-          conn.sadd "queues", "bar"
+          3.times { conn.call "RPUSH", "queue:bar", "{}" }
+          conn.call "SADD", "queues", "bar"
         end
 
         s = Sidekiq::Stats::Queues.new
@@ -112,8 +112,8 @@ describe "API" do
     describe "enqueued" do
       it "handles latency for good jobs" do
         Sidekiq.redis do |conn|
-          conn.rpush "queue:default", "{\"enqueued_at\": #{Time.now.to_f}}"
-          conn.sadd "queues", "default"
+          conn.call "RPUSH", "queue:default", "{\"enqueued_at\": #{Time.now.to_f}}"
+          conn.call "SADD", "queues", "default"
         end
         s = Sidekiq::Stats.new
         assert s.default_queue_latency > 0
@@ -123,8 +123,8 @@ describe "API" do
 
       it "handles latency for incomplete jobs" do
         Sidekiq.redis do |conn|
-          conn.rpush "queue:default", "{}"
-          conn.sadd "queues", "default"
+          conn.call "RPUSH", "queue:default", "{}"
+          conn.call "SADD", "queues", "default"
         end
         s = Sidekiq::Stats.new
         assert_equal 0, s.default_queue_latency
@@ -134,11 +134,11 @@ describe "API" do
 
       it "returns total enqueued jobs" do
         Sidekiq.redis do |conn|
-          conn.rpush "queue:foo", "{}"
-          conn.sadd "queues", "foo"
+          conn.call "RPUSH", "queue:foo", "{}"
+          conn.call "SADD",  "queues", "foo"
 
-          3.times { conn.rpush "queue:bar", "{}" }
-          conn.sadd "queues", "bar"
+          3.times { conn.call "RPUSH", "queue:bar", "{}" }
+          conn.call "SADD",  "queues", "bar"
         end
 
         s = Sidekiq::Stats.new
@@ -169,10 +169,10 @@ describe "API" do
       describe "processed" do
         it "retrieves hash of dates" do
           Sidekiq.redis do |c|
-            c.incrby("stat:processed:2012-12-24", 4)
-            c.incrby("stat:processed:2012-12-25", 1)
-            c.incrby("stat:processed:2012-12-26", 6)
-            c.incrby("stat:processed:2012-12-27", 2)
+            c.call("INCRBY", "stat:processed:2012-12-24", 4)
+            c.call("INCRBY", "stat:processed:2012-12-25", 1)
+            c.call("INCRBY", "stat:processed:2012-12-26", 6)
+            c.call("INCRBY", "stat:processed:2012-12-27", 2)
           end
           Time.stub(:now, Time.parse("2012-12-26 1:00:00 -0500")) do
             s = Sidekiq::Stats::History.new(2)
@@ -190,10 +190,10 @@ describe "API" do
       describe "failed" do
         it "retrieves hash of dates" do
           Sidekiq.redis do |c|
-            c.incrby("stat:failed:2012-12-24", 4)
-            c.incrby("stat:failed:2012-12-25", 1)
-            c.incrby("stat:failed:2012-12-26", 6)
-            c.incrby("stat:failed:2012-12-27", 2)
+            c.call("INCRBY", "stat:failed:2012-12-24", 4)
+            c.call("INCRBY", "stat:failed:2012-12-25", 1)
+            c.call("INCRBY", "stat:failed:2012-12-26", 6)
+            c.call("INCRBY", "stat:failed:2012-12-27", 2)
           end
           Time.stub(:now, Time.parse("2012-12-26 1:00:00 -0500")) do
             s = Sidekiq::Stats::History.new(2)
@@ -415,8 +415,8 @@ describe "API" do
       q.clear
 
       Sidekiq.redis do |conn|
-        refute conn.smembers("queues").include?("foo")
-        refute conn.exists?("queue:foo")
+        refute conn.call("SMEMBERS", "queues").include?("foo")
+        assert_equal 0, conn.call("EXISTS", "queue:foo")
       end
     end
 
@@ -540,9 +540,9 @@ describe "API" do
       time = Time.now.to_f
       Sidekiq.redis do |conn|
         conn.multi do |transaction|
-          transaction.sadd("processes", odata["key"])
-          transaction.hmset(odata["key"], "info", Sidekiq.dump_json(odata), "busy", 10, "beat", time)
-          transaction.sadd("processes", "fake:pid")
+          transaction.call("SADD", "processes", odata["key"])
+          transaction.call("HMSET", odata["key"], "info", Sidekiq.dump_json(odata), "busy", 10, "beat", time)
+          transaction.call("SADD", "processes", "fake:pid")
         end
       end
 
@@ -556,8 +556,8 @@ describe "API" do
       data.quiet!
       data.stop!
       signals_string = "#{odata["key"]}-signals"
-      assert_equal "TERM", Sidekiq.redis { |c| c.lpop(signals_string) }
-      assert_equal "TSTP", Sidekiq.redis { |c| c.lpop(signals_string) }
+      assert_equal "TERM", Sidekiq.redis { |c| c.call("LPOP", signals_string) }
+      assert_equal "TSTP", Sidekiq.redis { |c| c.call("LPOP", signals_string) }
     end
 
     it "can enumerate workers" do
@@ -571,14 +571,14 @@ describe "API" do
       key = "#{hn}:#{$$}"
       pdata = {"pid" => $$, "hostname" => hn, "started_at" => Time.now.to_i}
       Sidekiq.redis do |conn|
-        conn.sadd("processes", key)
-        conn.hmset(key, "info", Sidekiq.dump_json(pdata), "busy", 0, "beat", Time.now.to_f)
+        conn.call("SADD", "processes", key)
+        conn.call("HMSET", key, "info", Sidekiq.dump_json(pdata), "busy", 0, "beat", Time.now.to_f)
       end
 
       s = "#{key}:work"
       data = Sidekiq.dump_json({"payload" => "{}", "queue" => "default", "run_at" => Time.now.to_i})
       Sidekiq.redis do |c|
-        c.hmset(s, "1234", data)
+        c.call("HMSET", s, "1234", data)
       end
 
       w.each do |p, x, y|
@@ -593,8 +593,8 @@ describe "API" do
       data = Sidekiq.dump_json({"payload" => {}, "queue" => "default", "run_at" => (Time.now.to_i - 2 * 60 * 60)})
       Sidekiq.redis do |c|
         c.multi do |transaction|
-          transaction.hmset(s, "5678", data)
-          transaction.hmset("b#{s}", "5678", data)
+          transaction.call("HMSET", s, "5678", data)
+          transaction.call("HMSET", "b#{s}", "5678", data)
         end
       end
 
@@ -623,8 +623,8 @@ describe "API" do
       data = {"pid" => rand(10_000), "hostname" => "app#{rand(1_000)}", "started_at" => Time.now.to_f}
       key = "#{data["hostname"]}:#{data["pid"]}"
       Sidekiq.redis do |conn|
-        conn.sadd("processes", key)
-        conn.hmset(key, "info", Sidekiq.dump_json(data), "busy", 0, "beat", Time.now.to_f)
+        conn.call("SADD", "processes", key)
+        conn.call("HMSET", key, "info", Sidekiq.dump_json(data), "busy", 0, "beat", Time.now.to_f)
       end
 
       ps = Sidekiq::ProcessSet.new
@@ -632,8 +632,8 @@ describe "API" do
       assert_equal 1, ps.to_a.size
 
       Sidekiq.redis do |conn|
-        conn.sadd("processes", "bar:987")
-        conn.sadd("processes", "bar:986")
+        conn.call("SADD", "processes", "bar:987")
+        conn.call("SADD", "processes", "bar:986")
       end
 
       ps = Sidekiq::ProcessSet.new
@@ -644,7 +644,7 @@ describe "API" do
     def add_retry(jid = "bob", at = Time.now.to_f)
       payload = Sidekiq.dump_json("class" => "ApiWorker", "args" => [1, "mike"], "queue" => "default", "jid" => jid, "retry_count" => 2, "failed_at" => Time.now.to_f, "error_backtrace" => ["line1", "line2"])
       Sidekiq.redis do |conn|
-        conn.zadd("retry", at.to_s, payload)
+        conn.call("ZADD", "retry", at.to_s, payload)
       end
     end
   end

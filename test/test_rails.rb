@@ -6,7 +6,7 @@ require "sidekiq/api"
 
 describe "ActiveJob" do
   before do
-    Sidekiq.redis { |c| c.flushdb }
+    Sidekiq.redis { |c| c.call("FLUSHDB") }
     # need to force this since we aren't booting a Rails app
     ActiveJob::Base.queue_adapter = :sidekiq
     ActiveJob::Base.logger = nil

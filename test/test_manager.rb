@@ -5,7 +5,7 @@ require "sidekiq/manager"
 
 describe Sidekiq::Manager do
   before do
-    Sidekiq.redis { |c| c.flushdb }
+    Sidekiq.redis { |c| c.call("FLUSHDB") }
   end
 
   def new_manager(opts)

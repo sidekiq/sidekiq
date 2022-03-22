@@ -12,7 +12,7 @@ describe Sidekiq::Scheduled do
 
   describe "poller" do
     before do
-      Sidekiq.redis { |c| c.flushdb }
+      Sidekiq.redis { |c| c.call("FLUSHDB") }
       @error_1 = {"class" => ScheduledWorker.name, "args" => [0], "queue" => "queue_1"}
       @error_2 = {"class" => ScheduledWorker.name, "args" => [1], "queue" => "queue_2"}
       @error_3 = {"class" => ScheduledWorker.name, "args" => [2], "queue" => "queue_3"}
@@ -68,8 +68,8 @@ describe Sidekiq::Scheduled do
 
         Sidekiq.redis do |conn|
           %w[queue:queue_1 queue:queue_2 queue:queue_4 queue:queue_5].each do |queue_name|
-            assert_equal 1, conn.llen(queue_name)
-            job = Sidekiq.load_json(conn.lrange(queue_name, 0, -1)[0])
+            assert_equal 1, conn.call("LLEN", queue_name)
+            job = Sidekiq.load_json(conn.call("LRANGE", queue_name, 0, -1)[0])
             assert_equal enqueued_time.to_f, job["enqueued_at"]
             assert_equal created_time.to_f, job["created_at"]
           end
@@ -95,7 +95,7 @@ describe Sidekiq::Scheduled do
 
         Sidekiq.redis do |conn|
           %w[queue:queue_1 queue:queue_4].each do |queue_name|
-            assert_equal 0, conn.llen(queue_name)
+            assert_equal 0, conn.call("LLEN", queue_name)
           end
         end
 
@@ -128,8 +128,8 @@ describe Sidekiq::Scheduled do
       with_sidekiq_option(:average_scheduled_poll_interval, 10) do
         3.times do |i|
           Sidekiq.redis do |conn|
-            conn.sadd("processes", "process-#{i}")
-            conn.hset("process-#{i}", "info", nil)
+            conn.call("SADD", "processes", "process-#{i}")
+            conn.call("HSET", "process-#{i}", "info", "")
           end
         end
 

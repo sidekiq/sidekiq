@@ -69,9 +69,9 @@ describe Sidekiq do
 
   describe "redis connection" do
     it "does not continually retry" do
-      assert_raises Redis::CommandError do
+      assert_raises RedisClient::CommandError do
         Sidekiq.redis do |c|
-          raise Redis::CommandError, "READONLY You can't write against a replica."
+          raise RedisClient::CommandError, "READONLY You can't write against a replica."
         end
       end
     end
@@ -79,8 +79,8 @@ describe Sidekiq do
     it "reconnects if connection is flagged as readonly" do
       counts = []
       Sidekiq.redis do |c|
-        counts << c.info["total_connections_received"].to_i
-        raise Redis::CommandError, "READONLY You can't write against a replica." if counts.size == 1
+        counts << c.call("INFO").match(/total_connections_received:(\d+)/)[1].to_i
+        raise RedisClient::CommandError, "READONLY You can't write against a replica." if counts.size == 1
       end
       assert_equal 2, counts.size
       assert_equal counts[0] + 1, counts[1]
@@ -89,8 +89,8 @@ describe Sidekiq do
     it "reconnects if instance state changed" do
       counts = []
       Sidekiq.redis do |c|
-        counts << c.info["total_connections_received"].to_i
-        raise Redis::CommandError, "UNBLOCKED force unblock from blocking operation, instance state changed (master -> replica?)" if counts.size == 1
+        counts << c.call("INFO").match(/total_connections_received:(\d+)/)[1].to_i
+        raise RedisClient::CommandError, "UNBLOCKED force unblock from blocking operation, instance state changed (master -> replica?)" if counts.size == 1
       end
       assert_equal 2, counts.size
       assert_equal counts[0] + 1, counts[1]

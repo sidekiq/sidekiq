@@ -11,27 +11,27 @@ module Sidekiq
       ending = starting + page_size - 1
 
       Sidekiq.redis do |conn|
-        type = conn.type(key)
+        type = conn.call("TYPE", key)
         rev = opts && opts[:reverse]
 
         case type
         when "zset"
           total_size, items = conn.multi { |transaction|
-            transaction.zcard(key)
+            transaction.call("ZCARD", key)
             if rev
-              transaction.zrevrange(key, starting, ending, with_scores: true)
+              transaction.call("ZREVRANGE", key, starting, ending, "WITHSCORES")
             else
-              transaction.zrange(key, starting, ending, with_scores: true)
+              transaction.call("ZRANGE", key, starting, ending, "WITHSCORES")
             end
           }
           [current_page, total_size, items]
         when "list"
           total_size, items = conn.multi { |transaction|
-            transaction.llen(key)
+            transaction.call("LLEN", key)
             if rev
-              transaction.lrange(key, -ending - 1, -starting - 1)
+              transaction.call("LRANGE", key, -ending - 1, -starting - 1)
             else
-              transaction.lrange(key, starting, ending)
+              transaction.call("LRANGE", key, starting, ending)
             end
           }
           items.reverse! if rev

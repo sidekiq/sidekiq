@@ -176,7 +176,7 @@ module Sidekiq
         retry_at = Time.now.to_f + delay
         payload = Sidekiq.dump_json(msg)
         Sidekiq.redis do |conn|
-          conn.zadd("retry", retry_at.to_s, payload)
+          conn.call("ZADD", "retry", retry_at.to_s, payload)
         end
       else
         # Goodbye dear message, you (re)tried your best I'm sure.

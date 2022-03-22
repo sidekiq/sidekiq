@@ -18,7 +18,7 @@ describe Sidekiq::JobRetry do
     end
 
     before do
-      Sidekiq.redis { |c| c.flushdb }
+      Sidekiq.redis { |c| c.call("FLUSHDB") }
     end
 
     def worker

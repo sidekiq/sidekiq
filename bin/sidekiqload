@@ -55,7 +55,7 @@ rescue ArgumentError
   puts "Signal #{sig} not supported"
 end
 
-Sidekiq.redis { |c| c.flushdb }
+Sidekiq.redis { |c| c.call("FLUSHDB") }
 def handle_signal(launcher, sig)
   Sidekiq.logger.debug "Got #{sig} signal"
   case sig
@@ -100,7 +100,7 @@ Monitoring = Thread.new do
   while true
     sleep 0.2
     qsize = Sidekiq.redis do |conn|
-      conn.llen "queue:default"
+      conn.call("LLEN", "queue:default")
     end
     total = qsize
     # Sidekiq.logger.error("RSS: #{Process.rss} Pending: #{total}")

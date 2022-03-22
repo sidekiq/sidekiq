@@ -298,7 +298,7 @@ describe Sidekiq::Processor do
 
   describe "stats" do
     before do
-      Sidekiq.redis { |c| c.flushdb }
+      Sidekiq.redis { |c| c.call("FLUSHDB") }
     end
 
     describe "when successful" do
@@ -336,7 +336,7 @@ describe Sidekiq::Processor do
 
   describe "stats" do
     before do
-      Sidekiq.redis { |c| c.flushdb }
+      Sidekiq.redis { |c| c.call("FLUSHDB") }
     end
 
     def successful_job

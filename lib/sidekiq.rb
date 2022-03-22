@@ -63,7 +63,7 @@ module Sidekiq
   # Configuration for Sidekiq server, use like:
   #
   #   Sidekiq.configure_server do |config|
-  #     config.redis = { :namespace => 'myapp', :size => 25, :url => 'redis://myhost:8877/0' }
+  #     config.redis = { :size => 25, :url => 'redis://myhost:8877/0' }
   #     config.server_middleware do |chain|
   #       chain.add MyServerHook
   #     end
@@ -76,7 +76,7 @@ module Sidekiq
   # Configuration for Sidekiq client, use like:
   #
   #   Sidekiq.configure_client do |config|
-  #     config.redis = { :namespace => 'myapp', :size => 1, :url => 'redis://myhost:8877/0' }
+  #     config.redis = { ::size => 1, :url => 'redis://myhost:8877/0' }
   #   end
   def self.configure_client
     yield self unless server?
@@ -92,14 +92,14 @@ module Sidekiq
       retryable = true
       begin
         yield conn
-      rescue Redis::BaseError => ex
+      rescue RedisClient::Error => ex
         # 2550 Failover can cause the server to become a replica, need
         # to disconnect and reopen the socket to get back to the primary.
         # 4495 Use the same logic if we have a "Not enough replicas" error from the primary
         # 4985 Use the same logic when a blocking command is force-unblocked
         # The same retry logic is also used in client.rb
         if retryable && ex.message =~ /READONLY|NOREPLICAS|UNBLOCKED/
-          conn.disconnect!
+          conn.close
           retryable = false
           retry
         end
@@ -110,14 +110,8 @@ module Sidekiq
 
   def self.redis_info
     redis do |conn|
-      # admin commands can't go through redis-namespace starting
-      # in redis-namespace 2.0
-      if conn.respond_to?(:namespace)
-        conn.redis.info
-      else
-        conn.info
-      end
-    rescue Redis::CommandError => ex
+      conn.call("INFO").lines(chomp: true).map { |l| l.split(":", 2) }.select { |l| l.size == 2 }.to_h
+    rescue RedisClient::CommandError => ex
       # 2850 return fake version when INFO command has (probably) been renamed
       raise unless /unknown command/.match?(ex.message)
       FAKE_INFO

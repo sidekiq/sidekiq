@@ -154,7 +154,7 @@ module Sidekiq
 
     def redis_connection
       Sidekiq.redis do |conn|
-        conn.connection[:id]
+        conn.id
       end
     end
 

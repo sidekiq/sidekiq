@@ -83,8 +83,8 @@ module Sidekiq
       # doesn't actually exit, it'll reappear in the Web UI.
       Sidekiq.redis do |conn|
         conn.pipelined do |pipeline|
-          pipeline.srem("processes", identity)
-          pipeline.unlink("#{identity}:work")
+          pipeline.call("srem", "processes", identity)
+          pipeline.call("unlink" "#{identity}:work")
         end
       end
     rescue
@@ -106,13 +106,13 @@ module Sidekiq
       begin
         Sidekiq.redis do |conn|
           conn.pipelined do |pipeline|
-            pipeline.incrby("stat:processed", procd)
-            pipeline.incrby("stat:processed:#{nowdate}", procd)
-            pipeline.expire("stat:processed:#{nowdate}", STATS_TTL)
+            pipeline.call("INCRBY", "stat:processed", procd)
+            pipeline.call("INCRBY", "stat:processed:#{nowdate}", procd)
+            pipeline.call("EXPIRE", "stat:processed:#{nowdate}", STATS_TTL)
 
-            pipeline.incrby("stat:failed", fails)
-            pipeline.incrby("stat:failed:#{nowdate}", fails)
-            pipeline.expire("stat:failed:#{nowdate}", STATS_TTL)
+            pipeline.call("INCRBY", "stat:failed", fails)
+            pipeline.call("INCRBY", "stat:failed:#{nowdate}", fails)
+            pipeline.call("EXPIRE", "stat:failed:#{nowdate}", STATS_TTL)
           end
         end
       rescue => ex
@@ -136,23 +136,23 @@ module Sidekiq
 
         Sidekiq.redis do |conn|
           conn.multi do |transaction|
-            transaction.incrby("stat:processed", procd)
-            transaction.incrby("stat:processed:#{nowdate}", procd)
-            transaction.expire("stat:processed:#{nowdate}", STATS_TTL)
+            transaction.call("INCRBY", "stat:processed", procd)
+            transaction.call("INCRBY", "stat:processed:#{nowdate}", procd)
+            transaction.call("EXPIRE", "stat:processed:#{nowdate}", STATS_TTL)
 
-            transaction.incrby("stat:failed", fails)
-            transaction.incrby("stat:failed:#{nowdate}", fails)
-            transaction.expire("stat:failed:#{nowdate}", STATS_TTL)
+            transaction.call("INCRBY", "stat:failed", fails)
+            transaction.call("INCRBY", "stat:failed:#{nowdate}", fails)
+            transaction.call("EXPIRE", "stat:failed:#{nowdate}", STATS_TTL)
           end
 
           # work is the current set of executing jobs
           work_key = "#{key}:work"
           conn.pipelined do |transaction|
-            transaction.unlink(work_key)
+            transaction.call("UNLINK", work_key)
             curstate.each_pair do |tid, hash|
-              transaction.hset(work_key, tid, Sidekiq.dump_json(hash))
+              transaction.call("HSET", work_key, tid, Sidekiq.dump_json(hash))
             end
-            transaction.expire(work_key, 60)
+            transaction.call("EXPIRE", work_key, 60)
           end
         end
 
@@ -163,26 +163,27 @@ module Sidekiq
 
         _, exists, _, _, msg = Sidekiq.redis { |conn|
           conn.multi { |transaction|
-            transaction.sadd("processes", key)
-            transaction.exists?(key)
-            transaction.hmset(key, "info", to_json,
+            transaction.call("SADD", "processes", key)
+            transaction.call("EXISTS", key)
+            transaction.call("HMSET", key,
+              "info", to_json,
               "busy", curstate.size,
               "beat", Time.now.to_f,
               "rtt_us", rtt,
-              "quiet", @done,
+              "quiet", @done.to_s,
               "rss", kb)
-            transaction.expire(key, 60)
-            transaction.rpop("#{key}-signals")
+            transaction.call("EXPIRE", key, 60)
+            transaction.call("RPOP", "#{key}-signals")
           }
         }
 
         # first heartbeat or recovering from an outage and need to reestablish our heartbeat
-        fire_event(:heartbeat) unless exists
+        fire_event(:heartbeat) unless exists == 1
 
         return unless msg
 
         ::Process.kill(msg, ::Process.pid)
-      rescue => e
+      rescue RedisClient::Error => e
         # ignore all redis/network issues
         logger.error("heartbeat: #{e}")
         # don't lose the counts if there was a network issue
@@ -201,7 +202,7 @@ module Sidekiq
       a = b = 0
       Sidekiq.redis do |x|
         a = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :microsecond)
-        x.ping
+        x.call("PING")
         b = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :microsecond)
       end
       rtt = b - a

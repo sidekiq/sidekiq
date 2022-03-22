@@ -19,7 +19,7 @@ module Sidekiq
 
       def requeue
         Sidekiq.redis do |conn|
-          conn.rpush(queue, job)
+          conn.call("RPUSH", queue, job)
         end
       end
     }
@@ -44,7 +44,7 @@ module Sidekiq
         return nil
       end
 
-      work = Sidekiq.redis { |conn| conn.brpop(*qs) }
+      work = Sidekiq.redis { |conn| conn.blocking_call(false, "BRPOP", *qs) }
       UnitOfWork.new(*work) if work
     end
 
@@ -61,7 +61,7 @@ module Sidekiq
       Sidekiq.redis do |conn|
         conn.pipelined do |pipeline|
           jobs_to_requeue.each do |queue, jobs|
-            pipeline.rpush(queue, jobs)
+            pipeline.call("RPUSH", queue, jobs)
           end
         end
       end

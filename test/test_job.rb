@@ -11,7 +11,7 @@ describe Sidekiq::Job do
     end
 
     def setup
-      Sidekiq.redis { |c| c.flushdb }
+      Sidekiq.redis { |c| c.call("FLUSHDB") }
     end
 
     it "provides basic ActiveJob compatibilility" do

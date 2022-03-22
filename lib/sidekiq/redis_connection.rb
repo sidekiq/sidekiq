@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "connection_pool"
-require "redis"
+require "redis-client"
 require "uri"
 
 module Sidekiq
@@ -15,7 +15,7 @@ module Sidekiq
         end
 
         size = if symbolized_options[:size]
-          symbolized_options[:size]
+          symbolized_options.delete(:size)
         elsif Sidekiq.server?
           # Give ourselves plenty of connections.  pool is lazy
           # so we won't create them until we need them.
@@ -28,11 +28,12 @@ module Sidekiq
 
         verify_sizing(size, Sidekiq.options[:concurrency]) if Sidekiq.server?
 
-        pool_timeout = symbolized_options[:pool_timeout] || 1
+        pool_timeout = symbolized_options.delete(:pool_timeout) || 1
         log_info(symbolized_options)
 
+        redis_config = build_config(symbolized_options)
         ConnectionPool.new(timeout: pool_timeout, size: size) do
-          build_client(symbolized_options)
+          redis_config.new_client
         end
       end
 
@@ -50,26 +51,18 @@ module Sidekiq
         raise ArgumentError, "Your Redis connection pool is too small for Sidekiq. Your pool has #{size} connections but must have at least #{concurrency + 2}" if size < (concurrency + 2)
       end
 
-      def build_client(options)
-        namespace = options[:namespace]
-
-        client = Redis.new client_opts(options)
-        if namespace
-          begin
-            require "redis/namespace"
-            Redis::Namespace.new(namespace, redis: client)
-          rescue LoadError
-            Sidekiq.logger.error("Your Redis configuration uses the namespace '#{namespace}' but the redis-namespace gem is not included in the Gemfile." \
-                                 "Add the gem to your Gemfile to continue using a namespace. Otherwise, remove the namespace parameter.")
-            exit(-127)
-          end
+      def build_config(options)
+        opts = client_opts(options)
+        if opts.key?(:sentinels)
+          RedisClient.sentinel(**opts)
         else
-          client
+          RedisClient.config(**opts)
         end
       end
 
       def client_opts(options)
         opts = options.dup
+
         if opts[:namespace]
           opts.delete(:namespace)
         end
@@ -79,7 +72,9 @@ module Sidekiq
           opts.delete(:network_timeout)
         end
 
-        opts[:driver] ||= Redis::Connection.drivers.last || "ruby"
+        opts[:name] = opts.delete(:master_name) if opts.key?(:master_name)
+        opts[:role] = opts[:role].to_sym if opts.key?(:role)
+        opts.delete(:url) if opts.key?(:sentinels)
 
         # Issue #3303, redis-rb will silently retry an operation.
         # This can lead to duplicate jobs if Sidekiq::Client's LPUSH

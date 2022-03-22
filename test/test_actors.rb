@@ -17,7 +17,7 @@ describe "Actors" do
   end
 
   before do
-    Sidekiq.redis { |c| c.flushdb }
+    Sidekiq.redis { |c| c.call("FLUSHDB") }
   end
 
   describe "scheduler" do
