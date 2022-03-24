@@ -1,9 +1,9 @@
 require_relative "helper"
 
-describe Sidekiq::Worker do
+describe Sidekiq::Job do
   describe "#set" do
-    class SetWorker
-      include Sidekiq::Worker
+    class MySetJob
+      include Sidekiq::Job
       queue_as :foo
       sidekiq_options "retry" => 12
       def perform
@@ -17,28 +17,28 @@ describe Sidekiq::Worker do
     it "provides basic ActiveJob compatibilility" do
       q = Sidekiq::ScheduledSet.new
       assert_equal 0, q.size
-      jid = SetWorker.set(wait_until: 1.hour.from_now).perform_async(123)
+      jid = MySetJob.set(wait_until: 1.hour.from_now).perform_async(123)
       assert jid
       assert_equal 1, q.size
-      jid = SetWorker.set(wait: 1.hour).perform_async(123)
+      jid = MySetJob.set(wait: 1.hour).perform_async(123)
       assert jid
       assert_equal 2, q.size
 
       q = Sidekiq::Queue.new("foo")
       assert_equal 0, q.size
-      SetWorker.perform_async
-      SetWorker.perform_inline
-      SetWorker.perform_sync
+      MySetJob.perform_async
+      MySetJob.perform_inline
+      MySetJob.perform_sync
       assert_equal 1, q.size
 
-      SetWorker.set(queue: "xyz").perform_async
+      MySetJob.set(queue: "xyz").perform_async
       assert_equal 1, Sidekiq::Queue.new("xyz").size
     end
 
     it "can be memoized" do
       q = Sidekiq::Queue.new("bar")
       assert_equal 0, q.size
-      set = SetWorker.set(queue: :bar, foo: "qaaz")
+      set = MySetJob.set(queue: :bar, foo: "qaaz")
       set.perform_async(1)
       set.perform_async(1)
       set.perform_async(1)
@@ -51,7 +51,7 @@ describe Sidekiq::Worker do
     it "allows option overrides" do
       q = Sidekiq::Queue.new("bar")
       assert_equal 0, q.size
-      assert SetWorker.set(queue: :bar).perform_async(1)
+      assert MySetJob.set(queue: :bar).perform_async(1)
       job = q.first
       assert_equal "bar", job["queue"]
       assert_equal 12, job["retry"]
@@ -60,13 +60,13 @@ describe Sidekiq::Worker do
     it "handles symbols and strings" do
       q = Sidekiq::Queue.new("bar")
       assert_equal 0, q.size
-      assert SetWorker.set("queue" => "bar", :retry => 11).perform_async(1)
+      assert MySetJob.set("queue" => "bar", :retry => 11).perform_async(1)
       job = q.first
       assert_equal "bar", job["queue"]
       assert_equal 11, job["retry"]
 
       q.clear
-      assert SetWorker.perform_async(1)
+      assert MySetJob.perform_async(1)
       assert_equal 0, q.size
 
       q = Sidekiq::Queue.new("foo")
@@ -76,7 +76,7 @@ describe Sidekiq::Worker do
     end
 
     it "allows multiple calls" do
-      SetWorker.set(queue: :foo).set(bar: "xyz").perform_async
+      MySetJob.set(queue: :foo).set(bar: "xyz").perform_async
 
       q = Sidekiq::Queue.new("foo")
       job = q.first
@@ -88,7 +88,7 @@ describe Sidekiq::Worker do
       q = Sidekiq::Queue.new("bar")
       assert_equal 0, q.size
 
-      set = SetWorker.set(queue: "bar")
+      set = MySetJob.set(queue: "bar")
       jids = set.perform_bulk((1..1_001).to_a.map { |x| Array(x) })
 
       assert_equal 1_001, q.size
@@ -100,7 +100,7 @@ describe Sidekiq::Worker do
         q = Sidekiq::Queue.new("bar")
         assert_equal 0, q.size
 
-        set = SetWorker.set("queue" => "bar")
+        set = MySetJob.set("queue" => "bar")
         lazy_args = (1..1_001).to_a.map { |x| Array(x) }.lazy
         jids = set.perform_bulk(lazy_args)
 
@@ -113,8 +113,8 @@ describe Sidekiq::Worker do
   describe "#perform_inline" do
     $my_recorder = []
 
-    class MyCustomWorker
-      include Sidekiq::Worker
+    class MyCustomJob
+      include Sidekiq::Job
 
       def perform(recorder)
         $my_recorder << ["work_performed"]
@@ -142,7 +142,7 @@ describe Sidekiq::Worker do
       client_chain.add MyCustomMiddleware, "1-client", $my_recorder
       Sidekiq.stub(:server_middleware, server_chain) do
         Sidekiq.stub(:client_middleware, client_chain) do
-          MyCustomWorker.perform_inline($my_recorder)
+          MyCustomJob.perform_inline($my_recorder)
           assert_equal $my_recorder.flatten, %w[1-client-before 1-client-after 1-server-before work_performed 1-server-after]
         end
       end
