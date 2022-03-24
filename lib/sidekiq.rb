@@ -5,8 +5,8 @@ fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 2.7.0." i
 
 require "sidekiq/logger"
 require "sidekiq/client"
-require "sidekiq/worker"
 require "sidekiq/job"
+require "sidekiq/worker_compatibility_alias"
 require "sidekiq/redis_connection"
 
 require "json"

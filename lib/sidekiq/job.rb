@@ -4,11 +4,11 @@ require "sidekiq/client"
 
 module Sidekiq
   ##
-  # Include this module in your worker class and you can easily create
+  # Include this module in your job class and you can easily create
   # asynchronous jobs:
   #
-  #   class HardWorker
-  #     include Sidekiq::Worker
+  #   class HardJob
+  #     include Sidekiq::Job
   #     sidekiq_options queue: 'critical', retry: 5
   #
   #     def perform(*args)
@@ -18,22 +18,22 @@ module Sidekiq
   #
   # Then in your Rails app, you can do this:
   #
-  #   HardWorker.perform_async(1, 2, 3)
+  #   HardJob.perform_async(1, 2, 3)
   #
   # Note that perform_async is a class method, perform is an instance method.
   #
-  # Sidekiq::Worker also includes several APIs to provide compatibility with
+  # Sidekiq::Job also includes several APIs to provide compatibility with
   # ActiveJob.
   #
-  #   class SomeWorker
-  #     include Sidekiq::Worker
+  #   class SomeJob
+  #     include Sidekiq::Job
   #     queue_as :critical
   #
   #     def perform(...)
   #     end
   #   end
   #
-  #   SomeWorker.set(wait_until: 1.hour).perform_async(123)
+  #   SomeJob.set(wait_until: 1.hour).perform_async(123)
   #
   # Note that arguments passed to the job must still obey Sidekiq's
   # best practice for simple, JSON-native data types. Sidekiq will not
@@ -41,7 +41,7 @@ module Sidekiq
   # this reason, we don't implement `perform_later` as our call semantics
   # are very different.
   #
-  module Worker
+  module Job
     ##
     # The Options module is extracted so we can include it in ActiveJob::Base
     # and allow native AJs to configure Sidekiq features/internals.
@@ -57,11 +57,11 @@ module Sidekiq
         ACCESSOR_MUTEX = Mutex.new
 
         ##
-        # Allows customization for this type of Worker.
+        # Allows customization for this type of Job.
         # Legal options:
         #
         #   queue - name of queue to use for this job type, default *default*
-        #   retry - enable retries for this Worker in case of error during execution,
+        #   retry - enable retries for this Job in case of error during execution,
         #      *true* to use the default or *Integer* count
         #   backtrace - whether to save any error backtrace in the retry payload to display in web UI,
         #      can be true, false or an integer number of lines to save, default *false*
@@ -156,7 +156,7 @@ module Sidekiq
     attr_accessor :jid
 
     def self.included(base)
-      raise ArgumentError, "Sidekiq::Worker cannot be included in an ActiveJob: #{base.name}" if base.ancestors.any? { |c| c.name == "ActiveJob::Base" }
+      raise ArgumentError, "Sidekiq::Job cannot be included in an ActiveJob: #{base.name}" if base.ancestors.any? { |c| c.name == "ActiveJob::Base" }
 
       base.include(Options)
       base.extend(ClassMethods)
@@ -168,7 +168,7 @@ module Sidekiq
 
     # This helper class encapsulates the set options for `set`, e.g.
     #
-    #     SomeWorker.set(queue: 'foo').perform_async(....)
+    #     SomeJob.set(queue: 'foo').perform_async(....)
     #
     class Setter
       include Sidekiq::JobUtil
@@ -266,15 +266,15 @@ module Sidekiq
 
     module ClassMethods
       def delay(*args)
-        raise ArgumentError, "Do not call .delay on a Sidekiq::Worker class, call .perform_async"
+        raise ArgumentError, "Do not call .delay on a Sidekiq::Job class, call .perform_async"
       end
 
       def delay_for(*args)
-        raise ArgumentError, "Do not call .delay_for on a Sidekiq::Worker class, call .perform_in"
+        raise ArgumentError, "Do not call .delay_for on a Sidekiq::Job class, call .perform_in"
       end
 
       def delay_until(*args)
-        raise ArgumentError, "Do not call .delay_until on a Sidekiq::Worker class, call .perform_at"
+        raise ArgumentError, "Do not call .delay_until on a Sidekiq::Job class, call .perform_at"
       end
 
       def queue_as(q)
@@ -307,13 +307,13 @@ module Sidekiq
       #
       # Example (3 Redis round trips):
       #
-      #     SomeWorker.perform_async(1)
-      #     SomeWorker.perform_async(2)
-      #     SomeWorker.perform_async(3)
+      #     SomeJob.perform_async(1)
+      #     SomeJob.perform_async(2)
+      #     SomeJob.perform_async(3)
       #
       # Would instead become (1 Redis round trip):
       #
-      #     SomeWorker.perform_bulk([[1], [2], [3]])
+      #     SomeJob.perform_bulk([[1], [2], [3]])
       #
       def perform_bulk(*args, **kwargs)
         Setter.new(self, {}).perform_bulk(*args, **kwargs)
@@ -336,11 +336,11 @@ module Sidekiq
       alias_method :perform_at, :perform_in
 
       ##
-      # Allows customization for this type of Worker.
+      # Allows customization for this type of Job.
       # Legal options:
       #
-      #   queue - use a named queue for this Worker, default 'default'
-      #   retry - enable the RetryJobs middleware for this Worker, *true* to use the default
+      #   queue - use a named queue for this Job, default 'default'
+      #   retry - enable the RetryJobs middleware for this Job, *true* to use the default
       #      or *Integer* count
       #   backtrace - whether to save any error backtrace in the retry payload to display in web UI,
       #      can be true, false or an integer number of lines to save, default *false*

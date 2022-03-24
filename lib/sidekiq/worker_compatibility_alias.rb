@@ -1,4 +1,4 @@
-require "sidekiq/worker"
+require "sidekiq/job"
 
 module Sidekiq
   # Sidekiq::Job is a new alias for Sidekiq::Worker as of Sidekiq 6.3.0.
@@ -9,5 +9,5 @@ module Sidekiq
   # process a "worker". Some people call the thread that executes jobs a
   # "worker". This change brings Sidekiq closer to ActiveJob where your job
   # classes extend ApplicationJob.
-  Job = Worker
+  Worker = Job
 end
