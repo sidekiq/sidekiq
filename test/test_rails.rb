@@ -13,13 +13,13 @@ describe "ActiveJob" do
     ActiveJob::Base.send(:include, ::Sidekiq::Worker::Options) unless ActiveJob::Base.respond_to?(:sidekiq_options)
   end
 
-  it "does not allow Sidekiq::Worker in AJ::Base classes" do
+  it "does not allow Sidekiq::Job in AJ::Base classes" do
     ex = assert_raises ArgumentError do
       Class.new(ActiveJob::Base) do
         include Sidekiq::Worker
       end
     end
-    assert_includes ex.message, "Sidekiq::Worker cannot be included"
+    assert_includes ex.message, "Sidekiq::Job cannot be included"
   end
 
   it "loads Sidekiq::Worker::Options in AJ::Base classes" do
