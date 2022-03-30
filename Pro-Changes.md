@@ -7,6 +7,8 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 HEAD
 ---------
 
+- DEPRECATION: remove support for statsd-ruby via `Sidekiq::Pro.statsd`.
+  dogstatsd-ruby will be the only supported statsd library in 6.0. [#5212]
 - Add `Sidekiq.via` API for targeting shards [#5269]
 ```ruby
 SHARD1 = ConnectionPool.new { Redis.new(db: 0) }
@@ -15,7 +17,7 @@ Sidekiq.via(SHARD2) do
   Sidekiq::Queue.all.sum(&:size)
 end
 ```
-- Excise "worker" from codebase [#4955]
+- Excise "worker" terminology from codebase [#4955]
 - Ensure batch callback metrics are always fired [#5217]
 - Added `error_type` tag for `job.failures` metrics [#5211]
 
