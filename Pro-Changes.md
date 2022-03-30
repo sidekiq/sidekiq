@@ -8,6 +8,13 @@ HEAD
 ---------
 
 - Add `Sidekiq.via` API for targeting shards [#5269]
+```ruby
+SHARD1 = ConnectionPool.new { Redis.new(db: 0) }
+SHARD2 = ConnectionPool.new { Redis.new(db: 1) }
+Sidekiq.via(SHARD2) do
+  Sidekiq::Queue.all.sum(&:size)
+end
+```
 - Excise "worker" from codebase [#4955]
 - Ensure batch callback metrics are always fired [#5217]
 - Added `error_type` tag for `job.failures` metrics [#5211]
