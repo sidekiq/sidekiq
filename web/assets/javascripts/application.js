@@ -32,6 +32,7 @@ function addListeners() {
   })
 
   updateFuzzyTimes();
+  setLivePollFromUrl();
 
   var buttons = document.querySelectorAll(".live-poll");
   if (buttons.length > 0) {
@@ -81,6 +82,14 @@ function updateFuzzyTimes() {
   var t = timeago()
   t.render(document.querySelectorAll('time'), locale);
   t.cancel();
+}
+
+function setLivePollFromUrl() {
+  var url_params = new URL(window.location.href).searchParams
+
+  if (url_params.get("poll") == "true") {
+    localStorage.sidekiqLivePoll = "enabled";
+  }
 }
 
 function updateLivePollButton() {
