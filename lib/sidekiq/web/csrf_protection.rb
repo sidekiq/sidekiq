@@ -143,7 +143,7 @@ module Sidekiq
         one_time_pad = SecureRandom.random_bytes(token.length)
         encrypted_token = xor_byte_strings(one_time_pad, token)
         masked_token = one_time_pad + encrypted_token
-        Base64.strict_encode64(masked_token)
+        Base64.urlsafe_encode64(masked_token)
       end
 
       # Essentially the inverse of +mask_token+.
@@ -169,7 +169,7 @@ module Sidekiq
       end
 
       def decode_token(token)
-        Base64.strict_decode64(token)
+        Base64.urlsafe_decode64(token)
       end
 
       def xor_byte_strings(s1, s2)
