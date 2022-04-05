@@ -47,7 +47,7 @@ describe "XA" do
   end
 
   after do
-    Sidekiq.default_job_options["xa"] = nil
+    Sidekiq.default_job_options.delete("xa")
   end
 
   describe ActiveRecord do
