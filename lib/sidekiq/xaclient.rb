@@ -14,22 +14,31 @@ module Sidekiq
     ##
     # Control job push within ActiveRecord transactions. Jobs can specify an
     # "xa" attribute to define the policy to use:
+    #
     #   * true or "commit" means enqueue the job after committing the current transaction.
     #   * "rollback" means enqueue this job only if the current transaction rolls back
     #   * nil or false means enqueue the job immediately, Sidekiq's default behavior
+    #
+    # If we are not in a transaction, behavior should be unchanged.
+    # If we ARE in a transaction, the return value of JID will not be available
+    # due to the asynchronous callback.
     def push(item)
       # Sidekiq::Job does not merge sidekiq_options so we need to fallback
       policy = item.fetch("xa") { |key|
         kl = item["class"]
         kl.respond_to?(:get_sidekiq_options) ? kl.get_sidekiq_options[key] : nil
       }
-      if policy == "commit" || policy == true
-        after_commit { super }
-      elsif policy == "rollback"
-        after_rollback { super }
-      else # enqueue immediately
-        super
+      if policy && in_transaction?
+        if policy == "commit" || policy == true
+          after_commit { super }
+          return "after_commit"
+        elsif policy == "rollback"
+          after_rollback { super }
+          return "after_rollback"
+        end
       end
+
+      super
     end
 
     ##
