@@ -30,11 +30,9 @@ module Sidekiq
       }
       if policy && in_transaction?
         if policy == "commit" || policy == true
-          after_commit { super }
-          return "after_commit"
+          return after_commit { super }
         elsif policy == "rollback"
-          after_rollback { super }
-          return "after_rollback"
+          return after_rollback { super }
         end
       end
 
