@@ -5,6 +5,7 @@
 HEAD
 ---------
 
+- Strict argument checking now runs after client-side middleware [#5246]
 - Fix page events with live polling [#5184]
 - Many under-the-hood changes to remove all usage of the term "worker"
   from the Sidekiq codebase and APIs. This mostly involved RDoc and local
@@ -332,6 +333,13 @@ See the [Logging wiki page](https://github.com/mperham/sidekiq/wiki/Logging) for
   more resources.
 - Integrate the StandardRB code formatter to ensure consistent code
   styling. [#4114, gearnode]
+
+5.2.10
+---------
+
+- Backport fix for CVE-2022-23837.
+- Migrate to `exists?` for redis-rb.
+- Lock redis-rb to <4.6 to avoid deprecations.
 
 5.2.9
 ---------

@@ -28,40 +28,46 @@ function addListeners() {
   })
 
   document.querySelectorAll("[data-toggle]").forEach(node => {
-    node.addEventListener("click", event => {
-      var targName = node.getAttribute("data-toggle");
-      var full = document.getElementById(targName + "_full");
-      if (full.style.display == "block") {
-        full.style.display = 'none';
-      } else {
-        full.style.display = 'block';
-      }
-    })
+    node.addEventListener("click", addDataToggleListeners)
   })
 
   updateFuzzyTimes();
+  setLivePollFromUrl();
 
   var buttons = document.querySelectorAll(".live-poll");
   if (buttons.length > 0) {
     buttons.forEach(node => {
-      node.addEventListener("click", event => {
-        if (localStorage.sidekiqLivePoll == "enabled") {
-          localStorage.sidekiqLivePoll = "disabled";
-          clearTimeout(livePollTimer);
-          livePollTimer = null;
-        } else {
-          localStorage.sidekiqLivePoll = "enabled";
-          livePollCallback();
-        }
-
-        updateLivePollButton();
-      })
+      node.addEventListener("click", addPollingListeners)
     });
 
     updateLivePollButton();
-    if (localStorage.sidekiqLivePoll == "enabled") {
+    if (localStorage.sidekiqLivePoll == "enabled" && !livePollTimer) {
       scheduleLivePoll();
     }
+  }
+}
+
+function addPollingListeners(_event)  {
+  if (localStorage.sidekiqLivePoll == "enabled") {
+    localStorage.sidekiqLivePoll = "disabled";
+    clearTimeout(livePollTimer);
+    livePollTimer = null;
+  } else {
+    localStorage.sidekiqLivePoll = "enabled";
+    livePollCallback();
+  }
+
+  updateLivePollButton();
+}
+
+function addDataToggleListeners(event) {
+  var source = event.target || event.srcElement;
+  var targName = source.getAttribute("data-toggle");
+  var full = document.getElementById(targName + "_full");
+  if (full.style.display == "block") {
+    full.style.display = 'none';
+  } else {
+    full.style.display = 'block';
   }
 }
 
@@ -76,6 +82,14 @@ function updateFuzzyTimes() {
   var t = timeago()
   t.render(document.querySelectorAll('time'), locale);
   t.cancel();
+}
+
+function setLivePollFromUrl() {
+  var url_params = new URL(window.location.href).searchParams
+
+  if (url_params.get("poll") == "true") {
+    localStorage.sidekiqLivePoll = "enabled";
+  }
 }
 
 function updateLivePollButton() {

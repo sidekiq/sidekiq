@@ -70,7 +70,15 @@ module Sidekiq
     #   push('queue' => 'my_queue', 'class' => MyJob, 'args' => ['foo', 1, :bat => 'bar'])
     #
     def push(item)
-      push_bulk(item.merge("args" => [item["args"]])).first
+      normed = normalize_item(item)
+      payload = middleware.invoke(normed["class"], normed, normed["queue"], @redis_pool) do
+        normed
+      end
+      if payload
+        verify_json(payload)
+        raw_push([payload])
+        payload["jid"]
+      end
     end
 
     ##
@@ -100,10 +108,12 @@ module Sidekiq
 
       normed = normalize_item(items)
       payloads = args.map.with_index { |job_args, index|
-        copy = normed.merge("args" => job_args, "jid" => jid || generate_jid)
+        copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12))
         copy["at"] = (at.is_a?(Array) ? at[index] : at) if at
-
-        result = process_single(items["class"], copy)
+        result = middleware.invoke(copy["class"], copy, copy["queue"], @redis_pool) do
+          verify_json(copy)
+          copy
+        end
         result || nil
       }.compact
 
@@ -223,14 +233,6 @@ module Sidekiq
         }
         conn.sadd("queues", queue)
         conn.lpush("queue:#{queue}", to_push)
-      end
-    end
-
-    def process_single(job_class, item)
-      queue = item["queue"]
-
-      middleware.invoke(job_class, item, queue, @redis_pool) do
-        item
       end
     end
   end

@@ -76,7 +76,7 @@ Environment=MALLOC_ARENA_MAX=2
 
 # if we crash, restart
 RestartSec=1
-Restart=on-failure
+Restart=always
 
 # output goes to /var/log/syslog (Ubuntu) or /var/log/messages (CentOS)
 StandardOutput=syslog

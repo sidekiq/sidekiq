@@ -36,7 +36,7 @@ Sidekiq 7.0 supports Rails 6.0+ but does not require it.
 Installation
 -----------------
 
-    gem install sidekiq
+    bundle add sidekiq
 
 
 Getting Started

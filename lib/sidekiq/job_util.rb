@@ -12,7 +12,9 @@ module Sidekiq
       raise(ArgumentError, "Job class must be either a Class or String representation of the class name: `#{item}`") unless item["class"].is_a?(Class) || item["class"].is_a?(String)
       raise(ArgumentError, "Job 'at' must be a Numeric timestamp: `#{item}`") if item.key?("at") && !item["at"].is_a?(Numeric)
       raise(ArgumentError, "Job tags must be an Array: `#{item}`") if item["tags"] && !item["tags"].is_a?(Array)
+    end
 
+    def verify_json(item)
       job_class = item["wrapped"] || item["class"]
       if Sidekiq.options[:on_complex_arguments] == :raise
         msg = <<~EOM
@@ -40,10 +42,10 @@ module Sidekiq
 
       raise(ArgumentError, "Job must include a valid queue name") if item["queue"].nil? || item["queue"] == ""
 
+      item["jid"] ||= SecureRandom.hex(12)
       item["class"] = item["class"].to_s
       item["queue"] = item["queue"].to_s
       item["created_at"] ||= Time.now.to_f
-
       item
     end
 
@@ -60,10 +62,6 @@ module Sidekiq
 
     def json_safe?(item)
       JSON.parse(JSON.dump(item["args"])) == item["args"]
-    end
-
-    def generate_jid
-      SecureRandom.hex(12)
     end
   end
 end
