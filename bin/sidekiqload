@@ -11,6 +11,10 @@ Bundler.require(:default, :load_test)
 require_relative "../lib/sidekiq/cli"
 require_relative "../lib/sidekiq/launcher"
 
+if ENV["SIDEKIQ_REDIS_CLIENT"]
+  Sidekiq.connection_adapter = Sidekiq::RedisClientConnection
+end
+
 Sidekiq.configure_server do |config|
   config.options[:concurrency] = 10
   config.redis = {db: 13, port: 6380}
@@ -118,15 +122,23 @@ Monitoring = Thread.new do
   end
 end
 
+def with_latency(latency, &block)
+  Sidekiq.logger.error "Simulating #{latency}ms of latency between Sidekiq and redis"
+  if latency > 0
+    Toxiproxy[:redis].downstream(:latency, latency: latency).apply(&block)
+  else
+    yield
+  end
+end
+
 begin
   # RubyProf::exclude_threads = [ Monitoring ]
   # RubyProf.start
   events = Sidekiq.options[:lifecycle_events][:startup]
   events.each(&:call)
   events.clear
-
-  Sidekiq.logger.error "Simulating 1ms of latency between Sidekiq and redis"
-  Toxiproxy[:redis].downstream(:latency, latency: 1).apply do
+  
+  with_latency(Integer(ENV.fetch("LATENCY", "1"))) do
     launcher = Sidekiq::Launcher.new(Sidekiq.options)
     launcher.run
 

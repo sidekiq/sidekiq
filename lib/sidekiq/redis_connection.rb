@@ -6,6 +6,9 @@ require "uri"
 
 module Sidekiq
   class RedisConnection
+    BaseError = Redis::BaseError
+    CommandError = Redis::CommandError
+
     class << self
       def create(options = {})
         symbolized_options = options.transform_keys(&:to_sym)

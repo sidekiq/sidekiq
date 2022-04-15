@@ -191,7 +191,7 @@ module Sidekiq
               stat_hash[dates[idx]] = value ? value.to_i : 0
             end
           end
-        rescue Redis::CommandError
+        rescue Sidekiq.connection_adapter::CommandError
           # mget will trigger a CROSSSLOT error when run against a Cluster
           # TODO Someone want to add Cluster support?
         end
@@ -436,7 +436,7 @@ module Sidekiq
 
     def initialize(parent, score, item)
       super(item)
-      @score = score
+      @score = Float(score)
       @parent = parent
     end
 
@@ -921,10 +921,10 @@ module Sidekiq
         procs = conn.sscan_each("processes").to_a
         procs.sort.each do |key|
           valid, workers = conn.pipelined { |pipeline|
-            pipeline.exists?(key)
+            pipeline.exists(key)
             pipeline.hgetall("#{key}:work")
           }
-          next unless valid
+          next unless valid > 0
           workers.each_pair do |tid, json|
             hsh = Sidekiq.load_json(json)
             p = hsh["payload"]
