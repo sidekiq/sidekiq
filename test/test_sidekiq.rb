@@ -90,7 +90,7 @@ describe Sidekiq do
       counts = []
       Sidekiq.redis do |c|
         counts << c.info["total_connections_received"].to_i
-        raise Redis::CommandError, "READONLY You can't write against a replica." if counts.size == 1
+        raise Sidekiq::RedisConnection.adapter::CommandError, "READONLY You can't write against a replica." if counts.size == 1
       end
       assert_equal 2, counts.size
       assert_equal counts[0] + 1, counts[1]
@@ -100,7 +100,7 @@ describe Sidekiq do
       counts = []
       Sidekiq.redis do |c|
         counts << c.info["total_connections_received"].to_i
-        raise Redis::CommandError, "UNBLOCKED force unblock from blocking operation, instance state changed (master -> replica?)" if counts.size == 1
+        raise Sidekiq::RedisConnection.adapter::CommandError, "UNBLOCKED force unblock from blocking operation, instance state changed (master -> replica?)" if counts.size == 1
       end
       assert_equal 2, counts.size
       assert_equal counts[0] + 1, counts[1]

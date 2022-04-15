@@ -129,7 +129,7 @@ describe Sidekiq::Scheduled do
         3.times do |i|
           Sidekiq.redis do |conn|
             conn.sadd("processes", "process-#{i}")
-            conn.hset("process-#{i}", "info", nil)
+            conn.hset("process-#{i}", "info", "")
           end
         end
 

@@ -6,7 +6,25 @@ require "uri"
 
 module Sidekiq
   class RedisConnection
+    BaseError = Redis::BaseError
+    CommandError = Redis::CommandError
+
+    @adapter = self
+
     class << self
+      attr_reader :adapter
+
+      def adapter=(adapter)
+        @adapter = case adapter
+        when :redis_client
+          RedisClientConnection
+        when :redis
+          self
+        else
+          adapter
+        end
+      end
+
       def create(options = {})
         symbolized_options = options.transform_keys(&:to_sym)
 
@@ -31,9 +49,7 @@ module Sidekiq
         pool_timeout = symbolized_options[:pool_timeout] || 1
         log_info(symbolized_options)
 
-        ConnectionPool.new(timeout: pool_timeout, size: size) do
-          build_client(symbolized_options)
-        end
+        build_pool(size, pool_timeout, symbolized_options)
       end
 
       private
@@ -48,6 +64,12 @@ module Sidekiq
       #   - enterprise's cron support
       def verify_sizing(size, concurrency)
         raise ArgumentError, "Your Redis connection pool is too small for Sidekiq. Your pool has #{size} connections but must have at least #{concurrency + 2}" if size < (concurrency + 2)
+      end
+
+      def build_pool(size, pool_timeout, symbolized_options)
+        ConnectionPool.new(timeout: pool_timeout, size: size) do
+          build_client(symbolized_options)
+        end
       end
 
       def build_client(options)
@@ -140,5 +162,7 @@ module Sidekiq
         ]
       end
     end
+
+    self.adapter = self
   end
 end

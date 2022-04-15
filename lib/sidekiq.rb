@@ -13,6 +13,8 @@ require "sidekiq/delay"
 require "json"
 
 module Sidekiq
+  autoload :RedisClientConnection, "sidekiq/redis_client_connection"
+
   NAME = "Sidekiq"
   LICENSE = "See LICENSE and the LGPL-3.0 for licensing details."
 
@@ -93,7 +95,7 @@ module Sidekiq
       retryable = true
       begin
         yield conn
-      rescue Redis::BaseError => ex
+      rescue RedisConnection.adapter::BaseError => ex
         # 2550 Failover can cause the server to become a replica, need
         # to disconnect and reopen the socket to get back to the primary.
         # 4495 Use the same logic if we have a "Not enough replicas" error from the primary
@@ -118,7 +120,7 @@ module Sidekiq
       else
         conn.info
       end
-    rescue Redis::CommandError => ex
+    rescue RedisConnection.adapter::CommandError => ex
       # 2850 return fake version when INFO command has (probably) been renamed
       raise unless /unknown command/.match?(ex.message)
       FAKE_INFO
@@ -126,14 +128,14 @@ module Sidekiq
   end
 
   def self.redis_pool
-    @redis ||= Sidekiq::RedisConnection.create
+    @redis ||= RedisConnection.adapter.create
   end
 
   def self.redis=(hash)
     @redis = if hash.is_a?(ConnectionPool)
       hash
     else
-      Sidekiq::RedisConnection.create(hash)
+      RedisConnection.adapter.create(hash)
     end
   end
 
