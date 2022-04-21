@@ -18,7 +18,7 @@ module Sidekiq
     end
 
     def self.add(k, v)
-      Thread.current[:sidekiq_context][k] = v
+      current[k] = v
     end
   end
 
