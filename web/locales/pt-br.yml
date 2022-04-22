@@ -27,7 +27,7 @@
   Delete: Apagar
   AddToQueue: Adicionar à fila
   AreYouSureDeleteJob: Deseja deletar esta tarefa?
-  AreYouSureDeleteQueue: Deseja deletar a fila%{queue}? Isso irá deletar todos as tarefas desta fila, e irá reaparecer caso mais tarefas sejam adicionadas à mesma no futuro.
+  AreYouSureDeleteQueue: Deseja deletar a fila %{queue}? Isso irá deletar todos as tarefas desta fila, e irá reaparecer caso mais tarefas sejam adicionadas à mesma no futuro.
   Queues: Filas
   Size: Tamanho
   Actions: Ações
