@@ -8,6 +8,7 @@
   History: Histórico
   Busy: Ocupados
   Processed: Processados
+  Utilization: Utilização
   Failed: Falhas
   Scheduled: Agendados
   Retries: Tentativas
@@ -26,18 +27,20 @@
   Delete: Apagar
   AddToQueue: Adicionar à fila
   AreYouSureDeleteJob: Deseja deletar esta tarefa?
-  AreYouSureDeleteQueue: Deseja deletar a %{queue} fila?
+  AreYouSureDeleteQueue: Deseja deletar a fila %{queue}? Isso irá deletar todas as tarefas desta fila.
   Queues: Filas
   Size: Tamanho
   Actions: Ações
   NextRetry: Próxima Tentativa
   RetryCount: Número de Tentativas
   RetryNow: Tentar novamente agora
+  Kill: Matar
   LastRetry: Última tentativa
   OriginallyFailed: Falhou originalmente
   AreYouSure: Tem certeza?
   DeleteAll: Apagar tudo
   RetryAll: Tentar tudo novamente
+  KillAll: Matar todas
   NoRetriesFound: Nenhuma tentativa encontrada
   Error: Erro
   ErrorClass: Classe de erro
@@ -58,11 +61,26 @@
   OneMonth: 1 mês
   ThreeMonths: 3 meses
   SixMonths: 6 meses
-  Failures : Falhas
-  DeadJobs : Tarefas mortas
-  NoDeadJobsFound : Nenhuma tarefa morta foi encontrada
-  Dead : Morta
-  Processes : Processos
-  Thread : Thread
-  Threads : Threads
-  Jobs : Tarefas
+  Failures: Falhas
+  DeadJobs: Tarefas mortas
+  NoDeadJobsFound: Nenhuma tarefa morta foi encontrada
+  Dead: Morta
+  Process: Processo
+  Processes: Processos
+  Name: Nome
+  Thread: Thread
+  Threads: Threads
+  Jobs: Tarefas
+  Paused: Pausado
+  Stop: Parar
+  Quiet: Silenciar
+  StopAll: Parar Todos
+  QuietAll: Silenciar Todos
+  PollingInterval: Intervalo de Polling
+  Plugins: Plug-ins
+  NotYetEnqueued: Ainda não enfileirado
+  CreatedAt: Criado em
+  BackToApp: De volta ao aplicativo
+  Latency: Latência
+  Pause: Pausar
+  Unpause: Despausar
