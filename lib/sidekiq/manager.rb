@@ -107,7 +107,7 @@ module Sidekiq
         jobs = cleanup.map { |p| p.job }.compact
 
         logger.warn { "Terminating #{cleanup.size} busy threads" }
-        logger.warn { "Jobs still in progress #{jobs.inspect}" }
+        logger.debug { "Jobs still in progress #{jobs.inspect}" }
 
         # Re-enqueue unfinished jobs
         # NOTE: You may notice that we may push a job back to redis before
