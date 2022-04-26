@@ -209,7 +209,7 @@ module Sidekiq
 
   def self.logger=(logger)
     if logger.nil?
-      self.logger.fatal!
+      self.logger.level = Logger::FATAL
       return self.logger
     end
 
