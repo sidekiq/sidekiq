@@ -5,21 +5,73 @@ require "redis"
 require "uri"
 
 module Sidekiq
-  class RedisConnection
-    BaseError = Redis::BaseError
-    CommandError = Redis::CommandError
+  module RedisConnection
+    autoload :RedisClientAdapter, "sidekiq/redis_connection/redis_client_adapter"
 
-    @adapter = self
+    class RedisAdapter
+      BaseError = Redis::BaseError
+      CommandError = Redis::CommandError
+
+      def initialize(options)
+        @options = options
+      end
+
+      def new_client
+        namespace = @options[:namespace]
+
+        client = Redis.new client_opts(@options)
+        if namespace
+          begin
+            require "redis/namespace"
+            Redis::Namespace.new(namespace, redis: client)
+          rescue LoadError
+            Sidekiq.logger.error("Your Redis configuration uses the namespace '#{namespace}' but the redis-namespace gem is not included in the Gemfile." \
+                                 "Add the gem to your Gemfile to continue using a namespace. Otherwise, remove the namespace parameter.")
+            exit(-127)
+          end
+        else
+          client
+        end
+      end
+
+      private
+
+      def client_opts(options)
+        opts = options.dup
+        if opts[:namespace]
+          opts.delete(:namespace)
+        end
+
+        if opts[:network_timeout]
+          opts[:timeout] = opts[:network_timeout]
+          opts.delete(:network_timeout)
+        end
+
+        opts[:driver] ||= Redis::Connection.drivers.last || "ruby"
+
+        # Issue #3303, redis-rb will silently retry an operation.
+        # This can lead to duplicate jobs if Sidekiq::Client's LPUSH
+        # is performed twice but I believe this is much, much rarer
+        # than the reconnect silently fixing a problem; we keep it
+        # on by default.
+        opts[:reconnect_attempts] ||= 1
+
+        opts
+      end
+    end
+
+    @adapter = RedisAdapter
 
     class << self
       attr_reader :adapter
 
       def adapter=(adapter)
+        raise "no" if adapter == self
         @adapter = case adapter
         when :redis_client
-          RedisClientConnection
+          RedisClientAdapter
         when :redis
-          self
+          RedisAdapter
         else
           adapter
         end
@@ -49,7 +101,10 @@ module Sidekiq
         pool_timeout = symbolized_options[:pool_timeout] || 1
         log_info(symbolized_options)
 
-        build_pool(size, pool_timeout, symbolized_options)
+        redis_config = adapter.new(symbolized_options)
+        ConnectionPool.new(timeout: pool_timeout, size: size) do
+          redis_config.new_client
+        end
       end
 
       private
@@ -64,53 +119,6 @@ module Sidekiq
       #   - enterprise's cron support
       def verify_sizing(size, concurrency)
         raise ArgumentError, "Your Redis connection pool is too small for Sidekiq. Your pool has #{size} connections but must have at least #{concurrency + 2}" if size < (concurrency + 2)
-      end
-
-      def build_pool(size, pool_timeout, symbolized_options)
-        ConnectionPool.new(timeout: pool_timeout, size: size) do
-          build_client(symbolized_options)
-        end
-      end
-
-      def build_client(options)
-        namespace = options[:namespace]
-
-        client = Redis.new client_opts(options)
-        if namespace
-          begin
-            require "redis/namespace"
-            Redis::Namespace.new(namespace, redis: client)
-          rescue LoadError
-            Sidekiq.logger.error("Your Redis configuration uses the namespace '#{namespace}' but the redis-namespace gem is not included in the Gemfile." \
-                                 "Add the gem to your Gemfile to continue using a namespace. Otherwise, remove the namespace parameter.")
-            exit(-127)
-          end
-        else
-          client
-        end
-      end
-
-      def client_opts(options)
-        opts = options.dup
-        if opts[:namespace]
-          opts.delete(:namespace)
-        end
-
-        if opts[:network_timeout]
-          opts[:timeout] = opts[:network_timeout]
-          opts.delete(:network_timeout)
-        end
-
-        opts[:driver] ||= Redis::Connection.drivers.last || "ruby"
-
-        # Issue #3303, redis-rb will silently retry an operation.
-        # This can lead to duplicate jobs if Sidekiq::Client's LPUSH
-        # is performed twice but I believe this is much, much rarer
-        # than the reconnect silently fixing a problem; we keep it
-        # on by default.
-        opts[:reconnect_attempts] ||= 1
-
-        opts
       end
 
       def log_info(options)
@@ -162,7 +170,5 @@ module Sidekiq
         ]
       end
     end
-
-    self.adapter = self
   end
 end

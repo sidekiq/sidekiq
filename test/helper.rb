@@ -32,7 +32,7 @@ Sidekiq.logger = ::Logger.new(STDOUT)
 Sidekiq.logger.level = Logger::ERROR
 
 if ENV["SIDEKIQ_REDIS_CLIENT"]
-  Sidekiq::RedisConnection.adapter = Sidekiq::RedisClientConnection
+  Sidekiq::RedisConnection.adapter = :redis_client
 end
 
 def capture_logging(lvl = Logger::INFO)

@@ -13,8 +13,6 @@ require "sidekiq/delay"
 require "json"
 
 module Sidekiq
-  autoload :RedisClientConnection, "sidekiq/redis_client_connection"
-
   NAME = "Sidekiq"
   LICENSE = "See LICENSE and the LGPL-3.0 for licensing details."
 
@@ -128,14 +126,14 @@ module Sidekiq
   end
 
   def self.redis_pool
-    @redis ||= RedisConnection.adapter.create
+    @redis ||= RedisConnection.create
   end
 
   def self.redis=(hash)
     @redis = if hash.is_a?(ConnectionPool)
       hash
     else
-      RedisConnection.adapter.create(hash)
+      RedisConnection.create(hash)
     end
   end
 
