@@ -20,6 +20,10 @@ module Sidekiq
             @client.call("EVALSHA", sha, keys.size, *keys, *argv)
           end
 
+          def brpoplpush(*args)
+            @client.blocking_call(false, "BRPOPLPUSH", *args)
+          end
+
           def brpop(*args)
             @client.blocking_call(false, "BRPOP", *args)
           end
@@ -41,9 +45,9 @@ module Sidekiq
           end
 
           %i[
-            exists expire flushdb get hget hgetall hmget hmset hset incr incrby llen lpop lpush lrange
-            lrem mget mset ping pttl rpush rpop sadd scard smembers script set srem
-            type unlink zadd zcard zincrby zrem zremrangebyrank zremrangebyscore
+            exists expire flushdb get hget hgetall hmget hmset hset hincrby incr incrby llen lpop lpush lrange
+            lrem mget mset ping pttl rpush rpop sadd scard smembers sismember script set srem
+            type unlink zadd zcard zincrby zrem zremrangebyrank zremrangebyscore rpoplpush
           ].each do |command|
             alias_method command, :simple_call
             public command
@@ -88,6 +92,11 @@ module Sidekiq
         def multi
           @client.multi { |p| yield Pipeline.new(p) }
         end
+
+        def scan_each(*args, &block)
+          @client.scan(*args, &block)
+        end
+        ruby2_keywords :scan_each if respond_to?(:ruby2_keywords, true)
 
         def sscan_each(*args, &block)
           @client.sscan(*args, &block)
