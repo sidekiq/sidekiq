@@ -36,10 +36,6 @@ module Sidekiq
             @client.call("SISMEMBER", *args) == 1
           end
 
-          def publish(channel, msg)
-            @client.call("PUBLISH", channel, msg)
-          end
-
           def set(key, value, ex: nil, nx: false, px: nil)
             command = ["SET", key, value]
             command << "NX" if nx
@@ -64,7 +60,7 @@ module Sidekiq
 
           %i[
             del exists expire flushdb get hdel hget hgetall hlen hmget hmset hset hsetnx hincrby incr incrby llen lpop lpush lrange
-            lrem mget mset ping pttl rpush rpop sadd scard smembers scan script srem ttl
+            lrem mget mset ping pttl publish rpush rpop sadd scard smembers scan script srem ttl
             type unlink zadd zcard zincrby zrem zremrangebyrank zremrangebyscore rpoplpush
           ].each do |command|
             alias_method command, :simple_call
