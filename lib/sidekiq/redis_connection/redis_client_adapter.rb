@@ -16,7 +16,7 @@ module Sidekiq
             @client.call("INFO").lines(chomp: true).map { |l| l.split(":", 2) }.select { |l| l.size == 2 }.to_h
           end
 
-          def evalsha(sha, keys: [], argv: [])
+          def evalsha(sha, keys, argv)
             @client.call("EVALSHA", sha, keys.size, *keys, *argv)
           end
 
@@ -32,6 +32,24 @@ module Sidekiq
             @client.call(*args)
           end
 
+          def sismember(*args)
+            @client.call("SISMEMBER", *args) == 1
+          end
+
+          def publish(channel, msg)
+            @client.call("PUBLISH", channel, msg)
+          end
+
+          def set(key, value, ex: nil, nx: false, px: nil)
+            command = ["SET", key, value]
+            command << "NX" if nx
+            command << "EX" if ex
+            command << ex if ex
+            command << "PX" if px
+            command << px if px
+            @client.call(*command) == "OK"
+          end
+
           private
 
           def simple_call(*args)
@@ -45,8 +63,8 @@ module Sidekiq
           end
 
           %i[
-            exists expire flushdb get hget hgetall hmget hmset hset hincrby incr incrby llen lpop lpush lrange
-            lrem mget mset ping pttl rpush rpop sadd scard smembers sismember script set srem
+            del exists expire flushdb get hdel hget hgetall hlen hmget hmset hset hsetnx hincrby incr incrby llen lpop lpush lrange
+            lrem mget mset ping pttl rpush rpop sadd scard smembers scan script srem ttl
             type unlink zadd zcard zincrby zrem zremrangebyrank zremrangebyscore rpoplpush
           ].each do |command|
             alias_method command, :simple_call
