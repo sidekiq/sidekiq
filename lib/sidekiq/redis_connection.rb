@@ -13,6 +13,7 @@ module Sidekiq
       CommandError = Redis::CommandError
 
       def initialize(options)
+        warn("Usage of the 'redis' gem within Sidekiq itself is deprecated, Sidekiq 7.0 will only use the new, simpler 'redis-client' gem", caller) if ENV["SIDEKIQ_REDIS_CLIENT"] == "1"
         @options = options
       end
 

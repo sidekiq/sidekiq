@@ -36,13 +36,33 @@ module Sidekiq
             @client.call("SISMEMBER", *args) == 1
           end
 
+          def message
+            yield nil, @queue.pop
+          end
+
+          # NB: this method does not return
+          def subscribe(chan)
+            @queue = ::Queue.new
+
+            pubsub = @client.pubsub
+            pubsub.call("subscribe", chan)
+
+            loop do
+              evt = pubsub.next_event
+              next if evt.nil?
+              next unless evt[0] == "message" && evt[1] == chan
+
+              (_, _, msg) = evt
+              @queue << msg
+              yield self
+            end
+          end
+
           def set(key, value, ex: nil, nx: false, px: nil)
             command = ["SET", key, value]
             command << "NX" if nx
-            command << "EX" if ex
-            command << ex if ex
-            command << "PX" if px
-            command << px if px
+            command << "EX" << ex if ex
+            command << "PX" << px if px
             @client.call(*command) == "OK"
           end
 
