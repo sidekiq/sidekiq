@@ -110,7 +110,7 @@ module Sidekiq
       payloads = args.map.with_index { |job_args, index|
         copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12))
         copy["at"] = (at.is_a?(Array) ? at[index] : at) if at
-        result = middleware.invoke(copy["class"], copy, copy["queue"], @redis_pool) do
+        result = middleware.invoke(items["class"], copy, copy["queue"], @redis_pool) do
           verify_json(copy)
           copy
         end

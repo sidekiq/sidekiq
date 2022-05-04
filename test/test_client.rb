@@ -385,7 +385,8 @@ describe Sidekiq::Client do
       end
     end
 
-    it "sends correct arguments to middleware" do
+    it "push sends correct arguments to middleware" do
+      minimum_job_args = ["args", "class", "created_at", "enqueued_at", "jid", "queue"]
       client = Sidekiq::Client.new
       client.middleware do |chain|
         chain.add MiddlewareArguments
@@ -393,7 +394,20 @@ describe Sidekiq::Client do
       client.push("class" => MyWorker, "args" => [0])
 
       assert_equal($arguments_worker_class, MyWorker)
-      assert_equal($arguments_job.keys.sort, ["args", "class", "created_at", "enqueued_at", "jid", "queue", "retry"])
+      assert((minimum_job_args & $arguments_job.keys) == minimum_job_args)
+      assert_instance_of(ConnectionPool, $arguments_redis)
+    end
+
+    it "push bulk sends correct arguments to middleware" do
+      minimum_job_args = ["args", "class", "created_at", "enqueued_at", "jid", "queue"]
+      client = Sidekiq::Client.new
+      client.middleware do |chain|
+        chain.add MiddlewareArguments
+      end
+      client.push_bulk("class" => MyWorker, "args" => [[0]])
+
+      assert_equal($arguments_worker_class, MyWorker)
+      assert((minimum_job_args & $arguments_job.keys) == minimum_job_args)
       assert_instance_of(ConnectionPool, $arguments_redis)
     end
 
