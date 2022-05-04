@@ -375,6 +375,42 @@ describe Sidekiq::Client do
       end
     end
 
+    class MiddlewareArguments
+      def call(worker_class, job, queue, redis)
+        $arguments_worker_class = worker_class
+        $arguments_job = job
+        $arguments_queue = queue
+        $arguments_redis = redis
+        yield
+      end
+    end
+
+    it "push sends correct arguments to middleware" do
+      minimum_job_args = ["args", "class", "created_at", "enqueued_at", "jid", "queue"]
+      client = Sidekiq::Client.new
+      client.middleware do |chain|
+        chain.add MiddlewareArguments
+      end
+      client.push("class" => MyWorker, "args" => [0])
+
+      assert_equal($arguments_worker_class, MyWorker)
+      assert((minimum_job_args & $arguments_job.keys) == minimum_job_args)
+      assert_instance_of(ConnectionPool, $arguments_redis)
+    end
+
+    it "push bulk sends correct arguments to middleware" do
+      minimum_job_args = ["args", "class", "created_at", "enqueued_at", "jid", "queue"]
+      client = Sidekiq::Client.new
+      client.middleware do |chain|
+        chain.add MiddlewareArguments
+      end
+      client.push_bulk("class" => MyWorker, "args" => [[0]])
+
+      assert_equal($arguments_worker_class, MyWorker)
+      assert((minimum_job_args & $arguments_job.keys) == minimum_job_args)
+      assert_instance_of(ConnectionPool, $arguments_redis)
+    end
+
     it "can stop some of the jobs from pushing" do
       client = Sidekiq::Client.new
       client.middleware do |chain|
