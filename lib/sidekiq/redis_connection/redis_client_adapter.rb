@@ -32,32 +32,6 @@ module Sidekiq
             @client.call(*args)
           end
 
-          def sismember(*args)
-            @client.call("SISMEMBER", *args) == 1
-          end
-
-          def message
-            yield nil, @queue.pop
-          end
-
-          # NB: this method does not return
-          def subscribe(chan)
-            @queue = ::Queue.new
-
-            pubsub = @client.pubsub
-            pubsub.call("subscribe", chan)
-
-            loop do
-              evt = pubsub.next_event
-              next if evt.nil?
-              next unless evt[0] == "message" && evt[1] == chan
-
-              (_, _, msg) = evt
-              @queue << msg
-              yield self
-            end
-          end
-
           def set(key, value, ex: nil, nx: false, px: nil)
             command = ["SET", key, value]
             command << "NX" if nx
@@ -115,6 +89,10 @@ module Sidekiq
           @client.read_timeout
         end
 
+        def sismember(*args)
+          @client.call("SISMEMBER", *args) > 0
+        end
+
         def exists?(key)
           @client.call("EXISTS", key) > 0
         end
@@ -125,6 +103,28 @@ module Sidekiq
 
         def multi
           @client.multi { |p| yield Pipeline.new(p) }
+        end
+
+        def message
+          yield nil, @queue.pop
+        end
+
+        # NB: this method does not return
+        def subscribe(chan)
+          @queue = ::Queue.new
+
+          pubsub = @client.pubsub
+          pubsub.call("subscribe", chan)
+
+          loop do
+            evt = pubsub.next_event
+            next if evt.nil?
+            next unless evt[0] == "message" && evt[1] == chan
+
+            (_, _, msg) = evt
+            @queue << msg
+            yield self
+          end
         end
 
         def scan_each(*args, &block)
