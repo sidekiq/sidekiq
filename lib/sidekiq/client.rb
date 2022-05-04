@@ -71,7 +71,7 @@ module Sidekiq
     #
     def push(item)
       normed = normalize_item(item)
-      payload = middleware.invoke(normed["class"], normed, normed["queue"], @redis_pool) do
+      payload = middleware.invoke(item["class"], normed, normed["queue"], @redis_pool) do
         normed
       end
       if payload
