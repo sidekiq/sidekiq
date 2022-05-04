@@ -5,6 +5,8 @@
 HEAD
 ---------
 
+- Add **beta** support for the `redis-client` gem**. This will become the default Redis driver in Sidekiq 7.0. [#5298]
+  Read more: https://github.com/mperham/sidekiq/wiki/Using-redis-client
 - Add **beta** support for DB transaction-aware client [#5291]
   Add this line to your initializer and any jobs created during a transaction
   will only be pushed to Redis **after the transaction commits**. You will need to add the
@@ -16,7 +18,6 @@ Sidekiq.transactional_push!
   have any issues. It will be fully supported in Sidekiq 7.0 or removed if it
   proves problematic.
 - Fix regression with middleware arguments [#5312]
-
 
 6.4.2
 ---------
