@@ -164,7 +164,7 @@ module Sidekiq
         _, exists, _, _, msg = Sidekiq.redis { |conn|
           conn.multi { |transaction|
             transaction.sadd("processes", key)
-            transaction.exists(key)
+            transaction.exists?(key)
             transaction.hmset(key, "info", to_json,
               "busy", curstate.size,
               "beat", Time.now.to_f,
@@ -175,7 +175,6 @@ module Sidekiq
             transaction.rpop("#{key}-signals")
           }
         }
-        exists &&= exists > 0
 
         # first heartbeat or recovering from an outage and need to reestablish our heartbeat
         fire_event(:heartbeat) unless exists

@@ -606,7 +606,7 @@ module Sidekiq
         range_start = page * page_size + offset_size
         range_end = range_start + page_size - 1
         elements = Sidekiq.redis { |conn|
-          conn.zrange name, range_start, range_end, with_scores: true
+          conn.zrange name, range_start, range_end, withscores: true
         }
         break if elements.empty?
         page -= 1
@@ -629,7 +629,7 @@ module Sidekiq
         end
 
       elements = Sidekiq.redis { |conn|
-        conn.zrangebyscore(name, begin_score, end_score, with_scores: true)
+        conn.zrangebyscore(name, begin_score, end_score, withscores: true)
       }
 
       elements.each_with_object([]) do |element, result|
@@ -963,10 +963,10 @@ module Sidekiq
         procs = conn.sscan_each("processes").to_a
         procs.sort.each do |key|
           valid, workers = conn.pipelined { |pipeline|
-            pipeline.exists(key)
+            pipeline.exists?(key)
             pipeline.hgetall("#{key}:work")
           }
-          next unless valid > 0
+          next unless valid
           workers.each_pair do |tid, json|
             hsh = Sidekiq.load_json(json)
             p = hsh["payload"]

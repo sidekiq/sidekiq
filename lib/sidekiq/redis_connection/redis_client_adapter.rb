@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 require "connection_pool"
-require "redis-client"
+require "redis_client"
+require "redis_client/decorator"
 require "uri"
 
 module Sidekiq
@@ -10,99 +11,70 @@ module Sidekiq
       BaseError = RedisClient::Error
       CommandError = RedisClient::CommandError
 
-      class CompatClient
-        module Commands
-          def info
-            @client.call("INFO").lines(chomp: true).map { |l| l.split(":", 2) }.select { |l| l.size == 2 }.to_h
-          end
-
-          def evalsha(sha, keys, argv)
-            @client.call("EVALSHA", sha, keys.size, *keys, *argv)
-          end
-
-          def brpoplpush(*args)
-            @client.blocking_call(false, "BRPOPLPUSH", *args)
-          end
-
-          def brpop(*args)
-            @client.blocking_call(false, "BRPOP", *args)
-          end
-
-          def call(*args)
-            @client.call(*args)
-          end
-
-          def set(key, value, ex: nil, nx: false, px: nil)
-            command = ["SET", key, value]
-            command << "NX" if nx
-            command << "EX" << ex if ex
-            command << "PX" << px if px
-            @client.call(*command) == "OK"
-          end
-
-          private
-
-          def simple_call(*args)
-            @client.call(__callee__, *args)
-          end
-
-          def with_scores_call(*args, with_scores: false)
-            args.unshift(__callee__)
-            args << "WITHSCORES" if with_scores
-            @client.call(*args)
-          end
-
-          %i[
-            del exists expire flushdb get hdel hget hgetall hlen hmget hmset hset hsetnx hincrby incr incrby llen lpop lpush lrange
-            lrem mget mset ping pttl publish rpush rpop sadd scard smembers scan script srem ttl
-            type unlink zadd zcard zincrby zrem zremrangebyrank zremrangebyscore rpoplpush
-          ].each do |command|
-            alias_method command, :simple_call
-            public command
-          end
-
-          %i[zrange zrangebyscore zrevrange].each do |command|
-            alias_method command, :with_scores_call
-            public command
-          end
+      module CompatMethods
+        def info
+          @client.call("INFO") { |i| i.lines(chomp: true).map { |l| l.split(":", 2) }.select { |l| l.size == 2 }.to_h }
         end
 
-        class Pipeline
-          include Commands
-
-          def initialize(client)
-            @client = client
-          end
+        def evalsha(sha, keys, argv)
+          @client.call("EVALSHA", sha, keys.size, *keys, *argv)
         end
 
-        include Commands
-
-        def initialize(client)
-          @client = client
+        def brpoplpush(*args)
+          @client.blocking_call(false, "BRPOPLPUSH", *args)
         end
 
-        def id
-          @client.id
+        def brpop(*args)
+          @client.blocking_call(false, "BRPOP", *args)
         end
 
-        def read_timeout
-          @client.read_timeout
+        def set(*args)
+          @client.call("SET", *args) { |r| r == "OK" }
         end
+        ruby2_keywords :set if respond_to?(:ruby2_keywords, true)
 
         def sismember(*args)
-          @client.call("SISMEMBER", *args) > 0
+          @client.call("SISMEMBER", *args) { |c| c > 0 }
         end
 
         def exists?(key)
-          @client.call("EXISTS", key) > 0
+          @client.call("EXISTS", key) { |c| c > 0 }
         end
 
-        def pipelined
-          @client.pipelined { |p| yield Pipeline.new(p) }
+        private
+
+        def method_missing(*args, &block)
+          @client.call(*args, *block)
+        end
+        ruby2_keywords :method_missing if respond_to?(:ruby2_keywords, true)
+
+        def respond_to_missing?(name, include_private = false)
+          super # Appease the linter. We can't tell what is a valid command.
+        end
+      end
+
+      CompatClient = RedisClient::Decorator.create(CompatMethods)
+
+      class CompatClient
+        alias_method :scan_each, :scan
+        alias_method :sscan_each, :sscan
+        alias_method :zscan_each, :zscan
+        alias_method :hscan_each, :hscan
+
+        def disconnect!
+          @client.close
         end
 
-        def multi
-          @client.multi { |p| yield Pipeline.new(p) }
+        def connection
+          {id: @client.id}
+        end
+
+        def redis
+          self
+        end
+
+        def _client
+          @client
         end
 
         def message
@@ -125,41 +97,6 @@ module Sidekiq
             @queue << msg
             yield self
           end
-        end
-
-        def scan_each(*args, &block)
-          @client.scan(*args, &block)
-        end
-        ruby2_keywords :scan_each if respond_to?(:ruby2_keywords, true)
-
-        def sscan_each(*args, &block)
-          @client.sscan(*args, &block)
-        end
-        ruby2_keywords :sscan_each if respond_to?(:ruby2_keywords, true)
-
-        def zscan_each(*args, &block)
-          @client.zscan(*args, &block)
-        end
-        ruby2_keywords :zscan_each if respond_to?(:ruby2_keywords, true)
-
-        def disconnect!
-          @client.close
-        end
-
-        def config
-          @client.config
-        end
-
-        def connection
-          {id: @client.id}
-        end
-
-        def redis
-          self
-        end
-
-        def _client
-          @client
         end
       end
 
