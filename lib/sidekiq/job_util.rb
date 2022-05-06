@@ -4,7 +4,8 @@ require "time"
 module Sidekiq
   module JobUtil
     # These functions encapsulate various job utilities.
-    # They must be simple and free from side effects.
+
+    TRANSIENT_ATTRIBUTES = %w[]
 
     def validate(item)
       raise(ArgumentError, "Job must be a Hash with 'class' and 'args' keys: `#{item}`") unless item.is_a?(Hash) && item.key?("class") && item.key?("args")
@@ -41,6 +42,9 @@ module Sidekiq
       item = defaults.merge(item)
 
       raise(ArgumentError, "Job must include a valid queue name") if item["queue"].nil? || item["queue"] == ""
+
+      # remove job attributes which aren't necessary to persist into Redis
+      TRANSIENT_ATTRIBUTES.each { |key| item.delete(key) }
 
       item["jid"] ||= SecureRandom.hex(12)
       item["class"] = item["class"].to_s

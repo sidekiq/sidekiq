@@ -9,3 +9,5 @@ gem 'puma'
 platforms :ruby do
   gem 'sqlite3'
 end
+
+gem 'after_commit_everywhere'

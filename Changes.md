@@ -2,6 +2,19 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
+HEAD
+---------
+
+- Add beta support for transaction-aware client [#5291]
+  Add this line to your initializer and any jobs pushed during a transaction
+  will only be pushed after the transaction commits. You will need to add the
+  `after_commit_everywhere` gem to your Gemfile.
+```ruby
+Sidekiq.transactional_push!
+```
+- Fix regression with middleware arguments
+
+
 6.4.2
 ---------
 
