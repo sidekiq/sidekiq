@@ -6,13 +6,13 @@ HEAD
 ---------
 
 - Add beta support for transaction-aware client [#5291]
-  Add this line to your initializer and any jobs pushed during a transaction
-  will only be pushed after the transaction commits. You will need to add the
+  Add this line to your initializer and any jobs created during a transaction
+  will only be pushed to Redis **after the transaction commits**. You will need to add the
   `after_commit_everywhere` gem to your Gemfile.
 ```ruby
 Sidekiq.transactional_push!
 ```
-- Fix regression with middleware arguments
+- Fix regression with middleware arguments [#5312]
 
 
 6.4.2
