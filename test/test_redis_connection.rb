@@ -202,15 +202,8 @@ describe Sidekiq::RedisConnection do
 
     describe "driver" do
       if redis_client?
-        it "uses hiredis driver by default" do
+        it "uses ruby driver by default" do
           pool = Sidekiq::RedisConnection.create
-          config = config_for(pool.checkout)
-
-          assert_equal RedisClient::HiredisConnection, config.driver
-        end
-
-        it "uses hiredis driver if asked" do
-          pool = Sidekiq::RedisConnection.create(driver: "ruby")
           config = config_for(pool.checkout)
 
           assert_equal RedisClient::RubyConnection, config.driver
