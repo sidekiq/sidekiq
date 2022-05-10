@@ -6,8 +6,6 @@ require "uri"
 
 module Sidekiq
   module RedisConnection
-    autoload :RedisClientAdapter, "sidekiq/redis_connection/redis_client_adapter"
-
     class RedisAdapter
       BaseError = Redis::BaseError
       CommandError = Redis::CommandError
@@ -66,16 +64,20 @@ module Sidekiq
     class << self
       attr_reader :adapter
 
+      # RedisConnection.adapter = :redis
+      # RedisConnection.adapter = :redis_client
       def adapter=(adapter)
         raise "no" if adapter == self
-        @adapter = case adapter
-        when :redis_client
-          RedisClientAdapter
+        result = case adapter
         when :redis
           RedisAdapter
-        else
+        when Class
           adapter
+        else
+          require "sidekiq/#{adapter}_adapter"
+          nil
         end
+        @adapter = result if result
       end
 
       def create(options = {})

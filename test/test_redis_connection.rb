@@ -34,12 +34,12 @@ describe Sidekiq::RedisConnection do
     end
 
     def self.redis_client?
-      Sidekiq::RedisConnection.adapter == Sidekiq::RedisConnection::RedisClientAdapter
+      Sidekiq::RedisConnection.adapter.name == "Sidekiq::RedisClientAdapter"
     end
 
     if redis_client?
       def client_class
-        Sidekiq::RedisConnection::RedisClientAdapter::CompatClient
+        Sidekiq::RedisClientAdapter::CompatClient
       end
     else
       def client_class
