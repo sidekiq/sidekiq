@@ -201,7 +201,7 @@ module Sidekiq
           conn.pipelined do |pipeline|
             atomic_push(pipeline, payloads)
           end
-        rescue Redis::BaseError => ex
+        rescue RedisConnection.adapter::BaseError => ex
           # 2550 Failover can cause the server to become a replica, need
           # to disconnect and reopen the socket to get back to the primary.
           # 4495 Use the same logic if we have a "Not enough replicas" error from the primary
@@ -220,7 +220,7 @@ module Sidekiq
 
     def atomic_push(conn, payloads)
       if payloads.first.key?("at")
-        conn.zadd("schedule", payloads.map { |hash|
+        conn.zadd("schedule", *payloads.map { |hash|
           at = hash.delete("at").to_s
           [at, Sidekiq.dump_json(hash)]
         })

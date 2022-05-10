@@ -16,6 +16,10 @@ Sidekiq.configure_server do |config|
   end
 end
 
+if ENV["SIDEKIQ_REDIS_CLIENT"]
+  Sidekiq::RedisConnection.adapter = :redis_client
+end
+
 class EmptyWorker
   include Sidekiq::Worker
 

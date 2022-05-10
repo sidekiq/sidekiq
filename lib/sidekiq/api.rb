@@ -191,7 +191,7 @@ module Sidekiq
               stat_hash[dates[idx]] = value ? value.to_i : 0
             end
           end
-        rescue Redis::CommandError
+        rescue RedisConnection.adapter::CommandError
           # mget will trigger a CROSSSLOT error when run against a Cluster
           # TODO Someone want to add Cluster support?
         end
@@ -470,7 +470,7 @@ module Sidekiq
 
     def initialize(parent, score, item)
       super(item)
-      @score = score
+      @score = Float(score)
       @parent = parent
     end
 
@@ -606,7 +606,7 @@ module Sidekiq
         range_start = page * page_size + offset_size
         range_end = range_start + page_size - 1
         elements = Sidekiq.redis { |conn|
-          conn.zrange name, range_start, range_end, with_scores: true
+          conn.zrange name, range_start, range_end, withscores: true
         }
         break if elements.empty?
         page -= 1
@@ -629,7 +629,7 @@ module Sidekiq
         end
 
       elements = Sidekiq.redis { |conn|
-        conn.zrangebyscore(name, begin_score, end_score, with_scores: true)
+        conn.zrangebyscore(name, begin_score, end_score, withscores: true)
       }
 
       elements.each_with_object([]) do |element, result|

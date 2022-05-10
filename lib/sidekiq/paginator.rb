@@ -19,9 +19,9 @@ module Sidekiq
           total_size, items = conn.multi { |transaction|
             transaction.zcard(key)
             if rev
-              transaction.zrevrange(key, starting, ending, with_scores: true)
+              transaction.zrevrange(key, starting, ending, withscores: true)
             else
-              transaction.zrange(key, starting, ending, with_scores: true)
+              transaction.zrange(key, starting, ending, withscores: true)
             end
           }
           [current_page, total_size, items]
