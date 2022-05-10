@@ -1,46 +1,22 @@
-# elements like %{queue} are variables and should not be translated
 "pt-br":
   Actions: Ações
   AddToQueue: Adicionar à fila
   AreYouSure: Tem certeza?
   AreYouSureDeleteJob: Deseja deletar esta tarefa?
-  AreYouSureDeleteQueue: Deseja deletar a %{queue} fila?
+  AreYouSureDeleteQueue: Deseja deletar a fila %{queue}? Isso irá deletar todas as tarefas desta fila.
   Arguments: Argumentos
+  BackToApp: De volta ao aplicativo
   Busy: Ocupados
-  Processed: Processados
-  Utilization: Utilização
-  Failed: Falhas
-  Scheduled: Agendados
-  Retries: Tentativas
-  Enqueued: Na fila
-  Worker: Trabalhador
-  LivePoll: Live Poll
-  StopPolling: Parar Polling
-  Queue: Fila
   Class: Classe
   Connections: Conexões
+  CreatedAt: Criado em
   CurrentMessagesInQueue: Mensagens atualmente na <span class='title'>%{queue}</span>
   Dashboard: Painel
   Dead: Morta
   DeadJobs: Tarefas mortas
   Delete: Apagar
-  AddToQueue: Adicionar à fila
-  AreYouSureDeleteJob: Deseja deletar esta tarefa?
-  AreYouSureDeleteQueue: Deseja deletar a fila %{queue}? Isso irá deletar todas as tarefas desta fila.
-  Queues: Filas
-  Size: Tamanho
-  Actions: Ações
-  NextRetry: Próxima Tentativa
-  RetryCount: Número de Tentativas
-  RetryNow: Tentar novamente agora
-  Kill: Matar
-  LastRetry: Última tentativa
-  OriginallyFailed: Falhou originalmente
-  AreYouSure: Tem certeza?
   DeleteAll: Apagar tudo
-  RetryAll: Tentar tudo novamente
-  KillAll: Matar todas
-  NoRetriesFound: Nenhuma tentativa encontrada
+  Enqueued: Na fila
   Error: Erro
   ErrorBacktrace: Rastreamento do erro
   ErrorClass: Classe de erro
@@ -52,22 +28,34 @@
   History: Histórico
   Job: Tarefa
   Jobs: Tarefas
+  Kill: Matar
+  KillAll: Matar todas
   LastRetry: Última tentativa
+  Latency: Latência
   LivePoll: Live Poll
   MemoryUsage: Uso de memória
+  Name: Nome
   Namespace: Namespace
   NextRetry: Próxima Tentativa
   NoDeadJobsFound: Nenhuma tarefa morta foi encontrada
   NoRetriesFound: Nenhuma tentativa encontrada
   NoScheduledFound: Nenhuma tarefa agendada foi encontrada
+  NotYetEnqueued: Ainda não enfileirado
   OneMonth: 1 mês
   OneWeek: 1 semana
   OriginallyFailed: Falhou originalmente
+  Pause: Pausar
+  Paused: Pausado
   PeakMemoryUsage: Pico de uso de memória
+  Plugins: Plug-ins
+  PollingInterval: Intervalo de Polling
+  Process: Processo
   Processed: Processados
   Processes: Processos
   Queue: Fila
   Queues: Filas
+  Quiet: Silenciar
+  QuietAll: Silenciar Todos
   Realtime: Tempo real
   Retries: Tentativas
   RetryAll: Tentar tudo novamente
@@ -77,26 +65,12 @@
   ScheduledJobs: Tarefas agendadas
   ShowAll: Mostrar todos
   SixMonths: 6 meses
-  Failures: Falhas
-  DeadJobs: Tarefas mortas
-  NoDeadJobsFound: Nenhuma tarefa morta foi encontrada
-  Dead: Morta
-  Process: Processo
-  Processes: Processos
-  Name: Nome
+  Size: Tamanho
+  Stop: Parar
+  StopAll: Parar Todos
+  StopPolling: Parar Polling
   Thread: Thread
   Threads: Threads
-  Jobs: Tarefas
-  Paused: Pausado
-  Stop: Parar
-  Quiet: Silenciar
-  StopAll: Parar Todos
-  QuietAll: Silenciar Todos
-  PollingInterval: Intervalo de Polling
-  Plugins: Plug-ins
-  NotYetEnqueued: Ainda não enfileirado
-  CreatedAt: Criado em
-  BackToApp: De volta ao aplicativo
-  Latency: Latência
-  Pause: Pausar
   Unpause: Despausar
+  Utilization: Utilização
+  Worker: Trabalhador
