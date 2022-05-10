@@ -218,7 +218,7 @@ module Sidekiq
         msg = Sidekiq.load_json(Sidekiq.dump_json(item))
 
         # prepare the job instance
-        klass = msg["class"].constantize
+        klass = Sidekiq.constantize(msg["class"])
         job = klass.new
         job.jid = msg["jid"]
         job.bid = msg["bid"] if job.respond_to?(:bid)

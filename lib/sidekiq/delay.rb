@@ -27,14 +27,9 @@ module Sidekiq
 
     module PsychAutoload
       def resolve_class(klass_name)
-        return nil if !klass_name || klass_name.empty?
-        # constantize
-        names = klass_name.split("::")
-        names.shift if names.empty? || names.first.empty?
+        return if !klass_name || klass_name.empty?
 
-        names.inject(Object) do |constant, name|
-          constant.const_defined?(name) ? constant.const_get(name) : constant.const_missing(name)
-        end
+        Sidekiq.constantize(klass_name)
       rescue NameError
         super
       end
