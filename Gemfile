@@ -16,9 +16,6 @@ gem "sqlite3", platforms: :ruby
 gem "activerecord-jdbcsqlite3-adapter", platforms: :jruby
 gem "after_commit_everywhere"
 
-# mail dependencies
-gem "net-smtp", platforms: :mri, require: false
-
 group :test do
   gem "minitest"
   gem "simplecov"
