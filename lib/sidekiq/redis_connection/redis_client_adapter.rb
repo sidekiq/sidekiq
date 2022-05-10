@@ -56,7 +56,7 @@ module Sidekiq
       CompatClient = RedisClient::Decorator.create(CompatMethods)
 
       class CompatClient
-        %i(scan sscan zscan hscan).each do |method|
+        %i[scan sscan zscan hscan].each do |method|
           alias_method :"#{method}_each", method
           undef_method method
         end
