@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 Sidekiq.default_job_options = { queue: "something" }
->>>>>>> 9baf9070 (Fix API change)
 Sidekiq.configure_client do |config|
   config.redis = { :size => 2 }
 end
@@ -18,10 +15,6 @@ Sidekiq.configure_server do |config|
       #RubyProf::CallTreePrinter.new(result).print(f, :min_percent => 1)
     #end
   end
-end
-
-if ENV["SIDEKIQ_REDIS_CLIENT"]
-  Sidekiq::RedisConnection.adapter = :redis_client
 end
 
 class EmptyWorker
