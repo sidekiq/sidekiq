@@ -33,18 +33,8 @@ describe Sidekiq::RedisConnection do
       end
     end
 
-    def self.redis_client?
-      Sidekiq::RedisConnection.adapter.name == "Sidekiq::RedisClientAdapter"
-    end
-
-    if redis_client?
-      def client_class
-        Sidekiq::RedisClientAdapter::CompatClient
-      end
-    else
-      def client_class
-        Redis
-      end
+    def client_class
+      Sidekiq::RedisClientAdapter::CompatClient
     end
 
     it "creates a pooled redis connection" do
@@ -112,11 +102,7 @@ describe Sidekiq::RedisConnection do
       pool = Sidekiq::RedisConnection.create(id: nil)
       assert_equal client_class, pool.checkout.class
       client = client_for(pool.checkout)
-      if self.class.redis_client?
-        assert_nil client.id
-      else
-        assert_equal "redis://localhost:6379/15", client.id
-      end
+      assert_nil client.id
     end
 
     describe "network_timeout" do
@@ -130,12 +116,7 @@ describe Sidekiq::RedisConnection do
       it "uses the default network_timeout if none specified" do
         pool = Sidekiq::RedisConnection.create
         redis = pool.checkout
-
-        if self.class.redis_client?
-          assert_equal 1.0, client_for(redis).read_timeout
-        else
-          assert_equal 5, client_for(redis).read_timeout
-        end
+        assert_equal 1.0, client_for(redis).read_timeout
       end
     end
 
@@ -183,40 +164,11 @@ describe Sidekiq::RedisConnection do
     end
 
     describe "driver" do
-      if redis_client?
-        it "uses ruby driver by default" do
-          pool = Sidekiq::RedisConnection.create
-          config = config_for(pool.checkout)
+      it "uses ruby driver by default" do
+        pool = Sidekiq::RedisConnection.create
+        config = config_for(pool.checkout)
 
-          assert_equal RedisClient::RubyConnection, config.driver
-        end
-      else
-        it "uses redis' ruby driver" do
-          pool = Sidekiq::RedisConnection.create
-          redis = pool.checkout
-
-          assert_equal Redis::Connection::Ruby, redis.instance_variable_get(:@client).driver
-        end
-
-        it "uses redis' default driver if there are many available" do
-          redis_driver = Object.new
-          Redis::Connection.drivers << redis_driver
-
-          pool = Sidekiq::RedisConnection.create
-          redis = pool.checkout
-
-          assert_equal redis_driver, redis.instance_variable_get(:@client).driver
-        ensure
-          Redis::Connection.drivers.pop
-        end
-
-        it "uses a given :driver" do
-          redis_driver = Object.new
-          pool = Sidekiq::RedisConnection.create(driver: redis_driver)
-          redis = pool.checkout
-
-          assert_equal redis_driver, redis.instance_variable_get(:@client).driver
-        end
+        assert_equal RedisClient::RubyConnection, config.driver
       end
     end
 
