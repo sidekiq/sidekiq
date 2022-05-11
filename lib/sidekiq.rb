@@ -7,7 +7,7 @@ require "sidekiq/logger"
 require "sidekiq/client"
 require "sidekiq/job"
 require "sidekiq/worker_compatibility_alias"
-require "sidekiq/redis_connection"
+require "sidekiq/redis_client_adapter"
 
 require "json"
 
@@ -63,7 +63,7 @@ module Sidekiq
   # Configuration for Sidekiq server, use like:
   #
   #   Sidekiq.configure_server do |config|
-  #     config.redis = { :namespace => 'myapp', :size => 25, :url => 'redis://myhost:8877/0' }
+  #     config.redis = { :size => 25, :url => 'redis://myhost:8877/0' }
   #     config.server_middleware do |chain|
   #       chain.add MyServerHook
   #     end
@@ -76,7 +76,7 @@ module Sidekiq
   # Configuration for Sidekiq client, use like:
   #
   #   Sidekiq.configure_client do |config|
-  #     config.redis = { :namespace => 'myapp', :size => 1, :url => 'redis://myhost:8877/0' }
+  #     config.redis = { :size => 1, :url => 'redis://myhost:8877/0' }
   #   end
   def self.configure_client
     yield self unless server?
@@ -110,13 +110,7 @@ module Sidekiq
 
   def self.redis_info
     redis do |conn|
-      # admin commands can't go through redis-namespace starting
-      # in redis-namespace 2.0
-      if conn.respond_to?(:namespace)
-        conn.redis.info
-      else
-        conn.info
-      end
+      conn.info
     rescue RedisConnection.adapter::CommandError => ex
       # 2850 return fake version when INFO command has (probably) been renamed
       raise unless /unknown command/.match?(ex.message)

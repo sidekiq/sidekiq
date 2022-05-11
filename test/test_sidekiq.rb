@@ -69,9 +69,9 @@ describe Sidekiq do
 
   describe "redis connection" do
     it "does not continually retry" do
-      assert_raises Redis::CommandError do
+      assert_raises Sidekiq::RedisConnection.adapter::CommandError do
         Sidekiq.redis do |c|
-          raise Redis::CommandError, "READONLY You can't write against a replica."
+          raise Sidekiq::RedisConnection.adapter::CommandError, "READONLY You can't write against a replica."
         end
       end
     end

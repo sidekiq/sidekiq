@@ -140,33 +140,15 @@ describe Sidekiq::RedisConnection do
     end
 
     describe "namespace" do
-      if redis_client?
-        it "isn't supported" do
-          Kernel.stub(:exit, ->(code) { raise "Exited #{code}" }) do
-            output = capture_logging do
-              error = assert_raises RuntimeError do
-                Sidekiq::RedisConnection.create(namespace: "xxx")
-              end
-              assert_includes error.message, "Exited -127"
+      it "isn't supported" do
+        Kernel.stub(:exit, ->(code) { raise "Exited #{code}" }) do
+          output = capture_logging do
+            error = assert_raises RuntimeError do
+              Sidekiq::RedisConnection.create(namespace: "xxx")
             end
-            assert_includes output, "Your Redis configuration uses the namespace 'xxx' but this feature isn't supported by redis-client"
+            assert_includes error.message, "Exited -127"
           end
-        end
-      else
-        it "uses a given :namespace set by a symbol key" do
-          pool = Sidekiq::RedisConnection.create(namespace: "xxx")
-          assert_equal "xxx", pool.checkout.namespace
-        end
-
-        it "uses a given :namespace set by a string key" do
-          pool = Sidekiq::RedisConnection.create("namespace" => "xxx")
-          assert_equal "xxx", pool.checkout.namespace
-        end
-
-        it "uses given :namespace over :namespace from Sidekiq.options" do
-          Sidekiq.options[:namespace] = "xxx"
-          pool = Sidekiq::RedisConnection.create(namespace: "yyy")
-          assert_equal "yyy", pool.checkout.namespace
+          assert_includes output, "Your Redis configuration uses the namespace 'xxx' but this feature isn't supported by redis-client"
         end
       end
     end

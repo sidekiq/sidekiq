@@ -882,37 +882,25 @@ div.interval-slider input {
   }
 }
 
-.redis-url, .redis-namespace {
+.redis-url {
   overflow: hidden;
   white-space: nowrap;
 }
 
 @media (min-width: 768px) {
   .redis-url {
-    max-width: 200px;
-  }
-
-  .redis-namespace {
-    max-width: 150px;
+    max-width: 250px;
   }
 }
 
 @media (min-width: 992px) {
   .redis-url {
-    max-width: 390px;
-  }
-
-  .redis-namespace {
-    max-width: 300px;
+    max-width: 490px;
   }
 }
 @media (min-width: 1200px) {
   .redis-url {
-    max-width: 480px;
-  }
-
-  .redis-namespace {
-    max-width: 350px;
+    max-width: 600px;
   }
 }
 

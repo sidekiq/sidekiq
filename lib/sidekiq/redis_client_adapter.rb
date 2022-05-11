@@ -4,6 +4,7 @@ require "connection_pool"
 require "redis_client"
 require "redis_client/decorator"
 require "uri"
+require "sidekiq/redis_connection"
 
 module Sidekiq
   class RedisClientAdapter

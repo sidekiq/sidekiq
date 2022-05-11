@@ -158,10 +158,6 @@ module Sidekiq
       end
     end
 
-    def namespace
-      @ns ||= Sidekiq.redis { |conn| conn.respond_to?(:namespace) ? conn.namespace : nil }
-    end
-
     def redis_info
       Sidekiq.redis_info
     end
@@ -312,13 +308,6 @@ module Sidekiq
 
     def server_utc_time
       Time.now.utc.strftime("%H:%M:%S UTC")
-    end
-
-    def redis_connection_and_namespace
-      @redis_connection_and_namespace ||= begin
-        namespace_suffix = namespace.nil? ? "" : "##{namespace}"
-        "#{redis_connection}#{namespace_suffix}"
-      end
     end
 
     def retry_or_delete_or_kill(job, params)

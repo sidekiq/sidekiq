@@ -1,76 +1,16 @@
 # frozen_string_literal: true
 
 require "connection_pool"
-require "redis"
 require "uri"
 
 module Sidekiq
   module RedisConnection
-    class RedisAdapter
-      BaseError = Redis::BaseError
-      CommandError = Redis::CommandError
-
-      def initialize(options)
-        warn("Usage of the 'redis' gem within Sidekiq itself is deprecated, Sidekiq 7.0 will only use the new, simpler 'redis-client' gem", caller) if ENV["SIDEKIQ_REDIS_CLIENT"] == "1"
-        @options = options
-      end
-
-      def new_client
-        namespace = @options[:namespace]
-
-        client = Redis.new client_opts(@options)
-        if namespace
-          begin
-            require "redis/namespace"
-            Redis::Namespace.new(namespace, redis: client)
-          rescue LoadError
-            Sidekiq.logger.error("Your Redis configuration uses the namespace '#{namespace}' but the redis-namespace gem is not included in the Gemfile." \
-                                 "Add the gem to your Gemfile to continue using a namespace. Otherwise, remove the namespace parameter.")
-            exit(-127)
-          end
-        else
-          client
-        end
-      end
-
-      private
-
-      def client_opts(options)
-        opts = options.dup
-        if opts[:namespace]
-          opts.delete(:namespace)
-        end
-
-        if opts[:network_timeout]
-          opts[:timeout] = opts[:network_timeout]
-          opts.delete(:network_timeout)
-        end
-
-        opts[:driver] ||= Redis::Connection.drivers.last || "ruby"
-
-        # Issue #3303, redis-rb will silently retry an operation.
-        # This can lead to duplicate jobs if Sidekiq::Client's LPUSH
-        # is performed twice but I believe this is much, much rarer
-        # than the reconnect silently fixing a problem; we keep it
-        # on by default.
-        opts[:reconnect_attempts] ||= 1
-
-        opts
-      end
-    end
-
-    @adapter = RedisAdapter
-
     class << self
       attr_reader :adapter
 
-      # RedisConnection.adapter = :redis
-      # RedisConnection.adapter = :redis_client
       def adapter=(adapter)
         raise "no" if adapter == self
         result = case adapter
-        when :redis
-          RedisAdapter
         when Class
           adapter
         else
