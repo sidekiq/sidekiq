@@ -3,8 +3,7 @@ source "https://rubygems.org"
 gemspec
 
 gem "rake"
-gem "redis-client"
-gem "rails", "~> 6.1"
+gem "rails"
 
 # Required for Ruby 3.1
 # https://github.com/mikel/mail/pull/1439
@@ -18,17 +17,16 @@ gem "after_commit_everywhere"
 
 group :test do
   gem "minitest"
-  gem "simplecov"
-  gem "codecov", require: false
+  # gem "simplecov"
+  # gem "codecov", require: false
 end
 
 group :development, :test do
   gem "standard", require: false
-  gem "pry"
-  gem "yalphabetize", require: false
+  # gem "pry"
+  # gem "yalphabetize", require: false
 end
 
 group :load_test do
-  gem "hiredis"
-  gem "toxiproxy"
+  # gem "toxiproxy"
 end
