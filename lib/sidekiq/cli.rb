@@ -69,7 +69,7 @@ module Sidekiq
       # fire startup and start multithreading.
       info = Sidekiq.redis_info
       ver = Gem::Version.new(info["redis_version"])
-      raise "You are connecting to Redis #{ver}, Sidekiq requires Redis 6.0.0 or greater" if ver.segments[0] < 6
+      raise "You are connecting to Redis #{ver}, Sidekiq requires Redis 6.2.0 or greater" if ver < Gem::Version.new("6.2.0")
 
       maxmemory_policy = info["maxmemory_policy"]
       if maxmemory_policy != "noeviction"
@@ -87,7 +87,7 @@ module Sidekiq
       # need to verify the size is large enough or else Sidekiq's performance is dramatically slowed.
       cursize = Sidekiq.redis_pool.size
       needed = Sidekiq.options[:concurrency] + 2
-      raise "Your pool of #{cursize} Redis connections is too small, please increase the size to at least #{needed}" if cursize < needed
+      raise "Sidekiq's pool of #{cursize} Redis connections is too small, please increase the size to at least #{needed}" if cursize < needed
 
       # cache process identity
       Sidekiq.options[:identity] = identity
