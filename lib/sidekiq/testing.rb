@@ -55,15 +55,6 @@ module Sidekiq
         yield @server_chain if block_given?
         @server_chain
       end
-
-      def constantize(str)
-        names = str.split("::")
-        names.shift if names.empty? || names.first.empty?
-
-        names.inject(Object) do |constant, name|
-          constant.const_defined?(name) ? constant.const_get(name) : constant.const_missing(name)
-        end
-      end
     end
   end
 
@@ -83,7 +74,7 @@ module Sidekiq
         true
       elsif Sidekiq::Testing.inline?
         payloads.each do |job|
-          klass = Sidekiq::Testing.constantize(job["class"])
+          klass = Object.const_get(job["class"])
           job["id"] ||= SecureRandom.hex(12)
           job_hash = Sidekiq.load_json(Sidekiq.dump_json(job))
           klass.process_job(job_hash)
@@ -302,7 +293,7 @@ module Sidekiq
           job_classes = jobs.map { |job| job["class"] }.uniq
 
           job_classes.each do |job_class|
-            Sidekiq::Testing.constantize(job_class).drain
+            Object.const_get(job_class).drain
           end
         end
       end

@@ -129,7 +129,7 @@ module Sidekiq
               # the Reloader.  It handles code loading, db connection management, etc.
               # Effectively this block denotes a "unit of work" to Rails.
               @reloader.call do
-                klass = constantize(job_hash["class"])
+                klass = Object.const_get(job_hash["class"])
                 inst = klass.new
                 inst.jid = job_hash["jid"]
                 @retrier.local(inst, jobstr, queue) do
@@ -261,19 +261,6 @@ module Sidekiq
       ensure
         WORK_STATE.delete(tid)
         PROCESSED.incr
-      end
-    end
-
-    def constantize(str)
-      return Object.const_get(str) unless str.include?("::")
-
-      names = str.split("::")
-      names.shift if names.empty? || names.first.empty?
-
-      names.inject(Object) do |constant, name|
-        # the false flag limits search for name to under the constant namespace
-        #   which mimics Rails' behaviour
-        constant.const_get(name, false)
       end
     end
   end
