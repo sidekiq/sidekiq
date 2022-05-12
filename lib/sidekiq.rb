@@ -99,7 +99,7 @@ module Sidekiq
         # 4985 Use the same logic when a blocking command is force-unblocked
         # The same retry logic is also used in client.rb
         if retryable && ex.message =~ /READONLY|NOREPLICAS|UNBLOCKED/
-          conn.disconnect!
+          conn.close
           retryable = false
           retry
         end

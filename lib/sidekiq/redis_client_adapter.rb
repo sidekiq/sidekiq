@@ -61,10 +61,6 @@ module Sidekiq
         undef_method method
       end
 
-      def disconnect!
-        @client.close
-      end
-
       def connection
         {id: @client.id}
       end
