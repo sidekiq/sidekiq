@@ -4,6 +4,7 @@ gemspec
 
 gem "rake"
 gem "rails"
+gem "redis-client", github: "redis-rb/redis-client"
 
 # Required for Ruby 3.1
 # https://github.com/mikel/mail/pull/1439

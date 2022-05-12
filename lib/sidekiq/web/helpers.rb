@@ -152,9 +152,9 @@ module Sidekiq
       @stats ||= Sidekiq::Stats.new
     end
 
-    def redis_connection
+    def redis_url
       Sidekiq.redis do |conn|
-        conn.connection[:id]
+        conn._config.server_url
       end
     end
 

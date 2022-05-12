@@ -15,22 +15,12 @@ describe Sidekiq::RedisConnection do
       ENV["REDIS_URL"] = @old
     end
 
-    # To support both redis-rb 3.3.x #client and 4.0.x #_client
     def client_for(redis)
-      if redis.respond_to?(:_client)
-        redis._client
-      else
-        redis.client
-      end
+      redis._client
     end
 
     def config_for(redis)
-      client = client_for(redis)
-      if client.respond_to?(:config)
-        client.config
-      else
-        client
-      end
+      redis._config
     end
 
     def client_class
@@ -136,15 +126,15 @@ describe Sidekiq::RedisConnection do
 
     describe "socket path" do
       it "uses a given :path" do
-        pool = Sidekiq::RedisConnection.create(path: "/var/run/redis.sock")
+        pool = Sidekiq::RedisConnection.create(path: "/tmp/redis.sock")
         config = config_for(pool.checkout)
-        assert_equal "/var/run/redis.sock", config.path
+        assert_equal "/tmp/redis.sock", config.path
       end
 
       it "uses a given :path and :db" do
-        pool = Sidekiq::RedisConnection.create(path: "/var/run/redis.sock", db: 8)
+        pool = Sidekiq::RedisConnection.create(path: "/tmp/redis.sock", db: 8)
         config = config_for(pool.checkout)
-        assert_equal "/var/run/redis.sock", config.path
+        assert_equal "/tmp/redis.sock", config.path
         assert_equal 8, config.db
       end
     end

@@ -61,16 +61,13 @@ module Sidekiq
         undef_method method
       end
 
-      def connection
-        {id: @client.id}
-      end
-
-      def redis
-        self
-      end
-
+      # underscore methods are not official API
       def _client
         @client
+      end
+
+      def _config
+        @client.config
       end
 
       def message
