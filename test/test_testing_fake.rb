@@ -105,10 +105,17 @@ describe "Sidekiq::Testing.fake" do
   end
 
   it "round trip serializes the job arguments" do
+    assert_raises ArgumentError do
+      StoredWorker.perform_async(:mike)
+    end
+
+    Sidekiq.strict_args!(false)
     assert StoredWorker.perform_async(:mike)
     job = StoredWorker.jobs.first
     assert_equal "mike", job["args"].first
     StoredWorker.clear
+  ensure
+    Sidekiq.strict_args!(:raise)
   end
 
   it "perform_one runs only one job" do
