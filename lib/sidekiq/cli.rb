@@ -267,11 +267,10 @@ module Sidekiq
       if File.directory?(options[:require])
         require "rails"
         if ::Rails::VERSION::MAJOR < 6
-          raise "Sidekiq no longer supports this version of Rails"
-        else
-          require "sidekiq/rails"
-          require File.expand_path("#{options[:require]}/config/environment.rb")
+          warn "Sidekiq #{Sidekiq::VERSION} only supports Rails 6+"
         end
+        require "sidekiq/rails"
+        require File.expand_path("#{options[:require]}/config/environment.rb")
         options[:tag] ||= default_tag
       else
         require options[:require]
