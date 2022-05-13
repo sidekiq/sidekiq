@@ -75,8 +75,24 @@ module Sidekiq
 
     def process_one
       @job = fetch
-      process(@job) if @job
+      return unless @job
+      if has_concurrency?(@job)
+        process_throttled(@job)
+      else
+        process(@job)
+      end
       @job = nil
+    end
+
+    def has_concurrency?(job)
+      worker_class = JSON.parse(job.job)["class"].constantize
+      worker_class.new.sidekiq_options_hash["concurrency"]
+    end
+
+    def process_throttled(job)
+      Sidekiq::Throttle.run(job) do |job|
+        process(job)
+      end
     end
 
     def get_one

@@ -36,7 +36,7 @@ module Sidekiq
     end
 
     def retrieve_work
-      qs = queues_cmd
+      qs = queues_cmd - throttled_queues
       # 4825 Sidekiq Pro with all queues paused will return an
       # empty set of queues with a trailing TIMEOUT value.
       if qs.size <= 1
@@ -46,6 +46,10 @@ module Sidekiq
 
       work = Sidekiq.redis { |conn| conn.brpop(*qs) }
       UnitOfWork.new(*work) if work
+    end
+
+    def throttled_queues
+      Sidekiq::Throttle.throttled_queues
     end
 
     def bulk_requeue(inprogress, options)

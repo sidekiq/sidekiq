@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "sidekiq/client"
+require "sidekiq/throttle"
 
 module Sidekiq
   ##
@@ -70,7 +71,13 @@ module Sidekiq
         # options for a specific job.
         def sidekiq_options(opts = {})
           opts = opts.transform_keys(&:to_s) # stringify
+          store_throttle(opts["queue"], opts["concurrency"])
           self.sidekiq_options_hash = get_sidekiq_options.merge(opts)
+        end
+
+        def store_throttle(queue, concurrency)
+          return unless queue || concurrency
+          Sidekiq::Throttle.add(queue, concurrency)
         end
 
         def sidekiq_retry_in(&block)

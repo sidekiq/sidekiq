@@ -12,4 +12,5 @@ Rails.application.routes.draw do
   get "work/long" => "work#long"
   get "work/crash" => "work#crash"
   get "work/bulk" => "work#bulk"
+  get "work/throttle" => "work#throttle"
 end

@@ -30,6 +30,13 @@ class WorkController < ApplicationController
     render :plain => 'enqueued'
   end
 
+  def throttle
+    50.times do |x|
+      ThrottledWorker.perform_async("bob#{x}", 5 + rand(20), x)
+    end
+    render :plain => 'enqueued'
+  end
+
   def delayed_post
     p = Post.first
     unless p

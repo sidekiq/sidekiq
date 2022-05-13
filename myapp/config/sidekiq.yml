@@ -1,3 +1,6 @@
 ---
 :labels:
   - some_label
+:queues:
+  - default
+  - throttled_queue
