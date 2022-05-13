@@ -75,14 +75,6 @@ module Sidekiq
         send(:"#{attribute}=", value)
       end
 
-      def sessions=(val)
-        puts "WARNING: Sidekiq::Web.sessions= is no longer relevant and will be removed in Sidekiq 7.0. #{caller(1..1).first}"
-      end
-
-      def session_secret=(val)
-        puts "WARNING: Sidekiq::Web.session_secret= is no longer relevant and will be removed in Sidekiq 7.0. #{caller(1..1).first}"
-      end
-
       attr_accessor :app_url, :redis_pool
       attr_writer :locales, :views
     end
@@ -127,10 +119,6 @@ module Sidekiq
 
     def set(attribute, value)
       send(:"#{attribute}=", value)
-    end
-
-    def sessions=(val)
-      puts "Sidekiq::Web#sessions= is no longer relevant and will be removed in Sidekiq 7.0. #{caller[2..2].first}"
     end
 
     def self.register(extension)

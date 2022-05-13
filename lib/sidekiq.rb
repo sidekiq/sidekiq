@@ -25,7 +25,7 @@ module Sidekiq
     timeout: 25,
     poll_interval_average: nil,
     average_scheduled_poll_interval: 5,
-    on_complex_arguments: :warn,
+    on_complex_arguments: :raise,
     error_handlers: [],
     death_handlers: [],
     lifecycle_events: {
