@@ -65,6 +65,7 @@ module Sidekiq
         #      *true* to use the default or *Integer* count
         #   backtrace - whether to save any error backtrace in the retry payload to display in web UI,
         #      can be true, false or an integer number of lines to save, default *false*
+        #   dead - if *false*, sidekiq will not add failed jobs to the dead jobs list
         #
         # In practice, any option is allowed.  This is the main mechanism to configure the
         # options for a specific job.
