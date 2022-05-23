@@ -219,6 +219,12 @@ module Sidekiq
     end
 
     def atomic_push(conn, payloads)
+      push = if payloads.first['push_to_top']
+        conn.method(:rpush)
+      else 
+        conn.method(:lpush)
+      end
+
       if payloads.first.key?("at")
         conn.zadd("schedule", *payloads.map { |hash|
           at = hash.delete("at").to_s
@@ -232,7 +238,7 @@ module Sidekiq
           Sidekiq.dump_json(entry)
         }
         conn.sadd("queues", queue)
-        conn.lpush("queue:#{queue}", to_push)
+        push.call("queue:#{queue}", to_push)
       end
     end
   end
