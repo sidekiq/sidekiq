@@ -10,13 +10,16 @@ describe Sidekiq::CLI do
       @logger = Sidekiq.logger
       @logdev = StringIO.new
       Sidekiq.logger = Logger.new(@logdev)
+      @config = Sidekiq
     end
 
     after do
       Sidekiq.logger = @logger
     end
 
-    subject { Sidekiq::CLI.new }
+    subject do
+      Sidekiq::CLI.new.tap {|c| c.config = @config }
+    end
 
     def logdev
       @logdev ||= StringIO.new
@@ -453,6 +456,7 @@ describe Sidekiq::CLI do
       before do
         Sidekiq.options[:concurrency] = 2
         Sidekiq.options[:require] = "./test/fake_env.rb"
+        subject.config = Sidekiq
       end
 
       describe "require workers" do
@@ -560,7 +564,7 @@ describe Sidekiq::CLI do
             quiet = true
           end
 
-          subject.launcher = Sidekiq::Launcher.new(Sidekiq.options)
+          subject.launcher = Sidekiq::Launcher.new(Sidekiq)
           subject.handle_signal("TSTP")
 
           assert_match(/Got TSTP signal/, logdev.string)

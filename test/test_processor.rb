@@ -12,9 +12,9 @@ describe Sidekiq::Processor do
   before do
     $invokes = 0
     @mgr = Minitest::Mock.new
-    opts = {queues: ["default"]}
-    opts[:fetch] = Sidekiq::BasicFetch.new(opts)
-    @processor = ::Sidekiq::Processor.new(@mgr, opts)
+    @config = Sidekiq
+    @config[:fetch] = Sidekiq::BasicFetch.new(@config)
+    @processor = ::Sidekiq::Processor.new(@mgr, @config)
   end
 
   class MockWorker
@@ -354,7 +354,8 @@ describe Sidekiq::Processor do
 
   describe "custom job logger class" do
     before do
-      opts = {queues: ["default"], job_logger: CustomJobLogger}
+      opts = Sidekiq
+      opts[:job_logger] = CustomJobLogger
       opts[:fetch] = Sidekiq::BasicFetch.new(opts)
       @processor = ::Sidekiq::Processor.new(nil, opts)
     end

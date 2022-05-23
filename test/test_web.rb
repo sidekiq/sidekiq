@@ -2,7 +2,6 @@
 
 require_relative "helper"
 require "sidekiq/web"
-require "sidekiq/util"
 require "rack/test"
 
 describe Sidekiq::Web do
@@ -514,8 +513,6 @@ describe Sidekiq::Web do
   end
 
   describe "stats" do
-    include Sidekiq::Util
-
     before do
       Sidekiq.redis do |conn|
         conn.set("stat:processed", 5)
@@ -569,8 +566,6 @@ describe Sidekiq::Web do
   end
 
   describe "stats/queues" do
-    include Sidekiq::Util
-
     before do
       Sidekiq.redis do |conn|
         conn.set("stat:processed", 5)
@@ -708,6 +703,10 @@ describe Sidekiq::Web do
     end
 
     [msg, score]
+  end
+
+  def hostname
+    ENV["DYNO"] || Socket.gethostname
   end
 
   def add_worker

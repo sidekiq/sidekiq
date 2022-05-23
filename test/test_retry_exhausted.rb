@@ -1,30 +1,30 @@
 require_relative "helper"
 require "sidekiq/job_retry"
 
+class NewWorker
+  include Sidekiq::Worker
+
+  sidekiq_class_attribute :exhausted_called, :exhausted_job, :exhausted_exception
+
+  sidekiq_retries_exhausted do |job, e|
+    self.exhausted_called = true
+    self.exhausted_job = job
+    self.exhausted_exception = e
+  end
+end
+
+class OldWorker
+  include Sidekiq::Worker
+
+  sidekiq_class_attribute :exhausted_called, :exhausted_job, :exhausted_exception
+
+  sidekiq_retries_exhausted do |job|
+    self.exhausted_called = true
+    self.exhausted_job = job
+  end
+end
+
 describe "sidekiq_retries_exhausted" do
-  class NewWorker
-    include Sidekiq::Worker
-
-    sidekiq_class_attribute :exhausted_called, :exhausted_job, :exhausted_exception
-
-    sidekiq_retries_exhausted do |job, e|
-      self.exhausted_called = true
-      self.exhausted_job = job
-      self.exhausted_exception = e
-    end
-  end
-
-  class OldWorker
-    include Sidekiq::Worker
-
-    sidekiq_class_attribute :exhausted_called, :exhausted_job, :exhausted_exception
-
-    sidekiq_retries_exhausted do |job|
-      self.exhausted_called = true
-      self.exhausted_job = job
-    end
-  end
-
   def cleanup
     [NewWorker, OldWorker].each do |worker_class|
       worker_class.exhausted_called = nil
@@ -34,6 +34,7 @@ describe "sidekiq_retries_exhausted" do
   end
 
   before do
+    @config = Sidekiq
     cleanup
   end
 
@@ -49,8 +50,8 @@ describe "sidekiq_retries_exhausted" do
     @old_worker ||= OldWorker.new
   end
 
-  def handler(options = {})
-    @handler ||= Sidekiq::JobRetry.new(options)
+  def handler
+    @handler ||= Sidekiq::JobRetry.new(@config)
   end
 
   def job(options = {})

@@ -66,12 +66,13 @@ module Sidekiq
 
     class Skip < Handled; end
 
-    include Sidekiq::Util
+    include Sidekiq::Component
 
     DEFAULT_MAX_RETRY_ATTEMPTS = 25
 
-    def initialize(options = {})
-      @max_retries = Sidekiq.options.merge(options).fetch(:max_retries, DEFAULT_MAX_RETRY_ATTEMPTS)
+    def initialize(options)
+      @config = options
+      @max_retries = @config[:max_retries] || DEFAULT_MAX_RETRY_ATTEMPTS
     end
 
     # The global retry handler requires only the barest of data.

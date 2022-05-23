@@ -53,6 +53,13 @@ module Sidekiq
     puts "Calm down, yo."
   end
 
+  ### Private APIs
+  def self.default_error_handler(ex, ctx)
+    logger.warn(dump_json(ctx)) unless ctx.empty?
+    logger.warn("#{ex.class.name}: #{ex.message}")
+    logger.warn(ex.backtrace.join("\n")) unless ex.backtrace.nil?
+  end
+
   def self.options
     @options ||= DEFAULTS.dup
   end
@@ -60,6 +67,33 @@ module Sidekiq
   def self.options=(opts)
     @options = opts
   end
+
+  def self.[](key)
+    options[key]
+  end
+
+  def self.[]=(key, val)
+    options[key] = val
+  end
+
+  def self.merge!(hash)
+    options.merge!(hash)
+  end
+
+  def self.key?(key)
+    options.key?(key)
+  end
+
+  def self.handle_exception(ex, ctx = {})
+    options[:error_handlers].each do |handler|
+      handler.call(ex, ctx)
+    rescue => ex
+      logger.error "!!! ERROR HANDLER THREW AN ERROR !!!"
+      logger.error ex
+      logger.error ex.backtrace.join("\n") unless ex.backtrace.nil?
+    end
+  end
+  ###
 
   ##
   # Configuration for Sidekiq server, use like:

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require_relative "helper"
-require "sidekiq/cli"
 
 describe Sidekiq do
   describe "json processing" do
@@ -67,8 +66,7 @@ describe Sidekiq do
         Sidekiq.error_handlers << proc { |x, hash|
           raise "boom"
         }
-        cli = Sidekiq::CLI.new
-        cli.handle_exception(RuntimeError.new("hello"))
+        Sidekiq.handle_exception(RuntimeError.new("hello"))
       ensure
         Sidekiq.error_handlers.pop
       end

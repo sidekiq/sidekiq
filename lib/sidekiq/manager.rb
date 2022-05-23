@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "sidekiq/util"
 require "sidekiq/processor"
 require "sidekiq/fetch"
 require "set"
@@ -21,21 +20,20 @@ module Sidekiq
   # the shutdown process.  The other tasks are performed by other threads.
   #
   class Manager
-    include Util
+    include Sidekiq::Component
 
     attr_reader :workers
-    attr_reader :options
 
     def initialize(options = {})
+      @config = options
       logger.debug { options.inspect }
-      @options = options
       @count = options[:concurrency] || 10
       raise ArgumentError, "Concurrency of #{@count} is not supported" if @count < 1
 
       @done = false
       @workers = Set.new
       @count.times do
-        @workers << Processor.new(self, options)
+        @workers << Processor.new(self, @config)
       end
       @plock = Mutex.new
     end
@@ -82,7 +80,7 @@ module Sidekiq
       @plock.synchronize do
         @workers.delete(processor)
         unless @done
-          p = Processor.new(self, options)
+          p = Processor.new(self, @config)
           @workers << p
           p.start
         end
@@ -115,8 +113,8 @@ module Sidekiq
         # contract says that jobs are run AT LEAST once. Process termination
         # is delayed until we're certain the jobs are back in Redis because
         # it is worse to lose a job than to run it twice.
-        strategy = @options[:fetch]
-        strategy.bulk_requeue(jobs, @options)
+        strategy = @config[:fetch]
+        strategy.bulk_requeue(jobs, @config)
       end
 
       cleanup.each do |processor|
@@ -128,6 +126,19 @@ module Sidekiq
       # to 3 seconds to give threads a minimal amount of time to run `ensure` blocks.
       deadline = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) + 3
       wait_for(deadline) { @workers.empty? }
+    end
+
+    # hack for quicker development / testing environment #2774
+    PAUSE_TIME = $stdout.tty? ? 0.1 : 0.5
+
+    # Wait for the orblock to be true or the deadline passed.
+    def wait_for(deadline, &condblock)
+      remaining = deadline - ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+      while remaining > PAUSE_TIME
+        return if condblock.call
+        sleep PAUSE_TIME
+        remaining = deadline - ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+      end
     end
   end
 end

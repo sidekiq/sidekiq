@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "sidekiq/util"
 require "sidekiq/fetch"
 require "sidekiq/job_logger"
 require "sidekiq/job_retry"
@@ -23,7 +22,7 @@ module Sidekiq
   # to replace itself and exits.
   #
   class Processor
-    include Util
+    include Sidekiq::Component
 
     attr_reader :thread
     attr_reader :job
@@ -34,10 +33,11 @@ module Sidekiq
       @done = false
       @job = nil
       @thread = nil
+      @config = options
       @strategy = options[:fetch]
       @reloader = options[:reloader] || proc { |&block| block.call }
       @job_logger = (options[:job_logger] || Sidekiq::JobLogger).new
-      @retrier = Sidekiq::JobRetry.new
+      @retrier = Sidekiq::JobRetry.new(options)
     end
 
     def terminate(wait = false)
@@ -160,7 +160,7 @@ module Sidekiq
       ack = false
       begin
         dispatch(job_hash, queue, jobstr) do |inst|
-          Sidekiq.server_middleware.invoke(inst, job_hash, queue) do
+          @config.server_middleware.invoke(inst, job_hash, queue) do
             execute_job(inst, job_hash["args"])
           end
         end

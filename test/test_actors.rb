@@ -6,23 +6,27 @@ require "sidekiq/fetch"
 require "sidekiq/scheduled"
 require "sidekiq/processor"
 
-describe "Actors" do
-  class JoeWorker
-    include Sidekiq::Worker
-    def perform(slp)
-      raise "boom" if slp == "boom"
-      sleep(slp) if slp > 0
-      $count += 1
-    end
+class JoeWorker
+  include Sidekiq::Worker
+  def perform(slp)
+    raise "boom" if slp == "boom"
+    sleep(slp) if slp > 0
+    $count += 1
   end
+end
 
+describe "Actors" do
   before do
     Sidekiq.redis { |c| c.flushdb }
+    @config = Sidekiq
+    @config[:fetch] = Sidekiq::BasicFetch.new(@config)
+    @config[:error_handlers] << Sidekiq.method(:default_error_handler)
+    @config[:queues] = ["default"]
   end
 
   describe "scheduler" do
     it "can start and stop" do
-      f = Sidekiq::Scheduled::Poller.new
+      f = Sidekiq::Scheduled::Poller.new(@config)
       f.start
       f.terminate
     end
@@ -37,7 +41,7 @@ describe "Actors" do
       assert_equal 1, ss.size
 
       sleep 0.015
-      s = Sidekiq::Scheduled::Poller.new
+      s = Sidekiq::Scheduled::Poller.new(@config)
       s.enqueue
       assert_equal 1, q.size
       assert_equal 0, ss.size
@@ -52,7 +56,7 @@ describe "Actors" do
 
     it "can start and stop" do
       m = Mgr.new
-      f = Sidekiq::Processor.new(m, m.options)
+      f = Sidekiq::Processor.new(m, @config)
       f.terminate
     end
 
@@ -77,30 +81,28 @@ describe "Actors" do
           @cond.signal
         end
       end
-
-      def options
-        opts = {concurrency: 3, queues: ["default"]}
-        opts[:fetch] = Sidekiq::BasicFetch.new(opts)
-        opts
-      end
     end
 
     it "can process" do
       mgr = Mgr.new
 
-      p = Sidekiq::Processor.new(mgr, mgr.options)
+      q = Sidekiq::Queue.new
+      assert_equal 0, q.size
+      p = Sidekiq::Processor.new(mgr, @config)
       JoeWorker.perform_async(0)
+      assert_equal 1, q.size
 
       a = $count
       p.process_one
       b = $count
       assert_equal a + 1, b
+      assert_equal 0, q.size
     end
 
     it "deals with errors" do
       mgr = Mgr.new
 
-      p = Sidekiq::Processor.new(mgr, mgr.options)
+      p = Sidekiq::Processor.new(mgr, @config)
       JoeWorker.perform_async("boom")
       q = Sidekiq::Queue.new
       assert_equal 1, q.size
@@ -123,7 +125,7 @@ describe "Actors" do
     it "gracefully kills" do
       mgr = Mgr.new
 
-      p = Sidekiq::Processor.new(mgr, mgr.options)
+      p = Sidekiq::Processor.new(mgr, @config)
       JoeWorker.perform_async(1)
       q = Sidekiq::Queue.new
       assert_equal 1, q.size

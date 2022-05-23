@@ -1,15 +1,20 @@
 # frozen_string_literal: true
 
 require_relative "helper"
-require "sidekiq/exception_handler"
+require "sidekiq/component"
 require "stringio"
 require "logger"
 
 ExceptionHandlerTestException = Class.new(StandardError)
 TEST_EXCEPTION = ExceptionHandlerTestException.new("Something didn't work!")
 
-class Component
-  include Sidekiq::ExceptionHandler
+class Thing
+  include Sidekiq::Component
+  attr_reader :config
+
+  def initialize(config)
+    @config = config
+  end
 
   def invoke_exception(args)
     raise TEST_EXCEPTION
@@ -18,25 +23,23 @@ class Component
   end
 end
 
-describe Sidekiq::ExceptionHandler do
+describe Sidekiq::Component do
   describe "with mock logger" do
     before do
-      @old_logger = Sidekiq.logger
-      @str_logger = StringIO.new
-      Sidekiq.logger = Logger.new(@str_logger)
+      @config = Sidekiq
+      @config[:error_handlers] << Sidekiq.method(:default_error_handler)
     end
-
     after do
-      Sidekiq.logger = @old_logger
+      @config[:error_handlers].clear
     end
 
     it "logs the exception to Sidekiq.logger" do
-      Component.new.invoke_exception(a: 1)
-      @str_logger.rewind
-      log = @str_logger.readlines
-      assert_match(/"a":1/, log[0], "didn't include the context")
-      assert_match(/Something didn't work!/, log[1], "didn't include the exception message")
-      assert_match(/test\/test_exception_handler.rb/, log[2], "didn't include the backtrace")
+      output = capture_logging do
+        Thing.new(@config).invoke_exception(a: 1)
+      end
+      assert_match(/"a":1/, output, "didn't include the context")
+      assert_match(/Something didn't work!/, output, "didn't include the exception message")
+      assert_match(/test\/test_exception_handler.rb/, output, "didn't include the backtrace")
     end
 
     describe "when the exception does not have a backtrace" do
@@ -44,12 +47,7 @@ describe Sidekiq::ExceptionHandler do
         exception = ExceptionHandlerTestException.new
         assert_nil exception.backtrace
 
-        begin
-          Component.new.handle_exception exception
-          pass
-        rescue
-          flunk "failed handling a nil backtrace"
-        end
+        Thing.new(@config).handle_exception exception
       end
     end
   end
