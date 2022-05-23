@@ -219,7 +219,7 @@ module Sidekiq
     end
 
     def atomic_push(conn, payloads)
-      push = if payloads.first['push_to_top']
+      push = if payloads.first.delete('push_to_top')
         conn.method(:rpush)
       else 
         conn.method(:lpush)
