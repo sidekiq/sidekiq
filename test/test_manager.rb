@@ -6,6 +6,7 @@ require "sidekiq/manager"
 describe Sidekiq::Manager do
   before do
     Sidekiq.redis { |c| c.flushdb }
+    Sidekiq.options = Sidekiq::DEFAULTS.dup
     @config = Sidekiq
     @config[:fetch] = Sidekiq::BasicFetch.new(@config)
   end
@@ -29,12 +30,12 @@ describe Sidekiq::Manager do
     init_size = mgr.workers.size
     processor = mgr.workers.first
     begin
-      mgr.processor_died(processor, "ignored")
+      mgr.processor_result(processor, "ignored")
 
       assert_equal init_size, mgr.workers.size
       refute mgr.workers.include?(processor)
     ensure
-      mgr.workers.each { |p| p.terminate(true) }
+      mgr.quiet
     end
   end
 end

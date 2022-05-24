@@ -33,15 +33,13 @@ module Sidekiq
       @done = false
       @workers = Set.new
       @count.times do
-        @workers << Processor.new(self, @config)
+        @workers << Processor.new(@config, &method(:processor_result))
       end
       @plock = Mutex.new
     end
 
     def start
-      @workers.each do |x|
-        x.start
-      end
+      @workers.each(&:start)
     end
 
     def quiet
@@ -49,7 +47,7 @@ module Sidekiq
       @done = true
 
       logger.info { "Terminating quiet threads" }
-      @workers.each { |x| x.terminate }
+      @workers.each(&:terminate)
       fire_event(:quiet, reverse: true)
     end
 
@@ -70,17 +68,11 @@ module Sidekiq
       hard_shutdown
     end
 
-    def processor_stopped(processor)
-      @plock.synchronize do
-        @workers.delete(processor)
-      end
-    end
-
-    def processor_died(processor, reason)
+    def processor_result(processor, reason = nil)
       @plock.synchronize do
         @workers.delete(processor)
         unless @done
-          p = Processor.new(self, @config)
+          p = Processor.new(@config, &method(:processor_result))
           @workers << p
           p.start
         end

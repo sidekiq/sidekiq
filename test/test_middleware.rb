@@ -85,9 +85,7 @@ describe Sidekiq::Middleware do
       chain.insert_after AnotherCustomMiddleware, YetAnotherCustomMiddleware, "3", $recorder
     end
 
-    boss = Minitest::Mock.new
-    processor = Sidekiq::Processor.new(boss, @config)
-    boss.expect(:processor_done, nil, [processor])
+    processor = Sidekiq::Processor.new(@config) { |pr, ex| }
     processor.process(Sidekiq::BasicFetch::UnitOfWork.new("queue:default", msg))
     assert_equal %w[2 before 3 before 1 before work_performed 1 after 3 after 2 after], $recorder.flatten
   end
