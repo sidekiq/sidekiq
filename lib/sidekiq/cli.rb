@@ -303,7 +303,7 @@ module Sidekiq
       end
 
       [:concurrency, :timeout].each do |opt|
-        raise ArgumentError, "#{opt}: #{@config[opt]} is not a valid value" if @config.key?(opt) && @config[opt].to_i <= 0
+        raise ArgumentError, "#{opt}: #{@config[opt]} is not a valid value" if @config[opt].to_i <= 0
       end
     end
 

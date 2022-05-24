@@ -80,10 +80,6 @@ module Sidekiq
     options.merge!(hash)
   end
 
-  def self.key?(key)
-    options.key?(key)
-  end
-
   def self.handle_exception(ex, ctx = {})
     options[:error_handlers].each do |handler|
       handler.call(ex, ctx)
