@@ -123,7 +123,7 @@
           <%= display_tags(job, nil) %>
         </td>
         <td>
-          <div class="args"><%= display_args(job.display_args) %></div>
+          <div class="args"><%= display_args(job.display_args, nil) %></div>
         </td>
         <td><%= relative_time(Time.at(msg['run_at'])) %></td>
       </tr>
