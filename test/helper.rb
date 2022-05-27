@@ -49,6 +49,12 @@ def capture_logging(lvl = Logger::INFO)
   end
 end
 
+module Sidekiq
+  def self.reset!
+    @config = DEFAULTS.dup
+  end
+end
+
 Signal.trap("TTIN") do
   Thread.list.each do |thread|
     puts "Thread TID-#{(thread.object_id ^ ::Process.pid).to_s(36)} #{thread.name}"

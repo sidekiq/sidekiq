@@ -17,7 +17,7 @@ end
 
 describe "Actors" do
   before do
-    Sidekiq.options = Sidekiq::DEFAULTS.dup
+    Sidekiq.reset!
     Sidekiq.redis { |c| c.flushdb }
     @config = Sidekiq
     @config[:queues] = %w[default]

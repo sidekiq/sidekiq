@@ -10,10 +10,10 @@ describe Sidekiq::Launcher do
 
   before do
     Sidekiq.redis { |c| c.flushdb }
-    Sidekiq.options = Sidekiq::DEFAULTS.dup
-    Sidekiq.options[:tag] = "myapp"
-    Sidekiq.options[:concurrency] = 3
+    Sidekiq.reset!
     @config = Sidekiq
+    @config[:tag] = "myapp"
+    @config[:concurrency] = 3
   end
 
   def new_manager(opts)

@@ -10,7 +10,7 @@ describe Sidekiq::BasicFetch do
       conn.flushdb
       conn.rpush("queue:basic", "msg")
     end
-    Sidekiq.options = Sidekiq::DEFAULTS.dup
+    Sidekiq.reset!
     @config = Sidekiq
   end
 

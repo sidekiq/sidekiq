@@ -6,7 +6,7 @@ require "sidekiq/manager"
 describe Sidekiq::Manager do
   before do
     Sidekiq.redis { |c| c.flushdb }
-    Sidekiq.options = Sidekiq::DEFAULTS.dup
+    Sidekiq.reset!
     @config = Sidekiq
     @config[:fetch] = Sidekiq::BasicFetch.new(@config)
   end
