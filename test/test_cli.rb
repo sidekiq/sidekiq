@@ -6,17 +6,22 @@ require "sidekiq/cli"
 describe Sidekiq::CLI do
   describe "#parse" do
     before do
-      Sidekiq.options = Sidekiq::DEFAULTS.dup
+      Sidekiq.reset!
       @logger = Sidekiq.logger
       @logdev = StringIO.new
       Sidekiq.logger = Logger.new(@logdev)
+      @config = Sidekiq
     end
+
+    attr_reader :config
 
     after do
       Sidekiq.logger = @logger
     end
 
-    subject { Sidekiq::CLI.new }
+    subject do
+      Sidekiq::CLI.new.tap {|c| c.config = config }
+    end
 
     def logdev
       @logdev ||= StringIO.new
@@ -28,7 +33,7 @@ describe Sidekiq::CLI do
           it "accepts with -r" do
             subject.parse(%w[sidekiq -r ./test/fake_env.rb])
 
-            assert_equal "./test/fake_env.rb", Sidekiq.options[:require]
+            assert_equal "./test/fake_env.rb", config[:require]
           end
         end
 
@@ -36,7 +41,7 @@ describe Sidekiq::CLI do
           it "accepts with -c" do
             subject.parse(%w[sidekiq -c 60 -r ./test/fake_env.rb])
 
-            assert_equal 60, Sidekiq.options[:concurrency]
+            assert_equal 60, config[:concurrency]
           end
 
           describe "when concurrency is empty and RAILS_MAX_THREADS env var is set" do
@@ -51,13 +56,13 @@ describe Sidekiq::CLI do
             it "sets concurrency from RAILS_MAX_THREADS env var" do
               subject.parse(%w[sidekiq -r ./test/fake_env.rb])
 
-              assert_equal 9, Sidekiq.options[:concurrency]
+              assert_equal 9, config[:concurrency]
             end
 
             it "option overrides RAILS_MAX_THREADS env var" do
               subject.parse(%w[sidekiq -c 60 -r ./test/fake_env.rb])
 
-              assert_equal 60, Sidekiq.options[:concurrency]
+              assert_equal 60, config[:concurrency]
             end
           end
         end
@@ -67,7 +72,7 @@ describe Sidekiq::CLI do
             it "discards the `strict` option specified via the config file" do
               subject.parse(%w[sidekiq -C ./test/config_with_internal_options.yml])
 
-              assert_equal true, !!Sidekiq.options[:strict]
+              assert_equal true, !!config[:strict]
             end
           end
         end
@@ -76,20 +81,20 @@ describe Sidekiq::CLI do
           it "accepts with -q" do
             subject.parse(%w[sidekiq -q foo -r ./test/fake_env.rb])
 
-            assert_equal ["foo"], Sidekiq.options[:queues]
+            assert_equal ["foo"], config[:queues]
           end
 
           describe "when weights are not present" do
             it "accepts queues without weights" do
               subject.parse(%w[sidekiq -q foo -q bar -r ./test/fake_env.rb])
 
-              assert_equal ["foo", "bar"], Sidekiq.options[:queues]
+              assert_equal ["foo", "bar"], config[:queues]
             end
 
             it "sets strictly ordered queues" do
               subject.parse(%w[sidekiq -q foo -q bar -r ./test/fake_env.rb])
 
-              assert_equal true, !!Sidekiq.options[:strict]
+              assert_equal true, !!config[:strict]
             end
           end
 
@@ -97,26 +102,26 @@ describe Sidekiq::CLI do
             it "accepts queues with weights" do
               subject.parse(%w[sidekiq -q foo,3 -q bar -r ./test/fake_env.rb])
 
-              assert_equal ["foo", "foo", "foo", "bar"], Sidekiq.options[:queues]
+              assert_equal ["foo", "foo", "foo", "bar"], config[:queues]
             end
 
             it "does not set strictly ordered queues" do
               subject.parse(%w[sidekiq -q foo,3 -q bar -r ./test/fake_env.rb])
 
-              assert_equal false, !!Sidekiq.options[:strict]
+              assert_equal false, !!config[:strict]
             end
           end
 
           it "accepts queues with multi-word names" do
             subject.parse(%w[sidekiq -q queue_one -q queue-two -r ./test/fake_env.rb])
 
-            assert_equal ["queue_one", "queue-two"], Sidekiq.options[:queues]
+            assert_equal ["queue_one", "queue-two"], config[:queues]
           end
 
           it "accepts queues with dots in the name" do
             subject.parse(%w[sidekiq -q foo.bar -r ./test/fake_env.rb])
 
-            assert_equal ["foo.bar"], Sidekiq.options[:queues]
+            assert_equal ["foo.bar"], config[:queues]
           end
 
           describe "when duplicate queue names" do
@@ -131,7 +136,7 @@ describe Sidekiq::CLI do
               it "sets 'default' queue" do
                 subject.parse(%w[sidekiq -r ./test/fake_env.rb])
 
-                assert_equal ["default"], Sidekiq.options[:queues]
+                assert_equal ["default"], config[:queues]
               end
             end
 
@@ -139,7 +144,7 @@ describe Sidekiq::CLI do
               it "sets 'default' queue" do
                 subject.parse(%w[sidekiq -C ./test/config_empty.yml -r ./test/fake_env.rb])
 
-                assert_equal ["default"], Sidekiq.options[:queues]
+                assert_equal ["default"], config[:queues]
               end
             end
           end
@@ -149,7 +154,7 @@ describe Sidekiq::CLI do
           it "accepts with -t" do
             subject.parse(%w[sidekiq -t 30 -r ./test/fake_env.rb])
 
-            assert_equal 30, Sidekiq.options[:timeout]
+            assert_equal 30, config[:timeout]
           end
         end
 
@@ -165,57 +170,57 @@ describe Sidekiq::CLI do
           it "accepts with -C" do
             subject.parse(%w[sidekiq -C ./test/config.yml])
 
-            assert_equal "./test/config.yml", Sidekiq.options[:config_file]
-            refute Sidekiq.options[:verbose]
-            assert_equal "./test/fake_env.rb", Sidekiq.options[:require]
-            assert_nil Sidekiq.options[:environment]
-            assert_equal 50, Sidekiq.options[:concurrency]
-            assert_equal 2, Sidekiq.options[:queues].count { |q| q == "very_often" }
-            assert_equal 1, Sidekiq.options[:queues].count { |q| q == "seldom" }
+            assert_equal "./test/config.yml", config[:config_file]
+            refute config[:verbose]
+            assert_equal "./test/fake_env.rb", config[:require]
+            assert_nil config[:environment]
+            assert_equal 50, config[:concurrency]
+            assert_equal 2, config[:queues].count { |q| q == "very_often" }
+            assert_equal 1, config[:queues].count { |q| q == "seldom" }
           end
 
           it "accepts stringy keys" do
             subject.parse(%w[sidekiq -C ./test/config_string.yml])
 
-            assert_equal "./test/config_string.yml", Sidekiq.options[:config_file]
-            refute Sidekiq.options[:verbose]
-            assert_equal "./test/fake_env.rb", Sidekiq.options[:require]
-            assert_nil Sidekiq.options[:environment]
-            assert_equal 50, Sidekiq.options[:concurrency]
-            assert_equal 2, Sidekiq.options[:queues].count { |q| q == "very_often" }
-            assert_equal 1, Sidekiq.options[:queues].count { |q| q == "seldom" }
+            assert_equal "./test/config_string.yml", config[:config_file]
+            refute config[:verbose]
+            assert_equal "./test/fake_env.rb", config[:require]
+            assert_nil config[:environment]
+            assert_equal 50, config[:concurrency]
+            assert_equal 2, config[:queues].count { |q| q == "very_often" }
+            assert_equal 1, config[:queues].count { |q| q == "seldom" }
           end
 
           it "accepts environment specific config" do
             subject.parse(%w[sidekiq -e staging -C ./test/config_environment.yml])
 
-            assert_equal "./test/config_environment.yml", Sidekiq.options[:config_file]
-            refute Sidekiq.options[:verbose]
-            assert_equal "./test/fake_env.rb", Sidekiq.options[:require]
-            assert_equal "staging", Sidekiq.options[:environment]
-            assert_equal 50, Sidekiq.options[:concurrency]
-            assert_equal 2, Sidekiq.options[:queues].count { |q| q == "very_often" }
-            assert_equal 1, Sidekiq.options[:queues].count { |q| q == "seldom" }
+            assert_equal "./test/config_environment.yml", config[:config_file]
+            refute config[:verbose]
+            assert_equal "./test/fake_env.rb", config[:require]
+            assert_equal "staging", config[:environment]
+            assert_equal 50, config[:concurrency]
+            assert_equal 2, config[:queues].count { |q| q == "very_often" }
+            assert_equal 1, config[:queues].count { |q| q == "seldom" }
           end
 
           it "accepts environment specific config with alias" do
             subject.parse(%w[sidekiq -e staging -C ./test/config_with_alias.yml])
-            assert_equal "./test/config_with_alias.yml", Sidekiq.options[:config_file]
-            refute Sidekiq.options[:verbose]
-            assert_equal "./test/fake_env.rb", Sidekiq.options[:require]
-            assert_equal "staging", Sidekiq.options[:environment]
-            assert_equal 50, Sidekiq.options[:concurrency]
-            assert_equal 2, Sidekiq.options[:queues].count { |q| q == "very_often" }
-            assert_equal 1, Sidekiq.options[:queues].count { |q| q == "seldom" }
+            assert_equal "./test/config_with_alias.yml", config[:config_file]
+            refute config[:verbose]
+            assert_equal "./test/fake_env.rb", config[:require]
+            assert_equal "staging", config[:environment]
+            assert_equal 50, config[:concurrency]
+            assert_equal 2, config[:queues].count { |q| q == "very_often" }
+            assert_equal 1, config[:queues].count { |q| q == "seldom" }
 
             subject.parse(%w[sidekiq -e production -C ./test/config_with_alias.yml])
-            assert_equal "./test/config_with_alias.yml", Sidekiq.options[:config_file]
-            assert Sidekiq.options[:verbose]
-            assert_equal "./test/fake_env.rb", Sidekiq.options[:require]
-            assert_equal "production", Sidekiq.options[:environment]
-            assert_equal 50, Sidekiq.options[:concurrency]
-            assert_equal 2, Sidekiq.options[:queues].count { |q| q == "very_often" }
-            assert_equal 1, Sidekiq.options[:queues].count { |q| q == "seldom" }
+            assert_equal "./test/config_with_alias.yml", config[:config_file]
+            assert config[:verbose]
+            assert_equal "./test/fake_env.rb", config[:require]
+            assert_equal "production", config[:environment]
+            assert_equal 50, config[:concurrency]
+            assert_equal 2, config[:queues].count { |q| q == "very_often" }
+            assert_equal 1, config[:queues].count { |q| q == "seldom" }
           end
 
           it "exposes ERB expected __FILE__ and __dir__" do
@@ -226,8 +231,8 @@ describe Sidekiq::CLI do
 
             subject.parse(%W[sidekiq -C #{given_path}])
 
-            assert_equal(expected_file, Sidekiq.options.fetch(:__FILE__))
-            assert_equal(expected_dir, Sidekiq.options.fetch(:__dir__))
+            assert_equal(expected_file, config.fetch(:__FILE__))
+            assert_equal(expected_dir, config.fetch(:__dir__))
           end
         end
 
@@ -236,30 +241,30 @@ describe Sidekiq::CLI do
             it "tries config/sidekiq.yml from required diretory" do
               subject.parse(%w[sidekiq -r ./test/dummy])
 
-              assert_equal "./test/dummy/config/sidekiq.yml", Sidekiq.options[:config_file]
-              assert_equal 25, Sidekiq.options[:concurrency]
+              assert_equal "./test/dummy/config/sidekiq.yml", config[:config_file]
+              assert_equal 25, config[:concurrency]
             end
           end
 
           describe "when required path is a file" do
             it "tries config/sidekiq.yml from current diretory" do
-              Sidekiq.options[:require] = "./test/dummy" # stub current dir – ./
+              config[:require] = "./test/dummy" # stub current dir – ./
 
               subject.parse(%w[sidekiq -r ./test/fake_env.rb])
 
-              assert_equal "./test/dummy/config/sidekiq.yml", Sidekiq.options[:config_file]
-              assert_equal 25, Sidekiq.options[:concurrency]
+              assert_equal "./test/dummy/config/sidekiq.yml", config[:config_file]
+              assert_equal 25, config[:concurrency]
             end
           end
 
           describe "without any required path" do
             it "tries config/sidekiq.yml from current diretory" do
-              Sidekiq.options[:require] = "./test/dummy" # stub current dir – ./
+              config[:require] = "./test/dummy" # stub current dir – ./
 
               subject.parse(%w[sidekiq])
 
-              assert_equal "./test/dummy/config/sidekiq.yml", Sidekiq.options[:config_file]
-              assert_equal 25, Sidekiq.options[:concurrency]
+              assert_equal "./test/dummy/config/sidekiq.yml", config[:config_file]
+              assert_equal 25, config[:concurrency]
             end
           end
 
@@ -272,13 +277,13 @@ describe Sidekiq::CLI do
                 -q often,7
                 -q seldom,3])
 
-              assert_equal "./test/config.yml", Sidekiq.options[:config_file]
-              refute Sidekiq.options[:verbose]
-              assert_equal "./test/fake_env.rb", Sidekiq.options[:require]
-              assert_equal "snoop", Sidekiq.options[:environment]
-              assert_equal 100, Sidekiq.options[:concurrency]
-              assert_equal 7, Sidekiq.options[:queues].count { |q| q == "often" }
-              assert_equal 3, Sidekiq.options[:queues].count { |q| q == "seldom" }
+              assert_equal "./test/config.yml", config[:config_file]
+              refute config[:verbose]
+              assert_equal "./test/fake_env.rb", config[:require]
+              assert_equal "snoop", config[:environment]
+              assert_equal 100, config[:concurrency]
+              assert_equal 7, config[:queues].count { |q| q == "often" }
+              assert_equal 3, config[:queues].count { |q| q == "seldom" }
             end
 
             describe "when the config file specifies queues with weights" do
@@ -288,7 +293,7 @@ describe Sidekiq::CLI do
                     -r ./test/fake_env.rb
                     -q foo -q bar])
 
-                  assert_equal true, !!Sidekiq.options[:strict]
+                  assert_equal true, !!config[:strict]
                 end
               end
 
@@ -297,7 +302,7 @@ describe Sidekiq::CLI do
                   subject.parse(%w[sidekiq -C ./test/config.yml
                     -r ./test/fake_env.rb])
 
-                  assert_equal false, !!Sidekiq.options[:strict]
+                  assert_equal false, !!config[:strict]
                 end
               end
 
@@ -307,7 +312,7 @@ describe Sidekiq::CLI do
                     -r ./test/fake_env.rb
                     -q foo,2 -q bar,3])
 
-                  assert_equal false, !!Sidekiq.options[:strict]
+                  assert_equal false, !!config[:strict]
                 end
               end
             end
@@ -319,7 +324,7 @@ describe Sidekiq::CLI do
                     -r ./test/fake_env.rb
                     -q foo -q bar])
 
-                  assert_equal true, !!Sidekiq.options[:strict]
+                  assert_equal true, !!config[:strict]
                 end
               end
 
@@ -328,7 +333,7 @@ describe Sidekiq::CLI do
                   subject.parse(%w[sidekiq -C ./test/config_queues_without_weights.yml
                     -r ./test/fake_env.rb])
 
-                  assert_equal true, !!Sidekiq.options[:strict]
+                  assert_equal true, !!config[:strict]
                 end
               end
 
@@ -338,7 +343,7 @@ describe Sidekiq::CLI do
                     -r ./test/fake_env.rb
                     -q foo,2 -q bar,3])
 
-                  assert_equal false, !!Sidekiq.options[:strict]
+                  assert_equal false, !!config[:strict]
                 end
               end
             end
@@ -350,7 +355,7 @@ describe Sidekiq::CLI do
                     -r ./test/fake_env.rb
                     -q foo -q bar])
 
-                  assert_equal true, !!Sidekiq.options[:strict]
+                  assert_equal true, !!config[:strict]
                 end
               end
 
@@ -359,7 +364,7 @@ describe Sidekiq::CLI do
                   subject.parse(%w[sidekiq -C ./test/config_empty.yml
                     -r ./test/fake_env.rb])
 
-                  assert_equal true, !!Sidekiq.options[:strict]
+                  assert_equal true, !!config[:strict]
                 end
               end
 
@@ -369,7 +374,7 @@ describe Sidekiq::CLI do
                     -r ./test/fake_env.rb
                     -q foo,2 -q bar,3])
 
-                  assert_equal false, !!Sidekiq.options[:strict]
+                  assert_equal false, !!config[:strict]
                 end
               end
             end
@@ -380,8 +385,8 @@ describe Sidekiq::CLI do
               it "tries config/sidekiq.yml" do
                 subject.parse(%w[sidekiq -r ./test/dummy])
 
-                assert_equal "sidekiq.yml", File.basename(Sidekiq.options[:config_file])
-                assert_equal 25, Sidekiq.options[:concurrency]
+                assert_equal "sidekiq.yml", File.basename(config[:config_file])
+                assert_equal 25, config[:concurrency]
               end
             end
           end
@@ -451,14 +456,15 @@ describe Sidekiq::CLI do
 
     describe "#run" do
       before do
-        Sidekiq.options[:concurrency] = 2
-        Sidekiq.options[:require] = "./test/fake_env.rb"
+        subject.config = Sidekiq
+        subject.config[:concurrency] = 2
+        subject.config[:require] = "./test/fake_env.rb"
       end
 
       describe "require workers" do
         describe "when path is a rails directory" do
           before do
-            Sidekiq.options[:require] = "./test/dummy"
+            subject.config[:require] = "./test/dummy"
             subject.environment = "test"
           end
 
@@ -476,7 +482,7 @@ describe Sidekiq::CLI do
               subject.run
             end
 
-            assert_equal "dummy", Sidekiq.options[:tag]
+            assert_equal "dummy", subject.config[:tag]
           end
         end
 
@@ -556,11 +562,12 @@ describe Sidekiq::CLI do
         it "quiets with a corresponding event" do
           quiet = false
 
-          Sidekiq.on(:quiet) do
+          subject.config = Sidekiq
+          subject.config.on(:quiet) do
             quiet = true
           end
 
-          subject.launcher = Sidekiq::Launcher.new(Sidekiq.options)
+          subject.launcher = Sidekiq::Launcher.new(subject.config)
           subject.handle_signal("TSTP")
 
           assert_match(/Got TSTP signal/, logdev.string)

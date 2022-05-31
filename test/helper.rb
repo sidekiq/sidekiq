@@ -48,3 +48,20 @@ def capture_logging(lvl = Logger::INFO)
     Sidekiq.logger = old
   end
 end
+
+module Sidekiq
+  def self.reset!
+    @config = DEFAULTS.dup
+  end
+end
+
+Signal.trap("TTIN") do
+  Thread.list.each do |thread|
+    puts "Thread TID-#{(thread.object_id ^ ::Process.pid).to_s(36)} #{thread.name}"
+    if thread.backtrace
+      puts thread.backtrace.join("\n")
+    else
+      puts "<no backtrace available>"
+    end
+  end
+end

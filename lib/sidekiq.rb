@@ -53,19 +53,62 @@ module Sidekiq
     puts "Calm down, yo."
   end
 
+  %w[concurrency queues].each do |attr|
+    # these are typically write-only
+    define_singleton_method("#{attr}=") do |val|
+      self[attr.to_sym] = val
+    end
+  end
+
+  ### Private APIs
+  def self.default_error_handler(ex, ctx)
+    logger.warn(dump_json(ctx)) unless ctx.empty?
+    logger.warn("#{ex.class.name}: #{ex.message}")
+    logger.warn(ex.backtrace.join("\n")) unless ex.backtrace.nil?
+  end
+
+  @config = DEFAULTS.dup
   def self.options
-    @options ||= DEFAULTS.dup
+    logger.warn "`config.options[:key] = value` is deprecated, use `config[:key] = value`: #{caller(1..2)}"
+    @config
   end
 
   def self.options=(opts)
-    @options = opts
+    logger.warn "config.options = hash` is deprecated, use `config.merge!(hash)`: #{caller(1..2)}"
+    @config = opts
   end
+
+  def self.[](key)
+    @config[key]
+  end
+
+  def self.[]=(key, val)
+    @config[key] = val
+  end
+
+  def self.merge!(hash)
+    @config.merge!(hash)
+  end
+
+  def self.fetch(*args, &block)
+    @config.fetch(*args, &block)
+  end
+
+  def self.handle_exception(ex, ctx = {})
+    self[:error_handlers].each do |handler|
+      handler.call(ex, ctx)
+    rescue => ex
+      logger.error "!!! ERROR HANDLER THREW AN ERROR !!!"
+      logger.error ex
+      logger.error ex.backtrace.join("\n") unless ex.backtrace.nil?
+    end
+  end
+  ###
 
   ##
   # Configuration for Sidekiq server, use like:
   #
   #   Sidekiq.configure_server do |config|
-  #     config.redis = { :namespace => 'myapp', :size => 25, :url => 'redis://myhost:8877/0' }
   #     config.server_middleware do |chain|
   #       chain.add MyServerHook
   #     end
@@ -78,7 +121,7 @@ module Sidekiq
   # Configuration for Sidekiq client, use like:
   #
   #   Sidekiq.configure_client do |config|
-  #     config.redis = { :namespace => 'myapp', :size => 1, :url => 'redis://myhost:8877/0' }
+  #     config.redis = { size: 1, url: 'redis://myhost:8877/0' }
   #   end
   def self.configure_client
     yield self unless server?
@@ -180,7 +223,7 @@ module Sidekiq
   #   end
   # end
   def self.death_handlers
-    options[:death_handlers]
+    self[:death_handlers]
   end
 
   def self.load_json(string)
@@ -233,7 +276,7 @@ module Sidekiq
   #
   # See sidekiq/scheduled.rb for an in-depth explanation of this value
   def self.average_scheduled_poll_interval=(interval)
-    options[:average_scheduled_poll_interval] = interval
+    self[:average_scheduled_poll_interval] = interval
   end
 
   # Register a proc to handle any error which occurs within the Sidekiq process.
@@ -244,7 +287,7 @@ module Sidekiq
   #
   # The default error handler logs errors to Sidekiq.logger.
   def self.error_handlers
-    options[:error_handlers]
+    self[:error_handlers]
   end
 
   # Register a block to run at a point in the Sidekiq lifecycle.
@@ -257,12 +300,12 @@ module Sidekiq
   #   end
   def self.on(event, &block)
     raise ArgumentError, "Symbols only please: #{event}" unless event.is_a?(Symbol)
-    raise ArgumentError, "Invalid event name: #{event}" unless options[:lifecycle_events].key?(event)
-    options[:lifecycle_events][event] << block
+    raise ArgumentError, "Invalid event name: #{event}" unless self[:lifecycle_events].key?(event)
+    self[:lifecycle_events][event] << block
   end
 
   def self.strict_args!(mode = :raise)
-    options[:on_complex_arguments] = mode
+    self[:on_complex_arguments] = mode
   end
 
   # We are shutting down Sidekiq but what about threads that

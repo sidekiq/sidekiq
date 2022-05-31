@@ -3,11 +3,12 @@
 require "sidekiq/manager"
 require "sidekiq/fetch"
 require "sidekiq/scheduled"
+require "sidekiq/ring_buffer"
 
 module Sidekiq
   # The Launcher starts the Manager and Poller threads and provides the process heartbeat.
   class Launcher
-    include Util
+    include Sidekiq::Component
 
     STATS_TTL = 5 * 365 * 24 * 60 * 60 # 5 years
 
@@ -22,11 +23,11 @@ module Sidekiq
     attr_accessor :manager, :poller, :fetcher
 
     def initialize(options)
+      @config = options
       options[:fetch] ||= BasicFetch.new(options)
       @manager = Sidekiq::Manager.new(options)
-      @poller = Sidekiq::Scheduled::Poller.new
+      @poller = Sidekiq::Scheduled::Poller.new(options)
       @done = false
-      @options = options
     end
 
     def run
@@ -45,7 +46,7 @@ module Sidekiq
 
     # Shuts down this Sidekiq instance. Waits up to the deadline for all jobs to complete.
     def stop
-      deadline = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) + @options[:timeout]
+      deadline = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) + @config[:timeout]
 
       @done = true
       @manager.quiet
@@ -55,8 +56,8 @@ module Sidekiq
 
       # Requeue everything in case there was a thread which fetched a job while the process was stopped.
       # This call is a no-op in Sidekiq but necessary for Sidekiq Pro.
-      strategy = @options[:fetch]
-      strategy.bulk_requeue([], @options)
+      strategy = @config[:fetch]
+      strategy.bulk_requeue([], @config)
 
       clear_heartbeat
     end
@@ -74,14 +75,14 @@ module Sidekiq
         heartbeat
         sleep BEAT_PAUSE
       end
-      Sidekiq.logger.info("Heartbeat stopping...")
+      logger.info("Heartbeat stopping...")
     end
 
     def clear_heartbeat
       # Remove record from Redis since we are shutting down.
       # Note we don't stop the heartbeat thread; if the process
       # doesn't actually exit, it'll reappear in the Web UI.
-      Sidekiq.redis do |conn|
+      redis do |conn|
         conn.pipelined do |pipeline|
           pipeline.srem("processes", identity)
           pipeline.unlink("#{identity}:work")
@@ -134,7 +135,7 @@ module Sidekiq
 
         nowdate = Time.now.utc.strftime("%Y-%m-%d")
 
-        Sidekiq.redis do |conn|
+        redis do |conn|
           conn.multi do |transaction|
             transaction.incrby("stat:processed", procd)
             transaction.incrby("stat:processed:#{nowdate}", procd)
@@ -161,7 +162,7 @@ module Sidekiq
         fails = procd = 0
         kb = memory_usage(::Process.pid)
 
-        _, exists, _, _, msg = Sidekiq.redis { |conn|
+        _, exists, _, _, msg = redis { |conn|
           conn.multi { |transaction|
             transaction.sadd("processes", key)
             transaction.exists?(key)
@@ -199,7 +200,7 @@ module Sidekiq
 
     def check_rtt
       a = b = 0
-      Sidekiq.redis do |x|
+      redis do |x|
         a = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :microsecond)
         x.ping
         b = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :microsecond)
@@ -210,7 +211,7 @@ module Sidekiq
       # Workable is < 10,000µs
       # Log a warning if it's a disaster.
       if RTT_READINGS.all? { |x| x > RTT_WARNING_LEVEL }
-        Sidekiq.logger.warn <<~EOM
+        logger.warn <<~EOM
           Your Redis network connection is performing extremely poorly.
           Last RTT readings were #{RTT_READINGS.buffer.inspect}, ideally these should be < 1000.
           Ensure Redis is running in the same AZ or datacenter as Sidekiq.
@@ -247,10 +248,10 @@ module Sidekiq
         "hostname" => hostname,
         "started_at" => Time.now.to_f,
         "pid" => ::Process.pid,
-        "tag" => @options[:tag] || "",
-        "concurrency" => @options[:concurrency],
-        "queues" => @options[:queues].uniq,
-        "labels" => @options[:labels],
+        "tag" => @config[:tag] || "",
+        "concurrency" => @config[:concurrency],
+        "queues" => @config[:queues].uniq,
+        "labels" => @config[:labels],
         "identity" => identity
       }
     end

@@ -4,9 +4,16 @@ require_relative "helper"
 require "sidekiq/launcher"
 
 describe Sidekiq::Launcher do
-  subject { Sidekiq::Launcher.new(options) }
+  subject do
+    Sidekiq::Launcher.new(@config)
+  end
+
   before do
     Sidekiq.redis { |c| c.flushdb }
+    Sidekiq.reset!
+    @config = Sidekiq
+    @config[:tag] = "myapp"
+    @config[:concurrency] = 3
   end
 
   def new_manager(opts)
@@ -23,8 +30,8 @@ describe Sidekiq::Launcher do
 
   describe "heartbeat" do
     before do
-      @mgr = new_manager(options)
-      @launcher = Sidekiq::Launcher.new(options)
+      @mgr = new_manager(@config)
+      @launcher = Sidekiq::Launcher.new(@config)
       @launcher.manager = @mgr
       @id = @launcher.identity
 
@@ -156,9 +163,5 @@ describe Sidekiq::Launcher do
         assert_in_delta 60000, expires, 50
       end
     end
-  end
-
-  def options
-    {concurrency: 3, queues: ["default"], tag: "myapp"}
   end
 end

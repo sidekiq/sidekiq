@@ -77,17 +77,15 @@ describe Sidekiq::Middleware do
   it "executes middleware in the proper order" do
     msg = Sidekiq.dump_json({"class" => CustomWorker.to_s, "args" => [$recorder]})
 
-    Sidekiq.server_middleware do |chain|
+    @config = Sidekiq
+    @config.server_middleware do |chain|
       # should only add once, second should replace the first
       2.times { |i| chain.add CustomMiddleware, i.to_s, $recorder }
       chain.insert_before CustomMiddleware, AnotherCustomMiddleware, "2", $recorder
       chain.insert_after AnotherCustomMiddleware, YetAnotherCustomMiddleware, "3", $recorder
     end
 
-    boss = Minitest::Mock.new
-    opts = {queues: ["default"]}
-    processor = Sidekiq::Processor.new(boss, opts)
-    boss.expect(:processor_done, nil, [processor])
+    processor = Sidekiq::Processor.new(@config) { |pr, ex| }
     processor.process(Sidekiq::BasicFetch::UnitOfWork.new("queue:default", msg))
     assert_equal %w[2 before 3 before 1 before work_performed 1 after 3 after 2 after], $recorder.flatten
   end

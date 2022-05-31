@@ -6,23 +6,29 @@ require "sidekiq/fetch"
 require "sidekiq/scheduled"
 require "sidekiq/processor"
 
-describe "Actors" do
-  class JoeWorker
-    include Sidekiq::Worker
-    def perform(slp)
-      raise "boom" if slp == "boom"
-      sleep(slp) if slp > 0
-      $count += 1
-    end
+class JoeWorker
+  include Sidekiq::Job
+  def perform(slp)
+    raise "boom" if slp == "boom"
+    sleep(slp) if slp > 0
+    $count += 1
   end
+end
 
+describe "Actors" do
   before do
+    Sidekiq.reset!
     Sidekiq.redis { |c| c.flushdb }
+    @config = Sidekiq
+    @config[:queues] = %w[default]
+    @config[:fetch] = Sidekiq::BasicFetch.new(@config)
+    @config[:error_handlers] << Sidekiq.method(:default_error_handler)
+    # @config.logger.level = Logger::DEBUG
   end
 
   describe "scheduler" do
     it "can start and stop" do
-      f = Sidekiq::Scheduled::Poller.new
+      f = Sidekiq::Scheduled::Poller.new(@config)
       f.start
       f.terminate
     end
@@ -37,7 +43,7 @@ describe "Actors" do
       assert_equal 1, ss.size
 
       sleep 0.015
-      s = Sidekiq::Scheduled::Poller.new
+      s = Sidekiq::Scheduled::Poller.new(@config)
       s.enqueue
       assert_equal 1, q.size
       assert_equal 0, ss.size
@@ -48,84 +54,82 @@ describe "Actors" do
   describe "processor" do
     before do
       $count = 0
+      @mutex = ::Mutex.new
+      @cond = ::ConditionVariable.new
+      @latest_error = nil
+    end
+
+    def result(pr, ex)
+      @latest_error = ex
+      @mutex.synchronize do
+        @cond.signal
+      end
+    end
+
+    def await(timeout=0.5)
+      @mutex.synchronize do
+        yield
+        @cond.wait(@mutex, timeout)
+      end
     end
 
     it "can start and stop" do
-      m = Mgr.new
-      f = Sidekiq::Processor.new(m, m.options)
+      f = Sidekiq::Processor.new(@config) { |p, ex| raise "should not raise!" }
       f.terminate
     end
 
-    class Mgr
-      attr_reader :latest_error
-      attr_reader :mutex
-      attr_reader :cond
-      def initialize
-        @mutex = ::Mutex.new
-        @cond = ::ConditionVariable.new
-      end
-
-      def processor_died(inst, err)
-        @latest_error = err
-        @mutex.synchronize do
-          @cond.signal
-        end
-      end
-
-      def processor_stopped(inst)
-        @mutex.synchronize do
-          @cond.signal
-        end
-      end
-
-      def options
-        opts = {concurrency: 3, queues: ["default"]}
-        opts[:fetch] = Sidekiq::BasicFetch.new(opts)
-        opts
-      end
-    end
-
     it "can process" do
-      mgr = Mgr.new
-
-      p = Sidekiq::Processor.new(mgr, mgr.options)
-      JoeWorker.perform_async(0)
-
-      a = $count
-      p.process_one
-      b = $count
-      assert_equal a + 1, b
-    end
-
-    it "deals with errors" do
-      mgr = Mgr.new
-
-      p = Sidekiq::Processor.new(mgr, mgr.options)
-      JoeWorker.perform_async("boom")
       q = Sidekiq::Queue.new
+      assert_equal 0, q.size
+      p = Sidekiq::Processor.new(@config) do |pr, ex|
+        result(pr, ex)
+      end
+      JoeWorker.perform_async(0)
       assert_equal 1, q.size
 
       a = $count
-      mgr.mutex.synchronize do
+      await do
         p.start
-        mgr.cond.wait(mgr.mutex)
+      end
+
+      p.kill(true)
+      b = $count
+      assert_nil @latest_error
+      assert_equal a + 1, b
+      assert_equal 0, q.size
+    end
+
+    it "deals with errors" do
+      q = Sidekiq::Queue.new
+      assert_equal 0, q.size
+      p = Sidekiq::Processor.new(@config) do |pr, ex|
+        result(pr, ex)
+      end
+      jid = JoeWorker.perform_async("boom")
+      assert jid, jid
+      assert_equal 1, q.size
+
+      a = $count
+      await do
+        p.start
       end
       b = $count
       assert_equal a, b
 
-      sleep 0.001
-      assert_equal false, p.thread.status
-      p.terminate(true)
-      refute_nil mgr.latest_error
-      assert_equal RuntimeError, mgr.latest_error.class
+      p.kill(true)
+      assert @latest_error
+      assert_equal "boom", @latest_error.message
+      assert_equal RuntimeError, @latest_error.class
     end
 
     it "gracefully kills" do
-      mgr = Mgr.new
-
-      p = Sidekiq::Processor.new(mgr, mgr.options)
-      JoeWorker.perform_async(1)
       q = Sidekiq::Queue.new
+      assert_equal 0, q.size
+      p = Sidekiq::Processor.new(@config) do |pr, ex|
+        result(pr, ex)
+      end
+      jid = JoeWorker.perform_async(1)
+      assert jid, jid
       assert_equal 1, q.size
 
       a = $count
@@ -137,7 +141,7 @@ describe "Actors" do
       b = $count
       assert_equal a, b
       assert_equal false, p.thread.status
-      refute mgr.latest_error, mgr.latest_error.to_s
+      refute @latest_error, @latest_error.to_s
     end
   end
 end

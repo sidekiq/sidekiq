@@ -5,6 +5,8 @@
 HEAD
 ---------
 
+- Substantial refactoring of Sidekiq server internals, as part of a larger effort to 
+  reduce Sidekiq's internal usage of global methods and data, see [docs/component.md].
 - Add **beta** support for the `redis-client` gem**. This will become the default Redis driver in Sidekiq 7.0. [#5298]
   Read more: https://github.com/mperham/sidekiq/wiki/Using-redis-client
 - Add **beta** support for DB transaction-aware client [#5291]
@@ -14,8 +16,8 @@ HEAD
 ```ruby
 Sidekiq.transactional_push!
 ```
-  This feature is still beta quality; please try it out and let us know if you
-  have any issues. It will be fully supported in Sidekiq 7.0 or removed if it
+  This feature does not have a lot of production usage yet; please try it out and let us
+  know if you have any issues. It will be fully supported in Sidekiq 7.0 or removed if it
   proves problematic.
 - Fix regression with middleware arguments [#5312]
 
