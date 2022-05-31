@@ -16,8 +16,8 @@ HEAD
 ```ruby
 Sidekiq.transactional_push!
 ```
-  This feature is still beta quality; please try it out and let us know if you
-  have any issues. It will be fully supported in Sidekiq 7.0 or removed if it
+  This feature does not have a lot of production usage yet; please try it out and let us
+  know if you have any issues. It will be fully supported in Sidekiq 7.0 or removed if it
   proves problematic.
 - Fix regression with middleware arguments [#5312]
 
