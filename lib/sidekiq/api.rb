@@ -294,6 +294,10 @@ module Sidekiq
       end
     end
     alias_method :💣, :clear
+
+    def as_json(options = nil) # :nodoc:
+      {name: name} # 5336
+    end
   end
 
   ##
@@ -588,6 +592,10 @@ module Sidekiq
       end
     end
     alias_method :💣, :clear
+
+    def as_json(options = nil) # :nodoc:
+      {name: name} # 5336
+    end
   end
 
   class JobSet < SortedSet
