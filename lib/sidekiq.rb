@@ -53,10 +53,27 @@ module Sidekiq
     puts "Calm down, yo."
   end
 
-  %w[concurrency queues].each do |attr|
-    # these are typically write-only
-    define_singleton_method("#{attr}=") do |val|
-      self[attr.to_sym] = val
+  # config.concurrency = 5
+  def self.concurrency=(val)
+    self[:concurrency] = Integer(val)
+  end
+
+  # config.queues = %w( high default low )                 # strict
+  # config.queues = %w( high,3 default,2 low,1 )           # weighted
+  # config.queues = %w( feature1,1 feature2,1 feature3,1 ) # random
+  #
+  # With weighted priority, queue will be checked first (weight / total) of the time.
+  # high will be checked first (3/6) or 50% of the time.
+  # I'd recommend setting weights between 1-10. Weights in the hundreds or thousands
+  # are ridiculous and unnecessarily expensive. You can get random queue ordering
+  # by explicitly setting all weights to 1.
+  def self.queues=(val)
+    self[:queues] = Array(val).each_with_object([]) do |qstr, memo|
+      name, weight = qstr.split(",")
+      self[:strict] = false if weight.to_i > 0
+      [weight.to_i, 1].max.times do
+        memo << name
+      end
     end
   end
 
