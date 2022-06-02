@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 require_relative "helper"
 require "sidekiq/sd_notify"
 require "sidekiq/systemd"
 
-class TestSystemd < Minitest::Test
-  def setup
+describe 'Systemd' do
+  before do
     ::Dir::Tmpname.create("sidekiq_socket") do |sockaddr|
       @sockaddr = sockaddr
       @socket = Socket.new(:UNIX, :DGRAM, 0)
@@ -13,7 +15,7 @@ class TestSystemd < Minitest::Test
     end
   end
 
-  def teardown
+  after do
     @socket.close if @socket
     File.unlink(@sockaddr) if @sockaddr
     @socket = nil
@@ -24,7 +26,7 @@ class TestSystemd < Minitest::Test
     @socket.recvfrom(10)[0]
   end
 
-  def test_notify
+  it 'notifies' do
     count = Sidekiq::SdNotify.ready
     assert_equal(socket_message, "READY=1")
     assert_equal(ENV["NOTIFY_SOCKET"], @sockaddr)

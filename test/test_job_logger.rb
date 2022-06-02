@@ -3,8 +3,8 @@
 require_relative "helper"
 require "sidekiq/job_logger"
 
-class TestJobLogger < Minitest::Test
-  def setup
+describe 'Job logger' do
+  before do
     @old = Sidekiq.logger
     @output = StringIO.new
     @logger = Sidekiq::Logger.new(@output, level: :info)
@@ -14,13 +14,13 @@ class TestJobLogger < Minitest::Test
     Thread.current[:sidekiq_tid] = nil
   end
 
-  def teardown
+  after do
     Thread.current[:sidekiq_context] = nil
     Thread.current[:sidekiq_tid] = nil
     Sidekiq.logger = @old
   end
 
-  def test_pretty_output
+  it 'tests pretty output' do
     jl = Sidekiq::JobLogger.new(@logger)
 
     # pretty
@@ -41,7 +41,7 @@ class TestJobLogger < Minitest::Test
     assert_match(/#{Time.now.utc.to_date}.+Z pid=#{$$} tid=#{p.tid} .+INFO: done/, b)
   end
 
-  def test_json_output
+  it 'tests json output' do
     # json
     @logger.formatter = Sidekiq::Logger::Formatters::JSON.new
     jl = Sidekiq::JobLogger.new(@logger)
@@ -60,7 +60,7 @@ class TestJobLogger < Minitest::Test
     assert_equal(["bid", "class", "jid", "tags"], keys)
   end
 
-  def test_custom_log_level
+  it 'tests custom log level' do
     jl = Sidekiq::JobLogger.new(@logger)
     job = {"class" => "FooWorker", "log_level" => "debug"}
 
@@ -79,7 +79,7 @@ class TestJobLogger < Minitest::Test
     assert_match(/INFO: done/, c)
   end
 
-  def test_custom_log_level_uses_default_log_level_for_invalid_value
+  it 'tests custom log level uses default log level for invalid value' do
     jl = Sidekiq::JobLogger.new(@logger)
     job = {"class" => "FooWorker", "log_level" => "non_existent"}
 
@@ -94,7 +94,7 @@ class TestJobLogger < Minitest::Test
     assert_match(/WARN: Invalid log level/, log_level_warning)
   end
 
-  def test_custom_logger_with_non_numeric_levels
+  it 'tests custom logger with non numeric levels' do
     logger_class = Class.new(Logger) do
       def level
         :nonsense
