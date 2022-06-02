@@ -66,7 +66,7 @@ describe "Actors" do
       end
     end
 
-    def await(timeout=0.5)
+    def await(timeout = 0.5)
       @mutex.synchronize do
         yield
         @cond.wait(@mutex, timeout)
