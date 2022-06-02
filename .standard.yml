@@ -10,3 +10,6 @@ ignore:
     - Lint/RescueException
     - Security/YAMLLoad
     - Style/GlobalVars
+  - 'test/test*.rb':
+    - Lint/ConstantDefinitionInBlock
+

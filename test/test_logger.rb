@@ -49,7 +49,7 @@ class TestLogger < Minitest::Test
 
   def test_with_overlapping_context
     subject = Sidekiq::Context
-    subject.current.merge!({foo: "bar"})
+    subject.current[:foo] = "bar"
     assert_equal({foo: "bar"}, subject.current)
 
     subject.with(foo: "bingo") do

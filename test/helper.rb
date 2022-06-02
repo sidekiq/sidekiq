@@ -28,7 +28,7 @@ end
 
 ENV["REDIS_URL"] ||= "redis://localhost/15"
 
-Sidekiq.logger = ::Logger.new(STDOUT)
+Sidekiq.logger = ::Logger.new($stdout)
 Sidekiq.logger.level = Logger::ERROR
 
 if ENV["SIDEKIQ_REDIS_CLIENT"]

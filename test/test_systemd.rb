@@ -14,7 +14,7 @@ class TestSystemd < Minitest::Test
   end
 
   def teardown
-    @socket.close if @socket
+    @socket&.close
     File.unlink(@sockaddr) if @sockaddr
     @socket = nil
     @sockaddr = nil
