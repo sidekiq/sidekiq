@@ -200,13 +200,13 @@ module Sidekiq
       SIGNAL_HANDLERS[sig].call(self)
     end
 
-    private
-
     def print_banner
       puts "\e[31m"
       puts Sidekiq::CLI.banner
       puts "\e[0m"
     end
+
+    private
 
     def set_environment(cli_env)
       # See #984 for discussion.
