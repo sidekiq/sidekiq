@@ -42,4 +42,5 @@ jobs:
       run: bundle exec rake
     - name: Simplecov Report
       uses: aki77/simplecov-report-action@v1
-      failedThreshold: 20 # Start with 20% to test
+      with:
+        failedThreshold: 20 # Start with 20% to test
