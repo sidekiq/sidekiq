@@ -92,8 +92,7 @@ git checkout -b new_feature_name
 
 ### 11. Keep your forked branch up to date with changes in main repo
 ```
-git fetch upstream
-git merge upstream/main
+git pull upstream main
 ```
 
 ## Legal
