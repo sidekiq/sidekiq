@@ -3,8 +3,8 @@
 require_relative "helper"
 require "sidekiq/logger"
 
-class TestLogger < Minitest::Test
-  def setup
+describe 'logger' do
+  before do
     @output = StringIO.new
     @logger = Sidekiq::Logger.new(@output)
 
@@ -13,30 +13,30 @@ class TestLogger < Minitest::Test
     Thread.current[:sidekiq_tid] = nil
   end
 
-  def teardown
+  after do
     Sidekiq.log_formatter = nil
     Thread.current[:sidekiq_context] = nil
     Thread.current[:sidekiq_tid] = nil
   end
 
-  def test_default_log_formatter
+  it 'tests default logger format' do
     assert_kind_of Sidekiq::Logger::Formatters::Pretty, Sidekiq::Logger.new(@output).formatter
   end
 
-  def test_heroku_log_formatter
+  it 'tests heroku logger formatter' do
     ENV["DYNO"] = "dyno identifier"
     assert_kind_of Sidekiq::Logger::Formatters::WithoutTimestamp, Sidekiq::Logger.new(@output).formatter
   ensure
     ENV["DYNO"] = nil
   end
 
-  def test_json_log_formatter
+  it 'tests json logger formatter' do
     Sidekiq.log_formatter = Sidekiq::Logger::Formatters::JSON.new
 
     assert_kind_of Sidekiq::Logger::Formatters::JSON, Sidekiq::Logger.new(@output).formatter
   end
 
-  def test_with_context
+  it 'tests with context' do
     subject = Sidekiq::Context
     assert_equal({}, subject.current)
 
@@ -47,7 +47,7 @@ class TestLogger < Minitest::Test
     assert_equal({}, subject.current)
   end
 
-  def test_with_overlapping_context
+  it 'tests with overlapping context' do
     subject = Sidekiq::Context
     subject.current[:foo] = "bar"
     assert_equal({foo: "bar"}, subject.current)
@@ -59,7 +59,7 @@ class TestLogger < Minitest::Test
     assert_equal({foo: "bar"}, subject.current)
   end
 
-  def test_nested_contexts
+  it 'tests nested contexts' do
     subject = Sidekiq::Context
     assert_equal({}, subject.current)
 
@@ -76,7 +76,7 @@ class TestLogger < Minitest::Test
     assert_equal({}, subject.current)
   end
 
-  def test_formatted_output
+  it 'tests formatted output' do
     @logger.info("hello world")
     assert_match(/INFO: hello world/, @output.string)
     reset(@output)
@@ -96,7 +96,7 @@ class TestLogger < Minitest::Test
     end
   end
 
-  def test_json_output_is_parsable
+  it 'makes sure json output is parseable' do
     @logger.formatter = Sidekiq::Logger::Formatters::JSON.new
 
     @logger.debug("boom")
@@ -118,7 +118,7 @@ class TestLogger < Minitest::Test
     assert_equal "INFO", hash["lvl"]
   end
 
-  def test_forwards_logger_kwargs
+  it 'tests forwards logger kwards' do
     assert_silent do
       logger = Sidekiq::Logger.new("/dev/null", level: Logger::INFO)
 
@@ -126,7 +126,7 @@ class TestLogger < Minitest::Test
     end
   end
 
-  def test_log_level_query_methods
+  it 'tests log level query methods' do
     logger = Sidekiq::Logger.new("/dev/null", level: Logger::INFO)
 
     refute_predicate logger, :debug?
