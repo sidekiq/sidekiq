@@ -10,8 +10,8 @@ module Myapp
   end
 end
 
-describe 'Current attributes' do
-  it 'saves' do
+describe "Current attributes" do
+  it "saves" do
     cm = Sidekiq::CurrentAttributes::Save.new(Myapp::Current)
     job = {}
     with_context(:user_id, 123) do
@@ -21,7 +21,7 @@ describe 'Current attributes' do
     end
   end
 
-  it 'loads' do
+  it "loads" do
     cm = Sidekiq::CurrentAttributes::Load.new(Myapp::Current)
 
     job = {"cattr" => {"user_id" => 123}}
@@ -32,7 +32,7 @@ describe 'Current attributes' do
     # the Rails reloader is responsible for reseting Current after every unit of work
   end
 
-  it 'persists' do
+  it "persists" do
     Sidekiq::CurrentAttributes.persist(Myapp::Current)
     job_hash = {}
     with_context(:user_id, 16) do
@@ -41,15 +41,15 @@ describe 'Current attributes' do
       end
     end
 
-  #   assert_nil Myapp::Current.user_id
-  #   Sidekiq.server_middleware.invoke(nil, job_hash, nil) do
-  #     assert_equal 16, job_hash["cattr"][:user_id]
-  #     assert_equal 16, Myapp::Current.user_id
-  #   end
-  #   assert_nil Myapp::Current.user_id
-  # ensure
-  #   Sidekiq.client_middleware.clear
-  #   Sidekiq.server_middleware.clear
+    #   assert_nil Myapp::Current.user_id
+    #   Sidekiq.server_middleware.invoke(nil, job_hash, nil) do
+    #     assert_equal 16, job_hash["cattr"][:user_id]
+    #     assert_equal 16, Myapp::Current.user_id
+    #   end
+    #   assert_nil Myapp::Current.user_id
+    # ensure
+    #   Sidekiq.client_middleware.clear
+    #   Sidekiq.server_middleware.clear
   end
 
   private

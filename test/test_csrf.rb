@@ -3,7 +3,7 @@
 require_relative "./helper"
 require "sidekiq/web/csrf_protection"
 
-describe 'Csrf' do
+describe "Csrf" do
   def session
     @session ||= {}
   end
@@ -24,7 +24,7 @@ describe 'Csrf' do
     Sidekiq::Web::CsrfProtection.new(block).call(env)
   end
 
-  it 'get' do
+  it "get" do
     ok = [200, {}, ["OK"]]
     first = 1
     second = 1
@@ -48,7 +48,7 @@ describe 'Csrf' do
     refute_equal first, second
   end
 
-  it 'bad post' do
+  it "bad post" do
     result = call(env(:post)) do
       raise "Shouldnt be called"
     end
@@ -60,7 +60,7 @@ describe 'Csrf' do
     assert_match(/attack prevented/, @logio.string)
   end
 
-  it 'succeeds with good token' do
+  it "succeeds with good token" do
     # Make a GET to set up the session with a good token
     goodtoken = call(env) do |envy|
       envy[:csrf_token]
@@ -76,7 +76,7 @@ describe 'Csrf' do
     assert_equal ["OK"], result[2]
   end
 
-  it 'fails with bad token' do
+  it "fails with bad token" do
     # Make a POST with a known bad token
     result = call(env(:post, "authenticity_token" => "N0QRBD34tU61d7fi+0ZaF/35JLW/9K+8kk8dc1TZoK/0pTl7GIHap5gy7BWGsoKlzbMLRp1yaDpCDFwTJtxWAg==")) do
       raise "shouldnt be called"
@@ -86,7 +86,7 @@ describe 'Csrf' do
     assert_equal ["Forbidden"], result[2]
   end
 
-  it 'empty session post' do
+  it "empty session post" do
     # Make a GET to set up the session with a good token
     goodtoken = call(env) do |envy|
       envy[:csrf_token]
@@ -102,7 +102,7 @@ describe 'Csrf' do
     assert_equal ["Forbidden"], result[2]
   end
 
-  it 'empty csrf session post' do
+  it "empty csrf session post" do
     # Make a GET to set up the session with a good token
     goodtoken = call(env) do |envy|
       envy[:csrf_token]

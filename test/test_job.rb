@@ -9,7 +9,7 @@ describe Sidekiq::Job do
     include Sidekiq::Job
   end
 
-  it 'adds job to queue' do
+  it "adds job to queue" do
     SomeJob.perform_async
     assert_equal "SomeJob", Sidekiq::Queue.new.first.klass
   end
