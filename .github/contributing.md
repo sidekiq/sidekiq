@@ -90,6 +90,11 @@ rails s
 git checkout -b new_feature_name
 ```
 
+### 11. Keep your forked branch up to date with changes in main repo
+```
+git pull upstream main
+```
+
 ## Legal
 
 By submitting a Pull Request, you disavow any rights or claims to any changes
