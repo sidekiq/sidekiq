@@ -1,4 +1,4 @@
-# Reducing Global API usage in Sidekiq
+# Reducing Global API usage in Sidekiq 7.0
 
 In Sidekiq 6.x, we rely heavily on top-level APIs and options within the Sidekiq module itself. APIs like `Sidekiq.options` are used everywhere to pull dynamic configuration.
 This makes Sidekiq incompatible with Ractors or embedding within other processes.
@@ -21,7 +21,7 @@ Sidekiq.configure_server do |config|
 end
 ```
 
-Let me be clear: `Sidekiq.configure_{client,server}` will remain supported for the
+To be clear: `Sidekiq.configure_{client,server}` will remain supported for the
 foreseeable future. How Sidekiq works by default will remain very, very similar but these
 small tweaks will allow a new mode of operation for Sidekiq and unlock a few, new usecases... 
 
