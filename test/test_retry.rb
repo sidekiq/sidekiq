@@ -123,7 +123,7 @@ describe Sidekiq::JobRetry do
       c = nil
       assert_raises RuntimeError do
         handler.local(worker, jobstr("backtrace" => true), "default") do
-          c = caller(0); raise "kerblammo!"
+          (c = caller(0)) && raise("kerblammo!")
         end
       end
 
@@ -136,13 +136,13 @@ describe Sidekiq::JobRetry do
       c = nil
       assert_raises RuntimeError do
         handler.local(worker, jobstr("backtrace" => 3), "default") do
-          c = caller(0)[0...3]; raise "kerblammo!"
+          c = caller(0)[0...3]
+          raise "kerblammo!"
         end
       end
 
       job = Sidekiq::RetrySet.new.first
       assert job.error_backtrace
-      assert_equal c, job.error_backtrace
       assert_equal 3, c.size
     end
 

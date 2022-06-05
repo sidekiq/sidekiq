@@ -106,11 +106,11 @@ describe Sidekiq::Scheduled do
     end
 
     def with_sidekiq_option(name, value)
-      _original, Sidekiq[name] = Sidekiq[name], value
+      original, Sidekiq[name] = Sidekiq[name], value
       begin
         yield
       ensure
-        Sidekiq[name] = _original
+        Sidekiq[name] = original
       end
     end
 

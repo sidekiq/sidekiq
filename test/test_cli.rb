@@ -20,7 +20,7 @@ describe Sidekiq::CLI do
     end
 
     subject do
-      Sidekiq::CLI.new.tap {|c| c.config = config }
+      Sidekiq::CLI.new.tap { |c| c.config = config }
     end
 
     def logdev

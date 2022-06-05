@@ -4,7 +4,7 @@ require_relative "helper"
 require "sidekiq/sd_notify"
 require "sidekiq/systemd"
 
-describe 'Systemd' do
+describe "Systemd" do
   before do
     ::Dir::Tmpname.create("sidekiq_socket") do |sockaddr|
       @sockaddr = sockaddr
@@ -16,7 +16,7 @@ describe 'Systemd' do
   end
 
   after do
-    @socket.close if @socket
+    @socket&.close
     File.unlink(@sockaddr) if @sockaddr
     @socket = nil
     @sockaddr = nil
@@ -26,7 +26,7 @@ describe 'Systemd' do
     @socket.recvfrom(10)[0]
   end
 
-  it 'notifies' do
+  it "notifies" do
     count = Sidekiq::SdNotify.ready
     assert_equal(socket_message, "READY=1")
     assert_equal(ENV["NOTIFY_SOCKET"], @sockaddr)

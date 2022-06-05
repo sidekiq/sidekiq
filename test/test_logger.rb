@@ -3,7 +3,7 @@
 require_relative "helper"
 require "sidekiq/logger"
 
-describe 'logger' do
+describe "logger" do
   before do
     @output = StringIO.new
     @logger = Sidekiq::Logger.new(@output)
@@ -19,24 +19,24 @@ describe 'logger' do
     Thread.current[:sidekiq_tid] = nil
   end
 
-  it 'tests default logger format' do
+  it "tests default logger format" do
     assert_kind_of Sidekiq::Logger::Formatters::Pretty, Sidekiq::Logger.new(@output).formatter
   end
 
-  it 'tests heroku logger formatter' do
+  it "tests heroku logger formatter" do
     ENV["DYNO"] = "dyno identifier"
     assert_kind_of Sidekiq::Logger::Formatters::WithoutTimestamp, Sidekiq::Logger.new(@output).formatter
   ensure
     ENV["DYNO"] = nil
   end
 
-  it 'tests json logger formatter' do
+  it "tests json logger formatter" do
     Sidekiq.log_formatter = Sidekiq::Logger::Formatters::JSON.new
 
     assert_kind_of Sidekiq::Logger::Formatters::JSON, Sidekiq::Logger.new(@output).formatter
   end
 
-  it 'tests with context' do
+  it "tests with context" do
     subject = Sidekiq::Context
     assert_equal({}, subject.current)
 
@@ -47,9 +47,9 @@ describe 'logger' do
     assert_equal({}, subject.current)
   end
 
-  it 'tests with overlapping context' do
+  it "tests with overlapping context" do
     subject = Sidekiq::Context
-    subject.current.merge!({foo: "bar"})
+    subject.current[:foo] = "bar"
     assert_equal({foo: "bar"}, subject.current)
 
     subject.with(foo: "bingo") do
@@ -59,7 +59,7 @@ describe 'logger' do
     assert_equal({foo: "bar"}, subject.current)
   end
 
-  it 'tests nested contexts' do
+  it "tests nested contexts" do
     subject = Sidekiq::Context
     assert_equal({}, subject.current)
 
@@ -76,7 +76,7 @@ describe 'logger' do
     assert_equal({}, subject.current)
   end
 
-  it 'tests formatted output' do
+  it "tests formatted output" do
     @logger.info("hello world")
     assert_match(/INFO: hello world/, @output.string)
     reset(@output)
@@ -96,7 +96,7 @@ describe 'logger' do
     end
   end
 
-  it 'makes sure json output is parseable' do
+  it "makes sure json output is parseable" do
     @logger.formatter = Sidekiq::Logger::Formatters::JSON.new
 
     @logger.debug("boom")
@@ -118,7 +118,7 @@ describe 'logger' do
     assert_equal "INFO", hash["lvl"]
   end
 
-  it 'tests forwards logger kwards' do
+  it "tests forwards logger kwards" do
     assert_silent do
       logger = Sidekiq::Logger.new("/dev/null", level: Logger::INFO)
 
@@ -126,7 +126,7 @@ describe 'logger' do
     end
   end
 
-  it 'tests log level query methods' do
+  it "tests log level query methods" do
     logger = Sidekiq::Logger.new("/dev/null", level: Logger::INFO)
 
     refute_predicate logger, :debug?

@@ -3,7 +3,7 @@
 require_relative "helper"
 require "sidekiq/job_logger"
 
-describe 'Job logger' do
+describe "Job logger" do
   before do
     @old = Sidekiq.logger
     @output = StringIO.new
@@ -20,7 +20,7 @@ describe 'Job logger' do
     Sidekiq.logger = @old
   end
 
-  it 'tests pretty output' do
+  it "tests pretty output" do
     jl = Sidekiq::JobLogger.new(@logger)
 
     # pretty
@@ -41,7 +41,7 @@ describe 'Job logger' do
     assert_match(/#{Time.now.utc.to_date}.+Z pid=#{$$} tid=#{p.tid} .+INFO: done/, b)
   end
 
-  it 'tests json output' do
+  it "tests json output" do
     # json
     @logger.formatter = Sidekiq::Logger::Formatters::JSON.new
     jl = Sidekiq::JobLogger.new(@logger)
@@ -60,7 +60,7 @@ describe 'Job logger' do
     assert_equal(["bid", "class", "jid", "tags"], keys)
   end
 
-  it 'tests custom log level' do
+  it "tests custom log level" do
     jl = Sidekiq::JobLogger.new(@logger)
     job = {"class" => "FooWorker", "log_level" => "debug"}
 
@@ -79,7 +79,7 @@ describe 'Job logger' do
     assert_match(/INFO: done/, c)
   end
 
-  it 'tests custom log level uses default log level for invalid value' do
+  it "tests custom log level uses default log level for invalid value" do
     jl = Sidekiq::JobLogger.new(@logger)
     job = {"class" => "FooWorker", "log_level" => "non_existent"}
 
@@ -94,7 +94,7 @@ describe 'Job logger' do
     assert_match(/WARN: Invalid log level/, log_level_warning)
   end
 
-  it 'tests custom logger with non numeric levels' do
+  it "tests custom logger with non numeric levels" do
     logger_class = Class.new(Logger) do
       def level
         :nonsense

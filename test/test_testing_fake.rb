@@ -250,7 +250,7 @@ describe "Sidekiq::Testing.fake" do
     assert_equal 1, SecondWorker.count
   end
 
-  it 'clears the jobs of workers having their queue name defined as a symbol' do
+  it "clears the jobs of workers having their queue name defined as a symbol" do
     assert_equal Symbol, AltQueueWorker.sidekiq_options["queue"].class
 
     AltQueueWorker.perform_async

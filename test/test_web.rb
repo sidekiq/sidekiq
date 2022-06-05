@@ -428,7 +428,7 @@ describe Sidekiq::Web do
 
   it "escape job args and error messages" do
     # on /retries page
-    params = add_xss_retry
+    add_xss_retry
     get "/retries"
     assert_equal 200, last_response.status
     assert_match(/FailWorker/, last_response.body)
