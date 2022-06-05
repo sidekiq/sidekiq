@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>class Sidekiq::Process - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../";
+  var index_rel_prefix = "../";
+</script>
+
+<script src="../js/jquery.js"></script>
+<script src="../js/darkfish.js"></script>
+
+<link href="../css/fonts.css" rel="stylesheet">
+<link href="../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../table_of_contents.html#pages">Pages</a>
+    <a href="../table_of_contents.html#classes">Classes</a>
+    <a href="../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link">Object
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-5B-5D">#[]</a>
+    
+    <li ><a href="#method-i-dump_threads">#dump_threads</a>
+    
+    <li ><a href="#method-i-identity">#identity</a>
+    
+    <li ><a href="#method-i-labels">#labels</a>
+    
+    <li ><a href="#method-i-queues">#queues</a>
+    
+    <li ><a href="#method-i-quiet-21">#quiet!</a>
+    
+    <li ><a href="#method-i-stop-21">#stop!</a>
+    
+    <li ><a href="#method-i-stopping-3F">#stopping?</a>
+    
+    <li ><a href="#method-i-tag">#tag</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-Sidekiq::Process">
+  <h1 id="class-Sidekiq::Process" class="class">
+    class Sidekiq::Process
+  </h1>
+
+  <section class="description">
+    
+<p><a href="Process.html">Sidekiq::Process</a> represents an active <a
+href="../Sidekiq.html">Sidekiq</a> process talking with Redis. Each process
+has a set of attributes which look like this:</p>
+
+<p>{</p>
+
+<pre>&#39;hostname&#39; =&gt; &#39;app-1.example.com&#39;,
+&#39;started_at&#39; =&gt; &lt;process start time&gt;,
+&#39;pid&#39; =&gt; 12345,
+&#39;tag&#39; =&gt; &#39;myapp&#39;
+&#39;concurrency&#39; =&gt; 25,
+&#39;queues&#39; =&gt; [&#39;default&#39;, &#39;low&#39;],
+&#39;busy&#39; =&gt; 10,
+&#39;beat&#39; =&gt; &lt;last heartbeat&gt;,
+&#39;identity&#39; =&gt; &lt;unique string identifying the process&gt;,</pre>
+
+<p>}</p>
+
+  </section>
+
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">(hash)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File api.rb, line 892</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">initialize</span>(<span class="ruby-identifier">hash</span>)
+  <span class="ruby-ivar">@attribs</span> = <span class="ruby-identifier">hash</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-5B-5D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">[]</span><span
+            class="method-args">(key)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="5B-5D-source">
+            <pre><span class="ruby-comment"># File api.rb, line 904</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">[]</span>(<span class="ruby-identifier">key</span>)
+  <span class="ruby-ivar">@attribs</span>[<span class="ruby-identifier">key</span>]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-dump_threads" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">dump_threads</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="dump_threads-source">
+            <pre><span class="ruby-comment"># File api.rb, line 924</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">dump_threads</span>
+  <span class="ruby-identifier">signal</span>(<span class="ruby-string">&quot;TTIN&quot;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-identity" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">identity</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="identity-source">
+            <pre><span class="ruby-comment"># File api.rb, line 908</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">identity</span>
+  <span class="ruby-keyword">self</span>[<span class="ruby-string">&quot;identity&quot;</span>]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-labels" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">labels</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="labels-source">
+            <pre><span class="ruby-comment"># File api.rb, line 900</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">labels</span>
+  <span class="ruby-constant">Array</span>(<span class="ruby-keyword">self</span>[<span class="ruby-string">&quot;labels&quot;</span>])
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-queues" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">queues</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="queues-source">
+            <pre><span class="ruby-comment"># File api.rb, line 912</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">queues</span>
+  <span class="ruby-keyword">self</span>[<span class="ruby-string">&quot;queues&quot;</span>]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-quiet-21" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">quiet!</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="quiet-21-source">
+            <pre><span class="ruby-comment"># File api.rb, line 916</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">quiet!</span>
+  <span class="ruby-identifier">signal</span>(<span class="ruby-string">&quot;TSTP&quot;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-stop-21" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">stop!</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="stop-21-source">
+            <pre><span class="ruby-comment"># File api.rb, line 920</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">stop!</span>
+  <span class="ruby-identifier">signal</span>(<span class="ruby-string">&quot;TERM&quot;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-stopping-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">stopping?</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="stopping-3F-source">
+            <pre><span class="ruby-comment"># File api.rb, line 928</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">stopping?</span>
+  <span class="ruby-keyword">self</span>[<span class="ruby-string">&quot;quiet&quot;</span>] <span class="ruby-operator">==</span> <span class="ruby-string">&quot;true&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-tag" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tag</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="tag-source">
+            <pre><span class="ruby-comment"># File api.rb, line 896</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">tag</span>
+  <span class="ruby-keyword">self</span>[<span class="ruby-string">&quot;tag&quot;</span>]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="https://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.1.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

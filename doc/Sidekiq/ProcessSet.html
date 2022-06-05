@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>class Sidekiq::ProcessSet - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../";
+  var index_rel_prefix = "../";
+</script>
+
+<script src="../js/jquery.js"></script>
+<script src="../js/darkfish.js"></script>
+
+<link href="../css/fonts.css" rel="stylesheet">
+<link href="../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../table_of_contents.html#pages">Pages</a>
+    <a href="../table_of_contents.html#classes">Classes</a>
+    <a href="../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link">Object
+  
+</div>
+
+    <div id="includes-section" class="nav-section">
+  <h3>Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><span class="include">Enumerable</span>
+  
+  
+  </ul>
+</div>
+
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-cleanup">#cleanup</a>
+    
+    <li ><a href="#method-i-each">#each</a>
+    
+    <li ><a href="#method-i-leader">#leader</a>
+    
+    <li ><a href="#method-i-size">#size</a>
+    
+    <li ><a href="#method-i-total_concurrency">#total_concurrency</a>
+    
+    <li ><a href="#method-i-total_rss">#total_rss</a>
+    
+    <li ><a href="#method-i-total_rss_in_kb">#total_rss_in_kb</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-Sidekiq::ProcessSet">
+  <h1 id="class-Sidekiq::ProcessSet" class="class">
+    class Sidekiq::ProcessSet
+  </h1>
+
+  <section class="description">
+    
+<p>Enumerates the set of <a href="../Sidekiq.html">Sidekiq</a> processes which
+are actively working right now.  Each process sends a heartbeat to Redis
+every 5 seconds so this set should be relatively accurate, barring network
+partitions.</p>
+
+<p>Yields a <a href="Process.html">Sidekiq::Process</a>.</p>
+
+  </section>
+
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">(clean_plz = true)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File api.rb, line 787</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">initialize</span>(<span class="ruby-identifier">clean_plz</span> = <span class="ruby-keyword">true</span>)
+  <span class="ruby-identifier">cleanup</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">clean_plz</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-cleanup" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">cleanup</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Cleans up dead processes recorded in Redis. Returns the number of processes
+cleaned.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="cleanup-source">
+            <pre><span class="ruby-comment"># File api.rb, line 793</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">cleanup</span>
+  <span class="ruby-identifier">count</span> = <span class="ruby-value">0</span>
+  <span class="ruby-constant">Sidekiq</span>.<span class="ruby-identifier">redis</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">conn</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">procs</span> = <span class="ruby-identifier">conn</span>.<span class="ruby-identifier">sscan_each</span>(<span class="ruby-string">&quot;processes&quot;</span>).<span class="ruby-identifier">to_a</span>.<span class="ruby-identifier">sort</span>
+    <span class="ruby-identifier">heartbeats</span> = <span class="ruby-identifier">conn</span>.<span class="ruby-identifier">pipelined</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">pipeline</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">procs</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">key</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">pipeline</span>.<span class="ruby-identifier">hget</span>(<span class="ruby-identifier">key</span>, <span class="ruby-string">&quot;info&quot;</span>)
+      <span class="ruby-keyword">end</span>
+    }
+
+    <span class="ruby-comment"># the hash named key has an expiry of 60 seconds.</span>
+    <span class="ruby-comment"># if it&#39;s not found, that means the process has not reported</span>
+    <span class="ruby-comment"># in to Redis and probably died.</span>
+    <span class="ruby-identifier">to_prune</span> = <span class="ruby-identifier">procs</span>.<span class="ruby-identifier">select</span>.<span class="ruby-identifier">with_index</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">proc</span>, <span class="ruby-identifier">i</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">heartbeats</span>[<span class="ruby-identifier">i</span>].<span class="ruby-identifier">nil?</span>
+    }
+    <span class="ruby-identifier">count</span> = <span class="ruby-identifier">conn</span>.<span class="ruby-identifier">srem</span>(<span class="ruby-string">&quot;processes&quot;</span>, <span class="ruby-identifier">to_prune</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">to_prune</span>.<span class="ruby-identifier">empty?</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">count</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-each" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">each</span><span
+            class="method-args">() { |process(merge(&quot;busy&quot; =&gt; to_i, &quot;beat&quot; =&gt; to_f, &quot;quiet&quot; =&gt; quiet, &quot;rss&quot; =&gt; to_i, &quot;rtt_us&quot; =&gt; to_i))| ... }</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="each-source">
+            <pre><span class="ruby-comment"># File api.rb, line 814</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">each</span>
+  <span class="ruby-identifier">result</span> = <span class="ruby-constant">Sidekiq</span>.<span class="ruby-identifier">redis</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">conn</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">procs</span> = <span class="ruby-identifier">conn</span>.<span class="ruby-identifier">sscan_each</span>(<span class="ruby-string">&quot;processes&quot;</span>).<span class="ruby-identifier">to_a</span>.<span class="ruby-identifier">sort</span>
+
+    <span class="ruby-comment"># We&#39;re making a tradeoff here between consuming more memory instead of</span>
+    <span class="ruby-comment"># making more roundtrips to Redis, but if you have hundreds or thousands of workers,</span>
+    <span class="ruby-comment"># you&#39;ll be happier this way</span>
+    <span class="ruby-identifier">conn</span>.<span class="ruby-identifier">pipelined</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">pipeline</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">procs</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">key</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">pipeline</span>.<span class="ruby-identifier">hmget</span>(<span class="ruby-identifier">key</span>, <span class="ruby-string">&quot;info&quot;</span>, <span class="ruby-string">&quot;busy&quot;</span>, <span class="ruby-string">&quot;beat&quot;</span>, <span class="ruby-string">&quot;quiet&quot;</span>, <span class="ruby-string">&quot;rss&quot;</span>, <span class="ruby-string">&quot;rtt_us&quot;</span>)
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+  }
+
+  <span class="ruby-identifier">result</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">info</span>, <span class="ruby-identifier">busy</span>, <span class="ruby-identifier">at_s</span>, <span class="ruby-identifier">quiet</span>, <span class="ruby-identifier">rss</span>, <span class="ruby-identifier">rtt</span><span class="ruby-operator">|</span>
+    <span class="ruby-comment"># If a process is stopped between when we query Redis for `procs` and</span>
+    <span class="ruby-comment"># when we query for `result`, we will have an item in `result` that is</span>
+    <span class="ruby-comment"># composed of `nil` values.</span>
+    <span class="ruby-keyword">next</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">info</span>.<span class="ruby-identifier">nil?</span>
+
+    <span class="ruby-identifier">hash</span> = <span class="ruby-constant">Sidekiq</span>.<span class="ruby-identifier">load_json</span>(<span class="ruby-identifier">info</span>)
+    <span class="ruby-keyword">yield</span> <span class="ruby-constant">Process</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">hash</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-string">&quot;busy&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">busy</span>.<span class="ruby-identifier">to_i</span>,
+      <span class="ruby-string">&quot;beat&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">at_s</span>.<span class="ruby-identifier">to_f</span>,
+      <span class="ruby-string">&quot;quiet&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">quiet</span>,
+      <span class="ruby-string">&quot;rss&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">rss</span>.<span class="ruby-identifier">to_i</span>,
+      <span class="ruby-string">&quot;rtt_us&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">rtt</span>.<span class="ruby-identifier">to_i</span>))
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-leader" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">leader</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns the identity of the current cluster leader or “” if no leader. This
+is a <a href="../Sidekiq.html">Sidekiq</a> Enterprise feature, will always
+return “” in <a href="../Sidekiq.html">Sidekiq</a> or <a
+href="../Sidekiq.html">Sidekiq</a> Pro.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="leader-source">
+            <pre><span class="ruby-comment"># File api.rb, line 866</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">leader</span>
+  <span class="ruby-ivar">@leader</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">begin</span>
+    <span class="ruby-identifier">x</span> = <span class="ruby-constant">Sidekiq</span>.<span class="ruby-identifier">redis</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">c</span><span class="ruby-operator">|</span> <span class="ruby-identifier">c</span>.<span class="ruby-identifier">get</span>(<span class="ruby-string">&quot;dear-leader&quot;</span>) }
+    <span class="ruby-comment"># need a non-falsy value so we can memoize</span>
+    <span class="ruby-identifier">x</span> <span class="ruby-operator">||=</span> <span class="ruby-string">&quot;&quot;</span>
+    <span class="ruby-identifier">x</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-size" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">size</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>This method is not guaranteed accurate since it does not prune the set
+based on current heartbeat.  <a
+href="ProcessSet.html#method-i-each">each</a> does that and ensures the set
+only contains <a href="../Sidekiq.html">Sidekiq</a> processes which have
+sent a heartbeat within the last 60 seconds.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="size-source">
+            <pre><span class="ruby-comment"># File api.rb, line 847</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">size</span>
+  <span class="ruby-constant">Sidekiq</span>.<span class="ruby-identifier">redis</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">conn</span><span class="ruby-operator">|</span> <span class="ruby-identifier">conn</span>.<span class="ruby-identifier">scard</span>(<span class="ruby-string">&quot;processes&quot;</span>) }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-total_concurrency" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">total_concurrency</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Total number of threads available to execute jobs. For <a
+href="../Sidekiq.html">Sidekiq</a> Enterprise customers this number (in
+production) must be less than or equal to your licensed concurrency.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="total_concurrency-source">
+            <pre><span class="ruby-comment"># File api.rb, line 854</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">total_concurrency</span>
+  <span class="ruby-identifier">sum</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">x</span><span class="ruby-operator">|</span> <span class="ruby-identifier">x</span>[<span class="ruby-string">&quot;concurrency&quot;</span>].<span class="ruby-identifier">to_i</span> }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-total_rss" class="method-detail method-alias">
+        
+        <div class="method-heading">
+          <span class="method-name">total_rss</span><span
+            class="method-args">()</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+        <div class="aliases">
+          Alias for: <a href="ProcessSet.html#method-i-total_rss_in_kb">total_rss_in_kb</a>
+        </div>
+        
+      </div>
+
+    
+      <div id="method-i-total_rss_in_kb" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">total_rss_in_kb</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="total_rss_in_kb-source">
+            <pre><span class="ruby-comment"># File api.rb, line 858</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">total_rss_in_kb</span>
+  <span class="ruby-identifier">sum</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">x</span><span class="ruby-operator">|</span> <span class="ruby-identifier">x</span>[<span class="ruby-string">&quot;rss&quot;</span>].<span class="ruby-identifier">to_i</span> }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+        <div class="aliases">
+          Also aliased as: <a href="ProcessSet.html#method-i-total_rss">total_rss</a>
+        </div>
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="https://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.1.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>class Sidekiq::SortedEntry - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../";
+  var index_rel_prefix = "../";
+</script>
+
+<script src="../js/jquery.js"></script>
+<script src="../js/darkfish.js"></script>
+
+<link href="../css/fonts.css" rel="stylesheet">
+<link href="../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../table_of_contents.html#pages">Pages</a>
+    <a href="../table_of_contents.html#classes">Classes</a>
+    <a href="../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link"><a href="JobRecord.html">Sidekiq::JobRecord</a>
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li class="calls-super" ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-add_to_queue">#add_to_queue</a>
+    
+    <li ><a href="#method-i-at">#at</a>
+    
+    <li ><a href="#method-i-delete">#delete</a>
+    
+    <li ><a href="#method-i-error-3F">#error?</a>
+    
+    <li ><a href="#method-i-kill">#kill</a>
+    
+    <li ><a href="#method-i-reschedule">#reschedule</a>
+    
+    <li ><a href="#method-i-retry">#retry</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-Sidekiq::SortedEntry">
+  <h1 id="class-Sidekiq::SortedEntry" class="class">
+    class Sidekiq::SortedEntry
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+    <section class="attribute-method-details" class="method-section">
+      <header>
+        <h3>Attributes</h3>
+      </header>
+
+      
+      <div id="attribute-i-parent" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">parent</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-score" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">score</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section>
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">(parent, score, item)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              <a href="JobRecord.html#method-c-new">Sidekiq::JobRecord.new</a>
+            </div>
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File api.rb, line 475</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">initialize</span>(<span class="ruby-identifier">parent</span>, <span class="ruby-identifier">score</span>, <span class="ruby-identifier">item</span>)
+  <span class="ruby-keyword">super</span>(<span class="ruby-identifier">item</span>)
+  <span class="ruby-ivar">@score</span> = <span class="ruby-constant">Float</span>(<span class="ruby-identifier">score</span>)
+  <span class="ruby-ivar">@parent</span> = <span class="ruby-identifier">parent</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-add_to_queue" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">add_to_queue</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="add_to_queue-source">
+            <pre><span class="ruby-comment"># File api.rb, line 499</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">add_to_queue</span>
+  <span class="ruby-identifier">remove_job</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">message</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">msg</span> = <span class="ruby-constant">Sidekiq</span>.<span class="ruby-identifier">load_json</span>(<span class="ruby-identifier">message</span>)
+    <span class="ruby-constant">Sidekiq</span><span class="ruby-operator">::</span><span class="ruby-constant">Client</span>.<span class="ruby-identifier">push</span>(<span class="ruby-identifier">msg</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-at" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">at</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="at-source">
+            <pre><span class="ruby-comment"># File api.rb, line 481</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">at</span>
+  <span class="ruby-constant">Time</span>.<span class="ruby-identifier">at</span>(<span class="ruby-identifier">score</span>).<span class="ruby-identifier">utc</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-delete" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">delete</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="delete-source">
+            <pre><span class="ruby-comment"># File api.rb, line 485</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">delete</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@value</span>
+    <span class="ruby-ivar">@parent</span>.<span class="ruby-identifier">delete_by_value</span>(<span class="ruby-ivar">@parent</span>.<span class="ruby-identifier">name</span>, <span class="ruby-ivar">@value</span>)
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-ivar">@parent</span>.<span class="ruby-identifier">delete_by_jid</span>(<span class="ruby-identifier">score</span>, <span class="ruby-identifier">jid</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-error-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">error?</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="error-3F-source">
+            <pre><span class="ruby-comment"># File api.rb, line 522</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">error?</span>
+  <span class="ruby-operator">!</span><span class="ruby-operator">!</span><span class="ruby-identifier">item</span>[<span class="ruby-string">&quot;error_class&quot;</span>]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-kill" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">kill</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Place job in the dead set</p>
+          
+          
+
+          
+          <div class="method-source-code" id="kill-source">
+            <pre><span class="ruby-comment"># File api.rb, line 516</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">kill</span>
+  <span class="ruby-identifier">remove_job</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">message</span><span class="ruby-operator">|</span>
+    <span class="ruby-constant">DeadSet</span>.<span class="ruby-identifier">new</span>.<span class="ruby-identifier">kill</span>(<span class="ruby-identifier">message</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-reschedule" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">reschedule</span><span
+            class="method-args">(at)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="reschedule-source">
+            <pre><span class="ruby-comment"># File api.rb, line 493</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">reschedule</span>(<span class="ruby-identifier">at</span>)
+  <span class="ruby-constant">Sidekiq</span>.<span class="ruby-identifier">redis</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">conn</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">conn</span>.<span class="ruby-identifier">zincrby</span>(<span class="ruby-ivar">@parent</span>.<span class="ruby-identifier">name</span>, <span class="ruby-identifier">at</span>.<span class="ruby-identifier">to_f</span> <span class="ruby-operator">-</span> <span class="ruby-ivar">@score</span>, <span class="ruby-constant">Sidekiq</span>.<span class="ruby-identifier">dump_json</span>(<span class="ruby-ivar">@item</span>))
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-retry" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">retry</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="retry-source">
+            <pre><span class="ruby-comment"># File api.rb, line 506</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">retry</span>
+  <span class="ruby-identifier ruby-title">remove_job</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">message</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">msg</span> = <span class="ruby-constant">Sidekiq</span>.<span class="ruby-identifier">load_json</span>(<span class="ruby-identifier">message</span>)
+    <span class="ruby-identifier">msg</span>[<span class="ruby-string">&quot;retry_count&quot;</span>] <span class="ruby-operator">-=</span> <span class="ruby-value">1</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">msg</span>[<span class="ruby-string">&quot;retry_count&quot;</span>]
+    <span class="ruby-constant">Sidekiq</span><span class="ruby-operator">::</span><span class="ruby-constant">Client</span>.<span class="ruby-identifier">push</span>(<span class="ruby-identifier">msg</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="https://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.1.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>class Sidekiq::Stats - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../";
+  var index_rel_prefix = "../";
+</script>
+
+<script src="../js/jquery.js"></script>
+<script src="../js/darkfish.js"></script>
+
+<link href="../css/fonts.css" rel="stylesheet">
+<link href="../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../table_of_contents.html#pages">Pages</a>
+    <a href="../table_of_contents.html#classes">Classes</a>
+    <a href="../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link">Object
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-dead_size">#dead_size</a>
+    
+    <li ><a href="#method-i-default_queue_latency">#default_queue_latency</a>
+    
+    <li ><a href="#method-i-enqueued">#enqueued</a>
+    
+    <li ><a href="#method-i-failed">#failed</a>
+    
+    <li ><a href="#method-i-fetch_stats-21">#fetch_stats!</a>
+    
+    <li ><a href="#method-i-fetch_stats_fast-21">#fetch_stats_fast!</a>
+    
+    <li ><a href="#method-i-fetch_stats_slow-21">#fetch_stats_slow!</a>
+    
+    <li ><a href="#method-i-processed">#processed</a>
+    
+    <li ><a href="#method-i-processes_size">#processes_size</a>
+    
+    <li ><a href="#method-i-queues">#queues</a>
+    
+    <li ><a href="#method-i-reset">#reset</a>
+    
+    <li ><a href="#method-i-retry_size">#retry_size</a>
+    
+    <li ><a href="#method-i-scheduled_size">#scheduled_size</a>
+    
+    <li ><a href="#method-i-workers_size">#workers_size</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-Sidekiq::Stats">
+  <h1 id="class-Sidekiq::Stats" class="class">
+    class Sidekiq::Stats
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File api.rb, line 9</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">initialize</span>
+  <span class="ruby-identifier">fetch_stats_fast!</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-dead_size" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">dead_size</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="dead_size-source">
+            <pre><span class="ruby-comment"># File api.rb, line 29</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">dead_size</span>
+  <span class="ruby-identifier">stat</span> <span class="ruby-value">:dead_size</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-default_queue_latency" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">default_queue_latency</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="default_queue_latency-source">
+            <pre><span class="ruby-comment"># File api.rb, line 45</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">default_queue_latency</span>
+  <span class="ruby-identifier">stat</span> <span class="ruby-value">:default_queue_latency</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-enqueued" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">enqueued</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="enqueued-source">
+            <pre><span class="ruby-comment"># File api.rb, line 33</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">enqueued</span>
+  <span class="ruby-identifier">stat</span> <span class="ruby-value">:enqueued</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-failed" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">failed</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="failed-source">
+            <pre><span class="ruby-comment"># File api.rb, line 17</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">failed</span>
+  <span class="ruby-identifier">stat</span> <span class="ruby-value">:failed</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-fetch_stats-21" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">fetch_stats!</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="fetch_stats-21-source">
+            <pre><span class="ruby-comment"># File api.rb, line 118</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">fetch_stats!</span>
+  <span class="ruby-identifier">fetch_stats_fast!</span>
+  <span class="ruby-identifier">fetch_stats_slow!</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-fetch_stats_fast-21" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">fetch_stats_fast!</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>O(1) redis calls</p>
+          
+          
+
+          
+          <div class="method-source-code" id="fetch_stats_fast-21-source">
+            <pre><span class="ruby-comment"># File api.rb, line 54</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">fetch_stats_fast!</span>
+  <span class="ruby-identifier">pipe1_res</span> = <span class="ruby-constant">Sidekiq</span>.<span class="ruby-identifier">redis</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">conn</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">conn</span>.<span class="ruby-identifier">pipelined</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">pipeline</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">pipeline</span>.<span class="ruby-identifier">get</span>(<span class="ruby-string">&quot;stat:processed&quot;</span>)
+      <span class="ruby-identifier">pipeline</span>.<span class="ruby-identifier">get</span>(<span class="ruby-string">&quot;stat:failed&quot;</span>)
+      <span class="ruby-identifier">pipeline</span>.<span class="ruby-identifier">zcard</span>(<span class="ruby-string">&quot;schedule&quot;</span>)
+      <span class="ruby-identifier">pipeline</span>.<span class="ruby-identifier">zcard</span>(<span class="ruby-string">&quot;retry&quot;</span>)
+      <span class="ruby-identifier">pipeline</span>.<span class="ruby-identifier">zcard</span>(<span class="ruby-string">&quot;dead&quot;</span>)
+      <span class="ruby-identifier">pipeline</span>.<span class="ruby-identifier">scard</span>(<span class="ruby-string">&quot;processes&quot;</span>)
+      <span class="ruby-identifier">pipeline</span>.<span class="ruby-identifier">lrange</span>(<span class="ruby-string">&quot;queue:default&quot;</span>, <span class="ruby-value">-1</span>, <span class="ruby-value">-1</span>)
+    <span class="ruby-keyword">end</span>
+  }
+
+  <span class="ruby-identifier">default_queue_latency</span> = <span class="ruby-keyword">if</span> (<span class="ruby-identifier">entry</span> = <span class="ruby-identifier">pipe1_res</span>[<span class="ruby-value">6</span>].<span class="ruby-identifier">first</span>)
+    <span class="ruby-identifier">job</span> = <span class="ruby-keyword">begin</span>
+      <span class="ruby-constant">Sidekiq</span>.<span class="ruby-identifier">load_json</span>(<span class="ruby-identifier">entry</span>)
+    <span class="ruby-keyword">rescue</span>
+      {}
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">now</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>.<span class="ruby-identifier">to_f</span>
+    <span class="ruby-identifier">thence</span> = <span class="ruby-identifier">job</span>[<span class="ruby-string">&quot;enqueued_at&quot;</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">now</span>
+    <span class="ruby-identifier">now</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">thence</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-value">0</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-ivar">@stats</span> = {
+    <span class="ruby-value">processed:</span> <span class="ruby-identifier">pipe1_res</span>[<span class="ruby-value">0</span>].<span class="ruby-identifier">to_i</span>,
+    <span class="ruby-value">failed:</span> <span class="ruby-identifier">pipe1_res</span>[<span class="ruby-value">1</span>].<span class="ruby-identifier">to_i</span>,
+    <span class="ruby-value">scheduled_size:</span> <span class="ruby-identifier">pipe1_res</span>[<span class="ruby-value">2</span>],
+    <span class="ruby-value">retry_size:</span> <span class="ruby-identifier">pipe1_res</span>[<span class="ruby-value">3</span>],
+    <span class="ruby-value">dead_size:</span> <span class="ruby-identifier">pipe1_res</span>[<span class="ruby-value">4</span>],
+    <span class="ruby-value">processes_size:</span> <span class="ruby-identifier">pipe1_res</span>[<span class="ruby-value">5</span>],
+
+    <span class="ruby-value">default_queue_latency:</span> <span class="ruby-identifier">default_queue_latency</span>
+  }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-fetch_stats_slow-21" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">fetch_stats_slow!</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>O(number of processes + number of queues) redis calls</p>
+          
+          
+
+          
+          <div class="method-source-code" id="fetch_stats_slow-21-source">
+            <pre><span class="ruby-comment"># File api.rb, line 93</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">fetch_stats_slow!</span>
+  <span class="ruby-identifier">processes</span> = <span class="ruby-constant">Sidekiq</span>.<span class="ruby-identifier">redis</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">conn</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">conn</span>.<span class="ruby-identifier">sscan_each</span>(<span class="ruby-string">&quot;processes&quot;</span>).<span class="ruby-identifier">to_a</span>
+  }
+
+  <span class="ruby-identifier">queues</span> = <span class="ruby-constant">Sidekiq</span>.<span class="ruby-identifier">redis</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">conn</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">conn</span>.<span class="ruby-identifier">sscan_each</span>(<span class="ruby-string">&quot;queues&quot;</span>).<span class="ruby-identifier">to_a</span>
+  }
+
+  <span class="ruby-identifier">pipe2_res</span> = <span class="ruby-constant">Sidekiq</span>.<span class="ruby-identifier">redis</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">conn</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">conn</span>.<span class="ruby-identifier">pipelined</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">pipeline</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">processes</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">key</span><span class="ruby-operator">|</span> <span class="ruby-identifier">pipeline</span>.<span class="ruby-identifier">hget</span>(<span class="ruby-identifier">key</span>, <span class="ruby-string">&quot;busy&quot;</span>) }
+      <span class="ruby-identifier">queues</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">queue</span><span class="ruby-operator">|</span> <span class="ruby-identifier">pipeline</span>.<span class="ruby-identifier">llen</span>(<span class="ruby-node">&quot;queue:#{queue}&quot;</span>) }
+    <span class="ruby-keyword">end</span>
+  }
+
+  <span class="ruby-identifier">s</span> = <span class="ruby-identifier">processes</span>.<span class="ruby-identifier">size</span>
+  <span class="ruby-identifier">workers_size</span> = <span class="ruby-identifier">pipe2_res</span>[<span class="ruby-value">0</span><span class="ruby-operator">...</span><span class="ruby-identifier">s</span>].<span class="ruby-identifier">sum</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:to_i</span>)
+  <span class="ruby-identifier">enqueued</span> = <span class="ruby-identifier">pipe2_res</span>[<span class="ruby-identifier">s</span><span class="ruby-operator">..</span><span class="ruby-value">-1</span>].<span class="ruby-identifier">sum</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:to_i</span>)
+
+  <span class="ruby-ivar">@stats</span>[<span class="ruby-value">:workers_size</span>] = <span class="ruby-identifier">workers_size</span>
+  <span class="ruby-ivar">@stats</span>[<span class="ruby-value">:enqueued</span>] = <span class="ruby-identifier">enqueued</span>
+  <span class="ruby-ivar">@stats</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-processed" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">processed</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="processed-source">
+            <pre><span class="ruby-comment"># File api.rb, line 13</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">processed</span>
+  <span class="ruby-identifier">stat</span> <span class="ruby-value">:processed</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-processes_size" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">processes_size</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="processes_size-source">
+            <pre><span class="ruby-comment"># File api.rb, line 37</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">processes_size</span>
+  <span class="ruby-identifier">stat</span> <span class="ruby-value">:processes_size</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-queues" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">queues</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="queues-source">
+            <pre><span class="ruby-comment"># File api.rb, line 49</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">queues</span>
+  <span class="ruby-constant">Sidekiq</span><span class="ruby-operator">::</span><span class="ruby-constant">Stats</span><span class="ruby-operator">::</span><span class="ruby-constant">Queues</span>.<span class="ruby-identifier">new</span>.<span class="ruby-identifier">lengths</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-reset" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">reset</span><span
+            class="method-args">(*stats)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="reset-source">
+            <pre><span class="ruby-comment"># File api.rb, line 123</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">reset</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">stats</span>)
+  <span class="ruby-identifier">all</span> = <span class="ruby-node">%w[failed processed]</span>
+  <span class="ruby-identifier">stats</span> = <span class="ruby-identifier">stats</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">all</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">all</span> <span class="ruby-operator">&amp;</span> <span class="ruby-identifier">stats</span>.<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:to_s</span>)
+
+  <span class="ruby-identifier">mset_args</span> = []
+  <span class="ruby-identifier">stats</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">stat</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">mset_args</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;stat:#{stat}&quot;</span>
+    <span class="ruby-identifier">mset_args</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-value">0</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-constant">Sidekiq</span>.<span class="ruby-identifier">redis</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">conn</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">conn</span>.<span class="ruby-identifier">mset</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">mset_args</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-retry_size" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">retry_size</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="retry_size-source">
+            <pre><span class="ruby-comment"># File api.rb, line 25</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">retry_size</span>
+  <span class="ruby-identifier">stat</span> <span class="ruby-value">:retry_size</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-scheduled_size" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">scheduled_size</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="scheduled_size-source">
+            <pre><span class="ruby-comment"># File api.rb, line 21</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">scheduled_size</span>
+  <span class="ruby-identifier">stat</span> <span class="ruby-value">:scheduled_size</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-workers_size" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">workers_size</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="workers_size-source">
+            <pre><span class="ruby-comment"># File api.rb, line 41</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">workers_size</span>
+  <span class="ruby-identifier">stat</span> <span class="ruby-value">:workers_size</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="https://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.1.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+
