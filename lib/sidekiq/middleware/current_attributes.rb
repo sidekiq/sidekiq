@@ -15,6 +15,8 @@ module Sidekiq
   #
   module CurrentAttributes
     class Save
+      include Sidekiq::ClientMiddleware
+
       def initialize(cattr)
         @klass = cattr
       end
@@ -31,6 +33,8 @@ module Sidekiq
     end
 
     class Load
+      include Sidekiq::ServerMiddleware
+
       def initialize(cattr)
         @klass = cattr
       end

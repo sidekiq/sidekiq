@@ -165,4 +165,28 @@ describe Sidekiq::Middleware do
       I18n.available_locales = nil
     end
   end
+
+  class FooC
+    include Sidekiq::ClientMiddleware
+    def initialize(*args)
+      @args = args
+    end
+
+    def call(w, j, q, rp)
+      redis { |c| c.incr(self.class.name) }
+      logger.info { |c| [self.class.name, @args].inspect }
+      yield
+    end
+  end
+
+  describe "configuration" do
+    it "gets an object which provides redis and logging" do
+      cfg = Sidekiq
+      chain = Sidekiq::Middleware::Chain.new(cfg)
+      chain.add FooC, foo: "bar"
+      final_action = nil
+      chain.invoke(nil, nil, nil, nil) { final_action = true }
+      assert final_action
+    end
+  end
 end

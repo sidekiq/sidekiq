@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "sidekiq/middleware/modules"
+
 module Sidekiq
   # Middleware is code configured to run before/after
   # a message is processed.  It is patterned after Rack
@@ -44,10 +46,12 @@ module Sidekiq
   # This is an example of a minimal server middleware:
   #
   # class MyServerHook
+  #   include Sidekiq::ServerMiddleware
   #   def call(job_instance, msg, queue)
-  #     puts "Before job"
+  #     logger.info "Before job"
+  #     redis {|conn| conn.get("foo") } # do something in Redis
   #     yield
-  #     puts "After job"
+  #     logger.info "After job"
   #   end
   # end
   #
@@ -56,10 +60,11 @@ module Sidekiq
   # to Redis:
   #
   # class MyClientHook
+  #   include Sidekiq::ClientMiddleware
   #   def call(job_class, msg, queue, redis_pool)
-  #     puts "Before push"
+  #     logger.info "Before push"
   #     result = yield
-  #     puts "After push"
+  #     logger.info "After push"
   #     result
   #   end
   # end
@@ -76,7 +81,8 @@ module Sidekiq
         entries.each(&block)
       end
 
-      def initialize
+      def initialize(config = nil)
+        @config = config
         @entries = nil
         yield self if block_given?
       end
@@ -91,24 +97,24 @@ module Sidekiq
 
       def add(klass, *args)
         remove(klass)
-        entries << Entry.new(klass, *args)
+        entries << Entry.new(@config, klass, *args)
       end
 
       def prepend(klass, *args)
         remove(klass)
-        entries.insert(0, Entry.new(klass, *args))
+        entries.insert(0, Entry.new(@config, klass, *args))
       end
 
       def insert_before(oldklass, newklass, *args)
         i = entries.index { |entry| entry.klass == newklass }
-        new_entry = i.nil? ? Entry.new(newklass, *args) : entries.delete_at(i)
+        new_entry = i.nil? ? Entry.new(@config, newklass, *args) : entries.delete_at(i)
         i = entries.index { |entry| entry.klass == oldklass } || 0
         entries.insert(i, new_entry)
       end
 
       def insert_after(oldklass, newklass, *args)
         i = entries.index { |entry| entry.klass == newklass }
-        new_entry = i.nil? ? Entry.new(newklass, *args) : entries.delete_at(i)
+        new_entry = i.nil? ? Entry.new(@config, newklass, *args) : entries.delete_at(i)
         i = entries.index { |entry| entry.klass == oldklass } || entries.count - 1
         entries.insert(i + 1, new_entry)
       end
@@ -149,13 +155,16 @@ module Sidekiq
     class Entry
       attr_reader :klass
 
-      def initialize(klass, *args)
+      def initialize(config, klass, *args)
+        @config = config
         @klass = klass
         @args = args
       end
 
       def make_new
-        @klass.new(*@args)
+        x = @klass.new(*@args)
+        x.config = @config if @config && x.respond_to?(:config=)
+        x
       end
     end
   end
