@@ -199,7 +199,7 @@ module Sidekiq
   end
 
   def self.client_middleware
-    @client_chain ||= Middleware::Chain.new
+    @client_chain ||= Middleware::Chain.new(self)
     yield @client_chain if block_given?
     @client_chain
   end
@@ -211,7 +211,7 @@ module Sidekiq
   end
 
   def self.default_server_middleware
-    Middleware::Chain.new
+    Middleware::Chain.new(self)
   end
 
   def self.default_worker_options=(hash) # deprecated

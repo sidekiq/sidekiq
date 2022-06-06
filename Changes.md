@@ -5,11 +5,12 @@
 6.5.0
 ---------
 
-- Substantial refactoring of Sidekiq server internals, as part of a larger effort to 
-  reduce Sidekiq's internal usage of global methods and data, see [docs/component.md](docs/component.md) and [docs/global_to_local.md](docs/global_to_local.md).
-- Add **beta** support for the `redis-client` gem**. This will become the default Redis driver in Sidekiq 7.0. [#5298]
+- Substantial refactoring of Sidekiq server internals, part of a larger effort
+  to reduce Sidekiq's internal usage of global methods and data, see [docs/component.md](docs/component.md),
+  [docs/global_to_local.md](docs/global_to_local.md) and [docs/middleware.md](docs/middleware.md).
+- **Add beta support for the `redis-client` gem**. This will become the default Redis driver in Sidekiq 7.0. [#5298]
   Read more: https://github.com/mperham/sidekiq/wiki/Using-redis-client
-- Add **beta** support for DB transaction-aware client [#5291]
+- **Add beta support for DB transaction-aware client** [#5291]
   Add this line to your initializer and any jobs created during a transaction
   will only be pushed to Redis **after the transaction commits**. You will need to add the
   `after_commit_everywhere` gem to your Gemfile.
