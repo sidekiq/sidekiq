@@ -4,6 +4,13 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+2.5.0
+-------------
+
+- Per the 2.0 upgrade notes, Sidekiq Enterprise will stop if you do not have valid
+  credentials configured on startup.
+- Internal refactoring for Sidekiq 6.5.
+
 2.3.1
 -------------
 

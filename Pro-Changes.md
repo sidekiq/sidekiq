@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+5.5.0
 ---------
 
 - DEPRECATION: remove support for statsd-ruby via `Sidekiq::Pro.statsd`.
@@ -20,6 +20,7 @@ end
 - Excise "worker" terminology from codebase [#4955]
 - Ensure batch callback metrics are always fired [#5217]
 - Added `error_type` tag for `job.failures` metrics [#5211]
+- Internal refactoring for Sidekiq 6.5.
 
 5.3.1
 ---------
