@@ -21,6 +21,7 @@ end
 - Ensure batch callback metrics are always fired [#5217]
 - Added `error_type` tag for `job.failures` metrics [#5211]
 - Internal refactoring for Sidekiq 6.5.
+- Requires Sidekiq 6.5.
 
 5.3.1
 ---------
