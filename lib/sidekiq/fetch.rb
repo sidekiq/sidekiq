@@ -3,7 +3,7 @@
 require "sidekiq"
 require "sidekiq/component"
 
-module Sidekiq
+module Sidekiq # :nodoc:
   class BasicFetch
     include Sidekiq::Component
     # We want the fetch operation to timeout every few seconds so the thread

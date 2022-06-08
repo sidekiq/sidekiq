@@ -12,7 +12,7 @@ require "sidekiq"
 require "sidekiq/component"
 require "sidekiq/launcher"
 
-module Sidekiq
+module Sidekiq # :nodoc:
   class CLI
     include Sidekiq::Component
     include Singleton unless $TESTING

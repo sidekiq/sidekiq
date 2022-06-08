@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Sidekiq
+module Sidekiq # :nodoc:
   module Extensions
     def self.enable_delay!
       warn "Sidekiq's Delayed Extensions will be removed in Sidekiq 7.0", uplevel: 1

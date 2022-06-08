@@ -281,14 +281,22 @@ module Sidekiq
     #
     # This is a slow, inefficient operation.  Do not use under
     # normal conditions.
+    #
+    # @param jid string - looks for job id within the queue
+    #
+    # @return success: A Sidekiq::JobRecord
+    # @return failure: nil
     def find_job(jid)
       detect { |j| j.jid == jid }
     end
 
+    ##
+    # multioperation transaction
+    #
     def clear
       Sidekiq.redis do |conn|
         conn.multi do |transaction|
-          transaction.unlink(@rname)
+          transaction.unlink(@rname) # high performance delete
           transaction.srem("queues", name)
         end
       end
@@ -318,7 +326,7 @@ module Sidekiq
       @queue = queue_name || @item["queue"]
     end
 
-    def parse(item)
+    def parse(item) # :nodoc:
       Sidekiq.load_json(item)
     rescue JSON::ParserError
       # If the job payload in Redis is invalid JSON, we'll load
@@ -329,7 +337,7 @@ module Sidekiq
       {}
     end
 
-    def klass
+    def klass # :nodoc:
       self["class"]
     end
 

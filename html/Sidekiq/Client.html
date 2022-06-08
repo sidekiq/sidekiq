@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>class Sidekiq::Client - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../";
+  var index_rel_prefix = "../";
+</script>
+
+<script src="../js/jquery.js"></script>
+<script src="../js/darkfish.js"></script>
+
+<link href="../css/fonts.css" rel="stylesheet">
+<link href="../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../table_of_contents.html#pages">Pages</a>
+    <a href="../table_of_contents.html#classes">Classes</a>
+    <a href="../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link">Object
+  
+</div>
+
+    <div id="includes-section" class="nav-section">
+  <h3>Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><span class="include">Sidekiq::JobUtil</span>
+  
+  
+  </ul>
+</div>
+
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-enqueue">::enqueue</a>
+    
+    <li ><a href="#method-c-enqueue_in">::enqueue_in</a>
+    
+    <li ><a href="#method-c-enqueue_to">::enqueue_to</a>
+    
+    <li ><a href="#method-c-enqueue_to_in">::enqueue_to_in</a>
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-c-push">::push</a>
+    
+    <li ><a href="#method-c-push_bulk">::push_bulk</a>
+    
+    <li ><a href="#method-c-via">::via</a>
+    
+    <li ><a href="#method-i-middleware">#middleware</a>
+    
+    <li ><a href="#method-i-push">#push</a>
+    
+    <li ><a href="#method-i-push_bulk">#push_bulk</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-Sidekiq::Client">
+  <h1 id="class-Sidekiq::Client" class="class">
+    class Sidekiq::Client
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+    <section class="attribute-method-details" class="method-section">
+      <header>
+        <h3>Attributes</h3>
+      </header>
+
+      
+      <div id="attribute-i-redis_pool" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">redis_pool</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section>
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-enqueue" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">enqueue</span><span
+            class="method-args">(klass, *args)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Resque compatibility helpers.  Note all helpers should go through
+Sidekiq::Job#client_push.</p>
+
+<p>Example usage:</p>
+
+<pre class="ruby"><span class="ruby-constant">Sidekiq</span><span class="ruby-operator">::</span><span class="ruby-constant">Client</span>.<span class="ruby-identifier">enqueue</span>(<span class="ruby-constant">MyJob</span>, <span class="ruby-string">&#39;foo&#39;</span>, <span class="ruby-value">1</span>, <span class="ruby-value">:bat</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-string">&#39;bar&#39;</span>)
+</pre>
+
+<p>Messages are enqueued to the &#39;default&#39; queue.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="enqueue-source">
+            <pre><span class="ruby-comment"># File lib/sidekiq/client.rb, line 161</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">enqueue</span>(<span class="ruby-identifier">klass</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
+  <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">client_push</span>(<span class="ruby-string">&quot;class&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">klass</span>, <span class="ruby-string">&quot;args&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">args</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-enqueue_in" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">enqueue_in</span><span
+            class="method-args">(interval, klass, *args)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Example usage:</p>
+
+<pre class="ruby"><span class="ruby-constant">Sidekiq</span><span class="ruby-operator">::</span><span class="ruby-constant">Client</span>.<span class="ruby-identifier">enqueue_in</span>(<span class="ruby-value">3</span>.<span class="ruby-identifier">minutes</span>, <span class="ruby-constant">MyJob</span>, <span class="ruby-string">&#39;foo&#39;</span>, <span class="ruby-value">1</span>, <span class="ruby-value">:bat</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-string">&#39;bar&#39;</span>)
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="enqueue_in-source">
+            <pre><span class="ruby-comment"># File lib/sidekiq/client.rb, line 189</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">enqueue_in</span>(<span class="ruby-identifier">interval</span>, <span class="ruby-identifier">klass</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
+  <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">perform_in</span>(<span class="ruby-identifier">interval</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-enqueue_to" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">enqueue_to</span><span
+            class="method-args">(queue, klass, *args)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Example usage:</p>
+
+<pre class="ruby"><span class="ruby-constant">Sidekiq</span><span class="ruby-operator">::</span><span class="ruby-constant">Client</span>.<span class="ruby-identifier">enqueue_to</span>(<span class="ruby-value">:queue_name</span>, <span class="ruby-constant">MyJob</span>, <span class="ruby-string">&#39;foo&#39;</span>, <span class="ruby-value">1</span>, <span class="ruby-value">:bat</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-string">&#39;bar&#39;</span>)
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="enqueue_to-source">
+            <pre><span class="ruby-comment"># File lib/sidekiq/client.rb, line 168</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">enqueue_to</span>(<span class="ruby-identifier">queue</span>, <span class="ruby-identifier">klass</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
+  <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">client_push</span>(<span class="ruby-string">&quot;queue&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">queue</span>, <span class="ruby-string">&quot;class&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">klass</span>, <span class="ruby-string">&quot;args&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">args</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-enqueue_to_in" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">enqueue_to_in</span><span
+            class="method-args">(queue, interval, klass, *args)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Example usage:</p>
+
+<pre class="ruby"><span class="ruby-constant">Sidekiq</span><span class="ruby-operator">::</span><span class="ruby-constant">Client</span>.<span class="ruby-identifier">enqueue_to_in</span>(<span class="ruby-value">:queue_name</span>, <span class="ruby-value">3</span>.<span class="ruby-identifier">minutes</span>, <span class="ruby-constant">MyJob</span>, <span class="ruby-string">&#39;foo&#39;</span>, <span class="ruby-value">1</span>, <span class="ruby-value">:bat</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-string">&#39;bar&#39;</span>)
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="enqueue_to_in-source">
+            <pre><span class="ruby-comment"># File lib/sidekiq/client.rb, line 175</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">enqueue_to_in</span>(<span class="ruby-identifier">queue</span>, <span class="ruby-identifier">interval</span>, <span class="ruby-identifier">klass</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
+  <span class="ruby-identifier">int</span> = <span class="ruby-identifier">interval</span>.<span class="ruby-identifier">to_f</span>
+  <span class="ruby-identifier">now</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>.<span class="ruby-identifier">to_f</span>
+  <span class="ruby-identifier">ts</span> = (<span class="ruby-identifier">int</span> <span class="ruby-operator">&lt;</span> <span class="ruby-value">1_000_000_000</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">now</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">int</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">int</span>)
+
+  <span class="ruby-identifier">item</span> = {<span class="ruby-string">&quot;class&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">klass</span>, <span class="ruby-string">&quot;args&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">args</span>, <span class="ruby-string">&quot;at&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">ts</span>, <span class="ruby-string">&quot;queue&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">queue</span>}
+  <span class="ruby-identifier">item</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-string">&quot;at&quot;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">ts</span> <span class="ruby-operator">&lt;=</span> <span class="ruby-identifier">now</span>
+
+  <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">client_push</span>(<span class="ruby-identifier">item</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">(redis_pool = nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href="Client.html">Sidekiq::Client</a> normally uses the default Redis
+pool but you may pass a custom ConnectionPool if you want to shard your <a
+href="../Sidekiq.html">Sidekiq</a> jobs across several Redis instances (for
+scalability reasons, e.g.)</p>
+
+<pre class="ruby"><span class="ruby-constant">Sidekiq</span><span class="ruby-operator">::</span><span class="ruby-constant">Client</span>.<span class="ruby-identifier">new</span>(<span class="ruby-constant">ConnectionPool</span>.<span class="ruby-identifier">new</span> { <span class="ruby-constant">Redis</span>.<span class="ruby-identifier">new</span> })
+</pre>
+
+<p>Generally this is only needed for very large <a
+href="../Sidekiq.html">Sidekiq</a> installs processing thousands of jobs
+per second.  I don&#39;t recommend sharding unless you cannot scale any
+other way (e.g. splitting your app into smaller apps).</p>
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File lib/sidekiq/client.rb, line 43</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">initialize</span>(<span class="ruby-identifier">redis_pool</span> = <span class="ruby-keyword">nil</span>)
+  <span class="ruby-ivar">@redis_pool</span> = <span class="ruby-identifier">redis_pool</span> <span class="ruby-operator">||</span> <span class="ruby-constant">Thread</span>.<span class="ruby-identifier">current</span>[<span class="ruby-value">:sidekiq_via_pool</span>] <span class="ruby-operator">||</span> <span class="ruby-constant">Sidekiq</span>.<span class="ruby-identifier">redis_pool</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-push" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">push</span><span
+            class="method-args">(item)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="push-source">
+            <pre><span class="ruby-comment"># File lib/sidekiq/client.rb, line 145</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">push</span>(<span class="ruby-identifier">item</span>)
+  <span class="ruby-identifier">new</span>.<span class="ruby-identifier">push</span>(<span class="ruby-identifier">item</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-push_bulk" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">push_bulk</span><span
+            class="method-args">(items)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="push_bulk-source">
+            <pre><span class="ruby-comment"># File lib/sidekiq/client.rb, line 149</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">push_bulk</span>(<span class="ruby-identifier">items</span>)
+  <span class="ruby-identifier">new</span>.<span class="ruby-identifier">push_bulk</span>(<span class="ruby-identifier">items</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-via" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">via</span><span
+            class="method-args">(pool) { || ... }</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Allows sharding of jobs across any number of Redis instances.  All jobs
+defined within the block will use the given Redis connection pool.</p>
+
+<pre class="ruby"><span class="ruby-identifier">pool</span> = <span class="ruby-constant">ConnectionPool</span>.<span class="ruby-identifier">new</span> { <span class="ruby-constant">Redis</span>.<span class="ruby-identifier">new</span> }
+<span class="ruby-constant">Sidekiq</span><span class="ruby-operator">::</span><span class="ruby-constant">Client</span>.<span class="ruby-identifier">via</span>(<span class="ruby-identifier">pool</span>) <span class="ruby-keyword">do</span>
+  <span class="ruby-constant">SomeJob</span>.<span class="ruby-identifier">perform_async</span>(<span class="ruby-value">1</span>,<span class="ruby-value">2</span>,<span class="ruby-value">3</span>)
+  <span class="ruby-constant">SomeOtherJob</span>.<span class="ruby-identifier">perform_async</span>(<span class="ruby-value">1</span>,<span class="ruby-value">2</span>,<span class="ruby-value">3</span>)
+<span class="ruby-keyword">end</span>
+</pre>
+
+<p>Generally this is only needed for very large <a
+href="../Sidekiq.html">Sidekiq</a> installs processing thousands of jobs
+per second.  I do not recommend sharding unless you cannot scale any other
+way (e.g. splitting your app into smaller apps).</p>
+          
+          
+
+          
+          <div class="method-source-code" id="via-source">
+            <pre><span class="ruby-comment"># File lib/sidekiq/client.rb, line 135</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier ruby-title">via</span>(<span class="ruby-identifier">pool</span>)
+  <span class="ruby-identifier">raise</span> <span class="ruby-constant">ArgumentError</span>, <span class="ruby-string">&quot;No pool given&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">pool</span>.<span class="ruby-identifier">nil?</span>
+  <span class="ruby-identifier">current_sidekiq_pool</span> = <span class="ruby-constant">Thread</span>.<span class="ruby-identifier">current</span>[<span class="ruby-value">:sidekiq_via_pool</span>]
+  <span class="ruby-constant">Thread</span>.<span class="ruby-identifier">current</span>[<span class="ruby-value">:sidekiq_via_pool</span>] = <span class="ruby-identifier">pool</span>
+  <span class="ruby-keyword">yield</span>
+<span class="ruby-keyword">ensure</span>
+  <span class="ruby-constant">Thread</span>.<span class="ruby-identifier">current</span>[<span class="ruby-value">:sidekiq_via_pool</span>] = <span class="ruby-identifier">current_sidekiq_pool</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-middleware" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">middleware</span><span
+            class="method-args">() { |chain| ... }</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Define client-side middleware:</p>
+
+<pre class="ruby"><span class="ruby-identifier">client</span> = <span class="ruby-constant">Sidekiq</span><span class="ruby-operator">::</span><span class="ruby-constant">Client</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">client</span>.<span class="ruby-identifier">middleware</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">chain</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">chain</span>.<span class="ruby-identifier">use</span> <span class="ruby-constant">MyClientMiddleware</span>
+<span class="ruby-keyword">end</span>
+<span class="ruby-identifier">client</span>.<span class="ruby-identifier">push</span>(<span class="ruby-string">&#39;class&#39;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-string">&#39;SomeJob&#39;</span>, <span class="ruby-string">&#39;args&#39;</span> <span class="ruby-operator">=&gt;</span> [<span class="ruby-value">1</span>,<span class="ruby-value">2</span>,<span class="ruby-value">3</span>])
+</pre>
+
+<p>All client instances default to the globally-defined
+Sidekiq.client_middleware but you can change as necessary.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="middleware-source">
+            <pre><span class="ruby-comment"># File lib/sidekiq/client.rb, line 22</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">middleware</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
+  <span class="ruby-ivar">@chain</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">Sidekiq</span>.<span class="ruby-identifier">client_middleware</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">block</span>
+    <span class="ruby-ivar">@chain</span> = <span class="ruby-ivar">@chain</span>.<span class="ruby-identifier">dup</span>
+    <span class="ruby-keyword">yield</span> <span class="ruby-ivar">@chain</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-ivar">@chain</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-push" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">push</span><span
+            class="method-args">(item)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>The main method used to push a job to Redis.  Accepts a number of options:</p>
+
+<pre>queue - the named queue to use, default &#39;default&#39;
+class - the job class to call, required
+args - an array of simple arguments to the perform method, must be JSON-serializable
+at - timestamp to schedule the job (optional), must be Numeric (e.g. Time.now.to_f)
+retry - whether to retry this job if it fails, default true or an integer number of retries
+backtrace - whether to save any error backtrace, default false</pre>
+
+<p>If class is set to the class name, the jobs&#39; options will be based on
+Sidekiq&#39;s default job options. Otherwise, they will be based on the job
+class&#39;s options.</p>
+
+<p>Any options valid for a job class&#39;s sidekiq_options are also available
+here.</p>
+
+<p>All options must be strings, not symbols.  NB: because we are serializing
+to JSON, all symbols in &#39;args&#39; will be converted to strings.  Note
+that +backtrace: true+ can take quite a bit of space in Redis; a large
+volume of failing jobs can start Redis swapping if you aren&#39;t careful.</p>
+
+<p>Returns a unique Job ID.  If middleware stops the job, nil will be returned
+instead.</p>
+
+<p>Example:</p>
+
+<pre class="ruby"><span class="ruby-identifier">push</span>(<span class="ruby-string">&#39;queue&#39;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-string">&#39;my_queue&#39;</span>, <span class="ruby-string">&#39;class&#39;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-constant">MyJob</span>, <span class="ruby-string">&#39;args&#39;</span> <span class="ruby-operator">=&gt;</span> [<span class="ruby-string">&#39;foo&#39;</span>, <span class="ruby-value">1</span>, <span class="ruby-value">:bat</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-string">&#39;bar&#39;</span>])
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="push-source">
+            <pre><span class="ruby-comment"># File lib/sidekiq/client.rb, line 71</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">push</span>(<span class="ruby-identifier">item</span>)
+  <span class="ruby-identifier">normed</span> = <span class="ruby-identifier">normalize_item</span>(<span class="ruby-identifier">item</span>)
+  <span class="ruby-identifier">payload</span> = <span class="ruby-identifier">middleware</span>.<span class="ruby-identifier">invoke</span>(<span class="ruby-identifier">item</span>[<span class="ruby-string">&quot;class&quot;</span>], <span class="ruby-identifier">normed</span>, <span class="ruby-identifier">normed</span>[<span class="ruby-string">&quot;queue&quot;</span>], <span class="ruby-ivar">@redis_pool</span>) <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">normed</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">payload</span>
+    <span class="ruby-identifier">verify_json</span>(<span class="ruby-identifier">payload</span>)
+    <span class="ruby-identifier">raw_push</span>([<span class="ruby-identifier">payload</span>])
+    <span class="ruby-identifier">payload</span>[<span class="ruby-string">&quot;jid&quot;</span>]
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-push_bulk" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">push_bulk</span><span
+            class="method-args">(items)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Push a large number of jobs to Redis. This method cuts out the redis
+network round trip latency.  I wouldn&#39;t recommend pushing more than
+1000 per call but YMMV based on network quality, size of job args, etc. A
+large number of jobs can cause a bit of Redis command processing latency.</p>
+
+<p>Takes the same arguments as <a href="Client.html#method-i-push">push</a>
+except that args is expected to be an Array of Arrays.  All other keys are
+duplicated for each job.  Each job is run through the client middleware
+pipeline and each job gets its own Job ID as normal.</p>
+
+<p>Returns an array of the of pushed jobs&#39; jids.  The number of jobs
+pushed can be less than the number given if the middleware stopped
+processing for one or more jobs.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="push_bulk-source">
+            <pre><span class="ruby-comment"># File lib/sidekiq/client.rb, line 96</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">push_bulk</span>(<span class="ruby-identifier">items</span>)
+  <span class="ruby-identifier">args</span> = <span class="ruby-identifier">items</span>[<span class="ruby-string">&quot;args&quot;</span>]
+  <span class="ruby-identifier">raise</span> <span class="ruby-constant">ArgumentError</span>, <span class="ruby-string">&quot;Bulk arguments must be an Array of Arrays: [[1], [2]]&quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">args</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Array</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">args</span>.<span class="ruby-identifier">all?</span>(<span class="ruby-constant">Array</span>)
+  <span class="ruby-keyword">return</span> [] <span class="ruby-keyword">if</span> <span class="ruby-identifier">args</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-comment"># no jobs to push</span>
+
+  <span class="ruby-identifier">at</span> = <span class="ruby-identifier">items</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-string">&quot;at&quot;</span>)
+  <span class="ruby-identifier">raise</span> <span class="ruby-constant">ArgumentError</span>, <span class="ruby-string">&quot;Job &#39;at&#39; must be a Numeric or an Array of Numeric timestamps&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">at</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-constant">Array</span>(<span class="ruby-identifier">at</span>).<span class="ruby-identifier">empty?</span> <span class="ruby-operator">||</span> <span class="ruby-operator">!</span><span class="ruby-constant">Array</span>(<span class="ruby-identifier">at</span>).<span class="ruby-identifier">all?</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">entry</span><span class="ruby-operator">|</span> <span class="ruby-identifier">entry</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Numeric</span>) })
+  <span class="ruby-identifier">raise</span> <span class="ruby-constant">ArgumentError</span>, <span class="ruby-string">&quot;Job &#39;at&#39; Array must have same size as &#39;args&#39; Array&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">at</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Array</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">at</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">args</span>.<span class="ruby-identifier">size</span>
+
+  <span class="ruby-identifier">jid</span> = <span class="ruby-identifier">items</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-string">&quot;jid&quot;</span>)
+  <span class="ruby-identifier">raise</span> <span class="ruby-constant">ArgumentError</span>, <span class="ruby-string">&quot;Explicitly passing &#39;jid&#39; when pushing more than one job is not supported&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">jid</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">args</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>
+
+  <span class="ruby-identifier">normed</span> = <span class="ruby-identifier">normalize_item</span>(<span class="ruby-identifier">items</span>)
+  <span class="ruby-identifier">payloads</span> = <span class="ruby-identifier">args</span>.<span class="ruby-identifier">map</span>.<span class="ruby-identifier">with_index</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">job_args</span>, <span class="ruby-identifier">index</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">copy</span> = <span class="ruby-identifier">normed</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-string">&quot;args&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">job_args</span>, <span class="ruby-string">&quot;jid&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-constant">SecureRandom</span>.<span class="ruby-identifier">hex</span>(<span class="ruby-value">12</span>))
+    <span class="ruby-identifier">copy</span>[<span class="ruby-string">&quot;at&quot;</span>] = (<span class="ruby-identifier">at</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Array</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">at</span>[<span class="ruby-identifier">index</span>] <span class="ruby-operator">:</span> <span class="ruby-identifier">at</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">at</span>
+    <span class="ruby-identifier">result</span> = <span class="ruby-identifier">middleware</span>.<span class="ruby-identifier">invoke</span>(<span class="ruby-identifier">items</span>[<span class="ruby-string">&quot;class&quot;</span>], <span class="ruby-identifier">copy</span>, <span class="ruby-identifier">copy</span>[<span class="ruby-string">&quot;queue&quot;</span>], <span class="ruby-ivar">@redis_pool</span>) <span class="ruby-keyword">do</span>
+      <span class="ruby-identifier">verify_json</span>(<span class="ruby-identifier">copy</span>)
+      <span class="ruby-identifier">copy</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">result</span> <span class="ruby-operator">||</span> <span class="ruby-keyword">nil</span>
+  }.<span class="ruby-identifier">compact</span>
+
+  <span class="ruby-identifier">raw_push</span>(<span class="ruby-identifier">payloads</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">payloads</span>.<span class="ruby-identifier">empty?</span>
+  <span class="ruby-identifier">payloads</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">payload</span><span class="ruby-operator">|</span> <span class="ruby-identifier">payload</span>[<span class="ruby-string">&quot;jid&quot;</span>] }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="https://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.1.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

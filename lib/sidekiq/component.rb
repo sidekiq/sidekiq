@@ -1,7 +1,7 @@
 module Sidekiq
   ##
   # Sidekiq::Component assumes a config instance is available at @config
-  module Component
+  module Component # :nodoc:
     attr_reader :config
 
     def watchdog(last_words)
