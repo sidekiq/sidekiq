@@ -1,6 +1,0 @@
-Mon, 06 Jun 2022 22:11:44 -0700
-docs/rdoc.rdoc	Mon, 06 Jun 2022 21:14:14 -0700
-lib/sidekiq/api.rb	Mon, 06 Jun 2022 22:11:39 -0700
-lib/sidekiq/client.rb	Sun, 29 May 2022 16:47:46 -0700
-lib/sidekiq/worker.rb	Sun, 29 May 2022 16:47:46 -0700
-lib/sidekiq/job.rb	Sun, 29 May 2022 16:47:46 -0700
