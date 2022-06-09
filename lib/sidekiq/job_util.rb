@@ -17,13 +17,13 @@ module Sidekiq
 
     def verify_json(item)
       job_class = item["wrapped"] || item["class"]
-      if Sidekiq.options[:on_complex_arguments] == :raise
+      if Sidekiq[:on_complex_arguments] == :raise
         msg = <<~EOM
           Job arguments to #{job_class} must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices.
           To disable this error, add `Sidekiq.strict_args!(false)` to your initializer.
         EOM
         raise(ArgumentError, msg) unless json_safe?(item)
-      elsif Sidekiq.options[:on_complex_arguments] == :warn
+      elsif Sidekiq[:on_complex_arguments] == :warn
         Sidekiq.logger.warn <<~EOM unless json_safe?(item)
           Job arguments to #{job_class} do not serialize to JSON safely. This will raise an error in
           Sidekiq 7.0. See https://github.com/mperham/sidekiq/wiki/Best-Practices or raise an error today

@@ -16,3 +16,4 @@ development.log
 /Makefile
 /docker-compose.yml
 Gemfile.lock
+*.DS_Store

@@ -4,7 +4,7 @@ gemspec
 
 gem "rake"
 gem "rails"
-gem "redis-client", github: "redis-rb/redis-client"
+gem "redis-client"
 
 # Required for Ruby 3.1
 # https://github.com/mikel/mail/pull/1439
@@ -15,6 +15,7 @@ gem "net-pop"
 gem "sqlite3", platforms: :ruby
 gem "activerecord-jdbcsqlite3-adapter", platforms: :jruby
 gem "after_commit_everywhere"
+gem "yard"
 
 group :test do
   gem "minitest"

@@ -3,7 +3,7 @@
 require_relative "helper"
 require "sidekiq/web"
 
-class TestWebHelpers < Minitest::Test
+describe "Web helpers" do
   class Helpers
     include Sidekiq::WebHelpers
 
@@ -33,7 +33,7 @@ class TestWebHelpers < Minitest::Test
     end
   end
 
-  def test_locale_determination
+  it "tests locale determination" do
     obj = Helpers.new
     assert_equal "en", obj.locale
 
@@ -89,7 +89,7 @@ class TestWebHelpers < Minitest::Test
     assert_equal "en", obj.locale
   end
 
-  def test_available_locales
+  it "tests available locales" do
     obj = Helpers.new
     expected = %w[
       ar cs da de el en es fa fr he hi it ja
@@ -99,7 +99,7 @@ class TestWebHelpers < Minitest::Test
     assert_equal expected, obj.available_locales.sort
   end
 
-  def test_display_illegal_args
+  it "tests displaying of illegal args" do
     o = Helpers.new
     s = o.display_args([1, 2, 3])
     assert_equal "1, 2, 3", s
@@ -111,12 +111,12 @@ class TestWebHelpers < Minitest::Test
     assert_equal "Invalid job payload, args is nil", s
   end
 
-  def test_to_query_string_escapes_bad_query_input
+  it "query string escapes bad query input" do
     obj = Helpers.new
     assert_equal "page=B%3CH", obj.to_query_string("page" => "B<H")
   end
 
-  def test_qparams_string_escapes_bad_query_input
+  it "qparams string escapes bad query input" do
     obj = Helpers.new
     obj.instance_eval do
       def params

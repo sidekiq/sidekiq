@@ -20,9 +20,10 @@ describe Sidekiq::Scheduled do
       @future_2 = {"class" => ScheduledWorker.name, "args" => [4], "queue" => "queue_5"}
       @future_3 = {"class" => ScheduledWorker.name, "args" => [5], "queue" => "queue_6"}
 
+      @config = Sidekiq
       @retry = Sidekiq::RetrySet.new
       @scheduled = Sidekiq::ScheduledSet.new
-      @poller = Sidekiq::Scheduled::Poller.new
+      @poller = Sidekiq::Scheduled::Poller.new(@config)
     end
 
     class MyStopper
@@ -105,11 +106,11 @@ describe Sidekiq::Scheduled do
     end
 
     def with_sidekiq_option(name, value)
-      _original, Sidekiq.options[name] = Sidekiq.options[name], value
+      original, Sidekiq[name] = Sidekiq[name], value
       begin
         yield
       ensure
-        Sidekiq.options[name] = _original
+        Sidekiq[name] = original
       end
     end
 

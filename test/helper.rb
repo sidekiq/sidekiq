@@ -28,7 +28,7 @@ end
 
 ENV["REDIS_URL"] ||= "redis://localhost/15"
 
-Sidekiq.logger = ::Logger.new(STDOUT)
+Sidekiq.logger = ::Logger.new($stdout)
 Sidekiq.logger.level = Logger::ERROR
 
 if ENV["SIDEKIQ_REDIS_CLIENT"]
@@ -46,5 +46,22 @@ def capture_logging(lvl = Logger::INFO)
     out.string
   ensure
     Sidekiq.logger = old
+  end
+end
+
+module Sidekiq
+  def self.reset!
+    @config = DEFAULTS.dup
+  end
+end
+
+Signal.trap("TTIN") do
+  Thread.list.each do |thread|
+    puts "Thread TID-#{(thread.object_id ^ ::Process.pid).to_s(36)} #{thread.name}"
+    if thread.backtrace
+      puts thread.backtrace.join("\n")
+    else
+      puts "<no backtrace available>"
+    end
   end
 end

@@ -9,18 +9,23 @@ require "erb"
 require "fileutils"
 
 require "sidekiq"
+require "sidekiq/component"
 require "sidekiq/launcher"
-require "sidekiq/util"
 
-module Sidekiq
+module Sidekiq # :nodoc:
   class CLI
-    include Util
+    include Sidekiq::Component
     include Singleton unless $TESTING
 
     attr_accessor :launcher
     attr_accessor :environment
+    attr_accessor :config
 
     def parse(args = ARGV.dup)
+      @config = Sidekiq
+      @config[:error_handlers].clear
+      @config[:error_handlers] << @config.method(:default_error_handler)
+
       setup_options(args)
       initialize_logger
       validate!
@@ -36,7 +41,7 @@ module Sidekiq
     def run(boot_app: true)
       boot_application if boot_app
 
-      if environment == "development" && $stdout.tty? && Sidekiq.log_formatter.is_a?(Sidekiq::Logger::Formatters::Pretty)
+      if environment == "development" && $stdout.tty? && @config.log_formatter.is_a?(Sidekiq::Logger::Formatters::Pretty)
         print_banner
       end
       logger.info "Booted Rails #{::Rails.version} application in #{environment} environment" if rails_app?
@@ -67,7 +72,7 @@ module Sidekiq
 
       # touch the connection pool so it is created before we
       # fire startup and start multithreading.
-      info = Sidekiq.redis_info
+      info = @config.redis_info
       ver = Gem::Version.new(info["redis_version"])
       raise "You are connecting to Redis #{ver}, Sidekiq requires Redis 6.2.0 or greater" if ver < Gem::Version.new("6.2.0")
 
@@ -85,22 +90,22 @@ module Sidekiq
 
       # Since the user can pass us a connection pool explicitly in the initializer, we
       # need to verify the size is large enough or else Sidekiq's performance is dramatically slowed.
-      cursize = Sidekiq.redis_pool.size
-      needed = Sidekiq.options[:concurrency] + 2
+      cursize = @config.redis_pool.size
+      needed = @config[:concurrency] + 2
       raise "Sidekiq's pool of #{cursize} Redis connections is too small, please increase the size to at least #{needed}" if cursize < needed
 
       # cache process identity
-      Sidekiq.options[:identity] = identity
+      @config[:identity] = identity
 
       # Touch middleware so it isn't lazy loaded by multiple threads, #3043
-      Sidekiq.server_middleware
+      @config.server_middleware
 
       # Before this point, the process is initializing with just the main thread.
       # Starting here the process will now have multiple threads running.
       fire_event(:startup, reverse: false, reraise: true)
 
-      logger.debug { "Client Middleware: #{Sidekiq.client_middleware.map(&:klass).join(", ")}" }
-      logger.debug { "Server Middleware: #{Sidekiq.server_middleware.map(&:klass).join(", ")}" }
+      logger.debug { "Client Middleware: #{@config.client_middleware.map(&:klass).join(", ")}" }
+      logger.debug { "Server Middleware: #{@config.server_middleware.map(&:klass).join(", ")}" }
 
       launch(self_read)
     end
@@ -110,7 +115,7 @@ module Sidekiq
         logger.info "Starting processing, hit Ctrl-C to stop"
       end
 
-      @launcher = Sidekiq::Launcher.new(options)
+      @launcher = Sidekiq::Launcher.new(@config)
 
       begin
         launcher.run
@@ -173,25 +178,25 @@ module Sidekiq
       # Heroku sends TERM and then waits 30 seconds for process to exit.
       "TERM" => ->(cli) { raise Interrupt },
       "TSTP" => ->(cli) {
-        Sidekiq.logger.info "Received TSTP, no longer accepting new work"
+        cli.logger.info "Received TSTP, no longer accepting new work"
         cli.launcher.quiet
       },
       "TTIN" => ->(cli) {
         Thread.list.each do |thread|
-          Sidekiq.logger.warn "Thread TID-#{(thread.object_id ^ ::Process.pid).to_s(36)} #{thread.name}"
+          cli.logger.warn "Thread TID-#{(thread.object_id ^ ::Process.pid).to_s(36)} #{thread.name}"
           if thread.backtrace
-            Sidekiq.logger.warn thread.backtrace.join("\n")
+            cli.logger.warn thread.backtrace.join("\n")
           else
-            Sidekiq.logger.warn "<no backtrace available>"
+            cli.logger.warn "<no backtrace available>"
           end
         end
       }
     }
-    UNHANDLED_SIGNAL_HANDLER = ->(cli) { Sidekiq.logger.info "No signal handler registered, ignoring" }
+    UNHANDLED_SIGNAL_HANDLER = ->(cli) { cli.logger.info "No signal handler registered, ignoring" }
     SIGNAL_HANDLERS.default = UNHANDLED_SIGNAL_HANDLER
 
     def handle_signal(sig)
-      Sidekiq.logger.debug "Got #{sig} signal"
+      logger.debug "Got #{sig} signal"
       SIGNAL_HANDLERS[sig].call(self)
     end
 
@@ -237,7 +242,7 @@ module Sidekiq
         config_dir = if File.directory?(opts[:require].to_s)
           File.join(opts[:require], "config")
         else
-          File.join(options[:require], "config")
+          File.join(@config[:require], "config")
         end
 
         %w[sidekiq.yml sidekiq.yml.erb].each do |config_file|
@@ -254,26 +259,22 @@ module Sidekiq
       opts[:concurrency] = Integer(ENV["RAILS_MAX_THREADS"]) if opts[:concurrency].nil? && ENV["RAILS_MAX_THREADS"]
 
       # merge with defaults
-      options.merge!(opts)
-    end
-
-    def options
-      Sidekiq.options
+      @config.merge!(opts)
     end
 
     def boot_application
       ENV["RACK_ENV"] = ENV["RAILS_ENV"] = environment
 
-      if File.directory?(options[:require])
+      if File.directory?(@config[:require])
         require "rails"
         if ::Rails::VERSION::MAJOR < 6
           warn "Sidekiq #{Sidekiq::VERSION} only supports Rails 6+"
         end
         require "sidekiq/rails"
-        require File.expand_path("#{options[:require]}/config/environment.rb")
-        options[:tag] ||= default_tag
+        require File.expand_path("#{@config[:require]}/config/environment.rb")
+        @config[:tag] ||= default_tag
       else
-        require options[:require]
+        require @config[:require]
       end
     end
 
@@ -290,8 +291,8 @@ module Sidekiq
     end
 
     def validate!
-      if !File.exist?(options[:require]) ||
-          (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))
+      if !File.exist?(@config[:require]) ||
+          (File.directory?(@config[:require]) && !File.exist?("#{@config[:require]}/config/application.rb"))
         logger.info "=================================================================="
         logger.info "  Please point Sidekiq to a Rails application or a Ruby file  "
         logger.info "  to load your job classes with -r [DIR|FILE]."
@@ -301,7 +302,7 @@ module Sidekiq
       end
 
       [:concurrency, :timeout].each do |opt|
-        raise ArgumentError, "#{opt}: #{options[opt]} is not a valid value" if options.key?(opt) && options[opt].to_i <= 0
+        raise ArgumentError, "#{opt}: #{@config[opt]} is not a valid value" if @config[opt].to_i <= 0
       end
     end
 
@@ -375,7 +376,7 @@ module Sidekiq
     end
 
     def initialize_logger
-      Sidekiq.logger.level = ::Logger::DEBUG if options[:verbose]
+      @config.logger.level = ::Logger::DEBUG if @config[:verbose]
     end
 
     def parse_config(path)

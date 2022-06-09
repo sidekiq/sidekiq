@@ -77,17 +77,15 @@ describe Sidekiq::Middleware do
   it "executes middleware in the proper order" do
     msg = Sidekiq.dump_json({"class" => CustomWorker.to_s, "args" => [$recorder]})
 
-    Sidekiq.server_middleware do |chain|
+    @config = Sidekiq
+    @config.server_middleware do |chain|
       # should only add once, second should replace the first
       2.times { |i| chain.add CustomMiddleware, i.to_s, $recorder }
       chain.insert_before CustomMiddleware, AnotherCustomMiddleware, "2", $recorder
       chain.insert_after AnotherCustomMiddleware, YetAnotherCustomMiddleware, "3", $recorder
     end
 
-    boss = Minitest::Mock.new
-    opts = {queues: ["default"]}
-    processor = Sidekiq::Processor.new(boss, opts)
-    boss.expect(:processor_done, nil, [processor])
+    processor = Sidekiq::Processor.new(@config) { |pr, ex| }
     processor.process(Sidekiq::BasicFetch::UnitOfWork.new("queue:default", msg))
     assert_equal %w[2 before 3 before 1 before work_performed 1 after 3 after 2 after], $recorder.flatten
   end
@@ -165,6 +163,30 @@ describe Sidekiq::Middleware do
 
       I18n.enforce_available_locales = false
       I18n.available_locales = nil
+    end
+  end
+
+  class FooC
+    include Sidekiq::ClientMiddleware
+    def initialize(*args)
+      @args = args
+    end
+
+    def call(w, j, q, rp)
+      redis { |c| c.incr(self.class.name) }
+      logger.info { |c| [self.class.name, @args].inspect }
+      yield
+    end
+  end
+
+  describe "configuration" do
+    it "gets an object which provides redis and logging" do
+      cfg = Sidekiq
+      chain = Sidekiq::Middleware::Chain.new(cfg)
+      chain.add FooC, foo: "bar"
+      final_action = nil
+      chain.invoke(nil, nil, nil, nil) { final_action = true }
+      assert final_action
     end
   end
 end

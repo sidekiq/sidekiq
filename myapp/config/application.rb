@@ -1,18 +1,16 @@
-require_relative 'boot'
+require_relative "boot"
 
-require 'rails'
-%w(
+require "rails"
+%w[
   active_record/railtie
   action_controller/railtie
   action_view/railtie
   action_mailer/railtie
   active_job/railtie
   sprockets/railtie
-).each do |railtie|
-  begin
-    require railtie
-  rescue LoadError
-  end
+].each do |railtie|
+  require railtie
+rescue LoadError
 end
 
 # Require the gems listed in Gemfile, including any gems

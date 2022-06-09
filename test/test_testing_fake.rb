@@ -51,7 +51,7 @@ describe "Sidekiq::Testing.fake" do
     assert_in_delta 10.seconds.from_now.to_f, DirectWorker.jobs.last["at"], 0.1
   end
 
-  it 'stubs the enqueue call' do
+  it "stubs the enqueue call" do
     assert_equal 0, EnqueuedWorker.jobs.size
     assert Sidekiq::Client.enqueue(EnqueuedWorker, 1, 2)
     assert_equal 1, EnqueuedWorker.jobs.size
@@ -210,6 +210,18 @@ describe "Sidekiq::Testing.fake" do
 
     assert_equal 1, FirstWorker.count
     assert_equal 1, SecondWorker.count
+  end
+
+  it "clears the jobs of workers having their queue name defined as a symbol" do
+    assert_equal Symbol, AltQueueWorker.sidekiq_options["queue"].class
+
+    AltQueueWorker.perform_async
+    assert_equal 1, AltQueueWorker.jobs.size
+    assert_equal 1, Sidekiq::Queues[AltQueueWorker.sidekiq_options["queue"].to_s].size
+
+    AltQueueWorker.clear
+    assert_equal 0, AltQueueWorker.jobs.size
+    assert_equal 0, Sidekiq::Queues[AltQueueWorker.sidekiq_options["queue"].to_s].size
   end
 
   it "drains jobs across all workers even when workers create new jobs" do

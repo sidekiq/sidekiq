@@ -5,6 +5,7 @@ fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 2.7.0." i
 
 require "sidekiq/logger"
 require "sidekiq/client"
+require "sidekiq/transaction_aware_client"
 require "sidekiq/job"
 require "sidekiq/worker_compatibility_alias"
 require "sidekiq/redis_client_adapter"
@@ -51,19 +52,79 @@ module Sidekiq
     puts "Take a deep breath and count to ten..."
   end
 
+  # config.concurrency = 5
+  def self.concurrency=(val)
+    self[:concurrency] = Integer(val)
+  end
+
+  # config.queues = %w( high default low )                 # strict
+  # config.queues = %w( high,3 default,2 low,1 )           # weighted
+  # config.queues = %w( feature1,1 feature2,1 feature3,1 ) # random
+  #
+  # With weighted priority, queue will be checked first (weight / total) of the time.
+  # high will be checked first (3/6) or 50% of the time.
+  # I'd recommend setting weights between 1-10. Weights in the hundreds or thousands
+  # are ridiculous and unnecessarily expensive. You can get random queue ordering
+  # by explicitly setting all weights to 1.
+  def self.queues=(val)
+    self[:queues] = Array(val).each_with_object([]) do |qstr, memo|
+      name, weight = qstr.split(",")
+      self[:strict] = false if weight.to_i > 0
+      [weight.to_i, 1].max.times do
+        memo << name
+      end
+    end
+  end
+
+  ### Private APIs
+  def self.default_error_handler(ex, ctx)
+    logger.warn(dump_json(ctx)) unless ctx.empty?
+    logger.warn("#{ex.class.name}: #{ex.message}")
+    logger.warn(ex.backtrace.join("\n")) unless ex.backtrace.nil?
+  end
+
+  @config = DEFAULTS.dup
   def self.options
-    @options ||= DEFAULTS.dup
+    logger.warn "`config.options[:key] = value` is deprecated, use `config[:key] = value`: #{caller(1..2)}"
+    @config
   end
 
   def self.options=(opts)
-    @options = opts
+    logger.warn "config.options = hash` is deprecated, use `config.merge!(hash)`: #{caller(1..2)}"
+    @config = opts
   end
+
+  def self.[](key)
+    @config[key]
+  end
+
+  def self.[]=(key, val)
+    @config[key] = val
+  end
+
+  def self.merge!(hash)
+    @config.merge!(hash)
+  end
+
+  def self.fetch(...)
+    @config.fetch(...)
+  end
+
+  def self.handle_exception(ex, ctx = {})
+    self[:error_handlers].each do |handler|
+      handler.call(ex, ctx)
+    rescue => ex
+      logger.error "!!! ERROR HANDLER THREW AN ERROR !!!"
+      logger.error ex
+      logger.error ex.backtrace.join("\n") unless ex.backtrace.nil?
+    end
+  end
+  ###
 
   ##
   # Configuration for Sidekiq server, use like:
   #
   #   Sidekiq.configure_server do |config|
-  #     config.redis = { :size => 25, :url => 'redis://myhost:8877/0' }
   #     config.server_middleware do |chain|
   #       chain.add MyServerHook
   #     end
@@ -76,7 +137,7 @@ module Sidekiq
   # Configuration for Sidekiq client, use like:
   #
   #   Sidekiq.configure_client do |config|
-  #     config.redis = { :size => 1, :url => 'redis://myhost:8877/0' }
+  #     config.redis = { size: 1, url: 'redis://myhost:8877/0' }
   #   end
   def self.configure_client
     yield self unless server?
@@ -131,7 +192,7 @@ module Sidekiq
   end
 
   def self.client_middleware
-    @client_chain ||= Middleware::Chain.new
+    @client_chain ||= Middleware::Chain.new(self)
     yield @client_chain if block_given?
     @client_chain
   end
@@ -143,7 +204,7 @@ module Sidekiq
   end
 
   def self.default_server_middleware
-    Middleware::Chain.new
+    Middleware::Chain.new(self)
   end
 
   def self.default_worker_options=(hash) # deprecated
@@ -172,7 +233,7 @@ module Sidekiq
   #   end
   # end
   def self.death_handlers
-    options[:death_handlers]
+    self[:death_handlers]
   end
 
   def self.load_json(string)
@@ -225,7 +286,7 @@ module Sidekiq
   #
   # See sidekiq/scheduled.rb for an in-depth explanation of this value
   def self.average_scheduled_poll_interval=(interval)
-    options[:average_scheduled_poll_interval] = interval
+    self[:average_scheduled_poll_interval] = interval
   end
 
   # Register a proc to handle any error which occurs within the Sidekiq process.
@@ -236,7 +297,7 @@ module Sidekiq
   #
   # The default error handler logs errors to Sidekiq.logger.
   def self.error_handlers
-    options[:error_handlers]
+    self[:error_handlers]
   end
 
   # Register a block to run at a point in the Sidekiq lifecycle.
@@ -249,12 +310,12 @@ module Sidekiq
   #   end
   def self.on(event, &block)
     raise ArgumentError, "Symbols only please: #{event}" unless event.is_a?(Symbol)
-    raise ArgumentError, "Invalid event name: #{event}" unless options[:lifecycle_events].key?(event)
-    options[:lifecycle_events][event] << block
+    raise ArgumentError, "Invalid event name: #{event}" unless self[:lifecycle_events].key?(event)
+    self[:lifecycle_events][event] << block
   end
 
   def self.strict_args!(mode = :raise)
-    options[:on_complex_arguments] = mode
+    self[:on_complex_arguments] = mode
   end
 
   # We are shutting down Sidekiq but what about threads that

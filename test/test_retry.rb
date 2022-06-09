@@ -5,28 +5,31 @@ require "sidekiq/scheduled"
 require "sidekiq/job_retry"
 require "sidekiq/api"
 
+class SomeWorker
+  include Sidekiq::Worker
+end
+
+class BadErrorMessage < StandardError
+  def message
+    raise "Ahhh, this isn't supposed to happen"
+  end
+end
+
 describe Sidekiq::JobRetry do
+  before do
+    Sidekiq.redis { |c| c.flushdb }
+    @config = Sidekiq
+    @config[:max_retries] = 25
+    @config[:error_handlers] << Sidekiq.method(:default_error_handler)
+  end
+
   describe "middleware" do
-    class SomeWorker
-      include Sidekiq::Worker
-    end
-
-    class BadErrorMessage < StandardError
-      def message
-        raise "Ahhh, this isn't supposed to happen"
-      end
-    end
-
-    before do
-      Sidekiq.redis { |c| c.flushdb }
-    end
-
     def worker
       @worker ||= SomeWorker.new
     end
 
-    def handler(options = {})
-      @handler ||= Sidekiq::JobRetry.new(options)
+    def handler
+      @handler ||= Sidekiq::JobRetry.new(@config)
     end
 
     def jobstr(options = {})
@@ -105,7 +108,8 @@ describe Sidekiq::JobRetry do
       1.upto(max_retries + 1) do |i|
         assert_raises RuntimeError do
           job = i > 1 ? jobstr("retry_count" => i - 2) : jobstr
-          handler(max_retries: max_retries).local(worker, job, "default") do
+          @config[:max_retries] = max_retries
+          handler.local(worker, job, "default") do
             raise "kerblammo!"
           end
         end
@@ -119,7 +123,7 @@ describe Sidekiq::JobRetry do
       c = nil
       assert_raises RuntimeError do
         handler.local(worker, jobstr("backtrace" => true), "default") do
-          c = caller(0); raise "kerblammo!"
+          (c = caller(0)) && raise("kerblammo!")
         end
       end
 
@@ -132,13 +136,13 @@ describe Sidekiq::JobRetry do
       c = nil
       assert_raises RuntimeError do
         handler.local(worker, jobstr("backtrace" => 3), "default") do
-          c = caller(0)[0...3]; raise "kerblammo!"
+          c = caller(0)[0...3]
+          raise "kerblammo!"
         end
       end
 
       job = Sidekiq::RetrySet.new.first
       assert job.error_backtrace
-      assert_equal c, job.error_backtrace
       assert_equal 3, c.size
     end
 
@@ -221,6 +225,7 @@ describe Sidekiq::JobRetry do
           raise "kerblammo!"
         end
       end
+      assert job, "No job found in retry set"
       assert_equal "default", job["queue"]
       assert_equal "kerblammo!", job["error_message"]
       assert_equal "RuntimeError", job["error_class"]
@@ -248,17 +253,6 @@ describe Sidekiq::JobRetry do
     end
 
     describe "custom retry delay" do
-      before do
-        @old_logger = Sidekiq.logger
-        @tmp_log_path = "/tmp/sidekiq-retries.log"
-        Sidekiq.logger = Logger.new(@tmp_log_path)
-      end
-
-      after do
-        Sidekiq.logger = @old_logger
-        File.unlink @tmp_log_path if File.exist?(@tmp_log_path)
-      end
-
       class CustomWorkerWithoutException
         include Sidekiq::Worker
 
@@ -315,9 +309,11 @@ describe Sidekiq::JobRetry do
       end
 
       it "falls back to the default retry on exception" do
-        refute_equal 4, handler.__send__(:delay_for, ErrorWorker, 2, StandardError.new)
+        output = capture_logging do
+          refute_equal 4, handler.__send__(:delay_for, ErrorWorker, 2, StandardError.new)
+        end
         assert_match(/Failure scheduling retry using the defined `sidekiq_retry_in`/,
-          File.read(@tmp_log_path), "Log entry missing for sidekiq_retry_in")
+          output, "Log entry missing for sidekiq_retry_in")
       end
     end
 
@@ -332,7 +328,7 @@ describe Sidekiq::JobRetry do
       end
 
       it "does not recurse infinitely checking if it's a shutdown" do
-        assert(!Sidekiq::JobRetry.new.send(
+        assert(!Sidekiq::JobRetry.new(@config).send(
           :exception_caused_by_shutdown?, @error
         ))
       end
@@ -357,7 +353,7 @@ describe Sidekiq::JobRetry do
       end
 
       it "does not recurse infinitely checking if it's a shutdown" do
-        assert(!Sidekiq::JobRetry.new.send(
+        assert(!Sidekiq::JobRetry.new(@config).send(
           :exception_caused_by_shutdown?, @error
         ))
       end

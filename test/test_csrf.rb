@@ -1,17 +1,19 @@
+# frozen_string_literal: true
+
 require_relative "./helper"
 require "sidekiq/web/csrf_protection"
 
-class TestCsrf < Minitest::Test
+describe "Csrf" do
   def session
     @session ||= {}
   end
 
   def env(method = :get, form_hash = {}, rack_session = session)
-    imp = StringIO.new("")
+    imp = StringIO.new
     {
       "REQUEST_METHOD" => method.to_s.upcase,
       "rack.session" => rack_session,
-      "rack.logger" => ::Logger.new(@logio ||= StringIO.new("")),
+      "rack.logger" => ::Logger.new(@logio ||= StringIO.new),
       "rack.input" => imp,
       "rack.request.form_input" => imp,
       "rack.request.form_hash" => form_hash
@@ -22,7 +24,7 @@ class TestCsrf < Minitest::Test
     Sidekiq::Web::CsrfProtection.new(block).call(env)
   end
 
-  def test_get
+  it "get" do
     ok = [200, {}, ["OK"]]
     first = 1
     second = 1
@@ -46,7 +48,7 @@ class TestCsrf < Minitest::Test
     refute_equal first, second
   end
 
-  def test_bad_post
+  it "bad post" do
     result = call(env(:post)) do
       raise "Shouldnt be called"
     end
@@ -58,7 +60,7 @@ class TestCsrf < Minitest::Test
     assert_match(/attack prevented/, @logio.string)
   end
 
-  def test_good_and_bad_posts
+  it "succeeds with good token" do
     # Make a GET to set up the session with a good token
     goodtoken = call(env) do |envy|
       envy[:csrf_token]
@@ -72,7 +74,9 @@ class TestCsrf < Minitest::Test
     refute_nil result
     assert_equal 200, result[0]
     assert_equal ["OK"], result[2]
+  end
 
+  it "fails with bad token" do
     # Make a POST with a known bad token
     result = call(env(:post, "authenticity_token" => "N0QRBD34tU61d7fi+0ZaF/35JLW/9K+8kk8dc1TZoK/0pTl7GIHap5gy7BWGsoKlzbMLRp1yaDpCDFwTJtxWAg==")) do
       raise "shouldnt be called"
@@ -82,7 +86,7 @@ class TestCsrf < Minitest::Test
     assert_equal ["Forbidden"], result[2]
   end
 
-  def test_empty_session_post
+  it "empty session post" do
     # Make a GET to set up the session with a good token
     goodtoken = call(env) do |envy|
       envy[:csrf_token]
@@ -98,7 +102,8 @@ class TestCsrf < Minitest::Test
     assert_equal ["Forbidden"], result[2]
   end
 
-  def test_empty_csrf_session_post
+  it "empty csrf session post" do
+    # Make a GET to set up the session with a good token
     goodtoken = call(env) do |envy|
       envy[:csrf_token]
     end

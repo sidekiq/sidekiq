@@ -38,12 +38,12 @@ module Sidekiq
     end
 
     initializer "sidekiq.rails_logger" do
-      Sidekiq.configure_server do |_|
+      Sidekiq.configure_server do |config|
         # This is the integration code necessary so that if a job uses `Rails.logger.info "Hello"`,
         # it will appear in the Sidekiq console with all of the job context. See #5021 and
         # https://github.com/rails/rails/blob/b5f2b550f69a99336482739000c58e4e04e033aa/railties/lib/rails/commands/server/server_command.rb#L82-L84
-        unless ::Rails.logger == ::Sidekiq.logger || ::ActiveSupport::Logger.logger_outputs_to?(::Rails.logger, $stdout)
-          ::Rails.logger.extend(::ActiveSupport::Logger.broadcast(::Sidekiq.logger))
+        unless ::Rails.logger == config.logger || ::ActiveSupport::Logger.logger_outputs_to?(::Rails.logger, $stdout)
+          ::Rails.logger.extend(::ActiveSupport::Logger.broadcast(config.logger))
         end
       end
     end
@@ -60,8 +60,8 @@ module Sidekiq
     #
     # None of this matters on the client-side, only within the Sidekiq process itself.
     config.after_initialize do
-      Sidekiq.configure_server do |_|
-        Sidekiq.options[:reloader] = Sidekiq::Rails::Reloader.new
+      Sidekiq.configure_server do |config|
+        config[:reloader] = Sidekiq::Rails::Reloader.new
       end
     end
   end

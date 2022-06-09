@@ -32,14 +32,14 @@ module Sidekiq
         elsif Sidekiq.server?
           # Give ourselves plenty of connections.  pool is lazy
           # so we won't create them until we need them.
-          Sidekiq.options[:concurrency] + 5
+          Sidekiq[:concurrency] + 5
         elsif ENV["RAILS_MAX_THREADS"]
           Integer(ENV["RAILS_MAX_THREADS"])
         else
           5
         end
 
-        verify_sizing(size, Sidekiq.options[:concurrency]) if Sidekiq.server?
+        verify_sizing(size, Sidekiq[:concurrency]) if Sidekiq.server?
 
         pool_timeout = symbolized_options[:pool_timeout] || 1
         log_info(symbolized_options)

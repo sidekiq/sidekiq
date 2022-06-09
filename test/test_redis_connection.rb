@@ -6,7 +6,7 @@ require "sidekiq/cli"
 describe Sidekiq::RedisConnection do
   describe "create" do
     before do
-      Sidekiq.options = Sidekiq::DEFAULTS.dup
+      Sidekiq.reset!
       @old = ENV["REDIS_URL"]
       ENV["REDIS_URL"] = "redis://localhost/15"
     end
@@ -60,14 +60,15 @@ describe Sidekiq::RedisConnection do
 
       it "defaults server pool sizes based on concurrency with padding" do
         _expected_padding = 5
-        prev_concurrency = Sidekiq.options[:concurrency]
-        Sidekiq.options[:concurrency] = 6
+        config = Sidekiq
+        prev_concurrency = config[:concurrency]
+        config[:concurrency] = 6
         pool = server_connection
 
         assert_equal 11, pool.instance_eval { @size }
         assert_equal 11, pool.instance_eval { @available.length }
       ensure
-        Sidekiq.options[:concurrency] = prev_concurrency
+        config[:concurrency] = prev_concurrency
       end
 
       it "defaults client pool sizes to 5" do

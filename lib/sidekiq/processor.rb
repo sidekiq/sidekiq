@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "sidekiq/util"
 require "sidekiq/fetch"
 require "sidekiq/job_logger"
 require "sidekiq/job_retry"
@@ -15,29 +14,30 @@ module Sidekiq
   #   b. run the middleware chain
   #   c. call #perform
   #
-  # A Processor can exit due to shutdown (processor_stopped)
-  # or due to an error during job execution (processor_died)
+  # A Processor can exit due to shutdown or due to
+  # an error during job execution.
   #
   # If an error occurs in the job execution, the
   # Processor calls the Manager to create a new one
   # to replace itself and exits.
   #
   class Processor
-    include Util
+    include Sidekiq::Component
 
     attr_reader :thread
     attr_reader :job
 
-    def initialize(mgr, options)
-      @mgr = mgr
+    def initialize(options, &block)
+      @callback = block
       @down = false
       @done = false
       @job = nil
       @thread = nil
+      @config = options
       @strategy = options[:fetch]
       @reloader = options[:reloader] || proc { |&block| block.call }
       @job_logger = (options[:job_logger] || Sidekiq::JobLogger).new
-      @retrier = Sidekiq::JobRetry.new
+      @retrier = Sidekiq::JobRetry.new(options)
     end
 
     def terminate(wait = false)
@@ -66,14 +66,14 @@ module Sidekiq
 
     def run
       process_one until @done
-      @mgr.processor_stopped(self)
+      @callback.call(self)
     rescue Sidekiq::Shutdown
-      @mgr.processor_stopped(self)
+      @callback.call(self)
     rescue Exception => ex
-      @mgr.processor_died(self, ex)
+      @callback.call(self, ex)
     end
 
-    def process_one
+    def process_one(&block)
       @job = fetch
       process(@job) if @job
       @job = nil
@@ -160,7 +160,7 @@ module Sidekiq
       ack = false
       begin
         dispatch(job_hash, queue, jobstr) do |inst|
-          Sidekiq.server_middleware.invoke(inst, job_hash, queue) do
+          @config.server_middleware.invoke(inst, job_hash, queue) do
             execute_job(inst, job_hash["args"])
           end
         end

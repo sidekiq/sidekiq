@@ -132,13 +132,13 @@ describe Sidekiq::Client do
     end
 
     describe "argument checking" do
-        before do
-          Sidekiq.strict_args!(false)
-        end
+      before do
+        Sidekiq.strict_args!(false)
+      end
 
-        after do
-          Sidekiq.strict_args!(:raise)
-        end
+      after do
+        Sidekiq.strict_args!(:raise)
+      end
 
       class InterestingWorker
         include Sidekiq::Worker

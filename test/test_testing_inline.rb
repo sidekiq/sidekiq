@@ -39,7 +39,7 @@ describe "Sidekiq::Testing.inline" do
     end
   end
 
-  it 'stubs the enqueue call when in testing mode' do
+  it "stubs the enqueue call when in testing mode" do
     assert Sidekiq::Client.enqueue(InlineWorker, true)
 
     assert_raises InlineError do

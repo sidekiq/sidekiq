@@ -2,20 +2,22 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+6.5.0
 ---------
 
-- Add **beta** support for the `redis-client` gem**. This will become the default Redis driver in Sidekiq 7.0. [#5298]
+- Substantial refactoring of Sidekiq server internals, part of a larger effort
+  to reduce Sidekiq's internal usage of global methods and data, see [docs/global_to_local.md](docs/global_to_local.md) and [docs/middleware.md](docs/middleware.md).
+- **Add beta support for the `redis-client` gem**. This will become the default Redis driver in Sidekiq 7.0. [#5298]
   Read more: https://github.com/mperham/sidekiq/wiki/Using-redis-client
-- Add **beta** support for DB transaction-aware client [#5291]
+- **Add beta support for DB transaction-aware client** [#5291]
   Add this line to your initializer and any jobs created during a transaction
   will only be pushed to Redis **after the transaction commits**. You will need to add the
   `after_commit_everywhere` gem to your Gemfile.
 ```ruby
 Sidekiq.transactional_push!
 ```
-  This feature is still beta quality; please try it out and let us know if you
-  have any issues. It will be fully supported in Sidekiq 7.0 or removed if it
+  This feature does not have a lot of production usage yet; please try it out and let us
+  know if you have any issues. It will be fully supported in Sidekiq 7.0 or removed if it
   proves problematic.
 - Fix regression with middleware arguments [#5312]
 
