@@ -6,10 +6,10 @@ require "rdoc/task"
 RDoc::Task.new do |rdoc|
   rdoc.main = "docs/rdoc.rdoc"
   rdoc.rdoc_files.include("docs/rdoc.rdoc",
-                          "lib/sidekiq/api.rb",
-                          "lib/sidekiq/client.rb",
-                          "lib/sidekiq/worker.rb",
-                          "lib/sidekiq/job.rb")
+    "lib/sidekiq/api.rb",
+    "lib/sidekiq/client.rb",
+    "lib/sidekiq/worker.rb",
+    "lib/sidekiq/job.rb")
 end
 
 Rake::TestTask.new(:test) do |test|

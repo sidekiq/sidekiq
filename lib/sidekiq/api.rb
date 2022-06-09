@@ -289,7 +289,7 @@ module Sidekiq
     # normal conditions.
     #
     # @param jid [String] the job_id to look for
-    # @return [Sidekiq::JobRecord] 
+    # @return [Sidekiq::JobRecord]
     # @return [nil] if not found
     def find_job(jid)
       detect { |j| j.jid == jid }
