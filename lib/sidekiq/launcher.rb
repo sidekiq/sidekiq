@@ -79,6 +79,8 @@ module Sidekiq
     end
 
     def clear_heartbeat
+      flush_stats
+
       # Remove record from Redis since we are shutting down.
       # Note we don't stop the heartbeat thread; if the process
       # doesn't actually exit, it'll reappear in the Web UI.
@@ -98,54 +100,44 @@ module Sidekiq
       ❤
     end
 
-    def self.flush_stats
-      fails = Processor::FAILURE.reset
-      procd = Processor::PROCESSED.reset
-      return if fails + procd == 0
+    def flush_stats
+      tracked = Processor::PROCESSED.reset
+      procd = tracked["total|p"]
+      fails = tracked["total|f"]
+      return if procd == 0
 
       nowdate = Time.now.utc.strftime("%Y-%m-%d")
-      begin
-        Sidekiq.redis do |conn|
-          conn.pipelined do |pipeline|
-            pipeline.incrby("stat:processed", procd)
-            pipeline.incrby("stat:processed:#{nowdate}", procd)
-            pipeline.expire("stat:processed:#{nowdate}", STATS_TTL)
 
-            pipeline.incrby("stat:failed", fails)
-            pipeline.incrby("stat:failed:#{nowdate}", fails)
-            pipeline.expire("stat:failed:#{nowdate}", STATS_TTL)
-          end
+      redis do |conn|
+        conn.pipelined do |pipeline|
+          pipeline.incrby("stat:processed", procd)
+          pipeline.incrby("stat:processed:#{nowdate}", procd)
+          pipeline.expire("stat:processed:#{nowdate}", STATS_TTL)
+
+          pipeline.incrby("stat:failed", fails)
+          pipeline.incrby("stat:failed:#{nowdate}", fails)
+          pipeline.expire("stat:failed:#{nowdate}", STATS_TTL)
         end
-      rescue => ex
-        # we're exiting the process, things might be shut down so don't
-        # try to handle the exception
-        Sidekiq.logger.warn("Unable to flush stats: #{ex}")
+
+        # Quietly seed the new 7.0 stats format so migration is painless.
+        conn.pipelined do |xa|
+          stats = "exec:#{nowdate}"
+          tracked.each_pair do |key, value|
+            xa.hincrby stats, key, value
+          end
+          xa.expire(stats, 90 * 24 * 60 * 60) # expires in 90 days
+        end
       end
     end
-    at_exit(&method(:flush_stats))
 
     def ❤
       key = identity
-      fails = procd = 0
 
       begin
-        fails = Processor::FAILURE.reset
-        procd = Processor::PROCESSED.reset
+        flush_stats
+
         curstate = Processor::WORK_STATE.dup
-
-        nowdate = Time.now.utc.strftime("%Y-%m-%d")
-
         redis do |conn|
-          conn.multi do |transaction|
-            transaction.incrby("stat:processed", procd)
-            transaction.incrby("stat:processed:#{nowdate}", procd)
-            transaction.expire("stat:processed:#{nowdate}", STATS_TTL)
-
-            transaction.incrby("stat:failed", fails)
-            transaction.incrby("stat:failed:#{nowdate}", fails)
-            transaction.expire("stat:failed:#{nowdate}", STATS_TTL)
-          end
-
           # work is the current set of executing jobs
           work_key = "#{key}:work"
           conn.pipelined do |transaction|
@@ -159,11 +151,10 @@ module Sidekiq
 
         rtt = check_rtt
 
-        fails = procd = 0
-        kb = memory_usage(::Process.pid)
+        kb = memory_usage($$)
 
-        _, exists, _, _, msg = redis { |conn|
-          conn.multi { |transaction|
+        _, exists, _, _, msg = redis do |conn|
+          conn.multi do |transaction|
             transaction.sadd("processes", key)
             transaction.exists?(key)
             transaction.hmset(key, "info", to_json,
@@ -174,21 +165,16 @@ module Sidekiq
               "rss", kb)
             transaction.expire(key, 60)
             transaction.rpop("#{key}-signals")
-          }
-        }
+          end
+        end
 
         # first heartbeat or recovering from an outage and need to reestablish our heartbeat
         fire_event(:heartbeat) unless exists
 
-        return unless msg
-
-        ::Process.kill(msg, ::Process.pid)
+        ::Process.kill(msg, $$) if msg
       rescue => e
         # ignore all redis/network issues
         logger.error("heartbeat: #{e}")
-        # don't lose the counts if there was a network issue
-        Processor::PROCESSED.incr(procd)
-        Processor::FAILURE.incr(fails)
       end
     end
 

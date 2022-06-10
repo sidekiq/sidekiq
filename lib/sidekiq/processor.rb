@@ -123,7 +123,7 @@ module Sidekiq
       @job_logger.prepare(job_hash) do
         @retrier.global(jobstr, queue) do
           @job_logger.call(job_hash, queue) do
-            stats(jobstr, queue) do
+            stats(jobstr, queue, job_hash["wrapped"] || job_hash["class"]) do
               # Rails 5 requires a Reloader to wrap code execution.  In order to
               # constantize the worker and instantiate an instance, we have to call
               # the Reloader.  It handles code loading, db connection management, etc.
@@ -196,28 +196,6 @@ module Sidekiq
       inst.perform(*cloned_args)
     end
 
-    # Ruby doesn't provide atomic counters out of the box so we'll
-    # implement something simple ourselves.
-    # https://bugs.ruby-lang.org/issues/14706
-    class Counter
-      def initialize
-        @value = 0
-        @lock = Mutex.new
-      end
-
-      def incr(amount = 1)
-        @lock.synchronize { @value += amount }
-      end
-
-      def reset
-        @lock.synchronize {
-          val = @value
-          @value = 0
-          val
-        }
-      end
-    end
-
     # jruby's Hash implementation is not threadsafe, so we wrap it in a mutex here
     class SharedWorkState
       def initialize
@@ -246,21 +224,66 @@ module Sidekiq
       end
     end
 
-    PROCESSED = Counter.new
-    FAILURE = Counter.new
+    class ExecutionTracker
+      def initialize
+        @hash = Hash.new(0)
+        @lock = Mutex.new
+      end
+
+      # We track success/failure and time per class and per queue.
+      # "q:default|ms" => 1755 means 1755ms executing jobs from the default queue
+      # "Foo::SomeJob|f" => 5 means Foo::SomeJob failed 5 times
+      #
+      # All of these values are rolled up into one "exec" Hash per day in Redis:
+      # "exec:2022-07-06", etc by the heartbeat.
+      def track(queue, klass)
+        start = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :millisecond)
+        time_ms = 0
+        begin
+          begin
+            yield
+          ensure
+            finish = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :millisecond)
+            time_ms = finish - start
+          end
+        rescue Exception
+          @lock.synchronize {
+            @hash["q:#{queue}|f"] += 1
+            @hash["#{klass}|f"] += 1
+            @hash["total|f"] += 1
+          }
+          raise
+        ensure
+          @lock.synchronize {
+            @hash["q:#{queue}|ms"] += time_ms
+            @hash["#{klass}|ms"] += time_ms
+            @hash["total|ms"] += time_ms
+            @hash["q:#{queue}|p"] += 1
+            @hash["#{klass}|p"] += 1
+            @hash["total|p"] += 1
+          }
+        end
+      end
+
+      def reset
+        @lock.synchronize {
+          val = @hash
+          @hash = Hash.new(0)
+          val
+        }
+      end
+    end
+
+    PROCESSED = ExecutionTracker.new
     WORK_STATE = SharedWorkState.new
 
-    def stats(jobstr, queue)
+    def stats(jobstr, queue, klass, &block)
       WORK_STATE.set(tid, {queue: queue, payload: jobstr, run_at: Time.now.to_i})
 
       begin
-        yield
-      rescue Exception
-        FAILURE.incr
-        raise
+        PROCESSED.track(queue, klass, &block)
       ensure
         WORK_STATE.delete(tid)
-        PROCESSED.incr
       end
     end
 
