@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Unbreak queue pausing [#5382]
+
 5.5.0
 ---------
 
