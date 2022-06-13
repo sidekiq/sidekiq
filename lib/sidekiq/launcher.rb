@@ -107,9 +107,9 @@ module Sidekiq
       return if procd == 0
 
       now = Time.now.utc
-      nowdate = now.strftime("%Y-%m-%d")
-      nowhour = now.strftime("%Y-%m-%d|%H")
-      nowmin = now.strftime("%Y-%m-%d|%H:%M")
+      nowdate = now.strftime("%Y%m%d")
+      nowhour = now.strftime("%Y%m%d|%H")
+      nowmin = now.strftime("%Y%m%d|%H:%M")
 
       redis do |conn|
         conn.pipelined do |pipeline|
@@ -127,7 +127,7 @@ module Sidekiq
           ["q", queues, nowdate, 90 * 24 * 60 * 60],
           ["j", jobs, nowhour, 7 * 24 * 60 * 60],
           ["q", queues, nowhour, 7 * 24 * 60 * 60],
-          ["j", jobs, nowmin, 24 * 60 * 60]
+          ["j", jobs, nowmin, 2 * 60 * 60]
           # don't want queue data per min, not really that useful IMO
         ].each do |prefix, data, bucket, ttl|
           # Quietly seed the new 7.0 stats format so migration is painless.
