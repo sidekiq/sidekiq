@@ -1,15 +1,18 @@
 require "bundler/gem_tasks"
 require "rake/testtask"
 require "standard/rake"
-require "rdoc/task"
+require "yard"
+require "yard/rake/yardoc_task"
 
-RDoc::Task.new do |rdoc|
-  rdoc.main = "docs/rdoc.rdoc"
-  rdoc.rdoc_files.include("docs/rdoc.rdoc",
+YARD::Rake::YardocTask.new do |yard|
+  yard.files = [
     "lib/sidekiq/api.rb",
     "lib/sidekiq/client.rb",
     "lib/sidekiq/worker.rb",
-    "lib/sidekiq/job.rb")
+    # "lib/sidekiq/job.rb",
+    "-",
+    "Changes.md",
+    "docs/menu.md"]
 end
 
 Rake::TestTask.new(:test) do |test|

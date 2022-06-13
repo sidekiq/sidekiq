@@ -517,7 +517,7 @@ module Sidekiq
 
     # Change the scheduled time for this job.
     #
-    # @param [Time] the new timestamp for this job
+    # @param at [Time] the new timestamp for this job
     def reschedule(at)
       Sidekiq.redis do |conn|
         conn.zincrby(@parent.name, at.to_f - @score, Sidekiq.dump_json(@item))
@@ -678,8 +678,7 @@ module Sidekiq
     # Fetch jobs that match a given time or Range. Job ID is an
     # optional second argument.
     #
-    # @param score [Time] a specific timestamp
-    # @param score [Range] a timestamp range
+    # @param score [Time,Range] a specific timestamp or range
     # @param jid [String, optional] find a specific JID within the score
     # @return [Array<SortedEntry>] any results found, can be empty
     def fetch(score, jid = nil)
@@ -706,7 +705,7 @@ module Sidekiq
     # *This is a slow O(n) operation*.  Do not use for app logic.
     #
     # @param jid [String] the job identifier
-    # @returns [SortedEntry] the record or nil
+    # @return [SortedEntry] the record or nil
     def find_job(jid)
       Sidekiq.redis do |conn|
         conn.zscan_each(name, match: "*#{jid}*", count: 100) do |entry, score|
