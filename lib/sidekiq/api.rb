@@ -202,9 +202,10 @@ module Sidekiq
   end
 
   ##
-  # Encapsulates a queue within Sidekiq.
+  # Represents a queue within Sidekiq.
   # Allows enumeration of all jobs within the queue
-  # and deletion of jobs.
+  # and deletion of jobs. NB: this queue data is real-time
+  # and is changing within Redis moment by moment.
   #
   #   queue = Sidekiq::Queue.new("mailer")
   #   queue.each do |job|
@@ -296,6 +297,7 @@ module Sidekiq
     end
 
     # delete all jobs within this queue
+    # @return [Boolean] true
     def clear
       Sidekiq.redis do |conn|
         conn.multi do |transaction|
@@ -303,6 +305,7 @@ module Sidekiq
           transaction.srem("queues", name)
         end
       end
+      true
     end
     alias_method :💣, :clear
 
@@ -312,15 +315,18 @@ module Sidekiq
   end
 
   ##
-  # Encapsulates a pending job within a Sidekiq queue or
-  # sorted set.
+  # Represents a pending job within a Sidekiq queue.
   #
   # The job should be considered immutable but may be
   # removed from the queue via JobRecord#delete.
   #
   class JobRecord
+
+    # the parsed Hash of job data
     attr_reader :item
+    # the underlying String in Redis
     attr_reader :value
+    # the queue associated with this job
     attr_reader :queue
 
     def initialize(item, queue_name = nil) # :nodoc:
@@ -341,6 +347,8 @@ module Sidekiq
       {}
     end
 
+    # This is the job class which Sidekiq will execute. If using ActiveJob,
+    # this class will be the ActiveJob adapter class rather than a specific job.
     def klass
       self["class"]
     end
@@ -480,7 +488,9 @@ module Sidekiq
   end
 
   # Represents a job within a Redis sorted set where the score
-  # represents a timestamp for the job.
+  # represents a timestamp associated with the job. This timestamp
+  # could be the scheduled time for it to run (e.g. scheduled set),
+  # or the expiration date after which the entry should be deleted (e.g. dead set).
   class SortedEntry < JobRecord
     attr_reader :score
     attr_reader :parent
@@ -491,10 +501,12 @@ module Sidekiq
       @parent = parent
     end
 
+    # The timestamp associated with this entry
     def at
       Time.at(score).utc
     end
 
+    # remove this entry from the sorted set
     def delete
       if @value
         @parent.delete_by_value(@parent.name, @value)
@@ -505,7 +517,7 @@ module Sidekiq
 
     # Change the scheduled time for this job.
     #
-    # @param [Time] the new timestamp when this job will be enqueued.
+    # @param [Time] the new timestamp for this job
     def reschedule(at)
       Sidekiq.redis do |conn|
         conn.zincrby(@parent.name, at.to_f - @score, Sidekiq.dump_json(@item))
@@ -579,20 +591,30 @@ module Sidekiq
     end
   end
 
+  # Base class for all sorted sets within Sidekiq, e.g. scheduled, retry and dead.
+  # Sidekiq Pro and Enterprise add additional sorted sets for Batches, etc.
   class SortedSet
     include Enumerable
 
+    # Redis key of the set
     attr_reader :name
 
-    def initialize(name)
+    def initialize(name) # :nodoc:
       @name = name
       @_size = size
     end
 
+    # real-time size of the set, will change
     def size
       Sidekiq.redis { |c| c.zcard(name) }
     end
 
+    # Scan through each element of the sorted set, yielding each to the supplied block.
+    # Please see Redis's <a href="https://redis.io/commands/scan/">SCAN documentation</a> for implementation details.
+    # 
+    # @param match [String] a snippet or regexp to filter matches
+    # @param count [Integer] number of elements to retrieve at a time, default 100
+    # @yieldparam [SortedEntry] each entry
     def scan(match, count = 100)
       return to_enum(:scan, match, count) unless block_given?
 
