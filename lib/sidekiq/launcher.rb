@@ -101,12 +101,15 @@ module Sidekiq
     end
 
     def flush_stats
-      tracked = Processor::PROCESSED.reset
-      procd = tracked["total|p"]
-      fails = tracked["total|f"]
+      totals, queues, jobs = Processor::PROCESSED.reset
+      procd = totals["p"]
+      fails = totals["f"]
       return if procd == 0
 
-      nowdate = Time.now.utc.strftime("%Y-%m-%d")
+      now = Time.now.utc
+      nowdate = now.strftime("%Y-%m-%d")
+      nowhour = now.strftime("%Y-%m-%d|%H")
+      nowmin = now.strftime("%Y-%m-%d|%H:%M")
 
       redis do |conn|
         conn.pipelined do |pipeline|
@@ -119,13 +122,23 @@ module Sidekiq
           pipeline.expire("stat:failed:#{nowdate}", STATS_TTL)
         end
 
-        # Quietly seed the new 7.0 stats format so migration is painless.
-        conn.pipelined do |xa|
-          stats = "exec:#{nowdate}"
-          tracked.each_pair do |key, value|
-            xa.hincrby stats, key, value
+        [
+          ["j", jobs, nowdate, 90 * 24 * 60 * 60],
+          ["q", queues, nowdate, 90 * 24 * 60 * 60],
+          ["j", jobs, nowhour, 7 * 24 * 60 * 60],
+          ["q", queues, nowhour, 7 * 24 * 60 * 60],
+          ["j", jobs, nowmin, 24 * 60 * 60]
+          # don't want queue data per min, not really that useful IMO
+        ].each do |prefix, data, bucket, ttl|
+          # Quietly seed the new 7.0 stats format so migration is painless.
+          conn.pipelined do |xa|
+            stats = "#{prefix}|#{bucket}"
+            logger.info "Flushing metrics #{stats}"
+            data.each_pair do |key, value|
+              xa.hincrby stats, key, value
+            end
+            xa.expire(stats, ttl)
           end
-          xa.expire(stats, 90 * 24 * 60 * 60) # expires in 90 days
         end
       end
     end

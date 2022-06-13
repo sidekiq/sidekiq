@@ -226,7 +226,9 @@ module Sidekiq
 
     class ExecutionTracker
       def initialize
-        @hash = Hash.new(0)
+        @queues = Hash.new(0)
+        @jobs = Hash.new(0)
+        @totals = Hash.new(0)
         @lock = Mutex.new
       end
 
@@ -248,28 +250,32 @@ module Sidekiq
           end
         rescue Exception
           @lock.synchronize {
-            @hash["q:#{queue}|f"] += 1
-            @hash["#{klass}|f"] += 1
-            @hash["total|f"] += 1
+            @queues["#{queue}|f"] += 1
+            @jobs["#{klass}|f"] += 1
+            @totals["f"] += 1
           }
           raise
         ensure
           @lock.synchronize {
-            @hash["q:#{queue}|ms"] += time_ms
-            @hash["#{klass}|ms"] += time_ms
-            @hash["total|ms"] += time_ms
-            @hash["q:#{queue}|p"] += 1
-            @hash["#{klass}|p"] += 1
-            @hash["total|p"] += 1
+            @queues["#{queue}|ms"] += time_ms
+            @queues["#{queue}|p"] += 1
+
+            @jobs["#{klass}|ms"] += time_ms
+            @jobs["#{klass}|p"] += 1
+
+            @totals["ms"] += time_ms
+            @totals["p"] += 1
           }
         end
       end
 
       def reset
         @lock.synchronize {
-          val = @hash
-          @hash = Hash.new(0)
-          val
+          array = [@totals, @queues, @jobs]
+          @totals = Hash.new(0)
+          @queues = Hash.new(0)
+          @jobs = Hash.new(0)
+          array
         }
       end
     end
