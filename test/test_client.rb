@@ -271,13 +271,16 @@ describe Sidekiq::Client do
       assert_equal 1_000, jids.size
     end
 
-    it "can push jobs scheduled at different times" do
-      first_at = Time.new(2019, 1, 1)
-      second_at = Time.new(2019, 1, 2)
-      jids = Sidekiq::Client.push_bulk("class" => QueuedWorker, "args" => [[1], [2]], "at" => [first_at.to_f, second_at.to_f])
-      (first_jid, second_jid) = jids
-      assert_equal first_at, Sidekiq::ScheduledSet.new.find_job(first_jid).at
-      assert_equal second_at, Sidekiq::ScheduledSet.new.find_job(second_jid).at
+    [1, 2, 3].each do |job_count|
+      it "can push #{job_count} jobs scheduled at different times" do
+        times = job_count.times.map { |i| Time.new(2019, 1, i + 1) }
+        args = job_count.times.map { |i| [i] }
+
+        jids = Sidekiq::Client.push_bulk("class" => QueuedWorker, "args" => args, "at" => times.map(&:to_f))
+
+        assert_equal job_count, jids.size
+        assert_equal times, jids.map { |jid| Sidekiq::ScheduledSet.new.find_job(jid).at }
+      end
     end
 
     it "can push jobs scheduled using ActiveSupport::Duration" do
