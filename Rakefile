@@ -5,14 +5,16 @@ require "yard"
 require "yard/rake/yardoc_task"
 
 YARD::Rake::YardocTask.new do |yard|
-  yard.files = [
-    "lib/sidekiq/api.rb",
-    "lib/sidekiq/client.rb",
-    "lib/sidekiq/worker.rb",
-    # "lib/sidekiq/job.rb",
-    "-",
-    "Changes.md",
-    "docs/menu.md"]
+  # keeping this in here for now, but code can be deleted once we are ready
+  # to push. .yardopts takes care of this.
+  # yard.files = [
+  #   "lib/sidekiq/api.rb",
+  #   "lib/sidekiq/client.rb",
+  #   "lib/sidekiq/worker.rb",
+  #   # "lib/sidekiq/job.rb",
+  #   "-",
+  #   "Changes.md",
+  #   "docs/menu.md"]
 end
 
 Rake::TestTask.new(:test) do |test|
