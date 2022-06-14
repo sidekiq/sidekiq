@@ -5,6 +5,7 @@ require "sidekiq"
 require "zlib"
 require "base64"
 
+# @api public
 module Sidekiq
   class Stats
     def initialize
@@ -610,7 +611,7 @@ module Sidekiq
 
     # Scan through each element of the sorted set, yielding each to the supplied block.
     # Please see Redis's <a href="https://redis.io/commands/scan/">SCAN documentation</a> for implementation details.
-    # 
+    #
     # @param match [String] a snippet or regexp to filter matches.
     # @param count [Integer] number of elements to retrieve at a time, default 100
     # @yieldparam [Sidekiq::SortedEntry] each entry
