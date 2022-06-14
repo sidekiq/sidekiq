@@ -1,2 +1,3 @@
 --title "Sidekiq"
 --query '@return || @param || '@yield' || @api.text == "public"'
+--readme docs/menu.md
