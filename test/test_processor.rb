@@ -3,6 +3,7 @@
 require_relative "helper"
 require "sidekiq/fetch"
 require "sidekiq/cli"
+require "sidekiq/api"
 require "sidekiq/processor"
 
 describe Sidekiq::Processor do
@@ -11,7 +12,7 @@ describe Sidekiq::Processor do
 
   before do
     $invokes = 0
-    @config = Sidekiq
+    @config = reset!
     @config[:fetch] = Sidekiq::BasicFetch.new(@config)
     @processor = ::Sidekiq::Processor.new(@config) { |*args| }
   end
@@ -72,11 +73,11 @@ describe Sidekiq::Processor do
     end
 
     before do
-      Sidekiq.error_handlers << error_handler
+      @config.error_handlers << error_handler
     end
 
     after do
-      Sidekiq.error_handlers.pop
+      @config.error_handlers.pop
     end
 
     it "handles invalid JSON" do
@@ -127,7 +128,7 @@ describe Sidekiq::Processor do
     it "handles exceptions raised during fetch" do
       fetch_stub = lambda { raise StandardError, "fetch exception" }
       # swallow logging because actually care about the added exception handler
-      capture_logging do
+      capture_logging(@config) do
         @processor.instance_variable_get(:@strategy).stub(:retrieve_work, fetch_stub) do
           @processor.process_one
         end
@@ -161,15 +162,12 @@ describe Sidekiq::Processor do
     before do
       work.expect(:queue_name, "queue:default")
       work.expect(:job, Sidekiq.dump_json({"class" => MockWorker.to_s, "args" => worker_args}))
-      Sidekiq.server_middleware do |chain|
+      @config.server_middleware do |chain|
         chain.prepend ExceptionRaisingMiddleware, raise_before_yield, raise_after_yield, skip_job
       end
     end
 
     after do
-      Sidekiq.server_middleware do |chain|
-        chain.remove ExceptionRaisingMiddleware
-      end
       work.verify
     end
 
@@ -179,6 +177,7 @@ describe Sidekiq::Processor do
       it "acks the job" do
         work.expect(:acknowledge, nil)
         begin
+          @processor.config.logger.level = Logger::ERROR
           @processor.process(work)
           flunk "Expected #process to raise exception"
         rescue TestProcessorException
@@ -192,6 +191,7 @@ describe Sidekiq::Processor do
       it "acks the job" do
         work.expect(:acknowledge, nil)
         begin
+          @processor.config.logger.level = Logger::ERROR
           @processor.process(work)
           flunk "Expected #process to raise exception"
         rescue TestProcessorException
@@ -214,6 +214,7 @@ describe Sidekiq::Processor do
       it "acks the job" do
         work.expect(:acknowledge, nil)
         begin
+          @processor.config.logger.level = Logger::ERROR
           @processor.process(work)
           flunk "Expected #process to raise exception"
         rescue TestProcessorException
@@ -249,20 +250,11 @@ describe Sidekiq::Processor do
     end
 
     before do
-      Sidekiq.server_middleware do |chain|
+      @config.server_middleware do |chain|
         chain.prepend ArgsMutatingServerMiddleware
       end
-      Sidekiq.client_middleware do |chain|
+      @config.client_middleware do |chain|
         chain.prepend ArgsMutatingClientMiddleware
-      end
-    end
-
-    after do
-      Sidekiq.server_middleware do |chain|
-        chain.remove ArgsMutatingServerMiddleware
-      end
-      Sidekiq.client_middleware do |chain|
-        chain.remove ArgsMutatingClientMiddleware
       end
     end
 
@@ -300,7 +292,7 @@ describe Sidekiq::Processor do
     end
 
     before do
-      opts = Sidekiq
+      opts = @config
       opts[:job_logger] = CustomJobLogger
       opts[:fetch] = Sidekiq::BasicFetch.new(opts)
       @processor = ::Sidekiq::Processor.new(opts) { |pr, ex| }
@@ -310,6 +302,44 @@ describe Sidekiq::Processor do
       msg = Sidekiq.dump_json({"class" => MockWorker.to_s, "args" => ["myarg"]})
       @processor.process(work(msg))
       assert_equal 1, $invokes
+    end
+  end
+
+  describe "stats" do
+    before do
+      @config.redis { |c| c.flushdb }
+    end
+
+    describe "when successful" do
+      let(:processed_today_key) { "stat:processed:#{Time.now.utc.strftime("%Y-%m-%d")}" }
+
+      def successful_job
+        msg = Sidekiq.dump_json({"class" => MockWorker.to_s, "args" => ["myarg"]})
+        @processor.process(work(msg))
+      end
+
+      it "increments processed stat" do
+        Sidekiq::Processor::PROCESSED.reset
+        successful_job
+        assert_equal 1, Sidekiq::Processor::PROCESSED.reset
+      end
+    end
+  end
+
+  describe "stats" do
+    before do
+      @config.redis { |c| c.flushdb }
+    end
+
+    def successful_job
+      msg = Sidekiq.dump_json({"class" => MockWorker.to_s, "args" => ["myarg"]})
+      @processor.process(work(msg))
+    end
+
+    it "increments processed stat" do
+      Sidekiq::Processor::PROCESSED.reset
+      successful_job
+      assert_equal 1, Sidekiq::Processor::PROCESSED.reset
     end
   end
 end

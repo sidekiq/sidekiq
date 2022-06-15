@@ -22,9 +22,7 @@ module Sidekiq # :nodoc:
     attr_accessor :config
 
     def parse(args = ARGV.dup)
-      @config = Sidekiq
-      @config[:error_handlers].clear
-      @config[:error_handlers] << @config.method(:default_error_handler)
+      @config = Sidekiq::Config.new
 
       setup_options(args)
       initialize_logger
@@ -259,7 +257,9 @@ module Sidekiq # :nodoc:
       opts[:concurrency] = Integer(ENV["RAILS_MAX_THREADS"]) if opts[:concurrency].nil? && ENV["RAILS_MAX_THREADS"]
 
       # merge with defaults
+      p opts
       @config.merge!(opts)
+      p @config.options
     end
 
     def boot_application
@@ -382,7 +382,7 @@ module Sidekiq # :nodoc:
     def parse_config(path)
       erb = ERB.new(File.read(path))
       erb.filename = File.expand_path(path)
-      opts = load_yaml(erb.result) || {}
+      opts = YAML.safe_load(erb.result, permitted_classes: [Symbol], aliases: true) || {}
 
       if opts.respond_to? :deep_symbolize_keys!
         opts.deep_symbolize_keys!
@@ -396,14 +396,6 @@ module Sidekiq # :nodoc:
       parse_queues(opts, opts.delete(:queues) || [])
 
       opts
-    end
-
-    def load_yaml(src)
-      if Psych::VERSION > "4.0"
-        YAML.safe_load(src, permitted_classes: [Symbol], aliases: true)
-      else
-        YAML.load(src)
-      end
     end
 
     def parse_queues(opts, queues_and_weights)

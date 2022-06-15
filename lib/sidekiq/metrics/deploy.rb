@@ -15,7 +15,7 @@ module Sidekiq
     class Deploy
       MARK_TTL = 90 * 24 * 60 * 60 # 90 days
 
-      def initialize(pool = Sidekiq.redis_pool)
+      def initialize(pool = Sidekiq.default_configuration.redis_pool)
         @pool = pool
       end
 

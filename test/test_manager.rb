@@ -5,9 +5,7 @@ require "sidekiq/manager"
 
 describe Sidekiq::Manager do
   before do
-    Sidekiq.redis { |c| c.flushdb }
-    Sidekiq.reset!
-    @config = Sidekiq
+    @config = reset!
     @config[:fetch] = Sidekiq::BasicFetch.new(@config)
   end
 
@@ -22,6 +20,9 @@ describe Sidekiq::Manager do
 
   it "shuts down the system" do
     mgr = new_manager
+    # mgr.config.logger = ::Logger.new($stdout)
+    # mgr.config.logger.level = Logger::DEBUG
+    mgr.start
     mgr.stop(::Process.clock_gettime(::Process::CLOCK_MONOTONIC))
   end
 

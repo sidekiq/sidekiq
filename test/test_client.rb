@@ -6,6 +6,11 @@ require "sidekiq/api"
 require "sidekiq/rails"
 
 describe Sidekiq::Client do
+  before do
+    @config = reset!
+    @client = Sidekiq::Client.new(config: @config)
+  end
+
   describe "errors" do
     it "raises ArgumentError with invalid params" do
       assert_raises ArgumentError do
@@ -46,8 +51,7 @@ describe Sidekiq::Client do
     end
 
     it "can push" do
-      client = Sidekiq::Client.new
-      jid = client.push("class" => "Blah", "args" => [1, 2, 3])
+      jid = @client.push("class" => "Blah", "args" => [1, 2, 3])
       assert_equal 24, jid.size
     end
 
@@ -57,13 +61,12 @@ describe Sidekiq::Client do
           msg["args"][0] == 1 ? yield : false
         end
       end
-      client = Sidekiq::Client.new
-      client.middleware do |chain|
+      @client.middleware do |chain|
         chain.add mware
       end
       q = Sidekiq::Queue.new
       q.clear
-      result = client.push_bulk("class" => "Blah", "args" => [[1], [2], [3]])
+      result = @client.push_bulk("class" => "Blah", "args" => [[1], [2], [3]])
       assert_equal 1, result.size
       assert_equal 1, q.size
     end
@@ -76,15 +79,13 @@ describe Sidekiq::Client do
           msg
         end
       }
-      client = Sidekiq::Client.new
-      client.middleware do |chain|
+      @client.middleware do |chain|
         chain.add mware
       end
-      client.push("class" => "Blah", "args" => [1, 2, 3])
+      @client.push("class" => "Blah", "args" => [1, 2, 3])
 
       assert $called
-      assert client.middleware.exists?(mware)
-      refute Sidekiq.client_middleware.exists?(mware)
+      assert @client.middleware.exists?(mware)
     end
   end
 
@@ -108,16 +109,15 @@ describe Sidekiq::Client do
     end
 
     class MyWorker
-      include Sidekiq::Worker
+      include Sidekiq::Job
     end
 
     class QueuedWorker
-      include Sidekiq::Worker
+      include Sidekiq::Job
       sidekiq_options queue: :flimflam
     end
 
     it "enqueues" do
-      Sidekiq.redis { |c| c.flushdb }
       assert_equal Sidekiq.default_job_options, MyWorker.get_sidekiq_options
       assert MyWorker.perform_async(1, 2)
       assert Sidekiq::Client.enqueue(MyWorker, 1, 2)
@@ -141,7 +141,7 @@ describe Sidekiq::Client do
       end
 
       class InterestingWorker
-        include Sidekiq::Worker
+        include Sidekiq::Job
 
         def perform(an_argument)
         end
@@ -363,7 +363,7 @@ describe Sidekiq::Client do
   end
 
   class BaseWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     sidekiq_options "retry" => "base"
   end
 
@@ -398,11 +398,10 @@ describe Sidekiq::Client do
 
     it "push sends correct arguments to middleware" do
       minimum_job_args = ["args", "class", "created_at", "enqueued_at", "jid", "queue"]
-      client = Sidekiq::Client.new
-      client.middleware do |chain|
+      @client.middleware do |chain|
         chain.add MiddlewareArguments
       end
-      client.push("class" => MyWorker, "args" => [0])
+      @client.push("class" => MyWorker, "args" => [0])
 
       assert_equal($arguments_worker_class, MyWorker)
       assert((minimum_job_args & $arguments_job.keys) == minimum_job_args)
@@ -411,11 +410,10 @@ describe Sidekiq::Client do
 
     it "push bulk sends correct arguments to middleware" do
       minimum_job_args = ["args", "class", "created_at", "enqueued_at", "jid", "queue"]
-      client = Sidekiq::Client.new
-      client.middleware do |chain|
+      @client.middleware do |chain|
         chain.add MiddlewareArguments
       end
-      client.push_bulk("class" => MyWorker, "args" => [[0]])
+      @client.push_bulk("class" => MyWorker, "args" => [[0]])
 
       assert_equal($arguments_worker_class, MyWorker)
       assert((minimum_job_args & $arguments_job.keys) == minimum_job_args)
@@ -423,14 +421,13 @@ describe Sidekiq::Client do
     end
 
     it "can stop some of the jobs from pushing" do
-      client = Sidekiq::Client.new
-      client.middleware do |chain|
+      @client.middleware do |chain|
         chain.add Stopper
       end
 
-      assert_nil client.push("class" => MyWorker, "args" => [0])
-      assert_match(/[0-9a-f]{12}/, client.push("class" => MyWorker, "args" => [1]))
-      client.push_bulk("class" => MyWorker, "args" => [[0], [1]]).each do |jid|
+      assert_nil @client.push("class" => MyWorker, "args" => [0])
+      assert_match(/[0-9a-f]{12}/, @client.push("class" => MyWorker, "args" => [1]))
+      @client.push_bulk("class" => MyWorker, "args" => [[0], [1]]).each do |jid|
         assert_match(/[0-9a-f]{12}/, jid)
       end
     end
@@ -468,7 +465,7 @@ describe Sidekiq::Client do
     end
 
     it "allows #via to point to different Redi" do
-      default = Sidekiq::Client.new.redis_pool
+      default = @client.redis_pool
 
       moo = MiniTest::Mock.new
       moo.expect(:pipelined, [0, 1])

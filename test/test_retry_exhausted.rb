@@ -2,7 +2,7 @@ require_relative "helper"
 require "sidekiq/job_retry"
 
 class NewWorker
-  include Sidekiq::Worker
+  include Sidekiq::Job
 
   sidekiq_class_attribute :exhausted_called, :exhausted_job, :exhausted_exception
 
@@ -14,7 +14,7 @@ class NewWorker
 end
 
 class OldWorker
-  include Sidekiq::Worker
+  include Sidekiq::Job
 
   sidekiq_class_attribute :exhausted_called, :exhausted_job, :exhausted_exception
 
@@ -34,7 +34,7 @@ describe "sidekiq_retries_exhausted" do
   end
 
   before do
-    @config = Sidekiq
+    @config = Sidekiq::Config.new
     cleanup
   end
 
@@ -122,13 +122,13 @@ describe "sidekiq_retries_exhausted" do
 
   it "allows global failure handlers" do
     class Foobar
-      include Sidekiq::Worker
+      include Sidekiq::Job
     end
 
     exhausted_job = nil
     exhausted_exception = nil
-    Sidekiq.death_handlers.clear
-    Sidekiq.death_handlers << proc do |job, ex|
+    @config.death_handlers.clear
+    @config.death_handlers << proc do |job, ex|
       exhausted_job = job
       exhausted_exception = ex
     end
@@ -142,7 +142,5 @@ describe "sidekiq_retries_exhausted" do
 
     assert exhausted_job
     assert_equal raised_error, exhausted_exception
-  ensure
-    Sidekiq.death_handlers.clear
   end
 end

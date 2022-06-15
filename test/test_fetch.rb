@@ -6,12 +6,10 @@ require "sidekiq/api"
 
 describe Sidekiq::BasicFetch do
   before do
-    Sidekiq.redis do |conn|
-      conn.flushdb
+    @config = reset!
+    @config.redis do |conn|
       conn.rpush("queue:basic", "msg")
     end
-    Sidekiq.reset!
-    @config = Sidekiq
   end
 
   def fetcher(options)
@@ -39,7 +37,7 @@ describe Sidekiq::BasicFetch do
   end
 
   it "bulk requeues" do
-    Sidekiq.redis do |conn|
+    @config.redis do |conn|
       conn.rpush("queue:foo", ["bob", "bar"])
       conn.rpush("queue:bar", "widget")
     end

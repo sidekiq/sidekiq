@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 require_relative "helper"
-require "sidekiq/cli"
+require "sidekiq/redis_connection"
 
 describe Sidekiq::RedisConnection do
   describe "create" do
     before do
-      Sidekiq.reset!
       @old = ENV["REDIS_URL"]
       ENV["REDIS_URL"] = "redis://localhost/15"
+      @config = Sidekiq::Config.new
     end
 
     after do
@@ -36,45 +36,33 @@ describe Sidekiq::RedisConnection do
     # `connection_pool`, until then we need to reach into the internal state to
     # verify the setting.
     describe "size" do
-      def client_connection(*args)
+      def client_connection(args = nil)
         Sidekiq.stub(:server?, nil) do
-          Sidekiq::RedisConnection.create(*args)
+          @config.redis = args
+          @config.redis_pool
         end
       end
 
-      def server_connection(*args)
+      def server_connection(args = nil)
         Sidekiq.stub(:server?, "constant") do
-          Sidekiq::RedisConnection.create(*args)
+          @config.redis = args
+          @config.redis_pool
         end
-      end
-
-      it "uses the specified custom pool size" do
-        pool = client_connection(size: 42)
-        assert_equal 42, pool.instance_eval { @size }
-        assert_equal 42, pool.instance_eval { @available.length }
-
-        pool = server_connection(size: 42)
-        assert_equal 42, pool.instance_eval { @size }
-        assert_equal 42, pool.instance_eval { @available.length }
       end
 
       it "defaults server pool sizes based on concurrency with padding" do
-        _expected_padding = 5
-        config = Sidekiq
-        prev_concurrency = config[:concurrency]
-        config[:concurrency] = 6
+        _expected_padding = 3
+        @config[:concurrency] = 6
         pool = server_connection
 
-        assert_equal 11, pool.instance_eval { @size }
-        assert_equal 11, pool.instance_eval { @available.length }
-      ensure
-        config[:concurrency] = prev_concurrency
+        assert_equal 9, pool.size
+        assert_equal 9, pool.instance_eval { @available.length }
       end
 
       it "defaults client pool sizes to 5" do
         pool = client_connection
 
-        assert_equal 5, pool.instance_eval { @size }
+        assert_equal 5, pool.size
         assert_equal 5, pool.instance_eval { @available.length }
       end
 
@@ -82,7 +70,7 @@ describe Sidekiq::RedisConnection do
         ENV["RAILS_MAX_THREADS"] = "9"
         pool = client_connection
 
-        assert_equal 9, pool.instance_eval { @size }
+        assert_equal 9, pool.size
         assert_equal 9, pool.instance_eval { @available.length }
       ensure
         ENV.delete("RAILS_MAX_THREADS")
@@ -113,15 +101,10 @@ describe Sidekiq::RedisConnection do
 
     describe "namespace" do
       it "isn't supported" do
-        Kernel.stub(:exit, ->(code) { raise "Exited #{code}" }) do
-          output = capture_logging do
-            error = assert_raises RuntimeError do
-              Sidekiq::RedisConnection.create(namespace: "xxx")
-            end
-            assert_includes error.message, "Exited -127"
-          end
-          assert_includes output, "Your Redis configuration uses the namespace 'xxx' but this feature isn't supported by redis-client"
+        error = assert_raises ArgumentError do
+          Sidekiq::RedisConnection.create(namespace: "xxx")
         end
+        assert_includes error.message, "Your Redis configuration uses the namespace 'xxx' but this feature isn't supported by redis-client"
       end
     end
 
@@ -176,7 +159,7 @@ describe Sidekiq::RedisConnection do
           password: "secret"
         }
 
-        output = capture_logging do
+        output = capture_logging(@config) do
           Sidekiq::RedisConnection.create(options)
         end
 
@@ -188,17 +171,17 @@ describe Sidekiq::RedisConnection do
       end
 
       it "prunes SSL parameters from the logging" do
-        options = {
-          ssl_params: {
-            cert_store: OpenSSL::X509::Store.new
+        output = capture_logging(@config) do |logger|
+          options = {
+            ssl_params: {
+              cert_store: OpenSSL::X509::Store.new
+            },
+            logger: logger
           }
-        }
 
-        output = capture_logging do
           Sidekiq::RedisConnection.create(options)
+          assert_includes(options.inspect, "ssl_params")
         end
-
-        assert_includes(options.inspect, "ssl_params")
         refute_includes(output, "ssl_params")
       end
     end

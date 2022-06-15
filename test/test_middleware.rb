@@ -7,6 +7,7 @@ require "sidekiq/processor"
 describe Sidekiq::Middleware do
   before do
     $errors = []
+    @config = reset!
   end
 
   class CustomMiddleware
@@ -77,7 +78,6 @@ describe Sidekiq::Middleware do
   it "executes middleware in the proper order" do
     msg = Sidekiq.dump_json({"class" => CustomWorker.to_s, "args" => [$recorder]})
 
-    @config = Sidekiq
     @config.server_middleware do |chain|
       # should only add once, second should replace the first
       2.times { |i| chain.add CustomMiddleware, i.to_s, $recorder }
@@ -181,8 +181,7 @@ describe Sidekiq::Middleware do
 
   describe "configuration" do
     it "gets an object which provides redis and logging" do
-      cfg = Sidekiq
-      chain = Sidekiq::Middleware::Chain.new(cfg)
+      chain = Sidekiq::Middleware::Chain.new(@config)
       chain.add FooC, foo: "bar"
       final_action = nil
       chain.invoke(nil, nil, nil, nil) { final_action = true }

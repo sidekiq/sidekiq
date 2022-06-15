@@ -6,21 +6,21 @@ describe "Sidekiq::Testing.fake" do
   class PerformError < RuntimeError; end
 
   class DirectWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     def perform(a, b)
       a + b
     end
   end
 
   class EnqueuedWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     def perform(a, b)
       a + b
     end
   end
 
   class StoredWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     def perform(error)
       raise PerformError if error
     end
@@ -48,7 +48,8 @@ describe "Sidekiq::Testing.fake" do
     assert_equal 2, DirectWorker.jobs.size
     assert DirectWorker.perform_at(10, 1, 2)
     assert_equal 3, DirectWorker.jobs.size
-    assert_in_delta 10.seconds.from_now.to_f, DirectWorker.jobs.last["at"], 0.1
+    soon = (Time.now.to_f + 10)
+    assert_in_delta soon, DirectWorker.jobs.last["at"], 0.1
   end
 
   it "stubs the enqueue call" do
@@ -75,7 +76,7 @@ describe "Sidekiq::Testing.fake" do
   end
 
   class SpecificJidWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     sidekiq_class_attribute :count
     self.count = 0
     def perform(worker_jid)
@@ -137,7 +138,7 @@ describe "Sidekiq::Testing.fake" do
   end
 
   class FirstWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     sidekiq_class_attribute :count
     self.count = 0
     def perform
@@ -146,7 +147,7 @@ describe "Sidekiq::Testing.fake" do
   end
 
   class SecondWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     sidekiq_class_attribute :count
     self.count = 0
     def perform
@@ -155,7 +156,7 @@ describe "Sidekiq::Testing.fake" do
   end
 
   class ThirdWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     sidekiq_class_attribute :count
     def perform
       FirstWorker.perform_async
@@ -272,14 +273,14 @@ describe "Sidekiq::Testing.fake" do
     end
 
     class QueueWorker
-      include Sidekiq::Worker
+      include Sidekiq::Job
       def perform(a, b)
         a + b
       end
     end
 
     class AltQueueWorker
-      include Sidekiq::Worker
+      include Sidekiq::Job
       sidekiq_options queue: :alt
       def perform(a, b)
         a + b

@@ -7,33 +7,26 @@ describe "logger" do
   before do
     @output = StringIO.new
     @logger = Sidekiq::Logger.new(@output)
+    @config = Sidekiq::Config.new
 
-    Sidekiq.log_formatter = nil
     Thread.current[:sidekiq_context] = nil
     Thread.current[:sidekiq_tid] = nil
   end
 
   after do
-    Sidekiq.log_formatter = nil
     Thread.current[:sidekiq_context] = nil
     Thread.current[:sidekiq_tid] = nil
   end
 
   it "tests default logger format" do
-    assert_kind_of Sidekiq::Logger::Formatters::Pretty, Sidekiq::Logger.new(@output).formatter
+    assert_kind_of Sidekiq::Logger::Formatters::Pretty, @config.logger.formatter
   end
 
   it "tests heroku logger formatter" do
     ENV["DYNO"] = "dyno identifier"
-    assert_kind_of Sidekiq::Logger::Formatters::WithoutTimestamp, Sidekiq::Logger.new(@output).formatter
+    assert_kind_of Sidekiq::Logger::Formatters::WithoutTimestamp, @config.logger.formatter
   ensure
     ENV["DYNO"] = nil
-  end
-
-  it "tests json logger formatter" do
-    Sidekiq.log_formatter = Sidekiq::Logger::Formatters::JSON.new
-
-    assert_kind_of Sidekiq::Logger::Formatters::JSON, Sidekiq::Logger.new(@output).formatter
   end
 
   it "tests with context" do

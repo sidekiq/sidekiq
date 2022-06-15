@@ -22,11 +22,11 @@ module Sidekiq
 
     attr_accessor :manager, :poller, :fetcher
 
-    def initialize(options)
-      @config = options
-      options[:fetch] ||= BasicFetch.new(options)
-      @manager = Sidekiq::Manager.new(options)
-      @poller = Sidekiq::Scheduled::Poller.new(options)
+    def initialize(config)
+      @config = config
+      @config[:fetch] ||= BasicFetch.new(@config)
+      @manager = Sidekiq::Manager.new(@config)
+      @poller = Sidekiq::Scheduled::Poller.new(@config)
       @done = false
     end
 
@@ -119,9 +119,7 @@ module Sidekiq
           end
         end
       rescue => ex
-        # we're exiting the process, things might be shut down so don't
-        # try to handle the exception
-        Sidekiq.logger.warn("Unable to flush stats: #{ex}")
+        logger.warn("Unable to flush stats: #{ex}")
       end
     end
 
@@ -130,23 +128,10 @@ module Sidekiq
       fails = procd = 0
 
       begin
-        fails = Processor::FAILURE.reset
-        procd = Processor::PROCESSED.reset
+        flush_stats
+
         curstate = Processor::WORK_STATE.dup
-
-        nowdate = Time.now.utc.strftime("%Y-%m-%d")
-
         redis do |conn|
-          conn.multi do |transaction|
-            transaction.incrby("stat:processed", procd)
-            transaction.incrby("stat:processed:#{nowdate}", procd)
-            transaction.expire("stat:processed:#{nowdate}", STATS_TTL)
-
-            transaction.incrby("stat:failed", fails)
-            transaction.incrby("stat:failed:#{nowdate}", fails)
-            transaction.expire("stat:failed:#{nowdate}", STATS_TTL)
-          end
-
           # work is the current set of executing jobs
           work_key = "#{key}:work"
           conn.pipelined do |transaction|

@@ -6,7 +6,7 @@ require "sidekiq/job_retry"
 require "sidekiq/api"
 
 class SomeWorker
-  include Sidekiq::Worker
+  include Sidekiq::Job
 end
 
 class BadErrorMessage < StandardError
@@ -17,10 +17,8 @@ end
 
 describe Sidekiq::JobRetry do
   before do
-    Sidekiq.redis { |c| c.flushdb }
-    @config = Sidekiq
-    @config[:max_retries] = 25
-    @config[:error_handlers] << Sidekiq.method(:default_error_handler)
+    @config = Sidekiq::Config.new
+    @config.redis { |c| c.flushdb }
   end
 
   describe "middleware" do

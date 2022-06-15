@@ -5,10 +5,10 @@ require "sidekiq/job_logger"
 
 describe "Job logger" do
   before do
-    @old = Sidekiq.logger
     @output = StringIO.new
     @logger = Sidekiq::Logger.new(@output, level: :info)
-    Sidekiq.logger = @logger
+    @cfg = reset!
+    @cfg.logger = @logger
 
     Thread.current[:sidekiq_context] = nil
     Thread.current[:sidekiq_tid] = nil
@@ -17,7 +17,6 @@ describe "Job logger" do
   after do
     Thread.current[:sidekiq_context] = nil
     Thread.current[:sidekiq_tid] = nil
-    Sidekiq.logger = @old
   end
 
   it "tests pretty output" do
@@ -110,7 +109,7 @@ describe "Job logger" do
     end
 
     @logger = logger_class.new(@output, level: :info)
-    Sidekiq.logger = @logger
+    @cfg.logger = @logger
 
     jl = Sidekiq::JobLogger.new(@logger)
     job = {"class" => "FooWorker", "log_level" => "debug"}

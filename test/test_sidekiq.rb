@@ -4,7 +4,7 @@ require_relative "helper"
 
 describe Sidekiq do
   before do
-    @config = Sidekiq
+    @config = reset!
   end
 
   describe "json processing" do
@@ -24,40 +24,39 @@ describe Sidekiq do
 
   describe "lifecycle events" do
     it "handles invalid input" do
-      config = @config
-      config[:lifecycle_events][:startup].clear
+      @config[:lifecycle_events][:startup].clear
 
       e = assert_raises ArgumentError do
-        config.on(:startp)
+        @config.on(:startp)
       end
       assert_match(/Invalid event name/, e.message)
       e = assert_raises ArgumentError do
-        config.on("startup")
+        @config.on("startup")
       end
       assert_match(/Symbols only/, e.message)
-      config.on(:startup) do
+      @config.on(:startup) do
         1 + 1
       end
 
-      assert_equal 2, config[:lifecycle_events][:startup].first.call
+      assert_equal 2, @config[:lifecycle_events][:startup].first.call
     end
   end
 
   describe "default_job_options" do
     it "stringifies keys" do
-      @old_options = @config.default_job_options
+      @old_options = Sidekiq.default_job_options
       begin
-        @config.default_job_options = {queue: "cat"}
-        assert_equal "cat", @config.default_job_options["queue"]
+        Sidekiq.default_job_options = {queue: "cat"}
+        assert_equal "cat", Sidekiq.default_job_options["queue"]
       ensure
-        @config.default_job_options = @old_options
+        Sidekiq.default_job_options = @old_options
       end
     end
   end
 
   describe "error handling" do
     it "deals with user-specified error handlers which raise errors" do
-      output = capture_logging do
+      output = capture_logging(@config) do
         @config.error_handlers << proc { |x, hash|
           raise "boom"
         }
@@ -72,9 +71,9 @@ describe Sidekiq do
 
   describe "redis connection" do
     it "does not continually retry" do
-      assert_raises Sidekiq::RedisConnection.adapter::CommandError do
+      assert_raises Sidekiq::RedisClientAdapter::CommandError do
         @config.redis do |c|
-          raise Sidekiq::RedisConnection.adapter::CommandError, "READONLY You can't write against a replica."
+          raise Sidekiq::RedisClientAdapter::CommandError, "READONLY You can't write against a replica."
         end
       end
     end
@@ -83,7 +82,7 @@ describe Sidekiq do
       counts = []
       @config.redis do |c|
         counts << c.info["total_connections_received"].to_i
-        raise Sidekiq::RedisConnection.adapter::CommandError, "READONLY You can't write against a replica." if counts.size == 1
+        raise Sidekiq::RedisClientAdapter::CommandError, "READONLY You can't write against a replica." if counts.size == 1
       end
       assert_equal 2, counts.size
       assert_equal counts[0] + 1, counts[1]
@@ -93,7 +92,7 @@ describe Sidekiq do
       counts = []
       @config.redis do |c|
         counts << c.info["total_connections_received"].to_i
-        raise Sidekiq::RedisConnection.adapter::CommandError, "UNBLOCKED force unblock from blocking operation, instance state changed (master -> replica?)" if counts.size == 1
+        raise Sidekiq::RedisClientAdapter::CommandError, "UNBLOCKED force unblock from blocking operation, instance state changed (master -> replica?)" if counts.size == 1
       end
       assert_equal 2, counts.size
       assert_equal counts[0] + 1, counts[1]

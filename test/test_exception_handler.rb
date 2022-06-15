@@ -26,15 +26,11 @@ end
 describe Sidekiq::Component do
   describe "with mock logger" do
     before do
-      @config = Sidekiq
-      @config[:error_handlers] << Sidekiq.method(:default_error_handler)
-    end
-    after do
-      @config[:error_handlers].clear
+      @config = reset!
     end
 
     it "logs the exception to Sidekiq.logger" do
-      output = capture_logging do
+      output = capture_logging(@config) do
         Thing.new(@config).invoke_exception(a: 1)
       end
       assert_match(/"a":1/, output, "didn't include the context")

@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 require_relative "helper"
-require "sidekiq/scheduled"
+require "sidekiq/api"
 require "active_support/core_ext/integer/time"
 
 describe "job scheduling" do
   describe "middleware" do
     class SomeScheduledWorker
-      include Sidekiq::Worker
+      include Sidekiq::Job
       sidekiq_options queue: :custom_queue
       def perform(x)
       end

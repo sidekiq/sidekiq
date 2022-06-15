@@ -2,17 +2,18 @@
 
 require_relative "helper"
 require "sidekiq/scheduled"
+require "sidekiq/api"
 
 describe Sidekiq::Scheduled do
   class ScheduledWorker
-    include Sidekiq::Worker
+    include Sidekiq::Job
     def perform(x)
     end
   end
 
   describe "poller" do
     before do
-      Sidekiq.redis { |c| c.flushdb }
+      @config = reset!
       @error_1 = {"class" => ScheduledWorker.name, "args" => [0], "queue" => "queue_1"}
       @error_2 = {"class" => ScheduledWorker.name, "args" => [1], "queue" => "queue_2"}
       @error_3 = {"class" => ScheduledWorker.name, "args" => [2], "queue" => "queue_3"}
@@ -20,7 +21,6 @@ describe Sidekiq::Scheduled do
       @future_2 = {"class" => ScheduledWorker.name, "args" => [4], "queue" => "queue_5"}
       @future_3 = {"class" => ScheduledWorker.name, "args" => [5], "queue" => "queue_6"}
 
-      @config = Sidekiq
       @retry = Sidekiq::RetrySet.new
       @scheduled = Sidekiq::ScheduledSet.new
       @poller = Sidekiq::Scheduled::Poller.new(@config)
@@ -33,7 +33,7 @@ describe Sidekiq::Scheduled do
     end
 
     it "executes client middleware" do
-      Sidekiq.client_middleware.add MyStopper
+      @config.client_middleware.add MyStopper
       begin
         @retry.schedule (Time.now - 60).to_f, @error_1
         @retry.schedule (Time.now - 60).to_f, @error_2
@@ -46,8 +46,6 @@ describe Sidekiq::Scheduled do
         assert_equal 1, Sidekiq::Queue.new("queue_2").size
         assert_equal 0, Sidekiq::Queue.new("queue_5").size
         assert_equal 1, Sidekiq::Queue.new("queue_6").size
-      ensure
-        Sidekiq.client_middleware.remove MyStopper
       end
     end
 
@@ -67,7 +65,7 @@ describe Sidekiq::Scheduled do
       Time.stub(:now, enqueued_time) do
         @poller.enqueue
 
-        Sidekiq.redis do |conn|
+        @config.redis do |conn|
           %w[queue:queue_1 queue:queue_2 queue:queue_4 queue:queue_5].each do |queue_name|
             assert_equal 1, conn.llen(queue_name)
             job = Sidekiq.load_json(conn.lrange(queue_name, 0, -1)[0])
@@ -94,7 +92,7 @@ describe Sidekiq::Scheduled do
         @poller.terminate
         @poller.enqueue
 
-        Sidekiq.redis do |conn|
+        @config.redis do |conn|
           %w[queue:queue_1 queue:queue_4].each do |queue_name|
             assert_equal 0, conn.llen(queue_name)
           end
@@ -106,11 +104,11 @@ describe Sidekiq::Scheduled do
     end
 
     def with_sidekiq_option(name, value)
-      original, Sidekiq[name] = Sidekiq[name], value
+      original, @config[name] = @config[name], value
       begin
         yield
       ensure
-        Sidekiq[name] = original
+        @config[name] = original
       end
     end
 
@@ -128,7 +126,7 @@ describe Sidekiq::Scheduled do
     it "calculates an average poll interval based on the number of known Sidekiq processes" do
       with_sidekiq_option(:average_scheduled_poll_interval, 10) do
         3.times do |i|
-          Sidekiq.redis do |conn|
+          @config.redis do |conn|
             conn.sadd("processes", "process-#{i}")
             conn.hset("process-#{i}", "info", "")
           end

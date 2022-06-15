@@ -31,7 +31,7 @@ module Sidekiq
       "fatal" => 4
     }
     LEVELS.default_proc = proc do |_, level|
-      Sidekiq.logger.warn("Invalid log level: #{level.inspect}")
+      puts("Invalid log level: #{level.inspect}")
       nil
     end
 
@@ -74,11 +74,6 @@ module Sidekiq
 
   class Logger < ::Logger
     include LoggingUtils
-
-    def initialize(*args, **kwargs)
-      super
-      self.formatter = Sidekiq.log_formatter
-    end
 
     module Formatters
       class Base < ::Logger::Formatter

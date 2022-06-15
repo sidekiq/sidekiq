@@ -50,11 +50,11 @@ module Sidekiq
       end
     end
 
-    def self.persist(klass)
-      Sidekiq.configure_client do |config|
+    def self.persist(klass, container = Sidekiq.default_configuration)
+      container.configure_client do |config|
         config.client_middleware.add Save, klass
       end
-      Sidekiq.configure_server do |config|
+      container.configure_server do |config|
         config.client_middleware.add Save, klass
         config.server_middleware.add Load, klass
       end

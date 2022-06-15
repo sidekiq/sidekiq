@@ -16,7 +16,7 @@ describe Sidekiq::Web do
   end
 
   before do
-    Sidekiq.redis { |c| c.flushdb }
+    @config = reset!
     app.middlewares.clear
   end
 
@@ -60,7 +60,7 @@ describe Sidekiq::Web do
 
   describe "busy" do
     it "can display workers" do
-      Sidekiq.redis do |conn|
+      @config.redis do |conn|
         conn.incr("busy")
         conn.sadd("processes", "foo:1234")
         conn.hmset("foo:1234", "info", Sidekiq.dump_json("hostname" => "foo", "started_at" => Time.now.to_f, "queues" => [], "concurrency" => 10), "at", Time.now.to_f, "busy", 4)
@@ -81,20 +81,20 @@ describe Sidekiq::Web do
       identity = "identity"
       signals_key = "#{identity}-signals"
 
-      assert_nil Sidekiq.redis { |c| c.lpop signals_key }
+      assert_nil @config.redis { |c| c.lpop signals_key }
       post "/busy", "quiet" => "1", "identity" => identity
       assert_equal 302, last_response.status
-      assert_equal "TSTP", Sidekiq.redis { |c| c.lpop signals_key }
+      assert_equal "TSTP", @config.redis { |c| c.lpop signals_key }
     end
 
     it "can stop a process" do
       identity = "identity"
       signals_key = "#{identity}-signals"
 
-      assert_nil Sidekiq.redis { |c| c.lpop signals_key }
+      assert_nil @config.redis { |c| c.lpop signals_key }
       post "/busy", "stop" => "1", "identity" => identity
       assert_equal 302, last_response.status
-      assert_equal "TERM", Sidekiq.redis { |c| c.lpop signals_key }
+      assert_equal "TERM", @config.redis { |c| c.lpop signals_key }
     end
   end
 
@@ -134,7 +134,7 @@ describe Sidekiq::Web do
   end
 
   it "can sort on enqueued_at column" do
-    Sidekiq.redis do |conn|
+    @config.redis do |conn|
       (1000..1005).each do |i|
         conn.lpush("queue:default", Sidekiq.dump_json(args: [i], enqueued_at: Time.now.to_i + i))
       end
@@ -150,7 +150,7 @@ describe Sidekiq::Web do
   end
 
   it "can delete a queue" do
-    Sidekiq.redis do |conn|
+    @config.redis do |conn|
       conn.rpush("queue:foo", "{\"args\":[],\"enqueued_at\":1567894960}")
       conn.sadd("queues", "foo")
     end
@@ -161,7 +161,7 @@ describe Sidekiq::Web do
     post "/queues/foo"
     assert_equal 302, last_response.status
 
-    Sidekiq.redis do |conn|
+    @config.redis do |conn|
       refute conn.smembers("queues").include?("foo")
       refute conn.exists?("queue:foo")
     end
@@ -240,7 +240,7 @@ describe Sidekiq::Web do
   end
 
   it "can delete a job" do
-    Sidekiq.redis do |conn|
+    @config.redis do |conn|
       conn.rpush("queue:foo", '{"args":[],"enqueued_at":1567894960}')
       conn.rpush("queue:foo", '{"foo":"bar","args":[],"enqueued_at":1567894960}')
       conn.rpush("queue:foo", '{"foo2":"bar2","args":[],"enqueued_at":1567894960}')
@@ -252,7 +252,7 @@ describe Sidekiq::Web do
     post "/queues/foo/delete", key_val: "{\"foo\":\"bar\"}"
     assert_equal 302, last_response.status
 
-    Sidekiq.redis do |conn|
+    @config.redis do |conn|
       refute conn.lrange("queue:foo", 0, -1).include?("{\"foo\":\"bar\"}")
     end
   end
@@ -386,7 +386,7 @@ describe Sidekiq::Web do
 
   it "can delete scheduled" do
     params = add_scheduled
-    Sidekiq.redis do |conn|
+    @config.redis do |conn|
       assert_equal 1, conn.zcard("schedule")
       post "/scheduled", "key" => [job_params(*params)], "delete" => "Delete"
       assert_equal 302, last_response.status
@@ -398,7 +398,7 @@ describe Sidekiq::Web do
   it "can move scheduled to default queue" do
     q = Sidekiq::Queue.new
     params = add_scheduled
-    Sidekiq.redis do |conn|
+    @config.redis do |conn|
       assert_equal 1, conn.zcard("schedule")
       assert_equal 0, q.size
       post "/scheduled", "key" => [job_params(*params)], "add_to_queue" => "AddToQueue"
@@ -440,7 +440,7 @@ describe Sidekiq::Web do
     assert !last_response.body.include?("args\"><a>hello</a><")
 
     # on /workers page
-    Sidekiq.redis do |conn|
+    @config.redis do |conn|
       pro = "foo:1234"
       conn.sadd("processes", pro)
       conn.hmset(pro, "info", Sidekiq.dump_json("started_at" => Time.now.to_f, "labels" => ["frumduz"], "queues" => [], "concurrency" => 10), "busy", 1, "beat", Time.now.to_f)
@@ -514,7 +514,7 @@ describe Sidekiq::Web do
 
   describe "stats" do
     before do
-      Sidekiq.redis do |conn|
+      @config.redis do |conn|
         conn.set("stat:processed", 5)
         conn.set("stat:failed", 2)
         conn.sadd("queues", "default")
@@ -567,7 +567,7 @@ describe Sidekiq::Web do
 
   describe "stats/queues" do
     before do
-      Sidekiq.redis do |conn|
+      @config.redis do |conn|
         conn.set("stat:processed", 5)
         conn.set("stat:failed", 2)
         conn.sadd("queues", "default")
@@ -640,7 +640,7 @@ describe Sidekiq::Web do
            "args" => ["bob", 1, Time.now.to_f],
            "jid" => SecureRandom.hex(12),
            "tags" => ["tag1", "tag2"]}
-    Sidekiq.redis do |conn|
+    @config.redis do |conn|
       conn.zadd("schedule", score, Sidekiq.dump_json(msg))
     end
     [msg, score]
@@ -656,7 +656,7 @@ describe Sidekiq::Web do
            "failed_at" => Time.now.to_f,
            "jid" => SecureRandom.hex(12)}
     score = Time.now.to_f
-    Sidekiq.redis do |conn|
+    @config.redis do |conn|
       conn.zadd("retry", score, Sidekiq.dump_json(msg))
     end
 
@@ -673,7 +673,7 @@ describe Sidekiq::Web do
            "failed_at" => Time.now.utc,
            "jid" => jid}
     score = Time.now.to_f
-    Sidekiq.redis do |conn|
+    @config.redis do |conn|
       conn.zadd("dead", score, Sidekiq.dump_json(msg))
     end
     [msg, score]
@@ -682,7 +682,7 @@ describe Sidekiq::Web do
   def kill_bad
     job = "{ something bad }"
     score = Time.now.to_f
-    Sidekiq.redis do |conn|
+    @config.redis do |conn|
       conn.zadd("dead", score, job)
     end
     [job, score]
@@ -698,7 +698,7 @@ describe Sidekiq::Web do
            "failed_at" => Time.now.to_f,
            "jid" => SecureRandom.hex(12)}
     score = Time.now.to_f
-    Sidekiq.redis do |conn|
+    @config.redis do |conn|
       conn.zadd("retry", score, Sidekiq.dump_json(msg))
     end
 
@@ -712,7 +712,7 @@ describe Sidekiq::Web do
   def add_worker
     key = "#{hostname}:#{$$}"
     msg = "{\"queue\":\"default\",\"payload\":{\"retry\":true,\"queue\":\"default\",\"timeout\":20,\"backtrace\":5,\"class\":\"HardWorker\",\"args\":[\"bob\",10,5],\"jid\":\"2b5ad2b016f5e063a1c62872\"},\"run_at\":1361208995}"
-    Sidekiq.redis do |conn|
+    @config.redis do |conn|
       conn.multi do |transaction|
         transaction.sadd("processes", key)
         transaction.hmset(key, "info", Sidekiq.dump_json("hostname" => "foo", "started_at" => Time.now.to_f, "queues" => []), "at", Time.now.to_f, "busy", 4)

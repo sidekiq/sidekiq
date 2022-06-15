@@ -52,7 +52,7 @@ end
 
 describe Sidekiq::TransactionAwareClient do
   before do
-    Sidekiq.redis { |c| c.flushdb }
+    @config = reset!
     @app = Dummy::Application.new
     Post.delete_all
   end

@@ -7,7 +7,7 @@ require "action_mailer"
 
 describe "API" do
   before do
-    Sidekiq.redis { |c| c.flushdb }
+    @cfg = reset!
   end
 
   describe "stats" do
@@ -22,7 +22,7 @@ describe "API" do
 
     describe "processed" do
       it "returns number of processed jobs" do
-        Sidekiq.redis { |conn| conn.set("stat:processed", 5) }
+        @cfg.redis { |conn| conn.set("stat:processed", 5) }
         s = Sidekiq::Stats.new
         assert_equal 5, s.processed
       end
@@ -30,7 +30,7 @@ describe "API" do
 
     describe "failed" do
       it "returns number of failed jobs" do
-        Sidekiq.redis { |conn| conn.set("stat:failed", 5) }
+        @cfg.redis { |conn| conn.set("stat:failed", 5) }
         s = Sidekiq::Stats.new
         assert_equal 5, s.failed
       end
@@ -38,7 +38,7 @@ describe "API" do
 
     describe "reset" do
       before do
-        Sidekiq.redis do |conn|
+        @cfg.redis do |conn|
           conn.set("stat:processed", 5)
           conn.set("stat:failed", 10)
         end
@@ -75,7 +75,7 @@ describe "API" do
 
     describe "workers_size" do
       it "retrieves the number of busy workers" do
-        Sidekiq.redis do |c|
+        @cfg.redis do |c|
           c.sadd("processes", "process_1")
           c.sadd("processes", "process_2")
           c.hset("process_1", "busy", 1)
@@ -93,7 +93,7 @@ describe "API" do
       end
 
       it "returns a hash of queue and size in order" do
-        Sidekiq.redis do |conn|
+        @cfg.redis do |conn|
           conn.rpush "queue:foo", "{}"
           conn.sadd "queues", "foo"
 
@@ -111,7 +111,7 @@ describe "API" do
 
     describe "enqueued" do
       it "handles latency for good jobs" do
-        Sidekiq.redis do |conn|
+        @cfg.redis do |conn|
           conn.rpush "queue:default", "{\"enqueued_at\": #{Time.now.to_f}}"
           conn.sadd "queues", "default"
         end
@@ -122,7 +122,7 @@ describe "API" do
       end
 
       it "handles latency for incomplete jobs" do
-        Sidekiq.redis do |conn|
+        @cfg.redis do |conn|
           conn.rpush "queue:default", "{}"
           conn.sadd "queues", "default"
         end
@@ -133,7 +133,7 @@ describe "API" do
       end
 
       it "returns total enqueued jobs" do
-        Sidekiq.redis do |conn|
+        @cfg.redis do |conn|
           conn.rpush "queue:foo", "{}"
           conn.sadd "queues", "foo"
 
@@ -168,7 +168,7 @@ describe "API" do
 
       describe "processed" do
         it "retrieves hash of dates" do
-          Sidekiq.redis do |c|
+          @cfg.redis do |c|
             c.incrby("stat:processed:2012-12-24", 4)
             c.incrby("stat:processed:2012-12-25", 1)
             c.incrby("stat:processed:2012-12-26", 6)
@@ -189,7 +189,7 @@ describe "API" do
 
       describe "failed" do
         it "retrieves hash of dates" do
-          Sidekiq.redis do |c|
+          @cfg.redis do |c|
             c.incrby("stat:failed:2012-12-24", 4)
             c.incrby("stat:failed:2012-12-25", 1)
             c.incrby("stat:failed:2012-12-26", 6)
@@ -233,11 +233,11 @@ describe "API" do
     end
 
     class ApiWorker
-      include Sidekiq::Worker
+      include Sidekiq::Job
     end
 
     class WorkerWithTags
-      include Sidekiq::Worker
+      include Sidekiq::Job
       sidekiq_options tags: ["foo"]
     end
 
@@ -538,7 +538,7 @@ describe "API" do
       }
 
       time = Time.now.to_f
-      Sidekiq.redis do |conn|
+      @cfg.redis do |conn|
         conn.multi do |transaction|
           transaction.sadd("processes", odata["key"])
           transaction.hmset(odata["key"], "info", Sidekiq.dump_json(odata), "busy", 10, "beat", time)
@@ -556,8 +556,8 @@ describe "API" do
       data.quiet!
       data.stop!
       signals_string = "#{odata["key"]}-signals"
-      assert_equal "TERM", Sidekiq.redis { |c| c.lpop(signals_string) }
-      assert_equal "TSTP", Sidekiq.redis { |c| c.lpop(signals_string) }
+      assert_equal "TERM", @cfg.redis { |c| c.lpop(signals_string) }
+      assert_equal "TSTP", @cfg.redis { |c| c.lpop(signals_string) }
     end
 
     it "can enumerate workers" do
@@ -570,14 +570,14 @@ describe "API" do
       hn = Socket.gethostname
       key = "#{hn}:#{$$}"
       pdata = {"pid" => $$, "hostname" => hn, "started_at" => Time.now.to_i}
-      Sidekiq.redis do |conn|
+      @cfg.redis do |conn|
         conn.sadd("processes", key)
         conn.hmset(key, "info", Sidekiq.dump_json(pdata), "busy", 0, "beat", Time.now.to_f)
       end
 
       s = "#{key}:work"
       data = Sidekiq.dump_json({"payload" => "{}", "queue" => "default", "run_at" => Time.now.to_i})
-      Sidekiq.redis do |c|
+      @cfg.redis do |c|
         c.hmset(s, "1234", data)
       end
 
@@ -591,7 +591,7 @@ describe "API" do
 
       s = "#{key}:work"
       data = Sidekiq.dump_json({"payload" => {}, "queue" => "default", "run_at" => (Time.now.to_i - 2 * 60 * 60)})
-      Sidekiq.redis do |c|
+      @cfg.redis do |c|
         c.multi do |transaction|
           transaction.hmset(s, "5678", data)
           transaction.hmset("b#{s}", "5678", data)
@@ -622,7 +622,7 @@ describe "API" do
     it "prunes processes which have died" do
       data = {"pid" => rand(10_000), "hostname" => "app#{rand(1_000)}", "started_at" => Time.now.to_f}
       key = "#{data["hostname"]}:#{data["pid"]}"
-      Sidekiq.redis do |conn|
+      @cfg.redis do |conn|
         conn.sadd("processes", key)
         conn.hmset(key, "info", Sidekiq.dump_json(data), "busy", 0, "beat", Time.now.to_f)
       end
@@ -631,7 +631,7 @@ describe "API" do
       assert_equal 1, ps.size
       assert_equal 1, ps.to_a.size
 
-      Sidekiq.redis do |conn|
+      @cfg.redis do |conn|
         conn.sadd("processes", "bar:987")
         conn.sadd("processes", "bar:986")
         conn.del("process_cleanup")
@@ -644,7 +644,7 @@ describe "API" do
 
     def add_retry(jid = "bob", at = Time.now.to_f)
       payload = Sidekiq.dump_json("class" => "ApiWorker", "args" => [1, "mike"], "queue" => "default", "jid" => jid, "retry_count" => 2, "failed_at" => Time.now.to_f, "error_backtrace" => ["line1", "line2"])
-      Sidekiq.redis do |conn|
+      @cfg.redis do |conn|
         conn.zadd("retry", at.to_s, payload)
       end
     end

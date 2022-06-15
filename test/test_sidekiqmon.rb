@@ -19,7 +19,8 @@ end
 
 describe Sidekiq::Monitor do
   before do
-    Sidekiq.redis { |c| c.flushdb }
+    @config = Sidekiq::Config.new
+    @config.redis { |c| c.flushdb }
   end
 
   describe "status" do

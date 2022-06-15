@@ -9,9 +9,8 @@ describe Sidekiq::Launcher do
   end
 
   before do
-    Sidekiq.redis { |c| c.flushdb }
-    Sidekiq.reset!
-    @config = Sidekiq
+    @config = Sidekiq::Config.new
+    @config.redis { |c| c.flushdb }
     @config[:tag] = "myapp"
     @config[:concurrency] = 3
   end
@@ -56,13 +55,13 @@ describe Sidekiq::Launcher do
         it "stores process info in redis" do
           subject.heartbeat
 
-          workers, rtt = Sidekiq.redis { |c| c.hmget(subject.identity, "busy", "rtt_us") }
+          workers, rtt = @config.redis { |c| c.hmget(subject.identity, "busy", "rtt_us") }
 
           assert_equal "1", workers
           refute_nil rtt
           assert_in_delta 1000, rtt.to_i, 1000
 
-          expires = Sidekiq.redis { |c| c.pttl(subject.identity) }
+          expires = @config.redis { |c| c.pttl(subject.identity) }
 
           assert_in_delta 60000, expires, 500
         end
@@ -71,7 +70,7 @@ describe Sidekiq::Launcher do
           before do
             @cnt = 0
 
-            Sidekiq.on(:heartbeat) do
+            @config.on(:heartbeat) do
               @cnt += 1
             end
           end
@@ -100,11 +99,11 @@ describe Sidekiq::Launcher do
         it "stores process info in redis" do
           subject.heartbeat
 
-          info = Sidekiq.redis { |c| c.hmget(subject.identity, "busy") }
+          info = @config.redis { |c| c.hmget(subject.identity, "busy") }
 
           assert_equal ["1"], info
 
-          expires = Sidekiq.redis { |c| c.pttl(subject.identity) }
+          expires = @config.redis { |c| c.pttl(subject.identity) }
 
           assert_in_delta 60000, expires, 50
         end
@@ -112,7 +111,7 @@ describe Sidekiq::Launcher do
 
       it "fires new heartbeat events" do
         i = 0
-        Sidekiq.on(:heartbeat) do
+        @config.on(:heartbeat) do
           i += 1
         end
         assert_equal 0, i
@@ -134,9 +133,9 @@ describe Sidekiq::Launcher do
         end
 
         it "stores process info in redis" do
-          info = Sidekiq.redis { |c| c.hmget(@id, "busy") }
+          info = @config.redis { |c| c.hmget(@id, "busy") }
           assert_equal ["1"], info
-          expires = Sidekiq.redis { |c| c.pttl(@id) }
+          expires = @config.redis { |c| c.pttl(@id) }
           assert_in_delta 60000, expires, 500
         end
       end
@@ -157,9 +156,9 @@ describe Sidekiq::Launcher do
       end
 
       it "stores process info in redis" do
-        info = Sidekiq.redis { |c| c.hmget(@id, "busy") }
+        info = @config.redis { |c| c.hmget(@id, "busy") }
         assert_equal ["1"], info
-        expires = Sidekiq.redis { |c| c.pttl(@id) }
+        expires = @config.redis { |c| c.pttl(@id) }
         assert_in_delta 60000, expires, 50
       end
     end

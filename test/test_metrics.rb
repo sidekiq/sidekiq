@@ -9,7 +9,7 @@ require "sidekiq/api"
 
 describe Sidekiq::Metrics do
   before do
-    Sidekiq.redis { |c| c.flushdb }
+    @config = reset!
   end
 
   def fixed_time
@@ -17,7 +17,7 @@ describe Sidekiq::Metrics do
   end
 
   def create_known_metrics(time = fixed_time)
-    smet = Sidekiq::Metrics::ExecutionTracker.new(Sidekiq)
+    smet = Sidekiq::Metrics::ExecutionTracker.new(@config)
     smet.track("critical", "App::SomeJob") { sleep 0.001 }
     smet.track("critical", "App::FooJob") { sleep 0.001 }
     assert_raises RuntimeError do
@@ -73,7 +73,7 @@ describe Sidekiq::Metrics do
       h.record_time(302)
       h.record_time(300000000)
       assert_equal 8, h.sum
-      key = Sidekiq.redis do |conn|
+      key = @config.redis do |conn|
         h.persist(conn, fixed_time)
       end
       assert_equal 0, h.sum
@@ -81,7 +81,7 @@ describe Sidekiq::Metrics do
       assert_equal "App::FooJob-22-22:3", key
 
       h = Sidekiq::Metrics::Histogram.new("App::FooJob")
-      data = Sidekiq.redis { |c| h.fetch(c, fixed_time) }
+      data = @config.redis { |c| h.fetch(c, fixed_time) }
       {0 => 1, 3 => 3, 7 => 3, 25 => 1}.each_pair do |idx, val|
         assert_equal val, data[idx]
       end

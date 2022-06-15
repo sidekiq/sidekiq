@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require_relative "helper"
+require "sidekiq/api"
+require "active_support/core_ext/numeric/time"
 
 describe Sidekiq::Job do
   describe "#set" do
@@ -13,7 +15,7 @@ describe Sidekiq::Job do
     end
 
     def setup
-      Sidekiq.redis { |c| c.flushdb }
+      @cfg = reset!
     end
 
     it "provides basic ActiveJob compatibilility" do
@@ -142,8 +144,8 @@ describe Sidekiq::Job do
       server_chain.add MyCustomMiddleware, "1-server", $my_recorder
       client_chain = Sidekiq::Middleware::Chain.new
       client_chain.add MyCustomMiddleware, "1-client", $my_recorder
-      Sidekiq.stub(:server_middleware, server_chain) do
-        Sidekiq.stub(:client_middleware, client_chain) do
+      Sidekiq.default_configuration.stub(:server_middleware, server_chain) do
+        Sidekiq.default_configuration.stub(:client_middleware, client_chain) do
           MyCustomJob.perform_inline($my_recorder)
           assert_equal $my_recorder.flatten, %w[1-client-before 1-client-after 1-server-before work_performed 1-server-after]
         end

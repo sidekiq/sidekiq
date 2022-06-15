@@ -206,7 +206,7 @@ module Sidekiq
               stat_hash[dates[idx]] = value ? value.to_i : 0
             end
           end
-        rescue RedisConnection.adapter::CommandError
+        rescue RedisClientAdapter::CommandError
           # mget will trigger a CROSSSLOT error when run against a Cluster
           # TODO Someone want to add Cluster support?
         end
@@ -804,7 +804,7 @@ module Sidekiq
         job = Sidekiq.load_json(message)
         r = RuntimeError.new("Job killed by API")
         r.set_backtrace(caller)
-        Sidekiq.death_handlers.each do |handle|
+        Sidekiq.default_configuration.death_handlers.each do |handle|
           handle.call(job, r)
         end
       end
@@ -819,13 +819,13 @@ module Sidekiq
     # The maximum size of the Dead set. Older entries will be trimmed
     # to stay within this limit. Default value is 10,000.
     def self.max_jobs
-      Sidekiq[:dead_max_jobs]
+      Sidekiq::Config::DEFAULTS[:dead_max_jobs]
     end
 
     # The time limit for entries within the Dead set. Older entries will be thrown away.
     # Default value is six months.
     def self.timeout
-      Sidekiq[:dead_timeout_in_seconds]
+      Sidekiq::Config::DEFAULTS[:dead_timeout_in_seconds]
     end
   end
 

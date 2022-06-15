@@ -2,7 +2,7 @@
 
 module Sidekiq
   class JobLogger
-    def initialize(logger = Sidekiq.logger)
+    def initialize(logger)
       @logger = logger
     end
 

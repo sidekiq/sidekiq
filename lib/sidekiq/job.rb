@@ -209,7 +209,8 @@ module Sidekiq
         queue = item["queue"]
 
         # run client-side middleware
-        result = Sidekiq.client_middleware.invoke(item["class"], item, queue, Sidekiq.redis_pool) do
+        cfg = Sidekiq.default_configuration
+        result = cfg.client_middleware.invoke(item["class"], item, queue, cfg.redis_pool) do
           item
         end
         return nil unless result
@@ -224,7 +225,7 @@ module Sidekiq
         job.bid = msg["bid"] if job.respond_to?(:bid)
 
         # run the job through server-side middleware
-        result = Sidekiq.server_middleware.invoke(job, msg, msg["queue"]) do
+        result = cfg.server_middleware.invoke(job, msg, msg["queue"]) do
           # perform it
           job.perform(*msg["args"])
           true
@@ -358,9 +359,9 @@ module Sidekiq
       end
 
       def build_client # :nodoc:
-        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options["pool"] || Sidekiq.redis_pool
+        pool = Thread.current[:sidekiq_via_pool] || get_sidekiq_options["pool"] || Sidekiq.default_configuration.redis_pool
         client_class = get_sidekiq_options["client_class"] || Sidekiq::Client
-        client_class.new(pool)
+        client_class.new(pool: pool)
       end
     end
   end

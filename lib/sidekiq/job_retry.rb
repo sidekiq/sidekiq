@@ -68,8 +68,8 @@ module Sidekiq
 
     DEFAULT_MAX_RETRY_ATTEMPTS = 25
 
-    def initialize(options)
-      @config = options
+    def initialize(config)
+      @config = config
       @max_retries = @config[:max_retries] || DEFAULT_MAX_RETRY_ATTEMPTS
     end
 
@@ -91,7 +91,7 @@ module Sidekiq
       if msg["retry"]
         process_retry(nil, msg, queue, e)
       else
-        Sidekiq.death_handlers.each do |handler|
+        @config.death_handlers.each do |handler|
           handler.call(msg, e)
         rescue => handler_ex
           handle_exception(handler_ex, {context: "Error calling death handler", job: msg})

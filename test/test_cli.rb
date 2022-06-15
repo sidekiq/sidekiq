@@ -6,25 +6,16 @@ require "sidekiq/cli"
 describe Sidekiq::CLI do
   describe "#parse" do
     before do
-      Sidekiq.reset!
-      @logger = Sidekiq.logger
       @logdev = StringIO.new
-      Sidekiq.logger = Logger.new(@logdev)
-      @config = Sidekiq
+      @config = reset!
+      @config.logger = Logger.new(@logdev)
     end
 
     attr_reader :config
-
-    after do
-      Sidekiq.logger = @logger
-    end
+    attr_reader :logdev
 
     subject do
       Sidekiq::CLI.new.tap { |c| c.config = config }
-    end
-
-    def logdev
-      @logdev ||= StringIO.new
     end
 
     describe "#parse" do
@@ -162,7 +153,7 @@ describe Sidekiq::CLI do
           it "accepts with -v" do
             subject.parse(%w[sidekiq -v -r ./test/fake_env.rb])
 
-            assert_equal Logger::DEBUG, Sidekiq.logger.level
+            assert_equal Logger::DEBUG, @config.logger.level
           end
         end
 
@@ -456,7 +447,6 @@ describe Sidekiq::CLI do
 
     describe "#run" do
       before do
-        subject.config = Sidekiq
         subject.config[:concurrency] = 2
         subject.config[:require] = "./test/fake_env.rb"
       end
@@ -524,7 +514,7 @@ describe Sidekiq::CLI do
         it "warns if the policy is not noeviction" do
           redis_info = {"maxmemory_policy" => "allkeys-lru", "redis_version" => "6.2.1"}
 
-          Sidekiq.stub(:redis_info, redis_info) do
+          subject.config.stub(:redis_info, redis_info) do
             subject.stub(:launch, nil) do
               subject.run
             end
@@ -536,7 +526,7 @@ describe Sidekiq::CLI do
         it "silent if the policy is noeviction" do
           redis_info = {"maxmemory_policy" => "noeviction", "redis_version" => "6.2.1"}
 
-          Sidekiq.stub(:redis_info, redis_info) do
+          subject.config.stub(:redis_info, redis_info) do
             subject.stub(:launch, nil) do
               subject.run
             end
@@ -562,7 +552,6 @@ describe Sidekiq::CLI do
         it "quiets with a corresponding event" do
           quiet = false
 
-          subject.config = Sidekiq
           subject.config.on(:quiet) do
             quiet = true
           end

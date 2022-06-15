@@ -5,6 +5,7 @@ require "sidekiq/cli"
 require "sidekiq/fetch"
 require "sidekiq/scheduled"
 require "sidekiq/processor"
+require "sidekiq/api"
 
 class JoeWorker
   include Sidekiq::Job
@@ -17,12 +18,10 @@ end
 
 describe "Actors" do
   before do
-    Sidekiq.reset!
-    Sidekiq.redis { |c| c.flushdb }
-    @config = Sidekiq
+    @config = reset!
+
     @config[:queues] = %w[default]
     @config[:fetch] = Sidekiq::BasicFetch.new(@config)
-    @config[:error_handlers] << Sidekiq.method(:default_error_handler)
     # @config.logger.level = Logger::DEBUG
   end
 
@@ -100,6 +99,7 @@ describe "Actors" do
     end
 
     it "deals with errors" do
+      @config.logger.level = Logger::ERROR
       q = Sidekiq::Queue.new
       assert_equal 0, q.size
       p = Sidekiq::Processor.new(@config) do |pr, ex|

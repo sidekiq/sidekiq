@@ -5,8 +5,9 @@ require "sidekiq/client"
 
 module Sidekiq
   class TransactionAwareClient
-    def initialize(redis_pool)
-      @redis_client = Client.new(redis_pool)
+    def initialize(pool:, config:)
+      redis_pool = pool || config.redis_pool
+      @redis_client = Client.new(pool: redis_pool)
     end
 
     def push(item)
@@ -34,11 +35,10 @@ module Sidekiq
     begin
       require "after_commit_everywhere"
     rescue LoadError
-      Sidekiq.logger.error("You need to add after_commit_everywhere to your Gemfile to use Sidekiq's transactional client")
-      raise
+      raise %q(You need to add `gem "after_commit_everywhere"` to your Gemfile to use Sidekiq's transactional client)
     end
 
-    default_job_options["client_class"] = Sidekiq::TransactionAwareClient
+    Sidekiq.default_job_options["client_class"] = Sidekiq::TransactionAwareClient
     Sidekiq::JobUtil::TRANSIENT_ATTRIBUTES << "client_class"
     true
   end

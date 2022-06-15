@@ -24,10 +24,10 @@ module Sidekiq
 
     attr_reader :workers
 
-    def initialize(options = {})
-      @config = options
-      logger.debug { options.inspect }
-      @count = options[:concurrency] || 10
+    def initialize(config)
+      @config = config
+      logger.debug { config }
+      @count = config[:concurrency] || 10
       raise ArgumentError, "Concurrency of #{@count} is not supported" if @count < 1
 
       @done = false

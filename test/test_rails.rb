@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 require_relative "helper"
+require "active_job"
 require "sidekiq/rails"
 require "sidekiq/api"
 
 describe "ActiveJob" do
   before do
-    Sidekiq.redis { |c| c.flushdb }
+    @config = reset!
     # need to force this since we aren't booting a Rails app
     ActiveJob::Base.queue_adapter = :sidekiq
     ActiveJob::Base.logger = nil
@@ -16,19 +17,19 @@ describe "ActiveJob" do
   it "does not allow Sidekiq::Job in AJ::Base classes" do
     ex = assert_raises ArgumentError do
       Class.new(ActiveJob::Base) do
-        include Sidekiq::Worker
+        include Sidekiq::Job
       end
     end
     assert_includes ex.message, "Sidekiq::Job cannot be included"
   end
 
-  it "loads Sidekiq::Worker::Options in AJ::Base classes" do
+  it "loads Sidekiq::Job::Options in AJ::Base classes" do
     aj = Class.new(ActiveJob::Base) do
       queue_as :bar
       sidekiq_options retry: 4, queue: "foo", backtrace: 5
       sidekiq_retry_in { |count, _exception| count * 10 }
       sidekiq_retries_exhausted do |msg, _exception|
-        Sidekiq.logger.warn "Failed #{msg["class"]} with #{msg["args"]}: #{msg["error_message"]}"
+        @config.logger.warn "Failed #{msg["class"]} with #{msg["args"]}: #{msg["error_message"]}"
       end
     end
 
