@@ -1,4 +1,4 @@
 --title "Sidekiq"
---query '@return || @param || '@yield' || @api.text == "public"'
+--query '(@return || @param || @yield || @attr_reader || @api.text == "public") && @api.text != "private"'
 --readme docs/menu.md
 - Changes.md

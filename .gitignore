@@ -17,3 +17,5 @@ development.log
 /docker-compose.yml
 Gemfile.lock
 *.DS_Store
+doc/
+.yardoc/

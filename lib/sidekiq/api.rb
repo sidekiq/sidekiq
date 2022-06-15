@@ -7,6 +7,7 @@ require "base64"
 
 # @api public
 module Sidekiq
+  # @api private
   class Stats
     def initialize
       fetch_stats_fast!
@@ -214,7 +215,6 @@ module Sidekiq
   #     job.args # => [1, 2, 3]
   #     job.delete if job.jid == 'abcdef1234567890'
   #   end
-  #
   class Queue
     include Enumerable
 
@@ -310,7 +310,9 @@ module Sidekiq
     end
     alias_method :💣, :clear
 
-    def as_json(options = nil) # :nodoc:
+    # :nodoc:
+    # @api private
+    def as_json(options = nil)
       {name: name} # 5336
     end
   end
@@ -320,24 +322,30 @@ module Sidekiq
   #
   # The job should be considered immutable but may be
   # removed from the queue via JobRecord#delete.
-  #
   class JobRecord
 
     # the parsed Hash of job data
+    # @!attribute [r] Item
     attr_reader :item
     # the underlying String in Redis
+    # @!attribute [r] Value
     attr_reader :value
     # the queue associated with this job
+    # @!attribute [r] Queue
     attr_reader :queue
 
-    def initialize(item, queue_name = nil) # :nodoc:
+    # :nodoc:
+    # @api private
+    def initialize(item, queue_name = nil)
       @args = nil
       @value = item
       @item = item.is_a?(Hash) ? item : parse(item)
       @queue = queue_name || @item["queue"]
     end
 
-    def parse(item) # :nodoc:
+    # :nodoc:
+    # @api private
+    def parse(item)
       Sidekiq.load_json(item)
     rescue JSON::ParserError
       # If the job payload in Redis is invalid JSON, we'll load
@@ -496,7 +504,9 @@ module Sidekiq
     attr_reader :score
     attr_reader :parent
 
-    def initialize(parent, score, item) # :nodoc:
+    # :nodoc:
+    # @api private
+    def initialize(parent, score, item)
       super(item)
       @score = Float(score)
       @parent = parent
@@ -597,9 +607,12 @@ module Sidekiq
     include Enumerable
 
     # Redis key of the set
+    # @!attribute [r] Name
     attr_reader :name
 
-    def initialize(name) # :nodoc:
+    # :nodoc:
+    # @api private
+    def initialize(name)
       @name = name
       @_size = size
     end
@@ -635,7 +648,9 @@ module Sidekiq
     end
     alias_method :💣, :clear
 
-    def as_json(options = nil) # :nodoc:
+    # :nodoc:
+    # @api private
+    def as_json(options = nil)
       {name: name} # 5336
     end
   end
@@ -718,7 +733,9 @@ module Sidekiq
       nil
     end
 
-    def delete_by_value(name, value) # :nodoc:
+    # :nodoc:
+    # @api private
+    def delete_by_value(name, value)
       Sidekiq.redis do |conn|
         ret = conn.zrem(name, value)
         @_size -= 1 if ret
@@ -726,7 +743,9 @@ module Sidekiq
       end
     end
 
-    def delete_by_jid(score, jid) # :nodoc:
+    # :nodoc:
+    # @api private
+    def delete_by_jid(score, jid)
       Sidekiq.redis do |conn|
         elements = conn.zrangebyscore(name, score, score)
         elements.each do |element|
@@ -852,13 +871,17 @@ module Sidekiq
   class ProcessSet
     include Enumerable
 
-    def initialize(clean_plz = true) # :nodoc:
+    # :nodoc:
+    # @api private
+    def initialize(clean_plz = true)
       cleanup if clean_plz
     end
 
     # Cleans up dead processes recorded in Redis.
     # Returns the number of processes cleaned.
-    def cleanup # :nodoc:
+    # :nodoc:
+    # @api private
+    def cleanup
       count = 0
       Sidekiq.redis do |conn|
         procs = conn.sscan_each("processes").to_a.sort
@@ -934,6 +957,8 @@ module Sidekiq
     # Returns the identity of the current cluster leader or "" if no leader.
     # This is a Sidekiq Enterprise feature, will always return "" in Sidekiq
     # or Sidekiq Pro.
+    # @return [String] Identity of cluster leader
+    # @return [String] empty string if no leader
     def leader
       @leader ||= begin
         x = Sidekiq.redis { |c| c.get("dear-leader") }
@@ -960,7 +985,9 @@ module Sidekiq
   #   'identity' => <unique string identifying the process>,
   # }
   class Process
-    def initialize(hash) # :nodoc:
+    # :nodoc:
+    # @api private
+    def initialize(hash)
       @attribs = hash
     end
 

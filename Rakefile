@@ -4,18 +4,8 @@ require "standard/rake"
 require "yard"
 require "yard/rake/yardoc_task"
 
-YARD::Rake::YardocTask.new do |yard|
-  # keeping this in here for now, but code can be deleted once we are ready
-  # to push. .yardopts takes care of this.
-  # yard.files = [
-  #   "lib/sidekiq/api.rb",
-  #   "lib/sidekiq/client.rb",
-  #   "lib/sidekiq/worker.rb",
-  #   # "lib/sidekiq/job.rb",
-  #   "-",
-  #   "Changes.md",
-  #   "docs/menu.md"]
-end
+# If you want to generate the docs, run yarddoc from your terminal
+# https://rubydoc.info/gems/yard/file/README.md
 
 Rake::TestTask.new(:test) do |test|
   test.warning = true
