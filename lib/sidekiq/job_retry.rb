@@ -176,7 +176,7 @@ module Sidekiq
         # logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
         retry_at = Time.now.to_f + delay
         payload = Sidekiq.dump_json(msg)
-        Sidekiq.redis do |conn|
+        redis do |conn|
           conn.zadd("retry", retry_at.to_s, payload)
         end
       else
@@ -195,7 +195,7 @@ module Sidekiq
 
       send_to_morgue(msg) unless msg["dead"] == false
 
-      Sidekiq.death_handlers.each do |handler|
+      config.death_handlers.each do |handler|
         handler.call(msg, exception)
       rescue => e
         handle_exception(e, {context: "Error calling death handler", job: msg})
