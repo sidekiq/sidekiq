@@ -5,7 +5,6 @@ require "sidekiq"
 require "zlib"
 require "base64"
 
-# @api public
 module Sidekiq
   # @api private
   class Stats
