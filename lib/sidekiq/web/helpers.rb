@@ -148,6 +148,17 @@ module Sidekiq
       @processes ||= Sidekiq::ProcessSet.new
     end
 
+    # Sorts processes by hostname following the natural sort order so that
+    # 'worker.1' < 'worker.2' < 'worker.10' < 'worker.20'
+    def sorted_processes
+      @sorted_processes ||= processes.to_a.sort_by do |process|
+        words = process['hostname'].split('.')
+        padding = words.map(&:size).max
+
+        words.map { |word| word.rjust(padding, '0') }
+      end
+    end
+
     def stats
       @stats ||= Sidekiq::Stats.new
     end

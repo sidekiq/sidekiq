@@ -125,4 +125,21 @@ describe "Web helpers" do
     end
     assert_equal "direction=H%3EB&page=B%3CH", obj.qparams("page" => "B<H")
   end
+
+  it "sorts processes using the natural sort order" do
+    ['worker.10.2', 'worker.2', 'busybee', 'worker.23', 'worker.10.1', 'worker.1'].each do |hostname|
+      pdata = { "hostname" => hostname, "pid" => '123', "started_at" => Time.now.to_i }
+      key = "#{hostname}:123"
+
+      Sidekiq.redis do |conn|
+        conn.sadd("processes", key)
+        conn.hmset(key, "info", Sidekiq.dump_json(pdata), "busy", 0, "beat", Time.now.to_f)
+      end
+    end
+
+    obj = Helpers.new
+
+    assert obj.sorted_processes.all? { |process| assert_instance_of Sidekiq::Process, process }
+    assert_equal ['busybee', 'worker.1', 'worker.2', 'worker.10.1', 'worker.10.2', 'worker.23'], obj.sorted_processes.map { |process| process['hostname'] }
+  end
 end
