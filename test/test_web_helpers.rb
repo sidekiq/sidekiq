@@ -100,14 +100,14 @@ describe "Web helpers" do
   end
 
   it "tests displaying of illegal args" do
-    o = Helpers.new
-    s = o.display_args([1, 2, 3])
+    obj = Helpers.new
+    s = obj.display_args([1, 2, 3])
     assert_equal "1, 2, 3", s
-    s = o.display_args(["<html>", 12])
+    s = obj.display_args(["<html>", 12])
     assert_equal "&quot;&lt;html&gt;&quot;, 12", s
-    s = o.display_args("<html>")
+    s = obj.display_args("<html>")
     assert_equal "Invalid job payload, args must be an Array, not String", s
-    s = o.display_args(nil)
+    s = obj.display_args(nil)
     assert_equal "Invalid job payload, args is nil", s
   end
 
