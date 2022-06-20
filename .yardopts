@@ -1,3 +1,4 @@
 --title "Sidekiq"
 --readme docs/menu.md
+--hide-api private
 lib/sidekiq/api.rb lib/sidekiq/middleware/chain.rb - Changes.md
