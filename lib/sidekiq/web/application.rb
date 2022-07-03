@@ -81,6 +81,7 @@ module Sidekiq
 
     get "/queues" do
       @queues = Sidekiq::Queue.all
+      @should_hide_delete_queue_action = Sidekiq.options[:should_hide_web_action]?.include?("delete_queue")
 
       erb(:queues)
     end
