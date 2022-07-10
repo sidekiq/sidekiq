@@ -264,6 +264,9 @@ describe Sidekiq::JobRetry do
       class SpecialError < StandardError
       end
 
+      class KillMeError < StandardError
+      end
+
       class CustomWorkerWithException
         include Sidekiq::Worker
 
@@ -271,6 +274,8 @@ describe Sidekiq::JobRetry do
           case exception
           when SpecialError
             nil
+          when KillMeError
+            :kill
           when ArgumentError
             count * 4
           else
@@ -314,6 +319,16 @@ describe Sidekiq::JobRetry do
         end
         assert_match(/Failure scheduling retry using the defined `sidekiq_retry_in`/,
           output, "Log entry missing for sidekiq_retry_in")
+      end
+
+      it "kills when configured on special exceptions" do
+        assert_raises Sidekiq::JobRetry::Skip do
+          handler.local(CustomWorkerWithException, jobstr({"class" => "CustomWorkerWithException"}), "default") do
+            raise KillMeError
+          end
+        end
+
+        assert_equal 1, Sidekiq::DeadSet.new.size
       end
     end
 

@@ -2,6 +2,19 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
+
+- Allow to kill job if the exception is raised. The job will be moved to the dead job queue and
+  death handlers will be run if any. This is useful when the subject of the job, like an Active Record,
+  is no longer available, and the job is thus no longer relevant. [#5423, fatkodima]
+```ruby
+sidekiq_retry_in do |count, ex|
+  case ex
+  when SpecialException
+    :kill
+  end
+end
+```
+
 6.5.1
 ----------
 

@@ -170,7 +170,7 @@ module Sidekiq
         msg["error_backtrace"] = compress_backtrace(lines)
       end
 
-      if count < max_retry_attempts
+      if count < max_retry_attempts && !kill_job?(jobinst, count, exception)
         delay = delay_for(jobinst, count, exception)
         # Logging here can break retries if the logging device raises ENOSPC #3979
         # logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
@@ -213,6 +213,13 @@ module Sidekiq
         msg_retry
       else
         default
+      end
+    end
+
+    def kill_job?(jobinst, count, exception)
+      if jobinst&.sidekiq_retry_in_block
+        custom_retry_in = retry_in(jobinst, count, exception)
+        custom_retry_in == :kill
       end
     end
 
