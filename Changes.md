@@ -2,6 +2,12 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
+HEAD
+----------
+
+- Require redis 4.5.0. Note that Sidekiq will break if you use the
+  [`Redis.exists_returns_integer = false`](https://github.com/redis/redis-rb/blob/master/CHANGELOG.md#450) flag. [#5394]
+
 6.5.1
 ----------
 
