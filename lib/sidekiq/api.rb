@@ -6,7 +6,6 @@ require "zlib"
 require "base64"
 
 module Sidekiq
-
   # Retrieve runtime statistics from Redis regarding
   # this Sidekiq cluster.
   #
@@ -331,7 +330,6 @@ module Sidekiq
   # The job should be considered immutable but may be
   # removed from the queue via JobRecord#delete.
   class JobRecord
-
     # the parsed Hash of job data
     # @!attribute [r] Item
     attr_reader :item
@@ -667,7 +665,6 @@ module Sidekiq
   # Sidekiq Pro and Enterprise add additional sorted sets which do not contain job data,
   # e.g. Batches.
   class JobSet < SortedSet
-
     # Add a job with the associated timestamp to this set.
     # @param timestamp [Time] the score for the job
     # @param job [Hash] the job data
