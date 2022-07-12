@@ -6,7 +6,6 @@ require "zlib"
 require "base64"
 
 module Sidekiq
-  # @api private
   class Stats
     def initialize
       fetch_stats_fast!
