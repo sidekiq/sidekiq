@@ -220,7 +220,7 @@ module Sidekiq
 
     def atomic_push(conn, payloads)
       if payloads.first.key?("at")
-        conn.zadd("schedule", *payloads.map { |hash|
+        conn.zadd("schedule", payloads.flat_map { |hash|
           at = hash.delete("at").to_s
           [at, Sidekiq.dump_json(hash)]
         })

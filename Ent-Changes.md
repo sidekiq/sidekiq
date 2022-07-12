@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+2.5.1
+-------------
+
+- Fix crash with empty periodic data [#5374]
+
 2.5.0
 -------------
 
