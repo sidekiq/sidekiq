@@ -6,6 +6,12 @@ require "zlib"
 require "base64"
 
 module Sidekiq
+
+  # Retrieve runtime statistics from Redis regarding
+  # this Sidekiq cluster.
+  #
+  #   stat = Sidekiq::Stats.new
+  #   stat.processed
   class Stats
     def initialize
       fetch_stats_fast!
@@ -52,6 +58,7 @@ module Sidekiq
     end
 
     # O(1) redis calls
+    # @api private
     def fetch_stats_fast!
       pipe1_res = Sidekiq.redis { |conn|
         conn.pipelined do |pipeline|
@@ -91,6 +98,7 @@ module Sidekiq
     end
 
     # O(number of processes + number of queues) redis calls
+    # @api private
     def fetch_stats_slow!
       processes = Sidekiq.redis { |conn|
         conn.sscan_each("processes").to_a
@@ -116,11 +124,13 @@ module Sidekiq
       @stats
     end
 
+    # @api private
     def fetch_stats!
       fetch_stats_fast!
       fetch_stats_slow!
     end
 
+    # @api private
     def reset(*stats)
       all = %w[failed processed]
       stats = stats.empty? ? all : all & stats.flatten.compact.map(&:to_s)
