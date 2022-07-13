@@ -153,7 +153,7 @@ module Sidekiq
     # '2.1.1.1' < '192.168.0.2' < '192.168.0.10'
     def sorted_processes
       @sorted_processes ||= begin
-        return processes unless processes.all? { |p| p['hostname'].present? }
+        return processes unless processes.all? { |p| p['hostname'] }
 
         split_characters = /[\._-]/
 
