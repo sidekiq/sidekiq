@@ -294,7 +294,7 @@ describe Sidekiq::JobRetry do
       it "retries with a default delay" do
         strat, count = handler.__send__(:delay_for, worker, 2, StandardError.new)
         assert_equal :default, strat
-        refute_equal 4, count 
+        refute_equal 4, count
       end
 
       it "retries with a custom delay and exception 1" do

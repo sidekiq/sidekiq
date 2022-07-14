@@ -106,7 +106,6 @@ describe Sidekiq::Processor do
       end
       assert_equal 1, errors.count
       assert_instance_of TestProcessorException, errors.first[:exception]
-      assert_equal msg, errors.first[:context][:jobstr]
       assert_equal job_hash["jid"], errors.first[:context][:job]["jid"]
     end
 
@@ -122,7 +121,6 @@ describe Sidekiq::Processor do
       end
       assert_equal 1, errors.count
       assert_instance_of TestProcessorException, errors.first[:exception]
-      assert_equal msg, errors.first[:context][:jobstr]
       assert_equal job_hash, errors.first[:context][:job]
     end
 

@@ -153,17 +153,17 @@ module Sidekiq
     # '2.1.1.1' < '192.168.0.2' < '192.168.0.10'
     def sorted_processes
       @sorted_processes ||= begin
-        return processes unless processes.all? { |p| p['hostname'] }
+        return processes unless processes.all? { |p| p["hostname"] }
 
-        split_characters = /[\._-]/
+        split_characters = /[._-]/
 
-        padding = processes.flat_map { |p| p['hostname'].split(split_characters) }.map(&:size).max
+        padding = processes.flat_map { |p| p["hostname"].split(split_characters) }.map(&:size).max
 
         processes.to_a.sort_by do |process|
-          process['hostname'].split(split_characters).map do |substring|
+          process["hostname"].split(split_characters).map do |substring|
             # Left-pad the substring with '0' if it starts with a number or 'a'
             # otherwise, so that '25' < 192' < 'a' ('025' < '192' < 'aaa')
-            padding_char = substring.chars.first.match?(/\d/) ? '0' : 'a'
+            padding_char = substring[0].match?(/\d/) ? "0" : "a"
 
             substring.rjust(padding, padding_char)
           end
