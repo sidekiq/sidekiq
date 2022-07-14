@@ -5,6 +5,9 @@
 HEAD
 ----------
 
+- `sidekiq_retry_in` may now return `:discard` or `:kill` to dynamically stop job retries [#5406]
+- Smarter sorting of processes in /busy Web UI [#5398]
+- Fix broken hamburger menu in mobile UI [#5428]
 - Require redis 4.5.0. Note that Sidekiq will break if you use the
   [`Redis.exists_returns_integer = false`](https://github.com/redis/redis-rb/blob/master/CHANGELOG.md#450) flag. [#5394]
 
