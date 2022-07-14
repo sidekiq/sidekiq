@@ -278,7 +278,7 @@ describe Sidekiq::Processor do
           assert_equal "boom", msg["args"].first
         }
 
-        @processor.instance_variable_get(:@retrier).stub(:attempt_retry, retry_stub) do
+        @processor.instance_variable_get(:@retrier).stub(:process_retry, retry_stub) do
           msg = Sidekiq.dump_json(job_data)
           begin
             @processor.process(work(msg))
