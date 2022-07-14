@@ -4,6 +4,10 @@ require_relative "helper"
 require "sidekiq/web"
 
 describe "Web helpers" do
+  before do
+    Sidekiq.redis { |c| c.flushdb }
+  end
+
   class Helpers
     include Sidekiq::WebHelpers
 
