@@ -876,9 +876,11 @@ module Sidekiq
   class ProcessSet
     include Enumerable
 
+    CLEAN_ON_INIT = true
+
     # :nodoc:
     # @api private
-    def initialize(clean_plz = true)
+    def initialize(clean_plz = CLEAN_ON_INIT)
       cleanup if clean_plz
     end
 
