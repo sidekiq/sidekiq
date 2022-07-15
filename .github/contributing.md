@@ -66,7 +66,7 @@ bundle install
 redis-server
 ```
 
-#### 7. Navivate to myapp (small Rails app inside Sidekiq repository used for development)
+#### 7. Navigate to myapp (small Rails app inside Sidekiq repository used for development)
 
 ```
 cd myapp/

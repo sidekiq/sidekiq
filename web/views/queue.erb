@@ -35,7 +35,7 @@
           <% a = job.display_args %>
           <% if a.inspect.size > 100 %>
             <span id="job_<%= index %>"><%= h(a.inspect[0..100]) + "... " %></span>
-            <button data-toggle="job_<%= index %>" class="btn btn-default btn-xs"><%= t('ShowAll') %></button>
+            <button data-toggle="job_<%= index %>_full" class="btn btn-default btn-xs"><%= t('ShowAll') %></button>
             <div class="toggle" id="job_<%= index %>_full"><%= display_args(a) %></div>
           <% else %>
             <%= display_args(job.display_args) %>

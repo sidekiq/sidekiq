@@ -106,7 +106,6 @@ describe Sidekiq::Processor do
       end
       assert_equal 1, errors.count
       assert_instance_of TestProcessorException, errors.first[:exception]
-      assert_equal msg, errors.first[:context][:jobstr]
       assert_equal job_hash["jid"], errors.first[:context][:job]["jid"]
     end
 
@@ -122,7 +121,6 @@ describe Sidekiq::Processor do
       end
       assert_equal 1, errors.count
       assert_instance_of TestProcessorException, errors.first[:exception]
-      assert_equal msg, errors.first[:context][:jobstr]
       assert_equal job_hash, errors.first[:context][:job]
     end
 
@@ -278,7 +276,7 @@ describe Sidekiq::Processor do
           assert_equal "boom", msg["args"].first
         }
 
-        @processor.instance_variable_get(:@retrier).stub(:attempt_retry, retry_stub) do
+        @processor.instance_variable_get(:@retrier).stub(:process_retry, retry_stub) do
           msg = Sidekiq.dump_json(job_data)
           begin
             @processor.process(work(msg))

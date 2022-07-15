@@ -9,7 +9,7 @@ gem "rails", "~> 6.0"
 gem "sqlite3", platforms: :ruby
 gem "activerecord-jdbcsqlite3-adapter", platforms: :jruby
 gem "after_commit_everywhere"
-gem "yard"
+
 # mail dependencies
 gem "net-smtp", platforms: :mri, require: false
 

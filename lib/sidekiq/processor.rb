@@ -174,7 +174,7 @@ module Sidekiq
         # signals that we created a retry successfully.  We can acknowlege the job.
         ack = true
         e = h.cause || h
-        handle_exception(e, {context: "Job raised exception", job: job_hash, jobstr: jobstr})
+        handle_exception(e, {context: "Job raised exception", job: job_hash})
         raise e
       rescue Exception => ex
         # Unexpected error!  This is very bad and indicates an exception that got past

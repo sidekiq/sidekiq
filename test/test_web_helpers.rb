@@ -4,6 +4,10 @@ require_relative "helper"
 require "sidekiq/web"
 
 describe "Web helpers" do
+  before do
+    Sidekiq.redis { |c| c.flushdb }
+  end
+
   class Helpers
     include Sidekiq::WebHelpers
 
@@ -100,14 +104,14 @@ describe "Web helpers" do
   end
 
   it "tests displaying of illegal args" do
-    o = Helpers.new
-    s = o.display_args([1, 2, 3])
+    obj = Helpers.new
+    s = obj.display_args([1, 2, 3])
     assert_equal "1, 2, 3", s
-    s = o.display_args(["<html>", 12])
+    s = obj.display_args(["<html>", 12])
     assert_equal "&quot;&lt;html&gt;&quot;, 12", s
-    s = o.display_args("<html>")
+    s = obj.display_args("<html>")
     assert_equal "Invalid job payload, args must be an Array, not String", s
-    s = o.display_args(nil)
+    s = obj.display_args(nil)
     assert_equal "Invalid job payload, args is nil", s
   end
 
@@ -124,5 +128,22 @@ describe "Web helpers" do
       end
     end
     assert_equal "direction=H%3EB&page=B%3CH", obj.qparams("page" => "B<H")
+  end
+
+  it "sorts processes using the natural sort order" do
+    ["a.10.2", "a.2", "busybee-10_1", "a.23", "a.10.1", "a.1", "192.168.0.10", "192.168.0.2", "2.1.1.1", "busybee-2_34"].each do |hostname|
+      pdata = {"hostname" => hostname, "pid" => "123", "started_at" => Time.now.to_i}
+      key = "#{hostname}:123"
+
+      Sidekiq.redis do |conn|
+        conn.sadd("processes", key)
+        conn.hmset(key, "info", Sidekiq.dump_json(pdata), "busy", 0, "beat", Time.now.to_f)
+      end
+    end
+
+    obj = Helpers.new
+
+    assert obj.sorted_processes.all? { |process| assert_instance_of Sidekiq::Process, process }
+    assert_equal ["2.1.1.1", "192.168.0.2", "192.168.0.10", "a.1", "a.2", "a.10.1", "a.10.2", "a.23", "busybee-2_34", "busybee-10_1"], obj.sorted_processes.map { |process| process["hostname"] }
   end
 end

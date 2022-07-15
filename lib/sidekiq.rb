@@ -84,6 +84,11 @@ module Sidekiq
     logger.warn(ex.backtrace.join("\n")) unless ex.backtrace.nil?
   end
 
+  # DEFAULT_ERROR_HANDLER is a constant that allows the default error handler to
+  # be referenced. It must be defined here, after the default_error_handler
+  # method is defined.
+  DEFAULT_ERROR_HANDLER = method(:default_error_handler)
+
   @config = DEFAULTS.dup
   def self.options
     logger.warn "`config.options[:key] = value` is deprecated, use `config[:key] = value`: #{caller(1..2)}"
