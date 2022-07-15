@@ -125,4 +125,21 @@ describe "Web helpers" do
     end
     assert_equal "direction=H%3EB&page=B%3CH", obj.qparams("page" => "B<H")
   end
+
+  describe "#format_memory" do
+    it "returnsin KB" do
+      obj = Helpers.new
+      assert_equal "1 KB", obj.format_memory(1)
+    end
+
+    it "returns in MB" do
+      obj = Helpers.new
+      assert_equal "97 MB", obj.format_memory(100_002)
+    end
+
+    it "returns in GB" do
+      obj = Helpers.new
+      assert_equal "9.5 GB", obj.format_memory(10_000_001)
+    end
+  end
 end

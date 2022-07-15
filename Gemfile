@@ -19,7 +19,7 @@ gem "yard"
 
 group :test do
   gem "minitest"
-  # gem "simplecov"
+  gem "simplecov"
   # gem "codecov", require: false
 end
 
