@@ -43,3 +43,4 @@ jobs:
       uses: aki77/simplecov-report-action@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
+        resultPath: .github/.last_simplecov_report.json
