@@ -890,8 +890,8 @@ module Sidekiq
         while(conn.call("get","delay_cleanup") != "Wait to cleanup") {
           sleep 1
         }
+        conn.call("del","delay_cleanup")
       end
-      conn.call("del","delay_cleanup")
       true
     end
 
