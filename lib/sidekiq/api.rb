@@ -878,21 +878,8 @@ module Sidekiq
 
     # :nodoc:
     # @api private
-    def initialize(clean_plz = true, lock_seconds = 60)
-      cleanup if clean_plz && unlocked(lock_seconds)
-    end
-
-    # :nodoc:
-    # @api private
-    def unlocked(lock_seconds)
-      Sidekiq.redis do |conn|
-        conn.set("delay_cleanup", "Wait to cleanup", :NX => true, :EX => lock_seconds.seconds )
-        while(conn.call("get","delay_cleanup") != "Wait to cleanup") {
-          sleep 1
-        }
-        conn.call("del","delay_cleanup")
-      end
-      true
+    def initialize(clean_plz = true)
+      cleanup if clean_plz
     end
 
     # Cleans up dead processes recorded in Redis.
@@ -900,6 +887,7 @@ module Sidekiq
     # :nodoc:
     # @api private
     def cleanup
+      return 0 unless Sidekiq.redis { |conn| conn.set("process_cleanup", "1", nx: true, ex: 60) }
       count = 0
       Sidekiq.redis do |conn|
         procs = conn.sscan_each("processes").to_a.sort
