@@ -879,7 +879,7 @@ module Sidekiq
     # :nodoc:
     # @api private
     def initialize(clean_plz = true, lock_seconds = 60)
-      cleanup(lock_seconds) if clean_plz && unlocked(lock_seconds)
+      cleanup if clean_plz && unlocked(lock_seconds)
     end
 
     # :nodoc:
