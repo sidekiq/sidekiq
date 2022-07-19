@@ -887,6 +887,7 @@ module Sidekiq
     # :nodoc:
     # @api private
     def cleanup
+      return 0 unless Sidekiq.redis { |conn| conn.set("process_cleanup", "1", nx: true, ex: 60) }
       count = 0
       Sidekiq.redis do |conn|
         procs = conn.sscan_each("processes").to_a.sort

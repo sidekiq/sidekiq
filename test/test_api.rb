@@ -664,6 +664,7 @@ describe "API" do
       Sidekiq.redis do |conn|
         conn.sadd("processes", "bar:987")
         conn.sadd("processes", "bar:986")
+        conn.del("process_cleanup")
       end
 
       ps = Sidekiq::ProcessSet.new
