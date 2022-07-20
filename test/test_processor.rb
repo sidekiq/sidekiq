@@ -290,55 +290,6 @@ describe Sidekiq::Processor do
     end
   end
 
-  describe "stats" do
-    before do
-      Sidekiq.redis { |c| c.flushdb }
-    end
-
-    describe "execution" do
-      let(:processed_today_key) { "stat:processed:#{Time.now.utc.strftime("%Y-%m-%d")}" }
-
-      it "handles success" do
-        Sidekiq::Processor::PROCESSED.reset
-
-        msg = Sidekiq.dump_json({"class" => MockWorker.to_s, "args" => ["myarg"]})
-        @processor.process(work(msg))
-
-        metrics = Sidekiq::Processor::PROCESSED.reset
-        assert_equal 3, metrics.size
-        totals, queues, jobs = metrics
-        assert_equal 2, totals.size
-        assert_equal 2, queues.size
-        assert_equal 2, jobs.size
-        assert_equal 1, totals["p"]
-        assert_equal 1, queues["default|p"]
-        assert_equal 1, jobs["MockWorker|p"]
-      end
-
-      it "handles failure" do
-        Sidekiq::Processor::PROCESSED.reset
-
-        msg = Sidekiq.dump_json({"class" => MockWorker.to_s, "args" => ["boom"]})
-        assert_raises TestProcessorException do
-          @processor.process(work(msg))
-        end
-
-        metrics = Sidekiq::Processor::PROCESSED.reset
-        assert_equal 3, metrics.size
-        totals, queues, jobs = metrics
-        assert_equal 3, totals.size
-        assert_equal 3, queues.size
-        assert_equal 3, jobs.size
-        assert_equal 1, totals["f"]
-        assert_equal 1, queues["default|f"]
-        assert_equal 1, jobs["MockWorker|f"]
-        # {"f" => 1, "ms" => 0, "p" => 1},
-        #  {"q:default|f" => 1, "default|ms" => 0, "default|p" => 1},
-        # {"MockWorker|f" => 1, "MockWorker|ms" => 0, "MockWorker|p" => 1}],
-      end
-    end
-  end
-
   describe "custom job logger class" do
     class CustomJobLogger < Sidekiq::JobLogger
       def call(item, queue)

@@ -10,8 +10,6 @@ module Sidekiq
   class Launcher
     include Sidekiq::Component
 
-    STATS_TTL = 5 * 365 * 24 * 60 * 60 # 5 years
-
     PROCTITLES = [
       proc { "sidekiq" },
       proc { Sidekiq::VERSION },
@@ -68,7 +66,7 @@ module Sidekiq
 
     private unless $TESTING
 
-    BEAT_PAUSE = 5
+    BEAT_PAUSE = 10
 
     def start_heartbeat
       loop do
@@ -79,7 +77,7 @@ module Sidekiq
     end
 
     def clear_heartbeat
-      flush_stats
+      Sidekiq::Metrics::PROCESSED.flush
 
       # Remove record from Redis since we are shutting down.
       # Note we don't stop the heartbeat thread; if the process
@@ -100,55 +98,10 @@ module Sidekiq
       ❤
     end
 
-    def flush_stats
-      totals, queues, jobs = Processor::PROCESSED.reset
-      procd = totals["p"]
-      fails = totals["f"]
-      return if procd == 0
-
-      now = Time.now.utc
-      nowdate = now.strftime("%Y%m%d")
-      nowhour = now.strftime("%Y%m%d|%H")
-      nowmin = now.strftime("%Y%m%d|%H:%M")
-
-      redis do |conn|
-        conn.pipelined do |pipeline|
-          pipeline.incrby("stat:processed", procd)
-          pipeline.incrby("stat:processed:#{nowdate}", procd)
-          pipeline.expire("stat:processed:#{nowdate}", STATS_TTL)
-
-          pipeline.incrby("stat:failed", fails)
-          pipeline.incrby("stat:failed:#{nowdate}", fails)
-          pipeline.expire("stat:failed:#{nowdate}", STATS_TTL)
-        end
-
-        [
-          ["j", jobs, nowdate, 90 * 24 * 60 * 60],
-          ["q", queues, nowdate, 90 * 24 * 60 * 60],
-          ["j", jobs, nowhour, 7 * 24 * 60 * 60],
-          ["q", queues, nowhour, 7 * 24 * 60 * 60],
-          ["j", jobs, nowmin, 2 * 60 * 60]
-          # don't want queue data per min, not really that useful IMO
-        ].each do |prefix, data, bucket, ttl|
-          # Quietly seed the new 7.0 stats format so migration is painless.
-          conn.pipelined do |xa|
-            stats = "#{prefix}|#{bucket}"
-            logger.info "Flushing metrics #{stats}"
-            data.each_pair do |key, value|
-              xa.hincrby stats, key, value
-            end
-            xa.expire(stats, ttl)
-          end
-        end
-      end
-    end
-
     def ❤
       key = identity
 
       begin
-        flush_stats
-
         curstate = Processor::WORK_STATE.dup
         redis do |conn|
           # work is the current set of executing jobs
@@ -181,6 +134,7 @@ module Sidekiq
           end
         end
 
+        fire_event(:beat, oneshot: false)
         # first heartbeat or recovering from an outage and need to reestablish our heartbeat
         fire_event(:heartbeat) unless exists
 

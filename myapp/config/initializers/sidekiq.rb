@@ -48,3 +48,7 @@ require "sidekiq/middleware/current_attributes"
 Sidekiq::CurrentAttributes.persist(Myapp::Current) # Your AS::CurrentAttributes singleton
 
 # Sidekiq.transactional_push!
+
+Sidekiq.configure_server do |config|
+  Sidekiq::Metrics.track(config)
+end

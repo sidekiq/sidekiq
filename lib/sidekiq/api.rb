@@ -3,9 +3,97 @@
 require "sidekiq"
 
 require "zlib"
+require "set"
 require "base64"
 
 module Sidekiq
+  module Metrics
+    # Allows caller to query for Sidekiq execution metrics within Redis.
+    # Caller sets a set of attributes to act as filters. {#fetch} will call
+    # Redis and return a Hash of results.
+    class Query
+      # "job" or "queue"
+      attr_accessor :type
+      # :hour, :day, :month
+      attr_accessor :period
+      # a specific job class, e.g. "App::OrderJob"
+      attr_accessor :klass
+      # a specific queue name, e.g. "default"
+      attr_accessor :queue
+      # the date string specific to the period
+      # for :day or :hour, something like "20220715" for July 15th 2022
+      # for :month, "202207"
+      attr_accessor :date
+      # for period = :hour, the specific hour, integer e.g. 1 or 18
+      attr_accessor :hour
+
+      def initialize(pool: Sidekiq.redis_pool)
+        @pool = pool
+        @type = :job # or :queue
+        @period = :day
+        # default to yesterday's data
+        @date = (Date.today - 1).strftime("%Y%m%d")
+        @hour = 0
+        @queue = nil
+        @klass = nil
+      end
+
+      # @returns [Hash] the resultset
+      def fetch
+        resultset = {}
+        resultset[:type] = @type
+        resultset[:date] = @date
+        resultset[:period] = @period
+        resultset[:job_classes] = Set.new
+        resultset[:queues] = Set.new
+
+        char = @type[0] # "j" or "q"
+
+        results = @pool.with do |conn|
+          conn.pipelined do |pipe|
+            case @period
+            when :month
+              resultset[:size] = 31
+              31.times do |idx|
+                pipe.hgetall "#{char}|#{@date}#{idx < 10 ? "0" : ""}#{idx}"
+              end
+            when :day
+              resultset[:size] = 24
+              24.times do |idx|
+                pipe.hgetall "#{char}|#{@date}|#{idx}"
+              end
+            when :hour
+              resultset[:size] = 60
+              resultset[:hour] = @hour
+              60.times do |idx|
+                pipe.hgetall "#{char}|#{@date}|#{@hour}:#{idx}"
+              end
+            end
+          end
+        end
+
+        # job classes always start with upper-case letter
+        # queues should be lower-case
+        results.each do |hash|
+          resultset[:job_classes].merge(hash.keys.select { |k| UPPER.include?(k[0].ord) }.map { |k| k.split("|")[0] })
+          resultset[:queues].merge(hash.keys.select { |k| !UPPER.include?(k[0].ord) }.map { |k| k.split("|")[0] })
+        end
+
+        if @type == :job && @klass
+          results.each { |hash| hash.delete_if { |k, v| !k.start_with?("#{@klass}|") } }
+        elsif @type == :queue && @queue
+          results.each { |hash| hash.delete_if { |k, v| !k.start_with?("#{@queue}|") } }
+        end
+
+        resultset[:data] = results
+        resultset
+      end
+
+      # ASCII uppercase range
+      UPPER = 65..90
+    end
+  end
+
   # Retrieve runtime statistics from Redis regarding
   # this Sidekiq cluster.
   #

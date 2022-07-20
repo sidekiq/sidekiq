@@ -224,70 +224,13 @@ module Sidekiq
       end
     end
 
-    class ExecutionTracker
-      def initialize
-        @queues = Hash.new(0)
-        @jobs = Hash.new(0)
-        @totals = Hash.new(0)
-        @lock = Mutex.new
-      end
-
-      # We track success/failure and time per class and per queue.
-      # "q:default|ms" => 1755 means 1755ms executing jobs from the default queue
-      # "Foo::SomeJob|f" => 5 means Foo::SomeJob failed 5 times
-      #
-      # All of these values are rolled up into one "exec" Hash per day in Redis:
-      # "exec:2022-07-06", etc by the heartbeat.
-      def track(queue, klass)
-        start = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :millisecond)
-        time_ms = 0
-        begin
-          begin
-            yield
-          ensure
-            finish = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :millisecond)
-            time_ms = finish - start
-          end
-        rescue Exception
-          @lock.synchronize {
-            @queues["#{queue}|f"] += 1
-            @jobs["#{klass}|f"] += 1
-            @totals["f"] += 1
-          }
-          raise
-        ensure
-          @lock.synchronize {
-            @queues["#{queue}|ms"] += time_ms
-            @queues["#{queue}|p"] += 1
-
-            @jobs["#{klass}|ms"] += time_ms
-            @jobs["#{klass}|p"] += 1
-
-            @totals["ms"] += time_ms
-            @totals["p"] += 1
-          }
-        end
-      end
-
-      def reset
-        @lock.synchronize {
-          array = [@totals, @queues, @jobs]
-          @totals = Hash.new(0)
-          @queues = Hash.new(0)
-          @jobs = Hash.new(0)
-          array
-        }
-      end
-    end
-
-    PROCESSED = ExecutionTracker.new
     WORK_STATE = SharedWorkState.new
 
     def stats(jobstr, queue, klass, &block)
       WORK_STATE.set(tid, {queue: queue, payload: jobstr, run_at: Time.now.to_i})
 
       begin
-        PROCESSED.track(queue, klass, &block)
+        block.call
       ensure
         WORK_STATE.delete(tid)
       end
