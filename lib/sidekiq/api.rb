@@ -8,9 +8,31 @@ require "base64"
 
 module Sidekiq
   module Metrics
+    class Deploy
+      MARK_TTL = 90 * 24 * 60 * 60
+
+      def initialize(pool = Sidekiq.redis_pool)
+        @pool = pool
+      end
+
+      def mark!(whence = Time.now, label = "")
+        datecode = whence.utc.strftime("%Y%m%d")
+        key = "#{datecode}-marks"
+        @pool.with do |c|
+          c.pipelined do |pipe|
+            pipe.hset(key, whence.utc.rfc3339, label)
+            pipe.expire(key, MARK_TTL)
+          end
+        end
+      end
+    end
+
     # Allows caller to query for Sidekiq execution metrics within Redis.
     # Caller sets a set of attributes to act as filters. {#fetch} will call
     # Redis and return a Hash of results.
+    #
+    # NB: all metrics and times/dates are UTC only. We specifically do not
+    # support timezones.
     class Query
       # "job" or "queue"
       attr_accessor :type
@@ -20,11 +42,13 @@ module Sidekiq
       attr_accessor :klass
       # a specific queue name, e.g. "default"
       attr_accessor :queue
-      # the date string specific to the period
-      # for :day or :hour, something like "20220715" for July 15th 2022
-      # for :month, "202207"
+      # the date specific to the period
+      # for :day or :hour, something like Date.today or Date.new(2022, 7, 13)
+      # for :month, Date.new(2022, 7, 1)
       attr_accessor :date
       # for period = :hour, the specific hour, integer e.g. 1 or 18
+      # note that hours and minutes do not have a leading zero so minute-specific
+      # keys will look like "20220718|7:3" for data at 07:03.
       attr_accessor :hour
 
       def initialize(pool: Sidekiq.redis_pool)
@@ -32,7 +56,7 @@ module Sidekiq
         @type = :job # or :queue
         @period = :day
         # default to yesterday's data
-        @date = (Date.today - 1).strftime("%Y%m%d")
+        @date = (Date.today - 1)
         @hour = 0
         @queue = nil
         @klass = nil
@@ -40,6 +64,10 @@ module Sidekiq
 
       # @returns [Hash] the resultset
       def fetch
+        # coerce whatever the user gave us into a Date, could be
+        # a Time or ActiveSupport::TimeWithZone, etc.
+        @date = Date.new(@date.year, @date.month, @date.mday)
+
         resultset = {}
         resultset[:type] = @type
         resultset[:date] = @date
@@ -47,26 +75,32 @@ module Sidekiq
         resultset[:job_classes] = Set.new
         resultset[:queues] = Set.new
 
+        datecode = @date.strftime("%Y%m%d")
         char = @type[0] # "j" or "q"
 
         results = @pool.with do |conn|
           conn.pipelined do |pipe|
             case @period
             when :month
+              # we don't provide marks as this is expected to happen multiple
+              # times per day which would fill any monthly graph with hundreds
+              # of lines.
+              resultset[:marks] = []
               resultset[:size] = 31
+              monthcode = @date.strftime("%Y%m")
               31.times do |idx|
-                pipe.hgetall "#{char}|#{@date}#{idx < 10 ? "0" : ""}#{idx}"
+                pipe.hgetall "#{char}|#{monthcode}#{idx < 10 ? "0" : ""}#{idx}"
               end
             when :day
               resultset[:size] = 24
               24.times do |idx|
-                pipe.hgetall "#{char}|#{@date}|#{idx}"
+                pipe.hgetall "#{char}|#{datecode}|#{idx}"
               end
             when :hour
               resultset[:size] = 60
               resultset[:hour] = @hour
               60.times do |idx|
-                pipe.hgetall "#{char}|#{@date}|#{@hour}:#{idx}"
+                pipe.hgetall "#{char}|#{datecode}|#{@hour}:#{idx}"
               end
             end
           end
@@ -83,6 +117,10 @@ module Sidekiq
           results.each { |hash| hash.delete_if { |k, v| !k.start_with?("#{@klass}|") } }
         elsif @type == :queue && @queue
           results.each { |hash| hash.delete_if { |k, v| !k.start_with?("#{@queue}|") } }
+        end
+
+        if @period == :day || @period == :hour
+          resultset[:marks] = @pool.with { |c| c.hgetall("#{datecode}-marks") }
         end
 
         resultset[:data] = results

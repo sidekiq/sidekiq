@@ -31,14 +31,31 @@ describe Sidekiq::Metrics do
     assert_equal 15, count
   end
 
+  describe "marx" do
+    it "owns the means of production" do
+      whence = Time.local(2022, 7, 17, 12, 43, 0)
+
+      d = Sidekiq::Metrics::Deploy.new
+      d.mark!(whence, "cafed00d - some git summary line")
+
+      q = Sidekiq::Metrics::Query.new
+      q.date = whence
+      rs = q.fetch
+      refute_nil rs[:marks]
+      assert_equal 1, rs[:marks].size
+      assert_equal "cafed00d - some git summary line", rs[:marks][whence.rfc3339]
+    end
+  end
+
   describe "querying" do
     it "handles empty metrics" do
       q = Sidekiq::Metrics::Query.new
+      q.date = Date.today
       rs = q.fetch
       refute_nil rs
-      assert_equal rs.size, 7
+      assert_equal 8, rs.size
       refute_nil rs[:data]
-      assert_equal rs[:data].size, 24
+      assert_equal 24, rs[:data].size
       rs[:data].each do |hash|
         refute_nil hash
         assert_equal hash.size, 0
@@ -48,7 +65,7 @@ describe Sidekiq::Metrics do
     it "fetches existing job data" do
       create_known_metrics
       q = Sidekiq::Metrics::Query.new
-      q.date = fixed_time.strftime("%Y%m%d")
+      q.date = fixed_time
       rs = q.fetch
       assert_equal q.date, rs[:date]
       assert_equal 1, rs[:job_classes].size
@@ -64,7 +81,7 @@ describe Sidekiq::Metrics do
       create_known_metrics
       q = Sidekiq::Metrics::Query.new
       q.type = :queue
-      q.date = fixed_time.strftime("%Y%m%d")
+      q.date = fixed_time
       rs = q.fetch
       assert_equal q.date, rs[:date]
       assert_equal 1, rs[:queues].size
