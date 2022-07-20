@@ -36,7 +36,7 @@ describe Sidekiq::Metrics do
   describe "marx" do
     it "owns the means of production" do
       whence = Time.local(2022, 7, 17, 18, 43, 15)
-      floor = "2022-07-18T01:43:00Z"
+      floor = whence.utc.rfc3339.sub(":15", ":00")
 
       d = Sidekiq::Metrics::Deploy.new
       d.mark(at: whence, label: "cafed00d - some git summary line")
@@ -46,7 +46,7 @@ describe Sidekiq::Metrics do
       rs = q.fetch
       refute_nil rs[:marks]
       assert_equal 1, rs[:marks].size
-      assert_equal "cafed00d - some git summary line", rs[:marks][floor]
+      assert_equal "cafed00d - some git summary line", rs[:marks][floor], rs.inspect
 
       d = Sidekiq::Metrics::Deploy.new
       rs = d.fetch(whence)
