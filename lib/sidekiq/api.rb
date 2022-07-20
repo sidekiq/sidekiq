@@ -9,13 +9,13 @@ require "base64"
 module Sidekiq
   module Metrics
     class Deploy
-      MARK_TTL = 90 * 24 * 60 * 60
+      MARK_TTL = 90 * 24 * 60 * 60 # 90 days
 
       def initialize(pool = Sidekiq.redis_pool)
         @pool = pool
       end
 
-      def mark!(whence = Time.now, label = "")
+      def mark(whence = Time.now, label = "")
         datecode = whence.utc.strftime("%Y%m%d")
         key = "#{datecode}-marks"
         @pool.with do |c|
@@ -24,6 +24,11 @@ module Sidekiq
             pipe.expire(key, MARK_TTL)
           end
         end
+      end
+
+      def fetch(date = Time.now.utc.to_date)
+        datecode = date.strftime("%Y%m%d")
+        @pool.with { |c| c.hgetall("#{datecode}-marks") }
       end
     end
 
