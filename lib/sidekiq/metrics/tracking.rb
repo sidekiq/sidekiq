@@ -1,17 +1,9 @@
 require "time"
+require "sidekiq"
 
+# This file contains the components which track execution metrics within Sidekiq.
 module Sidekiq
   module Metrics
-    def self.track(config)
-      exec = Sidekiq::Metrics::ExecutionTracker.new(config)
-      config.server_middleware do |chain|
-        chain.add Sidekiq::Metrics::Middleware, exec
-      end
-      config.on(:beat) do
-        exec.flush
-      end
-    end
-
     class ExecutionTracker
       include Sidekiq::Component
 
@@ -23,12 +15,6 @@ module Sidekiq
         @lock = Mutex.new
       end
 
-      # We track success/failure and time per class and per queue.
-      # "q:default|ms" => 1755 means 1755ms executing jobs from the default queue
-      # "Foo::SomeJob|f" => 5 means Foo::SomeJob failed 5 times
-      #
-      # All of these values are rolled up into one "exec" Hash per day in Redis:
-      # "exec:2022-07-06", etc by the heartbeat.
       def track(queue, klass)
         start = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :millisecond)
         time_ms = 0
@@ -65,6 +51,10 @@ module Sidekiq
 
       STATS_TTL = 5 * 365 * 24 * 60 * 60 # 5 years
 
+      LONG_TERM = 90 * 24 * 60 * 60
+      MID_TERM = 7 * 24 * 60 * 60
+      SHORT_TERM = 8 * 60 * 60
+
       def flush(time = Time.now)
         totals, queues, jobs = reset
         procd = totals["p"]
@@ -89,17 +79,17 @@ module Sidekiq
           end
 
           [
-            ["j", jobs, nowdate, 90 * 24 * 60 * 60],
-            ["q", queues, nowdate, 90 * 24 * 60 * 60],
-            ["j", jobs, nowhour, 7 * 24 * 60 * 60],
-            ["q", queues, nowhour, 7 * 24 * 60 * 60],
-            ["j", jobs, nowmin, 2 * 60 * 60]
+            ["j", jobs, nowdate, LONG_TERM],
+            ["q", queues, nowdate, LONG_TERM],
+            ["j", jobs, nowhour, MID_TERM],
+            ["q", queues, nowhour, MID_TERM],
+            ["j", jobs, nowmin, SHORT_TERM]
             # don't want queue data per min, not really that useful IMO
           ].each do |prefix, data, bucket, ttl|
             # Quietly seed the new 7.0 stats format so migration is painless.
             conn.pipelined do |xa|
               stats = "#{prefix}|#{bucket}"
-              logger.info "Flushing metrics #{stats}"
+              # logger.debug "Flushing metrics #{stats}"
               data.each_pair do |key, value|
                 xa.hincrby stats, key, value
                 count += 1
@@ -135,5 +125,15 @@ module Sidekiq
         @exec.track(queue, hash["wrapped"] || hash["class"], &block)
       end
     end
+  end
+end
+
+Sidekiq.configure_server do |config|
+  exec = Sidekiq::Metrics::ExecutionTracker.new(config)
+  config.server_middleware do |chain|
+    chain.add Sidekiq::Metrics::Middleware, exec
+  end
+  config.on(:beat) do
+    exec.flush
   end
 end

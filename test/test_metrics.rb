@@ -2,7 +2,9 @@
 
 require_relative "helper"
 require "sidekiq/component"
-require "sidekiq/metrics"
+require "sidekiq/metrics/tracking"
+require "sidekiq/metrics/query"
+require "sidekiq/metrics/deploy"
 require "sidekiq/api"
 
 describe Sidekiq::Metrics do
@@ -33,23 +35,24 @@ describe Sidekiq::Metrics do
 
   describe "marx" do
     it "owns the means of production" do
-      whence = Time.local(2022, 7, 17, 18, 43, 0)
+      whence = Time.local(2022, 7, 17, 18, 43, 15)
+      floor = "2022-07-18T01:43:00Z"
 
       d = Sidekiq::Metrics::Deploy.new
-      d.mark(whence, "cafed00d - some git summary line")
+      d.mark(at: whence, label: "cafed00d - some git summary line")
 
       q = Sidekiq::Metrics::Query.new
       q.date = whence
       rs = q.fetch
       refute_nil rs[:marks]
       assert_equal 1, rs[:marks].size
-      assert_equal "cafed00d - some git summary line", rs[:marks][whence.rfc3339]
+      assert_equal "cafed00d - some git summary line", rs[:marks][floor]
 
       d = Sidekiq::Metrics::Deploy.new
       rs = d.fetch(whence)
       refute_nil rs
       assert_equal 1, rs.size
-      assert_equal "cafed00d - some git summary line", rs[whence.rfc3339]
+      assert_equal "cafed00d - some git summary line", rs[floor]
     end
   end
 

@@ -11,7 +11,7 @@ require "fileutils"
 require "sidekiq"
 require "sidekiq/component"
 require "sidekiq/launcher"
-require "sidekiq/metrics"
+require "sidekiq/metrics/tracking"
 
 module Sidekiq # :nodoc:
   class CLI
