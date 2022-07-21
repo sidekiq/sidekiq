@@ -49,8 +49,11 @@ module Sidekiq
     "used_memory_peak_human" => "9P"
   }
 
-  def self.❨╯°□°❩╯︵┻━┻
+  def self.table_flip
     puts "Calm down, yo."
+  end
+  class << self
+    alias_method :❨╯°□°❩╯︵┻━┻, :table_flip
   end
 
   # config.concurrency = 5

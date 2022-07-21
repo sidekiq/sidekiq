@@ -124,7 +124,7 @@ module Sidekiq
     end
     at_exit(&method(:flush_stats))
 
-    def ❤
+    def heart
       key = identity
       fails = procd = 0
 
@@ -191,6 +191,7 @@ module Sidekiq
         Processor::FAILURE.incr(fails)
       end
     end
+    alias ❤ heart
 
     # We run the heartbeat every five seconds.
     # Capture five samples of RTT, log a warning if each sample
