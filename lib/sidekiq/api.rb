@@ -555,7 +555,7 @@ module Sidekiq
     def retry
       remove_job do |message|
         msg = Sidekiq.load_json(message)
-        msg["retry_count"] -= 1 if msg["retry_count"]
+        msg["retry_count"] -= 1 if msg["retry_count"].to_i > 0
         Sidekiq::Client.push(msg)
       end
     end
