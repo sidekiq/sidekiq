@@ -1,36 +1,36 @@
 
 <h3><%= t('Metrics') %></h3>
+
+<form class="form-inline" action="<%= root_path %>metrics" method="get">
+  <div class="form-group">
+    <% if @resultset[:job_classes]&.size > 0 %>
+      <select class="form-control" name="klass">
+        <% @resultset[:job_classes].each do |name| %>
+          <option value="<%= h name %>"><%= h name %></option>
+        <% end %>
+      </select>
+    <% end %>
+    <button class="btn btn-primary">Filter</button>
+  </div>
+</form>
+
 <div class="table_container">
   <table class="table table-bordered table-striped table-hover">
     <tbody>
       <tr>
-        <th><%= t('Class') %></th>
+        <th><%= t('Name') %></th>
         <th><%= t('Processed') %></th>
         <th><%= t('Failed') %></th>
         <th><%= t('Execution Time') %></th>
-        <td>
-          <code><%= @dead['error_class'] %></code>
-        </td>
       </tr>
-      <tr>
-        <th><%= t('ErrorMessage') %></th>
-        <td><%= h(@dead['error_message']) %></td>
-      </tr>
-      <% if @dead.error_backtrace %>
+      <% @resultset[:data].each_with_index do |hash, index| %>
         <tr>
-          <th><%= t('ErrorBacktrace') %></th>
-          <td>
-            <code><%= @dead.error_backtrace.join("<br/>") %></code>
-          </td>
+          <td><%= index %></td>
+          <td><%= hash.fetch("p", "-") %></td>
+          <td><%= hash.fetch("f", "-") %></td>
+          <td><%= hash.fetch("ms", "-") %></td>
         </tr>
       <% end %>
     </tbody>
   </table>
 </div>
-
-<form class="form-horizontal" action="<%= root_path %>morgue/<%= job_params(@dead, @dead.score) %>" method="post">
-  <%= csrf_tag %>
-  <a class="btn btn-default" href="<%= root_path %>morgue"><%= t('GoBack') %></a>
-  <input class="btn btn-primary" type="submit" name="retry" value="<%= t('RetryNow') %>" />
-  <input class="btn btn-danger" type="submit" name="delete" value="<%= t('Delete') %>" />
-</form>

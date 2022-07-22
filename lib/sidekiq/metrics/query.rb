@@ -11,17 +11,11 @@ module Sidekiq
     # NB: all metrics and times/dates are UTC only. We specifically do not
     # support timezones.
     class Query
-      # "job" or "queue"
-      attr_accessor :type
-
       # :hour, :day, :month
       attr_accessor :period
 
       # a specific job class, e.g. "App::OrderJob"
       attr_accessor :klass
-
-      # a specific queue name, e.g. "default"
-      attr_accessor :queue
 
       # the date specific to the period
       # for :day or :hour, something like Date.today or Date.new(2022, 7, 13)
@@ -30,18 +24,23 @@ module Sidekiq
 
       # for period = :hour, the specific hour, integer e.g. 1 or 18
       # note that hours and minutes do not have a leading zero so minute-specific
-      # keys will look like "20220718|7:3" for data at 07:03.
+      # keys will look like "j|20220718|7:3" for data at 07:03.
       attr_accessor :hour
 
       def initialize(pool: Sidekiq.redis_pool)
         @pool = pool
-        @type = :job # or :queue
         @period = :day
         # default to yesterday's data
         @date = (Date.today - 1)
         @hour = 0
-        @queue = nil
         @klass = nil
+      end
+
+      def filter_on(params)
+        p params
+        self.date = Date.today
+        self.klass = params["klass"] if params["klass"]
+        self
       end
 
       # @returns [Hash] the resultset
@@ -51,14 +50,11 @@ module Sidekiq
         @date = Date.new(@date.year, @date.month, @date.mday)
 
         resultset = {}
-        resultset[:type] = @type
         resultset[:date] = @date
         resultset[:period] = @period
         resultset[:job_classes] = Set.new
-        resultset[:queues] = Set.new
 
         datecode = @date.strftime("%Y%m%d")
-        char = @type[0] # "j" or "q"
 
         results = @pool.with do |conn|
           conn.pipelined do |pipe|
@@ -70,35 +66,39 @@ module Sidekiq
               resultset[:marks] = []
               resultset[:size] = 31
               monthcode = @date.strftime("%Y%m")
+              bucket = +"j|"
+              bucket << monthcode
               31.times do |idx|
-                pipe.hgetall "#{char}|#{monthcode}#{idx < 10 ? "0" : ""}#{idx}"
+                pipe.hgetall "#{bucket}#{idx < 10 ? "0" : ""}#{idx}"
               end
             when :day
               resultset[:size] = 24
+              bucket = +"j|"
+              bucket << datecode
               24.times do |idx|
-                pipe.hgetall "#{char}|#{datecode}|#{idx}"
+                pipe.hgetall "#{bucket}|#{idx}"
               end
             when :hour
               resultset[:size] = 60
               resultset[:hour] = @hour
+              bucket = +"j|"
+              bucket << datecode
+              bucket << "|"
+              bucket << @hour
               60.times do |idx|
-                pipe.hgetall "#{char}|#{datecode}|#{@hour}:#{idx}"
+                pipe.hgetall "#{bucket}:#{idx}"
               end
             end
           end
         end
 
         # job classes always start with upper-case letter
-        # queues should be lower-case
         results.each do |hash|
-          resultset[:job_classes].merge(hash.keys.select { |k| UPPER.include?(k[0].ord) }.map { |k| k.split("|")[0] })
-          resultset[:queues].merge(hash.keys.select { |k| !UPPER.include?(k[0].ord) }.map { |k| k.split("|")[0] })
+          resultset[:job_classes].merge(hash.keys.select { |k| UPPER.include?(k[0].ord) && k.size > 2 }.map { |k| k.split("|")[0] })
         end
 
-        if @type == :job && @klass
+        if @klass
           results.each { |hash| hash.delete_if { |k, v| !k.start_with?("#{@klass}|") } }
-        elsif @type == :queue && @queue
-          results.each { |hash| hash.delete_if { |k, v| !k.start_with?("#{@queue}|") } }
         end
 
         if @period == :day || @period == :hour
@@ -106,6 +106,7 @@ module Sidekiq
         end
 
         resultset[:data] = results
+        # p resultset
         resultset
       end
 

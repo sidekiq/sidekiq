@@ -9,7 +9,6 @@ module Sidekiq
 
       def initialize(config)
         @config = config
-        @queues = Hash.new(0)
         @jobs = Hash.new(0)
         @totals = Hash.new(0)
         @lock = Mutex.new
@@ -29,20 +28,17 @@ module Sidekiq
           # execution times. more important to know average time for successful jobs so we
           # can better recognize when a perf regression is introduced.
           @lock.synchronize {
-            @queues["#{queue}|ms"] += time_ms
             @jobs["#{klass}|ms"] += time_ms
             @totals["ms"] += time_ms
           }
         rescue Exception
           @lock.synchronize {
-            @queues["#{queue}|f"] += 1
             @jobs["#{klass}|f"] += 1
             @totals["f"] += 1
           }
           raise
         ensure
           @lock.synchronize {
-            @queues["#{queue}|p"] += 1
             @jobs["#{klass}|p"] += 1
             @totals["p"] += 1
           }
@@ -56,7 +52,7 @@ module Sidekiq
       SHORT_TERM = 8 * 60 * 60
 
       def flush(time = Time.now)
-        totals, queues, jobs = reset
+        totals, jobs = reset
         procd = totals["p"]
         fails = totals["f"]
         return if procd == 0 && fails == 0
@@ -80,11 +76,8 @@ module Sidekiq
 
           [
             ["j", jobs, nowdate, LONG_TERM],
-            ["q", queues, nowdate, LONG_TERM],
             ["j", jobs, nowhour, MID_TERM],
-            ["q", queues, nowhour, MID_TERM],
             ["j", jobs, nowmin, SHORT_TERM]
-            # don't want queue data per min, not really that useful IMO
           ].each do |prefix, data, bucket, ttl|
             # Quietly seed the new 7.0 stats format so migration is painless.
             conn.pipelined do |xa|
@@ -97,6 +90,7 @@ module Sidekiq
               xa.expire(stats, ttl)
             end
           end
+          logger.info "Flushed #{count} elements"
           count
         end
       end
@@ -105,9 +99,8 @@ module Sidekiq
 
       def reset
         @lock.synchronize {
-          array = [@totals, @queues, @jobs]
+          array = [@totals, @jobs]
           @totals = Hash.new(0)
-          @queues = Hash.new(0)
           @jobs = Hash.new(0)
           array
         }

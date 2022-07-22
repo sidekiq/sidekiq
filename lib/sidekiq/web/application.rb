@@ -60,6 +60,12 @@ module Sidekiq
       erb(:dashboard)
     end
 
+    get "/metrics" do
+      q = Sidekiq::Metrics::Query.new
+      @resultset = q.filter_on(params).fetch
+      erb(:metrics)
+    end
+
     get "/busy" do
       erb(:busy)
     end

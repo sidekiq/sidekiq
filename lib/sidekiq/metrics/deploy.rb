@@ -4,7 +4,7 @@ require "date"
 # This file is designed to be required within the user's
 # deployment script; it should need a bare minimum of dependencies.
 #
-#   require "sidekiq/api/deploy"
+#   require "sidekiq/metrics/deploy"
 #   gitdesc = `git log -1 --format="%h %s"`.strip
 #   d = Sidekiq::Metrics::Deploy.new
 #   d.mark(label: gitdesc)

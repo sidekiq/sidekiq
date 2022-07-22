@@ -19,7 +19,7 @@ describe Sidekiq::Metrics do
   def create_known_metrics(time = fixed_time)
     smet = Sidekiq::Metrics::ExecutionTracker.new(Sidekiq)
     smet.track("critical", "App::SomeJob") { sleep 0.001 }
-    smet.track("critical", "App::SomeJob") { sleep 0.001 }
+    smet.track("critical", "App::FooJob") { sleep 0.001 }
     assert_raises RuntimeError do
       smet.track("critical", "App::SomeJob") do
         raise "boom"
@@ -62,7 +62,7 @@ describe Sidekiq::Metrics do
       q.date = Date.today
       rs = q.fetch
       refute_nil rs
-      assert_equal 8, rs.size
+      assert_equal 6, rs.size
       refute_nil rs[:data]
       assert_equal 24, rs[:data].size
       rs[:data].each do |hash|
@@ -77,29 +77,14 @@ describe Sidekiq::Metrics do
       q.date = fixed_time
       rs = q.fetch
       assert_equal q.date, rs[:date]
-      assert_equal 1, rs[:job_classes].size
+      assert_equal 2, rs[:job_classes].size
       assert_equal "App::SomeJob", rs[:job_classes].first
-      bucket = rs[:data].detect { |hash| hash.size == 3 }
+      bucket = rs[:data].detect { |hash| hash.size == 5 }
       refute_nil bucket
-      assert_equal bucket.keys.sort, ["App::SomeJob|f", "App::SomeJob|ms", "App::SomeJob|p"]
-      assert_equal "3", bucket["App::SomeJob|p"]
+      assert_equal bucket.keys.sort, ["App::FooJob|ms", "App::FooJob|p", "App::SomeJob|f", "App::SomeJob|ms", "App::SomeJob|p"]
+      assert_equal "2", bucket["App::SomeJob|p"]
+      assert_equal "1", bucket["App::FooJob|p"]
       assert_equal "1", bucket["App::SomeJob|f"]
-    end
-
-    it "fetches existing queue data" do
-      create_known_metrics
-      q = Sidekiq::Metrics::Query.new
-      q.type = :queue
-      q.date = fixed_time
-      rs = q.fetch
-      assert_equal q.date, rs[:date]
-      assert_equal 1, rs[:queues].size
-      assert_equal "critical", rs[:queues].first
-      bucket = rs[:data].detect { |hash| hash.size == 3 }
-      refute_nil bucket
-      assert_equal bucket.keys.sort, ["critical|f", "critical|ms", "critical|p"]
-      assert_equal "3", bucket["critical|p"]
-      assert_equal "1", bucket["critical|f"]
     end
   end
 end
