@@ -11,11 +11,16 @@ module Sidekiq
     # NB: needs to be thread-safe or resiliant to races.
     #
     # To store this data, we use Redis' BITFIELD command to store unsigned 16-bit counters
-    # per minute. It's unlikely that most people will be executing more than 1000 job/sec
-    # for a full minute of a specific type.
+    # per bucket per klass per minute. It's unlikely that most people will be executing more
+    # than 1000 job/sec for a full minute of a specific type.
     class Histogram
       include Enumerable
 
+      # This number represents the maximum milliseconds for this bucket.
+      # 20 means all job executions up to 20ms, e.g. if a job takes
+      # 280ms, it'll increment bucket[7]. Note we can track job executions
+      # up to about 5.5 minutes. After that, it's assumed you're probably
+      # not too concerned with its performance.
       BUCKET_INTERVALS = [
         20, 30, 45, 65, 100,
         150, 225, 335, 500, 750,
@@ -115,8 +120,6 @@ module Sidekiq
         end
       end
 
-      STATS_TTL = 5 * 365 * 24 * 60 * 60 # 5 years
-
       LONG_TERM = 90 * 24 * 60 * 60
       MID_TERM = 7 * 24 * 60 * 60
       SHORT_TERM = 8 * 60 * 60
@@ -134,16 +137,6 @@ module Sidekiq
         count = 0
 
         redis do |conn|
-          conn.pipelined do |pipeline|
-            pipeline.incrby("stat:processed", procd)
-            pipeline.incrby("stat:processed:#{nowdate}", procd)
-            pipeline.expire("stat:processed:#{nowdate}", STATS_TTL)
-
-            pipeline.incrby("stat:failed", fails)
-            pipeline.incrby("stat:failed:#{nowdate}", fails)
-            pipeline.expire("stat:failed:#{nowdate}", STATS_TTL)
-          end
-
           conn.pipelined do |pipe|
             grams.each do |gram|
               gram.persist(conn)
