@@ -56,6 +56,33 @@ describe Sidekiq::Metrics do
     end
   end
 
+  describe "histograms" do
+    it "buckets a bunch of times" do
+      fixed_time = Time.utc(2022, 7, 22, 13, 43, 54)
+      h = Sidekiq::Metrics::Histogram.new("App::FooJob")
+      assert_equal 0, h.sum
+      h.record_time(10)
+      h.record_time(46)
+      h.record_time(47)
+      h.record_time(48)
+      h.record_time(300)
+      h.record_time(301)
+      h.record_time(302)
+      h.record_time(300000000)
+      assert_equal 8, h.sum
+      key = Sidekiq.redis do |conn|
+        h.persist(conn, fixed_time)
+      end
+      assert_equal 0, h.sum
+      refute_nil key
+      assert_equal "App::FooJob-22-13:43", key
+      data = Sidekiq.redis { |c| h.fetch(c, fixed_time) }
+      {0 => 1, 3 => 3, 7 => 3, 25 => 1}.each_pair do |idx, val|
+        assert_equal val, data[idx]
+      end
+    end
+  end
+
   describe "querying" do
     it "handles empty metrics" do
       q = Sidekiq::Metrics::Query.new

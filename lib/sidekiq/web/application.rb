@@ -66,6 +66,14 @@ module Sidekiq
       erb(:metrics)
     end
 
+    get "/metrics/:name" do
+      @name = route_params[:name]
+      q = Sidekiq::Metrics::Query.new
+      q.klass = @name
+      @resultset = q.filter_on(params).fetch
+      erb(:job_metrics)
+    end
+
     get "/busy" do
       erb(:busy)
     end
