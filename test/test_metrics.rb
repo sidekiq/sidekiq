@@ -26,11 +26,16 @@ describe Sidekiq::Metrics do
       end
     end
     smet.flush(time)
+    smet.track("critical", "App::FooJob") { sleep 0.001 }
+    smet.track("critical", "App::FooJob") { sleep 0.001 }
+    smet.track("critical", "App::FooJob") { sleep 0.001 }
+    smet.track("critical", "App::SomeJob") { sleep 0.001 }
+    smet.flush(time - 60)
   end
 
   it "tracks metrics" do
     count = create_known_metrics
-    assert_equal 15, count
+    assert_equal 12, count
   end
 
   describe "marx" do
@@ -41,8 +46,7 @@ describe Sidekiq::Metrics do
       d = Sidekiq::Metrics::Deploy.new
       d.mark(at: whence, label: "cafed00d - some git summary line")
 
-      q = Sidekiq::Metrics::Query.new
-      q.date = whence
+      q = Sidekiq::Metrics::Query.new(now: whence)
       rs = q.fetch
       refute_nil rs[:marks]
       assert_equal 1, rs[:marks].size
@@ -85,33 +89,26 @@ describe Sidekiq::Metrics do
 
   describe "querying" do
     it "handles empty metrics" do
-      q = Sidekiq::Metrics::Query.new
-      q.date = Date.today
+      q = Sidekiq::Metrics::Query.new(now: fixed_time)
       rs = q.fetch
+      p rs
       refute_nil rs
-      assert_equal 6, rs.size
-      refute_nil rs[:data]
-      assert_equal 24, rs[:data].size
-      rs[:data].each do |hash|
-        refute_nil hash
-        assert_equal hash.size, 0
-      end
+      assert_equal 9, rs.size
     end
 
     it "fetches existing job data" do
       create_known_metrics
-      q = Sidekiq::Metrics::Query.new
-      q.date = fixed_time
+      q = Sidekiq::Metrics::Query.new(now: fixed_time)
       rs = q.fetch
       assert_equal q.date, rs[:date]
       assert_equal 2, rs[:job_classes].size
       assert_equal "App::SomeJob", rs[:job_classes].first
-      bucket = rs[:data].detect { |hash| hash.size == 5 }
+      bucket = rs[:totals]
       refute_nil bucket
       assert_equal bucket.keys.sort, ["App::FooJob|ms", "App::FooJob|p", "App::SomeJob|f", "App::SomeJob|ms", "App::SomeJob|p"]
-      assert_equal "2", bucket["App::SomeJob|p"]
-      assert_equal "1", bucket["App::FooJob|p"]
-      assert_equal "1", bucket["App::SomeJob|f"]
+      assert_equal 3, bucket["App::SomeJob|p"]
+      assert_equal 4, bucket["App::FooJob|p"]
+      assert_equal 1, bucket["App::SomeJob|f"]
     end
   end
 end

@@ -27,86 +27,75 @@ module Sidekiq
       # keys will look like "j|20220718|7:3" for data at 07:03.
       attr_accessor :hour
 
-      def initialize(pool: Sidekiq.redis_pool)
+      def initialize(pool: Sidekiq.redis_pool, now: Time.now)
+        @time = now.utc
+        @date = @time.to_date
         @pool = pool
-        @period = :day
-        # default to yesterday's data
-        @date = (Date.today - 1)
-        @hour = 0
+        @period = :hour
         @klass = nil
       end
 
       def filter_on(params)
         p params
-        self.date = Date.today
         self.klass = params["klass"] if params["klass"]
         self
       end
 
       # @returns [Hash] the resultset
       def fetch
-        # coerce whatever the user gave us into a Date, could be
-        # a Time or ActiveSupport::TimeWithZone, etc.
-        @date = Date.new(@date.year, @date.month, @date.mday)
-
         resultset = {}
         resultset[:date] = @date
         resultset[:period] = @period
-        resultset[:job_classes] = Set.new
-
-        datecode = @date.strftime("%Y%m%d")
+        resultset[:ends_at] = @time
+        time = @time
+        datecode = time.strftime("%Y%m%d")
 
         results = @pool.with do |conn|
           conn.pipelined do |pipe|
             case @period
-            when :month
-              # we don't provide marks as this is expected to happen multiple
-              # times per day which would fill any monthly graph with hundreds
-              # of lines.
-              resultset[:marks] = []
-              resultset[:size] = 31
-              monthcode = @date.strftime("%Y%m")
-              bucket = +"j|"
-              bucket << monthcode
-              31.times do |idx|
-                pipe.hgetall "#{bucket}#{idx < 10 ? "0" : ""}#{idx}"
-              end
-            when :day
-              resultset[:size] = 24
-              bucket = +"j|"
-              bucket << datecode
-              24.times do |idx|
-                pipe.hgetall "#{bucket}|#{idx}"
-              end
             when :hour
               resultset[:size] = 60
-              resultset[:hour] = @hour
-              bucket = +"j|"
-              bucket << datecode
-              bucket << "|"
-              bucket << @hour
               60.times do |idx|
-                pipe.hgetall "#{bucket}:#{idx}"
+                key = "j|#{time.strftime("%Y%m%d")}|#{time.hour}:#{time.min}"
+                pipe.hgetall key
+                time -= 60
               end
+              resultset[:starts_at] = time
             end
           end
         end
-
-        # job classes always start with upper-case letter
-        results.each do |hash|
-          resultset[:job_classes].merge(hash.keys.select { |k| UPPER.include?(k[0].ord) && k.size > 2 }.map { |k| k.split("|")[0] })
-        end
+        p results
 
         if @klass
           results.each { |hash| hash.delete_if { |k, v| !k.start_with?("#{@klass}|") } }
+        else
+          t = Hash.new(0)
+          klsset = Set.new
+          # merge the per-minute data into a totals hash for the hour
+          results.each do |hash|
+            hash.each { |k, v| t[k] = t[k] + v.to_i }
+            klsset.merge(hash.keys.map { |k| k.split("|")[0] })
+          end
+          resultset[:job_classes] = klsset.delete_if { |item| item.size < 3 }
+          resultset[:totals] = t
+          top = t.each_with_object({}) do |(k, v), memo|
+            (kls, metric) = k.split("|")
+            memo[metric] ||= Hash.new(0)
+            memo[metric][kls] = v
+          end
+
+          sorted = {}
+          top.each_pair do |metric, hash|
+            sorted[metric] = hash.sort_by { |k, v| v }.reverse.to_h
+          end
+          resultset[:top_classes] = sorted
         end
 
         if @period == :day || @period == :hour
           resultset[:marks] = @pool.with { |c| c.hgetall("#{datecode}-marks") }
         end
 
-        resultset[:data] = results
-        # p resultset
+        p resultset
         resultset
       end
 

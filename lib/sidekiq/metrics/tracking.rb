@@ -131,6 +131,7 @@ module Sidekiq
         return if procd == 0 && fails == 0
 
         now = time.utc
+        p [:flush, now]
         nowdate = now.strftime("%Y%m%d")
         nowhour = now.strftime("%Y%m%d|%-H")
         nowmin = now.strftime("%Y%m%d|%-H:%-M")
@@ -138,10 +139,12 @@ module Sidekiq
 
         redis do |conn|
           conn.pipelined do |pipe|
+            conn.sadd "#{nowdate}-klasses", *grams.keys
+            conn.expire "#{nowdate}-klasses", 7 * 24 * 60 * 60
             grams.each do |gram|
               gram.persist(conn)
             end
-          end
+          end if grams.size > 0
 
           [
             ["j", jobs, nowdate, LONG_TERM],

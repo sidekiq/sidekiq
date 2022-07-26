@@ -180,6 +180,7 @@ module Sidekiq
 
         # first heartbeat or recovering from an outage and need to reestablish our heartbeat
         fire_event(:heartbeat) unless exists
+        fire_event(:beat, oneshot: false)
 
         return unless msg
 
