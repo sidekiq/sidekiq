@@ -29,78 +29,86 @@ module Sidekiq
 
       def initialize(pool: Sidekiq.redis_pool, now: Time.now)
         @time = now.utc
-        @date = @time.to_date
         @pool = pool
-        @period = :hour
         @klass = nil
       end
 
-      def filter_on(params)
-        p params
-        self.klass = params["klass"] if params["klass"]
-        self
-      end
-
-      # @returns [Hash] the resultset
-      def fetch
+      # Get metric data from the last hour and roll it up
+      # into top processed count and execution time based on class.
+      def top_jobs
         resultset = {}
-        resultset[:date] = @date
-        resultset[:period] = @period
+        resultset[:date] = @time.to_date
+        resultset[:period] = :hour
         resultset[:ends_at] = @time
         time = @time
-        datecode = time.strftime("%Y%m%d")
 
         results = @pool.with do |conn|
           conn.pipelined do |pipe|
-            case @period
-            when :hour
-              resultset[:size] = 60
-              60.times do |idx|
-                key = "j|#{time.strftime("%Y%m%d")}|#{time.hour}:#{time.min}"
-                pipe.hgetall key
-                time -= 60
-              end
-              resultset[:starts_at] = time
+            resultset[:size] = 60
+            60.times do |idx|
+              key = "j|#{time.strftime("%Y%m%d")}|#{time.hour}:#{time.min}"
+              pipe.hgetall key
+              time -= 60
             end
+            resultset[:starts_at] = time
           end
         end
-        p results
 
-        if @klass
-          results.each { |hash| hash.delete_if { |k, v| !k.start_with?("#{@klass}|") } }
-        else
-          t = Hash.new(0)
-          klsset = Set.new
-          # merge the per-minute data into a totals hash for the hour
-          results.each do |hash|
-            hash.each { |k, v| t[k] = t[k] + v.to_i }
-            klsset.merge(hash.keys.map { |k| k.split("|")[0] })
-          end
-          resultset[:job_classes] = klsset.delete_if { |item| item.size < 3 }
-          resultset[:totals] = t
-          top = t.each_with_object({}) do |(k, v), memo|
-            (kls, metric) = k.split("|")
-            memo[metric] ||= Hash.new(0)
-            memo[metric][kls] = v
-          end
-
-          sorted = {}
-          top.each_pair do |metric, hash|
-            sorted[metric] = hash.sort_by { |k, v| v }.reverse.to_h
-          end
-          resultset[:top_classes] = sorted
+        t = Hash.new(0)
+        klsset = Set.new
+        # merge the per-minute data into a totals hash for the hour
+        results.each do |hash|
+          hash.each { |k, v| t[k] = t[k] + v.to_i }
+          klsset.merge(hash.keys.map { |k| k.split("|")[0] })
+        end
+        resultset[:job_classes] = klsset.delete_if { |item| item.size < 3 }
+        resultset[:totals] = t
+        top = t.each_with_object({}) do |(k, v), memo|
+          (kls, metric) = k.split("|")
+          memo[metric] ||= Hash.new(0)
+          memo[metric][kls] = v
         end
 
-        if @period == :day || @period == :hour
-          resultset[:marks] = @pool.with { |c| c.hgetall("#{datecode}-marks") }
+        sorted = {}
+        top.each_pair do |metric, hash|
+          sorted[metric] = hash.sort_by { |k, v| v }.reverse.to_h
         end
-
-        p resultset
+        resultset[:top_classes] = sorted
         resultset
       end
 
-      # ASCII uppercase range
-      UPPER = 65..90
+      def for_job(klass)
+        resultset = {}
+        resultset[:date] = @time.to_date
+        resultset[:period] = :hour
+        resultset[:ends_at] = @time
+        marks = @pool.with { |c| c.hgetall("#{@time.strftime("%Y%m%d")}-marks") }
+
+        time = @time
+        initial = @pool.with do |conn|
+          conn.pipelined do |pipe|
+            resultset[:size] = 60
+            60.times do |idx|
+              key = "j|#{time.strftime("%Y%m%d")}|#{time.hour}:#{time.min}"
+              pipe.hmget key, "#{klass}|ms", "#{klass}|p", "#{klass}|f"
+              time -= 60
+            end
+          end
+        end
+
+        time = @time
+        results = initial.map do |(ms, p, f)|
+          {
+            time: Time.utc(time.year, time.month, time.mday, time.hour, time.min, 0).rfc3339,
+            ms: ms.to_i, p: p.to_i, f: f.to_i
+          }.tap { |x| x[:mark] = marks[x[:time]] if marks[x[:time]]; time -= 60 }
+        end
+
+        resultset[:marks] = marks
+        resultset[:starts_at] = time
+        resultset[:data] = results
+        resultset
+      end
     end
   end
 end

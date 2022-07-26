@@ -11,7 +11,7 @@
         <th><%= t('Processed') %></th>
         <th><%= t('Execution Time') %></th>
       </tr>
-      <% top["p"].first(10).each do |kls, val| %>
+      <% top["p"]&.first(10)&.each do |kls, val| %>
         <tr>
           <td><code><a href="<%= root_path %>metrics/<%= kls %>"><%= kls %></a></code></td>
           <td><%= val %></td>
@@ -31,7 +31,7 @@
         <th><%= t('Processed') %></th>
         <th><%= t('Execution Time') %></th>
       </tr>
-      <% top["ms"].first(10).each do |kls, val| %>
+      <% top["ms"]&.first(10)&.each do |kls, val| %>
         <tr>
           <td><code><a href="<%= root_path %>metrics/<%= kls %>"><%= kls %></a></code></td>
           <td><%= top["p"][kls] %></td>

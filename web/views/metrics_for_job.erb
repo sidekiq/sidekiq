@@ -1,0 +1,32 @@
+
+<h1><%= t('Metrics') %></h1>
+
+<h3><%= h @name %></h3>
+
+<% data = @resultset[:data] %>
+<div class="table_container">
+  <table class="table table-bordered table-striped table-hover">
+    <tbody>
+      <tr>
+        <th><%= t('Time') %></th>
+        <th><%= t('Processed') %></th>
+        <th><%= t('Execution Time') %></th>
+        <th><%= t('Failures') %></th>
+        <th><%= t('Deploy') %></th>
+      </tr>
+      <% data.each do |hash| %>
+        <tr>
+          <td><%= hash[:time] %></td>
+          <td><%= hash[:p] %></td>
+          <td><%= hash[:ms] %></td>
+          <td><%= hash[:f] %></td>
+          <td><%= hash[:mark] %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<p>
+Data from <%= @resultset[:starts_at] %> to <%= @resultset[:ends_at] %>
+</p>

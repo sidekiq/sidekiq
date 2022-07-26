@@ -47,7 +47,7 @@ describe Sidekiq::Metrics do
       d.mark(at: whence, label: "cafed00d - some git summary line")
 
       q = Sidekiq::Metrics::Query.new(now: whence)
-      rs = q.fetch
+      rs = q.for_job("FooJob")
       refute_nil rs[:marks]
       assert_equal 1, rs[:marks].size
       assert_equal "cafed00d - some git summary line", rs[:marks][floor], rs.inspect
@@ -90,17 +90,21 @@ describe Sidekiq::Metrics do
   describe "querying" do
     it "handles empty metrics" do
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
-      rs = q.fetch
-      p rs
+      rs = q.top_jobs
       refute_nil rs
-      assert_equal 9, rs.size
+      assert_equal 8, rs.size
+
+      q = Sidekiq::Metrics::Query.new(now: fixed_time)
+      rs = q.for_job("DoesntExist")
+      refute_nil rs
+      assert_equal 7, rs.size
     end
 
-    it "fetches existing job data" do
+    it "fetches top job data" do
       create_known_metrics
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
-      rs = q.fetch
-      assert_equal q.date, rs[:date]
+      rs = q.top_jobs
+      assert_equal Date.new(2022, 7, 22), rs[:date]
       assert_equal 2, rs[:job_classes].size
       assert_equal "App::SomeJob", rs[:job_classes].first
       bucket = rs[:totals]
@@ -109,6 +113,23 @@ describe Sidekiq::Metrics do
       assert_equal 3, bucket["App::SomeJob|p"]
       assert_equal 4, bucket["App::FooJob|p"]
       assert_equal 1, bucket["App::SomeJob|f"]
+    end
+
+    it "fetches job-specific data" do
+      create_known_metrics
+      d = Sidekiq::Metrics::Deploy.new
+      d.mark(at: fixed_time - 300, label: "cafed00d - some git summary line")
+
+      q = Sidekiq::Metrics::Query.new(now: fixed_time)
+      rs = q.for_class("App::FooJob")
+      p rs
+      assert_equal Date.new(2022, 7, 22), rs[:date]
+      assert_equal 60, rs[:data].size
+      assert_equal ["2022-07-22T21:58:00Z", "cafed00d - some git summary line"], rs[:marks].first
+
+      data = rs[:data]
+      assert_equal({time: "2022-07-22T22:03:00Z", ms: 1, p: 1, f: 0}, data[0])
+      assert_equal({time: "2022-07-22T22:02:00Z", ms: 3, p: 3, f: 0}, data[1])
     end
   end
 end
