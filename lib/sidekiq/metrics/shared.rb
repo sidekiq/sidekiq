@@ -67,7 +67,7 @@ module Sidekiq
         buckets, @buckets = @buckets, []
         window = now.utc.strftime("%d-%H:%-M")
         key = "#{@klass}-#{window}"
-        cmd = ["#{@klass}-#{window}", "OVERFLOW", "SAT"]
+        cmd = [key, "OVERFLOW", "SAT"]
         buckets.each_with_index do |counter, idx|
           val = counter.value
           cmd << "INCRBY" << "u16" << "##{idx}" << val.to_s if val > 0

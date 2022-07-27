@@ -3,40 +3,52 @@
 
 <h3>Top Jobs by Processed Count</h3>
 <% top = @resultset[:top_classes] %>
+
+<% topp = top["p"]&.first(10) %>
 <div class="table_container">
   <table class="table table-bordered table-striped table-hover">
     <tbody>
       <tr>
         <th><%= t('Name') %></th>
         <th><%= t('Processed') %></th>
-        <th><%= t('Execution Time') %></th>
+        <th><%= t('ExecutionTime') %></th>
       </tr>
-      <% top["p"]&.first(10)&.each do |kls, val| %>
-        <tr>
-          <td><code><a href="<%= root_path %>metrics/<%= kls %>"><%= kls %></a></code></td>
-          <td><%= val %></td>
-          <td><%= top["ms"][kls] %></td>
-        </tr>
+      <% if topp %>
+        <% topp.each do |kls, val| %>
+          <tr>
+            <td><code><a href="<%= root_path %>metrics/<%= kls %>"><%= kls %></a></code></td>
+            <td><%= val %></td>
+            <td><%= top["ms"][kls] %></td>
+          </tr>
+        <% end %>
+      <% else %>
+          <tr><td colspan=3><%= t("NoDataFound") %></td></tr>
       <% end %>
     </tbody>
   </table>
 </div>
 
 <h3>Top Jobs by Execution Time</h3>
+
+<% topms = top["ms"]&.first(10) %>
 <div class="table_container">
   <table class="table table-bordered table-striped table-hover">
     <tbody>
       <tr>
         <th><%= t('Name') %></th>
         <th><%= t('Processed') %></th>
-        <th><%= t('Execution Time') %></th>
+        <th><%= t('ExecutionTime') %></th>
       </tr>
-      <% top["ms"]&.first(10)&.each do |kls, val| %>
-        <tr>
-          <td><code><a href="<%= root_path %>metrics/<%= kls %>"><%= kls %></a></code></td>
-          <td><%= top["p"][kls] %></td>
-          <td><%= val %></td>
-        </tr>
+      <% if topms %>
+        <% topms.each do |kls, val| %>
+          <tr>
+            <td><code><a href="<%= root_path %>metrics/<%= kls %>"><%= kls %></a></code></td>
+            <td><%= top["p"][kls] %></td>
+            <td><%= val %></td>
+          </tr>
+        <% end %>
+      <% else %>
+          <tr><td colspan=3><%= t("NoDataFound") %></td></tr>
       <% end %>
     </tbody>
   </table>

@@ -58,3 +58,60 @@ Sidekiq.configure_server do |config|
   require "sidekiq/metrics/deploy"
   Sidekiq::Metrics::Deploy.new.mark(label: label)
 end
+
+class FooJob
+  include Sidekiq::Job
+  def perform(*)
+    sleep(rand)
+  end
+end
+
+class BarJob
+  include Sidekiq::Job
+  def perform(*)
+    sleep(rand)
+  end
+end
+
+class StoreCardJob
+  include Sidekiq::Job
+  def perform(*)
+    sleep(rand)
+  end
+end
+
+class OrderJunkJob
+  include Sidekiq::Job
+  def perform(*)
+    sleep(rand)
+  end
+end
+
+class SpamUserJob
+  include Sidekiq::Job
+  def perform(*)
+    sleep(rand)
+  end
+end
+
+class FastJob
+  include Sidekiq::Job
+  def perform(*)
+    sleep(rand * 0.1)
+  end
+end
+
+class SlowJob
+  include Sidekiq::Job
+  def perform(*)
+    sleep(rand * 10)
+  end
+end
+
+def seed_jobs
+  [FooJob, BarJob, StoreCardJob, OrderJunkJob, SpamUserJob, FastJob, SlowJob].each do |kls|
+    (kls.name.size * 10).times do
+      kls.perform_in(rand * 300)
+    end
+  end
+end

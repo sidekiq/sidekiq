@@ -13,7 +13,7 @@ describe Sidekiq::Metrics do
   end
 
   def fixed_time
-    @whence ||= Time.local(2022, 7, 22, 15, 3, 0)
+    @whence ||= Time.utc(2022, 7, 22, 22, 3, 0)
   end
 
   def create_known_metrics(time = fixed_time)
