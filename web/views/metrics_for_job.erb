@@ -13,6 +13,7 @@
         <th><%= t('Execution Time') %></th>
         <th><%= t('Failures') %></th>
         <th><%= t('Deploy') %></th>
+        <th><%= t('Histogram') %></th>
       </tr>
       <% data.each do |hash| %>
         <tr>
@@ -21,6 +22,7 @@
           <td><%= hash[:ms] %></td>
           <td><%= hash[:f] %></td>
           <td><%= hash[:mark] %></td>
+          <td><%= hash[:hist] %></td>
         </tr>
       <% end %>
     </tbody>

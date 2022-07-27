@@ -27,7 +27,7 @@ describe Sidekiq::Metrics do
     end
     smet.flush(time)
     smet.track("critical", "App::FooJob") { sleep 0.001 }
-    smet.track("critical", "App::FooJob") { sleep 0.001 }
+    smet.track("critical", "App::FooJob") { sleep 0.025 }
     smet.track("critical", "App::FooJob") { sleep 0.001 }
     smet.track("critical", "App::SomeJob") { sleep 0.001 }
     smet.flush(time - 60)
@@ -62,7 +62,6 @@ describe Sidekiq::Metrics do
 
   describe "histograms" do
     it "buckets a bunch of times" do
-      fixed_time = Time.utc(2022, 7, 22, 13, 43, 54)
       h = Sidekiq::Metrics::Histogram.new("App::FooJob")
       assert_equal 0, h.sum
       h.record_time(10)
@@ -79,7 +78,9 @@ describe Sidekiq::Metrics do
       end
       assert_equal 0, h.sum
       refute_nil key
-      assert_equal "App::FooJob-22-13:43", key
+      assert_equal "App::FooJob-22-22:3", key
+
+      h = Sidekiq::Metrics::Histogram.new("App::FooJob")
       data = Sidekiq.redis { |c| h.fetch(c, fixed_time) }
       {0 => 1, 3 => 3, 7 => 3, 25 => 1}.each_pair do |idx, val|
         assert_equal val, data[idx]
@@ -121,15 +122,20 @@ describe Sidekiq::Metrics do
       d.mark(at: fixed_time - 300, label: "cafed00d - some git summary line")
 
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
-      rs = q.for_class("App::FooJob")
-      p rs
+      rs = q.for_job("App::FooJob")
       assert_equal Date.new(2022, 7, 22), rs[:date]
       assert_equal 60, rs[:data].size
       assert_equal ["2022-07-22T21:58:00Z", "cafed00d - some git summary line"], rs[:marks].first
 
       data = rs[:data]
-      assert_equal({time: "2022-07-22T22:03:00Z", ms: 1, p: 1, f: 0}, data[0])
-      assert_equal({time: "2022-07-22T22:02:00Z", ms: 3, p: 3, f: 0}, data[1])
+      assert_equal({time: "2022-07-22T22:03:00Z", p: 1, f: 0}, data[0].slice(:time, :p, :f))
+      assert_equal({time: "2022-07-22T22:02:00Z", p: 3, f: 0}, data[1].slice(:time, :p, :f))
+      assert_equal "cafed00d - some git summary line", data[5][:mark]
+
+      # from create_known_data
+      hist = data[1][:hist]
+      assert_equal 2, hist[0]
+      assert_equal 1, hist[1]
     end
   end
 end

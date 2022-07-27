@@ -2,6 +2,8 @@ require "sidekiq"
 require "date"
 require "set"
 
+require "sidekiq/metrics/shared"
+
 module Sidekiq
   module Metrics
     # Allows caller to query for Sidekiq execution metrics within Redis.
@@ -89,7 +91,7 @@ module Sidekiq
           conn.pipelined do |pipe|
             resultset[:size] = 60
             60.times do |idx|
-              key = "j|#{time.strftime("%Y%m%d")}|#{time.hour}:#{time.min}"
+              key = "j|#{time.strftime("%Y%m%d|%-H:%-M")}"
               pipe.hmget key, "#{klass}|ms", "#{klass}|p", "#{klass}|f"
               time -= 60
             end
@@ -97,11 +99,17 @@ module Sidekiq
         end
 
         time = @time
-        results = initial.map do |(ms, p, f)|
-          {
-            time: Time.utc(time.year, time.month, time.mday, time.hour, time.min, 0).rfc3339,
-            ms: ms.to_i, p: p.to_i, f: f.to_i
-          }.tap { |x| x[:mark] = marks[x[:time]] if marks[x[:time]]; time -= 60 }
+        hist = Histogram.new(klass)
+        results = @pool.with do |conn|
+          initial.map do |(ms, p, f)|
+            {
+              time: Time.utc(time.year, time.month, time.mday, time.hour, time.min, 0).rfc3339,
+              ms: ms.to_i, p: p.to_i, f: f.to_i, hist: hist.fetch(conn, time)
+            }.tap { |x|
+              x[:mark] = marks[x[:time]] if marks[x[:time]]
+              time -= 60
+            }
+          end
         end
 
         resultset[:marks] = marks

@@ -1,82 +1,10 @@
 require "time"
 require "sidekiq"
+require "sidekiq/metrics/shared"
 
 # This file contains the components which track execution metrics within Sidekiq.
 module Sidekiq
   module Metrics
-    # Impleements space-efficient but statistically useful histogram storage.
-    # A precise time histogram stores every time. Instead we break times into a set of
-    # known buckets and increment counts of the associated time bucket. Even if we call
-    # the histogram a million times, we'll still only store 26 buckets.
-    # NB: needs to be thread-safe or resiliant to races.
-    #
-    # To store this data, we use Redis' BITFIELD command to store unsigned 16-bit counters
-    # per bucket per klass per minute. It's unlikely that most people will be executing more
-    # than 1000 job/sec for a full minute of a specific type.
-    class Histogram
-      include Enumerable
-
-      # This number represents the maximum milliseconds for this bucket.
-      # 20 means all job executions up to 20ms, e.g. if a job takes
-      # 280ms, it'll increment bucket[7]. Note we can track job executions
-      # up to about 5.5 minutes. After that, it's assumed you're probably
-      # not too concerned with its performance.
-      BUCKET_INTERVALS = [
-        20, 30, 45, 65, 100,
-        150, 225, 335, 500, 750,
-        1100, 1700, 2500, 3800, 5750,
-        8500, 13000, 20000, 30000, 45000,
-        65000, 100000, 150000, 225000, 335000,
-        Float::INFINITY # the "maybe your job is too long" bucket
-      ]
-
-      FETCH = "GET u16 #0 GET u16 #1 GET u16 #2 GET u16 #3 \
-        GET u16 #4 GET u16 #5 GET u16 #6 GET u16 #7 \
-        GET u16 #8 GET u16 #9 GET u16 #10 GET u16 #11 \
-        GET u16 #12 GET u16 #13 GET u16 #14 GET u16 #15 \
-        GET u16 #16 GET u16 #17 GET u16 #18 GET u16 #19 \
-        GET u16 #20 GET u16 #21 GET u16 #22 GET u16 #23 \
-        GET u16 #24 GET u16 #25".split
-
-      def each(&block)
-        buckets.each(&block)
-      end
-
-      attr_reader :buckets
-      def initialize(klass)
-        @klass = klass
-        @buckets = Array.new(BUCKET_INTERVALS.size, 0)
-      end
-
-      def record_time(ms)
-        index_to_use = BUCKET_INTERVALS.each_index do |idx|
-          break idx if ms < BUCKET_INTERVALS[idx]
-        end
-
-        @buckets[index_to_use] += 1
-      end
-
-      def fetch(conn, now = Time.now)
-        window = now.utc.strftime("%d-%H:%-M")
-        key = "#{@klass}-#{window}"
-        conn.bitfield(key, *FETCH)
-      end
-
-      def persist(conn, now = Time.now)
-        buckets, @buckets = @buckets, []
-        window = now.utc.strftime("%d-%H:%-M")
-        key = "#{@klass}-#{window}"
-        cmd = ["#{@klass}-#{window}", "OVERFLOW", "SAT"]
-        buckets.each_with_index do |value, idx|
-          next if value == 0
-          cmd << "INCRBY" << "u16" << "##{idx}" << value.to_s
-        end
-        conn.bitfield(*cmd) if cmd.size > 1
-        conn.expire(key, 86400)
-        key
-      end
-    end
-
     class ExecutionTracker
       include Sidekiq::Component
 
@@ -84,7 +12,7 @@ module Sidekiq
         @config = config
         @jobs = Hash.new(0)
         @totals = Hash.new(0)
-        @grams = Hash.new { |key| Histogram.new(key) }
+        @grams = Hash.new { |hash, key| hash[key] = Histogram.new(key) }
         @lock = Mutex.new
       end
 
@@ -139,10 +67,8 @@ module Sidekiq
         redis do |conn|
           if grams.size > 0
             conn.pipelined do |pipe|
-              conn.sadd "#{nowdate}-klasses", *grams.keys
-              conn.expire "#{nowdate}-klasses", 7 * 24 * 60 * 60
-              grams.each do |gram|
-                gram.persist(conn)
+              grams.each do |_, gram|
+                gram.persist(pipe, now)
               end
             end
           end
@@ -175,7 +101,7 @@ module Sidekiq
           array = [@totals, @jobs, @grams]
           @totals = Hash.new(0)
           @jobs = Hash.new(0)
-          @grams = Hash.new { |key| Histogram.new(key) }
+          @grams = Hash.new { |hash, key| hash[key] = Histogram.new(key) }
           array
         }
       end
