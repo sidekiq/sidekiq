@@ -5,7 +5,7 @@ module Sidekiq
     # TODO Support apps without concurrent-ruby
     Counter = ::Concurrent::AtomicFixnum
 
-    # Impleements space-efficient but statistically useful histogram storage.
+    # Implements space-efficient but statistically useful histogram storage.
     # A precise time histogram stores every time. Instead we break times into a set of
     # known buckets and increment counts of the associated time bucket. Even if we call
     # the histogram a million times, we'll still only store 26 buckets.
@@ -30,6 +30,14 @@ module Sidekiq
         65000, 100000, 150000, 225000, 335000,
         Float::INFINITY # the "maybe your job is too long" bucket
       ]
+      LABELS = [
+        "20ms", "30ms", "45ms", "65ms", "100ms",
+        "150ms", "225ms", "335ms", "500ms", "750ms",
+        "1.1s", "1.7s", "2.5s", "3.8s", "5.75s",
+        "8.5s", "13s", "20s", "30s", "45s",
+        "65s", "100s", "150s", "225s", "335s",
+        "Slow"
+      ]
 
       FETCH = "GET u16 #0 GET u16 #1 GET u16 #2 GET u16 #3 \
         GET u16 #4 GET u16 #5 GET u16 #6 GET u16 #7 \
@@ -41,6 +49,10 @@ module Sidekiq
 
       def each
         buckets.each { |counter| yield counter.value }
+      end
+
+      def label(idx)
+        LABELS[idx]
       end
 
       attr_reader :buckets

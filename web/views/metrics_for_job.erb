@@ -1,7 +1,9 @@
 
-<h1><%= t('Metrics') %></h1>
+<h2><%= t('Metrics') %> / <%= h @name %></h2>
 
-<h3><%= h @name %></h3>
+<div class="row chart">
+  <div id="realtime" data-processed-label="<%= t('Processed') %>" data-failed-label="<%= t('Failed') %>"></div>
+</div>
 
 <% data = @resultset[:data] %>
 <div class="table_container">
@@ -32,3 +34,49 @@
 <p>
 Data from <%= @resultset[:starts_at] %> to <%= @resultset[:ends_at] %>
 </p>
+
+<% atad = data.reverse %>
+<script type="text/javascript" src="<%= root_path %>javascripts/graph.js"></script>
+<%# <script type="text/javascript" src="<%= root_path %>javascripts/metrics.js"></script> %>
+<script>
+var palette = new Rickshaw.Color.Palette();
+var data = [ {
+     name: "Processed",
+     color: palette.color(),
+     data: [ <% atad.each do |hash| %>
+        { x: <%= hash[:epoch] %>, y: <%= hash[:p] %> },
+      <% end %> ]
+   }, {
+     name: "Failed",
+     color: palette.color(),
+     data: [ <% atad.each do |hash| %>
+        { x: <%= hash[:epoch] %>, y: <%= hash[:f] %> },
+      <% end %> ]
+   }, {
+     name: "Execution Time",
+     color: palette.color(),
+     data: [ <% atad.each do |hash| %>
+        { x: <%= hash[:epoch] %>, y: <%= hash[:ms] %> },
+      <% end %> ]
+   } ];
+
+var timeInterval = 60000;
+var graphElement = document.getElementById("realtime");
+
+var graph = new Rickshaw.Graph({
+  element: graphElement,
+  width: responsiveWidth(),
+  renderer: 'line',
+  interpolation: 'linear',
+  series: data,
+});
+var x_axis = new Rickshaw.Graph.Axis.Time( { graph: graph } );
+
+var y_axis = new Rickshaw.Graph.Axis.Y( {
+  graph: graph,
+  tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+  ticksTreatment: 'glow'
+});
+
+graph.render();
+</script>

@@ -102,8 +102,10 @@ module Sidekiq
         hist = Histogram.new(klass)
         results = @pool.with do |conn|
           initial.map do |(ms, p, f)|
+            tm = Time.utc(time.year, time.month, time.mday, time.hour, time.min, 0)
             {
-              time: Time.utc(time.year, time.month, time.mday, time.hour, time.min, 0).rfc3339,
+              time: tm.rfc3339,
+              epoch: tm.to_i,
               ms: ms.to_i, p: p.to_i, f: f.to_i, hist: hist.fetch(conn, time)
             }.tap { |x|
               x[:mark] = marks[x[:time]] if marks[x[:time]]
