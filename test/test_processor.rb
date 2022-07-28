@@ -290,60 +290,15 @@ describe Sidekiq::Processor do
     end
   end
 
-  describe "stats" do
-    before do
-      Sidekiq.redis { |c| c.flushdb }
-    end
-
-    describe "when successful" do
-      let(:processed_today_key) { "stat:processed:#{Time.now.utc.strftime("%Y-%m-%d")}" }
-
-      def successful_job
-        msg = Sidekiq.dump_json({"class" => MockWorker.to_s, "args" => ["myarg"]})
-        @processor.process(work(msg))
-      end
-
-      it "increments processed stat" do
-        Sidekiq::Processor::PROCESSED.reset
-        successful_job
-        assert_equal 1, Sidekiq::Processor::PROCESSED.reset
-      end
-    end
-
-    describe "custom job logger class" do
-      class CustomJobLogger < Sidekiq::JobLogger
-        def call(item, queue)
-          yield
-        rescue Exception
-          raise
-        end
-      end
-
-      before do
-        opts = {queues: ["default"], job_logger: CustomJobLogger}
-        @processor = ::Sidekiq::Processor.new(opts) { |pr, ex| }
-      end
-    end
-  end
-
-  describe "stats" do
-    before do
-      Sidekiq.redis { |c| c.flushdb }
-    end
-
-    def successful_job
-      msg = Sidekiq.dump_json({"class" => MockWorker.to_s, "args" => ["myarg"]})
-      @processor.process(work(msg))
-    end
-
-    it "increments processed stat" do
-      Sidekiq::Processor::PROCESSED.reset
-      successful_job
-      assert_equal 1, Sidekiq::Processor::PROCESSED.reset
-    end
-  end
-
   describe "custom job logger class" do
+    class CustomJobLogger < Sidekiq::JobLogger
+      def call(item, queue)
+        yield
+      rescue Exception
+        raise
+      end
+    end
+
     before do
       opts = Sidekiq
       opts[:job_logger] = CustomJobLogger

@@ -3,7 +3,10 @@
 require "sidekiq"
 
 require "zlib"
+require "set"
 require "base64"
+require "sidekiq/metrics/deploy"
+require "sidekiq/metrics/query"
 
 module Sidekiq
   # Retrieve runtime statistics from Redis regarding

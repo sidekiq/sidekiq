@@ -1,0 +1,82 @@
+
+<h2><%= t('Metrics') %> / <%= h @name %></h2>
+
+<div class="row chart">
+  <div id="realtime" data-processed-label="<%= t('Processed') %>" data-failed-label="<%= t('Failed') %>"></div>
+</div>
+
+<% data = @resultset[:data] %>
+<div class="table_container">
+  <table class="table table-bordered table-striped table-hover">
+    <tbody>
+      <tr>
+        <th><%= t('Time') %></th>
+        <th><%= t('Processed') %></th>
+        <th><%= t('ExecutionTime') %></th>
+        <th><%= t('Failed') %></th>
+        <th><%= t('Deploy') %></th>
+        <th><%= t('Histogram') %></th>
+      </tr>
+      <% data.each do |hash| %>
+        <tr>
+          <td><%= hash[:time] %></td>
+          <td><%= hash[:p] %></td>
+          <td><%= hash[:ms] %></td>
+          <td><%= hash[:f] %></td>
+          <td><%= hash[:mark] %></td>
+          <td><%= hash[:hist] %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<p>
+Data from <%= @resultset[:starts_at] %> to <%= @resultset[:ends_at] %>
+</p>
+
+<% atad = data.reverse %>
+<script type="text/javascript" src="<%= root_path %>javascripts/graph.js"></script>
+<%# <script type="text/javascript" src="<%= root_path %>javascripts/metrics.js"></script> %>
+<script>
+var palette = new Rickshaw.Color.Palette();
+var data = [ {
+     name: "Processed",
+     color: palette.color(),
+     data: [ <% atad.each do |hash| %>
+        { x: <%= hash[:epoch] %>, y: <%= hash[:p] %> },
+      <% end %> ]
+   }, {
+     name: "Failed",
+     color: palette.color(),
+     data: [ <% atad.each do |hash| %>
+        { x: <%= hash[:epoch] %>, y: <%= hash[:f] %> },
+      <% end %> ]
+   }, {
+     name: "Execution Time",
+     color: palette.color(),
+     data: [ <% atad.each do |hash| %>
+        { x: <%= hash[:epoch] %>, y: <%= hash[:ms] %> },
+      <% end %> ]
+   } ];
+
+var timeInterval = 60000;
+var graphElement = document.getElementById("realtime");
+
+var graph = new Rickshaw.Graph({
+  element: graphElement,
+  width: responsiveWidth(),
+  renderer: 'line',
+  interpolation: 'linear',
+  series: data,
+});
+var x_axis = new Rickshaw.Graph.Axis.Time( { graph: graph } );
+
+var y_axis = new Rickshaw.Graph.Axis.Y( {
+  graph: graph,
+  tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+  ticksTreatment: 'glow'
+});
+
+graph.render();
+</script>
