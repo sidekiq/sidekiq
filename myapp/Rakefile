@@ -4,3 +4,12 @@
 require_relative "config/application"
 
 Rails.application.load_tasks
+
+task :seed_jobs => :environment do
+  # see classes defined in config/initializers/sidekiq.rb
+  [FooJob, BarJob, StoreCardJob, OrderJunkJob, SpamUserJob, FastJob, SlowJob].each do |kls|
+    (kls.name.size * 10).times do
+      kls.perform_in(rand * 300)
+    end
+  end
+end
