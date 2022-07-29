@@ -18,7 +18,7 @@
           <tr>
             <td><code><a href="<%= root_path %>metrics/<%= kls %>"><%= kls %></a></code></td>
             <td><%= val %></td>
-            <td><%= top["ms"][kls] %></td>
+            <td><%= top.dig("ms", kls) %></td>
           </tr>
         <% end %>
       <% else %>
@@ -43,7 +43,7 @@
         <% topms.each do |kls, val| %>
           <tr>
             <td><code><a href="<%= root_path %>metrics/<%= kls %>"><%= kls %></a></code></td>
-            <td><%= top["p"][kls] %></td>
+            <td><%= top.dig("p", kls) %></td>
             <td><%= val %></td>
           </tr>
         <% end %>
