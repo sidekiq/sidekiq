@@ -81,6 +81,11 @@ module Sidekiq
 
             https://guides.rubyonrails.org/api_app.html#using-session-middlewares
 
+            # example config sidekiq specific session
+            # https://github.com/mperham/sidekiq/wiki/Monitoring#rails-api-application-session-configuration
+            Sidekiq::Web.use ActionDispatch::Cookies
+            Sidekiq::Web.use ActionDispatch::Session::CookieStore, key: "_interslice_session"
+
           If this is a bare Rack app, use a session middleware before Sidekiq::Web:
 
             # first, use IRB to create a shared secret key for sessions and commit it
