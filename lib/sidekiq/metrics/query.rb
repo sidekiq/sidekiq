@@ -104,7 +104,7 @@ module Sidekiq
           initial.map do |(ms, p, f)|
             tm = Time.utc(time.year, time.month, time.mday, time.hour, time.min, 0)
             {
-              time: tm.rfc3339,
+              time: tm.iso8601,
               epoch: tm.to_i,
               ms: ms.to_i, p: p.to_i, f: f.to_i, hist: hist.fetch(conn, time)
             }.tap { |x|

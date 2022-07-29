@@ -89,7 +89,7 @@ module Sidekiq
               xa.expire(stats, ttl)
             end
           end
-          logger.info "Flushed #{count} elements"
+          logger.info "Flushed #{count} metrics"
           count
         end
       end
