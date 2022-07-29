@@ -18,6 +18,7 @@
       <th><a href="<%= url %>?direction=<%= params[:direction] == 'asc' ? 'desc' : 'asc' %>"># <%= sort_direction_label %></a></th>
       <th><%= t('Job') %></th>
       <th><%= t('Arguments') %></th>
+      <th><%= t('Context') %></th>
       <th></th>
     </thead>
     <% @jobs.each_with_index do |job, index| %>
@@ -40,6 +41,9 @@
           <% else %>
             <%= display_args(job.display_args) %>
           <% end %>
+        </td>
+        <td>
+          <%= h(job["cattr"].inspect) if job["cattr"]&.any? %>
         </td>
         <td>
           <form action="<%= root_path %>queues/<%= CGI.escape(@name) %>/delete" method="post">

@@ -87,3 +87,4 @@ en: # <---- change this to your locale code
   Metrics: Metrics
   NoDataFound: No data found
   ExecutionTime: Execution Time
+  Context: Context

@@ -44,8 +44,8 @@ module Myapp
   end
 end
 
-require "sidekiq/middleware/current_attributes"
-Sidekiq::CurrentAttributes.persist(Myapp::Current) # Your AS::CurrentAttributes singleton
+# require "sidekiq/middleware/current_attributes"
+# Sidekiq::CurrentAttributes.persist(Myapp::Current) # Your AS::CurrentAttributes singleton
 
 # Sidekiq.transactional_push!
 
@@ -58,7 +58,6 @@ Sidekiq.configure_server do |config|
   require "sidekiq/metrics/deploy"
   Sidekiq::Metrics::Deploy.new.mark(label: label)
 end
-
 
 # helper jobs for seeding metrics data
 # you will need to restart if you change any of these
@@ -117,4 +116,3 @@ class SlowJob
     sleep(rand * 10)
   end
 end
-
