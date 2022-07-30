@@ -16,7 +16,8 @@ module Sidekiq
         @lock = Mutex.new
       end
 
-      def track(queue, klass)
+      def track(queue, klass, enqueued_at:)
+        latency_ms = Time.now - Time.at(enqueued_at) * 1000
         start = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :millisecond)
         time_ms = 0
         begin
@@ -44,6 +45,10 @@ module Sidekiq
           @lock.synchronize {
             @jobs["#{klass}|p"] += 1
             @totals["p"] += 1
+
+            # Track the latency no matter whether the job is processed successfully
+            @jobs["#{klass}|latency|ms"] += latency_ms
+            @totals["latency|ms"] += latency_ms
           }
         end
       end
@@ -115,7 +120,7 @@ module Sidekiq
       end
 
       def call(_instance, hash, queue, &block)
-        @exec.track(queue, hash["wrapped"] || hash["class"], &block)
+        @exec.track(queue, hash["wrapped"] || hash["class"], enqueued_at: hash["enqueued_at"] &block)
       end
     end
   end
