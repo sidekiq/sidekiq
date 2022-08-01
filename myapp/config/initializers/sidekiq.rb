@@ -44,8 +44,8 @@ module Myapp
   end
 end
 
-# require "sidekiq/middleware/current_attributes"
-# Sidekiq::CurrentAttributes.persist(Myapp::Current) # Your AS::CurrentAttributes singleton
+require "sidekiq/middleware/current_attributes"
+Sidekiq::CurrentAttributes.persist(Myapp::Current) # Your AS::CurrentAttributes singleton
 
 # Sidekiq.transactional_push!
 
