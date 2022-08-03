@@ -33,7 +33,10 @@ module Sidekiq
       startup: [],
       quiet: [],
       shutdown: [],
-      heartbeat: []
+      # triggers when we fire the first heartbeat on startup OR repairing a network partition
+      heartbeat: [],
+      # triggers on EVERY heartbeat call, every 10 seconds
+      beat: []
     },
     dead_max_jobs: 10_000,
     dead_timeout_in_seconds: 180 * 24 * 60 * 60, # 6 months
@@ -82,6 +85,11 @@ module Sidekiq
     logger.warn("#{ex.class.name}: #{ex.message}")
     logger.warn(ex.backtrace.join("\n")) unless ex.backtrace.nil?
   end
+
+  # DEFAULT_ERROR_HANDLER is a constant that allows the default error handler to
+  # be referenced. It must be defined here, after the default_error_handler
+  # method is defined.
+  DEFAULT_ERROR_HANDLER = method(:default_error_handler)
 
   @config = DEFAULTS.dup
   def self.options

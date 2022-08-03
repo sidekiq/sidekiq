@@ -54,7 +54,7 @@
       <th>&nbsp;</th>
     </thead>
     <% lead = processes.leader %>
-    <% processes.each do |process| %>
+    <% sorted_processes.each do |process| %>
       <tr>
         <td class="box">
           <%= "#{process['hostname']}:#{process['pid']}" %>

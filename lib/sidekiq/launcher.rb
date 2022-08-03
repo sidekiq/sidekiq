@@ -79,6 +79,8 @@ module Sidekiq
     end
 
     def clear_heartbeat
+      flush_stats
+
       # Remove record from Redis since we are shutting down.
       # Note we don't stop the heartbeat thread; if the process
       # doesn't actually exit, it'll reappear in the Web UI.
@@ -98,7 +100,7 @@ module Sidekiq
       ❤
     end
 
-    def self.flush_stats
+    def flush_stats
       fails = Processor::FAILURE.reset
       procd = Processor::PROCESSED.reset
       return if fails + procd == 0
@@ -122,7 +124,6 @@ module Sidekiq
         Sidekiq.logger.warn("Unable to flush stats: #{ex}")
       end
     end
-    at_exit(&method(:flush_stats))
 
     def ❤
       key = identity
@@ -179,6 +180,7 @@ module Sidekiq
 
         # first heartbeat or recovering from an outage and need to reestablish our heartbeat
         fire_event(:heartbeat) unless exists
+        fire_event(:beat, oneshot: false)
 
         return unless msg
 

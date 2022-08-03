@@ -84,3 +84,7 @@ en:
   Worker: Worker
   active: active
   idle: idle
+  Metrics: Metrics
+  NoDataFound: No data found
+  ExecutionTime: Execution Time
+  Context: Context

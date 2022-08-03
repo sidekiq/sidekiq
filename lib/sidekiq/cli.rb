@@ -425,3 +425,4 @@ module Sidekiq # :nodoc:
 end
 
 require "sidekiq/systemd"
+require "sidekiq/metrics/tracking"

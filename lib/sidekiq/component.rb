@@ -47,6 +47,7 @@ module Sidekiq
     end
 
     def fire_event(event, options = {})
+      oneshot = options.fetch(:oneshot, true)
       reverse = options[:reverse]
       reraise = options[:reraise]
 
@@ -58,7 +59,7 @@ module Sidekiq
         handle_exception(ex, {context: "Exception during Sidekiq lifecycle event.", event: event})
         raise ex if reraise
       end
-      arr.clear # once we've fired an event, we never fire it again
+      arr.clear if oneshot # once we've fired an event, we never fire it again
     end
   end
 end

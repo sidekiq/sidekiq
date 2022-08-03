@@ -33,6 +33,10 @@ module Sidekiq
       "Dead" => "morgue"
     }
 
+    if ENV["SIDEKIQ_METRICS_BETA"] == "1"
+      DEFAULT_TABS["Metrics"] = "metrics"
+    end
+
     class << self
       def settings
         self

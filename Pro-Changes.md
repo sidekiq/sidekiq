@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+5.5.2
+---------
+
+- Fix overly aggressive orphan check with large Sidekiq clusters [#5435]
+
 5.5.1
 ---------
 
