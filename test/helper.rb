@@ -19,10 +19,7 @@ if ENV["COVERAGE"]
     enable_coverage :branch
     add_filter "/test/"
     add_filter "/myapp/"
-  end
-  if ENV["CI"]
-    require "codecov"
-    SimpleCov.formatter = SimpleCov::Formatter::Codecov
+    minimum_coverage 90
   end
 end
 
