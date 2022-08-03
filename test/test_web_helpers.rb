@@ -127,7 +127,7 @@ describe "Web helpers" do
   end
 
   describe "#format_memory" do
-    it "returnsin KB" do
+    it "returns in KB" do
       obj = Helpers.new
       assert_equal "1 KB", obj.format_memory(1)
     end
