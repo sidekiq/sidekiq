@@ -8,6 +8,9 @@ require "standard/rake"
 # YARD tags: https://www.rubydoc.info/gems/yard/file/docs/Tags.md
 # YARD cheatsheet: https://gist.github.com/phansch/db18a595d2f5f1ef16646af72fe1fb0e
 
+# To check code coverage, include simplecov in the Gemfile and
+# run `COVERAGE=1 bundle exec rake`
+
 Rake::TestTask.new(:test) do |test|
   test.warning = true
   test.pattern = "test/**/test_*.rb"
