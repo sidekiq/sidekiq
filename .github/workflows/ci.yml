@@ -4,6 +4,7 @@ on:
   push:
     branches: [ main ]
   pull_request:
+    branches: [ "main", "7-0" ]
 
 permissions:
   contents: read
@@ -39,8 +40,3 @@ jobs:
         ruby-version: ${{ matrix.ruby }}
     - name: Run tests
       run: bundle exec rake
-    - name: Simplecov Report
-      uses: aki77/simplecov-report-action@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        resultPath: .last_simplecov_report.json
