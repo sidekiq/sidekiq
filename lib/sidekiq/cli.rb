@@ -426,4 +426,4 @@ module Sidekiq # :nodoc:
 end
 
 require "sidekiq/systemd"
-require "sidekiq/metrics/tracking"
+require "sidekiq/metrics/tracking" if ENV["SIDEKIQ_METRICS_BETA"]
