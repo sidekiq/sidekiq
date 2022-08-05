@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require "sidekiq/scheduled"
-require "sidekiq/api"
-
 require "zlib"
 require "base64"
 
@@ -236,7 +233,15 @@ module Sidekiq
     def send_to_morgue(msg)
       logger.info { "Adding dead #{msg["class"]} job #{msg["jid"]}" }
       payload = Sidekiq.dump_json(msg)
-      DeadSet.new.kill(payload, notify_failure: false)
+      now = Time.now.to_f
+
+      config.redis do |conn|
+        conn.multi do |xa|
+          xa.zadd("dead", now.to_s, payload)
+          xa.zremrangebyscore("dead", "-inf", now - config[:dead_timeout_in_seconds])
+          xa.zremrangebyrank("dead", 0, - config[:dead_max_jobs])
+        end
+      end
     end
 
     def retry_attempts_from(msg_retry, default)
