@@ -200,14 +200,13 @@ module Sidekiq
         nil
       end
 
-      delay = if Integer === rv && rv > 0
-        rv
+      delay = (count**4) + 15
+      if Integer === rv && rv > 0
+        delay = rv
       elsif rv == :discard
         return [:discard, nil] # do nothing, job goes poof
       elsif rv == :kill
         return [:kill, nil]
-      else
-        (count**4) + 15
       end
 
       [:default, delay]
