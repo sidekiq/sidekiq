@@ -152,8 +152,14 @@ module Sidekiq
         job_hash = Sidekiq.load_json(jobstr)
       rescue => ex
         handle_exception(ex, {context: "Invalid JSON for job", jobstr: jobstr})
-        # we can't notify because the job isn't a valid hash payload.
-        DeadSet.new.kill(jobstr, notify_failure: false)
+        now = Time.now.to_f
+        config.redis do |conn|
+          conn.multi do |xa|
+            xa.zadd("dead", now.to_s, jobstr)
+            xa.zremrangebyscore("dead", "-inf", now - config[:dead_timeout_in_seconds])
+            xa.zremrangebyrank("dead", 0, - config[:dead_max_jobs])
+          end
+        end
         return uow.acknowledge
       end
 
