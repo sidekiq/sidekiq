@@ -5,6 +5,7 @@
 6.5.4
 ----------
 
+- Fix invalid code on Ruby 2.5 [#5460]
 - Fix further metrics dependency issues [#5457]
 
 6.5.3
