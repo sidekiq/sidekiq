@@ -182,13 +182,8 @@ module Sidekiq
       end
 
       def process_count
-        # The work buried within Sidekiq::ProcessSet#cleanup can be
-        # expensive at scale. Cut it down by 90% with this counter.
-        # NB: This method is only called by the scheduler thread so we
-        # don't need to worry about the thread safety of +=.
         pcount = Sidekiq.redis { |conn| conn.scard("processes") }
         pcount = 1 if pcount == 0
-        @count_calls += 1
         pcount
       end
 

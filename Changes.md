@@ -2,6 +2,11 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
+6.5.4
+----------
+
+- Fix further metrics dependency issues [#5457]
+
 6.5.3
 ----------
 
