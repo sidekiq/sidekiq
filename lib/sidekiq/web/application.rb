@@ -61,7 +61,7 @@ module Sidekiq
     end
 
     get "/metrics" do
-      q = Sidekiq::Metrics::Query.new(now: Time.parse("2022-08-10T17:41:00Z"))
+      q = Sidekiq::Metrics::Query.new
       @query_result = q.top_jobs
       erb(:metrics)
     end

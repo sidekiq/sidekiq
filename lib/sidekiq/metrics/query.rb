@@ -50,26 +50,15 @@ module Sidekiq
             end
           end
         end
-        puts "*"*80
-        puts results.size
-        puts results
-        puts "*"*80
 
-        # TODO: is it necessary to iterate chronologically
-        time = result.starts_at
-        results.reverse.each do |hash|
+        time = @time
+        results.each do |hash|
           hash.each do |k, v|
             kls, metric = k.split("|")
             result.job_results[kls].add_metric metric, time, v.to_i
           end
-          time += 60
+          time -= 60
         end
-        puts "*"*80
-        result.job_results.each do |kls, jr|
-          puts kls
-          puts jr.series.map { |m, data| "  #{m}: #{data}" }
-        end
-        puts "*"*80
 
         result
       end
