@@ -86,6 +86,6 @@ en: # <---- change this to your locale code
   Unpause: Unpause
   Metrics: Metrics
   NoDataFound: No data found
-  ExecutionTime: Total Execution Time (ms)
-  AvgExecutionTime: Average Execution Time (ms)
+  ExecutionTime: Total Execution Time
+  AvgExecutionTime: Average Execution Time
   Context: Context

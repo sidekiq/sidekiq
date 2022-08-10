@@ -51,8 +51,8 @@
             </td>
             <td><%= jr.dig("totals", "p") %></td>
             <td><%= jr.dig("totals", "f") %></td>
-            <td><%= jr.dig("totals", "ms") %></td>
-            <td><%= jr.dig("totals", "ms") / jr.dig("totals", "p") %></td>
+            <td><%= (jr.dig("totals", "ms").to_f / 1000).round(0) %> seconds</td>
+            <td><%= (jr.dig("totals", "ms").to_f / jr.dig("totals", "p") / 1000).round(2) %> seconds</td>
           </tr>
         <% end %>
       <% else %>
