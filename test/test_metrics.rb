@@ -91,11 +91,6 @@ describe Sidekiq::Metrics do
   describe "querying" do
     it "handles empty metrics" do
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
-      # rs = q.top_jobs
-      # refute_nil rs
-      # assert_equal 10, rs.size
-
-      q = Sidekiq::Metrics::Query.new(now: fixed_time)
       rs = q.for_job("DoesntExist")
       refute_nil rs
       assert_equal 7, rs.size

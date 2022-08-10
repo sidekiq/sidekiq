@@ -108,7 +108,7 @@ module Sidekiq
         def initialize
           super
           self.buckets = []
-          self.job_results = Hash.new { |h,k| h[k] = JobResult.new }
+          self.job_results = Hash.new { |h, k| h[k] = JobResult.new }
         end
 
         def prepend_bucket(time)
@@ -121,7 +121,7 @@ module Sidekiq
       class JobResult < Struct.new(:series, :totals)
         def initialize
           super
-          self.series = Hash.new { |h,k| h[k] = {} }
+          self.series = Hash.new { |h, k| h[k] = {} }
           self.totals = Hash.new(0)
         end
 
