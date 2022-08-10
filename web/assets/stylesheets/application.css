@@ -954,3 +954,16 @@ div.interval-slider input {
   padding: 3px 7px;
   margin-left: 5px;
 }
+
+.metrics-swatch-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.metrics-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+}

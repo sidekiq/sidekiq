@@ -6,12 +6,26 @@
 <%
   limit = 10
   job_results = @query_result.job_results.sort_by { |(kls, jr)| jr.totals["ms"] }.reverse.first(limit).to_h
+  # Colors taken from https://www.chartjs.org/docs/latest/samples/utils.html
+  colors = [
+    "#4dc9f6",
+    "#f67019",
+    "#f53794",
+    "#537bc4",
+    "#acc236",
+    "#166a8f",
+    "#00a950",
+    "#58595b",
+    "#8549ba",
+    "#4dc9f6",
+  ]
 %>
 
 <canvas
   id="metrics-chart"
   data-labels="<%= h Sidekiq.dump_json(@query_result.buckets) %>"
   data-series="<%= h Sidekiq.dump_json(job_results.map { |(kls, jr)| [kls, jr.dig("series", "ms")] }.to_h) %>"
+  data-colors="<%= h Sidekiq.dump_json(colors) %>"
 ></canvas>
 
 <h3>Most Time-Consuming Jobs</h3>
@@ -27,9 +41,14 @@
         <th><%= t('AvgExecutionTime') %></th>
       </tr>
       <% if job_results.any? %>
-        <% job_results.each do |(kls, jr)| %>
+        <% job_results.each_with_index do |(kls, jr), i| %>
           <tr>
-            <td><code><a href="<%= root_path %>metrics/<%= kls %>"><%= kls %></a></code></td>
+            <td>
+              <div class="metrics-swatch-wrapper">
+                <span class="metrics-swatch" style="background: <%= colors[i] %>"></span>
+                <code><a href="<%= root_path %>metrics/<%= kls %>"><%= kls %></a></code>
+              </div>
+            </td>
             <td><%= jr.dig("totals", "p") %></td>
             <td><%= jr.dig("totals", "f") %></td>
             <td><%= jr.dig("totals", "ms") %></td>

@@ -1,18 +1,6 @@
-// Colors taken from https://www.chartjs.org/docs/latest/samples/utils.html
-const COLORS = [
-  "#4dc9f6",
-  "#f67019",
-  "#f53794",
-  "#537bc4",
-  "#acc236",
-  "#166a8f",
-  "#00a950",
-  "#58595b",
-  "#8549ba",
-];
-
 function init() {
   const ctx = document.getElementById("metrics-chart");
+  const colors = JSON.parse(ctx.getAttribute("data-colors"));
   const labels = JSON.parse(ctx.getAttribute("data-labels"));
   const datasets = Object.entries(
     JSON.parse(ctx.getAttribute("data-series"))
@@ -20,8 +8,8 @@ function init() {
     return {
       label: k,
       data: v,
-      borderColor: COLORS[i],
-      backgroundColor: COLORS[i],
+      borderColor: colors[i],
+      backgroundColor: colors[i],
       borderWidth: 2,
       pointRadius: 2,
     };
@@ -35,7 +23,12 @@ function init() {
     },
     interaction: {
       mode: "x",
-    }
+    },
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
   };
 
   const chart = new Chart(ctx, {
