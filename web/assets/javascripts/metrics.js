@@ -1,14 +1,14 @@
 // Colors taken from https://www.chartjs.org/docs/latest/samples/utils.html
 const COLORS = [
-  '#4dc9f6',
-  '#f67019',
-  '#f53794',
-  '#537bc4',
-  '#acc236',
-  '#166a8f',
-  '#00a950',
-  '#58595b',
-  '#8549ba'
+  "#4dc9f6",
+  "#f67019",
+  "#f53794",
+  "#537bc4",
+  "#acc236",
+  "#166a8f",
+  "#00a950",
+  "#58595b",
+  "#8549ba",
 ];
 
 function init() {
@@ -21,6 +21,9 @@ function init() {
       label: k,
       data: v,
       borderColor: COLORS[i],
+      backgroundColor: COLORS[i],
+      borderWidth: 2,
+      pointRadius: 2,
     };
   });
   const options = {
@@ -30,6 +33,9 @@ function init() {
         beginAtZero: true,
       },
     },
+    interaction: {
+      mode: "x",
+    }
   };
 
   const chart = new Chart(ctx, {
