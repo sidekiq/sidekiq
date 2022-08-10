@@ -36,7 +36,7 @@ module Sidekiq
       end
 
       # Get metric data for all jobs from the last hour
-      def top_jobs(minutes: 8)
+      def top_jobs(minutes: 60)
         result = Result.new
 
         time = @time
