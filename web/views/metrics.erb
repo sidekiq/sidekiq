@@ -5,14 +5,13 @@
 
 <canvas
   id="metrics-chart"
-  data-labels="<%= h Sidekiq.dump_json(@resultset[:series_labels]) %>"
-  data-series="<%= h Sidekiq.dump_json(@resultset[:ms_series]) %>"
+  data-labels="<%= h Sidekiq.dump_json(@query_result.buckets) %>"
+  data-series="<%= h Sidekiq.dump_json(@query_result.job_results.map { |(kls, jr)| [kls, jr.dig("series", "ms")] }.to_h) %>"
 ></canvas>
 
 <h3>Top Jobs by Processed Count</h3>
-<% top = @resultset[:top_classes] %>
 
-<% topp = top["p"]&.first(10) %>
+<% job_results = @query_result.job_results.sort_by { |(kls, jr)| jr.totals["p"] }.reverse.first(10).to_h %>
 <div class="table_container">
   <table class="table table-bordered table-striped table-hover">
     <tbody>
@@ -21,12 +20,12 @@
         <th><%= t('Processed') %></th>
         <th><%= t('ExecutionTime') %></th>
       </tr>
-      <% if topp %>
-        <% topp.each do |kls, val| %>
+      <% if job_results.any? %>
+        <% job_results.each do |(kls, jr)| %>
           <tr>
             <td><code><a href="<%= root_path %>metrics/<%= kls %>"><%= kls %></a></code></td>
-            <td><%= val %></td>
-            <td><%= top.dig("ms", kls) %></td>
+            <td><%= jr.dig("totals", "p") %></td>
+            <td><%= jr.dig("totals", "ms") %></td>
           </tr>
         <% end %>
       <% else %>
@@ -38,7 +37,7 @@
 
 <h3>Top Jobs by Execution Time</h3>
 
-<% topms = top["ms"]&.first(10) %>
+<% job_results = @query_result.job_results.sort_by { |(kls, jr)| jr.totals["ms"] }.reverse.first(10).to_h %>
 <div class="table_container">
   <table class="table table-bordered table-striped table-hover">
     <tbody>
@@ -47,12 +46,12 @@
         <th><%= t('Processed') %></th>
         <th><%= t('ExecutionTime') %></th>
       </tr>
-      <% if topms %>
-        <% topms.each do |kls, val| %>
+      <% if job_results.any? %>
+        <% job_results.each do |(kls, jr)| %>
           <tr>
             <td><code><a href="<%= root_path %>metrics/<%= kls %>"><%= kls %></a></code></td>
-            <td><%= top.dig("p", kls) %></td>
-            <td><%= val %></td>
+            <td><%= jr.dig("totals", "p") %></td>
+            <td><%= jr.dig("totals", "ms") %></td>
           </tr>
         <% end %>
       <% else %>
@@ -63,5 +62,5 @@
 </div>
 
 <p>
-Data from <%= @resultset[:starts_at] %> to <%= @resultset[:ends_at] %>
+Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %>
 </p>

@@ -62,7 +62,7 @@ module Sidekiq
 
     get "/metrics" do
       q = Sidekiq::Metrics::Query.new
-      @resultset = q.top_jobs
+      @query_result = q.top_jobs
       erb(:metrics)
     end
 
