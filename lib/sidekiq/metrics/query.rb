@@ -40,7 +40,7 @@ module Sidekiq
         result = Result.new
 
         time = @time
-        results = @pool.with do |conn|
+        redis_results = @pool.with do |conn|
           conn.pipelined do |pipe|
             minutes.times do |idx|
               key = "j|#{time.strftime("%Y%m%d")}|#{time.hour}:#{time.min}"
@@ -52,7 +52,7 @@ module Sidekiq
         end
 
         time = @time
-        results.each do |hash|
+        redis_results.each do |hash|
           hash.each do |k, v|
             kls, metric = k.split("|")
             result.job_results[kls].add_metric metric, time, v.to_i
