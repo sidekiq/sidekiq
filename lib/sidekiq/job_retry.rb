@@ -2,6 +2,7 @@
 
 require "zlib"
 require "base64"
+require "sidekiq/component"
 
 module Sidekiq
   ##
