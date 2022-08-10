@@ -42,6 +42,7 @@ module Sidekiq
         resultset[:date] = @time.to_date
         resultset[:period] = :hour
         resultset[:ends_at] = @time
+        resultset[:series_labels] = []
         time = @time
 
         results = @pool.with do |conn|
@@ -50,21 +51,31 @@ module Sidekiq
             60.times do |idx|
               key = "j|#{time.strftime("%Y%m%d")}|#{time.hour}:#{time.min}"
               pipe.hgetall key
+              resultset[:series_labels].unshift time.strftime("%H:%M")
               time -= 60
             end
-            resultset[:starts_at] = time
+            resultset[:starts_at] = time + 60
           end
         end
 
         t = Hash.new(0)
+        ms_series = Hash.new { |h,k| h[k] = {} }
         klsset = Set.new
         # merge the per-minute data into a totals hash for the hour
+        time = @time
         results.each do |hash|
-          hash.each { |k, v| t[k] = t[k] + v.to_i }
-          klsset.merge(hash.keys.map { |k| k.split("|")[0] })
+          time_str = time.strftime("%H:%M")
+          hash.each do |k, v|
+            kls = k.split("|")[0]
+            t[k] = t[k] + v.to_i
+            ms_series[kls][time_str] = v.to_i
+            klsset.add(kls)
+          end
+          time -= 60
         end
         resultset[:job_classes] = klsset.delete_if { |item| item.size < 3 }
         resultset[:totals] = t
+        resultset[:ms_series] = ms_series
         top = t.each_with_object({}) do |(k, v), memo|
           (kls, metric) = k.split("|")
           memo[metric] ||= Hash.new(0)

@@ -93,7 +93,7 @@ describe Sidekiq::Metrics do
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
       rs = q.top_jobs
       refute_nil rs
-      assert_equal 8, rs.size
+      assert_equal 10, rs.size
 
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
       rs = q.for_job("DoesntExist")
@@ -106,14 +106,28 @@ describe Sidekiq::Metrics do
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
       rs = q.top_jobs
       assert_equal Date.new(2022, 7, 22), rs[:date]
+      assert_equal fixed_time - 59 * 60, rs[:starts_at]
       assert_equal 2, rs[:job_classes].size
-      assert_equal "App::SomeJob", rs[:job_classes].first
+      assert_equal %w[App::SomeJob App::FooJob].sort, rs[:job_classes].sort
+
       bucket = rs[:totals]
       refute_nil bucket
       assert_equal bucket.keys.sort, ["App::FooJob|ms", "App::FooJob|p", "App::SomeJob|f", "App::SomeJob|ms", "App::SomeJob|p"]
       assert_equal 3, bucket["App::SomeJob|p"]
       assert_equal 4, bucket["App::FooJob|p"]
       assert_equal 1, bucket["App::SomeJob|f"]
+
+      series_labels = rs[:series_labels]
+      refute_nil series_labels
+      assert_equal 60, series_labels.size
+      assert_equal "21:04", series_labels.first
+      assert_equal "22:03", series_labels.last
+
+      ms_series = rs[:ms_series]
+      refute_nil ms_series
+      assert_equal %w[App::SomeJob App::FooJob].sort, ms_series.keys.sort
+      refute_nil ms_series["App::SomeJob"]
+      assert_equal 1, ms_series["App::SomeJob"]["22:03"]
     end
 
     it "fetches job-specific data" do

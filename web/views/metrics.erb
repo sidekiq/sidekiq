@@ -1,5 +1,13 @@
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/metrics.js"></script>
 
-<h1><%= t('Metrics') %></h1>
+<h3><%= t('Metrics') %></h3>
+
+<canvas
+  id="metrics-chart"
+  data-labels="<%= h Sidekiq.dump_json(@resultset[:series_labels]) %>"
+  data-series="<%= h Sidekiq.dump_json(@resultset[:ms_series]) %>"
+></canvas>
 
 <h3>Top Jobs by Processed Count</h3>
 <% top = @resultset[:top_classes] %>
