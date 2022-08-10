@@ -106,6 +106,7 @@ describe Sidekiq::Metrics do
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
       result = q.top_jobs
       assert_equal fixed_time - 59 * 60, result.starts_at
+      assert_equal fixed_time, result.ends_at
 
       assert_equal 60, result.buckets.size
       assert_equal "21:04", result.buckets.first
