@@ -2,6 +2,7 @@ class MetricsChart {
   constructor(id, options) {
     this.ctx = document.getElementById(id);
     this.series = options.series;
+    this.marks = options.marks;
     this.labels = options.labels;
     this.swatches = [];
     this.fallbackColor = "#999";
@@ -28,6 +29,8 @@ class MetricsChart {
       data: { labels: this.labels, datasets: datasets },
       options: this.chartOptions,
     });
+
+    this.addMarksToChart();
   }
 
   registerSwatch(id) {
@@ -54,6 +57,34 @@ class MetricsChart {
     }
 
     this.updateSwatch(kls);
+    this.chart.update();
+  }
+
+  addMarksToChart() {
+    this.marks.forEach(([bucket, label], i) => {
+      this.chart.options.plugins.annotation.annotations[`deploy-${i}`] = {
+        type: "line",
+        xMin: bucket,
+        xMax: bucket,
+        borderColor: "rgba(220, 38, 38, 0.4)",
+        borderWidth: 2,
+      };
+      this.chart.options.plugins.annotation.annotations[`label-${i}`] = {
+        type: "label",
+        position: { x: "center", y: "start" },
+        xValue: bucket,
+        yValue: () => this.chart && this.chart.scales.y.end,
+        backgroundColor: "#f3f3f3",
+        color: "rgba(220, 38, 38, 0.9)",
+        padding: 2,
+        content: [label.split(" ")[0]],
+        font: {
+          size: 14,
+          family: "monospace",
+        },
+      };
+    });
+
     this.chart.update();
   }
 
@@ -92,7 +123,13 @@ class MetricsChart {
         tooltip: {
           callbacks: {
             title: (items) => `${items[0].label} UTC`,
-            label: (item) => `${item.dataset.label}: ${item.parsed.y.toFixed(1)} seconds`,
+            label: (item) =>
+              `${item.dataset.label}: ${item.parsed.y.toFixed(1)} seconds`,
+            footer: (items) => {
+              const bucket = items[0].label;
+              const marks = this.marks.filter(([ b, _ ]) => b == bucket);
+              return marks.map(([ b, msg ]) => `Deploy: ${msg}`);
+            },
           },
         },
       },

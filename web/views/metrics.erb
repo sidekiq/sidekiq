@@ -1,4 +1,5 @@
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js"></script>
 <script type="text/javascript" src="<%= root_path %>javascripts/metrics.js"></script>
 
 <h3><%= t('Metrics') %></h3>
@@ -17,6 +18,7 @@
     "metrics-chart",
     <%= Sidekiq.dump_json({
       series: job_results.map { |(kls, jr)| [kls, jr.dig("series", "s")] }.to_h,
+      marks: @query_result.marks.map { |m| [m.bucket, m.label] },
       visible: visible_kls,
       labels: @query_result.buckets,
     }) %>

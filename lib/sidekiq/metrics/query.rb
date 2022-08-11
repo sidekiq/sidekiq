@@ -60,6 +60,15 @@ module Sidekiq
           time -= 60
         end
 
+        marks = @pool.with { |c| c.hgetall("#{@time.strftime("%Y%m%d")}-marks") }
+        result_range = result.starts_at..result.ends_at
+        marks.each do |timestamp, label|
+          time = Time.parse(timestamp)
+          if result_range.cover? time
+            result.marks << MarkResult.new(time, label)
+          end
+        end
+
         result
       end
 
@@ -104,10 +113,11 @@ module Sidekiq
         resultset
       end
 
-      class Result < Struct.new(:starts_at, :ends_at, :size, :buckets, :job_results)
+      class Result < Struct.new(:starts_at, :ends_at, :size, :buckets, :job_results, :marks)
         def initialize
           super
           self.buckets = []
+          self.marks = []
           self.job_results = Hash.new { |h, k| h[k] = JobResult.new }
         end
 
@@ -131,6 +141,12 @@ module Sidekiq
 
           # Include timing measurements in seconds for convenience
           add_metric("s", time, value / 1000.0) if metric == "ms"
+        end
+      end
+
+      class MarkResult < Struct.new(:time, :label)
+        def bucket
+          time.strftime("%H:%M")
         end
       end
     end

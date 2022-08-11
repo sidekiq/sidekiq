@@ -103,10 +103,16 @@ describe Sidekiq::Metrics do
 
     it "fetches top job data" do
       create_known_metrics
+      d = Sidekiq::Metrics::Deploy.new
+      d.mark(at: fixed_time - 300, label: "cafed00d - some git summary line")
+
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
       result = q.top_jobs
       assert_equal fixed_time - 59 * 60, result.starts_at
       assert_equal fixed_time, result.ends_at
+      assert_equal 1, result.marks.size
+      assert_equal "cafed00d - some git summary line", result.marks[0].label
+      assert_equal "21:58", result.marks[0].bucket
 
       assert_equal 60, result.buckets.size
       assert_equal "21:04", result.buckets.first
