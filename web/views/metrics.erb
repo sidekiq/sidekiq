@@ -4,8 +4,10 @@
 <h3><%= t('Metrics') %></h3>
 
 <%
-  limit = 10
-  job_results = @query_result.job_results.sort_by { |(kls, jr)| jr.totals["ms"] }.reverse.first(limit).to_h
+  table_limit = 20
+  chart_limit = 5
+  job_results = @query_result.job_results.sort_by { |(kls, jr)| jr.totals["ms"] }.reverse.first(table_limit)
+  visible_job_classes = job_results.first(chart_limit).map(&:first)
   # Colors taken from https://www.chartjs.org/docs/latest/samples/utils.html
   colors = [
     "#4dc9f6",
@@ -26,6 +28,7 @@
   data-labels="<%= h Sidekiq.dump_json(@query_result.buckets) %>"
   data-series="<%= h Sidekiq.dump_json(job_results.map { |(kls, jr)| [kls, jr.dig("series", "ms")] }.to_h) %>"
   data-colors="<%= h Sidekiq.dump_json(colors) %>"
+  data-visible="<%= h Sidekiq.dump_json(visible_job_classes) %>"
 ></canvas>
 
 <h3>Most Time-Consuming Jobs</h3>
@@ -45,7 +48,14 @@
           <tr>
             <td>
               <div class="metrics-swatch-wrapper">
-                <span class="metrics-swatch" style="background: <%= colors[i] %>"></span>
+                <input
+                  type="checkbox"
+                  class="metrics-swatch"
+                  <% if kls.in?(visible_job_classes) %>
+                    style="color: <%= colors[i] %>"
+                    checked
+                  <% end %>
+                />
                 <code><a href="<%= root_path %>metrics/<%= kls %>"><%= kls %></a></code>
               </div>
             </td>
