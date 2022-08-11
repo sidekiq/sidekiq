@@ -115,8 +115,8 @@ describe Sidekiq::Metrics do
       assert_equal %w[App::SomeJob App::FooJob].sort, result.job_results.keys.sort
       some_job_result = result.job_results["App::SomeJob"]
       refute_nil some_job_result
-      assert_equal 1, some_job_result.series.dig("ms", "22:03")
-      assert_equal 2, some_job_result.totals["ms"]
+      assert_equal 2, some_job_result.series.dig("p", "22:03")
+      assert_equal 3, some_job_result.totals["p"]
     end
 
     it "fetches job-specific data" do
