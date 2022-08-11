@@ -128,6 +128,9 @@ module Sidekiq
         def add_metric(metric, time, value)
           totals[metric] += value
           series[metric][time.strftime("%H:%M")] = value
+
+          # Include timing measurements in seconds for convenience
+          add_metric("s", time, value / 1000.0) if metric == "ms"
         end
       end
     end

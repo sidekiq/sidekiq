@@ -4,7 +4,7 @@ class MetricsChart {
     this.series = options.series;
     this.labels = options.labels;
     this.swatches = [];
-    this.fallbackColor = "#999"
+    this.fallbackColor = "#999";
     this.colors = [
       // Colors taken from https://www.chartjs.org/docs/latest/samples/utils.html
       "#4dc9f6",
@@ -33,15 +33,15 @@ class MetricsChart {
   registerSwatch(id) {
     const el = document.getElementById(id);
     el.onchange = () => this.toggle(el.value, el.checked);
-    this.swatches[el.value] = el
-    this.updateSwatch(el.value)
+    this.swatches[el.value] = el;
+    this.updateSwatch(el.value);
   }
 
   updateSwatch(kls) {
     const el = this.swatches[kls];
     const ds = this.chart.data.datasets.find((ds) => ds.label == kls);
-    el.checked = !!ds
-    el.style.color = ds ? ds.borderColor : null
+    el.checked = !!ds;
+    el.style.color = ds ? ds.borderColor : null;
   }
 
   toggle(kls, visible) {
@@ -49,7 +49,7 @@ class MetricsChart {
       this.chart.data.datasets.push(this.dataset(kls));
     } else {
       const i = this.chart.data.datasets.findIndex((ds) => ds.label == kls);
-      this.colors.unshift(this.chart.data.datasets[i].borderColor)
+      this.colors.unshift(this.chart.data.datasets[i].borderColor);
       this.chart.data.datasets.splice(i, 1);
     }
 
@@ -58,7 +58,7 @@ class MetricsChart {
   }
 
   dataset(kls) {
-    const color = this.colors.shift() || this.fallbackColor
+    const color = this.colors.shift() || this.fallbackColor;
 
     return {
       label: kls,
@@ -76,6 +76,10 @@ class MetricsChart {
       scales: {
         y: {
           beginAtZero: true,
+          title: {
+            text: "Total execution time (sec)",
+            display: true,
+          },
         },
       },
       interaction: {
@@ -84,6 +88,12 @@ class MetricsChart {
       plugins: {
         legend: {
           display: false,
+        },
+        tooltip: {
+          callbacks: {
+            title: (items) => `${items[0].label} UTC`,
+            label: (item) => `${item.dataset.label}: ${item.parsed.y.toFixed(1)} seconds`,
+          },
         },
       },
     };

@@ -115,6 +115,8 @@ describe Sidekiq::Metrics do
       assert_equal %w[App::SomeJob App::FooJob].sort, result.job_results.keys.sort
       some_job_result = result.job_results["App::SomeJob"]
       refute_nil some_job_result
+      assert_equal %w[p f ms s].sort, some_job_result.series.keys.sort
+      assert_equal %w[p f ms s].sort, some_job_result.totals.keys.sort
       assert_equal 2, some_job_result.series.dig("p", "22:03")
       assert_equal 3, some_job_result.totals["p"]
     end
