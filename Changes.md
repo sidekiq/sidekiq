@@ -2,10 +2,21 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+6.5.4
 ----------
 
-- [Job Metrics](https://github.com/mperham/sidekiq/wiki/Metrics#contributing) **BETA**
+- Fix invalid code on Ruby 2.5 [#5460]
+- Fix further metrics dependency issues [#5457]
+
+6.5.3
+----------
+
+- Don't require metrics code without explicit opt-in [#5456]
+
+6.5.2
+----------
+
+- [Job Metrics are under active development, help wanted!](https://github.com/mperham/sidekiq/wiki/Metrics#contributing) **BETA**
 - Add `Context` column on queue page which shows any CurrentAttributes [#5450]
 - `sidekiq_retry_in` may now return `:discard` or `:kill` to dynamically stop job retries [#5406]
 - Smarter sorting of processes in /busy Web UI [#5398]

@@ -312,7 +312,7 @@ module Sidekiq
 
     def call(env)
       action = self.class.match(env)
-      return [404, {"Content-Type" => "text/plain", "X-Cascade" => "pass"}, ["Not Found"]] unless action
+      return [404, {"content-type" => "text/plain", "x-cascade" => "pass"}, ["Not Found"]] unless action
 
       app = @klass
       resp = catch(:halt) do
@@ -329,10 +329,10 @@ module Sidekiq
       else
         # rendered content goes here
         headers = {
-          "Content-Type" => "text/html",
-          "Cache-Control" => "private, no-store",
-          "Content-Language" => action.locale,
-          "Content-Security-Policy" => CSP_HEADER
+          "content-type" => "text/html",
+          "cache-control" => "private, no-store",
+          "content-language" => action.locale,
+          "content-security-policy" => CSP_HEADER
         }
         # we'll let Rack calculate Content-Length for us.
         [200, headers, [resp]]
