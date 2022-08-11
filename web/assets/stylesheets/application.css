@@ -971,7 +971,7 @@ div.interval-slider input {
   -webkit-appearance: none;
   -moz-appearance: none;
   border: 1px solid #bbb;
-  color: #ddd;
+  color: white;
   background-color: currentColor;
 }
 
