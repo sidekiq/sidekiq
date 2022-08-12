@@ -91,9 +91,9 @@ describe Sidekiq::Metrics do
   describe "querying" do
     it "handles empty metrics" do
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
-      rs = q.top_jobs
-      refute_nil rs
-      assert_equal 8, rs.size
+      result = q.top_jobs
+      assert_equal 60, result.buckets.size
+      assert_equal({}, result.job_results)
 
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
       rs = q.for_job("DoesntExist")
@@ -103,17 +103,28 @@ describe Sidekiq::Metrics do
 
     it "fetches top job data" do
       create_known_metrics
+      d = Sidekiq::Metrics::Deploy.new
+      d.mark(at: fixed_time - 300, label: "cafed00d - some git summary line")
+
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
-      rs = q.top_jobs
-      assert_equal Date.new(2022, 7, 22), rs[:date]
-      assert_equal 2, rs[:job_classes].size
-      assert_equal "App::SomeJob", rs[:job_classes].first
-      bucket = rs[:totals]
-      refute_nil bucket
-      assert_equal bucket.keys.sort, ["App::FooJob|ms", "App::FooJob|p", "App::SomeJob|f", "App::SomeJob|ms", "App::SomeJob|p"]
-      assert_equal 3, bucket["App::SomeJob|p"]
-      assert_equal 4, bucket["App::FooJob|p"]
-      assert_equal 1, bucket["App::SomeJob|f"]
+      result = q.top_jobs
+      assert_equal fixed_time - 59 * 60, result.starts_at
+      assert_equal fixed_time, result.ends_at
+      assert_equal 1, result.marks.size
+      assert_equal "cafed00d - some git summary line", result.marks[0].label
+      assert_equal "21:58", result.marks[0].bucket
+
+      assert_equal 60, result.buckets.size
+      assert_equal "21:04", result.buckets.first
+      assert_equal "22:03", result.buckets.last
+
+      assert_equal %w[App::SomeJob App::FooJob].sort, result.job_results.keys.sort
+      some_job_result = result.job_results["App::SomeJob"]
+      refute_nil some_job_result
+      assert_equal %w[p f ms s].sort, some_job_result.series.keys.sort
+      assert_equal %w[p f ms s].sort, some_job_result.totals.keys.sort
+      assert_equal 2, some_job_result.series.dig("p", "22:03")
+      assert_equal 3, some_job_result.totals["p"]
     end
 
     it "fetches job-specific data" do

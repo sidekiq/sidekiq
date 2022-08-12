@@ -35,48 +35,41 @@ module Sidekiq
         @klass = nil
       end
 
-      # Get metric data from the last hour and roll it up
-      # into top processed count and execution time based on class.
-      def top_jobs
-        resultset = {}
-        resultset[:date] = @time.to_date
-        resultset[:period] = :hour
-        resultset[:ends_at] = @time
-        time = @time
+      # Get metric data for all jobs from the last hour
+      def top_jobs(minutes: 60)
+        result = Result.new
 
-        results = @pool.with do |conn|
+        time = @time
+        redis_results = @pool.with do |conn|
           conn.pipelined do |pipe|
-            resultset[:size] = 60
-            60.times do |idx|
+            minutes.times do |idx|
               key = "j|#{time.strftime("%Y%m%d")}|#{time.hour}:#{time.min}"
               pipe.hgetall key
+              result.prepend_bucket time
               time -= 60
             end
-            resultset[:starts_at] = time
           end
         end
 
-        t = Hash.new(0)
-        klsset = Set.new
-        # merge the per-minute data into a totals hash for the hour
-        results.each do |hash|
-          hash.each { |k, v| t[k] = t[k] + v.to_i }
-          klsset.merge(hash.keys.map { |k| k.split("|")[0] })
-        end
-        resultset[:job_classes] = klsset.delete_if { |item| item.size < 3 }
-        resultset[:totals] = t
-        top = t.each_with_object({}) do |(k, v), memo|
-          (kls, metric) = k.split("|")
-          memo[metric] ||= Hash.new(0)
-          memo[metric][kls] = v
+        time = @time
+        redis_results.each do |hash|
+          hash.each do |k, v|
+            kls, metric = k.split("|")
+            result.job_results[kls].add_metric metric, time, v.to_i
+          end
+          time -= 60
         end
 
-        sorted = {}
-        top.each_pair do |metric, hash|
-          sorted[metric] = hash.sort_by { |k, v| v }.reverse.to_h
+        marks = @pool.with { |c| c.hgetall("#{@time.strftime("%Y%m%d")}-marks") }
+        result_range = result.starts_at..result.ends_at
+        marks.each do |timestamp, label|
+          time = Time.parse(timestamp)
+          if result_range.cover? time
+            result.marks << MarkResult.new(time, label)
+          end
         end
-        resultset[:top_classes] = sorted
-        resultset
+
+        result
       end
 
       def for_job(klass)
@@ -118,6 +111,43 @@ module Sidekiq
         resultset[:starts_at] = time
         resultset[:data] = results
         resultset
+      end
+
+      class Result < Struct.new(:starts_at, :ends_at, :size, :buckets, :job_results, :marks)
+        def initialize
+          super
+          self.buckets = []
+          self.marks = []
+          self.job_results = Hash.new { |h, k| h[k] = JobResult.new }
+        end
+
+        def prepend_bucket(time)
+          buckets.unshift time.strftime("%H:%M")
+          self.ends_at ||= time
+          self.starts_at = time
+        end
+      end
+
+      class JobResult < Struct.new(:series, :totals)
+        def initialize
+          super
+          self.series = Hash.new { |h, k| h[k] = {} }
+          self.totals = Hash.new(0)
+        end
+
+        def add_metric(metric, time, value)
+          totals[metric] += value
+          series[metric][time.strftime("%H:%M")] = value
+
+          # Include timing measurements in seconds for convenience
+          add_metric("s", time, value / 1000.0) if metric == "ms"
+        end
+      end
+
+      class MarkResult < Struct.new(:time, :label)
+        def bucket
+          time.strftime("%H:%M")
+        end
       end
     end
   end
