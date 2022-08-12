@@ -30,7 +30,8 @@ class MetricsChart {
       options: this.chartOptions,
     });
 
-    this.update();
+    this.addMarksToChart();
+    this.chart.update();
   }
 
   registerSwatch(id) {
@@ -57,16 +58,6 @@ class MetricsChart {
     }
 
     this.updateSwatch(kls);
-    this.update();
-  }
-
-  update() {
-    // We want the deploy annotations to reach the top of the y-axis, but we don't want them
-    // to prevent the y-axis from adjusting when datasets change. The only way I've found to do
-    // this is removing them and re-adding them.
-    this.removeMarksFromChart();
-    this.chart.update();
-    this.addMarksToChart();
     this.chart.update();
   }
 
@@ -83,12 +74,6 @@ class MetricsChart {
     };
   }
 
-  removeMarksFromChart() {
-    for (const key in this.chart.options.plugins.annotation.annotations) {
-      delete this.chart.options.plugins.annotation.annotations[key];
-    }
-  }
-
   addMarksToChart() {
     this.marks.forEach(([bucket, label], i) => {
       this.chart.options.plugins.annotation.annotations[`deploy-${i}`] = {
@@ -97,22 +82,6 @@ class MetricsChart {
         xMax: bucket,
         borderColor: "rgba(220, 38, 38, 0.4)",
         borderWidth: 2,
-      };
-      this.chart.options.plugins.annotation.annotations[`label-${i}`] = {
-        type: "label",
-        position: { x: "center", y: "start" },
-        xValue: bucket,
-        // There may be a better way to ensure this annotation is positioned at the top of the y-axis.
-        // This approach requires us to hide and re-show the annotations whenever the datasets change.
-        yValue: (ctx) => ctx.chart && ctx.chart.scales.y.end,
-        backgroundColor: "#f3f3f3",
-        color: "rgba(220, 38, 38, 0.9)",
-        padding: 2,
-        content: [label.split(" ")[0]],
-        font: {
-          size: 14,
-          family: "monospace",
-        },
       };
     });
   }
