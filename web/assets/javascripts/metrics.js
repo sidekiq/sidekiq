@@ -30,7 +30,7 @@ class MetricsChart {
       options: this.chartOptions,
     });
 
-    this.addMarksToChart();
+    this.update();
   }
 
   registerSwatch(id) {
@@ -57,7 +57,36 @@ class MetricsChart {
     }
 
     this.updateSwatch(kls);
+    this.update();
+  }
+
+  update() {
+    // We want the deploy annotations to reach the top of the y-axis, but we don't want them
+    // to prevent the y-axis from adjusting when datasets change. The only way I've found to do
+    // this is removing them and re-adding them.
+    this.removeMarksFromChart();
     this.chart.update();
+    this.addMarksToChart();
+    this.chart.update();
+  }
+
+  dataset(kls) {
+    const color = this.colors.shift() || this.fallbackColor;
+
+    return {
+      label: kls,
+      data: this.series[kls],
+      borderColor: color,
+      backgroundColor: color,
+      borderWidth: 2,
+      pointRadius: 2,
+    };
+  }
+
+  removeMarksFromChart() {
+    for (const key in this.chart.options.plugins.annotation.annotations) {
+      delete this.chart.options.plugins.annotation.annotations[key];
+    }
   }
 
   addMarksToChart() {
@@ -73,7 +102,9 @@ class MetricsChart {
         type: "label",
         position: { x: "center", y: "start" },
         xValue: bucket,
-        yValue: () => this.chart && this.chart.scales.y.end,
+        // There may be a better way to ensure this annotation is positioned at the top of the y-axis.
+        // This approach requires us to hide and re-show the annotations whenever the datasets change.
+        yValue: (ctx) => ctx.chart && ctx.chart.scales.y.end,
         backgroundColor: "#f3f3f3",
         color: "rgba(220, 38, 38, 0.9)",
         padding: 2,
@@ -84,21 +115,6 @@ class MetricsChart {
         },
       };
     });
-
-    this.chart.update();
-  }
-
-  dataset(kls) {
-    const color = this.colors.shift() || this.fallbackColor;
-
-    return {
-      label: kls,
-      data: this.series[kls],
-      borderColor: color,
-      backgroundColor: color,
-      borderWidth: 2,
-      pointRadius: 2,
-    };
   }
 
   get chartOptions() {
@@ -127,8 +143,8 @@ class MetricsChart {
               `${item.dataset.label}: ${item.parsed.y.toFixed(1)} seconds`,
             footer: (items) => {
               const bucket = items[0].label;
-              const marks = this.marks.filter(([ b, _ ]) => b == bucket);
-              return marks.map(([ b, msg ]) => `Deploy: ${msg}`);
+              const marks = this.marks.filter(([b, _]) => b == bucket);
+              return marks.map(([b, msg]) => `Deploy: ${msg}`);
             },
           },
         },
