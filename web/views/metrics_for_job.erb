@@ -5,7 +5,7 @@
   <div id="realtime" data-processed-label="<%= t('Processed') %>" data-failed-label="<%= t('Failed') %>"></div>
 </div>
 
-<% data = @resultset[:data] %>
+<% job_result = @query_result.job_results[@name] %>
 <div class="table_container">
   <table class="table table-bordered table-striped table-hover">
     <tbody>
@@ -17,76 +17,18 @@
         <th><%= t('Deploy') %></th>
         <th><%= t('Histogram') %></th>
       </tr>
-      <% data.each do |hash| %>
-        <tr><td><%= hash[:time] %></td><td><%= hash[:p] %></td><td><%= hash[:ms] %></td><td><%= hash[:f] %></td><td><%= hash[:mark] %></td><td><%= hash[:hist] %></td></tr>
+      <% @query_result.buckets.each do |bucket| %>
+        <tr>
+          <td><%= bucket %></td>
+          <td><%= job_result.series.dig("p", bucket) %></td>
+          <td><%= job_result.series.dig("ms", bucket) %></td>
+          <td><%= job_result.series.dig("f", bucket) %></td>
+          <td><%= @query_result.marks %></td>
+          <td><%= job_result.hist[bucket] %></td>
+        </tr>
       <% end %>
     </tbody>
   </table>
 </div>
 
-<p>
-Data from <%= @resultset[:starts_at] %> to <%= @resultset[:ends_at] %>
-</p>
-
-<% atad = data.reverse %>
-<script type="text/javascript" src="<%= root_path %>javascripts/graph.js"></script>
-<script>
-var palette = new Rickshaw.Color.Palette();
-var data = [ {
-    name: "Processed",
-    color: palette.color(),
-    data: [ <% atad.each do |hash| %>
-      { x: <%= hash[:epoch] %>, y: <%= hash[:p] %> },
-    <% end %> ]
-  }, {
-    name: "Failed",
-    color: palette.color(),
-    data: [ <% atad.each do |hash| %>
-      { x: <%= hash[:epoch] %>, y: <%= hash[:f] %> },
-    <% end %>
-    ]
-  }, {
-    name: "Execution Time",
-    color: palette.color(),
-    data: [ <% atad.each do |hash| %>
-      { x: <%= hash[:epoch] %>, y: <%= hash[:ms] %> },
-    <% end %>
-    ]
-   } ];
-
-// TODO What to do with this? Minutely hover detail with a histogram bar chart?
-var histogramData = [ <% atad.each do |hash| %>
-  { x: <%= hash[:epoch] %>, hist: <%= hash[:hist] %> },
-<% end %> ]
-var histogramLabels = <%= Sidekiq::Metrics::Histogram::LABELS.inspect %>;
-
-var timeInterval = 60000;
-var graphElement = document.getElementById("realtime");
-
-var graph = new Rickshaw.Graph({
-  element: graphElement,
-  width: responsiveWidth(),
-  renderer: 'line',
-  interpolation: 'linear',
-  series: data,
-});
-var x_axis = new Rickshaw.Graph.Axis.Time( { graph: graph } );
-
-var y_axis = new Rickshaw.Graph.Axis.Y( {
-  graph: graph,
-  tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-  ticksTreatment: 'glow'
-});
-
-graph.render();
-
-var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-	graph: graph,
-	// formatter: function(series, x, y) {
-		// var date = '<span class="date">' + new Date(x * 1000).toUTCString() + '</span>';
-		// var swatch = '<span class="detail_swatch" style="background-color: ' + series.color + '"></span>';
-		// var content = swatch + series.name + ": " + parseInt(y) + '<br>' + date;
-		// return content;
-	// }
-} );
-</script>
+<p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p>

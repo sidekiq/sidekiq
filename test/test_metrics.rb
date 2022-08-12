@@ -48,9 +48,9 @@ describe Sidekiq::Metrics do
 
       q = Sidekiq::Metrics::Query.new(now: whence)
       rs = q.for_job("FooJob")
-      refute_nil rs[:marks]
-      assert_equal 1, rs[:marks].size
-      assert_equal "cafed00d - some git summary line", rs[:marks][floor], rs.inspect
+      refute_nil rs.marks
+      assert_equal 1, rs.marks.size
+      assert_equal "cafed00d - some git summary line", rs.marks.first.label, rs.marks.inspect
 
       d = Sidekiq::Metrics::Deploy.new
       rs = d.fetch(whence)
@@ -93,12 +93,12 @@ describe Sidekiq::Metrics do
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
       result = q.top_jobs
       assert_equal 60, result.buckets.size
-      assert_equal({}, result.job_results)
+      assert_equal([], result.job_results.keys)
 
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
-      rs = q.for_job("DoesntExist")
-      refute_nil rs
-      assert_equal 7, rs.size
+      result = q.for_job("DoesntExist")
+      assert_equal 60, result.buckets.size
+      assert_equal(["DoesntExist"], result.job_results.keys)
     end
 
     it "fetches top job data" do
@@ -119,12 +119,12 @@ describe Sidekiq::Metrics do
       assert_equal "22:03", result.buckets.last
 
       assert_equal %w[App::SomeJob App::FooJob].sort, result.job_results.keys.sort
-      some_job_result = result.job_results["App::SomeJob"]
-      refute_nil some_job_result
-      assert_equal %w[p f ms s].sort, some_job_result.series.keys.sort
-      assert_equal %w[p f ms s].sort, some_job_result.totals.keys.sort
-      assert_equal 2, some_job_result.series.dig("p", "22:03")
-      assert_equal 3, some_job_result.totals["p"]
+      job_result = result.job_results["App::SomeJob"]
+      refute_nil job_result
+      assert_equal %w[p f ms s].sort, job_result.series.keys.sort
+      assert_equal %w[p f ms s].sort, job_result.totals.keys.sort
+      assert_equal 2, job_result.series.dig("p", "22:03")
+      assert_equal 3, job_result.totals["p"]
     end
 
     it "fetches job-specific data" do
@@ -133,20 +133,27 @@ describe Sidekiq::Metrics do
       d.mark(at: fixed_time - 300, label: "cafed00d - some git summary line")
 
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
-      rs = q.for_job("App::FooJob")
-      assert_equal Date.new(2022, 7, 22), rs[:date]
-      assert_equal 60, rs[:data].size
-      assert_equal ["2022-07-22T21:58:00Z", "cafed00d - some git summary line"], rs[:marks].first
+      result = q.for_job("App::FooJob")
+      assert_equal fixed_time - 59 * 60, result.starts_at
+      assert_equal fixed_time, result.ends_at
+      assert_equal 1, result.marks.size
+      assert_equal "cafed00d - some git summary line", result.marks[0].label
+      assert_equal "21:58", result.marks[0].bucket
 
-      data = rs[:data]
-      assert_equal({time: "2022-07-22T22:03:00Z", p: 1, f: 0}, data[0].slice(:time, :p, :f))
-      assert_equal({time: "2022-07-22T22:02:00Z", p: 3, f: 0}, data[1].slice(:time, :p, :f))
-      assert_equal "cafed00d - some git summary line", data[5][:mark]
+      assert_equal 60, result.buckets.size
+      assert_equal "21:04", result.buckets.first
+      assert_equal "22:03", result.buckets.last
 
       # from create_known_data
-      hist = data[1][:hist]
-      assert_equal 2, hist[0]
-      assert_equal 1, hist[1]
+      assert_equal %w[App::FooJob], result.job_results.keys
+      job_result = result.job_results["App::FooJob"]
+      refute_nil job_result
+      assert_equal %w[p ms s].sort, job_result.series.keys.sort
+      assert_equal %w[p ms s].sort, job_result.totals.keys.sort
+      assert_equal 1, job_result.series.dig("p", "22:03")
+      assert_equal 4, job_result.totals["p"]
+      assert_equal 2, job_result.hist.dig("22:02", 0)
+      assert_equal 1, job_result.hist.dig("22:02", 1)
     end
   end
 end

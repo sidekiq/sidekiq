@@ -72,45 +72,42 @@ module Sidekiq
         result
       end
 
-      def for_job(klass)
-        resultset = {}
-        resultset[:date] = @time.to_date
-        resultset[:period] = :hour
-        resultset[:ends_at] = @time
-        marks = @pool.with { |c| c.hgetall("#{@time.strftime("%Y%m%d")}-marks") }
+      def for_job(klass, minutes: 60)
+        result = Result.new
 
         time = @time
-        initial = @pool.with do |conn|
+        redis_results = @pool.with do |conn|
           conn.pipelined do |pipe|
-            resultset[:size] = 60
-            60.times do |idx|
-              key = "j|#{time.strftime("%Y%m%d|%-H:%-M")}"
+            minutes.times do |idx|
+              key = "j|#{time.strftime("%Y%m%d")}|#{time.hour}:#{time.min}"
               pipe.hmget key, "#{klass}|ms", "#{klass}|p", "#{klass}|f"
+              result.prepend_bucket time
               time -= 60
             end
           end
         end
 
         time = @time
-        hist = Histogram.new(klass)
-        results = @pool.with do |conn|
-          initial.map do |(ms, p, f)|
-            tm = Time.utc(time.year, time.month, time.mday, time.hour, time.min, 0)
-            {
-              time: tm.iso8601,
-              epoch: tm.to_i,
-              ms: ms.to_i, p: p.to_i, f: f.to_i, hist: hist.fetch(conn, time)
-            }.tap { |x|
-              x[:mark] = marks[x[:time]] if marks[x[:time]]
-              time -= 60
-            }
+        @pool.with do |conn|
+          redis_results.each do |(ms, p, f)|
+            result.job_results[klass].add_metric "ms", time, ms.to_i if ms
+            result.job_results[klass].add_metric "p", time, p.to_i if p
+            result.job_results[klass].add_metric "f", time, f.to_i if f
+            result.job_results[klass].add_hist time, Histogram.new(klass).fetch(conn, time)
+            time -= 60
           end
         end
 
-        resultset[:marks] = marks
-        resultset[:starts_at] = time
-        resultset[:data] = results
-        resultset
+        marks = @pool.with { |c| c.hgetall("#{@time.strftime("%Y%m%d")}-marks") }
+        result_range = result.starts_at..result.ends_at
+        marks.each do |timestamp, label|
+          time = Time.parse(timestamp)
+          if result_range.cover? time
+            result.marks << MarkResult.new(time, label)
+          end
+        end
+
+        result
       end
 
       class Result < Struct.new(:starts_at, :ends_at, :size, :buckets, :job_results, :marks)
@@ -128,10 +125,11 @@ module Sidekiq
         end
       end
 
-      class JobResult < Struct.new(:series, :totals)
+      class JobResult < Struct.new(:series, :hist, :totals)
         def initialize
           super
           self.series = Hash.new { |h, k| h[k] = {} }
+          self.hist = Hash.new { |h, k| h[k] = [] }
           self.totals = Hash.new(0)
         end
 
@@ -141,6 +139,10 @@ module Sidekiq
 
           # Include timing measurements in seconds for convenience
           add_metric("s", time, value / 1000.0) if metric == "ms"
+        end
+
+        def add_hist(time, hist_result)
+          hist[time.strftime("%H:%M")] = hist_result
         end
       end
 
