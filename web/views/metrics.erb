@@ -60,12 +60,10 @@
           </tr>
         <% end %>
       <% else %>
-          <tr><td colspan=3><%= t("NoDataFound") %></td></tr>
+          <tr><td colspan=5><%= t("NoDataFound") %></td></tr>
       <% end %>
     </tbody>
   </table>
 </div>
 
-<p>
-Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %>
-</p>
+<p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p>
