@@ -1,11 +1,29 @@
+<script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/metrics.js"></script>
 
-<h2><%= t('Metrics') %> / <%= h @name %></h2>
+<h3><%= t('Metrics') %> / <%= h @name %></h3>
 
-<div class="row chart">
-  <div id="realtime" data-processed-label="<%= t('Processed') %>" data-failed-label="<%= t('Failed') %>"></div>
-</div>
+<%
+  job_result = @query_result.job_results[@name]
+%>
 
-<% job_result = @query_result.job_results[@name] %>
+<canvas id="hist-bubble-chart"></canvas>
+
+<script>
+  window.histBubbleChart = new HistBubbleChart(
+    "hist-bubble-chart",
+    <%= Sidekiq.dump_json({
+      hist: job_result.hist,
+      marks: @query_result.marks.map { |m| [m.bucket, m.label] },
+      labels: @query_result.buckets,
+      histBuckets: Sidekiq::Metrics::Histogram::LABELS.reverse,
+    }) %>
+  )
+</script>
+
+<h3>Performance over time</h3>
+
 <div class="table_container">
   <table class="table table-bordered table-striped table-hover">
     <tbody>
@@ -17,7 +35,7 @@
         <th><%= t('Deploy') %></th>
         <th><%= t('Histogram') %></th>
       </tr>
-      <% @query_result.buckets.each do |bucket| %>
+      <% @query_result.buckets.reverse.each do |bucket| %>
         <tr>
           <td><%= bucket %></td>
           <td><%= job_result.series.dig("p", bucket) %></td>
