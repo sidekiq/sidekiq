@@ -130,6 +130,7 @@ class HistBubbleChart {
     this.labels = options.labels;
     this.histBuckets = options.histBuckets;
     this.histIntervals = options.histIntervals;
+    this.logarithmic = options.logarithmic;
 
     this.chart = new Chart(this.ctx, {
       type: "bubble",
@@ -164,8 +165,9 @@ class HistBubbleChart {
             x: bucket,
             // histogram data is ordered fastest to slowest, but this.histBuckets is
             // slowest to fastest (so it displays correctly on the chart).
-            // y: this.histBuckets[this.histBuckets.length - 1 - histBucket],
-            y: this.histIntervals[this.histIntervals.length - 1 - histBucket],
+            y: this.logarithmic
+              ? this.histBuckets[this.histBuckets.length - 1 - histBucket]
+              : this.histIntervals[this.histIntervals.length - 1 - histBucket],
             count: count,
           });
 
@@ -196,9 +198,9 @@ class HistBubbleChart {
           type: "category",
           labels: this.labels,
         },
-        y: {
-          // type: "category",
-          // labels: this.histBuckets,
+        y: this.logarithmic && {
+          type: "category",
+          labels: this.histBuckets,
           // title: {
           //   text: "Total execution time (sec)",
           //   display: true,
@@ -273,7 +275,7 @@ class HistBoxPlotChart {
         for (let i = 0; i < count; i++) values.push(value);
       });
 
-      return values
+      return values;
     });
 
     return {

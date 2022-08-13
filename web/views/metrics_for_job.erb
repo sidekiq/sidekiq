@@ -25,6 +25,8 @@
   )
 </script>
 
+<h3><%= t('Metrics') %> / <%= h @name %></h3>
+
 <canvas id="hist-bubble-chart"></canvas>
 
 <script>
@@ -37,6 +39,25 @@
       histBuckets: Sidekiq::Metrics::Histogram::LABELS.reverse,
       # Remove INFINITY since it can't be represented as JSON
       histIntervals: Sidekiq::Metrics::Histogram::BUCKET_INTERVALS[0..-2].reverse,
+    }) %>
+  )
+</script>
+
+<h3><%= t('Metrics') %> / <%= h @name %></h3>
+
+<canvas id="hist-bubble-chart-log"></canvas>
+
+<script>
+  window.histBubbleChart = new HistBubbleChart(
+    "hist-bubble-chart-log",
+    <%= Sidekiq.dump_json({
+      hist: job_result.hist,
+      marks: @query_result.marks.map { |m| [m.bucket, m.label] },
+      labels: @query_result.buckets,
+      histBuckets: Sidekiq::Metrics::Histogram::LABELS.reverse,
+      # Remove INFINITY since it can't be represented as JSON
+      histIntervals: Sidekiq::Metrics::Histogram::BUCKET_INTERVALS[0..-2].reverse,
+      logarithmic: true,
     }) %>
   )
 </script>
