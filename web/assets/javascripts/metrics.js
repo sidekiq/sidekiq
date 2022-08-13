@@ -129,8 +129,7 @@ class HistBubbleChart {
     this.marks = options.marks;
     this.labels = options.labels;
     this.histBuckets = options.histBuckets;
-    console.log(this.histBuckets);
-    console.log(this.dataset);
+    this.histIntervals = options.histIntervals;
 
     this.chart = new Chart(this.ctx, {
       type: "bubble",
@@ -165,22 +164,22 @@ class HistBubbleChart {
             x: bucket,
             // histogram data is ordered fastest to slowest, but this.histBuckets is
             // slowest to fastest (so it displays correctly on the chart).
-            y: this.histBuckets[this.histBuckets.length - 1 - histBucket],
-            // TODO: scale this based on the largest overall count
+            // y: this.histBuckets[this.histBuckets.length - 1 - histBucket],
+            y: this.histIntervals[this.histIntervals.length - 1 - histBucket],
             count: count,
           });
 
-          if (count > maxCount) maxCount = count
+          if (count > maxCount) maxCount = count;
         }
       });
     });
 
     // Chart.js will not calculate the bubble size. We have to do that.
-    const maxRadius = this.ctx.offsetWidth / this.labels.length
-    const multiplier = maxRadius / maxCount * 1.5
+    const maxRadius = this.ctx.offsetWidth / this.labels.length;
+    const multiplier = (maxRadius / maxCount) * 1.5;
     data.forEach((entry) => {
-      entry.r = entry.count * multiplier
-    })
+      entry.r = entry.count * multiplier;
+    });
 
     return {
       data: data,
@@ -198,13 +197,108 @@ class HistBubbleChart {
           labels: this.labels,
         },
         y: {
-          type: "category",
-          labels: this.histBuckets,
+          // type: "category",
+          // labels: this.histBuckets,
           // title: {
           //   text: "Total execution time (sec)",
           //   display: true,
           // },
         },
+      },
+      interaction: {
+        mode: "x",
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+        // tooltip: {
+        //   callbacks: {
+        //     title: (items) => `${items[0].label} UTC`,
+        //     label: (item) =>
+        //       `${item.dataset.label}: ${item.parsed.y.toFixed(1)} seconds`,
+        //     footer: (items) => {
+        //       const bucket = items[0].label;
+        //       const marks = this.marks.filter(([b, _]) => b == bucket);
+        //       return marks.map(([b, msg]) => `Deploy: ${msg}`);
+        //     },
+        //   },
+        // },
+      },
+    };
+  }
+}
+
+class HistBoxPlotChart {
+  constructor(id, options) {
+    this.ctx = document.getElementById(id);
+    this.hist = options.hist;
+    this.marks = options.marks;
+    this.labels = options.labels;
+    this.histBuckets = options.histBuckets;
+    this.histIntervals = options.histIntervals;
+
+    this.chart = new Chart(this.ctx, {
+      type: "boxplot",
+      data: { datasets: [this.dataset] },
+      options: this.chartOptions,
+    });
+
+    this.addMarksToChart();
+    this.chart.update();
+  }
+
+  addMarksToChart() {
+    this.marks.forEach(([bucket, label], i) => {
+      this.chart.options.plugins.annotation.annotations[`deploy-${i}`] = {
+        type: "line",
+        xMin: bucket,
+        xMax: bucket,
+        borderColor: "rgba(220, 38, 38, 0.4)",
+        borderWidth: 2,
+      };
+    });
+  }
+
+  get dataset() {
+    const data = this.labels.map((time) => {
+      const hist = this.hist[time];
+      let values = [];
+
+      hist.forEach((count, histBucket) => {
+        // TODO: handle INFINITY histInterval
+        const value =
+          this.histIntervals[this.histIntervals.length - 1 - histBucket];
+
+        for (let i = 0; i < count; i++) values.push(value);
+      });
+
+      return values
+    });
+
+    return {
+      data: data,
+      backgroundColor: "#537bc4",
+      borderColor: "#537bc4",
+    };
+  }
+
+  get chartOptions() {
+    return {
+      aspectRatio: 3,
+      scales: {
+        x: {
+          type: "category",
+          labels: this.labels,
+        },
+        // y: {
+        //   type: "category",
+        //   labels: this.histBuckets,
+        //   // title: {
+        //   //   text: "Total execution time (sec)",
+        //   //   display: true,
+        //   // },
+        // },
       },
       interaction: {
         mode: "x",

@@ -1,12 +1,29 @@
 <script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js"></script>
 <script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js"></script>
 <script type="text/javascript" src="<%= root_path %>javascripts/metrics.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/chartjs-chart-boxplot.min.js"></script>
 
 <h3><%= t('Metrics') %> / <%= h @name %></h3>
 
 <%
   job_result = @query_result.job_results[@name]
 %>
+
+<canvas id="hist-box-plot-chart"></canvas>
+
+<script>
+  window.histBoxPlotChart = new HistBoxPlotChart(
+    "hist-box-plot-chart",
+    <%= Sidekiq.dump_json({
+      hist: job_result.hist,
+      marks: @query_result.marks.map { |m| [m.bucket, m.label] },
+      labels: @query_result.buckets,
+      histBuckets: Sidekiq::Metrics::Histogram::LABELS.reverse,
+      # Remove INFINITY since it can't be represented as JSON
+      histIntervals: Sidekiq::Metrics::Histogram::BUCKET_INTERVALS[0..-2].reverse,
+    }) %>
+  )
+</script>
 
 <canvas id="hist-bubble-chart"></canvas>
 
@@ -18,6 +35,8 @@
       marks: @query_result.marks.map { |m| [m.bucket, m.label] },
       labels: @query_result.buckets,
       histBuckets: Sidekiq::Metrics::Histogram::LABELS.reverse,
+      # Remove INFINITY since it can't be represented as JSON
+      histIntervals: Sidekiq::Metrics::Histogram::BUCKET_INTERVALS[0..-2].reverse,
     }) %>
   )
 </script>
