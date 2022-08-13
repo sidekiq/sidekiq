@@ -1,3 +1,8 @@
+if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  Chart.defaults.borderColor = "#333"
+  Chart.defaults.color = "#aaa"
+}
+
 class MetricsChart {
   constructor(id, options) {
     this.ctx = document.getElementById(id);
