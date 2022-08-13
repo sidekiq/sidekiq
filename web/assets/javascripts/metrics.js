@@ -272,7 +272,7 @@ class HistBoxPlotChart {
         const value =
           this.histIntervals[this.histIntervals.length - 1 - histBucket];
 
-        for (let i = 0; i < count; i++) values.push(value);
+        for (let i = 0; i < count; i++) values.push(value / 1000);
       });
 
       return values;
@@ -280,7 +280,7 @@ class HistBoxPlotChart {
 
     return {
       data: data,
-      backgroundColor: "#537bc4",
+      backgroundColor: "transparent",
       borderColor: "#537bc4",
     };
   }
@@ -293,14 +293,12 @@ class HistBoxPlotChart {
           type: "category",
           labels: this.labels,
         },
-        // y: {
-        //   type: "category",
-        //   labels: this.histBuckets,
-        //   // title: {
-        //   //   text: "Total execution time (sec)",
-        //   //   display: true,
-        //   // },
-        // },
+        y: {
+          title: {
+            text: "Total execution time (sec)",
+            display: true,
+          },
+        },
       },
       interaction: {
         mode: "x",
