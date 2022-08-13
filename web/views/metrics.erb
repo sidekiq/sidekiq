@@ -17,7 +17,14 @@
   window.metricsChart = new MetricsChart(
     "metrics-chart",
     <%= Sidekiq.dump_json({
-      series: job_results.map { |(kls, jr)| [kls, jr.dig("series", "s")] }.to_h,
+      series: {
+        s: job_results.map { |(kls, jr)| [kls, jr.dig("series", "s")] }.to_h,
+        p: job_results.map { |(kls, jr)| [kls, jr.dig("series", "p")] }.to_h,
+        f: job_results.map { |(kls, jr)| [kls, jr.dig("series", "f")] }.to_h,
+        avg: job_results.map { |(kls, jr)|
+          [kls, jr.dig("series", "s").map.with_index { |(b, s), i| [b, s / jr.dig("series", "p", b)] }.to_h]
+        }.to_h,
+      },
       marks: @query_result.marks.map { |m| [m.bucket, m.label] },
       visible: visible_kls,
       labels: @query_result.buckets,
@@ -32,10 +39,23 @@
     <tbody>
       <tr>
         <th><%= t('Name') %></th>
-        <th><%= t('Processed') %></th>
-        <th><%= t('Failed') %></th>
-        <th><%= t('ExecutionTime') %></th>
-        <th><%= t('AvgExecutionTime') %></th>
+        <th>
+          <a href="#" data-show-metric="p"><%= t('Processed') %></a>
+        </th>
+        <th>
+          <a href="#" data-show-metric="f"><%= t('Failed') %></a>
+        </th>
+        <th>
+          <a href="#" data-show-metric="s"><%= t('ExecutionTime') %></a>
+        </th>
+        <th>
+          <a href="#" data-show-metric="avg"><%= t('AvgExecutionTime') %></a>
+        </th>
+        <script>
+          for (const el of document.querySelectorAll("a[data-show-metric]")) {
+            metricsChart.registerMetricSelector(el)
+          }
+        </script>
       </tr>
       <% if job_results.any? %>
         <% job_results.each_with_index do |(kls, jr), i| %>

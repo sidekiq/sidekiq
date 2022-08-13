@@ -1,6 +1,8 @@
 class MetricsChart {
   constructor(id, options) {
     this.ctx = document.getElementById(id);
+    this.metric = "s";
+    this.visibleKls = options.visible;
     this.series = options.series;
     this.marks = options.marks;
     this.labels = options.labels;
@@ -20,13 +22,9 @@ class MetricsChart {
       "#991b1b",
     ];
 
-    const datasets = Object.entries(this.series)
-      .filter(([kls, _]) => options.visible.includes(kls))
-      .map(([kls, _]) => this.dataset(kls));
-
     this.chart = new Chart(this.ctx, {
       type: "line",
-      data: { labels: this.labels, datasets: datasets },
+      data: { labels: this.labels, datasets: this.datasets },
       options: this.chartOptions,
     });
 
@@ -34,9 +32,33 @@ class MetricsChart {
     this.chart.update();
   }
 
+  get currentSeries() {
+    return this.series[this.metric];
+  }
+
+  get datasets() {
+    return Object.entries(this.currentSeries)
+      .filter(([kls, _]) => this.visibleKls.includes(kls))
+      .map(([kls, _]) => this.dataset(kls));
+  }
+
+  selectMetric(e) {
+    e.preventDefault()
+    this.metric = e.target.getAttribute("data-show-metric")
+    // TODO: maintain current visible job classes and colors
+    this.chart.data.datasets = this.datasets;
+    this.chart.update();
+
+    // TODO: sort the table by the new metric
+  }
+
+  registerMetricSelector(el) {
+    el.addEventListener('click', this.selectMetric.bind(this));
+  }
+
   registerSwatch(id) {
     const el = document.getElementById(id);
-    el.onchange = () => this.toggle(el.value, el.checked);
+    el.addEventListener('change', () => this.toggleKls(el.value, el.checked));
     this.swatches[el.value] = el;
     this.updateSwatch(el.value);
   }
@@ -48,7 +70,7 @@ class MetricsChart {
     el.style.color = ds ? ds.borderColor : null;
   }
 
-  toggle(kls, visible) {
+  toggleKls(kls, visible) {
     if (visible) {
       this.chart.data.datasets.push(this.dataset(kls));
     } else {
@@ -66,7 +88,7 @@ class MetricsChart {
 
     return {
       label: kls,
-      data: this.series[kls],
+      data: this.currentSeries[kls],
       borderColor: color,
       backgroundColor: color,
       borderWidth: 2,
