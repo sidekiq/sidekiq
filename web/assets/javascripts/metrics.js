@@ -263,18 +263,18 @@ class HistBubbleChart {
         legend: {
           display: false,
         },
-        // tooltip: {
-        //   callbacks: {
-        //     title: (items) => `${items[0].label} UTC`,
-        //     label: (item) =>
-        //       `${item.dataset.label}: ${item.parsed.y.toFixed(1)} seconds`,
-        //     footer: (items) => {
-        //       const bucket = items[0].label;
-        //       const marks = this.marks.filter(([b, _]) => b == bucket);
-        //       return marks.map(([b, msg]) => `Deploy: ${msg}`);
-        //     },
-        //   },
-        // },
+        tooltip: {
+          callbacks: {
+            title: (items) => `${items[0].raw.x} UTC`,
+            label: (item) =>
+              `${item.parsed.y} seconds: ${item.raw.count} job${item.raw.count == 1 ? '' : 's'}`,
+            footer: (items) => {
+              const bucket = items[0].label;
+              const marks = this.marks.filter(([b, _]) => b == bucket);
+              return marks.map(([b, msg]) => `Deploy: ${msg}`);
+            },
+          },
+        },
       },
     };
   }
