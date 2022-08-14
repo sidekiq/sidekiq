@@ -37,7 +37,7 @@ class BaseChart {
   }
 }
 
-class MetricsChart extends BaseChart {
+class JobMetricsOverviewChart extends BaseChart {
   constructor(id, options) {
     super(id, { ...options, chartType: "line" });
     this.swatches = [];
