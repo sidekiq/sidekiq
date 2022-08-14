@@ -128,14 +128,14 @@ module Sidekiq
       class JobResult < Struct.new(:series, :hist, :totals)
         def initialize
           super
-          self.series = Hash.new { |h, k| h[k] = {} }
+          self.series = Hash.new { |h, k| h[k] = Hash.new(0) }
           self.hist = Hash.new { |h, k| h[k] = [] }
           self.totals = Hash.new(0)
         end
 
         def add_metric(metric, time, value)
           totals[metric] += value
-          series[metric][time.strftime("%H:%M")] = value
+          series[metric][time.strftime("%H:%M")] += value
 
           # Include timing measurements in seconds for convenience
           add_metric("s", time, value / 1000.0) if metric == "ms"
@@ -143,6 +143,18 @@ module Sidekiq
 
         def add_hist(time, hist_result)
           hist[time.strftime("%H:%M")] = hist_result
+        end
+
+        def total_avg(metric = "ms")
+          completed = totals["p"] - totals["f"]
+          totals[metric].to_f / completed
+        end
+
+        def series_avg(metric = "ms")
+          series[metric].each_with_object(Hash.new(0)) do |(bucket, value), result|
+            completed = series.dig("p", bucket) - series.dig("f", bucket)
+            result[bucket] = completed == 0 ? 0 : value.to_f / completed
+          end
         end
       end
 

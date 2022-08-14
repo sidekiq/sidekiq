@@ -4,6 +4,8 @@
 
 <%
   job_result = @query_result.job_results[@name]
+  hist_totals = job_result.hist.values.first.zip(*job_result.hist.values[1..-1]).map(&:sum)
+  bucket_labels =Sidekiq::Metrics::Histogram::LABELS
   bucket_intervals =Sidekiq::Metrics::Histogram::BUCKET_INTERVALS.reverse
 
   # Replace INFINITY since it can't be represented as JSON
@@ -26,6 +28,25 @@
   )
 </script>
 
+<h3>Histogram totals</h3>
+
+<div class="table_container">
+  <table class="table table-bordered table-striped table-hover">
+    <tbody>
+      <tr>
+        <th><%= t('Bucket') %></th>
+        <th><%= t('Processed') %></th>
+      </tr>
+      <% hist_totals.each_with_index do |total, i| %>
+        <tr>
+          <td><%= bucket_labels[i] %></td>
+          <td><%= total %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
 <h3>Performance over time</h3>
 
 <div class="table_container">
@@ -34,19 +55,17 @@
       <tr>
         <th><%= t('Time') %></th>
         <th><%= t('Processed') %></th>
-        <th><%= t('ExecutionTime') %></th>
         <th><%= t('Failed') %></th>
-        <th><%= t('Deploy') %></th>
-        <th><%= t('Histogram') %></th>
+        <th><%= t('ExecutionTime') %></th>
+        <th><%= t('AvgExecutionTime') %></th>
       </tr>
       <% @query_result.buckets.reverse.each do |bucket| %>
         <tr>
           <td><%= bucket %></td>
           <td><%= job_result.series.dig("p", bucket) %></td>
-          <td><%= job_result.series.dig("ms", bucket) %></td>
           <td><%= job_result.series.dig("f", bucket) %></td>
-          <td><%= @query_result.marks %></td>
-          <td><%= job_result.hist[bucket] %></td>
+          <td><%= job_result.series.dig("s", bucket).round(0) %> seconds</td>
+          <td><%= job_result.series_avg("s")[bucket].round(2) %> seconds</td>
         </tr>
       <% end %>
     </tbody>

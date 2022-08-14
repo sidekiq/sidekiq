@@ -89,3 +89,4 @@ en: # <---- change this to your locale code
   ExecutionTime: Total Execution Time
   AvgExecutionTime: Average Execution Time
   Context: Context
+  Bucket: Bucket
