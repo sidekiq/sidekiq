@@ -12,7 +12,21 @@
   bucket_intervals[0] = bucket_intervals[1] * 2
 %>
 
-<h3><%= t('Metrics') %> / <%= h @name %></h3>
+<h3><%= h @name %> histogram summary</h3>
+
+<canvas id="hist-totals-chart"></canvas>
+
+<script>
+  window.histTotalsChart = new HistTotalsChart(
+    "hist-totals-chart",
+    <%= Sidekiq.dump_json({
+      series: hist_totals,
+      labels: bucket_labels,
+    }) %>
+  )
+</script>
+
+<h3><%= h @name %> performance over time</h3>
 
 <canvas id="hist-bubble-chart"></canvas>
 
@@ -27,22 +41,6 @@
     }) %>
   )
 </script>
-
-<h3>Histogram totals</h3>
-
-<canvas id="hist-totals-chart"></canvas>
-
-<script>
-  window.histTotalsChart = new HistTotalsChart(
-    "hist-totals-chart",
-    <%= Sidekiq.dump_json({
-      series: hist_totals,
-      labels: bucket_labels,
-    }) %>
-  )
-</script>
-
-<h3>Performance over time</h3>
 
 <div class="table_container">
   <table class="table table-bordered table-striped table-hover">
