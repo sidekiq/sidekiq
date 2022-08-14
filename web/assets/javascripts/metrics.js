@@ -269,7 +269,7 @@ class HistBubbleChart {
             label: (item) =>
               `${item.parsed.y} seconds: ${item.raw.count} job${item.raw.count == 1 ? '' : 's'}`,
             footer: (items) => {
-              const bucket = items[0].label;
+              const bucket = items[0].raw.x;
               const marks = this.marks.filter(([b, _]) => b == bucket);
               return marks.map(([b, msg]) => `Deploy: ${msg}`);
             },
