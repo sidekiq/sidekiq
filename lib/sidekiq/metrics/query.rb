@@ -60,14 +60,7 @@ module Sidekiq
           time -= 60
         end
 
-        marks = @pool.with { |c| c.hgetall("#{@time.strftime("%Y%m%d")}-marks") }
-        result_range = result.starts_at..result.ends_at
-        marks.each do |timestamp, label|
-          time = Time.parse(timestamp)
-          if result_range.cover? time
-            result.marks << MarkResult.new(time, label)
-          end
-        end
+        result.marks = fetch_marks(result.starts_at..result.ends_at)
 
         result
       end
@@ -98,14 +91,7 @@ module Sidekiq
           end
         end
 
-        marks = @pool.with { |c| c.hgetall("#{@time.strftime("%Y%m%d")}-marks") }
-        result_range = result.starts_at..result.ends_at
-        marks.each do |timestamp, label|
-          time = Time.parse(timestamp)
-          if result_range.cover? time
-            result.marks << MarkResult.new(time, label)
-          end
-        end
+        result.marks = fetch_marks(result.starts_at..result.ends_at)
 
         result
       end
@@ -161,6 +147,21 @@ module Sidekiq
       class MarkResult < Struct.new(:time, :label)
         def bucket
           time.strftime("%H:%M")
+        end
+      end
+
+      private
+
+      def fetch_marks(time_range)
+        [].tap do |result|
+          marks = @pool.with { |c| c.hgetall("#{@time.strftime("%Y%m%d")}-marks") }
+
+          marks.each do |timestamp, label|
+            time = Time.parse(timestamp)
+            if time_range.cover? time
+              result << MarkResult.new(time, label)
+            end
+          end
         end
       end
     end
