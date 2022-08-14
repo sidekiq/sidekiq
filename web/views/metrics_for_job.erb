@@ -14,11 +14,11 @@
 
 <h3><%= t('Metrics') %> / <%= h @name %></h3>
 
-<canvas id="hist-bubble-chart-log"></canvas>
+<canvas id="hist-bubble-chart"></canvas>
 
 <script>
   window.histBubbleChart = new HistBubbleChart(
-    "hist-bubble-chart-log",
+    "hist-bubble-chart",
     <%= Sidekiq.dump_json({
       hist: job_result.hist,
       marks: @query_result.marks.map { |m| [m.bucket, m.label] },
@@ -30,22 +30,17 @@
 
 <h3>Histogram totals</h3>
 
-<div class="table_container">
-  <table class="table table-bordered table-striped table-hover">
-    <tbody>
-      <tr>
-        <th><%= t('Bucket') %></th>
-        <th><%= t('Processed') %></th>
-      </tr>
-      <% hist_totals.each_with_index do |total, i| %>
-        <tr>
-          <td><%= bucket_labels[i] %></td>
-          <td><%= total %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-</div>
+<canvas id="hist-totals-chart"></canvas>
+
+<script>
+  window.histTotalsChart = new HistTotalsChart(
+    "hist-totals-chart",
+    <%= Sidekiq.dump_json({
+      series: hist_totals,
+      labels: bucket_labels,
+    }) %>
+  )
+</script>
 
 <h3>Performance over time</h3>
 

@@ -122,6 +122,59 @@ class MetricsChart {
   }
 }
 
+class HistTotalsChart {
+  constructor(id, options) {
+    this.ctx = document.getElementById(id);
+    this.series = options.series;
+    this.labels = options.labels;
+    this.color = "#537bc4";
+
+    this.chart = new Chart(this.ctx, {
+      type: "bar",
+      data: { labels: this.labels, datasets: [this.dataset] },
+      options: this.chartOptions,
+    });
+
+    this.chart.update();
+  }
+
+  get dataset() {
+    return {
+      data: this.series,
+      backgroundColor: this.color,
+      borderWidth: 0,
+    };
+  }
+
+  get chartOptions() {
+    return {
+      aspectRatio: 6,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            text: "Total jobs",
+            display: true,
+          },
+        },
+      },
+      interaction: {
+        mode: "x",
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+        tooltip: {
+          callbacks: {
+            label: (item) => `${item.parsed.y} jobs`,
+          },
+        },
+      },
+    };
+  }
+}
+
 class HistBubbleChart {
   constructor(id, options) {
     this.ctx = document.getElementById(id);
@@ -163,7 +216,9 @@ class HistBubbleChart {
             x: bucket,
             // histogram data is ordered fastest to slowest, but this.histIntervals is
             // slowest to fastest (so it displays correctly on the chart).
-            y: this.histIntervals[this.histIntervals.length - 1 - histBucket] / 1000,
+            y:
+              this.histIntervals[this.histIntervals.length - 1 - histBucket] /
+              1000,
             count: count,
           });
 
