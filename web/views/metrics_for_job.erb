@@ -12,7 +12,13 @@
   bucket_intervals[0] = bucket_intervals[1] * 2
 %>
 
-<h3><%= h @name %> histogram summary</h3>
+<div class="header-with-subheader">
+  <h1>
+    <a href="<%= root_path %>/metrics"><%= t(:metrics).to_s.titleize %></a> /
+    <%= h @name %>
+  </h1>
+  <h2>Histogram summary</h2>
+</div>
 
 <canvas id="hist-totals-chart"></canvas>
 
@@ -26,7 +32,7 @@
   )
 </script>
 
-<h3><%= h @name %> performance over time</h3>
+<h2>Performance over time</h2>
 
 <canvas id="hist-bubble-chart"></canvas>
 

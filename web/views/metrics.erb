@@ -2,7 +2,10 @@
 <script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js"></script>
 <script type="text/javascript" src="<%= root_path %>javascripts/metrics.js"></script>
 
-<h3><%= t('Metrics') %></h3>
+<div class="header-with-subheader">
+  <h1><%= t('Metrics') %></h1>
+  <h2>Total execution time</h2>
+</div>
 
 <%
   table_limit = 20
@@ -25,7 +28,7 @@
   )
 </script>
 
-<h3>Most Time-Consuming Jobs</h3>
+<h2>Most Time-Consuming Jobs</h2>
 
 <div class="table_container">
   <table class="table table-bordered table-striped table-hover">
