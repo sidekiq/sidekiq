@@ -90,3 +90,4 @@ en: # <---- change this to your locale code
   AvgExecutionTime: Average Execution Time
   Context: Context
   Bucket: Bucket
+  NoJobMetricsFound: No recent job metrics were found
