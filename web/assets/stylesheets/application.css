@@ -67,8 +67,13 @@ body {
   padding: 0 20px;
 }
 
-h3 {
+h1, h2, h3 {
+  font-size: 24px;
   line-height: 45px;
+}
+
+.header-with-subheader h2 {
+  margin-top: -18px;
 }
 
 .centered {
@@ -987,4 +992,8 @@ div.interval-slider input {
 .metrics-swatch[type=checkbox]:focus {
   outline: 1px solid #888;
   outline-offset: 2px;
+}
+
+canvas {
+  margin: 20px 0 30px;
 }
