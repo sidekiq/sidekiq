@@ -8,8 +8,11 @@ module Sidekiq
     extend Forwardable
 
     DEFAULTS = {
+      queues: ["default"],
       labels: [],
+      concurrency: 10,
       require: ".",
+      strict: true,
       environment: nil,
       timeout: 25,
       poll_interval_average: nil,
@@ -21,10 +24,7 @@ module Sidekiq
         startup: [],
         quiet: [],
         shutdown: [],
-        # triggers when we fire the first heartbeat on startup OR repairing a network partition
-        heartbeat: [],
-        # triggers on EVERY heartbeat call, every 10 seconds
-        beat: []
+        heartbeat: []
       },
       dead_max_jobs: 10_000,
       dead_timeout_in_seconds: 180 * 24 * 60 * 60, # 6 months
@@ -41,7 +41,6 @@ module Sidekiq
     def initialize(options = {})
       @options = DEFAULTS.merge(options)
       @options[:error_handlers] << ERROR_HANDLER if @options[:error_handlers].empty?
-      @capsules = [Capsule.new]
       @directory = {}
     end
 
@@ -50,7 +49,7 @@ module Sidekiq
 
     # config.concurrency = 5
     def concurrency=(val)
-      @capsules.first.concurrency = Integer(val)
+      self[:concurrency] = Integer(val)
     end
 
     # config.queues = %w( high default low )                 # strict
@@ -63,7 +62,13 @@ module Sidekiq
     # are ridiculous and unnecessarily expensive. You can get random queue ordering
     # by explicitly setting all weights to 1.
     def queues=(val)
-      @capsules.first.queues = val
+      self[:queues] = Array(val).each_with_object([]) do |qstr, memo|
+        name, weight = qstr.split(",")
+        self[:strict] = false if weight.to_i > 0
+        [weight.to_i, 1].max.times do
+          memo << name
+        end
+      end
     end
 
     def redis
@@ -172,9 +177,19 @@ module Sidekiq
       @options[:death_handlers]
     end
 
+    # deprecated
+    def log_formatter
+      warn "config.log_formatter is deprecated, use `config.logger.formatter"
+      logger.formatter
+    end
+
+    def log_formatter=(log_formatter)
+      warn "`config.log_formatter=` is deprecated, use `config.logger.formatter=`"
+      logger.formatter = log_formatter
+    end
+
     def logger
       @logger ||= Sidekiq::Logger.new($stdout, level: :info).tap do |log|
-        log.level = Logger::INFO
         log.formatter = if ENV["DYNO"]
           Sidekiq::Logger::Formatters::WithoutTimestamp.new
         else

@@ -5,9 +5,8 @@ require "sidekiq/client"
 
 module Sidekiq
   class TransactionAwareClient
-    def initialize(pool:, config:)
-      redis_pool = pool || config.redis_pool
-      @redis_client = Client.new(pool: redis_pool)
+    def initialize(pool: nil, config: nil)
+      @redis_client = Client.new(pool: pool, config: config)
     end
 
     def push(item)

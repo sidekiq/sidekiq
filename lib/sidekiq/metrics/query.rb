@@ -29,9 +29,9 @@ module Sidekiq
       # keys will look like "j|20220718|7:3" for data at 07:03.
       attr_accessor :hour
 
-      def initialize(pool: Sidekiq.redis_pool, now: Time.now)
+      def initialize(pool: nil, now: Time.now)
         @time = now.utc
-        @pool = pool
+        @pool = pool || Sidekiq.default_configuration.redis_pool
         @klass = nil
       end
 

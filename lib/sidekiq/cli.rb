@@ -22,11 +22,14 @@ module Sidekiq # :nodoc:
     attr_accessor :config
 
     def parse(args = ARGV.dup)
-      @config = Sidekiq::Config.new
+      @config ||= Sidekiq::Config.new
 
       setup_options(args)
       initialize_logger
       validate!
+
+      # if you are changing this in user or app code, you have a bug.
+      Sidekiq.instance_variable_set(:@config, @config)
     end
 
     def jruby?
@@ -39,7 +42,7 @@ module Sidekiq # :nodoc:
     def run(boot_app: true)
       boot_application if boot_app
 
-      if environment == "development" && $stdout.tty? && @config.log_formatter.is_a?(Sidekiq::Logger::Formatters::Pretty)
+      if environment == "development" && $stdout.tty? && @config.logger.formatter.is_a?(Sidekiq::Logger::Formatters::Pretty)
         print_banner
       end
       logger.info "Booted Rails #{::Rails.version} application in #{environment} environment" if rails_app?
@@ -257,9 +260,9 @@ module Sidekiq # :nodoc:
       opts[:concurrency] = Integer(ENV["RAILS_MAX_THREADS"]) if opts[:concurrency].nil? && ENV["RAILS_MAX_THREADS"]
 
       # merge with defaults
-      p opts
+      # p opts
       @config.merge!(opts)
-      p @config.options
+      # p @config.options
     end
 
     def boot_application

@@ -11,6 +11,10 @@ module Myapp
 end
 
 describe "Current attributes" do
+  before do
+    @config = reset!
+  end
+
   it "saves" do
     cm = Sidekiq::CurrentAttributes::Save.new(Myapp::Current)
     job = {}
@@ -33,10 +37,10 @@ describe "Current attributes" do
   end
 
   it "persists" do
-    Sidekiq::CurrentAttributes.persist(Myapp::Current)
+    Sidekiq::CurrentAttributes.persist(Myapp::Current, @config)
     job_hash = {}
     with_context(:user_id, 16) do
-      Sidekiq.client_middleware.invoke(nil, job_hash, nil, nil) do
+      @config.client_middleware.invoke(nil, job_hash, nil, nil) do
         assert_equal 16, job_hash["cattr"][:user_id]
       end
     end

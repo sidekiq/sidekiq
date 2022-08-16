@@ -235,7 +235,7 @@ module Sidekiq
       payload = Sidekiq.dump_json(msg)
       now = Time.now.to_f
 
-      config.redis do |conn|
+      redis do |conn|
         conn.multi do |xa|
           xa.zadd("dead", now.to_s, payload)
           xa.zremrangebyscore("dead", "-inf", now - config[:dead_timeout_in_seconds])

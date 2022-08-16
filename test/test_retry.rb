@@ -17,8 +17,7 @@ end
 
 describe Sidekiq::JobRetry do
   before do
-    @config = Sidekiq::Config.new
-    @config.redis { |c| c.flushdb }
+    @config = reset!
   end
 
   describe "middleware" do
@@ -333,7 +332,7 @@ describe Sidekiq::JobRetry do
       end
 
       it "falls back to the default retry on exception" do
-        output = capture_logging do
+        output = capture_logging(@config) do
           strat, count = handler.__send__(:delay_for, ErrorWorker, 2, StandardError.new)
           assert_equal :default, strat
           refute_equal 4, count

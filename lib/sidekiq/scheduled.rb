@@ -8,6 +8,8 @@ module Sidekiq
     SETS = %w[retry schedule]
 
     class Enq
+      include Sidekiq::Component
+
       LUA_ZPOPBYSCORE = <<~LUA
         local key, now = KEYS[1], ARGV[1]
         local jobs = redis.call("zrangebyscore", key, "-inf", now, "limit", 0, 1)
@@ -17,7 +19,9 @@ module Sidekiq
         end
       LUA
 
-      def initialize
+      def initialize(container)
+        @config = container
+        @client = Sidekiq::Client.new(config: container)
         @done = false
         @lua_zpopbyscore_sha = nil
       end
@@ -25,15 +29,15 @@ module Sidekiq
       def enqueue_jobs(sorted_sets = SETS)
         # A job's "score" in Redis is the time at which it should be processed.
         # Just check Redis for the set of jobs with a timestamp before now.
-        Sidekiq.redis do |conn|
+        redis do |conn|
           sorted_sets.each do |sorted_set|
             # Get next item in the queue with score (time to execute) <= now.
             # We need to go through the list one at a time to reduce the risk of something
             # going wrong between the time jobs are popped from the scheduled queue and when
             # they are pushed onto a work queue and losing the jobs.
             while !@done && (job = zpopbyscore(conn, keys: [sorted_set], argv: [Time.now.to_f.to_s]))
-              Sidekiq::Client.push(Sidekiq.load_json(job))
-              Sidekiq.logger.debug { "enqueued #{sorted_set}: #{job}" }
+              @client.push(Sidekiq.load_json(job))
+              logger.debug { "enqueued #{sorted_set}: #{job}" }
             end
           end
         end
@@ -70,9 +74,9 @@ module Sidekiq
 
       INITIAL_WAIT = 10
 
-      def initialize(options)
-        @config = options
-        @enq = (options[:scheduled_enq] || Sidekiq::Scheduled::Enq).new
+      def initialize(config)
+        @config = config
+        @enq = (config[:scheduled_enq] || Sidekiq::Scheduled::Enq).new(config)
         @sleeper = ConnectionPool::TimedStack.new
         @done = false
         @thread = nil

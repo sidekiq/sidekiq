@@ -7,6 +7,8 @@ describe "Job logger" do
   before do
     @output = StringIO.new
     @logger = Sidekiq::Logger.new(@output, level: :info)
+    @logger.formatter = Sidekiq::Logger::Formatters::Pretty.new
+
     @cfg = reset!
     @cfg.logger = @logger
 
@@ -76,21 +78,6 @@ describe "Job logger" do
     assert_match(/INFO: start/, a)
     assert_match(/DEBUG: debug message/, b)
     assert_match(/INFO: done/, c)
-  end
-
-  it "tests custom log level uses default log level for invalid value" do
-    jl = Sidekiq::JobLogger.new(@logger)
-    job = {"class" => "FooWorker", "log_level" => "non_existent"}
-
-    assert @logger.info?
-    jl.prepare(job) do
-      jl.call(job, "queue") do
-        assert @logger.info?
-      end
-    end
-    assert @logger.info?
-    log_level_warning = @output.string.lines[0]
-    assert_match(/WARN: Invalid log level/, log_level_warning)
   end
 
   it "tests custom logger with non numeric levels" do

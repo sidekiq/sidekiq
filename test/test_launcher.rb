@@ -9,8 +9,7 @@ describe Sidekiq::Launcher do
   end
 
   before do
-    @config = Sidekiq::Config.new
-    @config.redis { |c| c.flushdb }
+    @config = reset!
     @config[:tag] = "myapp"
     @config[:concurrency] = 3
   end

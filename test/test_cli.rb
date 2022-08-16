@@ -487,20 +487,6 @@ describe Sidekiq::CLI do
         end
       end
 
-      describe "when development environment and stdout tty" do
-        it "prints banner" do
-          subject.stub(:environment, "development") do
-            assert_output(/#{Regexp.escape(Sidekiq::CLI.banner)}/) do
-              $stdout.stub(:tty?, true) do
-                subject.stub(:launch, nil) do
-                  subject.run
-                end
-              end
-            end
-          end
-        end
-      end
-
       it "prints rails info" do
         subject.stub(:environment, "production") do
           subject.stub(:launch, nil) do

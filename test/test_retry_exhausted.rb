@@ -34,7 +34,7 @@ describe "sidekiq_retries_exhausted" do
   end
 
   before do
-    @config = Sidekiq::Config.new
+    @config = reset!
     cleanup
   end
 

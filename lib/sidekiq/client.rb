@@ -52,7 +52,7 @@ module Sidekiq
         # new calling method: keyword arguments
         config = kwargs[:config] || Sidekiq.default_configuration
         @redis_pool = kwargs[:pool] || Thread.current[:sidekiq_via_pool] || config&.redis_pool
-        @chain = kwargs[:chain] || config&.client_middleware || Sidekiq.default_configuration.client_middleware
+        @chain = kwargs[:chain] || config&.client_middleware
         raise ArgumentError, "No Redis pool available for Sidekiq::Client" unless @redis_pool
       end
     end

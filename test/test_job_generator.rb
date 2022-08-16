@@ -10,6 +10,11 @@ class JobGeneratorTest < Rails::Generators::TestCase
   destination File.expand_path("../../tmp", __FILE__)
   setup :prepare_destination
 
+  setup do
+    # TODO what's the proper way to silence the generator output?
+    Rails.logger.level = Logger::WARN
+  end
+
   test "all files are properly created" do
     run_generator ["foo"]
     assert_file "app/sidekiq/foo_job.rb"

@@ -7,6 +7,7 @@ describe "logger" do
   before do
     @output = StringIO.new
     @logger = Sidekiq::Logger.new(@output)
+    @logger.formatter = Sidekiq::Logger::Formatters::Pretty.new
     @config = Sidekiq::Config.new
 
     Thread.current[:sidekiq_context] = nil

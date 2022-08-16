@@ -8,7 +8,7 @@ describe Sidekiq::RedisConnection do
     before do
       @old = ENV["REDIS_URL"]
       ENV["REDIS_URL"] = "redis://localhost/15"
-      @config = Sidekiq::Config.new
+      @config = reset!
     end
 
     after do
@@ -36,14 +36,14 @@ describe Sidekiq::RedisConnection do
     # `connection_pool`, until then we need to reach into the internal state to
     # verify the setting.
     describe "size" do
-      def client_connection(args = nil)
+      def client_connection(args = {})
         Sidekiq.stub(:server?, nil) do
           @config.redis = args
           @config.redis_pool
         end
       end
 
-      def server_connection(args = nil)
+      def server_connection(args = {})
         Sidekiq.stub(:server?, "constant") do
           @config.redis = args
           @config.redis_pool
@@ -159,8 +159,8 @@ describe Sidekiq::RedisConnection do
           password: "secret"
         }
 
-        output = capture_logging(@config) do
-          Sidekiq::RedisConnection.create(options)
+        output = capture_logging(@config) do |logger|
+          Sidekiq::RedisConnection.create(options.merge(logger: logger))
         end
 
         refute_includes(options.inspect, "REDACTED")

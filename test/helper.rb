@@ -28,6 +28,7 @@ ENV["REDIS_URL"] ||= "redis://localhost/15"
 def reset!
   cfg = Sidekiq::Config.new
   cfg.logger = ::Logger.new("/dev/null")
+  cfg.logger.level = Logger::WARN
   cfg.redis { |c| c.flushdb }
   Sidekiq.instance_variable_set :@config, cfg
   cfg

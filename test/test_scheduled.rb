@@ -24,6 +24,9 @@ describe Sidekiq::Scheduled do
       @retry = Sidekiq::RetrySet.new
       @scheduled = Sidekiq::ScheduledSet.new
       @poller = Sidekiq::Scheduled::Poller.new(@config)
+
+      # @config.logger = ::Logger.new($stdout)
+      # @config.logger.level = Logger::DEBUG
     end
 
     class MyStopper
@@ -34,19 +37,18 @@ describe Sidekiq::Scheduled do
 
     it "executes client middleware" do
       @config.client_middleware.add MyStopper
-      begin
-        @retry.schedule (Time.now - 60).to_f, @error_1
-        @retry.schedule (Time.now - 60).to_f, @error_2
-        @scheduled.schedule (Time.now - 60).to_f, @future_2
-        @scheduled.schedule (Time.now - 60).to_f, @future_3
 
-        @poller.enqueue
+      @retry.schedule (Time.now - 60).to_f, @error_1
+      @retry.schedule (Time.now - 60).to_f, @error_2
+      @scheduled.schedule (Time.now - 60).to_f, @future_2
+      @scheduled.schedule (Time.now - 60).to_f, @future_3
 
-        assert_equal 0, Sidekiq::Queue.new("queue_1").size
-        assert_equal 1, Sidekiq::Queue.new("queue_2").size
-        assert_equal 0, Sidekiq::Queue.new("queue_5").size
-        assert_equal 1, Sidekiq::Queue.new("queue_6").size
-      end
+      @poller.enqueue
+
+      assert_equal 0, Sidekiq::Queue.new("queue_1").size
+      assert_equal 1, Sidekiq::Queue.new("queue_2").size
+      assert_equal 0, Sidekiq::Queue.new("queue_5").size
+      assert_equal 1, Sidekiq::Queue.new("queue_6").size
     end
 
     it "should empty the retry and scheduled queues up to the current time" do
