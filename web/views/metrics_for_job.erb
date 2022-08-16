@@ -63,8 +63,13 @@
           <td><%= bucket %></td>
           <td><%= job_result.series.dig("p", bucket) %></td>
           <td><%= job_result.series.dig("f", bucket) %></td>
-          <td><%= job_result.series.dig("s", bucket).round(2) %> seconds</td>
-          <td><%= job_result.series_avg("s")[bucket].round(2) %> seconds</td>
+          <% if (total_sec = job_result.series.dig("s", bucket)) > 0 %>
+            <td><%= total_sec.round(2) %> seconds</td>
+            <td><%= job_result.series_avg("s")[bucket].round(2) %> seconds</td>
+          <% else %>
+            <td>&mdash;</td>
+            <td>&mdash;</td>
+          <% end %>
         </tr>
       <% end %>
     </tbody>
