@@ -1,13 +1,13 @@
-require "sidekiq"
-require "date"
+require "sidekiq/redis_connection"
+require "time"
 
 # This file is designed to be required within the user's
 # deployment script; it should need a bare minimum of dependencies.
 #
-#   require "sidekiq/metrics/deploy"
-#   gitdesc = `git log -1 --format="%h %s"`.strip
-#   d = Sidekiq::Metrics::Deploy.new
-#   d.mark(label: gitdesc)
+#  require "sidekiq/metrics/deploy"
+#  gitdesc = `git log -1 --format="%h %s"`.strip
+#  d = Sidekiq::Metrics::Deploy.new
+#  d.mark(label: gitdesc)
 #
 # Note that you cannot mark more than once per minute. This is a feature, not a bug.
 module Sidekiq
@@ -15,7 +15,7 @@ module Sidekiq
     class Deploy
       MARK_TTL = 90 * 24 * 60 * 60 # 90 days
 
-      def initialize(pool = Sidekiq.default_configuration.redis_pool)
+      def initialize(pool = Sidekiq::RedisConnection.create)
         @pool = pool
       end
 
@@ -32,7 +32,7 @@ module Sidekiq
         key = "#{datecode}-marks"
         @pool.with do |c|
           c.pipelined do |pipe|
-            pipe.hsetnx(key, floor.rfc3339, label)
+            pipe.hsetnx(key, floor.iso8601, label)
             pipe.expire(key, MARK_TTL)
           end
         end
