@@ -76,6 +76,7 @@
       </tbody>
     </table>
   </div>
+  <p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p>
 <% else %>
   <h1>
     <a href="<%= root_path %>/metrics"><%= t(:metrics).to_s.titleize %></a> /
@@ -84,5 +85,3 @@
 
   <div class="alert alert-success"><%= t('NoJobMetricsFound') %></div>
 <% end %>
-
-<p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p>
