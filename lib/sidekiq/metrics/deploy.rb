@@ -1,5 +1,5 @@
 require "sidekiq"
-require "date"
+require "time"
 
 # This file is designed to be required within the user's
 # deployment script; it should need a bare minimum of dependencies.
@@ -32,7 +32,7 @@ module Sidekiq
         key = "#{datecode}-marks"
         @pool.with do |c|
           c.pipelined do |pipe|
-            pipe.hsetnx(key, floor.rfc3339, label)
+            pipe.hsetnx(key, floor.iso8601, label)
             pipe.expire(key, MARK_TTL)
           end
         end
