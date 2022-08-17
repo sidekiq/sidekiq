@@ -3,7 +3,11 @@ source "https://rubygems.org"
 gemspec
 
 gem "rake"
-gem "redis"
+if ENV["REDIS_GEM"] == "edge"
+  gem "redis", github: "redis/redis-rb"
+else
+  gem "redis", ENV.fetch("REDIS_GEM", "< 5")
+end
 gem "redis-namespace"
 gem "redis-client"
 gem "rails", "~> 6.0"

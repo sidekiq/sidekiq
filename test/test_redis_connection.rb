@@ -113,7 +113,7 @@ describe Sidekiq::RedisConnection do
       pool = Sidekiq::RedisConnection.create(id: nil)
       assert_equal client_class, pool.checkout.class
       client = client_for(pool.checkout)
-      if self.class.redis_client?
+      if self.class.redis_client? || ::Redis::VERSION >= "5"
         assert_nil client.id
       else
         assert_equal "redis://localhost:6379/15", client.id
@@ -132,7 +132,7 @@ describe Sidekiq::RedisConnection do
         pool = Sidekiq::RedisConnection.create
         redis = pool.checkout
 
-        if self.class.redis_client?
+        if self.class.redis_client? || ::Redis::VERSION >= "5"
           assert_equal 1.0, client_for(redis).read_timeout
         else
           assert_equal 5, client_for(redis).read_timeout
@@ -209,7 +209,7 @@ describe Sidekiq::RedisConnection do
 
           assert_equal RedisClient::RubyConnection, config.driver
         end
-      else
+      elsif Redis::VERSION < "5"
         it "uses redis' ruby driver" do
           pool = Sidekiq::RedisConnection.create
           redis = pool.checkout

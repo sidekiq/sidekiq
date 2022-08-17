@@ -18,6 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby: ["2.5", "2.6", "2.7", "3.0", "3.1"]
+        redis-rb: ["< 5", "edge"]
     services:
       redis:
         image: redis
@@ -28,7 +29,8 @@ jobs:
           --health-retries 5
         ports:
           - 6379:6379
-
+    env:
+      REDIS_GEM: "${{ matrix.redis-rb }}"
     steps:
     - uses: actions/checkout@v3
     - name: Set up Ruby
