@@ -13,22 +13,6 @@ module Sidekiq
     # NB: all metrics and times/dates are UTC only. We specifically do not
     # support timezones.
     class Query
-      # :hour, :day, :month
-      attr_accessor :period
-
-      # a specific job class, e.g. "App::OrderJob"
-      attr_accessor :klass
-
-      # the date specific to the period
-      # for :day or :hour, something like Date.today or Date.new(2022, 7, 13)
-      # for :month, Date.new(2022, 7, 1)
-      attr_accessor :date
-
-      # for period = :hour, the specific hour, integer e.g. 1 or 18
-      # note that hours and minutes do not have a leading zero so minute-specific
-      # keys will look like "j|20220718|7:3" for data at 07:03.
-      attr_accessor :hour
-
       def initialize(pool: Sidekiq.redis_pool, now: Time.now)
         @time = now.utc
         @pool = pool
