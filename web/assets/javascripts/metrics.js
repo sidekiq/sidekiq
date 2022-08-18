@@ -1,16 +1,13 @@
-if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-  Chart.defaults.borderColor = "#333"
-  Chart.defaults.color = "#aaa"
+if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+  Chart.defaults.borderColor = "#333";
+  Chart.defaults.color = "#aaa";
 }
 
-class BaseChart {
-  constructor(id, options) {
-    this.ctx = document.getElementById(id);
-    this.metric = "s";
-    this.visibleKls = options.visible;
-    this.options = options
-    this.fallbackColor = "#999";
-    this.colors = [
+class Colors {
+  constructor() {
+    this.assigments = {};
+    this.fallback = "#999";
+    this.available = [
       // Colors taken from https://www.chartjs.org/docs/latest/samples/utils.html
       "#537bc4",
       "#4dc9f6",
@@ -23,6 +20,37 @@ class BaseChart {
       "#8549ba",
       "#991b1b",
     ];
+  }
+
+  reserve(assignee) {
+    const color = this.available.shift() || this.fallback;
+    this.assigments[assignee] = color;
+    return color;
+  }
+
+  return(assignee) {
+    const color = this.assigments[assignee];
+    delete this.assigments[assignee];
+
+    if (color && color != this.fallback) {
+      this.available.unshift(color);
+    }
+  }
+
+  returnAll() {
+    for (const assignee of Object.keys(this.assigments)) {
+      this.return(assignee);
+    }
+  }
+}
+
+class BaseChart {
+  constructor(id, options) {
+    this.ctx = document.getElementById(id);
+    this.metric = "s";
+    this.visibleKls = options.visible;
+    this.options = options;
+    this.colors = new Colors();
 
     this.chart = new Chart(this.ctx, {
       type: "line",
@@ -60,13 +88,13 @@ class JobMetricsOverviewChart extends BaseChart {
   get datasets() {
     return Object.entries(this.currentSeries)
       .filter(([kls, _]) => this.visibleKls.includes(kls))
-      .map(([kls, _]) => this.dataset(kls));
+      .map(([kls, _]) => this.buildDataset(kls));
   }
 
   selectMetric(e) {
-    e.preventDefault()
-    this.metric = e.target.getAttribute("data-show-metric")
-    // TODO: maintain current visible job classes and colors
+    e.preventDefault();
+    this.metric = e.target.getAttribute("data-show-metric");
+    this.colors.returnAll();
     this.chart.data.datasets = this.datasets;
     this.chart.update();
 
@@ -74,12 +102,12 @@ class JobMetricsOverviewChart extends BaseChart {
   }
 
   registerMetricSelector(el) {
-    el.addEventListener('click', this.selectMetric.bind(this));
+    el.addEventListener("click", this.selectMetric.bind(this));
   }
 
   registerSwatch(id) {
     const el = document.getElementById(id);
-    el.addEventListener('change', () => this.toggleKls(el.value, el.checked));
+    el.addEventListener("change", () => this.toggleKls(el.value, el.checked));
     this.swatches[el.value] = el;
     this.updateSwatch(el.value);
   }
@@ -93,10 +121,10 @@ class JobMetricsOverviewChart extends BaseChart {
 
   toggleKls(kls, visible) {
     if (visible) {
-      this.chart.data.datasets.push(this.dataset(kls));
+      this.chart.data.datasets.push(this.buildDataset(kls));
     } else {
       const i = this.chart.data.datasets.findIndex((ds) => ds.label == kls);
-      this.colors.unshift(this.chart.data.datasets[i].borderColor);
+      this.colors.return(kls);
       this.chart.data.datasets.splice(i, 1);
     }
 
@@ -104,8 +132,8 @@ class JobMetricsOverviewChart extends BaseChart {
     this.chart.update();
   }
 
-  dataset(kls) {
-    const color = this.colors.shift() || this.fallbackColor;
+  buildDataset(kls) {
+    const color = this.colors.reserve(kls);
 
     return {
       label: kls,
@@ -115,12 +143,6 @@ class JobMetricsOverviewChart extends BaseChart {
       borderWidth: 2,
       pointRadius: 2,
     };
-  }
-
-  get datasets() {
-    return Object.entries(this.options.series)
-      .filter(([kls, _]) => this.options.visible.includes(kls))
-      .map(([kls, _]) => this.dataset(kls));
   }
 
   get chartOptions() {
@@ -165,11 +187,13 @@ class HistTotalsChart extends BaseChart {
   }
 
   get datasets() {
-    return [{
-      data: this.options.series,
-      backgroundColor: this.colors[0],
-      borderWidth: 0,
-    }];
+    return [
+      {
+        data: this.options.series,
+        backgroundColor: this.colors[0],
+        borderWidth: 0,
+      },
+    ];
   }
 
   get chartOptions() {
@@ -221,8 +245,9 @@ class HistBubbleChart extends BaseChart {
             // histogram data is ordered fastest to slowest, but this.histIntervals is
             // slowest to fastest (so it displays correctly on the chart).
             y:
-              this.options.histIntervals[this.options.histIntervals.length - 1 - histBucket] /
-              1000,
+              this.options.histIntervals[
+                this.options.histIntervals.length - 1 - histBucket
+              ] / 1000,
             count: count,
           });
 
@@ -233,17 +258,19 @@ class HistBubbleChart extends BaseChart {
 
     // Chart.js will not calculate the bubble size. We have to do that.
     const maxRadius = this.ctx.offsetWidth / this.options.labels.length;
-    const minRadius = 1
+    const minRadius = 1;
     const multiplier = (maxRadius / maxCount) * 1.5;
     data.forEach((entry) => {
       entry.r = entry.count * multiplier + minRadius;
     });
 
-    return [{
-      data: data,
-      backgroundColor: "#537bc4",
-      borderColor: "#537bc4",
-    }];
+    return [
+      {
+        data: data,
+        backgroundColor: "#537bc4",
+        borderColor: "#537bc4",
+      },
+    ];
   }
 
   get chartOptions() {
