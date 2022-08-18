@@ -4,6 +4,18 @@ require "sidekiq/fetch"
 module Sidekiq
   # A Sidekiq::Capsule is the set of resources necessary to
   # process one or more queues with a given concurrency.
+  # One "default" Capsule is started but the user may declare additional
+  # Capsules in the initializer.
+  #
+  # To process a "single" queue with one thread so jobs are processed
+  # serially, you can do this:
+  #
+  # Sidekiq.configure_server do |config|
+  #   config.capsule("single-threaded") do |cap|
+  #     cap.concurrency = 1
+  #     cap.queues = %w(single)
+  #   end
+  # end
   class Capsule
     include Sidekiq::Component
 
@@ -40,6 +52,9 @@ module Sidekiq
       end
     end
 
+    # Allow the middleware to be different per-capsule.
+    # Avoid if possible and add middleware globally so all
+    # capsules share the same chains. Easier to debug that way.
     def client_middleware
       @client_chain ||= config.client_middleware.dup
       yield @client_chain if block_given?
@@ -78,10 +93,6 @@ module Sidekiq
           raise
         end
       end
-    end
-
-    def logger
-      config.logger
     end
 
     # Passthru any other calls to the underlying config

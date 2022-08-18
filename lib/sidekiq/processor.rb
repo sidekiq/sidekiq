@@ -27,15 +27,14 @@ module Sidekiq
     attr_reader :thread
     attr_reader :job
 
-    def initialize(cap, &block)
-      @config = cap
+    def initialize(capsule, &block)
+      @config = capsule
       @callback = block
       @down = false
       @done = false
       @job = nil
       @thread = nil
-      @strategy = cap.fetcher
-      @reloader = Sidekiq.default_configuration[:reloader] || proc { |&block| block.call }
+      @reloader = Sidekiq.default_configuration[:reloader]
       @job_logger = Sidekiq::JobLogger.new(logger)
       @retrier = Sidekiq::JobRetry.new(cap)
     end
@@ -80,7 +79,7 @@ module Sidekiq
     end
 
     def get_one
-      uow = @strategy.retrieve_work
+      uow = capsule.fetcher.retrieve_work
       if @down
         logger.info { "Redis is online, #{::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @down} sec downtime" }
         @down = nil

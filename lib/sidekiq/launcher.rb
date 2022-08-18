@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
 require "sidekiq/manager"
-require "sidekiq/fetch"
 require "sidekiq/scheduled"
 require "sidekiq/ring_buffer"
 
 module Sidekiq
-  # The Launcher starts the Manager and Poller threads and provides the process heartbeat.
+  # The Launcher starts the Capsule Managers, the Poller thread and provides the process heartbeat.
   class Launcher
     include Sidekiq::Component
 

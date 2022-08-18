@@ -3,7 +3,7 @@ require "forwardable"
 require "sidekiq/redis_connection"
 
 module Sidekiq
-  # Sidekiq::Config represents the configuration for an instance of Sidekiq.
+  # Sidekiq::Config represents the global configuration for an instance of Sidekiq.
   class Config
     extend Forwardable
 
@@ -31,7 +31,7 @@ module Sidekiq
       reloader: proc { |&block| block.call }
     }
 
-    ERROR_HANDLER = ->(ex, ctx, cfg = Sidekiq.config) {
+    ERROR_HANDLER = ->(ex, ctx, cfg = Sidekiq.default_configuration) {
       l = cfg.logger
       l.warn(Sidekiq.dump_json(ctx)) unless ctx.empty?
       l.warn("#{ex.class.name}: #{ex.message}")

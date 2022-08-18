@@ -107,7 +107,7 @@ module Sidekiq
         # contract says that jobs are run AT LEAST once. Process termination
         # is delayed until we're certain the jobs are back in Redis because
         # it is worse to lose a job than to run it twice.
-        config.fetcher.bulk_requeue(jobs, nil)
+        capsule.fetcher.bulk_requeue(jobs, nil)
       end
 
       cleanup.each do |processor|
