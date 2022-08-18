@@ -304,7 +304,7 @@ module Sidekiq
     def jobs_for(klass)
       jobs.select do |job|
         marshalled = job["args"][0]
-        marshalled.index(klass.to_s) && YAML.load(marshalled)[0] == klass
+        marshalled.index(klass.to_s) && YAML.safe_load(marshalled)[0] == klass
       end
     end
   end

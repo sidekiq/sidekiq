@@ -13,7 +13,7 @@ require "standard/rake"
 
 Rake::TestTask.new(:test) do |test|
   test.warning = true
-  test.pattern = "test/**/test_*.rb"
+  test.pattern = "test/**/*.rb"
 end
 
 task default: [:standard, :test]
