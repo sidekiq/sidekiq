@@ -2,6 +2,24 @@
 
 require_relative "helper"
 
+class AttributeWorker
+  include Sidekiq::Job
+  sidekiq_class_attribute :count
+  self.count = 0
+  attr_accessor :foo
+
+  def perform
+    self.class.count += 1 if foo == :bar
+  end
+end
+
+class AttributeMiddleware
+  def call(worker, msg, queue)
+    worker.foo = :bar if worker.respond_to?(:foo=)
+    yield
+  end
+end
+
 describe "Sidekiq::Testing" do
   describe "require/load sidekiq/testing.rb" do
     before do
@@ -87,24 +105,6 @@ describe "Sidekiq::Testing" do
 
     after do
       Sidekiq::Testing.disable!
-    end
-
-    class AttributeWorker
-      include Sidekiq::Job
-      sidekiq_class_attribute :count
-      self.count = 0
-      attr_accessor :foo
-
-      def perform
-        self.class.count += 1 if foo == :bar
-      end
-    end
-
-    class AttributeMiddleware
-      def call(worker, msg, queue)
-        worker.foo = :bar if worker.respond_to?(:foo=)
-        yield
-      end
     end
 
     it "wraps the inlined worker with middleware" do

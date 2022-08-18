@@ -3,38 +3,38 @@
 require_relative "helper"
 require "sidekiq/web"
 
+class Helpers
+  include Sidekiq::WebHelpers
+
+  def initialize(params = {})
+    @thehash = default.merge(params)
+  end
+
+  def request
+    self
+  end
+
+  def settings
+    self
+  end
+
+  def locales
+    ["web/locales"]
+  end
+
+  def env
+    @thehash
+  end
+
+  def default
+    {
+    }
+  end
+end
+
 describe "Web helpers" do
   before do
     Sidekiq.redis { |c| c.flushdb }
-  end
-
-  class Helpers
-    include Sidekiq::WebHelpers
-
-    def initialize(params = {})
-      @thehash = default.merge(params)
-    end
-
-    def request
-      self
-    end
-
-    def settings
-      self
-    end
-
-    def locales
-      ["web/locales"]
-    end
-
-    def env
-      @thehash
-    end
-
-    def default
-      {
-      }
-    end
   end
 
   it "tests locale determination" do

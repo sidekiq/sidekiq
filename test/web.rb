@@ -4,6 +4,14 @@ require_relative "helper"
 require "sidekiq/web"
 require "rack/test"
 
+class WebWorker
+  include Sidekiq::Worker
+
+  def perform(a, b)
+    a + b
+  end
+end
+
 describe Sidekiq::Web do
   include Rack::Test::Methods
 
@@ -18,14 +26,6 @@ describe Sidekiq::Web do
   before do
     @config = reset!
     app.middlewares.clear
-  end
-
-  class WebWorker
-    include Sidekiq::Worker
-
-    def perform(a, b)
-      a + b
-    end
   end
 
   it "can show text with any locales" do

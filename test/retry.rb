@@ -15,6 +15,44 @@ class BadErrorMessage < StandardError
   end
 end
 
+class CustomWorkerWithoutException
+  include Sidekiq::Worker
+
+  sidekiq_retry_in do |count|
+    count * 2
+  end
+end
+
+class SpecialError < StandardError
+end
+
+class CustomWorkerWithException
+  include Sidekiq::Worker
+
+  sidekiq_retry_in do |count, exception|
+    case exception
+    when RuntimeError
+      :kill
+    when Interrupt
+      :discard
+    when SpecialError
+      nil
+    when ArgumentError
+      count * 4
+    else
+      count * 2
+    end
+  end
+end
+
+class ErrorWorker
+  include Sidekiq::Worker
+
+  sidekiq_retry_in do |count|
+    count / 0
+  end
+end
+
 describe Sidekiq::JobRetry do
   before do
     @config = reset!
@@ -250,44 +288,6 @@ describe Sidekiq::JobRetry do
     end
 
     describe "custom retry delay" do
-      class CustomWorkerWithoutException
-        include Sidekiq::Worker
-
-        sidekiq_retry_in do |count|
-          count * 2
-        end
-      end
-
-      class SpecialError < StandardError
-      end
-
-      class CustomWorkerWithException
-        include Sidekiq::Worker
-
-        sidekiq_retry_in do |count, exception|
-          case exception
-          when RuntimeError
-            :kill
-          when Interrupt
-            :discard
-          when SpecialError
-            nil
-          when ArgumentError
-            count * 4
-          else
-            count * 2
-          end
-        end
-      end
-
-      class ErrorWorker
-        include Sidekiq::Worker
-
-        sidekiq_retry_in do |count|
-          count / 0
-        end
-      end
-
       it "retries with a default delay" do
         strat, count = handler.__send__(:delay_for, worker, 2, StandardError.new)
         assert_equal :default, strat

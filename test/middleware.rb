@@ -4,23 +4,81 @@ require_relative "helper"
 require "sidekiq/middleware/chain"
 require "sidekiq/processor"
 
+class CustomMiddleware
+  def initialize(name, recorder)
+    @name = name
+    @recorder = recorder
+  end
+
+  def call(*args)
+    @recorder << [@name, "before"]
+    yield
+    @recorder << [@name, "after"]
+  end
+end
+
+class CustomWorker
+  $recorder = []
+  include Sidekiq::Worker
+  def perform(recorder)
+    $recorder << ["work_performed"]
+  end
+end
+
+class NonYieldingMiddleware
+  def call(*args)
+  end
+end
+
+class ArgumentYieldingMiddleware
+  def call(*args)
+    yield 1
+  end
+end
+
+class AnotherCustomMiddleware
+  def initialize(name, recorder)
+    @name = name
+    @recorder = recorder
+  end
+
+  def call(*args)
+    @recorder << [@name, "before"]
+    yield
+    @recorder << [@name, "after"]
+  end
+end
+
+class YetAnotherCustomMiddleware
+  def initialize(name, recorder)
+    @name = name
+    @recorder = recorder
+  end
+
+  def call(*args)
+    @recorder << [@name, "before"]
+    yield
+    @recorder << [@name, "after"]
+  end
+end
+
+class FooC
+  include Sidekiq::ClientMiddleware
+  def initialize(*args)
+    @args = args
+  end
+
+  def call(w, j, q, rp)
+    redis { |c| c.incr(self.class.name) }
+    logger.info { |c| [self.class.name, @args].inspect }
+    yield
+  end
+end
+
 describe Sidekiq::Middleware do
   before do
     $errors = []
     @config = reset!
-  end
-
-  class CustomMiddleware
-    def initialize(name, recorder)
-      @name = name
-      @recorder = recorder
-    end
-
-    def call(*args)
-      @recorder << [@name, "before"]
-      yield
-      @recorder << [@name, "after"]
-    end
   end
 
   it "supports custom middleware" do
@@ -28,51 +86,6 @@ describe Sidekiq::Middleware do
     chain.add CustomMiddleware, 1, []
 
     assert_equal CustomMiddleware, chain.entries.last.klass
-  end
-
-  class CustomWorker
-    $recorder = []
-    include Sidekiq::Worker
-    def perform(recorder)
-      $recorder << ["work_performed"]
-    end
-  end
-
-  class NonYieldingMiddleware
-    def call(*args)
-    end
-  end
-
-  class ArgumentYieldingMiddleware
-    def call(*args)
-      yield 1
-    end
-  end
-
-  class AnotherCustomMiddleware
-    def initialize(name, recorder)
-      @name = name
-      @recorder = recorder
-    end
-
-    def call(*args)
-      @recorder << [@name, "before"]
-      yield
-      @recorder << [@name, "after"]
-    end
-  end
-
-  class YetAnotherCustomMiddleware
-    def initialize(name, recorder)
-      @name = name
-      @recorder = recorder
-    end
-
-    def call(*args)
-      @recorder << [@name, "before"]
-      yield
-      @recorder << [@name, "after"]
-    end
   end
 
   it "executes middleware in the proper order" do
@@ -163,19 +176,6 @@ describe Sidekiq::Middleware do
 
       I18n.enforce_available_locales = false
       I18n.available_locales = nil
-    end
-  end
-
-  class FooC
-    include Sidekiq::ClientMiddleware
-    def initialize(*args)
-      @args = args
-    end
-
-    def call(w, j, q, rp)
-      redis { |c| c.incr(self.class.name) }
-      logger.info { |c| [self.class.name, @args].inspect }
-      yield
     end
   end
 

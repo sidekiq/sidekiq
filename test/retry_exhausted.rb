@@ -24,6 +24,10 @@ class OldWorker
   end
 end
 
+class Foobar
+  include Sidekiq::Job
+end
+
 describe "sidekiq_retries_exhausted" do
   def cleanup
     [NewWorker, OldWorker].each do |worker_class|
@@ -121,10 +125,6 @@ describe "sidekiq_retries_exhausted" do
   end
 
   it "allows global failure handlers" do
-    class Foobar
-      include Sidekiq::Job
-    end
-
     exhausted_job = nil
     exhausted_exception = nil
     @config.death_handlers.clear

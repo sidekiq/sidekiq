@@ -4,22 +4,22 @@ require_relative "helper"
 require "sidekiq/api"
 require "active_support/core_ext/integer/time"
 
+class SomeScheduledWorker
+  include Sidekiq::Job
+  sidekiq_options queue: :custom_queue
+  def perform(x)
+  end
+end
+
+# Assume we can pass any class as time to perform_in
+class TimeDuck
+  def to_f
+    42.0
+  end
+end
+
 describe "job scheduling" do
   describe "middleware" do
-    class SomeScheduledWorker
-      include Sidekiq::Job
-      sidekiq_options queue: :custom_queue
-      def perform(x)
-      end
-    end
-
-    # Assume we can pass any class as time to perform_in
-    class TimeDuck
-      def to_f
-        42.0
-      end
-    end
-
     it "schedules jobs" do
       ss = Sidekiq::ScheduledSet.new
       ss.clear

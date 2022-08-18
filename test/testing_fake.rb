@@ -1,31 +1,82 @@
 # frozen_string_literal: true
 
 require_relative "helper"
+class PerformError < RuntimeError; end
+
+class DirectWorker
+  include Sidekiq::Job
+  def perform(a, b)
+    a + b
+  end
+end
+
+class EnqueuedWorker
+  include Sidekiq::Job
+  def perform(a, b)
+    a + b
+  end
+end
+
+class StoredWorker
+  include Sidekiq::Job
+  def perform(error)
+    raise PerformError if error
+  end
+end
+
+class SpecificJidWorker
+  include Sidekiq::Job
+  sidekiq_class_attribute :count
+  self.count = 0
+  def perform(worker_jid)
+    return unless worker_jid == jid
+    self.class.count += 1
+  end
+end
+
+class FirstWorker
+  include Sidekiq::Job
+  sidekiq_class_attribute :count
+  self.count = 0
+  def perform
+    self.class.count += 1
+  end
+end
+
+class SecondWorker
+  include Sidekiq::Job
+  sidekiq_class_attribute :count
+  self.count = 0
+  def perform
+    self.class.count += 1
+  end
+end
+
+class ThirdWorker
+  include Sidekiq::Job
+  sidekiq_class_attribute :count
+  def perform
+    FirstWorker.perform_async
+    SecondWorker.perform_async
+  end
+end
+
+class QueueWorker
+  include Sidekiq::Job
+  def perform(a, b)
+    a + b
+  end
+end
+
+class AltQueueWorker
+  include Sidekiq::Job
+  sidekiq_options queue: :alt
+  def perform(a, b)
+    a + b
+  end
+end
 
 describe "Sidekiq::Testing.fake" do
-  class PerformError < RuntimeError; end
-
-  class DirectWorker
-    include Sidekiq::Job
-    def perform(a, b)
-      a + b
-    end
-  end
-
-  class EnqueuedWorker
-    include Sidekiq::Job
-    def perform(a, b)
-      a + b
-    end
-  end
-
-  class StoredWorker
-    include Sidekiq::Job
-    def perform(error)
-      raise PerformError if error
-    end
-  end
-
   before do
     require "sidekiq/testing"
     Sidekiq::Testing.fake!
@@ -73,16 +124,6 @@ describe "Sidekiq::Testing.fake" do
       StoredWorker.drain
     end
     assert_equal 0, StoredWorker.jobs.size
-  end
-
-  class SpecificJidWorker
-    include Sidekiq::Job
-    sidekiq_class_attribute :count
-    self.count = 0
-    def perform(worker_jid)
-      return unless worker_jid == jid
-      self.class.count += 1
-    end
   end
 
   it "execute only jobs with assigned JID" do
@@ -134,33 +175,6 @@ describe "Sidekiq::Testing.fake" do
     DirectWorker.clear
     assert_raises Sidekiq::EmptyQueueError do
       DirectWorker.perform_one
-    end
-  end
-
-  class FirstWorker
-    include Sidekiq::Job
-    sidekiq_class_attribute :count
-    self.count = 0
-    def perform
-      self.class.count += 1
-    end
-  end
-
-  class SecondWorker
-    include Sidekiq::Job
-    sidekiq_class_attribute :count
-    self.count = 0
-    def perform
-      self.class.count += 1
-    end
-  end
-
-  class ThirdWorker
-    include Sidekiq::Job
-    sidekiq_class_attribute :count
-    def perform
-      FirstWorker.perform_async
-      SecondWorker.perform_async
     end
   end
 
@@ -270,21 +284,6 @@ describe "Sidekiq::Testing.fake" do
     after do
       Sidekiq::Testing.disable!
       Sidekiq::Queues.clear_all
-    end
-
-    class QueueWorker
-      include Sidekiq::Job
-      def perform(a, b)
-        a + b
-      end
-    end
-
-    class AltQueueWorker
-      include Sidekiq::Job
-      sidekiq_options queue: :alt
-      def perform(a, b)
-        a + b
-      end
     end
 
     it "finds enqueued jobs" do

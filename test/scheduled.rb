@@ -4,13 +4,19 @@ require_relative "helper"
 require "sidekiq/scheduled"
 require "sidekiq/api"
 
-describe Sidekiq::Scheduled do
-  class ScheduledWorker
-    include Sidekiq::Job
-    def perform(x)
-    end
+class ScheduledWorker
+  include Sidekiq::Job
+  def perform(x)
   end
+end
 
+class MyStopper
+  def call(worker_class, job, queue, r)
+    yield if job["args"].first.odd?
+  end
+end
+
+describe Sidekiq::Scheduled do
   describe "poller" do
     before do
       @config = reset!
@@ -27,12 +33,6 @@ describe Sidekiq::Scheduled do
 
       # @config.logger = ::Logger.new($stdout)
       # @config.logger.level = Logger::DEBUG
-    end
-
-    class MyStopper
-      def call(worker_class, job, queue, r)
-        yield if job["args"].first.odd?
-      end
     end
 
     it "executes client middleware" do

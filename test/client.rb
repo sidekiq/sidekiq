@@ -5,6 +5,63 @@ require "active_job"
 require "sidekiq/api"
 require "sidekiq/rails"
 
+class MyWorker
+  include Sidekiq::Job
+end
+
+class QueuedWorker
+  include Sidekiq::Job
+  sidekiq_options queue: :flimflam
+end
+
+class InterestingWorker
+  include Sidekiq::Job
+
+  def perform(an_argument)
+  end
+end
+
+class TestActiveJob < ActiveJob::Base
+  def perform(arg)
+  end
+end
+
+class BaseWorker
+  include Sidekiq::Job
+  sidekiq_options "retry" => "base"
+end
+
+class AWorker < BaseWorker
+end
+
+class BWorker < BaseWorker
+  sidekiq_options "retry" => "b"
+end
+
+class CWorker < BaseWorker
+  sidekiq_options "retry" => 2
+end
+
+class Stopper
+  def call(worker_class, job, queue, r)
+    raise ArgumentError unless r
+    yield if job["args"].first.odd?
+  end
+end
+
+class MiddlewareArguments
+  def call(worker_class, job, queue, redis)
+    $arguments_worker_class = worker_class
+    $arguments_job = job
+    $arguments_queue = queue
+    $arguments_redis = redis
+    yield
+  end
+end
+
+class DWorker < BaseWorker
+end
+
 describe Sidekiq::Client do
   before do
     @config = reset!
@@ -108,15 +165,6 @@ describe Sidekiq::Client do
       assert_equal pre + 1, q.size
     end
 
-    class MyWorker
-      include Sidekiq::Job
-    end
-
-    class QueuedWorker
-      include Sidekiq::Job
-      sidekiq_options queue: :flimflam
-    end
-
     it "enqueues" do
       assert_equal Sidekiq.default_job_options, MyWorker.get_sidekiq_options
       assert MyWorker.perform_async(1, 2)
@@ -138,13 +186,6 @@ describe Sidekiq::Client do
 
       after do
         Sidekiq.strict_args!(:raise)
-      end
-
-      class InterestingWorker
-        include Sidekiq::Job
-
-        def perform(an_argument)
-        end
       end
 
       it "enqueues jobs with a symbol as an argument" do
@@ -246,11 +287,6 @@ describe Sidekiq::Client do
           before do
             ActiveJob::Base.queue_adapter = :sidekiq
             ActiveJob::Base.logger = nil
-          end
-
-          class TestActiveJob < ActiveJob::Base
-            def perform(arg)
-            end
           end
 
           it "raises error with correct class name" do
@@ -362,40 +398,7 @@ describe Sidekiq::Client do
     end
   end
 
-  class BaseWorker
-    include Sidekiq::Job
-    sidekiq_options "retry" => "base"
-  end
-
-  class AWorker < BaseWorker
-  end
-
-  class BWorker < BaseWorker
-    sidekiq_options "retry" => "b"
-  end
-
-  class CWorker < BaseWorker
-    sidekiq_options "retry" => 2
-  end
-
   describe "client middleware" do
-    class Stopper
-      def call(worker_class, job, queue, r)
-        raise ArgumentError unless r
-        yield if job["args"].first.odd?
-      end
-    end
-
-    class MiddlewareArguments
-      def call(worker_class, job, queue, redis)
-        $arguments_worker_class = worker_class
-        $arguments_job = job
-        $arguments_queue = queue
-        $arguments_redis = redis
-        yield
-      end
-    end
-
     it "push sends correct arguments to middleware" do
       minimum_job_args = ["args", "class", "created_at", "enqueued_at", "jid", "queue"]
       @client.middleware do |chain|
@@ -441,9 +444,6 @@ describe Sidekiq::Client do
   end
 
   describe "sharding" do
-    class DWorker < BaseWorker
-    end
-
     it "allows sidekiq_options to point to different Redi" do
       conn = MiniTest::Mock.new
       conn.expect(:pipelined, [0, 1])

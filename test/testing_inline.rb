@@ -2,26 +2,26 @@
 
 require_relative "helper"
 
+class InlineError < RuntimeError; end
+
+class ParameterIsNotString < RuntimeError; end
+
+class InlineWorker
+  include Sidekiq::Job
+  def perform(pass)
+    raise ArgumentError, "no jid" unless jid
+    raise InlineError unless pass
+  end
+end
+
+class InlineWorkerWithTimeParam
+  include Sidekiq::Job
+  def perform(time)
+    raise ParameterIsNotString unless time.is_a?(String) || time.is_a?(Numeric)
+  end
+end
+
 describe "Sidekiq::Testing.inline" do
-  class InlineError < RuntimeError; end
-
-  class ParameterIsNotString < RuntimeError; end
-
-  class InlineWorker
-    include Sidekiq::Job
-    def perform(pass)
-      raise ArgumentError, "no jid" unless jid
-      raise InlineError unless pass
-    end
-  end
-
-  class InlineWorkerWithTimeParam
-    include Sidekiq::Job
-    def perform(time)
-      raise ParameterIsNotString unless time.is_a?(String) || time.is_a?(Numeric)
-    end
-  end
-
   before do
     require "sidekiq/testing/inline"
     Sidekiq::Testing.inline!

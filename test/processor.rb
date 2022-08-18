@@ -6,24 +6,64 @@ require "sidekiq/cli"
 require "sidekiq/api"
 require "sidekiq/processor"
 
-describe Sidekiq::Processor do
-  TestProcessorException = Class.new(StandardError)
-  TEST_PROC_EXCEPTION = TestProcessorException.new("kerboom!")
+TestProcessorException = Class.new(StandardError)
+TEST_PROC_EXCEPTION = TestProcessorException.new("kerboom!")
 
+class MockWorker
+  include Sidekiq::Worker
+  def perform(args)
+    raise TEST_PROC_EXCEPTION if args.to_s == "boom"
+    args.pop if args.is_a? Array
+    $invokes += 1
+  end
+end
+
+class ExceptionRaisingMiddleware
+  def initialize(raise_before_yield, raise_after_yield, skip)
+    @raise_before_yield = raise_before_yield
+    @raise_after_yield = raise_after_yield
+    @skip = skip
+  end
+
+  def call(worker, item, queue)
+    raise TEST_PROC_EXCEPTION if @raise_before_yield
+    yield unless @skip
+    raise TEST_PROC_EXCEPTION if @raise_after_yield
+  end
+end
+
+class ArgsMutatingServerMiddleware
+  def call(worker, item, queue)
+    item["args"] = item["args"].map do |arg|
+      arg.to_sym if arg.is_a?(String)
+    end
+    yield
+  end
+end
+
+class ArgsMutatingClientMiddleware
+  def call(worker, item, queue, redis_pool)
+    item["args"] = item["args"].map do |arg|
+      arg.to_s if arg.is_a?(Symbol)
+    end
+    yield
+  end
+end
+
+class CustomJobLogger < Sidekiq::JobLogger
+  def call(item, queue)
+    yield
+  rescue Exception
+    raise
+  end
+end
+
+describe Sidekiq::Processor do
   before do
     $invokes = 0
     @config = reset!
     @config[:fetch] = Sidekiq::BasicFetch.new(@config)
     @processor = ::Sidekiq::Processor.new(@config) { |*args| }
-  end
-
-  class MockWorker
-    include Sidekiq::Worker
-    def perform(args)
-      raise TEST_PROC_EXCEPTION if args.to_s == "boom"
-      args.pop if args.is_a? Array
-      $invokes += 1
-    end
   end
 
   def work(msg, queue = "queue:default")
@@ -139,20 +179,6 @@ describe Sidekiq::Processor do
   end
 
   describe "acknowledgement" do
-    class ExceptionRaisingMiddleware
-      def initialize(raise_before_yield, raise_after_yield, skip)
-        @raise_before_yield = raise_before_yield
-        @raise_after_yield = raise_after_yield
-        @skip = skip
-      end
-
-      def call(worker, item, queue)
-        raise TEST_PROC_EXCEPTION if @raise_before_yield
-        yield unless @skip
-        raise TEST_PROC_EXCEPTION if @raise_after_yield
-      end
-    end
-
     let(:raise_before_yield) { false }
     let(:raise_after_yield) { false }
     let(:skip_job) { false }
@@ -231,24 +257,6 @@ describe Sidekiq::Processor do
   end
 
   describe "retry" do
-    class ArgsMutatingServerMiddleware
-      def call(worker, item, queue)
-        item["args"] = item["args"].map do |arg|
-          arg.to_sym if arg.is_a?(String)
-        end
-        yield
-      end
-    end
-
-    class ArgsMutatingClientMiddleware
-      def call(worker, item, queue, redis_pool)
-        item["args"] = item["args"].map do |arg|
-          arg.to_s if arg.is_a?(Symbol)
-        end
-        yield
-      end
-    end
-
     before do
       @config.server_middleware do |chain|
         chain.prepend ArgsMutatingServerMiddleware
@@ -283,14 +291,6 @@ describe Sidekiq::Processor do
   end
 
   describe "custom job logger class" do
-    class CustomJobLogger < Sidekiq::JobLogger
-      def call(item, queue)
-        yield
-      rescue Exception
-        raise
-      end
-    end
-
     before do
       opts = @config
       opts[:job_logger] = CustomJobLogger

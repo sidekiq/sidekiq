@@ -4,16 +4,38 @@ require_relative "helper"
 require "sidekiq/api"
 require "active_support/core_ext/numeric/time"
 
+class MySetJob
+  include Sidekiq::Job
+  queue_as :foo
+  sidekiq_options "retry" => 12
+  def perform
+  end
+end
+
+class MyCustomJob
+  include Sidekiq::Job
+
+  def perform(recorder)
+    $my_recorder << ["work_performed"]
+  end
+end
+
+class MyCustomMiddleware
+  def initialize(name, recorder)
+    @name = name
+    @recorder = recorder
+  end
+
+  def call(*args)
+    @recorder << "#{@name}-before"
+    response = yield
+    @recorder << "#{@name}-after"
+    response
+  end
+end
+
 describe Sidekiq::Job do
   describe "#set" do
-    class MySetJob
-      include Sidekiq::Job
-      queue_as :foo
-      sidekiq_options "retry" => 12
-      def perform
-      end
-    end
-
     def setup
       @cfg = reset!
     end
@@ -116,28 +138,6 @@ describe Sidekiq::Job do
 
   describe "#perform_inline" do
     $my_recorder = []
-
-    class MyCustomJob
-      include Sidekiq::Job
-
-      def perform(recorder)
-        $my_recorder << ["work_performed"]
-      end
-    end
-
-    class MyCustomMiddleware
-      def initialize(name, recorder)
-        @name = name
-        @recorder = recorder
-      end
-
-      def call(*args)
-        @recorder << "#{@name}-before"
-        response = yield
-        @recorder << "#{@name}-after"
-        response
-      end
-    end
 
     it "executes middleware & runs job inline" do
       server_chain = Sidekiq::Middleware::Chain.new
