@@ -1,92 +1,88 @@
+<script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/metrics.js"></script>
 
-<h2><%= t('Metrics') %> / <%= h @name %></h2>
+<%
+  job_result = @query_result.job_results[@name]
+  hist_totals = job_result.hist.values.first.zip(*job_result.hist.values[1..-1]).map(&:sum)
+  bucket_labels =Sidekiq::Metrics::Histogram::LABELS
+  bucket_intervals =Sidekiq::Metrics::Histogram::BUCKET_INTERVALS.reverse
 
-<div class="row chart">
-  <div id="realtime" data-processed-label="<%= t('Processed') %>" data-failed-label="<%= t('Failed') %>"></div>
-</div>
+  # Replace INFINITY since it can't be represented as JSON
+  bucket_intervals[0] = bucket_intervals[1] * 2
+%>
 
-<% data = @resultset[:data] %>
-<div class="table_container">
-  <table class="table table-bordered table-striped table-hover">
-    <tbody>
-      <tr>
-        <th><%= t('Time') %></th>
-        <th><%= t('Processed') %></th>
-        <th><%= t('ExecutionTime') %></th>
-        <th><%= t('Failed') %></th>
-        <th><%= t('Deploy') %></th>
-        <th><%= t('Histogram') %></th>
-      </tr>
-      <% data.each do |hash| %>
-        <tr><td><%= hash[:time] %></td><td><%= hash[:p] %></td><td><%= hash[:ms] %></td><td><%= hash[:f] %></td><td><%= hash[:mark] %></td><td><%= hash[:hist] %></td></tr>
-      <% end %>
-    </tbody>
-  </table>
-</div>
+<% if job_result.totals["s"] > 0 %>
+  <div class="header-with-subheader">
+    <h1>
+      <a href="<%= root_path %>/metrics"><%= t(:metrics).to_s.titleize %></a> /
+      <%= h @name %>
+    </h1>
+    <h2>Histogram summary</h2>
+  </div>
 
-<p>
-Data from <%= @resultset[:starts_at] %> to <%= @resultset[:ends_at] %>
-</p>
+  <canvas id="hist-totals-chart"></canvas>
 
-<% atad = data.reverse %>
-<script type="text/javascript" src="<%= root_path %>javascripts/graph.js"></script>
-<script>
-var palette = new Rickshaw.Color.Palette();
-var data = [ {
-    name: "Processed",
-    color: palette.color(),
-    data: [ <% atad.each do |hash| %>
-      { x: <%= hash[:epoch] %>, y: <%= hash[:p] %> },
-    <% end %> ]
-  }, {
-    name: "Failed",
-    color: palette.color(),
-    data: [ <% atad.each do |hash| %>
-      { x: <%= hash[:epoch] %>, y: <%= hash[:f] %> },
-    <% end %>
-    ]
-  }, {
-    name: "Execution Time",
-    color: palette.color(),
-    data: [ <% atad.each do |hash| %>
-      { x: <%= hash[:epoch] %>, y: <%= hash[:ms] %> },
-    <% end %>
-    ]
-   } ];
+  <script>
+    window.histTotalsChart = new HistTotalsChart(
+      "hist-totals-chart",
+      <%= Sidekiq.dump_json({
+        series: hist_totals,
+        labels: bucket_labels,
+      }) %>
+    )
+  </script>
 
-// TODO What to do with this? Minutely hover detail with a histogram bar chart?
-var histogramData = [ <% atad.each do |hash| %>
-  { x: <%= hash[:epoch] %>, hist: <%= hash[:hist] %> },
-<% end %> ]
-var histogramLabels = <%= Sidekiq::Metrics::Histogram::LABELS.inspect %>;
+  <h2>Performance over time</h2>
 
-var timeInterval = 60000;
-var graphElement = document.getElementById("realtime");
+  <canvas id="hist-bubble-chart"></canvas>
 
-var graph = new Rickshaw.Graph({
-  element: graphElement,
-  width: responsiveWidth(),
-  renderer: 'line',
-  interpolation: 'linear',
-  series: data,
-});
-var x_axis = new Rickshaw.Graph.Axis.Time( { graph: graph } );
+  <script>
+    window.histBubbleChart = new HistBubbleChart(
+      "hist-bubble-chart",
+      <%= Sidekiq.dump_json({
+        hist: job_result.hist,
+        marks: @query_result.marks.map { |m| [m.bucket, m.label] },
+        labels: @query_result.buckets,
+        histIntervals: bucket_intervals,
+      }) %>
+    )
+  </script>
 
-var y_axis = new Rickshaw.Graph.Axis.Y( {
-  graph: graph,
-  tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-  ticksTreatment: 'glow'
-});
+  <div class="table_container">
+    <table class="table table-bordered table-striped table-hover">
+      <tbody>
+        <tr>
+          <th><%= t('Time') %></th>
+          <th><%= t('Processed') %></th>
+          <th><%= t('Failed') %></th>
+          <th><%= t('ExecutionTime') %></th>
+          <th><%= t('AvgExecutionTime') %></th>
+        </tr>
+        <% @query_result.buckets.reverse.each do |bucket| %>
+          <tr>
+            <td><%= bucket %></td>
+            <td><%= job_result.series.dig("p", bucket) %></td>
+            <td><%= job_result.series.dig("f", bucket) %></td>
+            <% if (total_sec = job_result.series.dig("s", bucket)) > 0 %>
+              <td><%= total_sec.round(2) %> seconds</td>
+              <td><%= job_result.series_avg("s")[bucket].round(2) %> seconds</td>
+            <% else %>
+              <td>&mdash;</td>
+              <td>&mdash;</td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <h1>
+    <a href="<%= root_path %>/metrics"><%= t(:metrics).to_s.titleize %></a> /
+    <%= h @name %>
+  </h1>
 
-graph.render();
+  <div class="alert alert-success"><%= t('NoJobMetricsFound') %></div>
+<% end %>
 
-var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-	graph: graph,
-	// formatter: function(series, x, y) {
-		// var date = '<span class="date">' + new Date(x * 1000).toUTCString() + '</span>';
-		// var swatch = '<span class="detail_swatch" style="background-color: ' + series.color + '"></span>';
-		// var content = swatch + series.name + ": " + parseInt(y) + '<br>' + date;
-		// return content;
-	// }
-} );
-</script>
+<p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p>
