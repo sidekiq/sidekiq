@@ -16,7 +16,7 @@ module Sidekiq
       proc { "sidekiq" },
       proc { Sidekiq::VERSION },
       proc { |me, data| data["tag"] },
-      proc { |me, data| "[#{Processor::WORK_STATE.size} of #{data["concurrency"]} busy]" },
+      proc { |me, data| "[#{Processor::WORK_STATE.size} of #{me.config.capsules.map(&:concurrency)} busy]" },
       proc { |me, data| "stopping" if me.stopping? }
     ]
 
@@ -24,8 +24,9 @@ module Sidekiq
 
     def initialize(config)
       @config = config
-      @config[:fetch] ||= BasicFetch.new(@config)
-      @manager = Sidekiq::Manager.new(@config)
+      @managers = config.capsules.map do |cap|
+        Sidekiq::Manager.new(cap)
+      end
       @poller = Sidekiq::Scheduled::Poller.new(@config)
       @done = false
     end
@@ -33,14 +34,14 @@ module Sidekiq
     def run
       @thread = safe_thread("heartbeat", &method(:start_heartbeat))
       @poller.start
-      @manager.start
+      @managers.each(&:start)
     end
 
     # Stops this instance from processing any more jobs,
     #
     def quiet
       @done = true
-      @manager.quiet
+      @managers.each(&:quiet)
       @poller.terminate
     end
 
@@ -49,15 +50,14 @@ module Sidekiq
       deadline = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) + @config[:timeout]
 
       @done = true
-      @manager.quiet
+      @managers.each(&:quiet)
       @poller.terminate
 
-      @manager.stop(deadline)
-
-      # Requeue everything in case there was a thread which fetched a job while the process was stopped.
-      # This call is a no-op in Sidekiq but necessary for Sidekiq Pro.
-      strategy = @config[:fetch]
-      strategy.bulk_requeue([], @config)
+      @managers.map do |mgr|
+        Thread.new do
+          mgr.stop(deadline)
+        end
+      end.each(&:join)
 
       clear_heartbeat
     end
@@ -107,7 +107,7 @@ module Sidekiq
 
       nowdate = Time.now.utc.strftime("%Y-%m-%d")
       begin
-        Sidekiq.redis do |conn|
+        redis do |conn|
           conn.pipelined do |pipeline|
             pipeline.incrby("stat:processed", procd)
             pipeline.incrby("stat:processed:#{nowdate}", procd)

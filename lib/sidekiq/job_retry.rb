@@ -70,7 +70,7 @@ module Sidekiq
 
     def initialize(config)
       @config = config
-      @max_retries = @config[:max_retries] || DEFAULT_MAX_RETRY_ATTEMPTS
+      @max_retries = Sidekiq.default_configuration[:max_retries] || DEFAULT_MAX_RETRY_ATTEMPTS
     end
 
     # The global retry handler requires only the barest of data.

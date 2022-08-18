@@ -27,10 +27,10 @@ module Sidekiq # :nodoc:
     }
 
     def initialize(config)
-      raise ArgumentError, "missing queue list" unless config[:queues]
+      raise ArgumentError, "missing queue list" unless config.queues
       @config = config
-      @strictly_ordered_queues = !!@config[:strict]
-      @queues = @config[:queues].map { |q| "queue:#{q}" }
+      @strictly_ordered_queues = !!@config.strict
+      @queues = config.queues.map { |q| "queue:#{q}" }
       if @strictly_ordered_queues
         @queues.uniq!
         @queues << TIMEOUT
@@ -50,7 +50,7 @@ module Sidekiq # :nodoc:
       UnitOfWork.new(queue, job, config) if queue
     end
 
-    def bulk_requeue(inprogress, options)
+    def bulk_requeue(inprogress, _)
       return if inprogress.empty?
 
       logger.debug { "Re-queueing terminated jobs" }

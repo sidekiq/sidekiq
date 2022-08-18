@@ -10,6 +10,7 @@ require "fileutils"
 
 require "sidekiq"
 require "sidekiq/component"
+require "sidekiq/capsule"
 require "sidekiq/launcher"
 
 module Sidekiq # :nodoc:
@@ -23,6 +24,7 @@ module Sidekiq # :nodoc:
 
     def parse(args = ARGV.dup)
       @config ||= Sidekiq::Config.new
+      @config.capsules << Sidekiq::Capsule.new("default", @config)
 
       setup_options(args)
       initialize_logger
@@ -91,9 +93,9 @@ module Sidekiq # :nodoc:
 
       # Since the user can pass us a connection pool explicitly in the initializer, we
       # need to verify the size is large enough or else Sidekiq's performance is dramatically slowed.
-      cursize = @config.redis_pool.size
-      needed = @config[:concurrency] + 2
-      raise "Sidekiq's pool of #{cursize} Redis connections is too small, please increase the size to at least #{needed}" if cursize < needed
+      @config.capsules.each do |cap|
+        raise ArgumentError, "Pool size too small" if cap.redis_pool.size < cap.concurrency
+      end
 
       # cache process identity
       @config[:identity] = identity
@@ -262,6 +264,8 @@ module Sidekiq # :nodoc:
       # merge with defaults
       # p opts
       @config.merge!(opts)
+      @config.queues = opts[:queues]
+      @config.concurrency = opts[:concurrency] || 10
       # p @config.options
     end
 
@@ -304,7 +308,7 @@ module Sidekiq # :nodoc:
         die(1)
       end
 
-      [:concurrency, :timeout].each do |opt|
+      [:timeout].each do |opt|
         raise ArgumentError, "#{opt}: #{@config[opt]} is not a valid value" if @config[opt].to_i <= 0
       end
     end
@@ -319,7 +323,7 @@ module Sidekiq # :nodoc:
     def option_parser(opts)
       parser = OptionParser.new { |o|
         o.on "-c", "--concurrency INT", "processor threads to use" do |arg|
-          opts[:concurrency] = Integer(arg)
+          config.concurrency = Integer(arg)
         end
 
         o.on "-d", "--daemon", "Daemonize process" do |arg|
@@ -335,8 +339,8 @@ module Sidekiq # :nodoc:
         end
 
         o.on "-q", "--queue QUEUE[,WEIGHT]", "Queues to process with optional weights" do |arg|
-          queue, weight = arg.split(",")
-          parse_queue opts, queue, weight
+          opts[:queues] ||= []
+          opts[:queues] << arg
         end
 
         o.on "-r", "--require [PATH|DIR]", "Location of Rails application with jobs or file to require" do |arg|
@@ -396,21 +400,7 @@ module Sidekiq # :nodoc:
       opts = opts.merge(opts.delete(environment.to_sym) || {})
       opts.delete(:strict)
 
-      parse_queues(opts, opts.delete(:queues) || [])
-
       opts
-    end
-
-    def parse_queues(opts, queues_and_weights)
-      queues_and_weights.each { |queue_and_weight| parse_queue(opts, *queue_and_weight) }
-    end
-
-    def parse_queue(opts, queue, weight = nil)
-      opts[:queues] ||= []
-      opts[:strict] = true if opts[:strict].nil?
-      raise ArgumentError, "queues: #{queue} cannot be defined twice" if opts[:queues].include?(queue)
-      [weight.to_i, 1].max.times { opts[:queues] << queue.to_s }
-      opts[:strict] = false if weight.to_i > 0
     end
 
     def rails_app?

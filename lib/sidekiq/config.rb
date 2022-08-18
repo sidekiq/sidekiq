@@ -41,18 +41,22 @@ module Sidekiq
     def initialize(options = {})
       @options = DEFAULTS.merge(options)
       @options[:error_handlers] << ERROR_HANDLER if @options[:error_handlers].empty?
-      @capsules = [Capsule.new]
       @directory = {}
+      @redis_config = {}
+      @capsules = []
     end
 
     def_delegators :@options, :[], :[]=, :fetch, :key?, :has_key?, :merge!
     attr_reader :options
+    attr_reader :capsules
 
+    # LEGACY: edits the default capsule
     # config.concurrency = 5
     def concurrency=(val)
       @capsules.first.concurrency = Integer(val)
     end
 
+    # LEGACY: edits the default capsule
     # config.queues = %w( high default low )                 # strict
     # config.queues = %w( high,3 default,2 low,1 )           # weighted
     # config.queues = %w( feature1,1 feature2,1 feature3,1 ) # random
@@ -64,6 +68,62 @@ module Sidekiq
     # by explicitly setting all weights to 1.
     def queues=(val)
       @capsules.first.queues = val
+    end
+
+    def queues
+      @capsules.first.queues
+    end
+
+    def client_middleware
+      @client_chain ||= Sidekiq::Middleware::Chain.new
+      yield @client_chain if block_given?
+      @client_chain
+    end
+
+    def server_middleware
+      @server_chain ||= Sidekiq::Middleware::Chain.new
+      yield @server_chain if block_given?
+      @server_chain
+    end
+
+    # register a new queue processing subsystem
+    def capsule(name)
+      cap = Sidekiq::Capsule.new(name, self)
+      yield cap
+      @capsules << cap
+    end
+
+    # All capsules must use the same Redis configuration
+    def redis=(hash)
+      @redis_config = @redis_config.merge(hash)
+    end
+
+    def redis_pool
+      # this is our global housekeeping pool. each capsule has its
+      # own pool for executing threads.
+      @redis ||= new_redis_pool(5)
+    end
+
+    def new_redis_pool(size)
+      # connection pool is lazy, it will not create connections unless you actually need them
+      # so don't be skimpy!
+      RedisConnection.create(@redis_config.merge(size: size, logger: logger))
+    end
+
+    def redis_info
+      redis do |conn|
+        conn.info
+      rescue RedisClientAdapter::CommandError => ex
+        # 2850 return fake version when INFO command has (probably) been renamed
+        raise unless /unknown command/.match?(ex.message)
+        {
+          "redis_version" => "9.9.9",
+          "uptime_in_days" => "9999",
+          "connected_clients" => "9999",
+          "used_memory_human" => "9P",
+          "used_memory_peak_human" => "9P"
+        }.freeze
+      end
     end
 
     def redis
@@ -88,75 +148,15 @@ module Sidekiq
       end
     end
 
+    # register global singletons which can be accessed elsewhere
     def register(name, instance)
       @directory[name] = instance
     end
 
+    # find a singleton
     def lookup(name)
       # JNDI is just a fancy name for a hash lookup
       @directory[name]
-    end
-
-    def redis_info
-      redis do |conn|
-        conn.info
-      rescue RedisClientAdapter::CommandError => ex
-        # 2850 return fake version when INFO command has (probably) been renamed
-        raise unless /unknown command/.match?(ex.message)
-        {
-          "redis_version" => "9.9.9",
-          "uptime_in_days" => "9999",
-          "connected_clients" => "9999",
-          "used_memory_human" => "9P",
-          "used_memory_peak_human" => "9P"
-        }.freeze
-      end
-    end
-
-    def redis_pool
-      # connection pool is lazy, it will not create connections unless you actually need them
-      # so don't be skimpy!
-      @redis ||= RedisConnection.create(size: required_pool_size, logger: logger)
-    end
-
-    def redis=(hash)
-      pool = if hash.is_a?(ConnectionPool)
-        hash
-      else
-        RedisConnection.create(hash.merge(size: required_pool_size, logger: logger))
-      end
-      raise ArgumentError, "Your Redis connection pool is too small for Sidekiq. Your pool has #{pool.size} connections but must have at least #{required_pool_size}" if pool.size < required_pool_size
-      @redis = pool
-    end
-
-    # Sidekiq needs many concurrent Redis connections.
-    #
-    # We need a connection for each Processor.
-    # We need a connection for Pro's real-time change listener
-    # We need a connection to various features to call Redis every few seconds:
-    #   - the process heartbeat.
-    #   - enterprise's leader election
-    #   - enterprise's cron support
-    def required_pool_size
-      if Sidekiq.server?
-        self[:concurrency] + 3
-      elsif ENV["RAILS_MAX_THREADS"]
-        Integer(ENV["RAILS_MAX_THREADS"])
-      else
-        5
-      end
-    end
-
-    def client_middleware
-      @client_chain ||= Middleware::Chain.new
-      yield @client_chain if block_given?
-      @client_chain
-    end
-
-    def server_middleware
-      @server_chain ||= Middleware::Chain.new
-      yield @server_chain if block_given?
-      @server_chain
     end
 
     ##
@@ -170,27 +170,6 @@ module Sidekiq
     # end
     def death_handlers
       @options[:death_handlers]
-    end
-
-    def logger
-      @logger ||= Sidekiq::Logger.new($stdout, level: :info).tap do |log|
-        log.level = Logger::INFO
-        log.formatter = if ENV["DYNO"]
-          Sidekiq::Logger::Formatters::WithoutTimestamp.new
-        else
-          Sidekiq::Logger::Formatters::Pretty.new
-        end
-      end
-    end
-
-    def logger=(logger)
-      if logger.nil?
-        self.logger.level = Logger::FATAL
-        return
-      end
-
-      logger.extend(Sidekiq::LoggingUtils)
-      @logger = logger
     end
 
     # How frequently Redis should be checked by a random Sidekiq process for
@@ -225,6 +204,27 @@ module Sidekiq
       raise ArgumentError, "Symbols only please: #{event}" unless event.is_a?(Symbol)
       raise ArgumentError, "Invalid event name: #{event}" unless @options[:lifecycle_events].key?(event)
       @options[:lifecycle_events][event] << block
+    end
+
+    def logger
+      @logger ||= Sidekiq::Logger.new($stdout, level: :info).tap do |log|
+        log.level = Logger::INFO
+        log.formatter = if ENV["DYNO"]
+          Sidekiq::Logger::Formatters::WithoutTimestamp.new
+        else
+          Sidekiq::Logger::Formatters::Pretty.new
+        end
+      end
+    end
+
+    def logger=(logger)
+      if logger.nil?
+        self.logger.level = Logger::FATAL
+        return
+      end
+
+      logger.extend(Sidekiq::LoggingUtils)
+      @logger = logger
     end
 
     # INTERNAL USE ONLY

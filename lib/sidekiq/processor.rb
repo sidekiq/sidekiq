@@ -27,17 +27,17 @@ module Sidekiq
     attr_reader :thread
     attr_reader :job
 
-    def initialize(options, &block)
-      @config = options
+    def initialize(cap, &block)
+      @config = cap
       @callback = block
       @down = false
       @done = false
       @job = nil
       @thread = nil
-      @strategy = options[:fetch]
-      @reloader = options[:reloader] || proc { |&block| block.call }
-      @job_logger = (options[:job_logger] || Sidekiq::JobLogger).new(config.logger)
-      @retrier = Sidekiq::JobRetry.new(options)
+      @strategy = cap.fetcher
+      @reloader = Sidekiq.default_configuration[:reloader] || proc { |&block| block.call }
+      @job_logger = Sidekiq::JobLogger.new(logger)
+      @retrier = Sidekiq::JobRetry.new(cap)
     end
 
     def terminate(wait = false)
@@ -59,7 +59,7 @@ module Sidekiq
     end
 
     def start
-      @thread ||= safe_thread("processor", &method(:run))
+      @thread ||= safe_thread("#{config.name}/processor", &method(:run))
     end
 
     private unless $TESTING

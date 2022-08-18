@@ -18,8 +18,7 @@ module Sidekiq
   #   stat = Sidekiq::Stats.new
   #   stat.processed
   class Stats
-    def initialize(pool: nil)
-      @pool = pool || Sidekiq.default_configuration.redis_pool
+    def initialize
       fetch_stats_fast!
     end
 
@@ -60,7 +59,7 @@ module Sidekiq
     end
 
     def queues
-      redis do |conn|
+      Sidekiq.redis do |conn|
         queues = conn.sscan_each("queues").to_a
 
         lengths = conn.pipelined { |pipeline|
@@ -77,7 +76,7 @@ module Sidekiq
     # O(1) redis calls
     # @api private
     def fetch_stats_fast!
-      pipe1_res = redis { |conn|
+      pipe1_res = Sidekiq.redis { |conn|
         conn.pipelined do |pipeline|
           pipeline.get("stat:processed")
           pipeline.get("stat:failed")
@@ -117,15 +116,15 @@ module Sidekiq
     # O(number of processes + number of queues) redis calls
     # @api private
     def fetch_stats_slow!
-      processes = redis { |conn|
+      processes = Sidekiq.redis { |conn|
         conn.sscan_each("processes").to_a
       }
 
-      queues = redis { |conn|
+      queues = Sidekiq.redis { |conn|
         conn.sscan_each("queues").to_a
       }
 
-      pipe2_res = redis { |conn|
+      pipe2_res = Sidekiq.redis { |conn|
         conn.pipelined do |pipeline|
           processes.each { |key| pipeline.hget(key, "busy") }
           queues.each { |queue| pipeline.llen("queue:#{queue}") }
@@ -175,7 +174,6 @@ module Sidekiq
         raise ArgumentError if days_previous < 1 || days_previous > (5 * 365)
         @days_previous = days_previous
         @start_date = start_date || Time.now.utc.to_date
-        @pool = pool || Sidekiq.default_configuration.redis_pool
       end
 
       def processed
@@ -196,15 +194,10 @@ module Sidekiq
 
         keys = dates.map { |datestr| "stat:#{stat}:#{datestr}" }
 
-        begin
-          redis do |conn|
-            conn.mget(keys).each_with_index do |value, idx|
-              stat_hash[dates[idx]] = value ? value.to_i : 0
-            end
+        Sidekiq.redis do |conn|
+          conn.mget(keys).each_with_index do |value, idx|
+            stat_hash[dates[idx]] = value ? value.to_i : 0
           end
-        rescue RedisClientAdapter::CommandError
-          # mget will trigger a CROSSSLOT error when run against a Cluster
-          # TODO Someone want to add Cluster support?
         end
 
         stat_hash
