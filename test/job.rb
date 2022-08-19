@@ -36,7 +36,7 @@ end
 
 describe Sidekiq::Job do
   describe "#set" do
-    def setup
+    before do
       @cfg = reset!
     end
 

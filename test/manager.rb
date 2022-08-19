@@ -6,22 +6,21 @@ require "sidekiq/manager"
 describe Sidekiq::Manager do
   before do
     @config = reset!
-    @config[:fetch] = Sidekiq::BasicFetch.new(@config)
+    @cap = Sidekiq::Capsule.new("default", @config)
+    @config.capsules << @cap
   end
 
   def new_manager
-    Sidekiq::Manager.new(@config)
+    Sidekiq::Manager.new(@cap)
   end
 
   it "creates N processor instances" do
     mgr = new_manager
-    assert_equal @config[:concurrency], mgr.workers.size
+    assert_equal @cap.concurrency, mgr.workers.size
   end
 
   it "shuts down the system" do
     mgr = new_manager
-    # mgr.config.logger = ::Logger.new($stdout)
-    # mgr.config.logger.level = Logger::DEBUG
     mgr.start
     mgr.stop(::Process.clock_gettime(::Process::CLOCK_MONOTONIC))
   end

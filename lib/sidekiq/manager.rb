@@ -33,12 +33,12 @@ module Sidekiq
       @done = false
       @workers = Set.new
       @plock = Mutex.new
-    end
-
-    def start
       @count.times do
         @workers << Processor.new(@config, &method(:processor_result))
       end
+    end
+
+    def start
       @workers.each(&:start)
     end
 
@@ -48,12 +48,10 @@ module Sidekiq
 
       logger.info { "Terminating quiet threads for #{capsule.name} capsule" }
       @workers.each(&:terminate)
-      fire_event(:quiet, reverse: true)
     end
 
     def stop(deadline)
       quiet
-      fire_event(:shutdown, reverse: true)
 
       # some of the shutdown events can be async,
       # we don't have any way to know when they're done but

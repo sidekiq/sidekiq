@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "sidekiq/manager"
+require "sidekiq/capsule"
 require "sidekiq/scheduled"
 require "sidekiq/ring_buffer"
 
@@ -15,11 +16,11 @@ module Sidekiq
       proc { "sidekiq" },
       proc { Sidekiq::VERSION },
       proc { |me, data| data["tag"] },
-      proc { |me, data| "[#{Processor::WORK_STATE.size} of #{me.config.capsules.map(&:concurrency)} busy]" },
+      proc { |me, data| "[#{Processor::WORK_STATE.size} of #{me.config.capsules.map { |cap| cap.concurrency }.sum} busy]" },
       proc { |me, data| "stopping" if me.stopping? }
     ]
 
-    attr_accessor :manager, :poller, :fetcher
+    attr_accessor :managers, :poller
 
     def initialize(config)
       @config = config
@@ -39,24 +40,27 @@ module Sidekiq
     # Stops this instance from processing any more jobs,
     #
     def quiet
+      return if @done
+
       @done = true
       @managers.each(&:quiet)
       @poller.terminate
+      fire_event(:quiet, reverse: true)
     end
 
     # Shuts down this Sidekiq instance. Waits up to the deadline for all jobs to complete.
     def stop
       deadline = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) + @config[:timeout]
 
-      @done = true
-      @managers.each(&:quiet)
-      @poller.terminate
-
-      @managers.map do |mgr|
+      quiet
+      stoppers = @managers.map do |mgr|
         Thread.new do
           mgr.stop(deadline)
         end
-      end.each(&:join)
+      end
+
+      fire_event(:shutdown, reverse: true)
+      stoppers.each(&:join)
 
       clear_heartbeat
     end
@@ -235,8 +239,8 @@ module Sidekiq
         "started_at" => Time.now.to_f,
         "pid" => ::Process.pid,
         "tag" => @config[:tag] || "",
-        "concurrency" => @config[:concurrency],
-        "queues" => @config[:queues].uniq,
+        "concurrency" => @config.capsules.map { |cap| cap.concurrency }.sum,
+        "queues" => @config.capsules.map { |cap| cap.queues }.flatten.uniq,
         "labels" => @config[:labels],
         "identity" => identity
       }

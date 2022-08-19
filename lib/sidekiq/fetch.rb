@@ -26,9 +26,9 @@ module Sidekiq # :nodoc:
       end
     }
 
-    def initialize(config)
-      raise ArgumentError, "missing queue list" unless config.queues
-      @config = config
+    def initialize(cap)
+      raise ArgumentError, "missing queue list" unless cap.queues
+      @config = cap
       @strictly_ordered_queues = !!@config.strict
       @queues = config.queues.map { |q| "queue:#{q}" }
       if @strictly_ordered_queues

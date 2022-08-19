@@ -4,441 +4,438 @@ require_relative "helper"
 require "sidekiq/cli"
 
 describe Sidekiq::CLI do
+  before do
+    @logdev = StringIO.new
+    @config = reset!
+    @config.logger = Logger.new(@logdev)
+    @cli = Sidekiq::CLI.new.tap { |c| c.config = config }
+  end
+
+  attr_reader :config
+  attr_reader :logdev
+
+  def queues
+    @cli.config.capsules.first.queues
+  end
+
+  def concurrency
+    @cli.config.capsules.first.concurrency
+  end
+
+  def strict
+    @cli.config.capsules.first.strict
+  end
+
   describe "#parse" do
-    before do
-      @logdev = StringIO.new
-      @config = reset!
-      @config.logger = Logger.new(@logdev)
-    end
+    describe "options" do
+      it "accepts -r" do
+        @cli.parse(%w[sidekiq -r ./test/fake_env.rb])
+        assert_equal "./test/fake_env.rb", config[:require]
+      end
 
-    attr_reader :config
-    attr_reader :logdev
+      describe "concurrency" do
+        it "accepts with -c" do
+          @cli.parse(%w[sidekiq -c 60 -r ./test/fake_env.rb])
 
-    subject do
-      Sidekiq::CLI.new.tap { |c| c.config = config }
-    end
+          assert_equal 60, concurrency
+        end
 
-    describe "#parse" do
-      describe "options" do
-        describe "require" do
-          it "accepts with -r" do
-            subject.parse(%w[sidekiq -r ./test/fake_env.rb])
+        describe "when concurrency is empty and RAILS_MAX_THREADS env var is set" do
+          before do
+            ENV["RAILS_MAX_THREADS"] = "9"
+          end
 
-            assert_equal "./test/fake_env.rb", config[:require]
+          after do
+            ENV.delete("RAILS_MAX_THREADS")
+          end
+
+          it "sets concurrency from RAILS_MAX_THREADS env var" do
+            @cli.parse(%w[sidekiq -r ./test/fake_env.rb])
+
+            assert_equal 9, concurrency
+          end
+
+          it "option overrides RAILS_MAX_THREADS env var" do
+            @cli.parse(%w[sidekiq -c 60 -r ./test/fake_env.rb])
+
+            assert_equal 60, concurrency
+          end
+        end
+      end
+
+      describe "setting internal options via the config file" do
+        describe "setting the `strict` option via the config file" do
+          it "discards the `strict` option specified via the config file" do
+            @cli.parse(%w[sidekiq -C ./test/config_with_internal_options.yml])
+
+            assert_equal true, !!strict
+          end
+        end
+      end
+
+      describe "queues" do
+        it "accepts with -q" do
+          @cli.parse(%w[sidekiq -q foo -r ./test/fake_env.rb])
+
+          assert_equal ["foo"], queues
+        end
+
+        describe "when weights are not present" do
+          it "accepts queues without weights" do
+            @cli.parse(%w[sidekiq -q foo -q bar -r ./test/fake_env.rb])
+
+            assert_equal ["foo", "bar"], queues
+          end
+
+          it "sets strictly ordered queues" do
+            @cli.parse(%w[sidekiq -q foo -q bar -r ./test/fake_env.rb])
+
+            assert_equal true, !!strict
           end
         end
 
-        describe "concurrency" do
-          it "accepts with -c" do
-            subject.parse(%w[sidekiq -c 60 -r ./test/fake_env.rb])
+        describe "when weights are present" do
+          it "accepts queues with weights" do
+            @cli.parse(%w[sidekiq -q foo,3 -q bar -r ./test/fake_env.rb])
 
-            assert_equal 60, config[:concurrency]
+            assert_equal ["foo", "foo", "foo", "bar"], queues
           end
 
-          describe "when concurrency is empty and RAILS_MAX_THREADS env var is set" do
-            before do
-              ENV["RAILS_MAX_THREADS"] = "9"
-            end
+          it "does not set strictly ordered queues" do
+            @cli.parse(%w[sidekiq -q foo,3 -q bar -r ./test/fake_env.rb])
 
-            after do
-              ENV.delete("RAILS_MAX_THREADS")
-            end
-
-            it "sets concurrency from RAILS_MAX_THREADS env var" do
-              subject.parse(%w[sidekiq -r ./test/fake_env.rb])
-
-              assert_equal 9, config[:concurrency]
-            end
-
-            it "option overrides RAILS_MAX_THREADS env var" do
-              subject.parse(%w[sidekiq -c 60 -r ./test/fake_env.rb])
-
-              assert_equal 60, config[:concurrency]
-            end
+            assert_equal false, !!strict
           end
         end
 
-        describe "setting internal options via the config file" do
-          describe "setting the `strict` option via the config file" do
-            it "discards the `strict` option specified via the config file" do
-              subject.parse(%w[sidekiq -C ./test/config_with_internal_options.yml])
+        it "accepts queues with multi-word names" do
+          @cli.parse(%w[sidekiq -q queue_one -q queue-two -r ./test/fake_env.rb])
 
-              assert_equal true, !!config[:strict]
-            end
-          end
+          assert_equal ["queue_one", "queue-two"], queues
         end
 
-        describe "queues" do
-          it "accepts with -q" do
-            subject.parse(%w[sidekiq -q foo -r ./test/fake_env.rb])
+        it "accepts queues with dots in the name" do
+          @cli.parse(%w[sidekiq -q foo.bar -r ./test/fake_env.rb])
 
-            assert_equal ["foo"], config[:queues]
-          end
-
-          describe "when weights are not present" do
-            it "accepts queues without weights" do
-              subject.parse(%w[sidekiq -q foo -q bar -r ./test/fake_env.rb])
-
-              assert_equal ["foo", "bar"], config[:queues]
-            end
-
-            it "sets strictly ordered queues" do
-              subject.parse(%w[sidekiq -q foo -q bar -r ./test/fake_env.rb])
-
-              assert_equal true, !!config[:strict]
-            end
-          end
-
-          describe "when weights are present" do
-            it "accepts queues with weights" do
-              subject.parse(%w[sidekiq -q foo,3 -q bar -r ./test/fake_env.rb])
-
-              assert_equal ["foo", "foo", "foo", "bar"], config[:queues]
-            end
-
-            it "does not set strictly ordered queues" do
-              subject.parse(%w[sidekiq -q foo,3 -q bar -r ./test/fake_env.rb])
-
-              assert_equal false, !!config[:strict]
-            end
-          end
-
-          it "accepts queues with multi-word names" do
-            subject.parse(%w[sidekiq -q queue_one -q queue-two -r ./test/fake_env.rb])
-
-            assert_equal ["queue_one", "queue-two"], config[:queues]
-          end
-
-          it "accepts queues with dots in the name" do
-            subject.parse(%w[sidekiq -q foo.bar -r ./test/fake_env.rb])
-
-            assert_equal ["foo.bar"], config[:queues]
-          end
-
-          describe "when duplicate queue names" do
-            it "raises an argument error" do
-              assert_raises(ArgumentError) { subject.parse(%w[sidekiq -q foo -q foo -r ./test/fake_env.rb]) }
-              assert_raises(ArgumentError) { subject.parse(%w[sidekiq -q foo,3 -q foo,1 -r ./test/fake_env.rb]) }
-            end
-          end
-
-          describe "when queues are empty" do
-            describe "when no queues are specified via -q" do
-              it "sets 'default' queue" do
-                subject.parse(%w[sidekiq -r ./test/fake_env.rb])
-
-                assert_equal ["default"], config[:queues]
-              end
-            end
-
-            describe "when no queues are specified via the config file" do
-              it "sets 'default' queue" do
-                subject.parse(%w[sidekiq -C ./test/config_empty.yml -r ./test/fake_env.rb])
-
-                assert_equal ["default"], config[:queues]
-              end
-            end
-          end
+          assert_equal ["foo.bar"], queues
         end
 
-        describe "timeout" do
-          it "accepts with -t" do
-            subject.parse(%w[sidekiq -t 30 -r ./test/fake_env.rb])
+        describe "when queues are empty" do
+          describe "when no queues are specified via -q" do
+            it "sets 'default' queue" do
+              @cli.parse(%w[sidekiq -r ./test/fake_env.rb])
 
-            assert_equal 30, config[:timeout]
-          end
-        end
-
-        describe "verbose" do
-          it "accepts with -v" do
-            subject.parse(%w[sidekiq -v -r ./test/fake_env.rb])
-
-            assert_equal Logger::DEBUG, @config.logger.level
-          end
-        end
-
-        describe "config file" do
-          it "accepts with -C" do
-            subject.parse(%w[sidekiq -C ./test/config.yml])
-
-            assert_equal "./test/config.yml", config[:config_file]
-            refute config[:verbose]
-            assert_equal "./test/fake_env.rb", config[:require]
-            assert_nil config[:environment]
-            assert_equal 50, config[:concurrency]
-            assert_equal 2, config[:queues].count { |q| q == "very_often" }
-            assert_equal 1, config[:queues].count { |q| q == "seldom" }
-          end
-
-          it "accepts stringy keys" do
-            subject.parse(%w[sidekiq -C ./test/config_string.yml])
-
-            assert_equal "./test/config_string.yml", config[:config_file]
-            refute config[:verbose]
-            assert_equal "./test/fake_env.rb", config[:require]
-            assert_nil config[:environment]
-            assert_equal 50, config[:concurrency]
-            assert_equal 2, config[:queues].count { |q| q == "very_often" }
-            assert_equal 1, config[:queues].count { |q| q == "seldom" }
-          end
-
-          it "accepts environment specific config" do
-            subject.parse(%w[sidekiq -e staging -C ./test/config_environment.yml])
-
-            assert_equal "./test/config_environment.yml", config[:config_file]
-            refute config[:verbose]
-            assert_equal "./test/fake_env.rb", config[:require]
-            assert_equal "staging", config[:environment]
-            assert_equal 50, config[:concurrency]
-            assert_equal 2, config[:queues].count { |q| q == "very_often" }
-            assert_equal 1, config[:queues].count { |q| q == "seldom" }
-          end
-
-          it "accepts environment specific config with alias" do
-            subject.parse(%w[sidekiq -e staging -C ./test/config_with_alias.yml])
-            assert_equal "./test/config_with_alias.yml", config[:config_file]
-            refute config[:verbose]
-            assert_equal "./test/fake_env.rb", config[:require]
-            assert_equal "staging", config[:environment]
-            assert_equal 50, config[:concurrency]
-            assert_equal 2, config[:queues].count { |q| q == "very_often" }
-            assert_equal 1, config[:queues].count { |q| q == "seldom" }
-
-            subject.parse(%w[sidekiq -e production -C ./test/config_with_alias.yml])
-            assert_equal "./test/config_with_alias.yml", config[:config_file]
-            assert config[:verbose]
-            assert_equal "./test/fake_env.rb", config[:require]
-            assert_equal "production", config[:environment]
-            assert_equal 50, config[:concurrency]
-            assert_equal 2, config[:queues].count { |q| q == "very_often" }
-            assert_equal 1, config[:queues].count { |q| q == "seldom" }
-          end
-
-          it "exposes ERB expected __FILE__ and __dir__" do
-            given_path = "./test/config__FILE__and__dir__.yml"
-            expected_file = File.expand_path(given_path)
-            # As per Ruby's Kernel module docs, __dir__ is equivalent to File.dirname(File.realpath(__FILE__))
-            expected_dir = File.dirname(File.realpath(expected_file))
-
-            subject.parse(%W[sidekiq -C #{given_path}])
-
-            assert_equal(expected_file, config.fetch(:__FILE__))
-            assert_equal(expected_dir, config.fetch(:__dir__))
-          end
-        end
-
-        describe "default config file" do
-          describe "when required path is a directory" do
-            it "tries config/sidekiq.yml from required diretory" do
-              subject.parse(%w[sidekiq -r ./test/dummy])
-
-              assert_equal "./test/dummy/config/sidekiq.yml", config[:config_file]
-              assert_equal 25, config[:concurrency]
+              assert_equal ["default"], queues
             end
           end
 
-          describe "when required path is a file" do
-            it "tries config/sidekiq.yml from current diretory" do
-              config[:require] = "./test/dummy" # stub current dir – ./
+          describe "when no queues are specified via the config file" do
+            it "sets 'default' queue" do
+              @cli.parse(%w[sidekiq -C ./test/config_empty.yml -r ./test/fake_env.rb])
 
-              subject.parse(%w[sidekiq -r ./test/fake_env.rb])
-
-              assert_equal "./test/dummy/config/sidekiq.yml", config[:config_file]
-              assert_equal 25, config[:concurrency]
-            end
-          end
-
-          describe "without any required path" do
-            it "tries config/sidekiq.yml from current diretory" do
-              config[:require] = "./test/dummy" # stub current dir – ./
-
-              subject.parse(%w[sidekiq])
-
-              assert_equal "./test/dummy/config/sidekiq.yml", config[:config_file]
-              assert_equal 25, config[:concurrency]
-            end
-          end
-
-          describe "when config file and flags" do
-            it "merges options" do
-              subject.parse(%w[sidekiq -C ./test/config.yml
-                -e snoop
-                -c 100
-                -r ./test/fake_env.rb
-                -q often,7
-                -q seldom,3])
-
-              assert_equal "./test/config.yml", config[:config_file]
-              refute config[:verbose]
-              assert_equal "./test/fake_env.rb", config[:require]
-              assert_equal "snoop", config[:environment]
-              assert_equal 100, config[:concurrency]
-              assert_equal 7, config[:queues].count { |q| q == "often" }
-              assert_equal 3, config[:queues].count { |q| q == "seldom" }
-            end
-
-            describe "when the config file specifies queues with weights" do
-              describe "when -q specifies queues without weights" do
-                it "sets strictly ordered queues" do
-                  subject.parse(%w[sidekiq -C ./test/config.yml
-                    -r ./test/fake_env.rb
-                    -q foo -q bar])
-
-                  assert_equal true, !!config[:strict]
-                end
-              end
-
-              describe "when -q specifies no queues" do
-                it "does not set strictly ordered queues" do
-                  subject.parse(%w[sidekiq -C ./test/config.yml
-                    -r ./test/fake_env.rb])
-
-                  assert_equal false, !!config[:strict]
-                end
-              end
-
-              describe "when -q specifies queues with weights" do
-                it "does not set strictly ordered queues" do
-                  subject.parse(%w[sidekiq -C ./test/config.yml
-                    -r ./test/fake_env.rb
-                    -q foo,2 -q bar,3])
-
-                  assert_equal false, !!config[:strict]
-                end
-              end
-            end
-
-            describe "when the config file specifies queues without weights" do
-              describe "when -q specifies queues without weights" do
-                it "sets strictly ordered queues" do
-                  subject.parse(%w[sidekiq -C ./test/config_queues_without_weights.yml
-                    -r ./test/fake_env.rb
-                    -q foo -q bar])
-
-                  assert_equal true, !!config[:strict]
-                end
-              end
-
-              describe "when -q specifies no queues" do
-                it "sets strictly ordered queues" do
-                  subject.parse(%w[sidekiq -C ./test/config_queues_without_weights.yml
-                    -r ./test/fake_env.rb])
-
-                  assert_equal true, !!config[:strict]
-                end
-              end
-
-              describe "when -q specifies queues with weights" do
-                it "does not set strictly ordered queues" do
-                  subject.parse(%w[sidekiq -C ./test/config_queues_without_weights.yml
-                    -r ./test/fake_env.rb
-                    -q foo,2 -q bar,3])
-
-                  assert_equal false, !!config[:strict]
-                end
-              end
-            end
-
-            describe "when the config file specifies no queues" do
-              describe "when -q specifies queues without weights" do
-                it "sets strictly ordered queues" do
-                  subject.parse(%w[sidekiq -C ./test/config_empty.yml
-                    -r ./test/fake_env.rb
-                    -q foo -q bar])
-
-                  assert_equal true, !!config[:strict]
-                end
-              end
-
-              describe "when -q specifies no queues" do
-                it "sets strictly ordered queues" do
-                  subject.parse(%w[sidekiq -C ./test/config_empty.yml
-                    -r ./test/fake_env.rb])
-
-                  assert_equal true, !!config[:strict]
-                end
-              end
-
-              describe "when -q specifies queues with weights" do
-                it "does not set strictly ordered queues" do
-                  subject.parse(%w[sidekiq -C ./test/config_empty.yml
-                    -r ./test/fake_env.rb
-                    -q foo,2 -q bar,3])
-
-                  assert_equal false, !!config[:strict]
-                end
-              end
-            end
-          end
-
-          describe "default config file" do
-            describe "when required path is a directory" do
-              it "tries config/sidekiq.yml" do
-                subject.parse(%w[sidekiq -r ./test/dummy])
-
-                assert_equal "sidekiq.yml", File.basename(config[:config_file])
-                assert_equal 25, config[:concurrency]
-              end
+              assert_equal ["default"], queues
             end
           end
         end
       end
 
-      describe "validation" do
-        describe "when required application path does not exist" do
-          it "exits with status 1" do
-            exit = assert_raises(SystemExit) { subject.parse(%w[sidekiq -r /non/existent/path]) }
-            assert_equal 1, exit.status
+      describe "timeout" do
+        it "accepts with -t" do
+          @cli.parse(%w[sidekiq -t 30 -r ./test/fake_env.rb])
+
+          assert_equal 30, config[:timeout]
+        end
+      end
+
+      describe "verbose" do
+        it "accepts with -v" do
+          @cli.parse(%w[sidekiq -v -r ./test/fake_env.rb])
+
+          assert_equal Logger::DEBUG, @config.logger.level
+        end
+      end
+
+      describe "config file" do
+        it "accepts with -C" do
+          @cli.parse(%w[sidekiq -C ./test/config.yml])
+
+          assert_equal "./test/config.yml", config[:config_file]
+          refute config[:verbose]
+          assert_equal "./test/fake_env.rb", config[:require]
+          assert_nil config[:environment]
+          assert_equal 50, concurrency
+          assert_equal 2, queues.count { |q| q == "very_often" }
+          assert_equal 1, queues.count { |q| q == "seldom" }
+        end
+
+        it "accepts stringy keys" do
+          @cli.parse(%w[sidekiq -C ./test/config_string.yml])
+
+          assert_equal "./test/config_string.yml", config[:config_file]
+          refute config[:verbose]
+          assert_equal "./test/fake_env.rb", config[:require]
+          assert_nil config[:environment]
+          assert_equal 50, concurrency
+          assert_equal 2, queues.count { |q| q == "very_often" }
+          assert_equal 1, queues.count { |q| q == "seldom" }
+        end
+
+        it "accepts environment specific config" do
+          @cli.parse(%w[sidekiq -e staging -C ./test/config_environment.yml])
+
+          assert_equal "./test/config_environment.yml", config[:config_file]
+          refute config[:verbose]
+          assert_equal "./test/fake_env.rb", config[:require]
+          assert_equal "staging", config[:environment]
+          assert_equal 50, concurrency
+          assert_equal 2, queues.count { |q| q == "very_often" }
+          assert_equal 1, queues.count { |q| q == "seldom" }
+        end
+
+        it "accepts environment specific config with alias" do
+          @cli.parse(%w[sidekiq -e staging -C ./test/config_with_alias.yml])
+          assert_equal "./test/config_with_alias.yml", config[:config_file]
+          refute config[:verbose]
+          assert_equal "./test/fake_env.rb", config[:require]
+          assert_equal "staging", config[:environment]
+          assert_equal 50, concurrency
+          assert_equal 2, queues.count { |q| q == "very_often" }
+          assert_equal 1, queues.count { |q| q == "seldom" }
+
+          @cli.parse(%w[sidekiq -e production -C ./test/config_with_alias.yml])
+          assert_equal "./test/config_with_alias.yml", config[:config_file]
+          assert config[:verbose]
+          assert_equal "./test/fake_env.rb", config[:require]
+          assert_equal "production", config[:environment]
+          assert_equal 50, concurrency
+          assert_equal 2, queues.count { |q| q == "very_often" }
+          assert_equal 1, queues.count { |q| q == "seldom" }
+        end
+
+        it "exposes ERB expected __FILE__ and __dir__" do
+          given_path = "./test/config__FILE__and__dir__.yml"
+          expected_file = File.expand_path(given_path)
+          # As per Ruby's Kernel module docs, __dir__ is equivalent to File.dirname(File.realpath(__FILE__))
+          expected_dir = File.dirname(File.realpath(expected_file))
+
+          @cli.parse(%W[sidekiq -C #{given_path}])
+
+          assert_equal(expected_file, config.fetch(:__FILE__))
+          assert_equal(expected_dir, config.fetch(:__dir__))
+        end
+      end
+
+      describe "default config file" do
+        describe "when required path is a directory" do
+          it "tries config/sidekiq.yml from required diretory" do
+            @cli.parse(%w[sidekiq -r ./test/dummy])
+
+            assert_equal "./test/dummy/config/sidekiq.yml", config[:config_file]
+            assert_equal 25, concurrency
           end
         end
 
-        describe "when required path is a directory without config/application.rb" do
-          it "exits with status 1" do
-            exit = assert_raises(SystemExit) { subject.parse(%w[sidekiq -r ./test/fixtures]) }
-            assert_equal 1, exit.status
+        describe "when required path is a file" do
+          it "tries config/sidekiq.yml from current diretory" do
+            config[:require] = "./test/dummy" # stub current dir – ./
+
+            @cli.parse(%w[sidekiq -r ./test/fake_env.rb])
+
+            assert_equal "./test/dummy/config/sidekiq.yml", config[:config_file]
+            assert_equal 25, concurrency
+          end
+        end
+
+        describe "without any required path" do
+          it "tries config/sidekiq.yml from current diretory" do
+            config[:require] = "./test/dummy" # stub current dir – ./
+
+            @cli.parse(%w[sidekiq])
+
+            assert_equal "./test/dummy/config/sidekiq.yml", config[:config_file]
+            assert_equal 25, concurrency
+          end
+        end
+
+        describe "when config file and flags" do
+          it "merges options" do
+            @cli.parse(%w[sidekiq -C ./test/config.yml
+              -e snoop
+              -c 100
+              -r ./test/fake_env.rb
+              -q often,7
+              -q seldom,3])
+
+            assert_equal "./test/config.yml", config[:config_file]
+            refute config[:verbose]
+            assert_equal "./test/fake_env.rb", config[:require]
+            assert_equal "snoop", config[:environment]
+            assert_equal 100, concurrency
+            assert_equal 7, queues.count { |q| q == "often" }
+            assert_equal 3, queues.count { |q| q == "seldom" }
           end
 
-          describe "when config file path does not exist" do
-            it "raises argument error" do
-              assert_raises(ArgumentError) do
-                subject.parse(%w[sidekiq -r ./test/fake_env.rb -C /non/existent/path])
+          describe "when the config file specifies queues with weights" do
+            describe "when -q specifies queues without weights" do
+              it "sets strictly ordered queues" do
+                @cli.parse(%w[sidekiq -C ./test/config.yml
+                  -r ./test/fake_env.rb
+                  -q foo -q bar])
+
+                assert_equal true, !!strict
+              end
+            end
+
+            describe "when -q specifies no queues" do
+              it "does not set strictly ordered queues" do
+                @cli.parse(%w[sidekiq -C ./test/config.yml
+                  -r ./test/fake_env.rb])
+
+                assert_equal false, !!strict
+              end
+            end
+
+            describe "when -q specifies queues with weights" do
+              it "does not set strictly ordered queues" do
+                @cli.parse(%w[sidekiq -C ./test/config.yml
+                  -r ./test/fake_env.rb
+                  -q foo,2 -q bar,3])
+
+                assert_equal false, !!strict
+              end
+            end
+          end
+
+          describe "when the config file specifies queues without weights" do
+            describe "when -q specifies queues without weights" do
+              it "sets strictly ordered queues" do
+                @cli.parse(%w[sidekiq -C ./test/config_queues_without_weights.yml
+                  -r ./test/fake_env.rb
+                  -q foo -q bar])
+
+                assert_equal true, !!strict
+              end
+            end
+
+            describe "when -q specifies no queues" do
+              it "sets strictly ordered queues" do
+                @cli.parse(%w[sidekiq -C ./test/config_queues_without_weights.yml
+                  -r ./test/fake_env.rb])
+
+                assert_equal true, !!strict
+              end
+            end
+
+            describe "when -q specifies queues with weights" do
+              it "does not set strictly ordered queues" do
+                @cli.parse(%w[sidekiq -C ./test/config_queues_without_weights.yml
+                  -r ./test/fake_env.rb
+                  -q foo,2 -q bar,3])
+
+                assert_equal false, !!strict
+              end
+            end
+          end
+
+          describe "when the config file specifies no queues" do
+            describe "when -q specifies queues without weights" do
+              it "sets strictly ordered queues" do
+                @cli.parse(%w[sidekiq -C ./test/config_empty.yml
+                  -r ./test/fake_env.rb
+                  -q foo -q bar])
+
+                assert_equal true, !!strict
+              end
+            end
+
+            describe "when -q specifies no queues" do
+              it "sets strictly ordered queues" do
+                @cli.parse(%w[sidekiq -C ./test/config_empty.yml
+                  -r ./test/fake_env.rb])
+
+                assert_equal true, !!strict
+              end
+            end
+
+            describe "when -q specifies queues with weights" do
+              it "does not set strictly ordered queues" do
+                @cli.parse(%w[sidekiq -C ./test/config_empty.yml
+                  -r ./test/fake_env.rb
+                  -q foo,2 -q bar,3])
+
+                assert_equal false, !!strict
               end
             end
           end
         end
 
-        describe "when concurrency is not valid" do
-          describe "when set to 0" do
-            it "raises argument error" do
-              assert_raises(ArgumentError) do
-                subject.parse(%w[sidekiq -r ./test/fake_env.rb -c 0])
-              end
+        describe "default config file" do
+          describe "when required path is a directory" do
+            it "tries config/sidekiq.yml" do
+              @cli.parse(%w[sidekiq -r ./test/dummy])
+
+              assert_equal "sidekiq.yml", File.basename(config[:config_file])
+              assert_equal 25, concurrency
             end
           end
+        end
+      end
+    end
 
-          describe "when set to a negative number" do
-            it "raises argument error" do
-              assert_raises(ArgumentError) do
-                subject.parse(%w[sidekiq -r ./test/fake_env.rb -c -2])
-              end
+    describe "validation" do
+      describe "when required application path does not exist" do
+        it "exits with status 1" do
+          exit = assert_raises(SystemExit) { @cli.parse(%w[sidekiq -r /non/existent/path]) }
+          assert_equal 1, exit.status
+        end
+      end
+
+      describe "when required path is a directory without config/application.rb" do
+        it "exits with status 1" do
+          exit = assert_raises(SystemExit) { @cli.parse(%w[sidekiq -r ./test/fixtures]) }
+          assert_equal 1, exit.status
+        end
+
+        describe "when config file path does not exist" do
+          it "raises argument error" do
+            assert_raises(ArgumentError) do
+              @cli.parse(%w[sidekiq -r ./test/fake_env.rb -C /non/existent/path])
+            end
+          end
+        end
+      end
+
+      describe "when concurrency is not valid" do
+        describe "when set to 0" do
+          it "raises argument error" do
+            assert_raises(ArgumentError) do
+              @cli.parse(%w[sidekiq -r ./test/fake_env.rb -c 0])
             end
           end
         end
 
-        describe "when timeout is not valid" do
-          describe "when set to 0" do
-            it "raises argument error" do
-              assert_raises(ArgumentError) do
-                subject.parse(%w[sidekiq -r ./test/fake_env.rb -t 0])
-              end
+        describe "when set to a negative number" do
+          it "raises argument error" do
+            assert_raises(ArgumentError) do
+              @cli.parse(%w[sidekiq -r ./test/fake_env.rb -c -2])
             end
           end
+        end
+      end
 
-          describe "when set to a negative number" do
-            it "raises argument error" do
-              assert_raises(ArgumentError) do
-                subject.parse(%w[sidekiq -r ./test/fake_env.rb -t -2])
-              end
+      describe "when timeout is not valid" do
+        describe "when set to 0" do
+          it "raises argument error" do
+            assert_raises(ArgumentError) do
+              @cli.parse(%w[sidekiq -r ./test/fake_env.rb -t 0])
+            end
+          end
+        end
+
+        describe "when set to a negative number" do
+          it "raises argument error" do
+            assert_raises(ArgumentError) do
+              @cli.parse(%w[sidekiq -r ./test/fake_env.rb -t -2])
             end
           end
         end
@@ -447,20 +444,19 @@ describe Sidekiq::CLI do
 
     describe "#run" do
       before do
-        subject.config[:concurrency] = 2
-        subject.config[:require] = "./test/fake_env.rb"
+        @cli.config[:require] = "./test/fake_env.rb"
       end
 
       describe "require workers" do
         describe "when path is a rails directory" do
           before do
-            subject.config[:require] = "./test/dummy"
-            subject.environment = "test"
+            @cli.config[:require] = "./test/dummy"
+            @cli.environment = "test"
           end
 
           it "requires sidekiq railtie and rails application with environment" do
-            subject.stub(:launch, nil) do
-              subject.run
+            @cli.stub(:launch, nil) do
+              @cli.run
             end
 
             assert defined?(Sidekiq::Rails)
@@ -468,18 +464,18 @@ describe Sidekiq::CLI do
           end
 
           it "tags with the app directory name" do
-            subject.stub(:launch, nil) do
-              subject.run
+            @cli.stub(:launch, nil) do
+              @cli.run
             end
 
-            assert_equal "dummy", subject.config[:tag]
+            assert_equal "dummy", @cli.config[:tag]
           end
         end
 
         describe "when path is file" do
           it "requires application" do
-            subject.stub(:launch, nil) do
-              subject.run
+            @cli.stub(:launch, nil) do
+              @cli.run
             end
 
             assert $LOADED_FEATURES.any? { |x| x =~ /test\/fake_env/ }
@@ -488,9 +484,9 @@ describe Sidekiq::CLI do
       end
 
       it "prints rails info" do
-        subject.stub(:environment, "production") do
-          subject.stub(:launch, nil) do
-            subject.run
+        @cli.stub(:environment, "production") do
+          @cli.stub(:launch, nil) do
+            @cli.run
           end
           assert_includes @logdev.string, "Booted Rails #{::Rails.version} application in production environment"
         end
@@ -500,9 +496,9 @@ describe Sidekiq::CLI do
         it "warns if the policy is not noeviction" do
           redis_info = {"maxmemory_policy" => "allkeys-lru", "redis_version" => "6.2.1"}
 
-          subject.config.stub(:redis_info, redis_info) do
-            subject.stub(:launch, nil) do
-              subject.run
+          @cli.config.stub(:redis_info, redis_info) do
+            @cli.stub(:launch, nil) do
+              @cli.run
             end
           end
 
@@ -512,9 +508,9 @@ describe Sidekiq::CLI do
         it "silent if the policy is noeviction" do
           redis_info = {"maxmemory_policy" => "noeviction", "redis_version" => "6.2.1"}
 
-          subject.config.stub(:redis_info, redis_info) do
-            subject.stub(:launch, nil) do
-              subject.run
+          @cli.config.stub(:redis_info, redis_info) do
+            @cli.stub(:launch, nil) do
+              @cli.run
             end
           end
 
@@ -528,7 +524,7 @@ describe Sidekiq::CLI do
         describe sig do
           it "raises interrupt error" do
             assert_raises Interrupt do
-              subject.handle_signal(sig)
+              @cli.handle_signal(sig)
             end
           end
         end
@@ -538,12 +534,12 @@ describe Sidekiq::CLI do
         it "quiets with a corresponding event" do
           quiet = false
 
-          subject.config.on(:quiet) do
+          @cli.config.on(:quiet) do
             quiet = true
           end
 
-          subject.launcher = Sidekiq::Launcher.new(subject.config)
-          subject.handle_signal("TSTP")
+          @cli.launcher = Sidekiq::Launcher.new(@cli.config)
+          @cli.handle_signal("TSTP")
 
           assert_match(/Got TSTP signal/, logdev.string)
           assert_equal true, quiet
@@ -552,7 +548,7 @@ describe Sidekiq::CLI do
 
       describe "TTIN" do
         it "prints backtraces for all threads in the process to the logfile" do
-          subject.handle_signal("TTIN")
+          @cli.handle_signal("TTIN")
 
           assert_match(/Got TTIN signal/, logdev.string)
           assert_match(/\bbacktrace\b/, logdev.string)
@@ -561,8 +557,8 @@ describe Sidekiq::CLI do
 
       describe "UNKNOWN" do
         it "logs about" do
-          # subject.parse(%w[sidekiq -r ./test/fake_env.rb])
-          subject.handle_signal("UNKNOWN")
+          # @cli.parse(%w[sidekiq -r ./test/fake_env.rb])
+          @cli.handle_signal("UNKNOWN")
 
           assert_match(/Got UNKNOWN signal/, logdev.string)
           assert_match(/No signal handler registered/, logdev.string)

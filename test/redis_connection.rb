@@ -2,17 +2,14 @@
 
 require_relative "helper"
 require "sidekiq/redis_connection"
+require "sidekiq/capsule"
 
 describe Sidekiq::RedisConnection do
   describe "create" do
     before do
-      @old = ENV["REDIS_URL"]
-      ENV["REDIS_URL"] = "redis://localhost/15"
       @config = reset!
-    end
-
-    after do
-      ENV["REDIS_URL"] = @old
+      @config.capsules << Sidekiq::Capsule.new("default", @config)
+      @config.capsules.first.concurrency = 12
     end
 
     def client_for(redis)
@@ -29,6 +26,7 @@ describe Sidekiq::RedisConnection do
 
     it "creates a pooled redis connection" do
       pool = Sidekiq::RedisConnection.create
+      assert_equal 5, pool.size
       assert_equal client_class, pool.checkout.class
     end
 
@@ -50,28 +48,24 @@ describe Sidekiq::RedisConnection do
         end
       end
 
-      it "defaults server pool sizes based on concurrency with padding" do
-        _expected_padding = 3
-        @config[:concurrency] = 6
+      it "sizes default pool" do
         pool = server_connection
-
-        assert_equal 9, pool.size
-        assert_equal 9, pool.instance_eval { @available.length }
+        assert_equal 5, pool.size
       end
 
       it "defaults client pool sizes to 5" do
         pool = client_connection
-
         assert_equal 5, pool.size
-        assert_equal 5, pool.instance_eval { @available.length }
+      end
+
+      it "sizes capsule pools based on concurrency" do
+        assert_equal 12, @config.capsules.first.redis_pool.size
       end
 
       it "changes client pool sizes with ENV" do
         ENV["RAILS_MAX_THREADS"] = "9"
         pool = client_connection
-
         assert_equal 9, pool.size
-        assert_equal 9, pool.instance_eval { @available.length }
       ensure
         ENV.delete("RAILS_MAX_THREADS")
       end

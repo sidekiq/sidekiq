@@ -11,6 +11,7 @@ module Sidekiq
       labels: [],
       require: ".",
       environment: nil,
+      concurrency: 10,
       timeout: 25,
       poll_interval_average: nil,
       average_scheduled_poll_interval: 5,
@@ -86,6 +87,12 @@ module Sidekiq
       @server_chain
     end
 
+    def default_capsule
+      @capsules.first || Sidekiq::Capsule.new("default", self).tap do |cap|
+        @capsules << cap
+      end
+    end
+
     # register a new queue processing subsystem
     def capsule(name)
       cap = Sidekiq::Capsule.new(name, self)
@@ -99,9 +106,10 @@ module Sidekiq
     end
 
     def redis_pool
-      # this is our global housekeeping pool. each capsule has its
+      # this is our global client/housekeeping pool. each capsule has its
       # own pool for executing threads.
-      @redis ||= new_redis_pool(5)
+      size = Integer(ENV["RAILS_MAX_THREADS"] || 5)
+      @redis ||= new_redis_pool(size)
     end
 
     def new_redis_pool(size)

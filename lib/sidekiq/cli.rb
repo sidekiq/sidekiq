@@ -24,7 +24,6 @@ module Sidekiq # :nodoc:
 
     def parse(args = ARGV.dup)
       @config ||= Sidekiq::Config.new
-      @config.capsules << Sidekiq::Capsule.new("default", @config)
 
       setup_options(args)
       initialize_logger
@@ -262,11 +261,12 @@ module Sidekiq # :nodoc:
       opts[:concurrency] = Integer(ENV["RAILS_MAX_THREADS"]) if opts[:concurrency].nil? && ENV["RAILS_MAX_THREADS"]
 
       # merge with defaults
-      # p opts
       @config.merge!(opts)
-      @config.queues = opts[:queues]
-      @config.concurrency = opts[:concurrency] || 10
-      # p @config.options
+
+      cap = Sidekiq::Capsule.new("default", @config)
+      cap.queues = opts[:queues]
+      cap.concurrency = opts[:concurrency] || 10
+      @config.capsules << cap
     end
 
     def boot_application
@@ -308,7 +308,7 @@ module Sidekiq # :nodoc:
         die(1)
       end
 
-      [:timeout].each do |opt|
+      [:concurrency, :timeout].each do |opt|
         raise ArgumentError, "#{opt}: #{@config[opt]} is not a valid value" if @config[opt].to_i <= 0
       end
     end
@@ -323,7 +323,7 @@ module Sidekiq # :nodoc:
     def option_parser(opts)
       parser = OptionParser.new { |o|
         o.on "-c", "--concurrency INT", "processor threads to use" do |arg|
-          config.concurrency = Integer(arg)
+          opts[:concurrency] = Integer(arg)
         end
 
         o.on "-d", "--daemon", "Daemonize process" do |arg|

@@ -550,6 +550,7 @@ describe Sidekiq::Web do
   describe "bad JSON" do
     it "displays without error" do
       s = Sidekiq::DeadSet.new
+      assert_equal 0, s.size
       (_, score) = kill_bad
       assert_equal 1, s.size
 

@@ -4,6 +4,7 @@ require_relative "helper"
 require "sidekiq/scheduled"
 require "sidekiq/job_retry"
 require "sidekiq/api"
+require "sidekiq/capsule"
 
 class SomeWorker
   include Sidekiq::Job
@@ -64,7 +65,7 @@ describe Sidekiq::JobRetry do
     end
 
     def handler
-      @handler ||= Sidekiq::JobRetry.new(@config)
+      @handler ||= Sidekiq::JobRetry.new(@config.default_capsule)
     end
 
     def jobstr(options = {})

@@ -26,17 +26,18 @@ module Sidekiq
 
     attr_reader :thread
     attr_reader :job
+    attr_reader :capsule
 
     def initialize(capsule, &block)
-      @config = capsule
+      @config = @capsule = capsule
       @callback = block
       @down = false
       @done = false
       @job = nil
       @thread = nil
       @reloader = Sidekiq.default_configuration[:reloader]
-      @job_logger = Sidekiq::JobLogger.new(logger)
-      @retrier = Sidekiq::JobRetry.new(cap)
+      @job_logger = (capsule.config[:job_logger] || Sidekiq::JobLogger).new(logger)
+      @retrier = Sidekiq::JobRetry.new(capsule)
     end
 
     def terminate(wait = false)
@@ -152,11 +153,11 @@ module Sidekiq
       rescue => ex
         handle_exception(ex, {context: "Invalid JSON for job", jobstr: jobstr})
         now = Time.now.to_f
-        config.redis do |conn|
+        redis do |conn|
           conn.multi do |xa|
             xa.zadd("dead", now.to_s, jobstr)
-            xa.zremrangebyscore("dead", "-inf", now - config[:dead_timeout_in_seconds])
-            xa.zremrangebyrank("dead", 0, - config[:dead_max_jobs])
+            xa.zremrangebyscore("dead", "-inf", now - @capsule.config[:dead_timeout_in_seconds])
+            xa.zremrangebyrank("dead", 0, - @capsule.config[:dead_max_jobs])
           end
         end
         return uow.acknowledge
@@ -165,7 +166,7 @@ module Sidekiq
       ack = false
       begin
         dispatch(job_hash, queue, jobstr) do |inst|
-          @config.server_middleware.invoke(inst, job_hash, queue) do
+          config.server_middleware.invoke(inst, job_hash, queue) do
             execute_job(inst, job_hash["args"])
           end
         end

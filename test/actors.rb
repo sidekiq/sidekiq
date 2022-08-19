@@ -19,10 +19,7 @@ end
 describe "Actors" do
   before do
     @config = reset!
-
-    @config[:queues] = %w[default]
-    @config[:fetch] = Sidekiq::BasicFetch.new(@config)
-    # @config.logger.level = Logger::DEBUG
+    @cap = @config.default_capsule
   end
 
   describe "scheduler" do
@@ -73,14 +70,14 @@ describe "Actors" do
     end
 
     it "can start and stop" do
-      f = Sidekiq::Processor.new(@config) { |p, ex| raise "should not raise!" }
+      f = Sidekiq::Processor.new(@cap) { |p, ex| raise "should not raise!" }
       f.terminate
     end
 
     it "can process" do
       q = Sidekiq::Queue.new
       assert_equal 0, q.size
-      p = Sidekiq::Processor.new(@config) do |pr, ex|
+      p = Sidekiq::Processor.new(@cap) do |pr, ex|
         result(pr, ex)
       end
       JoeWorker.perform_async(0)
@@ -102,7 +99,7 @@ describe "Actors" do
       @config.logger.level = Logger::ERROR
       q = Sidekiq::Queue.new
       assert_equal 0, q.size
-      p = Sidekiq::Processor.new(@config) do |pr, ex|
+      p = Sidekiq::Processor.new(@cap) do |pr, ex|
         result(pr, ex)
       end
       jid = JoeWorker.perform_async("boom")
@@ -125,10 +122,10 @@ describe "Actors" do
     it "gracefully kills" do
       q = Sidekiq::Queue.new
       assert_equal 0, q.size
-      p = Sidekiq::Processor.new(@config) do |pr, ex|
+      p = Sidekiq::Processor.new(@cap) do |pr, ex|
         result(pr, ex)
       end
-      jid = JoeWorker.perform_async(1)
+      jid = JoeWorker.perform_async(2)
       assert jid, jid
       assert_equal 1, q.size
 

@@ -43,8 +43,11 @@ module Sidekiq
     end
 
     def queues=(val)
+      @strict = true
       @queues = Array(val).each_with_object([]) do |qstr, memo|
-        name, weight = qstr.split(",")
+        arr = qstr
+        arr = qstr.split(",") if qstr.is_a?(String)
+        name, weight = arr
         @strict = false if weight.to_i > 0
         [weight.to_i, 1].max.times do
           memo << name
@@ -95,13 +98,8 @@ module Sidekiq
       end
     end
 
-    # Passthru any other calls to the underlying config
-    def method_missing(name, *args, **kwargs)
-      config.send(name, *args, **kwargs)
-    end
-
-    def respond_to_missing?(name)
-      true
+    def logger
+      config.logger
     end
   end
 end

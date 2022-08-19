@@ -55,7 +55,7 @@ describe "sidekiq_retries_exhausted" do
   end
 
   def handler
-    @handler ||= Sidekiq::JobRetry.new(@config)
+    @handler ||= Sidekiq::JobRetry.new(@config.default_capsule)
   end
 
   def job(options = {})

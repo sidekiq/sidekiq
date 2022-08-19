@@ -118,8 +118,8 @@ describe "API" do
 
     describe "queues" do
       it "is initially empty" do
-        s = Sidekiq::Stats::Queues.new
-        assert_equal 0, s.lengths.size
+        s = Sidekiq::Stats.new
+        assert_equal 0, s.queues.size
       end
 
       it "returns a hash of queue and size in order" do
@@ -131,11 +131,7 @@ describe "API" do
           conn.sadd "queues", "bar"
         end
 
-        s = Sidekiq::Stats::Queues.new
-        assert_equal ({"foo" => 1, "bar" => 3}), s.lengths
-        assert_equal "bar", s.lengths.first.first
-
-        assert_equal Sidekiq::Stats.new.queues, Sidekiq::Stats::Queues.new.lengths
+        assert_equal({"foo" => 1, "bar" => 3}, Sidekiq::Stats.new.queues)
       end
     end
 

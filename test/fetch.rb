@@ -2,23 +2,23 @@
 
 require_relative "helper"
 require "sidekiq/fetch"
+require "sidekiq/capsule"
 require "sidekiq/api"
 
 describe Sidekiq::BasicFetch do
   before do
     @config = reset!
+    @cap = @config.default_capsule
     @config.redis do |conn|
       conn.rpush("queue:basic", "msg")
     end
   end
 
-  def fetcher(options)
-    @config.merge!(options)
-    Sidekiq::BasicFetch.new(@config)
-  end
-
   it "retrieves" do
-    fetch = fetcher(queues: ["basic", "bar"])
+    @cap.queues = ["basic", "bar,3"]
+    refute @cap.strict
+    fetch = Sidekiq::BasicFetch.new(@cap)
+
     uow = fetch.retrieve_work
     refute_nil uow
     assert_equal "basic", uow.queue_name
@@ -31,7 +31,9 @@ describe Sidekiq::BasicFetch do
   end
 
   it "retrieves with strict setting" do
-    fetch = fetcher(queues: ["basic", "bar", "bar"], strict: true)
+    @cap.queues = ["basic", "bar"]
+    assert @cap.strict
+    fetch = Sidekiq::BasicFetch.new(@cap)
     cmd = fetch.queues_cmd
     assert_equal cmd, ["queue:basic", "queue:bar", Sidekiq::BasicFetch::TIMEOUT]
   end
@@ -47,18 +49,20 @@ describe Sidekiq::BasicFetch do
     assert_equal 2, q1.size
     assert_equal 1, q2.size
 
-    fetch = fetcher(queues: ["foo", "bar"])
+    @cap.queues = ["foo", "bar"]
+    fetch = Sidekiq::BasicFetch.new(@cap)
     works = 3.times.map { fetch.retrieve_work }
     assert_equal 0, q1.size
     assert_equal 0, q2.size
 
-    fetch.bulk_requeue(works, {queues: []})
+    fetch.bulk_requeue(works, nil)
     assert_equal 2, q1.size
     assert_equal 1, q2.size
   end
 
   it "sleeps when no queues are active" do
-    fetch = fetcher(queues: [])
+    @cap.queues = []
+    fetch = Sidekiq::BasicFetch.new(@cap)
     mock = Minitest::Mock.new
     mock.expect(:call, nil, [Sidekiq::BasicFetch::TIMEOUT])
     fetch.stub(:sleep, mock) { assert_nil fetch.retrieve_work }

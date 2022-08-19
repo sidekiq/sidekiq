@@ -156,7 +156,7 @@ module Sidekiq
         mset_args << "stat:#{stat}"
         mset_args << 0
       end
-      redis do |conn|
+      Sidekiq.redis do |conn|
         conn.mset(*mset_args)
       end
     end

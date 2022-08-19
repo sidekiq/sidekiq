@@ -3,6 +3,7 @@
 require_relative "helper"
 require "sidekiq/middleware/chain"
 require "sidekiq/processor"
+require "sidekiq/capsule"
 
 class CustomMiddleware
   def initialize(name, recorder)
@@ -98,7 +99,7 @@ describe Sidekiq::Middleware do
       chain.insert_after AnotherCustomMiddleware, YetAnotherCustomMiddleware, "3", $recorder
     end
 
-    processor = Sidekiq::Processor.new(@config) { |pr, ex| }
+    processor = Sidekiq::Processor.new(@config.default_capsule) { |pr, ex| }
     processor.process(Sidekiq::BasicFetch::UnitOfWork.new("queue:default", msg))
     assert_equal %w[2 before 3 before 1 before work_performed 1 after 3 after 2 after], $recorder.flatten
   end
@@ -181,7 +182,7 @@ describe Sidekiq::Middleware do
 
   describe "configuration" do
     it "gets an object which provides redis and logging" do
-      chain = Sidekiq::Middleware::Chain.new(@config)
+      chain = Sidekiq::Middleware::Chain.new(@config.default_capsule)
       chain.add FooC, foo: "bar"
       final_action = nil
       chain.invoke(nil, nil, nil, nil) { final_action = true }

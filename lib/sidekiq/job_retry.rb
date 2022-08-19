@@ -68,8 +68,8 @@ module Sidekiq
 
     DEFAULT_MAX_RETRY_ATTEMPTS = 25
 
-    def initialize(config)
-      @config = config
+    def initialize(capsule)
+      @config = @capsule = capsule
       @max_retries = Sidekiq.default_configuration[:max_retries] || DEFAULT_MAX_RETRY_ATTEMPTS
     end
 
@@ -91,7 +91,7 @@ module Sidekiq
       if msg["retry"]
         process_retry(nil, msg, queue, e)
       else
-        @config.death_handlers.each do |handler|
+        @capsule.config.death_handlers.each do |handler|
           handler.call(msg, e)
         rescue => handler_ex
           handle_exception(handler_ex, {context: "Error calling death handler", job: msg})
@@ -223,7 +223,7 @@ module Sidekiq
 
       send_to_morgue(msg) unless msg["dead"] == false
 
-      config.death_handlers.each do |handler|
+      @capsule.config.death_handlers.each do |handler|
         handler.call(msg, exception)
       rescue => e
         handle_exception(e, {context: "Error calling death handler", job: msg})
@@ -238,8 +238,8 @@ module Sidekiq
       redis do |conn|
         conn.multi do |xa|
           xa.zadd("dead", now.to_s, payload)
-          xa.zremrangebyscore("dead", "-inf", now - config[:dead_timeout_in_seconds])
-          xa.zremrangebyrank("dead", 0, - config[:dead_max_jobs])
+          xa.zremrangebyscore("dead", "-inf", now - @capsule.config[:dead_timeout_in_seconds])
+          xa.zremrangebyrank("dead", 0, - @capsule.config[:dead_max_jobs])
         end
       end
     end

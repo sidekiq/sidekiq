@@ -52,6 +52,7 @@ end
 
 class CustomJobLogger < Sidekiq::JobLogger
   def call(item, queue)
+    $invokes += 1
     yield
   rescue Exception
     raise
@@ -62,8 +63,7 @@ describe Sidekiq::Processor do
   before do
     $invokes = 0
     @config = reset!
-    @config[:fetch] = Sidekiq::BasicFetch.new(@config)
-    @processor = ::Sidekiq::Processor.new(@config) { |*args| }
+    @processor = ::Sidekiq::Processor.new(@config.default_capsule) { |*args| }
   end
 
   def work(msg, queue = "queue:default")
@@ -169,7 +169,7 @@ describe Sidekiq::Processor do
       fetch_stub = lambda { raise StandardError, "fetch exception" }
       # swallow logging because actually care about the added exception handler
       capture_logging(@config) do
-        @processor.instance_variable_get(:@strategy).stub(:retrieve_work, fetch_stub) do
+        @processor.capsule.fetcher.stub(:retrieve_work, fetch_stub) do
           @processor.process_one
         end
       end
@@ -292,16 +292,14 @@ describe Sidekiq::Processor do
 
   describe "custom job logger class" do
     before do
-      opts = @config
-      opts[:job_logger] = CustomJobLogger
-      opts[:fetch] = Sidekiq::BasicFetch.new(opts)
-      @processor = ::Sidekiq::Processor.new(opts) { |pr, ex| }
+      @config[:job_logger] = CustomJobLogger
+      @processor = ::Sidekiq::Processor.new(@config.capsules.first) { |pr, ex| }
     end
 
     it "is called instead default Sidekiq::JobLogger" do
       msg = Sidekiq.dump_json({"class" => MockWorker.to_s, "args" => ["myarg"]})
       @processor.process(work(msg))
-      assert_equal 1, $invokes
+      assert_equal 2, $invokes
     end
   end
 

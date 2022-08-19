@@ -10,12 +10,9 @@ describe Sidekiq::Launcher do
 
   before do
     @config = reset!
+    @config.capsules << Sidekiq::Capsule.new("default", @config)
+    @config.capsules.first.concurrency = 3
     @config[:tag] = "myapp"
-    @config[:concurrency] = 3
-  end
-
-  def new_manager(opts)
-    Sidekiq::Manager.new(opts)
   end
 
   describe "memory collection" do
@@ -28,10 +25,7 @@ describe Sidekiq::Launcher do
 
   describe "heartbeat" do
     before do
-      @mgr = new_manager(@config)
-      @launcher = Sidekiq::Launcher.new(@config)
-      @launcher.manager = @mgr
-      @id = @launcher.identity
+      @id = subject.identity
 
       Sidekiq::Processor::WORK_STATE.set("a", {"b" => 1})
 
@@ -114,16 +108,16 @@ describe Sidekiq::Launcher do
           i += 1
         end
         assert_equal 0, i
-        @launcher.heartbeat
+        subject.heartbeat
         assert_equal 1, i
-        @launcher.heartbeat
+        subject.heartbeat
         assert_equal 1, i
       end
 
       describe "when manager is active" do
         before do
           Sidekiq::Launcher::PROCTITLES << proc { "xyz" }
-          @launcher.heartbeat
+          subject.heartbeat
           Sidekiq::Launcher::PROCTITLES.pop
         end
 
@@ -142,8 +136,8 @@ describe Sidekiq::Launcher do
 
     describe "when manager is stopped" do
       before do
-        @launcher.quiet
-        @launcher.heartbeat
+        subject.quiet
+        subject.heartbeat
       end
 
       # after do
