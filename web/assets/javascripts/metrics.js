@@ -20,7 +20,7 @@ class Colors {
       "#8549ba",
       "#991b1b",
     ];
-    this.primary = this.available[0]
+    this.primary = this.available[0];
   }
 
   reserve(assignee) {
@@ -48,7 +48,6 @@ class Colors {
 class BaseChart {
   constructor(id, options) {
     this.ctx = document.getElementById(id);
-    this.metric = "s";
     this.visibleKls = options.visible;
     this.options = options;
     this.colors = new Colors();
@@ -76,6 +75,7 @@ class BaseChart {
 class JobMetricsOverviewChart extends BaseChart {
   constructor(id, options) {
     super(id, { ...options, chartType: "line" });
+    this.metric = this.options.initialMetric;
     this.swatches = [];
 
     this.addMarksToChart();
@@ -83,7 +83,7 @@ class JobMetricsOverviewChart extends BaseChart {
   }
 
   get currentSeries() {
-    return this.options.series[this.metric];
+    return this.options.series[this.metric || this.options.initialMetric];
   }
 
   get datasets() {
@@ -92,9 +92,11 @@ class JobMetricsOverviewChart extends BaseChart {
       .map(([kls, _]) => this.buildDataset(kls));
   }
 
-  selectMetric(e) {
-    e.preventDefault();
-    this.metric = e.target.getAttribute("data-show-metric");
+  selectMetric(metric) {
+    this.metric = metric;
+    for (const el of document.querySelectorAll("a[data-show-metric]")) {
+      this.updateMetricSelector(el);
+    }
     this.colors.returnAll();
     this.chart.data.datasets = this.datasets;
     this.chart.update();
@@ -102,8 +104,17 @@ class JobMetricsOverviewChart extends BaseChart {
     // TODO: sort the table by the new metric
   }
 
+  updateMetricSelector(el) {
+    const isCurrent = el.getAttribute("data-show-metric") == this.metric;
+    el.classList.toggle("current-chart", isCurrent);
+  }
+
   registerMetricSelector(el) {
-    el.addEventListener("click", this.selectMetric.bind(this));
+    this.updateMetricSelector(el);
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      this.selectMetric(e.target.getAttribute("data-show-metric"));
+    });
   }
 
   registerSwatch(id) {
