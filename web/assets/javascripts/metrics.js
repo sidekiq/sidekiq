@@ -24,7 +24,7 @@ class Colors {
   }
 
   reserve(assignee) {
-    const color = this.available.shift() || this.fallback;
+    const color = this.assigments[assignee] || this.available.shift() || this.fallback;
     this.assigments[assignee] = color;
     return color;
   }
@@ -35,12 +35,6 @@ class Colors {
 
     if (color && color != this.fallback) {
       this.available.unshift(color);
-    }
-  }
-
-  returnAll() {
-    for (const assignee of Object.keys(this.assigments)) {
-      this.return(assignee);
     }
   }
 }
@@ -97,7 +91,6 @@ class JobMetricsOverviewChart extends BaseChart {
     for (const el of document.querySelectorAll("a[data-show-metric]")) {
       this.updateMetricSelector(el);
     }
-    this.colors.returnAll();
     this.chart.data.datasets = this.datasets;
     this.chart.update();
   }
