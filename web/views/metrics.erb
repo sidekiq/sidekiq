@@ -23,6 +23,18 @@
         f: job_results.map { |(kls, jr)| [kls, jr.dig("series", "f")] }.to_h,
         avg: job_results.map { |(kls, jr)| [kls, jr.series_avg("s") ] }.to_h,
       },
+      metricLabels: {
+        s: "Total execution time (sec)",
+        p: "Processed jobs",
+        f: "Failed jobs",
+        avg: "Avg execution time (sec)",
+      },
+      metricUnits: {
+        s: "seconds",
+        p: "jobs",
+        f: "jobs",
+        avg: "seconds",
+      },
       marks: @query_result.marks.map { |m| [m.bucket, m.label] },
       visible: visible_kls,
       labels: @query_result.buckets,

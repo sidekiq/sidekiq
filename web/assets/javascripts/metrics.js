@@ -24,7 +24,8 @@ class Colors {
   }
 
   reserve(assignee) {
-    const color = this.assigments[assignee] || this.available.shift() || this.fallback;
+    const color =
+      this.assigments[assignee] || this.available.shift() || this.fallback;
     this.assigments[assignee] = color;
     return color;
   }
@@ -53,6 +54,12 @@ class BaseChart {
     });
   }
 
+  update() {
+    this.chart.options = this.chartOptions;
+    this.options.marks && this.addMarksToChart();
+    this.chart.update();
+  }
+
   addMarksToChart() {
     this.options.marks.forEach(([bucket, label], i) => {
       this.chart.options.plugins.annotation.annotations[`deploy-${i}`] = {
@@ -69,15 +76,13 @@ class BaseChart {
 class JobMetricsOverviewChart extends BaseChart {
   constructor(id, options) {
     super(id, { ...options, chartType: "line" });
-    this.metric = this.options.initialMetric;
     this.swatches = [];
 
-    this.addMarksToChart();
-    this.chart.update();
+    this.update();
   }
 
   get currentSeries() {
-    return this.options.series[this.metric || this.options.initialMetric];
+    return this.options.series[this.metric];
   }
 
   get datasets() {
@@ -86,13 +91,21 @@ class JobMetricsOverviewChart extends BaseChart {
       .map(([kls, _]) => this.buildDataset(kls));
   }
 
+  get metric() {
+    return this._metric || this.options.initialMetric;
+  }
+
+  set metric(m) {
+    this._metric = m;
+  }
+
   selectMetric(metric) {
     this.metric = metric;
     for (const el of document.querySelectorAll("a[data-show-metric]")) {
       this.updateMetricSelector(el);
     }
     this.chart.data.datasets = this.datasets;
-    this.chart.update();
+    this.update();
   }
 
   updateMetricSelector(el) {
@@ -136,7 +149,7 @@ class JobMetricsOverviewChart extends BaseChart {
     }
 
     this.updateSwatch(kls);
-    this.chart.update();
+    this.update();
   }
 
   sortTableBody(tbody, colNo) {
@@ -175,7 +188,7 @@ class JobMetricsOverviewChart extends BaseChart {
         y: {
           beginAtZero: true,
           title: {
-            text: "Total execution time (sec)",
+            text: this.options.metricLabels[this.metric],
             display: true,
           },
         },
@@ -191,7 +204,9 @@ class JobMetricsOverviewChart extends BaseChart {
           callbacks: {
             title: (items) => `${items[0].label} UTC`,
             label: (item) =>
-              `${item.dataset.label}: ${item.parsed.y.toFixed(1)} seconds`,
+              `${item.dataset.label}: ${item.parsed.y.toFixed(1)} ${
+                this.options.metricUnits[this.metric]
+              }`,
             footer: (items) => {
               const bucket = items[0].label;
               const marks = this.options.marks.filter(([b, _]) => b == bucket);
@@ -252,8 +267,7 @@ class HistBubbleChart extends BaseChart {
   constructor(id, options) {
     super(id, { ...options, chartType: "bubble" });
 
-    this.addMarksToChart();
-    this.chart.update();
+    this.update();
   }
 
   get datasets() {
