@@ -21,9 +21,7 @@
         s: job_results.map { |(kls, jr)| [kls, jr.dig("series", "s")] }.to_h,
         p: job_results.map { |(kls, jr)| [kls, jr.dig("series", "p")] }.to_h,
         f: job_results.map { |(kls, jr)| [kls, jr.dig("series", "f")] }.to_h,
-        avg: job_results.map { |(kls, jr)|
-          [kls, jr.dig("series", "s").map.with_index { |(b, s), i| [b, s / jr.dig("series", "p", b)] }.to_h]
-        }.to_h,
+        avg: job_results.map { |(kls, jr)| [kls, jr.series_avg("s") ] }.to_h,
       },
       marks: @query_result.marks.map { |m| [m.bucket, m.label] },
       visible: visible_kls,
