@@ -100,8 +100,6 @@ class JobMetricsOverviewChart extends BaseChart {
     this.colors.returnAll();
     this.chart.data.datasets = this.datasets;
     this.chart.update();
-
-    // TODO: sort the table by the new metric
   }
 
   updateMetricSelector(el) {
@@ -114,6 +112,10 @@ class JobMetricsOverviewChart extends BaseChart {
     el.addEventListener("click", (e) => {
       e.preventDefault();
       this.selectMetric(e.target.getAttribute("data-show-metric"));
+      this.sortTableBody(
+        e.target.closest("table").querySelector("tbody"),
+        [...e.target.closest("tr").children].indexOf(e.target.closest("th"))
+      );
     });
   }
 
@@ -142,6 +144,22 @@ class JobMetricsOverviewChart extends BaseChart {
 
     this.updateSwatch(kls);
     this.chart.update();
+  }
+
+  sortTableBody(tbody, colNo) {
+    const [...rows] = tbody.querySelectorAll("tr");
+
+    rows.sort((r1, r2) => {
+      const val1 = parseFloat(r1.children[colNo].innerText);
+      const val2 = parseFloat(r2.children[colNo].innerText);
+
+      // Sorting highest to lowest
+      return val2 - val1;
+    });
+
+    for (const row of rows) {
+      tbody.append(row);
+    }
   }
 
   buildDataset(kls) {

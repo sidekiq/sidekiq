@@ -37,7 +37,7 @@
 
 <div class="table_container">
   <table class="table table-bordered table-striped table-hover">
-    <tbody>
+    <thead>
       <tr>
         <th><%= t('Name') %></th>
         <th>
@@ -58,6 +58,8 @@
           }
         </script>
       </tr>
+    </thead>
+    <tbody>
       <% if job_results.any? %>
         <% job_results.each_with_index do |(kls, jr), i| %>
           <tr>
