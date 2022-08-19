@@ -20,6 +20,7 @@ class Colors {
       "#8549ba",
       "#991b1b",
     ];
+    this.primary = this.available[0]
   }
 
   reserve(assignee) {
@@ -53,7 +54,7 @@ class BaseChart {
     this.colors = new Colors();
 
     this.chart = new Chart(this.ctx, {
-      type: "line",
+      type: this.options.chartType,
       data: { labels: this.options.labels, datasets: this.datasets },
       options: this.chartOptions,
     });
@@ -190,7 +191,7 @@ class HistTotalsChart extends BaseChart {
     return [
       {
         data: this.options.series,
-        backgroundColor: this.colors[0],
+        backgroundColor: this.colors.primary,
         borderWidth: 0,
       },
     ];
@@ -267,8 +268,8 @@ class HistBubbleChart extends BaseChart {
     return [
       {
         data: data,
-        backgroundColor: "#537bc4",
-        borderColor: "#537bc4",
+        backgroundColor: this.colors.primary,
+        borderColor: this.colors.primary,
       },
     ];
   }
