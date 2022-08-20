@@ -6,6 +6,8 @@ if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
 class Colors {
   constructor() {
     this.assigments = {};
+    this.success = "#006f68";
+    this.failure = "#af0014";
     this.fallback = "#999";
     this.available = [
       // Colors taken from https://www.chartjs.org/docs/latest/samples/utils.html
@@ -61,6 +63,7 @@ class BaseChart {
 
   get chartOptions() {
     return {
+      plugins: this.plugins,
       interaction: {
         mode: "x",
       },
@@ -353,6 +356,45 @@ class HistBubbleChart extends BaseChart {
               return marks.map(([b, msg]) => `Deploy: ${msg}`);
             },
           },
+        },
+      },
+    };
+  }
+}
+
+class HistoryChart extends BaseChart {
+  constructor(id, options) {
+    super(id, { ...options, chartType: "line" });
+  }
+
+  get datasets() {
+    return [
+      {
+        label: this.options.processedLabel,
+        data: this.options.processed,
+        borderColor: this.colors.success,
+        backgroundColor: this.colors.success,
+        borderWidth: 2,
+        pointRadius: 2,
+      },
+      {
+        label: this.options.failedLabel,
+        data: this.options.failed,
+        borderColor: this.colors.failure,
+        backgroundColor: this.colors.failure,
+        borderWidth: 2,
+        pointRadius: 2,
+      },
+    ];
+  }
+
+  get chartOptions() {
+    return {
+      ...super.chartOptions,
+      aspectRatio: 4,
+      scales: {
+        y: {
+          beginAtZero: true,
         },
       },
     };
