@@ -77,15 +77,17 @@ class BaseChart {
       },
     };
 
-    this.options.marks.forEach(([bucket, label], i) => {
-      plugins.annotation.annotations[`deploy-${i}`] = {
-        type: "line",
-        xMin: bucket,
-        xMax: bucket,
-        borderColor: "rgba(220, 38, 38, 0.4)",
-        borderWidth: 2,
-      };
-    });
+    if (this.options.marks) {
+      this.options.marks.forEach(([bucket, label], i) => {
+        plugins.annotation.annotations[`deploy-${i}`] = {
+          type: "line",
+          xMin: bucket,
+          xMax: bucket,
+          borderColor: "rgba(220, 38, 38, 0.4)",
+          borderWidth: 2,
+        };
+      });
+    }
 
     return plugins;
   }
