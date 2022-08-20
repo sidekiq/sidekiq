@@ -23,14 +23,14 @@ class Colors {
     this.primary = this.available[0];
   }
 
-  reserve(assignee) {
+  checkOutFor(assignee) {
     const color =
       this.assigments[assignee] || this.available.shift() || this.fallback;
     this.assigments[assignee] = color;
     return color;
   }
 
-  return(assignee) {
+  checkInFor(assignee) {
     const color = this.assigments[assignee];
     delete this.assigments[assignee];
 
@@ -164,7 +164,7 @@ class JobMetricsOverviewChart extends BaseChart {
       this.chart.data.datasets.push(this.buildDataset(kls));
     } else {
       const i = this.chart.data.datasets.findIndex((ds) => ds.label == kls);
-      this.colors.return(kls);
+      this.colors.checkInFor(kls);
       this.chart.data.datasets.splice(i, 1);
     }
 
@@ -189,7 +189,7 @@ class JobMetricsOverviewChart extends BaseChart {
   }
 
   buildDataset(kls) {
-    const color = this.colors.reserve(kls);
+    const color = this.colors.checkOutFor(kls);
 
     return {
       label: kls,
