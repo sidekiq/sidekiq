@@ -56,13 +56,29 @@ class BaseChart {
 
   update() {
     this.chart.options = this.chartOptions;
-    this.options.marks && this.addMarksToChart();
     this.chart.update();
   }
 
-  addMarksToChart() {
+  get chartOptions() {
+    return {
+      interaction: {
+        mode: "x",
+      },
+    };
+  }
+
+  get plugins() {
+    const plugins = {
+      legend: {
+        display: false,
+      },
+      annotation: {
+        annotations: {},
+      },
+    };
+
     this.options.marks.forEach(([bucket, label], i) => {
-      this.chart.options.plugins.annotation.annotations[`deploy-${i}`] = {
+      plugins.annotation.annotations[`deploy-${i}`] = {
         type: "line",
         xMin: bucket,
         xMax: bucket,
@@ -70,6 +86,8 @@ class BaseChart {
         borderWidth: 2,
       };
     });
+
+    return plugins;
   }
 }
 
@@ -183,6 +201,7 @@ class JobMetricsOverviewChart extends BaseChart {
 
   get chartOptions() {
     return {
+      ...super.chartOptions,
       aspectRatio: 4,
       scales: {
         y: {
@@ -193,13 +212,8 @@ class JobMetricsOverviewChart extends BaseChart {
           },
         },
       },
-      interaction: {
-        mode: "x",
-      },
       plugins: {
-        legend: {
-          display: false,
-        },
+        ...this.plugins,
         tooltip: {
           callbacks: {
             title: (items) => `${items[0].label} UTC`,
@@ -236,6 +250,7 @@ class HistTotalsChart extends BaseChart {
 
   get chartOptions() {
     return {
+      ...super.chartOptions,
       aspectRatio: 6,
       scales: {
         y: {
@@ -246,13 +261,8 @@ class HistTotalsChart extends BaseChart {
           },
         },
       },
-      interaction: {
-        mode: "x",
-      },
       plugins: {
-        legend: {
-          display: false,
-        },
+        ...this.plugins,
         tooltip: {
           callbacks: {
             label: (item) => `${item.parsed.y} jobs`,
@@ -312,6 +322,7 @@ class HistBubbleChart extends BaseChart {
 
   get chartOptions() {
     return {
+      ...super.chartOptions,
       aspectRatio: 3,
       scales: {
         x: {
@@ -325,13 +336,8 @@ class HistBubbleChart extends BaseChart {
           },
         },
       },
-      interaction: {
-        mode: "x",
-      },
       plugins: {
-        legend: {
-          display: false,
-        },
+        ...this.plugins,
         tooltip: {
           callbacks: {
             title: (items) => `${items[0].raw.x} UTC`,
