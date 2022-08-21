@@ -1,104 +1,6 @@
 Sidekiq = {};
 
 var nf = new Intl.NumberFormat();
-var poller;
-var realtimeGraph = function(updatePath) {
-  var timeInterval = parseInt(localStorage.sidekiqTimeInterval) || 5000;
-  var graphElement = document.getElementById("realtime");
-
-  var graph = new Rickshaw.Graph( {
-    element: graphElement,
-    width: responsiveWidth(),
-    height: 200,
-    renderer: 'line',
-    interpolation: 'linear',
-
-    series: new Rickshaw.Series.FixedDuration([{ name: graphElement.dataset.failedLabel, color: '#af0014' }, { name: graphElement.dataset.processedLabel, color: '#006f68' }], undefined, {
-      timeInterval: timeInterval,
-      maxDataPoints: 100,
-    })
-  });
-
-  var y_axis = new Rickshaw.Graph.Axis.Y( {
-    graph: graph,
-    tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-    ticksTreatment: 'glow'
-  });
-
-  graph.render();
-
-  var legend = document.getElementById('realtime-legend');
-  var Hover = Rickshaw.Class.create(Rickshaw.Graph.HoverDetail, {
-    render: function(args) {
-      legend.innerHTML = "";
-
-      var timestamp = document.createElement('div');
-      timestamp.className = 'timestamp';
-      timestamp.innerHTML = args.formattedXValue;
-      legend.appendChild(timestamp);
-
-      args.detail.sort(function(a, b) { return a.order - b.order }).forEach( function(d) {
-        var line = document.createElement('div');
-        line.className = 'line';
-
-        var swatch = document.createElement('div');
-        swatch.className = 'swatch';
-        swatch.style.backgroundColor = d.series.color;
-
-        var label = document.createElement('div');
-        label.className = 'tag';
-        label.innerHTML = d.name + ": " + nf.format(Math.floor(d.formattedYValue));
-
-        line.appendChild(swatch);
-        line.appendChild(label);
-        legend.appendChild(line);
-
-        var dot = document.createElement('div');
-        dot.className = 'dot';
-        dot.style.top = graph.y(d.value.y0 + d.value.y) + 'px';
-        dot.style.borderColor = d.series.color;
-
-        this.element.appendChild(dot);
-        dot.className = 'dot active';
-        this.show();
-      }, this );
-    }
-  });
-  var hover = new Hover( { graph: graph } );
-
-  var i = 0;
-  poller = setInterval(function() {
-    var url = document.getElementById("realtime").getAttribute("data-update-url");
-
-    fetch(url).then(response => response.json()).then(data => {
-      if (i === 0) {
-        var processed = data.sidekiq.processed;
-        var failed = data.sidekiq.failed;
-      } else {
-        var processed = data.sidekiq.processed - Sidekiq.processed;
-        var failed = data.sidekiq.failed - Sidekiq.failed;
-      }
-
-      dataPoint = {};
-      dataPoint[graphElement.dataset.failedLabel] = failed;
-      dataPoint[graphElement.dataset.processedLabel] = processed;
-
-      graph.series.addData(dataPoint);
-      graph.render();
-
-      Sidekiq.processed = data.sidekiq.processed;
-      Sidekiq.failed = data.sidekiq.failed;
-
-      updateStatsSummary(data.sidekiq);
-      updateRedisStats(data.redis);
-      updateFooterUTCTime(data.server_utc_time)
-
-      pulseBeacon();
-    });
-
-    i++;
-  }, timeInterval);
-}
 
 var updateStatsSummary = function(data) {
   document.getElementById("txtProcessed").innerText = nf.format(data.processed);
@@ -127,11 +29,6 @@ var pulseBeacon = function() {
   window.setTimeout(() => { document.getElementById('beacon').classList.remove('pulse'); }, 1000);
 }
 
-// Render graphs
-var renderGraphs = function() {
-  realtimeGraph();
-};
-
 var setSliderLabel = function(val) {
   document.getElementById('sldr-text').innerText = Math.round(parseFloat(val) / 1000) + ' sec';
 }
@@ -142,8 +39,6 @@ var ready = (callback) => {
 }
 
 ready(() => {
-  renderGraphs();
-
   var sldr = document.getElementById('sldr');
   if (typeof localStorage.sidekiqTimeInterval !== 'undefined') {
     sldr.value = localStorage.sidekiqTimeInterval;
@@ -151,11 +46,11 @@ ready(() => {
   }
 
   sldr.addEventListener("change", event => {
-    clearInterval(poller);
     localStorage.sidekiqTimeInterval = sldr.value;
     setSliderLabel(sldr.value);
-    resetGraphs();
-    renderGraphs();
+    sldr.dispatchEvent(
+      new CustomEvent("interval:update", { bubbles: true, detail: sldr.value })
+    );
   });
 
   sldr.addEventListener("mousemove", event => {
@@ -163,45 +58,20 @@ ready(() => {
   });
 });
 
-// Reset graphs
-var resetGraphs = function() {
-  document.getElementById('realtime').innerHTML = '';
-};
-
-// Resize graphs after resizing window
-var debounce = function(fn, timeout) {
-  var timeoutID = -1;
-  return function() {
-    if (timeoutID > -1) {
-      window.clearTimeout(timeoutID);
-    }
-    timeoutID = window.setTimeout(fn, timeout);
-  }
-};
-
-window.onresize = function() {
-  var prevWidth = window.innerWidth;
-  return debounce(function () {
-    var currWidth = window.innerWidth;
-    if (prevWidth !== currWidth) {
-      prevWidth = currWidth;
-      clearInterval(poller);
-      resetGraphs();
-      renderGraphs();
-    }
-  }, 125);
-}();
-
-class HistoryChart extends BaseChart {
+class DashboardChart extends BaseChart {
   constructor(id, options) {
     super(id, { ...options, chartType: "line" });
+  }
+
+  get data() {
+    return [this.options.processed, this.options.failed];
   }
 
   get datasets() {
     return [
       {
         label: this.options.processedLabel,
-        data: this.options.processed,
+        data: this.data[0],
         borderColor: this.colors.success,
         backgroundColor: this.colors.success,
         borderWidth: 2,
@@ -209,7 +79,7 @@ class HistoryChart extends BaseChart {
       },
       {
         label: this.options.failedLabel,
-        data: this.options.failed,
+        data: this.data[1],
         borderColor: this.colors.failure,
         backgroundColor: this.colors.failure,
         borderWidth: 2,
@@ -228,5 +98,52 @@ class HistoryChart extends BaseChart {
         },
       },
     };
+  }
+}
+
+class RealtimeChart extends DashboardChart {
+  constructor(id, options) {
+    super(id, options);
+    this.delay = parseInt(localStorage.sidekiqTimeInterval) || 5000;
+    this.startPolling();
+    document.addEventListener("interval:update", this.handleUpdate.bind(this));
+  }
+
+  async startPolling() {
+    // Fetch initial values so we can show diffs moving forward
+    this.stats = await this.fetchStats();
+    this._interval = setInterval(this.poll.bind(this), this.delay);
+  }
+
+  async poll() {
+    const stats = await this.fetchStats();
+    const processed = stats.sidekiq.processed - this.stats.sidekiq.processed;
+    const failed = stats.sidekiq.failed - this.stats.sidekiq.failed;
+
+    this.chart.data.labels.shift();
+    this.chart.data.datasets[0].data.shift();
+    this.chart.data.datasets[1].data.shift();
+    this.chart.data.labels.push(new Date().toUTCString().split(" ")[4]);
+    this.chart.data.datasets[0].data.push(processed);
+    this.chart.data.datasets[1].data.push(failed);
+    this.chart.update();
+
+    updateStatsSummary(this.stats.sidekiq);
+    updateRedisStats(this.stats.redis);
+    updateFooterUTCTime(this.stats.server_utc_time);
+    pulseBeacon();
+
+    this.stats = stats;
+  }
+
+  async fetchStats() {
+    const response = await fetch(this.options.updateUrl);
+    return await response.json();
+  }
+
+  handleUpdate(e) {
+    this.delay = parseInt(e.detail);
+    clearInterval(this._interval);
+    this.startPolling();
   }
 }

@@ -19,8 +19,20 @@
 </div>
 
 <div class="row chart">
-  <div id="realtime" data-processed-label="<%= t('Processed') %>" data-failed-label="<%= t('Failed') %>" data-update-url="<%= root_path %>stats"></div>
-  <div id="realtime-legend"></div>
+  <canvas id="realtime-chart"></canvas>
+  <script>
+    window.realtimeChart = new RealtimeChart(
+      "realtime-chart",
+      <%= Sidekiq.dump_json({
+        processedLabel: t('Processed'),
+        failedLabel: t('Failed'),
+        labels: Array.new(50, ""),
+        processed: Array.new(50),
+        failed: Array.new(50),
+        updateUrl: "#{root_path}stats",
+      }) %>
+    )
+  </script>
 </div>
 
 <div class="row header">
@@ -38,14 +50,13 @@
 
   <canvas id="history-chart"></canvas>
   <script>
-    window.historyChart = new HistoryChart(
+    window.historyChart = new DashboardChart(
       "history-chart",
       <%= Sidekiq.dump_json({
         processedLabel: t('Processed'),
         failedLabel: t('Failed'),
         processed: @processed_history.to_a.reverse,
         failed: @failed_history.to_a.reverse,
-        updateUrl: "#{root_path}stats",
       }) %>
     )
   </script>
