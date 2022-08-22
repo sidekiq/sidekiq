@@ -76,8 +76,7 @@ describe "API" do
     describe "workers_size" do
       it "retrieves the number of busy workers" do
         Sidekiq.redis do |c|
-          c.sadd("processes", "process_1")
-          c.sadd("processes", "process_2")
+          c.sadd("processes", ["process_1", "process_2"])
           c.hset("process_1", "busy", 1)
           c.hset("process_2", "busy", 2)
         end
@@ -95,10 +94,10 @@ describe "API" do
       it "returns a hash of queue and size in order" do
         Sidekiq.redis do |conn|
           conn.rpush "queue:foo", "{}"
-          conn.sadd "queues", "foo"
+          conn.sadd "queues", ["foo"]
 
           3.times { conn.rpush "queue:bar", "{}" }
-          conn.sadd "queues", "bar"
+          conn.sadd "queues", ["bar"]
         end
 
         s = Sidekiq::Stats::Queues.new
@@ -113,7 +112,7 @@ describe "API" do
       it "handles latency for good jobs" do
         Sidekiq.redis do |conn|
           conn.rpush "queue:default", "{\"enqueued_at\": #{Time.now.to_f}}"
-          conn.sadd "queues", "default"
+          conn.sadd "queues", ["default"]
         end
         s = Sidekiq::Stats.new
         assert s.default_queue_latency > 0
@@ -124,7 +123,7 @@ describe "API" do
       it "handles latency for incomplete jobs" do
         Sidekiq.redis do |conn|
           conn.rpush "queue:default", "{}"
-          conn.sadd "queues", "default"
+          conn.sadd "queues", ["default"]
         end
         s = Sidekiq::Stats.new
         assert_equal 0, s.default_queue_latency
@@ -135,10 +134,10 @@ describe "API" do
       it "returns total enqueued jobs" do
         Sidekiq.redis do |conn|
           conn.rpush "queue:foo", "{}"
-          conn.sadd "queues", "foo"
+          conn.sadd "queues", ["foo"]
 
           3.times { conn.rpush "queue:bar", "{}" }
-          conn.sadd "queues", "bar"
+          conn.sadd "queues", ["bar"]
         end
 
         s = Sidekiq::Stats.new
@@ -570,9 +569,9 @@ describe "API" do
       time = Time.now.to_f
       Sidekiq.redis do |conn|
         conn.multi do |transaction|
-          transaction.sadd("processes", odata["key"])
+          transaction.sadd("processes", [odata["key"]])
           transaction.hmset(odata["key"], "info", Sidekiq.dump_json(odata), "busy", 10, "beat", time)
-          transaction.sadd("processes", "fake:pid")
+          transaction.sadd("processes", ["fake:pid"])
         end
       end
 
@@ -601,7 +600,7 @@ describe "API" do
       key = "#{hn}:#{$$}"
       pdata = {"pid" => $$, "hostname" => hn, "started_at" => Time.now.to_i}
       Sidekiq.redis do |conn|
-        conn.sadd("processes", key)
+        conn.sadd("processes", [key])
         conn.hmset(key, "info", Sidekiq.dump_json(pdata), "busy", 0, "beat", Time.now.to_f)
       end
 
@@ -653,7 +652,7 @@ describe "API" do
       data = {"pid" => rand(10_000), "hostname" => "app#{rand(1_000)}", "started_at" => Time.now.to_f}
       key = "#{data["hostname"]}:#{data["pid"]}"
       Sidekiq.redis do |conn|
-        conn.sadd("processes", key)
+        conn.sadd("processes", [key])
         conn.hmset(key, "info", Sidekiq.dump_json(data), "busy", 0, "beat", Time.now.to_f)
       end
 
@@ -662,8 +661,7 @@ describe "API" do
       assert_equal 1, ps.to_a.size
 
       Sidekiq.redis do |conn|
-        conn.sadd("processes", "bar:987")
-        conn.sadd("processes", "bar:986")
+        conn.sadd("processes", ["bar:987", "bar:986"])
         conn.del("process_cleanup")
       end
 

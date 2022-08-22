@@ -3,6 +3,7 @@ source "https://rubygems.org"
 gemspec
 
 gem "rake"
+gem "redis"
 gem "redis-namespace"
 gem "redis-client"
 gem "rails", "~> 6.0"

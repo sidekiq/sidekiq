@@ -231,7 +231,7 @@ module Sidekiq
           entry["enqueued_at"] = now
           Sidekiq.dump_json(entry)
         }
-        conn.sadd("queues", queue)
+        conn.sadd("queues", [queue])
         conn.lpush("queue:#{queue}", to_push)
       end
     end
