@@ -2,10 +2,11 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+6.5.5
 ----------
 
-- Fixes for compatibility with Rack 3.x
+- Fix require issue with job_retry.rb [#5462]
+- Improve Sidekiq::Web compatibility with Rack 3.x
 
 6.5.4
 ----------
