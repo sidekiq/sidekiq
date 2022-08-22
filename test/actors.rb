@@ -127,6 +127,7 @@ describe "Actors" do
       end
       jid = JoeWorker.perform_async(2)
       assert jid, jid
+      # debugger if q.size == 0
       assert_equal 1, q.size
 
       a = $count

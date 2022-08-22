@@ -213,7 +213,7 @@ module Sidekiq
           conn.pipelined do |pipeline|
             atomic_push(pipeline, payloads)
           end
-        rescue RedisConnection.adapter::BaseError => ex
+        rescue RedisClient::Error => ex
           # 2550 Failover can cause the server to become a replica, need
           # to disconnect and reopen the socket to get back to the primary.
           # 4495 Use the same logic if we have a "Not enough replicas" error from the primary
