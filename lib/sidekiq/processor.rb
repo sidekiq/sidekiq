@@ -65,6 +65,10 @@ module Sidekiq
     private unless $TESTING
 
     def run
+      # By setting this thread-local, Sidekiq.redis will access +Sidekiq::Capsule#redis_pool+
+      # instead of the global pool in +Sidekiq::Config#redis_pool+.
+      Thread.current[:sidekiq_capsule] = @capsule
+
       process_one until @done
       @callback.call(self)
     rescue Sidekiq::Shutdown
