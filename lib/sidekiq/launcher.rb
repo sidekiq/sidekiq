@@ -71,7 +71,7 @@ module Sidekiq
 
     private unless $TESTING
 
-    BEAT_PAUSE = 5
+    BEAT_PAUSE = 10
 
     def start_heartbeat
       loop do
