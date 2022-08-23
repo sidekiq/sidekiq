@@ -62,14 +62,14 @@ module Sidekiq
 
     get "/metrics" do
       q = Sidekiq::Metrics::Query.new
-      @resultset = q.top_jobs
+      @query_result = q.top_jobs
       erb(:metrics)
     end
 
     get "/metrics/:name" do
       @name = route_params[:name]
       q = Sidekiq::Metrics::Query.new
-      @resultset = q.for_job(@name)
+      @query_result = q.for_job(@name)
       erb(:metrics_for_job)
     end
 
