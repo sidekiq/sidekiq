@@ -54,10 +54,10 @@ module Sidekiq
     # LEGACY: edits the default capsule
     # config.concurrency = 5
     def concurrency=(val)
-      @capsules.first.concurrency = Integer(val)
+      default_capsule.concurrency = Integer(val)
     end
 
-    # LEGACY: edits the default capsule
+    # Edit the default capsule.
     # config.queues = %w( high default low )                 # strict
     # config.queues = %w( high,3 default,2 low,1 )           # weighted
     # config.queues = %w( feature1,1 feature2,1 feature3,1 ) # random
@@ -68,11 +68,11 @@ module Sidekiq
     # are ridiculous and unnecessarily expensive. You can get random queue ordering
     # by explicitly setting all weights to 1.
     def queues=(val)
-      @capsules.first.queues = val
+      default_capsule.queues = val
     end
 
     def queues
-      @capsules.first.queues
+      default_capsule.queues
     end
 
     def client_middleware
