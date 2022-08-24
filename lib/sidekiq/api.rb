@@ -486,7 +486,7 @@ module Sidekiq
       # #1761 in dev mode, it's possible to have jobs enqueued which haven't been loaded into
       # memory yet so the YAML can't be loaded.
       # TODO is this still necessary? Zeitwerk reloader should handle?
-      Sidekiq.logger.warn "Unable to load YAML: #{ex.message}" unless Sidekiq.config[:environment] == "development"
+      Sidekiq.logger.warn "Unable to load YAML: #{ex.message}" unless Sidekiq.options[:environment] == "development"
       default
     end
 
