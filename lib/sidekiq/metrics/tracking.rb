@@ -121,14 +121,12 @@ module Sidekiq
   end
 end
 
-if ENV["SIDEKIQ_METRICS_BETA"] == "1"
-  Sidekiq.configure_server do |config|
-    exec = Sidekiq::Metrics::ExecutionTracker.new(config)
-    config.server_middleware do |chain|
-      chain.add Sidekiq::Metrics::Middleware, exec
-    end
-    config.on(:beat) do
-      exec.flush
-    end
+Sidekiq.configure_server do |config|
+  exec = Sidekiq::Metrics::ExecutionTracker.new(config)
+  config.server_middleware do |chain|
+    chain.add Sidekiq::Metrics::Middleware, exec
+  end
+  config.on(:beat) do
+    exec.flush
   end
 end

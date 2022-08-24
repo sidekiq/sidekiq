@@ -2,7 +2,6 @@ require "concurrent"
 
 module Sidekiq
   module Metrics
-    # TODO Support apps without concurrent-ruby
     Counter = ::Concurrent::AtomicFixnum
 
     # Implements space-efficient but statistically useful histogram storage.
