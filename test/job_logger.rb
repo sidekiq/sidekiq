@@ -81,21 +81,7 @@ describe "Job logger" do
   end
 
   it "tests custom logger with non numeric levels" do
-    logger_class = Class.new(Logger) do
-      def level
-        :nonsense
-      end
-
-      def info?
-        true
-      end
-
-      def debug?
-        false
-      end
-    end
-
-    @logger = logger_class.new(@output, level: :info)
+    @logger = Logger.new(@output, level: :info)
     @cfg.logger = @logger
 
     jl = Sidekiq::JobLogger.new(@logger)

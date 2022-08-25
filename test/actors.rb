@@ -60,6 +60,7 @@ describe "Actors" do
       @mutex.synchronize do
         @cond.signal
       end
+      pr.job
     end
 
     def await(timeout = 0.5)
@@ -69,9 +70,10 @@ describe "Actors" do
       end
     end
 
-    it "can start and stop" do
+    it "can stop" do
       f = Sidekiq::Processor.new(@cap) { |p, ex| raise "should not raise!" }
       f.terminate
+      assert_nil f.thread # didnt start it
     end
 
     it "can process" do
@@ -88,15 +90,23 @@ describe "Actors" do
         p.start
       end
 
-      p.kill(true)
+      p.terminate
+      val = p.kill(true)
+      assert_nil val
+
+      # TODO this is necessary for the test below to pass!?!?!
+      # Is there a rogue thread alive and fetching?
+      # Comment out and run "bundle exec ruby test/actors.rb"
+      JoeWorker.perform_async(0)
+
       b = $count
       assert_nil @latest_error
+      assert_equal false, p.thread.status
       assert_equal a + 1, b
       assert_equal 0, q.size
     end
 
     it "deals with errors" do
-      @config.logger.level = Logger::ERROR
       q = Sidekiq::Queue.new
       assert_equal 0, q.size
       p = Sidekiq::Processor.new(@cap) do |pr, ex|
@@ -115,6 +125,7 @@ describe "Actors" do
 
       p.kill(true)
       assert @latest_error
+      assert_equal false, p.thread.status
       assert_equal "boom", @latest_error.message
       assert_equal RuntimeError, @latest_error.class
     end
@@ -127,7 +138,6 @@ describe "Actors" do
       end
       jid = JoeWorker.perform_async(2)
       assert jid, jid
-      # debugger if q.size == 0
       assert_equal 1, q.size
 
       a = $count
