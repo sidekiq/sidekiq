@@ -66,7 +66,7 @@ describe Sidekiq::CLI do
       describe "setting internal options via the config file" do
         describe "setting the `strict` option via the config file" do
           it "discards the `strict` option specified via the config file" do
-            @cli.parse(%w[sidekiq -C ./test/config_with_internal_options.yml])
+            @cli.parse(%w[sidekiq -C ./test/cfg/config_with_internal_options.yml])
 
             assert_equal true, !!strict
           end
@@ -131,7 +131,7 @@ describe Sidekiq::CLI do
 
           describe "when no queues are specified via the config file" do
             it "sets 'default' queue" do
-              @cli.parse(%w[sidekiq -C ./test/config_empty.yml -r ./test/fake_env.rb])
+              @cli.parse(%w[sidekiq -C ./test/cfg/config_empty.yml -r ./test/fake_env.rb])
 
               assert_equal ["default"], queues
             end
@@ -169,9 +169,9 @@ describe Sidekiq::CLI do
         end
 
         it "accepts stringy keys" do
-          @cli.parse(%w[sidekiq -C ./test/config_string.yml])
+          @cli.parse(%w[sidekiq -C ./test/cfg/config_string.yml])
 
-          assert_equal "./test/config_string.yml", config[:config_file]
+          assert_equal "./test/cfg/config_string.yml", config[:config_file]
           refute config[:verbose]
           assert_equal "./test/fake_env.rb", config[:require]
           assert_nil config[:environment]
@@ -181,9 +181,9 @@ describe Sidekiq::CLI do
         end
 
         it "accepts environment specific config" do
-          @cli.parse(%w[sidekiq -e staging -C ./test/config_environment.yml])
+          @cli.parse(%w[sidekiq -e staging -C ./test/cfg/config_environment.yml])
 
-          assert_equal "./test/config_environment.yml", config[:config_file]
+          assert_equal "./test/cfg/config_environment.yml", config[:config_file]
           refute config[:verbose]
           assert_equal "./test/fake_env.rb", config[:require]
           assert_equal "staging", config[:environment]
@@ -193,8 +193,8 @@ describe Sidekiq::CLI do
         end
 
         it "accepts environment specific config with alias" do
-          @cli.parse(%w[sidekiq -e staging -C ./test/config_with_alias.yml])
-          assert_equal "./test/config_with_alias.yml", config[:config_file]
+          @cli.parse(%w[sidekiq -e staging -C ./test/cfg/config_with_alias.yml])
+          assert_equal "./test/cfg/config_with_alias.yml", config[:config_file]
           refute config[:verbose]
           assert_equal "./test/fake_env.rb", config[:require]
           assert_equal "staging", config[:environment]
@@ -202,8 +202,8 @@ describe Sidekiq::CLI do
           assert_equal 2, queues.count { |q| q == "very_often" }
           assert_equal 1, queues.count { |q| q == "seldom" }
 
-          @cli.parse(%w[sidekiq -e production -C ./test/config_with_alias.yml])
-          assert_equal "./test/config_with_alias.yml", config[:config_file]
+          @cli.parse(%w[sidekiq -e production -C ./test/cfg/config_with_alias.yml])
+          assert_equal "./test/cfg/config_with_alias.yml", config[:config_file]
           assert config[:verbose]
           assert_equal "./test/fake_env.rb", config[:require]
           assert_equal "production", config[:environment]
@@ -213,7 +213,7 @@ describe Sidekiq::CLI do
         end
 
         it "exposes ERB expected __FILE__ and __dir__" do
-          given_path = "./test/config__FILE__and__dir__.yml"
+          given_path = "./test/cfg/config__FILE__and__dir__.yml"
           expected_file = File.expand_path(given_path)
           # As per Ruby's Kernel module docs, __dir__ is equivalent to File.dirname(File.realpath(__FILE__))
           expected_dir = File.dirname(File.realpath(expected_file))
@@ -309,7 +309,7 @@ describe Sidekiq::CLI do
           describe "when the config file specifies queues without weights" do
             describe "when -q specifies queues without weights" do
               it "sets strictly ordered queues" do
-                @cli.parse(%w[sidekiq -C ./test/config_queues_without_weights.yml
+                @cli.parse(%w[sidekiq -C ./test/cfg/config_queues_without_weights.yml
                   -r ./test/fake_env.rb
                   -q foo -q bar])
 
@@ -319,7 +319,7 @@ describe Sidekiq::CLI do
 
             describe "when -q specifies no queues" do
               it "sets strictly ordered queues" do
-                @cli.parse(%w[sidekiq -C ./test/config_queues_without_weights.yml
+                @cli.parse(%w[sidekiq -C ./test/cfg/config_queues_without_weights.yml
                   -r ./test/fake_env.rb])
 
                 assert_equal true, !!strict
@@ -328,7 +328,7 @@ describe Sidekiq::CLI do
 
             describe "when -q specifies queues with weights" do
               it "does not set strictly ordered queues" do
-                @cli.parse(%w[sidekiq -C ./test/config_queues_without_weights.yml
+                @cli.parse(%w[sidekiq -C ./test/cfg/config_queues_without_weights.yml
                   -r ./test/fake_env.rb
                   -q foo,2 -q bar,3])
 
@@ -340,7 +340,7 @@ describe Sidekiq::CLI do
           describe "when the config file specifies no queues" do
             describe "when -q specifies queues without weights" do
               it "sets strictly ordered queues" do
-                @cli.parse(%w[sidekiq -C ./test/config_empty.yml
+                @cli.parse(%w[sidekiq -C ./test/cfg/config_empty.yml
                   -r ./test/fake_env.rb
                   -q foo -q bar])
 
@@ -350,7 +350,7 @@ describe Sidekiq::CLI do
 
             describe "when -q specifies no queues" do
               it "sets strictly ordered queues" do
-                @cli.parse(%w[sidekiq -C ./test/config_empty.yml
+                @cli.parse(%w[sidekiq -C ./test/cfg/config_empty.yml
                   -r ./test/fake_env.rb])
 
                 assert_equal true, !!strict
@@ -359,7 +359,7 @@ describe Sidekiq::CLI do
 
             describe "when -q specifies queues with weights" do
               it "does not set strictly ordered queues" do
-                @cli.parse(%w[sidekiq -C ./test/config_empty.yml
+                @cli.parse(%w[sidekiq -C ./test/cfg/config_empty.yml
                   -r ./test/fake_env.rb
                   -q foo,2 -q bar,3])
 
