@@ -5,6 +5,7 @@ gemspec
 gem "rake"
 gem "rails"
 gem "redis-client"
+# gem "debug"
 
 # Required for Ruby 3.1
 # https://github.com/mikel/mail/pull/1439

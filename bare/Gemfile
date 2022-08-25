@@ -3,4 +3,3 @@
 source "https://rubygems.org"
 
 gem "sidekiq", path: ".."
-gem "rackup"

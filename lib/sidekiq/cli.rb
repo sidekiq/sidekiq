@@ -10,6 +10,7 @@ require "fileutils"
 
 require "sidekiq"
 require "sidekiq/component"
+require "sidekiq/capsule"
 require "sidekiq/launcher"
 
 module Sidekiq # :nodoc:
@@ -22,13 +23,14 @@ module Sidekiq # :nodoc:
     attr_accessor :config
 
     def parse(args = ARGV.dup)
-      @config = Sidekiq
-      @config[:error_handlers].clear
-      @config[:error_handlers] << @config.method(:default_error_handler)
+      @config ||= Sidekiq::Config.new
 
       setup_options(args)
       initialize_logger
       validate!
+
+      # if you are changing this in user or app code, you have a bug.
+      Sidekiq.instance_variable_set(:@config, @config)
     end
 
     def jruby?
@@ -41,7 +43,7 @@ module Sidekiq # :nodoc:
     def run(boot_app: true)
       boot_application if boot_app
 
-      if environment == "development" && $stdout.tty? && @config.log_formatter.is_a?(Sidekiq::Logger::Formatters::Pretty)
+      if environment == "development" && $stdout.tty? && @config.logger.formatter.is_a?(Sidekiq::Logger::Formatters::Pretty)
         print_banner
       end
       logger.info "Booted Rails #{::Rails.version} application in #{environment} environment" if rails_app?
@@ -90,9 +92,9 @@ module Sidekiq # :nodoc:
 
       # Since the user can pass us a connection pool explicitly in the initializer, we
       # need to verify the size is large enough or else Sidekiq's performance is dramatically slowed.
-      cursize = @config.redis_pool.size
-      needed = @config[:concurrency] + 2
-      raise "Sidekiq's pool of #{cursize} Redis connections is too small, please increase the size to at least #{needed}" if cursize < needed
+      @config.capsules.each do |cap|
+        raise ArgumentError, "Pool size too small" if cap.redis_pool.size < cap.concurrency
+      end
 
       # cache process identity
       @config[:identity] = identity
@@ -260,6 +262,11 @@ module Sidekiq # :nodoc:
 
       # merge with defaults
       @config.merge!(opts)
+
+      cap = Sidekiq::Capsule.new("default", @config)
+      cap.queues = opts[:queues]
+      cap.concurrency = opts[:concurrency] || 10
+      @config.capsules << cap
     end
 
     def boot_application
@@ -332,8 +339,8 @@ module Sidekiq # :nodoc:
         end
 
         o.on "-q", "--queue QUEUE[,WEIGHT]", "Queues to process with optional weights" do |arg|
-          queue, weight = arg.split(",")
-          parse_queue opts, queue, weight
+          opts[:queues] ||= []
+          opts[:queues] << arg
         end
 
         o.on "-r", "--require [PATH|DIR]", "Location of Rails application with jobs or file to require" do |arg|
@@ -382,7 +389,7 @@ module Sidekiq # :nodoc:
     def parse_config(path)
       erb = ERB.new(File.read(path))
       erb.filename = File.expand_path(path)
-      opts = load_yaml(erb.result) || {}
+      opts = YAML.safe_load(erb.result, permitted_classes: [Symbol], aliases: true) || {}
 
       if opts.respond_to? :deep_symbolize_keys!
         opts.deep_symbolize_keys!
@@ -393,29 +400,7 @@ module Sidekiq # :nodoc:
       opts = opts.merge(opts.delete(environment.to_sym) || {})
       opts.delete(:strict)
 
-      parse_queues(opts, opts.delete(:queues) || [])
-
       opts
-    end
-
-    def load_yaml(src)
-      if Psych::VERSION > "4.0"
-        YAML.safe_load(src, permitted_classes: [Symbol], aliases: true)
-      else
-        YAML.load(src)
-      end
-    end
-
-    def parse_queues(opts, queues_and_weights)
-      queues_and_weights.each { |queue_and_weight| parse_queue(opts, *queue_and_weight) }
-    end
-
-    def parse_queue(opts, queue, weight = nil)
-      opts[:queues] ||= []
-      opts[:strict] = true if opts[:strict].nil?
-      raise ArgumentError, "queues: #{queue} cannot be defined twice" if opts[:queues].include?(queue)
-      [weight.to_i, 1].max.times { opts[:queues] << queue.to_s }
-      opts[:strict] = false if weight.to_i > 0
     end
 
     def rails_app?

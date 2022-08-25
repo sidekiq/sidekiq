@@ -21,7 +21,6 @@ module Sidekiq
     # Sidekiq.client_middleware but you can change as necessary.
     #
     def middleware(&block)
-      @chain ||= Sidekiq.client_middleware
       if block
         @chain = @chain.dup
         yield @chain
@@ -31,18 +30,31 @@ module Sidekiq
 
     attr_accessor :redis_pool
 
-    # Sidekiq::Client normally uses the default Redis pool but you may
-    # pass a custom ConnectionPool if you want to shard your
-    # Sidekiq jobs across several Redis instances (for scalability
-    # reasons, e.g.)
+    # Sidekiq::Client is responsible for pushing job payloads to Redis.
+    # Requires the :pool or :config keyword argument.
     #
-    #   Sidekiq::Client.new(ConnectionPool.new { Redis.new })
+    #   Sidekiq::Client.new(pool: Sidekiq::RedisConnection.create)
     #
-    # Generally this is only needed for very large Sidekiq installs processing
-    # thousands of jobs per second.  I don't recommend sharding unless you
-    # cannot scale any other way (e.g. splitting your app into smaller apps).
-    def initialize(redis_pool = nil)
-      @redis_pool = redis_pool || Thread.current[:sidekiq_via_pool] || Sidekiq.redis_pool
+    # Inside the Sidekiq process, you can reuse the configured resources:
+    #
+    #   Sidekiq::Client.new(config: config)
+    #
+    # @param pool [ConnectionPool] explicit Redis pool to use
+    # @param config [Sidekiq::Config] use the pool and middleware from the given Sidekiq container
+    # @param chain [Sidekiq::Middleware::Chain] use the given middleware chain
+    def initialize(*args, **kwargs)
+      if args.size == 1 && kwargs.size == 0
+        warn "Sidekiq::Client.new(pool) is deprecated, please use Sidekiq::Client.new(pool: pool), #{caller(0..3)}"
+        # old calling method, accept 1 pool argument
+        @redis_pool = args[0]
+        @chain = Sidekiq.default_configuration.client_middleware
+      else
+        # new calling method: keyword arguments
+        config = kwargs[:config] || Sidekiq.default_configuration
+        @redis_pool = kwargs[:pool] || Thread.current[:sidekiq_via_pool] || config&.redis_pool
+        @chain = kwargs[:chain] || config&.client_middleware
+        raise ArgumentError, "No Redis pool available for Sidekiq::Client" unless @redis_pool
+      end
     end
 
     ##
@@ -201,7 +213,7 @@ module Sidekiq
           conn.pipelined do |pipeline|
             atomic_push(pipeline, payloads)
           end
-        rescue RedisConnection.adapter::BaseError => ex
+        rescue RedisClient::Error => ex
           # 2550 Failover can cause the server to become a replica, need
           # to disconnect and reopen the socket to get back to the primary.
           # 4495 Use the same logic if we have a "Not enough replicas" error from the primary

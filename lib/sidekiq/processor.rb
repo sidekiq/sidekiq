@@ -26,18 +26,18 @@ module Sidekiq
 
     attr_reader :thread
     attr_reader :job
+    attr_reader :capsule
 
-    def initialize(options, &block)
+    def initialize(capsule, &block)
+      @config = @capsule = capsule
       @callback = block
       @down = false
       @done = false
       @job = nil
       @thread = nil
-      @config = options
-      @strategy = options[:fetch]
-      @reloader = options[:reloader] || proc { |&block| block.call }
-      @job_logger = (options[:job_logger] || Sidekiq::JobLogger).new
-      @retrier = Sidekiq::JobRetry.new(options)
+      @reloader = Sidekiq.default_configuration[:reloader]
+      @job_logger = (capsule.config[:job_logger] || Sidekiq::JobLogger).new(logger)
+      @retrier = Sidekiq::JobRetry.new(capsule)
     end
 
     def terminate(wait = false)
@@ -59,12 +59,16 @@ module Sidekiq
     end
 
     def start
-      @thread ||= safe_thread("processor", &method(:run))
+      @thread ||= safe_thread("#{config.name}/processor", &method(:run))
     end
 
     private unless $TESTING
 
     def run
+      # By setting this thread-local, Sidekiq.redis will access +Sidekiq::Capsule#redis_pool+
+      # instead of the global pool in +Sidekiq::Config#redis_pool+.
+      Thread.current[:sidekiq_capsule] = @capsule
+
       process_one until @done
       @callback.call(self)
     rescue Sidekiq::Shutdown
@@ -80,7 +84,7 @@ module Sidekiq
     end
 
     def get_one
-      uow = @strategy.retrieve_work
+      uow = capsule.fetcher.retrieve_work
       if @down
         logger.info { "Redis is online, #{::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @down} sec downtime" }
         @down = nil
@@ -153,11 +157,11 @@ module Sidekiq
       rescue => ex
         handle_exception(ex, {context: "Invalid JSON for job", jobstr: jobstr})
         now = Time.now.to_f
-        config.redis do |conn|
+        redis do |conn|
           conn.multi do |xa|
             xa.zadd("dead", now.to_s, jobstr)
-            xa.zremrangebyscore("dead", "-inf", now - config[:dead_timeout_in_seconds])
-            xa.zremrangebyrank("dead", 0, - config[:dead_max_jobs])
+            xa.zremrangebyscore("dead", "-inf", now - @capsule.config[:dead_timeout_in_seconds])
+            xa.zremrangebyrank("dead", 0, - @capsule.config[:dead_max_jobs])
           end
         end
         return uow.acknowledge
@@ -166,7 +170,7 @@ module Sidekiq
       ack = false
       begin
         dispatch(job_hash, queue, jobstr) do |inst|
-          @config.server_middleware.invoke(inst, job_hash, queue) do
+          config.server_middleware.invoke(inst, job_hash, queue) do
             execute_job(inst, job_hash["args"])
           end
         end

@@ -176,13 +176,13 @@ module Sidekiq
     end
 
     def redis_url
-      Sidekiq.redis do |conn|
+      Sidekiq.default_configuration.redis do |conn|
         conn._config.server_url
       end
     end
 
     def redis_info
-      Sidekiq.redis_info
+      Sidekiq.default_configuration.redis_info
     end
 
     def root_path
@@ -320,7 +320,7 @@ module Sidekiq
     end
 
     def environment_title_prefix
-      environment = Sidekiq[:environment] || ENV["APP_ENV"] || ENV["RAILS_ENV"] || ENV["RACK_ENV"] || "development"
+      environment = Sidekiq.default_configuration[:environment] || ENV["APP_ENV"] || ENV["RAILS_ENV"] || ENV["RACK_ENV"] || "development"
 
       "[#{environment.upcase}] " unless environment == "production"
     end

@@ -13,9 +13,9 @@ module Sidekiq
     # NB: all metrics and times/dates are UTC only. We specifically do not
     # support timezones.
     class Query
-      def initialize(pool: Sidekiq.redis_pool, now: Time.now)
+      def initialize(pool: nil, now: Time.now)
         @time = now.utc
-        @pool = pool
+        @pool = pool || Sidekiq.default_configuration.redis_pool
         @klass = nil
       end
 

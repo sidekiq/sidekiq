@@ -307,7 +307,7 @@ module Sidekiq
     end
 
     get "/stats/queues" do
-      json Sidekiq::Stats::Queues.new.lengths
+      json Sidekiq::Stats.new.queues
     end
 
     def call(env)

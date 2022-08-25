@@ -54,6 +54,21 @@ Sidekiq.configure_server do |config|
   Sidekiq::Metrics::Deploy.new.mark(label: label)
 end
 
+class Singler
+  include Sidekiq::ServerMiddleware
+  def call(w, j, q)
+    puts q
+  end
+end
+
+Sidekiq.configure_server do |config|
+  config.capsule("single_threaded") do |cap|
+    cap.concurrency = 1
+    cap.queues = %w[single default]
+    cap.server_middleware.add Singler
+  end
+end
+
 # helper jobs for seeding metrics data
 # you will need to restart if you change any of these
 class FooJob

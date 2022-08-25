@@ -1,10 +1,7 @@
 # frozen_string_literal: true
 
-require "connection_pool"
 require "redis_client"
 require "redis_client/decorator"
-require "uri"
-require "sidekiq/redis_connection"
 
 module Sidekiq
   class RedisClientAdapter
@@ -112,9 +109,8 @@ module Sidekiq
       opts = options.dup
 
       if opts[:namespace]
-        Sidekiq.logger.error("Your Redis configuration uses the namespace '#{opts[:namespace]}' but this feature isn't supported by redis-client. " \
-          "Either use the redis adapter or remove the namespace.")
-        Kernel.exit(-127)
+        raise ArgumentError, "Your Redis configuration uses the namespace '#{opts[:namespace]}' but this feature isn't supported by redis-client. " \
+          "Either use the redis adapter or remove the namespace."
       end
 
       opts.delete(:size)
@@ -144,5 +140,3 @@ module Sidekiq
     end
   end
 end
-
-Sidekiq::RedisConnection.adapter = Sidekiq::RedisClientAdapter

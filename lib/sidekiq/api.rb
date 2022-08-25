@@ -57,7 +57,18 @@ module Sidekiq
     end
 
     def queues
-      Sidekiq::Stats::Queues.new.lengths
+      Sidekiq.redis do |conn|
+        queues = conn.sscan_each("queues").to_a
+
+        lengths = conn.pipelined { |pipeline|
+          queues.each do |queue|
+            pipeline.llen("queue:#{queue}")
+          end
+        }
+
+        array_of_arrays = queues.zip(lengths).sort_by { |_, size| -size }
+        array_of_arrays.to_h
+      end
     end
 
     # O(1) redis calls
@@ -155,25 +166,8 @@ module Sidekiq
       @stats[s] || raise(ArgumentError, "Unknown stat #{s}")
     end
 
-    class Queues
-      def lengths
-        Sidekiq.redis do |conn|
-          queues = conn.sscan_each("queues").to_a
-
-          lengths = conn.pipelined { |pipeline|
-            queues.each do |queue|
-              pipeline.llen("queue:#{queue}")
-            end
-          }
-
-          array_of_arrays = queues.zip(lengths).sort_by { |_, size| -size }
-          array_of_arrays.to_h
-        end
-      end
-    end
-
     class History
-      def initialize(days_previous, start_date = nil)
+      def initialize(days_previous, start_date = nil, pool: nil)
         # we only store five years of data in Redis
         raise ArgumentError if days_previous < 1 || days_previous > (5 * 365)
         @days_previous = days_previous
@@ -198,15 +192,10 @@ module Sidekiq
 
         keys = dates.map { |datestr| "stat:#{stat}:#{datestr}" }
 
-        begin
-          Sidekiq.redis do |conn|
-            conn.mget(keys).each_with_index do |value, idx|
-              stat_hash[dates[idx]] = value ? value.to_i : 0
-            end
+        Sidekiq.redis do |conn|
+          conn.mget(keys).each_with_index do |value, idx|
+            stat_hash[dates[idx]] = value ? value.to_i : 0
           end
-        rescue RedisConnection.adapter::CommandError
-          # mget will trigger a CROSSSLOT error when run against a Cluster
-          # TODO Someone want to add Cluster support?
         end
 
         stat_hash
@@ -585,16 +574,20 @@ module Sidekiq
     # @!attribute [r] Name
     attr_reader :name
 
+    # Redis location
+    attr_accessor :pool
+
     # :nodoc:
     # @api private
     def initialize(name)
+      @pool = Sidekiq.default_configuration.redis_pool
       @name = name
       @_size = size
     end
 
     # real-time size of the set, will change
     def size
-      Sidekiq.redis { |c| c.zcard(name) }
+      @pool.with { |c| c.zcard(name) }
     end
 
     # Scan through each element of the sorted set, yielding each to the supplied block.
@@ -607,7 +600,7 @@ module Sidekiq
       return to_enum(:scan, match, count) unless block_given?
 
       match = "*#{match}*" unless match.include?("*")
-      Sidekiq.redis do |conn|
+      @pool.with do |conn|
         conn.zscan_each(name, match: match, count: count) do |entry, score|
           yield SortedEntry.new(self, score, entry)
         end
@@ -616,7 +609,7 @@ module Sidekiq
 
     # @return [Boolean] always true
     def clear
-      Sidekiq.redis do |conn|
+      @pool.with do |conn|
         conn.unlink(name)
       end
       true
@@ -638,7 +631,7 @@ module Sidekiq
     # @param timestamp [Time] the score for the job
     # @param job [Hash] the job data
     def schedule(timestamp, job)
-      Sidekiq.redis do |conn|
+      @pool.with do |conn|
         conn.zadd(name, timestamp.to_f.to_s, Sidekiq.dump_json(job))
       end
     end
@@ -652,7 +645,7 @@ module Sidekiq
       loop do
         range_start = page * page_size + offset_size
         range_end = range_start + page_size - 1
-        elements = Sidekiq.redis { |conn|
+        elements = @pool.with { |conn|
           conn.zrange name, range_start, range_end, withscores: true
         }
         break if elements.empty?
@@ -679,7 +672,7 @@ module Sidekiq
           [score, score]
         end
 
-      elements = Sidekiq.redis { |conn|
+      elements = @pool.with { |conn|
         conn.zrangebyscore(name, begin_score, end_score, withscores: true)
       }
 
@@ -697,7 +690,7 @@ module Sidekiq
     # @param jid [String] the job identifier
     # @return [SortedEntry] the record or nil
     def find_job(jid)
-      Sidekiq.redis do |conn|
+      @pool.with do |conn|
         conn.zscan_each(name, match: "*#{jid}*", count: 100) do |entry, score|
           job = JSON.parse(entry)
           matched = job["jid"] == jid
@@ -710,7 +703,7 @@ module Sidekiq
     # :nodoc:
     # @api private
     def delete_by_value(name, value)
-      Sidekiq.redis do |conn|
+      @pool.with do |conn|
         ret = conn.zrem(name, value)
         @_size -= 1 if ret
         ret
@@ -720,7 +713,7 @@ module Sidekiq
     # :nodoc:
     # @api private
     def delete_by_jid(score, jid)
-      Sidekiq.redis do |conn|
+      @pool.with do |conn|
         elements = conn.zrangebyscore(name, score, score)
         elements.each do |element|
           if element.index(jid)
@@ -790,11 +783,11 @@ module Sidekiq
     # @param message [String] the job data as JSON
     def kill(message, opts = {})
       now = Time.now.to_f
-      Sidekiq.redis do |conn|
+      @pool.with do |conn|
         conn.multi do |transaction|
           transaction.zadd(name, now.to_s, message)
-          transaction.zremrangebyscore(name, "-inf", now - self.class.timeout)
-          transaction.zremrangebyrank(name, 0, - self.class.max_jobs)
+          transaction.zremrangebyscore(name, "-inf", now - Sidekiq::Config::DEFAULTS[:dead_timeout_in_seconds])
+          transaction.zremrangebyrank(name, 0, - Sidekiq::Config::DEFAULTS[:dead_max_jobs])
         end
       end
 
@@ -802,7 +795,7 @@ module Sidekiq
         job = Sidekiq.load_json(message)
         r = RuntimeError.new("Job killed by API")
         r.set_backtrace(caller)
-        Sidekiq.death_handlers.each do |handle|
+        Sidekiq.default_configuration.death_handlers.each do |handle|
           handle.call(job, r)
         end
       end
@@ -812,18 +805,6 @@ module Sidekiq
     # Enqueue all dead jobs
     def retry_all
       each(&:retry) while size > 0
-    end
-
-    # The maximum size of the Dead set. Older entries will be trimmed
-    # to stay within this limit. Default value is 10,000.
-    def self.max_jobs
-      Sidekiq[:dead_max_jobs]
-    end
-
-    # The time limit for entries within the Dead set. Older entries will be thrown away.
-    # Default value is six months.
-    def self.timeout
-      Sidekiq[:dead_timeout_in_seconds]
     end
   end
 

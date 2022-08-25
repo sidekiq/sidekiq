@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "sidekiq/processor"
-require "sidekiq/fetch"
 require "set"
 
 module Sidekiq
@@ -23,19 +22,20 @@ module Sidekiq
     include Sidekiq::Component
 
     attr_reader :workers
+    attr_reader :capsule
 
-    def initialize(options = {})
-      @config = options
-      logger.debug { options.inspect }
-      @count = options[:concurrency] || 10
+    def initialize(capsule)
+      @config = @capsule = capsule
+      logger.debug { capsule }
+      @count = capsule.concurrency
       raise ArgumentError, "Concurrency of #{@count} is not supported" if @count < 1
 
       @done = false
       @workers = Set.new
+      @plock = Mutex.new
       @count.times do
         @workers << Processor.new(@config, &method(:processor_result))
       end
-      @plock = Mutex.new
     end
 
     def start
@@ -46,14 +46,12 @@ module Sidekiq
       return if @done
       @done = true
 
-      logger.info { "Terminating quiet threads" }
+      logger.info { "Terminating quiet threads for #{capsule.name} capsule" }
       @workers.each(&:terminate)
-      fire_event(:quiet, reverse: true)
     end
 
     def stop(deadline)
       quiet
-      fire_event(:shutdown, reverse: true)
 
       # some of the shutdown events can be async,
       # we don't have any way to know when they're done but
@@ -66,6 +64,8 @@ module Sidekiq
       return if @workers.empty?
 
       hard_shutdown
+    ensure
+      capsule.stop
     end
 
     def processor_result(processor, reason = nil)
@@ -105,8 +105,7 @@ module Sidekiq
         # contract says that jobs are run AT LEAST once. Process termination
         # is delayed until we're certain the jobs are back in Redis because
         # it is worse to lose a job than to run it twice.
-        strategy = @config[:fetch]
-        strategy.bulk_requeue(jobs, @config)
+        capsule.fetcher.bulk_requeue(jobs, nil)
       end
 
       cleanup.each do |processor|

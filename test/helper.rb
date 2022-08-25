@@ -25,30 +25,26 @@ end
 
 ENV["REDIS_URL"] ||= "redis://localhost/15"
 
-Sidekiq.logger = ::Logger.new($stdout)
-Sidekiq.logger.level = Logger::ERROR
-
-if ENV["SIDEKIQ_REDIS_CLIENT"]
-  Sidekiq::RedisConnection.adapter = :redis_client
+def reset!
+  RedisClient.new(url: ENV["REDIS_URL"]).call("flushall")
+  cfg = Sidekiq::Config.new
+  cfg.logger = ::Logger.new("/dev/null")
+  cfg.logger.level = Logger::WARN
+  Sidekiq.instance_variable_set :@config, cfg
+  cfg
 end
 
-def capture_logging(lvl = Logger::INFO)
-  old = Sidekiq.logger
+def capture_logging(cfg, lvl = Logger::INFO)
+  old = cfg.logger
   begin
     out = StringIO.new
     logger = ::Logger.new(out)
     logger.level = lvl
-    Sidekiq.logger = logger
-    yield
+    cfg.logger = logger
+    yield logger
     out.string
   ensure
-    Sidekiq.logger = old
-  end
-end
-
-module Sidekiq
-  def self.reset!
-    @config = DEFAULTS.dup
+    cfg.logger = old
   end
 end
 
