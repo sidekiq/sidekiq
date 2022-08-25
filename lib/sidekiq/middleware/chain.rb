@@ -152,6 +152,7 @@ module Sidekiq
       def exists?(klass)
         any? { |entry| entry.klass == klass }
       end
+      alias_method :include?, :exists?
 
       # @return [Boolean] if the chain contains no middleware
       def empty?

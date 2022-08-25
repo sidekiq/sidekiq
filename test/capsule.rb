@@ -46,4 +46,35 @@ describe Sidekiq::Capsule do
     assert_equal %w[foo baz baz baz], cap.queues
     refute cap.strict
   end
+
+  it "can have customized middleware chains" do
+    one = Object.new
+    two = Object.new
+    @config.client_middleware.add one
+    @config.server_middleware.add one
+    assert_includes @config.client_middleware, one
+    assert_includes @config.server_middleware, one
+
+    @config.capsule("testy") do |cap|
+      cap.concurrency = 2
+      cap.queues = %w[foo bar,2]
+      cap.server_middleware do |chain|
+        chain.add two
+      end
+      cap.client_middleware do |chain|
+        chain.add two
+      end
+    end
+
+    assert_equal 2, @config.capsules.size
+    cap = @config.capsules[1]
+    assert_equal "testy", cap.name
+    assert_equal 2, cap.concurrency
+    assert_includes cap.server_middleware, one
+    assert_includes cap.client_middleware, one
+    assert_includes cap.server_middleware, two
+    assert_includes cap.client_middleware, two
+    refute_includes @config.server_middleware, two
+    refute_includes @config.client_middleware, two
+  end
 end
