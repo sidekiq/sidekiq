@@ -39,7 +39,7 @@ module Sidekiq
     end
 
     def stop
-      @fetcher&.bulk_requeue([], nil)
+      fetcher&.bulk_requeue([], nil)
     end
 
     def queues=(val)
