@@ -47,7 +47,7 @@ Sidekiq.configure_server do |config|
 end
 ```
 
-Capsules can have their own customzied middleware chains but by default will inherit the global middleware configuration. Each Capsule will have its own Redis connection pool sized to the configured concurrency.
+Capsules can have their own customized middleware chains but by default will inherit the global middleware configuration. Each Capsule will have its own Redis connection pool sized to the configured concurrency.
 
 `Sidekiq::Launcher` is the top-level component which takes a `Sidekiq::Config` and launches the
 tree of runtime components for each capsule. Once passed to Launcher, the global Config and each Capsule should be considered frozen and immutable.
@@ -136,5 +136,5 @@ Sidekiq::Capsule overrides Sidekiq::Config in order to provide Capsule-local res
 you'll see places within Sidekiq where Capsule acts like a Config.
 
 With this pattern, we greatly reduce the use of global APIs throughout Sidekiq internals.
-Where beforefore we'd call `Sidekiq.xyz`, we instead provide similar functionality like
+Where before we'd call `Sidekiq.xyz`, we instead provide similar functionality like
 `config.xyz`.
