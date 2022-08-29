@@ -9,6 +9,7 @@ require "erb"
 require "fileutils"
 
 require "sidekiq"
+require "sidekiq/config"
 require "sidekiq/component"
 require "sidekiq/capsule"
 require "sidekiq/launcher"
@@ -23,14 +24,11 @@ module Sidekiq # :nodoc:
     attr_accessor :config
 
     def parse(args = ARGV.dup)
-      @config ||= Sidekiq::Config.new
+      @config ||= Sidekiq.default_configuration
 
       setup_options(args)
       initialize_logger
       validate!
-
-      # if you are changing this in user or app code, you have a bug.
-      Sidekiq.instance_variable_set(:@config, @config)
     end
 
     def jruby?
@@ -106,8 +104,8 @@ module Sidekiq # :nodoc:
       # Starting here the process will now have multiple threads running.
       fire_event(:startup, reverse: false, reraise: true)
 
-      logger.debug { "Client Middleware: #{@config.client_middleware.map(&:klass).join(", ")}" }
-      logger.debug { "Server Middleware: #{@config.server_middleware.map(&:klass).join(", ")}" }
+      logger.debug { "Client Middleware: #{@config.default_capsule.client_middleware.map(&:klass).join(", ")}" }
+      logger.debug { "Server Middleware: #{@config.default_capsule.server_middleware.map(&:klass).join(", ")}" }
 
       launch(self_read)
     end

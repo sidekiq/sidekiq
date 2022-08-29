@@ -3,8 +3,7 @@ source "https://rubygems.org"
 gem "sidekiq", path: ".."
 gem "rails"
 gem "puma"
-
-gem "redis-client"
+gem "concurrent-ruby"
 
 # Ubuntu required packages to install rails
 # apt-get install build-essential patch ruby-dev zlib1g-dev liblzma-dev libsqlite3-dev

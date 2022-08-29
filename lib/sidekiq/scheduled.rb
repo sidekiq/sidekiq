@@ -51,8 +51,7 @@ module Sidekiq
 
       def zpopbyscore(conn, keys: nil, argv: nil)
         if @lua_zpopbyscore_sha.nil?
-          raw_conn = conn.respond_to?(:redis) ? conn.redis : conn
-          @lua_zpopbyscore_sha = raw_conn.script(:load, LUA_ZPOPBYSCORE)
+          @lua_zpopbyscore_sha = conn.script(:load, LUA_ZPOPBYSCORE)
         end
 
         conn.evalsha(@lua_zpopbyscore_sha, keys, argv)
@@ -86,14 +85,10 @@ module Sidekiq
       # Shut down this instance, will pause until the thread is dead.
       def terminate
         @done = true
-        @enq.terminate if @enq.respond_to?(:terminate)
+        @enq.terminate
 
-        if @thread
-          t = @thread
-          @thread = nil
-          @sleeper << 0
-          t.value
-        end
+        @sleeper << 0
+        @thread&.value
       end
 
       def start

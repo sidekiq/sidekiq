@@ -26,7 +26,6 @@ module Sidekiq
 
     def initialize(capsule)
       @config = @capsule = capsule
-      logger.debug { capsule }
       @count = capsule.concurrency
       raise ArgumentError, "Concurrency of #{@count} is not supported" if @count < 1
 

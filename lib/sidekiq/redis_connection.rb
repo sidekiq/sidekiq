@@ -11,13 +11,13 @@ module Sidekiq
         symbolized_options = options.transform_keys(&:to_sym)
         symbolized_options[:url] ||= determine_redis_provider
 
-        size = symbolized_options.delete(:size) || 5
-        pool_timeout = symbolized_options.delete(:pool_timeout) || 1
-
         if symbolized_options[:logger]
           log_info(symbolized_options)
           symbolized_options.delete(:logger)
         end
+
+        size = symbolized_options.delete(:size) || 5
+        pool_timeout = symbolized_options.delete(:pool_timeout) || 1
 
         redis_config = Sidekiq::RedisClientAdapter.new(symbolized_options)
         ConnectionPool.new(timeout: pool_timeout, size: size) do

@@ -22,7 +22,8 @@ Gem::Specification.new do |gem|
     "source_code_uri" => "https://github.com/mperham/sidekiq"
   }
 
-  gem.add_dependency "redis-client", ">= 0.4.0"
+  gem.add_dependency "redis-client", ">= 0.7.0"
   gem.add_dependency "connection_pool", ">= 2.2.5"
   gem.add_dependency "rack", "~> 2.2"
+  gem.add_dependency "concurrent-ruby", "< 2"
 end
