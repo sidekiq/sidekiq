@@ -9,6 +9,11 @@ class SomeWorker
   include Sidekiq::Worker
 end
 
+class WorkerWithRetryCount
+  include Sidekiq::Worker
+  sidekiq_options retry: 3
+end
+
 class BadErrorMessage < StandardError
   def message
     raise "Ahhh, this isn't supposed to happen"
@@ -118,6 +123,23 @@ describe Sidekiq::JobRetry do
       assert_equal max_retries, Sidekiq::RetrySet.new.size
       assert_equal 1, Sidekiq::DeadSet.new.size
     end
+
+    it "uses retry option from job" do
+      worker = WorkerWithRetryCount.new
+      max_retries = 3
+      1.upto(max_retries + 1) do |i|
+        assert_raises RuntimeError do
+          job = i > 1 ? jobstr("retry_count" => i - 2) : jobstr
+          handler.local(worker, job, "default") do
+            raise "kerblammo!"
+          end
+        end
+      end
+
+      assert_equal max_retries, Sidekiq::RetrySet.new.size
+      assert_equal 1, Sidekiq::DeadSet.new.size
+    end
+
 
     it "saves backtraces" do
       c = nil

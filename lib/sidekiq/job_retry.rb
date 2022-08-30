@@ -138,7 +138,12 @@ module Sidekiq
     # instantiate the job instance.  All access must be guarded and
     # best effort.
     def process_retry(jobinst, msg, queue, exception)
-      max_retry_attempts = retry_attempts_from(msg["retry"], @max_retries)
+      job_max_retries = if jobinst && jobinst.class.respond_to?(:get_sidekiq_options)
+                          retry_attempts_from(jobinst.class.get_sidekiq_options["retry"], @max_retries)
+                        else
+                          @max_retries
+                        end
+      max_retry_attempts = retry_attempts_from(msg["retry"], job_max_retries)
 
       msg["queue"] = (msg["retry_queue"] || queue)
 
