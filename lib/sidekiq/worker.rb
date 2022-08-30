@@ -340,7 +340,7 @@ module Sidekiq
       # Legal options:
       #
       #   queue - use a named queue for this Worker, default 'default'
-      #   retry - enable the RetryJobs middleware for this Worker, *true* to use the default
+      #   retry - enable retries via JobRetry, *true* to use the default
       #      or *Integer* count
       #   backtrace - whether to save any error backtrace in the retry payload to display in web UI,
       #      can be true, false or an integer number of lines to save, default *false*
