@@ -348,6 +348,9 @@ module Sidekiq
       #
       # In practice, any option is allowed.  This is the main mechanism to configure the
       # options for a specific job.
+      #
+      # These options will be saved into the serialized job when enqueued by
+      # the client.
       def sidekiq_options(opts = {})
         super
       end
