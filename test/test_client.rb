@@ -331,6 +331,13 @@ describe Sidekiq::Client do
         assert_equal 1_001, jids.size
       end
 
+      it "pushes a large set of jobs with specified 'at' argument" do
+        time = Time.new(2019, 1, 1)
+        jids = MyWorker.perform_bulk((1..1_001).to_a.map { |x| Array(x) }, at: time.to_i)
+        assert_equal 1_001, jids.size
+        assert jids.all? { |jid| Sidekiq::ScheduledSet.new.find_job(jid).at == time }
+      end
+
       it "handles no jobs" do
         jids = MyWorker.perform_bulk([])
         assert_equal 0, jids.size
