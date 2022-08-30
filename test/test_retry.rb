@@ -105,10 +105,10 @@ describe Sidekiq::JobRetry do
 
     it "allows a max_retries option in initializer" do
       max_retries = 7
+      @config[:max_retries] = max_retries
       1.upto(max_retries + 1) do |i|
         assert_raises RuntimeError do
           job = i > 1 ? jobstr("retry_count" => i - 2) : jobstr
-          @config[:max_retries] = max_retries
           handler.local(worker, job, "default") do
             raise "kerblammo!"
           end
