@@ -80,15 +80,6 @@ module Sidekiq
     class Chain
       include Enumerable
 
-      # A unique instance of the middleware chain is created for
-      # each job executed in order to be thread-safe.
-      # @param copy [Sidekiq::Middleware::Chain] New instance of Chain
-      # @returns nil
-      def initialize_copy(copy)
-        copy.instance_variable_set(:@entries, entries.dup)
-        nil
-      end
-
       # Iterate through each middleware in the chain
       def each(&block)
         entries.each(&block)
@@ -103,6 +94,12 @@ module Sidekiq
 
       def entries
         @entries ||= []
+      end
+
+      def copy_for(capsule)
+        chain = Sidekiq::Middleware::Chain.new(capsule)
+        chain.instance_variable_set(:@entries, entries.dup)
+        chain
       end
 
       # Remove all middleware matching the given Class

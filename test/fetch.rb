@@ -16,7 +16,6 @@ describe Sidekiq::BasicFetch do
 
   it "retrieves" do
     @cap.queues = ["basic", "bar,3"]
-    refute @cap.strict
     fetch = Sidekiq::BasicFetch.new(@cap)
 
     uow = fetch.retrieve_work
@@ -30,9 +29,8 @@ describe Sidekiq::BasicFetch do
     assert_nil uow.acknowledge
   end
 
-  it "retrieves with strict setting" do
+  it "retrieves with strict ordering" do
     @cap.queues = ["basic", "bar"]
-    assert @cap.strict
     fetch = Sidekiq::BasicFetch.new(@cap)
     cmd = fetch.queues_cmd
     assert_equal cmd, ["queue:basic", "queue:bar", Sidekiq::BasicFetch::TIMEOUT]

@@ -22,10 +22,6 @@ describe Sidekiq::CLI do
     @cli.config.capsules.first.concurrency
   end
 
-  def strict
-    @cli.config.capsules.first.strict
-  end
-
   describe "#parse" do
     describe "options" do
       it "accepts -r" do
@@ -63,16 +59,6 @@ describe Sidekiq::CLI do
         end
       end
 
-      describe "setting internal options via the config file" do
-        describe "setting the `strict` option via the config file" do
-          it "discards the `strict` option specified via the config file" do
-            @cli.parse(%w[sidekiq -C ./test/cfg/config_with_internal_options.yml])
-
-            assert_equal true, !!strict
-          end
-        end
-      end
-
       describe "queues" do
         it "accepts with -q" do
           @cli.parse(%w[sidekiq -q foo -r ./test/fake_env.rb])
@@ -86,12 +72,6 @@ describe Sidekiq::CLI do
 
             assert_equal ["foo", "bar"], queues
           end
-
-          it "sets strictly ordered queues" do
-            @cli.parse(%w[sidekiq -q foo -q bar -r ./test/fake_env.rb])
-
-            assert_equal true, !!strict
-          end
         end
 
         describe "when weights are present" do
@@ -99,12 +79,6 @@ describe Sidekiq::CLI do
             @cli.parse(%w[sidekiq -q foo,3 -q bar -r ./test/fake_env.rb])
 
             assert_equal ["foo", "foo", "foo", "bar"], queues
-          end
-
-          it "does not set strictly ordered queues" do
-            @cli.parse(%w[sidekiq -q foo,3 -q bar -r ./test/fake_env.rb])
-
-            assert_equal false, !!strict
           end
         end
 
@@ -273,99 +247,6 @@ describe Sidekiq::CLI do
             assert_equal 100, concurrency
             assert_equal 7, queues.count { |q| q == "often" }
             assert_equal 3, queues.count { |q| q == "seldom" }
-          end
-
-          describe "when the config file specifies queues with weights" do
-            describe "when -q specifies queues without weights" do
-              it "sets strictly ordered queues" do
-                @cli.parse(%w[sidekiq -C ./test/config.yml
-                  -r ./test/fake_env.rb
-                  -q foo -q bar])
-
-                assert_equal true, !!strict
-              end
-            end
-
-            describe "when -q specifies no queues" do
-              it "does not set strictly ordered queues" do
-                @cli.parse(%w[sidekiq -C ./test/config.yml
-                  -r ./test/fake_env.rb])
-
-                assert_equal false, !!strict
-              end
-            end
-
-            describe "when -q specifies queues with weights" do
-              it "does not set strictly ordered queues" do
-                @cli.parse(%w[sidekiq -C ./test/config.yml
-                  -r ./test/fake_env.rb
-                  -q foo,2 -q bar,3])
-
-                assert_equal false, !!strict
-              end
-            end
-          end
-
-          describe "when the config file specifies queues without weights" do
-            describe "when -q specifies queues without weights" do
-              it "sets strictly ordered queues" do
-                @cli.parse(%w[sidekiq -C ./test/cfg/config_queues_without_weights.yml
-                  -r ./test/fake_env.rb
-                  -q foo -q bar])
-
-                assert_equal true, !!strict
-              end
-            end
-
-            describe "when -q specifies no queues" do
-              it "sets strictly ordered queues" do
-                @cli.parse(%w[sidekiq -C ./test/cfg/config_queues_without_weights.yml
-                  -r ./test/fake_env.rb])
-
-                assert_equal true, !!strict
-              end
-            end
-
-            describe "when -q specifies queues with weights" do
-              it "does not set strictly ordered queues" do
-                @cli.parse(%w[sidekiq -C ./test/cfg/config_queues_without_weights.yml
-                  -r ./test/fake_env.rb
-                  -q foo,2 -q bar,3])
-
-                assert_equal false, !!strict
-              end
-            end
-          end
-
-          describe "when the config file specifies no queues" do
-            describe "when -q specifies queues without weights" do
-              it "sets strictly ordered queues" do
-                @cli.parse(%w[sidekiq -C ./test/cfg/config_empty.yml
-                  -r ./test/fake_env.rb
-                  -q foo -q bar])
-
-                assert_equal true, !!strict
-              end
-            end
-
-            describe "when -q specifies no queues" do
-              it "sets strictly ordered queues" do
-                @cli.parse(%w[sidekiq -C ./test/cfg/config_empty.yml
-                  -r ./test/fake_env.rb])
-
-                assert_equal true, !!strict
-              end
-            end
-
-            describe "when -q specifies queues with weights" do
-              it "does not set strictly ordered queues" do
-                @cli.parse(%w[sidekiq -C ./test/cfg/config_empty.yml
-                  -r ./test/fake_env.rb
-                  -q foo,2 -q bar,3])
-
-                assert_equal false, !!strict
-              end
-            end
           end
         end
 

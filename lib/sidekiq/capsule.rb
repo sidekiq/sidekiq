@@ -1,5 +1,4 @@
 require "sidekiq/component"
-require "sidekiq/fetch"
 
 module Sidekiq
   # A Sidekiq::Capsule is the set of resources necessary to
@@ -21,21 +20,21 @@ module Sidekiq
 
     attr_reader :name
     attr_reader :queues
-    attr_reader :strict
     attr_accessor :concurrency
-    attr_accessor :fetch_class
 
     def initialize(name, config)
       @name = name
       @config = config
       @queues = ["default"]
       @concurrency = 10
-      @strict = true
-      @fetch_class = Sidekiq::BasicFetch
     end
 
     def fetcher
-      @fetcher ||= fetch_class.new(self)
+      @fetcher ||= begin
+        inst = (config[:fetch_class] || Sidekiq::BasicFetch).new(self)
+        inst.setup(config[:fetch_setup]) if inst.respond_to?(:setup)
+        inst
+      end
     end
 
     def stop
@@ -43,12 +42,10 @@ module Sidekiq
     end
 
     def queues=(val)
-      @strict = true
       @queues = Array(val).each_with_object([]) do |qstr, memo|
         arr = qstr
         arr = qstr.split(",") if qstr.is_a?(String)
         name, weight = arr
-        @strict = false if weight.to_i > 0
         [weight.to_i, 1].max.times do
           memo << name
         end
@@ -59,18 +56,22 @@ module Sidekiq
     # Avoid if possible and add middleware globally so all
     # capsules share the same chains. Easier to debug that way.
     def client_middleware
-      @client_chain ||= config.client_middleware.dup
+      @client_chain ||= config.client_middleware.copy_for(self)
       yield @client_chain if block_given?
       @client_chain
     end
 
     def server_middleware
-      @server_chain ||= config.server_middleware.dup
+      @server_chain ||= config.server_middleware.copy_for(self)
       yield @server_chain if block_given?
       @server_chain
     end
 
     def redis_pool
+      Thread.current[:sidekiq_redis_pool] || local_redis_pool
+    end
+
+    def local_redis_pool
       # connection pool is lazy, it will not create connections unless you actually need them
       # so don't be skimpy!
       @redis ||= config.new_redis_pool(@concurrency)
@@ -96,6 +97,10 @@ module Sidekiq
           raise
         end
       end
+    end
+
+    def lookup(name)
+      config.lookup(name)
     end
 
     def logger

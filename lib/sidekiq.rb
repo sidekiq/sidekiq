@@ -70,19 +70,29 @@ module Sidekiq
   end
 
   def self.configure_server(&block)
-    (@servers ||= []) << block
+    (@config_blocks ||= []) << block
     yield default_configuration if server?
   end
 
   # Creates a Sidekiq::Config instance that is more tuned for embedding
   # within an arbitrary Ruby process. Noteably it reduces concurrency by
-  # default so there is less contention for CPU time.
+  # default so there is less contention for CPU time with other threads.
+  #
+  #   inst = Sidekiq.configure_embed do |config|
+  #     config.queues = %w[critical default low]
+  #   end
+  #   inst.run
+  #   sleep 10
+  #   inst.terminate
+  #
+  # NB: it is really easy to overload a Ruby process with threads due to the GIL.
+  # I do not recommend setting concurrency higher than 2-3.
   def self.configure_embed(&block)
     require "sidekiq/capsule"
     require "sidekiq/launcher"
     cfg = Sidekiq::Config.new
-    cfg.concurrency = 2
-    @servers.each { |block| block.call(cfg) }
+    cfg.concurrency = 1
+    @config_blocks.each { |block| block.call(cfg) }
     yield cfg
 
     Sidekiq::Launcher.new(cfg)

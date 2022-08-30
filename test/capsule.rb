@@ -31,20 +31,16 @@ describe Sidekiq::Capsule do
   it "parses queues correctly" do
     cap = @cap
     assert_equal ["default"], cap.queues
-    assert cap.strict
 
     cap.queues = %w[foo bar,2]
     assert_equal %w[foo bar bar], cap.queues
-    refute cap.strict
 
     cap.queues = ["default"]
     assert_equal %w[default], cap.queues
-    assert cap.strict
 
     # config/sidekiq.yml input will look like this
     cap.queues = [["foo"], ["baz", 3]]
     assert_equal %w[foo baz baz baz], cap.queues
-    refute cap.strict
   end
 
   it "can have customized middleware chains" do

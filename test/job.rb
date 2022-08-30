@@ -35,11 +35,11 @@ class MyCustomMiddleware
 end
 
 describe Sidekiq::Job do
-  describe "#set" do
-    before do
-      @cfg = reset!
-    end
+  before do
+    @config = reset!
+  end
 
+  describe "#set" do
     it "provides basic ActiveJob compatibilility" do
       q = Sidekiq::ScheduledSet.new
       assert_equal 0, q.size
@@ -140,16 +140,10 @@ describe Sidekiq::Job do
     $my_recorder = []
 
     it "executes middleware & runs job inline" do
-      server_chain = Sidekiq::Middleware::Chain.new
-      server_chain.add MyCustomMiddleware, "1-server", $my_recorder
-      client_chain = Sidekiq::Middleware::Chain.new
-      client_chain.add MyCustomMiddleware, "1-client", $my_recorder
-      Sidekiq.default_configuration.stub(:server_middleware, server_chain) do
-        Sidekiq.default_configuration.stub(:client_middleware, client_chain) do
-          MyCustomJob.perform_inline($my_recorder)
-          assert_equal $my_recorder.flatten, %w[1-client-before 1-client-after 1-server-before work_performed 1-server-after]
-        end
-      end
+      @config.server_middleware.add MyCustomMiddleware, "1-server", $my_recorder
+      @config.client_middleware.add MyCustomMiddleware, "1-client", $my_recorder
+      MyCustomJob.perform_inline($my_recorder)
+      assert_equal $my_recorder.flatten, %w[1-client-before 1-client-after 1-server-before work_performed 1-server-after]
     end
   end
 end

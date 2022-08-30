@@ -76,13 +76,13 @@ module Sidekiq
     end
 
     def client_middleware
-      @client_chain ||= Sidekiq::Middleware::Chain.new
+      @client_chain ||= Sidekiq::Middleware::Chain.new(self)
       yield @client_chain if block_given?
       @client_chain
     end
 
     def server_middleware
-      @server_chain ||= Sidekiq::Middleware::Chain.new
+      @server_chain ||= Sidekiq::Middleware::Chain.new(self)
       yield @server_chain if block_given?
       @server_chain
     end
@@ -106,7 +106,11 @@ module Sidekiq
     end
 
     def redis_pool
-      # this is our global client/housekeeping pool. each capsule has its
+      Thread.current[:sidekiq_redis_pool] || Thread.current[:sidekiq_capsule]&.redis_pool || local_redis_pool
+    end
+
+    private def local_redis_pool
+      # this is our default client/housekeeping pool. each capsule has its
       # own pool for executing threads.
       size = Integer(ENV["RAILS_MAX_THREADS"] || 5)
       @redis ||= new_redis_pool(size)
@@ -162,9 +166,12 @@ module Sidekiq
     end
 
     # find a singleton
-    def lookup(name)
+    def lookup(name, default_class = nil)
       # JNDI is just a fancy name for a hash lookup
-      @directory[name]
+      @directory.fetch(name) do |key|
+        return nil unless default_class
+        @directory[key] = default_class.new(self)
+      end
     end
 
     ##
@@ -237,6 +244,9 @@ module Sidekiq
 
     # INTERNAL USE ONLY
     def handle_exception(ex, ctx = {})
+      if @options[:error_handlers].size == 0
+        p ["!!!!!", ex]
+      end
       @options[:error_handlers].each do |handler|
         handler.call(ex, ctx, self)
       rescue => e

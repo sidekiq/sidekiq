@@ -51,7 +51,7 @@ module Sidekiq
       end
 
       def server_middleware
-        @server_chain ||= Middleware::Chain.new
+        @server_chain ||= Middleware::Chain.new(Sidekiq.default_configuration)
         yield @server_chain if block_given?
         @server_chain
       end

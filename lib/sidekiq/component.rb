@@ -50,6 +50,7 @@ module Sidekiq
       oneshot = options.fetch(:oneshot, true)
       reverse = options[:reverse]
       reraise = options[:reraise]
+      logger.debug("Firing #{event} event") if oneshot
 
       arr = config[:lifecycle_events][event]
       arr.reverse! if reverse
