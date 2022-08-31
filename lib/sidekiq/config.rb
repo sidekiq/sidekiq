@@ -1,5 +1,6 @@
 require "forwardable"
 
+require "set"
 require "sidekiq/redis_connection"
 
 module Sidekiq
@@ -8,7 +9,7 @@ module Sidekiq
     extend Forwardable
 
     DEFAULTS = {
-      labels: [],
+      labels: Set.new,
       require: ".",
       environment: nil,
       concurrency: 10,

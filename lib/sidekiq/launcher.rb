@@ -241,7 +241,7 @@ module Sidekiq
         "tag" => @config[:tag] || "",
         "concurrency" => @config.capsules.map { |cap| cap.concurrency }.sum,
         "queues" => @config.capsules.map { |cap| cap.queues }.flatten.uniq,
-        "labels" => @config[:labels],
+        "labels" => @config[:labels].to_a,
         "identity" => identity
       }
     end

@@ -944,7 +944,7 @@ module Sidekiq
     end
 
     def labels
-      Array(self["labels"])
+      self["labels"].to_a
     end
 
     def [](key)
