@@ -88,14 +88,13 @@ module Sidekiq
   # NB: it is really easy to overload a Ruby process with threads due to the GIL.
   # I do not recommend setting concurrency higher than 2-3.
   def self.configure_embed(&block)
-    require "sidekiq/capsule"
-    require "sidekiq/launcher"
-    cfg = Sidekiq::Config.new
+    require "sidekiq/embedded"
+    cfg = default_configuration
     cfg.concurrency = 1
-    @config_blocks.each { |block| block.call(cfg) }
+    @config_blocks&.each { |block| block.call(cfg) }
     yield cfg
 
-    Sidekiq::Launcher.new(cfg)
+    Sidekiq::Embedded.new(cfg)
   end
 
   def self.configure_client
