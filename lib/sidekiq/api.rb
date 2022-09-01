@@ -58,7 +58,7 @@ module Sidekiq
 
     def queues
       Sidekiq.redis do |conn|
-        queues = conn.sscan_each("queues").to_a
+        queues = conn.sscan("queues").to_a
 
         lengths = conn.pipelined { |pipeline|
           queues.each do |queue|
@@ -115,11 +115,11 @@ module Sidekiq
     # @api private
     def fetch_stats_slow!
       processes = Sidekiq.redis { |conn|
-        conn.sscan_each("processes").to_a
+        conn.sscan("processes").to_a
       }
 
       queues = Sidekiq.redis { |conn|
-        conn.sscan_each("queues").to_a
+        conn.sscan("queues").to_a
       }
 
       pipe2_res = Sidekiq.redis { |conn|
@@ -223,7 +223,7 @@ module Sidekiq
     #
     # @return [Array<Sidekiq::Queue>]
     def self.all
-      Sidekiq.redis { |c| c.sscan_each("queues").to_a }.sort.map { |q| Sidekiq::Queue.new(q) }
+      Sidekiq.redis { |c| c.sscan("queues").to_a }.sort.map { |q| Sidekiq::Queue.new(q) }
     end
 
     attr_reader :name
@@ -601,7 +601,7 @@ module Sidekiq
 
       match = "*#{match}*" unless match.include?("*")
       @pool.with do |conn|
-        conn.zscan_each(name, match: match, count: count) do |entry, score|
+        conn.zscan(name, match: match, count: count) do |entry, score|
           yield SortedEntry.new(self, score, entry)
         end
       end
@@ -691,7 +691,7 @@ module Sidekiq
     # @return [SortedEntry] the record or nil
     def find_job(jid)
       @pool.with do |conn|
-        conn.zscan_each(name, match: "*#{jid}*", count: 100) do |entry, score|
+        conn.zscan(name, match: "*#{jid}*", count: 100) do |entry, score|
           job = JSON.parse(entry)
           matched = job["jid"] == jid
           return SortedEntry.new(self, score, entry) if matched
@@ -832,7 +832,7 @@ module Sidekiq
       return 0 unless Sidekiq.redis { |conn| conn.set("process_cleanup", "1", nx: true, ex: 60) }
       count = 0
       Sidekiq.redis do |conn|
-        procs = conn.sscan_each("processes").to_a.sort
+        procs = conn.sscan("processes").to_a.sort
         heartbeats = conn.pipelined { |pipeline|
           procs.each do |key|
             pipeline.hget(key, "info")
@@ -852,7 +852,7 @@ module Sidekiq
 
     def each
       result = Sidekiq.redis { |conn|
-        procs = conn.sscan_each("processes").to_a.sort
+        procs = conn.sscan("processes").to_a.sort
 
         # We're making a tradeoff here between consuming more memory instead of
         # making more roundtrips to Redis, but if you have hundreds or thousands of workers,
@@ -1027,13 +1027,13 @@ module Sidekiq
     def each(&block)
       results = []
       Sidekiq.redis do |conn|
-        procs = conn.sscan_each("processes").to_a
+        procs = conn.sscan("processes").to_a
         procs.sort.each do |key|
           valid, workers = conn.pipelined { |pipeline|
-            pipeline.exists?(key)
+            pipeline.exists(key)
             pipeline.hgetall("#{key}:work")
           }
-          next unless valid
+          next unless valid > 0
           workers.each_pair do |tid, json|
             hsh = Sidekiq.load_json(json)
             p = hsh["payload"]
@@ -1055,7 +1055,7 @@ module Sidekiq
     # which can easily get out of sync with crashy processes.
     def size
       Sidekiq.redis do |conn|
-        procs = conn.sscan_each("processes").to_a
+        procs = conn.sscan("processes").to_a
         if procs.empty?
           0
         else

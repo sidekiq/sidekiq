@@ -154,7 +154,7 @@ module Sidekiq
         _, exists, _, _, msg = redis { |conn|
           conn.multi { |transaction|
             transaction.sadd("processes", key)
-            transaction.exists?(key)
+            transaction.exists(key)
             transaction.hmset(key, "info", to_json,
               "busy", curstate.size,
               "beat", Time.now.to_f,
@@ -167,7 +167,7 @@ module Sidekiq
         }
 
         # first heartbeat or recovering from an outage and need to reestablish our heartbeat
-        fire_event(:heartbeat) unless exists
+        fire_event(:heartbeat) unless exists > 0
         fire_event(:beat, oneshot: false)
 
         return unless msg
