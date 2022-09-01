@@ -10,8 +10,7 @@ describe Sidekiq::Launcher do
 
   before do
     @config = reset!
-    @config.capsules << Sidekiq::Capsule.new("default", @config)
-    @config.capsules.first.concurrency = 3
+    @config.default_capsule.concurrency = 3
     @config[:tag] = "myapp"
   end
 
@@ -21,6 +20,11 @@ describe Sidekiq::Launcher do
       refute_nil kb
       assert kb > 0
     end
+  end
+
+  it "starts and stops" do
+    subject.run
+    subject.stop
   end
 
   describe "heartbeat" do

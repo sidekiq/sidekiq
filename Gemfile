@@ -20,13 +20,12 @@ gem "yard"
 
 group :test do
   gem "minitest"
-  # gem "simplecov"
+  gem "simplecov"
 end
 
 group :development, :test do
   gem "standard", require: false
-  # gem "pry"
-  # gem "yalphabetize", require: false
+  gem "pry"
 end
 
 group :load_test do
