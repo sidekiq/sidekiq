@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-HEAD
+2.5.2
 ---------
 
 - Remove Redis 4.8.0 deprecation warnings
