@@ -89,7 +89,7 @@ def Process.rss
   `ps -o rss= -p #{Process.pid}`.chomp.to_i
 end
 
-iter = 50
+iter = 10
 count = 10_000
 
 iter.times do
@@ -139,7 +139,7 @@ begin
   events.clear
   
   with_latency(Integer(ENV.fetch("LATENCY", "1"))) do
-    launcher = Sidekiq::Launcher.new(Sidekiq.options)
+    launcher = Sidekiq::Launcher.new(Sidekiq)
     launcher.run
 
     while readable_io = IO.select([self_read])
