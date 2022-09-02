@@ -8,18 +8,11 @@ $TESTING = false
 require "bundler/setup"
 Bundler.require(:default, :load_test)
 
-require_relative "../lib/sidekiq/cli"
-require_relative "../lib/sidekiq/launcher"
-
-if ENV["SIDEKIQ_REDIS_CLIENT"]
-  Sidekiq::RedisConnection.adapter = :redis_client
-end
-
-Sidekiq.configure_server do |config|
-  config.options[:concurrency] = 10
+x = Sidekiq.configure_embed do |config|
   config.redis = {db: 13, port: 6380}
+  config.concurrency = 10
   # config.redis = { db: 13, port: 6380, driver: :hiredis}
-  config.options[:queues] << "default"
+  config.queues = %w[default]
   config.logger.level = Logger::ERROR
   config.average_scheduled_poll_interval = 2
   config.reliable! if defined?(Sidekiq::Pro)
@@ -89,7 +82,7 @@ def Process.rss
   `ps -o rss= -p #{Process.pid}`.chomp.to_i
 end
 
-iter = 50
+iter = 10
 count = 10_000
 
 iter.times do
@@ -101,8 +94,8 @@ Sidekiq.logger.error "Created #{count * iter} jobs"
 start = Time.now
 
 Monitoring = Thread.new do
-  while true
-    sleep 0.2
+  loop do
+    sleep 1.0
     qsize = Sidekiq.redis do |conn|
       conn.llen "queue:default"
     end
@@ -134,20 +127,16 @@ end
 begin
   # RubyProf::exclude_threads = [ Monitoring ]
   # RubyProf.start
-  events = Sidekiq.options[:lifecycle_events][:startup]
-  events.each(&:call)
-  events.clear
-  
-  with_latency(Integer(ENV.fetch("LATENCY", "1"))) do
-    launcher = Sidekiq::Launcher.new(Sidekiq.options)
-    launcher.run
 
-    while readable_io = IO.select([self_read])
+  with_latency(Integer(ENV.fetch("LATENCY", "1"))) do
+    x.run
+
+    while (readable_io = IO.select([self_read]))
       signal = readable_io.first[0].gets.strip
-      handle_signal(launcher, signal)
+      handle_signal(x, signal)
     end
   end
-rescue SystemExit => e
+rescue SystemExit
   # Sidekiq.logger.error("Profiling...")
   # result = RubyProf.stop
   # printer = RubyProf::GraphHtmlPrinter.new(result)
@@ -158,4 +147,6 @@ rescue => e
   warn e.message
   warn e.backtrace.join("\n")
   exit 1
+ensure
+  x.stop
 end

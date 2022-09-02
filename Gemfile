@@ -29,5 +29,5 @@ group :development, :test do
 end
 
 group :load_test do
-  # gem "toxiproxy"
+  gem "toxiproxy"
 end
