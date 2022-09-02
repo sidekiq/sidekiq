@@ -27,7 +27,7 @@ This benchmark can be found in `bin/sidekiqload` and assumes a Redis network lat
 Requirements
 -----------------
 
-- Redis: 6.0+
+- Redis: 6.2+
 - Ruby: MRI 2.7+ or JRuby 9.3+.
 
 Sidekiq 7.0 supports Rails 6.0+ but does not require it.
@@ -52,6 +52,7 @@ Sidekiq and see its features in action.  Here's the Web UI:
 Want to Upgrade?
 -------------------
 
+Use `bundle up sidekiq` to upgrade Sidekiq and all its dependencies.
 Upgrade notes between each major version can be found in the `docs/` directory.
 
 I also sell Sidekiq Pro and Sidekiq Enterprise, extensions to Sidekiq which provide more
@@ -63,12 +64,14 @@ quality open source development all at the same time.  Please see the
 Problems?
 -----------------
 
-**Please do not directly email any Sidekiq committers with questions or problems.**  A community is best served when discussions are held in public.
+**Please do not directly email any Sidekiq committers with questions or problems.**
+A community is best served when discussions are held in public.
 
 If you have a problem, please review the [FAQ](https://github.com/mperham/sidekiq/wiki/FAQ) and [Troubleshooting](https://github.com/mperham/sidekiq/wiki/Problems-and-Troubleshooting) wiki pages.
 Searching the [issues](https://github.com/mperham/sidekiq/issues) for your problem is also a good idea.
 
-Sidekiq Pro and Sidekiq Enterprise customers get private email support.  You can purchase at https://sidekiq.org; email support@contribsys.com for help.
+Sidekiq Pro and Sidekiq Enterprise customers get private email support.
+You can purchase at https://sidekiq.org; email support@contribsys.com for help.
 
 Useful resources:
 
@@ -76,7 +79,7 @@ Useful resources:
 * Occasional announcements are made to the [@sidekiq](https://twitter.com/sidekiq) Twitter account.
 * The [Sidekiq tag](https://stackoverflow.com/questions/tagged/sidekiq) on Stack Overflow has lots of useful Q &amp; A.
 
-Every Friday morning is Sidekiq happy hour: I video chat and answer questions.
+Every Friday morning is Sidekiq office hour: I video chat and answer questions.
 See the [Sidekiq support page](https://sidekiq.org/support.html) for details.
 
 Contributing
@@ -84,12 +87,11 @@ Contributing
 
 Please see [the contributing guidelines](https://github.com/mperham/sidekiq/blob/main/.github/contributing.md).
 
-
 License
 -----------------
 
-Please see [LICENSE](https://github.com/mperham/sidekiq/blob/main/LICENSE) for licensing details.
-
+Please see [LICENSE.txt](https://github.com/mperham/sidekiq/blob/main/LICENSE.txt) for licensing details.
+The license for Sidekiq Pro and Sidekiq Enterprise can be found in [COMM-LICENSE.txt](https://github.com/mperham/sidekiq/blob/main/COMM-LICENSE.txt).
 
 Author
 -----------------
