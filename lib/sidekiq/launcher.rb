@@ -89,7 +89,7 @@ module Sidekiq
       # doesn't actually exit, it'll reappear in the Web UI.
       redis do |conn|
         conn.pipelined do |pipeline|
-          pipeline.srem("processes", identity)
+          pipeline.srem("processes", [identity])
           pipeline.unlink("#{identity}:work")
         end
       end
@@ -153,7 +153,7 @@ module Sidekiq
 
         _, exists, _, _, msg = redis { |conn|
           conn.multi { |transaction|
-            transaction.sadd("processes", key)
+            transaction.sadd("processes", [key])
             transaction.exists(key)
             transaction.hmset(key, "info", to_json,
               "busy", curstate.size,

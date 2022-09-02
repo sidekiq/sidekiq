@@ -153,7 +153,7 @@ describe "Web helpers" do
       key = "#{hostname}:123"
 
       Sidekiq.redis do |conn|
-        conn.sadd("processes", key)
+        conn.sadd("processes", [key])
         conn.hmset(key, "info", Sidekiq.dump_json(pdata), "busy", 0, "beat", Time.now.to_f)
       end
     end

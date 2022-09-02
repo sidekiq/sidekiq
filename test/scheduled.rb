@@ -129,7 +129,7 @@ describe Sidekiq::Scheduled do
       with_sidekiq_option(:average_scheduled_poll_interval, 10) do
         3.times do |i|
           @config.redis do |conn|
-            conn.sadd("processes", "process-#{i}")
+            conn.sadd("processes", ["process-#{i}"])
             conn.hset("process-#{i}", "info", "")
           end
         end

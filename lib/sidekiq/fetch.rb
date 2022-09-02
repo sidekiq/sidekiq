@@ -34,7 +34,7 @@ module Sidekiq # :nodoc:
       @queues = config.queues.map { |q| "queue:#{q}" }
       if @strictly_ordered_queues
         @queues.uniq!
-        @queues << TIMEOUT
+        @queues << {timeout: TIMEOUT}
       end
     end
 
@@ -84,7 +84,7 @@ module Sidekiq # :nodoc:
       else
         permute = @queues.shuffle
         permute.uniq!
-        permute << TIMEOUT
+        permute << {timeout: TIMEOUT}
         permute
       end
     end
