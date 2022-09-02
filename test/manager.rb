@@ -6,8 +6,7 @@ require "sidekiq/manager"
 describe Sidekiq::Manager do
   before do
     @config = reset!
-    @cap = Sidekiq::Capsule.new("default", @config)
-    @config.capsules << @cap
+    @cap = @config.default_capsule
   end
 
   def new_manager

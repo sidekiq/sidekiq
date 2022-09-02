@@ -16,7 +16,7 @@ module Sidekiq
       proc { "sidekiq" },
       proc { Sidekiq::VERSION },
       proc { |me, data| data["tag"] },
-      proc { |me, data| "[#{Processor::WORK_STATE.size} of #{me.config.capsules.map { |cap| cap.concurrency }.sum} busy]" },
+      proc { |me, data| "[#{Processor::WORK_STATE.size} of #{me.config.total_concurrency} busy]" },
       proc { |me, data| "stopping" if me.stopping? }
     ]
 
@@ -24,7 +24,7 @@ module Sidekiq
 
     def initialize(config)
       @config = config
-      @managers = config.capsules.map do |cap|
+      @managers = config.capsules.values.map do |cap|
         Sidekiq::Manager.new(cap)
       end
       @poller = Sidekiq::Scheduled::Poller.new(@config)
@@ -239,8 +239,8 @@ module Sidekiq
         "started_at" => Time.now.to_f,
         "pid" => ::Process.pid,
         "tag" => @config[:tag] || "",
-        "concurrency" => @config.capsules.map { |cap| cap.concurrency }.sum,
-        "queues" => @config.capsules.map { |cap| cap.queues }.flatten.uniq,
+        "concurrency" => @config.total_concurrency,
+        "queues" => @config.capsules.values.map { |cap| cap.queues }.flatten.uniq,
         "labels" => @config[:labels].to_a,
         "identity" => identity
       }

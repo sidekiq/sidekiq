@@ -45,7 +45,7 @@ module Sidekiq
       @options[:error_handlers] << ERROR_HANDLER if @options[:error_handlers].empty?
       @directory = {}
       @redis_config = {}
-      @capsules = []
+      @capsules = {}
     end
 
     def_delegators :@options, :[], :[]=, :fetch, :key?, :has_key?, :merge!
@@ -56,6 +56,14 @@ module Sidekiq
     # config.concurrency = 5
     def concurrency=(val)
       default_capsule.concurrency = Integer(val)
+    end
+
+    def concurrency
+      default_capsule.concurrency
+    end
+
+    def total_concurrency
+      capsules.each_value.sum(&:concurrency)
     end
 
     # Edit the default capsule.
@@ -88,17 +96,19 @@ module Sidekiq
       @server_chain
     end
 
-    def default_capsule
-      @capsules.first || Sidekiq::Capsule.new("default", self).tap do |cap|
-        @capsules << cap
-      end
+    def default_capsule(&block)
+      capsule("default", &block)
     end
 
     # register a new queue processing subsystem
     def capsule(name)
-      cap = Sidekiq::Capsule.new(name, self)
-      yield cap
-      @capsules << cap
+      nm = name.to_s
+      cap = @capsules.fetch(nm) do
+        cap = Sidekiq::Capsule.new(nm, self)
+        @capsules[nm] = cap
+      end
+      yield cap if block_given?
+      cap
     end
 
     # All capsules must use the same Redis configuration

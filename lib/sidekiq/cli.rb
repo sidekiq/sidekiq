@@ -261,10 +261,10 @@ module Sidekiq # :nodoc:
       # merge with defaults
       @config.merge!(opts)
 
-      cap = Sidekiq::Capsule.new("default", @config)
-      cap.queues = opts[:queues]
-      cap.concurrency = opts[:concurrency] || 10
-      @config.capsules << cap
+      @config.default_capsule.tap do |cap|
+        cap.queues = opts[:queues]
+        cap.concurrency = opts[:concurrency] || 10
+      end
     end
 
     def boot_application

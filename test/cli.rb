@@ -15,11 +15,11 @@ describe Sidekiq::CLI do
   attr_reader :logdev
 
   def queues
-    @cli.config.capsules.first.queues
+    @cli.config.queues
   end
 
   def concurrency
-    @cli.config.capsules.first.concurrency
+    @cli.config.concurrency
   end
 
   describe "#parse" do

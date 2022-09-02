@@ -63,9 +63,13 @@ describe Sidekiq::Capsule do
     end
 
     assert_equal 2, @config.capsules.size
-    cap = @config.capsules[1]
-    assert_equal "testy", cap.name
-    assert_equal 2, cap.concurrency
+    assert_equal %w[default testy], @config.capsules.values.map(&:name).sort
+    assert_equal %w[default testy], @config.capsules.keys.sort
+    assert_equal 12, @config.total_concurrency
+    cap = @config.capsule("testy")
+    cap1 = @config.capsule(:testy)
+    assert cap
+    assert_equal cap, cap1
     assert_includes cap.server_middleware, one
     assert_includes cap.client_middleware, one
     assert_includes cap.server_middleware, two

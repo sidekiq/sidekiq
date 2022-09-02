@@ -293,7 +293,7 @@ describe Sidekiq::Processor do
   describe "custom job logger class" do
     before do
       @config[:job_logger] = CustomJobLogger
-      @processor = ::Sidekiq::Processor.new(@config.capsules.first) { |pr, ex| }
+      @processor = ::Sidekiq::Processor.new(@config.default_capsule) { |pr, ex| }
     end
 
     it "is called instead default Sidekiq::JobLogger" do

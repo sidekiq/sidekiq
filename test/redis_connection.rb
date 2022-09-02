@@ -8,8 +8,7 @@ describe Sidekiq::RedisConnection do
   describe "create" do
     before do
       @config = reset!
-      @config.capsules << Sidekiq::Capsule.new("default", @config)
-      @config.capsules.first.concurrency = 12
+      @config.default_capsule.concurrency = 12
     end
 
     def client_for(redis)
@@ -59,7 +58,7 @@ describe Sidekiq::RedisConnection do
       end
 
       it "sizes capsule pools based on concurrency" do
-        assert_equal 12, @config.capsules.first.redis_pool.size
+        assert_equal 12, @config.default_capsule.redis_pool.size
       end
 
       it "changes client pool sizes with ENV" do
