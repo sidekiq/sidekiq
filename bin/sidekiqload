@@ -125,7 +125,7 @@ def with_latency(latency, &block)
 end
 
 begin
-  # RubyProf::exclude_threads = [ Monitoring ]
+  # RubyProf.exclude_threads = [Monitoring]
   # RubyProf.start
 
   with_latency(Integer(ENV.fetch("LATENCY", "1"))) do
@@ -140,7 +140,7 @@ rescue SystemExit
   # Sidekiq.logger.error("Profiling...")
   # result = RubyProf.stop
   # printer = RubyProf::GraphHtmlPrinter.new(result)
-  # printer.print(File.new("output.html", "w"), :min_percent => 1)
+  # printer.print(File.new("output.html", "w"), min_percent: 1)
   # normal
 rescue => e
   raise e if $DEBUG

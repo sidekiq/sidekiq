@@ -30,4 +30,5 @@ end
 
 group :load_test do
   gem "toxiproxy"
+  gem "ruby-prof"
 end
