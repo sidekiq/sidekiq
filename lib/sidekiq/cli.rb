@@ -90,7 +90,7 @@ module Sidekiq # :nodoc:
 
       # Since the user can pass us a connection pool explicitly in the initializer, we
       # need to verify the size is large enough or else Sidekiq's performance is dramatically slowed.
-      @config.capsules.each do |cap|
+      @config.capsules.each_pair do |name, cap|
         raise ArgumentError, "Pool size too small" if cap.redis_pool.size < cap.concurrency
       end
 
