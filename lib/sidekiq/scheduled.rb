@@ -147,13 +147,16 @@ module Sidekiq
         # As we run more processes, the scheduling interval average will approach an even spread
         # between 0 and poll interval so we don't need this artifical boost.
         #
-        if process_count < 10
+        count = process_count
+        interval = poll_interval_average(count)
+
+        if count < 10
           # For small clusters, calculate a random interval that is ±50% the desired average.
-          poll_interval_average * rand + poll_interval_average.to_f / 2
+          interval * rand + interval.to_f / 2
         else
           # With 10+ processes, we should have enough randomness to get decent polling
           # across the entire timespan
-          poll_interval_average * rand
+          interval * rand
         end
       end
 
@@ -170,14 +173,14 @@ module Sidekiq
       # the same time: the thundering herd problem.
       #
       # We only do this if poll_interval_average is unset (the default).
-      def poll_interval_average
-        @config[:poll_interval_average] ||= scaled_poll_interval
+      def poll_interval_average(count)
+        @config[:poll_interval_average] || scaled_poll_interval(count)
       end
 
       # Calculates an average poll interval based on the number of known Sidekiq processes.
       # This minimizes a single point of failure by dispersing check-ins but without taxing
       # Redis if you run many Sidekiq processes.
-      def scaled_poll_interval
+      def scaled_poll_interval(process_count)
         process_count * @config[:average_scheduled_poll_interval]
       end
 
