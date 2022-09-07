@@ -191,6 +191,12 @@ module Sidekiq
       end
 
       def initial_wait
+        # periodically clean out the `processes` set in Redis which can collect
+        # references to dead processes over time. The process count affects how
+        # often we scan for scheduled jobs.
+        ps = Sidekiq::ProcessSet.new(false)
+        ps.cleanup if rand(1000) % 10 == 0 # only cleanup 10% of the time
+
         # Have all processes sleep between 5-15 seconds.  10 seconds
         # to give time for the heartbeat to register (if the poll interval is going to be calculated by the number
         # of workers), and 5 random seconds to ensure they don't all hit Redis at the same time.
