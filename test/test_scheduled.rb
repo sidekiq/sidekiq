@@ -125,16 +125,35 @@ describe Sidekiq::Scheduled do
       end
     end
 
-    it "calculates an average poll interval based on the number of known Sidekiq processes" do
+    it "generates random intervals based on the number of known Sidekiq processes" do
       with_sidekiq_option(:average_scheduled_poll_interval, 10) do
-        3.times do |i|
+        intervals_count = 500
+
+        # Start with 10 processes
+        10.times do |i|
           Sidekiq.redis do |conn|
             conn.sadd("processes", ["process-#{i}"])
-            conn.hset("process-#{i}", "info", "")
           end
         end
 
-        assert_equal 30, @poller.send(:scaled_poll_interval)
+        intervals = Array.new(intervals_count) { @poller.send(:random_poll_interval) }
+        assert intervals.all? { |x| x.between?(0, 100) }
+
+        # Reduce to 3 processes
+        (3..9).each do |i|
+          Sidekiq.redis do |conn|
+            conn.srem("processes", ["process-#{i}"])
+          end
+        end
+
+        intervals = Array.new(intervals_count) { @poller.send(:random_poll_interval) }
+        assert intervals.all? { |x| x.between?(15, 45) }
+      end
+    end
+
+    it "calculates an average poll interval based on a given number of processes" do
+      with_sidekiq_option(:average_scheduled_poll_interval, 10) do
+        assert_equal 30, @poller.send(:scaled_poll_interval, 3)
       end
     end
   end
