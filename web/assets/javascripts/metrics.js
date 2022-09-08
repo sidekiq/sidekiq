@@ -153,7 +153,13 @@ class HistTotalsChart extends BaseChart {
         y: {
           beginAtZero: true,
           title: {
-            text: "Total jobs",
+            text: "Jobs",
+            display: true,
+          },
+        },
+        x: {
+          title: {
+            text: "Execution Time",
             display: true,
           },
         },

@@ -13,12 +13,15 @@
 %>
 
 <% if job_result.totals["s"] > 0 %>
-  <div class="header-with-subheader">
+  <div class="header-container">
     <h1>
-      <a href="<%= root_path %>/metrics"><%= t(:metrics).to_s.titleize %></a> /
+      <a href="<%= root_path %>metrics"><%= t(:metrics).to_s.titleize %></a> /
       <%= h @name %>
     </h1>
-    <h2>Histogram summary</h2>
+
+    <div>
+      <a target="blank" href="https://github.com/mperham/sidekiq/wiki/Metrics"><span class="info-circle" title="Click to learn more about metrics">?</span></a>
+    </div>
   </div>
 
   <canvas id="hist-totals-chart"></canvas>
@@ -32,8 +35,6 @@
       }) %>
     )
   </script>
-
-  <h2>Performance over time</h2>
 
   <canvas id="hist-bubble-chart"></canvas>
 
@@ -49,33 +50,6 @@
     )
   </script>
 
-  <div class="table_container">
-    <table class="table table-bordered table-striped table-hover">
-      <tbody>
-        <tr>
-          <th><%= t('Time') %></th>
-          <th><%= t('Processed') %></th>
-          <th><%= t('Failed') %></th>
-          <th><%= t('ExecutionTime') %></th>
-          <th><%= t('AvgExecutionTime') %></th>
-        </tr>
-        <% @query_result.buckets.reverse.each do |bucket| %>
-          <tr>
-            <td><%= bucket %></td>
-            <td><%= job_result.series.dig("p", bucket) %></td>
-            <td><%= job_result.series.dig("f", bucket) %></td>
-            <% if (total_sec = job_result.series.dig("s", bucket)) > 0 %>
-              <td><%= total_sec.round(2) %> seconds</td>
-              <td><%= job_result.series_avg("s")[bucket].round(2) %> seconds</td>
-            <% else %>
-              <td>&mdash;</td>
-              <td>&mdash;</td>
-            <% end %>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </div>
   <p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p>
 <% else %>
   <h1>
