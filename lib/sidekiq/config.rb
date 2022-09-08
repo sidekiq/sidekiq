@@ -12,7 +12,7 @@ module Sidekiq
       labels: Set.new,
       require: ".",
       environment: nil,
-      concurrency: 10,
+      concurrency: 5,
       timeout: 25,
       poll_interval_average: nil,
       average_scheduled_poll_interval: 5,
