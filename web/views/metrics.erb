@@ -2,7 +2,13 @@
 <script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js"></script>
 <script type="text/javascript" src="<%= root_path %>javascripts/metrics.js"></script>
 
-<h2>Total execution time</h2>
+<div class="header-container">
+  <h1><%= t('Metrics') %></h1>
+
+  <div>
+    <a target="blank" href="https://github.com/mperham/sidekiq/wiki/Metrics"><span class="info-circle" title="Click to learn more about metrics">?</span></a>
+  </div>
+</div>
 
 <%
   table_limit = 20
@@ -25,8 +31,6 @@
   )
 </script>
 
-<h2>Most Time-Consuming Jobs</h2>
-
 <div class="table_container">
   <table class="table table-bordered table-striped table-hover">
     <tbody>
@@ -34,7 +38,7 @@
         <th><%= t('Name') %></th>
         <th><%= t('Success') %></th>
         <th><%= t('Failure') %></th>
-        <th><%= t('ExecutionTime') %></th>
+        <th><%= t('TotalExecutionTime') %></th>
         <th><%= t('AvgExecutionTime') %></th>
       </tr>
       <% if job_results.any? %>

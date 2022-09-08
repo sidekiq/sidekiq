@@ -82,6 +82,6 @@ el: # <---- change this to your locale code
   Unpause: Κατάργηση Παύσης
   Metrics: Μετρήσεις
   NoDataFound: Δεν βρέθηκαν δεδομένα
-  ExecutionTime: Συνολικός Χρόνος Εκτέλεσης
+  TotalExecutionTime: Συνολικός Χρόνος Εκτέλεσης
   AvgExecutionTime: Μέσος Χρόνος Εκτέλεσης
   # Context: Context

@@ -72,8 +72,10 @@ h1, h2, h3 {
   line-height: 45px;
 }
 
-.header-with-subheader h2 {
-  margin-top: -18px;
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .centered {

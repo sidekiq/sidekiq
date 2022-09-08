@@ -74,6 +74,7 @@ en:
   StopAll: Stop All
   StopPolling: Stop Polling
   Success: Success
+  Summary: Summary
   Thread: Thread
   Threads: Threads
   ThreeMonths: 3 months
@@ -88,7 +89,7 @@ en:
   idle: idle
   Metrics: Metrics
   NoDataFound: No data found
-  ExecutionTime: Total Execution Time
+  TotalExecutionTime: Total Execution Time
   AvgExecutionTime: Average Execution Time
   Context: Context
   Bucket: Bucket
