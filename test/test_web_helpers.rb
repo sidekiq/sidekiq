@@ -131,7 +131,7 @@ describe "Web helpers" do
   end
 
   it "sorts processes using the natural sort order" do
-    ["a.10.2", "a.2", "busybee-10_1", "a.23", "a.10.1", "a.1", "192.168.0.10", "192.168.0.2", "2.1.1.1", "busybee-2_34"].each do |hostname|
+    ["a.10.2", "a.2", "busybee--10_1", "a.23", "a.10.1", "a.1", "192.168.0.10", "192.168.0.2", "2.1.1.1", "busybee-2__34"].each do |hostname|
       pdata = {"hostname" => hostname, "pid" => "123", "started_at" => Time.now.to_i}
       key = "#{hostname}:123"
 
@@ -144,6 +144,6 @@ describe "Web helpers" do
     obj = Helpers.new
 
     assert obj.sorted_processes.all? { |process| assert_instance_of Sidekiq::Process, process }
-    assert_equal ["2.1.1.1", "192.168.0.2", "192.168.0.10", "a.1", "a.2", "a.10.1", "a.10.2", "a.23", "busybee-2_34", "busybee-10_1"], obj.sorted_processes.map { |process| process["hostname"] }
+    assert_equal ["2.1.1.1", "192.168.0.2", "192.168.0.10", "a.1", "a.2", "a.10.1", "a.10.2", "a.23", "busybee-2__34", "busybee--10_1"], obj.sorted_processes.map { |process| process["hostname"] }
   end
 end
