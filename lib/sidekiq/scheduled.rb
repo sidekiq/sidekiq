@@ -146,13 +146,16 @@ module Sidekiq
         # As we run more processes, the scheduling interval average will approach an even spread
         # between 0 and poll interval so we don't need this artifical boost.
         #
-        if process_count < 10
+        count = process_count
+        interval = poll_interval_average(count)
+
+        if count < 10
           # For small clusters, calculate a random interval that is ±50% the desired average.
-          poll_interval_average * rand + poll_interval_average.to_f / 2
+          interval * rand + interval.to_f / 2
         else
           # With 10+ processes, we should have enough randomness to get decent polling
           # across the entire timespan
-          poll_interval_average * rand
+          interval * rand
         end
       end
 
@@ -169,14 +172,14 @@ module Sidekiq
       # the same time: the thundering herd problem.
       #
       # We only do this if poll_interval_average is unset (the default).
-      def poll_interval_average
-        @config[:poll_interval_average] ||= scaled_poll_interval
+      def poll_interval_average(count)
+        @config[:poll_interval_average] || scaled_poll_interval(count)
       end
 
       # Calculates an average poll interval based on the number of known Sidekiq processes.
       # This minimizes a single point of failure by dispersing check-ins but without taxing
       # Redis if you run many Sidekiq processes.
-      def scaled_poll_interval
+      def scaled_poll_interval(process_count)
         process_count * @config[:average_scheduled_poll_interval]
       end
 
@@ -186,9 +189,35 @@ module Sidekiq
         pcount
       end
 
+      # A copy of Sidekiq::ProcessSet#cleanup because server
+      # should never depend on sidekiq/api.
+      def cleanup
+        # dont run cleanup more than once per minute
+        return 0 unless redis { |conn| conn.set("process_cleanup", "1", nx: true, ex: 60) }
+
+        count = 0
+        redis do |conn|
+          procs = conn.sscan("processes").to_a
+          heartbeats = conn.pipelined { |pipeline|
+            procs.each do |key|
+              pipeline.hget(key, "info")
+            end
+          }
+
+          # the hash named key has an expiry of 60 seconds.
+          # if it's not found, that means the process has not reported
+          # in to Redis and probably died.
+          to_prune = procs.select.with_index { |proc, i|
+            heartbeats[i].nil?
+          }
+          count = conn.srem("processes", to_prune) unless to_prune.empty?
+        end
+        count
+      end
+
       def initial_wait
-        # Have all processes sleep between 5-15 seconds.  10 seconds
-        # to give time for the heartbeat to register (if the poll interval is going to be calculated by the number
+        # Have all processes sleep between 5-15 seconds. 10 seconds to give time for
+        # the heartbeat to register (if the poll interval is going to be calculated by the number
         # of workers), and 5 random seconds to ensure they don't all hit Redis at the same time.
         total = 0
         total += INITIAL_WAIT unless @config[:poll_interval_average]
@@ -196,6 +225,11 @@ module Sidekiq
 
         @sleeper.pop(total)
       rescue Timeout::Error
+      ensure
+        # periodically clean out the `processes` set in Redis which can collect
+        # references to dead processes over time. The process count affects how
+        # often we scan for scheduled jobs.
+        cleanup
       end
     end
   end
