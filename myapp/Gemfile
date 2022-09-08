@@ -1,14 +1,11 @@
 source "https://rubygems.org"
+git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
+ruby "3.1.2"
+
+gem "rails", "~> 7.0.3", ">= 7.0.3.1"
+gem "sqlite3", "~> 1.4"
+gem "puma", "~> 5.0"
 gem "sidekiq", path: ".."
-gem "rails"
-gem "puma"
-gem "concurrent-ruby"
-
-# Ubuntu required packages to install rails
-# apt-get install build-essential patch ruby-dev zlib1g-dev liblzma-dev libsqlite3-dev
-platforms :ruby do
-  gem "sqlite3"
-end
 
 gem "after_commit_everywhere"
