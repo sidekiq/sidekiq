@@ -32,8 +32,8 @@
     <tbody>
       <tr>
         <th><%= t('Name') %></th>
-        <th><%= t('Processed') %></th>
-        <th><%= t('Failed') %></th>
+        <th><%= t('Success') %></th>
+        <th><%= t('Failure') %></th>
         <th><%= t('ExecutionTime') %></th>
         <th><%= t('AvgExecutionTime') %></th>
       </tr>
@@ -53,7 +53,7 @@
               </div>
               <script>jobMetricsChart.registerSwatch("<%= id %>")</script>
             </td>
-            <td><%= jr.dig("totals", "p") %></td>
+            <td><%= jr.dig("totals", "p") - jr.dig("totals", "f") %></td>
             <td><%= jr.dig("totals", "f") %></td>
             <td><%= jr.dig("totals", "s").round(2) %> seconds</td>
             <td><%= jr.total_avg("s").round(2) %> seconds</td>

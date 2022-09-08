@@ -25,6 +25,7 @@ en:
   Extras: Extras
   Failed: Failed
   Failures: Failures
+  Failure: Failure
   GoBack: ← Back
   History: History
   Job: Job
@@ -72,6 +73,7 @@ en:
   Stop: Stop
   StopAll: Stop All
   StopPolling: Stop Polling
+  Success: Success
   Thread: Thread
   Threads: Threads
   ThreeMonths: 3 months
