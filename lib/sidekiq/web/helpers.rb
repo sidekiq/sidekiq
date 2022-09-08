@@ -155,7 +155,7 @@ module Sidekiq
       @sorted_processes ||= begin
         return processes unless processes.all? { |p| p["hostname"] }
 
-        split_characters = /[._-]/
+        split_characters = /[._-]+/
 
         padding = processes.flat_map { |p| p["hostname"].split(split_characters) }.map(&:size).max
 
