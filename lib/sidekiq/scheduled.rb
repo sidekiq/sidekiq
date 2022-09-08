@@ -190,15 +190,35 @@ module Sidekiq
         pcount
       end
 
-      def initial_wait
-        # periodically clean out the `processes` set in Redis which can collect
-        # references to dead processes over time. The process count affects how
-        # often we scan for scheduled jobs.
-        ps = Sidekiq::ProcessSet.new(false)
-        ps.cleanup if rand(1000) % 10 == 0 # only cleanup 10% of the time
+      # A copy of Sidekiq::ProcessSet#cleanup because server
+      # should never depend on sidekiq/api.
+      def cleanup
+        # dont run cleanup more than once per minute
+        return 0 unless Sidekiq.redis { |conn| conn.set("process_cleanup", "1", nx: true, ex: 60) }
 
-        # Have all processes sleep between 5-15 seconds.  10 seconds
-        # to give time for the heartbeat to register (if the poll interval is going to be calculated by the number
+        count = 0
+        Sidekiq.redis do |conn|
+          procs = conn.sscan_each("processes").to_a
+          heartbeats = conn.pipelined { |pipeline|
+            procs.each do |key|
+              pipeline.hget(key, "info")
+            end
+          }
+
+          # the hash named key has an expiry of 60 seconds.
+          # if it's not found, that means the process has not reported
+          # in to Redis and probably died.
+          to_prune = procs.select.with_index { |proc, i|
+            heartbeats[i].nil?
+          }
+          count = conn.srem("processes", to_prune) unless to_prune.empty?
+        end
+        count
+      end
+
+      def initial_wait
+        # Have all processes sleep between 5-15 seconds. 10 seconds to give time for
+        # the heartbeat to register (if the poll interval is going to be calculated by the number
         # of workers), and 5 random seconds to ensure they don't all hit Redis at the same time.
         total = 0
         total += INITIAL_WAIT unless @config[:poll_interval_average]
@@ -206,6 +226,11 @@ module Sidekiq
 
         @sleeper.pop(total)
       rescue Timeout::Error
+      ensure
+        # periodically clean out the `processes` set in Redis which can collect
+        # references to dead processes over time. The process count affects how
+        # often we scan for scheduled jobs.
+        cleanup
       end
     end
   end

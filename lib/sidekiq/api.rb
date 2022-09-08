@@ -11,6 +11,17 @@ if ENV["SIDEKIQ_METRICS_BETA"]
   require "sidekiq/metrics/query"
 end
 
+#
+# Sidekiq's Data API provides a Ruby object model on top
+# of Sidekiq's runtime data in Redis. This API should never
+# be used within application code for business logic.
+#
+# The Sidekiq server process never uses this API: all data
+# manipulation is done directly for performance reasons to
+# ensure we are using Redis as efficiently as possible at
+# every callsite.
+#
+
 module Sidekiq
   # Retrieve runtime statistics from Redis regarding
   # this Sidekiq cluster.
@@ -893,10 +904,12 @@ module Sidekiq
     # :nodoc:
     # @api private
     def cleanup
+      # dont run cleanup more than once per minute
       return 0 unless Sidekiq.redis { |conn| conn.set("process_cleanup", "1", nx: true, ex: 60) }
+
       count = 0
       Sidekiq.redis do |conn|
-        procs = conn.sscan_each("processes").to_a.sort
+        procs = conn.sscan_each("processes").to_a
         heartbeats = conn.pipelined { |pipeline|
           procs.each do |key|
             pipeline.hget(key, "info")
