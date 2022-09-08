@@ -41,4 +41,4 @@ The standard Ruby runtime does not scale well with lots of Threads so embedded m
 
 > RULE OF THUMB: **if you are using embedded mode, you should be monitoring the CPU usage of that process!**
 
-Note the other Threads enumerated above. The concurrency value controls how many Processor threads will be started but there are also separate threads for heartbeat, poller, manager and other internal services. These threads are relatively CPU-light but they still need regular, predictable access to the CPU for their own work.
+Note the other Threads enumerated above. The concurrency value controls how many Processor threads will be started but there are also separate threads for heartbeat, scheduler, and other internal services. These threads are relatively CPU-light but they still need regular, predictable access to the CPU for their own work.

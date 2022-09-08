@@ -15,6 +15,10 @@ module Sidekiq
       fire_event(:startup, reverse: false, reraise: true)
       @launcher = Sidekiq::Launcher.new(@config)
       @launcher.run
+      sleep 0.1
+
+      logger.info "Embedded mode running with #{Thread.list.size} threads"
+      logger.debug { Thread.list.map(&:name) }
     end
 
     def quiet
