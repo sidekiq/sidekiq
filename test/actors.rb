@@ -76,41 +76,11 @@ describe "Actors" do
       assert_nil f.thread # didnt start it
     end
 
-    it "can process" do
-      q = Sidekiq::Queue.new
-      assert_equal 0, q.size
-      p = Sidekiq::Processor.new(@cap) do |pr, ex|
-        result(pr, ex)
-      end
-      JoeWorker.perform_async(0)
-      assert_equal 1, q.size
-
-      a = $count
-      await do
-        p.start
-      end
-
-      p.terminate
-      val = p.kill(true)
-      assert_nil val
-
-      # TODO this is necessary for the test below to pass!?!?!
-      # Is there a rogue thread alive and fetching?
-      # Comment out and run "bundle exec ruby test/actors.rb"
-      JoeWorker.perform_async(0)
-
-      b = $count
-      assert_nil @latest_error
-      assert_equal false, p.thread.status
-      assert_equal a + 1, b
-      assert_equal 0, q.size
-    end
-
     it "deals with errors" do
       q = Sidekiq::Queue.new
       assert_equal 0, q.size
-      p = Sidekiq::Processor.new(@cap) do |pr, ex|
-        result(pr, ex)
+      pr = Sidekiq::Processor.new(@cap) do |prc, ex|
+        result(prc, ex)
       end
       jid = JoeWorker.perform_async("boom")
       assert jid, jid
@@ -118,14 +88,14 @@ describe "Actors" do
 
       a = $count
       await do
-        p.start
+        pr.start
       end
+
+      pr.kill(true)
       b = $count
       assert_equal a, b
-
-      p.kill(true)
       assert @latest_error
-      assert_equal false, p.thread.status
+      assert_equal false, pr.thread.status
       assert_equal "boom", @latest_error.message
       assert_equal RuntimeError, @latest_error.class
     end
