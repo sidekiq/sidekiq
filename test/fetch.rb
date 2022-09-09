@@ -33,7 +33,7 @@ describe Sidekiq::BasicFetch do
     @cap.queues = ["basic", "bar"]
     fetch = Sidekiq::BasicFetch.new(@cap)
     cmd = fetch.queues_cmd
-    assert_equal cmd, ["queue:basic", "queue:bar", {timeout: Sidekiq::BasicFetch::TIMEOUT}]
+    assert_equal cmd, ["queue:basic", "queue:bar"]
   end
 
   it "bulk requeues" do

@@ -34,20 +34,19 @@ module Sidekiq # :nodoc:
       @queues = config.queues.map { |q| "queue:#{q}" }
       if @strictly_ordered_queues
         @queues.uniq!
-        @queues << {timeout: TIMEOUT}
       end
     end
 
     def retrieve_work
       qs = queues_cmd
       # 4825 Sidekiq Pro with all queues paused will return an
-      # empty set of queues with a trailing TIMEOUT value.
-      if qs.size <= 1
+      # empty set of queues
+      if qs.size <= 0
         sleep(TIMEOUT)
         return nil
       end
 
-      queue, job = redis { |conn| conn.blocking_call(false, "brpop", *qs) }
+      queue, job = redis { |conn| conn.blocking_call(false, "brpop", *qs, TIMEOUT) }
       UnitOfWork.new(queue, job, config) if queue
     end
 
@@ -84,7 +83,6 @@ module Sidekiq # :nodoc:
       else
         permute = @queues.shuffle
         permute.uniq!
-        permute << {timeout: TIMEOUT}
         permute
       end
     end
