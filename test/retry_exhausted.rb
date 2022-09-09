@@ -1,5 +1,6 @@
 require_relative "helper"
 require "sidekiq/job_retry"
+require "sidekiq/capsule"
 
 class NewWorker
   include Sidekiq::Job
