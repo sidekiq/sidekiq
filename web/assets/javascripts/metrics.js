@@ -68,7 +68,7 @@ class JobMetricsOverviewChart extends BaseChart {
         y: {
           beginAtZero: true,
           title: {
-            text: this.options.metricLabels[this.metric],
+            text: "Total Execution Time (sec)",
             display: true,
           },
         },
