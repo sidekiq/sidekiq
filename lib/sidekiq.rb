@@ -92,6 +92,9 @@ module Sidekiq
   #
   # NB: it is really easy to overload a Ruby process with threads due to the GIL.
   # I do not recommend setting concurrency higher than 2-3.
+  #
+  # NB: Sidekiq only supports one instance in memory. You will get undefined behavior
+  # if you try to embed Sidekiq twice in the same process.
   def self.configure_embed(&block)
     raise "Sidekiq global configuration is frozen, you must create all embedded instances BEFORE calling `run`" if @frozen
 

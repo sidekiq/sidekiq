@@ -13,7 +13,7 @@ module Sidekiq
     def run
       housekeeping
       fire_event(:startup, reverse: false, reraise: true)
-      @launcher = Sidekiq::Launcher.new(@config)
+      @launcher = Sidekiq::Launcher.new(@config, true)
       @launcher.run
       sleep 0.1
 

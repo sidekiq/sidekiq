@@ -22,8 +22,9 @@ module Sidekiq
 
     attr_accessor :managers, :poller
 
-    def initialize(config)
+    def initialize(config, embedded = false)
       @config = config
+      @embedded = embedded
       @managers = config.capsules.values.map do |cap|
         Sidekiq::Manager.new(cap)
       end
@@ -99,7 +100,7 @@ module Sidekiq
     end
 
     def heartbeat
-      $0 = PROCTITLES.map { |proc| proc.call(self, to_data) }.compact.join(" ")
+      $0 = PROCTITLES.map { |proc| proc.call(self, to_data) }.compact.join(" ") unless @embedded
 
       ❤
     end
