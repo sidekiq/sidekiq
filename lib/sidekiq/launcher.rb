@@ -32,6 +32,7 @@ module Sidekiq
     end
 
     def run
+      Sidekiq.freeze!
       @thread = safe_thread("heartbeat", &method(:start_heartbeat))
       @poller.start
       @managers.each(&:start)
