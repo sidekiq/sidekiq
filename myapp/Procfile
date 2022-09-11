@@ -1,0 +1,3 @@
+web: PORT=3000 bin/rails server
+seed: while true; do bundle exec rake seed_jobs; sleep 240; done
+worker: bundle exec sidekiq
