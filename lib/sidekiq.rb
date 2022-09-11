@@ -97,7 +97,7 @@ module Sidekiq
 
     require "sidekiq/embedded"
     cfg = default_configuration
-    cfg.concurrency = 1
+    cfg.concurrency = 2
     @config_blocks&.each { |block| block.call(cfg) }
     yield cfg
 
