@@ -22,7 +22,7 @@
 
 <script>
   window.jobMetricsChart = new JobMetricsOverviewChart(
-    "job-metrics-overview-chart",
+    document.getElementById("job-metrics-overview-chart"),
     <%= Sidekiq.dump_json({
       series: job_results.map { |(kls, jr)| [kls, jr.dig("series", "s")] }.to_h,
       marks: @query_result.marks.map { |m| [m.bucket, m.label] },

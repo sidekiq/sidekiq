@@ -21,7 +21,7 @@
   <canvas id="realtime-chart"></canvas>
   <script>
     window.realtimeChart = new RealtimeChart(
-      "realtime-chart",
+      document.getElementById("realtime-chart"),
       <%= Sidekiq.dump_json({
         processedLabel: t('Processed'),
         failedLabel: t('Failed'),

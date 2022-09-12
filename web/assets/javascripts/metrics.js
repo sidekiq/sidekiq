@@ -172,7 +172,7 @@ class HistBubbleChart extends BaseChart {
     });
 
     // Chart.js will not calculate the bubble size. We have to do that.
-    const maxRadius = this.ctx.offsetWidth / this.options.labels.length;
+    const maxRadius = this.el.offsetWidth / this.options.labels.length;
     const minRadius = 1;
     const multiplier = (maxRadius / maxCount) * 1.5;
     data.forEach((entry) => {

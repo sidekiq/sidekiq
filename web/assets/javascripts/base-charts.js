@@ -9,6 +9,7 @@ class Colors {
     this.success = "#006f68";
     this.failure = "#af0014";
     this.fallback = "#999";
+    this.primary = "#537bc4";
     this.available = [
       // Colors taken from https://www.chartjs.org/docs/latest/samples/utils.html
       "#537bc4",
@@ -22,7 +23,6 @@ class Colors {
       "#8549ba",
       "#991b1b",
     ];
-    this.primary = this.available[0];
   }
 
   checkOutFor(assignee) {
@@ -43,12 +43,12 @@ class Colors {
 }
 
 class BaseChart {
-  constructor(id, options) {
-    this.ctx = document.getElementById(id);
+  constructor(el, options) {
+    this.el = el;
     this.options = options;
     this.colors = new Colors();
 
-    this.chart = new Chart(this.ctx, {
+    this.chart = new Chart(this.el, {
       type: this.options.chartType,
       data: { labels: this.options.labels, datasets: this.datasets },
       options: this.chartOptions,
