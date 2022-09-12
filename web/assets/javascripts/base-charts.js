@@ -45,7 +45,6 @@ class Colors {
 class BaseChart {
   constructor(id, options) {
     this.ctx = document.getElementById(id);
-    this.visibleKls = options.visible;
     this.options = options;
     this.colors = new Colors();
 

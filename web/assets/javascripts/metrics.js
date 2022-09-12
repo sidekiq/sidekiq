@@ -1,6 +1,7 @@
 class JobMetricsOverviewChart extends BaseChart {
   constructor(id, options) {
     super(id, { ...options, chartType: "line" });
+    this.visibleKls = options.visible;
     this.swatches = [];
 
     this.update();

@@ -746,11 +746,3 @@ div.interval-slider input {
 canvas {
   margin: 20px 0 30px;
 }
-
-a.current-chart {
-  text-decoration: underline;
-}
-
-a.current-chart:after {
-  content: ' 📈';
-}
