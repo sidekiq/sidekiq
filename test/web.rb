@@ -141,12 +141,12 @@ describe Sidekiq::Web do
     end
 
     get "/queues/default?count=3" # direction is 'desc' by default
-    assert_match(/\b1005\b/, last_response.body)
-    refute_match(/\b1002\b/, last_response.body)
+    assert_match(/1005/, last_response.body)
+    refute_match(/1002/, last_response.body)
 
     get "/queues/default?count=3&direction=asc"
-    assert_match(/\b1000\b/, last_response.body)
-    refute_match(/\b1003\b/, last_response.body)
+    assert_match(/1000/, last_response.body)
+    refute_match(/1003/, last_response.body)
   end
 
   it "can delete a queue" do
