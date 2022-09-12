@@ -1,3 +1,5 @@
+require "sidekiq/metrics/tracking"
+
 Sidekiq.configure_client do |config|
   config.redis = {size: 2}
 end
