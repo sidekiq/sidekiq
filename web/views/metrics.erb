@@ -27,8 +27,8 @@
       <%= Sidekiq.dump_json({
         series: job_results.map { |(kls, jr)| [kls, jr.dig("series", "s")] }.to_h,
         marks: @query_result.marks.map { |m| [m.bucket, m.label] },
-        visible: visible_kls,
         labels: @query_result.buckets,
+        visibleKls: visible_kls,
       }) %>
     )
   </script>
@@ -55,6 +55,7 @@
                   id="<%= id %>"
                   class="metrics-swatch"
                   value="<%= kls %>"
+                  <%= visible_kls.include?(kls) ? 'checked' : '' %>
                 />
                 <code><a href="<%= root_path %>metrics/<%= kls %>"><%= kls %></a></code>
               </div>

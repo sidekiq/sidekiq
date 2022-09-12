@@ -1,10 +1,10 @@
 class JobMetricsOverviewChart extends BaseChart {
   constructor(id, options) {
     super(id, { ...options, chartType: "line" });
-    this.visibleKls = options.visible;
     this.swatches = [];
+    this.visibleKls = options.visibleKls;
 
-    this.update();
+    this.init();
   }
 
   get datasets() {
@@ -25,14 +25,13 @@ class JobMetricsOverviewChart extends BaseChart {
     const el = document.getElementById(id);
     el.addEventListener("change", () => this.toggleKls(el.value, el.checked));
     this.swatches[el.value] = el;
-    this.updateSwatch(el.value);
+    this.updateSwatch(el.value, el.checked);
   }
 
-  updateSwatch(kls) {
+  updateSwatch(kls, checked) {
     const el = this.swatches[kls];
-    const ds = this.chart.data.datasets.find((ds) => ds.label == kls);
-    el.checked = !!ds;
-    el.style.color = ds ? ds.borderColor : null;
+    el.checked = checked;
+    el.style.color = this.colors.assignments[kls] || "";
   }
 
   toggleKls(kls, visible) {
@@ -44,7 +43,7 @@ class JobMetricsOverviewChart extends BaseChart {
       this.chart.data.datasets.splice(i, 1);
     }
 
-    this.updateSwatch(kls);
+    this.updateSwatch(kls, visible);
     this.update();
   }
 
@@ -98,6 +97,7 @@ class JobMetricsOverviewChart extends BaseChart {
 class HistTotalsChart extends BaseChart {
   constructor(id, options) {
     super(id, { ...options, chartType: "bar" });
+    this.init();
   }
 
   get datasets() {
@@ -144,8 +144,7 @@ class HistTotalsChart extends BaseChart {
 class HistBubbleChart extends BaseChart {
   constructor(id, options) {
     super(id, { ...options, chartType: "bubble" });
-
-    this.update();
+    this.init();
   }
 
   get datasets() {

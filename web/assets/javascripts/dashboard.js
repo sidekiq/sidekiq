@@ -61,6 +61,7 @@ ready(() => {
 class DashboardChart extends BaseChart {
   constructor(id, options) {
     super(id, { ...options, chartType: "line" });
+    this.init();
   }
 
   get data() {

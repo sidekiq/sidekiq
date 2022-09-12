@@ -5,7 +5,7 @@ if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
 
 class Colors {
   constructor() {
-    this.assigments = {};
+    this.assignments = {};
     this.success = "#006f68";
     this.failure = "#af0014";
     this.fallback = "#999";
@@ -27,14 +27,14 @@ class Colors {
 
   checkOutFor(assignee) {
     const color =
-      this.assigments[assignee] || this.available.shift() || this.fallback;
-    this.assigments[assignee] = color;
+      this.assignments[assignee] || this.available.shift() || this.fallback;
+    this.assignments[assignee] = color;
     return color;
   }
 
   checkInFor(assignee) {
-    const color = this.assigments[assignee];
-    delete this.assigments[assignee];
+    const color = this.assignments[assignee];
+    delete this.assignments[assignee];
 
     if (color && color != this.fallback) {
       this.available.unshift(color);
@@ -47,7 +47,9 @@ class BaseChart {
     this.el = el;
     this.options = options;
     this.colors = new Colors();
+  }
 
+  init() {
     this.chart = new Chart(this.el, {
       type: this.options.chartType,
       data: { labels: this.options.labels, datasets: this.datasets },
