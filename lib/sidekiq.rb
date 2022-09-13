@@ -74,6 +74,11 @@ module Sidekiq
     yield default_configuration if server?
   end
 
+  def self.freeze!
+    @frozen = true
+    @config_blocks = nil
+  end
+
   # Creates a Sidekiq::Config instance that is more tuned for embedding
   # within an arbitrary Ruby process. Noteably it reduces concurrency by
   # default so there is less contention for CPU time with other threads.
@@ -87,10 +92,15 @@ module Sidekiq
   #
   # NB: it is really easy to overload a Ruby process with threads due to the GIL.
   # I do not recommend setting concurrency higher than 2-3.
+  #
+  # NB: Sidekiq only supports one instance in memory. You will get undefined behavior
+  # if you try to embed Sidekiq twice in the same process.
   def self.configure_embed(&block)
+    raise "Sidekiq global configuration is frozen, you must create all embedded instances BEFORE calling `run`" if @frozen
+
     require "sidekiq/embedded"
     cfg = default_configuration
-    cfg.concurrency = 1
+    cfg.concurrency = 2
     @config_blocks&.each { |block| block.call(cfg) }
     yield cfg
 

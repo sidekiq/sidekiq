@@ -11,10 +11,8 @@ module Sidekiq
         symbolized_options = options.transform_keys(&:to_sym)
         symbolized_options[:url] ||= determine_redis_provider
 
-        if symbolized_options[:logger]
-          log_info(symbolized_options)
-          symbolized_options.delete(:logger)
-        end
+        logger = symbolized_options.delete(:logger)
+        logger&.info { "Sidekiq #{Sidekiq::VERSION} connecting to Redis with options #{scrub(symbolized_options)}" }
 
         size = symbolized_options.delete(:size) || 5
         pool_timeout = symbolized_options.delete(:pool_timeout) || 1
@@ -27,7 +25,7 @@ module Sidekiq
 
       private
 
-      def log_info(options)
+      def scrub(options)
         redacted = "REDACTED"
 
         # Deep clone so we can muck with these options all we want and exclude
@@ -45,7 +43,7 @@ module Sidekiq
         scrubbed_options[:sentinels]&.each do |sentinel|
           sentinel[:password] = redacted if sentinel[:password]
         end
-        options[:logger].info("Sidekiq #{Sidekiq::VERSION} connecting to Redis with options #{scrubbed_options}")
+        scrubbed_options
       end
 
       def determine_redis_provider

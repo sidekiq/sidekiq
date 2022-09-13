@@ -4,7 +4,7 @@ require_relative "helper"
 require "sidekiq/component"
 require "sidekiq/metrics/tracking"
 require "sidekiq/metrics/query"
-require "sidekiq/metrics/deploy"
+require "sidekiq/deploy"
 require "sidekiq/api"
 
 describe Sidekiq::Metrics do
@@ -43,7 +43,7 @@ describe Sidekiq::Metrics do
       whence = Time.local(2022, 7, 17, 18, 43, 15)
       floor = whence.utc.rfc3339.sub(":15", ":00")
 
-      d = Sidekiq::Metrics::Deploy.new
+      d = Sidekiq::Deploy.new
       d.mark(at: whence, label: "cafed00d - some git summary line")
 
       q = Sidekiq::Metrics::Query.new(now: whence)
@@ -52,7 +52,7 @@ describe Sidekiq::Metrics do
       assert_equal 1, rs.marks.size
       assert_equal "cafed00d - some git summary line", rs.marks.first.label, rs.marks.inspect
 
-      d = Sidekiq::Metrics::Deploy.new
+      d = Sidekiq::Deploy.new
       rs = d.fetch(whence)
       refute_nil rs
       assert_equal 1, rs.size
@@ -103,7 +103,7 @@ describe Sidekiq::Metrics do
 
     it "fetches top job data" do
       create_known_metrics
-      d = Sidekiq::Metrics::Deploy.new
+      d = Sidekiq::Deploy.new
       d.mark(at: fixed_time - 300, label: "cafed00d - some git summary line")
 
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
@@ -132,7 +132,7 @@ describe Sidekiq::Metrics do
 
     it "fetches job-specific data" do
       create_known_metrics
-      d = Sidekiq::Metrics::Deploy.new
+      d = Sidekiq::Deploy.new
       d.mark(at: fixed_time - 300, label: "cafed00d - some git summary line")
 
       q = Sidekiq::Metrics::Query.new(now: fixed_time)

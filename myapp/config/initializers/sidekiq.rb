@@ -45,25 +45,25 @@ Sidekiq::CurrentAttributes.persist(Myapp::Current) # Your AS::CurrentAttributes 
 
 # create a label based on the shorthash and subject line of the latest commit in git.
 # WARNING: you only want to run this ONCE! If this runs on boot for 20 different Sidekiq processes,
-# you will get 20 different deploy marks in Redis! Instead this should go into the script
+# you can get multiple deploy marks in Redis! Instead this should go into the script
 # that runs your deploy, e.g. your capistrano script.
 Sidekiq.configure_server do |config|
   label = `git log -1 --format="%h %s"`.strip
-  require "sidekiq/metrics/deploy"
-  Sidekiq::Metrics::Deploy.new.mark(label: label)
+  require "sidekiq/deploy"
+  Sidekiq::Deploy.mark!(label)
 end
 
 class Singler
   include Sidekiq::ServerMiddleware
   def call(w, j, q)
-    puts q
+    puts "single-threaded #{w.class.name}!"
   end
 end
 
 Sidekiq.configure_server do |config|
   config.capsule("single_threaded") do |cap|
     cap.concurrency = 1
-    cap.queues = %w[single default]
+    cap.queues = %w[single]
     cap.server_middleware.add Singler
   end
 end

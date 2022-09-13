@@ -2,6 +2,8 @@ require "concurrent"
 
 module Sidekiq
   module Metrics
+    # This is the only dependency on concurrent-ruby in Sidekiq but it's
+    # mandatory for thread-safety until MRI supports atomic operations on values.
     Counter = ::Concurrent::AtomicFixnum
 
     # Implements space-efficient but statistically useful histogram storage.
@@ -37,7 +39,6 @@ module Sidekiq
         "65s", "100s", "150s", "225s", "335s",
         "Slow"
       ]
-
       FETCH = "GET u16 #0 GET u16 #1 GET u16 #2 GET u16 #3 \
         GET u16 #4 GET u16 #5 GET u16 #6 GET u16 #7 \
         GET u16 #8 GET u16 #9 GET u16 #10 GET u16 #11 \
