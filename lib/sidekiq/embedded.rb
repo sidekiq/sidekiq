@@ -1,5 +1,6 @@
 require "sidekiq/component"
 require "sidekiq/launcher"
+require "sidekiq/metrics/tracking"
 
 module Sidekiq
   class Embedded
