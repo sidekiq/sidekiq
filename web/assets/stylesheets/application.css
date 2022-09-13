@@ -417,51 +417,20 @@ div.interval-slider input {
   background: currentcolor;
 }
 
-#realtime-legend,
-#history-legend {
-  width: 580px;
-  text-align: left;
-  margin-top: 5px;
-  float: right;
+#realtime-legend {
+  margin-top: -20px;
+  padding-left: 30px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
 }
-#realtime-legend .timestamp,
-#history-legend .timestamp {
-  display: inline-block;
-  width: 220px;
-  text-align: right;
-}
-#realtime-legend .line,
-#history-legend .line {
-  display: inline-block;
-  margin: 0 0 0 20px;
-}
-#realtime-legend .swatch,
-#history-legend .swatch {
+#realtime-legend .swatch {
   display: inline-block;
   width: 10px;
   height: 10px;
-  margin: 0 8px 0 0;
-}
-#realtime-legend .tag,
-#history-legend .tag {
-  display: inline-block;
+  margin: 0 5px;
 }
 
-@media (max-width: 790px) {
-  #realtime-legend,
-  #history-legend {
-    float: none;
-    width: 100%;
-    margin-bottom: 20px;
-  }
-}
-
-@media (max-width: 500px) {
-  #realtime-legend,
-  #history-legend {
-    text-align: center;
-  }
-}
 /* Beacon
 ********************************** */
 

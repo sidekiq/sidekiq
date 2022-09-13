@@ -63,27 +63,33 @@ class BaseChart {
   }
 
   get chartOptions() {
-    return {
-      plugins: this.plugins,
+    let chartOptions = {
       interaction: {
         mode: "x",
       },
-    };
-  }
-
-  get plugins() {
-    const plugins = {
-      legend: {
-        display: false,
+      scales: {
+        x: {
+          ticks: {
+            autoSkipPadding: 10,
+          },
+        },
       },
-      annotation: {
-        annotations: {},
+      plugins: {
+        legend: {
+          display: false,
+        },
+        annotation: {
+          annotations: {},
+        },
+        tooltip: {
+          animation: false,
+        },
       },
     };
 
     if (this.options.marks) {
       this.options.marks.forEach(([bucket, label], i) => {
-        plugins.annotation.annotations[`deploy-${i}`] = {
+        chartOptions.plugins.annotation.annotations[`deploy-${i}`] = {
           type: "line",
           xMin: bucket,
           xMax: bucket,
@@ -93,6 +99,6 @@ class BaseChart {
       });
     }
 
-    return plugins;
+    return chartOptions;
   }
 }

@@ -94,7 +94,19 @@ class DashboardChart extends BaseChart {
       ...super.chartOptions,
       aspectRatio: 4,
       scales: {
+        ...super.chartOptions.scales,
+        x: {
+          ...super.chartOptions.scales.x,
+          ticks: {
+            ...super.chartOptions.scales.x.ticks,
+            callback: function (value, index, ticks) {
+              // Remove the year from the date string
+              return this.getLabelForValue(value).split("-").slice(1).join("-");
+            },
+          },
+        },
         y: {
+          ...super.chartOptions.scales.y,
           beginAtZero: true,
         },
       },
@@ -146,5 +158,47 @@ class RealtimeChart extends DashboardChart {
     this.delay = parseInt(e.detail);
     clearInterval(this._interval);
     this.startPolling();
+  }
+
+  registerLegend(el) {
+    this.legend = el;
+  }
+
+  renderLegend(dp) {
+    this.legend.innerHTML = `
+      <span>${dp[0].label}</span>
+      <span>
+        <span class="swatch" style="background-color: ${dp[0].dataset.borderColor};"></span>
+        <span>${dp[0].dataset.label}: ${dp[0].formattedValue}</span>
+      </span>
+      <span>
+        <span class="swatch" style="background-color: ${dp[1].dataset.borderColor};"></span>
+        <span>${dp[1].dataset.label}: ${dp[1].formattedValue}</span>
+      </span>
+    `;
+  }
+
+  get chartOptions() {
+    return {
+      ...super.chartOptions,
+      scales: {
+        ...super.chartOptions.scales,
+        x: {
+          ...super.chartOptions.scales.x,
+          display: false,
+        },
+      },
+      plugins: {
+        ...super.chartOptions.plugins,
+        tooltip: {
+          ...super.chartOptions.plugins.tooltip,
+          enabled: false,
+          external: (context) => {
+            const dp = context.tooltip.dataPoints;
+            if (dp && this.legend) this.renderLegend(dp);
+          },
+        },
+      },
+    };
   }
 }

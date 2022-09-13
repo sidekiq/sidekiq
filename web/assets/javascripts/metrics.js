@@ -65,7 +65,9 @@ class JobMetricsOverviewChart extends BaseChart {
       ...super.chartOptions,
       aspectRatio: 4,
       scales: {
+        ...super.chartOptions.scales,
         y: {
+          ...super.chartOptions.scales.y,
           beginAtZero: true,
           title: {
             text: "Total Execution Time (sec)",
@@ -74,14 +76,13 @@ class JobMetricsOverviewChart extends BaseChart {
         },
       },
       plugins: {
-        ...this.plugins,
+        ...super.chartOptions.plugins,
         tooltip: {
+          ...super.chartOptions.plugins.tooltip,
           callbacks: {
             title: (items) => `${items[0].label} UTC`,
             label: (item) =>
-              `${item.dataset.label}: ${item.parsed.y.toFixed(1)} ${
-                this.options.metricUnits[this.metric]
-              }`,
+              `${item.dataset.label}: ${item.parsed.y.toFixed(1)} seconds`,
             footer: (items) => {
               const bucket = items[0].label;
               const marks = this.options.marks.filter(([b, _]) => b == bucket);
@@ -115,7 +116,9 @@ class HistTotalsChart extends BaseChart {
       ...super.chartOptions,
       aspectRatio: 6,
       scales: {
+        ...super.chartOptions.scales,
         y: {
+          ...super.chartOptions.scales.y,
           beginAtZero: true,
           title: {
             text: "Jobs",
@@ -123,6 +126,7 @@ class HistTotalsChart extends BaseChart {
           },
         },
         x: {
+          ...super.chartOptions.scales.x,
           title: {
             text: "Execution Time",
             display: true,
@@ -130,8 +134,9 @@ class HistTotalsChart extends BaseChart {
         },
       },
       plugins: {
-        ...this.plugins,
+        ...super.chartOptions.plugins,
         tooltip: {
+          ...super.chartOptions.plugins.tooltip,
           callbacks: {
             label: (item) => `${item.parsed.y} jobs`,
           },
@@ -192,11 +197,14 @@ class HistBubbleChart extends BaseChart {
       ...super.chartOptions,
       aspectRatio: 3,
       scales: {
+        ...super.chartOptions.scales,
         x: {
+          ...super.chartOptions.scales.x,
           type: "category",
           labels: this.options.labels,
         },
         y: {
+          ...super.chartOptions.scales.y,
           title: {
             text: "Execution time (sec)",
             display: true,
@@ -204,8 +212,9 @@ class HistBubbleChart extends BaseChart {
         },
       },
       plugins: {
-        ...this.plugins,
+        ...super.chartOptions.plugins,
         tooltip: {
+          ...super.chartOptions.plugins.tooltip,
           callbacks: {
             title: (items) => `${items[0].raw.x} UTC`,
             label: (item) =>
