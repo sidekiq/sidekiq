@@ -1,6 +1,5 @@
 require "time"
 require "sidekiq"
-require "sidekiq/component"
 require "sidekiq/metrics/shared"
 
 # This file contains the components which track execution metrics within Sidekiq.
