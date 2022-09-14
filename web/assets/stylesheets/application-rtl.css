@@ -102,22 +102,8 @@ div.interval-slider {
   float: left;
 }
 
-#realtime-legend,
-#history-legend {
+#realtime-legend {
   text-align: right;
-  float: left;
-}
-#realtime-legend .timestamp,
-#history-legend .timestamp {
-  text-align: left;
-}
-#realtime-legend .line,
-#history-legend .line {
-  margin: 0 20px 0 0;
-}
-#realtime-legend .swatch,
-#history-legend .swatch {
-  margin: 0 0 0 8px;
 }
 
 /* Beacon
@@ -164,79 +150,4 @@ div.interval-slider {
     padding-right: unset;
     padding-left: 5px;
   }
-}
-
-/* Rickshaw */
-
-.rickshaw_graph .detail .x_label.left {
-    right: 0
-}
-.rickshaw_graph .detail .x_label.right {
-    left: 0
-}
-.rickshaw_graph .detail .item.left {
-    right: 0
-}
-.rickshaw_graph .detail .item.right {
-    left: 0
-}
-.rickshaw_graph .detail .item.left:after {
-    left: 0;
-    right: -5px;
-    border-right-color: unset;
-    border-left-color: rgba(0, 0, 0, .8);
-    border-right-width: 0;
-    border-left-width: unset;
-}
-.rickshaw_graph .detail .item.right:after {
-    right: 0;
-    left: -5px;
-    border-left-color: unset;
-    border-right-color: rgba(0, 0, 0, .8);
-    border-left-width: 0;
-    border-right-width: unset;
-}
-.rickshaw_graph .detail .dot {
-    margin-right: -3px;
-    margin-left: unset;
-}
-.rickshaw_graph .x_tick {
-    border-left: unset;
-    border-right: 1px dotted rgba(0, 0, 0, .2);
-}
-.rickshaw_graph .x_tick .title {
-    margin-right: 3px;
-    margin-left: unset;
-}
-.rickshaw_annotation_timeline .annotation {
-    margin-right: -2px;
-    margin-left: unset;
-}
-.rickshaw_graph .annotation_line {
-    border-right: 2px solid rgba(0, 0, 0, .3);
-    border-left: unset;
-}
-.rickshaw_annotation_timeline .annotation .content {
-    left: unset;
-    right: -11px;
-}
-.rickshaw_graph .x_tick.glow .title,
-.rickshaw_graph .y_ticks.glow text {
-    text-shadow: 1px 1px 0 rgba(255, 255, 255, .1), -1px -1px 0 rgba(255, 255, 255, .1), -1px 1px 0 rgba(255, 255, 255, .1), 0 1px 0 rgba(255, 255, 255, .1), 0 -1px 0 rgba(255, 255, 255, .1), -1px 0 0 rgba(255, 255, 255, .1), 1px 0 0 rgba(255, 255, 255, .1), 1px -1px 0 rgba(255, 255, 255, .1)
-}
-.rickshaw_graph .x_tick.inverse .title,
-.rickshaw_graph .y_ticks.inverse text {
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, .8), -1px -1px 0 rgba(0, 0, 0, .8), -1px 1px 0 rgba(0, 0, 0, .8), 0 1px 0 rgba(0, 0, 0, .8), 0 -1px 0 rgba(0, 0, 0, .8), -1px 0 0 rgba(0, 0, 0, .8), 1px 0 0 rgba(0, 0, 0, .8), 1px -1px 0 rgba(0, 0, 0, .8)
-}
-.rickshaw_legend .line {
-    padding-left: 15px;
-    padding-right: unset;
-}
-.rickshaw_legend .line .swatch {
-    margin-left: 3px;
-    margin-right: unset;
-}
-.rickshaw_legend .action {
-    margin-left: .2em;
-    margin-right: unset;
 }

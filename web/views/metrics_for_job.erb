@@ -1,5 +1,6 @@
 <script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js"></script>
 <script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/base-charts.js"></script>
 <script type="text/javascript" src="<%= root_path %>javascripts/metrics.js"></script>
 
 <%
@@ -28,7 +29,7 @@
 
   <script>
     window.histTotalsChart = new HistTotalsChart(
-      "hist-totals-chart",
+      document.getElementById("hist-totals-chart"),
       <%= Sidekiq.dump_json({
         series: hist_totals,
         labels: bucket_labels,
@@ -40,7 +41,7 @@
 
   <script>
     window.histBubbleChart = new HistBubbleChart(
-      "hist-bubble-chart",
+      document.getElementById("hist-bubble-chart"),
       <%= Sidekiq.dump_json({
         hist: job_result.hist,
         marks: @query_result.marks.map { |m| [m.bucket, m.label] },
