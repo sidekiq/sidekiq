@@ -1,6 +1,6 @@
 class JobMetricsOverviewChart extends BaseChart {
-  constructor(id, options) {
-    super(id, { ...options, chartType: "line" });
+  constructor(el, options) {
+    super(el, { ...options, chartType: "line" });
     this.swatches = [];
     this.visibleKls = options.visibleKls;
 
@@ -39,7 +39,7 @@ class JobMetricsOverviewChart extends BaseChart {
       this.chart.data.datasets.push(this.buildDataset(kls));
     } else {
       const i = this.chart.data.datasets.findIndex((ds) => ds.label == kls);
-      this.colors.checkInFor(kls);
+      this.colors.checkIn(kls);
       this.chart.data.datasets.splice(i, 1);
     }
 
@@ -48,7 +48,7 @@ class JobMetricsOverviewChart extends BaseChart {
   }
 
   buildDataset(kls) {
-    const color = this.colors.checkOutFor(kls);
+    const color = this.colors.checkOut(kls);
 
     return {
       label: kls,
@@ -96,8 +96,8 @@ class JobMetricsOverviewChart extends BaseChart {
 }
 
 class HistTotalsChart extends BaseChart {
-  constructor(id, options) {
-    super(id, { ...options, chartType: "bar" });
+  constructor(el, options) {
+    super(el, { ...options, chartType: "bar" });
     this.init();
   }
 
@@ -147,8 +147,8 @@ class HistTotalsChart extends BaseChart {
 }
 
 class HistBubbleChart extends BaseChart {
-  constructor(id, options) {
-    super(id, { ...options, chartType: "bubble" });
+  constructor(el, options) {
+    super(el, { ...options, chartType: "bubble" });
     this.init();
   }
 
@@ -159,14 +159,13 @@ class HistBubbleChart extends BaseChart {
     Object.entries(this.options.hist).forEach(([bucket, hist]) => {
       hist.forEach((count, histBucket) => {
         if (count > 0) {
+          // histogram data is ordered fastest to slowest, but this.histIntervals is
+          // slowest to fastest (so it displays correctly on the chart).
+          const index = this.options.histIntervals.length - 1 - histBucket
+
           data.push({
             x: bucket,
-            // histogram data is ordered fastest to slowest, but this.histIntervals is
-            // slowest to fastest (so it displays correctly on the chart).
-            y:
-              this.options.histIntervals[
-                this.options.histIntervals.length - 1 - histBucket
-              ] / 1000,
+            y: this.options.histIntervals[index] / 1000,
             count: count,
           });
 
@@ -206,7 +205,7 @@ class HistBubbleChart extends BaseChart {
         y: {
           ...super.chartOptions.scales.y,
           title: {
-            text: "Execution time (sec)",
+            text: "Execution Time (sec)",
             display: true,
           },
         },

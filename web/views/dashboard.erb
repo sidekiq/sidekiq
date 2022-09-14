@@ -1,5 +1,6 @@
 <script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js"></script>
 <script type="text/javascript" src="<%= root_path %>javascripts/base-charts.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/dashboard-charts.js"></script>
 <script type="text/javascript" src="<%= root_path %>javascripts/dashboard.js"></script>
 <div class= "dashboard clearfix">
   <h3 >
@@ -33,6 +34,7 @@
     )
   </script>
 
+  <!-- start with a space in the legend so the height doesn't change when we add content dynamically -->
   <div id="realtime-legend">&nbsp;</div>
   <script>
     realtimeChart.registerLegend(document.getElementById("realtime-legend"))
@@ -55,7 +57,7 @@
   <canvas id="history-chart"></canvas>
   <script>
     window.historyChart = new DashboardChart(
-      "history-chart",
+      document.getElementById("history-chart"),
       <%= Sidekiq.dump_json({
         processedLabel: t('Processed'),
         failedLabel: t('Failed'),

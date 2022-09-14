@@ -25,14 +25,14 @@ class Colors {
     ];
   }
 
-  checkOutFor(assignee) {
+  checkOut(assignee) {
     const color =
       this.assignments[assignee] || this.available.shift() || this.fallback;
     this.assignments[assignee] = color;
     return color;
   }
 
-  checkInFor(assignee) {
+  checkIn(assignee) {
     const color = this.assignments[assignee];
     delete this.assignments[assignee];
 
