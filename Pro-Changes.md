@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+5.5.4
+---------
+
+- Fix batch "pending == -1" race condition [#5524]
+
 5.5.3
 ---------
 
