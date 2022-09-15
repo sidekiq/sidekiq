@@ -26,7 +26,7 @@ module Sidekiq
       @name = name
       @config = config
       @queues = ["default"]
-      @concurrency = 10
+      @concurrency = config[:concurrency]
     end
 
     def fetcher
@@ -74,7 +74,7 @@ module Sidekiq
     def local_redis_pool
       # connection pool is lazy, it will not create connections unless you actually need them
       # so don't be skimpy!
-      @redis ||= config.new_redis_pool(@concurrency)
+      @redis ||= config.new_redis_pool(@concurrency, name)
     end
 
     def redis

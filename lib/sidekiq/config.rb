@@ -123,14 +123,13 @@ module Sidekiq
     private def local_redis_pool
       # this is our default client/housekeeping pool. each capsule has its
       # own pool for executing threads.
-      size = Integer(ENV["RAILS_MAX_THREADS"] || 5)
-      @redis ||= new_redis_pool(size)
+      @redis ||= new_redis_pool(5, "global")
     end
 
-    def new_redis_pool(size)
+    def new_redis_pool(size, name = "unset")
       # connection pool is lazy, it will not create connections unless you actually need them
       # so don't be skimpy!
-      RedisConnection.create(@redis_config.merge(size: size, logger: logger))
+      RedisConnection.create(@redis_config.merge(size: size, logger: logger, pool_name: name))
     end
 
     def redis_info

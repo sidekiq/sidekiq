@@ -16,6 +16,7 @@ module Sidekiq
 
         size = symbolized_options.delete(:size) || 5
         pool_timeout = symbolized_options.delete(:pool_timeout) || 1
+        symbolized_options.delete(:pool_name)
 
         redis_config = Sidekiq::RedisClientAdapter.new(symbolized_options)
         ConnectionPool.new(timeout: pool_timeout, size: size) do
