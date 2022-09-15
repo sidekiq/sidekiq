@@ -61,10 +61,11 @@ describe Sidekiq::RedisConnection do
         assert_equal 12, @config.default_capsule.redis_pool.size
       end
 
-      it "changes client pool sizes with ENV" do
+      it "does not change client pool sizes with ENV" do
+        # Only Sidekiq::CLI looks at ENV
         ENV["RAILS_MAX_THREADS"] = "9"
         pool = client_connection
-        assert_equal 9, pool.size
+        assert_equal 5, pool.size
       ensure
         ENV.delete("RAILS_MAX_THREADS")
       end

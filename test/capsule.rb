@@ -65,7 +65,7 @@ describe Sidekiq::Capsule do
     assert_equal 2, @config.capsules.size
     assert_equal %w[default testy], @config.capsules.values.map(&:name).sort
     assert_equal %w[default testy], @config.capsules.keys.sort
-    assert_equal 12, @config.total_concurrency
+    assert_equal 7, @config.total_concurrency
     cap = @config.capsule("testy")
     cap1 = @config.capsule(:testy)
     assert cap
