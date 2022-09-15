@@ -88,15 +88,24 @@ module Sidekiq
 
       erb(:queue)
     end
-
-    post "/queues/:name" do
+    
+    post '/queues/:name' do
       queue = Sidekiq::Queue.new(route_params[:name])
 
-      if Sidekiq.pro? && params["pause"]
+      unless Sidekiq.pro?
+        queue.clear
+        redirect "#{root_path}queues"
+      end
+
+      if params['pause']
         queue.pause!
-      elsif Sidekiq.pro? && params["unpause"]
+      elsif params['unpause']
         queue.unpause!
-      else
+      elsif params['set_non_work_hour']
+        queue.set_non_work_hour_only!
+      elsif params['unset_non_work_hour']
+        queue.unset_non_work_hour_only!
+      elsif params['delete']
         queue.clear
       end
 
