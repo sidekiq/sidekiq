@@ -118,6 +118,11 @@ class RealtimeChart extends DashboardChart {
     `;
   }
 
+  renderCursor(dp) {
+    const cursor = this.chart.options.plugins.annotation.annotations.cursor
+    cursor.xMin = cursor.xMax = dp[0].label;
+  }
+
   get chartOptions() {
     return {
       ...super.chartOptions,
@@ -135,7 +140,20 @@ class RealtimeChart extends DashboardChart {
           enabled: false,
           external: (context) => {
             const dp = context.tooltip.dataPoints;
-            if (dp && this.legend) this.renderLegend(dp);
+            if (dp && dp.length == 2 && this.legend) {
+              this.renderLegend(dp);
+              this.renderCursor(dp);
+            }
+          },
+        },
+        annotation: {
+          annotations: {
+            ...super.chartOptions.plugins.annotation.annotations,
+            cursor: {
+              type: "line",
+              borderColor: "rgba(220, 38, 38, 0.4)",
+              borderWidth: 2,
+            },
           },
         },
       },
