@@ -33,6 +33,9 @@
       <%= Sidekiq.dump_json({
         series: hist_totals,
         labels: bucket_labels,
+        xLabel: t('ExecutionTime'),
+        yLabel: t('Jobs'),
+        units: t('Jobs').downcase,
       }) %>
     )
   </script>
@@ -47,6 +50,10 @@
         marks: @query_result.marks.map { |m| [m.bucket, m.label] },
         labels: @query_result.buckets,
         histIntervals: bucket_intervals,
+        yLabel: t('ExecutionTime'),
+        markLabel: t('Deploy'),
+        yUnits: t('Seconds').downcase,
+        zUnits: t('Jobs').downcase,
       }) %>
     )
   </script>

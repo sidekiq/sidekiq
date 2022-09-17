@@ -29,6 +29,9 @@
         marks: @query_result.marks.map { |m| [m.bucket, m.label] },
         labels: @query_result.buckets,
         visibleKls: visible_kls,
+        yLabel: t('TotalExecutionTime'),
+        units: t('Seconds').downcase,
+        markLabel: t('Deploy'),
       }) %>
     )
   </script>
