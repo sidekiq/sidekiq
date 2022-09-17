@@ -17,11 +17,13 @@ en:
   DeadJobs: Dead Jobs
   Delete: Delete
   DeleteAll: Delete All
+  Deploy: Deploy
   Enqueued: Enqueued
   Error: Error
   ErrorBacktrace: Error Backtrace
   ErrorClass: Error Class
   ErrorMessage: Error Message
+  ExecutionTime: Execution Time
   Extras: Extras
   Failed: Failed
   Failures: Failures
@@ -65,6 +67,7 @@ en:
   RetryNow: Retry Now
   Scheduled: Scheduled
   ScheduledJobs: Scheduled Jobs
+  Seconds: Seconds
   ShowAll: Show All
   SixMonths: 6 months
   Size: Size

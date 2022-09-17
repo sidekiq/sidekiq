@@ -70,7 +70,7 @@ class JobMetricsOverviewChart extends BaseChart {
           ...super.chartOptions.scales.y,
           beginAtZero: true,
           title: {
-            text: "Total Execution Time (sec)",
+            text: this.options.yLabel,
             display: true,
           },
         },
@@ -82,11 +82,14 @@ class JobMetricsOverviewChart extends BaseChart {
           callbacks: {
             title: (items) => `${items[0].label} UTC`,
             label: (item) =>
-              `${item.dataset.label}: ${item.parsed.y.toFixed(1)} seconds`,
+              `${item.dataset.label}: ${item.parsed.y.toFixed(1)} ` +
+              `${this.options.units}`,
             footer: (items) => {
               const bucket = items[0].label;
               const marks = this.options.marks.filter(([b, _]) => b == bucket);
-              return marks.map(([b, msg]) => `Deploy: ${msg}`);
+              return marks.map(
+                ([b, msg]) => `${this.options.markLabel}: ${msg}`
+              );
             },
           },
         },
@@ -121,14 +124,14 @@ class HistTotalsChart extends BaseChart {
           ...super.chartOptions.scales.y,
           beginAtZero: true,
           title: {
-            text: "Jobs",
+            text: this.options.yLabel,
             display: true,
           },
         },
         x: {
           ...super.chartOptions.scales.x,
           title: {
-            text: "Execution Time",
+            text: this.options.xLabel,
             display: true,
           },
         },
@@ -138,7 +141,7 @@ class HistTotalsChart extends BaseChart {
         tooltip: {
           ...super.chartOptions.plugins.tooltip,
           callbacks: {
-            label: (item) => `${item.parsed.y} jobs`,
+            label: (item) => `${item.parsed.y} ${this.options.units}`,
           },
         },
       },
@@ -161,7 +164,7 @@ class HistBubbleChart extends BaseChart {
         if (count > 0) {
           // histogram data is ordered fastest to slowest, but this.histIntervals is
           // slowest to fastest (so it displays correctly on the chart).
-          const index = this.options.histIntervals.length - 1 - histBucket
+          const index = this.options.histIntervals.length - 1 - histBucket;
 
           data.push({
             x: bucket,
@@ -205,7 +208,7 @@ class HistBubbleChart extends BaseChart {
         y: {
           ...super.chartOptions.scales.y,
           title: {
-            text: "Execution Time (sec)",
+            text: this.options.yLabel,
             display: true,
           },
         },
@@ -217,13 +220,13 @@ class HistBubbleChart extends BaseChart {
           callbacks: {
             title: (items) => `${items[0].raw.x} UTC`,
             label: (item) =>
-              `${item.parsed.y} seconds: ${item.raw.count} job${
-                item.raw.count == 1 ? "" : "s"
-              }`,
+              `${item.parsed.y} ${this.options.yUnits}: ${item.raw.count} ${this.options.zUnits}`,
             footer: (items) => {
               const bucket = items[0].raw.x;
               const marks = this.options.marks.filter(([b, _]) => b == bucket);
-              return marks.map(([b, msg]) => `Deploy: ${msg}`);
+              return marks.map(
+                ([b, msg]) => `${this.options.markLabel}: ${msg}`
+              );
             },
           },
         },
