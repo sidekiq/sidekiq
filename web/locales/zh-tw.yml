@@ -15,11 +15,13 @@ zh-tw:
   DeadJobs: 停滯工作
   Delete: 刪除
   DeleteAll: 刪除全部
+  Deploy: 佈署
   Enqueued: 已佇列
   Error: 錯誤
   ErrorBacktrace: 錯誤的回調追踨
   ErrorClass: 錯誤類別
   ErrorMessage: 錯誤訊息
+  ExecutionTime: 執行時間
   Extras: 額外的
   Failed: 已失敗
   Failures: 失敗
@@ -50,6 +52,7 @@ zh-tw:
   RetryNow: 馬上重試
   Scheduled: 已排程
   ScheduledJobs: 已排程的工作
+  Seconds: 秒
   ShowAll: 顯示全部
   SixMonths: 六個月
   Size: 容量
