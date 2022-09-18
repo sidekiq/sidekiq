@@ -119,8 +119,10 @@ class RealtimeChart extends DashboardChart {
   }
 
   renderCursor(dp) {
-    const cursor = this.chart.options.plugins.annotation.annotations.cursor
-    cursor.xMin = cursor.xMax = dp[0].label;
+    if (this.cursorX != dp[0].label) {
+      this.cursorX = dp[0].label;
+      this.update()
+    }
   }
 
   get chartOptions() {
@@ -149,10 +151,12 @@ class RealtimeChart extends DashboardChart {
         annotation: {
           annotations: {
             ...super.chartOptions.plugins.annotation.annotations,
-            cursor: {
+            cursor: this.cursorX && {
               type: "line",
-              borderColor: "rgba(220, 38, 38, 0.4)",
-              borderWidth: 2,
+              borderColor: "rgba(0, 0, 0, 0.3)",
+              xMin: this.cursorX,
+              xMax: this.cursorX,
+              borderWidth: 1,
             },
           },
         },
