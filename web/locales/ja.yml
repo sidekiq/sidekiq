@@ -80,10 +80,10 @@ ja:
   ThreeMonths: 3 ヶ月
   Time: 時間
   Unpause: 一時停止を解除
-  Uptime: 連続稼働時間 (日)
-  Utilization: 使用率
-  Version: バージョン
-  When: いつ
-  Worker: 動作中の作業
-  active: アクティブ
-  idle: アイドル
+  Metrics: メトリクス
+  NoDataFound: データが見つかりませんでした
+  ExecutionTime: 合計実行時間
+  AvgExecutionTime: 平均実行時間
+  Context: コンテキスト
+  Bucket: バケット
+  NoJobMetricsFound: 直近のジョブメトリクスが見つかりませんでした
