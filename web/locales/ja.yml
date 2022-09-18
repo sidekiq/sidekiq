@@ -17,11 +17,13 @@ ja:
   DeadJobs: デッドジョブ
   Delete: 削除
   DeleteAll: 全て削除
+  Deploy: デプロイ
   Enqueued: 待機状態
   Error: エラー
   ErrorBacktrace: エラーバックトレース
   ErrorClass: エラークラス
   ErrorMessage: エラーメッセージ
+  ExecutionTime: 実行時間
   Extras: エクストラ
   Failed: 失敗
   Failures: 失敗
@@ -64,6 +66,7 @@ ja:
   RetryNow: 今すぐ再試行
   Scheduled: 予定
   ScheduledJobs: 予定されたジョブ
+  Seconds: 秒
   ShowAll: 全て見せる
   SixMonths: 6 ヶ月
   Size: サイズ
