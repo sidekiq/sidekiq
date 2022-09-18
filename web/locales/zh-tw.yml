@@ -7,6 +7,7 @@ zh-tw: # <---- change this to your locale code
   Realtime: 即時
   History: 歷史資料
   Busy: 忙碌
+  Utilization: 使用率
   Processed: 已處理
   Failed: 已失敗
   Scheduled: 已排程
@@ -25,26 +26,28 @@ zh-tw: # <---- change this to your locale code
   CurrentMessagesInQueue: 目前在<span class='title'>%{queue}</span>的工作
   Delete: 刪除
   AddToQueue: 增加至佇列
-  AreYouSureDeleteJob: 你確定要刪除這個工作嗎？
-  AreYouSureDeleteQueue: 你確定要刪除%{queue}這個佇列？
+  AreYouSureDeleteJob: 確定要刪除這個工作嗎？
+  AreYouSureDeleteQueue: 確定要刪除%{queue}佇列？這會刪除佇列裡的所有工作，佇列將會在有新工作時重新出現。
   Queues: 佇列
   Size: 容量
   Actions: 動作
   NextRetry: 下次重試
   RetryCount: 重試次數
   RetryNow: 馬上重試
+  Kill: 取消
   LastRetry: 最後一次重試
   OriginallyFailed: 原本已失敗
   AreYouSure: 你確定？
-  DeleteAll: 刪除全部
-  RetryAll: 重試全部
-  NoRetriesFound: 沒有發現可重試
+  DeleteAll: 全部刪除
+  RetryAll: 全部重試
+  KillAll: 全部取消
+  NoRetriesFound: 找無可重試的工作
   Error: 錯誤
   ErrorClass: 錯誤類別
   ErrorMessage: 錯誤訊息
-  ErrorBacktrace: 錯誤的回調追踨
+  ErrorBacktrace: 詳細錯誤訊息
   GoBack: ← 返回
-  NoScheduledFound: 沒有發現已排程的工作
+  NoScheduledFound: 找無已排程的工作
   When: 當
   ScheduledJobs: 已排程的工作
   idle: 閒置
@@ -62,7 +65,29 @@ zh-tw: # <---- change this to your locale code
   DeadJobs: 停滯工作
   NoDeadJobsFound: 沒有發現任何停滯的工作
   Dead: 停滯
+  Process: 程序
   Processes: 處理中
+  Name: 名稱
   Thread: 執行緒
   Threads: 執行緒
   Jobs: 工作
+  Paused: 已暫停
+  Stop: 強制暫停
+  Quiet: 暫停
+  StopAll: 全部強制暫停
+  QuietAll: 全部暫停
+  PollingInterval: 輪詢週期
+  Plugins: 套件
+  NotYetEnqueued: 尚未進入佇列
+  CreatedAt: 建立時間
+  BackToApp: 回首頁
+  Latency: 延時
+  Pause: 暫停
+  Unpause: 取消暫停
+  Metrics: 計量
+  NoDataFound: 找無資料
+  TotalExecutionTime: 總執行時間
+  AvgExecutionTime: 平均執行時間
+  Context: 上下文
+  Bucket: 桶
+  NoJobMetricsFound: 找無工作相關計量資料
