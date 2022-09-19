@@ -15,11 +15,13 @@ zh-cn:
   DeadJobs: 已停滞作业
   Delete: 删除
   DeleteAll: 删除全部
+  Deploy: 部署
   Enqueued: 已进入队列
   Error: 错误
   ErrorBacktrace: 错误的回调追踪
   ErrorClass: 错误类别
   ErrorMessage: 错误消息
+  ExecutionTime: 执行时间
   Extras: 额外的
   Failed: 已失败
   Failures: 失败
@@ -50,6 +52,7 @@ zh-cn:
   RetryNow: 现在重试
   Scheduled: 已计划
   ScheduledJobs: 计划作业
+  Seconds: 秒
   ShowAll: 显示全部
   SixMonths: 六个月
   Size: 容量
