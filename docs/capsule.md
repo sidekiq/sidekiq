@@ -61,8 +61,7 @@ If you want to process jobs from two separate Redis instances, you need to start
 ## Use Cases
 
 With Capsules, you can programmatically tune how a Sidekiq process handles specific queues. One
-Capsule can use 1 thread to process jobs within a `thread_unsafe` queue while another Capsule uses
-10 threads to process `default` jobs.
+Capsule can use 1 thread to process jobs within a `thread_unsafe` queue while another Capsule uses 10 threads to process `default` jobs.
 
 ```ruby
 # within your initializer
@@ -78,14 +77,14 @@ The contents of `config/sidekiq.yml` configure the default capsule.
 
 ## Redis Pools
 
-Before 7.0, the Sidekiq process would create a redis pool sized to `concurrency + 3`.
-Now Sidekiq will create multiple Redis pools: a global pool of **five** connections available to global components, a pool of **concurrency** for the job processors within each Capsule.
+Before 7.0, the Sidekiq process would create one redis pool sized to `concurrency + 3`.
+Now Sidekiq will create multiple Redis pools: an internal pool of **five** connections available to Sidekiq components along with a pool of **concurrency** for the job processors within each Capsule.
 
-So for a Sidekiq process with a default Capsule and a single threaded Capsule, you should have three Redis pools of size 5, 10 and 1.
+For a Sidekiq process with a default Capsule and a single threaded Capsule, you should have three Redis pools of size 5, 10 and 1.
 Remember that connection pools are lazy so it won't create all those connections unless they are actively needed.
 
-All Sidekiq components and add-ons should avoid using `Sidekiq.redis` or `Sidekiq.logger`.
-Instead use the implicit `redis` or `logger` methods available on `Sidekiq::Component`, `Sidekiq::Capsule` or `Sidekiq::{Client,Server}Middleware`.
+Sidekiq components and add-ons should avoid using `Sidekiq.redis` or `Sidekiq.logger`.
+Instead use the implicit `redis` or `logger` methods available on `Sidekiq::Component`, `Sidekiq::Capsule` or `Sidekiq::{Client,Server}Middleware`. Jobs may continue to use `Sidekiq.redis`, they will automagically use the capsule's pool of `concurrency` connections.
 
 ## Sidekiq::Component
 
@@ -132,8 +131,8 @@ class Sidekiq::Processor
 end
 ```
 
-Sidekiq::Capsule overrides Sidekiq::Config in order to provide Capsule-local resources so
-you'll see places within Sidekiq where Capsule acts like a Config.
+Sidekiq::Capsule overrides Sidekiq::Config in order to provide Capsule-local resources;
+you'll see places within Sidekiq where Capsule acts like a Config. Code running within the Capsule will use resources local to that Capsule.
 
 With this pattern, we greatly reduce the use of global APIs throughout Sidekiq internals.
 Where before we'd call `Sidekiq.xyz`, we instead provide similar functionality like
