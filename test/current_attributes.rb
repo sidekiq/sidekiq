@@ -16,7 +16,7 @@ describe "Current attributes" do
   end
 
   it "saves" do
-    cm = Sidekiq::CurrentAttributes::Save.new(Myapp::Current)
+    cm = Sidekiq::CurrentAttributes::Save.new("Myapp::Current")
     job = {}
     with_context(:user_id, 123) do
       cm.call(nil, job, nil, nil) do
@@ -26,7 +26,7 @@ describe "Current attributes" do
   end
 
   it "loads" do
-    cm = Sidekiq::CurrentAttributes::Load.new(Myapp::Current)
+    cm = Sidekiq::CurrentAttributes::Load.new("Myapp::Current")
 
     job = {"cattr" => {"user_id" => 123}}
     assert_nil Myapp::Current.user_id
@@ -37,7 +37,7 @@ describe "Current attributes" do
   end
 
   it "persists" do
-    Sidekiq::CurrentAttributes.persist(Myapp::Current, @config)
+    Sidekiq::CurrentAttributes.persist("Myapp::Current", @config)
     job_hash = {}
     with_context(:user_id, 16) do
       @config.client_middleware.invoke(nil, job_hash, nil, nil) do

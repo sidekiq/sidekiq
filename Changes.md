@@ -2,6 +2,12 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
+HEAD
+----------
+
+- Adjust CurrentAttributes to work with the String class name so we aren't referencing
+the Class within a Rails initializer [#5536]
+
 6.5.7
 ----------
 

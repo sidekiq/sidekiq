@@ -32,14 +32,8 @@ class TimedWorker
   end
 end
 
-module Myapp
-  class Current < ActiveSupport::CurrentAttributes
-    attribute :tenant_id
-  end
-end
-
 require "sidekiq/middleware/current_attributes"
-Sidekiq::CurrentAttributes.persist(Myapp::Current) # Your AS::CurrentAttributes singleton
+Sidekiq::CurrentAttributes.persist("Myapp::Current") # Your AS::CurrentAttributes singleton
 
 # Sidekiq.transactional_push!
 

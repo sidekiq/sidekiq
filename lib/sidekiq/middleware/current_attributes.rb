@@ -11,18 +11,18 @@ module Sidekiq
   #
   #   # in your initializer
   #   require "sidekiq/middleware/current_attributes"
-  #   Sidekiq::CurrentAttributes.persist(Myapp::Current)
+  #   Sidekiq::CurrentAttributes.persist("Myapp::Current")
   #
   module CurrentAttributes
     class Save
       include Sidekiq::ClientMiddleware
 
       def initialize(cattr)
-        @klass = cattr
+        @strklass = cattr
       end
 
       def call(_, job, _, _)
-        attrs = @klass.attributes
+        attrs = @strklass.constantize.attributes
         if attrs.any?
           if job.has_key?("cattr")
             job["cattr"].merge!(attrs)
@@ -38,12 +38,12 @@ module Sidekiq
       include Sidekiq::ServerMiddleware
 
       def initialize(cattr)
-        @klass = cattr
+        @strklass = cattr
       end
 
       def call(_, job, _, &block)
         if job.has_key?("cattr")
-          @klass.set(job["cattr"], &block)
+          @strklass.constantize.set(job["cattr"], &block)
         else
           yield
         end
@@ -51,8 +51,8 @@ module Sidekiq
     end
 
     def self.persist(klass, config = Sidekiq.default_configuration)
-      config.client_middleware.add Save, klass
-      config.server_middleware.add Load, klass
+      config.client_middleware.add Save, klass.to_s
+      config.server_middleware.add Load, klass.to_s
     end
   end
 end
