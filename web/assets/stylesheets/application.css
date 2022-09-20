@@ -421,6 +421,7 @@ div.interval-slider input {
   margin-top: -20px;
   padding-left: 30px;
   display: flex;
+  justify-content: end;
   gap: 15px;
   align-items: center;
 }
