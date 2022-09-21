@@ -8,6 +8,7 @@ class JobMetricsOverviewChart extends BaseChart {
   }
 
   get datasets() {
+    console.log(this.options)
     return Object.entries(this.options.series)
       .filter(([kls, _]) => this.visibleKls.includes(kls))
       .map(([kls, _]) => this.buildDataset(kls));
@@ -58,6 +59,17 @@ class JobMetricsOverviewChart extends BaseChart {
       borderWidth: 2,
       pointRadius: 2,
     };
+  }
+
+  update(options) {
+    this.options = { ...options, chartType: "line" }
+    this.chart.data = { labels: this.options.labels, datasets: this.datasets };
+    console.log("Chart update: ", this.datasets)
+    this.chart.update();
+  }
+
+  destroy() {
+    this.chart.destroy();
   }
 
   get chartOptions() {

@@ -66,6 +66,22 @@ module Sidekiq
       erb(:metrics)
     end
 
+    get "/metrics.json" do
+      q = Sidekiq::Metrics::Query.new
+      job_results = q.top_jobs.job_results.sort_by { |(kls, jr)| jr.totals["s"] }.reverse.first(20)
+      visible_kls = job_results.first(5).map(&:first)
+      json_data = {
+        series: job_results.map { |(kls, jr)| [kls, jr.dig("series", "s")] }.to_h,
+        marks: q.top_jobs.marks.map { |m| [m.bucket, m.label] },
+        labels: q.top_jobs.buckets,
+        visibleKls: visible_kls,
+        yLabel: t('TotalExecutionTime'),
+        units: t('Seconds').downcase,
+        markLabel: t('Deploy'),
+      }
+      json(json_data)
+    end
+
     get "/metrics/:name" do
       @name = route_params[:name]
       q = Sidekiq::Metrics::Query.new

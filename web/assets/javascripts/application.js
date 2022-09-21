@@ -105,12 +105,21 @@ function updateLivePollButton() {
 function livePollCallback() {
   clearTimeout(livePollTimer);
 
-  fetch(window.location.href)
-  .then(checkResponse)
-  .then(resp => resp.text())
-  .then(replacePage)
-  .catch(showError)
-  .finally(scheduleLivePoll)
+  if (window.location.href.indexOf("/metrics") > -1) {
+    fetch(`${window.location.href}.json`)
+      .then(checkResponse)
+      .then(resp => resp.text())
+      .then(refreshMetrics)
+      .catch(showError)
+      .finally(() => scheduleLivePoll(60000))
+  } else {
+    fetch(window.location.href)
+    .then(checkResponse)
+    .then(resp => resp.text())
+    .then(replacePage)
+    .catch(showError)
+    .finally(scheduleLivePoll)
+  }
 }
 
 function checkResponse(resp) {
@@ -120,9 +129,23 @@ function checkResponse(resp) {
   return resp
 }
 
-function scheduleLivePoll() {
-  let ti = parseInt(localStorage.sidekiqTimeInterval) || 5000;
+function scheduleLivePoll(interval = 5000) {
+  let ti = parseInt(localStorage.sidekiqTimeInterval) || interval;
   livePollTimer = setTimeout(livePollCallback, ti);
+}
+
+function refreshMetrics(text) {
+  const data = JSON.parse(text);
+
+  if (window.jobMetricsChart) {
+    console.log("Destroy jobMetricsChart")
+    window.jobMetricsChart.destroy();
+  }
+
+  window.jobMetricsChart = new JobMetricsOverviewChart(
+    "job-metrics-overview-chart",
+    data
+  )
 }
 
 function replacePage(text) {

@@ -16,6 +16,15 @@
   chart_limit = 5
   job_results = @query_result.job_results.sort_by { |(kls, jr)| jr.totals["s"] }.reverse.first(table_limit)
   visible_kls = job_results.first(chart_limit).map(&:first)
+  json_data = {
+    series: job_results.map { |(kls, jr)| [kls, jr.dig("series", "s")] }.to_h,
+    marks: @query_result.marks.map { |m| [m.bucket, m.label] },
+    labels: @query_result.buckets,
+    visibleKls: visible_kls,
+    yLabel: t('TotalExecutionTime'),
+    units: t('Seconds').downcase,
+    markLabel: t('Deploy'),
+  }
 %>
 
 <% if job_results.any? %>
@@ -24,22 +33,14 @@
   <script>
     window.jobMetricsChart = new JobMetricsOverviewChart(
       document.getElementById("job-metrics-overview-chart"),
-      <%= Sidekiq.dump_json({
-        series: job_results.map { |(kls, jr)| [kls, jr.dig("series", "s")] }.to_h,
-        marks: @query_result.marks.map { |m| [m.bucket, m.label] },
-        labels: @query_result.buckets,
-        visibleKls: visible_kls,
-        yLabel: t('TotalExecutionTime'),
-        units: t('Seconds').downcase,
-        markLabel: t('Deploy'),
-      }) %>
-    )
+      <%= Sidekiq.dump_json(json_data) %>
+    );
   </script>
 <% end %>
 
 <div class="table_container">
-  <table class="table table-bordered table-striped table-hover">
-    <tbody>
+  <table id="metrics-table" class="table table-bordered table-striped table-hover">
+    <thead>
       <tr>
         <th><%= t('Name') %></th>
         <th><%= t('Success') %></th>
@@ -47,6 +48,8 @@
         <th><%= t('TotalExecutionTime') %></th>
         <th><%= t('AvgExecutionTime') %></th>
       </tr>
+    </thead>
+    <tbody>
       <% if job_results.any? %>
         <% job_results.each_with_index do |(kls, jr), i| %>
           <tr>
@@ -77,4 +80,4 @@
   </table>
 </div>
 
-<p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p>
+<p><small id="metrics-data-from">Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p>
