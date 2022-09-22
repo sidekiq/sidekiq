@@ -40,10 +40,16 @@ module Sidekiq
       floor = Time.utc(whence.year, whence.month, whence.mday, whence.hour, whence.min, 0)
       datecode = floor.strftime("%Y%m%d")
       key = "#{datecode}-marks"
+      stamp = floor.iso8601
+
       @pool.with do |c|
-        c.pipelined do |pipe|
-          pipe.hsetnx(key, floor.iso8601, label)
-          pipe.expire(key, MARK_TTL)
+        # only allow one deploy mark for a given label for the next minute
+        lock = c.set("deploylock-#{label}", stamp, nx: true, ex: 60)
+        if lock
+          c.multi do |pipe|
+            pipe.hsetnx(key, stamp, label)
+            pipe.expire(key, MARK_TTL)
+          end
         end
       end
     end
