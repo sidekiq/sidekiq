@@ -46,6 +46,7 @@ module Sidekiq
         GET u16 #16 GET u16 #17 GET u16 #18 GET u16 #19 \
         GET u16 #20 GET u16 #21 GET u16 #22 GET u16 #23 \
         GET u16 #24 GET u16 #25".split
+      HISTOGRAM_TTL = 8 * 60 * 60
 
       def each
         buckets.each { |counter| yield counter.value }
@@ -86,7 +87,7 @@ module Sidekiq
         end
 
         conn.bitfield(*cmd) if cmd.size > 3
-        conn.expire(key, 86400)
+        conn.expire(key, HISTOGRAM_TTL)
         key
       end
     end

@@ -35,7 +35,7 @@ describe Sidekiq::Metrics do
 
   it "tracks metrics" do
     count = create_known_metrics
-    assert_equal 12, count
+    assert_equal 4, count
   end
 
   describe "marx" do

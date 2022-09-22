@@ -48,8 +48,8 @@ module Sidekiq
         end
       end
 
-      LONG_TERM = 90 * 24 * 60 * 60
-      MID_TERM = 7 * 24 * 60 * 60
+      # LONG_TERM = 90 * 24 * 60 * 60
+      # MID_TERM = 7 * 24 * 60 * 60
       SHORT_TERM = 8 * 60 * 60
 
       def flush(time = Time.now)
@@ -59,12 +59,13 @@ module Sidekiq
         return if procd == 0 && fails == 0
 
         now = time.utc
-        nowdate = now.strftime("%Y%m%d")
-        nowhour = now.strftime("%Y%m%d|%-H")
+        # nowdate = now.strftime("%Y%m%d")
+        # nowhour = now.strftime("%Y%m%d|%-H")
         nowmin = now.strftime("%Y%m%d|%-H:%-M")
         count = 0
 
         redis do |conn|
+          # persist fine-grained histogram data
           if grams.size > 0
             conn.pipelined do |pipe|
               grams.each do |_, gram|
@@ -73,15 +74,16 @@ module Sidekiq
             end
           end
 
+          # persist coarse grained execution count + execution millis.
+          # note as of today we don't use or do anything with the
+          # daily or hourly rollups.
           [
-            ["j", jobs, nowdate, LONG_TERM],
-            ["j", jobs, nowhour, MID_TERM],
+            # ["j", jobs, nowdate, LONG_TERM],
+            # ["j", jobs, nowhour, MID_TERM],
             ["j", jobs, nowmin, SHORT_TERM]
           ].each do |prefix, data, bucket, ttl|
-            # Quietly seed the new 7.0 stats format so migration is painless.
             conn.pipelined do |xa|
               stats = "#{prefix}|#{bucket}"
-              # logger.debug "Flushing metrics #{stats}"
               data.each_pair do |key, value|
                 xa.hincrby stats, key, value
                 count += 1
@@ -89,7 +91,7 @@ module Sidekiq
               xa.expire(stats, ttl)
             end
           end
-          logger.info "Flushed #{count} metrics"
+          logger.debug "Flushed #{count} metrics"
           count
         end
       end
