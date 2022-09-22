@@ -6,7 +6,6 @@ module Sidekiq
   class Embedded
     include Sidekiq::Component
 
-    attr_accessor :config
     def initialize(config)
       @config = config
     end
@@ -14,9 +13,9 @@ module Sidekiq
     def run
       housekeeping
       fire_event(:startup, reverse: false, reraise: true)
-      @launcher = Sidekiq::Launcher.new(@config, true)
+      @launcher = Sidekiq::Launcher.new(@config, embedded: true)
       @launcher.run
-      sleep 0.1
+      sleep 0.1 # pause to give threads time to spin up
 
       logger.info "Embedded mode running with #{Thread.list.size} threads"
       logger.debug { Thread.list.map(&:name) }

@@ -22,7 +22,7 @@ module Sidekiq
 
     attr_accessor :managers, :poller
 
-    def initialize(config, embedded = false)
+    def initialize(config, embedded: false)
       @config = config
       @embedded = embedded
       @managers = config.capsules.values.map do |cap|

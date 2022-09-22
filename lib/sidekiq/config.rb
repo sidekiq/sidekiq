@@ -121,9 +121,9 @@ module Sidekiq
     end
 
     private def local_redis_pool
-      # this is our default client/housekeeping pool. each capsule has its
+      # this is our internal client/housekeeping pool. each capsule has its
       # own pool for executing threads.
-      @redis ||= new_redis_pool(5, "global")
+      @redis ||= new_redis_pool(5, "internal")
     end
 
     def new_redis_pool(size, name = "unset")
