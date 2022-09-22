@@ -65,7 +65,9 @@ class BaseChart {
   get chartOptions() {
     let chartOptions = {
       interaction: {
-        mode: "x",
+        mode: "nearest",
+        axis: "x",
+        intersect: false,
       },
       scales: {
         x: {

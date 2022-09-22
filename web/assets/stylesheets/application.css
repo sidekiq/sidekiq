@@ -421,14 +421,21 @@ div.interval-slider input {
   margin-top: -20px;
   padding-left: 30px;
   display: flex;
-  gap: 15px;
+  justify-content: end;
   align-items: center;
+}
+#realtime-legend > * {
+  min-width: 14rem;
 }
 #realtime-legend .swatch {
   display: inline-block;
   width: 10px;
   height: 10px;
   margin: 0 5px;
+}
+#realtime-legend .time {
+  min-width: auto;
+  text-align: right;
 }
 
 /* Beacon

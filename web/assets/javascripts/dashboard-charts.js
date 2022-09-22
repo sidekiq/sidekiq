@@ -106,7 +106,6 @@ class RealtimeChart extends DashboardChart {
 
   renderLegend(dp) {
     this.legend.innerHTML = `
-      <span>${dp[0].label}</span>
       <span>
         <span class="swatch" style="background-color: ${dp[0].dataset.borderColor};"></span>
         <span>${dp[0].dataset.label}: ${dp[0].formattedValue}</span>
@@ -115,7 +114,15 @@ class RealtimeChart extends DashboardChart {
         <span class="swatch" style="background-color: ${dp[1].dataset.borderColor};"></span>
         <span>${dp[1].dataset.label}: ${dp[1].formattedValue}</span>
       </span>
+      <span class="time">${dp[0].label}</span>
     `;
+  }
+
+  renderCursor(dp) {
+    if (this.cursorX != dp[0].label) {
+      this.cursorX = dp[0].label;
+      this.update()
+    }
   }
 
   get chartOptions() {
@@ -135,7 +142,22 @@ class RealtimeChart extends DashboardChart {
           enabled: false,
           external: (context) => {
             const dp = context.tooltip.dataPoints;
-            if (dp && this.legend) this.renderLegend(dp);
+            if (dp && dp.length == 2 && this.legend) {
+              this.renderLegend(dp);
+              this.renderCursor(dp);
+            }
+          },
+        },
+        annotation: {
+          annotations: {
+            ...super.chartOptions.plugins.annotation.annotations,
+            cursor: this.cursorX && {
+              type: "line",
+              borderColor: "rgba(0, 0, 0, 0.3)",
+              xMin: this.cursorX,
+              xMax: this.cursorX,
+              borderWidth: 1,
+            },
           },
         },
       },

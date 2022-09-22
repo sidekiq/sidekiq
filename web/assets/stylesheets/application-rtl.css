@@ -103,7 +103,7 @@ div.interval-slider {
 }
 
 #realtime-legend {
-  text-align: right;
+  justify-content: start;
 }
 
 /* Beacon
