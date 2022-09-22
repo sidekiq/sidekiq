@@ -114,7 +114,7 @@ class RealtimeChart extends DashboardChart {
         <span class="swatch" style="background-color: ${dp[1].dataset.borderColor};"></span>
         <span>${dp[1].dataset.label}: ${dp[1].formattedValue}</span>
       </span>
-      <span>${dp[0].label}</span>
+      <span class="time">${dp[0].label}</span>
     `;
   }
 
