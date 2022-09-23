@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+5.5.5
+---------
+
+- Lock Sidekiq Pro 5.x to Sidekiq 6.x.
+- Update IT localization
+
 5.5.4
 ---------
 

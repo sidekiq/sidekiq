@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+2.5.3
+---------
+
+- Adjust rate limiters to lazy initialize, avoiding connection issues
+when forking preloaded app code [#5535]
+
 2.5.2
 ---------
 
