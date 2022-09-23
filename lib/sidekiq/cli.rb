@@ -272,7 +272,7 @@ module Sidekiq # :nodoc:
 
       @config.default_capsule.tap do |cap|
         cap.queues = opts[:queues]
-        cap.concurrency = opts[:concurrency] || 10
+        cap.concurrency = opts[:concurrency] || @config[:concurrency]
       end
     end
 
