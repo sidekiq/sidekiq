@@ -142,8 +142,17 @@ module Sidekiq # :nodoc:
       "\e[37m"
     end
 
+    COLORS = {
+      # got other holidays from around the world?
+      # https://developer-book.com/post/definitive-guide-for-colored-text-in-terminal/#256-color-escape-codes
+      "3-17" => "\e[1;32m", # Happy St. Patrick's Day!
+      "10-31" => "\e[38;5;208m" # Happy Halloween!
+    }
+    COLORS.default = "\e[1;31m"
+
     def self.r
-      "\e[31m"
+      t = Date.today
+      COLORS["#{t.month}-#{t.day}"]
     end
 
     def self.b
