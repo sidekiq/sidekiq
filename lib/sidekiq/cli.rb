@@ -138,28 +138,34 @@ module Sidekiq # :nodoc:
       end
     end
 
-    def self.w
-      "\e[37m"
+    HOLIDAY_COLORS = {
+      # got other color-specific holidays from around the world?
+      # https://developer-book.com/post/definitive-guide-for-colored-text-in-terminal/#256-color-escape-codes
+      "3-17" => "\e[1;32m", # St. Patrick's Day green
+      "10-31" => "\e[38;5;208m" # Halloween orange
+    }
+
+    def self.day
+      @@day ||= begin
+        t = Date.today
+        "#{t.month}-#{t.day}"
+      end
     end
 
-    COLORS = {
-      # got other holidays from around the world?
-      # https://developer-book.com/post/definitive-guide-for-colored-text-in-terminal/#256-color-escape-codes
-      "3-17" => "\e[1;32m", # Happy St. Patrick's Day!
-      "10-31" => "\e[38;5;208m" # Happy Halloween!
-    }
-    COLORS.default = "\e[1;31m"
-
     def self.r
-      t = Date.today
-      COLORS["#{t.month}-#{t.day}"]
+      @@r ||= HOLIDAY_COLORS[day] || "\e[1;31m"
     end
 
     def self.b
-      "\e[30m"
+      @@b ||= HOLIDAY_COLORS[day] || "\e[30m"
+    end
+
+    def self.w
+      "\e[1;37m"
     end
 
     def self.reset
+      @@b = @@r = @@day = nil
       "\e[0m"
     end
 
@@ -172,7 +178,7 @@ module Sidekiq # :nodoc:
       #{w}     ,$$$$$b#{b}/#{w}md$$$P^'
       #{w}   .d$$$$$$#{b}/#{w}$$$P'
       #{w}   $$^' `"#{b}/#{w}$$$'       #{r}____  _     _      _    _
-      #{w}   $:     ,$$:      #{r} / ___|(_) __| | ___| | _(_) __ _
+      #{w}   $:    #{b}'#{w},$$:      #{r} / ___|(_) __| | ___| | _(_) __ _
       #{w}   `b     :$$       #{r} \\___ \\| |/ _` |/ _ \\ |/ / |/ _` |
       #{w}          $$:        #{r} ___) | | (_| |  __/   <| | (_| |
       #{w}          $$         #{r}|____/|_|\\__,_|\\___|_|\\_\\_|\\__, |
