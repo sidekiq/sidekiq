@@ -26,4 +26,27 @@ Gem::Specification.new do |gem|
   gem.add_dependency "connection_pool", ">= 2.3.0"
   gem.add_dependency "rack", ">= 2.2.4"
   gem.add_dependency "concurrent-ruby", "< 2"
+  gem.post_install_message = <<-EOM
+
+####################################################
+
+
+  █████████  █████ ██████████   ██████████ █████   ████ █████    ██████       ██████████       █████
+ ███░░░░░███░░███ ░░███░░░░███ ░░███░░░░░█░░███   ███░ ░░███   ███░░░░███    ░███░░░░███     ███░░░███
+░███    ░░░  ░███  ░███   ░░███ ░███  █ ░  ░███  ███    ░███  ███    ░░███   ░░░    ███     ███   ░░███
+░░█████████  ░███  ░███    ░███ ░██████    ░███████     ░███ ░███     ░███         ███     ░███    ░███
+ ░░░░░░░░███ ░███  ░███    ░███ ░███░░█    ░███░░███    ░███ ░███   ██░███        ███      ░███    ░███
+ ███    ░███ ░███  ░███    ███  ░███ ░   █ ░███ ░░███   ░███ ░░███ ░░████        ███       ░░███   ███
+░░█████████  █████ ██████████   ██████████ █████ ░░████ █████ ░░░██████░██      ███      ██ ░░░█████░
+ ░░░░░░░░░  ░░░░░ ░░░░░░░░░░   ░░░░░░░░░░ ░░░░░   ░░░░ ░░░░░    ░░░░░░ ░░      ░░░      ░░    ░░░░░░
+
+
+WARNING: This is a beta release, expect breakage!
+
+1. Use `gem 'sidekiq', '<7'` in your Gemfile if you don't want to be a beta tester.
+2. Read the release notes at https://github.com/mperham/sidekiq/blob/7-0/docs/7.0-Upgrade.md
+3. Search for open/closed issues at https://github.com/mperham/sidekiq/issues/
+
+####################################################
+EOM
 end
