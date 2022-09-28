@@ -22,7 +22,7 @@ module Sidekiq
 
     # By including the Options module, we allow AJs to directly control sidekiq features
     # via the *sidekiq_options* class method and, for instance, not use AJ's retry system.
-    # AJ retries don't show up in the Sidekiq UI Retries tab, save any error data, can't be
+    # AJ retries don't show up in the Sidekiq UI Retries tab, don't save any error data, can't be
     # manually retried, don't automatically die, etc.
     #
     #   class SomeJob < ActiveJob::Base
@@ -46,13 +46,6 @@ module Sidekiq
           ::Rails.logger.extend(::ActiveSupport::Logger.broadcast(config.logger))
         end
       end
-    end
-
-    config.before_configuration do
-      dep = ActiveSupport::Deprecation.new("7.0", "Sidekiq")
-      dep.deprecate_methods(Sidekiq.singleton_class,
-        default_worker_options: :default_job_options,
-        "default_worker_options=": :default_job_options=)
     end
 
     # This hook happens after all initializers are run, just before returning

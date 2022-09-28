@@ -49,7 +49,6 @@ module Sidekiq
     end
 
     def_delegators :@options, :[], :[]=, :fetch, :key?, :has_key?, :merge!
-    attr_reader :options
     attr_reader :capsules
 
     # LEGACY: edits the default capsule
