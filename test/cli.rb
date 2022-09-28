@@ -22,6 +22,10 @@ describe Sidekiq::CLI do
     @cli.config.concurrency
   end
 
+  def capsules
+    @cli.config.capsules
+  end
+
   describe "#parse" do
     describe "options" do
       it "accepts -r" do
@@ -196,6 +200,15 @@ describe Sidekiq::CLI do
 
           assert_equal(expected_file, config.fetch(:__FILE__))
           assert_equal(expected_dir, config.fetch(:__dir__))
+        end
+
+        it "configures capsules defined in the config file" do
+          @cli.parse(%w[sidekiq -C ./test/cfg/config_capsules.yml])
+          assert_equal 1, capsules["non_concurrent"].concurrency
+          assert_equal %w[non_concurrent], capsules["non_concurrent"].queues
+
+          assert_equal 2, capsules["binary"].concurrency
+          assert_equal %w[sirius sirius_b], capsules["binary"].queues
         end
       end
 

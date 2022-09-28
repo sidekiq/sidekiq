@@ -280,6 +280,13 @@ module Sidekiq # :nodoc:
         cap.queues = opts[:queues]
         cap.concurrency = opts[:concurrency] || @config[:concurrency]
       end
+
+      opts[:capsules]&.each do |name, cap_config|
+        @config.capsule(name.to_s) do |cap|
+          cap.queues = cap_config[:queues]
+          cap.concurrency = cap_config[:concurrency]
+        end
+      end
     end
 
     def boot_application
