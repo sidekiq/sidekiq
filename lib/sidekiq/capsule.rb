@@ -4,10 +4,10 @@ module Sidekiq
   # A Sidekiq::Capsule is the set of resources necessary to
   # process one or more queues with a given concurrency.
   # One "default" Capsule is started but the user may declare additional
-  # Capsules in the initializer.
+  # Capsules in their initializer.
   #
-  # To process a "single" queue with one thread so jobs are processed
-  # serially, you can do this:
+  # This capsule will pull jobs from the "single" queue and process
+  # the jobs with one thread, meaning the jobs will be processed serially.
   #
   # Sidekiq.configure_server do |config|
   #   config.capsule("single-threaded") do |cap|
@@ -38,7 +38,7 @@ module Sidekiq
     end
 
     def stop
-      fetcher&.bulk_requeue([], nil)
+      fetcher&.bulk_requeue([])
     end
 
     def queues=(val)

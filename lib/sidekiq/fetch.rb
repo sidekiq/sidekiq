@@ -50,7 +50,7 @@ module Sidekiq # :nodoc:
       UnitOfWork.new(queue, job, config) if queue
     end
 
-    def bulk_requeue(inprogress, _)
+    def bulk_requeue(inprogress)
       return if inprogress.empty?
 
       logger.debug { "Re-queueing terminated jobs" }
