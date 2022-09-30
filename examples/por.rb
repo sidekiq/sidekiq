@@ -1,9 +1,9 @@
 require "sidekiq"
 
 # Start up sidekiq via
-# ./bin/sidekiq -r ./examples/por.rb
+# bundle exec bin/sidekiq -r ./examples/por.rb
 # and then you can open up an IRB session like so:
-# irb -r ./examples/por.rb
+# bundle exec irb -r ./examples/por.rb
 # where you can then say
 # PlainOldRuby.perform_async "like a dog", 3
 #
