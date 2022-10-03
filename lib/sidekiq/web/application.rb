@@ -74,6 +74,9 @@ module Sidekiq
     end
 
     get "/busy" do
+      @count = (params["count"] || 100).to_i
+      (@current_page, @total_size, @workset) = page_items(workset, params["page"], @count)
+
       erb(:busy)
     end
 

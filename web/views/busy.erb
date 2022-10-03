@@ -96,6 +96,11 @@
   <div class="col-sm-7">
     <h3><%= t('Jobs') %></h3>
   </div>
+  <% if @workset.size > 0 && @total_size > @count %>
+    <div class="col-sm-4">
+      <%= erb :_paging, locals: { url: "#{root_path}busy" } %>
+    </div>
+  <% end %>
 </div>
 
 <div class="table_container">
@@ -109,7 +114,7 @@
       <th><%= t('Arguments') %></th>
       <th><%= t('Started') %></th>
     </thead>
-    <% workset.each do |process, thread, msg| %>
+    <% @workset.each do |process, thread, msg| %>
       <% job = Sidekiq::JobRecord.new(msg['payload']) %>
       <tr>
         <td><%= process %></td>
