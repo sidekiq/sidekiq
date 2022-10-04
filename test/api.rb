@@ -582,7 +582,7 @@ describe "API" do
         assert_equal key, p
         assert_equal "1234", x
         assert_equal "default", y["queue"]
-        assert_equal({}, y["payload"])
+        assert_equal("{}", y["payload"])
         assert_equal Time.now.year, Time.at(y["run_at"]).year
       end
 
