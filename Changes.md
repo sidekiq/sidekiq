@@ -2,9 +2,19 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+main
 ----------
 
+- Embedded mode!
+- Capsules!!
+- Job Execution metrics!!!
+- See `docs/7.0-Upgrade.md` for release notes
+
+6-x
+----------
+
+- Add pagination to Busy page [#5556]
+- Speed up WorkSet#each [#5559]
 - Adjust CurrentAttributes to work with the String class name so we aren't referencing
 the Class within a Rails initializer [#5536]
 
