@@ -346,10 +346,6 @@ module Sidekiq # :nodoc:
           opts[:concurrency] = Integer(arg)
         end
 
-        o.on "-d", "--daemon", "Daemonize process" do |arg|
-          puts "ERROR: Daemonization mode was removed in Sidekiq 6.0, please use a proper process supervisor to start and manage your services"
-        end
-
         o.on "-e", "--environment ENV", "Application environment" do |arg|
           opts[:environment] = arg
         end
@@ -379,15 +375,7 @@ module Sidekiq # :nodoc:
           opts[:config_file] = arg
         end
 
-        o.on "-L", "--logfile PATH", "path to writable logfile" do |arg|
-          puts "ERROR: Logfile redirection was removed in Sidekiq 6.0, Sidekiq will only log to STDOUT"
-        end
-
-        o.on "-P", "--pidfile PATH", "path to pidfile" do |arg|
-          puts "ERROR: PID file creation was removed in Sidekiq 6.0, please use a proper process supervisor to start and manage your services"
-        end
-
-        o.on "-V", "--version", "Print version and exit" do |arg|
+        o.on "-V", "--version", "Print version and exit" do
           puts "Sidekiq #{Sidekiq::VERSION}"
           die(0)
         end
