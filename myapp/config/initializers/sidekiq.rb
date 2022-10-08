@@ -17,14 +17,14 @@ Sidekiq.configure_server do |config|
 end
 
 class EmptyWorker
-  include Sidekiq::Worker
+  include Sidekiq::Job
 
   def perform
   end
 end
 
 class TimedWorker
-  include Sidekiq::Worker
+  include Sidekiq::Job
 
   def perform(start)
     now = Time.now.to_f

@@ -502,7 +502,7 @@ describe Sidekiq::Client do
   describe "class attribute race conditions" do
     new_class = -> {
       Class.new do
-        class_eval("include Sidekiq::Worker", __FILE__, __LINE__)
+        class_eval("include Sidekiq::Job", __FILE__, __LINE__)
 
         define_method(:foo) { get_sidekiq_options }
       end

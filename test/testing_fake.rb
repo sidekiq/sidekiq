@@ -179,7 +179,7 @@ describe "Sidekiq::Testing.fake" do
   end
 
   it "clears jobs across all workers" do
-    Sidekiq::Worker.jobs.clear
+    Sidekiq::Job.jobs.clear
     FirstWorker.count = 0
     SecondWorker.count = 0
 
@@ -192,7 +192,7 @@ describe "Sidekiq::Testing.fake" do
     assert_equal 1, FirstWorker.jobs.size
     assert_equal 1, SecondWorker.jobs.size
 
-    Sidekiq::Worker.clear_all
+    Sidekiq::Job.clear_all
 
     assert_equal 0, FirstWorker.jobs.size
     assert_equal 0, SecondWorker.jobs.size
@@ -202,7 +202,7 @@ describe "Sidekiq::Testing.fake" do
   end
 
   it "drains jobs across all workers" do
-    Sidekiq::Worker.jobs.clear
+    Sidekiq::Job.jobs.clear
     FirstWorker.count = 0
     SecondWorker.count = 0
 
@@ -218,7 +218,7 @@ describe "Sidekiq::Testing.fake" do
     assert_equal 1, FirstWorker.jobs.size
     assert_equal 1, SecondWorker.jobs.size
 
-    Sidekiq::Worker.drain_all
+    Sidekiq::Job.drain_all
 
     assert_equal 0, FirstWorker.jobs.size
     assert_equal 0, SecondWorker.jobs.size
@@ -240,7 +240,7 @@ describe "Sidekiq::Testing.fake" do
   end
 
   it "drains jobs across all workers even when workers create new jobs" do
-    Sidekiq::Worker.jobs.clear
+    Sidekiq::Job.jobs.clear
     FirstWorker.count = 0
     SecondWorker.count = 0
 
@@ -253,7 +253,7 @@ describe "Sidekiq::Testing.fake" do
 
     assert_equal 1, ThirdWorker.jobs.size
 
-    Sidekiq::Worker.drain_all
+    Sidekiq::Job.drain_all
 
     assert_equal 0, ThirdWorker.jobs.size
 
@@ -262,12 +262,12 @@ describe "Sidekiq::Testing.fake" do
   end
 
   it "drains jobs of workers with symbolized queue names" do
-    Sidekiq::Worker.jobs.clear
+    Sidekiq::Job.jobs.clear
 
     AltQueueWorker.perform_async(5, 6)
     assert_equal 1, AltQueueWorker.jobs.size
 
-    Sidekiq::Worker.drain_all
+    Sidekiq::Job.drain_all
     assert_equal 0, AltQueueWorker.jobs.size
   end
 

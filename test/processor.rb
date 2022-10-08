@@ -10,7 +10,7 @@ TestProcessorException = Class.new(StandardError)
 TEST_PROC_EXCEPTION = TestProcessorException.new("kerboom!")
 
 class MockWorker
-  include Sidekiq::Worker
+  include Sidekiq::Job
   def perform(args)
     raise TEST_PROC_EXCEPTION if args.to_s == "boom"
     args.pop if args.is_a? Array

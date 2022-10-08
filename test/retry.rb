@@ -17,7 +17,7 @@ class BadErrorMessage < StandardError
 end
 
 class CustomWorkerWithoutException
-  include Sidekiq::Worker
+  include Sidekiq::Job
 
   sidekiq_retry_in do |count|
     count * 2
@@ -28,7 +28,7 @@ class SpecialError < StandardError
 end
 
 class CustomWorkerWithException
-  include Sidekiq::Worker
+  include Sidekiq::Job
 
   sidekiq_retry_in do |count, exception|
     case exception
@@ -47,7 +47,7 @@ class CustomWorkerWithException
 end
 
 class ErrorWorker
-  include Sidekiq::Worker
+  include Sidekiq::Job
 
   sidekiq_retry_in do |count|
     count / 0

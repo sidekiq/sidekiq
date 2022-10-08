@@ -20,7 +20,7 @@ end
 
 class CustomWorker
   $recorder = []
-  include Sidekiq::Worker
+  include Sidekiq::Job
   def perform(recorder)
     $recorder << ["work_performed"]
   end
