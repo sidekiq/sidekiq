@@ -211,7 +211,7 @@ module Sidekiq
     #
     # You can also clear and drain all job types:
     #
-    #   Sidekiq::Worker.clear_all # or .drain_all
+    #   Sidekiq::Job.clear_all # or .drain_all
     #
     # This can be useful to make sure jobs don't linger between tests:
     #
