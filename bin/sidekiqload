@@ -19,7 +19,7 @@ x = Sidekiq.configure_embed do |config|
 end
 
 class LoadWorker
-  include Sidekiq::Worker
+  include Sidekiq::Job
   sidekiq_options retry: 1
   sidekiq_retry_in do |x|
     1

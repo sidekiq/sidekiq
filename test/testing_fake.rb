@@ -267,7 +267,7 @@ describe "Sidekiq::Testing.fake" do
     AltQueueWorker.perform_async(5, 6)
     assert_equal 1, AltQueueWorker.jobs.size
 
-    Sidekiq::Worker.drain_all
+    Sidekiq::Job.drain_all
     assert_equal 0, AltQueueWorker.jobs.size
   end
 
