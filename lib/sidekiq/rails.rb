@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "sidekiq/job"
+require 'rails'
 
 module Sidekiq
   class Rails < ::Rails::Engine

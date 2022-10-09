@@ -3,15 +3,15 @@ source "https://rubygems.org"
 gemspec
 
 gem "rake"
-gem "rails"
+RAILS_VERSION = '~> 7.0.4'
+gem 'actionmailer', RAILS_VERSION
+gem 'actionpack', RAILS_VERSION
+gem 'activejob', RAILS_VERSION
+gem 'activerecord', RAILS_VERSION
+gem 'railties', RAILS_VERSION
 gem "redis-client"
 # gem "debug"
 
-# Required for Ruby 3.1
-# https://github.com/mikel/mail/pull/1439
-gem "net-smtp"
-gem "net-imap"
-gem "net-pop"
 
 gem "sqlite3", platforms: :ruby
 gem "activerecord-jdbcsqlite3-adapter", platforms: :jruby
