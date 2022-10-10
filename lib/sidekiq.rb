@@ -80,7 +80,7 @@ module Sidekiq
   end
 
   # Creates a Sidekiq::Config instance that is more tuned for embedding
-  # within an arbitrary Ruby process. Noteably it reduces concurrency by
+  # within an arbitrary Ruby process. Notably it reduces concurrency by
   # default so there is less contention for CPU time with other threads.
   #
   #   inst = Sidekiq.configure_embed do |config|
