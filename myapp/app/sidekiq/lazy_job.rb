@@ -1,4 +1,4 @@
-class LazyWorker
+class LazyJob
   include Sidekiq::Job
 
   def perform
