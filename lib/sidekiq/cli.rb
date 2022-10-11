@@ -417,5 +417,5 @@ module Sidekiq # :nodoc:
   end
 end
 
-require "sidekiq/systemd"
+require "sidekiq/systemd" if Gem::Specification.find_all_by_name("sd_notify").any?
 require "sidekiq/metrics/tracking"

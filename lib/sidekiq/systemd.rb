@@ -15,9 +15,11 @@ module Sidekiq
     ping_f = sec_f / 2
     Sidekiq.logger.info "Pinging systemd watchdog every #{ping_f.round(1)} sec"
     Thread.new do
+      # if sd_notify was not required, only this thread will load it.
+      require "sd_notify"
       loop do
         sleep ping_f
-        Sidekiq::SdNotify.watchdog
+        SdNotify.watchdog
       end
     end
   end

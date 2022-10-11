@@ -17,6 +17,8 @@ gem "activerecord-jdbcsqlite3-adapter", platforms: :jruby
 gem "after_commit_everywhere"
 gem "yard"
 
+gem 'sd_notify', require: false ## This is for systemd, an optional gem.
+
 group :test do
   gem "minitest"
   gem "simplecov"
