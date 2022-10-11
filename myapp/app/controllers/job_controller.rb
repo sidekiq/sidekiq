@@ -1,4 +1,4 @@
-class WorkController < ApplicationController
+class JobController < ApplicationController
   def index
     @count = rand(100)
     puts "Adding #{@count} jobs"
