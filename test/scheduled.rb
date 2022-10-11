@@ -4,7 +4,7 @@ require_relative "helper"
 require "sidekiq/scheduled"
 require "sidekiq/api"
 
-class ScheduledWorker
+class ScheduledJob
   include Sidekiq::Job
   def perform(x)
   end
@@ -20,12 +20,12 @@ describe Sidekiq::Scheduled do
   describe "poller" do
     before do
       @config = reset!
-      @error_1 = {"class" => ScheduledWorker.name, "args" => [0], "queue" => "queue_1"}
-      @error_2 = {"class" => ScheduledWorker.name, "args" => [1], "queue" => "queue_2"}
-      @error_3 = {"class" => ScheduledWorker.name, "args" => [2], "queue" => "queue_3"}
-      @future_1 = {"class" => ScheduledWorker.name, "args" => [3], "queue" => "queue_4"}
-      @future_2 = {"class" => ScheduledWorker.name, "args" => [4], "queue" => "queue_5"}
-      @future_3 = {"class" => ScheduledWorker.name, "args" => [5], "queue" => "queue_6"}
+      @error_1 = {"class" => ScheduledJob.name, "args" => [0], "queue" => "queue_1"}
+      @error_2 = {"class" => ScheduledJob.name, "args" => [1], "queue" => "queue_2"}
+      @error_3 = {"class" => ScheduledJob.name, "args" => [2], "queue" => "queue_3"}
+      @future_1 = {"class" => ScheduledJob.name, "args" => [3], "queue" => "queue_4"}
+      @future_2 = {"class" => ScheduledJob.name, "args" => [4], "queue" => "queue_5"}
+      @future_3 = {"class" => ScheduledJob.name, "args" => [5], "queue" => "queue_6"}
 
       @retry = Sidekiq::RetrySet.new
       @scheduled = Sidekiq::ScheduledSet.new

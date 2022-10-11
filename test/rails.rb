@@ -11,7 +11,7 @@ describe "ActiveJob" do
     # need to force this since we aren't booting a Rails app
     ActiveJob::Base.queue_adapter = :sidekiq
     ActiveJob::Base.logger = nil
-    ActiveJob::Base.send(:include, ::Sidekiq::Worker::Options) unless ActiveJob::Base.respond_to?(:sidekiq_options)
+    ActiveJob::Base.send(:include, ::Sidekiq::Job::Options) unless ActiveJob::Base.respond_to?(:sidekiq_options)
   end
 
   it "does not allow Sidekiq::Job in AJ::Base classes" do

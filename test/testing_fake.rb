@@ -3,28 +3,28 @@
 require_relative "helper"
 class PerformError < RuntimeError; end
 
-class DirectWorker
+class DirectJob
   include Sidekiq::Job
   def perform(a, b)
     a + b
   end
 end
 
-class EnqueuedWorker
+class EnqueuedJob
   include Sidekiq::Job
   def perform(a, b)
     a + b
   end
 end
 
-class StoredWorker
+class StoredJob
   include Sidekiq::Job
   def perform(error)
     raise PerformError if error
   end
 end
 
-class SpecificJidWorker
+class SpecificJidJob
   include Sidekiq::Job
   sidekiq_class_attribute :count
   self.count = 0
@@ -34,7 +34,7 @@ class SpecificJidWorker
   end
 end
 
-class FirstWorker
+class FirstJob
   include Sidekiq::Job
   sidekiq_class_attribute :count
   self.count = 0
@@ -43,7 +43,7 @@ class FirstWorker
   end
 end
 
-class SecondWorker
+class SecondJob
   include Sidekiq::Job
   sidekiq_class_attribute :count
   self.count = 0
@@ -52,23 +52,23 @@ class SecondWorker
   end
 end
 
-class ThirdWorker
+class ThirdJob
   include Sidekiq::Job
   sidekiq_class_attribute :count
   def perform
-    FirstWorker.perform_async
-    SecondWorker.perform_async
+    FirstJob.perform_async
+    SecondJob.perform_async
   end
 end
 
-class QueueWorker
+class QueueJob
   include Sidekiq::Job
   def perform(a, b)
     a + b
   end
 end
 
-class AltQueueWorker
+class AltQueueJob
   include Sidekiq::Job
   sidekiq_options queue: :alt
   def perform(a, b)
@@ -80,8 +80,8 @@ describe "Sidekiq::Testing.fake" do
   before do
     require "sidekiq/testing"
     Sidekiq::Testing.fake!
-    EnqueuedWorker.jobs.clear
-    DirectWorker.jobs.clear
+    EnqueuedJob.jobs.clear
+    DirectJob.jobs.clear
   end
 
   after do
@@ -90,189 +90,189 @@ describe "Sidekiq::Testing.fake" do
   end
 
   it "stubs the async call" do
-    assert_equal 0, DirectWorker.jobs.size
-    assert DirectWorker.perform_async(1, 2)
-    assert_in_delta Time.now.to_f, DirectWorker.jobs.last["enqueued_at"], 0.1
-    assert_equal 1, DirectWorker.jobs.size
-    assert DirectWorker.perform_in(10, 1, 2)
-    refute DirectWorker.jobs.last["enqueued_at"]
-    assert_equal 2, DirectWorker.jobs.size
-    assert DirectWorker.perform_at(10, 1, 2)
-    assert_equal 3, DirectWorker.jobs.size
+    assert_equal 0, DirectJob.jobs.size
+    assert DirectJob.perform_async(1, 2)
+    assert_in_delta Time.now.to_f, DirectJob.jobs.last["enqueued_at"], 0.1
+    assert_equal 1, DirectJob.jobs.size
+    assert DirectJob.perform_in(10, 1, 2)
+    refute DirectJob.jobs.last["enqueued_at"]
+    assert_equal 2, DirectJob.jobs.size
+    assert DirectJob.perform_at(10, 1, 2)
+    assert_equal 3, DirectJob.jobs.size
     soon = (Time.now.to_f + 10)
-    assert_in_delta soon, DirectWorker.jobs.last["at"], 0.1
+    assert_in_delta soon, DirectJob.jobs.last["at"], 0.1
   end
 
   it "stubs the enqueue call" do
-    assert_equal 0, EnqueuedWorker.jobs.size
-    assert Sidekiq::Client.enqueue(EnqueuedWorker, 1, 2)
-    assert_equal 1, EnqueuedWorker.jobs.size
+    assert_equal 0, EnqueuedJob.jobs.size
+    assert Sidekiq::Client.enqueue(EnqueuedJob, 1, 2)
+    assert_equal 1, EnqueuedJob.jobs.size
   end
 
   it "stubs the enqueue_to call" do
-    assert_equal 0, EnqueuedWorker.jobs.size
-    assert Sidekiq::Client.enqueue_to("someq", EnqueuedWorker, 1, 2)
+    assert_equal 0, EnqueuedJob.jobs.size
+    assert Sidekiq::Client.enqueue_to("someq", EnqueuedJob, 1, 2)
     assert_equal 1, Sidekiq::Queues["someq"].size
   end
 
   it "executes all stored jobs" do
-    assert StoredWorker.perform_async(false)
-    assert StoredWorker.perform_async(true)
+    assert StoredJob.perform_async(false)
+    assert StoredJob.perform_async(true)
 
-    assert_equal 2, StoredWorker.jobs.size
+    assert_equal 2, StoredJob.jobs.size
     assert_raises PerformError do
-      StoredWorker.drain
+      StoredJob.drain
     end
-    assert_equal 0, StoredWorker.jobs.size
+    assert_equal 0, StoredJob.jobs.size
   end
 
   it "execute only jobs with assigned JID" do
     4.times do |i|
-      jid = SpecificJidWorker.perform_async(nil)
-      SpecificJidWorker.jobs[-1]["args"] = if i % 2 == 0
+      jid = SpecificJidJob.perform_async(nil)
+      SpecificJidJob.jobs[-1]["args"] = if i % 2 == 0
         ["wrong_jid"]
       else
         [jid]
       end
     end
 
-    SpecificJidWorker.perform_one
-    assert_equal 0, SpecificJidWorker.count
+    SpecificJidJob.perform_one
+    assert_equal 0, SpecificJidJob.count
 
-    SpecificJidWorker.perform_one
-    assert_equal 1, SpecificJidWorker.count
+    SpecificJidJob.perform_one
+    assert_equal 1, SpecificJidJob.count
 
-    SpecificJidWorker.drain
-    assert_equal 2, SpecificJidWorker.count
+    SpecificJidJob.drain
+    assert_equal 2, SpecificJidJob.count
   end
 
   it "round trip serializes the job arguments" do
     assert_raises ArgumentError do
-      StoredWorker.perform_async(:mike)
+      StoredJob.perform_async(:mike)
     end
 
     Sidekiq.strict_args!(false)
-    assert StoredWorker.perform_async(:mike)
-    job = StoredWorker.jobs.first
+    assert StoredJob.perform_async(:mike)
+    job = StoredJob.jobs.first
     assert_equal "mike", job["args"].first
-    StoredWorker.clear
+    StoredJob.clear
   ensure
     Sidekiq.strict_args!(:raise)
   end
 
   it "perform_one runs only one job" do
-    DirectWorker.perform_async(1, 2)
-    DirectWorker.perform_async(3, 4)
-    assert_equal 2, DirectWorker.jobs.size
+    DirectJob.perform_async(1, 2)
+    DirectJob.perform_async(3, 4)
+    assert_equal 2, DirectJob.jobs.size
 
-    DirectWorker.perform_one
-    assert_equal 1, DirectWorker.jobs.size
+    DirectJob.perform_one
+    assert_equal 1, DirectJob.jobs.size
 
-    DirectWorker.clear
+    DirectJob.clear
   end
 
   it "perform_one raise error upon empty queue" do
-    DirectWorker.clear
+    DirectJob.clear
     assert_raises Sidekiq::EmptyQueueError do
-      DirectWorker.perform_one
+      DirectJob.perform_one
     end
   end
 
   it "clears jobs across all workers" do
     Sidekiq::Job.jobs.clear
-    FirstWorker.count = 0
-    SecondWorker.count = 0
+    FirstJob.count = 0
+    SecondJob.count = 0
 
-    assert_equal 0, FirstWorker.jobs.size
-    assert_equal 0, SecondWorker.jobs.size
+    assert_equal 0, FirstJob.jobs.size
+    assert_equal 0, SecondJob.jobs.size
 
-    FirstWorker.perform_async
-    SecondWorker.perform_async
+    FirstJob.perform_async
+    SecondJob.perform_async
 
-    assert_equal 1, FirstWorker.jobs.size
-    assert_equal 1, SecondWorker.jobs.size
+    assert_equal 1, FirstJob.jobs.size
+    assert_equal 1, SecondJob.jobs.size
 
     Sidekiq::Job.clear_all
 
-    assert_equal 0, FirstWorker.jobs.size
-    assert_equal 0, SecondWorker.jobs.size
+    assert_equal 0, FirstJob.jobs.size
+    assert_equal 0, SecondJob.jobs.size
 
-    assert_equal 0, FirstWorker.count
-    assert_equal 0, SecondWorker.count
+    assert_equal 0, FirstJob.count
+    assert_equal 0, SecondJob.count
   end
 
   it "drains jobs across all workers" do
     Sidekiq::Job.jobs.clear
-    FirstWorker.count = 0
-    SecondWorker.count = 0
+    FirstJob.count = 0
+    SecondJob.count = 0
 
-    assert_equal 0, FirstWorker.jobs.size
-    assert_equal 0, SecondWorker.jobs.size
+    assert_equal 0, FirstJob.jobs.size
+    assert_equal 0, SecondJob.jobs.size
 
-    assert_equal 0, FirstWorker.count
-    assert_equal 0, SecondWorker.count
+    assert_equal 0, FirstJob.count
+    assert_equal 0, SecondJob.count
 
-    FirstWorker.perform_async
-    SecondWorker.perform_async
+    FirstJob.perform_async
+    SecondJob.perform_async
 
-    assert_equal 1, FirstWorker.jobs.size
-    assert_equal 1, SecondWorker.jobs.size
+    assert_equal 1, FirstJob.jobs.size
+    assert_equal 1, SecondJob.jobs.size
 
     Sidekiq::Job.drain_all
 
-    assert_equal 0, FirstWorker.jobs.size
-    assert_equal 0, SecondWorker.jobs.size
+    assert_equal 0, FirstJob.jobs.size
+    assert_equal 0, SecondJob.jobs.size
 
-    assert_equal 1, FirstWorker.count
-    assert_equal 1, SecondWorker.count
+    assert_equal 1, FirstJob.count
+    assert_equal 1, SecondJob.count
   end
 
   it "clears the jobs of workers having their queue name defined as a symbol" do
-    assert_equal Symbol, AltQueueWorker.sidekiq_options["queue"].class
+    assert_equal Symbol, AltQueueJob.sidekiq_options["queue"].class
 
-    AltQueueWorker.perform_async
-    assert_equal 1, AltQueueWorker.jobs.size
-    assert_equal 1, Sidekiq::Queues[AltQueueWorker.sidekiq_options["queue"].to_s].size
+    AltQueueJob.perform_async
+    assert_equal 1, AltQueueJob.jobs.size
+    assert_equal 1, Sidekiq::Queues[AltQueueJob.sidekiq_options["queue"].to_s].size
 
-    AltQueueWorker.clear
-    assert_equal 0, AltQueueWorker.jobs.size
-    assert_equal 0, Sidekiq::Queues[AltQueueWorker.sidekiq_options["queue"].to_s].size
+    AltQueueJob.clear
+    assert_equal 0, AltQueueJob.jobs.size
+    assert_equal 0, Sidekiq::Queues[AltQueueJob.sidekiq_options["queue"].to_s].size
   end
 
   it "drains jobs across all workers even when workers create new jobs" do
     Sidekiq::Job.jobs.clear
-    FirstWorker.count = 0
-    SecondWorker.count = 0
+    FirstJob.count = 0
+    SecondJob.count = 0
 
-    assert_equal 0, ThirdWorker.jobs.size
+    assert_equal 0, ThirdJob.jobs.size
 
-    assert_equal 0, FirstWorker.count
-    assert_equal 0, SecondWorker.count
+    assert_equal 0, FirstJob.count
+    assert_equal 0, SecondJob.count
 
-    ThirdWorker.perform_async
+    ThirdJob.perform_async
 
-    assert_equal 1, ThirdWorker.jobs.size
+    assert_equal 1, ThirdJob.jobs.size
 
     Sidekiq::Job.drain_all
 
-    assert_equal 0, ThirdWorker.jobs.size
+    assert_equal 0, ThirdJob.jobs.size
 
-    assert_equal 1, FirstWorker.count
-    assert_equal 1, SecondWorker.count
+    assert_equal 1, FirstJob.count
+    assert_equal 1, SecondJob.count
   end
 
   it "drains jobs of workers with symbolized queue names" do
     Sidekiq::Job.jobs.clear
 
-    AltQueueWorker.perform_async(5, 6)
-    assert_equal 1, AltQueueWorker.jobs.size
+    AltQueueJob.perform_async(5, 6)
+    assert_equal 1, AltQueueJob.jobs.size
 
     Sidekiq::Job.drain_all
-    assert_equal 0, AltQueueWorker.jobs.size
+    assert_equal 0, AltQueueJob.jobs.size
   end
 
   it "can execute a job" do
-    DirectWorker.execute_job(DirectWorker.new, [2, 3])
+    DirectJob.execute_job(DirectJob.new, [2, 3])
   end
 
   describe "queue testing" do
@@ -289,9 +289,9 @@ describe "Sidekiq::Testing.fake" do
     it "finds enqueued jobs" do
       assert_equal 0, Sidekiq::Queues["default"].size
 
-      QueueWorker.perform_async(1, 2)
-      QueueWorker.perform_async(1, 2)
-      AltQueueWorker.perform_async(1, 2)
+      QueueJob.perform_async(1, 2)
+      QueueJob.perform_async(1, 2)
+      AltQueueJob.perform_async(1, 2)
 
       assert_equal 2, Sidekiq::Queues["default"].size
       assert_equal [1, 2], Sidekiq::Queues["default"].first["args"]
@@ -302,21 +302,21 @@ describe "Sidekiq::Testing.fake" do
     it "clears out all queues" do
       assert_equal 0, Sidekiq::Queues["default"].size
 
-      QueueWorker.perform_async(1, 2)
-      QueueWorker.perform_async(1, 2)
-      AltQueueWorker.perform_async(1, 2)
+      QueueJob.perform_async(1, 2)
+      QueueJob.perform_async(1, 2)
+      AltQueueJob.perform_async(1, 2)
 
       Sidekiq::Queues.clear_all
 
       assert_equal 0, Sidekiq::Queues["default"].size
-      assert_equal 0, QueueWorker.jobs.size
+      assert_equal 0, QueueJob.jobs.size
       assert_equal 0, Sidekiq::Queues["alt"].size
-      assert_equal 0, AltQueueWorker.jobs.size
+      assert_equal 0, AltQueueJob.jobs.size
     end
 
     it "finds jobs enqueued by client" do
       Sidekiq::Client.push(
-        "class" => "NonExistentWorker",
+        "class" => "NonExistentJob",
         "queue" => "missing",
         "args" => [1]
       )
@@ -327,13 +327,13 @@ describe "Sidekiq::Testing.fake" do
     it "respects underlying array changes" do
       # Rspec expect change() syntax saves a reference to
       # an underlying array. When the array containing jobs is
-      # derived, Rspec test using `change(QueueWorker.jobs, :size).by(1)`
+      # derived, Rspec test using `change(QueueJob.jobs, :size).by(1)`
       # won't pass. This attempts to recreate that scenario
       # by saving a reference to the jobs array and ensuring
       # it changes properly on enqueueing
-      jobs = QueueWorker.jobs
+      jobs = QueueJob.jobs
       assert_equal 0, jobs.size
-      QueueWorker.perform_async(1, 2)
+      QueueJob.perform_async(1, 2)
       assert_equal 1, jobs.size
     end
   end

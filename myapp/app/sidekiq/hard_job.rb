@@ -1,4 +1,4 @@
-class HardWorker
+class HardJob
   include Sidekiq::Job
   sidekiq_options backtrace: 5
 

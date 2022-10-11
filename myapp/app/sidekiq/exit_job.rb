@@ -1,4 +1,4 @@
-class ExitWorker
+class ExitJob
   include Sidekiq::Job
 
   def perform

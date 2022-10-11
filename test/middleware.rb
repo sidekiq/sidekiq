@@ -18,11 +18,11 @@ class CustomMiddleware
   end
 end
 
-class CustomWorker
+class CustomJob
   $recorder = []
   include Sidekiq::Job
   def perform(recorder)
-    $recorder << ["work_performed"]
+    $recorder << ["job_performed"]
   end
 end
 
@@ -90,7 +90,7 @@ describe Sidekiq::Middleware do
   end
 
   it "executes middleware in the proper order" do
-    msg = Sidekiq.dump_json({"class" => CustomWorker.to_s, "args" => [$recorder]})
+    msg = Sidekiq.dump_json({"class" => CustomJob.to_s, "args" => [$recorder]})
 
     @config.server_middleware do |chain|
       # should only add once, second should replace the first
@@ -101,7 +101,7 @@ describe Sidekiq::Middleware do
 
     processor = Sidekiq::Processor.new(@config.default_capsule) { |pr, ex| }
     processor.process(Sidekiq::BasicFetch::UnitOfWork.new("queue:default", msg))
-    assert_equal %w[2 before 3 before 1 before work_performed 1 after 3 after 2 after], $recorder.flatten
+    assert_equal %w[2 before 3 before 1 before job_performed 1 after 3 after 2 after], $recorder.flatten
   end
 
   it "correctly replaces middleware when using middleware with options in the initializer" do

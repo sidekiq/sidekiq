@@ -4,7 +4,7 @@ require_relative "helper"
 require "sidekiq/web"
 require "rack/test"
 
-class WebWorker
+class WebJob
   include Sidekiq::Job
 
   def perform(a, b)
@@ -65,7 +65,7 @@ describe Sidekiq::Web do
         conn.sadd("processes", ["foo:1234"])
         conn.hmset("foo:1234", "info", Sidekiq.dump_json("hostname" => "foo", "started_at" => Time.now.to_f, "queues" => [], "concurrency" => 10), "at", Time.now.to_f, "busy", 4)
         identity = "foo:1234:work"
-        hash = {queue: "critical", payload: {"class" => WebWorker.name, "args" => [1, "abc"]}, run_at: Time.now.to_i}
+        hash = {queue: "critical", payload: {"class" => WebJob.name, "args" => [1, "abc"]}, run_at: Time.now.to_i}
         conn.hmset(identity, 1001, Sidekiq.dump_json(hash))
       end
       assert_equal ["1001"], Sidekiq::WorkSet.new.map { |pid, tid, data| tid }
@@ -74,7 +74,7 @@ describe Sidekiq::Web do
       assert_equal 200, last_response.status
       assert_match(/status-active/, last_response.body)
       assert_match(/critical/, last_response.body)
-      assert_match(/WebWorker/, last_response.body)
+      assert_match(/WebJob/, last_response.body)
     end
 
     it "can quiet a process" do
@@ -99,24 +99,24 @@ describe Sidekiq::Web do
   end
 
   it "can display queues" do
-    assert Sidekiq::Client.push("queue" => :foo, "class" => WebWorker, "args" => [1, 3])
+    assert Sidekiq::Client.push("queue" => :foo, "class" => WebJob, "args" => [1, 3])
 
     get "/queues"
     assert_equal 200, last_response.status
     assert_match(/foo/, last_response.body)
-    refute_match(/HardWorker/, last_response.body)
+    refute_match(/HardJob/, last_response.body)
     assert_match(/0.0/, last_response.body)
     refute_match(/datetime/, last_response.body)
     Sidekiq::Queue.new("foo").clear
 
     Time.stub(:now, Time.now - 65) do
-      assert Sidekiq::Client.push("queue" => :foo, "class" => WebWorker, "args" => [1, 3])
+      assert Sidekiq::Client.push("queue" => :foo, "class" => WebJob, "args" => [1, 3])
     end
 
     get "/queues"
     assert_equal 200, last_response.status
     assert_match(/foo/, last_response.body)
-    refute_match(/HardWorker/, last_response.body)
+    refute_match(/HardJob/, last_response.body)
     assert_match(/65.0/, last_response.body)
     assert_match(/datetime/, last_response.body)
   end
@@ -261,14 +261,14 @@ describe Sidekiq::Web do
     get "/retries"
     assert_equal 200, last_response.status
     assert_match(/found/, last_response.body)
-    refute_match(/HardWorker/, last_response.body)
+    refute_match(/HardJob/, last_response.body)
 
     add_retry
 
     get "/retries"
     assert_equal 200, last_response.status
     refute_match(/found/, last_response.body)
-    assert_match(/HardWorker/, last_response.body)
+    assert_match(/HardJob/, last_response.body)
   end
 
   it "can display a single retry" do
@@ -277,7 +277,7 @@ describe Sidekiq::Web do
     assert_equal 302, last_response.status
     get "/retries/#{job_params(*params)}"
     assert_equal 200, last_response.status
-    assert_match(/HardWorker/, last_response.body)
+    assert_match(/HardJob/, last_response.body)
   end
 
   it "handles missing retry" do
@@ -331,14 +331,14 @@ describe Sidekiq::Web do
     get "/scheduled"
     assert_equal 200, last_response.status
     assert_match(/found/, last_response.body)
-    refute_match(/HardWorker/, last_response.body)
+    refute_match(/HardJob/, last_response.body)
 
     add_scheduled
 
     get "/scheduled"
     assert_equal 200, last_response.status
     refute_match(/found/, last_response.body)
-    assert_match(/HardWorker/, last_response.body)
+    assert_match(/HardJob/, last_response.body)
   end
 
   it "can display a single scheduled job" do
@@ -347,7 +347,7 @@ describe Sidekiq::Web do
     assert_equal 302, last_response.status
     get "/scheduled/#{job_params(*params)}"
     assert_equal 200, last_response.status
-    assert_match(/HardWorker/, last_response.body)
+    assert_match(/HardJob/, last_response.body)
   end
 
   it "can display a single scheduled job tags" do
@@ -431,7 +431,7 @@ describe Sidekiq::Web do
     add_xss_retry
     get "/retries"
     assert_equal 200, last_response.status
-    assert_match(/FailWorker/, last_response.body)
+    assert_match(/FailJob/, last_response.body)
 
     assert last_response.body.include?("fail message: &lt;a&gt;hello&lt;&#x2F;a&gt;")
     assert !last_response.body.include?("fail message: <a>hello</a>")
@@ -445,14 +445,14 @@ describe Sidekiq::Web do
       conn.sadd("processes", [pro])
       conn.hmset(pro, "info", Sidekiq.dump_json("started_at" => Time.now.to_f, "labels" => ["frumduz"], "queues" => [], "concurrency" => 10), "busy", 1, "beat", Time.now.to_f)
       identity = "#{pro}:work"
-      hash = {queue: "critical", payload: {"class" => "FailWorker", "args" => ["<a>hello</a>"]}, run_at: Time.now.to_i}
+      hash = {queue: "critical", payload: {"class" => "FailJob", "args" => ["<a>hello</a>"]}, run_at: Time.now.to_i}
       conn.hmset(identity, 100001, Sidekiq.dump_json(hash))
       conn.incr("busy")
     end
 
     get "/busy"
     assert_equal 200, last_response.status
-    assert_match(/FailWorker/, last_response.body)
+    assert_match(/FailJob/, last_response.body)
     assert_match(/frumduz/, last_response.body)
     assert last_response.body.include?("&lt;a&gt;hello&lt;&#x2F;a&gt;")
     assert !last_response.body.include?("<a>hello</a>")
@@ -636,7 +636,7 @@ describe Sidekiq::Web do
 
   def add_scheduled
     score = Time.now.to_f
-    msg = {"class" => "HardWorker",
+    msg = {"class" => "HardJob",
            "args" => ["bob", 1, Time.now.to_f],
            "jid" => SecureRandom.hex(12),
            "tags" => ["tag1", "tag2"]}
@@ -647,7 +647,7 @@ describe Sidekiq::Web do
   end
 
   def add_retry
-    msg = {"class" => "HardWorker",
+    msg = {"class" => "HardJob",
            "args" => ["bob", 1, Time.now.to_f],
            "queue" => "default",
            "error_message" => "Some fake message",
@@ -664,7 +664,7 @@ describe Sidekiq::Web do
   end
 
   def add_dead(jid = SecureRandom.hex(12))
-    msg = {"class" => "HardWorker",
+    msg = {"class" => "HardJob",
            "args" => ["bob", 1, Time.now.to_f],
            "queue" => "foo",
            "error_message" => "Some fake message",
@@ -689,7 +689,7 @@ describe Sidekiq::Web do
   end
 
   def add_xss_retry(job_id = SecureRandom.hex(12))
-    msg = {"class" => "FailWorker",
+    msg = {"class" => "FailJob",
            "args" => ["<a>hello</a>"],
            "queue" => "foo",
            "error_message" => "fail message: <a>hello</a>",
@@ -711,7 +711,7 @@ describe Sidekiq::Web do
 
   def add_worker
     key = "#{hostname}:#{$$}"
-    msg = "{\"queue\":\"default\",\"payload\":{\"retry\":true,\"queue\":\"default\",\"timeout\":20,\"backtrace\":5,\"class\":\"HardWorker\",\"args\":[\"bob\",10,5],\"jid\":\"2b5ad2b016f5e063a1c62872\"},\"run_at\":1361208995}"
+    msg = "{\"queue\":\"default\",\"payload\":{\"retry\":true,\"queue\":\"default\",\"timeout\":20,\"backtrace\":5,\"class\":\"HardJob\",\"args\":[\"bob\",10,5],\"jid\":\"2b5ad2b016f5e063a1c62872\"},\"run_at\":1361208995}"
     @config.redis do |conn|
       conn.multi do |transaction|
         transaction.sadd("processes", [key])

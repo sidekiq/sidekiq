@@ -2,7 +2,7 @@ require_relative "helper"
 require "sidekiq/job_retry"
 require "sidekiq/capsule"
 
-class NewWorker
+class NewJob
   include Sidekiq::Job
 
   sidekiq_class_attribute :exhausted_called, :exhausted_job, :exhausted_exception
@@ -14,7 +14,7 @@ class NewWorker
   end
 end
 
-class OldWorker
+class OldJob
   include Sidekiq::Job
 
   sidekiq_class_attribute :exhausted_called, :exhausted_job, :exhausted_exception
@@ -31,7 +31,7 @@ end
 
 describe "sidekiq_retries_exhausted" do
   def cleanup
-    [NewWorker, OldWorker].each do |worker_class|
+    [NewJob, OldJob].each do |worker_class|
       worker_class.exhausted_called = nil
       worker_class.exhausted_job = nil
       worker_class.exhausted_exception = nil
@@ -48,11 +48,11 @@ describe "sidekiq_retries_exhausted" do
   end
 
   def new_worker
-    @new_worker ||= NewWorker.new
+    @new_worker ||= NewJob.new
   end
 
   def old_worker
-    @old_worker ||= OldWorker.new
+    @old_worker ||= OldJob.new
   end
 
   def handler
@@ -68,7 +68,7 @@ describe "sidekiq_retries_exhausted" do
       # successful
     end
 
-    refute NewWorker.exhausted_called
+    refute NewJob.exhausted_called
   end
 
   it "does not run exhausted block when job successful on last retry" do
@@ -76,7 +76,7 @@ describe "sidekiq_retries_exhausted" do
       # successful
     end
 
-    refute NewWorker.exhausted_called
+    refute NewJob.exhausted_called
   end
 
   it "does not run exhausted block when retries not exhausted yet" do
@@ -86,7 +86,7 @@ describe "sidekiq_retries_exhausted" do
       end
     end
 
-    refute NewWorker.exhausted_called
+    refute NewJob.exhausted_called
   end
 
   it "runs exhausted block when retries exhausted" do
@@ -96,7 +96,7 @@ describe "sidekiq_retries_exhausted" do
       end
     end
 
-    assert NewWorker.exhausted_called
+    assert NewJob.exhausted_called
   end
 
   it "passes job and exception to retries exhausted block" do

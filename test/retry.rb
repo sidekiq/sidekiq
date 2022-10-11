@@ -6,7 +6,7 @@ require "sidekiq/job_retry"
 require "sidekiq/api"
 require "sidekiq/capsule"
 
-class SomeWorker
+class SomeJob
   include Sidekiq::Job
 end
 
@@ -16,7 +16,7 @@ class BadErrorMessage < StandardError
   end
 end
 
-class CustomWorkerWithoutException
+class CustomJobWithoutException
   include Sidekiq::Job
 
   sidekiq_retry_in do |count|
@@ -27,7 +27,7 @@ end
 class SpecialError < StandardError
 end
 
-class CustomWorkerWithException
+class CustomJobWithException
   include Sidekiq::Job
 
   sidekiq_retry_in do |count, exception|
@@ -46,7 +46,7 @@ class CustomWorkerWithException
   end
 end
 
-class ErrorWorker
+class ErrorJob
   include Sidekiq::Job
 
   sidekiq_retry_in do |count|
@@ -61,7 +61,7 @@ describe Sidekiq::JobRetry do
 
   describe "middleware" do
     def worker
-      @worker ||= SomeWorker.new
+      @worker ||= SomeJob.new
     end
 
     def handler
@@ -296,45 +296,45 @@ describe Sidekiq::JobRetry do
       end
 
       it "retries with a custom delay and exception 1" do
-        strat, count = handler.__send__(:delay_for, CustomWorkerWithException, 2, ArgumentError.new)
+        strat, count = handler.__send__(:delay_for, CustomJobWithException, 2, ArgumentError.new)
         assert_equal :default, strat
         assert_includes 4..35, count
       end
 
       it "supports discard" do
-        strat, count = handler.__send__(:delay_for, CustomWorkerWithException, 2, Interrupt.new)
+        strat, count = handler.__send__(:delay_for, CustomJobWithException, 2, Interrupt.new)
         assert_equal :discard, strat
         assert_nil count
       end
 
       it "supports kill" do
-        strat, count = handler.__send__(:delay_for, CustomWorkerWithException, 2, RuntimeError.new)
+        strat, count = handler.__send__(:delay_for, CustomJobWithException, 2, RuntimeError.new)
         assert_equal :kill, strat
         assert_nil count
       end
 
       it "retries with a custom delay and exception 2" do
-        strat, count = handler.__send__(:delay_for, CustomWorkerWithException, 2, StandardError.new)
+        strat, count = handler.__send__(:delay_for, CustomJobWithException, 2, StandardError.new)
         assert_equal :default, strat
         assert_includes 4..35, count
       end
 
       it "retries with a default delay and exception in case of configured with nil" do
-        strat, count = handler.__send__(:delay_for, CustomWorkerWithException, 2, SpecialError.new)
+        strat, count = handler.__send__(:delay_for, CustomJobWithException, 2, SpecialError.new)
         assert_equal :default, strat
         refute_equal 8, count
         refute_equal 4, count
       end
 
       it "retries with a custom delay without exception" do
-        strat, count = handler.__send__(:delay_for, CustomWorkerWithoutException, 2, StandardError.new)
+        strat, count = handler.__send__(:delay_for, CustomJobWithoutException, 2, StandardError.new)
         assert_equal :default, strat
         assert_includes 4..35, count
       end
 
       it "falls back to the default retry on exception" do
         output = capture_logging(@config) do
-          strat, count = handler.__send__(:delay_for, ErrorWorker, 2, StandardError.new)
+          strat, count = handler.__send__(:delay_for, ErrorJob, 2, StandardError.new)
           assert_equal :default, strat
           refute_equal 4, count
         end
@@ -346,7 +346,7 @@ describe Sidekiq::JobRetry do
         ds = Sidekiq::DeadSet.new
         assert_equal 0, ds.size
         assert_raises Sidekiq::JobRetry::Skip do
-          handler.local(CustomWorkerWithException, jobstr({"class" => "CustomWorkerWithException"}), "default") do
+          handler.local(CustomJobWithException, jobstr({"class" => "CustomJobWithException"}), "default") do
             raise "oops"
           end
         end

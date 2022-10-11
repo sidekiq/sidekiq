@@ -7,7 +7,7 @@ require "sidekiq/scheduled"
 require "sidekiq/processor"
 require "sidekiq/api"
 
-class JoeWorker
+class JoeJob
   include Sidekiq::Job
   def perform(slp)
     raise "boom" if slp == "boom"
@@ -33,7 +33,7 @@ describe "Actors" do
       ss = Sidekiq::ScheduledSet.new
       q = Sidekiq::Queue.new
 
-      JoeWorker.perform_in(0.01, 0)
+      JoeJob.perform_in(0.01, 0)
 
       assert_equal 0, q.size
       assert_equal 1, ss.size
@@ -82,7 +82,7 @@ describe "Actors" do
       pr = Sidekiq::Processor.new(@cap) do |prc, ex|
         result(prc, ex)
       end
-      jid = JoeWorker.perform_async("boom")
+      jid = JoeJob.perform_async("boom")
       assert jid, jid
       assert_equal 1, q.size
 
@@ -106,7 +106,7 @@ describe "Actors" do
       p = Sidekiq::Processor.new(@cap) do |pr, ex|
         result(pr, ex)
       end
-      jid = JoeWorker.perform_async(2)
+      jid = JoeJob.perform_async(2)
       assert jid, jid
       assert_equal 1, q.size
 

@@ -1,9 +1,9 @@
-class WorkController < ApplicationController
+class JobController < ApplicationController
   def index
     @count = rand(100)
     puts "Adding #{@count} jobs"
     @count.times do |x|
-      HardWorker.perform_async("bubba", 0.01, x)
+      HardJob.perform_async("bubba", 0.01, x)
     end
   end
 
@@ -13,20 +13,20 @@ class WorkController < ApplicationController
   end
 
   def bulk
-    Sidekiq::Client.push_bulk("class" => HardWorker,
+    Sidekiq::Client.push_bulk("class" => HardJob,
       "args" => [["bob", 1, 1], ["mike", 1, 2]])
     render plain: "enbulked"
   end
 
   def long
     50.times do |x|
-      HardWorker.perform_async("bob", 15, x)
+      HardJob.perform_async("bob", 15, x)
     end
     render plain: "enqueued"
   end
 
   def crash
-    HardWorker.perform_async("crash", 1, Time.now.to_f)
+    HardJob.perform_async("crash", 1, Time.now.to_f)
     render plain: "enqueued"
   end
 
