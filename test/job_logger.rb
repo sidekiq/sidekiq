@@ -26,7 +26,7 @@ describe "Job logger" do
 
     # pretty
     p = @logger.formatter = Sidekiq::Logger::Formatters::Pretty.new
-    job = {"jid" => "1234abc", "wrapped" => "FooWorker", "class" => "Wrapper", "tags" => ["bar", "baz"]}
+    job = {"jid" => "1234abc", "wrapped" => "FooJob", "class" => "Wrapper", "tags" => ["bar", "baz"]}
     # this mocks what Processor does
     jl.prepare(job) do
       jl.call(job, "queue") {}
@@ -36,7 +36,7 @@ describe "Job logger" do
     assert a
     assert b
 
-    expected = /pid=#{$$} tid=#{p.tid} class=FooWorker jid=1234abc tags=bar,baz/
+    expected = /pid=#{$$} tid=#{p.tid} class=FooJob jid=1234abc tags=bar,baz/
     assert_match(expected, a)
     assert_match(expected, b)
     assert_match(/#{Time.now.utc.to_date}.+Z pid=#{$$} tid=#{p.tid} .+INFO: done/, b)
@@ -46,7 +46,7 @@ describe "Job logger" do
     # json
     @logger.formatter = Sidekiq::Logger::Formatters::JSON.new
     jl = Sidekiq::JobLogger.new(@logger)
-    job = {"jid" => "1234abc", "wrapped" => "Wrapper", "class" => "FooWorker", "bid" => "b-xyz", "tags" => ["bar", "baz"]}
+    job = {"jid" => "1234abc", "wrapped" => "Wrapper", "class" => "FooJob", "bid" => "b-xyz", "tags" => ["bar", "baz"]}
     # this mocks what Processor does
     jl.prepare(job) do
       jl.call(job, "queue") {}
@@ -63,7 +63,7 @@ describe "Job logger" do
 
   it "tests custom log level" do
     jl = Sidekiq::JobLogger.new(@logger)
-    job = {"class" => "FooWorker", "log_level" => "debug"}
+    job = {"class" => "FooJob", "log_level" => "debug"}
 
     assert @logger.info?
     jl.prepare(job) do
@@ -85,7 +85,7 @@ describe "Job logger" do
     @cfg.logger = @logger
 
     jl = Sidekiq::JobLogger.new(@logger)
-    job = {"class" => "FooWorker", "log_level" => "debug"}
+    job = {"class" => "FooJob", "log_level" => "debug"}
 
     assert @logger.info?
     refute @logger.debug?

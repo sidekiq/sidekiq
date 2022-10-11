@@ -5,16 +5,16 @@ require "active_job"
 require "sidekiq/api"
 require "sidekiq/rails"
 
-class MyWorker
+class MyJob
   include Sidekiq::Job
 end
 
-class QueuedWorker
+class QueuedJob
   include Sidekiq::Job
   sidekiq_options queue: :flimflam
 end
 
-class InterestingWorker
+class InterestingJob
   include Sidekiq::Job
 
   def perform(an_argument)
@@ -26,19 +26,19 @@ class TestActiveJob < ActiveJob::Base
   end
 end
 
-class BaseWorker
+class BaseJob
   include Sidekiq::Job
   sidekiq_options "retry" => "base"
 end
 
-class AWorker < BaseWorker
+class AJob < BaseJob
 end
 
-class BWorker < BaseWorker
+class BJob < BaseJob
   sidekiq_options "retry" => "b"
 end
 
-class CWorker < BaseWorker
+class CJob < BaseJob
   sidekiq_options "retry" => 2
 end
 
@@ -59,7 +59,7 @@ class MiddlewareArguments
   end
 end
 
-class DWorker < BaseWorker
+class DJob < BaseJob
 end
 
 describe Sidekiq::Client do
@@ -79,7 +79,7 @@ describe Sidekiq::Client do
       end
 
       assert_raises ArgumentError do
-        Sidekiq::Client.push("queue" => "foo", "class" => MyWorker, "noargs" => [1, 2])
+        Sidekiq::Client.push("queue" => "foo", "class" => MyJob, "noargs" => [1, 2])
       end
 
       assert_raises ArgumentError do
@@ -87,15 +87,15 @@ describe Sidekiq::Client do
       end
 
       assert_raises ArgumentError do
-        Sidekiq::Client.push("queue" => "foo", "class" => MyWorker, "args" => :not_an_array)
+        Sidekiq::Client.push("queue" => "foo", "class" => MyJob, "args" => :not_an_array)
       end
 
       assert_raises ArgumentError do
-        Sidekiq::Client.push("queue" => "foo", "class" => MyWorker, "args" => [1], "at" => :not_a_numeric)
+        Sidekiq::Client.push("queue" => "foo", "class" => MyJob, "args" => [1], "at" => :not_a_numeric)
       end
 
       assert_raises ArgumentError do
-        Sidekiq::Client.push("queue" => "foo", "class" => MyWorker, "args" => [1], "tags" => :not_an_array)
+        Sidekiq::Client.push("queue" => "foo", "class" => MyJob, "args" => [1], "tags" => :not_an_array)
       end
     end
   end
@@ -150,7 +150,7 @@ describe Sidekiq::Client do
     it "pushes messages to redis" do
       q = Sidekiq::Queue.new("foo")
       pre = q.size
-      jid = Sidekiq::Client.push("queue" => "foo", "class" => MyWorker, "args" => [1, 2])
+      jid = Sidekiq::Client.push("queue" => "foo", "class" => MyJob, "args" => [1, 2])
       assert jid
       assert_equal 24, jid.size
       assert_equal pre + 1, q.size
@@ -159,23 +159,23 @@ describe Sidekiq::Client do
     it "pushes messages to redis using a String class" do
       q = Sidekiq::Queue.new("foo")
       pre = q.size
-      jid = Sidekiq::Client.push("queue" => "foo", "class" => "MyWorker", "args" => [1, 2])
+      jid = Sidekiq::Client.push("queue" => "foo", "class" => "MyJob", "args" => [1, 2])
       assert jid
       assert_equal 24, jid.size
       assert_equal pre + 1, q.size
     end
 
     it "enqueues" do
-      assert_equal Sidekiq.default_job_options, MyWorker.get_sidekiq_options
-      assert MyWorker.perform_async(1, 2)
-      assert Sidekiq::Client.enqueue(MyWorker, 1, 2)
-      assert Sidekiq::Client.enqueue_to(:custom_queue, MyWorker, 1, 2)
+      assert_equal Sidekiq.default_job_options, MyJob.get_sidekiq_options
+      assert MyJob.perform_async(1, 2)
+      assert Sidekiq::Client.enqueue(MyJob, 1, 2)
+      assert Sidekiq::Client.enqueue_to(:custom_queue, MyJob, 1, 2)
       assert_equal 1, Sidekiq::Queue.new("custom_queue").size
-      assert Sidekiq::Client.enqueue_to_in(:custom_queue, 3, MyWorker, 1, 2)
-      assert Sidekiq::Client.enqueue_to_in(:custom_queue, -3, MyWorker, 1, 2)
+      assert Sidekiq::Client.enqueue_to_in(:custom_queue, 3, MyJob, 1, 2)
+      assert Sidekiq::Client.enqueue_to_in(:custom_queue, -3, MyJob, 1, 2)
       assert_equal 2, Sidekiq::Queue.new("custom_queue").size
-      assert Sidekiq::Client.enqueue_in(3, MyWorker, 1, 2)
-      assert QueuedWorker.perform_async(1, 2)
+      assert Sidekiq::Client.enqueue_in(3, MyJob, 1, 2)
+      assert QueuedJob.perform_async(1, 2)
       assert_equal 1, Sidekiq::Queue.new("flimflam").size
     end
 
@@ -189,15 +189,15 @@ describe Sidekiq::Client do
       end
 
       it "enqueues jobs with a symbol as an argument" do
-        InterestingWorker.perform_async(:symbol)
+        InterestingJob.perform_async(:symbol)
       end
 
       it "enqueues jobs with a Date as an argument" do
-        InterestingWorker.perform_async(Date.new(2021, 1, 1))
+        InterestingJob.perform_async(Date.new(2021, 1, 1))
       end
 
       it "enqueues jobs with a Hash with symbols and string as keys as an argument" do
-        InterestingWorker.perform_async(
+        InterestingJob.perform_async(
           {
             :some => "hash",
             "with" => "different_keys"
@@ -206,13 +206,13 @@ describe Sidekiq::Client do
       end
 
       it "enqueues jobs with a Struct as an argument" do
-        InterestingWorker.perform_async(
+        InterestingJob.perform_async(
           Struct.new(:x, :y).new(0, 0)
         )
       end
 
       it "works with a JSON-friendly deep, nested structure" do
-        InterestingWorker.perform_async(
+        InterestingJob.perform_async(
           {
             "foo" => ["a", "b", "c"],
             "bar" => ["x", "y", "z"]
@@ -231,19 +231,19 @@ describe Sidekiq::Client do
 
         it "raises an error when using a symbol as an argument" do
           assert_raises ArgumentError do
-            InterestingWorker.perform_async(:symbol)
+            InterestingJob.perform_async(:symbol)
           end
         end
 
         it "raises an error when using a Date as an argument" do
           assert_raises ArgumentError do
-            InterestingWorker.perform_async(Date.new(2021, 1, 1))
+            InterestingJob.perform_async(Date.new(2021, 1, 1))
           end
         end
 
         it "raises an error when using a Hash with symbols and string as keys as an argument" do
           assert_raises ArgumentError do
-            InterestingWorker.perform_async(
+            InterestingJob.perform_async(
               {
                 :some => "hash",
                 "with" => "different_keys"
@@ -254,14 +254,14 @@ describe Sidekiq::Client do
 
         it "raises an error when using a Struct as an argument" do
           assert_raises ArgumentError do
-            InterestingWorker.perform_async(
+            InterestingJob.perform_async(
               Struct.new(:x, :y).new(0, 0)
             )
           end
         end
 
         it "works with a JSON-friendly deep, nested structure" do
-          InterestingWorker.perform_async(
+          InterestingJob.perform_async(
             {
               "foo" => ["a", "b", "c"],
               "bar" => ["x", "y", "z"]
@@ -272,14 +272,14 @@ describe Sidekiq::Client do
         describe "worker that takes deep, nested structures" do
           it "raises an error on JSON-unfriendly structures" do
             error = assert_raises ArgumentError do
-              InterestingWorker.perform_async(
+              InterestingJob.perform_async(
                 {
                   "foo" => [:a, :b, :c],
                   :bar => ["x", "y", "z"]
                 }
               )
             end
-            assert_match(/Job arguments to InterestingWorker/, error.message)
+            assert_match(/Job arguments to InterestingJob/, error.message)
           end
         end
 
@@ -306,12 +306,12 @@ describe Sidekiq::Client do
     end
 
     it "can push a large set of jobs at once" do
-      jids = Sidekiq::Client.push_bulk("class" => QueuedWorker, "args" => (1..1_000).to_a.map { |x| Array(x) })
+      jids = Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => (1..1_000).to_a.map { |x| Array(x) })
       assert_equal 1_000, jids.size
     end
 
     it "can push a large set of jobs at once using a String class" do
-      jids = Sidekiq::Client.push_bulk("class" => "QueuedWorker", "args" => (1..1_000).to_a.map { |x| Array(x) })
+      jids = Sidekiq::Client.push_bulk("class" => "QueuedJob", "args" => (1..1_000).to_a.map { |x| Array(x) })
       assert_equal 1_000, jids.size
     end
 
@@ -320,7 +320,7 @@ describe Sidekiq::Client do
         times = job_count.times.map { |i| Time.new(2019, 1, i + 1) }
         args = job_count.times.map { |i| [i] }
 
-        jids = Sidekiq::Client.push_bulk("class" => QueuedWorker, "args" => args, "at" => times.map(&:to_f))
+        jids = Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => args, "at" => times.map(&:to_f))
 
         assert_equal job_count, jids.size
         assert_equal times, jids.map { |jid| Sidekiq::ScheduledSet.new.find_job(jid).at }
@@ -329,61 +329,61 @@ describe Sidekiq::Client do
 
     it "can push jobs scheduled using ActiveSupport::Duration" do
       require "active_support/core_ext/integer/time"
-      jids = Sidekiq::Client.push_bulk("class" => QueuedWorker, "args" => [[1], [2]], "at" => [1.seconds, 111.seconds])
+      jids = Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => [[1], [2]], "at" => [1.seconds, 111.seconds])
       assert_equal 2, jids.size
     end
 
     it "returns the jids for the jobs" do
-      Sidekiq::Client.push_bulk("class" => "QueuedWorker", "args" => (1..2).to_a.map { |x| Array(x) }).each do |jid|
+      Sidekiq::Client.push_bulk("class" => "QueuedJob", "args" => (1..2).to_a.map { |x| Array(x) }).each do |jid|
         assert_match(/[0-9a-f]{12}/, jid)
       end
     end
 
     it "handles no jobs" do
-      result = Sidekiq::Client.push_bulk("class" => "QueuedWorker", "args" => [])
+      result = Sidekiq::Client.push_bulk("class" => "QueuedJob", "args" => [])
       assert_equal 0, result.size
     end
 
     describe "errors" do
       it "raises ArgumentError with invalid params" do
         assert_raises ArgumentError do
-          Sidekiq::Client.push_bulk("class" => "QueuedWorker", "args" => [[1], 2])
+          Sidekiq::Client.push_bulk("class" => "QueuedJob", "args" => [[1], 2])
         end
 
         assert_raises ArgumentError do
-          Sidekiq::Client.push_bulk("class" => "QueuedWorker", "args" => [[1], [2]], "at" => [Time.now.to_f, :not_a_numeric])
+          Sidekiq::Client.push_bulk("class" => "QueuedJob", "args" => [[1], [2]], "at" => [Time.now.to_f, :not_a_numeric])
         end
 
         assert_raises ArgumentError do
-          Sidekiq::Client.push_bulk("class" => QueuedWorker, "args" => [[1], [2]], "at" => [Time.now.to_f])
+          Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => [[1], [2]], "at" => [Time.now.to_f])
         end
 
         assert_raises ArgumentError do
-          Sidekiq::Client.push_bulk("class" => QueuedWorker, "args" => [[1]], "at" => [Time.now.to_f, Time.now.to_f])
+          Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => [[1]], "at" => [Time.now.to_f, Time.now.to_f])
         end
       end
     end
 
     describe ".perform_bulk" do
       it "pushes a large set of jobs" do
-        jids = MyWorker.perform_bulk((1..1_001).to_a.map { |x| Array(x) })
+        jids = MyJob.perform_bulk((1..1_001).to_a.map { |x| Array(x) })
         assert_equal 1_001, jids.size
       end
 
       it "pushes a large set of jobs with a different batch size" do
-        jids = MyWorker.perform_bulk((1..1_001).to_a.map { |x| Array(x) }, batch_size: 100)
+        jids = MyJob.perform_bulk((1..1_001).to_a.map { |x| Array(x) }, batch_size: 100)
         assert_equal 1_001, jids.size
       end
 
       it "handles no jobs" do
-        jids = MyWorker.perform_bulk([])
+        jids = MyJob.perform_bulk([])
         assert_equal 0, jids.size
       end
 
       describe "errors" do
         it "raises ArgumentError with invalid params" do
           assert_raises ArgumentError do
-            Sidekiq::Client.push_bulk("class" => "MyWorker", "args" => [[1], 2])
+            Sidekiq::Client.push_bulk("class" => "MyJob", "args" => [[1], 2])
           end
         end
       end
@@ -391,7 +391,7 @@ describe Sidekiq::Client do
       describe "lazy enumerator" do
         it "enqueues the jobs by evaluating the enumerator" do
           lazy_array = (1..1_001).to_a.map { |x| Array(x) }.lazy
-          jids = MyWorker.perform_bulk(lazy_array)
+          jids = MyJob.perform_bulk(lazy_array)
           assert_equal 1_001, jids.size
         end
       end
@@ -404,9 +404,9 @@ describe Sidekiq::Client do
       @client.middleware do |chain|
         chain.add MiddlewareArguments
       end
-      @client.push("class" => MyWorker, "args" => [0])
+      @client.push("class" => MyJob, "args" => [0])
 
-      assert_equal($arguments_worker_class, MyWorker)
+      assert_equal($arguments_worker_class, MyJob)
       assert((minimum_job_args & $arguments_job.keys) == minimum_job_args)
       assert_instance_of(ConnectionPool, $arguments_redis)
     end
@@ -416,9 +416,9 @@ describe Sidekiq::Client do
       @client.middleware do |chain|
         chain.add MiddlewareArguments
       end
-      @client.push_bulk("class" => MyWorker, "args" => [[0]])
+      @client.push_bulk("class" => MyJob, "args" => [[0]])
 
-      assert_equal($arguments_worker_class, MyWorker)
+      assert_equal($arguments_worker_class, MyJob)
       assert((minimum_job_args & $arguments_job.keys) == minimum_job_args)
       assert_instance_of(ConnectionPool, $arguments_redis)
     end
@@ -428,9 +428,9 @@ describe Sidekiq::Client do
         chain.add Stopper
       end
 
-      assert_nil @client.push("class" => MyWorker, "args" => [0])
-      assert_match(/[0-9a-f]{12}/, @client.push("class" => MyWorker, "args" => [1]))
-      @client.push_bulk("class" => MyWorker, "args" => [[0], [1]]).each do |jid|
+      assert_nil @client.push("class" => MyJob, "args" => [0])
+      assert_match(/[0-9a-f]{12}/, @client.push("class" => MyJob, "args" => [1]))
+      @client.push_bulk("class" => MyJob, "args" => [[0], [1]]).each do |jid|
         assert_match(/[0-9a-f]{12}/, jid)
       end
     end
@@ -438,8 +438,8 @@ describe Sidekiq::Client do
 
   describe "inheritance" do
     it "inherits sidekiq options" do
-      assert_equal "base", AWorker.get_sidekiq_options["retry"]
-      assert_equal "b", BWorker.get_sidekiq_options["retry"]
+      assert_equal "base", AJob.get_sidekiq_options["retry"]
+      assert_equal "b", BJob.get_sidekiq_options["retry"]
     end
   end
 
@@ -447,8 +447,8 @@ describe Sidekiq::Client do
     it "allows sidekiq_options to point to different Redi" do
       conn = MiniTest::Mock.new
       conn.expect(:pipelined, [0, 1])
-      DWorker.sidekiq_options("pool" => ConnectionPool.new(size: 1) { conn })
-      DWorker.perform_async(1, 2, 3)
+      DJob.sidekiq_options("pool" => ConnectionPool.new(size: 1) { conn })
+      DJob.perform_async(1, 2, 3)
       conn.verify
     end
 
@@ -458,7 +458,7 @@ describe Sidekiq::Client do
       sharded_pool = ConnectionPool.new(size: 1) { conn }
       Sidekiq::Client.via(sharded_pool) do
         Sidekiq::Client.via(sharded_pool) do
-          CWorker.perform_async(1, 2, 3)
+          CJob.perform_async(1, 2, 3)
         end
       end
       conn.verify
@@ -476,11 +476,11 @@ describe Sidekiq::Client do
       pork = ConnectionPool.new(size: 1) { oink }
 
       Sidekiq::Client.via(beef) do
-        CWorker.perform_async(1, 2, 3)
+        CJob.perform_async(1, 2, 3)
         assert_equal beef, Sidekiq::Client.new.redis_pool
         Sidekiq::Client.via(pork) do
           assert_equal pork, Sidekiq::Client.new.redis_pool
-          CWorker.perform_async(1, 2, 3)
+          CJob.perform_async(1, 2, 3)
         end
         assert_equal beef, Sidekiq::Client.new.redis_pool
       end
@@ -493,8 +493,8 @@ describe Sidekiq::Client do
       conn = MiniTest::Mock.new
       conn.expect(:pipelined, []) { |*args, &block| block.call(conn) }
       conn.expect(:zadd, 1, [String, Array])
-      DWorker.sidekiq_options("pool" => ConnectionPool.new(size: 1) { conn })
-      Sidekiq::Client.enqueue_in(10, DWorker, 3)
+      DJob.sidekiq_options("pool" => ConnectionPool.new(size: 1) { conn })
+      Sidekiq::Client.enqueue_in(10, DJob, 3)
       conn.verify
     end
   end

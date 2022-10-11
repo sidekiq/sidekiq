@@ -9,7 +9,7 @@ require "sidekiq/processor"
 TestProcessorException = Class.new(StandardError)
 TEST_PROC_EXCEPTION = TestProcessorException.new("kerboom!")
 
-class MockWorker
+class MockJob
   include Sidekiq::Job
   def perform(args)
     raise TEST_PROC_EXCEPTION if args.to_s == "boom"
@@ -71,7 +71,7 @@ describe Sidekiq::Processor do
   end
 
   it "processes as expected" do
-    msg = Sidekiq.dump_json({"class" => MockWorker.to_s, "args" => ["myarg"]})
+    msg = Sidekiq.dump_json({"class" => MockJob.to_s, "args" => ["myarg"]})
     @processor.process(work(msg))
     assert_equal 1, $invokes
   end
@@ -83,7 +83,7 @@ describe Sidekiq::Processor do
   end
 
   it "re-raises exceptions after handling" do
-    msg = Sidekiq.dump_json({"class" => MockWorker.to_s, "args" => ["boom"]})
+    msg = Sidekiq.dump_json({"class" => MockJob.to_s, "args" => ["boom"]})
     re_raise = false
 
     begin
@@ -98,7 +98,7 @@ describe Sidekiq::Processor do
   end
 
   it "does not modify original arguments" do
-    msg = {"class" => MockWorker.to_s, "args" => [["myarg"]]}
+    msg = {"class" => MockJob.to_s, "args" => [["myarg"]]}
     msgstr = Sidekiq.dump_json(msg)
     @processor.process(work(msgstr))
     assert_equal [["myarg"]], msg["args"]
@@ -123,7 +123,7 @@ describe Sidekiq::Processor do
     it "handles invalid JSON" do
       ds = Sidekiq::DeadSet.new
       ds.clear
-      job_hash = {"class" => MockWorker.to_s, "args" => ["boom"]}
+      job_hash = {"class" => MockJob.to_s, "args" => ["boom"]}
       msg = Sidekiq.dump_json(job_hash)
       job = work(msg[0...-2])
       ds = Sidekiq::DeadSet.new
@@ -137,7 +137,7 @@ describe Sidekiq::Processor do
     end
 
     it "handles exceptions raised by the job" do
-      job_hash = {"class" => MockWorker.to_s, "args" => ["boom"], "jid" => "123987123"}
+      job_hash = {"class" => MockJob.to_s, "args" => ["boom"], "jid" => "123987123"}
       msg = Sidekiq.dump_json(job_hash)
       job = work(msg)
       begin
@@ -151,7 +151,7 @@ describe Sidekiq::Processor do
     end
 
     it "handles exceptions raised by the reloader" do
-      job_hash = {"class" => MockWorker.to_s, "args" => ["boom"]}
+      job_hash = {"class" => MockJob.to_s, "args" => ["boom"]}
       msg = Sidekiq.dump_json(job_hash)
       @processor.instance_variable_set(:@reloader, proc { raise TEST_PROC_EXCEPTION })
       job = work(msg)
@@ -187,7 +187,7 @@ describe Sidekiq::Processor do
 
     before do
       work.expect(:queue_name, "queue:default")
-      work.expect(:job, Sidekiq.dump_json({"class" => MockWorker.to_s, "args" => worker_args}))
+      work.expect(:job, Sidekiq.dump_json({"class" => MockJob.to_s, "args" => worker_args}))
       @config.server_middleware do |chain|
         chain.prepend ExceptionRaisingMiddleware, raise_before_yield, raise_after_yield, skip_job
       end
@@ -268,7 +268,7 @@ describe Sidekiq::Processor do
 
     describe "middleware mutates the job args and then fails" do
       it "requeues with original arguments" do
-        job_data = {"class" => MockWorker.to_s, "args" => ["boom"]}
+        job_data = {"class" => MockJob.to_s, "args" => ["boom"]}
 
         retry_stub_called = false
         retry_stub = lambda { |worker, msg, queue, exception|
@@ -297,7 +297,7 @@ describe Sidekiq::Processor do
     end
 
     it "is called instead default Sidekiq::JobLogger" do
-      msg = Sidekiq.dump_json({"class" => MockWorker.to_s, "args" => ["myarg"]})
+      msg = Sidekiq.dump_json({"class" => MockJob.to_s, "args" => ["myarg"]})
       @processor.process(work(msg))
       assert_equal 2, $invokes
     end
@@ -312,7 +312,7 @@ describe Sidekiq::Processor do
       let(:processed_today_key) { "stat:processed:#{Time.now.utc.strftime("%Y-%m-%d")}" }
 
       def successful_job
-        msg = Sidekiq.dump_json({"class" => MockWorker.to_s, "args" => ["myarg"]})
+        msg = Sidekiq.dump_json({"class" => MockJob.to_s, "args" => ["myarg"]})
         @processor.process(work(msg))
       end
 
@@ -330,7 +330,7 @@ describe Sidekiq::Processor do
     end
 
     def successful_job
-      msg = Sidekiq.dump_json({"class" => MockWorker.to_s, "args" => ["myarg"]})
+      msg = Sidekiq.dump_json({"class" => MockJob.to_s, "args" => ["myarg"]})
       @processor.process(work(msg))
     end
 

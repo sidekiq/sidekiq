@@ -2,7 +2,7 @@
 
 require_relative "helper"
 
-class AttributeWorker
+class AttributeJob
   include Sidekiq::Job
   sidekiq_class_attribute :count
   self.count = 0
@@ -114,16 +114,16 @@ describe "Sidekiq::Testing" do
 
       begin
         Sidekiq::Testing.fake! do
-          AttributeWorker.perform_async
-          assert_equal 0, AttributeWorker.count
+          AttributeJob.perform_async
+          assert_equal 0, AttributeJob.count
         end
 
-        AttributeWorker.perform_one
-        assert_equal 1, AttributeWorker.count
+        AttributeJob.perform_one
+        assert_equal 1, AttributeJob.count
 
         Sidekiq::Testing.inline! do
-          AttributeWorker.perform_async
-          assert_equal 2, AttributeWorker.count
+          AttributeJob.perform_async
+          assert_equal 2, AttributeJob.count
         end
       ensure
         Sidekiq::Testing.server_middleware.clear

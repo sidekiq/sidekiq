@@ -4,7 +4,7 @@ require_relative "helper"
 require "sidekiq"
 require "sidekiq/api"
 
-class ShardWorker
+class ShardJob
   include Sidekiq::Job
 end
 
@@ -31,8 +31,8 @@ describe "Sharding" do
       Sidekiq::Client.via(@sh1) do
         assert_equal 0, q.size
         assert_equal 0, ss.size
-        ShardWorker.perform_async
-        ShardWorker.perform_in(3)
+        ShardJob.perform_async
+        ShardJob.perform_in(3)
         assert_equal 1, q.size
         assert_equal 1, ss.size
       end
@@ -43,8 +43,8 @@ describe "Sharding" do
       end
 
       # redirect jobs explicitly with pool attribute
-      ShardWorker.set(pool: @sh2).perform_async
-      ShardWorker.set(pool: @sh2).perform_in(4)
+      ShardJob.set(pool: @sh2).perform_async
+      ShardJob.set(pool: @sh2).perform_in(4)
       Sidekiq::Client.via(@sh2) do
         assert_equal 1, q.size
         assert_equal 1, ss.size

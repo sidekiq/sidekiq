@@ -80,7 +80,7 @@ describe "logger" do
       Sidekiq::Logger::Formatters::JSON]
     formats.each do |fmt|
       @logger.formatter = fmt.new
-      Sidekiq::Context.with(class: "HaikuWorker", bid: "b-1234abc") do
+      Sidekiq::Context.with(class: "HaikuJob", bid: "b-1234abc") do
         @logger.info("hello context")
       end
       assert_match(/INFO/, @output.string)
@@ -94,7 +94,7 @@ describe "logger" do
     @logger.formatter = Sidekiq::Logger::Formatters::JSON.new
 
     @logger.debug("boom")
-    Sidekiq::Context.with(class: "HaikuWorker", jid: "1234abc") do
+    Sidekiq::Context.with(class: "HaikuJob", jid: "1234abc") do
       @logger.info("json format")
     end
     a, b = @output.string.lines
