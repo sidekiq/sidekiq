@@ -1,16 +1,59 @@
 class JobMetricsOverviewChart extends BaseChart {
-  constructor(el, options) {
-    super(el, { ...options, chartType: "line" });
-    this.swatches = [];
-    this.visibleKls = options.visibleKls;
+  POLL_DELAY = 60000;
+  CHART_LIMIT = 5;
 
-    this.init();
+  constructor(chartId, tableBodyId, options) {
+    super(document.getElementById(chartId), { ...options, chartType: "line" });
+    this.tableBodyId = tableBodyId;
+
+    this.updateUrl = "/sidekiq/metrics.json";
+
+    this.jobClassMetadata = {};
+    this.startPolling();
   }
 
+  async startPolling() {
+    await this.poll();
+    this._interval = setInterval(this.poll.bind(this), this.POLL_DELAY);
+  }
+
+  async poll() {
+    const data = await this.fetchStats();
+    this.options = {
+      ...this.options,
+      ...data
+    };
+
+    this.jobClasses.forEach((jobClass) => {
+      if (!this.jobClassMetadata[jobClass]) {
+        this.jobClassMetadata[jobClass] = {
+          checked: this.checkedJobClasses.length < this.CHART_LIMIT,
+        };
+      }
+    })
+
+    if (!this.chart) {
+      this.init();
+    }
+
+    this.update();
+
+    document.getElementById('serverUtcTime').innerText = data.server_utc_time;
+    document.getElementById('metrics-data-from').innerText = data.data_from;
+  }
+
+  async fetchStats() {
+    const response = await fetch(this.updateUrl);
+    return await response.json();
+  }
+
+  // Return the datasets that are checked in the table
+  // and should be included in the chart.
   get datasets() {
-    return Object.entries(this.options.series)
-      .filter(([kls, _]) => this.visibleKls.includes(kls))
-      .map(([kls, _]) => this.buildDataset(kls));
+
+    return Object.entries(this.options.series || {})
+      .filter(([jobClass, _]) => this.checkedJobClasses.includes(jobClass))
+      .map(([jobClass, _]) => this.buildDataset(jobClass));
   }
 
   get metric() {
@@ -21,43 +64,107 @@ class JobMetricsOverviewChart extends BaseChart {
     this._metric = m;
   }
 
-  registerSwatch(id) {
-    const el = document.getElementById(id);
-    el.addEventListener("change", () => this.toggleKls(el.value, el.checked));
-    this.swatches[el.value] = el;
-    this.updateSwatch(el.value, el.checked);
+  get jobClasses() {
+    return Object.keys(this.options.tableData || {});
   }
 
-  updateSwatch(kls, checked) {
-    const el = this.swatches[kls];
-    el.checked = checked;
-    el.style.color = this.colors.assignments[kls] || "";
+  get checkedJobClasses() {
+    return this.jobClasses.filter((jobClass) => this.jobClassMetadata[jobClass]?.checked);
   }
 
-  toggleKls(kls, visible) {
-    if (visible) {
-      this.chart.data.datasets.push(this.buildDataset(kls));
+  // Setup eventListener for table checkbox and
+  // assign a color.
+  registerSwatch(element) {
+    element.addEventListener(
+      "change",
+      (event) => {
+        const element = event.target;
+        this.toggleClass(element.value, element.checked);
+      }
+    )
+    const jobClass = element.value;
+    element.style.color = this.colors.assignments[jobClass] || "";
+  }
+
+  // Toggle the jobClass and add / remove it from the chart.
+  toggleClass(jobClass, checked) {
+    if (checked) {
+      this.chart.data.datasets.push(this.buildDataset(jobClass));
     } else {
-      const i = this.chart.data.datasets.findIndex((ds) => ds.label == kls);
-      this.colors.checkIn(kls);
+      const i = this.chart.data.datasets.findIndex((ds) => ds.label == jobClass);
+      this.colors.checkIn(jobClass);
       this.chart.data.datasets.splice(i, 1);
     }
 
-    this.updateSwatch(kls, visible);
+    const metadata = this.jobClassMetadata[jobClass] || {};
+    metadata.checked = checked;
+    metadata.color = this.colors.assignments[jobClass] || "";
+    this.jobClassMetadata[jobClass] = metadata;
     this.update();
   }
 
-  buildDataset(kls) {
-    const color = this.colors.checkOut(kls);
+  buildDataset(jobClass) {
+    const color = this.colors.checkOut(jobClass);
 
     return {
-      label: kls,
-      data: this.options.series[kls],
+      label: jobClass,
+      data: this.options.series[jobClass],
       borderColor: color,
       backgroundColor: color,
       borderWidth: 2,
       pointRadius: 2,
     };
+  }
+
+  update() {
+    this.chart.data = {labels: this.options.labels, datasets: this.datasets };
+    this.chart.update('none');
+    this.updateTableBody();
+  }
+
+  updateTableBody() {
+    let rows = "";
+    if (this.jobClasses.length > 0) {
+      this.jobClasses.forEach((jobClass) => {
+        const metadata = this.jobClassMetadata[jobClass] || {};
+        const result = this.options.tableData[jobClass];
+        rows += `
+          <tr>
+            <td>
+              <div class="metrics-swatch-wrapper">
+                <input
+                  type="checkbox"
+                  id="metrics-swatch-${jobClass}"
+                  class="metrics-swatch"
+                  value="${jobClass}"
+                  ${metadata.checked ? 'checked' : ''}
+                  style="color: ${metadata.color}"
+                />
+                <code>
+                  <a href="/sidekiq/metrics/${jobClass}">
+                    ${jobClass}
+                  </a>
+                </code>
+              </div>
+            </td>
+            <td>${result["success"]}</td>
+            <td>${result["failure"]}</td>
+            <td>${result["total"]} ${this.options.units}</td>
+            <td>${result["average"]} ${this.options.units}</td>
+          </tr>
+        `;
+      });
+    } else {
+      rows = `<tr><td colspan='5'>${this.options.noDataFound}</td></tr>`
+    }
+
+    const table = document.getElementById(this.tableBodyId)
+    if (table) {
+      table.innerHTML = rows;
+      table.querySelectorAll(".metrics-swatch").forEach((el) => {
+        this.registerSwatch(el);
+      });
+    }
   }
 
   get chartOptions() {

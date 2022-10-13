@@ -61,9 +61,31 @@ module Sidekiq
     end
 
     get "/metrics" do
-      q = Sidekiq::Metrics::Query.new
-      @query_result = q.top_jobs
       erb(:metrics)
+    end
+
+    get "/metrics.json" do
+      query = Sidekiq::Metrics::Query.new
+      job_results = query.top_jobs.job_results.sort_by { |(kls, jr)| jr.totals["s"] }.reverse.first(20)
+      json_data = {
+        labels: query.top_jobs.buckets,
+        marks: query.top_jobs.marks.map { |m| [m.bucket, m.label] },
+        tableData: job_results.map do |(kls, jr)|
+          [
+            kls,
+            {
+              success: jr.dig("totals", "p") - jr.dig("totals", "f"),
+              failure: jr.dig("totals", "f"),
+              total: jr.dig("totals", "s").round(2),
+              average: jr.total_avg("s").round(2)
+            }
+          ]
+        end.to_h,
+        series: job_results.map { |(kls, jr)| [kls, jr.dig("series", "s")] }.to_h,
+        server_utc_time: server_utc_time,
+        data_from: "#{t('Data from')} #{query.top_jobs.starts_at} #{t('to')} #{query.top_jobs.ends_at}."
+      }
+      json(json_data)
     end
 
     get "/metrics/:name" do
