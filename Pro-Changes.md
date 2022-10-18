@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+6.0.0.beta1
+------------
+
+- Componentize and capsulize Pro functionality for Sidekiq 7.
+- Add DE locale
+
 5.5.5
 ---------
 
