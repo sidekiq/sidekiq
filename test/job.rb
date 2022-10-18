@@ -121,6 +121,21 @@ describe Sidekiq::Job do
       assert_equal 1_001, jids.size
     end
 
+    it "works with custom options on .perform_bulk" do
+      q = Sidekiq::Queue.new("bar")
+      assert_equal 0, q.size
+
+      set = MySetJob.set(queue: "bar")
+      args = (1..1_001).to_a.map { |x| Array(x) }
+      jids = set.perform_bulk(args, custom_opts: { "foo_bar" => 1})
+
+      assert_equal 1_001, q.size
+      assert_equal 1_001, jids.size
+
+      custom_options_value = q.all? {|j| JSON.parse(j.value).key?("foo_bar") }
+      assert_equal true, custom_options_value
+    end
+
     describe ".perform_bulk and lazy enumerators" do
       it "evaluates lazy enumerators" do
         q = Sidekiq::Queue.new("bar")
