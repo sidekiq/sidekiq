@@ -44,7 +44,7 @@ Gem::Specification.new do |gem|
     WARNING: This is a beta release, expect breakage!
     
     1. Use `gem 'sidekiq', '<7'` in your Gemfile if you don't want to be a beta tester.
-    2. Read the release notes at https://github.com/mperham/sidekiq/blob/7-0/docs/7.0-Upgrade.md
+    2. Read the release notes at https://github.com/mperham/sidekiq/blob/main/docs/7.0-Upgrade.md
     3. Search for open/closed issues at https://github.com/mperham/sidekiq/issues/
     
     ####################################################
