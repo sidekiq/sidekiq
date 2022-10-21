@@ -1,6 +1,8 @@
-# Welcome to Sidekiq Pro 6.0
+# Welcome to Sidekiq Pro 7.0
 
-Sidekiq Pro 6.0 contains some breaking changes which refactor internals, remove deprecated features and update required dependency versions.
+Sidekiq Pro 7.0 contains some breaking changes which refactor internals, remove deprecated features and update required dependency versions.
+
+Note that version 6.x was skipped in order to synchronize Sidekiq Pro's major version number with Sidekiq 7.
 
 ## What's New
 
@@ -28,4 +30,4 @@ end
 - Ruby 2.7+ is now required
 - Rails 6.0+ is now supported
 
-Support is only guaranteed for the current and previous major versions. With the release of Sidekiq Pro 6, Sidekiq Pro 4.x is no longer supported.
+Support is only guaranteed for the current and previous major versions. With the release of Sidekiq Pro 7, Sidekiq Pro 4.x is no longer supported.
