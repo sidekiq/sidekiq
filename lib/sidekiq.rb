@@ -3,6 +3,30 @@
 require "sidekiq/version"
 fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 2.7.0." if RUBY_PLATFORM != "java" && Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.7.0")
 
+begin
+  require "sidekiq-ent/version"
+  fail <<~EOM  if Gem::Version.new(Sidekiq::Enterprise::VERSION).segments[0] != Sidekiq::MAJOR
+
+    Sidekiq Enterprise #{Sidekiq::Enterprise::VERSION} does not work with Sidekiq #{Sidekiq::VERSION}.
+    Starting with Sidekiq 7, major versions are synchronized so Sidekiq Enterprise 7 works with Sidekiq 7.
+    Use `bundle up sidekiq-ent` to upgrade.
+
+  EOM
+rescue LoadError
+end
+
+begin
+  require "sidekiq/pro/version"
+  fail <<~EOM  if Gem::Version.new(Sidekiq::Pro::VERSION).segments[0] != Sidekiq::MAJOR
+
+    Sidekiq Pro #{Sidekiq::Pro::VERSION} does not work with Sidekiq #{Sidekiq::VERSION}.
+    Starting with Sidekiq 7, major versions are synchronized so Sidekiq Pro 7 works with Sidekiq 7.
+    Use `bundle up sidekiq-pro` to upgrade.
+
+  EOM
+rescue LoadError
+end
+
 require "sidekiq/config"
 require "sidekiq/logger"
 require "sidekiq/client"
