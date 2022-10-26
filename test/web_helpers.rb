@@ -2,7 +2,6 @@
 
 require_relative "helper"
 require "sidekiq/web"
-require "pry"
 
 class Helpers
   include Sidekiq::WebHelpers
