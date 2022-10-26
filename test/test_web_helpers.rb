@@ -146,4 +146,21 @@ describe "Web helpers" do
     assert obj.sorted_processes.all? { |process| assert_instance_of Sidekiq::Process, process }
     assert_equal ["2.1.1.1", "192.168.0.2", "192.168.0.10", "a.1", "a.2", "a.10.1", "a.10.2", "a.23", "busybee-2__34", "busybee--10_1"], obj.sorted_processes.map { |process| process["hostname"] }
   end
+
+  it "sorts processes with multiple dividers correctly" do
+    ["worker_critical.2", "worker_default.1", "worker_critical.1", "worker_default.2", "worker_critical.10"].each do |hostname|
+      pdata = {"hostname" => hostname, "pid" => "123", "started_at" => Time.now.to_i}
+      key = "#{hostname}:123"
+
+      Sidekiq.redis do |conn|
+        conn.sadd("processes", [key])
+        conn.hmset(key, "info", Sidekiq.dump_json(pdata), "busy", 0, "beat", Time.now.to_f)
+      end
+    end
+
+    obj = Helpers.new
+
+    assert obj.sorted_processes.all? { |process| assert_instance_of Sidekiq::Process, process }
+    assert_equal ["worker_critical.1", "worker_critical.2", "worker_critical.10", "worker_default.1", "worker_default.2"], obj.sorted_processes.map { |process| process["hostname"] }
+  end
 end
