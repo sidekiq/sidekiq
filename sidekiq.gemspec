@@ -41,7 +41,7 @@ Gem::Specification.new do |gem|
      ░░░░░░░░░  ░░░░░ ░░░░░░░░░░   ░░░░░░░░░░ ░░░░░   ░░░░ ░░░░░    ░░░░░░ ░░      ░░░      ░░    ░░░░░░
     
     
-    1. Use `gem 'sidekiq', '<7'` in your Gemfile if you don't want the new version.
+    1. Use `gem 'sidekiq', '<7'` in your Gemfile if you don't want this new version.
     2. Read the release notes at https://github.com/mperham/sidekiq/blob/main/docs/7.0-Upgrade.md
     3. Search for open/closed issues at https://github.com/mperham/sidekiq/issues/
     

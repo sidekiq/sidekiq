@@ -4,11 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-3.0.0.beta1
-------------
+7.0.0
+---------
 
 - Componentize and capsulize Enterprise functionality for Sidekiq 7
 - Remove bucket history graph from Web UI
+- Rename "Cron" tab to "Periodic" [#5590]
 - Add DE locale
 
 2.5.3
