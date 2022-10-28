@@ -15,9 +15,9 @@ module Sidekiq
       fire_event(:startup, reverse: false, reraise: true)
       @launcher = Sidekiq::Launcher.new(@config, embedded: true)
       @launcher.run
-      sleep 0.1 # pause to give threads time to spin up
+      sleep 0.2 # pause to give threads time to spin up
 
-      logger.info "Embedded mode running with #{Thread.list.size} threads"
+      logger.info "Sidekiq running embedded, total process thread count: #{Thread.list.size}"
       logger.debug { Thread.list.map(&:name) }
     end
 
