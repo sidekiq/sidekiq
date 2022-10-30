@@ -32,23 +32,22 @@ zh-cn: # <---- change this to your locale code
   Size: 容量
   Actions: 动作
   NextRetry: 下次重试
-  RetryCount: 重试次數
+  RetryCount: 重试次数
   RetryNow: 现在重试
   Kill: 终止
-  LastRetry: 最后一次重试
-  OriginallyFailed: 原本已失败
+  LastRetry: 上次重试
+  OriginallyFailed: 首次失败
   AreYouSure: 你确定？
   DeleteAll: 全部删除
   RetryAll: 全部重试
   KillAll: 全部终止
-  NoRetriesFound: 沒有发现可重试
+  NoRetriesFound: 没有发现可重试
   Error: 错误
-  ErrorBacktrace: 错误的回调追踪
   ErrorClass: 错误类别
   ErrorMessage: 错误消息
   ErrorBacktrace: 错误细节
   GoBack: ← 返回
-  NoScheduledFound: 沒有发现计划任务
+  NoScheduledFound: 没有发现计划任务
   When: 当
   ScheduledJobs: 计划任务
   idle: 闲置
@@ -64,26 +63,26 @@ zh-cn: # <---- change this to your locale code
   SixMonths: 六个月
   Failures: 失败
   DeadJobs: 已停滞任务
-  NoDeadJobsFound: 沒有发现任何已停滞的任务
+  NoDeadJobsFound: 没有发现任何已停滞的任务
   Dead: 已停滞
   Process: 进程
-  Processes: 处理中
+  Processes: 进程
   Name: 名称
   Thread: 线程
   Threads: 线程
   Jobs: 任务
-  Paused: 已暫停
-  Stop: 強制暫停
-  Quiet: 暫停
-  StopAll: 全部強制暫停
-  QuietAll: 全部暫停
-  PollingInterval: 輪詢週期
-  Plugins: 套件
-  NotYetEnqueued: 尚未進入佇列
-  CreatedAt: 建立時間
+  Paused: 已暂停
+  Stop: 强制暂停
+  Quiet: 暂停
+  StopAll: 全部强制暂停
+  QuietAll: 全部暂停
+  PollingInterval: 轮询周期
+  Plugins: 插件
+  NotYetEnqueued: 尚未进入队列
+  CreatedAt: 建立时间
   BackToApp: 回首頁
-  Latency: 延時
-  Pause: 暫停
+  Latency: 延迟
+  Pause: 暂停
   Unpause: 取消暂停
   Metrics: 指标
   NoDataFound: 无数据
@@ -92,3 +91,5 @@ zh-cn: # <---- change this to your locale code
   Context: 上下文
   Bucket: 桶
   NoJobMetricsFound: 无任务相关指标数据
+  Success: 成功
+  Failure: 失败
