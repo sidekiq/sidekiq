@@ -36,23 +36,22 @@ workers ENV.fetch("WEB_CONCURRENCY", 2)
 # This directive tells Puma to first boot the application and load code
 # before forking the application. This takes advantage of Copy On Write
 # process behavior so workers use less memory.
-#
-require "sidekiq"
 preload_app!
 
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart
 
+x = nil
 on_worker_boot do
-  $sidekiq = Sidekiq.configure_embed do |config|
+  x = Sidekiq.configure_embed do |config|
     config.queues = %w[critical default low]
     # don't raise this unless you know your app has available CPU time to burn.
     # it's easy to overload a Ruby process with too many threads.
     config.concurrency = 2
   end
-  $sidekiq&.run
+  x&.run
 end
 
 on_worker_shutdown do
-  $sidekiq&.stop
+  x&.stop
 end
