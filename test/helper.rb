@@ -4,7 +4,8 @@ require "bundler/setup"
 Bundler.require(:default, :test)
 
 require "minitest/pride"
-require "minitest/autorun"
+require "maxitest/autorun"
+# require "maxitest/threads"
 
 $TESTING = true
 # disable minitest/parallel threads

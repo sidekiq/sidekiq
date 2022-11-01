@@ -18,7 +18,7 @@ gem "after_commit_everywhere"
 gem "yard"
 
 group :test do
-  gem "minitest"
+  gem "maxitest"
   gem "simplecov"
 end
 
