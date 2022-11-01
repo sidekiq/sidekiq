@@ -28,13 +28,10 @@ describe Sidekiq::Manager do
     mgr = new_manager
     init_size = mgr.workers.size
     processor = mgr.workers.first
-    begin
-      mgr.processor_result(processor, "ignored")
+    mgr.quiet
+    mgr.processor_result(processor, "ignored")
 
-      assert_equal init_size, mgr.workers.size
-      refute mgr.workers.include?(processor)
-    ensure
-      mgr.quiet
-    end
+    assert_equal init_size - 1, mgr.workers.size
+    refute mgr.workers.include?(processor)
   end
 end

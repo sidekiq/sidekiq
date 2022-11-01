@@ -32,15 +32,17 @@ module Sidekiq
       @done = false
     end
 
-    def run
+    # Start this Sidekiq instance. If an embedding process already
+    # has a heartbeat thread, caller can use `async_beat: false`
+    # and instead have thread call Launcher#heartbeat every N seconds.
+    def run(async_beat: true)
       Sidekiq.freeze!
-      @thread = safe_thread("heartbeat", &method(:start_heartbeat))
+      @thread = safe_thread("heartbeat", &method(:start_heartbeat)) if async_beat
       @poller.start
       @managers.each(&:start)
     end
 
     # Stops this instance from processing any more jobs,
-    #
     def quiet
       return if @done
 
@@ -71,16 +73,28 @@ module Sidekiq
       @done
     end
 
+    # If embedding Sidekiq, you can have the process heartbeat
+    # call this method to regularly heartbeat rather than creating
+    # a separate thread.
+    def heartbeat
+      ❤
+    end
+
     private unless $TESTING
 
     BEAT_PAUSE = 10
 
     def start_heartbeat
       loop do
-        heartbeat
+        beat
         sleep BEAT_PAUSE
       end
       logger.info("Heartbeat stopping...")
+    end
+
+    def beat
+      $0 = PROCTITLES.map { |proc| proc.call(self, to_data) }.compact.join(" ") unless @embedded
+      ❤
     end
 
     def clear_heartbeat
@@ -97,12 +111,6 @@ module Sidekiq
       end
     rescue
       # best effort, ignore network errors
-    end
-
-    def heartbeat
-      $0 = PROCTITLES.map { |proc| proc.call(self, to_data) }.compact.join(" ") unless @embedded
-
-      ❤
     end
 
     def flush_stats
