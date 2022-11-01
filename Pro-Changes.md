@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Fix eager connection to Redis [#5606]
+
 7.0.0
 ---------
 

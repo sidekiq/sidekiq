@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+HEAD
+---------
+
+- Fix spurious ReadTimeoutError in concurrent rate limiter [#5611]
+- Fix eager connection to Redis [#5606]
+
 7.0.0
 ---------
 
