@@ -2,9 +2,10 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+6.5.8
 ----------
 
+- Fail if using a bad version of scout_apm [#5616]
 - Add pagination to Busy page [#5556]
 - Speed up WorkSet#each [#5559]
 - Adjust CurrentAttributes to work with the String class name so we aren't referencing
