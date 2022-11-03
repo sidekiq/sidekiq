@@ -12,6 +12,17 @@ require "sidekiq"
 require "sidekiq/component"
 require "sidekiq/launcher"
 
+# module ScoutApm
+  # VERSION = "5.3.1"
+# end
+fail <<~EOM if defined?(ScoutApm::VERSION) && ScoutApm::VERSION < "5.2.0"
+
+
+scout_apm v#{ScoutApm::VERSION} is unsafe with Sidekiq 6.5. Please run `bundle up scout_apm` to upgrade to 5.2.0 or greater.
+
+
+EOM
+
 module Sidekiq # :nodoc:
   class CLI
     include Sidekiq::Component
