@@ -4,10 +4,10 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+7.0.1
 ---------
 
-- Fix eager connection to Redis [#5606]
+- Fix eager connection to Redis when activating reliable_push [#5606]
 
 7.0.0
 ---------
