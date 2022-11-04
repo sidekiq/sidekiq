@@ -323,6 +323,16 @@ module Sidekiq
       Time.now.utc.strftime("%H:%M:%S UTC")
     end
 
+    # Routes of the web UI where Live Poll should not be available
+    NOT_POLLABLE = ["metrics"]
+
+    # Split current_path to be able to match for both "metrics" and "metrics/:name"
+    def pollable?
+      return false if current_path.blank?
+
+      NOT_POLLABLE.exclude?(current_path.split("/").first)
+    end
+
     def retry_or_delete_or_kill(job, params)
       if params["retry"]
         job.retry
