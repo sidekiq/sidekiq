@@ -35,7 +35,7 @@ describe Sidekiq::Component do
       end
       assert_match(/"a":1/, output, "didn't include the context")
       assert_match(/Something didn't work!/, output, "didn't include the exception message")
-      assert_match(/test\/exception_handler.rb/, output, "didn't include the backtrace")
+      assert_match(/test\/exception_handler_test.rb/, output, "didn't include the backtrace")
     end
 
     describe "when the exception does not have a backtrace" do
