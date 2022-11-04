@@ -16,13 +16,13 @@
 - Job Execution metrics!!!
 - See `docs/7.0-Upgrade.md` for release notes
 
-6-x
+6.5.8
 ----------
 
+- Fail if using a bad version of scout_apm [#5616]
 - Add pagination to Busy page [#5556]
 - Speed up WorkSet#each [#5559]
-- Adjust CurrentAttributes to work with the String class name so we aren't referencing
-the Class within a Rails initializer [#5536]
+- Adjust CurrentAttributes to work with the String class name so we aren't referencing the Class within a Rails initializer [#5536]
 
 6.5.7
 ----------
