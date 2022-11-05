@@ -30,6 +30,10 @@ class Helpers
     {
     }
   end
+
+  def path_info
+    @thehash[:path_info]
+  end
 end
 
 describe "Web helpers" do
@@ -179,5 +183,23 @@ describe "Web helpers" do
 
     assert obj.sorted_processes.all? { |process| assert_instance_of Sidekiq::Process, process }
     assert_equal ["worker_critical.1", "worker_critical.2", "worker_critical.10", "worker_default.1", "worker_default.2"], obj.sorted_processes.map { |process| process["hostname"] }
+  end
+
+  describe "#pollable?" do
+    it "returns true if not the root or metrics path" do
+      obj = Helpers.new({path_info: "/retries"})
+
+      assert obj.pollable?
+    end
+
+    it "returns false if the root or metrics path" do
+      obj = Helpers.new({path_info: "/metrics"})
+
+      assert_equal false, obj.pollable?
+
+      obj = Helpers.new({path_info: "/"})
+
+      assert_equal false, obj.pollable?
+    end
   end
 end
