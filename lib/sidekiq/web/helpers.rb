@@ -324,7 +324,7 @@ module Sidekiq
     end
 
     def pollable?
-      !(current_path == "" || current_path.starts_with?("metrics"))
+      !(current_path == "" || current_path.start_with?("metrics"))
     end
 
     def retry_or_delete_or_kill(job, params)
