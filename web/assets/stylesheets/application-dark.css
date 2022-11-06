@@ -72,6 +72,10 @@ table {
   background-color: #31708f;
 }
 
+.alert-warning {
+  background-color: #c47612;
+}
+
 a:link, a:active, a:hover, a:visited {
   color: #ddd;
 }
