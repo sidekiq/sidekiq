@@ -84,6 +84,12 @@
           <td><%= relative_time(job.at) if job['retry_count'] %></td>
         </tr>
       <% end %>
+      <% unless batch_id(job).nil? %>
+        <tr>
+          <th><%= t('Batch') %></th>
+          <td><a href="<%= root_path %>batches/<%= batch_id(job) %>"><%= batch_id(job) %></td>
+        </tr>
+      <% end %>
     </tbody>
   </table>
 </div>

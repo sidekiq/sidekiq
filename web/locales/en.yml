@@ -7,6 +7,7 @@ en:
   AreYouSureDeleteQueue: Are you sure you want to delete the %{queue} queue? This will delete all jobs within the queue, it will reappear if you push more jobs to it in the future.
   Arguments: Arguments
   BackToApp: Back to App
+  Batch: Batch
   Busy: Busy
   Class: Class
   Connections: Connections
