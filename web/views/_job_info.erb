@@ -92,6 +92,14 @@
           <td><%= relative_time(job.at) if job['retry_count'] %></td>
         </tr>
       <% end %>
+      <% Sidekiq::Web.custom_job_info_rows.each do |processor| %>
+        <% if processor.show_row(job) %>
+          <tr>
+            <th><%= processor.row_name %></th>
+            <td><%= processor.row_contents(job) %></td>
+          </tr>
+        <% end %>
+      <% end %>
     </tbody>
   </table>
 </div>

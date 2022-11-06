@@ -48,6 +48,10 @@ module Sidekiq
       end
       alias_method :tabs, :custom_tabs
 
+      def custom_job_info_rows
+        @custom_job_info_rows ||= []
+      end
+
       def locales
         @locales ||= LOCALES
       end
