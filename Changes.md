@@ -6,6 +6,7 @@ HEAD
 ----------
 
 - Add BID link on job_info page if job is part of a Batch [#5623]
+- Allow custom extensions to add rows/links within the Job Details page [#5624]
 
 7.0.1
 ----------

@@ -12,6 +12,12 @@ class WebJob
   end
 end
 
+class LogDisplayer
+  def add_pair(job)
+    yield "External Logs", "<a href='https://example.com/logs/#{job.jid}'>Logs for #{job.jid}</a>"
+  end
+end
+
 describe Sidekiq::Web do
   include Rack::Test::Methods
 
@@ -271,10 +277,21 @@ describe Sidekiq::Web do
     assert_match(/HardJob/, last_response.body)
   end
 
+  it "displays custom job info" do
+    Sidekiq::Web.custom_job_info_rows << LogDisplayer.new
+    params = add_retry
+    get "/retries/#{job_params(*params)}"
+    assert_equal 200, last_response.status
+    assert_match(/https:\/\/example.com\/logs\//, last_response.body)
+  ensure
+    Sidekiq::Web.custom_job_info_rows.clear
+  end
+
   it "can display a single retry" do
     params = add_retry
     get "/retries/0-shouldntexist"
     assert_equal 302, last_response.status
+
     get "/retries/#{job_params(*params)}"
     assert_equal 200, last_response.status
     assert_match(/HardJob/, last_response.body)
