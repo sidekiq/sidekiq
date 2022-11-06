@@ -418,6 +418,10 @@ module Sidekiq
       self["jid"]
     end
 
+    def bid
+      self["bid"]
+    end
+
     def enqueued_at
       self["enqueued_at"] ? Time.at(self["enqueued_at"]).utc : nil
     end

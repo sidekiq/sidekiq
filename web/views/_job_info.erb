@@ -33,6 +33,14 @@
           <code><%= job.jid %></code>
         </td>
       </tr>
+      <% if job.bid %>
+      <tr>
+        <th>BID</th>
+        <td>
+          <a href="<%= root_path %>batches/<%= job.bid %>"><%= job.bid %>
+        </td>
+      </tr>
+      <% end %>
       <tr>
         <th><%= t('CreatedAt') %></th>
         <td><%= relative_time(job.created_at) %></td>
