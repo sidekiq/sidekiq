@@ -676,8 +676,8 @@ div.interval-slider input {
 }
 
 .info-circle {
-  color: #ccc;
-  background-color: #000;
+  color: #333;
+  background-color: #ccc;
   border-radius: 50%;
   text-align: center;
   vertical-align: middle;
