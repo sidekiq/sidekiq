@@ -67,7 +67,7 @@ class Sidekiq::Monitor
         puts "  Started: #{Time.at(process["started_at"])} (#{time_ago(process["started_at"])})"
         puts "  Threads: #{process["concurrency"]} (#{process["busy"]} busy)"
         puts "   Queues: #{split_multiline(queues, pad: 11)}"
-        puts "  Version: #{process["version"] || "Unknown"}"
+        puts "  Version: #{process["version"] || "Unknown"}" if process["version"] != Sidekiq::VERSION
         puts "" unless (index + 1) == process_set.size
       end
     end

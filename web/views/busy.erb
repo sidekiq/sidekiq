@@ -75,12 +75,14 @@
           <% else %>
             <%= process.queues.sort.join(", ") %>
           <% end %>
-          <br>
-          <b><%= "#{t('Version')}: " %></b>
-          <% if process.version %>
-            <%= process.version %>
-          <% else %>
-            <%= t('Unknown') %>
+          <% if process.version != Sidekiq::VERSION %>
+            <br>
+            <b><%= "#{t('Version')}: " %></b>
+            <% if process.version %>
+              <%= process.version %>
+            <% else %>
+              <%= t('Unknown') %>
+            <% end %>
           <% end %>
         </td>
         <td><%= relative_time(Time.at(process['started_at'])) %></td>
