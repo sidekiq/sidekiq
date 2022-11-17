@@ -531,7 +531,9 @@ describe "API" do
         "key" => identity_string,
         "identity" => identity_string,
         "started_at" => Time.now.to_f - 15,
-        "queues" => {"foo" => 1, "bar" => 1}
+        "queues" => ["foo", "bar"],
+        "weights" => {"foo" => 1, "bar" => 1},
+        "version" => Sidekiq::VERSION
       }
 
       time = Time.now.to_f
@@ -549,7 +551,9 @@ describe "API" do
       assert_equal 10, data["busy"]
       assert_equal time, data["beat"]
       assert_equal 123, data["pid"]
-      assert_equal({"foo" => 1, "bar" => 1}, data.queues)
+      assert_equal(["foo", "bar"], data.queues)
+      assert_equal({"foo" => 1, "bar" => 1}, data.weights)
+      assert_equal(Sidekiq::VERSION, data.version)
       data.quiet!
       data.stop!
       signals_string = "#{odata["key"]}-signals"
