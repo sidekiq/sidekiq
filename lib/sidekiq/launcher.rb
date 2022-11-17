@@ -250,9 +250,11 @@ module Sidekiq
         "pid" => ::Process.pid,
         "tag" => @config[:tag] || "",
         "concurrency" => @config.total_concurrency,
-        "queues" => @config.capsules.values.map { |cap| cap.queues }.flatten.uniq,
+        "queues" => @config.capsules.values.flat_map { |cap| cap.queues }.uniq,
+        "weights" => @config.capsules.values.flat_map { |cap| cap.queues }.tally,
         "labels" => @config[:labels].to_a,
-        "identity" => identity
+        "identity" => identity,
+        "version" => Sidekiq::VERSION
       }
     end
 

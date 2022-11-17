@@ -971,6 +971,14 @@ module Sidekiq
       self["queues"]
     end
 
+    def weights
+      self["weights"]
+    end
+
+    def version
+      self["version"]
+    end
+
     # Signal this process to stop processing new jobs.
     # It will continue to execute jobs it has already fetched.
     # This method is *asynchronous* and it can take 5-10
