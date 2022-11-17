@@ -49,10 +49,25 @@ class Sidekiq::Monitor
     def processes
       puts "---- Processes (#{process_set.size}) ----"
       process_set.each_with_index do |process, index|
+        # Keep compatibility with legacy versions since we don't want to break sidekiqmon during rolling upgrades or downgrades.
+        #
+        # Before:
+        #   ["default", "critical"]
+        #
+        # After:
+        #   {"default" => 1, "critical" => 10}
+        queues =
+          if process["weights"]
+            process["weights"].sort_by { |queue| queue[0] }.map { |queue| queue.join(": ") }
+          else
+            process["queues"].sort
+          end
+
         puts "#{process["identity"]} #{tags_for(process)}"
         puts "  Started: #{Time.at(process["started_at"])} (#{time_ago(process["started_at"])})"
         puts "  Threads: #{process["concurrency"]} (#{process["busy"]} busy)"
-        puts "   Queues: #{split_multiline(process["queues"].sort, pad: 11)}"
+        puts "   Queues: #{split_multiline(queues, pad: 11)}"
+        puts "  Version: #{process["version"] || "Unknown"}" if process["version"] != Sidekiq::VERSION
         puts "" unless (index + 1) == process_set.size
       end
     end
