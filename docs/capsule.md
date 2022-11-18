@@ -28,7 +28,7 @@ Sidekiq can be used.
 ## Sidekiq::Config
 
 Before, all Sidekiq configuration went through the Sidekiq module and was stored in the top-level hash at `Sidekiq.options`.
-Now Sidekiq::CLI creates a `Sidekiq::Config` object which holds the global configuration at, shockingly, `Sidekiq.global_configuration`.
+Now Sidekiq::CLI creates a `Sidekiq::Config` object which holds the global configuration at `Sidekiq.default_configuration`.
 This instance is now passed into `Sidekiq.configure_{client,server} do |config|`
 
 ## Sidekiq::Capsule
