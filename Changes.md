@@ -2,12 +2,17 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/master/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/master/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/master/Ent-Changes.md)
 
+5.2.11
+---------
+- Relax `rack` requirement to allow for 1.xx versions
+
 5.2.10
 ---------
 
 - Backport fix for CVE-2022-23837.
 - Migrate to `exists?` for redis-rb.
 - Lock redis-rb to <4.6 to avoid deprecations.
+- **BREAKING CHANGE**: Require a 4.5 minimum of version of [`redis`](https://github.com/redis/redis-rb).
 
 5.2.9
 ---------
