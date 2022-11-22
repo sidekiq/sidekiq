@@ -432,12 +432,14 @@ See the [Logging wiki page](https://github.com/mperham/sidekiq/wiki/Logging) for
 - Backport fix for CVE-2022-23837.
 - Migrate to `exists?` for redis-rb.
 - Lock redis-rb to <4.6 to avoid deprecations.
+- **BREAKING CHANGE**: Require a minimum 4.5 version of `redis-rb`
 
 5.2.9
 ---------
 
 - Release Rack lock due to a cascade of CVEs. [#4566]
   Pro-tip: don't lock Rack.
+- **BREAKING CHANGE**: Require a minimum 2.0 version of `rack`
 
 5.2.8
 ---------
