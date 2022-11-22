@@ -134,7 +134,7 @@ module Sidekiq
 
     def redis_info
       redis do |conn|
-        conn.info
+        conn.call("INFO") { |i| i.lines(chomp: true).map { |l| l.split(":", 2) }.select { |l| l.size == 2 }.to_h }
       rescue RedisClientAdapter::CommandError => ex
         # 2850 return fake version when INFO command has (probably) been renamed
         raise unless /unknown command/.match?(ex.message)

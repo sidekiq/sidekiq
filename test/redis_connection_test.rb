@@ -12,11 +12,11 @@ describe Sidekiq::RedisConnection do
     end
 
     def client_for(redis)
-      redis._client
+      redis.instance_variable_get(:@client)
     end
 
     def config_for(redis)
-      redis._config
+      redis.config
     end
 
     def client_class

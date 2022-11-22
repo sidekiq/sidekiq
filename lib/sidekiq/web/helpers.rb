@@ -167,7 +167,7 @@ module Sidekiq
 
     def redis_url
       Sidekiq.redis do |conn|
-        conn._config.server_url
+        conn.config.server_url
       end
     end
 

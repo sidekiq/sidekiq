@@ -54,7 +54,7 @@ module Sidekiq
           @lua_zpopbyscore_sha = conn.script(:load, LUA_ZPOPBYSCORE)
         end
 
-        conn.evalsha(@lua_zpopbyscore_sha, keys, argv)
+        conn.call("EVALSHA", @lua_zpopbyscore_sha, keys.size, *keys, *argv)
       rescue RedisClient::CommandError => e
         raise unless e.message.start_with?("NOSCRIPT")
 

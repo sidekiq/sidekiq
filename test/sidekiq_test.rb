@@ -81,7 +81,7 @@ describe Sidekiq do
     it "reconnects if connection is flagged as readonly" do
       counts = []
       @config.redis do |c|
-        counts << c.info["total_connections_received"].to_i
+        counts << c.incr("connections").to_i
         raise Sidekiq::RedisClientAdapter::CommandError, "READONLY You can't write against a replica." if counts.size == 1
       end
       assert_equal 2, counts.size
@@ -91,7 +91,7 @@ describe Sidekiq do
     it "reconnects if instance state changed" do
       counts = []
       @config.redis do |c|
-        counts << c.info["total_connections_received"].to_i
+        counts << c.incr("connections").to_i
         raise Sidekiq::RedisClientAdapter::CommandError, "UNBLOCKED force unblock from blocking operation, instance state changed (master -> replica?)" if counts.size == 1
       end
       assert_equal 2, counts.size

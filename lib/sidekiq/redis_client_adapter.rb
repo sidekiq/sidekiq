@@ -9,10 +9,12 @@ module Sidekiq
     CommandError = RedisClient::CommandError
 
     module CompatMethods
+      # TODO Deprecate and remove this
       def info
         @client.call("INFO") { |i| i.lines(chomp: true).map { |l| l.split(":", 2) }.select { |l| l.size == 2 }.to_h }
       end
 
+      # TODO Deprecate and remove this
       def evalsha(sha, keys, argv)
         @client.call("EVALSHA", sha, keys.size, *keys, *argv)
       end
@@ -34,12 +36,7 @@ module Sidekiq
     CompatClient = RedisClient::Decorator.create(CompatMethods)
 
     class CompatClient
-      # underscore methods are not official API
-      def _client
-        @client
-      end
-
-      def _config
+      def config
         @client.config
       end
 
