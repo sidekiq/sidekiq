@@ -91,10 +91,17 @@ describe "Job logger" do
     refute @logger.debug?
     jl.prepare(job) do
       jl.call(job, "queue") do
-        assert @logger.debug?
+        refute @logger.debug?
       end
     end
     assert @logger.info?
     refute @logger.debug?
+
+    @logger.extend(Sidekiq::LoggingUtils)
+    jl.prepare(job) do
+      jl.call(job, "queue") do
+        assert @logger.debug?
+      end
+    end
   end
 end

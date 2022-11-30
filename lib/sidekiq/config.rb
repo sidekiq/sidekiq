@@ -248,7 +248,6 @@ module Sidekiq
         return
       end
 
-      logger.extend(Sidekiq::LoggingUtils)
       @logger = logger
     end
 
