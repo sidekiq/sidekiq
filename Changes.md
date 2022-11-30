@@ -2,11 +2,28 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+7.0.2
 ----------
 
+- Improve compatibility with custom loggers [#5673]
+- Add queue weights on Busy page [#5640]
 - Add BID link on job_info page if job is part of a Batch [#5623]
-- Allow custom extensions to add rows/links within the Job Details page [#5624]
+- Allow custom extensions to add rows/links within Job detail pages [#5624]
+```ruby
+Sidekiq::Web.custom_job_info_rows << AddAccountLink.new
+
+class AddAccountLink
+  include CGI::Util
+  def add_pair(job)
+    # yield a (name, value) pair
+    # You can include HTML tags and CSS, Sidekiq does not do any
+    # escaping so beware user data injection! Note how we use CGI's
+    # `h` escape helper.
+    aid = job["account_id"]
+    yield "Account", "<a href='/accounts/#{h aid}'>#{h aid}</a>" if aid
+  end
+end
+```
 
 7.0.1
 ----------

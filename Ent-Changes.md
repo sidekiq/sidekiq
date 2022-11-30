@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+7.0.2
+---------
+
+- Fix crash in graceful restarts [#5667]
+
 7.0.1
 ---------
 
