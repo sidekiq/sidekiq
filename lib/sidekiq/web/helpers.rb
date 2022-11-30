@@ -137,7 +137,7 @@ module Sidekiq
     end
 
     def sort_direction_label
-      params[:direction] == "asc" ? "&uarr;" : "&darr;"
+      (params[:direction] == "asc") ? "&uarr;" : "&darr;"
     end
 
     def workset
@@ -184,7 +184,7 @@ module Sidekiq
     end
 
     def current_status
-      workset.size == 0 ? "idle" : "active"
+      (workset.size == 0) ? "idle" : "active"
     end
 
     def relative_time(time)
@@ -217,7 +217,7 @@ module Sidekiq
     end
 
     def truncate(text, truncate_after_chars = 2000)
-      truncate_after_chars && text.size > truncate_after_chars ? "#{text[0..truncate_after_chars]}..." : text
+      (truncate_after_chars && text.size > truncate_after_chars) ? "#{text[0..truncate_after_chars]}..." : text
     end
 
     def display_args(args, truncate_after_chars = 2000)

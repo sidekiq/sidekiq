@@ -27,8 +27,7 @@ class Helpers
   end
 
   def default
-    {
-    }
+    {}
   end
 
   def path_info
