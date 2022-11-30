@@ -44,7 +44,8 @@ describe Sidekiq::Metrics do
       floor = whence.utc.rfc3339.sub(":15", ":00")
 
       d = Sidekiq::Deploy.new
-      d.mark(at: whence, label: "cafed00d - some git summary line")
+      d.mark!(at: whence, label: "cafed00d - some git summary line")
+      d.mark!(at: whence)
 
       q = Sidekiq::Metrics::Query.new(now: whence)
       rs = q.for_job("FooJob")
@@ -104,7 +105,7 @@ describe Sidekiq::Metrics do
     it "fetches top job data" do
       create_known_metrics
       d = Sidekiq::Deploy.new
-      d.mark(at: fixed_time - 300, label: "cafed00d - some git summary line")
+      d.mark!(at: fixed_time - 300, label: "cafed00d - some git summary line")
 
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
       result = q.top_jobs
@@ -133,7 +134,7 @@ describe Sidekiq::Metrics do
     it "fetches job-specific data" do
       create_known_metrics
       d = Sidekiq::Deploy.new
-      d.mark(at: fixed_time - 300, label: "cafed00d - some git summary line")
+      d.mark!(at: fixed_time - 300, label: "cafed00d - some git summary line")
 
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
       result = q.for_job("App::FooJob")

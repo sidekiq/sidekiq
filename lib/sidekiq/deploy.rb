@@ -21,15 +21,15 @@ module Sidekiq
     }
 
     def self.mark!(label = nil)
-      label ||= LABEL_MAKER.call
-      Sidekiq::Deploy.new.mark(label: label)
+      Sidekiq::Deploy.new.mark!(label: label)
     end
 
     def initialize(pool = Sidekiq::RedisConnection.create)
       @pool = pool
     end
 
-    def mark(at: Time.now, label: "")
+    def mark!(at: Time.now, label: nil)
+      label ||= LABEL_MAKER.call
       # we need to round the timestamp so that we gracefully
       # handle an very common error in marking deploys:
       # having every process mark its deploy, leading
