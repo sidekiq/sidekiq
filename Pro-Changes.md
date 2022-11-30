@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+7.0.2
+---------
+
+- Clamp Batch `pending` to 0 [#5659]
+
 7.0.1
 ---------
 
@@ -14,6 +19,11 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
 - Componentize and capsulize Pro functionality for Sidekiq 7.
 - Add DE locale
+
+5.5.6
+---------
+
+- Clamp Batch `pending` to 0 [#5659]
 
 5.5.5
 ---------
