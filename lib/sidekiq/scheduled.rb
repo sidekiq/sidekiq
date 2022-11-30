@@ -65,7 +65,7 @@ module Sidekiq
 
     ##
     # The Poller checks Redis every N seconds for jobs in the retry or scheduled
-    # set have passed their timestamp and should be enqueued.  If so, it
+    # set have passed their timestamp and should be enqueued. If so, it
     # just pops the job back onto its original queue so the
     # workers can pick it up like any other job.
     class Poller
@@ -127,10 +127,10 @@ module Sidekiq
       end
 
       def random_poll_interval
-        # We want one Sidekiq process to schedule jobs every N seconds.  We have M processes
+        # We want one Sidekiq process to schedule jobs every N seconds. We have M processes
         # and **don't** want to coordinate.
         #
-        # So in N*M second timespan, we want each process to schedule once.  The basic loop is:
+        # So in N*M second timespan, we want each process to schedule once. The basic loop is:
         #
         # * sleep a random amount within that N*M timespan
         # * wake up and schedule
@@ -164,10 +164,10 @@ module Sidekiq
       # Sidekiq is checking Redis every 0.5 seconds - way too often for most people
       # and really bad if the retry or scheduled sets are large.
       #
-      # Instead try to avoid polling more than once every 15 seconds.  If you have
+      # Instead try to avoid polling more than once every 15 seconds. If you have
       # 30 Sidekiq processes, we'll poll every 30 * 15 or 450 seconds.
       # To keep things statistically random, we'll sleep a random amount between
-      # 225 and 675 seconds for each poll or 450 seconds on average.  Otherwise restarting
+      # 225 and 675 seconds for each poll or 450 seconds on average. Otherwise restarting
       # all your Sidekiq processes at the same time will lead to them all polling at
       # the same time: the thundering herd problem.
       #
