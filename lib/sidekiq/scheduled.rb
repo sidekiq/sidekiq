@@ -160,7 +160,7 @@ module Sidekiq
       end
 
       # We do our best to tune the poll interval to the size of the active Sidekiq
-      # cluster.  If you have 30 processes and poll every 15 seconds, that means one
+      # cluster. If you have 30 processes and poll every 15 seconds, that means one
       # Sidekiq is checking Redis every 0.5 seconds - way too often for most people
       # and really bad if the retry or scheduled sets are large.
       #
