@@ -15,8 +15,6 @@ module Sidekiq
         @app.reloader.wrap(**params) do
           yield
         end
-          yield
-        end
       end
 
       def inspect
