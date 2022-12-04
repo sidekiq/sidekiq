@@ -11,7 +11,10 @@ module Sidekiq
       end
 
       def call
-        @app.reloader.wrap do
+        params = ::Rails::VERSION::STRING >= '7.1' ? {source: "sidekiq.active_job"} : {}
+        @app.reloader.wrap(**params) do
+          yield
+        end
           yield
         end
       end
