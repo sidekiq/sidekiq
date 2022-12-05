@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+7.0.3
+---------
+
+- Adjust statsd middleware to not hold an open connection while executing a job [#5684]
+
 7.0.2
 ---------
 
