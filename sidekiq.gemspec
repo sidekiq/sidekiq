@@ -28,23 +28,11 @@ Gem::Specification.new do |gem|
   gem.add_dependency "concurrent-ruby", "< 2"
   gem.post_install_message = <<~EOM
     
-    ####################################################
-    
-    
-      █████████  █████ ██████████   ██████████ █████   ████ █████    ██████       ██████████       █████
-     ███░░░░░███░░███ ░░███░░░░███ ░░███░░░░░█░░███   ███░ ░░███   ███░░░░███    ░███░░░░███     ███░░░███
-    ░███    ░░░  ░███  ░███   ░░███ ░███  █ ░  ░███  ███    ░███  ███    ░░███   ░░░    ███     ███   ░░███
-    ░░█████████  ░███  ░███    ░███ ░██████    ░███████     ░███ ░███     ░███         ███     ░███    ░███
-     ░░░░░░░░███ ░███  ░███    ░███ ░███░░█    ░███░░███    ░███ ░███   ██░███        ███      ░███    ░███
-     ███    ░███ ░███  ░███    ███  ░███ ░   █ ░███ ░░███   ░███ ░░███ ░░████        ███       ░░███   ███
-    ░░█████████  █████ ██████████   ██████████ █████ ░░████ █████ ░░░██████░██      ███      ██ ░░░█████░
-     ░░░░░░░░░  ░░░░░ ░░░░░░░░░░   ░░░░░░░░░░ ░░░░░   ░░░░ ░░░░░    ░░░░░░ ░░      ░░░      ░░    ░░░░░░
-    
+    Welcome to Sidekiq 7.0!
     
     1. Use `gem 'sidekiq', '<7'` in your Gemfile if you don't want this new version.
     2. Read the release notes at https://github.com/mperham/sidekiq/blob/main/docs/7.0-Upgrade.md
-    3. Search for open/closed issues at https://github.com/mperham/sidekiq/issues/
-    
-    ####################################################
+    3. If you have problems, search for open/closed issues at https://github.com/mperham/sidekiq/issues/
+
   EOM
 end
