@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+7.0.4
+---------
+
+- Fix typo in `pending` fix [#5689]
+
 7.0.3
 ---------
 
@@ -24,6 +29,11 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
 - Componentize and capsulize Pro functionality for Sidekiq 7.
 - Add DE locale
+
+5.5.7
+---------
+
+- Fix typo in `pending` fix [#5689]
 
 5.5.6
 ---------
