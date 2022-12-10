@@ -23,6 +23,12 @@ describe "Current attributes" do
         assert_equal 123, job["cattr"][:user_id]
       end
     end
+
+    with_context(:user_id, 456) do
+      cm.call(nil, job, nil, nil) do
+        assert_equal 123, job["cattr"][:user_id]
+      end
+    end
   end
 
   it "loads" do

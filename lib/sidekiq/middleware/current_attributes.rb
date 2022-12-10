@@ -22,13 +22,11 @@ module Sidekiq
       end
 
       def call(_, job, _, _)
-        attrs = @strklass.constantize.attributes
-        if attrs.any?
-          if job.has_key?("cattr")
-            job["cattr"].merge!(attrs)
-          else
-            job["cattr"] = attrs
-          end
+        if !job.has_key?("cattr")
+          attrs = @strklass.constantize.attributes
+          # Retries can push the job N times, we don't
+          # want retries to reset cattr. #5692, #5090
+          job["cattr"] = attrs if attrs.any?
         end
         yield
       end
