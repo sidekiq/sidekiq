@@ -4,10 +4,25 @@
 <script type="text/javascript" src="<%= root_path %>javascripts/metrics.js"></script>
 
 <div class="header-container">
-  <h1><%= t('Metrics') %></h1>
+  <div>
+    <h1><%= t('Metrics') %></h1>
+
+    <div>
+      <a target="blank" href="https://github.com/mperham/sidekiq/wiki/Metrics"><span class="info-circle" title="Click to learn more about metrics">?</span></a>
+    </div>
+  </div>
 
   <div>
-    <a target="blank" href="https://github.com/mperham/sidekiq/wiki/Metrics"><span class="info-circle" title="Click to learn more about metrics">?</span></a>
+    <select class="form-control" aria-label="" onchange="window.location.href = '<%= root_path %>metrics?period=' + event.target.value">
+      <% @periods.each_key do |code| %>
+
+        <% if code == params[:period] %>
+          <option selected value="<%= code %>"><%= code %></option>
+        <% else %>
+          <option value="<%= code %>"><%= code %></option>
+        <% end %>
+      <% end %>
+    </select>
   </div>
 </div>
 
