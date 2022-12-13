@@ -251,11 +251,21 @@ module Sidekiq
         "tag" => @config[:tag] || "",
         "concurrency" => @config.total_concurrency,
         "queues" => @config.capsules.values.flat_map { |cap| cap.queues }.uniq,
-        "weights" => @config.capsules.values.flat_map { |cap| cap.queues }.tally,
+        "weights" => to_weights,
         "labels" => @config[:labels].to_a,
         "identity" => identity,
         "version" => Sidekiq::VERSION
       }
+    end
+
+    def to_weights
+      weights = @config.capsules.values.flat_map { |cap| cap.queues }.tally
+      if weights.values.all? { |val| val == 1 }
+        # strict priority, don't show any weights at all
+        nil
+      else
+        weights
+      end
     end
 
     def to_json
