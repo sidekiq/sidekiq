@@ -26,7 +26,7 @@ module TestScenariosForMetrics
     context "when period param is not provided" do
       let(:period) { nil }
       let(:expected_minutes) { 60 }
-      it "calls top_jobs with minutes: 60" do
+      it "queries using 60 minutes" do
         subject
       end
     end
@@ -34,7 +34,7 @@ module TestScenariosForMetrics
     context "when period param is unknown" do
       let(:period) { "2d" }
       let(:expected_minutes) { 60 }
-      it "calls top_jobs with minutes: 60" do
+      it "queries using 60 minutes" do
         subject
       end
     end
@@ -43,7 +43,7 @@ module TestScenariosForMetrics
       context "when period param is #{code}" do
         let(:period) { code }
         let(:expected_minutes) { minutes }
-        it "calls top_jobs with minutes: #{minutes}" do
+        it "it queries using #{minutes} minutes" do
           subject
         end
       end
