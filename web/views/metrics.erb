@@ -4,26 +4,13 @@
 <script type="text/javascript" src="<%= root_path %>javascripts/metrics.js"></script>
 
 <div class="header-container">
-  <div>
+  <div class="page-title-container">
     <h1><%= t('Metrics') %></h1>
 
-    <div>
-      <a target="blank" href="https://github.com/mperham/sidekiq/wiki/Metrics"><span class="info-circle" title="Click to learn more about metrics">?</span></a>
-    </div>
+    <a target="blank" href="https://github.com/mperham/sidekiq/wiki/Metrics"><span class="info-circle" title="Click to learn more about metrics">?</span></a>
   </div>
 
-  <div>
-    <select class="form-control" aria-label="" onchange="window.location.href = '<%= root_path %>metrics?period=' + event.target.value">
-      <% @periods.each_key do |code| %>
-
-        <% if code == params[:period] %>
-          <option selected value="<%= code %>"><%= code %></option>
-        <% else %>
-          <option value="<%= code %>"><%= code %></option>
-        <% end %>
-      <% end %>
-    </select>
-  </div>
+  <%= erb :_metrics_period_select, locals: { periods: @periods, period: @period, path: "#{root_path}metrics" } %>
 </div>
 
 <%
@@ -75,7 +62,7 @@
                   value="<%= kls %>"
                   <%= visible_kls.include?(kls) ? 'checked' : '' %>
                 />
-                <code><a href="<%= root_path %>metrics/<%= kls %>"><%= kls %></a></code>
+                <code><a href="<%= root_path %>metrics/<%= kls %>?period=<%= @period %>"><%= kls %></a></code>
               </div>
               <script>jobMetricsChart.registerSwatch("<%= id %>")</script>
             </td>

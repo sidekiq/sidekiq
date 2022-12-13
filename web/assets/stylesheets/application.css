@@ -72,7 +72,7 @@ h1, h2, h3 {
   line-height: 45px;
 }
 
-.header-container {
+.header-container, .header-container .page-title-container {
   display: flex;
   justify-content: space-between;
   align-items: center;

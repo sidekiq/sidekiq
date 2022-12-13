@@ -18,6 +18,39 @@ class LogDisplayer
   end
 end
 
+# Common test scenarios for both metrics index and detail page.
+module TestScenariosForMetrics
+  extend Minitest::Spec::DSL
+
+  def self.included(base)
+    context "when period param is not provided" do
+      let(:period) { nil }
+      let(:expected_minutes) { 60 }
+      it "calls top_jobs with minutes: 60" do
+        subject
+      end
+    end
+
+    context "when period param is unknown" do
+      let(:period) { "2d" }
+      let(:expected_minutes) { 60 }
+      it "calls top_jobs with minutes: 60" do
+        subject
+      end
+    end
+
+    Sidekiq::WebApplication::METRICS_PERIODS.each do |code, minutes|
+      context "when period param is #{code}" do
+        let(:period) { code }
+        let(:expected_minutes) { minutes }
+        it "calls top_jobs with minutes: #{minutes}" do
+          subject
+        end
+      end
+    end
+  end
+end
+
 describe Sidekiq::Web do
   include Rack::Test::Methods
 
@@ -811,53 +844,63 @@ describe Sidekiq::Web do
     end
   end
 
-  describe "metrics" do
-    before do
-      result_mock = MiniTest::Mock.new
-      result_mock.expect(:job_results, [])
-      result_mock.expect(:marks, [])
-      result_mock.expect(:buckets, [])
-      result_mock.expect(:starts_at, Time.now - 3600)
-      result_mock.expect(:ends_at, Time.now)
+  describe "Metrics Dashboard" do
+    describe "/metrics" do
+      before do
+        result_mock = MiniTest::Mock.new
+        result_mock.expect(:job_results, {})
+        result_mock.expect(:marks, [])
+        result_mock.expect(:buckets, [])
+        result_mock.expect(:starts_at, Time.now - 3600)
+        result_mock.expect(:ends_at, Time.now)
 
-      @query_mock = Minitest::Mock.new
-      @query_mock.expect :top_jobs, result_mock do |minutes:|
-        assert_equal expected_minutes, minutes
-      end
-    end
-
-    subject do
-      Sidekiq::Metrics::Query.stub :new, @query_mock do
-        get "/metrics", {period: period}.compact
-        assert_equal 200, last_response.status
-        assert_match(/Metrics/, last_response.body)
-      end
-    end
-
-    context "when period param is not provided" do
-      let(:period) { nil }
-      let(:expected_minutes) { 60 }
-      it "calls top_jobs with minutes: 60" do
-        subject
-      end
-    end
-
-    context "when period param is unknown" do
-      let(:period) { "2d" }
-      let(:expected_minutes) { 60 }
-      it "calls top_jobs with minutes: 60" do
-        subject
-      end
-    end
-
-    Sidekiq::WebApplication::METRICS_PERIODS.each do |code, minutes|
-      context "when period param is #{code}" do
-        let(:period) { code }
-        let(:expected_minutes) { minutes }
-        it "calls top_jobs with minutes: #{minutes}" do
-          subject
+        @query_mock = Minitest::Mock.new
+        @query_mock.expect :top_jobs, result_mock do |minutes:|
+          assert_equal expected_minutes, minutes
         end
       end
+
+      subject do
+        Sidekiq::Metrics::Query.stub :new, @query_mock do
+          get "/metrics", {period: period}.compact
+          assert_equal 200, last_response.status
+          assert_match(/Metrics/, last_response.body)
+        end
+      end
+
+      include TestScenariosForMetrics
+    end
+
+    describe "/metrics/:job" do
+      before do
+        job_result_mock = Minitest::Mock.new
+        job_result_mock.expect(:totals, {"s" => 1})
+        3.times { job_result_mock.expect(:hist, {"FooJob" => []}) }
+
+        result_mock = MiniTest::Mock.new
+        result_mock.expect(:job_results, {"FooJob" => job_result_mock})
+        result_mock.expect(:starts_at, Time.now - 3600)
+        result_mock.expect(:ends_at, Time.now)
+        result_mock.expect(:marks, [])
+        result_mock.expect(:buckets, [])
+
+        @query_mock = Minitest::Mock.new
+        @query_mock.expect :for_job, result_mock do |job, minutes:|
+          assert_equal "FooJob", job
+          assert_equal expected_minutes, minutes
+        end
+      end
+
+      subject do
+        Sidekiq::Metrics::Query.stub :new, @query_mock do
+          get "/metrics/FooJob", {period: period}.compact
+          assert_equal 200, last_response.status
+          assert_match(/Metrics/, last_response.body)
+          assert_match(/FooJob/, last_response.body)
+        end
+      end
+
+      include TestScenariosForMetrics
     end
   end
 end

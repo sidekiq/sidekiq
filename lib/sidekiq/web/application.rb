@@ -68,16 +68,20 @@ module Sidekiq
 
     get "/metrics" do
       q = Sidekiq::Metrics::Query.new
+      @period = params[:period]
       @periods = METRICS_PERIODS
-      minutes = @periods.fetch(params[:period], @periods.values.first)
+      minutes = @periods.fetch(@period, @periods.values.first)
       @query_result = q.top_jobs(minutes: minutes)
       erb(:metrics)
     end
 
     get "/metrics/:name" do
       @name = route_params[:name]
+      @period = params[:period]
       q = Sidekiq::Metrics::Query.new
-      @query_result = q.for_job(@name)
+      @periods = METRICS_PERIODS
+      minutes = @periods.fetch(@period, @periods.values.first)
+      @query_result = q.for_job(@name, minutes: minutes)
       erb(:metrics_for_job)
     end
 
