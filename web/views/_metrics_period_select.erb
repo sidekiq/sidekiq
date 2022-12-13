@@ -1,5 +1,5 @@
 <div>
-  <select class="form-control" aria-label="" onchange="window.location.href = '<%= path %>?period=' + event.target.value">
+  <select class="form-control" onchange="window.location.href = '<%= path %>?period=' + event.target.value">
     <% periods.each_key do |code| %>
 
       <% if code == period %>
