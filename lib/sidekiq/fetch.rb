@@ -30,11 +30,9 @@ module Sidekiq # :nodoc:
     def initialize(cap)
       raise ArgumentError, "missing queue list" unless cap.queues
       @config = cap
-      @strictly_ordered_queues = (config.queues.size == config.queues.uniq.size)
+      @strictly_ordered_queues = cap.mode == :strict
       @queues = config.queues.map { |q| "queue:#{q}" }
-      if @strictly_ordered_queues
-        @queues.uniq!
-      end
+      @queues.uniq! if @strictly_ordered_queues
     end
 
     def retrieve_work

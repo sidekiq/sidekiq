@@ -71,7 +71,7 @@
           <br>
           <b><%= "#{t('Queues')}: " %></b>
           <% if process.weights %>
-            <%= process.weights.sort_by { |weight| weight[0] }.map { |weight| weight.join(": ") }.join(", ") %>
+            <%= busy_weights(process.weights) %>
           <% else %>
             <%= process.queues.sort.join(", ") %>
           <% end %>
