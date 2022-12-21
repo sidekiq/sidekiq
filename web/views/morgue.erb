@@ -1,14 +1,10 @@
-<header class="row">
-  <div class="col-sm-5">
-    <h3><%= t('DeadJobs') %></h3>
-  </div>
+<div class="header-container">
+  <h1><%= t('DeadJobs') %></h1>
   <% if @dead.size > 0 && @total_size > @count %>
-    <div class="col-sm-4">
-      <%= erb :_paging, locals: { url: "#{root_path}morgue" } %>
-    </div>
+    <%= erb :_paging, locals: { url: "#{root_path}morgue" } %>
   <% end %>
   <%= filtering('dead') %>
-</header>
+</div>
 
 <% if @dead.size > 0 %>
   <form action="<%= root_path %>morgue" method="post">

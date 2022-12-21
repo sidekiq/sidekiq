@@ -1,7 +1,5 @@
-<div class="row header">
-  <div class="col-sm-4 pull-left flip">
-    <h3><%= t('Status') %></h3>
-  </div>
+<div class="header-container">
+  <h1><%= t('Status') %></h1>
 </div>
 
 <div class="stats-wrapper">
@@ -29,11 +27,9 @@
   </div>
 </div>
 
-<div class="row header">
-  <div class="col-sm-4 pull-left flip">
-    <h3><%= t('Processes') %></h3>
-  </div>
-  <div class="col-sm-3 pull-right flip">
+<div class="header-container">
+  <h1><%= t('Processes') %></h1>
+  <div>
     <form method="POST" class="warning-messages">
       <%= csrf_tag %>
       <div class="btn-group pull-right flip">
@@ -43,6 +39,7 @@
     </form>
   </div>
 </div>
+
 <div class="table_container">
   <table class="processes table table-hover table-bordered table-striped">
     <thead>
@@ -105,14 +102,10 @@
   </table>
 </div>
 
-<div class="row header">
-  <div class="col-sm-7">
-    <h3><%= t('Jobs') %></h3>
-  </div>
+<div class="header-container">
+  <h1><%= t('Jobs') %></h1>
   <% if @workset.size > 0 && @total_size > @count %>
-    <div class="col-sm-4">
-      <%= erb :_paging, locals: { url: "#{root_path}busy" } %>
-    </div>
+    <%= erb :_paging, locals: { url: "#{root_path}busy" } %>
   <% end %>
 </div>
 
