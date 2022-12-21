@@ -129,7 +129,7 @@ module Sidekiq
     def new_redis_pool(size, name = "unset")
       # connection pool is lazy, it will not create connections unless you actually need them
       # so don't be skimpy!
-      RedisConnection.create(@redis_config.merge(size: size, logger: logger, pool_name: name))
+      RedisConnection.create({size: size, logger: logger, pool_name: name}.merge(@redis_config))
     end
 
     def redis_info
