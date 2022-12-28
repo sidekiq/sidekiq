@@ -16,7 +16,7 @@
 <% if job_result.totals["s"] > 0 %>
   <div class="header-container">
     <h1>
-      <a href="<%= root_path %>metrics"><%= t(:metrics).to_s.titleize %></a> /
+      <a href="<%= root_path %>metrics"><%= t('Metrics') %></a> /
       <%= h @name %>
     </h1>
 
@@ -61,7 +61,7 @@
   <p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p>
 <% else %>
   <h1>
-    <a href="<%= root_path %>/metrics"><%= t(:metrics).to_s.titleize %></a> /
+    <a href="<%= root_path %>/metrics"><%= t('Metrics') %></a> /
     <%= h @name %>
   </h1>
 
