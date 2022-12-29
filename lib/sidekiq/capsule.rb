@@ -21,12 +21,15 @@ module Sidekiq
     attr_reader :name
     attr_reader :queues
     attr_accessor :concurrency
+    attr_reader :mode
+    attr_reader :weights
 
     def initialize(name, config)
       @name = name
       @config = config
       @queues = ["default"]
       @concurrency = config[:concurrency]
+      @mode = :strict
     end
 
     def fetcher
@@ -41,14 +44,27 @@ module Sidekiq
       fetcher&.bulk_requeue([])
     end
 
+    # Sidekiq checks queues in three modes:
+    # - :strict - all queues have 0 weight and are checked strictly in order
+    # - :weighted - queues have arbitrary weight between 1 and N
+    # - :random - all queues have weight of 1
     def queues=(val)
+      @weights = {}
       @queues = Array(val).each_with_object([]) do |qstr, memo|
         arr = qstr
         arr = qstr.split(",") if qstr.is_a?(String)
         name, weight = arr
+        @weights[name] = weight.to_i
         [weight.to_i, 1].max.times do
           memo << name
         end
+      end
+      @mode = if @weights.values.all?(&:zero?)
+        :strict
+      elsif @weights.values.all? { |x| x == 1 }
+        :random
+      else
+        :weighted
       end
     end
 

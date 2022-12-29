@@ -1,17 +1,13 @@
-<header class="row">
-  <div class="col-sm-5">
-    <h3>
-      <%= t('CurrentMessagesInQueue', :queue => h(@name)) %>
-      <% if @queue.paused? %>
-        <span class="label label-danger"><%= t('Paused') %></span>
-      <% end %>
-      <span class="badge badge-secondary"><%= number_with_delimiter(@total_size) %></span>
-    </h3>
-  </div>
-  <div class="col-sm-4 pull-right flip">
-    <%= erb :_paging, locals: { url: "#{root_path}queues/#{CGI.escape(@name)}" } %>
-  </div>
-</header>
+<div class="header-container">
+  <h1><%= t('CurrentMessagesInQueue', :queue => h(@name)) %>
+    <% if @queue.paused? %>
+      <span class="label label-danger"><%= t('Paused') %></span>
+    <% end %>
+    <span class="badge badge-secondary"><%= number_with_delimiter(@total_size) %></span>
+  </h1>
+  <%= erb :_paging, locals: { url: "#{root_path}queues/#{CGI.escape(@name)}" } %>
+</div>
+
 <div class="table_container">
   <table class="queue table table-hover table-bordered table-striped">
     <thead>

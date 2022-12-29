@@ -259,13 +259,7 @@ module Sidekiq
     end
 
     def to_weights
-      weights = @config.capsules.values.flat_map { |cap| cap.queues }.tally
-      if weights.values.all? { |val| val == 1 }
-        # strict priority, don't show any weights at all
-        nil
-      else
-        weights
-      end
+      @config.capsules.values.map(&:weights)
     end
 
     def to_json

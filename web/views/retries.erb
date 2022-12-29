@@ -1,14 +1,10 @@
-<header class="row">
-  <div class="col-sm-5">
-    <h3><%= t('Retries') %></h3>
-  </div>
+<div class="header-container">
+  <h1><%= t('Retries') %></h1>
   <% if @retries.size > 0 && @total_size > @count %>
-    <div class="col-sm-4">
-      <%= erb :_paging, locals: { url: "#{root_path}retries" } %>
-    </div>
+    <%= erb :_paging, locals: { url: "#{root_path}retries" } %>
   <% end %>
   <%= filtering('retries') %>
-</header>
+</div>
 
 <% if @retries.size > 0 %>
   <form action="<%= root_path %>retries" method="post">

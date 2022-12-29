@@ -49,7 +49,7 @@ module Sidekiq
   # The default number of retries is 25 which works out to about 3 weeks
   # You can change the default maximum number of retries in your initializer:
   #
-  #   Sidekiq.options[:max_retries] = 7
+  #   Sidekiq.default_configuration[:max_retries] = 7
   #
   # or limit the number of retries for a particular job and send retries to
   # a low priority queue with:

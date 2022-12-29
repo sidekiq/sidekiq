@@ -17,7 +17,7 @@
   <div class="header-container">
     <div class="page-title-container">
       <h1>
-        <a href="<%= root_path %>metrics?period=<%= @period %>"><%= t(:metrics).to_s.titleize %></a> /
+        <a href="<%= root_path %>metrics?period=<%= @period %>"><%= t('Metrics') %></a> /
         <%= h @name %>
       </h1>
 
@@ -63,7 +63,7 @@
   <p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p>
 <% else %>
   <h1>
-    <a href="<%= root_path %>/metrics"><%= t(:metrics).to_s.titleize %></a> /
+    <a href="<%= root_path %>/metrics"><%= t('Metrics') %></a> /
     <%= h @name %>
   </h1>
 

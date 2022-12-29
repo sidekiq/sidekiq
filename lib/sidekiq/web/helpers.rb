@@ -161,6 +161,14 @@ module Sidekiq
       end
     end
 
+    def busy_weights(capsule_weights)
+      # backwards compat with 7.0.0, remove in 7.1
+      cw = [capsule_weights].flatten
+      cw.map { |hash|
+        hash.map { |name, weight| (weight > 0) ? +name << ": " << weight.to_s : name }.join(", ")
+      }.join("; ")
+    end
+
     def stats
       @stats ||= Sidekiq::Stats.new
     end
