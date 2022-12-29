@@ -4,10 +4,10 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-7.0.4
+7.0.4, 7.0.5
 ---------
 
-- Fix typo in `pending` fix [#5689]
+- Fixes for the `pending` fix [#5689]
 
 7.0.3
 ---------
