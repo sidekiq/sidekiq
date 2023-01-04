@@ -23,6 +23,7 @@ end
 
 describe "Sidekiq::Testing.inline" do
   before do
+    reset!
     require "sidekiq/testing/inline"
     Sidekiq::Testing.inline!
   end
