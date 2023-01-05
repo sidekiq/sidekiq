@@ -533,7 +533,8 @@ describe "API" do
         "started_at" => Time.now.to_f - 15,
         "queues" => ["foo", "bar"],
         "weights" => {"foo" => 1, "bar" => 1},
-        "version" => Sidekiq::VERSION
+        "version" => Sidekiq::VERSION,
+        "embedded" => false
       }
 
       time = Time.now.to_f
@@ -554,11 +555,22 @@ describe "API" do
       assert_equal ["foo", "bar"], data.queues
       assert_equal({"foo" => 1, "bar" => 1}, data.weights)
       assert_equal Sidekiq::VERSION, data.version
+      assert_equal false, data.embedded?
       data.quiet!
       data.stop!
       signals_string = "#{odata["key"]}-signals"
       assert_equal "TERM", @cfg.redis { |c| c.lpop(signals_string) }
       assert_equal "TSTP", @cfg.redis { |c| c.lpop(signals_string) }
+    end
+
+    it "can't quiet or stop embedded processes" do
+      p = Sidekiq::Process.new("embedded" => true)
+
+      e = assert_raises(RuntimeError) { p.quiet! }
+      assert_equal "Can't quiet an embedded process", e.message
+
+      e = assert_raises(RuntimeError) { p.stop! }
+      assert_equal "Can't stop an embedded process", e.message
     end
 
     it "can enumerate workers" do

@@ -86,6 +86,10 @@ describe Sidekiq::Web do
     it "can quiet a process" do
       identity = "identity"
       signals_key = "#{identity}-signals"
+      @config.redis do |conn|
+        conn.sadd("processes", ["foo:#{identity}"])
+        conn.hmset("foo:#{identity}", "info", Sidekiq.dump_json("hostname" => "foo", "identity" => identity), "at", Time.now.to_f, "busy", 0)
+      end
 
       assert_nil @config.redis { |c| c.lpop signals_key }
       post "/busy", "quiet" => "1", "identity" => identity
@@ -96,6 +100,10 @@ describe Sidekiq::Web do
     it "can stop a process" do
       identity = "identity"
       signals_key = "#{identity}-signals"
+      @config.redis do |conn|
+        conn.sadd("processes", ["foo:#{identity}"])
+        conn.hmset("foo:#{identity}", "info", Sidekiq.dump_json("hostname" => "foo", "identity" => identity), "at", Time.now.to_f, "busy", 0)
+      end
 
       assert_nil @config.redis { |c| c.lpop signals_key }
       post "/busy", "stop" => "1", "identity" => identity

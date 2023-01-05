@@ -161,7 +161,7 @@ module Sidekiq
         fails = procd = 0
         kb = memory_usage(::Process.pid)
 
-        _, exists, _, _, msg = redis { |conn|
+        _, exists, _, _, signal = redis { |conn|
           conn.multi { |transaction|
             transaction.sadd("processes", [key])
             transaction.exists(key)
@@ -172,7 +172,7 @@ module Sidekiq
               "quiet", @done.to_s,
               "rss", kb)
             transaction.expire(key, 60)
-            transaction.rpop("#{key}-signals")
+            transaction.rpop("#{key}-signals") unless @embedded
           }
         }
 
@@ -180,9 +180,7 @@ module Sidekiq
         fire_event(:heartbeat) unless exists > 0
         fire_event(:beat, oneshot: false)
 
-        return unless msg
-
-        ::Process.kill(msg, ::Process.pid)
+        ::Process.kill(signal, ::Process.pid) if signal
       rescue => e
         # ignore all redis/network issues
         logger.error("heartbeat: #{e}")
@@ -254,7 +252,8 @@ module Sidekiq
         "weights" => to_weights,
         "labels" => @config[:labels].to_a,
         "identity" => identity,
-        "version" => Sidekiq::VERSION
+        "version" => Sidekiq::VERSION,
+        "embedded" => @embedded
       }
     end
 

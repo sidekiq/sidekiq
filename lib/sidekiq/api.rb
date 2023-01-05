@@ -943,6 +943,7 @@ module Sidekiq
   #   'busy' => 10,
   #   'beat' => <last heartbeat>,
   #   'identity' => <unique string identifying the process>,
+  #   'embedded' => true,
   # }
   class Process
     # :nodoc:
@@ -979,11 +980,17 @@ module Sidekiq
       self["version"]
     end
 
+    def embedded?
+      self["embedded"]
+    end
+
     # Signal this process to stop processing new jobs.
     # It will continue to execute jobs it has already fetched.
     # This method is *asynchronous* and it can take 5-10
     # seconds for the process to quiet.
     def quiet!
+      raise "Can't quiet an embedded process" if embedded?
+
       signal("TSTP")
     end
 
@@ -992,6 +999,8 @@ module Sidekiq
     # This method is *asynchronous* and it can take 5-10
     # seconds for the process to start shutting down.
     def stop!
+      raise "Can't stop an embedded process" if embedded?
+
       signal("TERM")
     end
 
