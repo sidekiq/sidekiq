@@ -172,7 +172,7 @@ module Sidekiq
               "quiet", @done.to_s,
               "rss", kb)
             transaction.expire(key, 60)
-            transaction.rpop("#{key}-signals") unless @embedded
+            transaction.rpop("#{key}-signals")
           }
         }
 
@@ -180,7 +180,7 @@ module Sidekiq
         fire_event(:heartbeat) unless exists > 0
         fire_event(:beat, oneshot: false)
 
-        ::Process.kill(signal, ::Process.pid) if signal
+        ::Process.kill(signal, ::Process.pid) if signal && !@embedded
       rescue => e
         # ignore all redis/network issues
         logger.error("heartbeat: #{e}")

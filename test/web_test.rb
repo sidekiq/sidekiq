@@ -87,8 +87,8 @@ describe Sidekiq::Web do
       identity = "identity"
       signals_key = "#{identity}-signals"
       @config.redis do |conn|
-        conn.sadd("processes", ["foo:#{identity}"])
-        conn.hmset("foo:#{identity}", "info", Sidekiq.dump_json("hostname" => "foo", "identity" => identity), "at", Time.now.to_f, "busy", 0)
+        conn.sadd("processes", [identity])
+        conn.hmset(identity, "info", Sidekiq.dump_json("hostname" => "foo", "identity" => identity), "at", Time.now.to_f, "busy", 0)
       end
 
       assert_nil @config.redis { |c| c.lpop signals_key }
@@ -101,8 +101,8 @@ describe Sidekiq::Web do
       identity = "identity"
       signals_key = "#{identity}-signals"
       @config.redis do |conn|
-        conn.sadd("processes", ["foo:#{identity}"])
-        conn.hmset("foo:#{identity}", "info", Sidekiq.dump_json("hostname" => "foo", "identity" => identity), "at", Time.now.to_f, "busy", 0)
+        conn.sadd("processes", [identity])
+        conn.hmset(identity, "info", Sidekiq.dump_json("hostname" => "foo", "identity" => identity), "at", Time.now.to_f, "busy", 0)
       end
 
       assert_nil @config.redis { |c| c.lpop signals_key }

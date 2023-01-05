@@ -876,7 +876,7 @@ module Sidekiq
         end
       }
 
-      result.each do |info, busy, at_s, quiet, rss, rtt|
+      result.each do |info, busy, beat, quiet, rss, rtt_us|
         # If a process is stopped between when we query Redis for `procs` and
         # when we query for `result`, we will have an item in `result` that is
         # composed of `nil` values.
@@ -884,10 +884,10 @@ module Sidekiq
 
         hash = Sidekiq.load_json(info)
         yield Process.new(hash.merge("busy" => busy.to_i,
-          "beat" => at_s.to_f,
+          "beat" => beat.to_f,
           "quiet" => quiet,
           "rss" => rss.to_i,
-          "rtt_us" => rtt.to_i))
+          "rtt_us" => rtt_us.to_i))
       end
     end
 
@@ -946,6 +946,24 @@ module Sidekiq
   #   'embedded' => true,
   # }
   class Process
+    def self.find(identity)
+      exists, (info, busy, beat, quiet, rss, rtt_us) = Sidekiq.redis { |conn|
+        conn.multi { |transaction|
+          transaction.sismember("processes", identity)
+          transaction.hmget(identity, "info", "busy", "beat", "quiet", "rss", "rtt_us")
+        }
+      }
+
+      return nil if exists == 0 || info.nil?
+
+      hash = Sidekiq.load_json(info)
+      Process.new(hash.merge("busy" => busy.to_i,
+        "beat" => beat.to_f,
+        "quiet" => quiet,
+        "rss" => rss.to_i,
+        "rtt_us" => rtt_us.to_i))
+    end
+
     # :nodoc:
     # @api private
     def initialize(hash)
