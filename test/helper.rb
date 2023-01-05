@@ -28,10 +28,8 @@ ENV["REDIS_URL"] ||= "redis://localhost/15"
 
 def reset!
   # tidy up any open but unreferenced Redis connections so we don't run out of file handles
-  if Sidekiq.default_configuration.instance_variable_defined?(:@redis)
-    existing_pool = Sidekiq.default_configuration.instance_variable_get(:@redis)
-    existing_pool&.shutdown(&:close)
-  end
+  existing_pool = Sidekiq.default_configuration.instance_variable_get(:@redis)
+  existing_pool&.shutdown(&:close)
 
   RedisClient.new(url: ENV["REDIS_URL"]).call("flushall")
   cfg = Sidekiq::Config.new
