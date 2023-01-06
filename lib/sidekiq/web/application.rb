@@ -82,7 +82,7 @@ module Sidekiq
 
     post "/busy" do
       if params["identity"]
-        pro = Sidekiq::Process.find(params["identity"])
+        pro = Sidekiq::ProcessSet[params["identity"]]
 
         pro.quiet! if params["quiet"]
         pro.stop! if params["stop"]

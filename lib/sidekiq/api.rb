@@ -828,6 +828,24 @@ module Sidekiq
   class ProcessSet
     include Enumerable
 
+    def self.[](identity)
+      exists, (info, busy, beat, quiet, rss, rtt_us) = Sidekiq.redis { |conn|
+        conn.multi { |transaction|
+          transaction.sismember("processes", identity)
+          transaction.hmget(identity, "info", "busy", "beat", "quiet", "rss", "rtt_us")
+        }
+      }
+
+      return nil if exists == 0 || info.nil?
+
+      hash = Sidekiq.load_json(info)
+      Process.new(hash.merge("busy" => busy.to_i,
+        "beat" => beat.to_f,
+        "quiet" => quiet,
+        "rss" => rss.to_i,
+        "rtt_us" => rtt_us.to_i))
+    end
+
     # :nodoc:
     # @api private
     def initialize(clean_plz = true)
@@ -946,24 +964,6 @@ module Sidekiq
   #   'embedded' => true,
   # }
   class Process
-    def self.find(identity)
-      exists, (info, busy, beat, quiet, rss, rtt_us) = Sidekiq.redis { |conn|
-        conn.multi { |transaction|
-          transaction.sismember("processes", identity)
-          transaction.hmget(identity, "info", "busy", "beat", "quiet", "rss", "rtt_us")
-        }
-      }
-
-      return nil if exists == 0 || info.nil?
-
-      hash = Sidekiq.load_json(info)
-      Process.new(hash.merge("busy" => busy.to_i,
-        "beat" => beat.to_f,
-        "quiet" => quiet,
-        "rss" => rss.to_i,
-        "rtt_us" => rtt_us.to_i))
-    end
-
     # :nodoc:
     # @api private
     def initialize(hash)

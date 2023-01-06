@@ -585,9 +585,9 @@ describe "API" do
         end
       end
 
-      assert_nil Sidekiq::Process.find("nope")
+      assert_nil Sidekiq::ProcessSet["nope"]
 
-      pro = Sidekiq::Process.find("identity_string")
+      pro = Sidekiq::ProcessSet["identity_string"]
       assert_equal 10, pro["busy"]
       assert_equal time, pro["beat"]
       assert_equal 123, pro["pid"]
