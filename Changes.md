@@ -5,6 +5,7 @@
 HEAD
 ----------
 
+- Don't allow Quiet/Stop on embedded Sidekiq instances [#5716]
 - Fix `size: X` for configuring the default Redis pool size [#5702]
 - Improve the display of queue weights on Busy page [#5642]
 - Freeze CurrentAttributes on a job once initially set [#5692]

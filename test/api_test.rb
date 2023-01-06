@@ -563,7 +563,7 @@ describe "API" do
       assert_equal "TSTP", @cfg.redis { |c| c.lpop(signals_string) }
     end
 
-    it 'can find processes' do
+    it "can find processes" do
       identity_string = "identity_string"
       odata = {
         "pid" => 123,
