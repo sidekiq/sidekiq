@@ -828,6 +828,24 @@ module Sidekiq
   class ProcessSet
     include Enumerable
 
+    def self.[](identity)
+      exists, (info, busy, beat, quiet, rss, rtt_us) = Sidekiq.redis { |conn|
+        conn.multi { |transaction|
+          transaction.sismember("processes", identity)
+          transaction.hmget(identity, "info", "busy", "beat", "quiet", "rss", "rtt_us")
+        }
+      }
+
+      return nil if exists == 0 || info.nil?
+
+      hash = Sidekiq.load_json(info)
+      Process.new(hash.merge("busy" => busy.to_i,
+        "beat" => beat.to_f,
+        "quiet" => quiet,
+        "rss" => rss.to_i,
+        "rtt_us" => rtt_us.to_i))
+    end
+
     # :nodoc:
     # @api private
     def initialize(clean_plz = true)
@@ -876,7 +894,7 @@ module Sidekiq
         end
       }
 
-      result.each do |info, busy, at_s, quiet, rss, rtt|
+      result.each do |info, busy, beat, quiet, rss, rtt_us|
         # If a process is stopped between when we query Redis for `procs` and
         # when we query for `result`, we will have an item in `result` that is
         # composed of `nil` values.
@@ -884,10 +902,10 @@ module Sidekiq
 
         hash = Sidekiq.load_json(info)
         yield Process.new(hash.merge("busy" => busy.to_i,
-          "beat" => at_s.to_f,
+          "beat" => beat.to_f,
           "quiet" => quiet,
           "rss" => rss.to_i,
-          "rtt_us" => rtt.to_i))
+          "rtt_us" => rtt_us.to_i))
       end
     end
 
@@ -943,6 +961,7 @@ module Sidekiq
   #   'busy' => 10,
   #   'beat' => <last heartbeat>,
   #   'identity' => <unique string identifying the process>,
+  #   'embedded' => true,
   # }
   class Process
     # :nodoc:
@@ -979,11 +998,17 @@ module Sidekiq
       self["version"]
     end
 
+    def embedded?
+      self["embedded"]
+    end
+
     # Signal this process to stop processing new jobs.
     # It will continue to execute jobs it has already fetched.
     # This method is *asynchronous* and it can take 5-10
     # seconds for the process to quiet.
     def quiet!
+      raise "Can't quiet an embedded process" if embedded?
+
       signal("TSTP")
     end
 
@@ -992,6 +1017,8 @@ module Sidekiq
     # This method is *asynchronous* and it can take 5-10
     # seconds for the process to start shutting down.
     def stop!
+      raise "Can't stop an embedded process" if embedded?
+
       signal("TERM")
     end
 
