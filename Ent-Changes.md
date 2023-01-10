@@ -48,8 +48,10 @@ when forking preloaded app code [#5535]
 2.5.0
 -------------
 
-- Per the 2.0 upgrade notes, Sidekiq Enterprise will stop if you do not have valid
-  credentials configured on startup.
+- Per the 2.0 upgrade notes, Sidekiq Enterprise will stop if you do not
+  have a licensed username configured on startup. It will extract it from
+  the Bundler environment if possible or look for SIDEKIQ_ENT_USERNAME.
+  `SIDEKIQ_ENT_USERNAME=abcd1234 bundle exec sidekiq`
 - Internal refactoring for Sidekiq 6.5.
 - Requires Sidekiq 6.5, Pro 5.5.
 
