@@ -8,7 +8,7 @@ HEAD
 ---------
 
 - Allow user to define the context used to calculate unique locks, see the Unique Jobs wiki page [#5544]
-- Provide a little smart connection pool sizing for rate limiters [#5685]
+- Smarter connection pool sizing for rate limiters [#5685]
 
 7.0.2
 ---------

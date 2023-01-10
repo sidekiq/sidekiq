@@ -2,9 +2,10 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+7.0.3
 ----------
 
+- Don't warn about memory policy on Redis Enterprise [#5712]
 - Don't allow Quiet/Stop on embedded Sidekiq instances [#5716]
 - Fix `size: X` for configuring the default Redis pool size [#5702]
 - Improve the display of queue weights on Busy page [#5642]

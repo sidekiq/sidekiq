@@ -77,7 +77,8 @@ module Sidekiq # :nodoc:
       raise "You are connecting to Redis #{ver}, Sidekiq requires Redis 6.2.0 or greater" if ver < Gem::Version.new("6.2.0")
 
       maxmemory_policy = info["maxmemory_policy"]
-      if maxmemory_policy != "noeviction"
+      if maxmemory_policy != "noeviction" && maxmemory_policy != ""
+        # Redis Enterprise Cloud returns "" for their policy 😳
         logger.warn <<~EOM
 
 
