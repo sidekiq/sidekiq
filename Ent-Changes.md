@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-HEAD
+7.0.3
 ---------
 
 - Allow user to define the context used to calculate unique locks, see the Unique Jobs wiki page [#5544]
