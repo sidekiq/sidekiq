@@ -31,7 +31,7 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 - Componentize and capsulize Pro functionality for Sidekiq 7.
 - Add DE locale
 
-5.5.7
+5.5.7, 5.5.8
 ---------
 
 - Fix typo in `pending` fix [#5689]
