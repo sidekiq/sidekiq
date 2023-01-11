@@ -18,6 +18,7 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 ---------
 
 - Clamp Batch `pending` to 0 [#5659]
+- Drop Batch pub/sub feature [#5645]
 
 7.0.1
 ---------
