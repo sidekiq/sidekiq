@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+7.0.6
+---------
+
+- Fix random fetching with super_fetch [#5726]
+- Fix config issue with reliable_push [#5698]
+
 7.0.4, 7.0.5
 ---------
 
