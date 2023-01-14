@@ -5,7 +5,7 @@
 $TESTING = false
 puts RUBY_DESCRIPTION
 
-# require "ruby-prof"
+require "ruby-prof" if ENV["PROFILE"]
 require "bundler/setup"
 Bundler.require(:default, :load_test)
 
@@ -20,6 +20,19 @@ Toxiproxy.populate([{
   listen: "127.0.0.1:6380",
   upstream: "127.0.0.1:6379"
 }])
+
+if ENV["AJ"]
+  require "active_job"
+  puts "Using ActiveJob #{ActiveJob::VERSION::STRING}"
+  ActiveJob::Base.queue_adapter = :sidekiq
+  ActiveJob::Base.logger.level = Logger::WARN
+
+  class LoadJob < ActiveJob::Base
+    def perform(idx, ts=nil)
+      puts(Time.now.to_f - ts) if !ts.nil?
+    end
+  end
+end
 
 class LoadWorker
   include Sidekiq::Job
@@ -41,7 +54,7 @@ end
 class Loader
   def initialize
     @iter = ENV["GC"] ? 1 : 50
-    @count = 10_000
+    @count = Integer(ENV["COUNT"] || 10_000)
   end
 
   def configure
@@ -93,17 +106,27 @@ class Loader
   end
 
   def setup
+    Sidekiq.logger.error("Setup RSS: #{Process.rss}")
     Sidekiq.redis { |c| c.flushdb }
-    @iter.times do
-      arr = Array.new(@count) { |idx| [idx] }
-      Sidekiq::Client.push_bulk("class" => LoadWorker, "args" => arr)
+    start = Time.now
+    if ENV["AJ"]
+      @iter.times do
+        @count.times do |idx|
+          LoadJob.perform_later(idx)
+        end
+      end
+    else
+      @iter.times do
+        arr = Array.new(@count) { |idx| [idx] }
+        Sidekiq::Client.push_bulk("class" => LoadWorker, "args" => arr)
+      end
     end
-    puts "Created #{@count * @iter} jobs"
+    Sidekiq.logger.warn "Created #{@count * @iter} jobs in #{Time.now - start} sec"
   end
 
   def monitor
     @monitor = Thread.new do
-      Sidekiq.logger.error("Start RSS: #{Process.rss}")
+      GC.start
       loop do
         sleep 0.2
         qsize = Sidekiq.redis do |conn|
@@ -117,9 +140,15 @@ class Loader
           Sidekiq.logger.error("Ending RSS: #{Process.rss}")
           Sidekiq.logger.error("Now here's the latency for three jobs")
 
-          LoadWorker.perform_async(1, Time.now.to_f)
-          LoadWorker.perform_async(2, Time.now.to_f)
-          LoadWorker.perform_async(3, Time.now.to_f)
+          if ENV["AJ"]
+            LoadJob.perform_later(1, Time.now.to_f)
+            LoadJob.perform_later(2, Time.now.to_f)
+            LoadJob.perform_later(3, Time.now.to_f)
+          else
+            LoadWorker.perform_async(1, Time.now.to_f)
+            LoadWorker.perform_async(2, Time.now.to_f)
+            LoadWorker.perform_async(3, Time.now.to_f)
+          end
 
           sleep 0.1
           @x.stop
@@ -140,12 +169,13 @@ class Loader
   end
 
   def run(name)
-    # RubyProf.exclude_threads = [Monitoring]
-    # RubyProf.start
     Sidekiq.logger.warn("Starting #{name}")
     monitor
 
-    if ENV["GC"]
+    if ENV["PROFILE"]
+      RubyProf.exclude_threads = [@monitor]
+      RubyProf.start
+    elsif ENV["GC"]
       GC.start
       GC.compact
       GC.disable
@@ -160,11 +190,6 @@ class Loader
         handle_signal(signal)
       end
     end
-  rescue SystemExit
-    # Sidekiq.logger.error("Profiling...")
-    # result = RubyProf.stop
-    # printer = RubyProf::GraphHtmlPrinter.new(result)
-    # printer.print(File.new("output.html", "w"), min_percent: 1)
     # normal
   rescue Interrupt
   rescue => e
@@ -175,17 +200,26 @@ class Loader
   ensure
     @x.stop
   end
+
+  def done
+    Sidekiq.logger.error("GC End RSS: #{Process.rss}") if ENV["GC"]
+    if ENV["PROFILE"]
+      Sidekiq.logger.error("Profiling...")
+      result = RubyProf.stop
+      printer = RubyProf::GraphHtmlPrinter.new(result)
+      printer.print(File.new("output.html", "w"), min_percent: 1)
+    end
+  end
 end
 
 ll = Loader.new
 ll.configure
 
-unless ENV["GC"]
+unless ENV["GC"] || ENV["PROFILE"]
   ll.setup
   ll.run("warmup")
 end
 
 ll.setup
 ll.run("ideal")
-
-Sidekiq.logger.error("GC End RSS: #{Process.rss}") if ENV["GC"]
+ll.done

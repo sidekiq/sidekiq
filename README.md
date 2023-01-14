@@ -18,14 +18,13 @@ This requires a lot of Redis network I/O and JSON parsing.
 This benchmark is IO-bound so we increase the concurrency to 25.
 If your application is sending lots of emails or performing other network-intensive work, you could see a similar benefit but be careful not to saturate the CPU.
 
-Version | Time to process 500k jobs | Throughput (jobs/sec) | Ruby | Concurrency
+Version | Time to process 500k jobs | Throughput (jobs/sec) | Ruby | Concurrency | Job Type
 -----------------|------|---------|---------|------------------------
-Sidekiq 7.0.3 | 19.5 sec| **25,500** | 3.2.0+yjit | 50
-Sidekiq 7.0.3 | 23.3 sec| 21,450 | 3.2.0 | 50
-Sidekiq 7.0.3 | 22.4 sec| 22,350 | 2.7.5 | 50
-Sidekiq 7.0.3 | 24.2 sec| 20,660 | 3.2.0+yjit | 25
-Sidekiq 7.0.3 | 24.8 sec| 20,150 | 3.2.0 | 25
-Sidekiq 7.0.3 | 24.0 sec| 20,840 | 2.7.5 | 25
+Sidekiq 7.0.3 | 24.2 sec| 20,660 | 3.2.0+yjit | 25 | S::Job
+Sidekiq 7.0.3 | 33.8 sec| 14,775 | 3.2.0+yjit | 25 | ActiveJob 7.0.4
+Sidekiq 7.0.3 | 24.8 sec| 20,150 | 3.2.0 | 25 | S::Job
+Sidekiq 7.0.3 | 46.5 sec| 10,750 | 3.2.0 | 25 | ActiveJob 7.0.4
+Sidekiq 7.0.3 | 24.0 sec| 20,840 | 2.7.5 | 25 | S::Job
 
 Requirements
 -----------------
