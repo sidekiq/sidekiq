@@ -20,7 +20,7 @@ If your application is sending lots of emails or performing other network-intens
 
 Version | Time to process 500k jobs | Throughput (jobs/sec) | Ruby | Concurrency | Job Type
 -----------------|------|---------|---------|------------------------|---
-Sidekiq 7.0.3 | 24.2 sec| 20,660 | 3.2.0+yjit | 25 | S::Job
+Sidekiq 7.0.3 | 24.2 sec| 20,660 | 3.2.0+yjit | 25 | Sidekiq::Job
 Sidekiq 7.0.3 | 33.8 sec| 14,775 | 3.2.0+yjit | 25 | ActiveJob 7.0.4
 Sidekiq 7.0.3 | 24.8 sec| 20,150 | 3.2.0 | 25 | S::Job
 Sidekiq 7.0.3 | 46.5 sec| 10,750 | 3.2.0 | 25 | ActiveJob 7.0.4
