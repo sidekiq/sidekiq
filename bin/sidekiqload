@@ -4,22 +4,26 @@
 # RUBYOPT=-w bundle exec sidekiq
 $TESTING = false
 puts RUBY_DESCRIPTION
+puts(%w[THREADS LATENCY AJ PROFILE].map { |x| "#{x}: #{ENV[x] || "nil"}" }.join(", "))
 
 require "ruby-prof" if ENV["PROFILE"]
 require "bundler/setup"
 Bundler.require(:default, :load_test)
 
-# brew tap shopify/shopify
-# brew install toxiproxy
-# run `toxiproxy-server` in a separate terminal window.
-require "toxiproxy"
-# simulate a non-localhost network for realer-world conditions.
-# adding 1ms of network latency has an ENORMOUS impact on benchmarks
-Toxiproxy.populate([{
-  name: "redis",
-  listen: "127.0.0.1:6380",
-  upstream: "127.0.0.1:6379"
-}])
+latency = Integer(ENV["LATENCY"] || 1)
+if latency > 0
+  # brew tap shopify/shopify
+  # brew install toxiproxy
+  # run `toxiproxy-server` in a separate terminal window.
+  require "toxiproxy"
+  # simulate a non-localhost network for realer-world conditions.
+  # adding 1ms of network latency has an ENORMOUS impact on benchmarks
+  Toxiproxy.populate([{
+    name: "redis",
+    listen: "127.0.0.1:6380",
+    upstream: "127.0.0.1:6379"
+  }])
+end
 
 if ENV["AJ"]
   require "active_job"
@@ -53,14 +57,13 @@ end
 
 class Loader
   def initialize
-    @iter = ENV["GC"] ? 1 : 50
-    @count = Integer(ENV["COUNT"] || 10_000)
+    @iter = ENV["GC"] ? 10 : 500
+    @count = Integer(ENV["COUNT"] || 1_000)
   end
 
   def configure
     @x = Sidekiq.configure_embed do |config|
-      config.redis = {db: 13, port: 6380}
-      # config.redis = {db: 13, port: 6379}
+      config.redis = {db: 13, port: ((latency > 0) ? 6380 : 6379)}
       config.concurrency = Integer(ENV.fetch("THREADS", "10"))
       # config.redis = { db: 13, port: 6380, driver: :hiredis}
       config.queues = %w[default]
