@@ -78,6 +78,7 @@ end
 
 describe "Sidekiq::Testing.fake" do
   before do
+    reset!
     require "sidekiq/testing"
     Sidekiq::Testing.fake!
     EnqueuedJob.jobs.clear

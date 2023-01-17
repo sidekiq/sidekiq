@@ -21,6 +21,9 @@ class AttributeMiddleware
 end
 
 describe "Sidekiq::Testing" do
+  before do
+    reset!
+  end
   describe "require/load sidekiq/testing.rb" do
     before do
       require "sidekiq/testing"
