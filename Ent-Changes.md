@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+HEAD
+---------
+
+- Unique middleware now prints the JID holding the lock if there is a duplicate [#5736]
+
 7.0.3
 ---------
 
