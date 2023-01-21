@@ -22,9 +22,9 @@ Version | Time to process 500k jobs | Throughput (jobs/sec) | Ruby | Concurrency
 -----------------|------|---------|---------|------------------------|---
 Sidekiq 7.0.3 | 21.3 sec| 23,500 | 3.2.0+yjit | 30 | Sidekiq::Job
 Sidekiq 7.0.3 | 33.8 sec| 14,700 | 3.2.0+yjit | 30 | ActiveJob 7.0.4
-Sidekiq 7.0.3 | 23.5 sec| 21,300 | 3.2.0 | 30 | S::Job
+Sidekiq 7.0.3 | 23.5 sec| 21,300 | 3.2.0 | 30 | Sidekiq::Job
 Sidekiq 7.0.3 | 46.5 sec| 10,700 | 3.2.0 | 30 | ActiveJob 7.0.4
-Sidekiq 7.0.3 | 23.0 sec| 21,700 | 2.7.5 | 30 | S::Job
+Sidekiq 7.0.3 | 23.0 sec| 21,700 | 2.7.5 | 30 | Sidekiq::Job
 Sidekiq 7.0.3 | 46.5 sec| 10,850 | 2.7.5 | 30 | ActiveJob 7.0.4
 
 Most of Sidekiq's overhead is Redis network I/O.
