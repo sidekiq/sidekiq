@@ -5,10 +5,10 @@ class JobMetricsOverviewChart extends BaseChart {
     this.visibleKls = options.visibleKls;
 
     const countBuckets = this.options.labels.length / 60;
-    this.labelBuckets = this.options.labels.reduce((acc, curr, index) => {
+    this.labelBuckets = this.options.labels.reduce((acc, label, index) => {
       const bucket = Math.floor(index / countBuckets);
       acc[bucket] = acc[bucket] || [];
-      acc[bucket].push(curr);
+      acc[bucket].push(label);
       return acc;
     }, []);
 
