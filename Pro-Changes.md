@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Fix death callback firing multiple times per batch [#5740]
+
 7.0.6
 ---------
 
