@@ -28,6 +28,7 @@ rescue LoadError
 end
 
 require "sidekiq/config"
+require "sidekiq/deprecation"
 require "sidekiq/logger"
 require "sidekiq/client"
 require "sidekiq/transaction_aware_client"
@@ -101,6 +102,10 @@ module Sidekiq
   def self.freeze!
     @frozen = true
     @config_blocks = nil
+  end
+
+  def self.deprecate(msg)
+    default_configuration.handle_deprecation(msg, caller: caller)
   end
 
   # Creates a Sidekiq::Config instance that is more tuned for embedding

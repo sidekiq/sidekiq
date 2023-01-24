@@ -44,7 +44,7 @@ module Sidekiq
     # @param chain [Sidekiq::Middleware::Chain] use the given middleware chain
     def initialize(*args, **kwargs)
       if args.size == 1 && kwargs.size == 0
-        warn "Sidekiq::Client.new(pool) is deprecated, please use Sidekiq::Client.new(pool: pool), #{caller(0..3)}"
+        Sidekiq::Deprecation.warn "Sidekiq::Client.new(pool) is deprecated, please use Sidekiq::Client.new(pool: pool)"
         # old calling method, accept 1 pool argument
         @redis_pool = args[0]
         @chain = Sidekiq.default_configuration.client_middleware
