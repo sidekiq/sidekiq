@@ -5,6 +5,7 @@
 HEAD
 ----------
 
+- Add 1-8 hour period selector to Metrics pages [#5694]
 - Fix process display with `sidekiqmon` [#5733]
 
 7.0.3
