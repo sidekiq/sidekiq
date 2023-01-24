@@ -88,7 +88,7 @@ describe Sidekiq do
           raise "DEPRECATION ERROR: #{msg}"
         }
 
-        assert_raises RuntimeError, "DEPRECATION ERROR: everything" do
+        assert_raises RuntimeError, "DEPRECATION ERROR: this thing here" do
           @config.handle_deprecation(RuntimeError.new("this thing here"))
         end
       end
