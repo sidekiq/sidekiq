@@ -69,11 +69,14 @@ class JobMetricsOverviewChart extends BaseChart {
   }
 
   buildSeries(kls) {
+    // `series` is an object that maps labels to counts => { "20:15" => 2, "20:16" => 3, ... }
     const series = this.options.series[kls];
     return this.labelBuckets.reduce((acc, labels) => {
-      const values = labels.map((label) => series[label]).filter(v => v);
-      if (values.length > 0) {
-        acc[labels[0]] = values.reduce((a, b) => a + b, 0);
+      const bucketValues = labels.map(label => series[label]).filter(v => v);
+      if (bucketValues.length > 0) {
+        // Sum up the values for each bucket that has data.
+        // The new label is the bucket's first label, its start time.
+        acc[labels[0]] = bucketValues.reduce((a, b) => a + b, 0);
       }
       return acc;
     }, {});
