@@ -104,7 +104,7 @@ module Sidekiq
   end
 
   def self.deprecate(msg)
-    default_configuration.handle_deprecation(msg)
+    default_configuration.handle_deprecation(msg, caller: caller)
   end
 
   # Creates a Sidekiq::Config instance that is more tuned for embedding

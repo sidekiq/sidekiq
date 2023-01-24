@@ -41,10 +41,11 @@ module Sidekiq
       l.warn(ex.backtrace.join("\n")) unless ex.backtrace.nil?
     }
 
-    DEPRECATION_HANDLER = ->(msg, ctx) {
-      cfg = ctx[:_config] || Sidekiq.default_configuration
-      l = cfg.logger
-      l.warn "DEPRECATION WARNING: #{msg}"
+    DEPRECATION_HANDLER = ->(msg, ctx, caller) {
+      logger = Sidekiq.default_configuration.logger
+
+      line = caller[0]
+      logger.warn "DEPRECATION WARNING: #{msg} (called from #{line})"
     }
 
     def initialize(options = {})
@@ -266,9 +267,8 @@ module Sidekiq
       @logger = logger
     end
 
-    def handle_deprecation(msg, ctx = {})
-      ctx[:_config] = self
-      @options[:deprecation_handler].call(msg, ctx)
+    def handle_deprecation(msg, ctx: {}, caller:)
+      @options[:deprecation_handler].call(msg, ctx, caller)
     end
 
     # INTERNAL USE ONLY
