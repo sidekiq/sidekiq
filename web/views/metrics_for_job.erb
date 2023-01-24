@@ -15,14 +15,16 @@
 
 <% if job_result.totals["s"] > 0 %>
   <div class="header-container">
-    <h1>
-      <a href="<%= root_path %>metrics"><%= t('Metrics') %></a> /
-      <%= h @name %>
-    </h1>
+    <div class="page-title-container">
+      <h1>
+        <a href="<%= root_path %>metrics?period=<%= @period %>"><%= t('Metrics') %></a> /
+        <%= h @name %>
+      </h1>
 
-    <div>
       <a target="blank" href="https://github.com/mperham/sidekiq/wiki/Metrics"><span class="info-circle" title="Click to learn more about metrics">?</span></a>
     </div>
+
+    <%= erb :_metrics_period_select, locals: { periods: @periods, period: @period, path: "#{root_path}metrics/#{@name}" } %>
   </div>
 
   <canvas id="hist-totals-chart"></canvas>

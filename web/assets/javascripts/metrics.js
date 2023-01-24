@@ -4,6 +4,14 @@ class JobMetricsOverviewChart extends BaseChart {
     this.swatches = [];
     this.visibleKls = options.visibleKls;
 
+    const countBuckets = this.options.labels.length / 60;
+    this.labelBuckets = this.options.labels.reduce((acc, label, index) => {
+      const bucket = Math.floor(index / countBuckets);
+      acc[bucket] = acc[bucket] || [];
+      acc[bucket].push(label);
+      return acc;
+    }, []);
+
     this.init();
   }
 
@@ -52,12 +60,32 @@ class JobMetricsOverviewChart extends BaseChart {
 
     return {
       label: kls,
-      data: this.options.series[kls],
+      data: this.buildSeries(kls),
       borderColor: color,
       backgroundColor: color,
       borderWidth: 2,
       pointRadius: 2,
     };
+  }
+
+  buildSeries(kls) {
+    // `series` is an object that maps labels to counts => { "20:15" => 2, "20:16" => 3, ... }
+    const series = this.options.series[kls];
+    return this.labelBuckets.reduce((acc, labels) => {
+      const bucketValues = labels.map(label => series[label]).filter(v => v);
+      if (bucketValues.length > 0) {
+        // Sum up the values for each bucket that has data.
+        // The new label is the bucket's first label, its start time.
+        acc[labels[0]] = bucketValues.reduce((a, b) => a + b, 0);
+      }
+      return acc;
+    }, {});
+  }
+
+  buildTooltipTitle(items) {
+    const [first, ...rest] = this.labelBuckets.find((labels) => labels[0] === items[0].label);
+    const title = [first, rest[rest.length - 1]].filter(v => v).join(" - ");
+    return `${title} UTC`
   }
 
   get chartOptions() {
@@ -80,7 +108,7 @@ class JobMetricsOverviewChart extends BaseChart {
         tooltip: {
           ...super.chartOptions.plugins.tooltip,
           callbacks: {
-            title: (items) => `${items[0].label} UTC`,
+            title: (items) => this.buildTooltipTitle(items),
             label: (item) =>
               `${item.dataset.label}: ${item.parsed.y.toFixed(1)} ` +
               `${this.options.units}`,

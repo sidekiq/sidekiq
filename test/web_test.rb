@@ -818,4 +818,56 @@ describe Sidekiq::Web do
       assert_equal :after, Thread.current[:some_setting]
     end
   end
+
+  describe "Metrics" do
+    describe "/metrics" do
+      it "calls the Sidekiq::Metrics::Query and renders correctly" do
+        result_mock = MiniTest::Mock.new
+        result_mock.expect(:job_results, {})
+        result_mock.expect(:marks, [])
+        result_mock.expect(:buckets, [])
+        result_mock.expect(:starts_at, Time.now - 3600)
+        result_mock.expect(:ends_at, Time.now)
+
+        query_mock = Minitest::Mock.new
+        query_mock.expect :top_jobs, result_mock do |minutes:|
+          assert_equal minutes, 240
+        end
+
+        Sidekiq::Metrics::Query.stub :new, query_mock do
+          get "/metrics", { period: "4h" }.compact
+          assert_equal 200, last_response.status
+          assert_match(/Metrics/, last_response.body)
+        end
+      end
+    end
+
+    describe "/metrics/:job" do
+      it "calls the Sidekiq::Metrics::Query and renders correctly" do
+        job_result_mock = Minitest::Mock.new
+        job_result_mock.expect(:totals, { "s" => 1 })
+        3.times { job_result_mock.expect(:hist, { "FooJob" => [] }) }
+
+        result_mock = MiniTest::Mock.new
+        result_mock.expect(:job_results, { "FooJob" => job_result_mock })
+        result_mock.expect(:starts_at, Time.now - 3600)
+        result_mock.expect(:ends_at, Time.now)
+        result_mock.expect(:marks, [])
+        result_mock.expect(:buckets, [])
+
+        query_mock = Minitest::Mock.new
+        query_mock.expect :for_job, result_mock do |job, minutes:|
+          assert_equal "FooJob", job
+          assert_equal minutes, 120
+        end
+
+        Sidekiq::Metrics::Query.stub :new, query_mock do
+          get "/metrics/FooJob", { period: "2h" }
+          assert_equal 200, last_response.status
+          assert_match(/Metrics/, last_response.body)
+          assert_match(/FooJob/, last_response.body)
+        end
+      end
+    end
+  end
 end

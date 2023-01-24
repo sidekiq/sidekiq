@@ -20,6 +20,12 @@ module Sidekiq
       "worker-src 'self'",
       "base-uri 'self'"
     ].join("; ").freeze
+    METRICS_PERIODS = {
+      "1h" => 60,
+      "2h" => 120,
+      "4h" => 240,
+      "8h" => 480
+    }
 
     def initialize(klass)
       @klass = klass
@@ -62,14 +68,20 @@ module Sidekiq
 
     get "/metrics" do
       q = Sidekiq::Metrics::Query.new
-      @query_result = q.top_jobs
+      @period = params[:period]
+      @periods = METRICS_PERIODS
+      minutes = @periods.fetch(@period, @periods.values.first)
+      @query_result = q.top_jobs(minutes: minutes)
       erb(:metrics)
     end
 
     get "/metrics/:name" do
       @name = route_params[:name]
+      @period = params[:period]
       q = Sidekiq::Metrics::Query.new
-      @query_result = q.for_job(@name)
+      @periods = METRICS_PERIODS
+      minutes = @periods.fetch(@period, @periods.values.first)
+      @query_result = q.for_job(@name, minutes: minutes)
       erb(:metrics_for_job)
     end
 
