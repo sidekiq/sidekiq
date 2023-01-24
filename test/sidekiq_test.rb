@@ -74,22 +74,29 @@ describe Sidekiq do
       @config.deprecation_handler = Sidekiq::Config::DEPRECATION_HANDLER
     end
 
+    # put this in a method, so we can pass a caller to the method
+    def handle!(msg)
+      @config.handle_deprecation("everything!", caller: caller)
+    end
+
     it "has a reasonable default behavior to log" do
+      caller_line = __LINE__ + 2 # the line the handle_deprecation is on
       output = capture_logging(@config) do
-        @config.handle_deprecation("everything!")
+        handle! "everything!"
       end
 
       assert_includes output, "DEPRECATION WARNING: everything!"
+      assert_includes output, "called from #{__FILE__}:#{caller_line}"
     end
 
     it "can use a user-provided handler" do
       output = capture_logging(@config) do
-        @config.deprecation_handler = proc {|msg, hash|
+        @config.deprecation_handler = proc {|msg, ctx, caller|
           raise "DEPRECATION ERROR: #{msg}"
         }
 
         assert_raises RuntimeError, "DEPRECATION ERROR: this thing here" do
-          @config.handle_deprecation(RuntimeError.new("this thing here"))
+          handle! "this thing here"
         end
       end
 
