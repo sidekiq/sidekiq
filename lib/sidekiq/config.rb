@@ -41,9 +41,16 @@ module Sidekiq
       l.warn(ex.backtrace.join("\n")) unless ex.backtrace.nil?
     }
 
+    DEPRECATION_HANDLER = ->(msg, ctx) {
+      cfg = ctx[:_config] || Sidekiq.default_configuration
+      l = cfg.logger
+      l.warn "DEPRECATION WARNING: #{msg}"
+    }
+
     def initialize(options = {})
       @options = DEFAULTS.merge(options)
       @options[:error_handlers] << ERROR_HANDLER if @options[:error_handlers].empty?
+      @options[:deprecation_handler] = DEPRECATION_HANDLER if @options[:deprecation_handler].nil?
       @directory = {}
       @redis_config = {}
       @capsules = {}
@@ -217,6 +224,14 @@ module Sidekiq
       @options[:error_handlers]
     end
 
+    def deprecation_handler
+      @options[:deprecation_handler]
+    end
+
+    def deprecation_handler=(deprecation_handler)
+      @options[:deprecation_handler] = deprecation_handler
+    end
+
     # Register a block to run at a point in the Sidekiq lifecycle.
     # :startup, :quiet or :shutdown are valid events.
     #
@@ -249,6 +264,11 @@ module Sidekiq
       end
 
       @logger = logger
+    end
+
+    def handle_deprecation(msg, ctx = {})
+      ctx[:_config] = self
+      @options[:deprecation_handler].call(msg, ctx)
     end
 
     # INTERNAL USE ONLY

@@ -69,6 +69,34 @@ describe Sidekiq do
     end
   end
 
+  describe "deprecation handling" do
+    after do
+      @config.deprecation_handler = Sidekiq::Config::DEPRECATION_HANDLER
+    end
+
+    it "has a reasonable default behavior to log" do
+      output = capture_logging(@config) do
+        @config.handle_deprecation("everything!")
+      end
+
+      assert_includes output, "DEPRECATION WARNING: everything!"
+    end
+
+    it "can use a user-provided handler" do
+      output = capture_logging(@config) do
+        @config.deprecation_handler = proc {|msg, hash|
+          raise "DEPRECATION ERROR: #{msg}"
+        }
+
+        assert_raises RuntimeError, "DEPRECATION ERROR: everything" do
+          @config.handle_deprecation(RuntimeError.new("this thing here"))
+        end
+      end
+
+      refute_includes output, "DEPRECATION WARNING: this thing here"
+    end
+  end
+
   describe "redis connection" do
     it "does not continually retry" do
       assert_raises Sidekiq::RedisClientAdapter::CommandError do
