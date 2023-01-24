@@ -835,7 +835,7 @@ describe Sidekiq::Web do
         end
 
         Sidekiq::Metrics::Query.stub :new, query_mock do
-          get "/metrics", { period: "4h" }.compact
+          get "/metrics", {period: "4h"}.compact
           assert_equal 200, last_response.status
           assert_match(/Metrics/, last_response.body)
         end
@@ -845,11 +845,11 @@ describe Sidekiq::Web do
     describe "/metrics/:job" do
       it "calls the Sidekiq::Metrics::Query and renders correctly" do
         job_result_mock = Minitest::Mock.new
-        job_result_mock.expect(:totals, { "s" => 1 })
-        3.times { job_result_mock.expect(:hist, { "FooJob" => [] }) }
+        job_result_mock.expect(:totals, {"s" => 1})
+        3.times { job_result_mock.expect(:hist, {"FooJob" => []}) }
 
         result_mock = MiniTest::Mock.new
-        result_mock.expect(:job_results, { "FooJob" => job_result_mock })
+        result_mock.expect(:job_results, {"FooJob" => job_result_mock})
         result_mock.expect(:starts_at, Time.now - 3600)
         result_mock.expect(:ends_at, Time.now)
         result_mock.expect(:marks, [])
@@ -862,7 +862,7 @@ describe Sidekiq::Web do
         end
 
         Sidekiq::Metrics::Query.stub :new, query_mock do
-          get "/metrics/FooJob", { period: "2h" }
+          get "/metrics/FooJob", {period: "2h"}
           assert_equal 200, last_response.status
           assert_match(/Metrics/, last_response.body)
           assert_match(/FooJob/, last_response.body)
