@@ -95,6 +95,13 @@ describe Sidekiq do
 
       refute_includes output, "DEPRECATION WARNING: this thing here"
     end
+
+    it "has a top-level method to communicate deprecation that can show where a deprecated call was made from" do
+      output = capture_logging(@config) do
+          Sidekiq.deprecate("this method is going away in Sidekiq 9000.0")
+      end
+      assert_includes output, "DEPRECATION WARNING: this method is going away in Sidekiq 9000.0"
+    end
   end
 
   describe "redis connection" do

@@ -103,6 +103,10 @@ module Sidekiq
     @config_blocks = nil
   end
 
+  def self.deprecate(msg)
+    default_configuration.handle_deprecation(msg)
+  end
+
   # Creates a Sidekiq::Config instance that is more tuned for embedding
   # within an arbitrary Ruby process. Notably it reduces concurrency by
   # default so there is less contention for CPU time with other threads.
