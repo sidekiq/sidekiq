@@ -19,6 +19,9 @@ class TimeDuck
 end
 
 describe "job scheduling" do
+  before do
+    reset!
+  end
   describe "middleware" do
     it "schedules jobs" do
       ss = Sidekiq::ScheduledSet.new
