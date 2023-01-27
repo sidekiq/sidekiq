@@ -38,6 +38,12 @@ describe Sidekiq::Deprecation do
         Sidekiq::Deprecation.warn "this thing here"
       end
     end
+
+    it "errors on non-symbols and non-callable objects" do
+      assert_raises ArgumentError, /expected symbol or object that responds to call/i do
+        Sidekiq::Deprecation.behavior = "not a symbol or callable"
+      end
+    end
   end
 
   describe ".warn" do
