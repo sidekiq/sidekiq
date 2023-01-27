@@ -6,8 +6,14 @@ module Sidekiq
 
     DEFAULT_BEHAVIORS = {
       log: ->(msg, callstack, details) {
+        logged_message = "DEPRECATION(#{details}): #{msg}" 
+        if details.see_docs
+          logged_message += ". See #{details.see_docs} for details."
+        end
+        logged_message +="(called from #{callstack[0]})"
+
         logger = Sidekiq.default_configuration.logger
-        logger.warn "DEPRECATION(#{details}): #{msg} (called from #{callstack[0]})"
+        logger.warn logged_message
       },
 
       silence: ->(message, callstack, details) { },
@@ -25,20 +31,21 @@ module Sidekiq
       end
     end
 
-    def self.warn(message = nil, callstack = nil, gem_name: "sidekiq", deprecation_horizon: nil)
+    def self.warn(message = nil, callstack = nil, gem_name: "sidekiq", deprecation_horizon: nil, see_docs: nil)
       callstack ||= caller
-      details = Details.new(gem_name: gem_name, deprecation_horizon: deprecation_horizon)
+      details = Details.new(gem_name: gem_name, deprecation_horizon: deprecation_horizon, see_docs: see_docs)
 
       self.behavior ||= DEFAULT_BEHAVIORS[:log]
       self.behavior.call(message, callstack, details)
     end
 
     class Details
-      attr_accessor :gem_name, :deprecation_horizon
+      attr_accessor :gem_name, :deprecation_horizon, :see_docs
 
-      def initialize(gem_name: "sidekiq", deprecation_horizon: nil)
+      def initialize(gem_name:, deprecation_horizon:, see_docs:)
         @gem_name = gem_name
         @deprecation_horizon = deprecation_horizon
+        @see_docs = see_docs
       end
 
       def to_s

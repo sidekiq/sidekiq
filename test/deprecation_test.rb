@@ -62,6 +62,14 @@ describe Sidekiq::Deprecation do
 
       assert_includes output, "DEPRECATION(sidekiq-9000.0): this method is being removed"
     end
+
+    it "can be given docs to reference" do
+      output = capture_logging(@config) do
+        Sidekiq::Deprecation.warn("this method is being removed", deprecation_horizon: "9000.0", see_docs: "https://github.com/mperham/sidekiq/wiki/Over9000")
+      end
+
+      assert_includes output, "DEPRECATION(sidekiq-9000.0): this method is being removed. See https://github.com/mperham/sidekiq/wiki/Over9000 for details."
+    end
   end
 end
 
