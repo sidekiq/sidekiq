@@ -1,11 +1,12 @@
 # elements like %{queue} are variables and should not be translated
 da:
-  Actions: Actions
+  Actions: Handlinger
   AddToQueue: Tilføj til kø
   AreYouSure: Er du sikker?
   AreYouSureDeleteJob: Er du sikker på at du vil slette dette job?
   AreYouSureDeleteQueue: Er du sikker på at du vil slette %{queue} køen?
   Arguments: Argumenter
+  AvgExecutionTime: Gennemsnitlig eksekveringstid
   Busy: Travl
   Class: Klasse
   Connections: Forbindelser
@@ -18,21 +19,25 @@ da:
   Enqueued: I kø
   Error: Fejl
   ErrorBacktrace: Fejl backtrace
-  ErrorClass: Fejl klasse
-  ErrorMessage: Fejl besked
+  ErrorClass: Fejlklasse
+  ErrorMessage: Fejlbesked
   Extras: Ekstra
   Failed: Fejlet
+  Failure: Fejl
   Failures: Fejl
   GoBack: ← Tilbage
   History: Historik
   Job: Job
   Jobs: Jobs
+  Latency: Forsinkelse
   LastRetry: Sidste forsøg
   LivePoll: Live Poll
   MemoryUsage: RAM forbrug
+  Name: Navn
   Namespace: Namespace
   NextRetry: Næste forsøg
   NoDeadJobsFound: Ingen døde jobs fundet
+  NoJobMetricsFound: Ingen nylig job-metrics blev fundet
   NoRetriesFound: Ingen gen-forsøg var fundet
   NoScheduledFound: Ingen jobs i kø fundet
   OneMonth: 1 måned
@@ -43,7 +48,7 @@ da:
   Processes: Processer
   Queue: Kø
   Queues: Køer
-  Realtime: Real-time
+  Realtime: Realtid
   Retries: Forsøg
   RetryAll: Forsøg alle
   RetryCount: Antal forsøg
@@ -56,10 +61,12 @@ da:
   Started: Startet
   Status: Status
   StopPolling: Stop Polling
+  Success: Succes
   Thread: Tråd
   Threads: Tråde
   ThreeMonths: 3 måneder
   Time: Tid
+  TotalExecutionTime: Total eksekveringstid
   Uptime: Oppetid (dage)
   Version: Version
   When: Når
