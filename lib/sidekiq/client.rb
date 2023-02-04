@@ -128,10 +128,11 @@ module Sidekiq
           copy
         end
         result || nil
-      }.compact
+      }
 
-      raw_push(payloads) unless payloads.empty?
-      payloads.collect { |payload| payload["jid"] }
+      to_push = payloads.compact
+      raw_push(to_push) unless to_push.empty?
+      payloads.map { |payload| payload&.[]("jid") }
     end
 
     # Allows sharding of jobs across any number of Redis instances.  All jobs
