@@ -43,6 +43,21 @@ describe Sidekiq::Capsule do
     assert_equal %w[foo baz baz baz], cap.queues
   end
 
+  it "parses weights correctly" do
+    cap = @cap
+    assert_equal({ "default" => 0 }, cap.weights)
+
+    cap.queues = %w[foo bar,2]
+    assert_equal({ "foo" => 0, "bar" => 2 }, cap.weights)
+
+    cap.queues = ["default"]
+    assert_equal({ "default" => 0 }, cap.weights)
+
+    # config/sidekiq.yml input will look like this
+    cap.queues = [["foo"], ["baz", 3]]
+    assert_equal({ "foo" => 0, "baz" => 3 }, cap.weights)
+  end
+
   it "can have customized middleware chains" do
     one = Object.new
     two = Object.new

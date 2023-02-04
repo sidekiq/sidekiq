@@ -28,6 +28,7 @@ module Sidekiq
       @name = name
       @config = config
       @queues = ["default"]
+      @weights = { "default" => 0 }
       @concurrency = config[:concurrency]
       @mode = :strict
     end
