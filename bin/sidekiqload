@@ -59,11 +59,12 @@ class Loader
   def initialize
     @iter = ENV["GC"] ? 10 : 500
     @count = Integer(ENV["COUNT"] || 1_000)
+    @latency = Integer(ENV["LATENCY"] || 1)
   end
 
   def configure
     @x = Sidekiq.configure_embed do |config|
-      config.redis = {db: 13, port: ((latency > 0) ? 6380 : 6379)}
+      config.redis = {db: 13, port: ((@latency > 0) ? 6380 : 6379)}
       config.concurrency = Integer(ENV.fetch("THREADS", "10"))
       # config.redis = { db: 13, port: 6380, driver: :hiredis}
       config.queues = %w[default]
@@ -185,7 +186,7 @@ class Loader
       Sidekiq.logger.error("GC Start RSS: #{Process.rss}")
     end
     @start = Time.now
-    with_latency(Integer(ENV.fetch("LATENCY", "1"))) do
+    with_latency(@latency) do
       @x.run
 
       while (readable_io = IO.select([@self_read]))
