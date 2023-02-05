@@ -146,6 +146,9 @@ module Sidekiq
       end
     end
 
+    IGNORE_SHUTDOWN_INTERRUPTS = {Sidekiq::Shutdown => :never}
+    private_constant :IGNORE_SHUTDOWN_INTERRUPTS
+
     def process(uow)
       jobstr = uow.job
       queue = uow.queue_name
@@ -195,7 +198,7 @@ module Sidekiq
       ensure
         if ack
           # We don't want a shutdown signal to interrupt job acknowledgment.
-          Thread.handle_interrupt(Sidekiq::Shutdown => :never) do
+          Thread.handle_interrupt(IGNORE_SHUTDOWN_INTERRUPTS) do
             uow.acknowledge
           end
         end

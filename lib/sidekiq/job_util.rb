@@ -18,7 +18,7 @@ module Sidekiq
     def verify_json(item)
       job_class = item["wrapped"] || item["class"]
       if Sidekiq::Config::DEFAULTS[:on_complex_arguments] == :raise
-        unless json_safe?(item)
+        unless json_safe?(item["args"])
           msg = <<~EOM
             Job arguments to #{job_class} must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices.
             To disable this error, add `Sidekiq.strict_args!(false)` to your initializer.
@@ -26,7 +26,7 @@ module Sidekiq
           raise(ArgumentError, msg)
         end
       elsif Sidekiq::Config::DEFAULTS[:on_complex_arguments] == :warn
-        warn <<~EOM unless json_safe?(item)
+        warn <<~EOM unless json_safe?(item["args"])
           Job arguments to #{job_class} do not serialize to JSON safely. This will raise an error in
           Sidekiq 7.0. See https://github.com/mperham/sidekiq/wiki/Best-Practices or raise an error today
           by calling `Sidekiq.strict_args!` during Sidekiq initialization.
@@ -66,8 +66,27 @@ module Sidekiq
 
     private
 
+    RECURSIVE_JSON_SAFE = {
+      Integer => ->(val) { true },
+      Float => ->(val) { true },
+      TrueClass => ->(val) { true },
+      FalseClass => ->(val) { true },
+      NilClass => ->(val) { true },
+      String => ->(val) { true },
+      Array => ->(val) {
+        val.all? { |e| RECURSIVE_JSON_SAFE[e.class].call(e) }
+      },
+      Hash => ->(val) {
+        val.all? { |k, v| String === k && RECURSIVE_JSON_SAFE[v.class].call(v) }
+      }
+    }
+
+    RECURSIVE_JSON_SAFE.default = ->(_val) { false }
+    RECURSIVE_JSON_SAFE.compare_by_identity
+    private_constant :RECURSIVE_JSON_SAFE
+
     def json_safe?(item)
-      JSON.parse(JSON.dump(item["args"])) == item["args"]
+      RECURSIVE_JSON_SAFE[item.class].call(item)
     end
   end
 end

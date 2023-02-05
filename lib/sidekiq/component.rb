@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Sidekiq
   ##
   # Sidekiq::Component assumes a config instance is available at @config
