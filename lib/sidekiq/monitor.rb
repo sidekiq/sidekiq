@@ -16,8 +16,6 @@ class Sidekiq::Monitor
         return
       end
       send(section)
-    rescue => e
-      abort "Couldn't get status: #{e}"
     end
 
     def all
@@ -58,7 +56,7 @@ class Sidekiq::Monitor
         #   {"default" => 1, "critical" => 10}
         queues =
           if process["weights"]
-            process["weights"].sort_by { |queue| queue[0] }.map { |capsule| capsule.map { |name, weight| (weight > 0) ? "#{name}: #{weight}" : name }.join(",") }
+            process["weights"].sort_by { |queue| queue[0] }.map { |capsule| capsule.map { |name, weight| (weight > 0) ? "#{name}: #{weight}" : name }.join(", ") }
           else
             process["queues"].sort
           end
