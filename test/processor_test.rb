@@ -54,8 +54,6 @@ class CustomJobLogger < Sidekiq::JobLogger
   def call(item, queue)
     $invokes += 1
     yield
-  rescue Exception
-    raise
   end
 end
 
