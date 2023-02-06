@@ -27,9 +27,8 @@ module Sidekiq
         end
       elsif Sidekiq::Config::DEFAULTS[:on_complex_arguments] == :warn
         warn <<~EOM unless json_safe?(item["args"])
-          Job arguments to #{job_class} do not serialize to JSON safely. This will raise an error in
-          Sidekiq 7.0. See https://github.com/mperham/sidekiq/wiki/Best-Practices or raise an error today
-          by calling `Sidekiq.strict_args!` during Sidekiq initialization.
+          Job arguments to #{job_class} must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices.
+          To disable this warning, add `Sidekiq.strict_args!(false)` to your initializer.
         EOM
       end
     end

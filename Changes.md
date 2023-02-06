@@ -5,6 +5,7 @@
 HEAD
 ----------
 
+- Performance and memory optimizations [#5768, fatkodima]
 - Add 1-8 hour period selector to Metrics pages [#5694]
 - Fix process display with `sidekiqmon` [#5733]
 
