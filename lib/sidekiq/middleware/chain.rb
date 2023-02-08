@@ -166,22 +166,25 @@ module Sidekiq
 
       # Used by Sidekiq to execute the middleware at runtime
       # @api private
-      def invoke(*args)
+      def invoke(*args, &block)
         return yield if empty?
 
         chain = retrieve
-        traverse_chain = proc do
-          if chain.empty?
-            yield
-          else
-            chain.shift.call(*args, &traverse_chain)
+        traverse(chain, 0, args, &block)
+      end
+
+      private
+
+      def traverse(chain, index, args, &block)
+        if index >= chain.size
+          yield
+        else
+          chain[index].call(*args) do
+            traverse(chain, index + 1, args, &block)
           end
         end
-        traverse_chain.call
       end
     end
-
-    private
 
     # Represents each link in the middleware chain
     # @api private
