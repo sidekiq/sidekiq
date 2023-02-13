@@ -118,7 +118,7 @@ module Sidekiq
       }.join(" ")
     end
 
-    # mperham/sidekiq#3243
+    # sidekiq/sidekiq#3243
     def unfiltered?
       yield unless env["PATH_INFO"].start_with?("/filter/")
     end

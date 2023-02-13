@@ -34,7 +34,7 @@ bundle exec rake
 
 ### Beginner's Guide to Local Development Setup
 
-#### 1. Fork [mperham/sidekiq](https://github.com/mperham/sidekiq) project repository to your personal GitHub account
+#### 1. Fork [sidekiq/sidekiq](https://github.com/sidekiq/sidekiq) project repository to your personal GitHub account
 
 #### 2. Click 'Clone or Download' button in personal sidekiq repository and copy HTTPS URL
 
@@ -53,7 +53,7 @@ cd sidekiq/
 #### 5. Set remote upstream branch
 
 ```
-git remote add upstream https://github.com/mperham/sidekiq.git
+git remote add upstream https://github.com/sidekiq/sidekiq.git
 ```
 
 #### 6. Install necessary gems for development and start Redis server

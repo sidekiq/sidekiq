@@ -214,7 +214,7 @@ module Sidekiq
           Last RTT readings were #{RTT_READINGS.buffer.inspect}, ideally these should be < 1000.
           Ensure Redis is running in the same AZ or datacenter as Sidekiq.
           If these values are close to 100,000, that means your Sidekiq process may be
-          CPU-saturated; reduce your concurrency and/or see https://github.com/mperham/sidekiq/discussions/5039
+          CPU-saturated; reduce your concurrency and/or see https://github.com/sidekiq/sidekiq/discussions/5039
         EOM
         RTT_READINGS.reset
       end

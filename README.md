@@ -2,7 +2,7 @@ Sidekiq
 ==============
 
 [![Gem Version](https://badge.fury.io/rb/sidekiq.svg)](https://rubygems.org/gems/sidekiq)
-![Build](https://github.com/mperham/sidekiq/workflows/CI/badge.svg)
+![Build](https://github.com/sidekiq/sidekiq/workflows/CI/badge.svg)
 
 Simple, efficient background processing for Ruby.
 
@@ -49,11 +49,11 @@ Installation
 Getting Started
 -----------------
 
-See the [Getting Started wiki page](https://github.com/mperham/sidekiq/wiki/Getting-Started) and follow the simple setup process.
+See the [Getting Started wiki page](https://github.com/sidekiq/sidekiq/wiki/Getting-Started) and follow the simple setup process.
 You can watch [this YouTube playlist](https://www.youtube.com/playlist?list=PLjeHh2LSCFrWGT5uVjUuFKAcrcj5kSai1) to learn all about
 Sidekiq and see its features in action.  Here's the Web UI:
 
-![Web UI](https://github.com/mperham/sidekiq/raw/main/examples/web-ui.png)
+![Web UI](https://github.com/sidekiq/sidekiq/raw/main/examples/web-ui.png)
 
 
 Want to Upgrade?
@@ -74,15 +74,15 @@ Problems?
 **Please do not directly email any Sidekiq committers with questions or problems.**
 A community is best served when discussions are held in public.
 
-If you have a problem, please review the [FAQ](https://github.com/mperham/sidekiq/wiki/FAQ) and [Troubleshooting](https://github.com/mperham/sidekiq/wiki/Problems-and-Troubleshooting) wiki pages.
-Searching the [issues](https://github.com/mperham/sidekiq/issues) for your problem is also a good idea.
+If you have a problem, please review the [FAQ](https://github.com/sidekiq/sidekiq/wiki/FAQ) and [Troubleshooting](https://github.com/sidekiq/sidekiq/wiki/Problems-and-Troubleshooting) wiki pages.
+Searching the [issues](https://github.com/sidekiq/sidekiq/issues) for your problem is also a good idea.
 
 Sidekiq Pro and Sidekiq Enterprise customers get private email support.
 You can purchase at https://sidekiq.org; email support@contribsys.com for help.
 
 Useful resources:
 
-* Product documentation is in the [wiki](https://github.com/mperham/sidekiq/wiki).
+* Product documentation is in the [wiki](https://github.com/sidekiq/sidekiq/wiki).
 * Occasional announcements are made to the [@sidekiq](https://twitter.com/sidekiq) Twitter account.
 * The [Sidekiq tag](https://stackoverflow.com/questions/tagged/sidekiq) on Stack Overflow has lots of useful Q &amp; A.
 
@@ -92,13 +92,13 @@ See the [Sidekiq support page](https://sidekiq.org/support.html) for details.
 Contributing
 -----------------
 
-Please see [the contributing guidelines](https://github.com/mperham/sidekiq/blob/main/.github/contributing.md).
+Please see [the contributing guidelines](https://github.com/sidekiq/sidekiq/blob/main/.github/contributing.md).
 
 License
 -----------------
 
-Please see [LICENSE.txt](https://github.com/mperham/sidekiq/blob/main/LICENSE.txt) for licensing details.
-The license for Sidekiq Pro and Sidekiq Enterprise can be found in [COMM-LICENSE.txt](https://github.com/mperham/sidekiq/blob/main/COMM-LICENSE.txt).
+Please see [LICENSE.txt](https://github.com/sidekiq/sidekiq/blob/main/LICENSE.txt) for licensing details.
+The license for Sidekiq Pro and Sidekiq Enterprise can be found in [COMM-LICENSE.txt](https://github.com/sidekiq/sidekiq/blob/main/COMM-LICENSE.txt).
 
 Author
 -----------------

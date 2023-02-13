@@ -20,14 +20,14 @@ module Sidekiq
       if Sidekiq::Config::DEFAULTS[:on_complex_arguments] == :raise
         unless json_safe?(item["args"])
           msg = <<~EOM
-            Job arguments to #{job_class} must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices.
+            Job arguments to #{job_class} must be native JSON types, see https://github.com/sidekiq/sidekiq/wiki/Best-Practices.
             To disable this error, add `Sidekiq.strict_args!(false)` to your initializer.
           EOM
           raise(ArgumentError, msg)
         end
       elsif Sidekiq::Config::DEFAULTS[:on_complex_arguments] == :warn
         warn <<~EOM unless json_safe?(item["args"])
-          Job arguments to #{job_class} must be native JSON types, see https://github.com/mperham/sidekiq/wiki/Best-Practices.
+          Job arguments to #{job_class} must be native JSON types, see https://github.com/sidekiq/sidekiq/wiki/Best-Practices.
           To disable this warning, add `Sidekiq.strict_args!(false)` to your initializer.
         EOM
       end

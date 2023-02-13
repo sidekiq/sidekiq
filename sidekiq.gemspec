@@ -2,7 +2,7 @@ require_relative "lib/sidekiq/version"
 
 Gem::Specification.new do |gem|
   gem.authors = ["Mike Perham"]
-  gem.email = ["mperham@gmail.com"]
+  gem.email = ["info@contribsys.com"]
   gem.summary = "Simple, efficient background processing for Ruby"
   gem.description = "Simple, efficient background processing for Ruby."
   gem.homepage = "https://sidekiq.org"
@@ -16,10 +16,10 @@ Gem::Specification.new do |gem|
 
   gem.metadata = {
     "homepage_uri" => "https://sidekiq.org",
-    "bug_tracker_uri" => "https://github.com/mperham/sidekiq/issues",
-    "documentation_uri" => "https://github.com/mperham/sidekiq/wiki",
-    "changelog_uri" => "https://github.com/mperham/sidekiq/blob/main/Changes.md",
-    "source_code_uri" => "https://github.com/mperham/sidekiq"
+    "bug_tracker_uri" => "https://github.com/sidekiq/sidekiq/issues",
+    "documentation_uri" => "https://github.com/sidekiq/sidekiq/wiki",
+    "changelog_uri" => "https://github.com/sidekiq/sidekiq/blob/main/Changes.md",
+    "source_code_uri" => "https://github.com/sidekiq/sidekiq"
   }
 
   gem.add_dependency "redis-client", ">= 0.11.0"
@@ -31,8 +31,8 @@ Gem::Specification.new do |gem|
     Welcome to Sidekiq 7.0!
     
     1. Use `gem 'sidekiq', '<7'` in your Gemfile if you don't want this new version.
-    2. Read the release notes at https://github.com/mperham/sidekiq/blob/main/docs/7.0-Upgrade.md
-    3. If you have problems, search for open/closed issues at https://github.com/mperham/sidekiq/issues/
+    2. Read the release notes at https://github.com/sidekiq/sidekiq/blob/main/docs/7.0-Upgrade.md
+    3. If you have problems, search for open/closed issues at https://github.com/sidekiq/sidekiq/issues/
 
   EOM
 end

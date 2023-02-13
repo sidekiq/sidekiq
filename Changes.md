@@ -1,6 +1,6 @@
 # Sidekiq Changes
 
-[Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
+[Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
 HEAD
 ----------
@@ -95,7 +95,7 @@ end
 6.5.2
 ----------
 
-- [Job Metrics are under active development, help wanted!](https://github.com/mperham/sidekiq/wiki/Metrics#contributing) **BETA**
+- [Job Metrics are under active development, help wanted!](https://github.com/sidekiq/sidekiq/wiki/Metrics#contributing) **BETA**
 - Add `Context` column on queue page which shows any CurrentAttributes [#5450]
 - `sidekiq_retry_in` may now return `:discard` or `:kill` to dynamically stop job retries [#5406]
 - Smarter sorting of processes in /busy Web UI [#5398]
@@ -114,7 +114,7 @@ end
 - Substantial refactoring of Sidekiq server internals, part of a larger effort
   to reduce Sidekiq's internal usage of global methods and data, see [docs/global_to_local.md](docs/global_to_local.md) and [docs/middleware.md](docs/middleware.md).
 - **Add beta support for the `redis-client` gem**. This will become the default Redis driver in Sidekiq 7.0. [#5298]
-  Read more: https://github.com/mperham/sidekiq/wiki/Using-redis-client
+  Read more: https://github.com/sidekiq/sidekiq/wiki/Using-redis-client
 - **Add beta support for DB transaction-aware client** [#5291]
   Add this line to your initializer and any jobs created during a transaction
   will only be pushed to Redis **after the transaction commits**. You will need to add the
@@ -314,7 +314,7 @@ If this is a Rails app in API mode, you need to enable sessions.
 ---------
 
 - **Integrate with systemd's watchdog and notification features** [#4488]
-  Set `Type=notify` in [sidekiq.service](https://github.com/mperham/sidekiq/blob/4b8a8bd3ae42f6e48ae1fdaf95ed7d7af18ed8bb/examples/systemd/sidekiq.service#L30-L39). The integration works automatically.
+  Set `Type=notify` in [sidekiq.service](https://github.com/sidekiq/sidekiq/blob/4b8a8bd3ae42f6e48ae1fdaf95ed7d7af18ed8bb/examples/systemd/sidekiq.service#L30-L39). The integration works automatically.
 - Use `setTimeout` rather than `setInterval` to avoid thundering herd [#4480]
 - Fix edge case where a job can be pushed without a queue.
 - Flush job stats at exit [#4498]
@@ -327,7 +327,7 @@ If this is a Rails app in API mode, you need to enable sessions.
 - Fix broken Web UI response when using NewRelic and Rack 2.1.2+. [#4440]
 - Update APIs to use `UNLINK`, not `DEL`. [#4449]
 - Fix Ruby 2.7 warnings [#4412]
-- Add support for `APP_ENV` [[95fa5d9]](https://github.com/mperham/sidekiq/commit/95fa5d90192148026e52ca2902f1b83c70858ce8)
+- Add support for `APP_ENV` [[95fa5d9]](https://github.com/sidekiq/sidekiq/commit/95fa5d90192148026e52ca2902f1b83c70858ce8)
 
 6.0.4
 ---------
@@ -439,7 +439,7 @@ Sidekiq.configure_server do |config|
   config.log_formatter = Sidekiq::Logger::Formatters::JSON.new
 end
 ```
-See the [Logging wiki page](https://github.com/mperham/sidekiq/wiki/Logging) for more details.
+See the [Logging wiki page](https://github.com/sidekiq/sidekiq/wiki/Logging) for more details.
 - **BREAKING CHANGE** Validate proper usage of the `REDIS_PROVIDER`
   variable.  This variable is meant to hold the name of the environment
   variable which contains your Redis URL, so that you can switch Redis
@@ -886,7 +886,7 @@ Sidekiq::Queues.clear_all
 - **FIX MEMORY LEAK** Under rare conditions, threads may leak [#2598, gazay]
 - Add Ukrainian locale [#2561, elrakita]
 - Disconnect and retry Redis operations if we see a READONLY error [#2550]
-- Add server middleware testing harness; see [wiki](https://github.com/mperham/sidekiq/wiki/Testing#testing-server-middleware) [#2534, ryansch]
+- Add server middleware testing harness; see [wiki](https://github.com/sidekiq/sidekiq/wiki/Testing#testing-server-middleware) [#2534, ryansch]
 
 3.5.0
 -----------
@@ -904,7 +904,7 @@ Sidekiq::Queues.clear_all
 - Fix CSRF vulnerability in Web UI, thanks to Egor Homakov for
   reporting. [#2422] If you are running the Web UI as a standalone Rack app,
   ensure you have a [session middleware
-configured](https://github.com/mperham/sidekiq/wiki/Monitoring#standalone):
+configured](https://github.com/sidekiq/sidekiq/wiki/Monitoring#standalone):
 ```ruby
 use Rack::Session::Cookie, :secret => "some unique secret string here"
 ```
@@ -1288,7 +1288,7 @@ middleware, see docs/3.0-Upgrade.md.**
   appear to be doing any work. [#1194]
 - Sidekiq's testing behavior is now dynamic.  You can choose between
   `inline` and `fake` behavior in your tests. See
-[Testing](https://github.com/mperham/sidekiq/wiki/Testing) for detail. [#1193]
+[Testing](https://github.com/sidekiq/sidekiq/wiki/Testing) for detail. [#1193]
 - The Retries table has a new column for the error message.
 - The Web UI topbar now contains the status and live poll button.
 - Orphaned worker records are now auto-vacuumed when you visit the

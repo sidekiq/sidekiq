@@ -1,6 +1,6 @@
 # Sidekiq Enterprise Changelog
 
-[Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
+[Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
@@ -148,7 +148,7 @@ sidekiq.latency.#{name} -> sidekiq.queue.latency with tag queue:#{name}
 2.0.0
 -------------
 
-- Except for the [newly required credentials](https://github.com/mperham/sidekiq/issues/4232), Sidekiq Enterprise 2.0 does not have any significant migration steps.
+- Except for the [newly required credentials](https://github.com/sidekiq/sidekiq/issues/4232), Sidekiq Enterprise 2.0 does not have any significant migration steps.
 - Sidekiq Enterprise must now be started with valid license credentials. [#4232]
 - Call `GC.compact` if possible in sidekiqswarm before forking [#4181]
 - Changes for forward-compatibility with Sidekiq 6.0.
@@ -160,7 +160,7 @@ sidekiq.latency.#{name} -> sidekiq.queue.latency with tag queue:#{name}
 -------------
 
 - Fix excessive lock reclaims with concurrent limiter [#4105]
-- Add ES translations, see issues [#3949](https://github.com/mperham/sidekiq/issues/3949) and [#3951](https://github.com/mperham/sidekiq/issues/3951) to add your own language.
+- Add ES translations, see issues [#3949](https://github.com/sidekiq/sidekiq/issues/3949) and [#3951](https://github.com/sidekiq/sidekiq/issues/3951) to add your own language.
 
 1.8.0
 -------------
@@ -187,7 +187,7 @@ sidekiq.latency.#{name} -> sidekiq.queue.latency with tag queue:#{name}
 1.7.0
 -------------
 
-- **NEW FEATURE** [Rolling restarts](https://github.com/mperham/sidekiq/wiki/Ent-Rolling-Restarts) - great for long running jobs!
+- **NEW FEATURE** [Rolling restarts](https://github.com/sidekiq/sidekiq/wiki/Ent-Rolling-Restarts) - great for long running jobs!
 - Adjust middleware so unique jobs that don't push aren't registered in a Batch [#3662]
 - Add new unlimited rate limiter, useful for testing [#3743]
 ```ruby
@@ -261,7 +261,7 @@ expiry = 1.month.to_i; Sidekiq::Limiter.redis { |c| c.scan_each(match: "lmtr-cfr
 1.3.0
 -------------
 
-- **BETA** [New encryption feature](https://github.com/mperham/sidekiq/wiki/Ent-Encryption)
+- **BETA** [New encryption feature](https://github.com/sidekiq/sidekiq/wiki/Ent-Encryption)
   which automatically encrypts the last argument of a Worker, aka the secret bag.
 
 1.2.4
@@ -301,7 +301,7 @@ MAXMEM_KB=1048576 COUNT=2 bundle exec sidekiqswarm ...
 
 - **NEW FEATURE** Multi-process mode!  Sidekiq Enterprise can now fork multiple worker
   processes, enabling significant memory savings.  See the [wiki
-documentation](https://github.com/mperham/sidekiq/wiki/Ent-Multi-Process) for details.
+documentation](https://github.com/sidekiq/sidekiq/wiki/Ent-Multi-Process) for details.
 
 
 0.7.10
@@ -312,7 +312,7 @@ documentation](https://github.com/mperham/sidekiq/wiki/Ent-Multi-Process) for de
 1.1.0
 -------------
 
-- **NEW FEATURE** Historical queue metrics, [documented in the wiki](https://github.com/mperham/sidekiq/wiki/Ent-Historical-Metrics) [#2719]
+- **NEW FEATURE** Historical queue metrics, [documented in the wiki](https://github.com/sidekiq/sidekiq/wiki/Ent-Historical-Metrics) [#2719]
 
 0.7.9, 1.0.2
 -------------

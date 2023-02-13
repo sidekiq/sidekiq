@@ -1,6 +1,6 @@
 # Sidekiq Pro Changelog
 
-[Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
+[Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
@@ -187,14 +187,14 @@ job.WorkerName.failure -> job.failure with tag worker:WorkerName
 
 - There is no significant migration from Sidekiq Pro 4.0 to 5.0
   but make sure you read the [update notes for Sidekiq
-6.0](https://github.com/mperham/sidekiq/blob/main/docs/6.0-Upgrade.md).
+6.0](https://github.com/sidekiq/sidekiq/blob/main/docs/6.0-Upgrade.md).
 - Removed various deprecated APIs and associated warnings.
 - **BREAKING CHANGE** Remove the `Sidekiq::Batch::Status#dead_jobs` API in favor of
   `Sidekiq::Batch::Status#dead_jids`. [#4217]
 - Update Sidekiq Pro codebase to use StandardRB formatting
 - Fix lingering "b-XXX-died" elements in Redis which could cause
   excessive memory usage. [#4217]
-- Add ES translations, see issues [#3949](https://github.com/mperham/sidekiq/issues/3949) and [#3951](https://github.com/mperham/sidekiq/issues/3951) to add your own language.
+- Add ES translations, see issues [#3949](https://github.com/sidekiq/sidekiq/issues/3949) and [#3951](https://github.com/sidekiq/sidekiq/issues/3951) to add your own language.
 
 4.0.5
 ---------
@@ -439,7 +439,7 @@ end
 ---------
 
 - New container-friendly fetch algorithm: `timed_fetch`.  See the
-  [wiki documentation](https://github.com/mperham/sidekiq/wiki/Pro-Reliability-Server)
+  [wiki documentation](https://github.com/sidekiq/sidekiq/wiki/Pro-Reliability-Server)
   for trade offs between the two reliability options.  You should
   use this if you are on Heroku, Docker, Amazon ECS or EBS or
   another container-based system.
