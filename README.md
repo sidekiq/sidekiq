@@ -10,26 +10,6 @@ Sidekiq uses threads to handle many jobs at the same time in the
 same process.  It does not require Rails but will integrate tightly with
 Rails to make background processing dead simple.
 
-Performance
----------------
-
-The benchmark in `bin/sidekiqload` creates 500,000 no-op jobs and drains them as fast as possible, assuming a fixed Redis network latency of 1ms.
-This requires a lot of Redis network I/O and JSON parsing.
-This benchmark is IO-bound so we increase the concurrency to 25.
-If your application is sending lots of emails or performing other network-intensive work, you could see a similar benefit but be careful not to saturate the CPU.
-
-Version | Time to process 500k jobs | Throughput (jobs/sec) | Ruby | Concurrency | Job Type
------------------|------|---------|---------|------------------------|---
-Sidekiq 7.0.3 | 21.3 sec| 23,500 | 3.2.0+yjit | 30 | Sidekiq::Job
-Sidekiq 7.0.3 | 33.8 sec| 14,700 | 3.2.0+yjit | 30 | ActiveJob 7.0.4
-Sidekiq 7.0.3 | 23.5 sec| 21,300 | 3.2.0 | 30 | Sidekiq::Job
-Sidekiq 7.0.3 | 46.5 sec| 10,700 | 3.2.0 | 30 | ActiveJob 7.0.4
-Sidekiq 7.0.3 | 23.0 sec| 21,700 | 2.7.5 | 30 | Sidekiq::Job
-Sidekiq 7.0.3 | 46.5 sec| 10,850 | 2.7.5 | 30 | ActiveJob 7.0.4
-
-Most of Sidekiq's overhead is Redis network I/O.
-ActiveJob adds a notable amount of CPU overhead due to argument deserialization and callbacks.
-Concurrency of 30 was determined experimentally to maximize one CPU without saturating it.
 
 Requirements
 -----------------
@@ -55,6 +35,26 @@ Sidekiq and see its features in action.  Here's the Web UI:
 
 ![Web UI](https://github.com/sidekiq/sidekiq/raw/main/examples/web-ui.png)
 
+Performance
+---------------
+
+The benchmark in `bin/sidekiqload` creates 500,000 no-op jobs and drains them as fast as possible, assuming a fixed Redis network latency of 1ms.
+This requires a lot of Redis network I/O and JSON parsing.
+This benchmark is IO-bound so we increase the concurrency to 25.
+If your application is sending lots of emails or performing other network-intensive work, you could see a similar benefit but be careful not to saturate the CPU.
+
+Version | Time to process 500k jobs | Throughput (jobs/sec) | Ruby | Concurrency | Job Type
+-----------------|------|---------|---------|------------------------|---
+Sidekiq 7.0.3 | 21.3 sec| 23,500 | 3.2.0+yjit | 30 | Sidekiq::Job
+Sidekiq 7.0.3 | 33.8 sec| 14,700 | 3.2.0+yjit | 30 | ActiveJob 7.0.4
+Sidekiq 7.0.3 | 23.5 sec| 21,300 | 3.2.0 | 30 | Sidekiq::Job
+Sidekiq 7.0.3 | 46.5 sec| 10,700 | 3.2.0 | 30 | ActiveJob 7.0.4
+Sidekiq 7.0.3 | 23.0 sec| 21,700 | 2.7.5 | 30 | Sidekiq::Job
+Sidekiq 7.0.3 | 46.5 sec| 10,850 | 2.7.5 | 30 | ActiveJob 7.0.4
+
+Most of Sidekiq's overhead is Redis network I/O.
+ActiveJob adds a notable amount of CPU overhead due to argument deserialization and callbacks.
+Concurrency of 30 was determined experimentally to maximize one CPU without saturating it.
 
 Want to Upgrade?
 -------------------
