@@ -98,12 +98,19 @@ module Sidekiq
       when String, Integer, Float, TrueClass, FalseClass, NilClass
         nil
       when Array
-        item.find { |e| !json_unsafe_item(e).nil? }
+        item.each do |e|
+          unsafe_item = json_unsafe_item(e)
+          return unsafe_item unless unsafe_item.nil?
+        end
+        nil
       when Hash
         item.each do |k, v|
           return k unless String === k
-          return v unless json_unsafe_item(v).nil?
+
+          unsafe_item = json_unsafe_item(v)
+          return unsafe_item unless unsafe_item.nil?
         end
+        nil
       else
         item
       end
