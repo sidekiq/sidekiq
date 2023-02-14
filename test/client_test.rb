@@ -230,9 +230,10 @@ describe Sidekiq::Client do
         end
 
         it "raises an error when using a symbol as an argument" do
-          assert_raises ArgumentError do
+          error = assert_raises ArgumentError do
             InterestingJob.perform_async(:symbol)
           end
+          assert_match(/but :symbol is a Symbol/, error.message)
         end
 
         it "raises an error when using a Date as an argument" do

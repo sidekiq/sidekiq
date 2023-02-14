@@ -17,19 +17,24 @@ module Sidekiq
 
     def verify_json(item)
       job_class = item["wrapped"] || item["class"]
-      if Sidekiq::Config::DEFAULTS[:on_complex_arguments] == :raise
-        unless json_safe?(item["args"])
+      args = item["args"]
+      mode = Sidekiq::Config::DEFAULTS[:on_complex_arguments]
+
+      if mode == :raise || mode == :warn
+        unless json_safe?(args)
+          unsafe_item = json_unsafe_item(args)
           msg = <<~EOM
-            Job arguments to #{job_class} must be native JSON types, see https://github.com/sidekiq/sidekiq/wiki/Best-Practices.
+            Job arguments to #{job_class} must be native JSON types, but #{unsafe_item.inspect} is a #{unsafe_item.class}.
+            See https://github.com/sidekiq/sidekiq/wiki/Best-Practices.
             To disable this error, add `Sidekiq.strict_args!(false)` to your initializer.
           EOM
-          raise(ArgumentError, msg)
+
+          if mode == :raise
+            raise(ArgumentError, msg)
+          else
+            warn(msg)
+          end
         end
-      elsif Sidekiq::Config::DEFAULTS[:on_complex_arguments] == :warn
-        warn <<~EOM unless json_safe?(item["args"])
-          Job arguments to #{job_class} must be native JSON types, see https://github.com/sidekiq/sidekiq/wiki/Best-Practices.
-          To disable this warning, add `Sidekiq.strict_args!(false)` to your initializer.
-        EOM
       end
     end
 
@@ -86,6 +91,22 @@ module Sidekiq
 
     def json_safe?(item)
       RECURSIVE_JSON_SAFE[item.class].call(item)
+    end
+
+    def json_unsafe_item(item)
+      case item
+      when String, Integer, Float, TrueClass, FalseClass, NilClass
+        nil
+      when Array
+        item.find { |e| !json_unsafe_item(e).nil? }
+      when Hash
+        item.each do |k, v|
+          return k unless String === k
+          return v unless json_unsafe_item(v).nil?
+        end
+      else
+        item
+      end
     end
   end
 end
