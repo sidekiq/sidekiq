@@ -21,8 +21,7 @@ module Sidekiq
       mode = Sidekiq::Config::DEFAULTS[:on_complex_arguments]
 
       if mode == :raise || mode == :warn
-        unless json_safe?(args)
-          unsafe_item = json_unsafe_item(args)
+        if (unsafe_item = json_unsafe?(args))
           msg = <<~EOM
             Job arguments to #{job_class} must be native JSON types, but #{unsafe_item.inspect} is a #{unsafe_item.class}.
             See https://github.com/sidekiq/sidekiq/wiki/Best-Practices.
@@ -70,50 +69,37 @@ module Sidekiq
 
     private
 
-    RECURSIVE_JSON_SAFE = {
-      Integer => ->(val) { true },
-      Float => ->(val) { true },
-      TrueClass => ->(val) { true },
-      FalseClass => ->(val) { true },
-      NilClass => ->(val) { true },
-      String => ->(val) { true },
+    RECURSIVE_JSON_UNSAFE = {
+      Integer => ->(val) {},
+      Float => ->(val) {},
+      TrueClass => ->(val) {},
+      FalseClass => ->(val) {},
+      NilClass => ->(val) {},
+      String => ->(val) {},
       Array => ->(val) {
-        val.all? { |e| RECURSIVE_JSON_SAFE[e.class].call(e) }
+        val.each do |e|
+          unsafe_item = RECURSIVE_JSON_UNSAFE[e.class].call(e)
+          return unsafe_item unless unsafe_item.nil?
+        end
+        nil
       },
       Hash => ->(val) {
-        val.all? { |k, v| String === k && RECURSIVE_JSON_SAFE[v.class].call(v) }
+        val.each do |k, v|
+          return k unless String === k
+
+          unsafe_item = RECURSIVE_JSON_UNSAFE[v.class].call(v)
+          return unsafe_item unless unsafe_item.nil?
+        end
+        nil
       }
     }
 
-    RECURSIVE_JSON_SAFE.default = ->(_val) { false }
-    RECURSIVE_JSON_SAFE.compare_by_identity
-    private_constant :RECURSIVE_JSON_SAFE
+    RECURSIVE_JSON_UNSAFE.default = ->(val) { val }
+    RECURSIVE_JSON_UNSAFE.compare_by_identity
+    private_constant :RECURSIVE_JSON_UNSAFE
 
-    def json_safe?(item)
-      RECURSIVE_JSON_SAFE[item.class].call(item)
-    end
-
-    def json_unsafe_item(item)
-      case item
-      when String, Integer, Float, TrueClass, FalseClass, NilClass
-        nil
-      when Array
-        item.each do |e|
-          unsafe_item = json_unsafe_item(e)
-          return unsafe_item unless unsafe_item.nil?
-        end
-        nil
-      when Hash
-        item.each do |k, v|
-          return k unless String === k
-
-          unsafe_item = json_unsafe_item(v)
-          return unsafe_item unless unsafe_item.nil?
-        end
-        nil
-      else
-        item
-      end
+    def json_unsafe?(item)
+      RECURSIVE_JSON_UNSAFE[item.class].call(item)
     end
   end
 end
