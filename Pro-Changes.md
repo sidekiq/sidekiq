@@ -4,9 +4,10 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+7.0.7
 ---------
 
+- Add Farsi translations
 - Fix death callback firing multiple times per batch [#5740]
 
 7.0.6
