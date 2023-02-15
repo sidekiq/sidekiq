@@ -9,21 +9,22 @@ module Sidekiq
     CommandError = RedisClient::CommandError
 
     module CompatMethods
-      # TODO Deprecate and remove this
       def info
         @client.call("INFO") { |i| i.lines(chomp: true).map { |l| l.split(":", 2) }.select { |l| l.size == 2 }.to_h }
       end
 
-      # TODO Deprecate and remove this
       def evalsha(sha, keys, argv)
         @client.call("EVALSHA", sha, keys.size, *keys, *argv)
       end
 
       private
 
+      DEPRECATED_COMMANDS = %i[rpoplpush zrangebyscore zrevrange zrevrangebyscore getset hmset setex setnx]
+
       # this allows us to use methods like `conn.hmset(...)` instead of having to use
       # redis-client's native `conn.call("hmset", ...)`
       def method_missing(*args, &block)
+        warn("Deprecated Redis command: #{args.first} at #{caller(1..1)}") if DEPRECATED_COMMANDS.include?(args.first)
         @client.call(*args, *block)
       end
       ruby2_keywords :method_missing if respond_to?(:ruby2_keywords, true)

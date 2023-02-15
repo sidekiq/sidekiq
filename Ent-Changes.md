@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+HEAD
+---------
+
+- Add new points-based rate limiter popular with GraphQL endpoints at Shopify, GitHub, et al.
+  Thanks to Thad Sauter of NexHealth for contributing the initial skeleton. [#5757]
+
 7.0.4
 ---------
 

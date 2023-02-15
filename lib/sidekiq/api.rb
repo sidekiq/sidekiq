@@ -548,7 +548,7 @@ module Sidekiq
     def remove_job
       Sidekiq.redis do |conn|
         results = conn.multi { |transaction|
-          transaction.zrangebyscore(parent.name, score, score)
+          transaction.zrange(parent.name, score, score, "BYSCORE")
           transaction.zremrangebyscore(parent.name, score, score)
         }.first
 
@@ -683,7 +683,7 @@ module Sidekiq
         end
 
       elements = Sidekiq.redis { |conn|
-        conn.zrangebyscore(name, begin_score, end_score, withscores: true)
+        conn.zrange(name, begin_score, end_score, "BYSCORE", withscores: true)
       }
 
       elements.each_with_object([]) do |element, result|
@@ -724,7 +724,7 @@ module Sidekiq
     # @api private
     def delete_by_jid(score, jid)
       Sidekiq.redis do |conn|
-        elements = conn.zrangebyscore(name, score, score)
+        elements = conn.zrange(name, score, score, "BYSCORE")
         elements.each do |element|
           if element.index(jid)
             message = Sidekiq.load_json(element)

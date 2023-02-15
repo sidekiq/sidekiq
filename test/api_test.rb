@@ -541,7 +541,7 @@ describe "API" do
       @cfg.redis do |conn|
         conn.multi do |transaction|
           transaction.sadd("processes", [odata["key"]])
-          transaction.hmset(odata["key"], "info", Sidekiq.dump_json(odata), "busy", 10, "beat", time)
+          transaction.hset(odata["key"], "info", Sidekiq.dump_json(odata), "busy", 10, "beat", time)
           transaction.sadd("processes", ["fake:pid"])
         end
       end
@@ -581,7 +581,7 @@ describe "API" do
       @cfg.redis do |conn|
         conn.multi do |transaction|
           transaction.sadd("processes", [odata["key"]])
-          transaction.hmset(odata["key"], "info", Sidekiq.dump_json(odata), "busy", 10, "beat", time)
+          transaction.hset(odata["key"], "info", Sidekiq.dump_json(odata), "busy", 10, "beat", time)
         end
       end
 
@@ -619,13 +619,13 @@ describe "API" do
       pdata = {"pid" => $$, "hostname" => hn, "started_at" => Time.now.to_i}
       @cfg.redis do |conn|
         conn.sadd("processes", [key])
-        conn.hmset(key, "info", Sidekiq.dump_json(pdata), "busy", 0, "beat", Time.now.to_f)
+        conn.hset(key, "info", Sidekiq.dump_json(pdata), "busy", 0, "beat", Time.now.to_f)
       end
 
       s = "#{key}:work"
       data = Sidekiq.dump_json({"payload" => "{}", "queue" => "default", "run_at" => Time.now.to_i})
       @cfg.redis do |c|
-        c.hmset(s, "1234", data)
+        c.hset(s, "1234", data)
       end
 
       w.each do |p, x, y|
@@ -640,8 +640,8 @@ describe "API" do
       data = Sidekiq.dump_json({"payload" => {}, "queue" => "default", "run_at" => (Time.now.to_i - 2 * 60 * 60)})
       @cfg.redis do |c|
         c.multi do |transaction|
-          transaction.hmset(s, "5678", data)
-          transaction.hmset("b#{s}", "5678", data)
+          transaction.hset(s, "5678", data)
+          transaction.hset("b#{s}", "5678", data)
         end
       end
 
@@ -671,7 +671,7 @@ describe "API" do
       key = "#{data["hostname"]}:#{data["pid"]}"
       @cfg.redis do |conn|
         conn.sadd("processes", [key])
-        conn.hmset(key, "info", Sidekiq.dump_json(data), "busy", 0, "beat", Time.now.to_f)
+        conn.hset(key, "info", Sidekiq.dump_json(data), "busy", 0, "beat", Time.now.to_f)
       end
       ps = Sidekiq::ProcessSet.new
       assert_equal 1, ps.size
