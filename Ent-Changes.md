@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+HEAD
+---------
+
+- Revert unique impl which required Redis 7.0 [#5793]
+
 7.0.4
 ---------
 
