@@ -38,6 +38,17 @@ describe Sidekiq::Component do
       assert_match(/test\/exception_handler_test.rb/, output, "didn't include the backtrace")
     end
 
+    it "cleans a backtrace if there is a cleaner" do
+      @config[:backtrace_cleaner] = ->(backtrace) { backtrace.take(1) }
+      output = capture_logging(@config) do
+        Thing.new(@config).invoke_exception(a: 1)
+      end
+
+      assert_equal 1, output.lines.count { |line| line.match?(/\d+:in/) }
+    ensure
+      @config[:backtrace_cleaner] = Sidekiq::Config::DEFAULTS[:backtrace_cleaner]
+    end
+
     describe "when the exception does not have a backtrace" do
       it "does not fail" do
         exception = ExceptionHandlerTestException.new

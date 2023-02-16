@@ -50,6 +50,12 @@ module Sidekiq
       end
     end
 
+    initializer "sidekiq.backtrace_cleaner" do
+      Sidekiq.configure_server do |config|
+        config[:backtrace_cleaner] = ::Rails.backtrace_cleaner
+      end
+    end
+
     # This hook happens after all initializers are run, just before returning
     # from config/environment.rb back to sidekiq/cli.rb.
     #
@@ -59,5 +65,9 @@ module Sidekiq
         config[:reloader] = Sidekiq::Rails::Reloader.new
       end
     end
+  end
+
+  ActiveSupport::BacktraceCleaner.class_eval do
+    alias :call :clean
   end
 end
