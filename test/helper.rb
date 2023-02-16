@@ -36,6 +36,7 @@ def reset!
 
   RedisClient.new(url: ENV["REDIS_URL"]).call("flushall")
   cfg = Sidekiq::Config.new
+  cfg[:backtrace_cleaner] = Sidekiq::Config::DEFAULTS[:backtrace_cleaner]
   cfg.logger = NULL_LOGGER
   cfg.logger.level = Logger::WARN
   Sidekiq.instance_variable_set :@config, cfg

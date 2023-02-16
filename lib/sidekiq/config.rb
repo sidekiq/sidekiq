@@ -30,7 +30,8 @@ module Sidekiq
       },
       dead_max_jobs: 10_000,
       dead_timeout_in_seconds: 180 * 24 * 60 * 60, # 6 months
-      reloader: proc { |&block| block.call }
+      reloader: proc { |&block| block.call },
+      backtrace_cleaner: ->(backtrace) { backtrace }
     }
 
     ERROR_HANDLER = ->(ex, ctx) {
@@ -38,7 +39,10 @@ module Sidekiq
       l = cfg.logger
       l.warn(Sidekiq.dump_json(ctx)) unless ctx.empty?
       l.warn("#{ex.class.name}: #{ex.message}")
-      l.warn(ex.backtrace.join("\n")) unless ex.backtrace.nil?
+      unless ex.backtrace.nil?
+        backtrace = cfg[:backtrace_cleaner].call(ex.backtrace)
+        l.warn(backtrace.join("\n"))
+      end
     }
 
     def initialize(options = {})
