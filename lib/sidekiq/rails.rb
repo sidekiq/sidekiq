@@ -52,7 +52,7 @@ module Sidekiq
 
     initializer "sidekiq.backtrace_cleaner" do
       Sidekiq.configure_server do |config|
-        config[:backtrace_cleaner] = ::Rails.backtrace_cleaner
+        config[:backtrace_cleaner] = ->(backtrace) { ::Rails.backtrace_cleaner.clean(backtrace) }
       end
     end
 
@@ -65,9 +65,5 @@ module Sidekiq
         config[:reloader] = Sidekiq::Rails::Reloader.new
       end
     end
-  end
-
-  ActiveSupport::BacktraceCleaner.class_eval do
-    alias :call :clean
   end
 end
