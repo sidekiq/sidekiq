@@ -30,7 +30,7 @@ Gem::Specification.new do |gem|
     
     Welcome to Sidekiq 7.0!
     
-    1. Use `gem 'sidekiq', '<7'` in your Gemfile if you don't want this new version.
+    1. Use `gem 'sidekiq', '~> 6'` in your Gemfile if you don't want this new version.
     2. Read the release notes at https://github.com/sidekiq/sidekiq/blob/main/docs/7.0-Upgrade.md
     3. If you have problems, search for open/closed issues at https://github.com/sidekiq/sidekiq/issues/
 
