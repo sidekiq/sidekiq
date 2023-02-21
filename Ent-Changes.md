@@ -4,6 +4,14 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+HEAD
+---------
+
+- Add new "points-based" leaky bucket rate limiter [#5757]
+  Useful for rate-limited GraphQL query endpoints at Shopify, GitHub, etc.
+- Refactor rate limiter codebase to use `autoload`
+- Refactor concurrent and bucket rate limiter data model to be cluster-friendly [#5800]
+
 7.0.5
 ---------
 
