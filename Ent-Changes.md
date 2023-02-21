@@ -8,6 +8,7 @@ HEAD
 ---------
 
 - Revert unique impl which required Redis 7.0 [#5793]
+- Fix spurious "Uh oh" messages with `sidekiqswarm` [#5801]
 
 7.0.4
 ---------
