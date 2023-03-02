@@ -1,6 +1,7 @@
 require "forwardable"
 
 require "set"
+require "sidekiq/capsule"
 require "sidekiq/redis_connection"
 
 module Sidekiq
