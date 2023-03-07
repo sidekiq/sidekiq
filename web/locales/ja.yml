@@ -27,6 +27,7 @@ ja:
   Extras: エクストラ
   Failed: 失敗
   Failures: 失敗
+  Failure: 失敗
   GoBack: ← 戻る
   History: 履歴
   Job: ジョブ
@@ -75,6 +76,7 @@ ja:
   Stop: 停止
   StopAll: すべて停止
   StopPolling: ポーリング停止
+  Success: 成功
   Thread: スレッド
   Threads: スレッド
   ThreeMonths: 3 ヶ月
@@ -82,7 +84,7 @@ ja:
   Unpause: 一時停止を解除
   Metrics: メトリクス
   NoDataFound: データが見つかりませんでした
-  ExecutionTime: 合計実行時間
+  TotalExecutionTime: 合計実行時間
   AvgExecutionTime: 平均実行時間
   Context: コンテキスト
   Bucket: バケット
