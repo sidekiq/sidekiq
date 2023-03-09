@@ -5,6 +5,7 @@ require "sidekiq/scheduled"
 require "sidekiq/job_retry"
 require "sidekiq/api"
 require "sidekiq/capsule"
+require "active_support/core_ext/numeric/time"
 
 class SomeJob
   include Sidekiq::Job
@@ -43,6 +44,14 @@ class CustomJobWithException
     else
       count * 2
     end
+  end
+end
+
+class ASDurationJob
+  include Sidekiq::Job
+
+  sidekiq_retry_in do |count|
+    count.hours
   end
 end
 
@@ -346,6 +355,12 @@ describe Sidekiq::JobRetry do
         strat, count = handler.__send__(:delay_for, CustomJobWithoutException, 2, StandardError.new)
         assert_equal :default, strat
         assert_includes 4..35, count
+      end
+
+      it "retries with AS::Durations" do
+        strat, count = handler.__send__(:delay_for, ASDurationJob, 2, StandardError.new)
+        assert_equal :default, strat
+        assert_equal 7200, count
       end
 
       it "falls back to the default retry on exception" do

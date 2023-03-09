@@ -13,7 +13,7 @@
   which jobs pushed successfully and which did not.
 - Migrate away from all deprecated Redis commands including `rpoplpush zrangebyscore zrevrange zrevrangebyscore getset hmset setex setnx`.
 
-7.0.5
+7.0.5,7.0.6
 ----------
 
 - More context for debugging json unsafe errors [#5787]

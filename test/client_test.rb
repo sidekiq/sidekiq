@@ -62,6 +62,13 @@ end
 class DJob < BaseJob
 end
 
+class ChildHash < Hash
+  def initialize(constructor)
+    super
+    update(constructor)
+  end
+end
+
 describe Sidekiq::Client do
   before do
     @config = reset!
@@ -253,6 +260,13 @@ describe Sidekiq::Client do
             )
           end
           assert_match(/but :some is a Symbol/, error.message)
+        end
+
+        it "raises an error when using a Hash subclass" do
+          error = assert_raises ArgumentError do
+            InterestingJob.perform_async(ChildHash.new("some" => "hash"))
+          end
+          assert_includes(error.message, 'but {"some"=>"hash"} is a ChildHash')
         end
 
         it "raises an error when using a Struct as an argument" do

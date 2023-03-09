@@ -203,6 +203,7 @@ module Sidekiq
         nil
       end
 
+      rv = rv.to_i if rv.respond_to?(:to_i)
       delay = (count**4) + 15
       if Integer === rv && rv > 0
         delay = rv

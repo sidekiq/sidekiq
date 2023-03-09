@@ -9,6 +9,14 @@ HEAD
 
 - Add new points-based rate limiter popular with GraphQL endpoints at Shopify, GitHub, et al.
   Thanks to Thad Sauter of NexHealth for contributing the initial skeleton. [#5757]
+- Refactor rate limiter codebase to use `autoload`
+- Refactor concurrent and bucket rate limiter data model to be cluster-friendly [#5800]
+
+7.0.5
+---------
+
+- Revert unique impl which required Redis 7.0 [#5793]
+- Fix spurious "Uh oh" messages with `sidekiqswarm` [#5801]
 
 7.0.4
 ---------
