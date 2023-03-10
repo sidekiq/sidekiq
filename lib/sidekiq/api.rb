@@ -397,7 +397,7 @@ module Sidekiq
           job_args.drop(3)
         elsif (self["wrapped"] || args[0]) == "ActionMailer::MailDeliveryJob"
           # remove MailerClass, mailer_method and 'deliver_now'
-          job_args.drop(3).first["args"]
+          job_args.drop(3).first.values_at("params", "args")
         else
           job_args
         end
