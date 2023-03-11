@@ -96,8 +96,9 @@ module Sidekiq
 
     ##
     # Push a large number of jobs to Redis. This method cuts out the redis
-    # network round trip latency.  I wouldn't recommend pushing more than
-    # 1000 per call but YMMV based on network quality, size of job args, etc.
+    # network round trip latency. It pushes jobs in batches if more than
+    # `:batch_size` (1000 by default) of jobs are passed. I wouldn't recommend making `:batch_size`
+    # larger than 1000 but YMMV based on network quality, size of job args, etc.
     # A large number of jobs can cause a bit of Redis command processing latency.
     #
     # Takes the same arguments as #push except that args is expected to be
@@ -107,11 +108,13 @@ module Sidekiq
     #
     # Returns an array of the of pushed jobs' jids.  The number of jobs pushed can be less
     # than the number given if the middleware stopped processing for one or more jobs.
+    #
+    # Example (pushing jobs in batches):
+    #   push_bulk('class' => 'MyJob', 'args' => (1..100_000).to_a, batch_size: 10_000)
+    #
     def push_bulk(items)
+      batch_size = items.delete(:batch_size) || 1_000
       args = items["args"]
-      raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" unless args.is_a?(Array) && args.all?(Array)
-      return [] if args.empty? # no jobs to push
-
       at = items.delete("at")
       raise ArgumentError, "Job 'at' must be a Numeric or an Array of Numeric timestamps" if at && (Array(at).empty? || !Array(at).all? { |entry| entry.is_a?(Numeric) })
       raise ArgumentError, "Job 'at' Array must have same size as 'args' Array" if at.is_a?(Array) && at.size != args.size
@@ -120,18 +123,26 @@ module Sidekiq
       raise ArgumentError, "Explicitly passing 'jid' when pushing more than one job is not supported" if jid && args.size > 1
 
       normed = normalize_item(items)
-      payloads = args.map.with_index { |job_args, index|
-        copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12))
-        copy["at"] = (at.is_a?(Array) ? at[index] : at) if at
-        result = middleware.invoke(items["class"], copy, copy["queue"], @redis_pool) do
-          verify_json(copy)
-          copy
-        end
-        result || nil
-      }.compact
 
-      raw_push(payloads) unless payloads.empty?
-      payloads.collect { |payload| payload["jid"] }
+      result = args.each_slice(batch_size).flat_map do |slice|
+        raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" unless slice.is_a?(Array) && slice.all?(Array)
+        break [] if slice.empty? # no jobs to push
+
+        payloads = slice.map.with_index { |job_args, index|
+          copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12))
+          copy["at"] = (at.is_a?(Array) ? at[index] : at) if at
+          result = middleware.invoke(items["class"], copy, copy["queue"], @redis_pool) do
+            verify_json(copy)
+            copy
+          end
+          result || nil
+        }.compact
+
+        raw_push(payloads) unless payloads.empty?
+        payloads.collect { |payload| payload["jid"] }
+      end
+
+      result.is_a?(Enumerator::Lazy) ? result.force : result
     end
 
     # Allows sharding of jobs across any number of Redis instances.  All jobs

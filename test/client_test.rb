@@ -322,13 +322,26 @@ describe Sidekiq::Client do
     end
 
     it "can push a large set of jobs at once" do
-      jids = Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => (1..1_000).to_a.map { |x| Array(x) })
-      assert_equal 1_000, jids.size
+      jids = Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => (1..1_001).to_a.map { |x| Array(x) })
+      assert_equal 1_001, jids.size
     end
 
     it "can push a large set of jobs at once using a String class" do
-      jids = Sidekiq::Client.push_bulk("class" => "QueuedJob", "args" => (1..1_000).to_a.map { |x| Array(x) })
-      assert_equal 1_000, jids.size
+      jids = Sidekiq::Client.push_bulk("class" => "QueuedJob", "args" => (1..1_001).to_a.map { |x| Array(x) })
+      assert_equal 1_001, jids.size
+    end
+
+    it "pushes a large set of jobs with a different batch size" do
+      jids = Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => (1..1_001).to_a.map { |x| Array(x) }, :batch_size => 100)
+      assert_equal 1_001, jids.size
+    end
+
+    describe "lazy enumerator" do
+      it "enqueues the jobs by evaluating the enumerator" do
+        lazy_array = (1..1_001).to_a.map { |x| Array(x) }.lazy
+        jids = Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => lazy_array)
+        assert_equal 1_001, jids.size
+      end
     end
 
     [1, 2, 3].each do |job_count|

@@ -9,7 +9,7 @@ module Sidekiq
 
     def validate(item)
       raise(ArgumentError, "Job must be a Hash with 'class' and 'args' keys: `#{item}`") unless item.is_a?(Hash) && item.key?("class") && item.key?("args")
-      raise(ArgumentError, "Job args must be an Array: `#{item}`") unless item["args"].is_a?(Array)
+      raise(ArgumentError, "Job args must be an Array: `#{item}`") unless item["args"].is_a?(Array) || item["args"].is_a?(Enumerator::Lazy)
       raise(ArgumentError, "Job class must be either a Class or String representation of the class name: `#{item}`") unless item["class"].is_a?(Class) || item["class"].is_a?(String)
       raise(ArgumentError, "Job 'at' must be a Numeric timestamp: `#{item}`") if item.key?("at") && !item["at"].is_a?(Numeric)
       raise(ArgumentError, "Job tags must be an Array: `#{item}`") if item["tags"] && !item["tags"].is_a?(Array)
