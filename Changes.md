@@ -23,6 +23,7 @@
 - Fix redis-client API usage which could result in stuck Redis
 connections [#5823]
 - Fix AS::Duration with `sidekiq_retry_in` [#5806]
+- Restore dumping config options on startup with `-v` [#5822]
 
 7.0.5,7.0.6
 ----------
