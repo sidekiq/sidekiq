@@ -131,7 +131,8 @@ describe Sidekiq::Client do
       q = Sidekiq::Queue.new
       q.clear
       result = @client.push_bulk("class" => "Blah", "args" => [[1], [2], [3]])
-      assert_equal 1, result.size
+      assert_equal 3, result.size
+      assert_equal [24, 0, 0], result.map(&:to_s).map(&:size)
       assert_equal 1, q.size
     end
 
@@ -459,9 +460,10 @@ describe Sidekiq::Client do
 
       assert_nil @client.push("class" => MyJob, "args" => [0])
       assert_match(/[0-9a-f]{12}/, @client.push("class" => MyJob, "args" => [1]))
-      @client.push_bulk("class" => MyJob, "args" => [[0], [1]]).each do |jid|
-        assert_match(/[0-9a-f]{12}/, jid)
-      end
+      result = @client.push_bulk("class" => MyJob, "args" => [[0], [1]])
+      assert_equal 2, result.size
+      refute result[0]
+      assert_match(/[0-9a-f]{12}/, result[1])
     end
   end
 

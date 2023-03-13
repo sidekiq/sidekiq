@@ -191,6 +191,22 @@ describe Sidekiq::JobRetry do
       assert_equal 3, c.size
     end
 
+    it "cleans backtraces" do
+      @config[:backtrace_cleaner] = ->(backtrace) { backtrace.take(1) }
+
+      assert_raises RuntimeError do
+        handler.local(worker, jobstr("backtrace" => true), "default") do
+          raise("kerblammo!")
+        end
+      end
+
+      job = Sidekiq::RetrySet.new.first
+      assert job.error_backtrace
+      assert_equal 1, job.error_backtrace.size
+    ensure
+      @config[:backtrace_cleaner] = Sidekiq::Config::DEFAULTS[:backtrace_cleaner]
+    end
+
     it "handles a new failed message" do
       assert_raises RuntimeError do
         handler.local(worker, jobstr, "default") do

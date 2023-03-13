@@ -391,13 +391,13 @@ module Sidekiq
     def display_args
       # Unwrap known wrappers so they show up in a human-friendly manner in the Web UI
       @display_args ||= if klass == "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
-        job_args = self["wrapped"] ? args[0]["arguments"] : []
+        job_args = self["wrapped"] ? deserialize_argument(args[0]["arguments"]) : []
         if (self["wrapped"] || args[0]) == "ActionMailer::DeliveryJob"
           # remove MailerClass, mailer_method and 'deliver_now'
           job_args.drop(3)
         elsif (self["wrapped"] || args[0]) == "ActionMailer::MailDeliveryJob"
           # remove MailerClass, mailer_method and 'deliver_now'
-          job_args.drop(3).first["args"]
+          job_args.drop(3).first.values_at("params", "args")
         else
           job_args
         end
@@ -466,6 +466,29 @@ module Sidekiq
     end
 
     private
+
+    ACTIVE_JOB_PREFIX = "_aj_"
+    GLOBALID_KEY = "_aj_globalid"
+
+    def deserialize_argument(argument)
+      case argument
+      when Array
+        argument.map { |arg| deserialize_argument(arg) }
+      when Hash
+        if serialized_global_id?(argument)
+          argument[GLOBALID_KEY]
+        else
+          argument.transform_values { |v| deserialize_argument(v) }
+            .reject { |k, _| k.start_with?(ACTIVE_JOB_PREFIX) }
+        end
+      else
+        argument
+      end
+    end
+
+    def serialized_global_id?(hash)
+      hash.size == 1 && hash.include?(GLOBALID_KEY)
+    end
 
     def uncompress_backtrace(backtrace)
       decoded = Base64.decode64(backtrace)
@@ -548,7 +571,7 @@ module Sidekiq
     def remove_job
       Sidekiq.redis do |conn|
         results = conn.multi { |transaction|
-          transaction.zrangebyscore(parent.name, score, score)
+          transaction.zrange(parent.name, score, score, "BYSCORE")
           transaction.zremrangebyscore(parent.name, score, score)
         }.first
 
@@ -683,7 +706,7 @@ module Sidekiq
         end
 
       elements = Sidekiq.redis { |conn|
-        conn.zrangebyscore(name, begin_score, end_score, withscores: true)
+        conn.zrange(name, begin_score, end_score, "BYSCORE", withscores: true)
       }
 
       elements.each_with_object([]) do |element, result|
@@ -724,7 +747,7 @@ module Sidekiq
     # @api private
     def delete_by_jid(score, jid)
       Sidekiq.redis do |conn|
-        elements = conn.zrangebyscore(name, score, score)
+        elements = conn.zrange(name, score, score, "BYSCORE")
         elements.each do |element|
           if element.index(jid)
             message = Sidekiq.load_json(element)

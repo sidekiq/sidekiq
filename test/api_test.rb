@@ -31,7 +31,7 @@ SERIALIZED_JOBS = {
   ],
   "6.x" => [
     '{"class":"ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper","wrapped":"ApiAjJob","queue":"default","args":[{"job_class":"ApiAjJob","job_id":"ff2b48d4-bdce-4825-af6b-ef8c11ab651e","provider_job_id":null,"queue_name":"default","priority":null,"arguments":[1,2,3],"executions":0,"exception_executions":{},"locale":"en","timezone":"UTC","enqueued_at":"2019-09-12T16:28:37Z"}],"retry":true,"jid":"ce121bf77b37ae81fe61b6dc","created_at":1568305717.9469702,"enqueued_at":1568305717.947005}',
-    '{"class":"ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper","wrapped":"ActionMailer::MailDeliveryJob","queue":"mailers","args":[{"job_class":"ActionMailer::MailDeliveryJob","job_id":"2f967da1-a389-479c-9a4e-5cc059e6d65c","provider_job_id":null,"queue_name":"mailers","priority":null,"arguments":["ApiMailer","test_email","deliver_now",{"args":[1,2,3],"_aj_symbol_keys":["args"]}],"executions":0,"exception_executions":{},"locale":"en","timezone":"UTC","enqueued_at":"2019-09-12T16:28:37Z"}],"retry":true,"jid":"469979df52bb9ef9f48b49e1","created_at":1568305717.9457421,"enqueued_at":1568305717.9457731}'
+    '{"class":"ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper","wrapped":"ActionMailer::MailDeliveryJob","queue":"mailers","args":[{"job_class":"ActionMailer::MailDeliveryJob","job_id":"2f967da1-a389-479c-9a4e-5cc059e6d65c","provider_job_id":null,"queue_name":"mailers","priority":null,"arguments":["ApiMailer","test_email","deliver_now",{"params":{"user":{"_aj_globalid":"gid://app/User/1"}, "_aj_symbol_keys":["user"]},"args":[1,2,3],"_aj_symbol_keys":["params", "args"]}],"executions":0,"exception_executions":{},"locale":"en","timezone":"UTC","enqueued_at":"2019-09-12T16:28:37Z"}],"retry":true,"jid":"469979df52bb9ef9f48b49e1","created_at":1568305717.9457421,"enqueued_at":1568305717.9457731}'
   ]
 }
 
@@ -294,8 +294,13 @@ describe "API" do
           # ApiMailer.test_email(1,2,3).deliver_later
           # puts Sidekiq::Queue.new("mailers").first.value
           x = Sidekiq::JobRecord.new(jobs[1], "mailers")
+
+          expected_args_by_version = {
+            "5.x" => [1, 2, 3],
+            "6.x" => [{"user" => "gid://app/User/1"}, [1, 2, 3]]
+          }
           assert_equal "#{ApiMailer.name}#test_email", x.display_class
-          assert_equal [1, 2, 3], x.display_args
+          assert_equal expected_args_by_version[ver], x.display_args
         end
       end
     end
@@ -541,7 +546,7 @@ describe "API" do
       @cfg.redis do |conn|
         conn.multi do |transaction|
           transaction.sadd("processes", [odata["key"]])
-          transaction.hmset(odata["key"], "info", Sidekiq.dump_json(odata), "busy", 10, "beat", time)
+          transaction.hset(odata["key"], "info", Sidekiq.dump_json(odata), "busy", 10, "beat", time)
           transaction.sadd("processes", ["fake:pid"])
         end
       end
@@ -581,7 +586,7 @@ describe "API" do
       @cfg.redis do |conn|
         conn.multi do |transaction|
           transaction.sadd("processes", [odata["key"]])
-          transaction.hmset(odata["key"], "info", Sidekiq.dump_json(odata), "busy", 10, "beat", time)
+          transaction.hset(odata["key"], "info", Sidekiq.dump_json(odata), "busy", 10, "beat", time)
         end
       end
 
@@ -619,13 +624,13 @@ describe "API" do
       pdata = {"pid" => $$, "hostname" => hn, "started_at" => Time.now.to_i}
       @cfg.redis do |conn|
         conn.sadd("processes", [key])
-        conn.hmset(key, "info", Sidekiq.dump_json(pdata), "busy", 0, "beat", Time.now.to_f)
+        conn.hset(key, "info", Sidekiq.dump_json(pdata), "busy", 0, "beat", Time.now.to_f)
       end
 
       s = "#{key}:work"
       data = Sidekiq.dump_json({"payload" => "{}", "queue" => "default", "run_at" => Time.now.to_i})
       @cfg.redis do |c|
-        c.hmset(s, "1234", data)
+        c.hset(s, "1234", data)
       end
 
       w.each do |p, x, y|
@@ -640,8 +645,8 @@ describe "API" do
       data = Sidekiq.dump_json({"payload" => {}, "queue" => "default", "run_at" => (Time.now.to_i - 2 * 60 * 60)})
       @cfg.redis do |c|
         c.multi do |transaction|
-          transaction.hmset(s, "5678", data)
-          transaction.hmset("b#{s}", "5678", data)
+          transaction.hset(s, "5678", data)
+          transaction.hset("b#{s}", "5678", data)
         end
       end
 
@@ -671,7 +676,7 @@ describe "API" do
       key = "#{data["hostname"]}:#{data["pid"]}"
       @cfg.redis do |conn|
         conn.sadd("processes", [key])
-        conn.hmset(key, "info", Sidekiq.dump_json(data), "busy", 0, "beat", Time.now.to_f)
+        conn.hset(key, "info", Sidekiq.dump_json(data), "busy", 0, "beat", Time.now.to_f)
       end
       ps = Sidekiq::ProcessSet.new
       assert_equal 1, ps.size

@@ -12,6 +12,7 @@ describe "ActiveJob" do
     ActiveJob::Base.queue_adapter = :sidekiq
     ActiveJob::Base.logger = nil
     ActiveJob::Base.send(:include, ::Sidekiq::Job::Options) unless ActiveJob::Base.respond_to?(:sidekiq_options)
+    @config[:backtrace_cleaner] = ->(backtrace) { Rails.backtrace_cleaner.clean(backtrace) }
   end
 
   it "does not allow Sidekiq::Job in AJ::Base classes" do

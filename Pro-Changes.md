@@ -4,6 +4,14 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+7.1.0
+---------
+
+- **SEMANTIC CHANGE**: Empty batches now automatically create an empty job.
+  This ensures callbacks are fired even if no jobs are created. The behavior
+  of empty batches has always been documented as undefined so this is not
+  considered a breaking change.
+
 7.0.7
 ---------
 

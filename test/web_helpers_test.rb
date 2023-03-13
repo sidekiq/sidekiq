@@ -157,7 +157,7 @@ describe "Web helpers" do
 
       Sidekiq.redis do |conn|
         conn.sadd("processes", [key])
-        conn.hmset(key, "info", Sidekiq.dump_json(pdata), "busy", 0, "beat", Time.now.to_f)
+        conn.hset(key, "info", Sidekiq.dump_json(pdata), "busy", 0, "beat", Time.now.to_f)
       end
     end
 
@@ -174,7 +174,7 @@ describe "Web helpers" do
 
       Sidekiq.redis do |conn|
         conn.sadd("processes", [key])
-        conn.hmset(key, "info", Sidekiq.dump_json(pdata), "busy", 0, "beat", Time.now.to_f)
+        conn.hset(key, "info", Sidekiq.dump_json(pdata), "busy", 0, "beat", Time.now.to_f)
       end
     end
 

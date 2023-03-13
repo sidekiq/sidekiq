@@ -19,7 +19,7 @@ module Sidekiq
           total_size, items = conn.multi { |transaction|
             transaction.zcard(key)
             if rev
-              transaction.zrevrange(key, starting, ending, withscores: true)
+              transaction.zrange(key, starting, ending, "REV", withscores: true)
             else
               transaction.zrange(key, starting, ending, withscores: true)
             end

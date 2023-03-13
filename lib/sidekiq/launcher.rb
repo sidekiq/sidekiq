@@ -165,7 +165,7 @@ module Sidekiq
           conn.multi { |transaction|
             transaction.sadd("processes", [key])
             transaction.exists(key)
-            transaction.hmset(key, "info", to_json,
+            transaction.hset(key, "info", to_json,
               "busy", curstate.size,
               "beat", Time.now.to_f,
               "rtt_us", rtt,

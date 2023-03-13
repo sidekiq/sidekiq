@@ -71,6 +71,7 @@ module Sidekiq
     def initialize(capsule)
       @config = @capsule = capsule
       @max_retries = Sidekiq.default_configuration[:max_retries] || DEFAULT_MAX_RETRY_ATTEMPTS
+      @backtrace_cleaner = Sidekiq.default_configuration[:backtrace_cleaner]
     end
 
     # The global retry handler requires only the barest of data.
@@ -159,10 +160,11 @@ module Sidekiq
       end
 
       if msg["backtrace"]
+        backtrace = @backtrace_cleaner.call(exception.backtrace)
         lines = if msg["backtrace"] == true
-          exception.backtrace
+          backtrace
         else
-          exception.backtrace[0...msg["backtrace"].to_i]
+          backtrace[0...msg["backtrace"].to_i]
         end
 
         msg["error_backtrace"] = compress_backtrace(lines)

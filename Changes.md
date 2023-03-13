@@ -2,6 +2,25 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+7.1.0
+----------
+
+- Improve display of ActiveJob arguments in Web UI [#5825, cover]
+- Change return value of `push_bulk` to map 1-to-1 with arguments.
+  If you call `push_bulk(args: [[1], [2], [3]])`, you will now always get
+  an array of 3 values as the result: `["jid1", nil, "jid3"]` where nil means
+  that particular job did not push successfully (possibly due to middleware
+  stopping it). Previously nil values were removed so it was impossible to tell
+  which jobs pushed successfully and which did not.
+- Migrate away from all deprecated Redis commands [#5788]
+
+7.0.7
+----------
+
+- Fix redis-client API usage which could result in stuck Redis
+connections [#5823]
+- Fix AS::Duration with `sidekiq_retry_in` [#5806]
+
 7.0.5,7.0.6
 ----------
 
