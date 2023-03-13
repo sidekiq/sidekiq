@@ -2,6 +2,14 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+7.0.7
+----------
+
+- Fix redis-client API usage which could result in stuck Redis
+connections [#5823]
+- Fix AS::Duration with `sidekiq_retry_in` [#5806]
+
+
 7.0.5,7.0.6
 ----------
 
