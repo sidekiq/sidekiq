@@ -12,6 +12,12 @@ HEAD
 - Refactor rate limiter codebase to use `autoload`
 - Refactor concurrent and bucket rate limiter data model to be cluster-friendly [#5800]
 
+7.0.6
+---------
+
+- Fix redis-client API usage which could result in stuck Redis
+connections [#5823]
+
 7.0.5
 ---------
 
