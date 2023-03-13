@@ -110,10 +110,10 @@ module Sidekiq
     # prevented a job push.
     #
     # Example (pushing jobs in batches):
-    #   push_bulk('class' => 'MyJob', 'args' => (1..100_000).to_a, batch_size: 10_000)
+    #   push_bulk('class' => 'MyJob', 'args' => (1..100_000).to_a, batch_size: 1_000)
     #
     def push_bulk(items)
-      batch_size = items.delete(:batch_size) || 1_000
+      batch_size = items.delete(:batch_size) || items.delete("batch_size") || 1_000
       args = items["args"]
       at = items.delete("at")
       raise ArgumentError, "Job 'at' must be a Numeric or an Array of Numeric timestamps" if at && (Array(at).empty? || !Array(at).all? { |entry| entry.is_a?(Numeric) })
@@ -171,8 +171,8 @@ module Sidekiq
         new.push(item)
       end
 
-      def push_bulk(items)
-        new.push_bulk(items)
+      def push_bulk(...)
+        new.push_bulk(...)
       end
 
       # Resque compatibility helpers.  Note all helpers

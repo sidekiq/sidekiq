@@ -343,6 +343,14 @@ describe Sidekiq::Client do
         jids = Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => lazy_array)
         assert_equal 1_001, jids.size
       end
+
+      it "handles lots of jobs in bulk" do
+        # assume this apes a cursor which can lazy generate a dynamic list of IDs
+        # to process, one job per ID.
+        user_ids = (1..10_000).lazy.map { |x| Array(x) }
+        jids = Sidekiq::Client.new.push_bulk("class" => "A", "args" => user_ids, :batch_size => 5000)
+        assert_equal 10_000, jids.size
+      end
     end
 
     [1, 2, 3].each do |job_count|

@@ -6,6 +6,9 @@
 ----------
 
 - Improve display of ActiveJob arguments in Web UI [#5825, cover]
+- Update `push_bulk` to push `batch_size` jobs at a time and allow laziness [#5827, fatkodima]
+  This allows Sidekiq::Client to push unlimited jobs as long as it has enough memory for the batch_size.
+- Update `perform_bulk` to use `push_bulk` internally.
 - Change return value of `push_bulk` to map 1-to-1 with arguments.
   If you call `push_bulk(args: [[1], [2], [3]])`, you will now always get
   an array of 3 values as the result: `["jid1", nil, "jid3"]` where nil means

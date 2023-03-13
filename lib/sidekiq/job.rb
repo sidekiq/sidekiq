@@ -239,11 +239,7 @@ module Sidekiq
 
       def perform_bulk(args, batch_size: 1_000)
         client = @klass.build_client
-        result = args.each_slice(batch_size).flat_map do |slice|
-          client.push_bulk(@opts.merge("class" => @klass, "args" => slice))
-        end
-
-        result.is_a?(Enumerator::Lazy) ? result.force : result
+        client.push_bulk(@opts.merge("class" => @klass, "args" => args, :batch_size => batch_size))
       end
 
       # +interval+ must be a timestamp, numeric or something that acts
