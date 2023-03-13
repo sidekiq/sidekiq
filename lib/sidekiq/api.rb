@@ -391,7 +391,7 @@ module Sidekiq
     def display_args
       # Unwrap known wrappers so they show up in a human-friendly manner in the Web UI
       @display_args ||= if klass == "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper"
-        job_args = self["wrapped"] ? args[0]["arguments"] : []
+        job_args = self["wrapped"] ? deserialize_argument(args[0]["arguments"]) : []
         if (self["wrapped"] || args[0]) == "ActionMailer::DeliveryJob"
           # remove MailerClass, mailer_method and 'deliver_now'
           job_args.drop(3)
@@ -466,6 +466,29 @@ module Sidekiq
     end
 
     private
+
+    ACTIVE_JOB_PREFIX = "_aj_"
+    GLOBALID_KEY = "_aj_globalid"
+
+    def deserialize_argument(argument)
+      case argument
+      when Array
+        argument.map { |arg| deserialize_argument(arg) }
+      when Hash
+        if serialized_global_id?(argument)
+          argument[GLOBALID_KEY]
+        else
+          argument.transform_values { |v| deserialize_argument(v) }
+            .reject { |k, _| k.start_with?(ACTIVE_JOB_PREFIX) }
+        end
+      else
+        argument
+      end
+    end
+
+    def serialized_global_id?(hash)
+      hash.size == 1 && hash.include?(GLOBALID_KEY)
+    end
 
     def uncompress_backtrace(backtrace)
       decoded = Base64.decode64(backtrace)
