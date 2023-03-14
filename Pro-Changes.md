@@ -12,6 +12,11 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
   of empty batches has always been documented as undefined so this is not
   considered a breaking change.
 
+7.0.8
+---------
+
+- Fix redis-client API usage which could result in stuck Redis connections [#5823]
+
 7.0.7
 ---------
 
