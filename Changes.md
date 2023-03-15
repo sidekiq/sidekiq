@@ -5,6 +5,8 @@
 7.1.0
 ----------
 
+- Sidekiq can optionally log source locations from where the job was enqueued.
+  Just include `require 'sidekiq/middleware/enqueue_source_logger'` in your sidekiq initializer [#5833, fatkodima]
 - Improve display of ActiveJob arguments in Web UI [#5825, cover]
 - Update `push_bulk` to push `batch_size` jobs at a time and allow laziness [#5827, fatkodima]
   This allows Sidekiq::Client to push unlimited jobs as long as it has enough memory for the batch_size.
