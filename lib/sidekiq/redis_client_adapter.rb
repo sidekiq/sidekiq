@@ -42,27 +42,6 @@ module Sidekiq
         @client.config
       end
 
-      def message
-        yield nil, @queue.pop
-      end
-
-      # NB: this method does not return
-      def subscribe(chan)
-        @queue = ::Queue.new
-
-        pubsub = @client.pubsub
-        pubsub.call("subscribe", chan)
-
-        loop do
-          evt = pubsub.next_event
-          next if evt.nil?
-          next unless evt[0] == "message" && evt[1] == chan
-
-          (_, _, msg) = evt
-          @queue << msg
-          yield self
-        end
-      end
     end
 
     def initialize(options)
