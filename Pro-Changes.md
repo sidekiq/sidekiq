@@ -11,6 +11,8 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
   This ensures callbacks are fired even if no jobs are created. The behavior
   of empty batches has always been documented as undefined so this is not
   considered a breaking change.
+- Add `complete_at`, `success_at` and `death_at` timestamps to `S::Batch::Status`, which track when that batch callback was triggered. [#5818]
+- Refactor all `*_at` Batch APIs to consistently return `Time` objects [#5837]
 
 7.0.8
 ---------
