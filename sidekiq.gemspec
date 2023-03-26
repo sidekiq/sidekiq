@@ -19,7 +19,8 @@ Gem::Specification.new do |gem|
     "bug_tracker_uri" => "https://github.com/sidekiq/sidekiq/issues",
     "documentation_uri" => "https://github.com/sidekiq/sidekiq/wiki",
     "changelog_uri" => "https://github.com/sidekiq/sidekiq/blob/main/Changes.md",
-    "source_code_uri" => "https://github.com/sidekiq/sidekiq"
+    "source_code_uri" => "https://github.com/sidekiq/sidekiq",
+    "rubygems_mfa_required" => "true"
   }
 
   gem.add_dependency "redis-client", ">= 0.11.0"
