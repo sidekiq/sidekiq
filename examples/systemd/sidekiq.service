@@ -8,6 +8,9 @@
 # Then run:
 #   - systemctl --user enable sidekiq
 #   - systemctl --user {start,stop,restart} sidekiq
+# Also you might want to run:
+#   - loginctl enable-linger username
+# So that the service is not killed when the user logs out.
 #
 # If you are going to run this as a system service
 # Customize and copy this into /usr/lib/systemd/system (CentOS) or /lib/systemd/system (Ubuntu).
