@@ -7,8 +7,14 @@ Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 HEAD
 ---------
 
-- Add new points-based rate limiter popular with GraphQL endpoints at Shopify, GitHub, et al.
+- **NEW** Points-based rate limiter popular with GraphQL endpoints at Shopify, GitHub, et al.
   Thanks to Thad Sauter of NexHealth for contributing the initial skeleton. [#5757]
+- **NEW** Test helper to verify periodic job registration block [#5832]
+```ruby
+CRON_BLOCK = ->(mgr) { mgr.register("0 * * * * *", "SomeJob") }
+ct = Sidekiq::Periodic::ConfigTester.new
+ct.verify(CRON_BLOCK) # => raises ArgumentError, invalid crontab syntax
+```
 - Refactor rate limiter codebase to use `autoload`
 - Refactor concurrent and bucket rate limiter data model to be cluster-friendly [#5800]
 
