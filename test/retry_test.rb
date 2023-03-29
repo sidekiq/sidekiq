@@ -31,7 +31,7 @@ end
 class CustomJobWithException
   include Sidekiq::Job
 
-  sidekiq_retry_in do |count, exception|
+  sidekiq_retry_in do |count, exception, job|
     case exception
     when RuntimeError
       :kill
@@ -299,57 +299,57 @@ describe Sidekiq::JobRetry do
 
     describe "custom retry delay" do
       it "retries with a default delay" do
-        strat, count = handler.__send__(:delay_for, worker, 2, StandardError.new)
+        strat, count = handler.__send__(:delay_for, worker, 2, StandardError.new, {})
         assert_equal :default, strat
         refute_equal 4, count
       end
 
       it "retries with a custom delay and exception 1" do
-        strat, count = handler.__send__(:delay_for, CustomJobWithException, 2, ArgumentError.new)
+        strat, count = handler.__send__(:delay_for, CustomJobWithException, 2, ArgumentError.new, {})
         assert_equal :default, strat
         assert_includes 4..35, count
       end
 
       it "supports discard" do
-        strat, count = handler.__send__(:delay_for, CustomJobWithException, 2, Interrupt.new)
+        strat, count = handler.__send__(:delay_for, CustomJobWithException, 2, Interrupt.new, {})
         assert_equal :discard, strat
         assert_nil count
       end
 
       it "supports kill" do
-        strat, count = handler.__send__(:delay_for, CustomJobWithException, 2, RuntimeError.new)
+        strat, count = handler.__send__(:delay_for, CustomJobWithException, 2, RuntimeError.new, {})
         assert_equal :kill, strat
         assert_nil count
       end
 
       it "retries with a custom delay and exception 2" do
-        strat, count = handler.__send__(:delay_for, CustomJobWithException, 2, StandardError.new)
+        strat, count = handler.__send__(:delay_for, CustomJobWithException, 2, StandardError.new, {})
         assert_equal :default, strat
         assert_includes 4..35, count
       end
 
       it "retries with a default delay and exception in case of configured with nil" do
-        strat, count = handler.__send__(:delay_for, CustomJobWithException, 2, SpecialError.new)
+        strat, count = handler.__send__(:delay_for, CustomJobWithException, 2, SpecialError.new, {})
         assert_equal :default, strat
         refute_equal 8, count
         refute_equal 4, count
       end
 
       it "retries with a custom delay without exception" do
-        strat, count = handler.__send__(:delay_for, CustomJobWithoutException, 2, StandardError.new)
+        strat, count = handler.__send__(:delay_for, CustomJobWithoutException, 2, StandardError.new, {})
         assert_equal :default, strat
         assert_includes 4..35, count
       end
 
       it "retries with AS::Durations" do
-        strat, count = handler.__send__(:delay_for, ASDurationJob, 2, StandardError.new)
+        strat, count = handler.__send__(:delay_for, ASDurationJob, 2, StandardError.new, {})
         assert_equal :default, strat
         assert_equal 7200, count
       end
 
       it "falls back to the default retry on exception" do
         output = capture_logging(@config) do
-          strat, count = handler.__send__(:delay_for, ErrorJob, 2, StandardError.new)
+          strat, count = handler.__send__(:delay_for, ErrorJob, 2, StandardError.new, {})
           assert_equal :default, strat
           refute_equal 4, count
         end
