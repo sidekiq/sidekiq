@@ -2,10 +2,13 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+7.0.8
 ----------
 
-- Add job hash as another parameter to any `sidekiq_retry_in` block.
+- **SECURITY** Sanitize `period` input parameter on Metrics pages.
+  Specially crafted values can lead to XSS. This functionality
+  was introduced in 7.0.4. Thank you to spercex @ huntr.dev [#5694]
+- Add job hash as 3rd parameter to the `sidekiq_retry_in` block.
 
 7.0.7
 ----------
