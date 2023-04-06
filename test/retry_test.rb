@@ -124,8 +124,6 @@ describe Sidekiq::JobRetry do
     end
 
     it "handles zany characters in error message, #1705" do
-      skip "skipped! test requires ruby 2.1+" if RUBY_VERSION <= "2.1.0"
-
       assert_raises RuntimeError do
         handler.local(worker, jobstr, "default") do
           raise "kerblammo! #{195.chr}"
