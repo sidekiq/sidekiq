@@ -173,7 +173,7 @@ module Sidekiq
       # Goodbye dear message, you (re)tried your best I'm sure.
       return retries_exhausted(jobinst, msg, exception) if count >= max_retry_attempts
 
-      strategy, delay = delay_for(jobinst, count, exception)
+      strategy, delay = delay_for(jobinst, count, exception, msg)
       case strategy
       when :discard
         return # poof!
@@ -192,12 +192,12 @@ module Sidekiq
     end
 
     # returns (strategy, seconds)
-    def delay_for(jobinst, count, exception)
+    def delay_for(jobinst, count, exception, msg)
       rv = begin
         # sidekiq_retry_in can return two different things:
         # 1. When to retry next, as an integer of seconds
         # 2. A symbol which re-routes the job elsewhere, e.g. :discard, :kill, :default
-        jobinst&.sidekiq_retry_in_block&.call(count, exception)
+        jobinst&.sidekiq_retry_in_block&.call(count, exception, msg)
       rescue Exception => e
         handle_exception(e, {context: "Failure scheduling retry using the defined `sidekiq_retry_in` in #{jobinst.class.name}, falling back to default"})
         nil

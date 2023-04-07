@@ -14,6 +14,13 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 - Add `complete_at`, `success_at` and `death_at` timestamps to `S::Batch::Status`, which track when that batch callback was triggered. [#5818]
 - Refactor all `*_at` Batch APIs to consistently return `Time` objects [#5837]
 
+7.0.9
+---------
+
+- Dead JIDs on the Batch page are now linked so you can quickly jump to them in Dead
+- Fix unnecessary Redis pool creation [#5830]
+- Fix network logic which could have resulted in pause/unpause not working [#5834]
+
 7.0.8
 ---------
 

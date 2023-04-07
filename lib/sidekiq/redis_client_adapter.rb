@@ -41,7 +41,6 @@ module Sidekiq
       def config
         @client.config
       end
-
     end
 
     def initialize(options)

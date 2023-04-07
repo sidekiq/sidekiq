@@ -16,6 +16,15 @@
   stopping it). Previously nil values were removed so it was impossible to tell
   which jobs pushed successfully and which did not.
 - Migrate away from all deprecated Redis commands [#5788]
+- Add Scottish Gaelic locale [#5867]
+
+7.0.8
+----------
+
+- **SECURITY** Sanitize `period` input parameter on Metrics pages.
+  Specially crafted values can lead to XSS. This functionality
+  was introduced in 7.0.4. Thank you to spercex @ huntr.dev [#5694]
+- Add job hash as 3rd parameter to the `sidekiq_retry_in` block.
 
 7.0.7
 ----------

@@ -99,7 +99,7 @@ describe "Web helpers" do
   it "tests available locales" do
     obj = Helpers.new
     expected = %w[
-      ar cs da de el en es fa fr he hi it ja
+      ar cs da de el en es fa fr gd he hi it ja
       ko lt nb nl pl pt pt-br ru sv ta uk ur
       vi zh-cn zh-tw
     ]

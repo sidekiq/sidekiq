@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-HEAD
+7-1
 ---------
 
 - **NEW** Points-based rate limiter popular with GraphQL endpoints at Shopify, GitHub, et al.
@@ -17,6 +17,16 @@ ct.verify(CRON_BLOCK) # => raises ArgumentError, invalid crontab syntax
 ```
 - Refactor rate limiter codebase to use `autoload`
 - Refactor concurrent and bucket rate limiter data model to be cluster-friendly [#5800]
+
+HEAD
+---------
+
+- Fix mutable job arguments when rescheduling an OverLimit [#5859]
+
+7.0.7
+---------
+
+- Tweak concurrent rate limiter to minimize spurious ReadTimeoutErrors [#5838]
 
 7.0.6
 ---------
