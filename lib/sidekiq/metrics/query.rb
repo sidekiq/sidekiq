@@ -70,7 +70,7 @@ module Sidekiq
             result.job_results[klass].add_metric "ms", time, ms.to_i if ms
             result.job_results[klass].add_metric "p", time, p.to_i if p
             result.job_results[klass].add_metric "f", time, f.to_i if f
-            result.job_results[klass].add_hist time, Histogram.new(klass).fetch(conn, time)
+            result.job_results[klass].add_hist time, Histogram.new(klass).fetch(conn, time).reverse
             time -= 60
           end
         end
