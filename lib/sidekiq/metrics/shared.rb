@@ -29,8 +29,8 @@ module Sidekiq
         1100, 1700, 2500, 3800, 5750,
         8500, 13000, 20000, 30000, 45000,
         65000, 100000, 150000, 225000, 335000,
-        Float::INFINITY # the "maybe your job is too long" bucket
-      ]
+        1e20 # the "maybe your job is too long" bucket
+      ].freeze
       LABELS = [
         "20ms", "30ms", "45ms", "65ms", "100ms",
         "150ms", "225ms", "335ms", "500ms", "750ms",
@@ -38,7 +38,7 @@ module Sidekiq
         "8.5s", "13s", "20s", "30s", "45s",
         "65s", "100s", "150s", "225s", "335s",
         "Slow"
-      ]
+      ].freeze
       FETCH = "GET u16 #0 GET u16 #1 GET u16 #2 GET u16 #3 \
         GET u16 #4 GET u16 #5 GET u16 #6 GET u16 #7 \
         GET u16 #8 GET u16 #9 GET u16 #10 GET u16 #11 \

@@ -6,11 +6,8 @@
 <%
   job_result = @query_result.job_results[@name]
   hist_totals = job_result.hist.values.first.zip(*job_result.hist.values[1..-1]).map(&:sum)
-  bucket_labels =Sidekiq::Metrics::Histogram::LABELS
-  bucket_intervals =Sidekiq::Metrics::Histogram::BUCKET_INTERVALS.reverse
-
-  # Replace INFINITY since it can't be represented as JSON
-  bucket_intervals[0] = bucket_intervals[1] * 2
+  bucket_labels = Sidekiq::Metrics::Histogram::LABELS
+  bucket_intervals = Sidekiq::Metrics::Histogram::BUCKET_INTERVALS
 %>
 
 <% if job_result.totals["s"] > 0 %>
