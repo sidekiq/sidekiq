@@ -41,7 +41,7 @@ describe Sidekiq::Metrics do
   describe "marx" do
     it "owns the means of production" do
       whence = Time.local(2022, 7, 17, 18, 43, 15)
-      floor = whence.utc.rfc3339.sub(":15", ":00")
+      floor = whence.utc.iso8601.sub(":15", ":00")
 
       d = Sidekiq::Deploy.new
       d.mark!(at: whence, label: "cafed00d - some git summary line")
