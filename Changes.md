@@ -16,6 +16,7 @@
   stopping it). Previously nil values were removed so it was impossible to tell
   which jobs pushed successfully and which did not.
 - Migrate away from all deprecated Redis commands [#5788]
+- Prefix all Sidekiq thread names [#5872]
 - Add Scottish Gaelic locale [#5867]
 
 7.0.8
