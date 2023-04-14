@@ -132,11 +132,7 @@ describe Sidekiq::RedisConnection do
         pool = Sidekiq::RedisConnection.create
         redis = pool.checkout
 
-        if self.class.redis_client?
-          assert_equal 1.0, client_for(redis).read_timeout
-        else
-          assert_equal 5, client_for(redis).read_timeout
-        end
+        assert_equal 1.0, client_for(redis).read_timeout
       end
     end
 
