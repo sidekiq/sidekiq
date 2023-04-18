@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "set"
 require "redis_client"
 require "redis_client/decorator"
 
@@ -9,7 +10,7 @@ module Sidekiq
     CommandError = RedisClient::CommandError
 
     # You can add/remove items or clear the whole thing if you don't want deprecation warnings.
-    DEPRECATED_COMMANDS = %i[rpoplpush zrangebyscore zrevrange zrevrangebyscore getset hmset setex setnx]
+    DEPRECATED_COMMANDS = %i[rpoplpush zrangebyscore zrevrange zrevrangebyscore getset hmset setex setnx].to_set
 
     module CompatMethods
       def info
@@ -25,7 +26,7 @@ module Sidekiq
       # this allows us to use methods like `conn.hmset(...)` instead of having to use
       # redis-client's native `conn.call("hmset", ...)`
       def method_missing(*args, &block)
-        warn("[#5788] Redis has deprecated the `#{args.first}`command, called at #{caller(1..1)}") if DEPRECATED_COMMANDS.include?(args.first)
+        warn("[sidekiq#5788] Redis has deprecated the `#{args.first}`command, called at #{caller(1..1)}") if DEPRECATED_COMMANDS.include?(args.first)
         @client.call(*args, *block)
       end
       ruby2_keywords :method_missing if respond_to?(:ruby2_keywords, true)

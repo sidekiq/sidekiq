@@ -16,6 +16,7 @@
   stopping it). Previously nil values were removed so it was impossible to tell
   which jobs pushed successfully and which did not.
 - Migrate away from all deprecated Redis commands [#5788]
+  Sidekiq will now print a warning if you use one of those deprecated commands.
 - Prefix all Sidekiq thread names [#5872]
 
 7.0.9
