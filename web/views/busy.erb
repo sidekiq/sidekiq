@@ -33,8 +33,8 @@
     <form method="POST" class="warning-messages">
       <%= csrf_tag %>
       <div class="btn-group pull-right flip">
-        <button class="btn btn-warn" type="submit" name="quiet" value="1" data-confirm="<%= t('AreYouSure') %>"><%= t('QuietAll') %></button>
-        <button class="btn btn-danger" type="submit" name="stop" value="1" data-confirm="<%= t('AreYouSure') %>"><%= t('StopAll') %></button>
+        <input class="btn btn-warn" type="submit" name="quiet" value="<%= t('QuietAll') %>" data-confirm="<%= t('AreYouSure') %>"/>
+        <input class="btn btn-danger" type="submit" name="stop" value="<%= t('StopAll') %>" data-confirm="<%= t('AreYouSure') %>"/>
       </div>
     </form>
   </div>
