@@ -2,6 +2,14 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+7.0.9
+----------
+
+- Restore confirmation dialogs in Web UI [#5881, shevaun]
+- Increase fetch timeout to minimize ReadTimeoutError [#5874]
+- Reverse histogram tooltip ordering [#5868]
+- Add Scottish Gaelic (gd) locale [#5867, GunChleoc]
+
 7.0.8
 ----------
 
