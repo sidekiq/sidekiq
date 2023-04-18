@@ -83,6 +83,20 @@ describe Sidekiq::Web do
       assert_match(/WebJob/, last_response.body)
     end
 
+    it "can quiet all processes" do
+      identity = "identity"
+      signals_key = "#{identity}-signals"
+      @config.redis do |conn|
+        conn.sadd("processes", [identity])
+        conn.hset(identity, "info", Sidekiq.dump_json("hostname" => "foo", "identity" => identity), "at", Time.now.to_f, "busy", 0)
+      end
+
+      assert_nil @config.redis { |c| c.lpop signals_key }
+      post "/busy", "quiet" => "Quiet All"
+      assert_equal 302, last_response.status
+      assert_equal "TSTP", @config.redis { |c| c.lpop signals_key }
+    end
+
     it "can quiet a process" do
       identity = "identity"
       signals_key = "#{identity}-signals"

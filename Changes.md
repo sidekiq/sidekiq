@@ -17,7 +17,14 @@
   which jobs pushed successfully and which did not.
 - Migrate away from all deprecated Redis commands [#5788]
 - Prefix all Sidekiq thread names [#5872]
-- Add Scottish Gaelic locale [#5867]
+
+7.0.9
+----------
+
+- Restore confirmation dialogs in Web UI [#5881, shevaun]
+- Increase fetch timeout to minimize ReadTimeoutError [#5874]
+- Reverse histogram tooltip ordering [#5868]
+- Add Scottish Gaelic (gd) locale [#5867, GunChleoc]
 
 7.0.8
 ----------
