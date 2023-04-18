@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+7.0.10
+---------
+
+- Increase fetch timeout to minimize ReadTimeoutError [#5874]
+- Add Hindi locale [gaurish]
+
 7.0.9
 ---------
 

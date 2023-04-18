@@ -12,7 +12,7 @@ Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 - Refactor rate limiter codebase to use `autoload`
 - Refactor concurrent and bucket rate limiter data model to be cluster-friendly [#5800]
 
-HEAD
+7.0.8
 ---------
 
 - Fix mutable job arguments when rescheduling an OverLimit [#5859]
