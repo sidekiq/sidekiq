@@ -5,7 +5,7 @@
 
 <%
   job_result = @query_result.job_results[@name]
-  hist_totals = job_result.hist.values.first.zip(*job_result.hist.values[1..-1]).map(&:sum)
+  hist_totals = job_result.hist.values.first.zip(*job_result.hist.values[1..-1]).map(&:sum).reverse
   bucket_labels = Sidekiq::Metrics::Histogram::LABELS
   bucket_intervals = Sidekiq::Metrics::Histogram::BUCKET_INTERVALS
 %>
