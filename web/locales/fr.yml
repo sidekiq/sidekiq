@@ -90,7 +90,7 @@ fr:
   Worker: Travailleur
   active: actif
   idle: inactif
-  Metrics: Metriques
+  Metrics: Métriques
   NoDataFound: Aucune donnée disponible
   TotalExecutionTime: Temps d'exécution total
   AvgExecutionTime: Temps d'exécution moyen
