@@ -23,17 +23,8 @@ Gem::Specification.new do |gem|
     "rubygems_mfa_required" => "true"
   }
 
-  gem.add_dependency "redis-client", ">= 0.11.0"
+  gem.add_dependency "redis-client", ">= 0.14.0"
   gem.add_dependency "connection_pool", ">= 2.3.0"
   gem.add_dependency "rack", ">= 2.2.4"
   gem.add_dependency "concurrent-ruby", "< 2"
-  gem.post_install_message = <<~EOM
-    
-    Welcome to Sidekiq 7.0!
-    
-    1. Use `gem 'sidekiq', '<7'` in your Gemfile if you don't want this new version.
-    2. Read the release notes at https://github.com/sidekiq/sidekiq/blob/main/docs/7.0-Upgrade.md
-    3. If you have problems, search for open/closed issues at https://github.com/sidekiq/sidekiq/issues/
-
-  EOM
 end
