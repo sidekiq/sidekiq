@@ -18,7 +18,7 @@ ct.verify(CRON_BLOCK) # => raises ArgumentError, invalid crontab syntax
 - Refactor rate limiter codebase to use `autoload`
 - Refactor concurrent and bucket rate limiter data model to be cluster-friendly [#5800]
 
-HEAD
+7.0.8
 ---------
 
 - Fix mutable job arguments when rescheduling an OverLimit [#5859]

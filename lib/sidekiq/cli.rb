@@ -396,7 +396,7 @@ module Sidekiq # :nodoc:
     end
 
     def parse_config(path)
-      erb = ERB.new(File.read(path))
+      erb = ERB.new(File.read(path), trim_mode: "-")
       erb.filename = File.expand_path(path)
       opts = YAML.safe_load(erb.result, permitted_classes: [Symbol], aliases: true) || {}
 

@@ -63,7 +63,8 @@ class Client
   def initialize(optional_args)
     @args = optional_args
   end
-  def call(worker, job, queue, redis_pool)
+  # @see https://github.com/sidekiq/sidekiq/wiki/Middleware
+  def call(job_class_or_string, job, queue, redis_pool)
     yield
   end
 end
@@ -76,7 +77,9 @@ class Server
   def initialize(optional_args)
     @args = optional_args
   end
-  def call(worker, job, queue)
+  
+  # @see https://github.com/sidekiq/sidekiq/wiki/Middleware
+  def call(job_instance, job_payload, queue)
     # note we no longer need to use the global Sidekiq module
     # to access Redis and the logger
     redis {|c| c.do_something }

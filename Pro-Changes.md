@@ -14,6 +14,12 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 - Add `complete_at`, `success_at` and `death_at` timestamps to `S::Batch::Status`, which track when that batch callback was triggered. [#5818]
 - Refactor all `*_at` Batch APIs to consistently return `Time` objects [#5837]
 
+7.0.10
+---------
+
+- Increase fetch timeout to minimize ReadTimeoutError [#5874]
+- Add Hindi locale [gaurish]
+
 7.0.9
 ---------
 

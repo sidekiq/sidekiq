@@ -17,14 +17,17 @@ fr:
   DeadJobs: Tâches mortes
   Delete: Supprimer
   DeleteAll: Tout supprimer
+  Deploy: Déploiement
   Enqueued: En attente
   Error: Erreur
   ErrorBacktrace: Backtrace d’erreur
   ErrorClass: Classe d’erreur
   ErrorMessage: Message d’erreur
+  ExecutionTime: Temps d'exécution
   Extras: Extras
   Failed: Échouées
   Failures: Echecs
+  Failure: Echec
   GoBack: ← Retour
   History: Historique
   Job: Tâche
@@ -35,6 +38,7 @@ fr:
   Latency: Latence
   LivePoll: Temps réel
   MemoryUsage: Mémoire utilisée
+  Name: Nom
   Namespace: Namespace
   NextRetry: Prochain essai
   NoDeadJobsFound: Aucune tâche morte n'a été trouvée
@@ -63,6 +67,7 @@ fr:
   RetryNow: Réessayer maintenant
   Scheduled: Planifiées
   ScheduledJobs: Tâches planifiées
+  Seconds: Secondes
   ShowAll: Tout montrer
   SixMonths: 6 mois
   Size: Taille
@@ -71,6 +76,8 @@ fr:
   Stop: Arrêter
   StopAll: Tout arrêter
   StopPolling: Arrêt du temps réel
+  Success: Succès
+  Summary: Résumé
   Thread: Thread
   Threads: Threads
   ThreeMonths: 3 mois
@@ -83,3 +90,10 @@ fr:
   Worker: Travailleur
   active: actif
   idle: inactif
+  Metrics: Métriques
+  NoDataFound: Aucune donnée disponible
+  TotalExecutionTime: Temps d'exécution total
+  AvgExecutionTime: Temps d'exécution moyen
+  Context: Contexte
+  Bucket: Bucket
+  NoJobMetricsFound: Aucune statistique de tâche récente n'a été trouvée

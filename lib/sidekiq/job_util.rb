@@ -24,7 +24,7 @@ module Sidekiq
         if (unsafe_item = json_unsafe?(args))
           msg = <<~EOM
             Job arguments to #{job_class} must be native JSON types, but #{unsafe_item.inspect} is a #{unsafe_item.class}.
-            See https://github.com/sidekiq/sidekiq/wiki/Best-Practices.
+            See https://github.com/sidekiq/sidekiq/wiki/Best-Practices
             To disable this error, add `Sidekiq.strict_args!(false)` to your initializer.
           EOM
 
