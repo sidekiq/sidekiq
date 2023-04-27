@@ -1,5 +1,23 @@
 #!/usr/bin/env ruby
 
+#
+# bin/sidekiqload is a helpful script to load test and
+# performance tune Sidekiq's core. It creates 500,000 no-op
+# jobs and executes them as fast as possible.
+# Example Usage:
+#
+# > RUBY_YJIT_ENABLE=1 LATENCY=0 THREADS=10 bin/sidekiqload
+# Result: Done, 500000 jobs in 20.264945 sec, 24673 jobs/sec
+#
+# Use LATENCY=1 to get a more real world network setup
+# but you'll need to setup and start toxiproxy as noted below.
+#
+# Use AJ=1 to test ActiveJob instead of plain old Sidekiq::Jobs so
+# you can see the runtime performance difference between the two APIs.
+#
+# None of this script is considered a public API and may change over time.
+#
+
 # Quiet some warnings we see when running in warning mode:
 # RUBYOPT=-w bundle exec sidekiq
 $TESTING = false
@@ -32,7 +50,7 @@ if ENV["AJ"]
   ActiveJob::Base.logger.level = Logger::WARN
 
   class LoadJob < ActiveJob::Base
-    def perform(idx, ts=nil)
+    def perform(idx, ts = nil)
       puts(Time.now.to_f - ts) if !ts.nil?
     end
   end
@@ -219,11 +237,11 @@ end
 ll = Loader.new
 ll.configure
 
-unless ENV["GC"] || ENV["PROFILE"]
+if ENV["WARM"]
   ll.setup
   ll.run("warmup")
 end
 
 ll.setup
-ll.run("ideal")
+ll.run("load")
 ll.done
