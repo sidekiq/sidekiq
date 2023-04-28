@@ -466,7 +466,8 @@ describe "API" do
     end
 
     it "can enumerate retries" do
-      add_retry
+      time = Time.now.to_f
+      add_retry("bob", time)
 
       r = Sidekiq::RetrySet.new
       assert_equal 1, r.size
@@ -477,7 +478,7 @@ describe "API" do
       assert_equal "ApiJob", retri.klass
       assert_equal "default", retri.queue
       assert_equal "bob", retri.jid
-      assert_in_delta Time.now.to_f, retri.at.to_f, 0.02
+      assert_equal time, retri.at.to_f
     end
 
     it "requires a jid to delete an entry" do
