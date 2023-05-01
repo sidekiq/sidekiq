@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-7-1
+7.1.0
 ---------
 
 - **NEW** Points-based rate limiter popular with GraphQL endpoints at Shopify, GitHub, et al.
@@ -15,6 +15,7 @@ CRON_BLOCK = ->(mgr) { mgr.register("0 * * * * *", "SomeJob") }
 ct = Sidekiq::Periodic::ConfigTester.new
 ct.verify(CRON_BLOCK) # => raises ArgumentError, invalid crontab syntax
 ```
+- Periodic jobs may now be ActiveJobs [#5902]
 - Refactor rate limiter codebase to use `autoload`
 - Refactor concurrent and bucket rate limiter data model to be cluster-friendly [#5800]
 
