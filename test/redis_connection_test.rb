@@ -49,12 +49,12 @@ describe Sidekiq::RedisConnection do
 
       it "sizes default pool" do
         pool = server_connection
-        assert_equal 5, pool.size
+        assert_equal 10, pool.size
       end
 
-      it "defaults client pool sizes to 5" do
+      it "defaults client pool sizes" do
         pool = client_connection
-        assert_equal 5, pool.size
+        assert_equal 10, pool.size
       end
 
       it "sizes capsule pools based on concurrency" do
@@ -65,7 +65,7 @@ describe Sidekiq::RedisConnection do
         # Only Sidekiq::CLI looks at ENV
         ENV["RAILS_MAX_THREADS"] = "9"
         pool = client_connection
-        assert_equal 5, pool.size
+        assert_equal 10, pool.size
       ensure
         ENV.delete("RAILS_MAX_THREADS")
       end
