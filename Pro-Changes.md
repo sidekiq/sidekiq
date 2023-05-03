@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+7.1.1
+---------
+
+- Fix empty batch support [#5903]
+
 7.1.0
 ---------
 
