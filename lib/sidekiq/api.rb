@@ -92,11 +92,11 @@ module Sidekiq
           pipeline.zcard("retry")
           pipeline.zcard("dead")
           pipeline.scard("processes")
-          pipeline.lrange("queue:default", -1, -1)
+          pipeline.lindex("queue:default", -1)
         end
       }
 
-      default_queue_latency = if (entry = pipe1_res[6].first)
+      default_queue_latency = if (entry = pipe1_res[6])
         job = begin
           Sidekiq.load_json(entry)
         rescue
@@ -264,8 +264,8 @@ module Sidekiq
     # @return [Float] in seconds
     def latency
       entry = Sidekiq.redis { |conn|
-        conn.lrange(@rname, -1, -1)
-      }.first
+        conn.lindex(@rname, -1)
+      }
       return 0 unless entry
       job = Sidekiq.load_json(entry)
       now = Time.now.to_f
