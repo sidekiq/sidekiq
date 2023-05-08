@@ -2,6 +2,13 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+HEAD
+----------
+
+- Support multiple CurrentAttributes [#5904]
+- Speed up latency fetch with large queues on Redis <7 [#5910]
+- Allow a larger default client pool [#5886]
+
 7.1.0
 ----------
 

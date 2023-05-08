@@ -77,7 +77,7 @@ module Sidekiq
 
       def build_cattrs_hash(klass_or_array)
         if klass_or_array.is_a?(Array)
-          Hash.new.tap do |hash|
+          {}.tap do |hash|
             klass_or_array.each_with_index do |klass, index|
               hash[key_at(index)] = klass.to_s
             end
@@ -88,7 +88,7 @@ module Sidekiq
       end
 
       def key_at(index)
-        index == 0 ? "cattr" : "cattr_#{index}"
+        (index == 0) ? "cattr" : "cattr_#{index}"
       end
     end
   end
