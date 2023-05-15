@@ -16,7 +16,7 @@ HEAD
   Thanks to Thad Sauter of NexHealth for contributing the initial skeleton. [#5757]
 - **NEW** Test helper to verify periodic job registration block [#5832]
 ```ruby
-require "sidekiq-ent/testing"
+require "sidekiq-ent/periodic/testing"
 CRON_BLOCK = ->(mgr) { mgr.register("0 * * * * *", "SomeJob") }
 ct = Sidekiq::Periodic::ConfigTester.new
 ct.verify(&CRON_BLOCK) # => raises ArgumentError, invalid crontab syntax
