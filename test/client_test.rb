@@ -413,6 +413,15 @@ describe Sidekiq::Client do
         assert_equal 1_001, jids.size
       end
 
+      it "pushes jobs into custom queue" do
+        q = Sidekiq::Queue.new("foo")
+        assert_equal 0, q.size
+
+        jids = MyJob.perform_bulk([[1], [2], [3]], "queue" => "foo")
+        assert_equal 3, jids.size
+        assert_equal 3, q.size
+      end
+
       it "handles no jobs" do
         jids = MyJob.perform_bulk([])
         assert_equal 0, jids.size
