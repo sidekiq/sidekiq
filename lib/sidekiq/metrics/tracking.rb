@@ -103,11 +103,15 @@ module Sidekiq
       def reset
         @lock.synchronize {
           array = [@totals, @jobs, @grams]
-          @totals = Hash.new(0)
-          @jobs = Hash.new(0)
-          @grams = Hash.new { |hash, key| hash[key] = Histogram.new(key) }
+          reset_instance_variables
           array
         }
+      end
+
+      def reset_instance_variables
+        @totals = Hash.new(0)
+        @jobs = Hash.new(0)
+        @grams = Hash.new { |hash, key| hash[key] = Histogram.new(key) }
       end
     end
 
