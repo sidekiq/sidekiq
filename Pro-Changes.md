@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Handle Oj-created `enqueued_at` String values in the reliable scheduler [#4768]
+
 7.1.1
 ---------
 
