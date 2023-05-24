@@ -4,9 +4,10 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+7.1.2
 ---------
 
+- Empty batch job now uses the configured default queue [#5914]
 - Handle Oj-created `enqueued_at` String values in the reliable scheduler [#4768]
 
 7.1.1
