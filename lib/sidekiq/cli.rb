@@ -230,6 +230,7 @@ module Sidekiq # :nodoc:
       # Both Sinatra 2.0+ and Sidekiq support this term.
       # RAILS_ENV and RACK_ENV are there for legacy support.
       @environment = cli_env || ENV["APP_ENV"] || ENV["RAILS_ENV"] || ENV["RACK_ENV"] || "development"
+      config[:environment] = @environment
     end
 
     def symbolize_keys_deep!(hash)

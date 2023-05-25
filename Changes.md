@@ -2,12 +2,13 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+7.1.1
 ----------
 
 - Support multiple CurrentAttributes [#5904]
 - Speed up latency fetch with large queues on Redis <7 [#5910]
 - Allow a larger default client pool [#5886]
+- Ensure Sidekiq.options[:environment] == RAILS_ENV [#5932]
 
 7.1.0
 ----------
@@ -107,6 +108,11 @@ end
 - Capsules!!
 - Job Execution metrics!!!
 - See `docs/7.0-Upgrade.md` for release notes
+
+6.5.9
+----------
+
+- Ensure Sidekiq.options[:environment] == RAILS_ENV [#5932]
 
 6.5.8
 ----------
