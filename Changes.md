@@ -2,6 +2,11 @@
 
 [Sidekiq Changes](https://github.com/mperham/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/mperham/sidekiq/blob/main/Ent-Changes.md)
 
+6.5.9
+----------
+
+- Ensure Sidekiq.options[:environment] == RAILS_ENV [#5932]
+
 6.5.8
 ----------
 
