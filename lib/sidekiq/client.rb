@@ -176,7 +176,7 @@ module Sidekiq
       def enqueue_to_in(queue, interval, klass, *args)
         int = interval.to_f
         now = Time.now.to_f
-        ts = (int < 1_000_000_000 ? now + int : int)
+        ts = ((int < 1_000_000_000) ? now + int : int)
 
         item = {"class" => klass, "args" => args, "at" => ts, "queue" => queue}
         item.delete("at") if ts <= now

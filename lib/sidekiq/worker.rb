@@ -257,7 +257,7 @@ module Sidekiq
       def at(interval)
         int = interval.to_f
         now = Time.now.to_f
-        ts = (int < 1_000_000_000 ? now + int : int)
+        ts = ((int < 1_000_000_000) ? now + int : int)
         # Optimization to enqueue something now that is scheduled to go out now or in the past
         @opts["at"] = ts if ts > now
         self
@@ -324,7 +324,7 @@ module Sidekiq
       def perform_in(interval, *args)
         int = interval.to_f
         now = Time.now.to_f
-        ts = (int < 1_000_000_000 ? now + int : int)
+        ts = ((int < 1_000_000_000) ? now + int : int)
 
         item = {"class" => self, "args" => args}
 

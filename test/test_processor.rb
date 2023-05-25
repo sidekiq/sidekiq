@@ -294,8 +294,6 @@ describe Sidekiq::Processor do
     class CustomJobLogger < Sidekiq::JobLogger
       def call(item, queue)
         yield
-      rescue Exception
-        raise
       end
     end
 

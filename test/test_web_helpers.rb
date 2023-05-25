@@ -32,8 +32,7 @@ describe "Web helpers" do
     end
 
     def default
-      {
-      }
+      {}
     end
   end
 

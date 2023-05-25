@@ -54,7 +54,7 @@ describe Sidekiq::Client do
     it "allows middleware to stop bulk jobs" do
       mware = Class.new do
         def call(worker_klass, msg, q, r)
-          msg["args"][0] == 1 ? yield : false
+          (msg["args"][0] == 1) ? yield : false
         end
       end
       client = Sidekiq::Client.new

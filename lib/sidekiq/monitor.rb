@@ -101,7 +101,7 @@ class Sidekiq::Monitor
       tags = [
         process["tag"],
         process["labels"],
-        (process["quiet"] == "true" ? "quiet" : nil)
+        ((process["quiet"] == "true") ? "quiet" : nil)
       ].flatten.compact
       tags.any? ? "[#{tags.join("] [")}]" : nil
     end

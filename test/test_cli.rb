@@ -6,6 +6,7 @@ require "sidekiq/cli"
 describe Sidekiq::CLI do
   describe "#parse" do
     before do
+      ENV["RAILS_ENV"] = ENV["RACK_ENV"] = nil
       Sidekiq.reset!
       @logger = Sidekiq.logger
       @logdev = StringIO.new
@@ -168,12 +169,12 @@ describe Sidekiq::CLI do
 
         describe "config file" do
           it "accepts with -C" do
-            subject.parse(%w[sidekiq -C ./test/config.yml])
+            subject.parse(%w[sidekiq -C ./test/config.yml -e production])
 
             assert_equal "./test/config.yml", config[:config_file]
             refute config[:verbose]
             assert_equal "./test/fake_env.rb", config[:require]
-            assert_nil config[:environment]
+            assert_equal "production", config[:environment]
             assert_equal 50, config[:concurrency]
             assert_equal 2, config[:queues].count { |q| q == "very_often" }
             assert_equal 1, config[:queues].count { |q| q == "seldom" }
@@ -185,7 +186,7 @@ describe Sidekiq::CLI do
             assert_equal "./test/config_string.yml", config[:config_file]
             refute config[:verbose]
             assert_equal "./test/fake_env.rb", config[:require]
-            assert_nil config[:environment]
+            assert_equal "development", config[:environment]
             assert_equal 50, config[:concurrency]
             assert_equal 2, config[:queues].count { |q| q == "very_often" }
             assert_equal 1, config[:queues].count { |q| q == "seldom" }

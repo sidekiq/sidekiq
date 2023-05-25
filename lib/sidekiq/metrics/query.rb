@@ -123,7 +123,7 @@ module Sidekiq
         def series_avg(metric = "ms")
           series[metric].each_with_object(Hash.new(0)) do |(bucket, value), result|
             completed = series.dig("p", bucket) - series.dig("f", bucket)
-            result[bucket] = completed == 0 ? 0 : value.to_f / completed
+            result[bucket] = (completed == 0) ? 0 : value.to_f / completed
           end
         end
       end
