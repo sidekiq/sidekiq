@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Add Korean locale [#3951, @yesh4gvm]
+
 7.1.2
 ---------
 
