@@ -4,9 +4,10 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+7.1.3
 ---------
 
+- Handle ISO8601 dates as enqueued_at values [#5937]
 - Add Korean locale [#3951, @yesh4gvm]
 
 7.1.2
