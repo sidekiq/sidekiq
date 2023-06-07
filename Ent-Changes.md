@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-HEAD
+7.1.1
 ---------
 
 - Fix hash mutation race condition in rate limiter autoloading [#5908]
