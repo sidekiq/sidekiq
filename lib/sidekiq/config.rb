@@ -56,6 +56,10 @@ module Sidekiq
     def_delegators :@options, :[], :[]=, :fetch, :key?, :has_key?, :merge!
     attr_reader :capsules
 
+    def to_json(*)
+      Sidekiq.dump_json(@options)
+    end
+
     # LEGACY: edits the default capsule
     # config.concurrency = 5
     def concurrency=(val)
