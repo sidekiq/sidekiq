@@ -42,6 +42,19 @@ describe Sidekiq::Component do
       assert_match(/test\/exception_handler_test.rb/, output, "didn't include the backtrace")
     end
 
+    it "handles exceptions in error handlers" do
+      test_handler = ->(_ex, _ctx) { raise SystemStackError }
+      @config[:error_handlers] << test_handler
+      output = capture_logging(@config) do
+        Thing.new(@config).invoke_exception(a: 1)
+      end
+
+      assert_match(/Something didn't work!/, output, "didn't include the exception message")
+      assert_match(/!!! ERROR HANDLER THREW AN ERROR !!!/, output, "didn't include error handler problem message")
+    ensure
+      @config[:error_handlers].delete(test_handler)
+    end
+
     it "cleans a backtrace if there is a cleaner" do
       @config[:backtrace_cleaner] = ->(backtrace) { backtrace.take(1) }
       output = capture_logging(@config) do

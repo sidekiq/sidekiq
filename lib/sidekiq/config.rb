@@ -267,7 +267,7 @@ module Sidekiq
       ctx[:_config] = self
       @options[:error_handlers].each do |handler|
         handler.call(ex, ctx)
-      rescue => e
+      rescue Exception => e
         l = logger
         l.error "!!! ERROR HANDLER THREW AN ERROR !!!"
         l.error e
