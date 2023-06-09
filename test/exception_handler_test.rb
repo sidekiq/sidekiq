@@ -2,6 +2,7 @@
 
 require_relative "helper"
 require "sidekiq/component"
+require "sidekiq/rails"
 require "stringio"
 require "logger"
 
@@ -30,9 +31,12 @@ describe Sidekiq::Component do
     end
 
     it "logs the exception to Sidekiq.logger" do
+      @config[:reloader] = Sidekiq::Rails::Reloader.new
       output = capture_logging(@config) do
         Thing.new(@config).invoke_exception(a: 1)
       end
+      assert_match(/"_config":{"labels"/, output, "didn't include the config")
+      assert_match(/"reloader":"#<Sidekiq::Rails::Reloader @app/, output, "didn't include the reloader")
       assert_match(/"a":1/, output, "didn't include the context")
       assert_match(/Something didn't work!/, output, "didn't include the exception message")
       assert_match(/test\/exception_handler_test.rb/, output, "didn't include the backtrace")
