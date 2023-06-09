@@ -7,7 +7,7 @@ Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 7.1.1
 ---------
 
-- Please note that license credentials are required when running in production.
+- **Please note that license credentials are required when running in production.**
   We recommend [configuring credentials with Bundler](https://github.com/sidekiq/sidekiq/wiki/Comm-Installation#sidekiq-enterprise).
 - Fix hash mutation race condition in rate limiter autoloading [#5908]
 

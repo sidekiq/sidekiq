@@ -2,9 +2,11 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+7.1.2
 ----------
 
+- Mark Web UI assets as private so CDNs won't cache them [#5936]
+- Fix stackoverflow when using Oj and the JSON log formatter [#5920]
 - Remove spurious `enqueued_at` from scheduled ActiveJobs [#5937]
 
 7.1.1
