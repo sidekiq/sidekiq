@@ -137,7 +137,7 @@ module Sidekiq
       m = middlewares
 
       rules = []
-      rules = [[:all, {"Cache-Control" => "private, max-age=86400"}]] unless ENV["SIDEKIQ_WEB_TESTING"]
+      rules = [[:all, {"cache-control" => "private, max-age=86400"}]] unless ENV["SIDEKIQ_WEB_TESTING"]
 
       ::Rack::Builder.new do
         use Rack::Static, urls: ["/stylesheets", "/images", "/javascripts"],
