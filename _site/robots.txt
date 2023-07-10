@@ -1,1 +1,1 @@
-Sitemap: https://sidekiq.org/sitemap.xml
+Sitemap: http://127.0.0.1/sidekiq/sidekiq/_site//sitemap.xml

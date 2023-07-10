@@ -1,3 +1,3 @@
-url: "https://sidekiq.org"
+url: "http://127.0.0.1/sidekiq/sidekiq/_site/"
 plugins:
   - jekyll-sitemap
