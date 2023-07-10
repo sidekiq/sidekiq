@@ -8087,8 +8087,16 @@ footer small a:hover {
     }
 }
 
-@media (max-width: 760px) {
-    .products-table, thead, tbody, th, td, tr {
+.products-table-mobile-links {
+    display: none;
+}
+
+@media (max-width: 759px) {
+    .products-table, thead, tbody, thead th, tbody tr td, tbody tr {
+        display: block;
+    }
+
+    .products-table-mobile-links {
         display: block;
     }
 }
@@ -8112,39 +8120,39 @@ footer small a:hover {
     }
 }
 
-.products-table tfoot tr {
-    border-bottom: none;
-    position: absolute;
-    left: -9999px;
-    top: -9999px;
-}
+/*.products-table tfoot tr {*/
+/*    border-bottom: none;*/
+/*    position: absolute;*/
+/*    left: -9999px;*/
+/*    top: -9999px;*/
+/*}*/
 
-@media (min-width: 760px) {
-    .products-table tfoot tr {
-        position: static;
-    }
+/*@media (min-width: 760px) {*/
+/*    .products-table tfoot tr {*/
+/*        position: static;*/
+/*    }*/
 
-    .products-table tfoot th {
-        padding: 12px 10px 0;
-    }
+/*    .products-table tfoot th {*/
+/*        padding: 12px 10px 0;*/
+/*    }*/
 
-    .products-table tfoot .invisible-block {
-        display: inline-block;
-        height: 110px;
-    }
-}
+/*    .products-table tfoot .invisible-block {*/
+/*        display: inline-block;*/
+/*        height: 110px;*/
+/*    }*/
+/*}*/
 
 .products-table th {
     border: none;
 }
 
 @media (min-width: 760px) {
-    .products-table th {
+    .products-table tbody tr th {
         text-align: left;
     }
 }
 
-.products-table td {
+.products-table tbody tr td {
     font-family: "Montserrat", Helvetica, Arial, sans-serif;
     font-size: 0.8em;
     position: relative;
@@ -8154,7 +8162,7 @@ footer small a:hover {
 }
 
 @media (min-width: 760px) {
-    .products-table td {
+    .products-table tbody tr td {
         font-size: 1.1em;
         text-align: left;
         width: 25%;
@@ -8169,17 +8177,17 @@ footer small a:hover {
     }
 }
 
-.products-table td img {
+.products-table tbody tr td img {
     width: 20px;
 }
 
 @media (min-width: 760px) {
-    .products-table td img {
+    .products-table tbody tr td img {
         width: 30px;
     }
 }
 
-.products-table td:before {
+.products-table tbody tr td:before {
     left: 6px;
     padding-right: 10px;
     position: absolute;
@@ -8188,49 +8196,49 @@ footer small a:hover {
     width: 45%;
 }
 
-.products-table td:nth-of-type(1):before {
+.products-table tbody tr td:nth-of-type(1):before {
     content: "";
     font-weight: bold;
     padding-bottom: 3px;
 }
 
 @media (min-width: 760px) {
-    .products-table td:nth-of-type(1):before {
+    .products-table tbody tr td:nth-of-type(1):before {
         content: "";
     }
 }
 
-.products-table td:nth-of-type(2):before {
+.products-table tbody tr td:nth-of-type(2):before {
     content: "OSS";
     margin-top: -5px;
 }
 
 @media (min-width: 760px) {
-    .products-table td:nth-of-type(2):before {
+    .products-table tbody tr td:nth-of-type(2):before {
         content: "";
         margin-top: 0;
     }
 }
 
-.products-table td:nth-of-type(3):before {
+.products-table tbody tr td:nth-of-type(3):before {
     content: "PRO";
     margin-top: -5px;
 }
 
 @media (min-width: 760px) {
-    .products-table td:nth-of-type(3):before {
+    .products-table tbody tr td:nth-of-type(3):before {
         content: "";
         margin-top: 0;
     }
 }
 
-.products-table td:nth-of-type(4):before {
+.products-table tbody tr td:nth-of-type(4):before {
     content: "ENTERPRISE";
     margin-top: -5px;
 }
 
 @media (min-width: 760px) {
-    .products-table td:nth-of-type(4):before {
+    .products-table tbody tr td:nth-of-type(4):before {
         content: "";
         margin-top: 0;
     }
@@ -8382,5 +8390,23 @@ footer small a:hover {
 
     .skq-hero-area {
         padding-top: 20px;
+    }
+}
+
+.products-table table thead {
+    inset-block-start: 0;
+}
+
+.products-table table tfoot {
+    inset-block-end: 0;
+}
+
+.products-table tfoot td {
+    padding: 12px;
+}
+
+@media (max-width: 760px) {
+    .products-table tfoot {
+        display: none;
     }
 }
