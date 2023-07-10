@@ -8044,10 +8044,6 @@ footer small a:hover {
         padding: 0 15px 0
     }
 
-    .skq-hero-area {
-        padding-top: 20px
-    }
-
     .skq-hero-area [class*="col-"] {
         padding: 0 30px
     }
@@ -8379,3 +8375,12 @@ footer small a:hover {
     padding: 20px !important;
 }
 
+@media (max-width: 768px) {
+    /*.spacer-md {*/
+    /*    display: none;*/
+    /*}*/
+
+    .skq-hero-area {
+        padding-top: 20px;
+    }
+}
