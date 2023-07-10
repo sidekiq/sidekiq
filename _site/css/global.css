@@ -8411,8 +8411,8 @@ footer small a:hover {
     }
 }
 
-@media (max-width: 860px) {
+@media (max-width: 985px) {
     .products-table tfoot a.btn {
-        font-size: .65em;
+        font-size: .60em;
     }
 }
