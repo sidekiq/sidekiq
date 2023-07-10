@@ -73,7 +73,7 @@ $(document).ready(function () {
     $('#logo-carousel').scrollingCarousel({
         autoScroll: true,
         scrollSpeed: 'slow',
-        autoScrollSpeed: 10000,
+        autoScrollSpeed: 15000,
         cursorPosition: 0,
     });
 
