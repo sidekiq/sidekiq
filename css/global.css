@@ -8376,9 +8376,9 @@ footer small a:hover {
 }
 
 @media (max-width: 768px) {
-    /*.spacer-md {*/
-    /*    display: none;*/
-    /*}*/
+    .spacer-md {
+        display: none;
+    }
 
     .skq-hero-area {
         padding-top: 20px;
