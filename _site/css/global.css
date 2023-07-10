@@ -8377,7 +8377,7 @@ footer small a:hover {
 
 @media (max-width: 768px) {
     .spacer-md.hide-md {
-        display: none;
+        display: none !important;
     }
 
     .skq-hero-area {
