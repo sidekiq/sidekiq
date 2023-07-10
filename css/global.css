@@ -8410,3 +8410,9 @@ footer small a:hover {
         display: none;
     }
 }
+
+@media (max-width: 860px) {
+    .products-table tfoot a.btn {
+        font-size: .65em;
+    }
+}
