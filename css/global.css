@@ -8376,7 +8376,7 @@ footer small a:hover {
 }
 
 @media (max-width: 768px) {
-    .spacer-md {
+    .spacer-md.hide-md {
         display: none;
     }
 
