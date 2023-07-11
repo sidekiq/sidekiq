@@ -6,7 +6,7 @@ $(document).ready(function() {
     var mobileBreak = 992;
     var logoCarousel = $(".logo-carousel");
     var navBar = $(".navbar");
-    
+
     setCarouselHeight('#carousel');
     logoCarousel.addClass('js-carousel');
     logoCarousel.removeClass('noscript-carousel');
@@ -44,7 +44,7 @@ $(document).ready(function() {
             $(".navbar, .navbar-header, .skq-header").css({'height' : 50});
             navBar.addClass('nav-mini');
             navBar.css({'min-height' : 50});
-            
+
             $(".skq, .skq-nav-link").css({'padding-top' : 15, 'padding-bottom' : 15});
             $(".navbar-toggle").css({'margin-top' : 8});
 
@@ -55,7 +55,7 @@ $(document).ready(function() {
         if(pageScroll < 5) {
             $(".navbar, .navbar-header, .skq-header").css({'height' : headerHeight});
             navBar.removeClass('nav-mini');
-            
+
             $(".skq, .skq-nav-link").css({'padding-top' : 49, 'padding-bottom' : 49});
             $(".navbar-toggle").css({'margin-top' : 43});
 
@@ -68,7 +68,10 @@ $(document).ready(function() {
     };
 
     $('#logo-carousel').scrollingCarousel({
-        scrollSpeed: 'slow'
+        autoScroll: true,
+        scrollSpeed: 'slow',
+        autoScrollSpeed: 15000,
+        cursorPosition: 0,
       });
 
       $('.jump-link').click(function(){
