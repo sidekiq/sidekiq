@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
-<loc>http://127.0.0.1/sidekiq/sidekiq/_site//about.html</loc>
+<loc>https://sidekiq.org/about.html</loc>
 </url>
 <url>
-<loc>http://127.0.0.1/sidekiq/sidekiq/_site//products/enterprise.html</loc>
+<loc>https://sidekiq.org/products/enterprise.html</loc>
 </url>
 <url>
-<loc>http://127.0.0.1/sidekiq/sidekiq/_site//</loc>
+<loc>https://sidekiq.org/</loc>
 </url>
 <url>
-<loc>http://127.0.0.1/sidekiq/sidekiq/_site//products/pro.html</loc>
+<loc>https://sidekiq.org/products/pro.html</loc>
 </url>
 <url>
-<loc>http://127.0.0.1/sidekiq/sidekiq/_site//support.html</loc>
+<loc>https://sidekiq.org/support.html</loc>
 </url>
 </urlset>
