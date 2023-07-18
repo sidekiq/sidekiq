@@ -8,6 +8,7 @@
     <h1><%= t('Metrics') %></h1>
 
     <a target="blank" href="https://github.com/sidekiq/sidekiq/wiki/Metrics"><span class="info-circle" title="Click to learn more about metrics">?</span></a>
+    <%= filtering('metrics') %>
   </div>
 
   <%= erb :_metrics_period_select, locals: { periods: @periods, period: @period, path: "#{root_path}metrics" } %>
