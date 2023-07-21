@@ -35,6 +35,6 @@ jobs:
     - name: Set up Redis ${{ matrix.redis }}
       uses: supercharge/redis-github-action@1.5.0
       with:
-        redis-version: ${{ matrix.redis-version }}        
+        redis-version: ${{ matrix.redis }}        
     - name: Run tests
       run: bundle exec rake
