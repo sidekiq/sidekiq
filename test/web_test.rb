@@ -836,7 +836,7 @@ describe Sidekiq::Web do
   describe "Metrics" do
     describe "/metrics" do
       it "calls the Sidekiq::Metrics::Query and renders correctly" do
-        result_mock = MiniTest::Mock.new
+        result_mock = Minitest::Mock.new
         result_mock.expect(:job_results, {})
         result_mock.expect(:marks, [])
         result_mock.expect(:buckets, [])
@@ -862,7 +862,7 @@ describe Sidekiq::Web do
         job_result_mock.expect(:totals, {"s" => 1})
         3.times { job_result_mock.expect(:hist, {"FooJob" => []}) }
 
-        result_mock = MiniTest::Mock.new
+        result_mock = Minitest::Mock.new
         result_mock.expect(:job_results, {"FooJob" => job_result_mock})
         result_mock.expect(:starts_at, Time.now - 3600)
         result_mock.expect(:ends_at, Time.now)
