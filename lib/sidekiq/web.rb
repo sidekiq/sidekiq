@@ -34,6 +34,18 @@ module Sidekiq
       "Metrics" => "metrics"
     }
 
+    if Gem::Version.new(Rack::RELEASE) < Gem::Version.new("3")
+      CONTENT_LANGUAGE = "Content-Language"
+      CONTENT_SECURITY_POLICY = "Content-Security-Policy"
+      LOCATION = "Location"
+      X_CASCADE = "X-Cascade"
+    else
+      CONTENT_LANGUAGE = "content-language"
+      CONTENT_SECURITY_POLICY = "content-security-policy"
+      LOCATION = "location"
+      X_CASCADE = "x-cascade"
+    end
+
     class << self
       def settings
         self
@@ -137,7 +149,7 @@ module Sidekiq
       m = middlewares
 
       rules = []
-      rules = [[:all, {"cache-control" => "private, max-age=86400"}]] unless ENV["SIDEKIQ_WEB_TESTING"]
+      rules = [[:all, {Rack::CACHE_CONTROL => "private, max-age=86400"}]] unless ENV["SIDEKIQ_WEB_TESTING"]
 
       ::Rack::Builder.new do
         use Rack::Static, urls: ["/stylesheets", "/images", "/javascripts"],
