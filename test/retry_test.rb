@@ -63,6 +63,12 @@ class ErrorJob
   end
 end
 
+class ActiveJobRetry < ActiveJob::Base
+  sidekiq_retry_in do |count|
+    10
+  end
+end
+
 describe Sidekiq::JobRetry do
   before do
     @config = reset!
@@ -380,6 +386,12 @@ describe Sidekiq::JobRetry do
           end
         end
         assert_equal 1, ds.size
+      end
+
+      it "supports wrapped jobs" do
+        strat, count = handler.__send__(:delay_for, ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper, 2, StandardError.new, {"wrapped" => "ActiveJobRetry"})
+        assert_equal :default, strat
+        assert_equal 10, count
       end
     end
 
