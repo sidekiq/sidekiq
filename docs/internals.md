@@ -1,6 +1,6 @@
 # Sidekiq Internals
 
-## Table of Contents
+## Quick Jump
 <!--toc:start-->
 - [Sidekiq Internals](#sidekiq-internals)
   - [Table of Contents](#table-of-contents)
