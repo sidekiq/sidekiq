@@ -1,6 +1,6 @@
 
 # Sidekiq 7.0 Capsules
-
+## Table of Contents
 <!--toc:start-->
 - [Sidekiq 7.0 Capsules](#sidekiq-70-capsules)
 - [The Problem](#the-problem)
