@@ -1,3 +1,6 @@
+
+# Sidekiq 7.0 Capsules
+
 <!--toc:start-->
 - [Sidekiq 7.0 Capsules](#sidekiq-70-capsules)
 - [The Problem](#the-problem)
@@ -8,8 +11,6 @@
   - [Redis Pools](#redis-pools)
   - [Sidekiq::Component](#sidekiqcomponent)
 <!--toc:end-->
-
-# Sidekiq 7.0 Capsules
 
 Sidekiq 7.0 contains the largest internal refactoring since Sidekiq 4.0.
 This refactoring is designed to improve deployment flexibility and allow
