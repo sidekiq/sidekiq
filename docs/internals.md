@@ -1,8 +1,18 @@
 # Sidekiq Internals
 
+## Quick Jump
+<!--toc:start-->
+- [Sidekiq Internals](#sidekiq-internals)
+  - [Table of Contents](#table-of-contents)
+  - [bundle exec sidekiq](#bundle-exec-sidekiq)
+  - [embedded](#embedded)
+<!--toc:end-->
+
+
+
 This document explains Sidekiq 7.0 internal code structure and implementation.
 
-## bundle exec sidekiq
+## `bundle exec sidekiq`
 
 When you start a Sidekiq instance using `bundle exec sidekiq`, execution starts in `bin/sidekiq`.
 This executable creates an instance of `Sidekiq::CLI` and runs it.
