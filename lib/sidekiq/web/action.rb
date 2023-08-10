@@ -15,11 +15,11 @@ module Sidekiq
     end
 
     def halt(res)
-      throw :halt, [res, {"content-type" => "text/plain"}, [res.to_s]]
+      throw :halt, [res, {Rack::CONTENT_TYPE => "text/plain"}, [res.to_s]]
     end
 
     def redirect(location)
-      throw :halt, [302, {"location" => "#{request.base_url}#{location}"}, []]
+      throw :halt, [302, {Web::LOCATION => "#{request.base_url}#{location}"}, []]
     end
 
     def params
@@ -68,7 +68,7 @@ module Sidekiq
     end
 
     def json(payload)
-      [200, {"content-type" => "application/json", "cache-control" => "private, no-store"}, [Sidekiq.dump_json(payload)]]
+      [200, {Rack::CONTENT_TYPE => "application/json", Rack::CACHE_CONTROL => "private, no-store"}, [Sidekiq.dump_json(payload)]]
     end
 
     def initialize(env, block)
