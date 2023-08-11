@@ -25,6 +25,8 @@ end
 group :development, :test do
   gem "standard", require: false
   gem "pry"
+
+  gem "ddtrace", "~> 1.13", git: "https://github.com/DataDog/dd-trace-rb.git", branch: "master"
 end
 
 group :load_test do
