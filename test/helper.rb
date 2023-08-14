@@ -6,6 +6,7 @@ Bundler.require(:default, :test)
 require "minitest/pride"
 require "maxitest/autorun"
 require "maxitest/threads"
+require "ddtrace"
 
 $TESTING = true
 # disable minitest/parallel threads
@@ -22,6 +23,11 @@ if ENV["COVERAGE"]
     add_filter "/myapp/"
     minimum_coverage 90
   end
+end
+
+# Configure default Minitest integration
+Datadog.configure do |c|
+  c.ci.instrument :minitest, service_name: "anmarchenko-sidekiq-local"
 end
 
 ENV["REDIS_URL"] ||= "redis://localhost/15"
