@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../dd-trace-rb"
+		}
+	],
+	"settings": {}
+}
