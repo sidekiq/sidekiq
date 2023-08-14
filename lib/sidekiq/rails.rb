@@ -21,6 +21,10 @@ module Sidekiq
         "#<Sidekiq::Rails::Reloader @app=#{@app.class.name}>"
       end
 
+      def as_json(*)
+        inspect
+      end
+
       def to_json(*)
         Sidekiq.dump_json(inspect)
       end
