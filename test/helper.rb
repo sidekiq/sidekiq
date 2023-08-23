@@ -28,10 +28,10 @@ end
 # Configure default Minitest integration
 Datadog.configure do |c|
   # The name of the service or library under test
-  c.service = 'anmarchenko-sidekiq-local'
+  c.service = "anmarchenko-sidekiq-local"
   # Configures the tracer to ensure results delivery
   c.ci.enabled = true
-  c.ci.instrument :minitest, service_name: 'anmarchenko-sidekiq-local'
+  c.ci.instrument :minitest, service_name: "anmarchenko-sidekiq-local"
 end
 
 ENV["REDIS_URL"] ||= "redis://localhost/15"
