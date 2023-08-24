@@ -73,7 +73,7 @@ module Sidekiq
       def fetch(conn, now = Time.now)
         window = now.utc.strftime("%d-%H:%-M")
         key = "#{@klass}-#{window}"
-        conn.bitfield(key, *FETCH)
+        conn.bitfield_ro(key, *FETCH)
       end
 
       def persist(conn, now = Time.now)
