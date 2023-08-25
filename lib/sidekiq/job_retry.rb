@@ -230,7 +230,7 @@ module Sidekiq
         # the sidekiq_retries_exhausted_block can be defined in a wrapped class (ActiveJob for instance)
         unless msg["wrapped"].nil?
           wrapped = Object.const_get(msg["wrapped"])
-          block = wrapped.sidekiq_retries_exhausted_block ? wrapped.respond_to?(:sidekiq_retries_exhausted_block) : nil
+          block = wrapped.respond_to?(:sidekiq_retries_exhausted_block) ? wrapped.sidekiq_retries_exhausted_block : nil
         end
         block&.call(msg, exception)
       rescue => e
