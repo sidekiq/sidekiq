@@ -64,10 +64,6 @@ describe "sidekiq_retries_exhausted" do
     @old_worker ||= OldJob.new
   end
 
-  def wrapped_worker
-    @wrapped_worker ||= WrappedJob.new
-  end
-
   def handler
     @handler ||= Sidekiq::JobRetry.new(@config.default_capsule)
   end
@@ -160,7 +156,7 @@ describe "sidekiq_retries_exhausted" do
 
   it "supports wrapped jobs" do
     assert_raises RuntimeError do
-      handler.local(wrapped_worker, job("retry_count" => 0, "retry" => 1, "wrapped" => "WrappedJob"), "default") do
+      handler.local(WrappedJob.new, job("retry_count" => 0, "retry" => 1, "wrapped" => WrappedJob.to_s), "default") do
         raise "kerblammo!"
       end
     end
