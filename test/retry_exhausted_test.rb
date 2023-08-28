@@ -29,6 +29,14 @@ class Foobar
   include Sidekiq::Job
 end
 
+class WrappedJob < ActiveJob::Base
+  class_attribute :exhausted_called
+
+  sidekiq_retries_exhausted do |job|
+    WrappedJob.exhausted_called = true
+  end
+end
+
 describe "sidekiq_retries_exhausted" do
   def cleanup
     [NewJob, OldJob].each do |worker_class|
@@ -36,6 +44,7 @@ describe "sidekiq_retries_exhausted" do
       worker_class.exhausted_job = nil
       worker_class.exhausted_exception = nil
     end
+    WrappedJob.exhausted_called = nil
   end
 
   before do
@@ -143,5 +152,15 @@ describe "sidekiq_retries_exhausted" do
 
     assert exhausted_job
     assert_equal raised_error, exhausted_exception
+  end
+
+  it "supports wrapped jobs" do
+    assert_raises RuntimeError do
+      handler.local(WrappedJob.new, job("retry_count" => 0, "retry" => 1, "wrapped" => WrappedJob.to_s), "default") do
+        raise "kerblammo!"
+      end
+    end
+
+    assert WrappedJob.exhausted_called
   end
 end

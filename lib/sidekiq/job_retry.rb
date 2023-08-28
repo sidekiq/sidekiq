@@ -197,7 +197,14 @@ module Sidekiq
         # sidekiq_retry_in can return two different things:
         # 1. When to retry next, as an integer of seconds
         # 2. A symbol which re-routes the job elsewhere, e.g. :discard, :kill, :default
-        jobinst&.sidekiq_retry_in_block&.call(count, exception, msg)
+        block = jobinst&.sidekiq_retry_in_block
+
+        # the sidekiq_retry_in_block can be defined in a wrapped class (ActiveJob for instance)
+        unless msg["wrapped"].nil?
+          wrapped = Object.const_get(msg["wrapped"])
+          block = wrapped.respond_to?(:sidekiq_retry_in_block) ? wrapped.sidekiq_retry_in_block : nil
+        end
+        block&.call(count, exception, msg)
       rescue Exception => e
         handle_exception(e, {context: "Failure scheduling retry using the defined `sidekiq_retry_in` in #{jobinst.class.name}, falling back to default"})
         nil
@@ -219,6 +226,12 @@ module Sidekiq
     def retries_exhausted(jobinst, msg, exception)
       begin
         block = jobinst&.sidekiq_retries_exhausted_block
+
+        # the sidekiq_retries_exhausted_block can be defined in a wrapped class (ActiveJob for instance)
+        unless msg["wrapped"].nil?
+          wrapped = Object.const_get(msg["wrapped"])
+          block = wrapped.respond_to?(:sidekiq_retries_exhausted_block) ? wrapped.sidekiq_retries_exhausted_block : nil
+        end
         block&.call(msg, exception)
       rescue => e
         handle_exception(e, {context: "Error calling retries_exhausted", job: msg})
