@@ -297,7 +297,7 @@ module Sidekiq # :nodoc:
       if File.directory?(@config[:require])
         require "rails"
         if ::Rails::VERSION::MAJOR < 6
-          warn "Sidekiq #{Sidekiq::VERSION} only supports Rails 6+"
+          warn "Sidekiq #{Sidekiq::VERSION} supports Rails 6.0+ but does not require it."
         end
         require "sidekiq/rails"
         require File.expand_path("#{@config[:require]}/config/environment.rb")
