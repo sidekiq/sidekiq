@@ -4,6 +4,14 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+7.1.2
+---------
+
+- Add support for a Kubernetes liveness / health check port. Start it with
+  `config.health_check(port = 7433)` [#5923]
+- Add missing points view [#6016]
+- Add Polish translations
+
 7.1.1
 ---------
 
