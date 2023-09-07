@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+7.1.4
+---------
+
+- Raise error instead of silently dropping jobs due to buffer overflow in reliable push [#5909]
+- Add Polish translations
+
 7.1.3
 ---------
 
