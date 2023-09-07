@@ -148,6 +148,8 @@ module Sidekiq
 
     IGNORE_SHUTDOWN_INTERRUPTS = {Sidekiq::Shutdown => :never}
     private_constant :IGNORE_SHUTDOWN_INTERRUPTS
+    ALLOW_SHUTDOWN_INTERRUPTS = {Sidekiq::Shutdown => :immediate}
+    private_constant :ALLOW_SHUTDOWN_INTERRUPTS
 
     def process(uow)
       jobstr = uow.job
@@ -171,36 +173,35 @@ module Sidekiq
       end
 
       ack = false
-      begin
-        dispatch(job_hash, queue, jobstr) do |inst|
-          config.server_middleware.invoke(inst, job_hash, queue) do
-            execute_job(inst, job_hash["args"])
+      Thread.handle_interrupt(IGNORE_SHUTDOWN_INTERRUPTS) do
+        Thread.handle_interrupt(ALLOW_SHUTDOWN_INTERRUPTS) do
+          dispatch(job_hash, queue, jobstr) do |inst|
+            config.server_middleware.invoke(inst, job_hash, queue) do
+              execute_job(inst, job_hash["args"])
+            end
           end
+          ack = true
+        rescue Sidekiq::Shutdown
+          # Had to force kill this job because it didn't finish
+          # within the timeout.  Don't acknowledge the work since
+          # we didn't properly finish it.
+        rescue Sidekiq::JobRetry::Handled => h
+          # this is the common case: job raised error and Sidekiq::JobRetry::Handled
+          # signals that we created a retry successfully.  We can acknowlege the job.
+          ack = true
+          e = h.cause || h
+          handle_exception(e, {context: "Job raised exception", job: job_hash})
+          raise e
+        rescue Exception => ex
+          # Unexpected error!  This is very bad and indicates an exception that got past
+          # the retry subsystem (e.g. network partition).  We won't acknowledge the job
+          # so it can be rescued when using Sidekiq Pro.
+          handle_exception(ex, {context: "Internal exception!", job: job_hash, jobstr: jobstr})
+          raise ex
         end
-        ack = true
-      rescue Sidekiq::Shutdown
-        # Had to force kill this job because it didn't finish
-        # within the timeout.  Don't acknowledge the work since
-        # we didn't properly finish it.
-      rescue Sidekiq::JobRetry::Handled => h
-        # this is the common case: job raised error and Sidekiq::JobRetry::Handled
-        # signals that we created a retry successfully.  We can acknowlege the job.
-        ack = true
-        e = h.cause || h
-        handle_exception(e, {context: "Job raised exception", job: job_hash})
-        raise e
-      rescue Exception => ex
-        # Unexpected error!  This is very bad and indicates an exception that got past
-        # the retry subsystem (e.g. network partition).  We won't acknowledge the job
-        # so it can be rescued when using Sidekiq Pro.
-        handle_exception(ex, {context: "Internal exception!", job: job_hash, jobstr: jobstr})
-        raise ex
       ensure
         if ack
-          # We don't want a shutdown signal to interrupt job acknowledgment.
-          Thread.handle_interrupt(IGNORE_SHUTDOWN_INTERRUPTS) do
-            uow.acknowledge
-          end
+          uow.acknowledge
         end
       end
     end

@@ -140,6 +140,7 @@ function checkResponse(resp) {
 
 function scheduleLivePoll() {
   let ti = parseInt(localStorage.sidekiqTimeInterval) || 5000;
+  if (ti < 2000) { ti = 2000 }
   livePollTimer = setTimeout(livePollCallback, ti);
 }
 

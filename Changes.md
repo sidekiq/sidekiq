@@ -2,6 +2,13 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+7.1.3
+----------
+
+- Support sidekiq_retry_in and sidekiq_retries_exhausted_block in ActiveJobs (#5994)
+- Lowercase all Rack headers for Rack 3.0 [#5951]
+- Validate Sidekiq::Web page refresh delay, thanks for reporting Keegan!
+
 7.1.2
 ----------
 

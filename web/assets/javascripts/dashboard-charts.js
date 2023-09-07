@@ -57,7 +57,9 @@ class DashboardChart extends BaseChart {
 class RealtimeChart extends DashboardChart {
   constructor(el, options) {
     super(el, options);
-    this.delay = parseInt(localStorage.sidekiqTimeInterval) || 5000;
+    let d = parseInt(localStorage.sidekiqTimeInterval) || 5000;
+    if (d < 2000) { d = 2000; }
+    this.delay = d
     this.startPolling();
     document.addEventListener("interval:update", this.handleUpdate.bind(this));
   }
