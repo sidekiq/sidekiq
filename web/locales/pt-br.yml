@@ -5,6 +5,7 @@
   AreYouSureDeleteJob: Deseja deletar esta tarefa?
   AreYouSureDeleteQueue: Deseja deletar a fila %{queue}? Isso irá deletar todas as tarefas desta fila.
   Arguments: Argumentos
+  AvgExecutionTime: Tempo médio de execução
   BackToApp: De volta ao aplicativo
   Busy: Ocupados
   Class: Classe
@@ -16,13 +17,16 @@
   DeadJobs: Tarefas mortas
   Delete: Apagar
   DeleteAll: Apagar tudo
+  Deploy: Deploy
   Enqueued: Na fila
   Error: Erro
   ErrorBacktrace: Rastreamento do erro
   ErrorClass: Classe de erro
   ErrorMessage: Mensagem de erro
+  ExecutionTime: Tempo de execução
   Extras: Extras
   Failed: Falhas
+  Failure: Falha
   Failures: Falhas
   GoBack: ← Voltar
   History: Histórico
@@ -34,10 +38,13 @@
   Latency: Latência
   LivePoll: Live Poll
   MemoryUsage: Uso de memória
+  Metrics: Métricas
   Name: Nome
   Namespace: Namespace
   NextRetry: Próxima Tentativa
+  NoDataFound: Nenhum dado encontrado
   NoDeadJobsFound: Nenhuma tarefa morta foi encontrada
+  NoJobMetricsFound: Nenhuma métrica de tarefa encontrada
   NoRetriesFound: Nenhuma tentativa encontrada
   NoScheduledFound: Nenhuma tarefa agendada foi encontrada
   NotYetEnqueued: Ainda não enfileirado
@@ -47,6 +54,7 @@
   Pause: Pausar
   Paused: Pausado
   PeakMemoryUsage: Pico de uso de memória
+  Uptime: Tempo de atividade
   Plugins: Plug-ins
   PollingInterval: Intervalo de Polling
   Process: Processo
@@ -63,14 +71,20 @@
   RetryNow: Tentar novamente agora
   Scheduled: Agendados
   ScheduledJobs: Tarefas agendadas
+  idle: Ocioso
+  active: Ativo
+  Seconds: Segundos
   ShowAll: Mostrar todos
   SixMonths: 6 meses
   Size: Tamanho
+  Started: Iniciado
   Stop: Parar
   StopAll: Parar Todos
   StopPolling: Parar Polling
+  Success: Sucesso
   Thread: Thread
   Threads: Threads
+  TotalExecutionTime: Tempo total de execução
   Unpause: Despausar
   Utilization: Utilização
   Worker: Trabalhador
