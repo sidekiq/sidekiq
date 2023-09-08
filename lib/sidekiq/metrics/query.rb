@@ -20,7 +20,7 @@ module Sidekiq
       end
 
       # Get metric data for all jobs from the last hour
-      def top_jobs(minutes: 60)
+      def top_jobs(minutes: 60, substr: nil)
         result = Result.new
 
         time = @time
@@ -35,10 +35,12 @@ module Sidekiq
           end
         end
 
+        rx = /#{Regexp.escape(substr)}/i if substr
         time = @time
         redis_results.each do |hash|
           hash.each do |k, v|
             kls, metric = k.split("|")
+            next if rx && !kls.match?(rx)
             result.job_results[kls].add_metric metric, time, v.to_i
           end
           time -= 60
