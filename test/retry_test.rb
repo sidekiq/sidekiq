@@ -69,6 +69,12 @@ class ActiveJobRetry < ActiveJob::Base
   end
 end
 
+class RetryForJob
+  include Sidekiq::Job
+
+  sidekiq_options retry_for: 48.hours
+end
+
 describe Sidekiq::JobRetry do
   before do
     @config = reset!
@@ -117,6 +123,28 @@ describe Sidekiq::JobRetry do
       end
       assert_equal 1, Sidekiq::RetrySet.new.size
       assert_equal 0, Sidekiq::DeadSet.new.size
+    end
+
+    it "allows retry_for => no retry and dead queue" do
+      assert_raises RuntimeError do
+        handler.local(worker, jobstr("retry_for" => 60), "default") do
+          raise "kerblammo!"
+        end
+      end
+      assert_equal 1, Sidekiq::RetrySet.new.size
+      assert_equal 0, Sidekiq::DeadSet.new.size
+
+      assert_raises RuntimeError do
+        handler.local(worker, jobstr("retry_for" => 60, "retry_count" => 0, "failed_at" => (Time.now.to_f - 61)), "default") do
+          raise "kerblammo!"
+        end
+      end
+      assert_equal 1, Sidekiq::RetrySet.new.size
+      assert_equal 1, Sidekiq::DeadSet.new.size
+
+      RetryForJob.perform_async
+      rfj = Sidekiq::Queue.new.first
+      assert_equal 172800, rfj["retry_for"]
     end
 
     it "allows 0 retry => no retry and dead queue" do
