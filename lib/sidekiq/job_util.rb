@@ -13,7 +13,7 @@ module Sidekiq
       raise(ArgumentError, "Job class must be either a Class or String representation of the class name: `#{item}`") unless item["class"].is_a?(Class) || item["class"].is_a?(String)
       raise(ArgumentError, "Job 'at' must be a Numeric timestamp: `#{item}`") if item.key?("at") && !item["at"].is_a?(Numeric)
       raise(ArgumentError, "Job tags must be an Array: `#{item}`") if item["tags"] && !item["tags"].is_a?(Array)
-      raise(ArgumentError, "retry_for must be a relative amount of time: 48.hours `#{item}`") if item["retry_for"] && item["retry_for"] > 1_000_000_000
+      raise(ArgumentError, "retry_for must be a relative amount of time, e.g. 48.hours `#{item}`") if item["retry_for"] && item["retry_for"] > 1_000_000_000
     end
 
     def verify_json(item)
