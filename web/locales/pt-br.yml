@@ -7,9 +7,11 @@
   Arguments: Argumentos
   AvgExecutionTime: Tempo médio de execução
   BackToApp: De volta ao aplicativo
+  Bucket: Bucket
   Busy: Ocupados
   Class: Classe
   Connections: Conexões
+  Context: Contexto
   CreatedAt: Criado em
   CurrentMessagesInQueue: Mensagens atualmente na <span class='title'>%{queue}</span>
   Dashboard: Painel
@@ -82,9 +84,13 @@
   StopAll: Parar Todos
   StopPolling: Parar Polling
   Success: Sucesso
+  Summary: Resumo
   Thread: Thread
   Threads: Threads
+  ThreeMonths: 3 meses
   TotalExecutionTime: Tempo total de execução
   Unpause: Despausar
   Utilization: Utilização
+  Version: Versão
+  When: Quando
   Worker: Trabalhador
