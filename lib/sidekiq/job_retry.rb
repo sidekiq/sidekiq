@@ -170,8 +170,10 @@ module Sidekiq
         msg["error_backtrace"] = compress_backtrace(lines)
       end
 
-      # Goodbye dear message, you (re)tried your best I'm sure.
       return retries_exhausted(jobinst, msg, exception) if count >= max_retry_attempts
+
+      rf = msg["retry_for"]
+      return retries_exhausted(jobinst, msg, exception) if rf && ((msg["failed_at"] + rf) < Time.now.to_f)
 
       strategy, delay = delay_for(jobinst, count, exception, msg)
       case strategy
