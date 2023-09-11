@@ -8,7 +8,8 @@
 - Add `sidekiq_options retry_for: 48.hours` to allow time-based retry windows [#6029]
 - Support sidekiq_retry_in and sidekiq_retries_exhausted_block in ActiveJobs (#5994)
 - Lowercase all Rack headers for Rack 3.0 [#5951]
-- Validate Sidekiq::Web page refresh delay, thanks for reporting Keegan!
+- Validate Sidekiq::Web page refresh delay to avoid potential DoS,
+  CVE-2023-26141, thanks for reporting Keegan!
 
 7.1.2
 ----------
