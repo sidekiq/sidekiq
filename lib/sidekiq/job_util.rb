@@ -55,7 +55,7 @@ module Sidekiq
       item["jid"] ||= SecureRandom.hex(12)
       item["class"] = item["class"].to_s
       item["queue"] = item["queue"].to_s
-      item["retry_for"] = item["retry_for"].to_i
+      item["retry_for"] = item["retry_for"].to_i if item["retry_for"]
       item["created_at"] ||= Time.now.to_f
       item
     end
