@@ -6,7 +6,7 @@ Bundler.require(:default, :test)
 require "minitest/pride"
 require "maxitest/autorun"
 require "maxitest/threads"
-require "ddtrace"
+require "datadog/ci"
 
 $TESTING = true
 # disable minitest/parallel threads

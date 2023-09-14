@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "./helper"
+require_relative "helper"
 require "sidekiq/middleware/current_attributes"
 require "sidekiq/fetch"
 
