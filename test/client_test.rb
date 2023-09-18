@@ -558,4 +558,17 @@ describe Sidekiq::Client do
       end
     end
   end
+
+  it "can specify different times when there are more jobs than the batch size" do
+    job_count = 5
+    times = job_count.times.map { |i| Time.new(2019, 1, i + 1).utc }
+    args = job_count.times.map { |i| [i] }
+    # When there are 3 jobs, we want to use `times[2]` for the final job.
+    batch_size = 2
+
+    jids = Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => args, "at" => times.map(&:to_f), :batch_size => batch_size)
+
+    assert_equal job_count, jids.size
+    assert_equal times, jids.map { |jid| Sidekiq::ScheduledSet.new.find_job(jid).at }
+  end
 end

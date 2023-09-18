@@ -124,19 +124,21 @@ module Sidekiq
       raise ArgumentError, "Explicitly passing 'jid' when pushing more than one job is not supported" if jid && args.size > 1
 
       normed = normalize_item(items)
+      slice_index = 0
       result = args.each_slice(batch_size).flat_map do |slice|
         raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" unless slice.is_a?(Array) && slice.all?(Array)
         break [] if slice.empty? # no jobs to push
 
         payloads = slice.map.with_index { |job_args, index|
           copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12))
-          copy["at"] = (at.is_a?(Array) ? at[index] : at) if at
+          copy["at"] = (at.is_a?(Array) ? at[slice_index + index] : at) if at
           result = middleware.invoke(items["class"], copy, copy["queue"], @redis_pool) do
             verify_json(copy)
             copy
           end
           result || nil
         }
+        slice_index += batch_size
 
         to_push = payloads.compact
         raw_push(to_push) unless to_push.empty?
