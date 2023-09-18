@@ -63,8 +63,7 @@ module Sidekiq
       opts = options.dup
 
       if opts[:namespace]
-        raise ArgumentError, "Your Redis configuration uses the namespace '#{opts[:namespace]}' but this feature isn't supported by redis-client. " \
-          "Either use the redis adapter or remove the namespace."
+        raise ArgumentError, "Your Redis configuration uses the namespace '#{opts[:namespace]}' but this feature is no longer supported in Sidekiq 7+. See https://github.com/sidekiq/sidekiq/blob/main/docs/7.0-Upgrade.md#redis-namespace."
       end
 
       opts.delete(:size)

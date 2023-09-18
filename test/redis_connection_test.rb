@@ -98,7 +98,7 @@ describe Sidekiq::RedisConnection do
         error = assert_raises ArgumentError do
           Sidekiq::RedisConnection.create(namespace: "xxx")
         end
-        assert_includes error.message, "Your Redis configuration uses the namespace 'xxx' but this feature isn't supported by redis-client"
+        assert_includes error.message, "Your Redis configuration uses the namespace 'xxx' but this feature is"
       end
     end
 
