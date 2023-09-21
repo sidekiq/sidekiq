@@ -328,6 +328,56 @@ module Sidekiq
       json Sidekiq::Stats.new.queues
     end
 
+    ########
+    # Filtering
+    get "/filter/retries" do
+      x = params[:substr]
+      return redirect "#{root_path}retries" unless x && x != ""
+
+      @retries = search(Sidekiq::RetrySet.new, params[:substr])
+      erb :retries
+    end
+
+    post "/filter/retries" do
+      x = params[:substr]
+      return redirect "#{root_path}retries" unless x && x != ""
+
+      @retries = search(Sidekiq::RetrySet.new, params[:substr])
+      erb :retries
+    end
+
+    get "/filter/scheduled" do
+      x = params[:substr]
+      return redirect "#{root_path}scheduled" unless x && x != ""
+
+      @scheduled = search(Sidekiq::ScheduledSet.new, params[:substr])
+      erb :scheduled
+    end
+
+    post "/filter/scheduled" do
+      x = params[:substr]
+      return redirect "#{root_path}scheduled" unless x && x != ""
+
+      @scheduled = search(Sidekiq::ScheduledSet.new, params[:substr])
+      erb :scheduled
+    end
+
+    get "/filter/dead" do
+      x = params[:substr]
+      return redirect "#{root_path}morgue" unless x && x != ""
+
+      @dead = search(Sidekiq::DeadSet.new, params[:substr])
+      erb :morgue
+    end
+
+    post "/filter/dead" do
+      x = params[:substr]
+      return redirect "#{root_path}morgue" unless x && x != ""
+
+      @dead = search(Sidekiq::DeadSet.new, params[:substr])
+      erb :morgue
+    end
+
     def call(env)
       action = self.class.match(env)
       return [404, {Rack::CONTENT_TYPE => "text/plain", Web::X_CASCADE => "pass"}, ["Not Found"]] unless action
