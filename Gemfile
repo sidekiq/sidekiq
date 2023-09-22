@@ -27,6 +27,7 @@ group :development, :test do
   gem "pry"
 
   gem "ddtrace", path: "../dd-trace-rb"
+  gem 'datadog-ci', path: '../datadog-ci-rb'
 end
 
 group :load_test do
