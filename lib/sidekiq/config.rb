@@ -34,8 +34,7 @@ module Sidekiq
       backtrace_cleaner: ->(backtrace) { backtrace }
     }
 
-    ERROR_HANDLER = ->(ex, ctx) {
-      cfg = ctx[:_config] || Sidekiq.default_configuration
+    ERROR_HANDLER = ->(ex, ctx, cfg = Sidekiq.default_configuration) {
       l = cfg.logger
       l.warn(Sidekiq.dump_json(ctx)) unless ctx.empty?
       l.warn("#{ex.class.name}: #{ex.message}")
@@ -264,9 +263,14 @@ module Sidekiq
       if @options[:error_handlers].size == 0
         p ["!!!!!", ex]
       end
-      ctx[:_config] = self
       @options[:error_handlers].each do |handler|
-        handler.call(ex, ctx)
+        if handler.arity == 2
+          # TODO Remove in 8.0
+          logger.info { "DEPRECATION: Sidekiq exception handlers now take three arguments, see #{handler}" }
+          handler.call(ex, {_config: self}.merge(ctx))
+        else
+          handler.call(ex, ctx, self)
+        end
       rescue Exception => e
         l = logger
         l.error "!!! ERROR HANDLER THREW AN ERROR !!!"

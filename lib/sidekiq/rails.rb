@@ -20,10 +20,6 @@ module Sidekiq
       def inspect
         "#<Sidekiq::Rails::Reloader @app=#{@app.class.name}>"
       end
-
-      def to_json(*)
-        Sidekiq.dump_json(inspect)
-      end
     end
 
     # By including the Options module, we allow AJs to directly control sidekiq features
