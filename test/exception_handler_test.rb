@@ -47,6 +47,8 @@ describe Sidekiq::Component do
         Thing.new(@config).invoke_exception(a: 1)
       end
 
+      assert_match(/DEPRECATION/, output, "didn't include the deprecation warning")
+      assert_match(/SystemStackError/, output, "didn't include the exception")
       assert_match(/Something didn't work!/, output, "didn't include the exception message")
       assert_match(/!!! ERROR HANDLER THREW AN ERROR !!!/, output, "didn't include error handler problem message")
     ensure
