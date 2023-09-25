@@ -5,7 +5,8 @@
 HEAD
 ----------
 
-- **BREAKING CHANGE** Error handlers now take three arguments `->(ex, context, config)`.
+- **FEATURE**: Promote UI filtering from Sidekiq Pro to OSS. This feature has been open sourced. [#6052]
+- **API CHANGE** Error handlers now take three arguments `->(ex, context, config)`.
   The previous calling convention will work until Sidekiq 8.0 but will print out a
   deprecation warning.
 - Fix issue with the `batch_size` and `at` options in `S::Client.push_bulk` [#6040]
