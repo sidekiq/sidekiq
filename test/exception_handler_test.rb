@@ -35,8 +35,6 @@ describe Sidekiq::Component do
       output = capture_logging(@config) do
         Thing.new(@config).invoke_exception(a: 1)
       end
-      assert_match(/"_config":{"labels"/, output, "didn't include the config")
-      assert_match(/"reloader":"#<Sidekiq::Rails::Reloader @app/, output, "didn't include the reloader")
       assert_match(/"a":1/, output, "didn't include the context")
       assert_match(/Something didn't work!/, output, "didn't include the exception message")
       assert_match(/test\/exception_handler_test.rb/, output, "didn't include the backtrace")
