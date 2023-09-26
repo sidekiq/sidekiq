@@ -45,7 +45,11 @@ module Sidekiq
         # it will appear in the Sidekiq console with all of the job context. See #5021 and
         # https://github.com/rails/rails/blob/b5f2b550f69a99336482739000c58e4e04e033aa/railties/lib/rails/commands/server/server_command.rb#L82-L84
         unless ::Rails.logger == config.logger || ::ActiveSupport::Logger.logger_outputs_to?(::Rails.logger, $stdout)
-          ::Rails.logger.extend(::ActiveSupport::Logger.broadcast(config.logger))
+          if ::Rails::VERSION::STRING >= "7.1"
+            ::Rails.logger = ActiveSupport::BroadcastLogger.new(::Rails.logger, config.logger)
+          else
+            ::Rails.logger.extend(::ActiveSupport::Logger.broadcast(config.logger))
+          end
         end
       end
     end
