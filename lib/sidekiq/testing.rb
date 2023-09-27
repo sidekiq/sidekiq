@@ -64,7 +64,7 @@ module Sidekiq
   class EmptyQueueError < RuntimeError; end
 
   module TestingClient
-    def raw_push(payloads)
+    def atomic_push(conn, payloads)
       if Sidekiq::Testing.fake?
         payloads.each do |job|
           job = Sidekiq.load_json(Sidekiq.dump_json(job))

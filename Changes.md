@@ -9,6 +9,7 @@ HEAD
   The previous calling convention will work until Sidekiq 8.0 but will print out a
   deprecation warning.
 - Fix issue with the `batch_size` and `at` options in `S::Client.push_bulk` [#6040]
+- Fix inline testing firing batch callbacks early [#6057]
 
 7.1.4
 ----------

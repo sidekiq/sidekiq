@@ -308,9 +308,9 @@ describe Sidekiq::Client do
 
           it "raises error with correct class name" do
             error = assert_raises ArgumentError do
-              TestActiveJob.perform_later(BigDecimal("1.1212"))
+              TestActiveJob.perform_later(Object.new)
             end
-            assert_match(/Job arguments to TestActiveJob/, error.message)
+            assert_match(/Unsupported argument type/, error.message)
           end
         end
       end
