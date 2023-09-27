@@ -49,8 +49,29 @@ module Sidekiq
       locale_files.select { |file| file =~ /\/#{lang}\.yml$/ }
     end
 
-    # This is a hook for a Sidekiq Pro feature.  Please don't touch.
-    def filtering(*)
+    def search(jobset, substr)
+      resultset = jobset.scan(substr).to_a
+      @current_page = 1
+      @count = @total_size = resultset.size
+      resultset
+    end
+
+    def filtering(which)
+      erb(:filtering, locals: {which: which})
+    end
+
+    def filter_link(jid, within = "retries")
+      if within.nil?
+        ::Rack::Utils.escape_html(jid)
+      else
+        "<a href='#{root_path}filter/#{within}?substr=#{jid}'>#{::Rack::Utils.escape_html(jid)}</a>"
+      end
+    end
+
+    def display_tags(job, within = "retries")
+      job.tags.map { |tag|
+        "<span class='label label-info jobtag'>#{filter_link(tag, within)}</span>"
+      }.join(" ")
     end
 
     # This view helper provide ability display you html code in
@@ -109,13 +130,6 @@ module Sidekiq
 
         matched_locale || "en"
       end
-    end
-
-    # within is used by Sidekiq Pro
-    def display_tags(job, within = nil)
-      job.tags.map { |tag|
-        "<span class='label label-info jobtag'>#{::Rack::Utils.escape_html(tag)}</span>"
-      }.join(" ")
     end
 
     # sidekiq/sidekiq#3243

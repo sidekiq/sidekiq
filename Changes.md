@@ -5,12 +5,14 @@
 HEAD
 ----------
 
-- **BREAKING CHANGE** Error handlers now take three arguments `->(ex, context, config)`.
-  The previous calling convention will work until Sidekiq 8.0 but will print out a
-  deprecation warning.
+- **FEATURE**: Job filtering within the Web UI. This feature has been open
+  sourced from Sidekiq Pro. [#6052]
+- **API CHANGE** Error handlers now take three arguments `->(ex, context, config)`.
+  The previous calling convention will work until Sidekiq 8.0 but will print
+  out a deprecation warning. [#6051]
 - Fix issue with the `batch_size` and `at` options in `S::Client.push_bulk` [#6040]
 - Fix inline testing firing batch callbacks early [#6057]
-- Fix log broadcast with Rails 7.1 [#6054]
+- Use new log broadcast API in Rails 7.1 [#6054]
 
 7.1.4
 ----------
