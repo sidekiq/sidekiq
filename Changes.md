@@ -11,6 +11,7 @@ HEAD
   deprecation warning. [#6051]
 - Fix issue with the `batch_size` and `at` options in `S::Client.push_bulk` [#6040]
 - Fix inline testing firing batch callbacks early [#6057]
+- Fix log broadcast with Rails 7.1 [#6054]
 
 7.1.4
 ----------
