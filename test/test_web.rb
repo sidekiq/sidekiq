@@ -293,7 +293,7 @@ describe Sidekiq::Web do
 
     get "/retries"
     assert_equal 200, last_response.status
-    refute_match(/#{params.first['args'][2]}/, last_response.body)
+    refute_match(/#{params.first["args"][2]}/, last_response.body)
   end
 
   it "can delete all retries" do
@@ -313,7 +313,7 @@ describe Sidekiq::Web do
 
     get "/queues/default"
     assert_equal 200, last_response.status
-    assert_match(/#{params.first['args'][2]}/, last_response.body)
+    assert_match(/#{params.first["args"][2]}/, last_response.body)
   end
 
   it "can kill a single retry now" do
@@ -324,7 +324,7 @@ describe Sidekiq::Web do
 
     get "/morgue"
     assert_equal 200, last_response.status
-    assert_match(/#{params.first['args'][2]}/, last_response.body)
+    assert_match(/#{params.first["args"][2]}/, last_response.body)
   end
 
   it "can display scheduled" do
@@ -370,7 +370,7 @@ describe Sidekiq::Web do
 
     get "/queues/default"
     assert_equal 200, last_response.status
-    assert_match(/#{params.first['args'][2]}/, last_response.body)
+    assert_match(/#{params.first["args"][2]}/, last_response.body)
   end
 
   it "can delete a single scheduled job" do
@@ -381,7 +381,7 @@ describe Sidekiq::Web do
 
     get "/scheduled"
     assert_equal 200, last_response.status
-    refute_match(/#{params.first['args'][2]}/, last_response.body)
+    refute_match(/#{params.first["args"][2]}/, last_response.body)
   end
 
   it "can delete scheduled" do
@@ -408,7 +408,7 @@ describe Sidekiq::Web do
       assert_equal 1, q.size
       get "/queues/default"
       assert_equal 200, last_response.status
-      assert_match(/#{params[0]['args'][2]}/, last_response.body)
+      assert_match(/#{params[0]["args"][2]}/, last_response.body)
     end
   end
 
@@ -423,7 +423,7 @@ describe Sidekiq::Web do
 
     get "/queues/default"
     assert_equal 200, last_response.status
-    assert_match(/#{msg['args'][2]}/, last_response.body)
+    assert_match(/#{msg["args"][2]}/, last_response.body)
   end
 
   it "escape job args and error messages" do
@@ -629,7 +629,7 @@ describe Sidekiq::Web do
 
       get "/queues/foo"
       assert_equal 200, last_response.status
-      assert_match(/#{params.first['args'][2]}/, last_response.body)
+      assert_match(/#{params.first["args"][2]}/, last_response.body)
     end
   end
 

@@ -440,7 +440,7 @@ describe Sidekiq::Client do
     end
 
     it "allows sidekiq_options to point to different Redi" do
-      conn = MiniTest::Mock.new
+      conn = Minitest::Mock.new
       conn.expect(:pipelined, [0, 1])
       DWorker.sidekiq_options("pool" => ConnectionPool.new(size: 1) { conn })
       DWorker.perform_async(1, 2, 3)
@@ -448,7 +448,7 @@ describe Sidekiq::Client do
     end
 
     it "allows #via to point to same Redi" do
-      conn = MiniTest::Mock.new
+      conn = Minitest::Mock.new
       conn.expect(:pipelined, [0, 1])
       sharded_pool = ConnectionPool.new(size: 1) { conn }
       Sidekiq::Client.via(sharded_pool) do
@@ -462,11 +462,11 @@ describe Sidekiq::Client do
     it "allows #via to point to different Redi" do
       default = Sidekiq::Client.new.redis_pool
 
-      moo = MiniTest::Mock.new
+      moo = Minitest::Mock.new
       moo.expect(:pipelined, [0, 1])
       beef = ConnectionPool.new(size: 1) { moo }
 
-      oink = MiniTest::Mock.new
+      oink = Minitest::Mock.new
       oink.expect(:pipelined, [0, 1])
       pork = ConnectionPool.new(size: 1) { oink }
 
@@ -485,7 +485,7 @@ describe Sidekiq::Client do
     end
 
     it "allows Resque helpers to point to different Redi" do
-      conn = MiniTest::Mock.new
+      conn = Minitest::Mock.new
       conn.expect(:pipelined, []) { |*args, &block| block.call(conn) }
       conn.expect(:zadd, 1, [String, Array])
       DWorker.sidekiq_options("pool" => ConnectionPool.new(size: 1) { conn })
