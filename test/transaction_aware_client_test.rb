@@ -108,6 +108,7 @@ describe Sidekiq::TransactionAwareClient do
     end
 
     it "defers push when enabled on a per job basis" do
+      Sidekiq.transactional_push!
       q = Sidekiq::Queue.new
       assert_equal 0, q.size
 

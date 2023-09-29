@@ -10,11 +10,12 @@ gem "activejob", RAILS_VERSION
 gem "activerecord", RAILS_VERSION
 gem "railties", RAILS_VERSION
 gem "redis-client"
+# gem "bumbler"
 gem "debug"
 
 gem "sqlite3", platforms: :ruby
 gem "activerecord-jdbcsqlite3-adapter", platforms: :jruby
-gem "after_commit_everywhere"
+gem "after_commit_everywhere", require: false
 gem "yard"
 
 group :test do
@@ -24,7 +25,6 @@ end
 
 group :development, :test do
   gem "standard", require: false
-  gem "pry"
 end
 
 group :load_test do
