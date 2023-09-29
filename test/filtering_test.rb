@@ -2,28 +2,29 @@ require_relative "helper"
 require "sidekiq/web"
 require "rack/test"
 
-class WebWorker
-  include Sidekiq::Worker
+class FilterJob
+  include Sidekiq::Job
 
   def perform(a, b)
     a + b
   end
 end
 
-describe "filtering" do
-  before do
-    @config = reset!
-  end
-
+class FilteringTest < Minitest::Test
   include Rack::Test::Methods
+
+  def setup
+    @config = reset!
+    app.middlewares.clear
+  end
 
   def app
     Sidekiq::Web
   end
 
-  it "can filter jobs" do
-    jid1 = WebWorker.perform_in(5, "bob", "tammy")
-    jid2 = WebWorker.perform_in(5, "mike", "jim")
+  def test_job_filtering
+    jid1 = FilterJob.perform_in(5, "bob", "tammy")
+    jid2 = FilterJob.perform_in(5, "mike", "jim")
 
     get "/scheduled"
     assert_equal 200, last_response.status
