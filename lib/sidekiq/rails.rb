@@ -59,7 +59,7 @@ module Sidekiq
           if ::Rails::VERSION::STRING < "7.1"
             ::Rails.logger.extend(::ActiveSupport::Logger.broadcast(config.logger))
           else
-            ::Rails.logger = ::ActiveSupport::BroadcastLogger.new(::Rails.logger, config.logger)
+            ::Rails.logger.broadcast_to(config.logger)
           end
         end
       end
