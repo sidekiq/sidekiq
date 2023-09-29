@@ -29,6 +29,12 @@ describe Sidekiq::RedisConnection do
       assert_equal client_class, pool.checkout.class
     end
 
+    it "crashes on RESP2" do
+      assert_raises RuntimeError do
+        Sidekiq::RedisConnection.create(protocol: 2)
+      end
+    end
+
     # Readers for these ivars should be available in the next release of
     # `connection_pool`, until then we need to reach into the internal state to
     # verify the setting.

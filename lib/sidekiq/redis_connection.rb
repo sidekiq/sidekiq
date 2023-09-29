@@ -14,6 +14,7 @@ module Sidekiq
         logger = symbolized_options.delete(:logger)
         logger&.info { "Sidekiq #{Sidekiq::VERSION} connecting to Redis with options #{scrub(symbolized_options)}" }
 
+        raise "Sidekiq 7+ does not support Redis protocol 2" if symbolized_options[:protocol] == 2
         size = symbolized_options.delete(:size) || 5
         pool_timeout = symbolized_options.delete(:pool_timeout) || 1
         pool_name = symbolized_options.delete(:pool_name)

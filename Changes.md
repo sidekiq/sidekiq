@@ -13,6 +13,7 @@ HEAD
 - Fix issue with the `batch_size` and `at` options in `S::Client.push_bulk` [#6040]
 - Fix inline testing firing batch callbacks early [#6057]
 - Use new log broadcast API in Rails 7.1 [#6054]
+- Crash if user tries to use RESP2 `protocol: 2` [#6061]
 
 7.1.4
 ----------
