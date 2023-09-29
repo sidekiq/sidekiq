@@ -83,7 +83,7 @@ You can purchase at https://sidekiq.org; email support@contribsys.com for help.
 Useful resources:
 
 * Product documentation is in the [wiki](https://github.com/sidekiq/sidekiq/wiki).
-* Occasional announcements are made to the [@sidekiq](https://twitter.com/sidekiq) Twitter account.
+* Occasional announcements are made to the [@sidekiq](https://ruby.social/@sidekiq) Mastodon account.
 * The [Sidekiq tag](https://stackoverflow.com/questions/tagged/sidekiq) on Stack Overflow has lots of useful Q &amp; A.
 
 Every Friday morning is Sidekiq office hour: I video chat and answer questions.
@@ -103,4 +103,4 @@ The license for Sidekiq Pro and Sidekiq Enterprise can be found in [COMM-LICENSE
 Author
 -----------------
 
-Mike Perham, [@getajobmike](https://twitter.com/getajobmike) / [@sidekiq](https://twitter.com/sidekiq), [https://www.mikeperham.com](https://www.mikeperham.com) / [https://www.contribsys.com](https://www.contribsys.com)
+Mike Perham, [@getajobmike](https://ruby.social/@getajobmike) / [@sidekiq](https://ruby.social/@sidekiq), [https://www.mikeperham.com](https://www.mikeperham.com) / [https://www.contribsys.com](https://www.contribsys.com)
