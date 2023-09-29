@@ -7,6 +7,7 @@ require "minitest/pride"
 require "maxitest/autorun"
 require "maxitest/threads"
 require "datadog/ci"
+require "ddtrace/auto_instrument"
 
 $TESTING = true
 # disable minitest/parallel threads
@@ -31,8 +32,6 @@ Datadog.configure do |c|
   c.service = "anmarchenko-sidekiq-local"
 
   c.diagnostics.startup_logs.enabled = false
-
-  c.tracing.instrument :redis
 
   # Configures the tracer to ensure results delivery
   c.ci.enabled = true
