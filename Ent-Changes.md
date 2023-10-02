@@ -63,6 +63,7 @@ connections [#5823]
 - Remove usage of `replicate_commands` Redis directive, default in 5.0, gone in 7.0
 - Fix issue with rate limiter connection pool [#5752]
 - Unique middleware now prints the JID holding the lock if there is a duplicate [#5736]
+  **NOTE**: Unique locks set with older versions (<7.0.4) will not work with newer versions.
 
 7.0.3
 ---------
