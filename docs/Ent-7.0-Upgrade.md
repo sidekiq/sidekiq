@@ -11,6 +11,12 @@ Note that major versions 3-6 were skipped in order to synchronize Sidekiq Enterp
 Sidekiq 7.0's new Embedding support required substantial refactoring of Enterprise internals.
 I've tried to maintain compatibility where possible.
 
+## Unique Locks in Version 7.0.4
+
+Sidekiq Enterprise v7.0.4 accidentally broke data compatibility with unique
+locks set by previous versions. You may see duplicate jobs for a short
+period until the new-style locks are populated in Redis.
+
 ## Version Support
 
 - Redis 6.2+ is now required
