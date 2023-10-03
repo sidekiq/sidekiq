@@ -24,6 +24,12 @@ class Thing
   end
 end
 
+class SErrorHandler
+  def call(x, y)
+    raise SystemStackError
+  end
+end
+
 describe Sidekiq::Component do
   describe "with mock logger" do
     before do
@@ -38,6 +44,21 @@ describe Sidekiq::Component do
       assert_match(/"a":1/, output, "didn't include the context")
       assert_match(/Something didn't work!/, output, "didn't include the exception message")
       assert_match(/test\/exception_handler_test.rb/, output, "didn't include the backtrace")
+    end
+
+    it "handles exceptions in classy error handlers" do
+      test_handler = SErrorHandler.new
+      @config[:error_handlers] << test_handler
+      output = capture_logging(@config) do
+        Thing.new(@config).invoke_exception(a: 1)
+      end
+
+      assert_match(/DEPRECATION/, output, "didn't include the deprecation warning")
+      assert_match(/SystemStackError/, output, "didn't include the exception")
+      assert_match(/Something didn't work!/, output, "didn't include the exception message")
+      assert_match(/!!! ERROR HANDLER THREW AN ERROR !!!/, output, "didn't include error handler problem message")
+    ensure
+      @config[:error_handlers].delete(test_handler)
     end
 
     it "handles exceptions in error handlers" do
