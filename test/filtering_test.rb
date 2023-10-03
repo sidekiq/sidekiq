@@ -10,10 +10,10 @@ class FilterJob
   end
 end
 
-class FilteringTest < Minitest::Test
+describe "filtering" do
   include Rack::Test::Methods
 
-  def setup
+  before do
     @config = reset!
     app.middlewares.clear
   end
@@ -22,7 +22,7 @@ class FilteringTest < Minitest::Test
     Sidekiq::Web
   end
 
-  def test_job_filtering
+  it "finds jobs matching substring" do
     jid1 = FilterJob.perform_in(5, "bob", "tammy")
     jid2 = FilterJob.perform_in(5, "mike", "jim")
 
