@@ -258,13 +258,18 @@ module Sidekiq
       @logger = logger
     end
 
+    private def arity(handler)
+      return handler.arity if handler.is_a?(Proc)
+      handler.method(:call).arity
+    end
+
     # INTERNAL USE ONLY
     def handle_exception(ex, ctx = {})
       if @options[:error_handlers].size == 0
         p ["!!!!!", ex]
       end
       @options[:error_handlers].each do |handler|
-        if handler.arity == 2
+        if arity(handler) == 2
           # TODO Remove in 8.0
           logger.info { "DEPRECATION: Sidekiq exception handlers now take three arguments, see #{handler}" }
           handler.call(ex, {_config: self}.merge(ctx))
