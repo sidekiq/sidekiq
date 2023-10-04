@@ -35,7 +35,7 @@ Datadog.configure do |c|
 
   # Configures the tracer to ensure results delivery
   c.ci.enabled = true
-  c.ci.agentless_mode_enabled = true
+  # c.ci.agentless_mode_enabled = true
   c.ci.instrument :minitest, service_name: "anmarchenko-sidekiq-local"
 end
 
