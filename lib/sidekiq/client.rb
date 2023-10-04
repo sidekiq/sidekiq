@@ -74,7 +74,7 @@ module Sidekiq
     #
     # Any options valid for a job class's sidekiq_options are also available here.
     #
-    # All options must be strings, not symbols.  NB: because we are serializing to JSON, all
+    # All keys must be strings, not symbols.  NB: because we are serializing to JSON, all
     # symbols in 'args' will be converted to strings.  Note that +backtrace: true+ can take quite a bit of
     # space in Redis; a large volume of failing jobs can start Redis swapping if you aren't careful.
     #
@@ -111,7 +111,7 @@ module Sidekiq
     # prevented a job push.
     #
     # Example (pushing jobs in batches):
-    #   push_bulk('class' => 'MyJob', 'args' => (1..100_000).to_a, batch_size: 1_000)
+    #   push_bulk('class' => MyJob, 'args' => (1..100_000).to_a, batch_size: 1_000)
     #
     def push_bulk(items)
       batch_size = items.delete(:batch_size) || items.delete("batch_size") || 1_000
