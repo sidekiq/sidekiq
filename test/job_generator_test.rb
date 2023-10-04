@@ -16,6 +16,7 @@ class JobGeneratorTest < Rails::Generators::TestCase
   end
 
   test "all files are properly created" do
+    assert 1 == 2, "OOOPS, 1 is not equal to 2"
     run_generator ["foo"]
     assert_file "app/sidekiq/foo_job.rb"
     assert_file "test/sidekiq/foo_job_test.rb"
