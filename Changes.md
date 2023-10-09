@@ -2,9 +2,11 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+7.1.6
 ----------
 
+- The block forms of testing modes (inline, fake) are now thread-safe so you can have
+  a multithreaded test suite which uses different modes for different tests. [#6069]
 - Fix breakage with non-Proc error handlers [#6065]
 
 7.1.5

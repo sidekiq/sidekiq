@@ -6,20 +6,33 @@ require "sidekiq"
 module Sidekiq
   class Testing
     class << self
-      attr_accessor :__test_mode
+      attr_accessor :__global_test_mode
 
+      # Calling without a block sets the global test mode, affecting
+      # all threads. Calling with a block only affects the current Thread.
       def __set_test_mode(mode)
         if block_given?
-          current_mode = __test_mode
           begin
-            self.__test_mode = mode
+            self.__local_test_mode = mode
             yield
           ensure
-            self.__test_mode = current_mode
+            self.__local_test_mode = nil
           end
         else
-          self.__test_mode = mode
+          self.__global_test_mode = mode
         end
+      end
+
+      def __test_mode
+        __local_test_mode || __global_test_mode
+      end
+
+      def __local_test_mode
+        Thread.current[:__sidekiq_test_mode]
+      end
+
+      def __local_test_mode=(value)
+        Thread.current[:__sidekiq_test_mode] = value
       end
 
       def disable!(&block)

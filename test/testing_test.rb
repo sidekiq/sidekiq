@@ -55,6 +55,21 @@ describe "Sidekiq::Testing" do
       refute Sidekiq::Testing.fake?
     end
 
+    it "supports thread-local testing modes" do
+      Sidekiq::Testing.disable!
+      refute Sidekiq::Testing.enabled?
+
+      Sidekiq::Testing.inline! do
+        assert Sidekiq::Testing.inline?
+        tval = Thread.new do
+          Sidekiq::Testing.inline?
+        end.value
+        refute tval
+      end
+
+      refute Sidekiq::Testing.inline?
+    end
+
     it "disables testing in a block" do
       Sidekiq::Testing.fake!
       assert Sidekiq::Testing.fake?
