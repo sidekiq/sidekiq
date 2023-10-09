@@ -26,7 +26,7 @@ group :development, :test do
   gem "standard", require: false
   gem "pry"
 
-  gem "ddtrace", path: "../dd-trace-rb"
+  gem "ddtrace"
   gem "parallel_tests"
 end
 
