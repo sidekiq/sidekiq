@@ -150,6 +150,11 @@ end
 - Job Execution metrics!!!
 - See `docs/7.0-Upgrade.md` for release notes
 
+6.5.{10,11,12}
+----------
+
+- Fixes for Rails 7.1 [#6067, #6070]
+
 6.5.9
 ----------
 
