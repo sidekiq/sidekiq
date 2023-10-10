@@ -155,6 +155,11 @@ describe Sidekiq::CLI do
           assert_equal 50, concurrency
           assert_equal 2, queues.count { |q| q == "very_often" }
           assert_equal 1, queues.count { |q| q == "seldom" }
+          assert_equal 'test_capsule', capsules['test_capsule'].name
+          assert_equal 2, capsules['test_capsule'].concurrency
+          assert_equal 1, capsules['test_capsule'].queues.count { |q| q == 'capsule_queue1' }
+          assert_equal 1, capsules['test_capsule'].queues.count { |q| q == 'capsule_queue2' }
+
         end
 
         it "accepts stringy keys" do

@@ -59,6 +59,16 @@ Sidekiq.configure_server do |config|
 end
 ```
 
+or through the configuration file:
+```yaml
+---
+:capsules:
+  :single_thread:
+    :concurrency: 1
+    :queues:
+      - single
+```
+
 Capsules can have their own customized middleware chains but by default will inherit the global middleware configuration. Each Capsule will have its own Redis connection pool sized to the configured concurrency.
 
 `Sidekiq::Launcher` is the top-level component which takes a `Sidekiq::Config` and launches the

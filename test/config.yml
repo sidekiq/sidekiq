@@ -5,3 +5,9 @@
 :queues:
   - [<%="very_"%>often, 2]
   - [seldom, 1]
+:capsules:
+  :test_capsule:
+    :concurrency:  2
+    :queues:
+      - capsule_queue1
+      - capsule_queue2
