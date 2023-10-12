@@ -1,7 +1,6 @@
 <script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js"></script>
 <script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js"></script>
 <script type="text/javascript" src="<%= root_path %>javascripts/base-charts.js"></script>
-<script type="text/javascript" src="<%= root_path %>javascripts/metrics.js"></script>
 
 <%
   job_result = @query_result.job_results[@name]
@@ -24,38 +23,28 @@
     <%= erb :_metrics_period_select, locals: { periods: @periods, period: @period, path: "#{root_path}metrics/#{@name}" } %>
   </div>
 
-  <canvas id="hist-totals-chart"></canvas>
+  <canvas id="hist-totals-chart">
+    <%= Sidekiq.dump_json({
+      series: hist_totals,
+      labels: bucket_labels,
+      xLabel: t('ExecutionTime'),
+      yLabel: t('Jobs'),
+      units: t('Jobs').downcase,
+    }) %>
+  </canvas>
 
-  <script>
-    window.histTotalsChart = new HistTotalsChart(
-      document.getElementById("hist-totals-chart"),
-      <%= Sidekiq.dump_json({
-        series: hist_totals,
-        labels: bucket_labels,
-        xLabel: t('ExecutionTime'),
-        yLabel: t('Jobs'),
-        units: t('Jobs').downcase,
-      }) %>
-    )
-  </script>
-
-  <canvas id="hist-bubble-chart"></canvas>
-
-  <script>
-    window.histBubbleChart = new HistBubbleChart(
-      document.getElementById("hist-bubble-chart"),
-      <%= Sidekiq.dump_json({
-        hist: job_result.hist,
-        marks: @query_result.marks.map { |m| [m.bucket, m.label] },
-        labels: @query_result.buckets,
-        histIntervals: bucket_intervals,
-        yLabel: t('ExecutionTime'),
-        markLabel: t('Deploy'),
-        yUnits: t('Seconds').downcase,
-        zUnits: t('Jobs').downcase,
-      }) %>
-    )
-  </script>
+  <canvas id="hist-bubble-chart">
+    <%= Sidekiq.dump_json({
+      hist: job_result.hist,
+      marks: @query_result.marks.map { |m| [m.bucket, m.label] },
+      labels: @query_result.buckets,
+      histIntervals: bucket_intervals,
+      yLabel: t('ExecutionTime'),
+      markLabel: t('Deploy'),
+      yUnits: t('Seconds').downcase,
+      zUnits: t('Jobs').downcase,
+    }) %>
+  </canvas>
 
   <p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p>
 <% else %>
@@ -66,3 +55,5 @@
 
   <div class="alert alert-success"><%= t('NoJobMetricsFound') %></div>
 <% end %>
+
+<script type="text/javascript" src="<%= root_path %>javascripts/metrics.js"></script>
