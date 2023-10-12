@@ -24,11 +24,49 @@ class Thing
   end
 end
 
-class SErrorHandler
+class ClassyErrorHandler1
   def call(x, y)
     raise SystemStackError
   end
 end
+
+class ClassyErrorHandler2
+  def call(x, y, z)
+    raise SystemStackError
+  end
+end
+
+class ClassyErrorHandler3
+  def call(x, y, z = nil)
+    raise SystemStackError
+  end
+end
+
+CLASSY_ERROR_HANDLER1 = ClassyErrorHandler1.new
+CLASSY_ERROR_HANDLER2 = ClassyErrorHandler2.new
+CLASSY_ERROR_HANDLER3 = ClassyErrorHandler3.new
+
+LAMBDA_ERROR_HANDLER1 = ->(_ex, _ctx) { raise SystemStackError }
+LAMBDA_ERROR_HANDLER2 = ->(_ex, _ctx, _cfg) { raise SystemStackError }
+LAMBDA_ERROR_HANDLER3 = ->(_ex, _ctx, _cfg = nil) { raise SystemStackError }
+
+PROC_ERROR_HANDLER1 = proc { |_ex, _ctx| raise SystemStackError }
+PROC_ERROR_HANDLER2 = proc { |_ex, _ctx, _cfg| raise SystemStackError }
+PROC_ERROR_HANDLER3 = proc { |_ex, _ctx, _cfg = nil| raise SystemStackError }
+
+VALID_ERROR_HANDLERS = %w[
+  CLASSY_ERROR_HANDLER2
+  CLASSY_ERROR_HANDLER3
+  LAMBDA_ERROR_HANDLER2
+  LAMBDA_ERROR_HANDLER3
+  PROC_ERROR_HANDLER2
+  PROC_ERROR_HANDLER3
+]
+DEPRECATED_ERROR_HANDLERS = %w[
+  CLASSY_ERROR_HANDLER1
+  LAMBDA_ERROR_HANDLER1
+  PROC_ERROR_HANDLER1
+]
 
 describe Sidekiq::Component do
   describe "with mock logger" do
@@ -46,34 +84,38 @@ describe Sidekiq::Component do
       assert_match(/test\/exception_handler_test.rb/, output, "didn't include the backtrace")
     end
 
-    it "handles exceptions in classy error handlers" do
-      test_handler = SErrorHandler.new
-      @config[:error_handlers] << test_handler
-      output = capture_logging(@config) do
-        Thing.new(@config).invoke_exception(a: 1)
-      end
+    VALID_ERROR_HANDLERS.each do |handler_name|
+      it "handles exceptions in #{handler_name} without DEPRECATION" do
+        test_handler = self.class.const_get(handler_name)
+        @config[:error_handlers] << test_handler
+        output = capture_logging(@config) do
+          Thing.new(@config).invoke_exception(a: 1)
+        end
 
-      assert_match(/DEPRECATION/, output, "didn't include the deprecation warning")
-      assert_match(/SystemStackError/, output, "didn't include the exception")
-      assert_match(/Something didn't work!/, output, "didn't include the exception message")
-      assert_match(/!!! ERROR HANDLER THREW AN ERROR !!!/, output, "didn't include error handler problem message")
-    ensure
-      @config[:error_handlers].delete(test_handler)
+        refute_match(/DEPRECATION/, output, "didn't include the deprecation warning")
+        assert_match(/SystemStackError/, output, "didn't include the exception")
+        assert_match(/Something didn't work!/, output, "didn't include the exception message")
+        assert_match(/!!! ERROR HANDLER THREW AN ERROR !!!/, output, "didn't include error handler problem message")
+      ensure
+        @config[:error_handlers].delete(test_handler)
+      end
     end
 
-    it "handles exceptions in error handlers" do
-      test_handler = ->(_ex, _ctx) { raise SystemStackError }
-      @config[:error_handlers] << test_handler
-      output = capture_logging(@config) do
-        Thing.new(@config).invoke_exception(a: 1)
-      end
+    DEPRECATED_ERROR_HANDLERS.each do |handler_name|
+      it "handles exceptions in #{handler_name} with DEPRECATION" do
+        test_handler = self.class.const_get(handler_name)
+        @config[:error_handlers] << test_handler
+        output = capture_logging(@config) do
+          Thing.new(@config).invoke_exception(a: 1)
+        end
 
-      assert_match(/DEPRECATION/, output, "didn't include the deprecation warning")
-      assert_match(/SystemStackError/, output, "didn't include the exception")
-      assert_match(/Something didn't work!/, output, "didn't include the exception message")
-      assert_match(/!!! ERROR HANDLER THREW AN ERROR !!!/, output, "didn't include error handler problem message")
-    ensure
-      @config[:error_handlers].delete(test_handler)
+        assert_match(/DEPRECATION/, output, "didn't include the deprecation warning")
+        assert_match(/SystemStackError/, output, "didn't include the exception")
+        assert_match(/Something didn't work!/, output, "didn't include the exception message")
+        assert_match(/!!! ERROR HANDLER THREW AN ERROR !!!/, output, "didn't include error handler problem message")
+      ensure
+        @config[:error_handlers].delete(test_handler)
+      end
     end
 
     it "cleans a backtrace if there is a cleaner" do
