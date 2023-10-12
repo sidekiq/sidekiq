@@ -166,3 +166,16 @@ class RealtimeChart extends DashboardChart {
     };
   }
 }
+
+  var rc = document.getElementById("realtime-chart")
+  if (rc != null) {
+    var rtc = new RealtimeChart(rc, JSON.parse(rc.textContent))
+    rtc.registerLegend(document.getElementById("realtime-legend"))
+    window.realtimeChart = rtc
+  }
+
+  var hc = document.getElementById("history-chart")
+  if (hc != null) {
+    var htc = new DashboardChart(hc, JSON.parse(hc.textContent))
+    window.historyChart = htc
+  }
