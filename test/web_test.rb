@@ -60,7 +60,7 @@ describe Sidekiq::Web do
     policies = last_response.headers["Content-Security-Policy"].split("; ")
     assert_includes(policies, "connect-src 'self' https: http: wss: ws:")
     assert_includes(policies, "style-src 'self' https: http: 'unsafe-inline'")
-    assert_includes(policies, "script-src 'self' https: http: 'unsafe-inline'")
+    assert_includes(policies, "script-src 'self' https: http:")
     assert_includes(policies, "object-src 'none'")
   end
 

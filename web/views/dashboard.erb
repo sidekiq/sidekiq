@@ -1,7 +1,3 @@
-<script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js"></script>
-<script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js"></script>
-<script type="text/javascript" src="<%= root_path %>javascripts/base-charts.js"></script>
-<script type="text/javascript" src="<%= root_path %>javascripts/dashboard-charts.js"></script>
 <script type="text/javascript" src="<%= root_path %>javascripts/dashboard.js"></script>
 <div class= "dashboard clearfix">
   <h3 >
@@ -20,26 +16,19 @@
 </div>
 
 <div class="row chart">
-  <canvas id="realtime-chart"></canvas>
-  <script>
-    window.realtimeChart = new RealtimeChart(
-      document.getElementById("realtime-chart"),
-      <%= Sidekiq.dump_json({
-        processedLabel: t('Processed'),
-        failedLabel: t('Failed'),
-        labels: Array.new(50, ""),
-        processed: Array.new(50),
-        failed: Array.new(50),
-        updateUrl: "#{root_path}stats",
-      }) %>
-    )
-  </script>
+  <canvas id="realtime-chart">
+    <%= Sidekiq.dump_json({
+      processedLabel: t('Processed'),
+      failedLabel: t('Failed'),
+      labels: Array.new(50, ""),
+      processed: Array.new(50),
+      failed: Array.new(50),
+      updateUrl: "#{root_path}stats",
+    }) %>
+  </canvas>
 
   <!-- start with a space in the legend so the height doesn't change when we add content dynamically -->
   <div id="realtime-legend">&nbsp;</div>
-  <script>
-    realtimeChart.registerLegend(document.getElementById("realtime-legend"))
-  </script>
 </div>
 
 <div class="row header">
@@ -55,18 +44,14 @@
     <a href="<%= root_path %>?days=180" class="history-graph <%= "active" if params[:days] == "180" %>"><%= t('SixMonths') %></a>
   </div>
 
-  <canvas id="history-chart"></canvas>
-  <script>
-    window.historyChart = new DashboardChart(
-      document.getElementById("history-chart"),
-      <%= Sidekiq.dump_json({
-        processedLabel: t('Processed'),
-        failedLabel: t('Failed'),
-        processed: @processed_history.to_a.reverse,
-        failed: @failed_history.to_a.reverse,
-      }) %>
-    )
-  </script>
+  <canvas id="history-chart">
+    <%= Sidekiq.dump_json({
+      processedLabel: t('Processed'),
+      failedLabel: t('Failed'),
+      processed: @processed_history.to_a.reverse,
+      failed: @failed_history.to_a.reverse,
+    }) %>
+  </canvas>
 </div>
 
 <br/>
@@ -113,3 +98,8 @@
     <% end %>
   </div>
 </div>
+
+<script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/base-charts.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/dashboard-charts.js"></script>
