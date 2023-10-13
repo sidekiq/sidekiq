@@ -5,6 +5,16 @@
 HEAD
 ----------
 
+- Add explicit error if user code tries to use nested test modes [#6078]
+```ruby
+Sidekiq::Testing.inline! # global setting
+Sidekiq::Testing.fake! do # override within block
+  # ok
+  Sidekiq::Testing.inline! do # can't override the override
+    # not ok, nested
+  end
+end
+```
 - Forbid inline JavaScript execution in Web UI [#6074]
 
 7.1.6

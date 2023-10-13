@@ -13,9 +13,11 @@ module Sidekiq
       # all threads. Calling with a block only affects the current Thread.
       def __set_test_mode(mode)
         if block_given?
-          if __local_test_mode
-            raise(TestModeAlreadySetError, "Nesting test modes not supported")
-          end
+          # Reentrant testing modes will lead to a rat's nest of code which is
+          # hard to reason about. You can set the testing mode once globally and
+          # you can override that global setting once per-thread.
+          raise TestModeAlreadySetError, "Nesting test modes is not supported" if __local_test_mode
+
           self.__local_test_mode = mode
           begin
             yield
