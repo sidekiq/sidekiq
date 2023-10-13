@@ -5,6 +5,7 @@ require "sidekiq"
 
 module Sidekiq
   class Testing
+    class TestModeAlreadySetError < RuntimeError; end
     class << self
       attr_accessor :__global_test_mode
 
@@ -12,8 +13,11 @@ module Sidekiq
       # all threads. Calling with a block only affects the current Thread.
       def __set_test_mode(mode)
         if block_given?
+          if __local_test_mode
+            raise(TestModeAlreadySetError, "Nesting test modes not supported")
+          end
+          self.__local_test_mode = mode
           begin
-            self.__local_test_mode = mode
             yield
           ensure
             self.__local_test_mode = nil
