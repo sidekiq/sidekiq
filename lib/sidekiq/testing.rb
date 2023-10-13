@@ -13,10 +13,10 @@ module Sidekiq
       def __set_test_mode(mode)
         if block_given?
           begin
-            self.__local_test_mode = mode
+            __local_test_mode_push(mode)
             yield
           ensure
-            self.__local_test_mode = nil
+            __local_test_mode_pop
           end
         else
           self.__global_test_mode = mode
@@ -28,11 +28,15 @@ module Sidekiq
       end
 
       def __local_test_mode
-        Thread.current[:__sidekiq_test_mode]
+        (Thread.current[:__sidekiq_test_mode] ||= []).last
       end
 
-      def __local_test_mode=(value)
-        Thread.current[:__sidekiq_test_mode] = value
+      def __local_test_mode_pop
+        Thread.current[:__sidekiq_test_mode].pop
+      end
+
+      def __local_test_mode_push(value)
+        (Thread.current[:__sidekiq_test_mode] ||= []) << value
       end
 
       def disable!(&block)

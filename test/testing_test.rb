@@ -100,6 +100,16 @@ describe "Sidekiq::Testing" do
       refute Sidekiq::Testing.fake?
     end
 
+    it "enables nested inline testing" do
+      Sidekiq::Testing.inline! do
+        assert Sidekiq::Testing.inline?
+        Sidekiq::Testing.inline! do
+          assert Sidekiq::Testing.inline?
+        end
+        assert Sidekiq::Testing.inline?
+      end
+    end
+
     it "enables inline testing in a block" do
       Sidekiq::Testing.disable!
       assert Sidekiq::Testing.disabled?
