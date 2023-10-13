@@ -14,7 +14,7 @@ module Sidekiq
       def __set_test_mode(mode)
         if block_given?
           if __local_test_mode
-            raise(TestModeAlreadySetError, "Local test mode already set")
+            raise(TestModeAlreadySetError, "Nesting test modes not supported")
           end
           self.__local_test_mode = mode
           begin
