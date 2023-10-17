@@ -298,6 +298,25 @@ describe Sidekiq::Client do
             end
             assert_match(/Job arguments to InterestingJob/, error.message)
           end
+
+          it "captures errors with custom proc" do
+            errors = []
+            Sidekiq.strict_args!(->(**kwargs) { errors << kwargs })
+
+            InterestingJob.perform_async(
+              {
+                "foo" => [:a, :b, :c],
+                :bar => ["x", "y", "z"]
+              }
+            )
+
+            assert_equal 1, errors.size
+            assert_equal "InterestingJob", errors.dig(0, :job_class)
+            assert_equal :a, errors.dig(0, :unsafe_item)
+            assert_match(/Job arguments to InterestingJob/, errors.dig(0, :msg))
+          ensure
+            Sidekiq.strict_args!(:raise)
+          end
         end
 
         describe "ActiveJob with non-native json types" do

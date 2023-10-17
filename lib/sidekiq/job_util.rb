@@ -18,22 +18,18 @@ module Sidekiq
 
     def verify_json(item)
       job_class = item["wrapped"] || item["class"]
-      args = item["args"]
-      mode = Sidekiq::Config::DEFAULTS[:on_complex_arguments]
 
-      if mode == :raise || mode == :warn
-        if (unsafe_item = json_unsafe?(args))
-          msg = <<~EOM
-            Job arguments to #{job_class} must be native JSON types, but #{unsafe_item.inspect} is a #{unsafe_item.class}.
-            See https://github.com/sidekiq/sidekiq/wiki/Best-Practices
-            To disable this error, add `Sidekiq.strict_args!(false)` to your initializer.
-          EOM
+      json_unsafe?(item["args"]) do |mode, unsafe_item|
+        msg = <<~EOM
+          Job arguments to #{job_class} must be native JSON types, but #{unsafe_item.inspect} is a #{unsafe_item.class}.
+          See https://github.com/sidekiq/sidekiq/wiki/Best-Practices
+          To disable this error, add `Sidekiq.strict_args!(false)` to your initializer.
+        EOM
 
-          if mode == :raise
-            raise(ArgumentError, msg)
-          else
-            warn(msg)
-          end
+        case mode
+        when :raise then raise(ArgumentError, msg)
+        when :warn then warn(msg)
+        when Proc then mode.call(job_class: job_class, unsafe_item: unsafe_item, msg: msg)
         end
       end
     end
@@ -101,7 +97,12 @@ module Sidekiq
     private_constant :RECURSIVE_JSON_UNSAFE
 
     def json_unsafe?(item)
-      RECURSIVE_JSON_UNSAFE[item.class].call(item)
+      mode = Sidekiq::Config::DEFAULTS[:on_complex_arguments]
+
+      if mode == :raise || mode == :warn || mode.is_a?(Proc)
+        unsafe_item = RECURSIVE_JSON_UNSAFE[item.class].call(item)
+        yield(mode, unsafe_item) if unsafe_item
+      end
     end
   end
 end
