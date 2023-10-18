@@ -27,6 +27,7 @@ group :development, :test do
   gem "pry"
 
   gem "ddtrace"
+  gem "datadog-ci", path: "../datadog-ci-rb"
   gem "parallel_tests"
 end
 
