@@ -296,7 +296,7 @@ module Sidekiq
       end
     end
 
-    def number_with_delimiter(number)
+    def number_with_delimiter(number, options = {})
       return "" if number.nil?
 
       begin
@@ -305,8 +305,10 @@ module Sidekiq
         return number
       end
 
-      options = {delimiter: ",", separator: "."}
-      parts = number.to_s.to_str.split(".")
+      options = {delimiter: ",", separator: "."}.merge(options)
+      number = number.to_s.to_str
+      number = sprintf("%.#{options[:precision]}f", number) unless options[:precision].nil?
+      parts = number.split(".")
       parts[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{options[:delimiter]}")
       parts.join(options[:separator])
     end
