@@ -86,6 +86,7 @@ class RealtimeChart extends DashboardChart {
     updateStatsSummary(this.stats.sidekiq);
     updateRedisStats(this.stats.redis);
     updateFooterUTCTime(this.stats.server_utc_time);
+    updateNumbers();
     pulseBeacon();
 
     this.stats = stats;

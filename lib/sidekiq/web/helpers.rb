@@ -292,25 +292,13 @@ module Sidekiq
       elsif rss_kb < 10_000_000
         "#{number_with_delimiter((rss_kb / 1024.0).to_i)} MB"
       else
-        "#{number_with_delimiter((rss_kb / (1024.0 * 1024.0)).round(1))} GB"
+        "#{number_with_delimiter((rss_kb / (1024.0 * 1024.0)), precision: 1)} GB"
       end
     end
 
     def number_with_delimiter(number, options = {})
-      return "" if number.nil?
-
-      begin
-        Float(number)
-      rescue ArgumentError, TypeError
-        return number
-      end
-
-      options = {delimiter: ",", separator: "."}.merge(options)
-      number = number.to_s.to_str
-      number = sprintf("%.#{options[:precision]}f", number) unless options[:precision].nil?
-      parts = number.split(".")
-      parts[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{options[:delimiter]}")
-      parts.join(options[:separator])
+      precision = options[:precision] || 0
+      %(<span data-nwp="#{precision}">#{number.round(precision)}</span>)
     end
 
     def h(text)

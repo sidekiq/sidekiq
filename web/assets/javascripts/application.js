@@ -104,9 +104,9 @@ function updateFuzzyTimes() {
 }
 
 function updateNumbers() {
-  document.querySelectorAll("[data-number-with-precision]").forEach(node => {
-    let number = parseInt(node.textContent);
-    let precision = parseInt(node.dataset["numberWithPrecision"] || 0);
+  document.querySelectorAll("[data-nwp]").forEach(node => {
+    let number = parseFloat(node.textContent);
+    let precision = parseInt(node.dataset["nwp"] || 0);
     if (typeof number === "number") {
       let formatted = number.toLocaleString(undefined, {
         minimumFractionDigits: precision,
