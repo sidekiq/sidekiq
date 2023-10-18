@@ -59,10 +59,10 @@
                 <code><a href="<%= root_path %>metrics/<%= kls %>?period=<%= @period %>"><%= kls %></a></code>
               </div>
             </td>
-            <td align="right"><samp><%= number_with_delimiter(jr.dig("totals", "p") - jr.dig("totals", "f")) %></samp></td>
-            <td align="right"><samp><%= number_with_delimiter(jr.dig("totals", "f")) %></samp></td>
-            <td align="right"><samp><%= number_with_delimiter(jr.dig("totals", "s"), precision: 2) %></samp></td>
-            <td align="right"><samp><%= number_with_delimiter(jr.total_avg("s"), precision: 2) %></samp></td>
+            <td align="right"><samp data-number-with-precision="0"><%= jr.dig("totals", "p") - jr.dig("totals", "f") %></samp></td>
+            <td align="right"><samp data-number-with-precision="0"><%= jr.dig("totals", "f") %></samp></td>
+            <td align="right"><samp data-number-with-precision="2"><%= jr.dig("totals", "s").round(2) %></samp></td>
+            <td align="right"><samp data-number-with-precision="2"><%= jr.total_avg("s").round(2) %></samp></td>
           </tr>
         <% end %>
       <% else %>

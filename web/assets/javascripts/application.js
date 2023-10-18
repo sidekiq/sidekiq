@@ -33,6 +33,7 @@ function addListeners() {
 
   addShiftClickListeners()
   updateFuzzyTimes();
+  updateNumbers();
   setLivePollFromUrl();
 
   var buttons = document.querySelectorAll(".live-poll");
@@ -100,6 +101,20 @@ function updateFuzzyTimes() {
   var t = timeago()
   t.render(document.querySelectorAll('time'), locale);
   t.cancel();
+}
+
+function updateNumbers() {
+  document.querySelectorAll("[data-number-with-precision]").forEach(node => {
+    let number = parseInt(node.textContent);
+    let precision = parseInt(node.dataset["numberWithPrecision"] || 0);
+    if (typeof number === "number") {
+      let formatted = number.toLocaleString(undefined, {
+        minimumFractionDigits: precision,
+        maximumFractionDigits: precision,
+      });
+      node.textContent = formatted;
+    }
+  });
 }
 
 function setLivePollFromUrl() {
