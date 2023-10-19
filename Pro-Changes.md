@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+7.1.6
 ---------
 
 - Nested batches can now execute inline [#6057]
