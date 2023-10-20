@@ -29,8 +29,6 @@ end
 # Configure default Minitest integration
 Datadog.configure do |c|
   c.service = "sidekiq"
-  c.diagnostics.startup_logs.enabled = false
-
   c.ci.enabled = true
   c.ci.instrument :minitest
 end
