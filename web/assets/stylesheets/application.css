@@ -371,11 +371,11 @@ img.smallogo {
   font-size: 0.9em;
 }
 
-.metric {
+.num {
   font-family: monospace;
 }
 
-td.metric {
+td.num {
   text-align: right;
 }
 
