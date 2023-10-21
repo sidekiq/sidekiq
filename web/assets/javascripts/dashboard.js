@@ -1,15 +1,13 @@
 Sidekiq = {};
 
-var nf = new Intl.NumberFormat();
-
 var updateStatsSummary = function(data) {
-  document.getElementById("txtProcessed").innerText = nf.format(data.processed);
-  document.getElementById("txtFailed").innerText = nf.format(data.failed);
-  document.getElementById("txtBusy").innerText = nf.format(data.busy);
-  document.getElementById("txtScheduled").innerText = nf.format(data.scheduled);
-  document.getElementById("txtRetries").innerText = nf.format(data.retries);
-  document.getElementById("txtEnqueued").innerText = nf.format(data.enqueued);
-  document.getElementById("txtDead").innerText = nf.format(data.dead);
+  document.getElementById("txtProcessed").innerText = data.processed;
+  document.getElementById("txtFailed").innerText = data.failed;
+  document.getElementById("txtBusy").innerText = data.busy;
+  document.getElementById("txtScheduled").innerText = data.scheduled;
+  document.getElementById("txtRetries").innerText = data.retries;
+  document.getElementById("txtEnqueued").innerText = data.enqueued;
+  document.getElementById("txtDead").innerText = data.dead;
 }
 
 var updateRedisStats = function(data) {

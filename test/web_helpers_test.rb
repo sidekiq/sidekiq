@@ -136,17 +136,17 @@ describe "Web helpers" do
   describe "#format_memory" do
     it "returns in KB" do
       obj = Helpers.new
-      assert_equal "1 KB", obj.format_memory(1)
+      assert_equal "<span data-nwp=\"0\">1</span> KB", obj.format_memory(1)
     end
 
     it "returns in MB" do
       obj = Helpers.new
-      assert_equal "97 MB", obj.format_memory(100_002)
+      assert_equal "<span data-nwp=\"0\">97</span> MB", obj.format_memory(100_002)
     end
 
     it "returns in GB" do
       obj = Helpers.new
-      assert_equal "9.5 GB", obj.format_memory(10_000_001)
+      assert_equal "<span data-nwp=\"1\">9.5</span> GB", obj.format_memory(10_000_001)
     end
   end
 

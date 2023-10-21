@@ -370,6 +370,15 @@ img.smallogo {
 .stat p {
   font-size: 0.9em;
 }
+
+.num {
+  font-family: monospace;
+}
+
+td.num {
+  text-align: right;
+}
+
 @media (max-width: 767px) {
   .stats-container {
     display: block;
