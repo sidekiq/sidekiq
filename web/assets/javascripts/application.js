@@ -31,6 +31,13 @@ function addListeners() {
     node.addEventListener("click", addDataToggleListeners)
   })
 
+  document.querySelectorAll("[data-metric-period]").forEach(node => {
+    node.addEventListener("change", event => {
+      const path = event.target.dataset["metricPeriod"]
+      window.location.href = `${path}?period=${event.target.value}`
+    })
+  })
+
   addShiftClickListeners()
   updateFuzzyTimes();
   updateNumbers();
