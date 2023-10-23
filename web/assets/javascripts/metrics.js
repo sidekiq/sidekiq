@@ -283,3 +283,10 @@ if (hbc != null) {
   var bc = new HistBubbleChart(hbc, JSON.parse(hbc.textContent));
   window.histBubbleChart = bc
 }
+
+document.querySelectorAll("[data-metric-period]").forEach(node => {
+  node.addEventListener("change", event => {
+    const path = event.target.dataset["metricPeriod"]
+    window.location.href = `${path}?period=${event.target.value}`
+  })
+})
