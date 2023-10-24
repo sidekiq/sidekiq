@@ -21,6 +21,22 @@ module Sidekiq
         @client.call("EVALSHA", sha, keys.size, *keys, *argv)
       end
 
+      # this is the set of Redis commands used by Sidekiq. Not guaranteed
+      # to be comprehensive, we use this as a performance enhancement to
+      # avoid calling method_missing on most commands
+      USED_COMMANDS = %w[bitfield bitfield_ro del exists expire flushdb
+        get hdel hget hgetall hincrby hlen hmget hset hsetnx incr incrby
+        lindex llen lmove lpop lpush lrange lrem mget mset ping pttl
+        publish rpop rpush sadd scard script set sismember smembers
+        srem ttl type unlink zadd zcard zincrby zrange zrem
+        zremrangebyrank zremrangebyscore]
+
+      USED_COMMANDS.each do |name|
+        define_method(name) do |*args|
+          @client.call(name, *args)
+        end
+      end
+
       private
 
       # this allows us to use methods like `conn.hmset(...)` instead of having to use

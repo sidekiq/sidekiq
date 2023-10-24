@@ -44,7 +44,7 @@ module Sidekiq
 
       @pool.with do |c|
         # only allow one deploy mark for a given label for the next minute
-        lock = c.set("deploylock-#{label}", stamp, nx: true, ex: 60)
+        lock = c.set("deploylock-#{label}", stamp, "nx", "ex", "60")
         if lock
           c.multi do |pipe|
             pipe.hsetnx(key, stamp, label)

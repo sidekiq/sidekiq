@@ -5,7 +5,9 @@
 HEAD
 ----------
 
-- Add explicit error if user code tries to use nested test modes [#6078]
+- Adjust redis client adapter to avoid `method_missing` [#6083]
+- Better readability and formatting for numbers within the Web UI [#6080]
+- Add explicit error if user code tries to nest test modes [#6078]
 ```ruby
 Sidekiq::Testing.inline! # global setting
 Sidekiq::Testing.fake! do # override within block
@@ -15,7 +17,7 @@ Sidekiq::Testing.fake! do # override within block
   end
 end
 ```
-- Forbid inline JavaScript execution in Web UI [#6074]
+- **SECURITY** Forbid inline JavaScript execution in Web UI [#6074]
 
 7.1.6
 ----------
