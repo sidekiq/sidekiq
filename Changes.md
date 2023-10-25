@@ -2,10 +2,10 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+7.2.0
 ----------
 
-- Adjust redis client adapter to avoid `method_missing` [#6083]
+- Metrics filtering in Web UI [#5974]
 - Better readability and formatting for numbers within the Web UI [#6080]
 - Add explicit error if user code tries to nest test modes [#6078]
 ```ruby
@@ -18,6 +18,9 @@ Sidekiq::Testing.fake! do # override within block
 end
 ```
 - **SECURITY** Forbid inline JavaScript execution in Web UI [#6074]
+- Adjust redis-client adapter to avoid `method_missing` [#6083]
+  This can result in app code breaking if your app's Redis API usage was
+  depending on Sidekiq's adapter to correct invalid redis-client API usage.
 
 7.1.6
 ----------
