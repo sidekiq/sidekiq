@@ -330,6 +330,22 @@ module Sidekiq
 
     ########
     # Filtering
+
+    get "/filter/metrics" do
+      redirect "#{root_path}metrics"
+    end
+
+    post "/filter/metrics" do
+      x = params[:substr]
+      q = Sidekiq::Metrics::Query.new
+      @period = h((params[:period] || "")[0..1])
+      @periods = METRICS_PERIODS
+      minutes = @periods.fetch(@period, @periods.values.first)
+      @query_result = q.top_jobs(minutes: minutes, class_filter: Regexp.new(Regexp.escape(x), Regexp::IGNORECASE))
+
+      erb :metrics
+    end
+
     get "/filter/retries" do
       x = params[:substr]
       return redirect "#{root_path}retries" unless x && x != ""

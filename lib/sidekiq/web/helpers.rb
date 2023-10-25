@@ -21,6 +21,10 @@ module Sidekiq
       end
     end
 
+    def to_json(x)
+      Sidekiq.dump_json(x)
+    end
+
     def singularize(str, count)
       if count == 1 && str.respond_to?(:singularize) # rails
         str.singularize

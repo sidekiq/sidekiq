@@ -5,11 +5,25 @@
 <div class="header-container">
   <div class="page-title-container">
     <h1><%= t('Metrics') %></h1>
-
     <a target="blank" href="https://github.com/sidekiq/sidekiq/wiki/Metrics"><span class="info-circle" title="Click to learn more about metrics">?</span></a>
   </div>
 
-  <%= erb :_metrics_period_select, locals: { periods: @periods, period: @period, path: "#{root_path}metrics" } %>
+  <div>
+    <form id="metrics-form" class="form-inline" action="<%= root_path %>filter/metrics" method="post">
+      <%= csrf_tag %>
+      <label for="substr"><%= t('Filter') %></label>
+      <input id="class-filter" class="form-control" type="text" name="substr" placeholder="<%= t('Name') %>" value="<%= params[:substr] %>">
+      <select id="period-selector" class="form-control" name="period">
+        <% @periods.each_key do |code| %>
+          <% if code == @period %>
+            <option selected value="<%= code %>"><%= code %></option>
+          <% else %>
+            <option value="<%= code %>"><%= code %></option>
+          <% end %>
+        <% end %>
+      </select>
+    </form>
+  </div>
 </div>
 
 <%
@@ -21,7 +35,7 @@
 
 <% if job_results.any? %>
   <canvas id="job-metrics-overview-chart">
-    <%= Sidekiq.dump_json({
+    <%= to_json({
       series: job_results.map { |(kls, jr)| [kls, jr.dig("series", "s")] }.to_h,
       marks: @query_result.marks.map { |m| [m.bucket, m.label] },
       labels: @query_result.buckets,
@@ -72,6 +86,6 @@
   </table>
 </div>
 
-<p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p>
+<!--p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p-->
 
 <script type="text/javascript" src="<%= root_path %>javascripts/metrics.js"></script>

@@ -17,7 +17,7 @@
 
 <div class="row chart">
   <canvas id="realtime-chart">
-    <%= Sidekiq.dump_json({
+    <%= to_json({
       processedLabel: t('Processed'),
       failedLabel: t('Failed'),
       labels: Array.new(50, ""),
@@ -45,7 +45,7 @@
   </div>
 
   <canvas id="history-chart">
-    <%= Sidekiq.dump_json({
+    <%= to_json({
       processedLabel: t('Processed'),
       failedLabel: t('Failed'),
       processed: @processed_history.to_a.reverse,

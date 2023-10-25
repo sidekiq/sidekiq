@@ -284,9 +284,15 @@ if (hbc != null) {
   window.histBubbleChart = bc
 }
 
-document.querySelectorAll("[data-metric-period]").forEach(node => {
-  node.addEventListener("change", event => {
-    const path = event.target.dataset["metricPeriod"]
-    window.location.href = `${path}?period=${event.target.value}`
-  })
+var form = document.getElementById("metrics-form")
+document.querySelectorAll("#period-selector").forEach(node => {
+  node.addEventListener("input", debounce(() => form.submit()))
 })
+
+function debounce(func, timeout = 300) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { func.apply(this, args); }, timeout);
+  };
+}

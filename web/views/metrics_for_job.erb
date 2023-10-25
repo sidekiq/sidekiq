@@ -24,7 +24,7 @@
   </div>
 
   <canvas id="hist-totals-chart">
-    <%= Sidekiq.dump_json({
+    <%= to_json({
       series: hist_totals,
       labels: bucket_labels,
       xLabel: t('ExecutionTime'),
@@ -34,7 +34,7 @@
   </canvas>
 
   <canvas id="hist-bubble-chart">
-    <%= Sidekiq.dump_json({
+    <%= to_json({
       hist: job_result.hist,
       marks: @query_result.marks.map { |m| [m.bucket, m.label] },
       labels: @query_result.buckets,
@@ -46,7 +46,7 @@
     }) %>
   </canvas>
 
-  <p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p>
+  <!--p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p-->
 <% else %>
   <h1>
     <a href="<%= root_path %>/metrics"><%= t('Metrics') %></a> /

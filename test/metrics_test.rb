@@ -102,6 +102,23 @@ describe Sidekiq::Metrics do
       assert_equal(["DoesntExist"], result.job_results.keys)
     end
 
+    it "filters top job data" do
+      create_known_metrics
+
+      q = Sidekiq::Metrics::Query.new(now: fixed_time)
+      result = q.top_jobs(class_filter: /some/i)
+      assert_equal fixed_time - 59 * 60, result.starts_at
+      assert_equal fixed_time, result.ends_at
+
+      assert_equal 60, result.buckets.size
+      assert_equal "21:04", result.buckets.first
+      assert_equal "22:03", result.buckets.last
+
+      assert_equal %w[App::SomeJob].sort, result.job_results.keys.sort
+      job_result = result.job_results["App::SomeJob"]
+      refute_nil job_result
+    end
+
     it "fetches top job data" do
       create_known_metrics
       d = Sidekiq::Deploy.new

@@ -20,7 +20,8 @@ module Sidekiq
       end
 
       # Get metric data for all jobs from the last hour
-      def top_jobs(minutes: 60)
+      #  +class_filter+: return only results for classes matching filter
+      def top_jobs(class_filter: nil, minutes: 60)
         result = Result.new
 
         time = @time
@@ -39,6 +40,7 @@ module Sidekiq
         redis_results.each do |hash|
           hash.each do |k, v|
             kls, metric = k.split("|")
+            next if class_filter && !class_filter.match?(kls)
             result.job_results[kls].add_metric metric, time, v.to_i
           end
           time -= 60
