@@ -26,7 +26,7 @@ group :development, :test do
   gem "standard", require: false
   gem "pry"
 
-  gem "ddtrace"
+  gem "ddtrace", github: "DataDog/dd-trace-rb", ref: "1.x-stable"
   gem "datadog-ci", path: "../datadog-ci-rb"
   gem "parallel_tests"
 end
