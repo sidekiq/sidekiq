@@ -31,6 +31,7 @@ Datadog.configure do |c|
   c.service = "sidekiq"
   c.ci.enabled = true
   c.ci.instrument :minitest
+  c.diagnostics.startup_logs.enabled = false
 end
 
 ENV["REDIS_URL"] ||= "redis://localhost/15"
