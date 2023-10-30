@@ -154,6 +154,44 @@ describe "sidekiq_retries_exhausted" do
     assert_equal raised_error, exhausted_exception
   end
 
+  it "adds jobs to the dead set" do
+    assert_raises RuntimeError do
+      handler.local(new_worker, job("retry" => 0), "default") do
+        raise "kerblammo!"
+      end
+    end
+
+    assert_equal 1, Sidekiq::DeadSet.new.size
+  end
+
+  it "allows disabling dead set" do
+    assert_raises RuntimeError do
+      handler.local(new_worker, job("retry" => 0, "dead" => false), "default") do
+        raise "kerblammo!"
+      end
+    end
+
+    assert_equal 0, Sidekiq::DeadSet.new.size
+  end
+
+  it "does not allow disabling global failure handlers when disabling dead set" do
+    exhausted_job = nil
+    exhausted_exception = nil
+    @config.death_handlers.clear
+    @config.death_handlers << proc do |job, ex|
+      exhausted_job = job
+      exhausted_exception = ex
+    end
+    assert_raises RuntimeError do
+      handler.local(new_worker, job("retry" => 0, "dead" => false), "default") do
+        raise "kerblammo!"
+      end
+    end
+
+    assert exhausted_job
+    assert exhausted_exception
+  end
+
   it "supports wrapped jobs" do
     assert_raises RuntimeError do
       handler.local(WrappedJob.new, job("retry_count" => 0, "retry" => 1, "wrapped" => WrappedJob.to_s), "default") do
