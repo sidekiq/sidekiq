@@ -5,6 +5,8 @@
 7.2.0
 ----------
 
+- `sidekiq_retries_exhausted` can return `:discard` to avoid the deadset
+  and all death handlers [#6091]
 - Metrics filtering by job class in Web UI [#5974]
 - Better readability and formatting for numbers within the Web UI [#6080]
 - Add explicit error if user code tries to nest test modes [#6078]
