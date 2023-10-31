@@ -4,6 +4,20 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+7.2.0
+---------
+
+- Kubernetes health check can be enabled through Sidekiq's config YML.
+  The full binding address can also be configured, not just port. Examples:
+```yaml
+---
+health_check: 127.0.0.1:8111 # static
+health_check: <%= ENV["SIDEKIQ_HEALTH_BINDING"] %> # dynamic!
+```
+```ruby
+config.health_check("127.0.0.1:8111")
+```
+
 7.1.2
 ---------
 

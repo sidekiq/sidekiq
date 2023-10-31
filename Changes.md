@@ -5,7 +5,7 @@
 7.2.0
 ----------
 
-- Metrics filtering in Web UI [#5974]
+- Metrics filtering by job class in Web UI [#5974]
 - Better readability and formatting for numbers within the Web UI [#6080]
 - Add explicit error if user code tries to nest test modes [#6078]
 ```ruby
@@ -21,6 +21,14 @@ end
 - Adjust redis-client adapter to avoid `method_missing` [#6083]
   This can result in app code breaking if your app's Redis API usage was
   depending on Sidekiq's adapter to correct invalid redis-client API usage.
+  One example:
+```ruby
+# bad, not redis-client native
+# Unsupported command argument type: TrueClass (TypeError)
+Sidekiq.redis { |c| c.set("key", "value", nx: true, ex: 15) }
+# good
+Sidekiq.redis { |c| c.set("key", "value", "nx", "ex", 15) }
+```
 
 7.1.6
 ----------
