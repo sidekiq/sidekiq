@@ -226,7 +226,7 @@ module Sidekiq
     end
 
     def retries_exhausted(jobinst, msg, exception)
-      begin
+      rv = begin
         block = jobinst&.sidekiq_retries_exhausted_block
 
         # the sidekiq_retries_exhausted_block can be defined in a wrapped class (ActiveJob for instance)
@@ -239,6 +239,7 @@ module Sidekiq
         handle_exception(e, {context: "Error calling retries_exhausted", job: msg})
       end
 
+      return if rv == :discard # poof!
       send_to_morgue(msg) unless msg["dead"] == false
 
       @capsule.config.death_handlers.each do |handler|
