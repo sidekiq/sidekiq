@@ -24,7 +24,7 @@ module Sidekiq
       Sidekiq::Deploy.new.mark!(label: label)
     end
 
-    def initialize(pool = Sidekiq::RedisConnection.create)
+    def initialize(pool = Sidekiq.redis_pool)
       @pool = pool
     end
 
