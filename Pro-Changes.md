@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+7.2.0
+---------
+
+- Adjust redis-client API usage for Sidekiq 7.2
+
 7.1.6
 ---------
 
