@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+HEAD
+---------
+
+- Use HWIA when scheduling periodic ActiveJobs, for compatibility [#6099]
+
 7.2.0
 ---------
 
