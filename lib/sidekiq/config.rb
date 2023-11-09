@@ -34,8 +34,7 @@ module Sidekiq
       backtrace_cleaner: ->(backtrace) { backtrace }
     }
 
-    ERROR_HANDLER = ->(ex, ctx) {
-      cfg = ctx[:_config] || Sidekiq.default_configuration
+    ERROR_HANDLER = ->(ex, ctx, cfg = Sidekiq.default_configuration) {
       l = cfg.logger
       l.warn(Sidekiq.dump_json(ctx)) unless ctx.empty?
       l.warn("#{ex.class.name}: #{ex.message}")
@@ -55,6 +54,10 @@ module Sidekiq
 
     def_delegators :@options, :[], :[]=, :fetch, :key?, :has_key?, :merge!
     attr_reader :capsules
+
+    def to_json(*)
+      Sidekiq.dump_json(@options)
+    end
 
     # LEGACY: edits the default capsule
     # config.concurrency = 5
@@ -127,7 +130,7 @@ module Sidekiq
     private def local_redis_pool
       # this is our internal client/housekeeping pool. each capsule has its
       # own pool for executing threads.
-      @redis ||= new_redis_pool(5, "internal")
+      @redis ||= new_redis_pool(10, "internal")
     end
 
     def new_redis_pool(size, name = "unset")
@@ -255,15 +258,25 @@ module Sidekiq
       @logger = logger
     end
 
+    private def parameter_size(handler)
+      target = handler.is_a?(Proc) ? handler : handler.method(:call)
+      target.parameters.size
+    end
+
     # INTERNAL USE ONLY
     def handle_exception(ex, ctx = {})
       if @options[:error_handlers].size == 0
         p ["!!!!!", ex]
       end
-      ctx[:_config] = self
       @options[:error_handlers].each do |handler|
-        handler.call(ex, ctx)
-      rescue => e
+        if parameter_size(handler) == 2
+          # TODO Remove in 8.0
+          logger.info { "DEPRECATION: Sidekiq exception handlers now take three arguments, see #{handler}" }
+          handler.call(ex, {_config: self}.merge(ctx))
+        else
+          handler.call(ex, ctx, self)
+        end
+      rescue Exception => e
         l = logger
         l.error "!!! ERROR HANDLER THREW AN ERROR !!!"
         l.error e

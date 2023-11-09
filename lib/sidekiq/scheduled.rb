@@ -193,7 +193,7 @@ module Sidekiq
       # should never depend on sidekiq/api.
       def cleanup
         # dont run cleanup more than once per minute
-        return 0 unless redis { |conn| conn.set("process_cleanup", "1", nx: true, ex: 60) }
+        return 0 unless redis { |conn| conn.set("process_cleanup", "1", "NX", "EX", "60") }
 
         count = 0
         redis do |conn|

@@ -9,7 +9,7 @@ describe Sidekiq::Config do
 
   it "provides a default size" do
     @config.redis = {}
-    assert_equal 5, @config.redis_pool.size
+    assert_equal 10, @config.redis_pool.size
   end
 
   it "allows custom sizing" do

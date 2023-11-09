@@ -262,3 +262,37 @@ class HistBubbleChart extends BaseChart {
     };
   }
 }
+
+var ch = document.getElementById("job-metrics-overview-chart");
+if (ch != null) {
+  var jm = new JobMetricsOverviewChart(ch, JSON.parse(ch.textContent));
+  document.querySelectorAll(".metrics-swatch-wrapper > input[type=checkbox]").forEach((imp) => {
+    jm.registerSwatch(imp.id)
+  });
+  window.jobMetricsChart = jm;
+}
+
+var htc = document.getElementById("hist-totals-chart");
+if (htc != null) {
+  var tc = new HistTotalsChart(htc, JSON.parse(htc.textContent));
+  window.histTotalsChart = tc
+}
+
+var hbc = document.getElementById("hist-bubble-chart");
+if (hbc != null) {
+  var bc = new HistBubbleChart(hbc, JSON.parse(hbc.textContent));
+  window.histBubbleChart = bc
+}
+
+var form = document.getElementById("metrics-form")
+document.querySelectorAll("#period-selector").forEach(node => {
+  node.addEventListener("input", debounce(() => form.submit()))
+})
+
+function debounce(func, timeout = 300) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { func.apply(this, args); }, timeout);
+  };
+}

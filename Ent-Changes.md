@@ -4,6 +4,40 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+HEAD
+---------
+
+- Use HWIA when scheduling periodic ActiveJobs, for compatibility [#6099]
+
+7.2.0
+---------
+
+- Kubernetes health check can be enabled through Sidekiq's config YML.
+  The full binding address can also be configured, not just port. Examples:
+```yaml
+---
+health_check: 127.0.0.1:8111 # static
+health_check: <%= ENV["SIDEKIQ_HEALTH_BINDING"] %> # dynamic!
+```
+```ruby
+config.health_check("127.0.0.1:8111")
+```
+
+7.1.2
+---------
+
+- Add support for a Kubernetes liveness / health check port. Start it with
+  `config.health_check(port = 7433)` [#5923]
+- Add missing points view [#6016]
+- Add Polish translations
+
+7.1.1
+---------
+
+- **Please note that license credentials are required when running in production.**
+  We recommend [configuring credentials with Bundler](https://github.com/sidekiq/sidekiq/wiki/Comm-Installation#sidekiq-enterprise).
+- Fix hash mutation race condition in rate limiter autoloading [#5908]
+
 7.1.0
 ---------
 
@@ -11,9 +45,10 @@ Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
   Thanks to Thad Sauter of NexHealth for contributing the initial skeleton. [#5757]
 - **NEW** Test helper to verify periodic job registration block [#5832]
 ```ruby
+require "sidekiq-ent/periodic/testing"
 CRON_BLOCK = ->(mgr) { mgr.register("0 * * * * *", "SomeJob") }
 ct = Sidekiq::Periodic::ConfigTester.new
-ct.verify(CRON_BLOCK) # => raises ArgumentError, invalid crontab syntax
+ct.verify(&CRON_BLOCK) # => raises ArgumentError, invalid crontab syntax
 ```
 - Periodic jobs may now be ActiveJobs [#5902]
 - Refactor rate limiter codebase to use `autoload`
@@ -47,6 +82,7 @@ connections [#5823]
 - Remove usage of `replicate_commands` Redis directive, default in 5.0, gone in 7.0
 - Fix issue with rate limiter connection pool [#5752]
 - Unique middleware now prints the JID holding the lock if there is a duplicate [#5736]
+  **NOTE**: Unique locks set with older versions (<7.0.4) will not work with newer versions.
 
 7.0.3
 ---------

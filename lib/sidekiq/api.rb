@@ -92,11 +92,11 @@ module Sidekiq
           pipeline.zcard("retry")
           pipeline.zcard("dead")
           pipeline.scard("processes")
-          pipeline.lrange("queue:default", -1, -1)
+          pipeline.lindex("queue:default", -1)
         end
       }
 
-      default_queue_latency = if (entry = pipe1_res[6].first)
+      default_queue_latency = if (entry = pipe1_res[6])
         job = begin
           Sidekiq.load_json(entry)
         rescue
@@ -264,8 +264,8 @@ module Sidekiq
     # @return [Float] in seconds
     def latency
       entry = Sidekiq.redis { |conn|
-        conn.lrange(@rname, -1, -1)
-      }.first
+        conn.lindex(@rname, -1)
+      }
       return 0 unless entry
       job = Sidekiq.load_json(entry)
       now = Time.now.to_f
@@ -679,7 +679,7 @@ module Sidekiq
         range_start = page * page_size + offset_size
         range_end = range_start + page_size - 1
         elements = Sidekiq.redis { |conn|
-          conn.zrange name, range_start, range_end, withscores: true
+          conn.zrange name, range_start, range_end, "withscores"
         }
         break if elements.empty?
         page -= 1
@@ -706,7 +706,7 @@ module Sidekiq
         end
 
       elements = Sidekiq.redis { |conn|
-        conn.zrange(name, begin_score, end_score, "BYSCORE", withscores: true)
+        conn.zrange(name, begin_score, end_score, "BYSCORE", "withscores")
       }
 
       elements.each_with_object([]) do |element, result|
@@ -881,7 +881,7 @@ module Sidekiq
     # @api private
     def cleanup
       # dont run cleanup more than once per minute
-      return 0 unless Sidekiq.redis { |conn| conn.set("process_cleanup", "1", nx: true, ex: 60) }
+      return 0 unless Sidekiq.redis { |conn| conn.set("process_cleanup", "1", "NX", "EX", "60") }
 
       count = 0
       Sidekiq.redis do |conn|

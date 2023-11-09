@@ -21,6 +21,10 @@ module Sidekiq
       end
     end
 
+    def to_json(x)
+      Sidekiq.dump_json(x)
+    end
+
     def singularize(str, count)
       if count == 1 && str.respond_to?(:singularize) # rails
         str.singularize
@@ -49,8 +53,29 @@ module Sidekiq
       locale_files.select { |file| file =~ /\/#{lang}\.yml$/ }
     end
 
-    # This is a hook for a Sidekiq Pro feature.  Please don't touch.
-    def filtering(*)
+    def search(jobset, substr)
+      resultset = jobset.scan(substr).to_a
+      @current_page = 1
+      @count = @total_size = resultset.size
+      resultset
+    end
+
+    def filtering(which)
+      erb(:filtering, locals: {which: which})
+    end
+
+    def filter_link(jid, within = "retries")
+      if within.nil?
+        ::Rack::Utils.escape_html(jid)
+      else
+        "<a href='#{root_path}filter/#{within}?substr=#{jid}'>#{::Rack::Utils.escape_html(jid)}</a>"
+      end
+    end
+
+    def display_tags(job, within = "retries")
+      job.tags.map { |tag|
+        "<span class='label label-info jobtag'>#{filter_link(tag, within)}</span>"
+      }.join(" ")
     end
 
     # This view helper provide ability display you html code in
@@ -109,13 +134,6 @@ module Sidekiq
 
         matched_locale || "en"
       end
-    end
-
-    # within is used by Sidekiq Pro
-    def display_tags(job, within = nil)
-      job.tags.map { |tag|
-        "<span class='label label-info jobtag'>#{::Rack::Utils.escape_html(tag)}</span>"
-      }.join(" ")
     end
 
     # sidekiq/sidekiq#3243
@@ -278,23 +296,13 @@ module Sidekiq
       elsif rss_kb < 10_000_000
         "#{number_with_delimiter((rss_kb / 1024.0).to_i)} MB"
       else
-        "#{number_with_delimiter((rss_kb / (1024.0 * 1024.0)).round(1))} GB"
+        "#{number_with_delimiter((rss_kb / (1024.0 * 1024.0)), precision: 1)} GB"
       end
     end
 
-    def number_with_delimiter(number)
-      return "" if number.nil?
-
-      begin
-        Float(number)
-      rescue ArgumentError, TypeError
-        return number
-      end
-
-      options = {delimiter: ",", separator: "."}
-      parts = number.to_s.to_str.split(".")
-      parts[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{options[:delimiter]}")
-      parts.join(options[:separator])
+    def number_with_delimiter(number, options = {})
+      precision = options[:precision] || 0
+      %(<span data-nwp="#{precision}">#{number.round(precision)}</span>)
     end
 
     def h(text)

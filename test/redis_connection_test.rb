@@ -29,6 +29,12 @@ describe Sidekiq::RedisConnection do
       assert_equal client_class, pool.checkout.class
     end
 
+    it "crashes on RESP2" do
+      assert_raises RuntimeError do
+        Sidekiq::RedisConnection.create(protocol: 2)
+      end
+    end
+
     # Readers for these ivars should be available in the next release of
     # `connection_pool`, until then we need to reach into the internal state to
     # verify the setting.
@@ -49,12 +55,12 @@ describe Sidekiq::RedisConnection do
 
       it "sizes default pool" do
         pool = server_connection
-        assert_equal 5, pool.size
+        assert_equal 10, pool.size
       end
 
-      it "defaults client pool sizes to 5" do
+      it "defaults client pool sizes" do
         pool = client_connection
-        assert_equal 5, pool.size
+        assert_equal 10, pool.size
       end
 
       it "sizes capsule pools based on concurrency" do
@@ -65,7 +71,7 @@ describe Sidekiq::RedisConnection do
         # Only Sidekiq::CLI looks at ENV
         ENV["RAILS_MAX_THREADS"] = "9"
         pool = client_connection
-        assert_equal 5, pool.size
+        assert_equal 10, pool.size
       ensure
         ENV.delete("RAILS_MAX_THREADS")
       end
@@ -98,7 +104,7 @@ describe Sidekiq::RedisConnection do
         error = assert_raises ArgumentError do
           Sidekiq::RedisConnection.create(namespace: "xxx")
         end
-        assert_includes error.message, "Your Redis configuration uses the namespace 'xxx' but this feature isn't supported by redis-client"
+        assert_includes error.message, "Your Redis configuration uses the namespace 'xxx' but this feature is"
       end
     end
 

@@ -57,7 +57,9 @@ class DashboardChart extends BaseChart {
 class RealtimeChart extends DashboardChart {
   constructor(el, options) {
     super(el, options);
-    this.delay = parseInt(localStorage.sidekiqTimeInterval) || 5000;
+    let d = parseInt(localStorage.sidekiqTimeInterval) || 5000;
+    if (d < 2000) { d = 2000; }
+    this.delay = d
     this.startPolling();
     document.addEventListener("interval:update", this.handleUpdate.bind(this));
   }
@@ -84,6 +86,7 @@ class RealtimeChart extends DashboardChart {
     updateStatsSummary(this.stats.sidekiq);
     updateRedisStats(this.stats.redis);
     updateFooterUTCTime(this.stats.server_utc_time);
+    updateNumbers();
     pulseBeacon();
 
     this.stats = stats;
@@ -164,3 +167,16 @@ class RealtimeChart extends DashboardChart {
     };
   }
 }
+
+  var rc = document.getElementById("realtime-chart")
+  if (rc != null) {
+    var rtc = new RealtimeChart(rc, JSON.parse(rc.textContent))
+    rtc.registerLegend(document.getElementById("realtime-legend"))
+    window.realtimeChart = rtc
+  }
+
+  var hc = document.getElementById("history-chart")
+  if (hc != null) {
+    var htc = new DashboardChart(hc, JSON.parse(hc.textContent))
+    window.historyChart = htc
+  }

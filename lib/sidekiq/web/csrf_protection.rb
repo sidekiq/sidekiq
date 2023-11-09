@@ -62,7 +62,7 @@ module Sidekiq
 
       def deny(env)
         logger(env).warn "attack prevented by #{self.class}"
-        [403, {"Content-Type" => "text/plain"}, ["Forbidden"]]
+        [403, {Rack::CONTENT_TYPE => "text/plain"}, ["Forbidden"]]
       end
 
       def session(env)

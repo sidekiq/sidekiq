@@ -5,15 +5,15 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby "3.1.2"
 
-RAILS_VERSION = "~> 7.0.4"
+RAILS_VERSION = "~> 7.1.0"
 gem "actionmailer", RAILS_VERSION
 gem "actionpack", RAILS_VERSION
 gem "activejob", RAILS_VERSION
 gem "activerecord", RAILS_VERSION
 gem "railties", RAILS_VERSION
 
-gem "puma", "~> 5.0"
+gem "puma"
 gem "sidekiq", path: ".."
-gem "sqlite3", "~> 1.4"
+gem "sqlite3"
 
 gem "after_commit_everywhere"

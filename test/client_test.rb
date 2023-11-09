@@ -308,9 +308,9 @@ describe Sidekiq::Client do
 
           it "raises error with correct class name" do
             error = assert_raises ArgumentError do
-              TestActiveJob.perform_later(BigDecimal("1.1212"))
+              TestActiveJob.perform_later(Object.new)
             end
-            assert_match(/Job arguments to TestActiveJob/, error.message)
+            assert_match(/Unsupported argument type/, error.message)
           end
         end
       end
@@ -484,7 +484,7 @@ describe Sidekiq::Client do
 
   describe "sharding" do
     it "allows sidekiq_options to point to different Redi" do
-      conn = MiniTest::Mock.new
+      conn = Minitest::Mock.new
       conn.expect(:pipelined, [0, 1])
       DJob.sidekiq_options("pool" => ConnectionPool.new(size: 1) { conn })
       DJob.perform_async(1, 2, 3)
@@ -492,7 +492,7 @@ describe Sidekiq::Client do
     end
 
     it "allows #via to point to same Redi" do
-      conn = MiniTest::Mock.new
+      conn = Minitest::Mock.new
       conn.expect(:pipelined, [0, 1])
       sharded_pool = ConnectionPool.new(size: 1) { conn }
       Sidekiq::Client.via(sharded_pool) do
@@ -506,11 +506,11 @@ describe Sidekiq::Client do
     it "allows #via to point to different Redi" do
       default = @client.redis_pool
 
-      moo = MiniTest::Mock.new
+      moo = Minitest::Mock.new
       moo.expect(:pipelined, [0, 1])
       beef = ConnectionPool.new(size: 1) { moo }
 
-      oink = MiniTest::Mock.new
+      oink = Minitest::Mock.new
       oink.expect(:pipelined, [0, 1])
       pork = ConnectionPool.new(size: 1) { oink }
 
@@ -529,7 +529,7 @@ describe Sidekiq::Client do
     end
 
     it "allows Resque helpers to point to different Redi" do
-      conn = MiniTest::Mock.new
+      conn = Minitest::Mock.new
       conn.expect(:pipelined, []) { |*args, &block| block.call(conn) }
       conn.expect(:zadd, 1, [String, Array])
       DJob.sidekiq_options("pool" => ConnectionPool.new(size: 1) { conn })
@@ -557,5 +557,18 @@ describe Sidekiq::Client do
         t2.join
       end
     end
+  end
+
+  it "can specify different times when there are more jobs than the batch size" do
+    job_count = 5
+    times = job_count.times.map { |i| Time.new(2019, 1, i + 1).utc }
+    args = job_count.times.map { |i| [i] }
+    # When there are 3 jobs, we want to use `times[2]` for the final job.
+    batch_size = 2
+
+    jids = Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => args, "at" => times.map(&:to_f), :batch_size => batch_size)
+
+    assert_equal job_count, jids.size
+    assert_equal times, jids.map { |jid| Sidekiq::ScheduledSet.new.find_job(jid).at }
   end
 end

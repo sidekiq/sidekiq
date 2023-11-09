@@ -60,7 +60,7 @@ describe Sidekiq::Web do
     policies = last_response.headers["Content-Security-Policy"].split("; ")
     assert_includes(policies, "connect-src 'self' https: http: wss: ws:")
     assert_includes(policies, "style-src 'self' https: http: 'unsafe-inline'")
-    assert_includes(policies, "script-src 'self' https: http: 'unsafe-inline'")
+    assert_includes(policies, "script-src 'self' https: http:")
     assert_includes(policies, "object-src 'none'")
   end
 
@@ -332,7 +332,7 @@ describe Sidekiq::Web do
 
     get "/retries"
     assert_equal 200, last_response.status
-    refute_match(/#{params.first['args'][2]}/, last_response.body)
+    refute_match(/#{params.first["args"][2]}/, last_response.body)
   end
 
   it "can delete all retries" do
@@ -352,7 +352,7 @@ describe Sidekiq::Web do
 
     get "/queues/default"
     assert_equal 200, last_response.status
-    assert_match(/#{params.first['args'][2]}/, last_response.body)
+    assert_match(/#{params.first["args"][2]}/, last_response.body)
   end
 
   it "can kill a single retry now" do
@@ -363,7 +363,7 @@ describe Sidekiq::Web do
 
     get "/morgue"
     assert_equal 200, last_response.status
-    assert_match(/#{params.first['args'][2]}/, last_response.body)
+    assert_match(/#{params.first["args"][2]}/, last_response.body)
   end
 
   it "can display scheduled" do
@@ -409,7 +409,7 @@ describe Sidekiq::Web do
 
     get "/queues/default"
     assert_equal 200, last_response.status
-    assert_match(/#{params.first['args'][2]}/, last_response.body)
+    assert_match(/#{params.first["args"][2]}/, last_response.body)
   end
 
   it "can delete a single scheduled job" do
@@ -420,7 +420,7 @@ describe Sidekiq::Web do
 
     get "/scheduled"
     assert_equal 200, last_response.status
-    refute_match(/#{params.first['args'][2]}/, last_response.body)
+    refute_match(/#{params.first["args"][2]}/, last_response.body)
   end
 
   it "can delete scheduled" do
@@ -447,7 +447,7 @@ describe Sidekiq::Web do
       assert_equal 1, q.size
       get "/queues/default"
       assert_equal 200, last_response.status
-      assert_match(/#{params[0]['args'][2]}/, last_response.body)
+      assert_match(/#{params[0]["args"][2]}/, last_response.body)
     end
   end
 
@@ -462,7 +462,7 @@ describe Sidekiq::Web do
 
     get "/queues/default"
     assert_equal 200, last_response.status
-    assert_match(/#{msg['args'][2]}/, last_response.body)
+    assert_match(/#{msg["args"][2]}/, last_response.body)
   end
 
   it "escape job args and error messages" do
@@ -669,7 +669,7 @@ describe Sidekiq::Web do
 
       get "/queues/foo"
       assert_equal 200, last_response.status
-      assert_match(/#{params.first['args'][2]}/, last_response.body)
+      assert_match(/#{params.first["args"][2]}/, last_response.body)
     end
   end
 
@@ -836,7 +836,7 @@ describe Sidekiq::Web do
   describe "Metrics" do
     describe "/metrics" do
       it "calls the Sidekiq::Metrics::Query and renders correctly" do
-        result_mock = MiniTest::Mock.new
+        result_mock = Minitest::Mock.new
         result_mock.expect(:job_results, {})
         result_mock.expect(:marks, [])
         result_mock.expect(:buckets, [])
@@ -862,7 +862,7 @@ describe Sidekiq::Web do
         job_result_mock.expect(:totals, {"s" => 1})
         3.times { job_result_mock.expect(:hist, {"FooJob" => []}) }
 
-        result_mock = MiniTest::Mock.new
+        result_mock = Minitest::Mock.new
         result_mock.expect(:job_results, {"FooJob" => job_result_mock})
         result_mock.expect(:starts_at, Time.now - 3600)
         result_mock.expect(:ends_at, Time.now)

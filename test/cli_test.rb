@@ -5,6 +5,7 @@ require "sidekiq/cli"
 
 describe Sidekiq::CLI do
   before do
+    ENV["RAILS_ENV"] = ENV["RACK_ENV"] = ENV["APP_ENV"] = nil
     @logdev = StringIO.new
     @config = reset!
     @config.logger = Logger.new(@logdev)
@@ -133,6 +134,16 @@ describe Sidekiq::CLI do
         end
       end
 
+      describe "environmental" do
+        it "handles RAILS_ENV" do
+          ENV["RAILS_ENV"] = "xyzzy"
+          @cli.parse(%w[sidekiq -C ./test/config.yml])
+          assert_equal "xyzzy", config[:environment]
+        ensure
+          ENV.delete "RAILS_ENV"
+        end
+      end
+
       describe "config file" do
         it "accepts with -C" do
           @cli.parse(%w[sidekiq -C ./test/config.yml])
@@ -140,7 +151,7 @@ describe Sidekiq::CLI do
           assert_equal "./test/config.yml", config[:config_file]
           refute config[:verbose]
           assert_equal "./test/fake_env.rb", config[:require]
-          assert_nil config[:environment]
+          assert_equal "development", config[:environment]
           assert_equal 50, concurrency
           assert_equal 2, queues.count { |q| q == "very_often" }
           assert_equal 1, queues.count { |q| q == "seldom" }
@@ -152,7 +163,7 @@ describe Sidekiq::CLI do
           assert_equal "./test/cfg/config_string.yml", config[:config_file]
           refute config[:verbose]
           assert_equal "./test/fake_env.rb", config[:require]
-          assert_nil config[:environment]
+          assert_equal "development", config[:environment]
           assert_equal 50, concurrency
           assert_equal 2, queues.count { |q| q == "very_often" }
           assert_equal 1, queues.count { |q| q == "seldom" }
@@ -374,15 +385,6 @@ describe Sidekiq::CLI do
 
             assert $LOADED_FEATURES.any? { |x| x =~ /test\/fake_env/ }
           end
-        end
-      end
-
-      it "prints rails info" do
-        @cli.stub(:environment, "production") do
-          @cli.stub(:launch, nil) do
-            @cli.run
-          end
-          assert_includes @logdev.string, "Booted Rails #{::Rails.version} application in production environment"
         end
       end
 

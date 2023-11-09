@@ -4,6 +4,44 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+7.2.0
+---------
+
+- Adjust redis-client API usage for Sidekiq 7.2
+
+7.1.6
+---------
+
+- Nested batches can now execute inline [#6057]
+
+7.1.5
+---------
+
+- Remove filtering functionality, now open source in Sidekiq [#6036]
+
+7.1.4
+---------
+
+- Raise error instead of silently dropping jobs due to buffer overflow in reliable push [#5909]
+- Add Polish translations
+
+7.1.3
+---------
+
+- Handle ISO8601 dates as enqueued_at values [#5937]
+- Add Korean locale [#3951, @yesh4gvm]
+
+7.1.2
+---------
+
+- Empty batch job now uses the configured default queue [#5914]
+- Handle Oj-created `enqueued_at` String values in the reliable scheduler [#4768]
+
+7.1.1
+---------
+
+- Fix empty batch support [#5903]
+
 7.1.0
 ---------
 

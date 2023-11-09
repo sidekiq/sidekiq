@@ -66,6 +66,7 @@ module Sidekiq
     #   args - an array of simple arguments to the perform method, must be JSON-serializable
     #   at - timestamp to schedule the job (optional), must be Numeric (e.g. Time.now.to_f)
     #   retry - whether to retry this job if it fails, default true or an integer number of retries
+    #   retry_for - relative amount of time to retry this job if it fails, default nil
     #   backtrace - whether to save any error backtrace, default false
     #
     # If class is set to the class name, the jobs' options will be based on Sidekiq's default
@@ -73,7 +74,7 @@ module Sidekiq
     #
     # Any options valid for a job class's sidekiq_options are also available here.
     #
-    # All options must be strings, not symbols.  NB: because we are serializing to JSON, all
+    # All keys must be strings, not symbols.  NB: because we are serializing to JSON, all
     # symbols in 'args' will be converted to strings.  Note that +backtrace: true+ can take quite a bit of
     # space in Redis; a large volume of failing jobs can start Redis swapping if you aren't careful.
     #
@@ -110,7 +111,7 @@ module Sidekiq
     # prevented a job push.
     #
     # Example (pushing jobs in batches):
-    #   push_bulk('class' => 'MyJob', 'args' => (1..100_000).to_a, batch_size: 1_000)
+    #   push_bulk('class' => MyJob, 'args' => (1..100_000).to_a, batch_size: 1_000)
     #
     def push_bulk(items)
       batch_size = items.delete(:batch_size) || items.delete("batch_size") || 1_000
@@ -123,19 +124,21 @@ module Sidekiq
       raise ArgumentError, "Explicitly passing 'jid' when pushing more than one job is not supported" if jid && args.size > 1
 
       normed = normalize_item(items)
+      slice_index = 0
       result = args.each_slice(batch_size).flat_map do |slice|
         raise ArgumentError, "Bulk arguments must be an Array of Arrays: [[1], [2]]" unless slice.is_a?(Array) && slice.all?(Array)
         break [] if slice.empty? # no jobs to push
 
         payloads = slice.map.with_index { |job_args, index|
           copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12))
-          copy["at"] = (at.is_a?(Array) ? at[index] : at) if at
+          copy["at"] = (at.is_a?(Array) ? at[slice_index + index] : at) if at
           result = middleware.invoke(items["class"], copy, copy["queue"], @redis_pool) do
             verify_json(copy)
             copy
           end
           result || nil
         }
+        slice_index += batch_size
 
         to_push = payloads.compact
         raw_push(to_push) unless to_push.empty?
@@ -246,6 +249,8 @@ module Sidekiq
       if payloads.first.key?("at")
         conn.zadd("schedule", payloads.flat_map { |hash|
           at = hash.delete("at").to_s
+          # ActiveJob sets this but the job has not been enqueued yet
+          hash.delete("enqueued_at")
           [at, Sidekiq.dump_json(hash)]
         })
       else

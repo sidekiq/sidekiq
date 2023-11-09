@@ -181,7 +181,7 @@ describe Sidekiq::Processor do
     let(:raise_after_yield) { false }
     let(:skip_job) { false }
     let(:worker_args) { ["myarg"] }
-    let(:work) { MiniTest::Mock.new }
+    let(:work) { Minitest::Mock.new }
 
     before do
       work.expect(:queue_name, "queue:default")

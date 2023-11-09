@@ -15,7 +15,7 @@ module Sidekiq
       "manifest-src 'self'",
       "media-src 'self'",
       "object-src 'none'",
-      "script-src 'self' https: http: 'unsafe-inline'",
+      "script-src 'self' https: http:",
       "style-src 'self' https: http: 'unsafe-inline'",
       "worker-src 'self'",
       "base-uri 'self'"
@@ -328,9 +328,75 @@ module Sidekiq
       json Sidekiq::Stats.new.queues
     end
 
+    ########
+    # Filtering
+
+    get "/filter/metrics" do
+      redirect "#{root_path}metrics"
+    end
+
+    post "/filter/metrics" do
+      x = params[:substr]
+      q = Sidekiq::Metrics::Query.new
+      @period = h((params[:period] || "")[0..1])
+      @periods = METRICS_PERIODS
+      minutes = @periods.fetch(@period, @periods.values.first)
+      @query_result = q.top_jobs(minutes: minutes, class_filter: Regexp.new(Regexp.escape(x), Regexp::IGNORECASE))
+
+      erb :metrics
+    end
+
+    get "/filter/retries" do
+      x = params[:substr]
+      return redirect "#{root_path}retries" unless x && x != ""
+
+      @retries = search(Sidekiq::RetrySet.new, params[:substr])
+      erb :retries
+    end
+
+    post "/filter/retries" do
+      x = params[:substr]
+      return redirect "#{root_path}retries" unless x && x != ""
+
+      @retries = search(Sidekiq::RetrySet.new, params[:substr])
+      erb :retries
+    end
+
+    get "/filter/scheduled" do
+      x = params[:substr]
+      return redirect "#{root_path}scheduled" unless x && x != ""
+
+      @scheduled = search(Sidekiq::ScheduledSet.new, params[:substr])
+      erb :scheduled
+    end
+
+    post "/filter/scheduled" do
+      x = params[:substr]
+      return redirect "#{root_path}scheduled" unless x && x != ""
+
+      @scheduled = search(Sidekiq::ScheduledSet.new, params[:substr])
+      erb :scheduled
+    end
+
+    get "/filter/dead" do
+      x = params[:substr]
+      return redirect "#{root_path}morgue" unless x && x != ""
+
+      @dead = search(Sidekiq::DeadSet.new, params[:substr])
+      erb :morgue
+    end
+
+    post "/filter/dead" do
+      x = params[:substr]
+      return redirect "#{root_path}morgue" unless x && x != ""
+
+      @dead = search(Sidekiq::DeadSet.new, params[:substr])
+      erb :morgue
+    end
+
     def call(env)
       action = self.class.match(env)
-      return [404, {"content-type" => "text/plain", "x-cascade" => "pass"}, ["Not Found"]] unless action
+      return [404, {Rack::CONTENT_TYPE => "text/plain", Web::X_CASCADE => "pass"}, ["Not Found"]] unless action
 
       app = @klass
       resp = catch(:halt) do
@@ -347,10 +413,10 @@ module Sidekiq
       else
         # rendered content goes here
         headers = {
-          "content-type" => "text/html",
-          "cache-control" => "private, no-store",
-          "content-language" => action.locale,
-          "content-security-policy" => CSP_HEADER
+          Rack::CONTENT_TYPE => "text/html",
+          Rack::CACHE_CONTROL => "private, no-store",
+          Web::CONTENT_LANGUAGE => action.locale,
+          Web::CONTENT_SECURITY_POLICY => CSP_HEADER
         }
         # we'll let Rack calculate Content-Length for us.
         [200, headers, [resp]]

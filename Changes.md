@@ -2,6 +2,85 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+7.2.0
+----------
+
+- `sidekiq_retries_exhausted` can return `:discard` to avoid the deadset
+  and all death handlers [#6091]
+- Metrics filtering by job class in Web UI [#5974]
+- Better readability and formatting for numbers within the Web UI [#6080]
+- Add explicit error if user code tries to nest test modes [#6078]
+```ruby
+Sidekiq::Testing.inline! # global setting
+Sidekiq::Testing.fake! do # override within block
+  # ok
+  Sidekiq::Testing.inline! do # can't override the override
+    # not ok, nested
+  end
+end
+```
+- **SECURITY** Forbid inline JavaScript execution in Web UI [#6074]
+- Adjust redis-client adapter to avoid `method_missing` [#6083]
+  This can result in app code breaking if your app's Redis API usage was
+  depending on Sidekiq's adapter to correct invalid redis-client API usage.
+  One example:
+```ruby
+# bad, not redis-client native
+# Unsupported command argument type: TrueClass (TypeError)
+Sidekiq.redis { |c| c.set("key", "value", nx: true, ex: 15) }
+# good
+Sidekiq.redis { |c| c.set("key", "value", "nx", "ex", 15) }
+```
+
+7.1.6
+----------
+
+- The block forms of testing modes (inline, fake) are now thread-safe so you can have
+  a multithreaded test suite which uses different modes for different tests. [#6069]
+- Fix breakage with non-Proc error handlers [#6065]
+
+7.1.5
+----------
+
+- **FEATURE**: Job filtering within the Web UI. This feature has been open
+  sourced from Sidekiq Pro. [#6052]
+- **API CHANGE** Error handlers now take three arguments `->(ex, context, config)`.
+  The previous calling convention will work until Sidekiq 8.0 but will print
+  out a deprecation warning. [#6051]
+- Fix issue with the `batch_size` and `at` options in `S::Client.push_bulk` [#6040]
+- Fix inline testing firing batch callbacks early [#6057]
+- Use new log broadcast API in Rails 7.1 [#6054]
+- Crash if user tries to use RESP2 `protocol: 2` [#6061]
+
+7.1.4
+----------
+
+- Fix empty `retry_for` logic [#6035]
+
+7.1.3
+----------
+
+- Add `sidekiq_options retry_for: 48.hours` to allow time-based retry windows [#6029]
+- Support sidekiq_retry_in and sidekiq_retries_exhausted_block in ActiveJobs (#5994)
+- Lowercase all Rack headers for Rack 3.0 [#5951]
+- Validate Sidekiq::Web page refresh delay to avoid potential DoS,
+  CVE-2023-26141, thanks for reporting Keegan!
+
+7.1.2
+----------
+
+- Mark Web UI assets as private so CDNs won't cache them [#5936]
+- Fix stackoverflow when using Oj and the JSON log formatter [#5920]
+- Remove spurious `enqueued_at` from scheduled ActiveJobs [#5937]
+
+7.1.1
+----------
+
+- Support multiple CurrentAttributes [#5904]
+- Speed up latency fetch with large queues on Redis <7 [#5910]
+- Allow a larger default client pool [#5886]
+- Ensure Sidekiq.options[:environment] == RAILS_ENV [#5932]
+
 7.1.0
 ----------
 
@@ -100,6 +179,16 @@ end
 - Capsules!!
 - Job Execution metrics!!!
 - See `docs/7.0-Upgrade.md` for release notes
+
+6.5.{10,11,12}
+----------
+
+- Fixes for Rails 7.1 [#6067, #6070]
+
+6.5.9
+----------
+
+- Ensure Sidekiq.options[:environment] == RAILS_ENV [#5932]
 
 6.5.8
 ----------

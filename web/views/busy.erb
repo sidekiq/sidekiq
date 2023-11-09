@@ -86,9 +86,9 @@
           <% end %>
         </td>
         <td><%= relative_time(Time.at(process['started_at'])) %></td>
-        <td><%= format_memory(process['rss'].to_i) %></td>
-        <td><%= process['concurrency'] %></td>
-        <td><%= process['busy'] %></td>
+        <td class="num"><%= format_memory(process['rss'].to_i) %></td>
+        <td class="num"><%= number_with_delimiter(process['concurrency']) %></td>
+        <td class="num"><%= number_with_delimiter(process['busy']) %></td>
         <td>
           <% unless process.embedded? %>
             <form method="POST">

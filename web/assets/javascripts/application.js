@@ -33,6 +33,7 @@ function addListeners() {
 
   addShiftClickListeners()
   updateFuzzyTimes();
+  updateNumbers();
   setLivePollFromUrl();
 
   var buttons = document.querySelectorAll(".live-poll");
@@ -102,6 +103,20 @@ function updateFuzzyTimes() {
   t.cancel();
 }
 
+function updateNumbers() {
+  document.querySelectorAll("[data-nwp]").forEach(node => {
+    let number = parseFloat(node.textContent);
+    let precision = parseInt(node.dataset["nwp"] || 0);
+    if (typeof number === "number") {
+      let formatted = number.toLocaleString(undefined, {
+        minimumFractionDigits: precision,
+        maximumFractionDigits: precision,
+      });
+      node.textContent = formatted;
+    }
+  });
+}
+
 function setLivePollFromUrl() {
   var url_params = new URL(window.location.href).searchParams
 
@@ -140,6 +155,7 @@ function checkResponse(resp) {
 
 function scheduleLivePoll() {
   let ti = parseInt(localStorage.sidekiqTimeInterval) || 5000;
+  if (ti < 2000) { ti = 2000 }
   livePollTimer = setTimeout(livePollCallback, ti);
 }
 
