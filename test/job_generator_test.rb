@@ -19,13 +19,15 @@ class JobGeneratorTest < Rails::Generators::TestCase
     assert 1 == 2, "OOOPS, 1 is not equal to 2"
   end
 
+  # here is the example of test with multiple threads and context propagation
   test "counter test" do
     result = 0
+    trace = Datadog::Tracing.active_trace
 
     10.times do
       Thread.new do
         c = 0
-        Datadog::CI.trace("counter", "counting_up_to_1m") do
+        Datadog::Tracing.trace("counter", continue_from: trace.to_digest, span_type: "counter", resource: "counting_up_to_1m") do
           while c < 1_000_000
             c += 1
             result += 1
