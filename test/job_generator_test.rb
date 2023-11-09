@@ -15,11 +15,30 @@ class JobGeneratorTest < Rails::Generators::TestCase
     super
   end
 
-  test "all files are properly created" do
+  test "addition test" do
     assert 1 == 2, "OOOPS, 1 is not equal to 2"
-    run_generator ["foo"]
-    assert_file "app/sidekiq/foo_job.rb"
-    assert_file "test/sidekiq/foo_job_test.rb"
+  end
+
+  test "counter test" do
+    result = 0
+
+    10.times do
+      Thread.new do
+        c = 0
+        Datadog::CI.trace("counter", "counting_up_to_1m") do
+          while c < 1_000_000
+            c += 1
+            result += 1
+          end
+        end
+      end
+    end
+
+    while result < 10_000_000
+      Datadog::CI.trace("waiter", "waiting for result") do
+        sleep 0.1
+      end
+    end
   end
 
   test "gracefully handles extra job suffix" do
