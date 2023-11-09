@@ -10,13 +10,9 @@ require "datadog/ci"
 require "ddtrace/auto_instrument"
 
 $TESTING = true
-ENV["MT_CPU"] = "4"
-ENV["N"] = "4"
-
-class Minitest::Test
-  parallelize_me!
-end
-
+# disable minitest/parallel threads
+ENV["MT_CPU"] = "0"
+ENV["N"] = "0"
 # Disable any stupid backtrace cleansers
 ENV["BACKTRACE"] = "1"
 
