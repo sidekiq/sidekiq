@@ -89,8 +89,8 @@ The contents of `config/sidekiq.yml` configure the default capsule.
 
 ## Redis Pools
 
-Before 7.0, the Sidekiq process would create one redis pool sized to `concurrency + 3`.
-Now Sidekiq will create multiple Redis pools: an internal pool of **five** connections available to Sidekiq components along with a pool of **concurrency** for the job processors within each Capsule.
+Before 7.0, the Sidekiq process would create one redis pool sized to `concurrency + 5`.
+Now Sidekiq will create multiple Redis pools: an internal pool of **ten** connections available to Sidekiq components along with a pool of **concurrency** for the job processors within each Capsule.
 
 For a Sidekiq process with a default Capsule and a single threaded Capsule, you should have three Redis pools of size 5, 10 and 1.
 Remember that connection pools are lazy so it won't create all those connections unless they are actively needed.
