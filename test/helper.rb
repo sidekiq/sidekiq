@@ -30,6 +30,7 @@ end
 Datadog.configure do |c|
   c.service = "sidekiq"
   c.ci.enabled = true
+  # c.ci.experimental_test_suite_level_visibility_enabled = true
   c.ci.instrument :minitest
   c.diagnostics.startup_logs.enabled = false
 end
@@ -77,3 +78,95 @@ Signal.trap("TTIN") do
     end
   end
 end
+
+# module Minitest
+#   class << self
+#     alias_method :old_run, :run
+
+#     def run(args = [])
+#       p "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+#       p "START TEST SESSION"
+#       test_session = Datadog::CI.start_test_session(
+#         service_name: "sidekiq",
+#         tags: {
+#           "test.framework" => "minitest",
+#           "test.type" => "test"
+#         }
+#       )
+
+#       p "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+#       p "START TEST MODULE"
+#       test_module = Datadog::CI.start_test_module("minitest-run")
+
+#       result = old_run
+
+#       p "TEST MODULE NOW IS"
+#       p test_module
+
+#       if test_module
+#         p "FINISHING TEST MODULE"
+#         if result
+#           test_module.passed!
+#         else
+#           test_module.failed!
+#         end
+
+#         test_module.finish
+#       end
+
+#       sleep(2)
+
+#       p "TEST SESSION NOW IS"
+#       p test_session
+
+#       if test_session
+#         p "FINISHING TEST SESSION"
+#         if result
+#           test_session.passed!
+#         else
+#           test_session.failed!
+#         end
+
+#         test_session.finish
+#       end
+
+#       result
+#     end
+#   end
+# end
+
+# class Minitest::Runnable
+#   class << self
+#     alias_method :old_run, :run
+
+#     def run reporter, options = {}
+#       # see cli_test.rb: every describe block is a separate runnable but in our
+#       # current definition they must all belong to a single test suite
+#       method_name = runnable_methods.first
+#       test_suite = nil
+
+#       if method_name
+#         path, = instance_method(method_name).source_location
+#         test_suite_name = Pathname.new(path.to_s).relative_path_from(Pathname.pwd).to_s
+
+#         p "START TEST SUITE: #{test_suite_name}"
+#         test_suite = Datadog::CI.start_test_suite(test_suite_name)
+#       end
+
+#       result = old_run(reporter, options)
+
+#       if test_suite
+#         p "FINISHING TEST SUITE: #{test_suite}"
+#         # reporter.passed? check is wrong, I need to check whether one of the runnables failed or not
+#         if reporter.passed?
+#           test_suite.passed!
+#         else
+#           test_suite.failed!
+#         end
+#         test_suite.finish
+#       end
+
+#       result
+#     end
+#   end
+# end
