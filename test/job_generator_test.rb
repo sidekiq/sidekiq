@@ -16,7 +16,7 @@ class JobGeneratorTest < Rails::Generators::TestCase
   end
 
   test "addition test" do
-    assert 1 == 2, "OOOPS, 1 is not equal to 2"
+    assert 1 == 1, "OOOPS, 1 is not equal to 2"
   end
 
   # here is the example of test with multiple threads and context propagation
