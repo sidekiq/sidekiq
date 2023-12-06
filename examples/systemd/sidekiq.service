@@ -48,6 +48,7 @@ After=syslog.target network.target
 #      !!!!  !!!!  !!!!
 #
 Type=notify
+NotifyAccess=all
 # If your Sidekiq process locks up, systemd's watchdog will restart it within seconds.
 WatchdogSec=10
 
