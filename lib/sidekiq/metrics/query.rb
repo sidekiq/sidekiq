@@ -119,6 +119,7 @@ module Sidekiq
 
         def total_avg(metric = "ms")
           completed = totals["p"] - totals["f"]
+          return 0 if completed.zero?
           totals[metric].to_f / completed
         end
 
