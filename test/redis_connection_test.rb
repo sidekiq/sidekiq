@@ -151,6 +151,7 @@ describe Sidekiq::RedisConnection do
         options = {
           role: "master",
           master_name: "mymaster",
+          sentinel_password: "secret",
           sentinels: [
             {host: "host1", port: 26379, password: "secret"},
             {host: "host2", port: 26379, password: "secret"},
@@ -164,6 +165,7 @@ describe Sidekiq::RedisConnection do
         end
 
         refute_includes(options.inspect, "REDACTED")
+        refute_includes(output, "secret")
         assert_includes(output, ':host=>"host1", :port=>26379, :password=>"REDACTED"')
         assert_includes(output, ':host=>"host2", :port=>26379, :password=>"REDACTED"')
         assert_includes(output, ':host=>"host3", :port=>26379, :password=>"REDACTED"')
