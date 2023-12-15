@@ -35,6 +35,7 @@ module Sidekiq
         define_method(name) do |*args|
           @client.call(name, *args)
         end
+        ruby2_keywords name if respond_to?(:ruby2_keywords, true)
       end
 
       private
