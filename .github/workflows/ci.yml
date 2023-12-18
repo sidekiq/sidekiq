@@ -33,7 +33,7 @@ jobs:
         bundler-cache: true # 'bundle install' and cache gems
         ruby-version: ${{ matrix.ruby }}
     - name: Set up Redis ${{ matrix.redis }}
-      uses: supercharge/redis-github-action@1.7.0
+      uses: supercharge/redis-github-action@1.8.0
       with:
         redis-version: ${{ matrix.redis }}        
     - name: Run tests
