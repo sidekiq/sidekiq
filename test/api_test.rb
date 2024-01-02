@@ -638,11 +638,12 @@ describe "API" do
         assert_equal key, p
         assert_equal "1234", x
         assert_equal "default", work["queue"]
-        assert_equal("{}", work["payload"])
+        assert_equal({}, work["payload"])
         assert_equal Time.now.year, Time.at(work["run_at"]).year
 
         assert_equal "{}", work.payload
         assert_equal({}, work.job)
+        assert_equal({}, work["payload"])
         assert_equal(Time.now.year, work.run_at.year)
         assert_equal "default", work.queue
         assert_equal "1234", work.thread_id

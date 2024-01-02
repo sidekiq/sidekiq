@@ -1167,6 +1167,8 @@ module Sidekiq
     end
 
     def [](key)
+      return job if key == "payload"
+
       @hsh[key]
     end
 
