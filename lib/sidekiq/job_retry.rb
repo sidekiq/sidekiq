@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "zlib"
-require "base64"
 require "sidekiq/component"
 
 module Sidekiq
@@ -295,7 +294,7 @@ module Sidekiq
     def compress_backtrace(backtrace)
       serialized = Sidekiq.dump_json(backtrace)
       compressed = Zlib::Deflate.deflate(serialized)
-      Base64.encode64(compressed)
+      [compressed].pack("m0") # Base64.strict_encode64
     end
   end
 end

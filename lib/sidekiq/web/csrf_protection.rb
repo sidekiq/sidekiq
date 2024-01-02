@@ -27,7 +27,6 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "securerandom"
-require "base64"
 require "rack/request"
 
 module Sidekiq
@@ -143,7 +142,7 @@ module Sidekiq
         one_time_pad = SecureRandom.random_bytes(token.length)
         encrypted_token = xor_byte_strings(one_time_pad, token)
         masked_token = one_time_pad + encrypted_token
-        Base64.urlsafe_encode64(masked_token)
+        encode_token(masked_token)
       end
 
       # Essentially the inverse of +mask_token+.
@@ -168,8 +167,25 @@ module Sidekiq
         ::Rack::Utils.secure_compare(token.to_s, decode_token(local).to_s)
       end
 
+      # Base64.urlsafe_encode64
+      # https://github.com/ruby/base64/blob/9669a7d3b0e3b9a739969404daf58f912c58c6b3/lib/base64.rb#L328-L333
+      def encode_token(token, padding: true)
+        str = [token].pack("m0")
+        str.chomp!("==") or str.chomp!("=") unless padding
+        str.tr!("+/", "-_")
+        str
+      end
+
+      # Base64.urlsafe_decode64
+      # https://github.com/ruby/base64/blob/9669a7d3b0e3b9a739969404daf58f912c58c6b3/lib/base64.rb#L351-L362
       def decode_token(token)
-        Base64.urlsafe_decode64(token)
+        if !token.end_with?("=") && token.length % 4 != 0
+          token = token.ljust((token.length + 3) & ~3, "=")
+          token.tr!("-_", "+/")
+        else
+          token = token.tr("-_", "+/")
+        end
+        token.unpack1("m0")
       end
 
       def xor_byte_strings(s1, s2)
