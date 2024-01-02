@@ -4,7 +4,6 @@ require "sidekiq"
 
 require "zlib"
 require "set"
-require "base64"
 
 require "sidekiq/metrics/query"
 
@@ -491,8 +490,8 @@ module Sidekiq
     end
 
     def uncompress_backtrace(backtrace)
-      decoded = Base64.decode64(backtrace)
-      uncompressed = Zlib::Inflate.inflate(decoded)
+      strict_base64_decoded = backtrace.unpack1("m0")
+      uncompressed = Zlib::Inflate.inflate(strict_base64_decoded)
       Sidekiq.load_json(uncompressed)
     end
   end
