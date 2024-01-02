@@ -167,25 +167,12 @@ module Sidekiq
         ::Rack::Utils.secure_compare(token.to_s, decode_token(local).to_s)
       end
 
-      # Base64.urlsafe_encode64
-      # https://github.com/ruby/base64/blob/9669a7d3b0e3b9a739969404daf58f912c58c6b3/lib/base64.rb#L328-L333
-      def encode_token(token, padding: true)
-        str = [token].pack("m0")
-        str.chomp!("==") or str.chomp!("=") unless padding
-        str.tr!("+/", "-_")
-        str
+      def encode_token(token)
+        [token].pack("m0").tr("+/", "-_")
       end
 
-      # Base64.urlsafe_decode64
-      # https://github.com/ruby/base64/blob/9669a7d3b0e3b9a739969404daf58f912c58c6b3/lib/base64.rb#L351-L362
       def decode_token(token)
-        if !token.end_with?("=") && token.length % 4 != 0
-          token = token.ljust((token.length + 3) & ~3, "=")
-          token.tr!("-_", "+/")
-        else
-          token = token.tr("-_", "+/")
-        end
-        token.unpack1("m0")
+        token.tr("-_", "+/").unpack1("m0")
       end
 
       def xor_byte_strings(s1, s2)
