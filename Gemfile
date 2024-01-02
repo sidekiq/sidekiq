@@ -11,7 +11,7 @@ gem "activerecord", RAILS_VERSION
 gem "railties", RAILS_VERSION
 gem "redis-client"
 # gem "bumbler"
-gem "debug"
+# gem "debug"
 
 gem "sqlite3", platforms: :ruby
 gem "activerecord-jdbcsqlite3-adapter", platforms: :jruby
