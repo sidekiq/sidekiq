@@ -1109,7 +1109,7 @@ module Sidekiq
 
       procs.zip(all_works).each do |key, workers|
         workers.each_pair do |tid, json|
-          results << [key, tid, Sidekiq.load_json(json)] unless json.empty?
+          results << [key, tid, Sidekiq::Work.new(key, tid, Sidekiq.load_json(json))] unless json.empty?
         end
       end
 
@@ -1137,6 +1137,48 @@ module Sidekiq
       end
     end
   end
+
+  # Sidekiq::Work represents a job which is currently executing.
+  class Work
+    attr_reader :process_id
+    attr_reader :thread_id
+
+    def initialize(pid, tid, hsh)
+      @process_id = pid
+      @thread_id = tid
+      @hsh = hsh
+      @job = nil
+    end
+
+    def queue
+      @hsh["queue"]
+    end
+
+    def run_at
+      Time.at(@hsh["run_at"])
+    end
+
+    def job
+      @job ||= Sidekiq.load_json(@hsh["payload"])
+    end
+
+    def payload
+      @hsh["payload"]
+    end
+
+    def [](key)
+      @hsh[key]
+    end
+
+    def method_missing(*all)
+      @hsh.send(*all)
+    end
+
+    def respond_to_missing?(name)
+      @hsh.respond_to?(name)
+    end
+  end
+
   # Since "worker" is a nebulous term, we've deprecated the use of this class name.
   # Is "worker" a process, a type of job, a thread? Undefined!
   # WorkSet better describes the data.

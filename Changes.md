@@ -5,6 +5,8 @@
 HEAD
 ----------
 
+- Add `Sidekiq::Work` type which replaces the raw Hash in
+  `Sidekiq::WorkSet#each { |pid, tid, hash| ... }` [#6145]
 - Fix Ruby 3.3 warnings around `base64` gem [#6151, earlopain]
 
 7.2.0
