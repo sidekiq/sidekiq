@@ -1168,8 +1168,9 @@ module Sidekiq
 
     # deprecated
     def [](key)
-      warn("Direct access to `Sidekiq::Work` attributes is deprecated, please use `#payload`, `#queue`, `#run_at` or `#job` instead",
-        uplevel: 1, category: :deprecated)
+      kwargs = {uplevel: 1}
+      kwargs[:category] = :deprecated if RUBY_VERSION > "3.0"
+      warn("Direct access to `Sidekiq::Work` attributes is deprecated, please use `#payload`, `#queue`, `#run_at` or `#job` instead", **kwargs)
 
       @hsh[key]
     end
