@@ -7,6 +7,8 @@ Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 HEAD
 ---------
 
+- Add `within_limit(used: 1)` option to `window` and `bucket` rate limiters.
+  You can adjust the number of points used by a call performing batch operations [#6146]
 - Use HWIA when scheduling periodic ActiveJobs, for compatibility [#6099]
 
 7.2.0

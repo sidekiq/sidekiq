@@ -125,14 +125,14 @@
       <th><%= t('Arguments') %></th>
       <th><%= t('Started') %></th>
     </thead>
-    <% @workset.each do |process, thread, msg| %>
-      <% job = Sidekiq::JobRecord.new(msg['payload']) %>
+    <% @workset.each do |process, thread, work| %>
+      <% job = work.job %>
       <tr>
         <td><%= process %></td>
         <td><%= thread %></td>
         <td><%= job.jid %></td>
         <td>
-          <a href="<%= root_path %>queues/<%= msg['queue'] %>"><%= msg['queue'] %></a>
+          <a href="<%= root_path %>queues/<%= work.queue %>"><%= work.queue %></a>
         </td>
         <td>
           <%= job.display_class %>
@@ -141,7 +141,7 @@
         <td>
           <div class="args"><%= display_args(job.display_args) %></div>
         </td>
-        <td><%= relative_time(Time.at(msg['run_at'])) %></td>
+        <td><%= relative_time(work.run_at) %></td>
       </tr>
     <% end %>
   </table>
