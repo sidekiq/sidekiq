@@ -634,12 +634,19 @@ describe "API" do
         c.hset(s, "1234", data)
       end
 
-      w.each do |p, x, y|
+      w.each do |p, x, work|
         assert_equal key, p
         assert_equal "1234", x
-        assert_equal "default", y["queue"]
-        assert_equal("{}", y["payload"])
-        assert_equal Time.now.year, Time.at(y["run_at"]).year
+        assert_equal "default", work["queue"]
+        assert_equal("{}", work["payload"])
+        assert_equal Time.now.year, Time.at(work["run_at"]).year
+
+        assert_equal "{}", work.payload
+        assert_equal({}, work.job.item)
+        assert_equal(Time.now.year, work.run_at.year)
+        assert_equal "default", work.queue
+        assert_equal "1234", work.thread_id
+        assert_equal key, work.process_id
       end
 
       s = "#{key}:work"

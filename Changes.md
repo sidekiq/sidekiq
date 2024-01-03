@@ -5,6 +5,14 @@
 HEAD
 ----------
 
+- Add `Sidekiq::Work` type which replaces the raw Hash as the third parameter in
+  `Sidekiq::WorkSet#each { |pid, tid, hash| ... }` [#6145]
+- **DEPRECATED**: direct access to the attributes within the `hash` block parameter above.
+  The `Sidekiq::Work` instance contains accessor methods to get at the same data, e.g.
+```ruby
+work["queue"] # Old
+work.queue # New
+```
 - Fix Ruby 3.3 warnings around `base64` gem [#6151, earlopain]
 
 7.2.0

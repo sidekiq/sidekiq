@@ -1109,11 +1109,11 @@ module Sidekiq
 
       procs.zip(all_works).each do |key, workers|
         workers.each_pair do |tid, json|
-          results << [key, tid, Sidekiq.load_json(json)] unless json.empty?
+          results << [key, tid, Sidekiq::Work.new(key, tid, Sidekiq.load_json(json))] unless json.empty?
         end
       end
 
-      results.sort_by { |(_, _, hsh)| hsh["run_at"] }.each(&block)
+      results.sort_by { |(_, _, hsh)| hsh.raw("run_at") }.each(&block)
     end
 
     # Note that #size is only as accurate as Sidekiq's heartbeat,
@@ -1137,6 +1137,59 @@ module Sidekiq
       end
     end
   end
+
+  # Sidekiq::Work represents a job which is currently executing.
+  class Work
+    attr_reader :process_id
+    attr_reader :thread_id
+
+    def initialize(pid, tid, hsh)
+      @process_id = pid
+      @thread_id = tid
+      @hsh = hsh
+      @job = nil
+    end
+
+    def queue
+      @hsh["queue"]
+    end
+
+    def run_at
+      Time.at(@hsh["run_at"])
+    end
+
+    def job
+      @job ||= Sidekiq::JobRecord.new(@hsh["payload"])
+    end
+
+    def payload
+      @hsh["payload"]
+    end
+
+    # deprecated
+    def [](key)
+      kwargs = {uplevel: 1}
+      kwargs[:category] = :deprecated if RUBY_VERSION > "3.0"
+      warn("Direct access to `Sidekiq::Work` attributes is deprecated, please use `#payload`, `#queue`, `#run_at` or `#job` instead", **kwargs)
+
+      @hsh[key]
+    end
+
+    # :nodoc:
+    # @api private
+    def raw(name)
+      @hsh[name]
+    end
+
+    def method_missing(*all)
+      @hsh.send(*all)
+    end
+
+    def respond_to_missing?(name)
+      @hsh.respond_to?(name)
+    end
+  end
+
   # Since "worker" is a nebulous term, we've deprecated the use of this class name.
   # Is "worker" a process, a type of job, a thread? Undefined!
   # WorkSet better describes the data.
