@@ -18,9 +18,12 @@ module Sidekiq
   class Capsule
     include Sidekiq::Component
 
+    DEFAULT_EXTRA_CONNECTIONS = 5
+
     attr_reader :name
     attr_reader :queues
     attr_accessor :concurrency
+    attr_accessor :extra_connections
     attr_reader :mode
     attr_reader :weights
 
@@ -30,6 +33,7 @@ module Sidekiq
       @queues = ["default"]
       @weights = {"default" => 0}
       @concurrency = config[:concurrency]
+      @extra_connections = config[:extra_connections] || DEFAULT_EXTRA_CONNECTIONS
       @mode = :strict
     end
 
@@ -91,7 +95,7 @@ module Sidekiq
     def local_redis_pool
       # connection pool is lazy, it will not create connections unless you actually need them
       # so don't be skimpy!
-      @redis ||= config.new_redis_pool(@concurrency, name)
+      @redis ||= config.new_redis_pool(pool_size, name)
     end
 
     def redis
@@ -122,6 +126,10 @@ module Sidekiq
 
     def logger
       config.logger
+    end
+
+    def pool_size
+      @concurrency.to_i + @extra_connections.to_i
     end
   end
 end

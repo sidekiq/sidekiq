@@ -63,8 +63,8 @@ describe Sidekiq::RedisConnection do
         assert_equal 10, pool.size
       end
 
-      it "sizes capsule pools based on concurrency" do
-        assert_equal 12, @config.default_capsule.redis_pool.size
+      it "sizes capsule pools based on concurrency + 5 spare" do
+        assert_equal 17, @config.default_capsule.redis_pool.size
       end
 
       it "does not change client pool sizes with ENV" do
@@ -74,6 +74,18 @@ describe Sidekiq::RedisConnection do
         assert_equal 10, pool.size
       ensure
         ENV.delete("RAILS_MAX_THREADS")
+      end
+
+      context 'when extra connections are set' do
+        before do
+          @config = reset!
+          @config.default_capsule.concurrency = 12
+          @config.default_capsule.extra_connections = 2
+        end
+
+        it 'sizes capsule pools based on concurrency and extra connections' do
+          assert_equal 14, @config.default_capsule.redis_pool.size
+        end
       end
     end
 

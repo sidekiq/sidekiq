@@ -19,8 +19,8 @@ describe Sidekiq::Capsule do
     assert_equal one.redis_pool, one.redis_pool
     assert_equal two.redis_pool, two.redis_pool
     # they are sized correctly
-    assert_equal 2, one.redis_pool.size
-    assert_equal 3, two.redis_pool.size
+    assert_equal 2 + Sidekiq::Capsule::DEFAULT_EXTRA_CONNECTIONS, one.redis_pool.size
+    assert_equal 3 + Sidekiq::Capsule::DEFAULT_EXTRA_CONNECTIONS, two.redis_pool.size
     refute_equal one.redis_pool, two.redis_pool
 
     # they point to the same Redis
