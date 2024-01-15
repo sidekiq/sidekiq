@@ -7,7 +7,6 @@ require "minitest/pride"
 require "maxitest/autorun"
 require "maxitest/threads"
 require "datadog/ci"
-require "ddtrace/auto_instrument"
 
 $TESTING = true
 # disable minitest/parallel threads
@@ -32,6 +31,8 @@ Datadog.configure do |c|
   c.ci.experimental_test_suite_level_visibility_enabled = true
   c.ci.instrument :minitest
   c.diagnostics.startup_logs.enabled = false
+
+  c.tracing.instrument :redis
 end
 
 ENV["REDIS_URL"] ||= "redis://localhost/15"
