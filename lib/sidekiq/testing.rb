@@ -278,7 +278,7 @@ module Sidekiq
       def perform_one
         raise(EmptyQueueError, "perform_one called with empty job queue") if jobs.empty?
         next_job = jobs.first
-        Queues.delete_for(next_job["jid"], queue, to_s)
+        Queues.delete_for(next_job["jid"], next_job["queue"], to_s)
         process_job(next_job)
       end
 
