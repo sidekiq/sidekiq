@@ -31,3 +31,10 @@ end
 - Rails 6.0+ is now supported
 
 Support is only guaranteed for the current and previous major versions. With the release of Sidekiq Pro 7, Sidekiq Pro 4.x is no longer supported.
+
+## Upgrading
+
+Upgrade your Sidekiq gems with `bundle up sidekiq-pro`.
+This will pull upgrades for sidekiq-pro, sidekiq and all lower-level dependent gems.
+
+**Warning**: using `bundle up sidekiq` can lead to incompatible gem versions in use.

@@ -1,6 +1,6 @@
 # Middleware Changes in Sidekiq 7.0
 
-With the internal refactoring coming in Sidekiq 7.0 it is necessary
+With the internal refactoring in Sidekiq 7.0 it is necessary
 to make minor changes to the Middleware API.
 
 > tl;dr - middleware should now include Sidekiq::ClientMiddleware or Sidekiq::ServerMiddleware.

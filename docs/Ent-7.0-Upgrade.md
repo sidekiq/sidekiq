@@ -23,4 +23,12 @@ period until the new-style locks are populated in Redis.
 - Ruby 2.7+ is now required
 - Rails 6.0+ is now supported
 
-Support is only guaranteed for the current and previous major versions. With the release of Sidekiq Enterprise 7, Sidekiq Enterprise 1.x is no longer supported.
+Support is only guaranteed for the current and previous major versions.
+With the release of Sidekiq Enterprise 7, Sidekiq Enterprise 1.x is no longer supported.
+
+## Upgrading
+
+Upgrade your Sidekiq gems with `bundle up sidekiq-ent`.
+This will pull upgrades for sidekiq-ent, sidekiq-pro, sidekiq and all lower-level dependent gems.
+
+**Warning**: using `bundle up sidekiq` can lead to incompatible gem versions in use.
