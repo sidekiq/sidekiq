@@ -2,7 +2,7 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+7.2.1
 ----------
 
 - Add `Sidekiq::Work` type which replaces the raw Hash as the third parameter in

@@ -23,7 +23,7 @@ Gem::Specification.new do |gem|
     "rubygems_mfa_required" => "true"
   }
 
-  gem.add_dependency "redis-client", ">= 0.14.0"
+  gem.add_dependency "redis-client", ">= 0.19.0"
   gem.add_dependency "connection_pool", ">= 2.3.0"
   gem.add_dependency "rack", ">= 2.2.4"
   gem.add_dependency "concurrent-ruby", "< 2"
