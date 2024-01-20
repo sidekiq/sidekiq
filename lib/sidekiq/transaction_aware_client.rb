@@ -9,7 +9,14 @@ module Sidekiq
       @redis_client = Client.new(pool: pool, config: config)
     end
 
+    def batching?
+      Thread.current[:sidekiq_batch]
+    end
+
     def push(item)
+      # 6160 we can't support both Sidekiq::Batch and transactions.
+      return @redis_client.push(item) if batching?
+
       # pre-allocate the JID so we can return it immediately and
       # save it to the database as part of the transaction.
       item["jid"] ||= SecureRandom.hex(12)
