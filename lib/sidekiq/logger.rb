@@ -36,7 +36,7 @@ module Sidekiq
     end
 
     LEVELS.each do |level, numeric_level|
-      define_method("#{level}?") do
+      define_method(:"#{level}?") do
         local_level.nil? ? super() : local_level <= numeric_level
       end
     end

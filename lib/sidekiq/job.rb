@@ -109,7 +109,7 @@ module Sidekiq
               m = "#{name}="
               undef_method(m) if method_defined?(m) || private_method_defined?(m)
             end
-            define_singleton_method("#{name}=") do |val|
+            define_singleton_method(:"#{name}=") do |val|
               singleton_class.class_eval do
                 ACCESSOR_MUTEX.synchronize do
                   undef_method(synchronized_getter) if method_defined?(synchronized_getter) || private_method_defined?(synchronized_getter)

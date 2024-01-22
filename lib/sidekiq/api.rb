@@ -773,7 +773,7 @@ module Sidekiq
   #
   class ScheduledSet < JobSet
     def initialize
-      super "schedule"
+      super("schedule")
     end
   end
 
@@ -787,7 +787,7 @@ module Sidekiq
   #
   class RetrySet < JobSet
     def initialize
-      super "retry"
+      super("retry")
     end
 
     # Enqueues all jobs pending within the retry set.
@@ -808,7 +808,7 @@ module Sidekiq
   #
   class DeadSet < JobSet
     def initialize
-      super "dead"
+      super("dead")
     end
 
     # Add the given job to the Dead set.
