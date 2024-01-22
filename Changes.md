@@ -5,6 +5,7 @@
 HEAD
 ----------
 
+- Add `Process.warmup` call in Ruby 3.3+
 - Batch jobs now skip transactional push [#6160]
 
 7.2.1

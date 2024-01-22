@@ -38,7 +38,7 @@ module Sidekiq # :nodoc:
     # Code within this method is not tested because it alters
     # global process state irreversibly.  PRs which improve the
     # test coverage of Sidekiq::CLI are welcomed.
-    def run(boot_app: true)
+    def run(boot_app: true, warmup: true)
       boot_application if boot_app
 
       if environment == "development" && $stdout.tty? && @config.logger.formatter.is_a?(Sidekiq::Logger::Formatters::Pretty)
@@ -100,6 +100,8 @@ module Sidekiq # :nodoc:
 
       # Touch middleware so it isn't lazy loaded by multiple threads, #3043
       @config.server_middleware
+
+      ::Process.warmup if warmup && RUBY_VERSION > "3.3"
 
       # Before this point, the process is initializing with just the main thread.
       # Starting here the process will now have multiple threads running.
