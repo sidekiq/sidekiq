@@ -14,7 +14,7 @@ Rails to make background processing dead simple.
 Requirements
 -----------------
 
-- Redis: 6.2+
+- Redis: 6.2+ or Dragonfly
 - Ruby: MRI 2.7+ or JRuby 9.3+.
 
 Sidekiq 7.0 supports Rails 6.0+ but does not require it.
@@ -35,7 +35,7 @@ Sidekiq and see its features in action.  Here's the Web UI:
 
 ![Web UI](https://github.com/sidekiq/sidekiq/raw/main/examples/web-ui.png)
 
-Performance
+Performance Redis
 ---------------
 
 The benchmark in `bin/sidekiqload` creates 500,000 no-op jobs and drains them as fast as possible, assuming a fixed Redis network latency of 1ms.
@@ -55,6 +55,26 @@ Sidekiq 7.0.3 | 46.5 sec| 10,850 | 2.7.5 | 30 | ActiveJob 7.0.4
 Most of Sidekiq's overhead is Redis network I/O.
 ActiveJob adds a notable amount of CPU overhead due to argument deserialization and callbacks.
 Concurrency of 30 was determined experimentally to maximize one CPU without saturating it.
+
+Performance Dragonfly
+-------------------
+
+The benchmark above was slightly revamped in `bin/multi_queue_bench` to scale better with multi-core systems like Dragonfly.
+We used a c5.4xlarge to run Dragonfly and a monstrous 96 core c5a.24xlarge to run the benchmark. All job types are no-op
+Sidekiq::Job. We run Dragonfly with `dragonfly --proactor_threads=n --shard_round_robin_prefix="queue"`. `n` is the number 
+of threads that Dragonfly uses and it defaults to the number of threads available on the system. This is different than Redis, 
+which is single threaded and scales vertically via the Redis cluster. This benchmark is all about scale, and therefore we
+run it with 3 different setups. `RUBY_YJIT_ENABLE=1 PROCESSES=96 QUEUES=k THREADS=10 ./multi_queue_bench` with `k` 1, 2, 8.
+We used Ruby with version 3.0.2p107 and Sidekiq trunk.
+
+The results are:
+
+Df proactors (n) | Number of Queues (k) | Jobs per queue | Total jobs | Throughput (jobs/sec)
+-----------------|----------------------|----------------|------------|-----------------------
+1 | 1 | 1M | 1M | 115,528 
+2 | 2 | 1M | 2M | 241,259
+8 | 8 | 1M | 8M | 487,781
+
 
 Want to Upgrade?
 -------------------
