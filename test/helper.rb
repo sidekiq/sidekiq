@@ -28,7 +28,6 @@ end
 # Configure default Minitest integration
 Datadog.configure do |c|
   c.ci.enabled = true
-  c.ci.experimental_test_suite_level_visibility_enabled = true
   c.ci.instrument :minitest
   c.diagnostics.startup_logs.enabled = false
 
