@@ -101,7 +101,7 @@ module Sidekiq # :nodoc:
       # Touch middleware so it isn't lazy loaded by multiple threads, #3043
       @config.server_middleware
 
-      ::Process.warmup if warmup && RUBY_VERSION > "3.3"
+      ::Process.warmup if warmup && ::Process.respond_to?(:warmup)
 
       # Before this point, the process is initializing with just the main thread.
       # Starting here the process will now have multiple threads running.
