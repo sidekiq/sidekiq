@@ -14,7 +14,7 @@ Rails to make background processing dead simple.
 Requirements
 -----------------
 
-- Redis: 6.2+
+- Redis: 6.2+ or Dragonfly 1.13+.
 - Ruby: MRI 2.7+ or JRuby 9.3+.
 
 Sidekiq 7.0 supports Rails 6.0+ but does not require it.
