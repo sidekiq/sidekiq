@@ -91,3 +91,5 @@ SyslogIdentifier=sidekiq
 
 [Install]
 WantedBy=multi-user.target
+# Uncomment this and remove the line above if you are going to use this as a user service
+# WantedBy=default.target
