@@ -1,8 +1,8 @@
 PATH
   remote: .
   specs:
-    sidekiq (0.1.0)
-      celluloid
+    sidekiq (0.5.1)
+      celluloid (~> 0.17.4)
       connection_pool
       multi_json
       redis
@@ -10,7 +10,23 @@ PATH
 GEM
   remote: http://rubygems.org/
   specs:
-    celluloid (0.8.0)
+    celluloid (0.17.4)
+      celluloid-essentials
+      celluloid-extras
+      celluloid-fsm
+      celluloid-pool
+      celluloid-supervision
+      timers (>= 4.1.1)
+    celluloid-essentials (0.20.5)
+      timers (>= 4.1.1)
+    celluloid-extras (0.20.5)
+      timers (>= 4.1.1)
+    celluloid-fsm (0.20.5)
+      timers (>= 4.1.1)
+    celluloid-pool (0.20.5)
+      timers (>= 4.1.1)
+    celluloid-supervision (0.20.6)
+      timers (>= 4.1.1)
     connection_pool (0.1.0)
     minitest (2.10.0)
     multi_json (1.0.4)
@@ -20,6 +36,7 @@ GEM
       multi_json (~> 1.0.3)
       simplecov-html (~> 0.5.3)
     simplecov-html (0.5.3)
+    timers (4.3.5)
 
 PLATFORMS
   java
@@ -30,3 +47,6 @@ DEPENDENCIES
   rake
   sidekiq!
   simplecov
+
+BUNDLED WITH
+   2.4.22

@@ -15,7 +15,7 @@ Gem::Specification.new do |gem|
   gem.version       = Sidekiq::VERSION
   gem.add_dependency                  'redis'
   gem.add_dependency                  'connection_pool'
-  gem.add_dependency                  'celluloid'
+  gem.add_dependency                  'celluloid', '~> 0.17.4'
   gem.add_dependency                  'multi_json'
   gem.add_development_dependency      'minitest'
   gem.add_development_dependency      'rake'
