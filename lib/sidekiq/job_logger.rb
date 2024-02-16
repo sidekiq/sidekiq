@@ -2,23 +2,36 @@
 
 module Sidekiq
   class JobLogger
-    def initialize(logger)
+    include Sidekiq::Component
+
+    def initialize(config)
+      @config = config
       @logger = logger
     end
 
+    # If true we won't do any job logging out of the box.
+    # The user is responsible for any logging.
+    def skip_default_logging?
+      config[:skip_default_job_logging]
+    end
+
     def call(item, queue)
-      start = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
-      @logger.info("start")
+      return yield if skip_default_logging?
 
-      yield
+      begin
+        start = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+        @logger.info("start")
 
-      Sidekiq::Context.add(:elapsed, elapsed(start))
-      @logger.info("done")
-    rescue Exception
-      Sidekiq::Context.add(:elapsed, elapsed(start))
-      @logger.info("fail")
+        yield
 
-      raise
+        Sidekiq::Context.add(:elapsed, elapsed(start))
+        @logger.info("done")
+      rescue Exception
+        Sidekiq::Context.add(:elapsed, elapsed(start))
+        @logger.info("fail")
+
+        raise
+      end
     end
 
     def prepare(job_hash, &block)
