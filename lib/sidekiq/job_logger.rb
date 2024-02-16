@@ -8,15 +8,15 @@ module Sidekiq
 
     def call(item, queue)
       start = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
-      @logger.info("start")
+      @logger.debug("start")
 
       yield
 
       Sidekiq::Context.add(:elapsed, elapsed(start))
-      @logger.info("done")
+      @logger.debug("done")
     rescue Exception
       Sidekiq::Context.add(:elapsed, elapsed(start))
-      @logger.info("fail")
+      @logger.debug("fail")
 
       raise
     end
