@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+7.2.2
+---------
+
+- Concurrent rate limiter raising ReadTimeoutError? Work around redis/redis#11732 [#6188]
+
 7.2.1
 ---------
 
