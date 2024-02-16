@@ -22,7 +22,7 @@ module Sidekiq
       end
 
       def to_hash
-        { app: @app.class.name }
+        {app: @app.class.name}
       end
     end
 
