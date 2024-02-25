@@ -340,7 +340,8 @@ module Sidekiq
     end
 
     def pollable?
-      !(current_path == "" || current_path.start_with?("metrics"))
+      # there's no point to refreshing the metrics pages every N seconds
+      !(current_path == "" || current_path.index("metrics"))
     end
 
     def retry_or_delete_or_kill(job, params)
