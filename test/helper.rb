@@ -8,17 +8,10 @@ require "maxitest/autorun"
 require "maxitest/threads"
 require "datadog/ci"
 
-$TESTING = true
-# disable minitest/parallel threads
-ENV["MT_CPU"] = "0"
-ENV["N"] = "0"
-# Disable any stupid backtrace cleansers
-ENV["BACKTRACE"] = "1"
-
 if ENV["COVERAGE"]
   require "simplecov"
   SimpleCov.start do
-    enable_coverage :branch
+    enable_coverage :line
     add_filter "/test/"
     add_filter "/myapp/"
     minimum_coverage 90
@@ -33,6 +26,13 @@ Datadog.configure do |c|
 
   c.tracing.instrument :redis
 end
+
+$TESTING = true
+# disable minitest/parallel threads
+ENV["MT_CPU"] = "0"
+ENV["N"] = "0"
+# Disable any stupid backtrace cleansers
+ENV["BACKTRACE"] = "1"
 
 ENV["REDIS_URL"] ||= "redis://localhost/15"
 NULL_LOGGER = Logger.new(IO::NULL)
