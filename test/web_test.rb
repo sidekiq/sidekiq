@@ -34,6 +34,12 @@ describe Sidekiq::Web do
     app.middlewares.clear
   end
 
+  it "passes on unexpected methods" do
+    patch "/"
+    assert_equal 404, last_response.status
+    assert_equal "pass", last_response.headers[Sidekiq::Web::X_CASCADE]
+  end
+
   it "can show text with any locales" do
     rackenv = {"HTTP_ACCEPT_LANGUAGE" => "ru,en"}
     get "/", {}, rackenv
@@ -336,6 +342,37 @@ describe Sidekiq::Web do
     assert_equal 302, last_response.status
   end
 
+  it "can filter retries" do
+    3.times { add_retry }
+    add_retry("MIKE1234")
+
+    get "/filter/retries"
+    assert_equal 302, last_response.status
+
+    post "/filter/retries"
+    assert_equal 302, last_response.status
+
+    post "/filter/retries", substr: "nope"
+    refute_match(/RuntimeError/, last_response.body)
+
+    get "/filter/retries", substr: "nope"
+    refute_match(/RuntimeError/, last_response.body)
+
+    post "/filter/retries", substr: "MIKE1234"
+    assert_match(/MIKE1234/, last_response.body)
+  end
+
+  it "can delete multiple retries" do
+    params = add_retry
+    post "/retries", "key" => [job_params(*params)], "delete" => "Delete"
+    assert_equal 302, last_response.status
+    assert_equal "http://example.org/retries", last_response.header["Location"]
+
+    get "/retries"
+    assert_equal 200, last_response.status
+    refute_match(/#{params.first["args"][2]}/, last_response.body)
+  end
+
   it "can delete a single retry" do
     params = add_retry
     post "/retries/#{job_params(*params)}", "delete" => "Delete"
@@ -421,6 +458,26 @@ describe Sidekiq::Web do
   it "handles missing scheduled job" do
     get "/scheduled/0-shouldntexist"
     assert_equal 302, last_response.status
+  end
+
+  it "can filter scheduled" do
+    3.times { add_scheduled }
+    add_scheduled("MIKE1234")
+
+    get "/filter/scheduled"
+    assert_equal 302, last_response.status
+
+    post "/filter/scheduled"
+    assert_equal 302, last_response.status
+
+    get "/filter/scheduled", substr: "nope"
+    refute_match(/RuntimeError/, last_response.body)
+
+    post "/filter/scheduled", substr: "nope"
+    refute_match(/RuntimeError/, last_response.body)
+
+    post "/filter/scheduled", substr: "MIKE1234"
+    assert_match(/MIKE1234/, last_response.body)
   end
 
   it "can add to queue a single scheduled job" do
@@ -661,6 +718,17 @@ describe Sidekiq::Web do
       assert_match(/#{score}/, last_response.body)
     end
 
+    it "can delete multiple dead" do
+      params = add_dead
+      post "/morgue", "key" => [job_params(*params)], "delete" => "Delete"
+      assert_equal 302, last_response.status
+      assert_equal "http://example.org/morgue", last_response.header["Location"]
+
+      get "/morgue"
+      assert_equal 200, last_response.status
+      refute_match(/#{params.first["args"][2]}/, last_response.body)
+    end
+
     it "can delete all dead" do
       3.times { add_dead }
 
@@ -669,6 +737,26 @@ describe Sidekiq::Web do
       assert_equal 0, Sidekiq::DeadSet.new.size
       assert_equal 302, last_response.status
       assert_equal "http://example.org/morgue", last_response.header["Location"]
+    end
+
+    it "can filter dead" do
+      3.times { add_dead }
+      add_dead("MIKE1234")
+
+      get "/filter/dead"
+      assert_equal 302, last_response.status
+
+      post "/filter/dead"
+      assert_equal 302, last_response.status
+
+      post "/filter/dead", substr: "nope"
+      refute_match(/RuntimeError/, last_response.body)
+
+      get "/filter/dead", substr: "nope"
+      refute_match(/RuntimeError/, last_response.body)
+
+      post "/filter/dead", substr: "MIKE1234"
+      assert_match(/MIKE1234/, last_response.body)
     end
 
     it "can retry all dead" do
@@ -707,11 +795,11 @@ describe Sidekiq::Web do
     end
   end
 
-  def add_scheduled
+  def add_scheduled(jid = SecureRandom.hex(12))
     score = Time.now.to_f
     msg = {"class" => "HardJob",
            "args" => ["bob", 1, Time.now.to_f],
-           "jid" => SecureRandom.hex(12),
+           "jid" => jid,
            "tags" => ["tag1", "tag2"]}
     @config.redis do |conn|
       conn.zadd("schedule", score, Sidekiq.dump_json(msg))
@@ -719,7 +807,7 @@ describe Sidekiq::Web do
     [msg, score]
   end
 
-  def add_retry
+  def add_retry(jid = SecureRandom.hex(12))
     msg = {"class" => "HardJob",
            "args" => ["bob", 1, Time.now.to_f],
            "queue" => "default",
@@ -727,7 +815,7 @@ describe Sidekiq::Web do
            "error_class" => "RuntimeError",
            "retry_count" => 0,
            "failed_at" => Time.now.to_f,
-           "jid" => SecureRandom.hex(12)}
+           "jid" => jid}
     score = Time.now.to_f
     @config.redis do |conn|
       conn.zadd("retry", score, Sidekiq.dump_json(msg))
@@ -868,6 +956,17 @@ describe Sidekiq::Web do
   end
 
   describe "Metrics" do
+    before do
+      require "sidekiq/component"
+      require "sidekiq/metrics/tracking"
+      t = Sidekiq::Metrics::ExecutionTracker.new(@config)
+      t.track("default", "MikeJob") do
+        # TODO replace sleep with a method we can call
+        sleep 0.02
+      end
+      t.flush
+    end
+
     describe "/metrics" do
       it "calls the Sidekiq::Metrics::Query and renders correctly" do
         result_mock = Minitest::Mock.new
@@ -887,6 +986,19 @@ describe Sidekiq::Web do
           assert_equal 200, last_response.status
           assert_match(/Metrics/, last_response.body)
         end
+      end
+
+      it "supports filtering" do
+        get "/filter/metrics"
+        assert_equal 302, last_response.status
+
+        post "/filter/metrics", "substr" => "mike"
+        assert_equal 200, last_response.status
+        assert_match(/MikeJob/, last_response.body)
+
+        post "/filter/metrics", "substr" => "notfound"
+        assert_equal 200, last_response.status
+        refute_match(/MikeJob/, last_response.body)
       end
     end
 
