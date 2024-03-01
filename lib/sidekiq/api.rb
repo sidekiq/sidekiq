@@ -355,7 +355,7 @@ module Sidekiq
     # @api private
     def parse(item)
       Sidekiq.load_json(item)
-    rescue JSON::ParserError
+    rescue ::JSON::ParserError
       # If the job payload in Redis is invalid JSON, we'll load
       # the item as an empty hash and store the invalid JSON as
       # the job 'args' for display in the Web UI.

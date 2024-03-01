@@ -57,6 +57,11 @@ def capture_logging(cfg, lvl = Logger::INFO)
   end
 end
 
+def global_change(&block)
+  pid = fork(&block)
+  Process.wait(pid) if pid
+end
+
 Signal.trap("TTIN") do
   Thread.list.each do |thread|
     puts "Thread TID-#{(thread.object_id ^ ::Process.pid).to_s(36)} #{thread.name}"
