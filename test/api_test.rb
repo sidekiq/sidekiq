@@ -661,6 +661,27 @@ describe "API" do
       assert_equal ["5678", "1234"], w.map { |_, tid, _| tid }
     end
 
+    it "can find a work by jid" do
+      w = Sidekiq::Workers.new
+      hn = Socket.gethostname
+      key = "#{hn}:#{$$}"
+      @cfg.redis do |conn|
+        conn.sadd("processes", [key])
+      end
+
+      s = "#{key}:work"
+      jid = "abcdef"
+      data = Sidekiq.dump_json({"payload" => {"args" => ["foo"], "jid" => jid}, "queue" => "default", "run_at" => Time.now.to_i})
+      @cfg.redis do |c|
+        c.hset(s, "1234", data)
+      end
+
+      assert_nil w.find_work_by_jid("nonexistent")
+
+      work = w.find_work_by_jid(jid)
+      assert_equal ["foo"], work.job.args
+    end
+
     it "can reschedule jobs" do
       add_retry("foo1")
       add_retry("foo2")

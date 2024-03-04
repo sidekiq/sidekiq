@@ -1136,6 +1136,20 @@ module Sidekiq
         end
       end
     end
+
+    ##
+    # Find the work which represents a job with the given JID.
+    # *This is a slow O(n) operation*.  Do not use for app logic.
+    #
+    # @param jid [String] the job identifier
+    # @return [Sidekiq::Work] the work or nil
+    def find_work_by_jid(jid)
+      each do |_process_id, _thread_id, work|
+        job = work.job
+        return work if job.jid == jid
+      end
+      nil
+    end
   end
 
   # Sidekiq::Work represents a job which is currently executing.
