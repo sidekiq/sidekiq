@@ -22,6 +22,7 @@ end
 Datadog.configure do |c|
   c.ci.enabled = true
   c.ci.instrument :minitest
+  c.ci.itr_enabled = true
   c.diagnostics.startup_logs.enabled = false
 
   c.tracing.instrument :redis
