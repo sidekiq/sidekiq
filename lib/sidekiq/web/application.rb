@@ -394,6 +394,18 @@ module Sidekiq
       erb :morgue
     end
 
+    post "/change_locale" do
+      locale = params["locale"]
+
+      match = available_locales.find { |available|
+        locale == available
+      }
+
+      session[:locale] = match if match
+
+      reload_page
+    end
+
     def call(env)
       action = self.class.match(env)
       return [404, {Rack::CONTENT_TYPE => "text/plain", Web::X_CASCADE => "pass"}, ["Not Found"]] unless action

@@ -47,6 +47,8 @@ function addListeners() {
       scheduleLivePoll();
     }
   }
+
+  document.getElementById("locale-select").addEventListener("change", updateLocale);
 }
 
 function addPollingListeners(_event)  {
@@ -175,3 +177,7 @@ function replacePage(text) {
 function showError(error) {
   console.error(error)
 }
+
+function updateLocale(event) {
+  event.target.form.submit();
+};
