@@ -154,16 +154,6 @@ div.interval-slider {
 
 .locale-select {
   float: right;
-  color: #ddd;
-  width: 66px;
-  margin: 11px 15px;
-  padding: 4px;
-  border-radius: 4px;
-  background-color: transparent;
-  box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
-  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
-  transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
-  -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
 }
 
 @media (max-width: 767px) {
