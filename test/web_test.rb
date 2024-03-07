@@ -18,12 +18,6 @@ class LogDisplayer
   end
 end
 
-class MockWebAction < Sidekiq::WebAction
-  def self.call(env)
-    [200, {}, []]
-  end
-end
-
 describe Sidekiq::Web do
   include Rack::Test::Methods
 
