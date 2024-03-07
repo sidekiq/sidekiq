@@ -19,7 +19,7 @@
               <%= csrf_tag %>
               <select id="locale-select" class="locale-select" name="locale">
                 <% available_locales.each do |locale_option| %>
-                  <% if locale_option === locale %>
+                  <% if locale_option == locale %>
                     <option selected value="<%= locale_option %>"><%= locale_option %></option>
                   <% else %>
                     <option value="<%= locale_option %>"><%= locale_option %></option>
