@@ -155,11 +155,3 @@ div.interval-slider {
 .locale-select {
   float: right;
 }
-
-@media (max-width: 767px) {
-  .locale-select {
-    float: none;
-    line-height: 30px;
-    margin: 11px auto;
-  }
-}
