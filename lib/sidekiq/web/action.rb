@@ -22,6 +22,11 @@ module Sidekiq
       throw :halt, [302, {Web::LOCATION => "#{request.base_url}#{location}"}, []]
     end
 
+    def reload_page
+      current_location = request.referer.gsub(request.base_url, "")
+      redirect current_location
+    end
+
     def params
       indifferent_hash = Hash.new { |hash, key| hash[key.to_s] if Symbol === key }
 

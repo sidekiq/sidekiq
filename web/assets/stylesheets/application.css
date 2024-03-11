@@ -731,3 +731,16 @@ div.interval-slider input {
 canvas {
   margin: 20px 0 30px;
 }
+
+#locale-select {
+  float: left;
+  margin: 8px 15px;
+}
+
+@media (max-width: 767px) {
+  #locale-select {
+    float: none;
+    width: auto;
+    margin: 15px auto;
+  }
+}

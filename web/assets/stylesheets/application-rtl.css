@@ -151,3 +151,13 @@ div.interval-slider {
     padding-left: 5px;
   }
 }
+
+#locale-select {
+  float: right;
+}
+
+@media (max-width: 767px) {
+  #locale-select {
+    float: none;
+  }
+}

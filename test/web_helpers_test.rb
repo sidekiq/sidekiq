@@ -96,6 +96,18 @@ describe "Web helpers" do
     assert_equal "en", obj.locale
   end
 
+  it "tests user selected locale" do
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "*")
+
+    obj.instance_eval do
+      def session
+        {locale: "es"}
+      end
+    end
+
+    assert_equal "es", obj.locale
+  end
+
   it "tests available locales" do
     obj = Helpers.new
     expected = %w[

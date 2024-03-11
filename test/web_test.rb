@@ -600,6 +600,18 @@ describe Sidekiq::Web do
     assert_equal 200, last_response.status
   end
 
+  it "can change the locale" do
+    session_data = {"rack.session" => {}}
+    headers = {"HTTP_REFERER" => "http://example.org/path", "HTTP_BASE_URL" => "http://example.org/"}
+
+    post "/change_locale", {"locale" => "es"}, session_data.merge(headers)
+
+    assert_equal "es", last_request.env["rack.session"][:locale]
+
+    assert_equal 302, last_response.status
+    assert_equal "http://example.org/path", last_response.location
+  end
+
   describe "custom locales" do
     before do
       Sidekiq::Web.settings.locales << File.join(File.dirname(__FILE__), "fixtures")
