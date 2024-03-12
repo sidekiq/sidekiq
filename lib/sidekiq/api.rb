@@ -269,7 +269,7 @@ module Sidekiq
       job = Sidekiq.load_json(entry)
       now = Time.now.to_f
       thence = job["enqueued_at"] || now
-      now - thence
+      (now - thence).to_f
     end
 
     def each
