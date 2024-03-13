@@ -5,6 +5,7 @@
 HEAD
 ----------
 
+- Fix potential heartbeat data leak [#6227]
 - Add ability to find a currently running work by jid [#6212, fatkodima]
 
 7.2.2

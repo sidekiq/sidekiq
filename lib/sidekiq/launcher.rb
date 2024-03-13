@@ -145,15 +145,17 @@ module Sidekiq
         flush_stats
 
         curstate = Processor::WORK_STATE.dup
+        curstate.transform_values! { |val| Sidekiq.dump_json(val) }
+
         redis do |conn|
           # work is the current set of executing jobs
           work_key = "#{key}:work"
-          conn.pipelined do |transaction|
+          conn.multi do |transaction|
             transaction.unlink(work_key)
-            curstate.each_pair do |tid, hash|
-              transaction.hset(work_key, tid, Sidekiq.dump_json(hash))
+            if curstate.size > 0
+              transaction.hset(work_key, curstate)
+              transaction.expire(work_key, 60)
             end
-            transaction.expire(work_key, 60)
           end
         end
 
