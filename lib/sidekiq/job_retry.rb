@@ -169,7 +169,9 @@ module Sidekiq
         msg["error_backtrace"] = compress_backtrace(lines)
       end
 
-      return retries_exhausted(jobinst, msg, exception) if count >= max_retry_attempts
+      disable_max_retries = msg["retry_for"] && msg["disable_max_retries"].is_a?(TrueClass)
+
+      return retries_exhausted(jobinst, msg, exception) if !disable_max_retries && count >= max_retry_attempts
 
       rf = msg["retry_for"]
       return retries_exhausted(jobinst, msg, exception) if rf && ((msg["failed_at"] + rf) < Time.now.to_f)
