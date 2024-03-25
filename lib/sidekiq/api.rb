@@ -773,7 +773,7 @@ module Sidekiq
   #
   class ScheduledSet < JobSet
     def initialize
-      super "schedule"
+      super("schedule")
     end
   end
 
@@ -787,7 +787,7 @@ module Sidekiq
   #
   class RetrySet < JobSet
     def initialize
-      super "retry"
+      super("retry")
     end
 
     # Enqueues all jobs pending within the retry set.
@@ -808,7 +808,7 @@ module Sidekiq
   #
   class DeadSet < JobSet
     def initialize
-      super "dead"
+      super("dead")
     end
 
     # Add the given job to the Dead set.
@@ -1135,6 +1135,20 @@ module Sidekiq
           }.sum(&:to_i)
         end
       end
+    end
+
+    ##
+    # Find the work which represents a job with the given JID.
+    # *This is a slow O(n) operation*.  Do not use for app logic.
+    #
+    # @param jid [String] the job identifier
+    # @return [Sidekiq::Work] the work or nil
+    def find_work_by_jid(jid)
+      each do |_process_id, _thread_id, work|
+        job = work.job
+        return work if job.jid == jid
+      end
+      nil
     end
   end
 

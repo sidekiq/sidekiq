@@ -66,9 +66,7 @@ module Sidekiq
           EOM
         end
 
-        ENV[
-          p || "REDIS_URL"
-        ]
+        ENV[p.to_s] || ENV["REDIS_URL"]
       end
     end
   end

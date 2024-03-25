@@ -121,6 +121,10 @@ module Sidekiq
     #
     # Inspiration taken from https://github.com/iain/http_accept_language/blob/master/lib/http_accept_language/parser.rb
     def locale
+      # session[:locale] is set via the locale selector from the footer
+      # defined?(session) && session are used to avoid exceptions when running tests
+      return session[:locale] if defined?(session) && session&.[](:locale)
+
       @locale ||= begin
         matched_locale = user_preferred_languages.map { |preferred|
           preferred_language = preferred.split("-", 2).first
@@ -340,7 +344,8 @@ module Sidekiq
     end
 
     def pollable?
-      !(current_path == "" || current_path.start_with?("metrics"))
+      # there's no point to refreshing the metrics pages every N seconds
+      !(current_path == "" || current_path.index("metrics"))
     end
 
     def retry_or_delete_or_kill(job, params)

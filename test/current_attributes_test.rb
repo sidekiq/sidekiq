@@ -98,7 +98,7 @@ describe "Current attributes" do
 
   def with_context(strklass, attr, value)
     constklass = strklass.constantize
-    constklass.send("#{attr}=", value)
+    constklass.send(:"#{attr}=", value)
     yield
   ensure
     constklass.reset_all

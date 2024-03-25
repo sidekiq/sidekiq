@@ -54,7 +54,7 @@ module Sidekiq
             cattrs_to_reset << constklass
 
             job[key].each do |(attribute, value)|
-              constklass.public_send("#{attribute}=", value)
+              constklass.public_send(:"#{attribute}=", value)
             end
           end
         end

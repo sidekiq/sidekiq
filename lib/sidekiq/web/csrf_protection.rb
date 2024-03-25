@@ -56,7 +56,7 @@ module Sidekiq
       end
 
       def logger(env)
-        @logger ||= (env["rack.logger"] || ::Logger.new(env["rack.errors"]))
+        @logger ||= env["rack.logger"] || ::Logger.new(env["rack.errors"])
       end
 
       def deny(env)

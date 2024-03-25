@@ -5,6 +5,13 @@
 HEAD
 ----------
 
+- Fix potential heartbeat data leak [#6227]
+- Add ability to find a currently running work by jid [#6212, fatkodima]
+
+7.2.2
+----------
+
+- Add `Process.warmup` call in Ruby 3.3+
 - Batch jobs now skip transactional push [#6160]
 
 7.2.1
