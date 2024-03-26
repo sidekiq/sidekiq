@@ -490,7 +490,7 @@ module Sidekiq
     end
 
     def uncompress_backtrace(backtrace)
-      strict_base64_decoded = backtrace.unpack1("m0")
+      strict_base64_decoded = backtrace.unpack1("m")
       uncompressed = Zlib::Inflate.inflate(strict_base64_decoded)
       Sidekiq.load_json(uncompressed)
     end
