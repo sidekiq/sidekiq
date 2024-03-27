@@ -9,7 +9,7 @@ Sidekiq provides a number of public APIs for various functionality.
 
 ## Middleware
 
-Middleware run around the the client-side push and the server-side execution of jobs. This allows plugins which mutate job data or provide additional functionality during the executiong of specific jobs.
+Middleware run around the the client-side push and the server-side execution of jobs. This allows plugins which mutate job data or provide additional functionality during the executing of specific jobs.
 
 ## Lifecycle Events
 

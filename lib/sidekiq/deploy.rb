@@ -34,7 +34,7 @@ module Sidekiq
       # handle an very common error in marking deploys:
       # having every process mark its deploy, leading
       # to N marks for each deploy. Instead we round the time
-      # to the minute so that multple marks within that minute
+      # to the minute so that multiple marks within that minute
       # will all naturally rollup into one mark per minute.
       whence = at.utc
       floor = Time.utc(whence.year, whence.month, whence.mday, whence.hour, whence.min, 0)

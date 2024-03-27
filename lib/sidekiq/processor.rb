@@ -187,7 +187,7 @@ module Sidekiq
           # we didn't properly finish it.
         rescue Sidekiq::JobRetry::Handled => h
           # this is the common case: job raised error and Sidekiq::JobRetry::Handled
-          # signals that we created a retry successfully.  We can acknowlege the job.
+          # signals that we created a retry successfully.  We can acknowledge the job.
           ack = true
           e = h.cause || h
           handle_exception(e, {context: "Job raised exception", job: job_hash})

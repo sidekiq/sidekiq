@@ -57,7 +57,7 @@ describe "Current attributes" do
       assert_equal 123, Myapp::Current.user_id
       assert_equal 456, Myapp::OtherCurrent.other_id
     end
-    # the Rails reloader is responsible for reseting Current after every unit of work
+    # the Rails reloader is responsible for resetting Current after every unit of work
   end
 
   it "persists with class argument" do

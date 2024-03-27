@@ -112,7 +112,7 @@ module Sidekiq
     # The Queues class is only for testing the fake queue implementation.
     # There are 2 data structures involved in tandem. This is due to the
     # Rspec syntax of change(HardJob.jobs, :size). It keeps a reference
-    # to the array. Because the array was dervied from a filter of the total
+    # to the array. Because the array was derived from a filter of the total
     # jobs enqueued, it appeared as though the array didn't change.
     #
     # To solve this, we'll keep 2 hashes containing the jobs. One with keys based

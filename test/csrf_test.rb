@@ -50,7 +50,7 @@ describe "Csrf" do
 
   it "bad post" do
     result = call(env(:post)) do
-      raise "Shouldnt be called"
+      raise "Shouldn't be called"
     end
     refute_nil result
     assert_equal 403, result[0]
@@ -79,7 +79,7 @@ describe "Csrf" do
   it "fails with bad token" do
     # Make a POST with a known bad token
     result = call(env(:post, "authenticity_token" => "N0QRBD34tU61d7fi+0ZaF/35JLW/9K+8kk8dc1TZoK/0pTl7GIHap5gy7BWGsoKlzbMLRp1yaDpCDFwTJtxWAg==")) do
-      raise "shouldnt be called"
+      raise "shouldn't be called"
     end
     refute_nil result
     assert_equal 403, result[0]
@@ -95,7 +95,7 @@ describe "Csrf" do
 
     # Make a POST with an empty session data and good token
     result = call(env(:post, {"authenticity_token" => goodtoken}, {})) do
-      raise "shouldnt be called"
+      raise "shouldn't be called"
     end
     refute_nil result
     assert_equal 403, result[0]
@@ -111,7 +111,7 @@ describe "Csrf" do
 
     # Make a POST without csrf session data and good token
     result = call(env(:post, {"authenticity_token" => goodtoken}, {"session_id" => "foo"})) do
-      raise "shouldnt be called"
+      raise "shouldn't be called"
     end
     refute_nil result
     assert_equal 403, result[0]

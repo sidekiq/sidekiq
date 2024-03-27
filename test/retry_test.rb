@@ -423,7 +423,7 @@ describe Sidekiq::JobRetry do
       end
     end
 
-    describe "handles errors withouth cause" do
+    describe "handles errors without cause" do
       before do
         @error = nil
         begin
