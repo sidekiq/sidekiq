@@ -5,9 +5,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
 
+    <% unless rtl? %>
     <link href="<%= root_path %>stylesheets/bootstrap.css" media="screen" rel="stylesheet" type="text/css" />
-    <% if rtl? %>
-    <link href="<%= root_path %>stylesheets/bootstrap-rtl.min.css" media="screen" rel="stylesheet" type="text/css"/>
+    <% else %>
+    <link href="<%= root_path %>stylesheets/bootstrap-rtl.css" media="screen" rel="stylesheet" type="text/css"/>
     <% end %>
 
     <link href="<%= root_path %>stylesheets/application.css" media="screen" rel="stylesheet" type="text/css" />
