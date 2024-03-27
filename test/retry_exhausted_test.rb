@@ -203,7 +203,7 @@ describe "sidekiq_retries_exhausted" do
     assert exhausted_exception
   end
 
-  it "supports discard option to disble global failure handlers and dead set" do
+  it "supports discard option to disable global failure handlers and dead set" do
     discard_job = DiscardJob.new
 
     exhausted_job = nil

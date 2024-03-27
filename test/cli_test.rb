@@ -225,7 +225,7 @@ describe Sidekiq::CLI do
 
       describe "default config file" do
         describe "when required path is a directory" do
-          it "tries config/sidekiq.yml from required diretory" do
+          it "tries config/sidekiq.yml from required directory" do
             @cli.parse(%w[sidekiq -r ./test/dummy])
 
             assert_equal "./test/dummy/config/sidekiq.yml", config[:config_file]
@@ -234,7 +234,7 @@ describe Sidekiq::CLI do
         end
 
         describe "when required path is a file" do
-          it "tries config/sidekiq.yml from current diretory" do
+          it "tries config/sidekiq.yml from current directory" do
             config[:require] = "./test/dummy" # stub current dir – ./
 
             @cli.parse(%w[sidekiq -r ./test/fake_env.rb])
@@ -245,7 +245,7 @@ describe Sidekiq::CLI do
         end
 
         describe "without any required path" do
-          it "tries config/sidekiq.yml from current diretory" do
+          it "tries config/sidekiq.yml from current directory" do
             config[:require] = "./test/dummy" # stub current dir – ./
 
             @cli.parse(%w[sidekiq])

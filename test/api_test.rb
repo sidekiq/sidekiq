@@ -266,7 +266,7 @@ describe "API" do
 
     it "enumerates jobs in descending score order" do
       # We need to enqueue more than 50 items, which is the page size when retrieving
-      # from Redis to ensure everything is sorted: the pages and the items withing them.
+      # from Redis to ensure everything is sorted: the pages and the items within them.
       51.times { ApiJob.perform_in(100, 1, "foo") }
 
       set = Sidekiq::ScheduledSet.new.to_a

@@ -144,7 +144,7 @@ module Sidekiq
         # In the example above, each process should schedule every 10 seconds on average. We special
         # case smaller clusters to add 50% so they would sleep somewhere between 5 and 15 seconds.
         # As we run more processes, the scheduling interval average will approach an even spread
-        # between 0 and poll interval so we don't need this artifical boost.
+        # between 0 and poll interval so we don't need this artificial boost.
         #
         count = process_count
         interval = poll_interval_average(count)

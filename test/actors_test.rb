@@ -73,7 +73,7 @@ describe "Actors" do
     it "can stop" do
       f = Sidekiq::Processor.new(@cap) { |p, ex| raise "should not raise!" }
       f.terminate
-      assert_nil f.thread # didnt start it
+      assert_nil f.thread # didn't start it
     end
 
     it "deals with errors" do
