@@ -36,7 +36,7 @@ module Sidekiq
       @job = nil
       @thread = nil
       @reloader = Sidekiq.default_configuration[:reloader]
-      @job_logger = (capsule.config[:job_logger] || Sidekiq::JobLogger).new(logger)
+      @job_logger = (capsule.config[:job_logger] || Sidekiq::JobLogger).new(capsule.config)
       @retrier = Sidekiq::JobRetry.new(capsule)
     end
 
