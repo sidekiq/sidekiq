@@ -10,6 +10,7 @@ gem "activejob", RAILS_VERSION
 gem "activerecord", RAILS_VERSION
 gem "railties", RAILS_VERSION
 gem "redis-client"
+gem "benchmark-ips"
 # gem "bumbler"
 # gem "debug"
 

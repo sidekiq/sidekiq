@@ -27,6 +27,7 @@ begin
 rescue LoadError
 end
 
+require "sidekiq/json"
 require "sidekiq/config"
 require "sidekiq/logger"
 require "sidekiq/client"
@@ -34,8 +35,6 @@ require "sidekiq/transaction_aware_client"
 require "sidekiq/job"
 require "sidekiq/worker_compatibility_alias"
 require "sidekiq/redis_client_adapter"
-
-require "json"
 
 module Sidekiq
   NAME = "Sidekiq"
@@ -49,12 +48,19 @@ module Sidekiq
     defined?(Sidekiq::CLI)
   end
 
-  def self.load_json(string)
-    JSON.parse(string)
+  PARSE_OPTIONS = {}
+  GENERATE_OPTIONS = {}
+  def self.parse_json(string, options = PARSE_OPTIONS)
+    ::JSON.parse(string, options)
   end
 
-  def self.dump_json(object)
-    JSON.generate(object)
+  def self.generate_json(object, options = GENERATE_OPTIONS)
+    ::JSON.generate(object, options)
+  end
+  # backwards compatibility
+  class << self
+    alias_method :load_json, :parse_json
+    alias_method :dump_json, :generate_json
   end
 
   def self.pro?

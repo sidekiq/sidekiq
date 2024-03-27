@@ -71,37 +71,8 @@ module Sidekiq
 
     private
 
-    RECURSIVE_JSON_UNSAFE = {
-      Integer => ->(val) {},
-      Float => ->(val) {},
-      TrueClass => ->(val) {},
-      FalseClass => ->(val) {},
-      NilClass => ->(val) {},
-      String => ->(val) {},
-      Array => ->(val) {
-        val.each do |e|
-          unsafe_item = RECURSIVE_JSON_UNSAFE[e.class].call(e)
-          return unsafe_item unless unsafe_item.nil?
-        end
-        nil
-      },
-      Hash => ->(val) {
-        val.each do |k, v|
-          return k unless String === k
-
-          unsafe_item = RECURSIVE_JSON_UNSAFE[v.class].call(v)
-          return unsafe_item unless unsafe_item.nil?
-        end
-        nil
-      }
-    }
-
-    RECURSIVE_JSON_UNSAFE.default = ->(val) { val }
-    RECURSIVE_JSON_UNSAFE.compare_by_identity
-    private_constant :RECURSIVE_JSON_UNSAFE
-
     def json_unsafe?(item)
-      RECURSIVE_JSON_UNSAFE[item.class].call(item)
+      Sidekiq::JSON::RULES[item.class].call(item)
     end
   end
 end
