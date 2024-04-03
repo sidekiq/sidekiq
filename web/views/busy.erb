@@ -2,29 +2,47 @@
   <h1><%= t('Status') %></h1>
 </div>
 
-<div class="stats-wrapper">
-  <div class="stats-container">
-    <div class="stat">
-      <h3><%= s = processes.size; number_with_delimiter(s) %></h3>
-      <p><%= t('Processes') %></p>
+<div class="row">
+    <div class="col">
+      <div class="card">
+        <div class="card-body centered p-3">
+          <h4 class="card-title"><%= s = processes.size; number_with_delimiter(s) %></h4>
+          <p class="card-text"><%= t('Processes') %></p>
+        </div>
+      </div>
     </div>
-    <div class="stat">
-      <h3><%= x = processes.total_concurrency; number_with_delimiter(x) %></h3>
-      <p><%= t('Threads') %></p>
+    <div class="col">
+      <div class="card">
+        <div class="card-body centered p-3">
+          <h4 class="card-title"><%= x = processes.total_concurrency; number_with_delimiter(x) %></h3>
+          <p class="card-text"><%= t('Threads') %></p>
+        </div>
+      </div>
     </div>
-    <div class="stat">
-      <h3><%= ws = workset.size; number_with_delimiter(ws) %></h3>
-      <p><%= t('Busy') %></p>
+    <div class="col">
+      <div class="card">
+        <div class="card-body centered p-3">
+          <h4 class="card-title"><%= ws = workset.size; number_with_delimiter(ws) %></h4>
+          <p class="card-text"><%= t('Busy') %></p>
+        </div>
+      </div>
     </div>
-    <div class="stat">
-      <h3><%= x == 0 ? 0 : ((ws / x.to_f) * 100).round(0) %>%</h3>
-      <p><%= t('Utilization') %></p>
+    <div class="col">
+      <div class="card">
+        <div class="card-body centered p-3">
+          <h4 class="card-title"><%= x == 0 ? 0 : ((ws / x.to_f) * 100).round(0) %>%</h4>
+          <p class="card-text"><%= t('Utilization') %></p>
+        </div>
+      </div>
     </div>
-    <div class="stat">
-      <h3><%= format_memory(processes.total_rss) %></h3>
-      <p><%= t('RSS') %></p>
+    <div class="col">
+      <div class="card">
+        <div class="card-body centered p-3">
+          <h4 class="card-title"><%= format_memory(processes.total_rss) %></h4>
+          <p class="card-text"><%= t('RSS') %></p>
+        </div>
+      </div>
     </div>
-  </div>
 </div>
 
 <div class="header-container">
@@ -45,9 +63,9 @@
     <thead>
       <th><%= t('Name') %></th>
       <th><%= t('Started') %></th>
-      <th class="col-sm-1"><%= t('RSS') %><a target="blank" href="https://github.com/sidekiq/sidekiq/wiki/Memory#rss"><span class="info-circle" title="Click to learn more about RSS">?</span></a></th>
-      <th class="col-sm-1"><%= t('Threads') %></th>
-      <th class="col-sm-1"><%= t('Busy') %></th>
+      <th class="col-1 text-right"><%= t('RSS') %> <a class="badge badge-primary" target="blank" title="Click to learn more about RSS" href="https://github.com/sidekiq/sidekiq/wiki/Memory#rss">?</a></th>
+      <th class="col-1"><%= t('Threads') %></th>
+      <th class="col-1"><%= t('Busy') %></th>
       <th>&nbsp;</th>
     </thead>
     <% lead = processes.leader %>
@@ -55,18 +73,18 @@
       <tr>
         <td class="box">
           <%= "#{process['hostname']}:#{process['pid']}" %>
-          <span class="label label-success"><%= process.tag %></span>
+          <span class="badge badge-success"><%= process.tag %></span>
           <% process.labels.each do |label| %>
-            <span class="label label-info"><%= label %></span>
+            <span class="badge badge-info"><%= label %></span>
           <% end %>
           <% if process.embedded? %>
-            <span class="label label-default">embedded</span>
+            <span class="badge badge-secondary">embedded</span>
           <% end %>
           <% if process.stopping? %>
-            <span class="label label-danger">quiet</span>
+            <span class="badge badge-danger">quiet</span>
           <% end %>
           <% if process.identity == lead %>
-            <span class="label label-warning">leader</span>
+            <span class="badge badge-warning">leader</span>
           <% end %>
           <br>
           <b><%= "#{t('Queues')}: " %></b>
