@@ -28,6 +28,7 @@ describe "Csrf" do
     ok = [200, {}, ["OK"]]
 
     first = 1
+
     second = 1
     result = call(env) do |envy|
       refute_nil envy[:csrf_token]
