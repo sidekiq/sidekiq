@@ -60,6 +60,10 @@ module Sidekiq
         # This is the integration code necessary so that if a job uses `Rails.logger.info "Hello"`,
         # it will appear in the Sidekiq console with all of the job context.
         unless ::Rails.logger == config.logger || ::ActiveSupport::Logger.logger_outputs_to?(::Rails.logger, $stdout)
+          # Temp fix until the google logging gem properly supports Rails 7.1
+          unless ::Rails.logger.respond_to?(:broadcast_to)
+            ::Rails.logger = ActiveSupport::BroadcastLogger.new(::Rails.logger)
+          end
           if ::Rails.logger.respond_to?(:broadcast_to)
             ::Rails.logger.broadcast_to(config.logger)
           else
