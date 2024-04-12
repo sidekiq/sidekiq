@@ -33,7 +33,9 @@ describe "Csrf" do
     result = call(env) do |envy|
       refute_nil envy[:csrf_token]
       assert_equal 88, envy[:csrf_token].size
+
       first = envy[:csrf_token]
+
       ok
     end
 
