@@ -28,7 +28,9 @@ describe "ActiveJob" do
     aj = Class.new(ActiveJob::Base) do
       queue_as :bar
       sidekiq_options retry: 4, queue: "foo", backtrace: 5
+
       sidekiq_retry_in { |count, _exception| count * 10 }
+
       sidekiq_retries_exhausted do |msg, _exception|
         @config.logger.warn "Failed #{msg["class"]} with #{msg["args"]}: #{msg["error_message"]}"
       end
