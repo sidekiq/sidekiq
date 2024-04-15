@@ -55,8 +55,10 @@ describe "Job logger" do
     assert a
     assert b
     hsh = JSON.parse(a)
+
     keys = hsh.keys.sort
     assert_equal(["ctx", "lvl", "msg", "pid", "tid", "ts"], keys)
+
     keys = hsh["ctx"].keys.sort
     assert_equal(["bid", "class", "jid", "tags"], keys)
   end
