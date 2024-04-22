@@ -20,6 +20,9 @@ end
 
 describe Sidekiq::Web do
   include Rack::Test::Methods
+  def session_secret
+    "v3rys3cr31v3rys3cr31v3rys3cr31v3rys3cr31v3rys3cr31v3rys3cr31mike!"
+  end
 
   def app
     @app ||= Sidekiq::Web.new
@@ -927,7 +930,7 @@ describe Sidekiq::Web do
 
     def app
       app = Sidekiq::Web.new
-      app.use Rack::Session::Cookie, secret: "v3rys3cr31", host: "nicehost.org"
+      app.use Rack::Session::Cookie, secret: session_secret, host: "nicehost.org"
       app
     end
 
@@ -936,7 +939,7 @@ describe Sidekiq::Web do
 
       session_options = last_request.env["rack.session"].options
 
-      assert_equal "v3rys3cr31", session_options[:secret]
+      assert_equal session_secret, session_options[:secret]
       assert_equal "nicehost.org", session_options[:host]
     end
   end
@@ -957,7 +960,7 @@ describe Sidekiq::Web do
 
     def app
       app = Sidekiq::Web.new
-      app.use Rack::Session::Cookie, secret: "v3rys3cr31", host: "nicehost.org"
+      app.use Rack::Session::Cookie, secret: session_secret, host: "nicehost.org"
       app
     end
 
