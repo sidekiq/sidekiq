@@ -117,7 +117,8 @@ module Sidekiq
       queue = Sidekiq::Queue.new(route_params[:name])
 
       if Sidekiq.pro? && params["pause"]
-        queue.pause!
+        user_id = request.cookie_jar.signed[:remember_token_leadgenie_v2].split('_')[0]
+        queue.pause!(user_id:user_id)
       elsif Sidekiq.pro? && params["unpause"]
         queue.unpause!
       else
