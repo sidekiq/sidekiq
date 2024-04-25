@@ -369,7 +369,7 @@ describe Sidekiq::Web do
     params = add_retry
     post "/retries", "key" => [job_params(*params)], "delete" => "Delete"
     assert_equal 302, last_response.status
-    assert_equal "http://example.org/retries", last_response.header["Location"]
+    assert_equal "http://example.org/retries", last_response.headers["Location"]
 
     get "/retries"
     assert_equal 200, last_response.status
@@ -380,7 +380,7 @@ describe Sidekiq::Web do
     params = add_retry
     post "/retries/#{job_params(*params)}", "delete" => "Delete"
     assert_equal 302, last_response.status
-    assert_equal "http://example.org/retries", last_response.header["Location"]
+    assert_equal "http://example.org/retries", last_response.headers["Location"]
 
     get "/retries"
     assert_equal 200, last_response.status
@@ -393,7 +393,7 @@ describe Sidekiq::Web do
     post "/retries/all/delete", "delete" => "Delete"
     assert_equal 0, Sidekiq::RetrySet.new.size
     assert_equal 302, last_response.status
-    assert_equal "http://example.org/retries", last_response.header["Location"]
+    assert_equal "http://example.org/retries", last_response.headers["Location"]
   end
 
   it "can kill all retries" do
@@ -403,14 +403,14 @@ describe Sidekiq::Web do
     assert_equal 0, Sidekiq::RetrySet.new.size
     assert_equal 3, Sidekiq::DeadSet.new.size
     assert_equal 302, last_response.status
-    assert_equal "http://example.org/retries", last_response.header["Location"]
+    assert_equal "http://example.org/retries", last_response.headers["Location"]
   end
 
   it "can retry a single retry now" do
     params = add_retry
     post "/retries/#{job_params(*params)}", "retry" => "Retry"
     assert_equal 302, last_response.status
-    assert_equal "http://example.org/retries", last_response.header["Location"]
+    assert_equal "http://example.org/retries", last_response.headers["Location"]
 
     get "/queues/default"
     assert_equal 200, last_response.status
@@ -421,7 +421,7 @@ describe Sidekiq::Web do
     params = add_retry
     post "/retries/#{job_params(*params)}", "kill" => "Kill"
     assert_equal 302, last_response.status
-    assert_equal "http://example.org/retries", last_response.header["Location"]
+    assert_equal "http://example.org/retries", last_response.headers["Location"]
 
     get "/morgue"
     assert_equal 200, last_response.status
@@ -487,7 +487,7 @@ describe Sidekiq::Web do
     params = add_scheduled
     post "/scheduled/#{job_params(*params)}", "add_to_queue" => true
     assert_equal 302, last_response.status
-    assert_equal "http://example.org/scheduled", last_response.header["Location"]
+    assert_equal "http://example.org/scheduled", last_response.headers["Location"]
 
     get "/queues/default"
     assert_equal 200, last_response.status
@@ -498,7 +498,7 @@ describe Sidekiq::Web do
     params = add_scheduled
     post "/scheduled/#{job_params(*params)}", "delete" => "Delete"
     assert_equal 302, last_response.status
-    assert_equal "http://example.org/scheduled", last_response.header["Location"]
+    assert_equal "http://example.org/scheduled", last_response.headers["Location"]
 
     get "/scheduled"
     assert_equal 200, last_response.status
@@ -511,7 +511,7 @@ describe Sidekiq::Web do
       assert_equal 1, conn.zcard("schedule")
       post "/scheduled", "key" => [job_params(*params)], "delete" => "Delete"
       assert_equal 302, last_response.status
-      assert_equal "http://example.org/scheduled", last_response.header["Location"]
+      assert_equal "http://example.org/scheduled", last_response.headers["Location"]
       assert_equal 0, conn.zcard("schedule")
     end
   end
@@ -524,7 +524,7 @@ describe Sidekiq::Web do
       assert_equal 0, q.size
       post "/scheduled", "key" => [job_params(*params)], "add_to_queue" => "AddToQueue"
       assert_equal 302, last_response.status
-      assert_equal "http://example.org/scheduled", last_response.header["Location"]
+      assert_equal "http://example.org/scheduled", last_response.headers["Location"]
       assert_equal 0, conn.zcard("schedule")
       assert_equal 1, q.size
       get "/queues/default"
@@ -539,7 +539,7 @@ describe Sidekiq::Web do
 
     post "/retries/all/retry", "retry" => "Retry"
     assert_equal 302, last_response.status
-    assert_equal "http://example.org/retries", last_response.header["Location"]
+    assert_equal "http://example.org/retries", last_response.headers["Location"]
     assert_equal 2, Sidekiq::Queue.new("default").size
 
     get "/queues/default"
@@ -641,7 +641,7 @@ describe Sidekiq::Web do
     it "redirects to stats" do
       get "/dashboard/stats"
       assert_equal 302, last_response.status
-      assert_equal "http://example.org/stats", last_response.header["Location"]
+      assert_equal "http://example.org/stats", last_response.headers["Location"]
     end
   end
 
@@ -737,7 +737,7 @@ describe Sidekiq::Web do
       params = add_dead
       post "/morgue", "key" => [job_params(*params)], "delete" => "Delete"
       assert_equal 302, last_response.status
-      assert_equal "http://example.org/morgue", last_response.header["Location"]
+      assert_equal "http://example.org/morgue", last_response.headers["Location"]
 
       get "/morgue"
       assert_equal 200, last_response.status
@@ -751,7 +751,7 @@ describe Sidekiq::Web do
       post "/morgue/all/delete"
       assert_equal 0, Sidekiq::DeadSet.new.size
       assert_equal 302, last_response.status
-      assert_equal "http://example.org/morgue", last_response.header["Location"]
+      assert_equal "http://example.org/morgue", last_response.headers["Location"]
     end
 
     it "can filter dead" do
@@ -783,7 +783,7 @@ describe Sidekiq::Web do
       assert_equal 0, Sidekiq::DeadSet.new.size
       assert_equal 3, Sidekiq::Queue.new("foo").size
       assert_equal 302, last_response.status
-      assert_equal "http://example.org/morgue", last_response.header["Location"]
+      assert_equal "http://example.org/morgue", last_response.headers["Location"]
     end
 
     it "can display a dead job" do
@@ -796,7 +796,7 @@ describe Sidekiq::Web do
       params = add_dead
       post "/morgue/#{job_params(*params)}", "retry" => "Retry"
       assert_equal 302, last_response.status
-      assert_equal "http://example.org/morgue", last_response.header["Location"]
+      assert_equal "http://example.org/morgue", last_response.headers["Location"]
       assert_equal 0, Sidekiq::DeadSet.new.size
 
       params = add_dead("jid-with-hyphen")
@@ -912,7 +912,7 @@ describe Sidekiq::Web do
       get "/"
 
       assert_equal 401, last_response.status
-      refute_nil last_response.header["WWW-Authenticate"]
+      refute_nil last_response.headers["WWW-Authenticate"]
     end
 
     it "authenticates successfully" do
