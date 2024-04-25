@@ -2,9 +2,11 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+7.2.3
 ----------
 
+- [Support Dragonfly.io](https://www.mikeperham.com/2024/02/01/supporting-dragonfly/) as an alternative Redis implementation
+- Fix error unpacking some compressed error backtraces [#6241]
 - Fix potential heartbeat data leak [#6227]
 - Add ability to find a currently running work by jid [#6212, fatkodima]
 
