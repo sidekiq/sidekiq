@@ -8,7 +8,8 @@ HEAD
 ---------
 
 - Limiters now have attr_readers for all static config elements [#6259]
-- Handle fractional values for SIDEKIQ_COUNT when containers have fractional CPU allocations, e.g. `SIDEKIQ_COUNT=2.5` will create 2 Sidekiq processes. [#6244]
+- Handle fractional values for SIDEKIQ_COUNT when containers have fractional CPU allocations,
+  e.g. `SIDEKIQ_COUNT=2.5` will create 2 Sidekiq processes. [#6244]
 
 7.2.2
 ---------

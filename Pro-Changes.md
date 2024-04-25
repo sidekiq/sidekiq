@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+7.2.1
+---------
+
+- Add explicit `base64` gem dependency for Ruby 3.3 compatibility
+
 7.2.0
 ---------
 
