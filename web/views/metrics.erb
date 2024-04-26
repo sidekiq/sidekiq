@@ -12,7 +12,7 @@
     <form id="metrics-form" class="form-inline" action="<%= root_path %>filter/metrics" method="post">
       <%= csrf_tag %>
       <label for="substr"><%= t('Filter') %></label>
-      <input id="class-filter" class="form-control" type="text" name="substr" placeholder="<%= t('Name') %>" value="<%= params[:substr] %>">
+      <input id="class-filter" class="form-control" type="text" name="substr" placeholder="<%= t('Name') %>" value="<%= h params[:substr] %>">
       <select id="period-selector" class="form-control" name="period">
         <% @periods.each_key do |code| %>
           <% if code == @period %>

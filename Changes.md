@@ -2,6 +2,12 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+7.2.4
+----------
+
+- Fix XSS in metrics filtering introduced in 7.2.0, CVE-2024-32887
+  Thanks to @UmerAdeemCheema for the security report.
+
 7.2.3
 ----------
 
