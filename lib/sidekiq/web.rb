@@ -11,7 +11,6 @@ require "sidekiq/web/helpers"
 require "sidekiq/web/router"
 require "sidekiq/web/action"
 require "sidekiq/web/application"
-require "sidekiq/web/content_security_policy_nonce"
 require "sidekiq/web/csrf_protection"
 
 require "rack/content_length"
@@ -116,6 +115,7 @@ module Sidekiq
     end
 
     def call(env)
+      env[:csp_nonce] = SecureRandom.base64(16)
       app.call(env)
     end
 
@@ -160,7 +160,6 @@ module Sidekiq
           header_rules: rules
         m.each { |middleware, block| use(*middleware, &block) }
         use Sidekiq::Web::CsrfProtection unless $TESTING
-        use Sidekiq::Web::ContentSecurityPolicyNonce
         run WebApplication.new(klass)
       end
     end
