@@ -5,6 +5,7 @@ require "sidekiq/web"
 
 class Helpers
   include Sidekiq::WebHelpers
+  include Sidekiq::PublicWebHelpers
 
   def initialize(params = {})
     @thehash = default.merge(params)

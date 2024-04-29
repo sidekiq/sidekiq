@@ -5,11 +5,13 @@ require "erb"
 require "sidekiq"
 require "sidekiq/api"
 require "sidekiq/paginator"
+require "sidekiq/web/public_helpers"
 require "sidekiq/web/helpers"
 
 require "sidekiq/web/router"
 require "sidekiq/web/action"
 require "sidekiq/web/application"
+require "sidekiq/web/content_security_policy_nonce"
 require "sidekiq/web/csrf_protection"
 
 require "rack/content_length"
@@ -158,12 +160,14 @@ module Sidekiq
           header_rules: rules
         m.each { |middleware, block| use(*middleware, &block) }
         use Sidekiq::Web::CsrfProtection unless $TESTING
+        use Sidekiq::Web::ContentSecurityPolicyNonce
         run WebApplication.new(klass)
       end
     end
   end
 
   Sidekiq::WebApplication.helpers WebHelpers
+  Sidekiq::WebApplication.helpers PublicWebHelpers
   Sidekiq::WebApplication.helpers Sidekiq::Paginator
 
   Sidekiq::WebAction.class_eval <<-RUBY, __FILE__, __LINE__ + 1

@@ -108,17 +108,27 @@ class RealtimeChart extends DashboardChart {
   }
 
   renderLegend(dp) {
-    this.legend.innerHTML = `
-      <span>
-        <span class="swatch" style="background-color: ${dp[0].dataset.borderColor};"></span>
-        <span>${dp[0].dataset.label}: ${dp[0].formattedValue}</span>
-      </span>
-      <span>
-        <span class="swatch" style="background-color: ${dp[1].dataset.borderColor};"></span>
-        <span>${dp[1].dataset.label}: ${dp[1].formattedValue}</span>
-      </span>
-      <span class="time">${dp[0].label}</span>
-    `;
+    const entry1 = this.legendEntry(dp[0]);
+    const entry2 = this.legendEntry(dp[1]);
+    const time = document.createElement("span");
+    time.classList.add("time");
+    time.innerText = dp[0].label;
+
+    this.legend.replaceChildren(entry1, entry2, time)
+  }
+
+  legendEntry(dp) {
+    const wrapper = document.createElement("span");
+
+    const swatch = document.createElement("span");
+    swatch.classList.add("swatch");
+    swatch.style.backgroundColor = dp.dataset.borderColor;
+    wrapper.appendChild(swatch)
+    
+    const label = document.createElement("span");
+    label.innerText = `${dp.dataset.label}: ${dp.formattedValue}`;
+    wrapper.appendChild(label)
+    return wrapper;
   }
 
   renderCursor(dp) {

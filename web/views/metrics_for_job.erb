@@ -1,6 +1,6 @@
-<script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js"></script>
-<script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js"></script>
-<script type="text/javascript" src="<%= root_path %>javascripts/base-charts.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js" nonce="<%= csp_nonce %>"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js" nonce="<%= csp_nonce %>"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/base-charts.js" nonce="<%= csp_nonce %>"></script>
 
 <%
   job_result = @query_result.job_results[@name]
@@ -56,4 +56,4 @@
   <div class="alert alert-success"><%= t('NoJobMetricsFound') %></div>
 <% end %>
 
-<script type="text/javascript" src="<%= root_path %>javascripts/metrics.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/metrics.js" nonce="<%= csp_nonce %>"></script>

@@ -1,6 +1,6 @@
-<script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js"></script>
-<script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js"></script>
-<script type="text/javascript" src="<%= root_path %>javascripts/base-charts.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js" nonce="<%= csp_nonce %>"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js" nonce="<%= csp_nonce %>"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/base-charts.js" nonce="<%= csp_nonce %>"></script>
 
 <div class="header-container">
   <div class="page-title-container">
@@ -88,4 +88,4 @@
 
 <!--p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p-->
 
-<script type="text/javascript" src="<%= root_path %>javascripts/metrics.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/metrics.js" nonce="<%= csp_nonce %>"></script>

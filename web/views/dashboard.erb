@@ -1,4 +1,4 @@
-<script type="text/javascript" src="<%= root_path %>javascripts/dashboard.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/dashboard.js" nonce="<%= csp_nonce %>"></script>
 <div class= "dashboard clearfix">
   <h3 >
     <%= t('Dashboard') %>
@@ -99,7 +99,7 @@
   </div>
 </div>
 
-<script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js"></script>
-<script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js"></script>
-<script type="text/javascript" src="<%= root_path %>javascripts/base-charts.js"></script>
-<script type="text/javascript" src="<%= root_path %>javascripts/dashboard-charts.js"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js" nonce="<%= csp_nonce %>"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js" nonce="<%= csp_nonce %>"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/base-charts.js" nonce="<%= csp_nonce %>"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/dashboard-charts.js" nonce="<%= csp_nonce %>"></script>

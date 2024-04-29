@@ -5,7 +5,8 @@ module Sidekiq
     extend WebRouter
 
     REDIS_KEYS = %w[redis_version uptime_in_days connected_clients used_memory_human used_memory_peak_human]
-    CSP_HEADER = [
+    NONCE_PLACEHOLDER = "nonce-placeholder"
+    CSP_HEADER_TEMPLATE = [
       "default-src 'self' https: http:",
       "child-src 'self'",
       "connect-src 'self' https: http: wss: ws:",
@@ -15,8 +16,8 @@ module Sidekiq
       "manifest-src 'self'",
       "media-src 'self'",
       "object-src 'none'",
-      "script-src 'self' https: http:",
-      "style-src 'self' https: http: 'unsafe-inline'",
+      "script-src 'self' 'nonce-#{NONCE_PLACEHOLDER}'",
+      "style-src 'self' 'nonce-#{NONCE_PLACEHOLDER}'",
       "worker-src 'self'",
       "base-uri 'self'"
     ].join("; ").freeze
@@ -428,11 +429,15 @@ module Sidekiq
           Rack::CONTENT_TYPE => "text/html",
           Rack::CACHE_CONTROL => "private, no-store",
           Web::CONTENT_LANGUAGE => action.locale,
-          Web::CONTENT_SECURITY_POLICY => CSP_HEADER
+          Web::CONTENT_SECURITY_POLICY => process_csp(env, CSP_HEADER_TEMPLATE)
         }
         # we'll let Rack calculate Content-Length for us.
         [200, headers, [resp]]
       end
+    end
+
+    def process_csp(env, input)
+      input.gsub(NONCE_PLACEHOLDER, env[:csp_nonce])
     end
 
     def self.helpers(mod = nil, &block)
