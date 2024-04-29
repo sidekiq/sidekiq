@@ -5,7 +5,6 @@ module Sidekiq
     extend WebRouter
 
     REDIS_KEYS = %w[redis_version uptime_in_days connected_clients used_memory_human used_memory_peak_human]
-    NONCE_PLACEHOLDER = "nonce-placeholder"
     CSP_HEADER_TEMPLATE = [
       "default-src 'self' https: http:",
       "child-src 'self'",
@@ -16,8 +15,8 @@ module Sidekiq
       "manifest-src 'self'",
       "media-src 'self'",
       "object-src 'none'",
-      "script-src 'self' 'nonce-#{NONCE_PLACEHOLDER}'",
-      "style-src 'self' 'nonce-#{NONCE_PLACEHOLDER}'",
+      "script-src 'self' 'nonce-!placeholder!'",
+      "style-src 'self' 'nonce-!placeholder!'",
       "worker-src 'self'",
       "base-uri 'self'"
     ].join("; ").freeze
@@ -437,7 +436,7 @@ module Sidekiq
     end
 
     def process_csp(env, input)
-      input.gsub(NONCE_PLACEHOLDER, env[:csp_nonce])
+      input.gsub("!placeholder!", env[:csp_nonce])
     end
 
     def self.helpers(mod = nil, &block)
