@@ -15,7 +15,7 @@ module Sidekiq
       # so extensions can be localized
       @strings[lang] ||= settings.locales.each_with_object({}) do |path, global|
         find_locale_files(lang).each do |file|
-          strs = YAML.safe_load(File.read(file))
+          strs = YAML.safe_load(File.read(file))&.with_indifferent_access
           global.merge!(strs[lang])
         end
       end
