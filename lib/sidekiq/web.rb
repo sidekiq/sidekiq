@@ -5,7 +5,6 @@ require "erb"
 require "sidekiq"
 require "sidekiq/api"
 require "sidekiq/paginator"
-require "sidekiq/web/public_helpers"
 require "sidekiq/web/helpers"
 
 require "sidekiq/web/router"
@@ -166,7 +165,6 @@ module Sidekiq
   end
 
   Sidekiq::WebApplication.helpers WebHelpers
-  Sidekiq::WebApplication.helpers PublicWebHelpers
   Sidekiq::WebApplication.helpers Sidekiq::Paginator
 
   Sidekiq::WebAction.class_eval <<-RUBY, __FILE__, __LINE__ + 1
