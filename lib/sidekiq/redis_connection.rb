@@ -8,7 +8,7 @@ module Sidekiq
   module RedisConnection
     class << self
       def create(options = {})
-        symbolized_options = options.transform_keys(&:to_sym)
+        symbolized_options = deep_symbolize_keys(options)
         symbolized_options[:url] ||= determine_redis_provider
 
         logger = symbolized_options.delete(:logger)
@@ -26,6 +26,19 @@ module Sidekiq
       end
 
       private
+
+      def deep_symbolize_keys(object)
+        case object
+        when Hash
+          object.each_with_object({}) do |(key, value), result|
+            result[key.to_sym] = deep_symbolize_keys(value)
+          end
+        when Array
+          object.map { |e| deep_symbolize_keys(e) }
+        else
+          object
+        end
+      end
 
       def scrub(options)
         redacted = "REDACTED"
