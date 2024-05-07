@@ -90,13 +90,9 @@ module Sidekiq
         opts.delete(:network_timeout)
       end
 
-      if opts[:driver]
-        opts[:driver] = opts[:driver].to_sym
-      end
-
       opts[:name] = opts.delete(:master_name) if opts.key?(:master_name)
       opts[:role] = opts[:role].to_sym if opts.key?(:role)
-      opts.delete(:url) if opts.key?(:sentinels)
+      opts[:driver] = opts[:driver].to_sym if opts.key?(:driver)
 
       # Issue #3303, redis-rb will silently retry an operation.
       # This can lead to duplicate jobs if Sidekiq::Client's LPUSH
