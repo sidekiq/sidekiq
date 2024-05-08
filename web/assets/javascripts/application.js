@@ -34,6 +34,7 @@ function addListeners() {
   addShiftClickListeners()
   updateFuzzyTimes();
   updateNumbers();
+  updateProgressBars();
   setLivePollFromUrl();
 
   var buttons = document.querySelectorAll(".live-poll");
@@ -180,4 +181,8 @@ function showError(error) {
 
 function updateLocale(event) {
   event.target.form.submit();
-};
+}
+
+function updateProgressBars() {
+  document.querySelectorAll('.progress-bar').forEach(bar => { bar.style.width = bar.dataset.width + "%"})
+}

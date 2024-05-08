@@ -72,6 +72,14 @@ h1, h2, h3 {
   line-height: 45px;
 }
 
+.progress {
+  margin-bottom: 0;
+}
+
+.w-50 {
+  width: 50%;
+}
+
 .header-container, .header-container .page-title-container {
   display: flex;
   justify-content: space-between;
