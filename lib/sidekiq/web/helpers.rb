@@ -267,6 +267,10 @@ module Sidekiq
       "<input type='hidden' name='authenticity_token' value='#{env[:csrf_token]}'/>"
     end
 
+    def csp_nonce
+      env[:csp_nonce]
+    end
+
     def to_display(arg)
       arg.inspect
     rescue

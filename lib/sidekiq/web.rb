@@ -114,6 +114,7 @@ module Sidekiq
     end
 
     def call(env)
+      env[:csp_nonce] = SecureRandom.base64(16)
       app.call(env)
     end
 
