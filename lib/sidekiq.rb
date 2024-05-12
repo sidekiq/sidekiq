@@ -32,6 +32,7 @@ require "sidekiq/logger"
 require "sidekiq/client"
 require "sidekiq/transaction_aware_client"
 require "sidekiq/job"
+require "sidekiq/job/iterable"
 require "sidekiq/worker_compatibility_alias"
 require "sidekiq/redis_client_adapter"
 
@@ -47,6 +48,11 @@ module Sidekiq
 
   def self.server?
     defined?(Sidekiq::CLI)
+  end
+
+  class << self
+    attr_accessor :stopping
+    alias_method :stopping?, :stopping
   end
 
   def self.load_json(string)
@@ -142,6 +148,12 @@ module Sidekiq
   # otherwise Ruby's Thread#kill will commit.  See #377.
   # DO NOT RESCUE THIS ERROR IN YOUR JOBS
   class Shutdown < Interrupt; end
+end
+
+Sidekiq.configure_server do |config|
+  config.on(:quiet) do
+    Sidekiq.stopping = true
+  end
 end
 
 require "sidekiq/rails" if defined?(::Rails::Engine)

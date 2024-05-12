@@ -17,6 +17,10 @@ module Sidekiq
       poll_interval_average: nil,
       average_scheduled_poll_interval: 5,
       on_complex_arguments: :raise,
+      iteration: {
+        max_job_runtime: nil,
+        retry_backoff: 0
+      },
       error_handlers: [],
       death_handlers: [],
       lifecycle_events: {
@@ -52,7 +56,7 @@ module Sidekiq
       @capsules = {}
     end
 
-    def_delegators :@options, :[], :[]=, :fetch, :key?, :has_key?, :merge!
+    def_delegators :@options, :[], :[]=, :fetch, :key?, :has_key?, :merge!, :dig
     attr_reader :capsules
 
     def to_json(*)
