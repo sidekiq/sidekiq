@@ -112,7 +112,7 @@ module Sidekiq
   #   end
   #   inst.run
   #   sleep 10
-  #   inst.terminate
+  #   inst.stop
   #
   # NB: it is really easy to overload a Ruby process with threads due to the GIL.
   # I do not recommend setting concurrency higher than 2-3.
