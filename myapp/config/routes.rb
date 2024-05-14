@@ -2,6 +2,7 @@
 ENV["SIDEKIQ_WEB_TESTING"] = "1"
 
 require "sidekiq/web"
+require "sidekiq-redis_info/web"
 Sidekiq::Web.app_url = "/"
 
 Rails.application.routes.draw do

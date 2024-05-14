@@ -139,7 +139,11 @@ module Sidekiq
       send(:"#{attribute}=", value)
     end
 
-    def self.register(extension)
+    # TODO tab and index will be mandatory in 8.0
+    def self.register(extension, tab: nil, index: nil, asset_dir: nil, locale_dir: nil)
+      tabs[tab] = index if tab && index
+      locales << locale_dir if locale_dir
+      yield self if block_given?
       extension.registered(WebApplication)
     end
 
@@ -157,7 +161,9 @@ module Sidekiq
           root: ASSETS,
           cascade: true,
           header_rules: rules
-        m.each { |middleware, block| use(*middleware, &block) }
+        m.each do |middleware, block|
+          use(*middleware, &block)
+        end
         use Sidekiq::Web::CsrfProtection unless $TESTING
         run WebApplication.new(klass)
       end

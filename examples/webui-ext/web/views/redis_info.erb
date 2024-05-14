@@ -1,0 +1,24 @@
+<link href="<%= root_path %>redis_info/css/ext.css" media="screen" rel="stylesheet" type="text/css" nonce="<%= csp_nonce %>" />
+
+<div class="header-container">
+  <h1><%= t('Redis') %></h1>
+</div>
+
+<div class="table_container">
+  <table class="table table-hover table-bordered table-striped table-condensed">
+    <thead>
+      <th class="keys" data-width="25"><%= t('Key') %></th>
+      <th class="values"><%= t('Value') %></th>
+    </thead>
+    <tbody>
+      <% @info.each do |k, v| %>
+      <tr>
+        <td><%= h k %></td>
+        <td><%= h v %></td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<script type="text/javascript" src="<%= root_path %>redis_info/js/ext.js" nonce="<%= csp_nonce %>"></script>

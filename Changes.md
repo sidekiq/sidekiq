@@ -2,6 +2,16 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+HEAD (7.3.0)
+----------
+
+- Allow `Sidekiq::Limiter.redis` to use Redis Cluster [#6288]
+- Adjust CSP to disallow inline styling and scripts within the Web UI [#6270]
+  This should make Sidekiq immune to future XSS attacks. 3rd party extensions
+  will need to adjust their web assets accordingly.
+- Add config option, `:skip_default_job_logging` to disable Sidekiq's default
+  start/finish job logging. [#6200]
+
 7.2.4
 ----------
 
