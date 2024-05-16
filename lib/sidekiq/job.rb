@@ -366,8 +366,30 @@ module Sidekiq
 
       def build_client # :nodoc:
         pool = Thread.current[:sidekiq_redis_pool] || get_sidekiq_options["pool"] || Sidekiq.default_configuration.redis_pool
-        client_class = get_sidekiq_options["client_class"] || Sidekiq::Client
+        client_class = Thread.current[:sidekiq_client_class] || get_sidekiq_options["client_class"] || Sidekiq::Client
         client_class.new(pool: pool)
+      end
+
+      # Allows to override the client class used by jobs
+      # enqueued from within the block.
+      #
+      #  MyJob.via_client(CustomClient) do
+      #    MyOtherJob.perform_async(1,2,3)
+      #    SomeJob.perform_bulk([[1], [2], [3]])
+      #    MyJob.perform_async(1,2,3)
+      #  end
+      #
+      # This is useful when you want to use a custom client class
+      # in an ad-hoc manner in a specific context, while still
+      # using the default client class for the rest of the application.
+      def via_client(client_class)
+        raise ArgumentError, "No client override given" if client_class.nil?
+
+        Thread.current[:sidekiq_client_class] = client_class
+
+        yield
+      ensure
+        Thread.current[:sidekiq_client_class] = nil
       end
     end
   end

@@ -146,4 +146,75 @@ describe Sidekiq::Job do
       assert_equal $my_recorder.flatten, %w[1-client-before 1-client-after 1-server-before work_performed 1-server-after]
     end
   end
+
+  describe "#via_client" do
+    context "when called in the context of a thread" do
+      it "overrides the client for the duration of the block in an isolated manner" do
+        client_class_override = Class.new do
+          def initialize(pool:)
+            @pool = pool
+          end
+        end
+
+        thread = Thread.new do
+          MyCustomJob.via_client(client_class_override) do
+            assert_equal client_class_override, MyCustomJob.build_client.class
+            assert_equal client_class_override, MySetJob.build_client.class
+
+            inner_thread = Thread.new do
+              assert_equal Sidekiq::Client, MyCustomJob.build_client.class
+              assert_equal Sidekiq::Client, MySetJob.build_client.class
+            end
+
+            inner_thread.join
+
+            assert_equal client_class_override, MyCustomJob.build_client.class
+            assert_equal client_class_override, MySetJob.build_client.class
+          end
+
+          assert_equal Sidekiq::Client, MyCustomJob.build_client.class
+          assert_equal Sidekiq::Client, MySetJob.build_client.class
+        end
+
+        thread.join
+      end
+    end
+
+    context "when called in the context of a fiber" do
+      it "overrides the client for the duration of the block in an isolated manner" do
+        client_class_override = Class.new do
+          def initialize(pool:)
+            @pool = pool
+          end
+        end
+
+        fiber = Fiber.new do
+          MyCustomJob.via_client(client_class_override) do
+            assert_equal client_class_override, MyCustomJob.build_client.class
+            assert_equal client_class_override, MySetJob.build_client.class
+
+            inner_fiber = Fiber.new do
+              assert_equal Sidekiq::Client, MyCustomJob.build_client.class
+              assert_equal Sidekiq::Client, MySetJob.build_client.class
+
+              Fiber.yield
+            end
+
+            inner_fiber.resume
+
+            assert_equal client_class_override, MyCustomJob.build_client.class
+            assert_equal client_class_override, MySetJob.build_client.class
+          end
+
+          assert_equal Sidekiq::Client, MyCustomJob.build_client.class
+          assert_equal Sidekiq::Client, MySetJob.build_client.class
+        end
+
+        fiber.resume
+
+        assert_equal Sidekiq::Client, MyCustomJob.build_client.class
+        assert_equal Sidekiq::Client, MySetJob.build_client.class
+      end
+    end
+  end
 end
