@@ -6,8 +6,8 @@ require "yaml"
 require "cgi"
 
 module Sidekiq
-  # These are not public APIs for applications to use.
   # These methods are available to pages within the Web UI and UI extensions.
+  # They are not public APIs for applications to use.
   module WebHelpers
     def style_tag(location, **kwargs)
       global = location.match?(/:\/\//)
@@ -33,6 +33,8 @@ module Sidekiq
       html_tag(:script, attrs.merge(kwargs)) {}
     end
 
+    # NB: keys and values are not escaped; do not allow user input
+    # in the attributes
     private def html_tag(tagname, attrs)
       s = "<#{tagname}"
       attrs.each_pair do |k, v|

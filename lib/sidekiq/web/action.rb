@@ -45,9 +45,9 @@ module Sidekiq
     end
 
     def erb(content, options = {})
-      views = options[:views] || Web.settings.views
       if content.is_a? Symbol
         unless respond_to?(:"_erb_#{content}")
+          views = options[:views] || Web.settings.views
           src = ERB.new(File.read("#{views}/#{content}.erb")).src
           WebAction.class_eval <<-RUBY, __FILE__, __LINE__ + 1
             def _erb_#{content}

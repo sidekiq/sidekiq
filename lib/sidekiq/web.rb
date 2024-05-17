@@ -148,7 +148,7 @@ module Sidekiq
     # @param index [String | Array] index route(s) for each tab
     # @param root_dir [String] directory location to find assets, locales and views, typically `web/` within the gemfile
     # @param asset_paths [Array] one or more directories under {root}/assets/{name} to be publicly served, e.g. ["js", "css", "img"]
-    # @param cache_for [Integer] amount of time to cache assets for, default one day
+    # @param cache_for [Integer] amount of time to cache assets, default one day
     #
     # TODO name, tab and index will be mandatory in 8.0
     #
@@ -200,9 +200,7 @@ module Sidekiq
           root: ASSETS,
           cascade: true,
           header_rules: rules
-        m.each do |middleware, block|
-          use(*middleware, &block)
-        end
+        m.each { |middleware, block| use(*middleware, &block) }
         use Sidekiq::Web::CsrfProtection unless $TESTING
         run WebApplication.new(klass)
       end
