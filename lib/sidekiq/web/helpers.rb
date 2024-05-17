@@ -6,7 +6,7 @@ require "yaml"
 require "cgi"
 
 module Sidekiq
-  # This is not a public API for applications to use.
+  # These are not public APIs for applications to use.
   # These methods are available to pages within the Web UI and UI extensions.
   module WebHelpers
     def style_tag(location, **kwargs)
