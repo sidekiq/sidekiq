@@ -48,7 +48,6 @@ module Sidekiq
       else
         s << " />"
       end
-      puts s
       s
     end
 
