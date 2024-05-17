@@ -5,12 +5,13 @@
 HEAD (7.3.0)
 ----------
 
-- Allow `Sidekiq::Limiter.redis` to use Redis Cluster [#6288]
-- Adjust CSP to disallow inline styling and scripts within the Web UI [#6270]
-  This should make Sidekiq immune to future XSS attacks. 3rd party extensions
-  will need to adjust their web assets accordingly.
+- **SECURITY** The Web UI no longer allows extensions to use `<script>`.
+  Adjust CSP to disallow inline scripts within the Web UI. Please see
+  `examples/webui-ext` for how to register Web UI extensions and use
+  dynamic CSS and JS. This will make Sidekiq immune to XSS attacks. [#6270]
 - Add config option, `:skip_default_job_logging` to disable Sidekiq's default
   start/finish job logging. [#6200]
+- Allow `Sidekiq::Limiter.redis` to use Redis Cluster [#6288]
 
 7.2.4
 ----------
