@@ -571,4 +571,54 @@ describe Sidekiq::Client do
     assert_equal job_count, jids.size
     assert_equal times, jids.map { |jid| Sidekiq::ScheduledSet.new.find_job(jid).at }
   end
+
+  describe "retry after Redis error" do
+    it "retries scheduled jobs correctly" do
+      aggregator = Hash.new do |hash, key|
+        hash[key] = Hash.new do |inner_hash, inner_key|
+          inner_hash[inner_key] = []
+        end
+      end
+
+      aggregator[:raised_once] = false
+
+      pool = Sidekiq::RedisConnection.create(size: 1)
+
+      pool.with do |conn|
+        pipeline = Object.new
+
+        conn.define_singleton_method(:pipelined) do |&block|
+          block.call(pipeline)
+        end
+
+        pipeline.define_singleton_method(:zadd) do |set, payloads|
+          if aggregator[:raised_once] == false
+            aggregator[:raised_once] = true
+            raise RedisClient::Error, "READONLY"
+          else
+            aggregator[:zadd][set].push(*payloads)
+          end
+        end
+
+        pipeline.define_singleton_method(:sadd) do |set, elements|
+          aggregator[:sadd][set].push(*elements)
+        end
+
+        pipeline.define_singleton_method(:lpush) do |list, elements|
+          aggregator[:lpush][list].push(*elements)
+        end
+      end
+
+      Sidekiq::Client.via(pool) do
+        client = Sidekiq::Client.new
+        client.push_bulk("class" => MyJob, "args" => (1..10).map { [_1] }, "at" => 10)
+      end
+
+      # 20 since the array of [at, dumped_payload] elements gets flattened.
+      assert_equal 20, aggregator[:zadd]["schedule"].size
+      assert_equal [], aggregator[:sadd]["queues"]
+      assert_equal 0, aggregator[:lpush]["queue:default"].size
+      assert_equal true, aggregator[:raised_once]
+    end
+  end
 end
