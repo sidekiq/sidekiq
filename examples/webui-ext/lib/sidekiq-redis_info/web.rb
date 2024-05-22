@@ -26,7 +26,6 @@ Sidekiq::Web.register(SidekiqExt::RedisInfo::Web,
   tab: ["Redis"],              # The name on your Tab(s)
   index: ["redis_info"],       # The path to the root page(s) of your extension within the Web UI, usually "/sidekiq/" + index
   root_dir: SidekiqExt::RedisInfo::Web::ROOT,
-  asset_paths: ["css", "js"]   # Paths within {root}/assets/{name} to serve static assets
-) do |app|
+  asset_paths: ["css", "js"]) do |app|   # Paths within {root}/assets/{name} to serve static assets
   # you can add your own middleware or additional settings here
 end
