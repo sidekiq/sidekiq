@@ -15,3 +15,5 @@ gem "sidekiq", path: ".."
 gem "sqlite3"
 
 gem "after_commit_everywhere"
+
+gem "sidekiq-redis_info", path: "../examples/webui-ext"

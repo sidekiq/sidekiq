@@ -6,8 +6,51 @@ require "yaml"
 require "cgi"
 
 module Sidekiq
-  # This is not a public API
+  # These methods are available to pages within the Web UI and UI extensions.
+  # They are not public APIs for applications to use.
   module WebHelpers
+    def style_tag(location, **kwargs)
+      global = location.match?(/:\/\//)
+      location = root_path + location if !global && !location.start_with?(root_path)
+      attrs = {
+        type: "text/css",
+        media: "screen",
+        rel: "stylesheet",
+        nonce: csp_nonce,
+        href: location
+      }
+      html_tag(:link, attrs.merge(kwargs))
+    end
+
+    def script_tag(location, **kwargs)
+      global = location.match?(/:\/\//)
+      location = root_path + location if !global && !location.start_with?(root_path)
+      attrs = {
+        type: "text/javascript",
+        nonce: csp_nonce,
+        src: location
+      }
+      html_tag(:script, attrs.merge(kwargs)) {}
+    end
+
+    # NB: keys and values are not escaped; do not allow user input
+    # in the attributes
+    private def html_tag(tagname, attrs)
+      s = "<#{tagname}"
+      attrs.each_pair do |k, v|
+        next unless v
+        s << " #{k}=\"#{v}\""
+      end
+      if block_given?
+        s << ">"
+        yield s
+        s << "</#{tagname}>"
+      else
+        s << " />"
+      end
+      s
+    end
+
     def strings(lang)
       @strings ||= {}
 

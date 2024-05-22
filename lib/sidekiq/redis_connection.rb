@@ -15,6 +15,10 @@ module Sidekiq
         logger&.info { "Sidekiq #{Sidekiq::VERSION} connecting to Redis with options #{scrub(symbolized_options)}" }
 
         raise "Sidekiq 7+ does not support Redis protocol 2" if symbolized_options[:protocol] == 2
+
+        safe = !!symbolized_options.delete(:cluster_safe)
+        raise ":nodes not allowed, Sidekiq is not safe to run on Redis Cluster" if !safe && symbolized_options.key?(:nodes)
+
         size = symbolized_options.delete(:size) || 5
         pool_timeout = symbolized_options.delete(:pool_timeout) || 1
         pool_name = symbolized_options.delete(:pool_name)

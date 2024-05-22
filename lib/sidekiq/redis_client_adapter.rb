@@ -64,6 +64,13 @@ module Sidekiq
       opts = client_opts(options)
       @config = if opts.key?(:sentinels)
         RedisClient.sentinel(**opts)
+      elsif opts.key?(:nodes)
+        # Sidekiq does not support Redis clustering but Sidekiq Enterprise's
+        # rate limiters are cluster-safe so we can scale to millions
+        # of rate limiters using a Redis cluster. This requires the
+        # `redis-cluster-client` gem.
+        # Sidekiq::Limiter.redis = { nodes: [...] }
+        RedisClient.cluster(**opts)
       else
         RedisClient.config(**opts)
       end
