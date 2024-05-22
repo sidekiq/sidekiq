@@ -36,7 +36,7 @@ module Sidekiq
       @job = nil
       @thread = nil
       @reloader = Sidekiq.default_configuration[:reloader]
-      @job_logger = (capsule.config[:job_logger] || Sidekiq::JobLogger).new(logger)
+      @job_logger = (capsule.config[:job_logger] || Sidekiq::JobLogger).new(capsule.config)
       @retrier = Sidekiq::JobRetry.new(capsule)
     end
 
@@ -56,6 +56,10 @@ module Sidekiq
       # timeout passes.
       @thread.raise ::Sidekiq::Shutdown
       @thread.value if wait
+    end
+
+    def stopping?
+      @done
     end
 
     def start
@@ -136,6 +140,7 @@ module Sidekiq
                 klass = Object.const_get(job_hash["class"])
                 inst = klass.new
                 inst.jid = job_hash["jid"]
+                inst.lifecycle = self if inst.is_a?(Job::Iterable)
                 @retrier.local(inst, jobstr, queue) do
                   yield inst
                 end

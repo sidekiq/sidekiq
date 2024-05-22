@@ -17,6 +17,7 @@ gem "sqlite3", "~> 1.4", platforms: :ruby
 gem "activerecord-jdbcsqlite3-adapter", platforms: :jruby
 gem "after_commit_everywhere", require: false
 gem "yard"
+gem "csv"
 
 group :test do
   gem "maxitest"

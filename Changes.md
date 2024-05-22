@@ -12,6 +12,7 @@ HEAD (7.3.0)
 - Add config option, `:skip_default_job_logging` to disable Sidekiq's default
   start/finish job logging. [#6200]
 - Allow `Sidekiq::Limiter.redis` to use Redis Cluster [#6288]
+- Add iteration support for long-running jobs [#6286, fatkodima]
 
 7.2.4
 ----------

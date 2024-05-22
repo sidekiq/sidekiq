@@ -69,7 +69,11 @@ module Sidekiq
         # In practice, any option is allowed.  This is the main mechanism to configure the
         # options for a specific job.
         def sidekiq_options(opts = {})
-          opts = opts.transform_keys(&:to_s) # stringify
+          # stringify 2 levels of keys
+          opts = opts.to_h do |k, v|
+            [k.to_s, (Hash === v) ? v.transform_keys(&:to_s) : v]
+          end
+
           self.sidekiq_options_hash = get_sidekiq_options.merge(opts)
         end
 
