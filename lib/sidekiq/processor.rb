@@ -58,6 +58,10 @@ module Sidekiq
       @thread.value if wait
     end
 
+    def stopping?
+      @done
+    end
+
     def start
       @thread ||= safe_thread("#{config.name}/processor", &method(:run))
     end
@@ -136,6 +140,7 @@ module Sidekiq
                 klass = Object.const_get(job_hash["class"])
                 inst = klass.new
                 inst.jid = job_hash["jid"]
+                inst.lifecycle = self if inst.is_a?(Job::Iterable)
                 @retrier.local(inst, jobstr, queue) do
                   yield inst
                 end

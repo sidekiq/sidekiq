@@ -7,15 +7,6 @@ require "sidekiq/transaction_aware_client"
 
 require_relative "dummy/config/environment"
 
-class Schema < ActiveRecord::Migration["6.1"]
-  def change
-    create_table :posts do |t|
-      t.string :title
-      t.date :published_date
-    end
-  end
-end
-
 class PostJob
   include Sidekiq::Job
   def perform
@@ -46,11 +37,14 @@ class Post < ActiveRecord::Base
   end
 end
 
-unless Post.connection.tables.include? "posts"
-  Schema.new.change
-end
-
 describe Sidekiq::TransactionAwareClient do
+  before(:all) do
+    Post.connection.create_table(:posts, force: true) do |t|
+      t.string :title
+      t.date :published_date
+    end
+  end
+
   before do
     @config = reset!
     @app = Dummy::Application.new

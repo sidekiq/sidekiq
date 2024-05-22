@@ -18,6 +18,19 @@ class MockJob
   end
 end
 
+class MockIterableJob
+  include Sidekiq::Job
+  include Sidekiq::Job::Iterable
+
+  def build_enumerator(cursor:)
+    array_enumerator((1..10).to_a, cursor: cursor)
+  end
+
+  def each_iteration(_number)
+    $invokes += 1
+  end
+end
+
 class ExceptionRaisingMiddleware
   def initialize(raise_before_yield, raise_after_yield, skip)
     @raise_before_yield = raise_before_yield
@@ -72,6 +85,12 @@ describe Sidekiq::Processor do
     msg = Sidekiq.dump_json({"class" => MockJob.to_s, "args" => ["myarg"]})
     @processor.process(work(msg))
     assert_equal 1, $invokes
+  end
+
+  it "processes iterable job as expected" do
+    msg = Sidekiq.dump_json({"class" => MockIterableJob.to_s})
+    @processor.process(work(msg))
+    assert_equal 10, $invokes
   end
 
   it "executes a worker as expected" do
