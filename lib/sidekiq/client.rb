@@ -248,10 +248,10 @@ module Sidekiq
     def atomic_push(conn, payloads)
       if payloads.first.key?("at")
         conn.zadd("schedule", payloads.flat_map { |hash|
-          at = hash.delete("at").to_s
+          at = hash["at"].to_s
           # ActiveJob sets this but the job has not been enqueued yet
           hash.delete("enqueued_at")
-          [at, Sidekiq.dump_json(hash)]
+          [at, Sidekiq.dump_json(hash.except("at"))]
         })
       else
         queue = payloads.first["queue"]
