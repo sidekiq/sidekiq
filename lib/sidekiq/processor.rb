@@ -58,6 +58,10 @@ module Sidekiq
       @thread.value if wait
     end
 
+    def stopping?
+      @done
+    end
+
     def start
       @thread ||= safe_thread("#{config.name}/processor", &method(:run))
     end
@@ -79,7 +83,10 @@ module Sidekiq
 
     def process_one(&block)
       @job = fetch
-      process(@job) if @job
+      if @job
+        @job.lifecycle = self if @job.is_a?(Job::Iterable)
+        process(@job)
+      end
       @job = nil
     end
 

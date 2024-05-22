@@ -50,11 +50,6 @@ module Sidekiq
     defined?(Sidekiq::CLI)
   end
 
-  class << self
-    attr_accessor :stopping
-    alias_method :stopping?, :stopping
-  end
-
   def self.load_json(string)
     JSON.parse(string)
   end
@@ -148,12 +143,6 @@ module Sidekiq
   # otherwise Ruby's Thread#kill will commit.  See #377.
   # DO NOT RESCUE THIS ERROR IN YOUR JOBS
   class Shutdown < Interrupt; end
-end
-
-Sidekiq.configure_server do |config|
-  config.on(:quiet) do
-    Sidekiq.stopping = true
-  end
 end
 
 require "sidekiq/rails" if defined?(::Rails::Engine)

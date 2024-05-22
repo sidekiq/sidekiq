@@ -10,6 +10,7 @@ class SimpleIterableJob
   cattr_accessor :on_resume_called, default: 0
   cattr_accessor :on_shutdown_called, default: 0
   cattr_accessor :on_complete_called, default: 0
+  cattr_accessor :lifecycle
 
   def on_start
     self.class.on_start_called += 1

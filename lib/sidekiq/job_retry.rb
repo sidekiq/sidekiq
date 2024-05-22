@@ -116,7 +116,7 @@ module Sidekiq
     rescue Sidekiq::Shutdown => ey
       # ignore, will be pushed back onto queue during hard_shutdown
       raise ey
-    rescue Job::Iterable::Interrupted
+    rescue Job::Interrupted
       process_requeue(jobinst, jobstr)
       raise Skip
     rescue Exception => e
@@ -138,8 +138,9 @@ module Sidekiq
     private
 
     def process_requeue(jobinst, jobstr)
-      retry_backoff = jobinst.class.get_sidekiq_options.dig("iteration", "retry_backoff") ||
-        Sidekiq.default_configuration.dig(:iteration, :retry_backoff)
+      msg = Sidekiq.load_json(jobstr)
+      capsule = jobinst.lifecycle.capsule
+      retry_backoff = msg.dig("iteration", "retry_backoff") || capsule.config.dig(:iteration, :retry_backoff)
 
       redis do |conn|
         conn.zadd("schedule", retry_backoff, jobstr)

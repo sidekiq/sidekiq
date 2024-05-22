@@ -3,9 +3,9 @@
 require "csv"
 require "active_record"
 require "sidekiq"
-require "sidekiq/job_retry"
-require "sidekiq/capsule"
 require_relative "../helper"
+require "sidekiq/job_retry"
+require "sidekiq/processor"
 require_relative "iterable_jobs"
 require_relative "../dummy/config/environment"
 
@@ -21,6 +21,7 @@ describe Sidekiq::Job::Iterable do
 
   before do
     @config = reset!
+    @processor = ::Sidekiq::Processor.new(@config.default_capsule)
 
     require "sidekiq/testing"
     Sidekiq::Testing.fake!
@@ -34,6 +35,7 @@ describe Sidekiq::Job::Iterable do
       klass.on_complete_called = 0
       klass.jobs.clear
     end
+    SimpleIterableJob.lifecycle = @processor
     ArrayIterableJob.stop_after_iterations = nil
   end
 
@@ -214,7 +216,7 @@ describe Sidekiq::Job::Iterable do
 
     assert_equal [10, 11], ArrayIterableJob.iterated_objects
 
-    Sidekiq.stub(:stopping?, true) do
+    @processor.stub(:stopping?, true) do
       iterate_exact_times(ArrayIterableJob, 2, jid: jid)
       assert_equal [10, 11, 11], ArrayIterableJob.iterated_objects
     end
@@ -227,7 +229,7 @@ describe Sidekiq::Job::Iterable do
     old = Sidekiq::Config::DEFAULTS[:iteration][:max_job_runtime]
     Sidekiq::Config::DEFAULTS[:iteration][:max_job_runtime] = 0.01
 
-    assert_raises Sidekiq::Job::Iterable::Interrupted do
+    assert_raises Sidekiq::Job::Interrupted do
       LongRunningCustomConfigIterableJob.perform_inline
     end
   ensure
@@ -238,7 +240,7 @@ describe Sidekiq::Job::Iterable do
     old = Sidekiq::Config::DEFAULTS[:iteration][:max_job_runtime]
     Sidekiq::Config::DEFAULTS[:iteration][:max_job_runtime] = 10 # larger than per-job value
 
-    assert_raises Sidekiq::Job::Iterable::Interrupted do
+    assert_raises Sidekiq::Job::Interrupted do
       LongRunningCustomConfigIterableJob.perform_inline
     end
   ensure

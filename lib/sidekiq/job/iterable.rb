@@ -4,9 +4,9 @@ require_relative "iterable/enumerators"
 
 module Sidekiq
   module Job
-    module Iterable
-      class Interrupted < ::RuntimeError; end
+    class Interrupted < ::RuntimeError; end
 
+    module Iterable
       include Enumerators
 
       # @api private
@@ -24,6 +24,9 @@ module Sidekiq
           super
         end
       end
+
+      # @api private
+      attr_accessor :lifecycle
 
       # @api private
       def initialize
@@ -224,7 +227,7 @@ module Sidekiq
           Sidekiq.default_configuration.dig(:iteration, :max_job_runtime)
 
         ran_enough = max_job_runtime && @start_time && (Time.now - @start_time > max_job_runtime)
-        ran_enough || Sidekiq.stopping? || throttle?
+        ran_enough || lifecycle.stopping? || throttle?
       end
 
       def flush_state

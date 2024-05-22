@@ -34,7 +34,10 @@ module Sidekiq
           filepath = @csv.path
           return unless filepath
 
-          count = `wc -l < #{filepath}`.strip.to_i
+          count = IO.popen(["wc", "-l", filepath]) do |out|
+            out.read.strip.to_i
+          end
+
           count -= 1 if @csv.headers
           count
         end
