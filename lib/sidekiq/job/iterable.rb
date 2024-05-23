@@ -26,11 +26,6 @@ module Sidekiq
       end
 
       # @api private
-      # This gives access to Sidekiq's execution context
-      # so iteration can access methods like `stopping?`.
-      attr_accessor :_context
-
-      # @api private
       def initialize
         super
 
