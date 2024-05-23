@@ -140,7 +140,7 @@ module Sidekiq
                 klass = Object.const_get(job_hash["class"])
                 inst = klass.new
                 inst.jid = job_hash["jid"]
-                inst.lifecycle = self if inst.is_a?(Job::Iterable)
+                inst._context = self
                 @retrier.local(inst, jobstr, queue) do
                   yield inst
                 end

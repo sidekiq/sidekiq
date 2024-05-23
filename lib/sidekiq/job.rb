@@ -159,6 +159,9 @@ module Sidekiq
 
     attr_accessor :jid
 
+    # This attribute is implementation-specific and not a public API
+    attr_accessor :_context
+
     def self.included(base)
       raise ArgumentError, "Sidekiq::Job cannot be included in an ActiveJob: #{base.name}" if base.ancestors.any? { |c| c.name == "ActiveJob::Base" }
 
@@ -168,6 +171,10 @@ module Sidekiq
 
     def logger
       Sidekiq.logger
+    end
+
+    def stopping?
+      @_context&.stopping?
     end
 
     # This helper class encapsulates the set options for `set`, e.g.

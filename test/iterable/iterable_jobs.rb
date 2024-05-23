@@ -10,7 +10,7 @@ class SimpleIterableJob
   cattr_accessor :on_resume_called, default: 0
   cattr_accessor :on_shutdown_called, default: 0
   cattr_accessor :on_complete_called, default: 0
-  cattr_accessor :lifecycle
+  cattr_accessor :context
 
   def on_start
     self.class.on_start_called += 1
@@ -157,13 +157,6 @@ class AbortingIterableJob < ArrayIterableJob
 end
 
 class LongRunningIterableJob < ArrayIterableJob
-  def each_iteration(*)
-    sleep(0.01)
-  end
-end
-
-class LongRunningCustomConfigIterableJob < ArrayIterableJob
-  sidekiq_options iteration: {max_job_runtime: 0.01}
   def each_iteration(*)
     sleep(0.01)
   end

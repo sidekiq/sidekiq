@@ -18,7 +18,7 @@ module Sidekiq
       module ClassMethods
         def method_added(method_name)
           if method_name == :perform
-            raise "Job that is using Iterable (#{self}) cannot redefine #perform"
+            raise "Iterable Job (#{self}) cannot define #perform"
           end
 
           super
@@ -26,7 +26,9 @@ module Sidekiq
       end
 
       # @api private
-      attr_accessor :lifecycle
+      # This gives access to Sidekiq's execution context
+      # so iteration can access methods like `stopping?`.
+      attr_accessor :_context
 
       # @api private
       def initialize
@@ -180,14 +182,13 @@ module Sidekiq
           @cursor = cursor
           adjust_total_time
 
-          if Time.now - state_flushed_at >= STATE_FLUSH_INTERVAL || job_should_exit?
+          is_interrupted = interrupted?
+          if Time.now - state_flushed_at >= STATE_FLUSH_INTERVAL || is_interrupted
             flush_state
             state_flushed_at = Time.now
           end
 
-          if job_should_exit?
-            return false
-          end
+          return false if is_interrupted
         end
 
         logger.debug("Enumerator found nothing to iterate!") unless found_record
@@ -210,7 +211,7 @@ module Sidekiq
       def assert_enumerator!(enum)
         unless enum.is_a?(Enumerator)
           raise ArgumentError, <<~MSG
-            #build_enumerator is expected to return Enumerator object, but returned #{enum.class}.
+            #build_enumerator must return an Enumerator, but returned #{enum.class}.
             Example:
               def build_enumerator(params, cursor:)
                 active_record_records_enumerator(
@@ -222,12 +223,8 @@ module Sidekiq
         end
       end
 
-      def job_should_exit?
-        max_job_runtime = self.class.get_sidekiq_options.dig("iteration", "max_job_runtime") ||
-          Sidekiq.default_configuration.dig(:iteration, :max_job_runtime)
-
-        ran_enough = max_job_runtime && @start_time && (Time.now - @start_time > max_job_runtime)
-        ran_enough || lifecycle.stopping? || throttle?
+      def interrupted?
+        _context&.stopping? || throttle?
       end
 
       def flush_state
