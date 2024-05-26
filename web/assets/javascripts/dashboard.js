@@ -28,7 +28,7 @@ var pulseBeacon = function() {
 }
 
 var setSliderLabel = function(val) {
-  document.getElementById('sldr-text').innerText = Math.round(parseFloat(val) / 1000) + ' sec';
+  document.getElementById('sldr-text').innerText = Math.round(parseFloat(val) / 1000) + ' s';
 }
 
 var ready = (callback) => {
