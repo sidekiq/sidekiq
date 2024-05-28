@@ -95,7 +95,7 @@ describe Sidekiq::RedisConnection do
       it "uses the default network_timeout if none specified" do
         pool = Sidekiq::RedisConnection.create
         redis = pool.checkout
-        assert_equal 1.0, client_for(redis).read_timeout
+        assert_equal 3.0, client_for(redis).read_timeout
       end
     end
 
