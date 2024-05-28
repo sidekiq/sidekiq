@@ -13,6 +13,9 @@ HEAD (7.3.0)
   start/finish job logging. [#6200]
 - Allow `Sidekiq::Limiter.redis` to use Redis Cluster [#6288]
 - Add iteration support for long-running jobs [#6286, fatkodima]
+- Retain CurrentAttributeѕ after inline execution [#6307]
+- Raise default Redis {read,write,connect} timeouts from 1 to 3 seconds
+  to minimize ReadTimeoutErrors [#6162]
 
 7.2.4
 ----------

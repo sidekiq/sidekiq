@@ -46,22 +46,26 @@ module Sidekiq
       end
 
       def call(_, job, _, &block)
-        cattrs_to_reset = []
+        klass_attrs = {}
 
         @cattrs.each do |(key, strklass)|
-          if job.has_key?(key)
-            constklass = strklass.constantize
-            cattrs_to_reset << constklass
+          next unless job.has_key?(key)
 
-            job[key].each do |(attribute, value)|
-              constklass.public_send(:"#{attribute}=", value)
-            end
-          end
+          klass_attrs[strklass.constantize] = job[key]
         end
 
-        yield
-      ensure
-        cattrs_to_reset.each(&:reset)
+        wrap(klass_attrs.to_a, &block)
+      end
+
+      private
+
+      def wrap(klass_attrs, &block)
+        klass, attrs = klass_attrs.shift
+        return block.call unless klass
+
+        klass.set(attrs) do
+          wrap(klass_attrs, &block)
+        end
       end
     end
 
