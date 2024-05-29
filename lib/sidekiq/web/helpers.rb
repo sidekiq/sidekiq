@@ -166,7 +166,7 @@ module Sidekiq
     def locale
       # session[:locale] is set via the locale selector from the footer
       # defined?(session) && session are used to avoid exceptions when running tests
-      return session[:locale].to_s if defined?(session) && session&.[](:locale)
+      return session[:locale].to_s if defined?(session) && session&.[](:locale) && available_locales.include?(session[:locale].to_s)
 
       @locale ||= begin
         matched_locale = user_preferred_languages.map { |preferred|
