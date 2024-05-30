@@ -17,10 +17,7 @@ module Sidekiq
       # @api private
       module ClassMethods
         def method_added(method_name)
-          if method_name == :perform
-            raise "Iterable Job (#{self}) cannot define #perform"
-          end
-
+          raise "#{self} is an iterable job and must not define #perform" if method_name == :perform
           super
         end
       end

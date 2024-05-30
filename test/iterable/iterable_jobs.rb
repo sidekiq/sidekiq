@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 class SimpleIterableJob
-  include Sidekiq::Job
-  include Sidekiq::Job::Iterable
+  include Sidekiq::IterableJob
 
   cattr_accessor :iterated_objects, default: []
   cattr_accessor :on_start_called, default: 0

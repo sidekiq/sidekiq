@@ -29,8 +29,8 @@ describe Sidekiq::Job::Iterable do
       klass.on_resume_called = 0
       klass.on_shutdown_called = 0
       klass.on_complete_called = 0
-      klass.jobs.clear
     end
+    Sidekiq::Job.clear_all
     SimpleIterableJob.context = @context
     ArrayIterableJob.stop_after_iterations = nil
   end
@@ -70,7 +70,7 @@ describe Sidekiq::Job::Iterable do
         end
       end
     end
-    assert_match(/cannot define #perform/, e.message)
+    assert_match(/must not define #perform/, e.message)
   end
 
   it "skips the job if #build_enumerator returned nil" do
