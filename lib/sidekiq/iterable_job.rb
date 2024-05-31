@@ -24,13 +24,15 @@ require "sidekiq/job/iterable"
 #
 #     enum = ProcessUserSet#build_enumerator(123, cursor: updated_cursor)
 #
+# The cursor object must be serializable to JSON.
+#
 # Note there are several APIs to help you build enumerators for
 # ActiveRecord Relations, CSV files, etc. See sidekiq/job/iterable/*.rb.
 module Sidekiq
   module IterableJob
     def self.included(base)
-      base.send(:include, Sidekiq::Job)
-      base.send(:include, Sidekiq::Job::Iterable)
+      base.include Sidekiq::Job
+      base.include Sidekiq::Job::Iterable
     end
 
     # def build_enumerator(*args, cursor:)
