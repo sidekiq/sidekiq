@@ -26,11 +26,11 @@ module Sidekiq
       def initialize
         super
 
-        @executions = 0
-        @cursor = nil
-        @times_interrupted = 0
-        @start_time = nil
-        @total_time = 0
+        @_executions = 0
+        @_cursor = nil
+        @_times_interrupted = 0
+        @_start_time = nil
+        @_total_time = 0
       end
 
       # A hook to override that will be called when the job starts iterating.
@@ -111,10 +111,10 @@ module Sidekiq
       def perform(*arguments)
         fetch_previous_iteration_state
 
-        @executions += 1
-        @start_time = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+        @_executions += 1
+        @_start_time = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
 
-        enumerator = build_enumerator(*arguments, cursor: @cursor)
+        enumerator = build_enumerator(*arguments, cursor: @_cursor)
         unless enumerator
           logger.debug("'#build_enumerator' returned nil, skipping the job.")
           return
@@ -122,7 +122,7 @@ module Sidekiq
 
         assert_enumerator!(enumerator)
 
-        if @executions == 1
+        if @_executions == 1
           on_start
         else
           on_resume
@@ -139,7 +139,7 @@ module Sidekiq
           on_complete
 
           logger.info {
-            format("Completed iterating. times_interrupted=%d total_time=%.3f", @times_interrupted, @total_time)
+            format("Completed iterating. times_interrupted=%d total_time=%.3f", @_times_interrupted, @_total_time)
           }
         else
           reenqueue_iteration_job
@@ -152,10 +152,10 @@ module Sidekiq
         state = Sidekiq.redis { |conn| conn.hgetall("it-#{jid}") }
 
         unless state.empty?
-          @executions = state["executions"].to_i
-          @cursor = Sidekiq.load_json(state["cursor"])
-          @times_interrupted = state["times_interrupted"].to_i
-          @total_time = state["total_time"].to_f
+          @_executions = state["executions"].to_i
+          @_cursor = Sidekiq.load_json(state["cursor"])
+          @_times_interrupted = state["times_interrupted"].to_i
+          @_total_time = state["total_time"].to_f
         end
       end
 
@@ -171,7 +171,7 @@ module Sidekiq
           around_iteration do
             each_iteration(object, *arguments)
           end
-          @cursor = cursor
+          @_cursor = cursor
           adjust_total_time
 
           is_interrupted = interrupted?
@@ -189,7 +189,7 @@ module Sidekiq
       end
 
       def reenqueue_iteration_job
-        @times_interrupted += 1
+        @_times_interrupted += 1
         flush_state
         logger.debug { "Interrupting and re-enqueueing the job (cursor=#{cursor.inspect})" }
 
@@ -197,7 +197,7 @@ module Sidekiq
       end
 
       def adjust_total_time
-        @total_time += (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @start_time).round(3)
+        @_total_time += (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @_start_time).round(3)
       end
 
       def assert_enumerator!(enum)
@@ -222,10 +222,10 @@ module Sidekiq
       def flush_state
         key = "it-#{jid}"
         state = {
-          "executions" => @executions,
-          "cursor" => Sidekiq.dump_json(@cursor),
-          "times_interrupted" => @times_interrupted,
-          "total_time" => @total_time
+          "executions" => @_executions,
+          "cursor" => Sidekiq.dump_json(@_cursor),
+          "times_interrupted" => @_times_interrupted,
+          "total_time" => @_total_time
         }
 
         Sidekiq.redis do |conn|
