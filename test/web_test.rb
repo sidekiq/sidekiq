@@ -35,6 +35,7 @@ describe Sidekiq::Web do
   before do
     @config = reset!
     app.middlewares.clear
+    app.use Rack::Session::Cookie, secrets: "35c5108120cb479eecb4e947e423cad6da6f38327cf0ebb323e30816d74fa01f"
   end
 
   it "passes on unexpected methods" do
@@ -611,10 +612,13 @@ describe Sidekiq::Web do
     session_data = {"rack.session" => {}}
     headers = {"HTTP_REFERER" => "http://example.org/path", "HTTP_BASE_URL" => "http://example.org/"}
 
+    post "/change_locale", {"locale" => "none"}, session_data.merge(headers)
+    assert_nil last_request.env["rack.session"][:locale]
+    assert_equal 302, last_response.status
+    assert_equal "http://example.org/path", last_response.location
+
     post "/change_locale", {"locale" => "es"}, session_data.merge(headers)
-
     assert_equal "es", last_request.env["rack.session"][:locale]
-
     assert_equal 302, last_response.status
     assert_equal "http://example.org/path", last_response.location
   end

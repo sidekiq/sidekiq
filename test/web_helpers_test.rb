@@ -30,6 +30,10 @@ class Helpers
     {}
   end
 
+  def session
+    {}
+  end
+
   def path_info
     @thehash[:path_info]
   end
@@ -96,15 +100,23 @@ describe "Web helpers" do
     assert_equal "en", obj.locale
   end
 
-  it "tests user selected locale" do
+  it "handles invalid locales" do
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "*")
+    obj.instance_eval do
+      def session
+        {locale: "xx"}
+      end
+    end
+    assert_equal "en", obj.locale
+  end
 
+  it "uses the user selected locale" do
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "*")
     obj.instance_eval do
       def session
         {locale: "es"}
       end
     end
-
     assert_equal "es", obj.locale
   end
 
