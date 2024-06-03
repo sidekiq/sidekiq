@@ -21,7 +21,8 @@ module Sidekiq
         def array_enumerator(array, cursor:)
           raise ArgumentError, "array must be an Array" unless array.is_a?(Array)
 
-          array.each_with_index.drop(cursor || 0).to_enum { array.size }
+          x = array.each_with_index.drop(cursor || 0)
+          x.to_enum { x.size }
         end
 
         # Builds Enumerator from `ActiveRecord::Relation`.
