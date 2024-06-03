@@ -112,7 +112,7 @@ module Sidekiq
         fetch_previous_iteration_state
 
         @executions += 1
-        @start_time = Time.now
+        @start_time = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
 
         enumerator = build_enumerator(*arguments, cursor: @cursor)
         unless enumerator
@@ -164,7 +164,7 @@ module Sidekiq
 
       def iterate_with_enumerator(enumerator, arguments)
         found_record = false
-        state_flushed_at = Time.now
+        state_flushed_at = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
 
         enumerator.each do |object, cursor|
           found_record = true
@@ -175,9 +175,9 @@ module Sidekiq
           adjust_total_time
 
           is_interrupted = interrupted?
-          if Time.now - state_flushed_at >= STATE_FLUSH_INTERVAL || is_interrupted
+          if ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - state_flushed_at >= STATE_FLUSH_INTERVAL || is_interrupted
             flush_state
-            state_flushed_at = Time.now
+            state_flushed_at = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
           end
 
           return false if is_interrupted
@@ -197,7 +197,7 @@ module Sidekiq
       end
 
       def adjust_total_time
-        @total_time += (Time.now - @start_time).round(3)
+        @total_time += (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @start_time).round(3)
       end
 
       def assert_enumerator!(enum)
