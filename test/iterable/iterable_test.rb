@@ -140,10 +140,10 @@ describe Sidekiq::Job::Iterable do
   end
 
   it "logs completion data" do
-    output = capture_logging(@config) do
+    output = capture_logging(@config, Logger::DEBUG) do
       ArrayIterableJob.perform_inline
     end
-    assert_match(/Completed iterating/, output)
+    assert_match(/Completed iteration/, output)
   end
 
   it "logs no iterations" do

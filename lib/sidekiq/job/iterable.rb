@@ -107,6 +107,10 @@ module Sidekiq
         false
       end
 
+      def iteration_key
+        "it-#{jid}"
+      end
+
       # @api private
       def perform(*arguments)
         fetch_previous_iteration_state
@@ -116,7 +120,7 @@ module Sidekiq
 
         enumerator = build_enumerator(*arguments, cursor: @_cursor)
         unless enumerator
-          logger.debug("'#build_enumerator' returned nil, skipping the job.")
+          logger.info("'#build_enumerator' returned nil, skipping the job.")
           return
         end
 
@@ -137,10 +141,8 @@ module Sidekiq
 
         if completed
           on_complete
+          cleanup
 
-          logger.info {
-            format("Completed iterating. times_interrupted=%d total_time=%.3f", @_times_interrupted, @_total_time)
-          }
         else
           reenqueue_iteration_job
         end
@@ -149,7 +151,7 @@ module Sidekiq
       private
 
       def fetch_previous_iteration_state
-        state = Sidekiq.redis { |conn| conn.hgetall("it-#{jid}") }
+        state = Sidekiq.redis { |conn| conn.hgetall(iteration_key) }
 
         unless state.empty?
           @_executions = state["executions"].to_i
@@ -160,7 +162,9 @@ module Sidekiq
       end
 
       STATE_FLUSH_INTERVAL = 5 # seconds
-      STATE_TTL = 30 * 24 * 60 * 60 # 30 days
+      # we need to keep the state around as long as the job
+      # might be retrying
+      STATE_TTL = 30 * 24 * 60 * 60 # one month
 
       def iterate_with_enumerator(enumerator, arguments)
         found_record = false
@@ -168,10 +172,10 @@ module Sidekiq
 
         enumerator.each do |object, cursor|
           found_record = true
+          @_cursor = cursor
           around_iteration do
             each_iteration(object, *arguments)
           end
-          @_cursor = cursor
           adjust_total_time
 
           is_interrupted = interrupted?
@@ -191,7 +195,7 @@ module Sidekiq
       def reenqueue_iteration_job
         @_times_interrupted += 1
         flush_state
-        logger.debug { "Interrupting and re-enqueueing the job (cursor=#{cursor.inspect})" }
+        logger.debug { "Interrupting job (cursor=#{cursor.inspect})" }
 
         raise Interrupted
       end
@@ -220,7 +224,7 @@ module Sidekiq
       end
 
       def flush_state
-        key = "it-#{jid}"
+        key = iteration_key
         state = {
           "executions" => @_executions,
           "cursor" => Sidekiq.dump_json(@_cursor),
@@ -234,6 +238,13 @@ module Sidekiq
             pipe.expire(key, STATE_TTL)
           end
         end
+      end
+
+      def cleanup
+        logger.debug {
+          format("Completed iteration. times_interrupted=%d total_time=%.3f", @_times_interrupted, @_total_time)
+        }
+        Sidekiq.redis { |conn| conn.del(iteration_key) }
       end
 
       def handle_completed(completed)
