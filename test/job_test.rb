@@ -12,6 +12,25 @@ class MySetJob
   end
 end
 
+class Stopper
+  attr_accessor :_stopping
+  def stopping?
+    @_stopping
+  end
+end
+
+class ForeverJob
+  include Sidekiq::Job
+
+  def perform
+    count = 0
+    until count > 1000 && stopping?
+      count += 1
+    end
+    count
+  end
+end
+
 class MyCustomJob
   include Sidekiq::Job
 
@@ -108,6 +127,24 @@ describe Sidekiq::Job do
       job = q.first
       assert_equal "foo", job["queue"]
       assert_equal "xyz", job["bar"]
+    end
+
+    it "can detect when stopping" do
+      refute MySetJob.new.stopping?
+    end
+
+    it "stops on command" do
+      stop = Stopper.new
+      stop._stopping = false
+      t = Thread.new do
+        job = ForeverJob.new
+        job._context = stop
+        job.perform
+      end
+      Thread.pass
+      stop._stopping = true
+      result = t.value
+      assert_operator 1000, :<=, result
     end
 
     it "works with .perform_bulk" do
