@@ -370,7 +370,7 @@ module Sidekiq
 
       def build_client # :nodoc:
         pool = Thread.current[:sidekiq_redis_pool] || get_sidekiq_options["pool"] || Sidekiq.default_configuration.redis_pool
-        client_class = get_sidekiq_options["client_class"] || Sidekiq::Client
+        client_class = Thread.current[:sidekiq_client_class] || get_sidekiq_options["client_class"] || Sidekiq::Client
         client_class.new(pool: pool)
       end
     end
