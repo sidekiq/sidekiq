@@ -142,7 +142,6 @@ module Sidekiq
         if completed
           on_complete
           cleanup
-
         else
           reenqueue_iteration_job
         end
@@ -173,10 +172,6 @@ module Sidekiq
         enumerator.each do |object, cursor|
           found_record = true
           @_cursor = cursor
-          around_iteration do
-            each_iteration(object, *arguments)
-          end
-          adjust_total_time
 
           is_interrupted = interrupted?
           if ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - state_flushed_at >= STATE_FLUSH_INTERVAL || is_interrupted
@@ -185,11 +180,16 @@ module Sidekiq
           end
 
           return false if is_interrupted
+
+          around_iteration do
+            each_iteration(object, *arguments)
+          end
         end
 
         logger.debug("Enumerator found nothing to iterate!") unless found_record
-
         true
+      ensure
+        @_total_time += (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @_start_time)
       end
 
       def reenqueue_iteration_job
@@ -198,10 +198,6 @@ module Sidekiq
         logger.debug { "Interrupting job (cursor=#{cursor.inspect})" }
 
         raise Interrupted
-      end
-
-      def adjust_total_time
-        @_total_time += (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @_start_time).round(3)
       end
 
       def assert_enumerator!(enum)

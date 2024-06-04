@@ -167,20 +167,20 @@ describe Sidekiq::Job::Iterable do
 
     previous_state = fetch_iteration_state(jid)
     assert_equal 1, previous_state["executions"].to_i
-    assert_equal 1, Sidekiq.load_json(previous_state["cursor"])
+    assert_equal 2, Sidekiq.load_json(previous_state["cursor"])
     assert_equal 1, previous_state["times_interrupted"].to_i
     assert Float(previous_state["total_time"])
 
     iterate_exact_times(ArrayIterableJob, 2, jid: jid)
-    assert_equal [10, 11, 11, 12], ArrayIterableJob.iterated_objects
+    assert_equal [10, 11, 12, 13], ArrayIterableJob.iterated_objects
 
     previous_state = fetch_iteration_state(jid)
     assert_equal 2, previous_state["executions"].to_i
-    assert_equal 2, Sidekiq.load_json(previous_state["cursor"])
+    assert_equal 4, Sidekiq.load_json(previous_state["cursor"])
     assert_equal 2, previous_state["times_interrupted"].to_i
 
     continue_iterating(ArrayIterableJob, jid: jid)
-    assert_equal (10..20).to_a, ArrayIterableJob.iterated_objects.uniq
+    assert_equal (10..20).to_a, ArrayIterableJob.iterated_objects
   end
 
   it "calls iteration hooks" do
@@ -203,7 +203,7 @@ describe Sidekiq::Job::Iterable do
     continue_iterating(ArrayIterableJob, jid: jid)
 
     assert_equal 1, ArrayIterableJob.on_start_called
-    assert_equal 13, ArrayIterableJob.around_iteration_called # 11 numbers + 2 restarts
+    assert_equal 11, ArrayIterableJob.around_iteration_called
     assert_equal 2, ArrayIterableJob.on_resume_called
     assert_equal 3, ArrayIterableJob.on_shutdown_called
     assert_equal 1, ArrayIterableJob.on_complete_called
