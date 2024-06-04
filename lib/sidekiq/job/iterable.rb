@@ -195,7 +195,7 @@ module Sidekiq
       def reenqueue_iteration_job
         @_times_interrupted += 1
         flush_state
-        logger.debug { "Interrupting job (cursor=#{cursor.inspect})" }
+        logger.debug { "Interrupting job (cursor=#{@_cursor.inspect})" }
 
         raise Interrupted
       end

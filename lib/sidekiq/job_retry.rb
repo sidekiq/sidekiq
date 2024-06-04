@@ -116,9 +116,6 @@ module Sidekiq
     rescue Sidekiq::Shutdown => ey
       # ignore, will be pushed back onto queue during hard_shutdown
       raise ey
-    rescue Job::Interrupted
-      process_interruption(jobinst, jobstr)
-      raise Skip
     rescue Exception => e
       # ignore, will be pushed back onto queue during hard_shutdown
       raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
@@ -136,13 +133,6 @@ module Sidekiq
     end
 
     private
-
-    def process_interruption(jobinst, jobstr)
-      retry_backoff = jobinst._context&.config&.dig(:iteration, :retry_backoff) || 30
-      redis do |conn|
-        conn.zadd("schedule", (Time.now + retry_backoff).to_f, jobstr)
-      end
-    end
 
     # Note that +jobinst+ can be nil here if an error is raised before we can
     # instantiate the job instance.  All access must be guarded and
