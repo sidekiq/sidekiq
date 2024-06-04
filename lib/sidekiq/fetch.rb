@@ -44,7 +44,7 @@ module Sidekiq # :nodoc:
         return nil
       end
 
-      queue, job = redis { |conn| conn.blocking_call(conn.read_timeout + TIMEOUT, "brpop", *qs, TIMEOUT) }
+      queue, job = redis { |conn| conn.blocking_call(TIMEOUT, "brpop", *qs, TIMEOUT) }
       UnitOfWork.new(queue, job, config) if queue
     end
 
