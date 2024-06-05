@@ -55,10 +55,9 @@ module Sidekiq
 
       # A hook to override that will be called each time the job is interrupted.
       #
-      # This can be due to throttling, `max_job_runtime` configuration,
-      # or sidekiq stopping.
+      # This can be due to interruption, throttling or sidekiq stopping.
       #
-      def on_shutdown
+      def on_stop
       end
 
       # A hook to override that will be called when the job finished iterating.
@@ -136,7 +135,7 @@ module Sidekiq
           iterate_with_enumerator(enumerator, arguments)
         end
 
-        on_shutdown
+        on_stop
         completed = handle_completed(completed)
 
         if completed

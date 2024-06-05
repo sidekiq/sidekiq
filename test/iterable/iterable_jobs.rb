@@ -7,7 +7,7 @@ class SimpleIterableJob
   cattr_accessor :on_start_called, default: 0
   cattr_accessor :around_iteration_called, default: 0
   cattr_accessor :on_resume_called, default: 0
-  cattr_accessor :on_shutdown_called, default: 0
+  cattr_accessor :on_stop_called, default: 0
   cattr_accessor :on_complete_called, default: 0
   cattr_accessor :context
 
@@ -24,8 +24,8 @@ class SimpleIterableJob
     self.class.on_resume_called += 1
   end
 
-  def on_shutdown
-    self.class.on_shutdown_called += 1
+  def on_stop
+    self.class.on_stop_called += 1
   end
 
   def on_complete

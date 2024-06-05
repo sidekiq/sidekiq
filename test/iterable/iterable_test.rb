@@ -27,7 +27,7 @@ describe Sidekiq::Job::Iterable do
       klass.on_start_called = 0
       klass.around_iteration_called = 0
       klass.on_resume_called = 0
-      klass.on_shutdown_called = 0
+      klass.on_stop_called = 0
       klass.on_complete_called = 0
     end
     Sidekiq::Job.clear_all
@@ -158,7 +158,7 @@ describe Sidekiq::Job::Iterable do
 
     assert_equal 2, AbortingIterableJob.iterated_objects.size
     assert_equal 1, AbortingIterableJob.on_complete_called
-    assert_equal 1, AbortingIterableJob.on_shutdown_called
+    assert_equal 1, AbortingIterableJob.on_stop_called
   end
 
   it "can be resumed" do
@@ -189,7 +189,7 @@ describe Sidekiq::Job::Iterable do
     assert_equal 1, ArrayIterableJob.on_start_called
     assert_equal 2, ArrayIterableJob.around_iteration_called
     assert_equal 0, ArrayIterableJob.on_resume_called
-    assert_equal 1, ArrayIterableJob.on_shutdown_called
+    assert_equal 1, ArrayIterableJob.on_stop_called
     assert_equal 0, ArrayIterableJob.on_complete_called
 
     iterate_exact_times(ArrayIterableJob, 2, jid: jid)
@@ -197,7 +197,7 @@ describe Sidekiq::Job::Iterable do
     assert_equal 1, ArrayIterableJob.on_start_called
     assert_equal 4, ArrayIterableJob.around_iteration_called
     assert_equal 1, ArrayIterableJob.on_resume_called
-    assert_equal 2, ArrayIterableJob.on_shutdown_called
+    assert_equal 2, ArrayIterableJob.on_stop_called
     assert_equal 0, ArrayIterableJob.on_complete_called
 
     continue_iterating(ArrayIterableJob, jid: jid)
@@ -205,7 +205,7 @@ describe Sidekiq::Job::Iterable do
     assert_equal 1, ArrayIterableJob.on_start_called
     assert_equal 11, ArrayIterableJob.around_iteration_called
     assert_equal 2, ArrayIterableJob.on_resume_called
-    assert_equal 3, ArrayIterableJob.on_shutdown_called
+    assert_equal 3, ArrayIterableJob.on_stop_called
     assert_equal 1, ArrayIterableJob.on_complete_called
   end
 
