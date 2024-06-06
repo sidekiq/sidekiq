@@ -28,9 +28,9 @@ module Sidekiq
 
         @_executions = 0
         @_cursor = nil
-        @_times_interrupted = 0
+        @_interrupted = 0
         @_start_time = nil
-        @_total_time = 0
+        @_runtime = 0
       end
 
       # A hook to override that will be called when the job starts iterating.
@@ -152,10 +152,10 @@ module Sidekiq
         state = Sidekiq.redis { |conn| conn.hgetall(iteration_key) }
 
         unless state.empty?
-          @_executions = state["executions"].to_i
-          @_cursor = Sidekiq.load_json(state["cursor"])
-          @_times_interrupted = state["times_interrupted"].to_i
-          @_total_time = state["total_time"].to_f
+          @_executions = state["ex"].to_i
+          @_cursor = Sidekiq.load_json(state["c"])
+          @_interrupted = state["int"].to_i
+          @_runtime = state["rt"].to_f
         end
       end
 
@@ -188,11 +188,11 @@ module Sidekiq
         logger.debug("Enumerator found nothing to iterate!") unless found_record
         true
       ensure
-        @_total_time += (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @_start_time)
+        @_runtime += (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @_start_time)
       end
 
       def reenqueue_iteration_job
-        @_times_interrupted += 1
+        @_interrupted += 1
         flush_state
         logger.debug { "Interrupting job (cursor=#{@_cursor.inspect})" }
 
@@ -221,10 +221,10 @@ module Sidekiq
       def flush_state
         key = iteration_key
         state = {
-          "executions" => @_executions,
-          "cursor" => Sidekiq.dump_json(@_cursor),
-          "times_interrupted" => @_times_interrupted,
-          "total_time" => @_total_time
+          "ex" => @_executions,
+          "c" => Sidekiq.dump_json(@_cursor),
+          "int" => @_interrupted,
+          "rt" => @_runtime
         }
 
         Sidekiq.redis do |conn|
@@ -237,7 +237,7 @@ module Sidekiq
 
       def cleanup
         logger.debug {
-          format("Completed iteration. times_interrupted=%d total_time=%.3f", @_times_interrupted, @_total_time)
+          format("Completed iteration. interrupted=%d runtime=%.3f", @_interrupted, @_runtime)
         }
         Sidekiq.redis { |conn| conn.del(iteration_key) }
       end

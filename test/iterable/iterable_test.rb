@@ -64,8 +64,7 @@ describe Sidekiq::Job::Iterable do
   it "cannot override #perform" do
     e = assert_raises(RuntimeError) do
       Class.new do
-        include Sidekiq::Job
-        include Sidekiq::Job::Iterable
+        include Sidekiq::IterableJob
         def perform(*)
         end
       end
@@ -166,18 +165,19 @@ describe Sidekiq::Job::Iterable do
     assert_equal [10, 11], ArrayIterableJob.iterated_objects
 
     previous_state = fetch_iteration_state(jid)
-    assert_equal 1, previous_state["executions"].to_i
-    assert_equal 2, Sidekiq.load_json(previous_state["cursor"])
-    assert_equal 1, previous_state["times_interrupted"].to_i
-    assert Float(previous_state["total_time"])
+    assert_equal 1, previous_state["ex"].to_i
+    assert_equal 2, Sidekiq.load_json(previous_state["c"])
+    assert_equal 1, previous_state["int"].to_i
+    assert Float(previous_state["rt"])
 
     iterate_exact_times(ArrayIterableJob, 2, jid: jid)
     assert_equal [10, 11, 12, 13], ArrayIterableJob.iterated_objects
 
     previous_state = fetch_iteration_state(jid)
-    assert_equal 2, previous_state["executions"].to_i
-    assert_equal 4, Sidekiq.load_json(previous_state["cursor"])
-    assert_equal 2, previous_state["times_interrupted"].to_i
+    assert_equal 2, previous_state["ex"].to_i
+    assert_equal 4, Sidekiq.load_json(previous_state["c"])
+    assert_equal 2, previous_state["int"].to_i
+    assert_operator Float(previous_state["rt"]), :>, 0
 
     continue_iterating(ArrayIterableJob, jid: jid)
     assert_equal (10..20).to_a, ArrayIterableJob.iterated_objects
