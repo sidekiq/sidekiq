@@ -32,6 +32,7 @@ See the [Iteration](//github.com/sidekiq/sidekiq/wiki/Iteration) wiki page and t
 - Retain CurrentAttributeѕ after inline execution [#6307]
 - Raise default Redis {read,write,connect} timeouts from 1 to 3 seconds
   to minimize ReadTimeoutErrors [#6162]
+- Add `logger` as a dependency since it will become bundled in Ruby 3.5 [#6320]
 
 7.2.4
 ----------
