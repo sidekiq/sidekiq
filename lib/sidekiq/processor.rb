@@ -190,6 +190,11 @@ module Sidekiq
           # Had to force kill this job because it didn't finish
           # within the timeout.  Don't acknowledge the work since
           # we didn't properly finish it.
+        rescue Sidekiq::JobRetry::Skip => s
+          # Skip means we handled this error elsewhere. We don't
+          # need to log or report the error.
+          ack = true
+          raise s
         rescue Sidekiq::JobRetry::Handled => h
           # this is the common case: job raised error and Sidekiq::JobRetry::Handled
           # signals that we created a retry successfully.  We can acknowledge the job.

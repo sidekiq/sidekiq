@@ -13,7 +13,6 @@ class PostCreator
   def build_enumerator(start_at, count, **kwargs)
     @start_at = start_at
     @count = count
-    logger.info { "Creating posts for #{start_at}" }
     array_enumerator((start_at...(start_at + count)).to_a, **kwargs)
   end
 
@@ -26,5 +25,13 @@ class PostCreator
   def on_complete
     logger.info { "#{@start_at} complete, updating..." }
     PostUpdater.perform_async(@start_at, @count)
+  end
+
+  def on_resume
+    logger.info { "#{@start_at} resuming" }
+  end
+
+  def on_stop
+    logger.info { "#{@start_at} stopping" }
   end
 end

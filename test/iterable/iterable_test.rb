@@ -2,6 +2,7 @@
 
 require_relative "../helper"
 require "sidekiq/job_retry"
+require "sidekiq/job/interrupt_handler"
 require_relative "iterable_jobs"
 require_relative "../dummy/config/environment"
 
@@ -234,8 +235,13 @@ describe Sidekiq::Job::Iterable do
     end
 
     begin
-      handler.local(job.new, jobstr(job: job), "default") do
-        job.perform_one
+      j = job.new
+      j.jid = jid
+
+      hash = {"class" => job.name, "retry" => true, "args" => []}
+      hash["jid"] = jid if jid
+      handler.call(j, hash, "default") do
+        j.perform
       end
     rescue Sidekiq::JobRetry::Skip
     end
@@ -250,11 +256,11 @@ describe Sidekiq::Job::Iterable do
   end
 
   def handler
-    @handler ||= Sidekiq::JobRetry.new(@config.default_capsule)
-  end
-
-  def jobstr(job:, **options)
-    Sidekiq.dump_json({"class" => job.name, "retry" => true}.merge(options))
+    @handler ||= begin
+      ih = Sidekiq::Job::InterruptHandler.new
+      ih.config = @config
+      ih
+    end
   end
 
   def fetch_iteration_state(jid)

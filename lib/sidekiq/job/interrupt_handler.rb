@@ -6,9 +6,10 @@ module Sidekiq
       def call(instance, hash, queue)
         yield
       rescue Interrupted
-        backoff = 30
+        logger.debug "Interrupted, re-queueing..."
         c = Sidekiq::Client.new
-        c.push(hash.merge("at" => (Time.now + backoff).to_f))
+        c.push(hash)
+        raise Sidekiq::JobRetry::Skip
       end
     end
   end

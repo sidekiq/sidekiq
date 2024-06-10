@@ -59,8 +59,13 @@ module Sidekiq
   #    end
   #
   class JobRetry
+    # Handled means the job failed but has been dealt with
+    # (by creating a retry, rescheduling it, etc). It still
+    # needs to be logged and dispatched to error_handlers.
     class Handled < ::RuntimeError; end
 
+    # Skip means the job failed but Sidekiq does not need to
+    # create a retry, log it or send to error_handlers.
     class Skip < Handled; end
 
     include Sidekiq::Component
@@ -129,7 +134,7 @@ module Sidekiq
       process_retry(jobinst, msg, queue, e)
       # We've handled this error associated with this job, don't
       # need to handle it at the global level
-      raise Skip
+      raise Handled
     end
 
     private

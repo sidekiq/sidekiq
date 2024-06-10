@@ -19,8 +19,7 @@ class MockJob
 end
 
 class MockIterableJob
-  include Sidekiq::Job
-  include Sidekiq::Job::Iterable
+  include Sidekiq::IterableJob
 
   def build_enumerator(cursor:)
     array_enumerator((1..10).to_a, cursor: cursor)
