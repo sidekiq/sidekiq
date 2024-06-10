@@ -1,11 +1,8 @@
 # frozen_string_literal: true
 
-require "csv"
-require "active_record"
-require "sidekiq"
 require_relative "../helper"
 require "sidekiq/job_retry"
-require "sidekiq/processor"
+require "sidekiq/job/interrupt_handler"
 require_relative "iterable_jobs"
 require_relative "../dummy/config/environment"
 
@@ -21,7 +18,7 @@ describe Sidekiq::Job::Iterable do
 
   before do
     @config = reset!
-    @processor = ::Sidekiq::Processor.new(@config.default_capsule)
+    @context = Minitest::Mock.new
 
     require "sidekiq/testing"
     Sidekiq::Testing.fake!
@@ -31,11 +28,11 @@ describe Sidekiq::Job::Iterable do
       klass.on_start_called = 0
       klass.around_iteration_called = 0
       klass.on_resume_called = 0
-      klass.on_shutdown_called = 0
+      klass.on_stop_called = 0
       klass.on_complete_called = 0
-      klass.jobs.clear
     end
-    SimpleIterableJob.lifecycle = @processor
+    Sidekiq::Job.clear_all
+    SimpleIterableJob.context = @context
     ArrayIterableJob.stop_after_iterations = nil
   end
 
@@ -55,7 +52,7 @@ describe Sidekiq::Job::Iterable do
     e = assert_raises(ArgumentError) do
       JobWithBuildEnumeratorReturningArray.perform_inline
     end
-    assert_match(/is expected to return Enumerator object, but returned Array/, e.message)
+    assert_match(/must return an Enumerator, but returned Array/, e.message)
   end
 
   it "raises when #each_iteration method is missing" do
@@ -67,12 +64,13 @@ describe Sidekiq::Job::Iterable do
 
   it "cannot override #perform" do
     e = assert_raises(RuntimeError) do
-      Class.new(SimpleIterableJob) do
+      Class.new do
+        include Sidekiq::IterableJob
         def perform(*)
         end
       end
     end
-    assert_match(/cannot redefine #perform/, e.message)
+    assert_match(/must not define #perform/, e.message)
   end
 
   it "skips the job if #build_enumerator returned nil" do
@@ -142,10 +140,10 @@ describe Sidekiq::Job::Iterable do
   end
 
   it "logs completion data" do
-    output = capture_logging(@config) do
+    output = capture_logging(@config, Logger::DEBUG) do
       ArrayIterableJob.perform_inline
     end
-    assert_match(/Completed iterating/, output)
+    assert_match(/Completed iteration/, output)
   end
 
   it "logs no iterations" do
@@ -160,7 +158,7 @@ describe Sidekiq::Job::Iterable do
 
     assert_equal 2, AbortingIterableJob.iterated_objects.size
     assert_equal 1, AbortingIterableJob.on_complete_called
-    assert_equal 1, AbortingIterableJob.on_shutdown_called
+    assert_equal 1, AbortingIterableJob.on_stop_called
   end
 
   it "can be resumed" do
@@ -168,21 +166,22 @@ describe Sidekiq::Job::Iterable do
     assert_equal [10, 11], ArrayIterableJob.iterated_objects
 
     previous_state = fetch_iteration_state(jid)
-    assert_equal 1, previous_state["executions"].to_i
-    assert_equal 1, Sidekiq.load_json(previous_state["cursor"])
-    assert_equal 1, previous_state["times_interrupted"].to_i
-    assert Float(previous_state["total_time"])
+    assert_equal 1, previous_state["ex"].to_i
+    assert_equal 2, Sidekiq.load_json(previous_state["c"])
+    assert_equal 1, previous_state["int"].to_i
+    assert Float(previous_state["rt"])
 
     iterate_exact_times(ArrayIterableJob, 2, jid: jid)
-    assert_equal [10, 11, 11, 12], ArrayIterableJob.iterated_objects
+    assert_equal [10, 11, 12, 13], ArrayIterableJob.iterated_objects
 
     previous_state = fetch_iteration_state(jid)
-    assert_equal 2, previous_state["executions"].to_i
-    assert_equal 2, Sidekiq.load_json(previous_state["cursor"])
-    assert_equal 2, previous_state["times_interrupted"].to_i
+    assert_equal 2, previous_state["ex"].to_i
+    assert_equal 4, Sidekiq.load_json(previous_state["c"])
+    assert_equal 2, previous_state["int"].to_i
+    assert_operator Float(previous_state["rt"]), :>, 0
 
     continue_iterating(ArrayIterableJob, jid: jid)
-    assert_equal (10..20).to_a, ArrayIterableJob.iterated_objects.uniq
+    assert_equal (10..20).to_a, ArrayIterableJob.iterated_objects
   end
 
   it "calls iteration hooks" do
@@ -191,7 +190,7 @@ describe Sidekiq::Job::Iterable do
     assert_equal 1, ArrayIterableJob.on_start_called
     assert_equal 2, ArrayIterableJob.around_iteration_called
     assert_equal 0, ArrayIterableJob.on_resume_called
-    assert_equal 1, ArrayIterableJob.on_shutdown_called
+    assert_equal 1, ArrayIterableJob.on_stop_called
     assert_equal 0, ArrayIterableJob.on_complete_called
 
     iterate_exact_times(ArrayIterableJob, 2, jid: jid)
@@ -199,15 +198,15 @@ describe Sidekiq::Job::Iterable do
     assert_equal 1, ArrayIterableJob.on_start_called
     assert_equal 4, ArrayIterableJob.around_iteration_called
     assert_equal 1, ArrayIterableJob.on_resume_called
-    assert_equal 2, ArrayIterableJob.on_shutdown_called
+    assert_equal 2, ArrayIterableJob.on_stop_called
     assert_equal 0, ArrayIterableJob.on_complete_called
 
     continue_iterating(ArrayIterableJob, jid: jid)
 
     assert_equal 1, ArrayIterableJob.on_start_called
-    assert_equal 13, ArrayIterableJob.around_iteration_called # 11 numbers + 2 restarts
+    assert_equal 11, ArrayIterableJob.around_iteration_called
     assert_equal 2, ArrayIterableJob.on_resume_called
-    assert_equal 3, ArrayIterableJob.on_shutdown_called
+    assert_equal 3, ArrayIterableJob.on_stop_called
     assert_equal 1, ArrayIterableJob.on_complete_called
   end
 
@@ -216,35 +215,13 @@ describe Sidekiq::Job::Iterable do
 
     assert_equal [10, 11], ArrayIterableJob.iterated_objects
 
-    @processor.stub(:stopping?, true) do
+    @context.expect(:stopping?, true) do
       iterate_exact_times(ArrayIterableJob, 2, jid: jid)
       assert_equal [10, 11, 11], ArrayIterableJob.iterated_objects
     end
 
     continue_iterating(ArrayIterableJob, jid: jid)
     assert_equal (10..20).to_a, ArrayIterableJob.iterated_objects.uniq
-  end
-
-  it "reschedules itself when the job runs longer than global :max_job_runtime" do
-    old = Sidekiq::Config::DEFAULTS[:iteration][:max_job_runtime]
-    Sidekiq::Config::DEFAULTS[:iteration][:max_job_runtime] = 0.01
-
-    assert_raises Sidekiq::Job::Interrupted do
-      LongRunningCustomConfigIterableJob.perform_inline
-    end
-  ensure
-    Sidekiq::Config::DEFAULTS[:iteration][:max_job_runtime] = old
-  end
-
-  it "reschedules itself when the job runs longer than per-job :max_job_runtime" do
-    old = Sidekiq::Config::DEFAULTS[:iteration][:max_job_runtime]
-    Sidekiq::Config::DEFAULTS[:iteration][:max_job_runtime] = 10 # larger than per-job value
-
-    assert_raises Sidekiq::Job::Interrupted do
-      LongRunningCustomConfigIterableJob.perform_inline
-    end
-  ensure
-    Sidekiq::Config::DEFAULTS[:iteration][:max_job_runtime] = old
   end
 
   private
@@ -258,8 +235,13 @@ describe Sidekiq::Job::Iterable do
     end
 
     begin
-      handler.local(job.new, jobstr(job: job), "default") do
-        job.perform_one
+      j = job.new
+      j.jid = jid
+
+      hash = {"class" => job.name, "retry" => true, "args" => []}
+      hash["jid"] = jid if jid
+      handler.call(j, hash, "default") do
+        j.perform
       end
     rescue Sidekiq::JobRetry::Skip
     end
@@ -274,11 +256,11 @@ describe Sidekiq::Job::Iterable do
   end
 
   def handler
-    @handler ||= Sidekiq::JobRetry.new(@config.default_capsule)
-  end
-
-  def jobstr(job:, **options)
-    Sidekiq.dump_json({"class" => job.name, "retry" => true}.merge(options))
+    @handler ||= begin
+      ih = Sidekiq::Job::InterruptHandler.new
+      ih.config = @config
+      ih
+    end
   end
 
   def fetch_iteration_state(jid)

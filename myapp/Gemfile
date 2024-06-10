@@ -12,7 +12,7 @@ gem "railties", RAILS_VERSION
 
 gem "puma"
 gem "sidekiq", path: ".."
-gem "sqlite3"
+gem "sqlite3", "~> 1.4"
 
 gem "after_commit_everywhere"
 

@@ -17,26 +17,20 @@ module Sidekiq
       # @api private
       module ClassMethods
         def method_added(method_name)
-          if method_name == :perform
-            raise "Job that is using Iterable (#{self}) cannot redefine #perform"
-          end
-
+          raise "#{self} is an iterable job and must not define #perform" if method_name == :perform
           super
         end
       end
 
       # @api private
-      attr_accessor :lifecycle
-
-      # @api private
       def initialize
         super
 
-        @executions = 0
-        @cursor = nil
-        @times_interrupted = 0
-        @start_time = nil
-        @total_time = 0
+        @_executions = 0
+        @_cursor = nil
+        @_interrupted = 0
+        @_start_time = nil
+        @_runtime = 0
       end
 
       # A hook to override that will be called when the job starts iterating.
@@ -61,10 +55,9 @@ module Sidekiq
 
       # A hook to override that will be called each time the job is interrupted.
       #
-      # This can be due to throttling, `max_job_runtime` configuration,
-      # or sidekiq stopping.
+      # This can be due to interruption, throttling or sidekiq stopping.
       #
-      def on_shutdown
+      def on_stop
       end
 
       # A hook to override that will be called when the job finished iterating.
@@ -113,22 +106,26 @@ module Sidekiq
         false
       end
 
+      def iteration_key
+        "it-#{jid}"
+      end
+
       # @api private
       def perform(*arguments)
         fetch_previous_iteration_state
 
-        @executions += 1
-        @start_time = Time.now
+        @_executions += 1
+        @_start_time = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
 
-        enumerator = build_enumerator(*arguments, cursor: @cursor)
+        enumerator = build_enumerator(*arguments, cursor: @_cursor)
         unless enumerator
-          logger.debug("'#build_enumerator' returned nil, skipping the job.")
+          logger.info("'#build_enumerator' returned nil, skipping the job.")
           return
         end
 
         assert_enumerator!(enumerator)
 
-        if @executions == 1
+        if @_executions == 1
           on_start
         else
           on_resume
@@ -138,15 +135,12 @@ module Sidekiq
           iterate_with_enumerator(enumerator, arguments)
         end
 
-        on_shutdown
+        on_stop
         completed = handle_completed(completed)
 
         if completed
           on_complete
-
-          logger.info {
-            format("Completed iterating. times_interrupted=%d total_time=%.3f", @times_interrupted, @total_time)
-          }
+          cleanup
         else
           reenqueue_iteration_job
         end
@@ -155,62 +149,60 @@ module Sidekiq
       private
 
       def fetch_previous_iteration_state
-        state = Sidekiq.redis { |conn| conn.hgetall("it-#{jid}") }
+        state = Sidekiq.redis { |conn| conn.hgetall(iteration_key) }
 
         unless state.empty?
-          @executions = state["executions"].to_i
-          @cursor = Sidekiq.load_json(state["cursor"])
-          @times_interrupted = state["times_interrupted"].to_i
-          @total_time = state["total_time"].to_f
+          @_executions = state["ex"].to_i
+          @_cursor = Sidekiq.load_json(state["c"])
+          @_interrupted = state["int"].to_i
+          @_runtime = state["rt"].to_f
         end
       end
 
       STATE_FLUSH_INTERVAL = 5 # seconds
-      STATE_TTL = 30 * 24 * 60 * 60 # 30 days
+      # we need to keep the state around as long as the job
+      # might be retrying
+      STATE_TTL = 30 * 24 * 60 * 60 # one month
 
       def iterate_with_enumerator(enumerator, arguments)
         found_record = false
-        state_flushed_at = Time.now
+        state_flushed_at = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
 
         enumerator.each do |object, cursor|
           found_record = true
+          @_cursor = cursor
+
+          is_interrupted = interrupted?
+          if ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - state_flushed_at >= STATE_FLUSH_INTERVAL || is_interrupted
+            flush_state
+            state_flushed_at = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+          end
+
+          return false if is_interrupted
+
           around_iteration do
             each_iteration(object, *arguments)
-          end
-          @cursor = cursor
-          adjust_total_time
-
-          if Time.now - state_flushed_at >= STATE_FLUSH_INTERVAL || job_should_exit?
-            flush_state
-            state_flushed_at = Time.now
-          end
-
-          if job_should_exit?
-            return false
           end
         end
 
         logger.debug("Enumerator found nothing to iterate!") unless found_record
-
         true
+      ensure
+        @_runtime += (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @_start_time)
       end
 
       def reenqueue_iteration_job
-        @times_interrupted += 1
+        @_interrupted += 1
         flush_state
-        logger.debug { "Interrupting and re-enqueueing the job (cursor=#{cursor.inspect})" }
+        logger.debug { "Interrupting job (cursor=#{@_cursor.inspect})" }
 
         raise Interrupted
-      end
-
-      def adjust_total_time
-        @total_time += (Time.now - @start_time).round(3)
       end
 
       def assert_enumerator!(enum)
         unless enum.is_a?(Enumerator)
           raise ArgumentError, <<~MSG
-            #build_enumerator is expected to return Enumerator object, but returned #{enum.class}.
+            #build_enumerator must return an Enumerator, but returned #{enum.class}.
             Example:
               def build_enumerator(params, cursor:)
                 active_record_records_enumerator(
@@ -222,21 +214,17 @@ module Sidekiq
         end
       end
 
-      def job_should_exit?
-        max_job_runtime = self.class.get_sidekiq_options.dig("iteration", "max_job_runtime") ||
-          Sidekiq.default_configuration.dig(:iteration, :max_job_runtime)
-
-        ran_enough = max_job_runtime && @start_time && (Time.now - @start_time > max_job_runtime)
-        ran_enough || lifecycle.stopping? || throttle?
+      def interrupted?
+        _context&.stopping? || throttle?
       end
 
       def flush_state
-        key = "it-#{jid}"
+        key = iteration_key
         state = {
-          "executions" => @executions,
-          "cursor" => Sidekiq.dump_json(@cursor),
-          "times_interrupted" => @times_interrupted,
-          "total_time" => @total_time
+          "ex" => @_executions,
+          "c" => Sidekiq.dump_json(@_cursor),
+          "int" => @_interrupted,
+          "rt" => @_runtime
         }
 
         Sidekiq.redis do |conn|
@@ -245,6 +233,13 @@ module Sidekiq
             pipe.expire(key, STATE_TTL)
           end
         end
+      end
+
+      def cleanup
+        logger.debug {
+          format("Completed iteration. interrupted=%d runtime=%.3f", @_interrupted, @_runtime)
+        }
+        Sidekiq.redis { |conn| conn.del(iteration_key) }
       end
 
       def handle_completed(completed)

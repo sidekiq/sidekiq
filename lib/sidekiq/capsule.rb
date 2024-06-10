@@ -17,12 +17,15 @@ module Sidekiq
   # end
   class Capsule
     include Sidekiq::Component
+    extend Forwardable
 
     attr_reader :name
     attr_reader :queues
     attr_accessor :concurrency
     attr_reader :mode
     attr_reader :weights
+
+    def_delegators :@config, :[], :[]=, :fetch, :key?, :has_key?, :merge!, :dig
 
     def initialize(name, config)
       @name = name

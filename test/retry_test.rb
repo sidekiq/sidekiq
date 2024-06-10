@@ -408,7 +408,7 @@ describe Sidekiq::JobRetry do
       it "kills when configured on special exceptions" do
         ds = Sidekiq::DeadSet.new
         assert_equal 0, ds.size
-        assert_raises Sidekiq::JobRetry::Skip do
+        assert_raises Sidekiq::JobRetry::Handled do
           handler.local(CustomJobWithException, jobstr({"class" => "CustomJobWithException"}), "default") do
             raise "oops"
           end

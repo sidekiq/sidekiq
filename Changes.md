@@ -5,6 +5,23 @@
 HEAD (7.3.0)
 ----------
 
+- **NEW FEATURE** Add `Sidekiq::IterableJob`, iteration support for long-running jobs. [#6286, fatkodima]
+  Iterable jobs are interruptible and can restart quickly if
+  running during a deploy. You must ensure that `each_iteration`
+  doesn't take more than Sidekiq's `-t` timeout (default: 25 seconds). Iterable jobs must not implement `perform`.
+```ruby
+class ProcessArrayJob
+  include Sidekiq::IterableJob
+  def build_enumerator(*args, **kwargs)
+    array_enumerator(args, **kwargs)
+  end
+  def each_iteration(arg)
+    puts arg
+  end
+end
+ProcessArrayJob.perform_async(1, 2, 3)
+```
+See the [Iteration](//github.com/sidekiq/sidekiq/wiki/Iteration) wiki page and the RDoc in `Sidekiq::IterableJob`.
 - **SECURITY** The Web UI no longer allows extensions to use `<script>`.
   Adjust CSP to disallow inline scripts within the Web UI. Please see
   `examples/webui-ext` for how to register Web UI extensions and use
@@ -12,7 +29,6 @@ HEAD (7.3.0)
 - Add config option, `:skip_default_job_logging` to disable Sidekiq's default
   start/finish job logging. [#6200]
 - Allow `Sidekiq::Limiter.redis` to use Redis Cluster [#6288]
-- Add iteration support for long-running jobs [#6286, fatkodima]
 - Retain CurrentAttributeѕ after inline execution [#6307]
 - Raise default Redis {read,write,connect} timeouts from 1 to 3 seconds
   to minimize ReadTimeoutErrors [#6162]

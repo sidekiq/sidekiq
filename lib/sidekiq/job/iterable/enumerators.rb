@@ -2,7 +2,6 @@
 
 require_relative "active_record_enumerator"
 require_relative "csv_enumerator"
-require_relative "nested_enumerator"
 
 module Sidekiq
   module Job
@@ -21,7 +20,8 @@ module Sidekiq
         def array_enumerator(array, cursor:)
           raise ArgumentError, "array must be an Array" unless array.is_a?(Array)
 
-          array.each_with_index.drop(cursor || 0).to_enum { array.size }
+          x = array.each_with_index.drop(cursor || 0)
+          x.to_enum { x.size }
         end
 
         # Builds Enumerator from `ActiveRecord::Relation`.
@@ -128,33 +128,6 @@ module Sidekiq
         #
         def csv_batches_enumerator(csv, cursor:, **options)
           CsvEnumerator.new(csv).batches(cursor: cursor, **options)
-        end
-
-        # Builds Enumerator for nested iteration.
-        #
-        # @param enums [Array<Proc>] an Array of Procs, each should return an Enumerator.
-        #   Each proc from enums should accept the yielded items from the parent enumerators and the `cursor` as its arguments.
-        #   Each proc's `cursor` argument is its part from the `build_enumerator`'s `cursor` array.
-        # @param cursor [Array<Object>] array of offsets for each of the enums to start iteration from
-        #
-        # @example
-        #   def build_enumerator(cursor:)
-        #     nested_enumerator(
-        #       [
-        #         ->(cursor) { active_record_records_enumerator(Shop.all, cursor: cursor) },
-        #         ->(shop, cursor) { active_record_records_enumerator(shop.products, cursor: cursor) },
-        #         ->(_shop, product, cursor) { active_record_relations_enumerator(product.product_variants, cursor: cursor) }
-        #       ],
-        #       cursor: cursor
-        #     )
-        #   end
-        #
-        #   def each_iteration(product_variants_relation)
-        #     # do something
-        #   end
-        #
-        def nested_enumerator(enums, cursor:)
-          NestedEnumerator.new(enums, cursor: cursor).each
         end
       end
     end

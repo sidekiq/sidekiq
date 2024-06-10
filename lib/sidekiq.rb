@@ -32,7 +32,7 @@ require "sidekiq/logger"
 require "sidekiq/client"
 require "sidekiq/transaction_aware_client"
 require "sidekiq/job"
-require "sidekiq/job/iterable"
+require "sidekiq/iterable_job"
 require "sidekiq/worker_compatibility_alias"
 require "sidekiq/redis_client_adapter"
 

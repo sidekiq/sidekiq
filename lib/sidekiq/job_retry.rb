@@ -59,8 +59,13 @@ module Sidekiq
   #    end
   #
   class JobRetry
+    # Handled means the job failed but has been dealt with
+    # (by creating a retry, rescheduling it, etc). It still
+    # needs to be logged and dispatched to error_handlers.
     class Handled < ::RuntimeError; end
 
+    # Skip means the job failed but Sidekiq does not need to
+    # create a retry, log it or send to error_handlers.
     class Skip < Handled; end
 
     include Sidekiq::Component
@@ -116,9 +121,6 @@ module Sidekiq
     rescue Sidekiq::Shutdown => ey
       # ignore, will be pushed back onto queue during hard_shutdown
       raise ey
-    rescue Job::Interrupted
-      process_requeue(jobinst, jobstr)
-      raise Skip
     rescue Exception => e
       # ignore, will be pushed back onto queue during hard_shutdown
       raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
@@ -132,20 +134,10 @@ module Sidekiq
       process_retry(jobinst, msg, queue, e)
       # We've handled this error associated with this job, don't
       # need to handle it at the global level
-      raise Skip
+      raise Handled
     end
 
     private
-
-    def process_requeue(jobinst, jobstr)
-      msg = Sidekiq.load_json(jobstr)
-      capsule = jobinst.lifecycle.capsule
-      retry_backoff = msg.dig("iteration", "retry_backoff") || capsule.config.dig(:iteration, :retry_backoff)
-
-      redis do |conn|
-        conn.zadd("schedule", retry_backoff, jobstr)
-      end
-    end
 
     # Note that +jobinst+ can be nil here if an error is raised before we can
     # instantiate the job instance.  All access must be guarded and
