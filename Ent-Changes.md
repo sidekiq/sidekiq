@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+7.2.4
+---------
+
+- Revert #6288 as this requires Sidekiq 7.3 [#6324]
+
 7.2.3
 ---------
 
