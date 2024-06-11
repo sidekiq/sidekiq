@@ -356,7 +356,7 @@ module Sidekiq
     end
 
     def h(text)
-      ::Rack::Utils.escape_html(text)
+      ::Rack::Utils.escape_html(text.to_s)
     rescue ArgumentError => e
       raise unless e.message.eql?("invalid byte sequence in UTF-8")
       text.encode!("UTF-16", "UTF-8", invalid: :replace, replace: "").encode!("UTF-8", "UTF-16")

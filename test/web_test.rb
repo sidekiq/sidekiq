@@ -216,7 +216,7 @@ describe Sidekiq::Web do
     assert_equal 302, last_response.status
 
     @config.redis do |conn|
-      refute conn.smembers("queues").include?("foo")
+      refute_includes conn.smembers("queues"), "foo"
       refute(conn.exists("queue:foo") > 0)
     end
   end
@@ -307,7 +307,7 @@ describe Sidekiq::Web do
     assert_equal 302, last_response.status
 
     @config.redis do |conn|
-      refute conn.lrange("queue:foo", 0, -1).include?("{\"foo\":\"bar\"}")
+      refute_includes conn.lrange("queue:foo", 0, -1), "{\"foo\":\"bar\"}"
     end
   end
 
@@ -559,11 +559,11 @@ describe Sidekiq::Web do
     assert_equal 200, last_response.status
     assert_match(/FailJob/, last_response.body)
 
-    assert last_response.body.include?("fail message: &lt;a&gt;hello&lt;&#x2F;a&gt;")
-    assert !last_response.body.include?("fail message: <a>hello</a>")
+    assert_includes last_response.body, "fail message: &lt;a&gt;hello&lt;/a&gt;"
+    refute_includes last_response.body, "fail message: <a>hello</a>"
 
-    assert last_response.body.include?("args\">&quot;&lt;a&gt;hello&lt;&#x2F;a&gt;&quot;<")
-    assert !last_response.body.include?("args\"><a>hello</a><")
+    assert_includes last_response.body, "args\">&quot;&lt;a&gt;hello&lt;/a&gt;&quot;<"
+    refute_includes last_response.body, "args\"><a>hello</a><"
 
     # on /workers page
     @config.redis do |conn|
@@ -580,8 +580,8 @@ describe Sidekiq::Web do
     assert_equal 200, last_response.status
     assert_match(/FailJob/, last_response.body)
     assert_match(/frumduz/, last_response.body)
-    assert last_response.body.include?("&lt;a&gt;hello&lt;&#x2F;a&gt;")
-    assert !last_response.body.include?("<a>hello</a>")
+    assert_includes last_response.body, "&lt;a&gt;hello&lt;/a&gt;"
+    refute_includes last_response.body, "<a>hello</a>"
 
     # on /queues page
     params = add_xss_retry # sorry, don't know how to easily make this show up on queues page otherwise.
@@ -590,8 +590,8 @@ describe Sidekiq::Web do
 
     get "/queues/foo"
     assert_equal 200, last_response.status
-    assert last_response.body.include?("&lt;a&gt;hello&lt;&#x2F;a&gt;")
-    assert !last_response.body.include?("<a>hello</a>")
+    assert_includes last_response.body, "&lt;a&gt;hello&lt;/a&gt;"
+    refute_includes last_response.body, "<a>hello</a>"
   end
 
   it "can show user defined tab" do
