@@ -23,7 +23,9 @@ describe "Sharding" do
   before do
     @config = reset!
     @sh1 = Sidekiq::RedisConnection.create(size: 1, db: 6)
+    @sh1.with { |c| c.flushdb }
     @sh2 = Sidekiq::RedisConnection.create(size: 1, db: 5)
+    @sh2.with { |c| c.flushdb }
   end
 
   after do

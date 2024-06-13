@@ -24,7 +24,7 @@ if ENV["COVERAGE"]
   end
 end
 
-ENV["REDIS_URL"] ||= "redis://localhost/15"
+ENV["REDIS_URL"] ||= "redis://localhost:6379/15"
 NULL_LOGGER = Logger.new(IO::NULL)
 
 def reset!
@@ -34,7 +34,7 @@ def reset!
     existing_pool&.shutdown(&:close)
   end
 
-  RedisClient.new(url: ENV["REDIS_URL"]).call("flushall")
+  RedisClient.new(url: ENV["REDIS_URL"]).call("flushdb")
   cfg = Sidekiq::Config.new
   cfg[:backtrace_cleaner] = Sidekiq::Config::DEFAULTS[:backtrace_cleaner]
   cfg.logger = NULL_LOGGER
