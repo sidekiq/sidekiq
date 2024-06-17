@@ -2,7 +2,6 @@
 
 require_relative "helper"
 require "sidekiq"
-require "sidekiq/api"
 
 class ShardJob
   include Sidekiq::Job

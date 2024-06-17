@@ -5,7 +5,6 @@ require "sidekiq/cli"
 require "sidekiq/fetch"
 require "sidekiq/scheduled"
 require "sidekiq/processor"
-require "sidekiq/api"
 
 class JoeJob
   include Sidekiq::Job

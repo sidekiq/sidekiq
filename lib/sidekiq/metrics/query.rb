@@ -1,4 +1,3 @@
-require "sidekiq"
 require "date"
 require "set"
 
