@@ -74,7 +74,7 @@ module Sidekiq # :nodoc:
       # fire startup and start multithreading.
       info = @config.redis_info
       ver = Gem::Version.new(info["redis_version"])
-      raise "You are connecting to Redis #{ver}, Sidekiq requires Redis 6.2.0 or greater" if ver < Gem::Version.new("6.2.0")
+      raise "You are connecting to Redis #{ver}, Sidekiq requires Redis 5.2.0 or greater" if ver < Gem::Version.new("5.2.0")
 
       maxmemory_policy = info["maxmemory_policy"]
       if maxmemory_policy != "noeviction" && maxmemory_policy != ""

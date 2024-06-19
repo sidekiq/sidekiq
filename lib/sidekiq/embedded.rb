@@ -1,6 +1,6 @@
-require "sidekiq/component"
-require "sidekiq/launcher"
-require "sidekiq/metrics/tracking"
+require 'sidekiq/component'
+require 'sidekiq/launcher'
+require 'sidekiq/metrics/tracking'
 
 module Sidekiq
   class Embedded
@@ -34,16 +34,20 @@ module Sidekiq
     def housekeeping
       logger.info "Running in #{RUBY_DESCRIPTION}"
       logger.info Sidekiq::LICENSE
-      logger.info "Upgrade to Sidekiq Pro for more features and support: https://sidekiq.org" unless defined?(::Sidekiq::Pro)
+      unless defined?(::Sidekiq::Pro)
+        logger.info 'Upgrade to Sidekiq Pro for more features and support: https://sidekiq.org'
+      end
 
       # touch the connection pool so it is created before we
       # fire startup and start multithreading.
       info = config.redis_info
-      ver = Gem::Version.new(info["redis_version"])
-      raise "You are connecting to Redis #{ver}, Sidekiq requires Redis 6.2.0 or greater" if ver < Gem::Version.new("6.2.0")
+      ver = Gem::Version.new(info['redis_version'])
+      if ver < Gem::Version.new('5.2.0')
+        raise "You are connecting to Redis #{ver}, Sidekiq requires Redis 5.2.0 or greater"
+      end
 
-      maxmemory_policy = info["maxmemory_policy"]
-      if maxmemory_policy != "noeviction"
+      maxmemory_policy = info['maxmemory_policy']
+      if maxmemory_policy != 'noeviction'
         logger.warn <<~EOM
 
 
@@ -54,8 +58,8 @@ module Sidekiq
         EOM
       end
 
-      logger.debug { "Client Middleware: #{@config.default_capsule.client_middleware.map(&:klass).join(", ")}" }
-      logger.debug { "Server Middleware: #{@config.default_capsule.server_middleware.map(&:klass).join(", ")}" }
+      logger.debug { "Client Middleware: #{@config.default_capsule.client_middleware.map(&:klass).join(', ')}" }
+      logger.debug { "Server Middleware: #{@config.default_capsule.server_middleware.map(&:klass).join(', ')}" }
     end
   end
 end
