@@ -30,6 +30,7 @@ See the [Iteration](//github.com/sidekiq/sidekiq/wiki/Iteration) wiki page and t
   start/finish job logging. [#6200]
 - Allow `Sidekiq::Limiter.redis` to use Redis Cluster [#6288]
 - Retain CurrentAttributeѕ after inline execution [#6307]
+- Ignore non-existent CurrentAttributes attributes when restoring [#6341]
 - Raise default Redis {read,write,connect} timeouts from 1 to 3 seconds
   to minimize ReadTimeoutErrors [#6162]
 - Add `logger` as a dependency since it will become bundled in Ruby 3.5 [#6320]
