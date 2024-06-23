@@ -63,8 +63,20 @@ module Sidekiq
         klass, attrs = klass_attrs.shift
         return block.call unless klass
 
-        klass.set(attrs) do
-          wrap(klass_attrs, &block)
+        retried = false
+
+        begin
+          klass.set(attrs) do
+            wrap(klass_attrs, &block)
+          end
+        rescue NoMethodError
+          raise if retried
+
+          # It is possible that the `CurrentAttributes` definition
+          # was changed before the job started processing.
+          attrs = attrs.select { |attr| klass.respond_to?(attr) }
+          retried = true
+          retry
         end
       end
     end

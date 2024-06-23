@@ -110,6 +110,18 @@ describe "Current attributes" do
     end
   end
 
+  it "ignores non-existent attributes" do
+    cm = Sidekiq::CurrentAttributes::Load.new({
+      "cattr" => "Myapp::Current"
+    })
+
+    job = {"cattr" => {"user_id" => 123, "non_existent" => 456}}
+    assert_nil Myapp::Current.user_id
+    cm.call(nil, job, nil) do
+      assert_equal 123, Myapp::Current.user_id
+    end
+  end
+
   private
 
   def with_context(strklass, attr, value)
