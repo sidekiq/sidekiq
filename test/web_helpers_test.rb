@@ -124,7 +124,7 @@ describe "Web helpers" do
     obj = Helpers.new
     expected = %w[
       ar cs da de el en es fa fr gd he hi it ja
-      ko lt nb nl pl pt pt-br ru sv ta uk ur
+      ko lt nb nl pl pt pt-br ru sv ta tr uk ur
       vi zh-cn zh-tw
     ]
     assert_equal expected, obj.available_locales.sort
