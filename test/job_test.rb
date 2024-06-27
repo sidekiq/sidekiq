@@ -24,7 +24,7 @@ class ForeverJob
 
   def perform
     count = 0
-    until count > 1000 && stopping?
+    until count > 1000 && interrupted?
       count += 1
     end
     count
@@ -130,7 +130,7 @@ describe Sidekiq::Job do
     end
 
     it "can detect when stopping" do
-      refute MySetJob.new.stopping?
+      refute MySetJob.new.interrupted?
     end
 
     it "stops on command" do

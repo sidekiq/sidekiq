@@ -54,7 +54,7 @@ module Sidekiq
 
       # A hook to override that will be called each time the job is interrupted.
       #
-      # This can be due to interruption, throttling or sidekiq stopping.
+      # This can be due to interruption or sidekiq stopping.
       #
       def on_stop
       end
@@ -84,25 +84,6 @@ module Sidekiq
       #
       def each_iteration(*)
         raise NotImplementedError, "#{self.class.name} must implement an '#each_iteration' method"
-      end
-
-      # A hook to override that can be used to throttle a job when a given condition is met.
-      #
-      # If a job is throttled, it will be interrupted and retried after a backoff period
-      # (0 by default) has passed.
-      #
-      # The backoff can be configured via `sidekiq_options` per job:
-      #
-      #   sidekiq_options iteration: { retry_backoff: 30 } # in seconds
-      #
-      #  or globally:
-      #
-      #   Sidekiq::Config::DEFAULTS[:iteration][:retry_backoff] = 30 # in seconds
-      #
-      # @return [Boolean]
-      #
-      def throttle?
-        false
       end
 
       def iteration_key
@@ -209,10 +190,6 @@ module Sidekiq
               end
           MSG
         end
-      end
-
-      def interrupted?
-        _context&.stopping? || throttle?
       end
 
       def flush_state

@@ -173,7 +173,7 @@ module Sidekiq
       Sidekiq.logger
     end
 
-    def stopping?
+    def interrupted?
       @_context&.stopping?
     end
 

@@ -72,7 +72,7 @@ class ArrayIterableJob < SimpleIterableJob
     @current_run_iterations += 1
   end
 
-  def throttle?
+  def interrupted?
     @current_run_iterations == stop_after_iterations
   end
 end
