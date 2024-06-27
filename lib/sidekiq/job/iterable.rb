@@ -28,7 +28,6 @@ module Sidekiq
 
         @_executions = 0
         @_cursor = nil
-        @_interrupted = 0
         @_start_time = nil
         @_runtime = 0
       end
@@ -154,7 +153,6 @@ module Sidekiq
         unless state.empty?
           @_executions = state["ex"].to_i
           @_cursor = Sidekiq.load_json(state["c"])
-          @_interrupted = state["int"].to_i
           @_runtime = state["rt"].to_f
         end
       end
@@ -192,7 +190,6 @@ module Sidekiq
       end
 
       def reenqueue_iteration_job
-        @_interrupted += 1
         flush_state
         logger.debug { "Interrupting job (cursor=#{@_cursor.inspect})" }
 
