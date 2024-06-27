@@ -223,7 +223,6 @@ module Sidekiq
         state = {
           "ex" => @_executions,
           "c" => Sidekiq.dump_json(@_cursor),
-          "int" => @_interrupted,
           "rt" => @_runtime
         }
 
@@ -237,7 +236,7 @@ module Sidekiq
 
       def cleanup
         logger.debug {
-          format("Completed iteration. interrupted=%d runtime=%.3f", @_interrupted, @_runtime)
+          format("Completed iteration. executions=%d runtime=%.3f", @_executions, @_runtime)
         }
         Sidekiq.redis { |conn| conn.del(iteration_key) }
       end

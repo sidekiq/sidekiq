@@ -168,7 +168,6 @@ describe Sidekiq::Job::Iterable do
     previous_state = fetch_iteration_state(jid)
     assert_equal 1, previous_state["ex"].to_i
     assert_equal 2, Sidekiq.load_json(previous_state["c"])
-    assert_equal 1, previous_state["int"].to_i
     assert Float(previous_state["rt"])
 
     iterate_exact_times(ArrayIterableJob, 2, jid: jid)
@@ -177,7 +176,6 @@ describe Sidekiq::Job::Iterable do
     previous_state = fetch_iteration_state(jid)
     assert_equal 2, previous_state["ex"].to_i
     assert_equal 4, Sidekiq.load_json(previous_state["c"])
-    assert_equal 2, previous_state["int"].to_i
     assert_operator Float(previous_state["rt"]), :>, 0
 
     continue_iterating(ArrayIterableJob, jid: jid)
