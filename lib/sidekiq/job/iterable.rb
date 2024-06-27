@@ -235,7 +235,7 @@ module Sidekiq
         logger.debug {
           format("Completed iteration. executions=%d runtime=%.3f", @_executions, @_runtime)
         }
-        Sidekiq.redis { |conn| conn.del(iteration_key) }
+        Sidekiq.redis { |conn| conn.unlink(iteration_key) }
       end
 
       def handle_completed(completed)
