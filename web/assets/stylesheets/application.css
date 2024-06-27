@@ -634,8 +634,12 @@ div.interval-slider input {
 .container {
   padding: 0;
 }
+.navbar-fixed-bottom {
+  position: relative;
+  top: auto;
+}
 @media (max-width: 767px) {
-  .navbar-fixed-top, .navbar-fixed-bottom {
+  .navbar-fixed-top {
     position: relative;
     top: auto;
   }
