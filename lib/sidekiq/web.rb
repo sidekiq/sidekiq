@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "erb"
+require "securerandom"
 
 require "sidekiq"
 require "sidekiq/api"
