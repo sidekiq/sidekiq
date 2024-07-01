@@ -7,6 +7,7 @@ require "sidekiq/api"
 
 describe "ActiveJob" do
   before do
+    ActiveJob::Base.queue_adapter = :sidekiq
     @config = reset!
     @config[:backtrace_cleaner] = ->(backtrace) { Rails.backtrace_cleaner.clean(backtrace) }
   end

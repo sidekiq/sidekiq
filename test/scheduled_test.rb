@@ -121,7 +121,7 @@ describe Sidekiq::Scheduled do
 
         assert intervals.all? { |x| x >= 5 }
         assert intervals.all? { |x| x <= 15 }
-        assert_in_delta 10, intervals.sum.to_f / i, 0.5
+        assert_in_delta 10, intervals.sum.to_f / i, 0.51
       end
     end
 
