@@ -86,7 +86,7 @@ Useful resources:
 * Occasional announcements are made to the [@sidekiq](https://ruby.social/@sidekiq) Mastodon account.
 * The [Sidekiq tag](https://stackoverflow.com/questions/tagged/sidekiq) on Stack Overflow has lots of useful Q &amp; A.
 
-Every Friday morning is Sidekiq office hour: I video chat and answer questions.
+Every Thursday morning is Sidekiq office hour: I video chat and answer questions.
 See the [Sidekiq support page](https://sidekiq.org/support.html) for details.
 
 Contributing
