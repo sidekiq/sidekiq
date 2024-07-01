@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+7.3.0
+---------
+
+- Remove `base64` gem dependency.
+
 7.2.1
 ---------
 

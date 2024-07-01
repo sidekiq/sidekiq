@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+7.3.0
+---------
+
+- Allow rate limiting to use Redis Cluster [#6288]
+- Remove `base64` gem dependency
+
 7.2.4
 ---------
 
@@ -12,7 +18,7 @@ Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 7.2.3
 ---------
 
-- Adjust ùnlimiter limiter to work as a points limiter too [#6301]
+- Adjust the unlimited rate limiter to work as a points limiter too [#6301]
 - Limiters can now use a clustered Redis client [#6288]
 - Limiters now have attr_readers for all static config elements [#6259]
 - Handle fractional values for SIDEKIQ_COUNT when containers have fractional CPU allocations,
