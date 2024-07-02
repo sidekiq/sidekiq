@@ -62,6 +62,10 @@ module Sidekiq
         unless ::Rails.logger == config.logger || ::ActiveSupport::Logger.logger_outputs_to?(::Rails.logger, $stdout)
           if ::Rails.logger.respond_to?(:broadcast_to)
             ::Rails.logger.broadcast_to(config.logger)
+          elsif defined?(::ActiveSupport::BroadcastLogger)
+            # use public rails api for broadcasting logs (2023)
+            # - see commit https://github.com/rails/rails/commit/1fbd812c47f7ba840390942e56d9b2ebbc260901
+            ::Rails.logger = ::ActiveSupport::BroadcastLogger.new(::Rails.logger, config.logger)
           else
             ::Rails.logger.extend(::ActiveSupport::Logger.broadcast(config.logger))
           end
