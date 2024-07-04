@@ -428,7 +428,8 @@ module Sidekiq
           Rack::CONTENT_TYPE => "text/html",
           Rack::CACHE_CONTROL => "private, no-store",
           Web::CONTENT_LANGUAGE => action.locale,
-          Web::CONTENT_SECURITY_POLICY => process_csp(env, CSP_HEADER_TEMPLATE)
+          Web::CONTENT_SECURITY_POLICY => process_csp(env, CSP_HEADER_TEMPLATE),
+          Web::X_CONTENT_TYPE_OPTIONS => "nosniff"
         }
         # we'll let Rack calculate Content-Length for us.
         [200, headers, [resp]]

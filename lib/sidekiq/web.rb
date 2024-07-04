@@ -40,11 +40,13 @@ module Sidekiq
       CONTENT_SECURITY_POLICY = "Content-Security-Policy"
       LOCATION = "Location"
       X_CASCADE = "X-Cascade"
+      X_CONTENT_TYPE_OPTIONS = "X-Content-Type-Options"
     else
       CONTENT_LANGUAGE = "content-language"
       CONTENT_SECURITY_POLICY = "content-security-policy"
       LOCATION = "location"
       X_CASCADE = "x-cascade"
+      X_CONTENT_TYPE_OPTIONS = "x-content-type-options"
     end
 
     class << self
