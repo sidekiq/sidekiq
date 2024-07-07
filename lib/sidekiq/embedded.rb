@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "sidekiq/component"
 require "sidekiq/launcher"
 require "sidekiq/metrics/tracking"

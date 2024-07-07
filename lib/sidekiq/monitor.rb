@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 require "fileutils"
 require "sidekiq/api"
@@ -98,7 +99,7 @@ class Sidekiq::Monitor
       pad = opts[:pad] || 0
       max_length = opts[:max_length] || (80 - pad)
       out = []
-      line = ""
+      line = +""
       values.each do |value|
         if (line.length + value.length) > max_length
           out << line

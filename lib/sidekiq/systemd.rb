@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 # Sidekiq's systemd integration allows Sidekiq to inform systemd:
 #  1. when it has successfully started

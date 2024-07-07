@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "helper"
 require "sidekiq/job_retry"
 require "sidekiq/capsule"

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "sidekiq/job/iterable"
 
 # Iterable jobs are ones which provide a sequence to process using

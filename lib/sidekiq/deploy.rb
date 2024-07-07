@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "sidekiq/redis_connection"
 require "time"
 
