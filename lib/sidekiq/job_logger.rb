@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "sidekiq/component"
+
 module Sidekiq
   class JobLogger
     include Sidekiq::Component
