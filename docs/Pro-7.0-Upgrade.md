@@ -29,6 +29,7 @@ end
 - Redis 6.2+ is now required
 - Ruby 2.7+ is now required
 - Rails 6.0+ is now supported
+- If using `dogstatsd-ruby`, v5.0+ is now required
 
 Support is only guaranteed for the current and previous major versions. With the release of Sidekiq Pro 7, Sidekiq Pro 4.x is no longer supported.
 
