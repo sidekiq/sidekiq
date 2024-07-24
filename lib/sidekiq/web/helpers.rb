@@ -36,7 +36,7 @@ module Sidekiq
     # NB: keys and values are not escaped; do not allow user input
     # in the attributes
     private def html_tag(tagname, attrs)
-      s = "<#{tagname}"
+      s = +"<#{tagname}"
       attrs.each_pair do |k, v|
         next unless v
         s << " #{k}=\"#{v}\""
