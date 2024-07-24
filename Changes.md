@@ -6,7 +6,7 @@ HEAD
 ----------
 
 - Add frozen string literal to a number of .rb files.
-- Fix an issue with Ruby 2.7 and asset helpers [#6371]
+- Fix frozen string error with style_tag and script_tag [#6371]
 
 7.3.0
 ----------
