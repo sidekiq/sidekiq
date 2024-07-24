@@ -44,6 +44,16 @@ describe "Web helpers" do
     Sidekiq.redis { |c| c.flushdb }
   end
 
+  it "tests script_tag" do
+    obj = Helpers.new
+    assert_equal '<script type="text/javascript" src="/sidekiq.js"></script>', obj.script_tag("sidekiq.js")
+  end
+
+  it "tests style_tag" do
+    obj = Helpers.new
+    assert_equal '<link type="text/css" media="screen" rel="stylesheet" href="/sidekiq.css" />', obj.style_tag("sidekiq.css")
+  end
+
   it "tests locale determination" do
     obj = Helpers.new
     assert_equal "en", obj.locale
