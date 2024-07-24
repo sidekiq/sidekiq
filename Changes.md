@@ -6,6 +6,7 @@ HEAD
 ----------
 
 - Add frozen string literal to a number of .rb files.
+- Fix an issue with Ruby 2.7 and asset helpers [#6371]
 
 7.3.0
 ----------
