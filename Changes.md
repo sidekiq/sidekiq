@@ -7,6 +7,7 @@ HEAD
 
 - Add frozen string literal to a number of .rb files.
 - Fix frozen string error with style_tag and script_tag [#6371]
+- Fix an error on Ruby 2.7 because of usage of `Hash#except` [#6376]
 
 7.3.0
 ----------
