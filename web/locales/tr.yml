@@ -4,7 +4,7 @@ tr:
   AddToQueue: Kuyruğa ekle
   AreYouSure: Emin misiniz?
   AreYouSureDeleteJob: Bu işi silmek istediğinizden emin misiniz?
-  AreYouSureDeleteQueue: %{queue} kuyruğunu silmek istediğinizden emin misiniz?
+  AreYouSureDeleteQueue: "%{queue} kuyruğunu silmek istediğinizden emin misiniz?"
   Arguments: Argümanlar
   BackToApp: Uygulamaya geri dön
   Busy: Meşgul
