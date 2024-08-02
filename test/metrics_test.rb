@@ -4,6 +4,7 @@ require_relative "helper"
 require "sidekiq/component"
 require "sidekiq/metrics/tracking"
 require "sidekiq/metrics/query"
+require "sidekiq/job_retry"
 require "sidekiq/deploy"
 require "sidekiq/api"
 
@@ -36,6 +37,24 @@ describe Sidekiq::Metrics do
   it "tracks metrics" do
     count = create_known_metrics
     assert_equal 4, count
+  end
+
+  it "does not track failures for interrupted iterable jobs" do
+    smet = Sidekiq::Metrics::ExecutionTracker.new(@config)
+    assert_raises Sidekiq::JobRetry::Skip do
+      smet.track("critical", "App::SomeJob") do
+        sleep 0.001
+        raise Sidekiq::JobRetry::Skip
+      end
+    end
+    smet.flush(fixed_time)
+
+    q = Sidekiq::Metrics::Query.new(now: fixed_time)
+    result = q.for_job("App::SomeJob")
+    job_result = result.job_results["App::SomeJob"]
+    refute_equal 0, job_result.totals["ms"]
+    assert_equal 1, job_result.totals["p"]
+    assert_equal 0, job_result.totals["f"]
   end
 
   describe "marx" do

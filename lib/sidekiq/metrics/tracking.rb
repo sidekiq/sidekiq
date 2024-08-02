@@ -31,11 +31,11 @@ module Sidekiq
           # We don't track time for failed jobs as they can have very unpredictable
           # execution times. more important to know average time for successful jobs so we
           # can better recognize when a perf regression is introduced.
-          @lock.synchronize {
-            @grams[klass].record_time(time_ms)
-            @jobs["#{klass}|ms"] += time_ms
-            @totals["ms"] += time_ms
-          }
+          track_time(klass, time_ms)
+        rescue JobRetry::Skip
+          # This is raised when iterable job is interrupted.
+          track_time(klass, time_ms)
+          raise
         rescue Exception
           @lock.synchronize {
             @jobs["#{klass}|f"] += 1
@@ -99,6 +99,14 @@ module Sidekiq
       end
 
       private
+
+      def track_time(klass, time_ms)
+        @lock.synchronize {
+          @grams[klass].record_time(time_ms)
+          @jobs["#{klass}|ms"] += time_ms
+          @totals["ms"] += time_ms
+        }
+      end
 
       def reset
         @lock.synchronize {
