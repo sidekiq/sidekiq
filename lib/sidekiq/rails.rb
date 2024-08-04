@@ -11,7 +11,7 @@ module Sidekiq
       end
 
       def call
-        params = (::Rails::VERSION::STRING >= "7.1") ? {source: "job.sidekiq"} : {}
+        params = (Gem::Version.new(::Rails::VERSION::STRING) >= Gem::Version.new('7.1')) ? {source: "job.sidekiq"} : {}
         @app.reloader.wrap(**params) do
           yield
         end
