@@ -66,7 +66,14 @@ module Sidekiq
         scrubbed_options[:password] = redacted if scrubbed_options[:password]
         scrubbed_options[:sentinel_password] = redacted if scrubbed_options[:sentinel_password]
         scrubbed_options[:sentinels]&.each do |sentinel|
-          sentinel[:password] = redacted if sentinel[:password]
+          if sentinel.is_a?(String)
+            if (uri = URI(sentinel)) && uri.password
+              uri.password = redacted
+              sentinel.replace(uri.to_s)
+            end
+          else
+            sentinel[:password] = redacted if sentinel[:password]
+          end
         end
         scrubbed_options
       end

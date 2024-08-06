@@ -172,6 +172,21 @@ describe Sidekiq::RedisConnection do
         assert_includes(output, ':password=>"REDACTED"')
       end
 
+      it "supports sentinel urls" do
+        options = {
+          url: "rediss://user:secret@mymaster",
+          sentinels: ["rediss://sentinel-user:secret@sentinel-host:26379"]
+        }
+
+        output = capture_logging(@config) do |logger|
+          Sidekiq::RedisConnection.create(options.merge(logger: logger))
+        end
+
+        refute_includes(options.inspect, "REDACTED")
+        refute_includes(output, "secret")
+        assert_includes(output, "sentinel-user:REDACTED@sentinel-host:26379")
+      end
+
       it "prunes SSL parameters from the logging" do
         output = capture_logging(@config) do |logger|
           options = {
