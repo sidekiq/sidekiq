@@ -2,17 +2,15 @@
 
 module Sidekiq
   class JobLogger
-    include Sidekiq::Component
-
     def initialize(config)
       @config = config
-      @logger = logger
+      @logger = @config.logger
     end
 
     # If true we won't do any job logging out of the box.
     # The user is responsible for any logging.
     def skip_default_logging?
-      config[:skip_default_job_logging]
+      @config[:skip_default_job_logging]
     end
 
     def call(item, queue)
