@@ -71,8 +71,8 @@ module Sidekiq
               uri.password = redacted
               sentinel.replace(uri.to_s)
             end
-          else
-            sentinel[:password] = redacted if sentinel[:password]
+          elsif sentinel[:password]
+            sentinel[:password] = redacted
           end
         end
         scrubbed_options
