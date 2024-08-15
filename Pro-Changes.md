@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+7.3.1
+---------
+
+- Adjust Batch CSS for better accessibility [#6387]
+- Adjust reliable scheduler for compatibility with DragonflyDB [dragonflydb/dragonfly#2442]
+
 7.3.0
 ---------
 

@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+7.3.1
+---------
+
+- Fix healthcheck when defined in config YML [#6352]
+
 7.3.0
 ---------
 

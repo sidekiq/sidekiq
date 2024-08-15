@@ -2,9 +2,10 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+7.3.1
 ----------
 
+- Don't count job interruptions as failures in metrics [#6386]
 - Add frozen string literal to a number of .rb files.
 - Fix frozen string error with style_tag and script_tag [#6371]
 - Fix an error on Ruby 2.7 because of usage of `Hash#except` [#6376]
