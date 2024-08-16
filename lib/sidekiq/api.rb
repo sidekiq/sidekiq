@@ -813,8 +813,8 @@ module Sidekiq
 
     # Add the given job to the Dead set.
     # @param message [String] the job data as JSON
-    # @option opts :notify_failure [Boolean] (true) Whether death handlers should be called
-    # @option opts :ex [Exception] (RuntimeError) An exception to pass to the death handlers
+    # @option opts [Boolean] :notify_failure  (true) Whether death handlers should be called
+    # @option opts [Exception] :ex (RuntimeError) An exception to pass to the death handlers
     def kill(message, opts = {})
       now = Time.now.to_f
       Sidekiq.redis do |conn|
@@ -828,7 +828,7 @@ module Sidekiq
       if opts[:notify_failure] != false
         job = Sidekiq.load_json(message)
         if opts[:ex]
-          ex = opt[:ex]
+          ex = opts[:ex]
         else
           ex = RuntimeError.new("Job killed by API")
           ex.set_backtrace(caller)
