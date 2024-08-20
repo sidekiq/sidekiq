@@ -727,4 +727,56 @@ describe "API" do
       end
     end
   end
+
+  describe "dead set" do
+    after do
+      @cfg.death_handlers.clear
+    end
+
+    it "can kill a job" do
+      death_handler_call_count = 0
+      expected_ex = RuntimeError.new("Job killed by API")
+      @cfg.death_handlers << ->(_job, ex) do
+        death_handler_call_count += 1
+        assert_equal expected_ex.message, ex.message
+      end
+      job_id = ApiJob.perform_in(100, 1, '{"foo":123}')
+      job = Sidekiq::ScheduledSet.new.find_job(job_id)
+      ds = Sidekiq::DeadSet.new
+      assert_equal 0, ds.size
+      ds.kill(job.value)
+      assert_equal 1, ds.size
+      assert_equal 1, death_handler_call_count
+    end
+
+    it "can kill a job without notifying failure" do
+      death_handler_call_count = 0
+      Sidekiq.default_configuration.death_handlers << ->(_job, _ex) do
+        death_handler_call_count += 1
+      end
+      job_id = ApiJob.perform_in(100, 1, '{"foo":123}')
+      job = Sidekiq::ScheduledSet.new.find_job(job_id)
+      ds = Sidekiq::DeadSet.new
+      assert_equal 0, ds.size
+      ds.kill(job.value, notify_failure: false)
+      assert_equal 1, ds.size
+      assert_equal 0, death_handler_call_count
+    end
+
+    it "can kill a job with a custom exception" do
+      death_handler_call_count = 0
+      expected_ex = StandardError.new("custom error")
+      Sidekiq.default_configuration.death_handlers << ->(_job, ex) do
+        death_handler_call_count += 1
+        assert_equal expected_ex.message, ex.message
+      end
+      job_id = ApiJob.perform_in(100, 1, '{"foo":123}')
+      job = Sidekiq::ScheduledSet.new.find_job(job_id)
+      ds = Sidekiq::DeadSet.new
+      assert_equal 0, ds.size
+      ds.kill(job.value, ex: expected_ex)
+      assert_equal 1, ds.size
+      assert_equal 1, death_handler_call_count
+    end
+  end
 end
