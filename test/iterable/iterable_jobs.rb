@@ -88,22 +88,40 @@ class ActiveRecordRecordsJob < SimpleIterableJob
 end
 
 class ActiveRecordBatchesJob < SimpleIterableJob
+  cattr_accessor :stop_after_iterations
+
   def build_enumerator(cursor:)
+    @current_run_iterations = 0
+
     active_record_batches_enumerator(Product.all, cursor: cursor, batch_size: 3)
   end
 
   def each_iteration(batch)
     self.class.iterated_objects << batch
+    @current_run_iterations += 1
+  end
+
+  def interrupted?
+    @current_run_iterations == stop_after_iterations
   end
 end
 
 class ActiveRecordRelationsJob < SimpleIterableJob
+  cattr_accessor :stop_after_iterations
+
   def build_enumerator(cursor:)
+    @current_run_iterations = 0
+
     active_record_relations_enumerator(Product.all, cursor: cursor, batch_size: 3)
   end
 
   def each_iteration(relation)
     self.class.iterated_objects << relation
+    @current_run_iterations += 1
+  end
+
+  def interrupted?
+    @current_run_iterations == stop_after_iterations
   end
 end
 
