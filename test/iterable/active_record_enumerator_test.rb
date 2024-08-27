@@ -50,7 +50,7 @@ describe Sidekiq::Job::Iterable::ActiveRecordEnumerator do
   end
 
   describe "#batches" do
-    it "yields batches of records with the last record's cursor position" do
+    it "yields batches of records with the first record's cursor position" do
       enum = build_enumerator.batches
       assert_equal 10, enum.size
 
@@ -58,7 +58,7 @@ describe Sidekiq::Job::Iterable::ActiveRecordEnumerator do
 
       enum.first(2).each_with_index do |(batch, cursor), index|
         expected_batch = products[index]
-        expected_cursor = expected_batch.last.id
+        expected_cursor = expected_batch.first.id
         assert_equal expected_batch, batch
         assert_equal expected_cursor, cursor
       end
@@ -77,7 +77,7 @@ describe Sidekiq::Job::Iterable::ActiveRecordEnumerator do
 
       enum.first(2).each_with_index do |(batch, cursor), index|
         expected_records = products[index]
-        expected_cursor = expected_records.last.id
+        expected_cursor = expected_records.first.id
         assert_equal expected_records, batch
         assert_equal expected_cursor, cursor
       end
@@ -85,7 +85,7 @@ describe Sidekiq::Job::Iterable::ActiveRecordEnumerator do
   end
 
   describe "#relations" do
-    it "yields relations with the last record's cursor position" do
+    it "yields relations with the first record's cursor position" do
       enum = build_enumerator.relations
       assert_equal 5, enum.size
 
@@ -95,7 +95,7 @@ describe Sidekiq::Job::Iterable::ActiveRecordEnumerator do
         assert_kind_of ActiveRecord::Relation, relation
 
         expected_records = product_batches[index]
-        expected_cursor = expected_records.last.id
+        expected_cursor = expected_records.first.id
         assert_equal expected_records, relation.to_a
         assert_equal expected_cursor, cursor
       end
@@ -123,7 +123,7 @@ describe Sidekiq::Job::Iterable::ActiveRecordEnumerator do
         assert_kind_of ActiveRecord::Relation, relation
 
         expected_records = product_batches[index]
-        expected_cursor = expected_records.last.id
+        expected_cursor = expected_records.first.id
         assert_equal expected_records, relation.to_a
         assert_equal expected_cursor, cursor
       end

@@ -22,7 +22,7 @@ module Sidekiq
         def batches
           Enumerator.new(-> { @relation.count }) do |yielder|
             @relation.find_in_batches(**@options, start: @cursor) do |batch|
-              yielder.yield(batch, batch.last.id)
+              yielder.yield(batch, batch.first.id)
             end
           end
         end
@@ -35,8 +35,8 @@ module Sidekiq
             options[:of] ||= options.delete(:batch_size)
 
             @relation.in_batches(**options, start: @cursor) do |relation|
-              last_record = relation.last
-              yielder.yield(relation, last_record.id)
+              first_record = relation.first
+              yielder.yield(relation, first_record.id)
             end
           end
         end
