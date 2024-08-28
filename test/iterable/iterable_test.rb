@@ -34,6 +34,8 @@ describe Sidekiq::Job::Iterable do
     Sidekiq::Job.clear_all
     SimpleIterableJob.context = @context
     ArrayIterableJob.stop_after_iterations = nil
+    ActiveRecordBatchesJob.stop_after_iterations = nil
+    ActiveRecordRelationsJob.stop_after_iterations = nil
   end
 
   after do
@@ -220,6 +222,34 @@ describe Sidekiq::Job::Iterable do
 
     continue_iterating(ArrayIterableJob, jid: jid)
     assert_equal (10..20).to_a, ArrayIterableJob.iterated_objects.uniq
+  end
+
+  it "reschedules batches when sidekiq is stopping" do
+    jid = iterate_exact_times(ActiveRecordBatchesJob, 1)
+
+    assert_equal [1, 2, 3], ActiveRecordBatchesJob.iterated_objects.flatten.map(&:id)
+
+    @context.expect(:stopping?, true) do
+      iterate_exact_times(ActiveRecordBatchesJob, 1, jid: jid)
+      assert_equal [1, 2, 3], ActiveRecordBatchesJob.iterated_objects
+    end
+
+    continue_iterating(ActiveRecordBatchesJob, jid: jid)
+    assert_equal (1..10).to_a, ActiveRecordBatchesJob.iterated_objects.flatten.uniq.map(&:id)
+  end
+
+  it "reschedules relations when sidekiq is stopping" do
+    jid = iterate_exact_times(ActiveRecordRelationsJob, 1)
+
+    assert_equal [1, 2, 3], ActiveRecordRelationsJob.iterated_objects.flatten.map(&:id)
+
+    @context.expect(:stopping?, true) do
+      iterate_exact_times(ActiveRecordRelationsJob, 1, jid: jid)
+      assert_equal [1, 2, 3], ActiveRecordRelationsJob.iterated_objects
+    end
+
+    continue_iterating(ActiveRecordRelationsJob, jid: jid)
+    assert_equal (1..10).to_a, ActiveRecordRelationsJob.iterated_objects.flatten.uniq.map(&:id)
   end
 
   private
