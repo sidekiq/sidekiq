@@ -634,12 +634,8 @@ div.interval-slider input {
 .container {
   padding: 0;
 }
-.navbar-fixed-bottom {
-  position: relative;
-  top: auto;
-}
 @media (max-width: 767px) {
-  .navbar-fixed-top {
+  .navbar-fixed-top, .navbar-fixed-bottom {
     position: relative;
     top: auto;
   }
@@ -652,18 +648,18 @@ div.interval-slider input {
 
 @media (min-width: 768px) {
   .redis-url {
-    max-width: 250px;
+    max-width: 160px;
   }
 }
 
 @media (min-width: 992px) {
   .redis-url {
-    max-width: 490px;
+    max-width: 380px;
   }
 }
 @media (min-width: 1200px) {
   .redis-url {
-    max-width: 600px;
+    max-width: 580px;
   }
 }
 
