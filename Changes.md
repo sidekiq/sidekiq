@@ -8,6 +8,7 @@
 - Adjust ActiveRecord batch iteration to restart an interrupted batch from the beginning.
   Each batch should be processed as a single transaction in order to be idempotent. [#6405]
 - Fix typo in S::DeadSet#kill [#6397]
+- Fix CSS issue with bottom bar in Web UI [#6414]
 
 7.3.1
 ----------
