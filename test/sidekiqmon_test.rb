@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "helper"
+require "ostruct"
 require "sidekiq/monitor"
 
 def capture_stdout
