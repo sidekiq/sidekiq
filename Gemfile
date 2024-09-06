@@ -21,6 +21,7 @@ gem "csv"
 
 group :test do
   gem "maxitest"
+  gem "ostruct"
   gem "simplecov"
 end
 
