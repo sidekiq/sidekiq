@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require_relative "helper"
-require "ostruct"
 require "sidekiq/monitor"
 
 def capture_stdout
@@ -42,7 +41,7 @@ describe Sidekiq::Monitor do
       end
 
       it "displays the correct output" do
-        mock_stats = OpenStruct.new(
+        stats_attributes = {
           processed: 420710,
           failed: 12,
           workers_size: 34,
@@ -50,7 +49,8 @@ describe Sidekiq::Monitor do
           retry_size: 78,
           scheduled_size: 90,
           dead_size: 666
-        )
+        }
+        mock_stats = Struct.new(*stats_attributes.keys).new(*stats_attributes.values)
         Sidekiq::Stats.stub(:new, mock_stats) do
           assert_includes output, "Processed: 420,710"
           assert_includes output, "Failed: 12"
@@ -92,9 +92,10 @@ describe Sidekiq::Monitor do
       end
 
       it "displays the correct output" do
+        queue_struct = Struct.new(:name, :size, :latency)
         mock_queues = [
-          OpenStruct.new(name: "foobar", size: 12, latency: 12.3456),
-          OpenStruct.new(name: "a_long_queue_name", size: 234, latency: 567.89999)
+          queue_struct.new("foobar", 12, 12.3456),
+          queue_struct.new("a_long_queue_name", 234, 567.89999)
         ]
         Sidekiq::Queue.stub(:all, mock_queues) do
           assert_includes output, "NAME                 SIZE  LATENCY"
