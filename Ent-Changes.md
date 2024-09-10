@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+HEAD
+---------
+
+- Add `Sidekiq::Enterprise.gem_version` API
+
 7.3.1
 ---------
 
