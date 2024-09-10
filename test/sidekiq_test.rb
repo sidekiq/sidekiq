@@ -7,6 +7,10 @@ describe Sidekiq do
     @config = reset!
   end
 
+  it "has a gem version" do
+    assert_equal Sidekiq.gem_version, Sidekiq::VERSION
+  end
+
   describe "json processing" do
     it "handles json" do
       assert_equal({"foo" => "bar"}, Sidekiq.load_json("{\"foo\":\"bar\"}"))
