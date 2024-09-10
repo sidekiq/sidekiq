@@ -8,7 +8,8 @@ describe Sidekiq do
   end
 
   it "has a gem version" do
-    assert_equal Sidekiq.gem_version, Sidekiq::VERSION
+    # .to_s necessary in Ruby < 3.1
+    assert_equal Sidekiq.gem_version.to_s, Sidekiq::VERSION
   end
 
   describe "json processing" do
