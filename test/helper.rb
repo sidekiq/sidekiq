@@ -70,6 +70,9 @@ end
 
 require "active_job"
 
+# Require adapter class before setting the adapter.
+require "sidekiq/rails"
+
 # need to force this since we aren't booting a Rails app
 ActiveJob::Base.queue_adapter = :sidekiq
 ActiveJob::Base.logger = nil

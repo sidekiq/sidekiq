@@ -2,7 +2,6 @@
 
 require_relative "helper"
 require "sidekiq/component"
-require "sidekiq/rails"
 require "stringio"
 require "logger"
 

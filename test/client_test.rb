@@ -3,7 +3,6 @@
 require_relative "helper"
 require "active_job"
 require "sidekiq/api"
-require "sidekiq/rails"
 
 class MyJob
   include Sidekiq::Job

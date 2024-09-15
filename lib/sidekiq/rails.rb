@@ -3,6 +3,12 @@
 require "sidekiq/job"
 require "rails"
 
+begin
+  require "active_job"
+  require "active_job/queue_adapters/sidekiq_adapter"
+rescue LoadError
+end
+
 module Sidekiq
   class Rails < ::Rails::Engine
     class Reloader

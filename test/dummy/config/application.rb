@@ -14,5 +14,9 @@ module Dummy
     config.root = File.expand_path("../..", __FILE__)
     config.eager_load = false
     config.load_defaults "7.0"
+    config.active_job.queue_adapter = :sidekiq
+
+    # Do not print logs when running tests.
+    Sidekiq.logger.level = :fatal
   end
 end

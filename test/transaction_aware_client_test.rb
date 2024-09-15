@@ -2,7 +2,6 @@
 
 require_relative "helper"
 require "sidekiq/api"
-require "sidekiq/rails"
 require "sidekiq/transaction_aware_client"
 
 require_relative "dummy/config/environment"
