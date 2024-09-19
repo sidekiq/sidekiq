@@ -417,7 +417,7 @@ describe Sidekiq::JobRetry do
       end
 
       it "supports wrapped jobs" do
-        strat, count = handler.__send__(:delay_for, ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper, 2, StandardError.new, {"wrapped" => ActiveJobRetry.to_s})
+        strat, count = handler.__send__(:delay_for, Sidekiq::ActiveJob::Wrapper, 2, StandardError.new, {"wrapped" => ActiveJobRetry.to_s})
         assert_equal :default, strat
         assert_equal 10, count
       end

@@ -32,6 +32,10 @@ SERIALIZED_JOBS = {
   "6.x" => [
     '{"class":"ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper","wrapped":"ApiAjJob","queue":"default","args":[{"job_class":"ApiAjJob","job_id":"ff2b48d4-bdce-4825-af6b-ef8c11ab651e","provider_job_id":null,"queue_name":"default","priority":null,"arguments":[1,2,3],"executions":0,"exception_executions":{},"locale":"en","timezone":"UTC","enqueued_at":"2019-09-12T16:28:37Z"}],"retry":true,"jid":"ce121bf77b37ae81fe61b6dc","created_at":1568305717.9469702,"enqueued_at":1568305717.947005}',
     '{"class":"ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper","wrapped":"ActionMailer::MailDeliveryJob","queue":"mailers","args":[{"job_class":"ActionMailer::MailDeliveryJob","job_id":"2f967da1-a389-479c-9a4e-5cc059e6d65c","provider_job_id":null,"queue_name":"mailers","priority":null,"arguments":["ApiMailer","test_email","deliver_now",{"params":{"user":{"_aj_globalid":"gid://app/User/1"}, "_aj_symbol_keys":["user"]},"args":[1,2,3],"_aj_symbol_keys":["params", "args"]}],"executions":0,"exception_executions":{},"locale":"en","timezone":"UTC","enqueued_at":"2019-09-12T16:28:37Z"}],"retry":true,"jid":"469979df52bb9ef9f48b49e1","created_at":1568305717.9457421,"enqueued_at":1568305717.9457731}'
+  ],
+  "8.x" => [
+    '{"class":"Sidekiq::ActiveJob::Wrapper","wrapped":"ApiAjJob","queue":"default","args":[{"job_class":"ApiAjJob","job_id":"37649eb0-c437-4e00-8a29-85cc12da1440","provider_job_id":null,"queue_name":"default","priority":null,"arguments":[1,2,3],"executions":0,"exception_executions":{},"locale":"en","timezone":null,"enqueued_at":"2024-09-19T16:39:26.609737000Z","scheduled_at":null}],"retry":true,"jid":"ec42f101ed1b16f27c6a6188","created_at":1726763966.610073,"enqueued_at":1726763966.6101718}',
+    '{"class":"Sidekiq::ActiveJob::Wrapper","wrapped":"ActionMailer::MailDeliveryJob","queue":"mailers","args":[{"job_class":"ActionMailer::MailDeliveryJob","job_id":"d6573e12-dd78-454a-83d5-67df94934c82","provider_job_id":null,"queue_name":"mailers","priority":null,"arguments":["ApiMailer","test_email","deliver_now",{"args":[1,2,3],"_aj_ruby2_keywords":["args"]}],"executions":0,"exception_executions":{},"locale":"en","timezone":null,"enqueued_at":"2024-09-19T16:45:38.673195000Z","scheduled_at":null}],"retry":true,"jid":"2cd7874f7651115f453d6315","created_at":1726764338.673335,"enqueued_at":1726764338.673404}'
   ]
 }
 
@@ -297,7 +301,8 @@ describe "API" do
 
           expected_args_by_version = {
             "5.x" => [1, 2, 3],
-            "6.x" => [{"user" => "gid://app/User/1"}, [1, 2, 3]]
+            "6.x" => [{"user" => "gid://app/User/1"}, [1, 2, 3]],
+            "8.x" => [nil, [1, 2, 3]]
           }
           assert_equal "#{ApiMailer.name}#test_email", x.display_class
           assert_equal expected_args_by_version[ver], x.display_args
