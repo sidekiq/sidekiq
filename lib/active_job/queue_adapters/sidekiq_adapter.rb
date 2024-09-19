@@ -5,7 +5,7 @@ module Sidekiq
   module ActiveJob
     # @api private
     class Wrapper
-      include Sidekiq::Worker
+      include Sidekiq::Job
 
       def perform(job_data)
         ::ActiveJob::Base.execute(job_data.merge("provider_job_id" => jid))
