@@ -5,6 +5,9 @@
 HEAD
 ----------
 
+- Take over support for ActiveJob's `:sidekiq` adapter.
+  Job class has changed from `ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper` to `Sidekiq::ActiveJob::Wrapper`,
+  existing jobs will work fine. [#6430, fatkodima]
 - Add `Sidekiq.gem_version` API.
 
 7.3.2
