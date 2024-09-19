@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
+# Define a new class whose name is shorter than from Active Job.
+module Sidekiq
+  module ActiveJob
+    # @api private
+    class Wrapper
+      include Sidekiq::Worker
+
+      def perform(job_data)
+        ::ActiveJob::Base.execute(job_data.merge("provider_job_id" => jid))
+      end
+    end
+  end
+end
+
 module ActiveJob
   module QueueAdapters
+    # Explicitly remove the implementation existing in older rails'.
+    remove_const(:SidekiqAdapter) if defined?(:SidekiqAdapter)
+
     # Sidekiq adapter for Active Job
     #
     # To use Sidekiq set the queue_adapter config to +:sidekiq+.
@@ -17,7 +34,7 @@ module ActiveJob
 
       # @api private
       def enqueue(job)
-        job.provider_job_id = JobWrapper.set(
+        job.provider_job_id = Sidekiq::ActiveJob::Wrapper.set(
           wrapped: job.class,
           queue: job.queue_name
         ).perform_async(job.serialize)
@@ -25,7 +42,7 @@ module ActiveJob
 
       # @api private
       def enqueue_at(job, timestamp)
-        job.provider_job_id = JobWrapper.set(
+        job.provider_job_id = Sidekiq::ActiveJob::Wrapper.set(
           wrapped: job.class,
           queue: job.queue_name
         ).perform_at(timestamp, job.serialize)
@@ -40,7 +57,7 @@ module ActiveJob
 
             if immediate_jobs.any?
               jids = Sidekiq::Client.push_bulk(
-                "class" => JobWrapper,
+                "class" => Sidekiq::ActiveJob::Wrapper,
                 "wrapped" => job_class,
                 "queue" => queue,
                 "args" => immediate_jobs.map { |job| [job.serialize] }
@@ -50,7 +67,7 @@ module ActiveJob
 
             if scheduled_jobs.any?
               jids = Sidekiq::Client.push_bulk(
-                "class" => JobWrapper,
+                "class" => Sidekiq::ActiveJob::Wrapper,
                 "wrapped" => job_class,
                 "queue" => queue,
                 "args" => scheduled_jobs.map { |job| [job.serialize] },
@@ -63,14 +80,9 @@ module ActiveJob
         enqueued_count
       end
 
+      # Defines a class alias for backwards compatibility with enqueued Active Job jobs.
       # @api private
-      class JobWrapper
-        include Sidekiq::Worker
-
-        def perform(job_data)
-          Base.execute job_data.merge("provider_job_id" => jid)
-        end
-      end
+      JobWrapper = Sidekiq::ActiveJob::Wrapper
     end
   end
 end
