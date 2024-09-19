@@ -2,7 +2,6 @@
 
 require_relative "helper"
 require "active_job"
-require "sidekiq/rails"
 require "sidekiq/api"
 
 describe "ActiveJob" do
