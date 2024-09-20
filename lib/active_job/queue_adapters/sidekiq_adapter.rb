@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# Define a new class whose name is shorter than from Active Job.
 module Sidekiq
   module ActiveJob
     # @api private
@@ -34,7 +33,7 @@ module ActiveJob
 
       # @api private
       def enqueue(job)
-        job.provider_job_id = Sidekiq::ActiveJob::Wrapper.set(
+        job.provider_job_id = JobWrapper.set(
           wrapped: job.class,
           queue: job.queue_name
         ).perform_async(job.serialize)
@@ -42,7 +41,7 @@ module ActiveJob
 
       # @api private
       def enqueue_at(job, timestamp)
-        job.provider_job_id = Sidekiq::ActiveJob::Wrapper.set(
+        job.provider_job_id = JobWrapper.set(
           wrapped: job.class,
           queue: job.queue_name
         ).perform_at(timestamp, job.serialize)
@@ -57,7 +56,7 @@ module ActiveJob
 
             if immediate_jobs.any?
               jids = Sidekiq::Client.push_bulk(
-                "class" => Sidekiq::ActiveJob::Wrapper,
+                "class" => JobWrapper,
                 "wrapped" => job_class,
                 "queue" => queue,
                 "args" => immediate_jobs.map { |job| [job.serialize] }
@@ -67,7 +66,7 @@ module ActiveJob
 
             if scheduled_jobs.any?
               jids = Sidekiq::Client.push_bulk(
-                "class" => Sidekiq::ActiveJob::Wrapper,
+                "class" => JobWrapper,
                 "wrapped" => job_class,
                 "queue" => queue,
                 "args" => scheduled_jobs.map { |job| [job.serialize] },
@@ -82,7 +81,8 @@ module ActiveJob
 
       # Defines a class alias for backwards compatibility with enqueued Active Job jobs.
       # @api private
-      JobWrapper = Sidekiq::ActiveJob::Wrapper
+      class JobWrapper < Sidekiq::ActiveJob::Wrapper
+      end
     end
   end
 end

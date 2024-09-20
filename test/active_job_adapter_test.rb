@@ -52,7 +52,7 @@ describe "SidekiqAdapter" do
     assert_equal 24, instance.provider_job_id.size
 
     job = q.first
-    assert_equal "Sidekiq::ActiveJob::Wrapper", job["class"]
+    assert_equal "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper", job["class"]
     assert_equal "AjJob", job["wrapped"]
   end
 
@@ -63,7 +63,7 @@ describe "SidekiqAdapter" do
 
     job = ss.find_job(instance.provider_job_id)
     assert_equal "default", job["queue"]
-    assert_equal "Sidekiq::ActiveJob::Wrapper", job["class"]
+    assert_equal "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper", job["class"]
     assert_equal "AjJob", job["wrapped"]
   end
 
