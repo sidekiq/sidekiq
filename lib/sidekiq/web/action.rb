@@ -48,8 +48,12 @@ module Sidekiq
       if content.is_a? Symbol
         unless respond_to?(:"_erb_#{content}")
           views = options[:views] || Web.settings.views
-          src = ERB.new(File.read("#{views}/#{content}.erb")).src
-          WebAction.class_eval <<-RUBY, __FILE__, __LINE__ + 1
+          filename = "#{views}/#{content}.erb"
+          src = ERB.new(File.read(filename)).src
+
+          # Need to use lineno less by 1 because erb generates a
+          # comment before the source code.
+          WebAction.class_eval <<-RUBY, filename, -1 # standard:disable Style/EvalWithLocation
             def _erb_#{content}
               #{src}
             end
