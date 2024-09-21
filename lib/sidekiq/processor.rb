@@ -138,11 +138,11 @@ module Sidekiq
               # Effectively this block denotes a "unit of work" to Rails.
               @reloader.call do
                 klass = Object.const_get(job_hash["class"])
-                inst = klass.new
-                inst.jid = job_hash["jid"]
-                inst._context = self
-                @retrier.local(inst, jobstr, queue) do
-                  yield inst
+                instance = klass.new
+                instance.jid = job_hash["jid"]
+                instance._context = self
+                @retrier.local(instance, jobstr, queue) do
+                  yield instance
                 end
               end
             end
@@ -180,9 +180,9 @@ module Sidekiq
       ack = false
       Thread.handle_interrupt(IGNORE_SHUTDOWN_INTERRUPTS) do
         Thread.handle_interrupt(ALLOW_SHUTDOWN_INTERRUPTS) do
-          dispatch(job_hash, queue, jobstr) do |inst|
-            config.server_middleware.invoke(inst, job_hash, queue) do
-              execute_job(inst, job_hash["args"])
+          dispatch(job_hash, queue, jobstr) do |instance|
+            config.server_middleware.invoke(instance, job_hash, queue) do
+              execute_job(instance, job_hash["args"])
             end
           end
           ack = true
@@ -216,8 +216,8 @@ module Sidekiq
       end
     end
 
-    def execute_job(inst, cloned_args)
-      inst.perform(*cloned_args)
+    def execute_job(instance, cloned_args)
+      instance.perform(*cloned_args)
     end
 
     # Ruby doesn't provide atomic counters out of the box so we'll
