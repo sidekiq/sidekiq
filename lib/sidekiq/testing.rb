@@ -283,11 +283,11 @@ module Sidekiq
       end
 
       def process_job(job)
-        inst = new
-        inst.jid = job["jid"]
-        inst.bid = job["bid"] if inst.respond_to?(:bid=)
-        Sidekiq::Testing.server_middleware.invoke(inst, job, job["queue"]) do
-          execute_job(inst, job["args"])
+        instance = new
+        instance.jid = job["jid"]
+        instance.bid = job["bid"] if instance.respond_to?(:bid=)
+        Sidekiq::Testing.server_middleware.invoke(instance, job, job["queue"]) do
+          execute_job(instance, job["args"])
         end
       end
 

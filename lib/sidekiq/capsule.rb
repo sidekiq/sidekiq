@@ -40,9 +40,9 @@ module Sidekiq
 
     def fetcher
       @fetcher ||= begin
-        inst = (config[:fetch_class] || Sidekiq::BasicFetch).new(self)
-        inst.setup(config[:fetch_setup]) if inst.respond_to?(:setup)
-        inst
+        instance = (config[:fetch_class] || Sidekiq::BasicFetch).new(self)
+        instance.setup(config[:fetch_setup]) if instance.respond_to?(:setup)
+        instance
       end
     end
 

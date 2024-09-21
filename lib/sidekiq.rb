@@ -108,12 +108,12 @@ module Sidekiq
   # within an arbitrary Ruby process. Notably it reduces concurrency by
   # default so there is less contention for CPU time with other threads.
   #
-  #   inst = Sidekiq.configure_embed do |config|
+  #   instance = Sidekiq.configure_embed do |config|
   #     config.queues = %w[critical default low]
   #   end
-  #   inst.run
+  #   instance.run
   #   sleep 10
-  #   inst.stop
+  #   instance.stop
   #
   # NB: it is really easy to overload a Ruby process with threads due to the GIL.
   # I do not recommend setting concurrency higher than 2-3.
