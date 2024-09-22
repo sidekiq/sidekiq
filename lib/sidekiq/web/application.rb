@@ -331,12 +331,10 @@ module Sidekiq
     ########
     # Filtering
 
-    get "/filter/metrics" do
-      redirect "#{root_path}metrics"
-    end
-
-    post "/filter/metrics" do
+    route :get, :post, "/filter/metrics" do
       x = params[:substr]
+      return redirect "#{root_path}metrics" unless x && x != ""
+
       q = Sidekiq::Metrics::Query.new
       @period = h((params[:period] || "")[0..1])
       @periods = METRICS_PERIODS
@@ -346,7 +344,7 @@ module Sidekiq
       erb :metrics
     end
 
-    get "/filter/retries" do
+    route :get, :post, "/filter/retries" do
       x = params[:substr]
       return redirect "#{root_path}retries" unless x && x != ""
 
@@ -354,15 +352,7 @@ module Sidekiq
       erb :retries
     end
 
-    post "/filter/retries" do
-      x = params[:substr]
-      return redirect "#{root_path}retries" unless x && x != ""
-
-      @retries = search(Sidekiq::RetrySet.new, params[:substr])
-      erb :retries
-    end
-
-    get "/filter/scheduled" do
+    route :get, :post, "/filter/scheduled" do
       x = params[:substr]
       return redirect "#{root_path}scheduled" unless x && x != ""
 
@@ -370,23 +360,7 @@ module Sidekiq
       erb :scheduled
     end
 
-    post "/filter/scheduled" do
-      x = params[:substr]
-      return redirect "#{root_path}scheduled" unless x && x != ""
-
-      @scheduled = search(Sidekiq::ScheduledSet.new, params[:substr])
-      erb :scheduled
-    end
-
-    get "/filter/dead" do
-      x = params[:substr]
-      return redirect "#{root_path}morgue" unless x && x != ""
-
-      @dead = search(Sidekiq::DeadSet.new, params[:substr])
-      erb :morgue
-    end
-
-    post "/filter/dead" do
+    route :get, :post, "/filter/dead" do
       x = params[:substr]
       return redirect "#{root_path}morgue" unless x && x != ""
 
