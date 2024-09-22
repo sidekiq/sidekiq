@@ -24,27 +24,59 @@ describe "filtering" do
     Sidekiq::Web
   end
 
-  it "finds jobs matching substring" do
+  it "finds retries matching substring" do
+    add_retry("jid123", "mike")
+    add_retry("jid456", "jim")
+
+    get "/filter/retries", substr: ""
+    assert_equal 302, last_response.status
+
+    post "/filter/retries", substr: "mike"
+    assert_equal 200, last_response.status
+    assert_includes(last_response.body, "jid123")
+    refute_includes(last_response.body, "jid456")
+  end
+
+  it "finds scheduled jobs matching substring" do
     jid1 = FilterJob.perform_in(5, "bob", "tammy")
     jid2 = FilterJob.perform_in(5, "mike", "jim")
 
-    get "/scheduled"
-    assert_equal 200, last_response.status
-    assert_match(/#{jid1}/, last_response.body)
-    assert_match(/#{jid2}/, last_response.body)
+    get "/filter/scheduled", substr: ""
+    assert_equal 302, last_response.status
 
     post "/filter/scheduled", substr: "tammy"
     assert_equal 200, last_response.status
     assert_match(/#{jid1}/, last_response.body)
     refute_match(/#{jid2}/, last_response.body)
+  end
 
-    post "/filter/scheduled", substr: ""
+  it "finds dead jobs matching substring" do
+    add_dead("jid123", "mike")
+    add_dead("jid456", "jim")
+
+    get "/filter/dead", substr: ""
     assert_equal 302, last_response.status
-    get "/filter/scheduled"
-    assert_equal 302, last_response.status
-    get "/filter/retries"
-    assert_equal 302, last_response.status
-    get "/filter/dead"
-    assert_equal 302, last_response.status
+
+    post "/filter/dead", substr: "jim"
+    assert_equal 200, last_response.status
+    refute_includes(last_response.body, "jid123")
+    assert_includes(last_response.body, "jid456")
+  end
+
+  private
+
+  def add_retry(*args)
+    add_to_set("retry", *args)
+  end
+
+  def add_dead(*args)
+    add_to_set("dead", *args)
+  end
+
+  def add_to_set(set, jid, arg)
+    msg = {"class" => "FilterJob", "args" => [arg], "queue" => "default", "jid" => jid}
+    @config.redis do |conn|
+      conn.zadd(set, Time.now.to_f, Sidekiq.dump_json(msg))
+    end
   end
 end

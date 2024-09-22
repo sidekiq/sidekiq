@@ -39,10 +39,13 @@ module Sidekiq
       route(DELETE, path, &block)
     end
 
-    def route(method, path, &block)
+    def route(*methods, path, &block)
       @routes ||= {GET => [], POST => [], PUT => [], PATCH => [], DELETE => [], HEAD => []}
 
-      @routes[method] << WebRoute.new(method, path, block)
+      methods.each do |method|
+        method = method.to_s.upcase
+        @routes[method] << WebRoute.new(method, path, block)
+      end
     end
 
     def match(env)
