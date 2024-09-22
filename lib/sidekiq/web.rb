@@ -213,7 +213,7 @@ module Sidekiq
   Sidekiq::WebApplication.helpers WebHelpers
   Sidekiq::WebApplication.helpers Sidekiq::Paginator
 
-  Sidekiq::WebAction.class_eval <<-RUBY, __FILE__, __LINE__ + 1
+  Sidekiq::WebAction.class_eval <<-RUBY, Web::LAYOUT, -1 # standard:disable Style/EvalWithLocation
     def _render
       #{ERB.new(File.read(Web::LAYOUT)).src}
     end
