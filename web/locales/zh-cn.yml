@@ -89,7 +89,6 @@ zh-cn: # <---- change this to your locale code
   TotalExecutionTime: 总执行时间
   AvgExecutionTime: 平均执行时间
   Context: 上下文
-  Bucket: 桶
   NoJobMetricsFound: 无任务相关指标数据
   Success: 成功
   Failure: 失败

@@ -95,7 +95,6 @@ tr:
   TotalExecutionTime: Toplam Yürütme Süresi
   AvgExecutionTime: Ortalama Yürütme Süresi
   Context: Bağlam
-  Bucket: Kova
   NoJobMetricsFound: Son iş metrikleri bulunamadı
   Filter: Filtre
   AnyJobContent: Herhangi bir iş içeriği

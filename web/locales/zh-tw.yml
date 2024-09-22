@@ -98,5 +98,4 @@ zh-tw: # <---- change this to your locale code
   TotalExecutionTime: 總執行時間
   AvgExecutionTime: 平均執行時間
   Context: 上下文
-  Bucket: 桶
   NoJobMetricsFound: 找無工作相關計量資料

@@ -95,7 +95,6 @@ en:
   TotalExecutionTime: Total Execution Time
   AvgExecutionTime: Average Execution Time
   Context: Context
-  Bucket: Bucket
   NoJobMetricsFound: No recent job metrics were found
   Filter: Filter
   AnyJobContent: Any job content
