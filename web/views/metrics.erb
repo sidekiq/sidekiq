@@ -54,8 +54,8 @@
         <th><%= t('Name') %></th>
         <th><%= t('Success') %></th>
         <th><%= t('Failure') %></th>
-        <th><%= t('TotalExecutionTime') %> (Seconds)</th>
-        <th><%= t('AvgExecutionTime') %> (Seconds)</th>
+        <th><%= t('TotalExecutionTime') %> (<%= t('Seconds') %>)</th>
+        <th><%= t('AvgExecutionTime') %> (<%= t('Seconds') %>)</th>
       </tr>
       <% if job_results.any? %>
         <% job_results.each_with_index do |(kls, jr), i| %>
