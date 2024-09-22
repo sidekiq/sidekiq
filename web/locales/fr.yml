@@ -95,5 +95,4 @@ fr:
   TotalExecutionTime: Temps d'exécution total
   AvgExecutionTime: Temps d'exécution moyen
   Context: Contexte
-  Bucket: Bucket
   NoJobMetricsFound: Aucune statistique de tâche récente n'a été trouvée
