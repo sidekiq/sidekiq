@@ -6,31 +6,39 @@ uk:
   AreYouSureDeleteJob: Ви впевнені у тому, що хочете видалити задачу?
   AreYouSureDeleteQueue: Ви впевнені у тому, що хочете видалити чергу %{queue}?
   Arguments: Аргументи
+  BackToApp: Назад
   Busy: Зайнятих
   Class: Клас
   Connections: З'єднань
+  CreatedAt: Створено
   CurrentMessagesInQueue: Поточні задачі у черзі <span class='title'>%{queue}</span>
   Dashboard: Панель керування
   Dead: Вбитих
   DeadJobs: Вбиті задачі
   Delete: Видалити
   DeleteAll: Видалити усі
+  Deploy: Деплой
   Enqueued: У черзі
   Error: Помилка
   ErrorBacktrace: Трасування помилки
   ErrorClass: Клас помилки
   ErrorMessage: Повідомлення про помилку
+  ExecutionTime: Час виконання
   Extras: Додатково
   Failed: Невдалих
   Failures: Невдачі
+  Failure: Невдача
   GoBack: ← Назад
   History: Історія
   Job: Задача
   Jobs: Задачі
-  Kill: Вбиваємо
+  Kill: Вбити
+  KillAll: Вбити все
   LastRetry: Остання спроба
+  Latency: Затримка
   LivePoll: Постійне опитування
   MemoryUsage: Використання пам'яті
+  Name: Назва
   Namespace: Простір імен
   NextRetry: Наступна спроба
   NoDeadJobsFound: Вбитих задач не знайдено
@@ -40,10 +48,12 @@ uk:
   OneMonth: 1 місяць
   OneWeek: 1 тиждень
   OriginallyFailed: Перша невдала спроба
+  Pause: Призупинити
   Paused: Призупинено
   PeakMemoryUsage: Максимальне використання пам'яті
   Plugins: Плагіни
   PollingInterval: Інтервал опитування
+  Process: Процес
   Processed: Опрацьовано
   Processes: Процеси
   Queue: Черга
@@ -57,6 +67,7 @@ uk:
   RetryNow: Повторити зараз
   Scheduled: Заплановано
   ScheduledJobs: Заплановані задачі
+  Seconds: Секунди
   ShowAll: Відобразити усі
   SixMonths: 6 місяців
   Size: Розмір
@@ -65,13 +76,25 @@ uk:
   Stop: Зупинити
   StopAll: Зупинити усі
   StopPolling: Зупинити опитування
+  Success: Успіх
+  Summary: Підсумок
   Thread: Потік
   Threads: Потоки
   ThreeMonths: 3 місяці
   Time: Час
+  Unpause: Відновити
   Uptime: Днів безперебійної роботи
+  Utilization: Утилізація
   Version: Версія
   When: Коли
   Worker: Обробник
   active: активний
   idle: незайнятий
+  Metrics: Метрики
+  NoDataFound: Даних не знайдено
+  TotalExecutionTime: Загальний час виконання
+  AvgExecutionTime: Середній час виконання
+  Context: Контекст
+  NoJobMetricsFound: Недавніх метрик задачі не знайдено
+  Filter: Фільтр
+  AnyJobContent: Будь-який атрибут задачі
