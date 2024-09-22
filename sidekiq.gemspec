@@ -26,6 +26,5 @@ Gem::Specification.new do |gem|
   gem.add_dependency "redis-client", ">= 0.22.2"
   gem.add_dependency "connection_pool", ">= 2.3.0"
   gem.add_dependency "rack", ">= 2.2.4"
-  gem.add_dependency "concurrent-ruby", "< 2"
   gem.add_dependency "logger"
 end
