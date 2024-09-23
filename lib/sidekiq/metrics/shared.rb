@@ -1,12 +1,21 @@
 # frozen_string_literal: true
 
-require "concurrent"
-
 module Sidekiq
   module Metrics
-    # This is the only dependency on concurrent-ruby in Sidekiq but it's
-    # mandatory for thread-safety until MRI supports atomic operations on values.
-    Counter = ::Concurrent::AtomicFixnum
+    class Counter
+      def initialize
+        @value = 0
+        @lock = Mutex.new
+      end
+
+      def increment
+        @lock.synchronize { @value += 1 }
+      end
+
+      def value
+        @lock.synchronize { @value }
+      end
+    end
 
     # Implements space-efficient but statistically useful histogram storage.
     # A precise time histogram stores every time. Instead we break times into a set of
