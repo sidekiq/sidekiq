@@ -1,7 +1,9 @@
-<div>
-  <form method="post" class="form-inline" action='<%= root_path %>filter/<%= which %>'>
+<div class="col-sm-6 col-lg-3">
+  <form method="post" class="d-flex" action='<%= root_path %>filter/<%= which %>'>
     <%= csrf_tag %>
-    <label for="substr"><%= t('Filter') %></label>
-    <input class="search form-control" type="search" name="substr" value="<%= h params[:substr] %>" placeholder="<%= t('AnyJobContent') %>"/>
+    <label for="substr" class="me-2 col col-form-label flex-grow-0"><%= t('Filter') %></label>
+    <div class="col flex-grow-1">
+      <input class="search form-control" type="search" name="substr" value="<%= h params[:substr] %>" placeholder="<%= t('AnyJobContent') %>"/>
+    </div>
   </form>
 </div>

@@ -1,5 +1,5 @@
 <div class="header-container">
-  <h1><%= t('Retries') %></h1>
+  <h1 class="flex-grow-1"><%= t('Retries') %></h1>
   <% if @retries.size > 0 && @total_size > @count %>
     <%= erb :_paging, locals: { url: "#{root_path}retries" } %>
   <% end %>
@@ -54,23 +54,23 @@
         <% end %>
       </table>
     </div>
-    <input class="btn btn-primary pull-left flip" type="submit" name="retry" value="<%= t('RetryNow') %>" />
-    <input class="btn btn-danger pull-left flip" type="submit" name="delete" value="<%= t('Delete') %>" />
-    <input class="btn btn-danger pull-left flip" type="submit" name="kill" value="<%= t('Kill') %>" />
+    <input class="btn btn-primary float-start" type="submit" name="retry" value="<%= t('RetryNow') %>" />
+    <input class="btn btn-danger float-start" type="submit" name="delete" value="<%= t('Delete') %>" />
+    <input class="btn btn-danger float-start" type="submit" name="kill" value="<%= t('Kill') %>" />
   </form>
 
   <% unfiltered? do %>
     <form action="<%= root_path %>retries/all/delete" method="post">
       <%= csrf_tag %>
-      <input class="btn btn-danger pull-right flip" type="submit" name="delete" value="<%= t('DeleteAll') %>" data-confirm="<%= t('AreYouSure') %>" />
+      <input class="btn btn-danger float-end" type="submit" name="delete" value="<%= t('DeleteAll') %>" data-confirm="<%= t('AreYouSure') %>" />
     </form>
     <form action="<%= root_path %>retries/all/retry" method="post">
       <%= csrf_tag %>
-      <input class="btn btn-danger pull-right flip" type="submit" name="retry" value="<%= t('RetryAll') %>" data-confirm="<%= t('AreYouSure') %>" />
+      <input class="btn btn-danger float-end" type="submit" name="retry" value="<%= t('RetryAll') %>" data-confirm="<%= t('AreYouSure') %>" />
     </form>
     <form action="<%= root_path %>retries/all/kill" method="post">
       <%= csrf_tag %>
-      <input class="btn btn-danger pull-right flip" type="submit" name="kill" value="<%= t('KillAll') %>" data-confirm="<%= t('AreYouSure') %>" />
+      <input class="btn btn-danger float-end" type="submit" name="kill" value="<%= t('KillAll') %>" data-confirm="<%= t('AreYouSure') %>" />
     </form>
   <% end %>
 

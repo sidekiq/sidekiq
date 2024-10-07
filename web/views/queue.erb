@@ -3,7 +3,7 @@
     <% if @queue.paused? %>
       <span class="label label-danger"><%= t('Paused') %></span>
     <% end %>
-    <span class="badge badge-secondary"><%= number_with_delimiter(@total_size) %></span>
+    <span class="badge rounded-pill text-bg-secondary"><%= number_with_delimiter(@total_size) %></span>
   </h1>
   <%= erb :_paging, locals: { url: "#{root_path}queues/#{CGI.escape(@name)}" } %>
 </div>

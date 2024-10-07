@@ -3,36 +3,36 @@
 </div>
 
 <div class="stats-wrapper">
-  <div class="stats-container">
+  <div class="d-block d-md-inline-flex">
     <div class="stat">
-      <h3><%= s = processes.size; number_with_delimiter(s) %></h3>
-      <p><%= t('Processes') %></p>
+      <div class="stat-figure"><%= s = processes.size; number_with_delimiter(s) %></div>
+      <div><%= t('Processes') %></div>
     </div>
     <div class="stat">
-      <h3><%= x = processes.total_concurrency; number_with_delimiter(x) %></h3>
-      <p><%= t('Threads') %></p>
+      <div class="stat-figure"><%= x = processes.total_concurrency; number_with_delimiter(x) %></div>
+      <div><%= t('Threads') %></div>
     </div>
     <div class="stat">
-      <h3><%= ws = workset.size; number_with_delimiter(ws) %></h3>
-      <p><%= t('Busy') %></p>
+      <div class="stat-figure"><%= ws = workset.size; number_with_delimiter(ws) %></div>
+      <div><%= t('Busy') %></div>
     </div>
     <div class="stat">
-      <h3><%= x == 0 ? 0 : ((ws / x.to_f) * 100).round(0) %>%</h3>
-      <p><%= t('Utilization') %></p>
+      <div class="stat-figure"><%= x == 0 ? 0 : ((ws / x.to_f) * 100).round(0) %>%</div>
+      <div><%= t('Utilization') %></div>
     </div>
     <div class="stat">
-      <h3><%= format_memory(processes.total_rss) %></h3>
-      <p><%= t('RSS') %></p>
+      <div class="stat-figure"><%= format_memory(processes.total_rss) %></div>
+      <div><%= t('RSS') %></div>
     </div>
   </div>
 </div>
 
-<div class="header-container">
-  <h1><%= t('Processes') %></h1>
-  <div>
-    <form method="POST" class="warning-messages">
+<div class="row">
+  <div class="d-md-flex">
+    <h1 class="flex-grow-1"><%= t('Processes') %></h1>
+    <form method="POST" class="warning-messages float-end">
       <%= csrf_tag %>
-      <div class="btn-group pull-right flip">
+      <div class="btn-group">
         <input class="btn btn-warn" type="submit" name="quiet" value="<%= t('QuietAll') %>" data-confirm="<%= t('AreYouSure') %>"/>
         <input class="btn btn-danger" type="submit" name="stop" value="<%= t('StopAll') %>" data-confirm="<%= t('AreYouSure') %>"/>
       </div>
@@ -95,7 +95,7 @@
               <%= csrf_tag %>
               <input type="hidden" name="identity" value="<%= process['identity'] %>"/>
 
-              <div class="btn-group pull-right flip">
+              <div class="btn-group float-end">
                 <% unless process.stopping? %><button class="btn btn-xs btn-warn" type="submit" name="quiet" value="1"><%= t('Quiet') %></button><% end %>
                 <button class="btn btn-xs btn-danger" type="submit" name="stop" value="1"><%= t('Stop') %></button>
               </div>

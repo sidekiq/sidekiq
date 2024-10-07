@@ -24,7 +24,7 @@ span.current-interval,
   color: #ddd;
 }
 
-.navbar-default .navbar-nav > li > a {
+.navbar-light .navbar-nav > li > a {
   color: #ddd;
 }
 
@@ -91,19 +91,19 @@ input {
   border: 1px solid #444;
 }
 
-.navbar-default {
+.navbar-light {
   background-color: #0F0F0F;
   border-color: #444;
 }
 
-.navbar-default .navbar-nav > .active > a,
-.navbar-default .navbar-nav > .active > a:focus,
-.navbar-default .navbar-nav > .active > a:hover {
+.navbar-light .navbar-nav > .active > a,
+.navbar-light .navbar-nav > .active > a:focus,
+.navbar-light .navbar-nav > .active > a:hover {
   color: #ddd;
   background-color: #333;
 }
 
-.navbar-default .navbar-nav > li > a:hover {
+.navbar-light .navbar-nav > li > a:hover {
   color: #ddd;
 }
 

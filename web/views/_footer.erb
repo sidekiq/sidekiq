@@ -1,35 +1,33 @@
-<div class="navbar navbar-fixed-bottom navbar-inverse ltr">
-  <div class="navbar-inner">
-    <div class="container text-center">
-        <ul class="nav">
-          <li>
-            <p class="navbar-text product-version"><%= product_version %></p>
-          </li>
-          <li>
-            <p class="navbar-text redis-url" title="<%= redis_url %>"><%= redis_url %></p>
-          </li>
-          <li>
-            <p id="serverUtcTime" class="navbar-text server-utc-time"><%= server_utc_time %></p>
-          </li>
-          <li>
-            <p class="navbar-text"><a rel=help href="https://github.com/sidekiq/sidekiq/wiki">docs</a></p>
-          </li>
-          <li>
-            <form id="locale-form" class="form-inline" action="<%= root_path %>change_locale" method="post">
-              <%= csrf_tag %>
-              <label class="sr-only" for="locale">Language</label>
-              <select id="locale-select" class="form-control" name="locale">
-                <% available_locales.each do |locale_option| %>
-                  <% if locale_option == locale %>
-                    <option selected value="<%= locale_option %>"><%= locale_option %></option>
-                  <% else %>
-                    <option value="<%= locale_option %>"><%= locale_option %></option>
-                  <% end %>
-                <% end %>
-              </select>
-            </form>
-          </li>
-        </ul>
-    </div>
+<div class="navbar navbar-expand-md fixed-bottom bg-dark ltr" data-bs-theme="dark">
+  <div class="container">
+    <ul class="navbar-nav align-items-center">
+      <li class="nav-item">
+        <span class="navbar-brand product-version"><%= product_version %></span>
+      </li>
+      <li class="nav-item">
+        <span class="navbar-text redis-url" title="<%= redis_url %>"><%= redis_url %></span>
+      </li>
+      <li class="nav-item">
+        <span id="serverUtcTime" class="navbar-text server-utc-time"><%= server_utc_time %></span>
+      </li>
+      <li class="nav-item">
+        <span><a rel=help href="https://github.com/sidekiq/sidekiq/wiki" class="nav-link">docs</a></span>
+      </li>
+      <li class="nav-item">
+        <form id="locale-form" class="d-flex" action="<%= root_path %>change_locale" method="post">
+          <%= csrf_tag %>
+          <label class="visually-hidden navbar-text" for="locale">Language</label>
+          <select id="locale-select" class="form-control" name="locale">
+            <% available_locales.each do |locale_option| %>
+              <% if locale_option == locale %>
+                <option selected value="<%= locale_option %>"><%= locale_option %></option>
+              <% else %>
+                <option value="<%= locale_option %>"><%= locale_option %></option>
+              <% end %>
+            <% end %>
+          </select>
+        </form>
+      </li>
+    </ul>
   </div>
 </div>
