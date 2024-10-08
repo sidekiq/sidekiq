@@ -17,7 +17,7 @@
         <form id="locale-form" class="d-flex" action="<%= root_path %>change_locale" method="post">
           <%= csrf_tag %>
           <label class="visually-hidden navbar-text" for="locale">Language</label>
-          <select id="locale-select" class="form-control" name="locale">
+          <select id="locale-select" class="form-select" name="locale">
             <% available_locales.each do |locale_option| %>
               <% if locale_option == locale %>
                 <option selected value="<%= locale_option %>"><%= locale_option %></option>

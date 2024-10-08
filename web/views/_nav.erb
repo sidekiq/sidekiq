@@ -1,4 +1,4 @@
-<div class="navbar navbar-expand-md navbar-light bg-light fixed-top">
+<div class="navbar navbar-expand-md fixed-top" data-bs-theme="light">
   <div class="container-fluid">
     <a class="navbar-brand" href="<%= root_path %>">
       <%= Sidekiq::NAME %>
@@ -12,19 +12,19 @@
       <ul class="navbar-nav">
         <% Sidekiq::Web.default_tabs.each do |title, url| %>
           <% if url == '' %>
-            <li class="<%= current_path == url ? 'active' : '' %> nav-item">
-            <a href="<%= root_path %><%= url %>" class="nav-link"><%= t(title) %></a>
+            <li class="nav-item">
+            <a href="<%= root_path %><%= url %>" class="nav-link <%= current_path == url ? 'active' : '' %>"><%= t(title) %></a>
             </li>
           <% else %>
-            <li class="<%= current_path.start_with?(url) ? 'active' : '' %> nav-item">
-            <a href="<%= root_path %><%= url %>" class="nav-link"><%= t(title) %></a>
+            <li class="nav-item">
+            <a href="<%= root_path %><%= url %>" class="nav-link <%= current_path.start_with?(url) ? 'active' : '' %>"><%= t(title) %></a>
             </li>
           <% end %>
         <% end %>
 
         <% Sidekiq::Web.custom_tabs.each do |title, url| %>
-          <li class="<%= current_path.start_with?(url) ? 'active' : '' %> nav-item" data-navbar="custom-tab">
-            <a href="<%= root_path %><%= url %>" class="nav-link"><%= t(title) %></a>
+          <li class="nav-item" data-navbar="custom-tab">
+            <a href="<%= root_path %><%= url %>" class="nav-link <%= current_path.start_with?(url) ? 'active' : '' %>"><%= t(title) %></a>
           </li>
         <% end %>
 

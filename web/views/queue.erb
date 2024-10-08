@@ -1,7 +1,7 @@
 <div class="header-container">
   <h1><%= t('CurrentMessagesInQueue', :queue => h(@name)) %>
     <% if @queue.paused? %>
-      <span class="label label-danger"><%= t('Paused') %></span>
+      <span class="badge text-bg-danger"><%= t('Paused') %></span>
     <% end %>
     <span class="badge rounded-pill text-bg-secondary"><%= number_with_delimiter(@total_size) %></span>
   </h1>

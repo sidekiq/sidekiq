@@ -117,7 +117,7 @@ module Sidekiq
 
     def display_tags(job, within = "retries")
       job.tags.map { |tag|
-        "<span class='label label-info jobtag'>#{filter_link(tag, within)}</span>"
+        "<span class='badge text-bg-info jobtag'>#{filter_link(tag, within)}</span>"
       }.join(" ")
     end
 

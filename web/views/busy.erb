@@ -55,18 +55,18 @@
       <tr>
         <td class="box">
           <%= "#{process['hostname']}:#{process['pid']}" %>
-          <span class="label label-success"><%= process.tag %></span>
+          <span class="badge text-bg-success"><%= process.tag %></span>
           <% process.labels.each do |label| %>
-            <span class="label label-info"><%= label %></span>
+            <span class="badge text-bg-info"><%= label %></span>
           <% end %>
           <% if process.embedded? %>
-            <span class="label label-default">embedded</span>
+            <span class="badge text-bg-light">embedded</span>
           <% end %>
           <% if process.stopping? %>
-            <span class="label label-danger">quiet</span>
+            <span class="badge text-bg-danger">quiet</span>
           <% end %>
           <% if process.identity == lead %>
-            <span class="label label-warning">leader</span>
+            <span class="badge text-bg-warning">leader</span>
           <% end %>
           <br>
           <b><%= "#{t('Queues')}: " %></b>
