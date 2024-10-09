@@ -173,6 +173,7 @@ module Sidekiq
           return true
         end
 
+        time_limit = Sidekiq.default_configuration[:timeout]
         found_record = false
         state_flushed_at = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
 
@@ -193,8 +194,10 @@ module Sidekiq
 
           return false if is_interrupted
 
-          around_iteration do
-            each_iteration(object, *arguments)
+          verify_iteration_time(time_limit, object) do
+            around_iteration do
+              each_iteration(object, *arguments)
+            end
           end
         end
 
@@ -202,6 +205,16 @@ module Sidekiq
         true
       ensure
         @_runtime += (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @_start_time)
+      end
+
+      def verify_iteration_time(time_limit, object)
+        start = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+        yield
+        finish = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+        total = finish - start
+        if total > time_limit
+          logger.warn { "Iteration took longer (%.2f) than Sidekiq's shutdown timeout (%d) when processing `%s`. This can lead to job processing problems during deploys" % [total, time_limit, object] }
+        end
       end
 
       def reenqueue_iteration_job
