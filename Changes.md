@@ -6,6 +6,7 @@ HEAD
 ----------
 
 - Take over support for ActiveJob's `:sidekiq` adapter [#6430, fatkodima]
+- Ensure CurrentAttributes are in scope when creating batch callbacks [#6455]
 - Add `Sidekiq.gem_version` API.
 - Update Ukranian translations
 
