@@ -252,6 +252,32 @@ describe Sidekiq::Job::Iterable do
     assert_equal (1..10).to_a, ActiveRecordRelationsJob.iterated_objects.flatten.uniq.map(&:id)
   end
 
+  describe "cancellation" do
+    it "can cancel midway" do
+      jid = iterate_exact_times(ArrayIterableJob, 2)
+      assert_equal [10, 11], ArrayIterableJob.iterated_objects
+      assert_equal 1, ArrayIterableJob.on_start_called
+      assert_equal 1, ArrayIterableJob.on_stop_called
+      assert_equal 0, ArrayIterableJob.on_resume_called
+      assert_equal 0, ArrayIterableJob.on_complete_called
+
+      x = ArrayIterableJob.new
+      x.jid = jid
+      assert_equal false, x.cancelled?
+      assert_equal true, x.cancel!
+      assert_equal true, x.cancelled?
+      assert_equal true, x.cancel!
+
+      ArrayIterableJob.iterated_objects.clear
+      continue_iterating(ArrayIterableJob, jid: jid)
+      assert_equal [], ArrayIterableJob.iterated_objects
+      assert_equal 1, ArrayIterableJob.on_start_called
+      assert_equal 2, ArrayIterableJob.on_stop_called
+      assert_equal 1, ArrayIterableJob.on_resume_called
+      assert_equal 1, ArrayIterableJob.on_complete_called
+    end
+  end
+
   describe "job arguments" do
     it "are available to all callbacks" do
       $args = {}

@@ -31,10 +31,30 @@ module Sidekiq
         @_start_time = nil
         @_runtime = 0
         @_args = nil
+        @_cancelled = false
       end
 
       def arguments
         @_args
+      end
+
+      # Three days is the longest period you generally need to wait for a retry to
+      # execute when using the default retry scheme. We don't want to "forget" the job
+      # is cancelled before it has a chance to execute and cancel itself.
+      CANCELLATION_PERIOD = (3 * 86_400).to_s
+
+      # Set a flag in Redis to mark this job as cancelled.
+      # Cancellation is asynchronous and is checked at the start of iteration
+      # and every 5 seconds thereafter as part of the recurring state flush.
+      def cancel!
+        return true if cancelled?
+
+        Sidekiq.redis { |c| c.set("cancelled-#{jid}", Time.now.to_i, "NX", "EX", CANCELLATION_PERIOD) }
+        @_cancelled = true
+      end
+
+      def cancelled?
+        @_cancelled
       end
 
       # A hook to override that will be called when the job starts iterating.
@@ -134,6 +154,10 @@ module Sidekiq
 
       private
 
+      def is_cancelled?
+        @_cancelled = Sidekiq.redis { |c| c.exists("cancelled-#{jid}") == 1 }
+      end
+
       def fetch_previous_iteration_state
         state = Sidekiq.redis { |conn| conn.hgetall(iteration_key) }
 
@@ -150,6 +174,12 @@ module Sidekiq
       STATE_TTL = 30 * 24 * 60 * 60 # one month
 
       def iterate_with_enumerator(enumerator, arguments)
+        if is_cancelled?
+          logger.info { "Job cancelled" }
+          return true
+        end
+
+        time_limit = Sidekiq.default_configuration[:timeout]
         found_record = false
         state_flushed_at = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
 
@@ -159,14 +189,21 @@ module Sidekiq
 
           is_interrupted = interrupted?
           if ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - state_flushed_at >= STATE_FLUSH_INTERVAL || is_interrupted
-            flush_state
+            _, _, cancelled = flush_state
             state_flushed_at = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+            if cancelled == 1
+              @_cancelled = true
+              logger.info { "Job cancelled" }
+              return true
+            end
           end
 
           return false if is_interrupted
 
-          around_iteration do
-            each_iteration(object, *arguments)
+          verify_iteration_time(time_limit, object) do
+            around_iteration do
+              each_iteration(object, *arguments)
+            end
           end
         end
 
@@ -174,6 +211,16 @@ module Sidekiq
         true
       ensure
         @_runtime += (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @_start_time)
+      end
+
+      def verify_iteration_time(time_limit, object)
+        start = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+        yield
+        finish = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+        total = finish - start
+        if total > time_limit
+          logger.warn { "Iteration took longer (%.2f) than Sidekiq's shutdown timeout (%d) when processing `%s`. This can lead to job processing problems during deploys" % [total, time_limit, object] }
+        end
       end
 
       def reenqueue_iteration_job
@@ -210,6 +257,7 @@ module Sidekiq
           conn.multi do |pipe|
             pipe.hset(key, state)
             pipe.expire(key, STATE_TTL)
+            pipe.exists("cancelled-#{jid}")
           end
         end
       end
