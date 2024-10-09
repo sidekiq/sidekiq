@@ -30,7 +30,12 @@ module Sidekiq
         @_cursor = nil
         @_start_time = nil
         @_runtime = 0
+        @_args = nil
         @_cancelled = false
+      end
+
+      def arguments
+        @_args
       end
 
       # Three days is the longest period you generally need to wait for a retry to
@@ -111,13 +116,14 @@ module Sidekiq
       end
 
       # @api private
-      def perform(*arguments)
+      def perform(*args)
+        @_args = args.dup.freeze
         fetch_previous_iteration_state
 
         @_executions += 1
         @_start_time = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
 
-        enumerator = build_enumerator(*arguments, cursor: @_cursor)
+        enumerator = build_enumerator(*args, cursor: @_cursor)
         unless enumerator
           logger.info("'#build_enumerator' returned nil, skipping the job.")
           return
@@ -132,7 +138,7 @@ module Sidekiq
         end
 
         completed = catch(:abort) do
-          iterate_with_enumerator(enumerator, arguments)
+          iterate_with_enumerator(enumerator, args)
         end
 
         on_stop
