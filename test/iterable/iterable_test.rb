@@ -263,10 +263,10 @@ describe Sidekiq::Job::Iterable do
 
       x = ArrayIterableJob.new
       x.jid = jid
-      assert_equal false, x.cancelled?
-      assert_equal true, x.cancel!
-      assert_equal true, x.cancelled?
-      assert_equal true, x.cancel!
+      refute x.cancelled?
+      assert x.cancel!
+      assert x.cancelled?
+      assert x.cancel!
 
       ArrayIterableJob.iterated_objects.clear
       continue_iterating(ArrayIterableJob, jid: jid)

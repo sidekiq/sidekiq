@@ -31,7 +31,7 @@ module Sidekiq
         @_start_time = nil
         @_runtime = 0
         @_args = nil
-        @_cancelled = false
+        @_cancelled = nil
       end
 
       def arguments
@@ -47,10 +47,17 @@ module Sidekiq
       # Cancellation is asynchronous and is checked at the start of iteration
       # and every 5 seconds thereafter as part of the recurring state flush.
       def cancel!
-        return true if cancelled?
+        return @_cancelled if cancelled?
 
-        Sidekiq.redis { |c| c.set("cancelled-#{jid}", Time.now.to_i, "NX", "EX", CANCELLATION_PERIOD) }
-        @_cancelled = true
+        key = "it-#{jid}"
+        _, result, _ = Sidekiq.redis do |c|
+          c.pipelined do |p|
+            p.hsetnx(key, "cancelled", Time.now.to_i)
+            p.hget(key, "cancelled")
+            p.expire(key, Sidekiq::Job::Iterable::STATE_TTL, "NX")
+          end
+        end
+        @_cancelled = result.to_i
       end
 
       def cancelled?
@@ -155,7 +162,7 @@ module Sidekiq
       private
 
       def is_cancelled?
-        @_cancelled = Sidekiq.redis { |c| c.exists("cancelled-#{jid}") == 1 }
+        @_cancelled = Sidekiq.redis { |c| c.hget("it-#{jid}", "cancelled") }
       end
 
       def fetch_previous_iteration_state
@@ -257,7 +264,7 @@ module Sidekiq
           conn.multi do |pipe|
             pipe.hset(key, state)
             pipe.expire(key, STATE_TTL)
-            pipe.exists("cancelled-#{jid}")
+            pipe.hget(key, "cancelled")
           end
         end
       end

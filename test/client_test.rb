@@ -113,6 +113,13 @@ describe Sidekiq::Client do
       end
     end
 
+    it "can cancel" do
+      jid = @client.push("class" => "Blah", "args" => [1, 2, 3])
+      res = @client.cancel!(jid)
+      assert res
+      assert res, @client.cancel!(jid)
+    end
+
     it "can push" do
       jid = @client.push("class" => "Blah", "args" => [1, 2, 3])
       assert_equal 24, jid.size
