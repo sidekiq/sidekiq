@@ -252,6 +252,62 @@ describe Sidekiq::Job::Iterable do
     assert_equal (1..10).to_a, ActiveRecordRelationsJob.iterated_objects.flatten.uniq.map(&:id)
   end
 
+  describe "cancellation" do
+    it "can cancel midway" do
+      jid = iterate_exact_times(ArrayIterableJob, 2)
+      assert_equal [10, 11], ArrayIterableJob.iterated_objects
+      assert_equal 1, ArrayIterableJob.on_start_called
+      assert_equal 1, ArrayIterableJob.on_stop_called
+      assert_equal 0, ArrayIterableJob.on_resume_called
+      assert_equal 0, ArrayIterableJob.on_complete_called
+
+      x = ArrayIterableJob.new
+      x.jid = jid
+      refute x.cancelled?
+      assert x.cancel!
+      assert x.cancelled?
+      assert x.cancel!
+
+      ArrayIterableJob.iterated_objects.clear
+      continue_iterating(ArrayIterableJob, jid: jid)
+      assert_equal [], ArrayIterableJob.iterated_objects
+      assert_equal 1, ArrayIterableJob.on_start_called
+      assert_equal 2, ArrayIterableJob.on_stop_called
+      assert_equal 1, ArrayIterableJob.on_resume_called
+      assert_equal 1, ArrayIterableJob.on_complete_called
+    end
+  end
+
+  describe "job arguments" do
+    it "are available to all callbacks" do
+      $args = {}
+      DynamicCallbackJob.reset
+      DynamicCallbackJob::CB[:on_stop] << -> { $args[:on_stop] = arguments }
+      DynamicCallbackJob::CB[:on_start] << -> { $args[:on_start] = arguments }
+      DynamicCallbackJob::CB[:on_complete] << -> { $args[:on_complete] = arguments }
+      DynamicCallbackJob::CB[:on_resume] << -> { $args[:on_resume] = arguments }
+
+      DynamicCallbackJob.perform_inline("mike", 123)
+      assert_equal($args, {on_start: ["mike", 123], on_stop: ["mike", 123], on_complete: ["mike", 123]})
+    end
+
+    it "are frozen" do
+      DynamicCallbackJob.reset
+      DynamicCallbackJob::CB[:on_start] << -> { arguments[1] = nil }
+      assert_raises FrozenError do
+        DynamicCallbackJob.perform_inline("mike", 123)
+      end
+    end
+
+    it "mangles keyword arguments, per JSON" do
+      $args = {}
+      DynamicCallbackJob.reset
+      DynamicCallbackJob::CB[:on_start] << -> { $args[:on_start] = arguments }
+      DynamicCallbackJob.perform_inline("first", mike: 456, bob: "string")
+      assert_equal($args, {on_start: ["first", {"mike" => 456, "bob" => "string"}]})
+    end
+  end
+
   private
 
   def iterate_exact_times(job, count, jid: nil)

@@ -157,6 +157,24 @@ class IterableJobWithArguments < SimpleIterableJob
   end
 end
 
+class DynamicCallbackJob < IterableJobWithArguments
+  CB = {}
+
+  %w[on_start on_complete on_stop on_resume].each do |cb|
+    name = cb.to_sym
+    CB[name] = []
+    define_method(name) do
+      CB[name].each { |cb| instance_exec(&cb) }
+    end
+  end
+  def self.reset
+    CB[:on_start] = []
+    CB[:on_stop] = []
+    CB[:on_resume] = []
+    CB[:on_complete] = []
+  end
+end
+
 class EmptyEnumeratorJob < SimpleIterableJob
   def build_enumerator(cursor:)
     array_enumerator([], cursor: cursor)

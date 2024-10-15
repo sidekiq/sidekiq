@@ -58,6 +58,23 @@ module Sidekiq
       end
     end
 
+    # Cancel the IterableJob with the given JID.
+    # **NB: Cancellation is asynchronous.** Iteration checks every
+    # five seconds so this will not immediately stop the given job.
+    def cancel!(jid)
+      key = "it-#{jid}"
+      _, result, _ = Sidekiq.redis do |c|
+        c.pipelined do |p|
+          p.hsetnx(key, "cancelled", Time.now.to_i)
+          p.hget(key, "cancelled")
+          p.expire(key, Sidekiq::Job::Iterable::STATE_TTL)
+          # TODO When Redis 7.2 is required
+          # p.expire(key, Sidekiq::Job::Iterable::STATE_TTL, "nx")
+        end
+      end
+      result.to_i
+    end
+
     ##
     # The main method used to push a job to Redis.  Accepts a number of options:
     #

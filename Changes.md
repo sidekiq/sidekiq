@@ -5,7 +5,21 @@
 HEAD
 ----------
 
+- Sidekiq now warns if a job iteration takes longer than the `-t` timeout setting (defaults to 25 seconds)
+- Iteration callbacks now have easy access to job arguments via the `arguments` method:
+```ruby
+def on_stop
+  p arguments # => `[123, "string", {"key" => "value"}]`
+end
+```
+- IterableJobs can be cancelled via `Sidekiq::Client#cancel!`:
+```ruby
+c = Sidekiq::Client.new
+jid = c.push("class" => SomeJob, "args" => [123])
+c.cancel!(jid) # => true
+```
 - Take over support for ActiveJob's `:sidekiq` adapter [#6430, fatkodima]
+- Ensure CurrentAttributes are in scope when creating batch callbacks [#6455]
 - Add `Sidekiq.gem_version` API.
 - Update Ukranian translations
 

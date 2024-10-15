@@ -88,7 +88,7 @@ module Sidekiq
         cattrs = build_cattrs_hash(klass_or_array)
 
         config.client_middleware.add Save, cattrs
-        config.server_middleware.add Load, cattrs
+        config.server_middleware.prepend Load, cattrs
       end
 
       private
