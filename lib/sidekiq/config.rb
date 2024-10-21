@@ -185,7 +185,13 @@ module Sidekiq
 
     # register global singletons which can be accessed elsewhere
     def register(name, instance)
-      @directory[name] = instance
+      # logger.debug("register[#{name}] = #{instance}")
+      # Sidekiq Enterprise lazy registers a few services so we
+      # can't lock down this hash completely.
+      hash = @directory.dup
+      hash[name] = instance
+      @directory = hash.freeze
+      instance
     end
 
     # find a singleton
@@ -193,8 +199,14 @@ module Sidekiq
       # JNDI is just a fancy name for a hash lookup
       @directory.fetch(name) do |key|
         return nil unless default_class
-        @directory[key] = default_class.new(self)
+        register(key, default_class.new(self))
       end
+    end
+
+    def freeze!
+      @directory.freeze
+      @options.freeze
+      true
     end
 
     ##

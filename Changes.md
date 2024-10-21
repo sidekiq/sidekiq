@@ -5,6 +5,7 @@
 HEAD
 ----------
 
+- Freeze global configuration once boot is complete, to avoid configuration race conditions [#6466, #6465]
 - Sidekiq now warns if a job iteration takes longer than the `-t` timeout setting (defaults to 25 seconds)
 - Iteration callbacks now have easy access to job arguments via the `arguments` method:
 ```ruby

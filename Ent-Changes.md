@@ -7,6 +7,7 @@ Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 HEAD
 ---------
 
+- Activate unique server middleware in client-mode so uniqueness works for `perform_inline` [#6460]
 - Add `Sidekiq::Enterprise.gem_version` API
 
 7.3.1
