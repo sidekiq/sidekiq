@@ -11,9 +11,10 @@ HEAD
 ```ruby
 def on_stop
   p arguments # => `[123, "string", {"key" => "value"}]`
+  id, str, hash = arguments
 end
 ```
-- IterableJobs can be cancelled via `Sidekiq::Client#cancel!`:
+- Iterable jobs can be cancelled via `Sidekiq::Client#cancel!`:
 ```ruby
 c = Sidekiq::Client.new
 jid = c.push("class" => SomeJob, "args" => [123])
