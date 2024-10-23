@@ -7,6 +7,7 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 HEAD
 ---------
 
+- Fix missing `success_at` in batch callbacks [#6463]
 - Add `Sidekiq::Pro.gem_version` API
 
 7.3.1
