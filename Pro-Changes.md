@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+7.3.2
 ---------
 
 - Fix missing `success_at` in batch callbacks [#6463]

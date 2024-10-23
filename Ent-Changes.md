@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-HEAD
+7.3.2
 ---------
 
 - Activate unique server middleware in client-mode so uniqueness works for `perform_inline` [#6460]
