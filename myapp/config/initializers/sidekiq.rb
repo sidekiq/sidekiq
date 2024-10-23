@@ -60,6 +60,7 @@ Sidekiq.configure_server do |config|
     cap.queues = %w[single]
     cap.server_middleware.add Singler
   end
+  config.logger = Sidekiq::Logger.new($stdout)
 end
 
 # helper jobs for seeding metrics data
