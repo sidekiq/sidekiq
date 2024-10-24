@@ -33,10 +33,25 @@ module Sidekiq
             attrs = strklass.constantize.attributes
             # Retries can push the job N times, we don't
             # want retries to reset cattr. #5692, #5090
-            job[key] = attrs if attrs.any?
+            if attrs.any?
+              # Older rails has a bug that `CurrentAttributes#attributes` always returns
+              # the same hash instance. We need to dup it to avoid being accidentally mutated.
+              job[key] = if returns_same_object?
+                attrs.dup
+              else
+                attrs
+              end
+            end
           end
         end
         yield
+      end
+
+      private
+
+      def returns_same_object?
+        ActiveSupport::VERSION::MAJOR < 8 ||
+          (ActiveSupport::VERSION::MAJOR == 8 && ActiveSupport::VERSION::MINOR == 0)
       end
     end
 
