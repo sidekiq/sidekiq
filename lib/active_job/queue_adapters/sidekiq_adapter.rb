@@ -16,7 +16,7 @@ end
 module ActiveJob
   module QueueAdapters
     # Explicitly remove the implementation existing in older rails'.
-    remove_const(:SidekiqAdapter) if defined?(:SidekiqAdapter)
+    remove_const(:SidekiqAdapter) if defined?("::#{name}::SidekiqAdapter")
 
     # Sidekiq adapter for Active Job
     #
