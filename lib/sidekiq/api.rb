@@ -690,10 +690,16 @@ module Sidekiq
 
     # Move all jobs from this Set to the Dead Set.
     # See DeadSet#kill
-    def kill_all(notify_failure: true, ex: nil)
+    def kill_all(notify_failure: false, ex: nil)
       ds = DeadSet.new
-      pop_each do |msg, _|
-        ds.kill(msg, notify_failure: notify_failure, ex: ex)
+      opts = {notify_failure: notify_failure, ex: ex, trim: false}
+
+      begin
+        pop_each do |msg, _|
+          ds.kill(msg, opts)
+        end
+      ensure
+        ds.trim
       end
     end
 
@@ -822,19 +828,30 @@ module Sidekiq
       super("dead")
     end
 
+    # Trim dead jobs which are over our storage limits
+    def trim
+      hash = Sidekiq.default_configuration
+      now = Time.now.to_f
+      Sidekiq.redis do |conn|
+        conn.multi do |transaction|
+          transaction.zremrangebyscore(name, "-inf", now - hash[:dead_timeout_in_seconds])
+          transaction.zremrangebyrank(name, 0, - hash[:dead_max_jobs])
+        end
+      end
+    end
+
     # Add the given job to the Dead set.
     # @param message [String] the job data as JSON
-    # @option opts [Boolean] :notify_failure  (true) Whether death handlers should be called
+    # @option opts [Boolean] :notify_failure (true) Whether death handlers should be called
+    # @option opts [Boolean] :trim (true) Whether Sidekiq should trim the structure to keep it within configuration
     # @option opts [Exception] :ex (RuntimeError) An exception to pass to the death handlers
     def kill(message, opts = {})
       now = Time.now.to_f
       Sidekiq.redis do |conn|
-        conn.multi do |transaction|
-          transaction.zadd(name, now.to_s, message)
-          transaction.zremrangebyscore(name, "-inf", now - Sidekiq::Config::DEFAULTS[:dead_timeout_in_seconds])
-          transaction.zremrangebyrank(name, 0, - Sidekiq::Config::DEFAULTS[:dead_max_jobs])
-        end
+        conn.zadd(name, now.to_s, message)
       end
+
+      trim if opts[:trim] != false
 
       if opts[:notify_failure] != false
         job = Sidekiq.load_json(message)

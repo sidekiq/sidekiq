@@ -778,28 +778,38 @@ describe "API" do
     end
 
     it "can retry and kill all safely" do
-      1000.times do
+      dcount = 1000
+      hash = Sidekiq.default_configuration
+      hash[:dead_max_jobs] = dcount
+
+      dcount.times do
         add_dead
       end
-      500.times do
+      rcount = 500
+      rcount.times do
         add_retry
       end
 
       q = Sidekiq::Queue.new
       ds = Sidekiq::DeadSet.new
       rs = Sidekiq::RetrySet.new
-      assert_equal 1000, ds.size
-      assert_equal 500, rs.size
+      assert_equal dcount, ds.size
+      assert_equal rcount, rs.size
 
       ds.retry_all
       assert_equal 0, ds.size
-      assert_equal 1000, q.size
+      assert_equal dcount, q.size
 
-      rs.kill_all(notify_failure: false)
-      assert_equal 500, ds.size
+      timing("kill_all") { rs.kill_all }
+      assert_equal rcount, ds.size
       assert_equal 0, rs.size
     end
   end
+end
+
+def timing(str)
+  yield
+  # p [str, (a = Time.now; yield; (Time.now - a))]
 end
 
 def add_retry(jid = "bob", at = Time.now.to_f)
