@@ -5,6 +5,10 @@
 HEAD
 ----------
 
+- Reimplement `retry_all` and `kill_all` API methods to use ZPOPMIN,
+  approximately 30-60% faster. [#6481]
+- Add preload testing binary at `examples/testing/sidekiq_boot` to verify your Rails app boots correctly with Sidekiq Enterprise's app preloading.
+- Fix circular require with ActiveJob adapter [#6477]
 - Fix potential race condition leading to incorrect serialized values for CurrentAttributes [#6475]
 
 7.3.4
