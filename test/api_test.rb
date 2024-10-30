@@ -724,7 +724,6 @@ describe "API" do
       assert_equal 1, ps.size
       assert_equal 1, ps.to_a.size
     end
-
   end
 
   describe "dead set" do

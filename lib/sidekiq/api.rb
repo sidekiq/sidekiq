@@ -790,7 +790,6 @@ module Sidekiq
     end
 
     alias_method :delete, :delete_by_jid
-
   end
 
   ##
