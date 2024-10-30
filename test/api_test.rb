@@ -725,12 +725,6 @@ describe "API" do
       assert_equal 1, ps.to_a.size
     end
 
-    def add_retry(jid = "bob", at = Time.now.to_f)
-      payload = Sidekiq.dump_json("class" => "ApiJob", "args" => [1, "mike"], "queue" => "default", "jid" => jid, "retry_count" => 2, "failed_at" => Time.now.to_f, "error_backtrace" => ["line1", "line2"])
-      @cfg.redis do |conn|
-        conn.zadd("retry", at.to_s, payload)
-      end
-    end
   end
 
   describe "dead set" do
@@ -783,5 +777,43 @@ describe "API" do
       assert_equal 1, ds.size
       assert_equal 1, death_handler_call_count
     end
+
+    it "can retry and kill all safely" do
+      1000.times do
+        add_dead
+      end
+      500.times do
+        add_retry
+      end
+
+      q = Sidekiq::Queue.new
+      ds = Sidekiq::DeadSet.new
+      rs = Sidekiq::RetrySet.new
+      assert_equal 1000, ds.size
+      assert_equal 500, rs.size
+
+      ds.retry_all
+      assert_equal 0, ds.size
+      assert_equal 1000, q.size
+
+      rs.kill_all(notify_failure: false)
+      assert_equal 500, ds.size
+      assert_equal 0, rs.size
+    end
+  end
+end
+
+def add_retry(jid = "bob", at = Time.now.to_f)
+  payload = Sidekiq.dump_json("class" => "ApiJob", "args" => [1, "mike"], "queue" => "default", "jid" => jid, "retry_count" => 2, "failed_at" => Time.now.to_f, "error_backtrace" => ["line1", "line2"])
+  @cfg.redis do |conn|
+    conn.zadd("retry", at.to_s, payload)
+  end
+end
+
+def add_dead(jid = nil, at = Time.now.to_f)
+  jid ||= SecureRandom.hex(12)
+  payload = Sidekiq.dump_json("class" => "ApiJob", "args" => [1, "mike"], "queue" => "default", "jid" => jid)
+  @cfg.redis do |conn|
+    conn.zadd("dead", at.to_s, payload)
   end
 end

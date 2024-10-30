@@ -668,6 +668,31 @@ module Sidekiq
       end
     end
 
+    def pop_each(&block)
+      size.times do
+        popmin(&block)
+      end
+    end
+
+    def retry_all
+      c = Sidekiq::Client.new
+      pop_each do |msg, _|
+        job = Sidekiq.load_json(msg)
+        # Manual retries should not count against the retry limit.
+        job["retry_count"] -= 1 if job["retry_count"]
+        c.push(job)
+      end
+    end
+
+    # Move all jobs from this Set to the Dead Set.
+    # See DeadSet#kill
+    def kill_all(notify_failure: true, ex: nil)
+      ds = DeadSet.new
+      pop_each do |msg, _|
+        ds.kill(msg, notify_failure: notify_failure, ex: ex)
+      end
+    end
+
     def each
       initial_size = @_size
       offset_size = 0
@@ -761,14 +786,18 @@ module Sidekiq
     end
 
     alias_method :delete, :delete_by_jid
+
+    def popmin
+      Sidekiq.redis { |c|
+        data, score = c.zpopmin(name, 1)&.first
+        break unless data
+        yield data, score
+      }
+    end
   end
 
   ##
   # The set of scheduled jobs within Sidekiq.
-  # Based on this, you can search/filter for jobs.  Here's an
-  # example where I'm selecting jobs based on some complex logic
-  # and deleting them from the scheduled set.
-  #
   # See the API wiki page for usage notes and examples.
   #
   class ScheduledSet < JobSet
@@ -779,25 +808,11 @@ module Sidekiq
 
   ##
   # The set of retries within Sidekiq.
-  # Based on this, you can search/filter for jobs.  Here's an
-  # example where I'm selecting all jobs of a certain type
-  # and deleting them from the retry queue.
-  #
   # See the API wiki page for usage notes and examples.
   #
   class RetrySet < JobSet
     def initialize
       super("retry")
-    end
-
-    # Enqueues all jobs pending within the retry set.
-    def retry_all
-      each(&:retry) while size > 0
-    end
-
-    # Kills all jobs pending within the retry set.
-    def kill_all
-      each(&:kill) while size > 0
     end
   end
 
@@ -838,11 +853,6 @@ module Sidekiq
         end
       end
       true
-    end
-
-    # Enqueue all dead jobs
-    def retry_all
-      each(&:retry) while size > 0
     end
   end
 
