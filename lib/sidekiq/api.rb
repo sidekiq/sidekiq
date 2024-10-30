@@ -668,9 +668,13 @@ module Sidekiq
       end
     end
 
-    def pop_each(&block)
-      size.times do
-        popmin(&block)
+    def pop_each
+      Sidekiq.redis do |c|
+        size.times do
+          data, score = c.zpopmin(name, 1)&.first
+          break unless data
+          yield data, score
+        end
       end
     end
 
@@ -787,13 +791,6 @@ module Sidekiq
 
     alias_method :delete, :delete_by_jid
 
-    def popmin
-      Sidekiq.redis { |c|
-        data, score = c.zpopmin(name, 1)&.first
-        break unless data
-        yield data, score
-      }
-    end
   end
 
   ##
