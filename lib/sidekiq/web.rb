@@ -32,7 +32,8 @@ module Sidekiq
       "Retries" => "retries",
       "Scheduled" => "scheduled",
       "Dead" => "morgue",
-      "Metrics" => "metrics"
+      "Metrics" => "metrics",
+      "Profiles" => "profiles"
     }
 
     if Gem::Version.new(Rack::RELEASE) < Gem::Version.new("3")

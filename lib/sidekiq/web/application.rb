@@ -328,6 +328,24 @@ module Sidekiq
       json Sidekiq::Stats.new.queues
     end
 
+    get "/profiles" do
+      erb(:profiles)
+    end
+
+    get "/profiles/:key" do
+      # TODO
+    end
+
+    get "/profiles/:key/data" do
+      key = route_params[:key]
+      data = Sidekiq.redis { |c| c.hget(key, "data") }
+
+      [200, {
+        "content-type" => "application/json",
+        "content-encoding" => "gzip"
+      }, [data]]
+    end
+
     ########
     # Filtering
 

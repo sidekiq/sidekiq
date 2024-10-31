@@ -1237,4 +1237,50 @@ module Sidekiq
   # Is "worker" a process, a type of job, a thread? Undefined!
   # WorkSet better describes the data.
   Workers = WorkSet
+
+  class ProfileSet
+    def initialize
+      @records = Sidekiq.redis do |c|
+        c.zremrangebyscore("profiles", "-inf", Time.now.to_f.to_s)
+        c.zrange("profiles", 0, "+inf", "byscore")
+      end
+    end
+
+    def size
+      @records.size
+    end
+
+    def each(&block)
+      fetch_keys = %w[started_at jid type token].freeze
+      arrays = Sidekiq.redis do |c|
+        c.pipelined do |p|
+          @records.each do |key|
+            p.hmget(key, *fetch_keys)
+          end
+        end
+      end
+
+      arrays.compact.map { |arr| ProfileRecord.new(arr) }.each(&block)
+    end
+  end
+
+  class ProfileRecord
+    attr_reader :started_at, :jid, :type, :token
+
+    def initialize(arr)
+      # Must be same order as fetch_keys above
+      @started_at = Time.at(Integer(arr[0]))
+      @jid = arr[1]
+      @type = arr[2]
+      @token = arr[3]
+    end
+
+    def key
+      "#{token}-#{jid}"
+    end
+
+    def data
+      Sidekiq.redis { |c| c.hget(key, "data") }
+    end
+  end
 end
