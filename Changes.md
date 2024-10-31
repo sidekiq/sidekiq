@@ -10,6 +10,7 @@ HEAD
 - Add preload testing binary at `examples/testing/sidekiq_boot` to verify your Rails app boots correctly with Sidekiq Enterprise's app preloading.
 - Fix circular require with ActiveJob adapter [#6477]
 - Fix potential race condition leading to incorrect serialized values for CurrentAttributes [#6475]
+- Restore missing elapsed time when default job logging is disabled
 
 7.3.4
 ----------
