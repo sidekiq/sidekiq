@@ -41,18 +41,22 @@ module Sidekiq
       }
 
       require "vernier"
-      Vernier.profile(**options.merge(out: rundata[:filename]), &block)
+      begin
+        Vernier.profile(**options.merge(out: rundata[:filename]), &block)
 
-      key = "#{token}-#{jid}"
-      redis do |conn|
-        conn.multi do |m|
-          m.zadd("profiles", Time.now.to_f + EXPIRY, key)
-          m.hset(key, rundata.merge(data: File.read(rundata[:filename])))
-          m.expire(key, EXPIRY)
+        # Failed jobs will raise an exception on previous line and skip this
+        # block. Only successful jobs will persist profile data to Redis.
+        key = "#{token}-#{jid}"
+        redis do |conn|
+          conn.multi do |m|
+            m.zadd("profiles", Time.now.to_f + EXPIRY, key)
+            m.hset(key, rundata.merge(data: File.read(rundata[:filename])))
+            m.expire(key, EXPIRY)
+          end
         end
+      ensure
+        FileUtils.rm_f(rundata[:filename])
       end
-
-      FileUtils.rm(rundata[:filename])
     end
   end
 end

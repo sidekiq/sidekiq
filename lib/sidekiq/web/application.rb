@@ -342,7 +342,9 @@ module Sidekiq
 
       [200, {
         "content-type" => "application/json",
-        "content-encoding" => "gzip"
+        "content-encoding" => "gzip",
+        # allow Firefox Profiler's XHR to fetch this profile data
+        "access-control-allow-origin" => "*"
       }, [data]]
     end
 
