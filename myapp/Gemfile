@@ -13,6 +13,7 @@ gem "railties", RAILS_VERSION
 gem "puma"
 gem "sidekiq", path: ".."
 gem "sqlite3", "~> 1.4"
+gem "json"
 
 gem "after_commit_everywhere"
 
