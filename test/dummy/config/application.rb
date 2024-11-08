@@ -15,6 +15,7 @@ module Dummy
     config.eager_load = false
     config.load_defaults "7.0"
     config.active_job.queue_adapter = :sidekiq
+    config.active_support.to_time_preserves_timezone = :zone # 8.0 deprecation
 
     # Do not print logs when running tests.
     Sidekiq.logger.level = :fatal
