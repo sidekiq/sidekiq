@@ -54,7 +54,7 @@ You create additional Capsules within your initializer, like so:
 Sidekiq.configure_server do |config|
   config.capsule("single-threaded") do |cap|
     cap.concurrency = 1
-    cap.queues = %w[single]
+    cap.queues = %w[single] # to specify weights: %w[important,10 mailers,7]
   end
 end
 ```
