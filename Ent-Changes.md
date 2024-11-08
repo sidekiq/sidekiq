@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+HEAD
+---------
+
+- Call `Process.warmup` before fork in sidekiqswarm, use `RUBY_DISABLE_WARMUP=1` to disable [#6279]
+- Disable health checks if running sidekiqswarm, we can't use one port to monitor many children
+
 7.3.2
 ---------
 
