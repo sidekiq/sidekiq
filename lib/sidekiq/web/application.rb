@@ -67,12 +67,16 @@ module Sidekiq
     end
 
     get "/metrics" do
+      x = params[:substr]
+      class_filter = (x.nil? || x == "") ? nil : Regexp.new(Regexp.escape(x), Regexp::IGNORECASE)
+
       q = Sidekiq::Metrics::Query.new
       @period = h((params[:period] || "")[0..1])
       @periods = METRICS_PERIODS
       minutes = @periods.fetch(@period, @periods.values.first)
-      @query_result = q.top_jobs(minutes: minutes)
-      erb(:metrics)
+      @query_result = q.top_jobs(minutes: minutes, class_filter: class_filter)
+
+      erb :metrics
     end
 
     get "/metrics/:name" do
@@ -330,19 +334,6 @@ module Sidekiq
 
     ########
     # Filtering
-
-    route :get, :post, "/filter/metrics" do
-      x = params[:substr]
-      return redirect "#{root_path}metrics" unless x && x != ""
-
-      q = Sidekiq::Metrics::Query.new
-      @period = h((params[:period] || "")[0..1])
-      @periods = METRICS_PERIODS
-      minutes = @periods.fetch(@period, @periods.values.first)
-      @query_result = q.top_jobs(minutes: minutes, class_filter: Regexp.new(Regexp.escape(x), Regexp::IGNORECASE))
-
-      erb :metrics
-    end
 
     route :get, :post, "/filter/retries" do
       x = params[:substr]
