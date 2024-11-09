@@ -1000,8 +1000,9 @@ describe Sidekiq::Web do
         result_mock.expect(:ends_at, Time.now)
 
         query_mock = Minitest::Mock.new
-        query_mock.expect :top_jobs, result_mock do |minutes:|
+        query_mock.expect :top_jobs, result_mock do |minutes:, class_filter:|
           assert_equal minutes, 240
+          assert_nil class_filter
         end
 
         Sidekiq::Metrics::Query.stub :new, query_mock do
