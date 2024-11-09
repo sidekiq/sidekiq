@@ -1012,14 +1012,11 @@ describe Sidekiq::Web do
       end
 
       it "supports filtering" do
-        get "/filter/metrics"
-        assert_equal 302, last_response.status
-
-        post "/filter/metrics", "substr" => "mike"
+        get "/metrics", "substr" => "mike"
         assert_equal 200, last_response.status
         assert_match(/MikeJob/, last_response.body)
 
-        post "/filter/metrics", "substr" => "notfound"
+        get "/metrics", "substr" => "notfound"
         assert_equal 200, last_response.status
         refute_match(/MikeJob/, last_response.body)
       end
