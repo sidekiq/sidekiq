@@ -76,7 +76,7 @@ module Sidekiq
       minutes = @periods.fetch(@period, @periods.values.first)
       @query_result = q.top_jobs(minutes: minutes, class_filter: class_filter)
 
-      erb :metrics
+      erb(:metrics)
     end
 
     get "/metrics/:name" do
