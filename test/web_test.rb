@@ -354,19 +354,13 @@ describe Sidekiq::Web do
     3.times { add_retry }
     add_retry("MIKE1234")
 
-    get "/filter/retries"
-    assert_equal 302, last_response.status
-
-    post "/filter/retries"
-    assert_equal 302, last_response.status
-
-    post "/filter/retries", substr: "nope"
+    get "/retries", substr: "nope"
     refute_match(/RuntimeError/, last_response.body)
 
-    get "/filter/retries", substr: "nope"
+    get "/retries", substr: "nope"
     refute_match(/RuntimeError/, last_response.body)
 
-    post "/filter/retries", substr: "MIKE1234"
+    get "/retries", substr: "MIKE1234"
     assert_match(/MIKE1234/, last_response.body)
   end
 
@@ -472,19 +466,13 @@ describe Sidekiq::Web do
     3.times { add_scheduled }
     add_scheduled("MIKE1234")
 
-    get "/filter/scheduled"
-    assert_equal 302, last_response.status
-
-    post "/filter/scheduled"
-    assert_equal 302, last_response.status
-
-    get "/filter/scheduled", substr: "nope"
+    get "/scheduled", substr: "nope"
     refute_match(/RuntimeError/, last_response.body)
 
-    post "/filter/scheduled", substr: "nope"
+    get "/scheduled", substr: "nope"
     refute_match(/RuntimeError/, last_response.body)
 
-    post "/filter/scheduled", substr: "MIKE1234"
+    get "/scheduled", substr: "MIKE1234"
     assert_match(/MIKE1234/, last_response.body)
   end
 
@@ -766,19 +754,13 @@ describe Sidekiq::Web do
       3.times { add_dead }
       add_dead("MIKE1234")
 
-      get "/filter/dead"
-      assert_equal 302, last_response.status
-
-      post "/filter/dead"
-      assert_equal 302, last_response.status
-
-      post "/filter/dead", substr: "nope"
+      get "/morgue", substr: "nope"
       refute_match(/RuntimeError/, last_response.body)
 
-      get "/filter/dead", substr: "nope"
+      get "/morgue", substr: "nope"
       refute_match(/RuntimeError/, last_response.body)
 
-      post "/filter/dead", substr: "MIKE1234"
+      get "/morgue", substr: "MIKE1234"
       assert_match(/MIKE1234/, last_response.body)
     end
 
