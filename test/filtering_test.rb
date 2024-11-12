@@ -28,10 +28,12 @@ describe "filtering" do
     add_retry("jid123", "mike")
     add_retry("jid456", "jim")
 
-    get "/filter/retries", substr: ""
-    assert_equal 302, last_response.status
+    get "/retries", substr: ""
+    assert_equal 200, last_response.status
+    assert_includes(last_response.body, "jid123")
+    assert_includes(last_response.body, "jid456")
 
-    post "/filter/retries", substr: "mike"
+    get "/retries", substr: "mike"
     assert_equal 200, last_response.status
     assert_includes(last_response.body, "jid123")
     refute_includes(last_response.body, "jid456")
@@ -41,10 +43,12 @@ describe "filtering" do
     jid1 = FilterJob.perform_in(5, "bob", "tammy")
     jid2 = FilterJob.perform_in(5, "mike", "jim")
 
-    get "/filter/scheduled", substr: ""
-    assert_equal 302, last_response.status
+    get "/scheduled", substr: ""
+    assert_equal 200, last_response.status
+    assert_match(/#{jid1}/, last_response.body)
+    assert_match(/#{jid2}/, last_response.body)
 
-    post "/filter/scheduled", substr: "tammy"
+    get "/scheduled", substr: "tammy"
     assert_equal 200, last_response.status
     assert_match(/#{jid1}/, last_response.body)
     refute_match(/#{jid2}/, last_response.body)
@@ -54,10 +58,12 @@ describe "filtering" do
     add_dead("jid123", "mike")
     add_dead("jid456", "jim")
 
-    get "/filter/dead", substr: ""
-    assert_equal 302, last_response.status
+    get "/morgue", substr: ""
+    assert_equal 200, last_response.status
+    assert_includes(last_response.body, "jid123")
+    assert_includes(last_response.body, "jid456")
 
-    post "/filter/dead", substr: "jim"
+    get "/morgue", substr: "jim"
     assert_equal 200, last_response.status
     refute_includes(last_response.body, "jid123")
     assert_includes(last_response.body, "jid456")

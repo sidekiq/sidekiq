@@ -67,11 +67,15 @@ module Sidekiq
     end
 
     get "/metrics" do
+      x = params[:substr]
+      class_filter = (x.nil? || x == "") ? nil : Regexp.new(Regexp.escape(x), Regexp::IGNORECASE)
+
       q = Sidekiq::Metrics::Query.new
       @period = h((params[:period] || "")[0..1])
       @periods = METRICS_PERIODS
       minutes = @periods.fetch(@period, @periods.values.first)
-      @query_result = q.top_jobs(minutes: minutes)
+      @query_result = q.top_jobs(minutes: minutes, class_filter: class_filter)
+
       erb(:metrics)
     end
 
@@ -153,9 +157,15 @@ module Sidekiq
     end
 
     get "/morgue" do
-      @count = (params["count"] || 25).to_i
-      (@current_page, @total_size, @dead) = page("dead", params["page"], @count, reverse: true)
-      @dead = @dead.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+      x = params[:substr]
+
+      if x && x != ""
+        @dead = search(Sidekiq::DeadSet.new, x)
+      else
+        @count = (params["count"] || 25).to_i
+        (@current_page, @total_size, @dead) = page("dead", params["page"], @count, reverse: true)
+        @dead = @dead.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+      end
 
       erb(:morgue)
     end
@@ -207,9 +217,15 @@ module Sidekiq
     end
 
     get "/retries" do
-      @count = (params["count"] || 25).to_i
-      (@current_page, @total_size, @retries) = page("retry", params["page"], @count)
-      @retries = @retries.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+      x = params[:substr]
+
+      if x && x != ""
+        @retries = search(Sidekiq::RetrySet.new, x)
+      else
+        @count = (params["count"] || 25).to_i
+        (@current_page, @total_size, @retries) = page("retry", params["page"], @count)
+        @retries = @retries.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+      end
 
       erb(:retries)
     end
@@ -262,9 +278,15 @@ module Sidekiq
     end
 
     get "/scheduled" do
-      @count = (params["count"] || 25).to_i
-      (@current_page, @total_size, @scheduled) = page("schedule", params["page"], @count)
-      @scheduled = @scheduled.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+      x = params[:substr]
+
+      if x && x != ""
+        @scheduled = search(Sidekiq::ScheduledSet.new, x)
+      else
+        @count = (params["count"] || 25).to_i
+        (@current_page, @total_size, @scheduled) = page("schedule", params["page"], @count)
+        @scheduled = @scheduled.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+      end
 
       erb(:scheduled)
     end
@@ -326,46 +348,6 @@ module Sidekiq
 
     get "/stats/queues" do
       json Sidekiq::Stats.new.queues
-    end
-
-    ########
-    # Filtering
-
-    route :get, :post, "/filter/metrics" do
-      x = params[:substr]
-      return redirect "#{root_path}metrics" unless x && x != ""
-
-      q = Sidekiq::Metrics::Query.new
-      @period = h((params[:period] || "")[0..1])
-      @periods = METRICS_PERIODS
-      minutes = @periods.fetch(@period, @periods.values.first)
-      @query_result = q.top_jobs(minutes: minutes, class_filter: Regexp.new(Regexp.escape(x), Regexp::IGNORECASE))
-
-      erb :metrics
-    end
-
-    route :get, :post, "/filter/retries" do
-      x = params[:substr]
-      return redirect "#{root_path}retries" unless x && x != ""
-
-      @retries = search(Sidekiq::RetrySet.new, params[:substr])
-      erb :retries
-    end
-
-    route :get, :post, "/filter/scheduled" do
-      x = params[:substr]
-      return redirect "#{root_path}scheduled" unless x && x != ""
-
-      @scheduled = search(Sidekiq::ScheduledSet.new, params[:substr])
-      erb :scheduled
-    end
-
-    route :get, :post, "/filter/dead" do
-      x = params[:substr]
-      return redirect "#{root_path}morgue" unless x && x != ""
-
-      @dead = search(Sidekiq::DeadSet.new, params[:substr])
-      erb :morgue
     end
 
     post "/change_locale" do
