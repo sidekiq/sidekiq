@@ -354,19 +354,13 @@ describe Sidekiq::Web do
     3.times { add_retry }
     add_retry("MIKE1234")
 
-    get "/filter/retries"
-    assert_equal 302, last_response.status
-
-    post "/filter/retries"
-    assert_equal 302, last_response.status
-
-    post "/filter/retries", substr: "nope"
+    get "/retries", substr: "nope"
     refute_match(/RuntimeError/, last_response.body)
 
-    get "/filter/retries", substr: "nope"
+    get "/retries", substr: "nope"
     refute_match(/RuntimeError/, last_response.body)
 
-    post "/filter/retries", substr: "MIKE1234"
+    get "/retries", substr: "MIKE1234"
     assert_match(/MIKE1234/, last_response.body)
   end
 
@@ -472,19 +466,13 @@ describe Sidekiq::Web do
     3.times { add_scheduled }
     add_scheduled("MIKE1234")
 
-    get "/filter/scheduled"
-    assert_equal 302, last_response.status
-
-    post "/filter/scheduled"
-    assert_equal 302, last_response.status
-
-    get "/filter/scheduled", substr: "nope"
+    get "/scheduled", substr: "nope"
     refute_match(/RuntimeError/, last_response.body)
 
-    post "/filter/scheduled", substr: "nope"
+    get "/scheduled", substr: "nope"
     refute_match(/RuntimeError/, last_response.body)
 
-    post "/filter/scheduled", substr: "MIKE1234"
+    get "/scheduled", substr: "MIKE1234"
     assert_match(/MIKE1234/, last_response.body)
   end
 
@@ -766,19 +754,13 @@ describe Sidekiq::Web do
       3.times { add_dead }
       add_dead("MIKE1234")
 
-      get "/filter/dead"
-      assert_equal 302, last_response.status
-
-      post "/filter/dead"
-      assert_equal 302, last_response.status
-
-      post "/filter/dead", substr: "nope"
+      get "/morgue", substr: "nope"
       refute_match(/RuntimeError/, last_response.body)
 
-      get "/filter/dead", substr: "nope"
+      get "/morgue", substr: "nope"
       refute_match(/RuntimeError/, last_response.body)
 
-      post "/filter/dead", substr: "MIKE1234"
+      get "/morgue", substr: "MIKE1234"
       assert_match(/MIKE1234/, last_response.body)
     end
 
@@ -1000,8 +982,9 @@ describe Sidekiq::Web do
         result_mock.expect(:ends_at, Time.now)
 
         query_mock = Minitest::Mock.new
-        query_mock.expect :top_jobs, result_mock do |minutes:|
+        query_mock.expect :top_jobs, result_mock do |minutes:, class_filter:|
           assert_equal minutes, 240
+          assert_nil class_filter
         end
 
         Sidekiq::Metrics::Query.stub :new, query_mock do
@@ -1012,14 +995,11 @@ describe Sidekiq::Web do
       end
 
       it "supports filtering" do
-        get "/filter/metrics"
-        assert_equal 302, last_response.status
-
-        post "/filter/metrics", "substr" => "mike"
+        get "/metrics", "substr" => "mike"
         assert_equal 200, last_response.status
         assert_match(/MikeJob/, last_response.body)
 
-        post "/filter/metrics", "substr" => "notfound"
+        get "/metrics", "substr" => "notfound"
         assert_equal 200, last_response.status
         refute_match(/MikeJob/, last_response.body)
       end
