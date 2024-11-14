@@ -36,6 +36,11 @@ module Sidekiq
       "Profiles" => "profiles"
     }
 
+    PROFILE_OPTIONS = {
+      view_url: "https://profiler.firefox.com/public/%s",
+      store_url: "https://api.profiler.firefox.com/compressed-store"
+    }
+
     if Gem::Version.new(Rack::RELEASE) < Gem::Version.new("3")
       CONTENT_LANGUAGE = "Content-Language"
       CONTENT_SECURITY_POLICY = "Content-Security-Policy"
