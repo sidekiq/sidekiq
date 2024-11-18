@@ -1242,6 +1242,9 @@ module Sidekiq
     def initialize
       @records = Sidekiq.redis do |c|
         c.zremrangebyscore("profiles", "-inf", Time.now.to_f.to_s)
+        # TODO I'd like to use "REV" here and avoid the reverse_each
+        # below but it's not working for me in 7.2.3
+        # c.zrange("profiles", 0, "+inf", "byscore", "rev")
         c.zrange("profiles", 0, "+inf", "byscore")
       end
     end
@@ -1260,7 +1263,7 @@ module Sidekiq
         end
       end
 
-      arrays.compact.map { |arr| ProfileRecord.new(arr) }.each(&block)
+      arrays.compact.map { |arr| ProfileRecord.new(arr) }.reverse_each(&block)
     end
   end
 

@@ -2,6 +2,8 @@
   <h1><%= t('Profiles') %></h1>
 </div>
 
+<% @profiles = Sidekiq::ProfileSet.new %>
+<% if @profiles.size > 0 %>
 <div class="table_container">
   <table class="table table-hover table-bordered table-striped">
     <thead>
@@ -11,17 +13,20 @@
       <th><%= t('Token') %></th>
       <th>&nbsp</th>
     </thead>
-    <% Sidekiq::ProfileSet.new.each do |record| %>
+    <% @profiles.each do |record| %>
       <tr>
         <td><%= relative_time(record.started_at) %></td>
         <td><%= record.type %> </td>
         <td><%= record.jid %> </td>
         <td><%= record.token %> </td>
         <td>
-          <a class="btn" href="<%= root_path %>profiles/<%= CGI.escape(record.key) %>">View</a>
-          <a class="btn" href="<%= root_path %>profiles/<%= CGI.escape(record.key) %>/data">Raw JSON</a>
+          <a class="btn btn-sm" href="<%= root_path %>profiles/<%= CGI.escape(record.key) %>"><%= t("View") %></a>
+          <a class="btn btn-sm" href="<%= root_path %>profiles/<%= CGI.escape(record.key) %>/data"><%= t("Data") %></a>
         </td>
       </tr>
     <% end %>
   </table>
 </div>
+<% else %>
+  <div class="alert alert-success"><%= t('NoDataFound') %></div>
+<% end %>

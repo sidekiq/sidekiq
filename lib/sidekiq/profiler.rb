@@ -4,7 +4,7 @@ module Sidekiq
   # Allows the user to profile jobs running in production.
   # See details in the Profiling wiki page.
   class Profiler
-    EXPIRY = 12 * 3600 # 12 hours
+    EXPIRY = 86400 # 1 day
     DEFAULT_OPTIONS = {
       mode: :wall
     }
