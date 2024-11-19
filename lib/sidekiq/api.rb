@@ -1239,8 +1239,13 @@ module Sidekiq
   Workers = WorkSet
 
   class ProfileSet
+    include Enumerable
+
+    # This is a point in time/snapshot API, you'll need to instantiate a new instance
+    # if you want to fetch newer records.
     def initialize
       @records = Sidekiq.redis do |c|
+        # This throws away expired profiles
         c.zremrangebyscore("profiles", "-inf", Time.now.to_f.to_s)
         # TODO I'd like to use "REV" here and avoid the reverse_each
         # below but it's not working for me in 7.2.3

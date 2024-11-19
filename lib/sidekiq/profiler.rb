@@ -1,4 +1,5 @@
 require "fileutils"
+require "sidekiq/component"
 
 module Sidekiq
   # Allows the user to profile jobs running in production.
@@ -42,7 +43,7 @@ module Sidekiq
 
       require "vernier"
       begin
-        Vernier.profile(**options.merge(out: rundata[:filename]), &block)
+        rc = Vernier.profile(**options.merge(out: rundata[:filename]), &block)
 
         # Failed jobs will raise an exception on previous line and skip this
         # block. Only successful jobs will persist profile data to Redis.
@@ -54,6 +55,7 @@ module Sidekiq
             m.expire(key, EXPIRY)
           end
         end
+        rc
       ensure
         FileUtils.rm_f(rundata[:filename])
       end

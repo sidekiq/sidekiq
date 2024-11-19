@@ -36,6 +36,9 @@ module Sidekiq
       "Profiles" => "profiles"
     }
 
+    # By default we support direct uploads to p.f.c since the UI is a JS SPA
+    # and very difficult for us to vendor or provide ourselves. If you are worried
+    # about data security and wish to self-host, you can change these URLs.
     PROFILE_OPTIONS = {
       view_url: "https://profiler.firefox.com/public/%s",
       store_url: "https://api.profiler.firefox.com/compressed-store"
