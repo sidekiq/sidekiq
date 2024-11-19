@@ -13,7 +13,7 @@ gem "redis-client"
 # gem "bumbler"
 # gem "debug"
 
-gem "sqlite3", "~> 2.1", platforms: :ruby
+gem "sqlite3", "~> 1.7", platforms: :ruby
 gem "activerecord-jdbcsqlite3-adapter", platforms: :jruby
 gem "after_commit_everywhere", require: false
 gem "yard"
