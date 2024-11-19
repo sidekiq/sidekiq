@@ -1259,7 +1259,7 @@ module Sidekiq
     end
 
     def each(&block)
-      fetch_keys = %w[started_at jid type token].freeze
+      fetch_keys = %w[started_at jid type token size elapsed].freeze
       arrays = Sidekiq.redis do |c|
         c.pipelined do |p|
           @records.each do |key|
@@ -1273,7 +1273,7 @@ module Sidekiq
   end
 
   class ProfileRecord
-    attr_reader :started_at, :jid, :type, :token
+    attr_reader :started_at, :jid, :type, :token, :size, :elapsed
 
     def initialize(arr)
       # Must be same order as fetch_keys above
@@ -1281,6 +1281,8 @@ module Sidekiq
       @jid = arr[1]
       @type = arr[2]
       @token = arr[3]
+      @size = Integer(arr[4])
+      @elapsed = Float(arr[5])
     end
 
     def key

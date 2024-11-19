@@ -18,14 +18,6 @@ module Sidekiq
     def call(job, &block)
       return yield unless job["profile"]
 
-      if RUBY_VERSION < "3.3"
-        logger.warn { "Job profiling requires Ruby 3.3, you are using Ruby #{RUBY_VERSION}" }
-        # Should we execute the job or raise an error?
-        # We consider profiling best effort and execute anyways.
-        # Open an issue and explain your POV if you disagree.
-        return yield
-      end
-
       token = job["profile"]
       type = job["class"]
       jid = job["jid"]
@@ -43,15 +35,18 @@ module Sidekiq
 
       require "vernier"
       begin
+        a = Time.now
         rc = Vernier.profile(**options.merge(out: rundata[:filename]), &block)
+        b = Time.now
 
         # Failed jobs will raise an exception on previous line and skip this
         # block. Only successful jobs will persist profile data to Redis.
         key = "#{token}-#{jid}"
+        data = File.read(rundata[:filename])
         redis do |conn|
           conn.multi do |m|
             m.zadd("profiles", Time.now.to_f + EXPIRY, key)
-            m.hset(key, rundata.merge(data: File.read(rundata[:filename])))
+            m.hset(key, rundata.merge(elapsed: (b - a), data: data, size: data.bytesize))
             m.expire(key, EXPIRY)
           end
         end

@@ -839,6 +839,7 @@ def add_profile(count, token, jid)
     token: token,
     type: type,
     jid: jid,
+    size: FAKE_DATA.bytesize,
     # .gz extension tells Vernier to compress the data
     filename: "#{token}-#{type}-#{jid}-#{started_at.strftime("%Y%m%d-%H%M%S")}.json.gz"
   }

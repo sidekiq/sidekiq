@@ -46,6 +46,8 @@ describe "profiling" do
     header = "\x1f\x8b".force_encoding("BINARY")
     profiles.each do |pr|
       assert pr.started_at
+      assert_operator pr.size, :>, 2
+      assert_operator pr.elapsed, :>, 0
       data = pr.data[0..1] # gzipped data
       assert_equal header, data # gzip magic number
     end
