@@ -153,11 +153,9 @@ module Sidekiq
     # @param asset_paths [Array] one or more directories under {root}/assets/{name} to be publicly served, e.g. ["js", "css", "img"]
     # @param cache_for [Integer] amount of time to cache assets, default one day
     #
-    # TODO name, tab and index will be mandatory in 8.0
-    #
     # Web extensions will have a root `web/` directory with `locales/`, `assets/`
     # and `views/` subdirectories.
-    def self.register(extension, name: nil, tab: nil, index: nil, root_dir: nil, cache_for: 86400, asset_paths: nil)
+    def self.register(extension, name:, tab:, index:, root_dir: nil, cache_for: 86400, asset_paths: nil)
       tab = Array(tab)
       index = Array(index)
       tab.zip(index).each do |tab, index|

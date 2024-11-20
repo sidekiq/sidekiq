@@ -285,13 +285,7 @@ module Sidekiq
         p ["!!!!!", ex]
       end
       @options[:error_handlers].each do |handler|
-        if parameter_size(handler) == 2
-          # TODO Remove in 8.0
-          logger.info { "DEPRECATION: Sidekiq exception handlers now take three arguments, see #{handler}" }
-          handler.call(ex, {_config: self}.merge(ctx))
-        else
-          handler.call(ex, ctx, self)
-        end
+        handler.call(ex, ctx, self)
       rescue Exception => e
         l = logger
         l.error "!!! ERROR HANDLER THREW AN ERROR !!!"
