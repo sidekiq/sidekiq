@@ -2,6 +2,12 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+7.3.6
+----------
+
+- Forward compatibility fixes for Ruby 3.4
+- Filtering in the Web UI now works via GET so you can bookmark a filtered view. [#6497]
+
 7.3.5
 ----------
 
