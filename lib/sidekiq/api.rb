@@ -1140,7 +1140,7 @@ module Sidekiq
         end
       end
 
-      results.sort_by { |(_, _, hsh)| hsh.raw("run_at") }.each(&block)
+      results.sort_by { |(_, _, work)| work.run_at }.each(&block)
     end
 
     # Note that #size is only as accurate as Sidekiq's heartbeat,
@@ -1205,29 +1205,6 @@ module Sidekiq
 
     def payload
       @hsh["payload"]
-    end
-
-    # deprecated
-    def [](key)
-      kwargs = {uplevel: 1}
-      kwargs[:category] = :deprecated if RUBY_VERSION > "3.0" # TODO
-      warn("Direct access to `Sidekiq::Work` attributes is deprecated, please use `#payload`, `#queue`, `#run_at` or `#job` instead", **kwargs)
-
-      @hsh[key]
-    end
-
-    # :nodoc:
-    # @api private
-    def raw(name)
-      @hsh[name]
-    end
-
-    def method_missing(*all)
-      @hsh.send(*all)
-    end
-
-    def respond_to_missing?(name, *args)
-      @hsh.respond_to?(name)
     end
   end
 
