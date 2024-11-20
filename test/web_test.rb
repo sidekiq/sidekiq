@@ -966,7 +966,6 @@ describe Sidekiq::Web do
       require "sidekiq/metrics/tracking"
       t = Sidekiq::Metrics::ExecutionTracker.new(@config)
       t.track("default", "MikeJob") do
-        # TODO replace sleep with a method we can call
         sleep 0.02
       end
       t.flush

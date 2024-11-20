@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
   gem.files = %w[sidekiq.gemspec README.md Changes.md LICENSE.txt] + `git ls-files | grep -E '^(bin|lib|web)'`.split("\n")
   gem.name = "sidekiq"
   gem.version = Sidekiq::VERSION
-  gem.required_ruby_version = ">= 2.7.0"
+  gem.required_ruby_version = ">= 3.2.0"
 
   gem.metadata = {
     "homepage_uri" => "https://sidekiq.org",
@@ -24,7 +24,7 @@ Gem::Specification.new do |gem|
   }
 
   gem.add_dependency "redis-client", ">= 0.22.2"
-  gem.add_dependency "connection_pool", ">= 2.3.0"
-  gem.add_dependency "rack", ">= 2.2.4"
+  gem.add_dependency "connection_pool", ">= 2.4.0"
+  gem.add_dependency "rack", ">= 3.1.0"
   gem.add_dependency "logger"
 end

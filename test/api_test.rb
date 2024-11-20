@@ -642,10 +642,6 @@ describe "API" do
       w.each do |p, x, work|
         assert_equal key, p
         assert_equal "1234", x
-        assert_equal "default", work["queue"]
-        assert_equal("{}", work["payload"])
-        assert_equal Time.now.year, Time.at(work["run_at"]).year
-
         assert_equal "{}", work.payload
         assert_equal({}, work.job.item)
         assert_equal(Time.now.year, work.run_at.year)

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "sidekiq/processor"
-require "set"
 
 module Sidekiq
   ##

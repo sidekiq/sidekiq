@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
-require "sidekiq"
 require "date"
-require "set"
-
+require "sidekiq"
 require "sidekiq/metrics/shared"
 
 module Sidekiq

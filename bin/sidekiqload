@@ -50,7 +50,7 @@ if ENV["AJ"]
   ActiveJob::Base.logger.level = Logger::WARN
 
   class LoadJob < ActiveJob::Base
-    def perform(idx, ts = nil)
+    def perform(string, idx, hash, ts = nil)
       puts(Time.now.to_f - ts) if !ts.nil?
     end
   end
@@ -58,12 +58,21 @@ end
 
 class LoadWorker
   include Sidekiq::Job
+  $count = 0
+  $lock = Mutex.new
+ 
   sidekiq_options retry: 1
   sidekiq_retry_in do |x|
     1
   end
 
-  def perform(idx, ts = nil)
+  def perform(string, idx, hash, ts = nil)
+    $lock.synchronize do
+      $count += 1
+      if $count % 100_000 == 0
+        logger.warn("#{Time.now} Done #{$count}")
+      end
+    end
     puts(Time.now.to_f - ts) if !ts.nil?
     # raise idx.to_s if idx % 100 == 1
   end
@@ -133,13 +142,13 @@ class Loader
     start = Time.now
     if ENV["AJ"]
       @iter.times do
-        @count.times do |idx|
-          LoadJob.perform_later(idx)
-        end
+        ActiveJob.perform_all_later(@count.times.map do |idx|
+          LoadJob.new("mike", idx, {mike: "bob"})
+        end)
       end
     else
       @iter.times do
-        arr = Array.new(@count) { |idx| [idx] }
+        arr = Array.new(@count) { |idx| ["string", idx, {"mike" => "bob"}] }
         Sidekiq::Client.push_bulk("class" => LoadWorker, "args" => arr)
       end
     end
@@ -163,13 +172,13 @@ class Loader
           Sidekiq.logger.error("Now here's the latency for three jobs")
 
           if ENV["AJ"]
-            LoadJob.perform_later(1, Time.now.to_f)
-            LoadJob.perform_later(2, Time.now.to_f)
-            LoadJob.perform_later(3, Time.now.to_f)
+            LoadJob.perform_later("", 1, {}, Time.now.to_f)
+            LoadJob.perform_later("", 2, {}, Time.now.to_f)
+            LoadJob.perform_later("", 3, {}, Time.now.to_f)
           else
-            LoadWorker.perform_async(1, Time.now.to_f)
-            LoadWorker.perform_async(2, Time.now.to_f)
-            LoadWorker.perform_async(3, Time.now.to_f)
+            LoadWorker.perform_async("", 1, {}, Time.now.to_f)
+            LoadWorker.perform_async("", 2, {}, Time.now.to_f)
+            LoadWorker.perform_async("", 3, {}, Time.now.to_f)
           end
 
           sleep 0.1
