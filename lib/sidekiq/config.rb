@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require "forwardable"
-
-require "set"
 require "sidekiq/redis_connection"
 
 module Sidekiq

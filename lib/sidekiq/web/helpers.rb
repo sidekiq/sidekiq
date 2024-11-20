@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "uri"
-require "set"
 require "yaml"
 require "cgi"
 
@@ -36,7 +35,7 @@ module Sidekiq
     # NB: keys and values are not escaped; do not allow user input
     # in the attributes
     private def html_tag(tagname, attrs)
-      s = +"<#{tagname}"
+      s = "<#{tagname}"
       attrs.each_pair do |k, v|
         next unless v
         s << " #{k}=\"#{v}\""
@@ -58,7 +57,7 @@ module Sidekiq
       # so extensions can be localized
       @strings[lang] ||= settings.locales.each_with_object({}) do |path, global|
         find_locale_files(lang).each do |file|
-          strs = YAML.safe_load(File.read(file))
+          strs = YAML.safe_load_file(file)
           global.merge!(strs[lang])
         end
       end

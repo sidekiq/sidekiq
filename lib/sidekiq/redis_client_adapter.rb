@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "set"
 require "redis_client"
 require "redis_client/decorator"
 

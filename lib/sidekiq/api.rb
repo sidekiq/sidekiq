@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
-require "sidekiq"
-
 require "zlib"
-require "set"
 
+require "sidekiq"
 require "sidekiq/metrics/query"
 
 #
