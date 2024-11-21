@@ -12,6 +12,7 @@ describe "profiling" do
     # Ensure we don't touch external systems in our test suite
     Sidekiq::Web::PROFILE_OPTIONS.clear
     Sidekiq::Web::PROFILE_OPTIONS[:view_url] = "https://localhost/public/%s"
+    Sidekiq::Web::PROFILE_OPTIONS[:store_url] = "https://localhost/store"
   end
 
   it "profiles" do
@@ -52,12 +53,13 @@ describe "profiling" do
       assert_equal header, data # gzip magic number
     end
 
+    Sidekiq.redis { |c| c.hset("mike-1234", "sid", "sid1234") }
+    Sidekiq.redis { |c| c.hset("bob-5678", "sid", "sid5678") }
+
     get "/profiles"
     assert_match(/mike-1234/, last_response.body)
     assert_match(/bob-5678/, last_response.body)
-
-    Sidekiq.redis { |c| c.hset("mike-1234", "sid", "sid1234") }
-    Sidekiq.redis { |c| c.hset("bob-5678", "sid", "sid5678") }
+    assert_match(/View/, last_response.body)
 
     get "/profiles/mike-1234"
     assert_equal 302, last_response.status
@@ -67,6 +69,18 @@ describe "profiling" do
     assert_equal "application/json", last_response.headers["Content-Type"]
     assert_equal "gzip", last_response.headers["Content-Encoding"]
     assert_equal header, last_response.body[0..1]
+
+    # Verify we can turn off remote viewing by removing the store url
+    Sidekiq::Web::PROFILE_OPTIONS[:store_url] = nil
+
+    get "/profiles"
+    assert_match(/mike-1234/, last_response.body)
+    assert_match(/bob-5678/, last_response.body)
+    refute_match(/View/, last_response.body)
+
+    get "/profiles/mike-1234"
+    assert_equal 302, last_response.status
+    assert_equal "/profiles", last_response.headers["Location"]
   end
 
   include Rack::Test::Methods

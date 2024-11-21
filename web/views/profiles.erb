@@ -27,7 +27,9 @@
         <td><%= format_memory(record.size / 1024) %> </td>
         <td><%= number_with_delimiter(record.elapsed, precision: 2) %> </td>
         <td>
-          <a target="_blank" class="btn btn-sm" href="<%= root_path %>profiles/<%= CGI.escape(record.key) %>"><%= t("View") %></a>
+          <% if Sidekiq::Web::PROFILE_OPTIONS[:store_url] %>
+            <a target="_blank" class="btn btn-sm" href="<%= root_path %>profiles/<%= CGI.escape(record.key) %>"><%= t("View") %></a>
+          <% end %>
           <a class="btn btn-sm" href="<%= root_path %>profiles/<%= CGI.escape(record.key) %>/data"><%= t("Data") %></a>
         </td>
       </tr>

@@ -357,6 +357,8 @@ module Sidekiq
     end
 
     get "/profiles/:key" do
+      return redirect_to "#{root_path}profiles" unless Web::PROFILE_OPTIONS[:store_url]
+
       key = route_params[:key]
       sid = Sidekiq.redis { |c| c.hget(key, "sid") }
 
