@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-HEAD
+7.3.3
 ---------
 
 - Call `Process.warmup` before fork in sidekiqswarm, use `RUBY_DISABLE_WARMUP=1` to disable [#6279]

@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+7.3.3
 ---------
 
 - Don't issue Batch::Empty jobs when reopening but adding zero jobs [#6489]
