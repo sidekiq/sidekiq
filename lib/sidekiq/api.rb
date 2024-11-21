@@ -1212,4 +1212,60 @@ module Sidekiq
   # Is "worker" a process, a type of job, a thread? Undefined!
   # WorkSet better describes the data.
   Workers = WorkSet
+
+  class ProfileSet
+    include Enumerable
+
+    # This is a point in time/snapshot API, you'll need to instantiate a new instance
+    # if you want to fetch newer records.
+    def initialize
+      @records = Sidekiq.redis do |c|
+        # This throws away expired profiles
+        c.zremrangebyscore("profiles", "-inf", Time.now.to_f.to_s)
+        # TODO I'd like to use "REV" here and avoid the reverse_each
+        # below but it's not working for me in 7.2.3
+        # c.zrange("profiles", 0, "+inf", "byscore", "rev")
+        c.zrange("profiles", 0, "+inf", "byscore")
+      end
+    end
+
+    def size
+      @records.size
+    end
+
+    def each(&block)
+      fetch_keys = %w[started_at jid type token size elapsed].freeze
+      arrays = Sidekiq.redis do |c|
+        c.pipelined do |p|
+          @records.each do |key|
+            p.hmget(key, *fetch_keys)
+          end
+        end
+      end
+
+      arrays.compact.map { |arr| ProfileRecord.new(arr) }.reverse_each(&block)
+    end
+  end
+
+  class ProfileRecord
+    attr_reader :started_at, :jid, :type, :token, :size, :elapsed
+
+    def initialize(arr)
+      # Must be same order as fetch_keys above
+      @started_at = Time.at(Integer(arr[0]))
+      @jid = arr[1]
+      @type = arr[2]
+      @token = arr[3]
+      @size = Integer(arr[4])
+      @elapsed = Float(arr[5])
+    end
+
+    def key
+      "#{token}-#{jid}"
+    end
+
+    def data
+      Sidekiq.redis { |c| c.hget(key, "data") }
+    end
+  end
 end

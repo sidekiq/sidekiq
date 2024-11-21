@@ -18,6 +18,11 @@ module Sidekiq
       throw :halt, [res, {Rack::CONTENT_TYPE => "text/plain"}, [res.to_s]]
     end
 
+    def redirect_to(url)
+      Sidekiq.logger.info "Redirecting to #{url}"
+      throw :halt, [302, {Web::LOCATION => url}, []]
+    end
+
     def redirect(location)
       throw :halt, [302, {Web::LOCATION => "#{request.base_url}#{location}"}, []]
     end

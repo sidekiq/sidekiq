@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "base64"
+
 module Sidekiq
   class WebApplication
     extend WebRouter
@@ -348,6 +350,41 @@ module Sidekiq
 
     get "/stats/queues" do
       json Sidekiq::Stats.new.queues
+    end
+
+    get "/profiles" do
+      erb(:profiles)
+    end
+
+    get "/profiles/:key" do
+      key = route_params[:key]
+      sid = Sidekiq.redis { |c| c.hget(key, "sid") }
+
+      unless sid
+        require "net/http"
+        data = Sidekiq.redis { |c| c.hget(key, "data") }
+        resp = Net::HTTP.post(URI(Web::PROFILE_OPTIONS[:store_url]),
+          data,
+          {"Accept" => "application/vnd.firefox-profiler+json;version=1.0",
+           "User-Agent" => "Sidekiq #{Sidekiq::VERSION} job profiler"})
+        # https://raw.githubusercontent.com/firefox-devtools/profiler-server/master/tools/decode_jwt_payload.py
+        sid = Sidekiq.load_json(Base64.decode64(resp.body.split(".")[1]))["profileToken"]
+        Sidekiq.redis { |c| c.hset(key, "sid", sid) }
+      end
+      url = Web::PROFILE_OPTIONS[:view_url] % sid
+      redirect_to url
+    end
+
+    get "/profiles/:key/data" do
+      key = route_params[:key]
+      data = Sidekiq.redis { |c| c.hget(key, "data") }
+
+      [200, {
+        "content-type" => "application/json",
+        "content-encoding" => "gzip",
+        # allow Firefox Profiler's XHR to fetch this profile data
+        "access-control-allow-origin" => "*"
+      }, [data]]
     end
 
     post "/change_locale" do

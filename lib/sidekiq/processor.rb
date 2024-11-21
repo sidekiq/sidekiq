@@ -3,6 +3,7 @@
 require "sidekiq/fetch"
 require "sidekiq/job_logger"
 require "sidekiq/job_retry"
+require "sidekiq/profiler"
 
 module Sidekiq
   ##
@@ -119,6 +120,11 @@ module Sidekiq
       nil
     end
 
+    def profile(job, &block)
+      return yield unless job["profile"]
+      Sidekiq::Profiler.new(config).call(job, &block)
+    end
+
     def dispatch(job_hash, queue, jobstr)
       # since middleware can mutate the job hash
       # we need to clone it to report the original
@@ -132,17 +138,19 @@ module Sidekiq
         @retrier.global(jobstr, queue) do
           @job_logger.call(job_hash, queue) do
             stats(jobstr, queue) do
-              # Rails 5 requires a Reloader to wrap code execution.  In order to
-              # constantize the worker and instantiate an instance, we have to call
-              # the Reloader.  It handles code loading, db connection management, etc.
-              # Effectively this block denotes a "unit of work" to Rails.
-              @reloader.call do
-                klass = Object.const_get(job_hash["class"])
-                instance = klass.new
-                instance.jid = job_hash["jid"]
-                instance._context = self
-                @retrier.local(instance, jobstr, queue) do
-                  yield instance
+              profile(job_hash) do
+                # Rails 5 requires a Reloader to wrap code execution.  In order to
+                # constantize the worker and instantiate an instance, we have to call
+                # the Reloader.  It handles code loading, db connection management, etc.
+                # Effectively this block denotes a "unit of work" to Rails.
+                @reloader.call do
+                  klass = Object.const_get(job_hash["class"])
+                  instance = klass.new
+                  instance.jid = job_hash["jid"]
+                  instance._context = self
+                  @retrier.local(instance, jobstr, queue) do
+                    yield instance
+                  end
                 end
               end
             end

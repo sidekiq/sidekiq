@@ -801,6 +801,54 @@ describe "API" do
       assert_equal 0, rs.size
     end
   end
+
+  describe "profiling" do
+    it "can show profile records" do
+      ps = Sidekiq::ProfileSet.new
+      assert_equal 0, ps.size
+
+      before = Time.now
+      add_profile(1, "mike", "123")
+      add_profile(2, "mike", "456")
+      add_profile(3, "fred", "789")
+      assert_equal 0, ps.size
+      ps = Sidekiq::ProfileSet.new
+      assert_equal 3, ps.size
+
+      ps.each do |record|
+        assert_equal "ProfileJob", record.type
+        assert_operator before, :<, record.started_at
+        assert record.token
+        assert record.jid
+      end
+    end
+  end
+end
+
+FAKE_DATA = "H4sICNrWI2cAA3NvbWUuanNvbgCrVlDKTq1UslJQKkvMKU1V0lFQSiwqSgSJRBvqKBjpKBjHKtRyAQDd7Kt/JwAAAA=="
+
+def add_profile(count, token, jid)
+  type = "ProfileJob"
+  started_at = Time.now + count
+  rundata = {
+    started_at: started_at.to_i,
+    token: token,
+    type: type,
+    jid: jid,
+    size: FAKE_DATA.bytesize,
+    elapsed: 4.36273,
+    # .gz extension tells Vernier to compress the data
+    filename: "#{token}-#{type}-#{jid}-#{started_at.strftime("%Y%m%d-%H%M%S")}.json.gz"
+  }
+
+  key = "#{token}-#{jid}"
+  @cfg.redis do |conn|
+    conn.multi do |m|
+      m.zadd("profiles", Time.now.to_f + 60, key)
+      m.hset(key, rundata.merge(data: Base64.decode64(FAKE_DATA)))
+      m.expire(key, 60)
+    end
+  end
 end
 
 def timing(str)
