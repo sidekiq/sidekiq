@@ -56,7 +56,7 @@ module Sidekiq
         @cattrs.each do |(key, strklass)|
           next unless job.has_key?(key)
 
-          klass_attrs[strklass.constantize] = Serializer.deserialize(job[key])
+          klass_attrs[strklass.constantize] = Serializer.deserialize(job[key]).to_h
         end
 
         wrap(klass_attrs.to_a, &block)
@@ -68,7 +68,6 @@ module Sidekiq
         klass, attrs = klass_attrs.shift
         return block.call unless klass
 
-        attrs = attrs.to_h if attrs.is_a?(Array)
         retried = false
 
         begin
