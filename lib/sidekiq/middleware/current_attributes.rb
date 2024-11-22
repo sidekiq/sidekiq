@@ -49,13 +49,6 @@ module Sidekiq
         end
         yield
       end
-
-      private
-
-      def returns_same_object?
-        ActiveSupport::VERSION::MAJOR < 8 ||
-          (ActiveSupport::VERSION::MAJOR == 8 && ActiveSupport::VERSION::MINOR == 0)
-      end
     end
 
     class Load
