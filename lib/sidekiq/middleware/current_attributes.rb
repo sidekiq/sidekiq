@@ -21,15 +21,7 @@ module Sidekiq
   #   Sidekiq::CurrentAttributes.persist(["Myapp::Current", "Myapp::OtherCurrent"])
   #
   module CurrentAttributes
-    class Serializer
-      def self.deserialize(argument)
-        ::ActiveJob::Arguments.deserialize(argument).to_h
-      end
-
-      def self.serialize(argument)
-        ::ActiveJob::Arguments.serialize(argument).to_h
-      end
-    end
+    Serializer = ::ActiveJob::Arguments
 
     class Save
       include Sidekiq::ClientMiddleware
@@ -76,6 +68,7 @@ module Sidekiq
         klass, attrs = klass_attrs.shift
         return block.call unless klass
 
+        attrs = attrs.to_h if attrs.is_a?(Array)
         retried = false
 
         begin
