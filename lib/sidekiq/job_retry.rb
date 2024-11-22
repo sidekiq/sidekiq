@@ -189,7 +189,7 @@ module Sidekiq
 
       # Logging here can break retries if the logging device raises ENOSPC #3979
       # logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
-      jitter = rand(10) * (count + 1)
+      jitter = rand(10 * (count + 1))
       retry_at = Time.now.to_f + delay + jitter
       payload = Sidekiq.dump_json(msg)
       redis do |conn|
