@@ -666,6 +666,9 @@ div.interval-slider input {
   .redis-url {
     max-width: 580px;
   }
+  .container{
+    width: 100%;
+  }
 }
 
 .redis-url {
