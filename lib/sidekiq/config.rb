@@ -47,7 +47,7 @@ module Sidekiq
           end
         else
           cfg.logger.info do
-            ex.detailed_message(highlight: fancy).tr("\n", " ")
+            ex.detailed_message(highlight: fancy)
           end
         end
       end

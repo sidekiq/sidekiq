@@ -84,7 +84,12 @@ module Sidekiq
         def format_context(ctxt = Sidekiq::Context.current)
           if ctxt.size > 0
             ctxt.map { |k, v|
-              "#{k}=#{Sidekiq.dump_json(v)}"
+              case v
+              when Array
+                "#{k}=#{v.join(",")}"
+              else
+                "#{k}=#{v}"
+              end
             }.join(" ")
           end
         end

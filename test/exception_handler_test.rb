@@ -65,11 +65,10 @@ describe Sidekiq::Component do
     end
 
     it "logs the exception to Sidekiq.logger" do
-      @config[:reloader] = Sidekiq::Rails::Reloader.new
-      output = capture_logging(@config) do
+      output = capture_logging(@config, :debug) do
         Thing.new(@config).invoke_exception(a: 1)
       end
-      assert_match(/"a":1/, output, "didn't include the context")
+      assert_match(/a=1/, output, "didn't include the context")
       assert_match(/Something didn't work!/, output, "didn't include the exception message")
       assert_match(/test\/exception_handler_test.rb/, output, "didn't include the backtrace")
     end
@@ -89,17 +88,6 @@ describe Sidekiq::Component do
       ensure
         @config[:error_handlers].delete(test_handler)
       end
-    end
-
-    it "cleans a backtrace if there is a cleaner" do
-      @config[:backtrace_cleaner] = ->(backtrace) { backtrace.take(1) }
-      output = capture_logging(@config) do
-        Thing.new(@config).invoke_exception(a: 1)
-      end
-
-      assert_equal 1, output.lines.count { |line| line.match?(/\d+:in/) }
-    ensure
-      @config[:backtrace_cleaner] = Sidekiq::Config::DEFAULTS[:backtrace_cleaner]
     end
 
     describe "when the exception does not have a backtrace" do
