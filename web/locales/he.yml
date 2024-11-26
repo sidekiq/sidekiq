@@ -1,5 +1,6 @@
 # elements like %{queue} are variables and should not be translated
 he:
+  LanguageName: עברית
   Actions: פעולות
   AddToQueue: הוסף לתור
   AreYouSure: אתם בטוחים?
