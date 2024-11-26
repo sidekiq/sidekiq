@@ -1,5 +1,6 @@
 # elements like %{queue} are variables and should not be translated
 hi:
+  LanguageName: हिन्दी
   Actions: कार्रवाई
   AddToQueue: कतार मे जोड़ें
   AreYouSure: क्या आपको यकीन है?

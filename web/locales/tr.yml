@@ -1,5 +1,6 @@
 # elements like %{queue} are variables and should not be translated
 tr:
+  LanguageName: Türkçe
   Actions: Eylemler
   AddToQueue: Kuyruğa ekle
   AreYouSure: Emin misiniz?

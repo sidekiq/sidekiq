@@ -1,5 +1,6 @@
 # elements like %{queue} are variables and should not be translated
 ja:
+  LanguageName: 日本語
   Actions: アクション
   AddToQueue: キューに追加
   AreYouSure: よろしいですか？

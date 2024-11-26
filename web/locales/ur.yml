@@ -1,5 +1,6 @@
 # elements like %{queue} are variables and should not be translated
 ur:
+  LanguageName: اردو
   Actions: ﻋﻮاﻣﻞ
   AddToQueue: ﻗﻄﺎﺭ ميں شامل کريں
   AreYouSure: کيا یقین ؟

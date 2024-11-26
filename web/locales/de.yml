@@ -1,5 +1,6 @@
 # elements like %{queue} are variables and should not be translated
 de:
+  LanguageName: Deutsch
   Actions: Aktionen
   AddToQueue: In Warteschlange einreihen
   AreYouSure: Bist du sicher?

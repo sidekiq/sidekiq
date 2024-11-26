@@ -1,5 +1,6 @@
 # elements like %{queue} are variables and should not be translated
 uk:
+  LanguageName: Українська
   Actions: Дії
   AddToQueue: Додати до черги
   AreYouSure: Ви впевнені?
