@@ -1,5 +1,6 @@
 # elements like %{queue} are variables and should not be translated
 ar:
+  LanguageName: العربية
   Actions: إجراءات
   AddToQueue: إضافة إلى الرتل
   AreYouSure: هل انت متأكد؟

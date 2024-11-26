@@ -95,6 +95,10 @@ module Sidekiq
       locale_files.select { |file| file =~ /\/#{lang}\.yml$/ }
     end
 
+    def language_name(locale)
+      strings(locale).fetch("LanguageName", locale)
+    end
+
     def search(jobset, substr)
       resultset = jobset.scan(substr).to_a
       @current_page = 1

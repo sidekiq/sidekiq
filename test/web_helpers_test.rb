@@ -110,6 +110,13 @@ describe "Web helpers" do
     assert_equal "en", obj.locale
   end
 
+  it "returns language name from locale" do
+    obj = Helpers.new
+    assert_equal "English", obj.language_name("en")
+    assert_equal "Português", obj.language_name("pt")
+    assert_equal "missing", obj.language_name("missing")
+  end
+
   it "handles invalid locales" do
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "*")
     obj.instance_eval do
