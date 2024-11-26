@@ -39,12 +39,17 @@ module Sidekiq
     }
 
     ERROR_HANDLER = ->(ex, ctx, cfg = Sidekiq.default_configuration) {
-      l = cfg.logger
-      l.warn(Sidekiq.dump_json(ctx)) unless ctx.empty?
-      l.warn("#{ex.class.name}: #{ex.message}")
-      unless ex.backtrace.nil?
-        backtrace = cfg[:backtrace_cleaner].call(ex.backtrace)
-        l.warn(backtrace.join("\n"))
+      Sidekiq::Context.with(ctx) do
+        fancy = cfg[:environment] == "development" && $stdout.tty?
+        if cfg.logger.debug?
+          cfg.logger.debug do
+            ex.full_message(highlight: fancy)
+          end
+        else
+          cfg.logger.info do
+            ex.detailed_message(highlight: fancy).tr("\n", " ")
+          end
+        end
       end
     }
 
