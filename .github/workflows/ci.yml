@@ -13,13 +13,12 @@ jobs:
   test:
 
     runs-on: ubuntu-latest
-    # on-hover of the checkmark, show "Ruby 3 / Redis 6" instead of "(3 / 6)"
-    name: "Ruby ${{ matrix.ruby }} / ${{ matrix.database.image }}-${{ matrix.database.version }}"
+    name: "${{ matrix.ruby }} / ${{ matrix.database.image }}-${{ matrix.database.version }}"
 
     strategy:
       fail-fast: false
       matrix:
-        ruby: ["3.2", "3.3", "3.4"]
+        ruby: ["ruby-3.2", "ruby-3.3", "ruby-3.4"]
         database: [
           { image: "redis", version: "6.2" },
           { image: "redis", version: "7.2.4" }, # last BSD-licensed version
