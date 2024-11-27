@@ -69,6 +69,15 @@ module Sidekiq
 
     # def middlewares = self.class.middlewares
 
+    # Allow user to say
+    #   run Sidekiq::Web
+    # rather than:
+    #   run Sidekiq::Web.new
+    def self.call(env)
+      @inst ||= new
+      @inst.call(env)
+    end
+
     def call(env)
       env[:csp_nonce] = SecureRandom.base64(16)
       env[:redis_pool] = self.class.redis_pool
