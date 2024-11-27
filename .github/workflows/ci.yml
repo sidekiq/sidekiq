@@ -1,0 +1,46 @@
+name: Sidekiq CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+    # on-hover of the checkmark, show "Ruby 3 / Redis 6" instead of "(3 / 6)"
+    name: "Ruby ${{ matrix.ruby }} / ${{ matrix.database.image }}-${{ matrix.database.version }}"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ["3.2", "3.3", "3.4"]
+        database: [
+          { image: "redis/redis-stack-server", version: "6" },
+          { image: "redis/redis-stack-server", version: "7" },
+          { image: "valkey/valkey", version: "8" },
+          { image: "dragonflydb/dragonfly", version: "newest" }
+        ]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Ruby ${{ matrix.ruby }}
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+        ruby-version: ${{ matrix.ruby }}
+
+    - name: Start Redis
+      uses: supercharge/redis-github-action@1.8.0
+      with:
+        redis-image: ${{ matrix.database.image }}
+        redis-version: ${{ matrix.database.version }}
+
+    - name: Run tests
+      run: bundle exec rake test
