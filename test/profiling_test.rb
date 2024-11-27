@@ -44,7 +44,7 @@ describe "profiling" do
     assert_equal %w[bob-5678 mike-1234], profiles.map(&:key)
     assert_equal %w[5678 1234], profiles.map(&:jid)
 
-    header = "\x1f\x8b".force_encoding("BINARY")
+    header = +"\x1f\x8b".force_encoding("BINARY")
     profiles.each do |pr|
       assert pr.started_at
       assert_operator pr.size, :>, 2
