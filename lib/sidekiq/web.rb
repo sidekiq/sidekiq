@@ -2,20 +2,10 @@
 
 require "erb"
 require "securerandom"
-
-require "sidekiq"
-require "sidekiq/api"
-require "sidekiq/paginator"
-require "sidekiq/web/helpers"
-
-require "sidekiq/web/router"
-require "sidekiq/web/action"
-require "sidekiq/web/application"
-require "sidekiq/web/csrf_protection"
-
-require "rack/content_length"
 require "rack/builder"
 require "rack/static"
+require "sidekiq"
+require "sidekiq/api"
 
 module Sidekiq
   class Web
@@ -44,36 +34,9 @@ module Sidekiq
       store_url: "https://api.profiler.firefox.com/compressed-store"
     }
 
-    if Gem::Version.new(Rack::RELEASE) < Gem::Version.new("3")
-      CONTENT_LANGUAGE = "Content-Language"
-      CONTENT_SECURITY_POLICY = "Content-Security-Policy"
-      LOCATION = "Location"
-      X_CASCADE = "X-Cascade"
-      X_CONTENT_TYPE_OPTIONS = "X-Content-Type-Options"
-    else
-      CONTENT_LANGUAGE = "content-language"
-      CONTENT_SECURITY_POLICY = "content-security-policy"
-      LOCATION = "location"
-      X_CASCADE = "x-cascade"
-      X_CONTENT_TYPE_OPTIONS = "x-content-type-options"
-    end
-
     class << self
-      def settings
-        self
-      end
-
-      def default_tabs
-        DEFAULT_TABS
-      end
-
-      def custom_tabs
-        @custom_tabs ||= {}
-      end
-      alias_method :tabs, :custom_tabs
-
-      def custom_job_info_rows
-        @custom_job_info_rows ||= []
+      def tabs
+        @tabs ||= DEFAULT_TABS.dup
       end
 
       def locales
@@ -84,12 +47,12 @@ module Sidekiq
         @views ||= VIEWS
       end
 
-      def enable(*opts)
-        opts.each { |key| set(key, true) }
+      def redis_pool
+        @pool || Sidekiq.default_configuration.redis_pool
       end
 
-      def disable(*opts)
-        opts.each { |key| set(key, false) }
+      def redis_pool=(pool)
+        @pool = pool
       end
 
       def middlewares
@@ -99,56 +62,21 @@ module Sidekiq
       def use(*args, &block)
         middlewares << [args, block]
       end
-
-      def set(attribute, value)
-        send(:"#{attribute}=", value)
-      end
-
-      attr_accessor :app_url, :redis_pool
-      attr_writer :locales, :views
+      attr_accessor :app_url
     end
 
-    def self.inherited(child)
-      child.app_url = app_url
-      child.redis_pool = redis_pool
-    end
+    # def use(*args, &) = self.class.use(*args, &)
 
-    def settings
-      self.class.settings
-    end
-
-    def middlewares
-      @middlewares ||= self.class.middlewares
-    end
-
-    def use(*args, &block)
-      middlewares << [args, block]
-    end
+    # def middlewares = self.class.middlewares
 
     def call(env)
       env[:csp_nonce] = SecureRandom.base64(16)
+      env[:redis_pool] = self.class.redis_pool
       app.call(env)
-    end
-
-    def self.call(env)
-      @app ||= new
-      @app.call(env)
     end
 
     def app
       @app ||= build
-    end
-
-    def enable(*opts)
-      opts.each { |key| set(key, true) }
-    end
-
-    def disable(*opts)
-      opts.each { |key| set(key, false) }
-    end
-
-    def set(attribute, value)
-      send(:"#{attribute}=", value)
     end
 
     # Register a class as a Sidekiq Web UI extension. The class should
@@ -187,23 +115,23 @@ module Sidekiq
             root: assdir,
             cascade: true
           }
-          assetprops[:header_rules] = [[:all, {Rack::CACHE_CONTROL => "private, max-age=#{cache_for.to_i}"}]] if cache_for
+          assetprops[:header_rules] = [[:all, {"cache-control" => "private, max-age=#{cache_for.to_i}"}]] if cache_for
           middlewares << [[Rack::Static, assetprops], nil]
         end
       end
 
       yield self if block_given?
-      extension.registered(WebApplication)
+      extension.registered(Web::Application)
     end
 
     private
 
     def build
       klass = self.class
-      m = middlewares
+      m = klass.middlewares
 
       rules = []
-      rules = [[:all, {Rack::CACHE_CONTROL => "private, max-age=86400"}]] unless ENV["SIDEKIQ_WEB_TESTING"]
+      rules = [[:all, {"cache-control" => "private, max-age=86400"}]] unless ENV["SIDEKIQ_WEB_TESTING"]
 
       ::Rack::Builder.new do
         use Rack::Static, urls: ["/stylesheets", "/images", "/javascripts"],
@@ -212,17 +140,13 @@ module Sidekiq
           header_rules: rules
         m.each { |middleware, block| use(*middleware, &block) }
         use Sidekiq::Web::CsrfProtection unless $TESTING
-        run WebApplication.new(klass)
+        run Sidekiq::Web::Application.new(klass)
       end
     end
   end
-
-  Sidekiq::WebApplication.helpers WebHelpers
-  Sidekiq::WebApplication.helpers Sidekiq::Paginator
-
-  Sidekiq::WebAction.class_eval <<-RUBY, Web::LAYOUT, -1 # standard:disable Style/EvalWithLocation
-    def _render
-      #{ERB.new(File.read(Web::LAYOUT)).src}
-    end
-  RUBY
 end
+
+require "sidekiq/web/router"
+require "sidekiq/web/action"
+require "sidekiq/web/application"
+require "sidekiq/web/csrf_protection"
