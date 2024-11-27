@@ -44,19 +44,11 @@ module Sidekiq
       store_url: "https://api.profiler.firefox.com/compressed-store"
     }
 
-    if Gem::Version.new(Rack::RELEASE) < Gem::Version.new("3")
-      CONTENT_LANGUAGE = "Content-Language"
-      CONTENT_SECURITY_POLICY = "Content-Security-Policy"
-      LOCATION = "Location"
-      X_CASCADE = "X-Cascade"
-      X_CONTENT_TYPE_OPTIONS = "X-Content-Type-Options"
-    else
-      CONTENT_LANGUAGE = "content-language"
-      CONTENT_SECURITY_POLICY = "content-security-policy"
-      LOCATION = "location"
-      X_CASCADE = "x-cascade"
-      X_CONTENT_TYPE_OPTIONS = "x-content-type-options"
-    end
+    CONTENT_LANGUAGE = "content-language"
+    CONTENT_SECURITY_POLICY = "content-security-policy"
+    LOCATION = "location"
+    X_CASCADE = "x-cascade"
+    X_CONTENT_TYPE_OPTIONS = "x-content-type-options"
 
     class << self
       def settings
