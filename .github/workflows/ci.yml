@@ -24,7 +24,7 @@ jobs:
           { image: "redis", version: "6.2" },
           { image: "redis", version: "7.2.4" }, # last BSD-licensed version
           { image: "valkey/valkey", version: "8" },
-          { image: "dragonflydb/dragonfly", version: "newest" }
+          { image: "docker.dragonflydb.io/dragonflydb/dragonfly", version: "1" }
         ]
 
     steps:
