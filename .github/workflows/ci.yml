@@ -1,4 +1,4 @@
-name: Sidekiq CI
+name: CI
 
 on:
   push:
@@ -23,7 +23,8 @@ jobs:
           { image: "redis", version: "6.2" },
           { image: "redis", version: "7.2.4" }, # last BSD-licensed version
           { image: "valkey/valkey", version: "8" },
-          { image: "docker.dragonflydb.io/dragonflydb/dragonfly", version: "1" }
+          # dragonfly doesn't publish any version tags aside from "latest", seems bad man
+          { image: "docker.dragonflydb.io/dragonflydb/dragonfly", version: "latest" } 
         ]
 
     steps:
