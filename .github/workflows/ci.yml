@@ -21,8 +21,8 @@ jobs:
       matrix:
         ruby: ["3.2", "3.3", "3.4"]
         database: [
-          { image: "redis/redis-stack-server", version: "6" },
-          { image: "redis/redis-stack-server", version: "7" },
+          { image: "redis", version: "6.2" },
+          { image: "redis", version: "7.2.4" }, # last BSD-licensed version
           { image: "valkey/valkey", version: "8" },
           { image: "dragonflydb/dragonfly", version: "newest" }
         ]
