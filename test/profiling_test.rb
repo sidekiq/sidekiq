@@ -9,6 +9,7 @@ describe "profiling" do
   before do
     @config = reset!
 
+    Sidekiq::Web.middlewares.clear
     # Ensure we don't touch external systems in our test suite
     Sidekiq::Web::PROFILE_OPTIONS.clear
     Sidekiq::Web::PROFILE_OPTIONS[:view_url] = "https://localhost/public/%s"
