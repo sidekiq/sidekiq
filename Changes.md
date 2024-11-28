@@ -5,9 +5,13 @@
 HEAD / main
 ----------
 
-- **NEW FEATURE** Job Profiling is now supported with [Vernier](https://vernier.prof).
+- **NEW FEATURE** Job Profiling is now supported with [Vernier](https://vernier.prof)
+  which makes it really easy to performance tune your slow jobs.
   The Web UI contains a new **Profiles** tab to view any collected profile data.
   Please read the new [Profiling](https://github.com/sidekiq/sidekiq/wiki/Profiling) wiki page for details.
+- Default error logging has been modified to use Ruby's `Exception#detailed_message` and `#full_message` APIs.
+- CI now runs against Redis, Dragonfly and Valkey.
+- The Web UI's language picker now shows options in the native language
 
 HEAD / 7-x
 ----------
