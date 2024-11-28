@@ -2,12 +2,17 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD (main branch is now 8.0-pre)
+HEAD / main
 ----------
 
 - **NEW FEATURE** Job Profiling is now supported with [Vernier](https://vernier.prof).
   The Web UI contains a new **Profiles** tab to view any collected profile data.
   Please read the new [Profiling](https://github.com/sidekiq/sidekiq/wiki/Profiling) wiki page for details.
+
+HEAD / 7-x
+----------
+
+- Fix dead filtering [#6508]
 
 7.3.6
 ----------

@@ -4,6 +4,14 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+7.3.4
+---------
+
+- Add new `distribution` and `distribution_time` metrics [#6534]
+- `time` metrics no longer hold a Statsd connection while timing the block
+- Fix queue pause affecting all applications using the same Redis instance,
+  even if using different DB indexes. [#6528]
+
 7.3.3
 ---------
 
