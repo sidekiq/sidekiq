@@ -9,6 +9,7 @@ describe "profiling" do
   before do
     @config = reset!
 
+    Sidekiq::Web.middlewares.clear
     # Ensure we don't touch external systems in our test suite
     Sidekiq::Web::PROFILE_OPTIONS.clear
     Sidekiq::Web::PROFILE_OPTIONS[:view_url] = "https://localhost/public/%s"
@@ -44,7 +45,7 @@ describe "profiling" do
     assert_equal %w[bob-5678 mike-1234], profiles.map(&:key)
     assert_equal %w[5678 1234], profiles.map(&:jid)
 
-    header = "\x1f\x8b".force_encoding("BINARY")
+    header = +"\x1f\x8b".force_encoding("BINARY")
     profiles.each do |pr|
       assert pr.started_at
       assert_operator pr.size, :>, 2
