@@ -1,5 +1,6 @@
 # elements like %{queue} are variables and should not be translated
 fa:
+  LanguageName: فارسى
   Actions: اعمال
   AddToQueue: افزودن به صف
   AreYouSure: آیا مطمعن هستید?

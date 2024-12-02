@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+    name: "${{ matrix.ruby }} / ${{ matrix.database.image }}-${{ matrix.database.version }}"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ["ruby-3.2", "ruby-3.3", "ruby-3.4"]
+        database: [
+          { image: "redis", version: "6.2" },
+          { image: "redis", version: "7.2.4" }, # last BSD-licensed version
+          { image: "valkey/valkey", version: "8" },
+          # dragonfly doesn't publish any version tags aside from "latest", seems bad man
+          { image: "docker.dragonflydb.io/dragonflydb/dragonfly", version: "latest" } 
+        ]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Ruby ${{ matrix.ruby }}
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+        ruby-version: ${{ matrix.ruby }}
+
+    - name: Start Redis
+      uses: supercharge/redis-github-action@1.8.0
+      with:
+        redis-image: ${{ matrix.database.image }}
+        redis-version: ${{ matrix.database.version }}
+
+    - name: Run tests
+      run: bundle exec rake test

@@ -1,5 +1,6 @@
 # elements like %{queue} are variables and should not be translated
 ta:
+  LanguageName: தமிழ்
   Actions: செயல்கள்
   AddToQueue: வரிசையில் சேர்
   AreYouSure: நீங்கள் உறுதியாக இருக்கிறீர்களா?
