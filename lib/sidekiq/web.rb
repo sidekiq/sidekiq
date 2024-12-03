@@ -50,6 +50,11 @@ module Sidekiq
     end
 
     class << self
+      # Forward compatibility with 8.0
+      def configure
+        yield self
+      end
+
       def settings
         self
       end
