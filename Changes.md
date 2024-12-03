@@ -6,6 +6,7 @@ HEAD
 ----------
 
 - Backport `Sidekiq::Web.configure` for compatibility with 8.0 [#6532]
+- Backport `url_params(key)` and `route_params(key)` for compatibility with 8.0 [#6532]
 - Fix dead filtering [#6508]
 
 7.3.6

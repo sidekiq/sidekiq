@@ -184,7 +184,7 @@ module Sidekiq
     end
 
     post "/morgue" do
-      redirect(request.path) unless params["key"]
+      redirect(request.path) unless url_params("key")
 
       params["key"].each do |key|
         job = Sidekiq::DeadSet.new.fetch(*parse_params(key)).first
@@ -207,7 +207,7 @@ module Sidekiq
     end
 
     post "/morgue/:key" do
-      key = route_params[:key]
+      key = route_params(:key)
       halt(404) unless key
 
       job = Sidekiq::DeadSet.new.fetch(*parse_params(key)).first
@@ -217,7 +217,7 @@ module Sidekiq
     end
 
     get "/retries" do
-      x = params[:substr]
+      x = url_params("substr")
 
       if x && x != ""
         @retries = search(Sidekiq::RetrySet.new, x)

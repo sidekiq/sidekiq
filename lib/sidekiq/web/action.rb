@@ -27,6 +27,7 @@ module Sidekiq
       redirect current_location
     end
 
+    # deprecated, will warn in 8.0
     def params
       indifferent_hash = Hash.new { |hash, key| hash[key.to_s] if Symbol === key }
 
@@ -36,8 +37,19 @@ module Sidekiq
       indifferent_hash
     end
 
-    def route_params
-      env[WebRouter::ROUTE_PARAMS]
+    # Use like `url_params("page")` within your action blocks
+    def url_params(key)
+      request.params[key]
+    end
+
+    # Use like `route_params(:name)` within your action blocks
+    # key is required in 8.0, nil is only used for backwards compatibility
+    def route_params(key = nil)
+      if key
+        env[WebRouter::ROUTE_PARAMS][key]
+      else
+        env[WebRouter::ROUTE_PARAMS]
+      end
     end
 
     def session
