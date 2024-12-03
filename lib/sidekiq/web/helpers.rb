@@ -204,7 +204,7 @@ module Sidekiq
     end
 
     def sort_direction_label
-      (params[:direction] == "asc") ? "&uarr;" : "&darr;"
+      (url_params("direction") == "asc") ? "&uarr;" : "&darr;"
     end
 
     def workset
@@ -271,8 +271,8 @@ module Sidekiq
       "#{score}-#{job["jid"]}"
     end
 
-    def parse_params(params)
-      score, jid = params.split("-", 2)
+    def parse_key(key)
+      score, jid = key.split("-", 2)
       [score.to_f, jid]
     end
 
@@ -282,11 +282,11 @@ module Sidekiq
     def qparams(options)
       stringified_options = options.transform_keys(&:to_s)
 
-      to_query_string(params.merge(stringified_options))
+      to_query_string(request.params.merge(stringified_options))
     end
 
-    def to_query_string(params)
-      params.map { |key, value|
+    def to_query_string(hash)
+      hash.map { |key, value|
         SAFE_QPARAMS.include?(key) ? "#{key}=#{CGI.escape(value.to_s)}" : next
       }.compact.join("&")
     end

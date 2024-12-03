@@ -44,15 +44,22 @@ module Sidekiq
       end
 
       # stuff after ? or form input
-      def params
-        # uses string keys, no symbols!
-        request.params
+      # uses String keys, no Symbols!
+      def url_params(key)
+        warn { "URL parameter `#{key}` should be accessed via String, not Symbol (at #{caller(3..3).first})" } if key.is_a?(Symbol)
+        request.params[key.to_s]
       end
 
       # variables embedded in path, `/metrics/:name`
-      def route_params
-        # symbol'd keys
-        env["rack.route_params"]
+      # uses Symbol keys, no Strings!
+      def route_params(key)
+        warn { "Route parameter `#{key}` should be accessed via Symbol, not String (at #{caller(3..3).first})" } if key.is_a?(String)
+        env["rack.route_params"][key.to_sym]
+      end
+
+      def params
+        warn { "Direct access to Rack parameters is discouraged, use `url_params` or `route_params` (at #{caller(3..3).first})" }
+        request.params
       end
 
       def session
@@ -99,6 +106,10 @@ module Sidekiq
       end
 
       private
+
+      def warn
+        Sidekiq.logger.warn yield
+      end
 
       def _erb(file, locals)
         locals&.each { |k, v| define_singleton_method(k) { v } unless singleton_methods.include? k }
