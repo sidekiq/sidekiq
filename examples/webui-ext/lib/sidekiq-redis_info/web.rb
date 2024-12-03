@@ -21,11 +21,13 @@ end
 # This new way allows you to serve your own static assets
 # and provide localizations for any strings in your extension.
 
-Sidekiq::Web.register(SidekiqExt::RedisInfo::Web,
-  name: "redis_info",
-  tab: ["Redis"],              # The name on your Tab(s)
-  index: ["redis_info"],       # The path to the root page(s) of your extension within the Web UI, usually "/sidekiq/" + index
-  root_dir: SidekiqExt::RedisInfo::Web::ROOT,
-  asset_paths: ["css", "js"]) do |app|   # Paths within {root}/assets/{name} to serve static assets
-  # you can add your own middleware or additional settings here
+Sidekiq::Web.configure do |config|
+  config.register(SidekiqExt::RedisInfo::Web,
+    name: "redis_info",
+    tab: ["Redis"],              # The name on your Tab(s)
+    index: ["redis_info"],       # The path to the root page(s) of your extension within the Web UI, usually "/sidekiq/" + index
+    root_dir: SidekiqExt::RedisInfo::Web::ROOT,
+    asset_paths: ["css", "js"]) do |app|   # Paths within {root}/assets/{name} to serve static assets
+    # you can add your own middleware or additional settings here
+  end
 end

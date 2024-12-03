@@ -22,6 +22,10 @@ class Helpers
     ["web/locales"]
   end
 
+  def config
+    self
+  end
+
   def env
     @thehash
   end

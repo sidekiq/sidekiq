@@ -1,6 +1,6 @@
 <div>
   <form method="get" class="form-inline" action='<%= root_path %><%= which %>'>
     <label for="substr"><%= t('Filter') %></label>
-    <input class="search form-control" type="search" name="substr" value="<%= h params[:substr] %>" placeholder="<%= t('AnyJobContent') %>"/>
+    <input class="search form-control" type="search" name="substr" value="<%= h url_params("substr") %>" placeholder="<%= t('AnyJobContent') %>"/>
   </form>
 </div>

@@ -3,6 +3,7 @@
 require_relative "helper"
 require "sidekiq/web"
 require "rack/test"
+require "rack/session"
 
 class WebJob
   include Sidekiq::Job
@@ -34,14 +35,17 @@ describe Sidekiq::Web do
 
   before do
     @config = reset!
-    app.middlewares.clear
-    app.use Rack::Session::Cookie, secrets: "35c5108120cb479eecb4e947e423cad6da6f38327cf0ebb323e30816d74fa01f"
+
+    Sidekiq::Web.configure do |c|
+      c.middlewares.clear
+      c.use Rack::Session::Cookie, secrets: "35c5108120cb479eecb4e947e423cad6da6f38327cf0ebb323e30816d74fa01f"
+    end
   end
 
   it "passes on unexpected methods" do
     patch "/"
     assert_equal 404, last_response.status
-    assert_equal "pass", last_response.headers[Sidekiq::Web::X_CASCADE]
+    assert_equal "pass", last_response.headers["x-cascade"]
   end
 
   it "can show text with any locales" do
@@ -326,13 +330,17 @@ describe Sidekiq::Web do
   end
 
   it "displays custom job info" do
-    Sidekiq::Web.custom_job_info_rows << LogDisplayer.new
+    Sidekiq::Web.configure do |c|
+      c.custom_job_info_rows << LogDisplayer.new
+    end
     params = add_retry
     get "/retries/#{job_params(*params)}"
     assert_equal 200, last_response.status
     assert_match(/https:\/\/example.com\/logs\//, last_response.body)
   ensure
-    Sidekiq::Web.custom_job_info_rows.clear
+    Sidekiq::Web.configure do |c|
+      c.custom_job_info_rows.clear
+    end
   end
 
   it "can display a single retry" do
@@ -613,9 +621,9 @@ describe Sidekiq::Web do
 
   describe "custom locales" do
     before do
-      Sidekiq::Web.settings.locales << File.join(File.dirname(__FILE__), "fixtures")
+      Sidekiq::Web.locales << File.join(File.dirname(__FILE__), "fixtures")
       Sidekiq::Web.tabs["Custom Tab"] = "/custom"
-      Sidekiq::WebApplication.get("/custom") do
+      Sidekiq::Web::Application.get("/custom") do
         clear_caches # ugly hack since I can't figure out how to access WebHelpers outside of this context
         t("translated_text")
       end
@@ -623,7 +631,7 @@ describe Sidekiq::Web do
 
     after do
       Sidekiq::Web.tabs.delete "Custom Tab"
-      Sidekiq::Web.settings.locales.pop
+      Sidekiq::Web.locales.pop
     end
 
     it "can show user defined tab with custom locales" do
@@ -890,12 +898,9 @@ describe Sidekiq::Web do
   describe "basic auth" do
     include Rack::Test::Methods
 
-    def app
-      app = Sidekiq::Web.new
-      app.use(Rack::Auth::Basic) { |user, pass| user == "a" && pass == "b" }
-      app.use(Rack::Session::Cookie, secret: SecureRandom.hex(32))
-
-      app
+    before do
+      Sidekiq::Web.use(Rack::Auth::Basic) { |user, pass| user == "a" && pass == "b" }
+      Sidekiq::Web.use(Rack::Session::Cookie, secret: SecureRandom.hex(32))
     end
 
     it "requires basic authentication" do
@@ -912,51 +917,6 @@ describe Sidekiq::Web do
       assert_equal 200, last_response.status
       get "/?days=1000000"
       assert_equal 401, last_response.status
-    end
-  end
-
-  describe "custom session" do
-    include Rack::Test::Methods
-
-    def app
-      app = Sidekiq::Web.new
-      app.use Rack::Session::Cookie, secret: session_secret, host: "nicehost.org"
-      app
-    end
-
-    it "requires uses session options" do
-      get "/"
-
-      session_options = last_request.env["rack.session"].options
-
-      assert_equal session_secret, session_options[:secret]
-      assert_equal "nicehost.org", session_options[:host]
-    end
-  end
-
-  describe "redirecting in before" do
-    include Rack::Test::Methods
-
-    before do
-      Sidekiq::WebApplication.before { Thread.current[:some_setting] = :before }
-      Sidekiq::WebApplication.before { redirect "/" }
-      Sidekiq::WebApplication.after { Thread.current[:some_setting] = :after }
-    end
-
-    after do
-      Sidekiq::WebApplication.remove_instance_variable(:@befores)
-      Sidekiq::WebApplication.remove_instance_variable(:@afters)
-    end
-
-    def app
-      app = Sidekiq::Web.new
-      app.use Rack::Session::Cookie, secret: session_secret, host: "nicehost.org"
-      app
-    end
-
-    it "allows afters to run" do
-      get "/"
-      assert_equal :after, Thread.current[:some_setting]
     end
   end
 
