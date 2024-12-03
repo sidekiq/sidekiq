@@ -6,6 +6,7 @@ require "rack/builder"
 require "rack/static"
 require "sidekiq"
 require "sidekiq/api"
+require "sidekiq/web/config"
 
 module Sidekiq
   class Web
@@ -26,26 +27,28 @@ module Sidekiq
       "Profiles" => "profiles"
     }
 
-    # By default we support direct uploads to p.f.c since the UI is a JS SPA
-    # and very difficult for us to vendor or provide ourselves. If you are worried
-    # about data security and wish to self-host, you can change these URLs.
-    PROFILE_OPTIONS = {
-      view_url: "https://profiler.firefox.com/public/%s",
-      store_url: "https://api.profiler.firefox.com/compressed-store"
-    }
+    @@config = Sidekiq::Web::Config.new
 
     class << self
-      def tabs
-        @tabs ||= DEFAULT_TABS.dup
+      def configure
+        if block_given?
+          yield @@config
+        else
+          @@config
+        end
       end
 
-      def locales
-        @locales ||= LOCALES
+      def app_url=(url)
+        @@config.app_url = url
       end
 
-      def views
-        @views ||= VIEWS
-      end
+      def tabs = @@config.tabs
+
+      def locales = @@config.locales
+
+      def views = @@config.views
+
+      def custom_job_info_rows = @@config.custom_job_info_rows
 
       def redis_pool
         @pool || Sidekiq.default_configuration.redis_pool
@@ -55,19 +58,15 @@ module Sidekiq
         @pool = pool
       end
 
-      def middlewares
-        @middlewares ||= []
-      end
+      def middlewares = @@config.middlewares
 
-      def use(*args, &block)
-        middlewares << [args, block]
+      def use(*args, &block) = @@config.middlewares << [args, block]
+
+      def register(*args, **kw, &block)
+        puts "`Sidekiq::Web.register` is deprecated, use `Sidekiq::Web.configure {|cfg| cfg.register(...) }`"
+        @@config.register(*args, **kw, &block)
       end
-      attr_accessor :app_url
     end
-
-    # def use(*args, &) = self.class.use(*args, &)
-
-    # def middlewares = self.class.middlewares
 
     # Allow user to say
     #   run Sidekiq::Web
@@ -78,66 +77,26 @@ module Sidekiq
       @inst.call(env)
     end
 
+    def self.reset
+      @@config = Sidekiq::Web::Config.new
+    end
+
     def call(env)
+      env[:web_config] = Sidekiq::Web.configure
       env[:csp_nonce] = SecureRandom.base64(16)
       env[:redis_pool] = self.class.redis_pool
       app.call(env)
     end
 
     def app
-      @app ||= build
-    end
-
-    # Register a class as a Sidekiq Web UI extension. The class should
-    # provide one or more tabs which map to an index route. Options:
-    #
-    # @param extension [Class] Class which contains the HTTP actions, required
-    # @param name [String] the name of the extension, used to namespace assets
-    # @param tab [String | Array] labels(s) of the UI tabs
-    # @param index [String | Array] index route(s) for each tab
-    # @param root_dir [String] directory location to find assets, locales and views, typically `web/` within the gemfile
-    # @param asset_paths [Array] one or more directories under {root}/assets/{name} to be publicly served, e.g. ["js", "css", "img"]
-    # @param cache_for [Integer] amount of time to cache assets, default one day
-    #
-    # Web extensions will have a root `web/` directory with `locales/`, `assets/`
-    # and `views/` subdirectories.
-    def self.register(extension, name:, tab:, index:, root_dir: nil, cache_for: 86400, asset_paths: nil)
-      tab = Array(tab)
-      index = Array(index)
-      tab.zip(index).each do |tab, index|
-        tabs[tab] = index
-      end
-      if root_dir
-        locdir = File.join(root_dir, "locales")
-        locales << locdir if File.directory?(locdir)
-
-        if asset_paths && name
-          # if you have {root}/assets/{name}/js/scripts.js
-          # and {root}/assets/{name}/css/styles.css
-          # you would pass in:
-          #   asset_paths: ["js", "css"]
-          # See script_tag and style_tag in web/helpers.rb
-          assdir = File.join(root_dir, "assets")
-          assurls = Array(asset_paths).map { |x| "/#{name}/#{x}" }
-          assetprops = {
-            urls: assurls,
-            root: assdir,
-            cascade: true
-          }
-          assetprops[:header_rules] = [[:all, {"cache-control" => "private, max-age=#{cache_for.to_i}"}]] if cache_for
-          middlewares << [[Rack::Static, assetprops], nil]
-        end
-      end
-
-      yield self if block_given?
-      extension.registered(Web::Application)
+      @app ||= build(@@config)
     end
 
     private
 
-    def build
-      klass = self.class
-      m = klass.middlewares
+    def build(cfg)
+      cfg.freeze
+      m = cfg.middlewares
 
       rules = []
       rules = [[:all, {"cache-control" => "private, max-age=86400"}]] unless ENV["SIDEKIQ_WEB_TESTING"]
@@ -149,7 +108,7 @@ module Sidekiq
           header_rules: rules
         m.each { |middleware, block| use(*middleware, &block) }
         use Sidekiq::Web::CsrfProtection unless $TESTING
-        run Sidekiq::Web::Application.new(klass)
+        run Sidekiq::Web::Application.new(self.class)
       end
     end
   end

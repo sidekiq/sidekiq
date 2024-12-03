@@ -75,10 +75,12 @@ module Sidekiq
         end
       end
 
+      EMPTY = {}.freeze
+
       def match(request_method, path)
         case matcher
         when String
-          {} if path == matcher
+          EMPTY if path == matcher
         else
           path_match = path.match(matcher)
           path_match&.named_captures&.transform_keys(&:to_sym)

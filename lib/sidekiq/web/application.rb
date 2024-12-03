@@ -59,11 +59,11 @@ module Sidekiq
       end
 
       get "/metrics" do
-        x = params[:substr]
+        x = params["substr"]
         class_filter = (x.nil? || x == "") ? nil : Regexp.new(Regexp.escape(x), Regexp::IGNORECASE)
 
         q = Sidekiq::Metrics::Query.new
-        @period = h((params[:period] || "")[0..1])
+        @period = h((params["period"] || "")[0..1])
         @periods = METRICS_PERIODS
         minutes = @periods.fetch(@period, @periods.values.first)
         @query_result = q.top_jobs(minutes: minutes, class_filter: class_filter)
@@ -73,7 +73,7 @@ module Sidekiq
 
       get "/metrics/:name" do
         @name = route_params[:name]
-        @period = h((params[:period] || "")[0..1])
+        @period = h((params["period"] || "")[0..1])
         q = Sidekiq::Metrics::Query.new
         @periods = METRICS_PERIODS
         minutes = @periods.fetch(@period, @periods.values.first)
@@ -149,7 +149,7 @@ module Sidekiq
       end
 
       get "/morgue" do
-        x = params[:substr]
+        x = params["substr"]
 
         if x && x != ""
           @dead = search(Sidekiq::DeadSet.new, x)
@@ -209,7 +209,7 @@ module Sidekiq
       end
 
       get "/retries" do
-        x = params[:substr]
+        x = params["substr"]
 
         if x && x != ""
           @retries = search(Sidekiq::RetrySet.new, x)
@@ -270,7 +270,7 @@ module Sidekiq
       end
 
       get "/scheduled" do
-        x = params[:substr]
+        x = params["substr"]
 
         if x && x != ""
           @scheduled = search(Sidekiq::ScheduledSet.new, x)
@@ -347,7 +347,8 @@ module Sidekiq
       end
 
       get "/profiles/:key" do
-        return redirect_to "#{root_path}profiles" unless Web::PROFILE_OPTIONS[:store_url]
+        store = config[:profile_store_url]
+        return redirect_to "#{root_path}profiles" unless store
 
         key = route_params[:key]
         sid = Sidekiq.redis { |c| c.hget(key, "sid") }
@@ -355,7 +356,7 @@ module Sidekiq
         unless sid
           require "net/http"
           data = Sidekiq.redis { |c| c.hget(key, "data") }
-          resp = Net::HTTP.post(URI(Web::PROFILE_OPTIONS[:store_url]),
+          resp = Net::HTTP.post(URI(store),
             data,
             {"Accept" => "application/vnd.firefox-profiler+json;version=1.0",
              "User-Agent" => "Sidekiq #{Sidekiq::VERSION} job profiler"})
@@ -363,7 +364,7 @@ module Sidekiq
           sid = Sidekiq.load_json(Base64.decode64(resp.body.split(".")[1]))["profileToken"]
           Sidekiq.redis { |c| c.hset(key, "sid", sid) }
         end
-        url = Web::PROFILE_OPTIONS[:view_url] % sid
+        url = config[:profile_view_url] % sid
         redirect_to url
       end
 

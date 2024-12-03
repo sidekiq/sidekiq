@@ -35,8 +35,11 @@ describe Sidekiq::Web do
 
   before do
     @config = reset!
-    Sidekiq::Web.middlewares.clear
-    Sidekiq::Web.use Rack::Session::Cookie, secrets: "35c5108120cb479eecb4e947e423cad6da6f38327cf0ebb323e30816d74fa01f"
+
+    Sidekiq::Web.configure do |c|
+      c.middlewares.clear
+      c.use Rack::Session::Cookie, secrets: "35c5108120cb479eecb4e947e423cad6da6f38327cf0ebb323e30816d74fa01f"
+    end
   end
 
   it "passes on unexpected methods" do
@@ -324,6 +327,20 @@ describe Sidekiq::Web do
     assert_equal 200, last_response.status
     refute_match(/found/, last_response.body)
     assert_match(/HardJob/, last_response.body)
+  end
+
+  it "displays custom job info" do
+    Sidekiq::Web.configure do |c|
+      c.custom_job_info_rows << LogDisplayer.new
+    end
+    params = add_retry
+    get "/retries/#{job_params(*params)}"
+    assert_equal 200, last_response.status
+    assert_match(/https:\/\/example.com\/logs\//, last_response.body)
+  ensure
+    Sidekiq::Web.configure do |c|
+      c.custom_job_info_rows.clear
+    end
   end
 
   it "can display a single retry" do

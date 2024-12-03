@@ -4,6 +4,9 @@ require "erb"
 
 module Sidekiq
   class Web
+    ##
+    # These instance methods are available to all executing ERB
+    # templates.
     class Action
       attr_accessor :env, :block
 
@@ -11,6 +14,10 @@ module Sidekiq
         @_erb = false
         @env = env
         @block = block
+      end
+
+      def config
+        env[:web_config]
       end
 
       def request
@@ -38,11 +45,13 @@ module Sidekiq
 
       # stuff after ? or form input
       def params
+        # uses string keys, no symbols!
         request.params
       end
 
       # variables embedded in path, `/metrics/:name`
       def route_params
+        # symbol'd keys
         env["rack.route_params"]
       end
 

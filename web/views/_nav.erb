@@ -8,8 +8,8 @@
       </button>
       <div class="navbar-toggle collapsed navbar-livereload">
         <%= erb :_poll_link %>
-        <% if Sidekiq::Web.app_url %>
-          <a class="btn btn-inverse" href="<%= Sidekiq::Web.app_url %>"><%= t('BackToApp') %></a>
+        <% if config.app_url %>
+          <a class="btn btn-inverse" href="<%= config.app_url %>"><%= t('BackToApp') %></a>
         <% end %>
       </div>
       <a class="navbar-brand" href="<%= root_path %>">
@@ -20,7 +20,7 @@
 
     <div class="collapse navbar-collapse" id="navbar-menu">
       <ul class="nav navbar-nav" data-navbar="static">
-        <% Sidekiq::Web.tabs.each do |title, url| %>
+        <% config.tabs.each do |title, url| %>
           <% if url == '' %>
             <li class="<%= current_path == url ? 'active' : '' %>">
             <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
@@ -35,8 +35,8 @@
         <li class="navbar-livereload">
           <div class="poll-wrapper">
             <%= erb :_poll_link %>
-            <% if Sidekiq::Web.app_url %>
-              <a class="btn btn-inverse" href="<%= Sidekiq::Web.app_url %>"><%= t('BackToApp') %></a>
+            <% if config.app_url %>
+              <a class="btn btn-inverse" href="<%= config.app_url %>"><%= t('BackToApp') %></a>
             <% end %>
           </div>
         </li>
