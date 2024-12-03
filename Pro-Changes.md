@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD (8.0)
+---------
+
+- Sidekiq::Web internal refactoring [#6532]
+
 7.3.4
 ---------
 
