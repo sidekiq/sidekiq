@@ -59,6 +59,11 @@ module Sidekiq
         @pool = nil
       end
 
+      def reset!
+        @middlewares.clear
+        @custom_job_info_rows.clear
+      end
+
       def_delegators :@options, :[], :[]=, :fetch, :key?, :has_key?, :merge!, :dig
 
       def redis_pool

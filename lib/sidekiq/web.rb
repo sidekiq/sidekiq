@@ -77,8 +77,10 @@ module Sidekiq
       @inst.call(env)
     end
 
-    def self.reset
-      @@config = Sidekiq::Web::Config.new
+    # testing, internal use only
+    def self.reset!
+      @@config.reset!
+      @inst = nil
     end
 
     def call(env)
