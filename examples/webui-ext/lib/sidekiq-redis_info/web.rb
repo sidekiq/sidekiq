@@ -17,13 +17,13 @@ end
 # Sidekiq::Web.register(SidekiqExt::RedisInfo::Web)
 # Sidekiq::Web.tabs["Redis"] = "redis_info"
 
-# NEW API IN 7.3.0
+# NEW API IN 7.3
 # This new way allows you to serve your own static assets
 # and provide localizations for any strings in your extension.
 
 Sidekiq::Web.configure do |config|
-  config.register(SidekiqExt::RedisInfo::Web,
-    name: "redis_info",
+  config.register_extension(SidekiqExt::RedisInfo::Web,
+    name: "redis_info",          # name of the extension, no whitespace!
     tab: ["Redis"],              # The name on your Tab(s)
     index: ["redis_info"],       # The path to the root page(s) of your extension within the Web UI, usually "/sidekiq/" + index
     root_dir: SidekiqExt::RedisInfo::Web::ROOT,

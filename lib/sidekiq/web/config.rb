@@ -72,7 +72,7 @@ module Sidekiq
       # Register a class as a Sidekiq Web UI extension. The class should
       # provide one or more tabs which map to an index route. Options:
       #
-      # @param extension [Class] Class which contains the HTTP actions, required
+      # @param extclass [Class] Class which contains the HTTP actions, required
       # @param name [String] the name of the extension, used to namespace assets
       # @param tab [String | Array] labels(s) of the UI tabs
       # @param index [String | Array] index route(s) for each tab
@@ -82,7 +82,7 @@ module Sidekiq
       #
       # Web extensions will have a root `web/` directory with `locales/`, `assets/`
       # and `views/` subdirectories.
-      def register(extension, name:, tab:, index:, root_dir: nil, cache_for: 86400, asset_paths: nil)
+      def register_extension(extclass, name:, tab:, index:, root_dir: nil, cache_for: 86400, asset_paths: nil)
         tab = Array(tab)
         index = Array(index)
         tab.zip(index).each do |tab, index|
@@ -113,6 +113,7 @@ module Sidekiq
         yield self if block_given?
         extension.registered(Web::Application)
       end
+      alias_method :register, :register_extension
     end
   end
 end
