@@ -14,7 +14,7 @@ Rails to make background processing dead simple.
 Requirements
 -----------------
 
-- Redis: Redis 6.2+, Valkey 8.0+ or Dragonfly 1.13+
+- Redis: Redis 7.2+, Valkey 8.0+ or Dragonfly 1.13+
 - Ruby: MRI 3.2+ or JRuby 9.4+.
 
 Sidekiq 8.0 supports Rails 7.0+ but does not require it.
@@ -106,4 +106,4 @@ The license for Sidekiq Pro and Sidekiq Enterprise can be found in [COMM-LICENSE
 Author
 -----------------
 
-Mike Perham, [@getajobmike](https://ruby.social/@getajobmike) / [@sidekiq](https://ruby.social/@sidekiq), [https://www.mikeperham.com](https://www.mikeperham.com) / [https://www.contribsys.com](https://www.contribsys.com)
+Mike Perham, [bluesky](https://bsky.app/profile/mike.contribsys.com) / [mastodon](https://ruby.social/@getajobmike), [https://www.mikeperham.com](https://www.mikeperham.com) / [https://www.contribsys.com](https://www.contribsys.com)
