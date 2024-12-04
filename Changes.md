@@ -2,12 +2,12 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+7.3.7
 ----------
 
 - Backport `Sidekiq::Web.configure` for compatibility with 8.0 [#6532]
 - Backport `url_params(key)` and `route_params(key)` for compatibility with 8.0 [#6532]
-- Fix dead filtering [#6508]
+- Various fixes for UI filtering [#6508]
 
 7.3.6
 ----------
