@@ -111,7 +111,7 @@ module Sidekiq
       if within.nil?
         ::Rack::Utils.escape_html(jid)
       else
-        "<a href='#{root_path}filter/#{within}?substr=#{jid}'>#{::Rack::Utils.escape_html(jid)}</a>"
+        "<a href='#{root_path}#{within}?substr=#{jid}'>#{::Rack::Utils.escape_html(jid)}</a>"
       end
     end
 
@@ -184,7 +184,8 @@ module Sidekiq
 
     # sidekiq/sidekiq#3243
     def unfiltered?
-      yield unless env["PATH_INFO"].start_with?("/filter/")
+      s = url_params("substr")
+      yield unless s && s.size > 0
     end
 
     def get_locale

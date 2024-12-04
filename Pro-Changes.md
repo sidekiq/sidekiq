@@ -11,6 +11,7 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 - `time` metrics no longer hold a Statsd connection while timing the block
 - Fix queue pause affecting all applications using the same Redis instance,
   even if using different DB indexes. [#6528]
+- Fix broken filter links on Batch details page
 
 7.3.3
 ---------
