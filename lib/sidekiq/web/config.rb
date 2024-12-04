@@ -111,7 +111,7 @@ module Sidekiq
         end
 
         yield self if block_given?
-        extension.registered(Web::Application)
+        extclass.registered(Web::Application)
       end
       alias_method :register, :register_extension
     end
