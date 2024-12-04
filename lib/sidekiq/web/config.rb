@@ -56,7 +56,6 @@ module Sidekiq
         @tabs = DEFAULT_TABS.dup
         @middlewares = []
         @custom_job_info_rows = []
-        @pool = nil
       end
 
       def reset!
@@ -65,14 +64,6 @@ module Sidekiq
       end
 
       def_delegators :@options, :[], :[]=, :fetch, :key?, :has_key?, :merge!, :dig
-
-      def redis_pool
-        @pool || Sidekiq.default_configuration.redis_pool
-      end
-
-      def redis_pool=(pool)
-        @pool = pool
-      end
 
       def use(*args, &block)
         middlewares << [args, block]
