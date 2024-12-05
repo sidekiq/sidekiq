@@ -9,10 +9,9 @@ describe "profiling" do
   before do
     @config = reset!
 
-    Sidekiq::Web.middlewares.clear
     # Ensure we don't touch external systems in our test suite
-    Sidekiq::Web.reset!
     Sidekiq::Web.configure do |config|
+      config.middlewares.clear
       config[:profile_view_url] = "https://localhost/public/%s"
       config[:profile_store_url] = "https://localhost/store"
     end

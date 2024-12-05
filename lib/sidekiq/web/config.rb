@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "sidekiq/web/csrf_protection"
+
 module Sidekiq
   class Web
     ##
@@ -54,13 +56,8 @@ module Sidekiq
         @locales = LOCALES
         @views = VIEWS
         @tabs = DEFAULT_TABS.dup
-        @middlewares = []
+        @middlewares = [Sidekiq::Web::CsrfProtection]
         @custom_job_info_rows = []
-      end
-
-      def reset!
-        @middlewares.clear
-        @custom_job_info_rows.clear
       end
 
       def_delegators :@options, :[], :[]=, :fetch, :key?, :has_key?, :merge!, :dig

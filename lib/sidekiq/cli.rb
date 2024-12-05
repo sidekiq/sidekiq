@@ -3,7 +3,6 @@
 $stdout.sync = true
 
 require "yaml"
-require "singleton"
 require "optparse"
 require "erb"
 require "fileutils"
@@ -17,7 +16,6 @@ require "sidekiq/launcher"
 module Sidekiq # :nodoc:
   class CLI
     include Sidekiq::Component
-    include Singleton unless $TESTING
 
     attr_accessor :launcher
     attr_accessor :environment
@@ -29,6 +27,10 @@ module Sidekiq # :nodoc:
       setup_options(args)
       initialize_logger
       validate!
+    end
+
+    def self.instance
+      @instance ||= new
     end
 
     def jruby?

@@ -110,7 +110,6 @@ module Sidekiq
           cascade: true,
           header_rules: rules
         m.each { |middleware, block| use(*middleware, &block) }
-        use Sidekiq::Web::CsrfProtection unless $TESTING
         run Sidekiq::Web::Application.new(self.class)
       end
     end
@@ -120,4 +119,3 @@ end
 require "sidekiq/web/router"
 require "sidekiq/web/action"
 require "sidekiq/web/application"
-require "sidekiq/web/csrf_protection"
