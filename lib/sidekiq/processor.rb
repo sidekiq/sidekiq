@@ -67,7 +67,7 @@ module Sidekiq
       @thread ||= safe_thread("#{config.name}/processor", &method(:run))
     end
 
-    private unless $TESTING
+    private
 
     def run
       # By setting this thread-local, Sidekiq.redis will access +Sidekiq::Capsule#redis_pool+

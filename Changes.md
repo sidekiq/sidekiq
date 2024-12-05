@@ -13,10 +13,12 @@ HEAD / main
 - CI now runs against Redis, Dragonfly and Valkey.
 - The Web UI's language picker now shows options in the native language
 
-HEAD / 7-x
+7.3.7
 ----------
 
-- Fix dead filtering [#6508]
+- Backport `Sidekiq::Web.configure` for compatibility with 8.0 [#6532]
+- Backport `url_params(key)` and `route_params(key)` for compatibility with 8.0 [#6532]
+- Various fixes for UI filtering [#6508]
 
 7.3.6
 ----------

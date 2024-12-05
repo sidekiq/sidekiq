@@ -81,7 +81,7 @@ module Sidekiq
       ❤
     end
 
-    private unless $TESTING
+    private
 
     BEAT_PAUSE = 10
 

@@ -20,7 +20,6 @@ jobs:
       matrix:
         ruby: ["ruby-3.2", "ruby-3.3", "ruby-3.4"]
         database: [
-          { image: "redis", version: "6.2" },
           { image: "redis", version: "7.2.4" }, # last BSD-licensed version
           { image: "valkey/valkey", version: "8" },
           # dragonfly doesn't publish any version tags aside from "latest", seems bad man

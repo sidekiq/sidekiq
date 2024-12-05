@@ -67,9 +67,7 @@ module Sidekiq
         c.pipelined do |p|
           p.hsetnx(key, "cancelled", Time.now.to_i)
           p.hget(key, "cancelled")
-          p.expire(key, Sidekiq::Job::Iterable::STATE_TTL)
-          # TODO When Redis 7.2 is required
-          # p.expire(key, Sidekiq::Job::Iterable::STATE_TTL, "nx")
+          p.expire(key, Sidekiq::Job::Iterable::STATE_TTL, "nx")
         end
       end
       result.to_i

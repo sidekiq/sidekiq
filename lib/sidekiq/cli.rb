@@ -3,7 +3,6 @@
 $stdout.sync = true
 
 require "yaml"
-require "singleton"
 require "optparse"
 require "erb"
 require "fileutils"
@@ -17,7 +16,6 @@ require "sidekiq/launcher"
 module Sidekiq # :nodoc:
   class CLI
     include Sidekiq::Component
-    include Singleton unless $TESTING
 
     attr_accessor :launcher
     attr_accessor :environment
@@ -29,6 +27,10 @@ module Sidekiq # :nodoc:
       setup_options(args)
       initialize_logger
       validate!
+    end
+
+    def self.instance
+      @instance ||= new
     end
 
     def jruby?
@@ -74,7 +76,9 @@ module Sidekiq # :nodoc:
       # fire startup and start multithreading.
       info = @config.redis_info
       ver = Gem::Version.new(info["redis_version"])
-      raise "You are connecting to Redis #{ver}, Sidekiq requires Redis 6.2.0 or greater" if ver < Gem::Version.new("6.2.0")
+      if ver != "6.2.11" # TODO dragonfly
+        raise "You are connected to Redis #{ver}, Sidekiq requires Redis 7.2.0 or greater" if ver < Gem::Version.new("7.2.0")
+      end
 
       maxmemory_policy = info["maxmemory_policy"]
       if maxmemory_policy != "noeviction" && maxmemory_policy != ""
@@ -298,8 +302,8 @@ module Sidekiq # :nodoc:
 
       if File.directory?(@config[:require])
         require "rails"
-        if ::Rails::VERSION::MAJOR < 6
-          warn "Sidekiq #{Sidekiq::VERSION} only supports Rails 6+"
+        if ::Rails::VERSION::MAJOR < 7
+          warn "Sidekiq #{Sidekiq::VERSION} only supports Rails 7+"
         end
         require "sidekiq/rails"
         require File.expand_path("#{@config[:require]}/config/environment.rb")

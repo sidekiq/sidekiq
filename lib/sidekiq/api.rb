@@ -1222,10 +1222,8 @@ module Sidekiq
       @records = Sidekiq.redis do |c|
         # This throws away expired profiles
         c.zremrangebyscore("profiles", "-inf", Time.now.to_f.to_s)
-        # TODO I'd like to use "REV" here and avoid the reverse_each
-        # below but it's not working for me in 7.2.3
-        # c.zrange("profiles", 0, "+inf", "byscore", "rev")
-        c.zrange("profiles", 0, "+inf", "byscore")
+        # retreive records, newest to oldest
+        c.zrange("profiles", "+inf", 0, "byscore", "rev")
       end
     end
 
@@ -1243,7 +1241,7 @@ module Sidekiq
         end
       end
 
-      arrays.compact.map { |arr| ProfileRecord.new(arr) }.reverse_each(&block)
+      arrays.compact.map { |arr| ProfileRecord.new(arr) }.each(&block)
     end
   end
 
