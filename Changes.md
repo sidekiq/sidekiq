@@ -9,9 +9,11 @@ HEAD / main
   which makes it really easy to performance tune your slow jobs.
   The Web UI contains a new **Profiles** tab to view any collected profile data.
   Please read the new [Profiling](https://github.com/sidekiq/sidekiq/wiki/Profiling) wiki page for details.
+- Refactor Sidekiq::Web to simplify the code and improve security [#6532]
 - Default error logging has been modified to use Ruby's `Exception#detailed_message` and `#full_message` APIs.
 - CI now runs against Redis, Dragonfly and Valkey.
 - The Web UI's language picker now shows options in the native language
+- Remove global variable usage within the codebase
 
 7.3.7
 ----------
