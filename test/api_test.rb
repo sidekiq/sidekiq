@@ -51,6 +51,7 @@ describe "API" do
       assert_equal 0, s.failed
       assert_equal 0, s.enqueued
       assert_equal 0, s.default_queue_latency
+      assert_kind_of Float, s.default_queue_latency
       assert_equal 0, s.workers_size
     end
 
@@ -244,6 +245,7 @@ describe "API" do
       q = Sidekiq::Queue.new
       assert_equal 0, q.size
       assert_equal 0, q.latency
+      assert_kind_of Float, q.latency
     end
 
     before do
