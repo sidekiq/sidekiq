@@ -105,7 +105,7 @@ module Sidekiq
         thence = job["enqueued_at"] || now
         now - thence
       else
-        0
+        0.0
       end
 
       @stats = {
@@ -265,7 +265,7 @@ module Sidekiq
       entry = Sidekiq.redis { |conn|
         conn.lindex(@rname, -1)
       }
-      return 0 unless entry
+      return 0.0 unless entry
       job = Sidekiq.load_json(entry)
       now = Time.now.to_f
       thence = job["enqueued_at"] || now
