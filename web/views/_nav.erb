@@ -10,7 +10,7 @@
 
     <div class="collapse navbar-collapse" id="navbar-menu">
       <ul class="navbar-nav">
-        <% Sidekiq::Web.default_tabs.each do |title, url| %>
+        <% config.tabs.each do |title, url| %>
           <% if url == '' %>
             <li class="nav-item">
             <a href="<%= root_path %><%= url %>" class="nav-link <%= current_path == url ? 'active' : '' %>"><%= t(title) %></a>
@@ -21,22 +21,15 @@
             </li>
           <% end %>
         <% end %>
-
-        <% Sidekiq::Web.custom_tabs.each do |title, url| %>
-          <li class="nav-item" data-navbar="custom-tab">
-            <a href="<%= root_path %><%= url %>" class="nav-link <%= current_path.start_with?(url) ? 'active' : '' %>"><%= t(title) %></a>
-          </li>
-        <% end %>
-
       </ul>
-        <div class="nav-text navbar-livereload">
-          <div class="poll-wrapper">
-            <%= erb :_poll_link %>
-            <% if Sidekiq::Web.app_url %>
-              <a class="btn btn-inverse" href="<%= Sidekiq::Web.app_url %>"><%= t('BackToApp') %></a>
-            <% end %>
-          </div>
+      <div class="nav-text navbar-livereload">
+        <div class="poll-wrapper">
+          <%= erb :_poll_link %>
+          <% if config.app_url %>
+            <a class="btn btn-inverse" href="<%= config.app_url %>"><%= t('BackToApp') %></a>
+          <% end %>
         </div>
+      </div>
     </div>
   </div>
 </div>

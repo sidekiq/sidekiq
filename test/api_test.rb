@@ -51,6 +51,7 @@ describe "API" do
       assert_equal 0, s.failed
       assert_equal 0, s.enqueued
       assert_equal 0, s.default_queue_latency
+      assert_kind_of Float, s.default_queue_latency
       assert_equal 0, s.workers_size
     end
 
@@ -244,6 +245,7 @@ describe "API" do
       q = Sidekiq::Queue.new
       assert_equal 0, q.size
       assert_equal 0, q.latency
+      assert_kind_of Float, q.latency
     end
 
     before do
@@ -642,10 +644,6 @@ describe "API" do
       w.each do |p, x, work|
         assert_equal key, p
         assert_equal "1234", x
-        assert_equal "default", work["queue"]
-        assert_equal("{}", work["payload"])
-        assert_equal Time.now.year, Time.at(work["run_at"]).year
-
         assert_equal "{}", work.payload
         assert_equal({}, work.job.item)
         assert_equal(Time.now.year, work.run_at.year)
@@ -724,13 +722,6 @@ describe "API" do
       assert_equal 1, ps.size
       assert_equal 1, ps.to_a.size
     end
-
-    def add_retry(jid = "bob", at = Time.now.to_f)
-      payload = Sidekiq.dump_json("class" => "ApiJob", "args" => [1, "mike"], "queue" => "default", "jid" => jid, "retry_count" => 2, "failed_at" => Time.now.to_f, "error_backtrace" => ["line1", "line2"])
-      @cfg.redis do |conn|
-        conn.zadd("retry", at.to_s, payload)
-      end
-    end
   end
 
   describe "dead set" do
@@ -783,5 +774,101 @@ describe "API" do
       assert_equal 1, ds.size
       assert_equal 1, death_handler_call_count
     end
+
+    it "can retry and kill all safely" do
+      dcount = 1000
+      hash = Sidekiq.default_configuration
+      hash[:dead_max_jobs] = dcount
+
+      dcount.times do
+        add_dead
+      end
+      rcount = 500
+      rcount.times do
+        add_retry
+      end
+
+      q = Sidekiq::Queue.new
+      ds = Sidekiq::DeadSet.new
+      rs = Sidekiq::RetrySet.new
+      assert_equal dcount, ds.size
+      assert_equal rcount, rs.size
+
+      ds.retry_all
+      assert_equal 0, ds.size
+      assert_equal dcount, q.size
+
+      timing("kill_all") { rs.kill_all }
+      assert_equal rcount, ds.size
+      assert_equal 0, rs.size
+    end
+  end
+
+  describe "profiling" do
+    it "can show profile records" do
+      ps = Sidekiq::ProfileSet.new
+      assert_equal 0, ps.size
+
+      before = Time.now
+      add_profile(1, "mike", "123")
+      add_profile(2, "mike", "456")
+      add_profile(3, "fred", "789")
+      assert_equal 0, ps.size
+      ps = Sidekiq::ProfileSet.new
+      assert_equal 3, ps.size
+
+      ps.each do |record|
+        assert_equal "ProfileJob", record.type
+        assert_operator before, :<, record.started_at
+        assert record.token
+        assert record.jid
+      end
+    end
+  end
+end
+
+FAKE_DATA = "H4sICNrWI2cAA3NvbWUuanNvbgCrVlDKTq1UslJQKkvMKU1V0lFQSiwqSgSJRBvqKBjpKBjHKtRyAQDd7Kt/JwAAAA=="
+
+def add_profile(count, token, jid)
+  type = "ProfileJob"
+  started_at = Time.now + count
+  rundata = {
+    started_at: started_at.to_i,
+    token: token,
+    type: type,
+    jid: jid,
+    size: FAKE_DATA.bytesize,
+    elapsed: 4.36273,
+    # .gz extension tells Vernier to compress the data
+    filename: "#{token}-#{type}-#{jid}-#{started_at.strftime("%Y%m%d-%H%M%S")}.json.gz"
+  }
+
+  key = "#{token}-#{jid}"
+  @cfg.redis do |conn|
+    conn.multi do |m|
+      m.zadd("profiles", Time.now.to_f + 60, key)
+      m.hset(key, rundata.merge(data: Base64.decode64(FAKE_DATA)))
+      m.expire(key, 60)
+    end
+  end
+end
+
+def timing(str)
+  yield
+  # p [str, (a = Time.now; yield; (Time.now - a))]
+end
+
+def add_retry(jid = "bob", at = Time.now.to_f)
+  payload = Sidekiq.dump_json("class" => "ApiJob", "args" => [1, "mike"], "queue" => "default", "jid" => jid, "retry_count" => 2, "failed_at" => Time.now.to_f, "error_backtrace" => ["line1", "line2"])
+  @cfg.redis do |conn|
+    conn.zadd("retry", at.to_s, payload)
+  end
+end
+
+def add_dead(jid = nil, at = Time.now.to_f)
+  jid ||= SecureRandom.hex(12)
+  payload = Sidekiq.dump_json("class" => "ApiJob", "args" => [1, "mike"], "queue" => "default", "jid" => jid)
+  @cfg.redis do |conn|
+    conn.zadd("dead", at.to_s, payload)
   end
 end

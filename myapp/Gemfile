@@ -3,7 +3,7 @@
 source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-RAILS_VERSION = "~> 7.1.0"
+RAILS_VERSION = "~> 8.0"
 gem "actionmailer", RAILS_VERSION
 gem "actionpack", RAILS_VERSION
 gem "activejob", RAILS_VERSION
@@ -12,8 +12,13 @@ gem "railties", RAILS_VERSION
 
 gem "puma"
 gem "sidekiq", path: ".."
-gem "sqlite3", "~> 1.4"
+gem "sqlite3", "~> 2.2"
+gem "json"
 
 gem "after_commit_everywhere"
 
 gem "sidekiq-redis_info", path: "../examples/webui-ext"
+
+gem "vernier", "~> 1.2"
+gem "debug"
+gem "msgpack"

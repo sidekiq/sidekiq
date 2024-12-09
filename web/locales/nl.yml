@@ -1,5 +1,6 @@
 # elements like %{queue} are variables and should not be translated
 nl:
+  LanguageName: Nederlands
   Actions: Acties
   AddToQueue: Toevoegen aan wachtrij
   AreYouSure: Weet u het zeker?

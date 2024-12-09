@@ -37,10 +37,11 @@
    </div>
 </div>
 <ul class="nav">
-  <li class="nav-item"><a href="<%= root_path %>?days=7" class="nav-link history-graph <%= "active" if params[:days] == "7" %>"><%= t('OneWeek') %></a></li>
-  <li class="nav-item"><a href="<%= root_path %>" class="nav-link history-graph <%= "active" if params[:days].nil? || params[:days] == "30" %>"><%= t('OneMonth') %></a></li>
-  <li class="nav-item"><a href="<%= root_path %>?days=90" class="nav-link history-graph <%= "active" if params[:days] == "90" %>"><%= t('ThreeMonths') %></a></li>
-  <li class="nav-item"><a href="<%= root_path %>?days=180" class="nav-link history-graph <%= "active" if params[:days] == "180" %>"><%= t('SixMonths') %></a></li>
+  <% d = url_params("days") %>
+  <li class="nav-item"><a href="<%= root_path %>?days=7" class="nav-link history-graph <%= "active" if d == "7" %>"><%= t('OneWeek') %></a></li>
+  <li class="nav-item"><a href="<%= root_path %>" class="nav-link history-graph <%= "active" if d.nil? || d == "30" %>"><%= t('OneMonth') %></a></li>
+  <li class="nav-item"><a href="<%= root_path %>?days=90" class="nav-link history-graph <%= "active" if d == "90" %>"><%= t('ThreeMonths') %></a></li>
+  <li class="nav-item"><a href="<%= root_path %>?days=180" class="nav-link history-graph <%= "active" if d == "180" %>"><%= t('SixMonths') %></a></li>
 </ul>
 <div class="row chart">
   <canvas id="history-chart">

@@ -9,11 +9,10 @@
   </div>
 
   <div class="col-6 col-md-4">
-    <form id="metrics-form" class="d-flex" action="<%= root_path %>filter/metrics" method="post">
-      <%= csrf_tag %>
+    <form id="metrics-form" class="d-flex" action="<%= root_path %>metrics" method="get">
       <label for="substr" class="me-2 col-form-label flex-grow-0"><%= t('Filter') %></label>
       <div class="me-2 flex-grow-1">
-        <input id="class-filter" class="form-control" type="text" name="substr" placeholder="<%= t('Name') %>" value="<%= h params[:substr] %>">
+        <input id="class-filter" class="form-control" type="text" name="substr" placeholder="<%= t('Name') %>" value="<%= h url_params("substr") %>">
       </div>
       <div class="col-auto">
         <select id="period-selector" class="form-select" name="period">

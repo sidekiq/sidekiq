@@ -1,5 +1,6 @@
 # elements like %{queue} are variables and should not be translated
 en:
+  LanguageName: English
   Actions: Actions
   AddToQueue: Add to queue
   AreYouSure: Are you sure?
@@ -98,3 +99,8 @@ en:
   NoJobMetricsFound: No recent job metrics were found
   Filter: Filter
   AnyJobContent: Any job content
+  Profiles: Profiles
+  Data: Data
+  View: View
+  Token: Token
+  ElapsedTime: Elapsed Time

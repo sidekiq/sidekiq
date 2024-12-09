@@ -102,6 +102,7 @@ module Sidekiq
   def self.freeze!
     @frozen = true
     @config_blocks = nil
+    default_configuration.freeze!
   end
 
   # Creates a Sidekiq::Config instance that is more tuned for embedding

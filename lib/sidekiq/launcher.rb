@@ -36,8 +36,8 @@ module Sidekiq
     # has a heartbeat thread, caller can use `async_beat: false`
     # and instead have thread call Launcher#heartbeat every N seconds.
     def run(async_beat: true)
-      Sidekiq.freeze!
       logger.debug { @config.merge!({}) }
+      Sidekiq.freeze!
       @thread = safe_thread("heartbeat", &method(:start_heartbeat)) if async_beat
       @poller.start
       @managers.each(&:start)
@@ -81,7 +81,7 @@ module Sidekiq
       ❤
     end
 
-    private unless $TESTING
+    private
 
     BEAT_PAUSE = 10
 

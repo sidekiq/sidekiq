@@ -23,12 +23,6 @@ class Thing
   end
 end
 
-class ClassyErrorHandler1
-  def call(x, y)
-    raise SystemStackError
-  end
-end
-
 class ClassyErrorHandler2
   def call(x, y, z)
     raise SystemStackError
@@ -41,15 +35,12 @@ class ClassyErrorHandler3
   end
 end
 
-CLASSY_ERROR_HANDLER1 = ClassyErrorHandler1.new
 CLASSY_ERROR_HANDLER2 = ClassyErrorHandler2.new
 CLASSY_ERROR_HANDLER3 = ClassyErrorHandler3.new
 
-LAMBDA_ERROR_HANDLER1 = ->(_ex, _ctx) { raise SystemStackError }
 LAMBDA_ERROR_HANDLER2 = ->(_ex, _ctx, _cfg) { raise SystemStackError }
 LAMBDA_ERROR_HANDLER3 = ->(_ex, _ctx, _cfg = nil) { raise SystemStackError }
 
-PROC_ERROR_HANDLER1 = proc { |_ex, _ctx| raise SystemStackError }
 PROC_ERROR_HANDLER2 = proc { |_ex, _ctx, _cfg| raise SystemStackError }
 PROC_ERROR_HANDLER3 = proc { |_ex, _ctx, _cfg = nil| raise SystemStackError }
 
@@ -74,11 +65,10 @@ describe Sidekiq::Component do
     end
 
     it "logs the exception to Sidekiq.logger" do
-      @config[:reloader] = Sidekiq::Rails::Reloader.new
-      output = capture_logging(@config) do
+      output = capture_logging(@config, :debug) do
         Thing.new(@config).invoke_exception(a: 1)
       end
-      assert_match(/"a":1/, output, "didn't include the context")
+      assert_match(/a=1/, output, "didn't include the context")
       assert_match(/Something didn't work!/, output, "didn't include the exception message")
       assert_match(/test\/exception_handler_test.rb/, output, "didn't include the backtrace")
     end
@@ -98,34 +88,6 @@ describe Sidekiq::Component do
       ensure
         @config[:error_handlers].delete(test_handler)
       end
-    end
-
-    DEPRECATED_ERROR_HANDLERS.each do |handler_name|
-      it "handles exceptions in #{handler_name} with DEPRECATION" do
-        test_handler = self.class.const_get(handler_name)
-        @config[:error_handlers] << test_handler
-        output = capture_logging(@config) do
-          Thing.new(@config).invoke_exception(a: 1)
-        end
-
-        assert_match(/DEPRECATION/, output, "didn't include the deprecation warning")
-        assert_match(/SystemStackError/, output, "didn't include the exception")
-        assert_match(/Something didn't work!/, output, "didn't include the exception message")
-        assert_match(/!!! ERROR HANDLER THREW AN ERROR !!!/, output, "didn't include error handler problem message")
-      ensure
-        @config[:error_handlers].delete(test_handler)
-      end
-    end
-
-    it "cleans a backtrace if there is a cleaner" do
-      @config[:backtrace_cleaner] = ->(backtrace) { backtrace.take(1) }
-      output = capture_logging(@config) do
-        Thing.new(@config).invoke_exception(a: 1)
-      end
-
-      assert_equal 1, output.lines.count { |line| line.match?(/\d+:in/) }
-    ensure
-      @config[:backtrace_cleaner] = Sidekiq::Config::DEFAULTS[:backtrace_cleaner]
     end
 
     describe "when the exception does not have a backtrace" do

@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require "forwardable"
-
-require "set"
 require "sidekiq/redis_connection"
 
 module Sidekiq
@@ -41,12 +39,17 @@ module Sidekiq
     }
 
     ERROR_HANDLER = ->(ex, ctx, cfg = Sidekiq.default_configuration) {
-      l = cfg.logger
-      l.warn(Sidekiq.dump_json(ctx)) unless ctx.empty?
-      l.warn("#{ex.class.name}: #{ex.message}")
-      unless ex.backtrace.nil?
-        backtrace = cfg[:backtrace_cleaner].call(ex.backtrace)
-        l.warn(backtrace.join("\n"))
+      Sidekiq::Context.with(ctx) do
+        fancy = cfg[:environment] == "development" && $stdout.tty?
+        if cfg.logger.debug?
+          cfg.logger.debug do
+            ex.full_message(highlight: fancy)
+          end
+        else
+          cfg.logger.info do
+            ex.detailed_message(highlight: fancy)
+          end
+        end
       end
     }
 
@@ -185,7 +188,13 @@ module Sidekiq
 
     # register global singletons which can be accessed elsewhere
     def register(name, instance)
-      @directory[name] = instance
+      # logger.debug("register[#{name}] = #{instance}")
+      # Sidekiq Enterprise lazy registers a few services so we
+      # can't lock down this hash completely.
+      hash = @directory.dup
+      hash[name] = instance
+      @directory = hash.freeze
+      instance
     end
 
     # find a singleton
@@ -193,8 +202,14 @@ module Sidekiq
       # JNDI is just a fancy name for a hash lookup
       @directory.fetch(name) do |key|
         return nil unless default_class
-        @directory[key] = default_class.new(self)
+        register(key, default_class.new(self))
       end
+    end
+
+    def freeze!
+      @directory.freeze
+      @options.freeze
+      true
     end
 
     ##
@@ -275,13 +290,7 @@ module Sidekiq
         p ["!!!!!", ex]
       end
       @options[:error_handlers].each do |handler|
-        if parameter_size(handler) == 2
-          # TODO Remove in 8.0
-          logger.info { "DEPRECATION: Sidekiq exception handlers now take three arguments, see #{handler}" }
-          handler.call(ex, {_config: self}.merge(ctx))
-        else
-          handler.call(ex, ctx, self)
-        end
+        handler.call(ex, ctx, self)
       rescue Exception => e
         l = logger
         l.error "!!! ERROR HANDLER THREW AN ERROR !!!"

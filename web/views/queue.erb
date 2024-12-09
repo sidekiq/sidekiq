@@ -11,7 +11,7 @@
 <div class="table_container">
   <table class="queue table table-hover table-bordered table-striped">
     <thead>
-      <th><a href="<%= url %>?direction=<%= params[:direction] == 'asc' ? 'desc' : 'asc' %>"># <%= sort_direction_label %></a></th>
+      <th><a href="<%= url %>?direction=<%= url_params("direction") == 'asc' ? 'desc' : 'asc' %>"># <%= sort_direction_label %></a></th>
       <th><%= t('Job') %></th>
       <th><%= t('Arguments') %></th>
       <th><%= t('Context') %></th>
@@ -19,7 +19,7 @@
     </thead>
     <% @jobs.each_with_index do |job, index| %>
       <tr title="<%= job.jid %>">
-        <% if params[:direction] == 'asc' %>
+        <% if url_params("direction") == 'asc' %>
           <td><%= @count * (@current_page - 1) + index + 1 %></td>
         <% else %>
           <td><%= @total_size - (@count * (@current_page - 1) + index) %></td>

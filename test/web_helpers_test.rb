@@ -22,6 +22,10 @@ class Helpers
     ["web/locales"]
   end
 
+  def config
+    self
+  end
+
   def env
     @thehash
   end
@@ -108,6 +112,13 @@ describe "Web helpers" do
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "*")
     assert_equal "en", obj.locale
+  end
+
+  it "returns language name from locale" do
+    obj = Helpers.new
+    assert_equal "English", obj.language_name("en")
+    assert_equal "Português", obj.language_name("pt")
+    assert_equal "missing", obj.language_name("missing")
   end
 
   it "handles invalid locales" do

@@ -390,7 +390,7 @@ describe Sidekiq::CLI do
 
       describe "checking maxmemory policy" do
         it "warns if the policy is not noeviction" do
-          redis_info = {"maxmemory_policy" => "allkeys-lru", "redis_version" => "6.2.1"}
+          redis_info = {"maxmemory_policy" => "allkeys-lru", "redis_version" => "7.2.1"}
 
           @cli.config.stub(:redis_info, redis_info) do
             @cli.stub(:launch, nil) do
@@ -402,7 +402,7 @@ describe Sidekiq::CLI do
         end
 
         it "silent if the policy is noeviction" do
-          redis_info = {"maxmemory_policy" => "noeviction", "redis_version" => "6.2.1"}
+          redis_info = {"maxmemory_policy" => "noeviction", "redis_version" => "7.2.1"}
 
           @cli.config.stub(:redis_info, redis_info) do
             @cli.stub(:launch, nil) do

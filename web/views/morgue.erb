@@ -3,7 +3,7 @@
   <% if @dead.size > 0 && @total_size > @count %>
     <%= erb :_paging, locals: { url: "#{root_path}morgue" } %>
   <% end %>
-  <%= filtering('dead') %>
+  <%= filtering('morgue') %>
 </div>
 
 <% if @dead.size > 0 %>

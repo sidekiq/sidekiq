@@ -644,6 +644,11 @@ div.interval-slider input {
   .redis-url {
     max-width: 160px;
   }
+
+  .navbar-fixed-bottom .nav {
+    margin-left: -15px;
+    margin-right: -15px;
+  }
 }
 
 @media (min-width: 992px) {

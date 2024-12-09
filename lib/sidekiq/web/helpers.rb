@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "uri"
-require "set"
 require "yaml"
 require "cgi"
 
@@ -36,7 +35,7 @@ module Sidekiq
     # NB: keys and values are not escaped; do not allow user input
     # in the attributes
     private def html_tag(tagname, attrs)
-      s = +"<#{tagname}"
+      s = "<#{tagname}"
       attrs.each_pair do |k, v|
         next unless v
         s << " #{k}=\"#{v}\""
@@ -56,9 +55,9 @@ module Sidekiq
 
       # Allow sidekiq-web extensions to add locale paths
       # so extensions can be localized
-      @strings[lang] ||= settings.locales.each_with_object({}) do |path, global|
+      @strings[lang] ||= config.locales.each_with_object({}) do |path, global|
         find_locale_files(lang).each do |file|
-          strs = YAML.safe_load(File.read(file))
+          strs = YAML.safe_load_file(file)
           global.merge!(strs[lang])
         end
       end
@@ -83,7 +82,7 @@ module Sidekiq
     end
 
     def locale_files
-      @locale_files ||= settings.locales.flat_map { |path|
+      @locale_files ||= config.locales.flat_map { |path|
         Dir["#{path}/*.yml"]
       }
     end
@@ -94,6 +93,10 @@ module Sidekiq
 
     def find_locale_files(lang)
       locale_files.select { |file| file =~ /\/#{lang}\.yml$/ }
+    end
+
+    def language_name(locale)
+      strings(locale).fetch("LanguageName", locale)
     end
 
     def search(jobset, substr)
@@ -111,7 +114,7 @@ module Sidekiq
       if within.nil?
         ::Rack::Utils.escape_html(jid)
       else
-        "<a href='#{root_path}filter/#{within}?substr=#{jid}'>#{::Rack::Utils.escape_html(jid)}</a>"
+        "<a href='#{root_path}#{within}?substr=#{jid}'>#{::Rack::Utils.escape_html(jid)}</a>"
       end
     end
 
@@ -184,7 +187,8 @@ module Sidekiq
 
     # sidekiq/sidekiq#3243
     def unfiltered?
-      yield unless env["PATH_INFO"].start_with?("/filter/")
+      s = url_params("substr")
+      yield unless s && s.size > 0
     end
 
     def get_locale
@@ -201,7 +205,7 @@ module Sidekiq
     end
 
     def sort_direction_label
-      (params[:direction] == "asc") ? "&uarr;" : "&darr;"
+      (url_params("direction") == "asc") ? "&uarr;" : "&darr;"
     end
 
     def workset
@@ -268,8 +272,8 @@ module Sidekiq
       "#{score}-#{job["jid"]}"
     end
 
-    def parse_params(params)
-      score, jid = params.split("-", 2)
+    def parse_key(key)
+      score, jid = key.split("-", 2)
       [score.to_f, jid]
     end
 
@@ -279,11 +283,11 @@ module Sidekiq
     def qparams(options)
       stringified_options = options.transform_keys(&:to_s)
 
-      to_query_string(params.merge(stringified_options))
+      to_query_string(request.params.merge(stringified_options))
     end
 
-    def to_query_string(params)
-      params.map { |key, value|
+    def to_query_string(hash)
+      hash.map { |key, value|
         SAFE_QPARAMS.include?(key) ? "#{key}=#{CGI.escape(value.to_s)}" : next
       }.compact.join("&")
     end

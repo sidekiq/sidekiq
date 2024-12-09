@@ -1,5 +1,6 @@
 # elements like %{queue} are variables and should not be translated
 cs:
+  LanguageName: Čeština
   Actions: Akce
   AddToQueue: Přidat do fronty
   AreYouSure: Jste si jisti?

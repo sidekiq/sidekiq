@@ -2,17 +2,60 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+HEAD / main
 ----------
 
+- **NEW FEATURE** Job Profiling is now supported with [Vernier](https://vernier.prof)
+  which makes it really easy to performance tune your slow jobs.
+  The Web UI contains a new **Profiles** tab to view any collected profile data.
+  Please read the new [Profiling](https://github.com/sidekiq/sidekiq/wiki/Profiling) wiki page for details.
+- Refactor Sidekiq::Web to simplify the code and improve security [#6532]
+- Default error logging has been modified to use Ruby's `Exception#detailed_message` and `#full_message` APIs.
+- CI now runs against Redis, Dragonfly and Valkey.
+- The Web UI's language picker now shows options in the native language
+- Remove global variable usage within the codebase
+
+7.3.7
+----------
+
+- Backport `Sidekiq::Web.configure` for compatibility with 8.0 [#6532]
+- Backport `url_params(key)` and `route_params(key)` for compatibility with 8.0 [#6532]
+- Various fixes for UI filtering [#6508]
+
+7.3.6
+----------
+
+- Forward compatibility fixes for Ruby 3.4
+- Filtering in the Web UI now works via GET so you can bookmark a filtered view. [#6497]
+
+7.3.5
+----------
+
+- Reimplement `retry_all` and `kill_all` API methods to use ZPOPMIN,
+  approximately 30-60% faster. [#6481]
+- Add preload testing binary at `examples/testing/sidekiq_boot` to verify your Rails app boots correctly with Sidekiq Enterprise's app preloading.
+- Fix circular require with ActiveJob adapter [#6477]
+- Fix potential race condition leading to incorrect serialized values for CurrentAttributes [#6475]
+- Restore missing elapsed time when default job logging is disabled
+
+7.3.4
+----------
+
+- Fix FrozenError when starting Sidekiq [#6470]
+
+7.3.3
+----------
+
+- Freeze global configuration once boot is complete, to avoid configuration race conditions [#6466, #6465]
 - Sidekiq now warns if a job iteration takes longer than the `-t` timeout setting (defaults to 25 seconds)
 - Iteration callbacks now have easy access to job arguments via the `arguments` method:
 ```ruby
 def on_stop
   p arguments # => `[123, "string", {"key" => "value"}]`
+  id, str, hash = arguments
 end
 ```
-- IterableJobs can be cancelled via `Sidekiq::Client#cancel!`:
+- Iterable jobs can be cancelled via `Sidekiq::Client#cancel!`:
 ```ruby
 c = Sidekiq::Client.new
 jid = c.push("class" => SomeJob, "args" => [123])
@@ -28,7 +71,7 @@ c.cancel!(jid) # => true
 
 - Adjust ActiveRecord batch iteration to restart an interrupted batch from the beginning.
   Each batch should be processed as a single transaction in order to be idempotent. [#6405]
-- Fix typo in S::DeadSet#kill [#6397]
+- Fix typo in Sidekiq::DeadSet#kill [#6397]
 - Fix CSS issue with bottom bar in Web UI [#6414]
 
 7.3.1

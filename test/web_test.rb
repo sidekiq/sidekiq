@@ -3,6 +3,7 @@
 require_relative "helper"
 require "sidekiq/web"
 require "rack/test"
+require "rack/session"
 
 class WebJob
   include Sidekiq::Job
@@ -34,14 +35,17 @@ describe Sidekiq::Web do
 
   before do
     @config = reset!
-    app.middlewares.clear
-    app.use Rack::Session::Cookie, secrets: "35c5108120cb479eecb4e947e423cad6da6f38327cf0ebb323e30816d74fa01f"
+
+    Sidekiq::Web.configure do |c|
+      c.middlewares.clear
+      c.use Rack::Session::Cookie, secrets: "35c5108120cb479eecb4e947e423cad6da6f38327cf0ebb323e30816d74fa01f"
+    end
   end
 
   it "passes on unexpected methods" do
     patch "/"
     assert_equal 404, last_response.status
-    assert_equal "pass", last_response.headers[Sidekiq::Web::X_CASCADE]
+    assert_equal "pass", last_response.headers["x-cascade"]
   end
 
   it "can show text with any locales" do
@@ -326,13 +330,17 @@ describe Sidekiq::Web do
   end
 
   it "displays custom job info" do
-    Sidekiq::Web.custom_job_info_rows << LogDisplayer.new
+    Sidekiq::Web.configure do |c|
+      c.custom_job_info_rows << LogDisplayer.new
+    end
     params = add_retry
     get "/retries/#{job_params(*params)}"
     assert_equal 200, last_response.status
     assert_match(/https:\/\/example.com\/logs\//, last_response.body)
   ensure
-    Sidekiq::Web.custom_job_info_rows.clear
+    Sidekiq::Web.configure do |c|
+      c.custom_job_info_rows.clear
+    end
   end
 
   it "can display a single retry" do
@@ -354,19 +362,13 @@ describe Sidekiq::Web do
     3.times { add_retry }
     add_retry("MIKE1234")
 
-    get "/filter/retries"
-    assert_equal 302, last_response.status
-
-    post "/filter/retries"
-    assert_equal 302, last_response.status
-
-    post "/filter/retries", substr: "nope"
+    get "/retries", substr: "nope"
     refute_match(/RuntimeError/, last_response.body)
 
-    get "/filter/retries", substr: "nope"
+    get "/retries", substr: "nope"
     refute_match(/RuntimeError/, last_response.body)
 
-    post "/filter/retries", substr: "MIKE1234"
+    get "/retries", substr: "MIKE1234"
     assert_match(/MIKE1234/, last_response.body)
   end
 
@@ -472,19 +474,13 @@ describe Sidekiq::Web do
     3.times { add_scheduled }
     add_scheduled("MIKE1234")
 
-    get "/filter/scheduled"
-    assert_equal 302, last_response.status
-
-    post "/filter/scheduled"
-    assert_equal 302, last_response.status
-
-    get "/filter/scheduled", substr: "nope"
+    get "/scheduled", substr: "nope"
     refute_match(/RuntimeError/, last_response.body)
 
-    post "/filter/scheduled", substr: "nope"
+    get "/scheduled", substr: "nope"
     refute_match(/RuntimeError/, last_response.body)
 
-    post "/filter/scheduled", substr: "MIKE1234"
+    get "/scheduled", substr: "MIKE1234"
     assert_match(/MIKE1234/, last_response.body)
   end
 
@@ -625,9 +621,9 @@ describe Sidekiq::Web do
 
   describe "custom locales" do
     before do
-      Sidekiq::Web.settings.locales << File.join(File.dirname(__FILE__), "fixtures")
+      Sidekiq::Web.locales << File.join(File.dirname(__FILE__), "fixtures")
       Sidekiq::Web.tabs["Custom Tab"] = "/custom"
-      Sidekiq::WebApplication.get("/custom") do
+      Sidekiq::Web::Application.get("/custom") do
         clear_caches # ugly hack since I can't figure out how to access WebHelpers outside of this context
         t("translated_text")
       end
@@ -635,7 +631,7 @@ describe Sidekiq::Web do
 
     after do
       Sidekiq::Web.tabs.delete "Custom Tab"
-      Sidekiq::Web.settings.locales.pop
+      Sidekiq::Web.locales.pop
     end
 
     it "can show user defined tab with custom locales" do
@@ -766,19 +762,13 @@ describe Sidekiq::Web do
       3.times { add_dead }
       add_dead("MIKE1234")
 
-      get "/filter/dead"
-      assert_equal 302, last_response.status
-
-      post "/filter/dead"
-      assert_equal 302, last_response.status
-
-      post "/filter/dead", substr: "nope"
+      get "/morgue", substr: "nope"
       refute_match(/RuntimeError/, last_response.body)
 
-      get "/filter/dead", substr: "nope"
+      get "/morgue", substr: "nope"
       refute_match(/RuntimeError/, last_response.body)
 
-      post "/filter/dead", substr: "MIKE1234"
+      get "/morgue", substr: "MIKE1234"
       assert_match(/MIKE1234/, last_response.body)
     end
 
@@ -908,12 +898,9 @@ describe Sidekiq::Web do
   describe "basic auth" do
     include Rack::Test::Methods
 
-    def app
-      app = Sidekiq::Web.new
-      app.use(Rack::Auth::Basic) { |user, pass| user == "a" && pass == "b" }
-      app.use(Rack::Session::Cookie, secret: SecureRandom.hex(32))
-
-      app
+    before do
+      Sidekiq::Web.use(Rack::Auth::Basic) { |user, pass| user == "a" && pass == "b" }
+      Sidekiq::Web.use(Rack::Session::Cookie, secret: SecureRandom.hex(32))
     end
 
     it "requires basic authentication" do
@@ -933,58 +920,12 @@ describe Sidekiq::Web do
     end
   end
 
-  describe "custom session" do
-    include Rack::Test::Methods
-
-    def app
-      app = Sidekiq::Web.new
-      app.use Rack::Session::Cookie, secret: session_secret, host: "nicehost.org"
-      app
-    end
-
-    it "requires uses session options" do
-      get "/"
-
-      session_options = last_request.env["rack.session"].options
-
-      assert_equal session_secret, session_options[:secret]
-      assert_equal "nicehost.org", session_options[:host]
-    end
-  end
-
-  describe "redirecting in before" do
-    include Rack::Test::Methods
-
-    before do
-      Sidekiq::WebApplication.before { Thread.current[:some_setting] = :before }
-      Sidekiq::WebApplication.before { redirect "/" }
-      Sidekiq::WebApplication.after { Thread.current[:some_setting] = :after }
-    end
-
-    after do
-      Sidekiq::WebApplication.remove_instance_variable(:@befores)
-      Sidekiq::WebApplication.remove_instance_variable(:@afters)
-    end
-
-    def app
-      app = Sidekiq::Web.new
-      app.use Rack::Session::Cookie, secret: session_secret, host: "nicehost.org"
-      app
-    end
-
-    it "allows afters to run" do
-      get "/"
-      assert_equal :after, Thread.current[:some_setting]
-    end
-  end
-
   describe "Metrics" do
     before do
       require "sidekiq/component"
       require "sidekiq/metrics/tracking"
       t = Sidekiq::Metrics::ExecutionTracker.new(@config)
       t.track("default", "MikeJob") do
-        # TODO replace sleep with a method we can call
         sleep 0.02
       end
       t.flush
@@ -1000,8 +941,9 @@ describe Sidekiq::Web do
         result_mock.expect(:ends_at, Time.now)
 
         query_mock = Minitest::Mock.new
-        query_mock.expect :top_jobs, result_mock do |minutes:|
+        query_mock.expect :top_jobs, result_mock do |minutes:, class_filter:|
           assert_equal minutes, 240
+          assert_nil class_filter
         end
 
         Sidekiq::Metrics::Query.stub :new, query_mock do
@@ -1012,14 +954,11 @@ describe Sidekiq::Web do
       end
 
       it "supports filtering" do
-        get "/filter/metrics"
-        assert_equal 302, last_response.status
-
-        post "/filter/metrics", "substr" => "mike"
+        get "/metrics", "substr" => "mike"
         assert_equal 200, last_response.status
         assert_match(/MikeJob/, last_response.body)
 
-        post "/filter/metrics", "substr" => "notfound"
+        get "/metrics", "substr" => "notfound"
         assert_equal 200, last_response.status
         refute_match(/MikeJob/, last_response.body)
       end

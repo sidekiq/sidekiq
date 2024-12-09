@@ -4,9 +4,24 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-HEAD
+HEAD (8.0)
 ---------
 
+- Move from SHA1 to SHA256 internally. Unique locks are now SHA256 but only take 10% more
+  space due to using a more efficient encoding (base64 vs hex).
+- Sidekiq::Web internal refactoring [#6532]
+- Limiter factory methods now raise ArgumentError if you pass them a block [#6512]
+
+7.3.3
+---------
+
+- Call `Process.warmup` before fork in sidekiqswarm, use `RUBY_DISABLE_WARMUP=1` to disable [#6279]
+- Disable health checks if running sidekiqswarm, we can't use one port to monitor many children
+
+7.3.2
+---------
+
+- Activate unique server middleware in client-mode so uniqueness works for `perform_inline` [#6460]
 - Add `Sidekiq::Enterprise.gem_version` API
 
 7.3.1

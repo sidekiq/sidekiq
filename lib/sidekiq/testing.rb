@@ -329,6 +329,6 @@ module Sidekiq
   end
 end
 
-if defined?(::Rails) && Rails.respond_to?(:env) && !Rails.env.test? && !$TESTING
+if defined?(::Rails) && Rails.respond_to?(:env) && !Rails.env.test? && !$TESTING # rubocop:disable Style/GlobalVars
   warn("⛔️ WARNING: Sidekiq testing API enabled, but this is not the test environment.  Your jobs will not go to Redis.", uplevel: 1)
 end
