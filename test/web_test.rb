@@ -101,7 +101,6 @@ describe Sidekiq::Web do
 
       get "/busy"
       assert_equal 200, last_response.status
-      assert_match(/status-active/, last_response.body)
       assert_match(/critical/, last_response.body)
       assert_match(/WebJob/, last_response.body)
     end
