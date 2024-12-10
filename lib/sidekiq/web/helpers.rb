@@ -18,7 +18,9 @@ module Sidekiq
         nonce: csp_nonce,
         href: location
       }
-      html_tag(:link, attrs.merge(kwargs))
+      add_to_head do
+        html_tag(:link, attrs.merge(kwargs))
+      end
     end
 
     def script_tag(location, **kwargs)

@@ -86,7 +86,7 @@ module Sidekiq
 
     def call(env)
       env[:web_config] = Sidekiq::Web.configure
-      env[:csp_nonce] = SecureRandom.base64(16)
+      env[:csp_nonce] = SecureRandom.hex(8)
       env[:redis_pool] = self.class.redis_pool
       app.call(env)
     end

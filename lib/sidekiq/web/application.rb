@@ -23,7 +23,7 @@ module Sidekiq
         "media-src 'self'",
         "object-src 'none'",
         "script-src 'self' 'nonce-!placeholder!'",
-        "style-src 'self' https: http: 'unsafe-inline'", # TODO Nonce in 8.0
+        "style-src 'self' 'nonce-!placeholder!'",
         "worker-src 'self'",
         "base-uri 'self'"
       ].join("; ").freeze
