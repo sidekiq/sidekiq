@@ -73,10 +73,10 @@ describe Sidekiq::Web do
     get "/", {}
     policies = last_response.headers["Content-Security-Policy"].split("; ")
     assert_includes(policies, "connect-src 'self' https: http: wss: ws:")
-    assert_includes(policies, "style-src 'self' https: http: 'unsafe-inline'")
+    assert_includes(policies, "style-src 'self' 'nonce-#{last_request.env[:csp_nonce]}'")
     assert_includes(policies, "script-src 'self' 'nonce-#{last_request.env[:csp_nonce]}'")
     assert_includes(policies, "object-src 'none'")
-    assert_operator(24, :>=, last_request.env[:csp_nonce].length)
+    assert_operator(last_request.env[:csp_nonce].length, :>=, 16)
   end
 
   it "provides a cheap HEAD response" do

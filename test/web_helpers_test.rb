@@ -38,6 +38,10 @@ class Helpers
     {}
   end
 
+  def csp_nonce
+    "12345678deadbeef"
+  end
+
   def path_info
     @thehash[:path_info]
   end
@@ -50,12 +54,12 @@ describe "Web helpers" do
 
   it "tests script_tag" do
     obj = Helpers.new
-    assert_equal '<script type="text/javascript" src="/sidekiq.js"></script>', obj.script_tag("sidekiq.js")
+    assert_equal "<script type=\"text/javascript\" nonce=\"12345678deadbeef\" src=\"/sidekiq.js\"></script>", obj.script_tag("sidekiq.js")
   end
 
   it "tests style_tag" do
     obj = Helpers.new
-    assert_equal '<link type="text/css" media="screen" rel="stylesheet" href="/sidekiq.css" />', obj.style_tag("sidekiq.css")
+    assert_equal ["<link type=\"text/css\" media=\"screen\" rel=\"stylesheet\" nonce=\"12345678deadbeef\" href=\"/sidekiq.css\" />"], obj.style_tag("sidekiq.css")
   end
 
   it "tests locale determination" do
