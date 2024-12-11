@@ -169,9 +169,6 @@ function replacePage(text) {
   var page = doc.querySelector('#page')
   document.querySelector("#page").replaceWith(page)
 
-  var header_status = doc.querySelector('.status')
-  document.querySelector('.status').replaceWith(header_status)
-
   addListeners();
 }
 
