@@ -32,7 +32,7 @@
           <% a = job.display_args %>
           <% if a.inspect.size > 100 %>
             <span id="job_<%= index %>"><%= h(a.inspect[0..100]) + "... " %></span>
-            <button data-toggle="job_<%= index %>_full" class="btn btn-default btn-xs"><%= t('ShowAll') %></button>
+            <button data-toggle="job_<%= index %>_full" class="btn btn-default btn-sm"><%= t('ShowAll') %></button>
             <div class="toggle" id="job_<%= index %>_full"><%= display_args(a) %></div>
           <% else %>
             <%= display_args(job.display_args) %>
@@ -45,7 +45,7 @@
           <form action="<%= root_path %>queues/<%= CGI.escape(@name) %>/delete" method="post">
             <%= csrf_tag %>
             <input name="key_val" value="<%= h job.value %>" type="hidden" />
-            <input class="btn btn-danger btn-xs" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSure') %>" />
+            <input class="btn btn-danger btn-sm" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSure') %>" />
           </form>
         </td>
       </tr>
