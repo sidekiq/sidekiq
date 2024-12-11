@@ -70,10 +70,7 @@ describe "Web helpers" do
     assert_equal "fr", obj.locale
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2")
-    assert_equal "zh-CN", obj.locale
-
-    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2")
-    assert_equal "zh-TW", obj.locale
+    assert_equal "zh-cn", obj.locale
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "en-US,sv-SE;q=0.8,sv;q=0.6,en;q=0.4")
     assert_equal "en", obj.locale
@@ -88,13 +85,13 @@ describe "Web helpers" do
     assert_equal "sv", obj.locale
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4")
-    assert_equal "pt-BR", obj.locale
+    assert_equal "pt-br", obj.locale
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "pt-PT,pt;q=0.8,en-US;q=0.6,en;q=0.4")
     assert_equal "pt", obj.locale
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "pt-br")
-    assert_equal "pt", obj.locale
+    assert_equal "pt-br", obj.locale
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "pt-pt")
     assert_equal "pt", obj.locale
@@ -152,8 +149,8 @@ describe "Web helpers" do
     obj = Helpers.new
     expected = %w[
       ar cs da de el en es fa fr gd he hi it ja
-      ko lt nb nl pl pt pt-BR ru sv ta tr uk ur
-      vi zh-CN zh-TW
+      ko lt nb nl pl pt pt-br ru sv ta tr uk ur
+      vi zh-cn zh-tw
     ]
     assert_equal expected, obj.available_locales.sort
   end

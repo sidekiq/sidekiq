@@ -58,10 +58,10 @@ describe Sidekiq::Web do
     rackenv = {"HTTP_ACCEPT_LANGUAGE" => "en-us"}
     get "/", {}, rackenv
     assert_match(/Dashboard/, last_response.body)
-    rackenv = {"HTTP_ACCEPT_LANGUAGE" => "zh-CN"}
+    rackenv = {"HTTP_ACCEPT_LANGUAGE" => "zh-cn"}
     get "/", {}, rackenv
     assert_match(/信息板/, last_response.body)
-    rackenv = {"HTTP_ACCEPT_LANGUAGE" => "zh-TW"}
+    rackenv = {"HTTP_ACCEPT_LANGUAGE" => "zh-tw"}
     get "/", {}, rackenv
     assert_match(/資訊主頁/, last_response.body)
     rackenv = {"HTTP_ACCEPT_LANGUAGE" => "nb"}

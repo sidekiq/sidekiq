@@ -1,5 +1,5 @@
 # elements like %{queue} are variables and should not be translated
-zh-CN: # <---- change this to your locale code
+zh-cn: # <---- change this to your locale code
   LanguageName: 中文
   Dashboard: 信息板
   Status: 状态
