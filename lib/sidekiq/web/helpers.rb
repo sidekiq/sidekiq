@@ -154,7 +154,7 @@ module Sidekiq
     # See https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.4
     def user_preferred_languages
       languages = env["HTTP_ACCEPT_LANGUAGE"]
-      languages.to_s.downcase.gsub(/\s+/, "").split(",").map { |language|
+      languages.to_s.gsub(/\s+/, "").split(",").map { |language|
         locale, quality = language.split(";q=", 2)
         locale = nil if locale == "*" # Ignore wildcards
         quality = quality ? quality.to_f : 1.0
@@ -173,7 +173,13 @@ module Sidekiq
       @locale ||= if (l = session&.fetch(:locale, nil)) && available_locales.include?(l)
         l
       else
-        matched_locale = user_preferred_languages.map { |preferred|
+
+        # exactly match with preferred like "pt-BR, zh-CN, zh-TW..." first
+        matched_locale = user_preferred_languages.find { |preferred|
+          available_locales.include?(preferred) if preferred.length == 5
+        }
+
+        matched_locale ||= user_preferred_languages.map { |preferred|
           preferred_language = preferred.split("-", 2).first
 
           lang_group = available_locales.select { |available|
