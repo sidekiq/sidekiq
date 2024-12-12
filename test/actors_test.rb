@@ -19,6 +19,7 @@ end
 describe "Actors" do
   before do
     @config = reset!
+    @config.thread_priority = 0
     @cap = @config.default_capsule
   end
 

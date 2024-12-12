@@ -73,6 +73,7 @@ describe Sidekiq::Processor do
   before do
     $invokes = 0
     @config = reset!
+    @config.thread_priority = 0
     @processor = ::Sidekiq::Processor.new(@config.default_capsule) { |*args| }
   end
 
