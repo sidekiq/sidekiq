@@ -175,7 +175,7 @@ module Sidekiq
       else
 
         # exactly match with preferred like "pt-BR, zh-CN, zh-TW..." first
-        matched_locale = user_preferred_languages.map { |preferred|
+        matched_locale = user_preferred_languages.find { |preferred|
           available_locales.include?(preferred) if preferred.length == 5
         }
 
