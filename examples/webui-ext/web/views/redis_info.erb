@@ -1,24 +1,25 @@
 <% style_tag "redis_info/css/ext.css" %>
 
-<div class="header-container">
-  <h1><%= t('Redis') %></h1>
-</div>
+<section>
+  <header>
+    <h1><%= t('Redis') %></h1>
+  </header>
 
-<div class="table_container">
-  <table class="table table-hover table-bordered table-striped table-condensed">
-    <thead>
-      <th class="keys" data-width="25"><%= t('Key') %></th>
-      <th class="values"><%= t('Value') %></th>
-    </thead>
-    <tbody>
-      <% @info.each do |k, v| %>
-      <tr>
-        <td><%= h k %></td>
-        <td><%= h v %></td>
-      </tr>
-      <% end %>
-    </tbody>
-  </table>
-</div>
-
+  <div class="table_container">
+    <table class="table table-hover table-bordered table-striped table-condensed">
+      <thead>
+        <th class="keys" data-width="25"><%= t('Key') %></th>
+        <th class="values"><%= t('Value') %></th>
+      </thead>
+      <tbody>
+        <% @info.each do |k, v| %>
+        <tr>
+          <td><%= h k %></td>
+          <td><%= h v %></td>
+        </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</section>
 <%= script_tag "redis_info/js/ext.js" %>

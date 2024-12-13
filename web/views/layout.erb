@@ -30,19 +30,15 @@
   </head>
   <body class="admin" data-locale="<%= locale %>">
     <%= erb :_nav %>
-    <div id="page">
+    <main id="page">
       <div class="container">
-        <div class="row">
-          <div class="col-sm-12 summary_bar">
-            <%= erb :_summary %>
-          </div>
-
-          <div class="col-sm-12">
-            <%= yield %>
-          </div>
+        <div class="summary_bar">
+          <%= erb :_summary %>
         </div>
+
+        <%= yield %>
       </div>
-    </div>
+    </main>
     <%= erb :_footer %>
   </body>
 </html>

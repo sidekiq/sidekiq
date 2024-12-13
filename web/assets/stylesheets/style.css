@@ -221,22 +221,14 @@ h1, h2, h3 {
   font-weight: 700;
 }
 
-.page-title-container {
+section > header {
   display: flex;
   gap: var(--space);
-  align-items: center;
-}
-
-
-.header-container {
-  display: flex;
   align-items: center;
   margin: var(--space-3x) 0 var(--space);
 }
 
-.header-container > div:not(.page-title-container) {
-  margin: 0 0 0 auto;
-}
+section > header .filter { margin-left: auto; }
 
 .stats-container {
   display: flex;
