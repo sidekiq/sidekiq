@@ -9,8 +9,8 @@
   --color-success: oklch(0.5 0.18 149);
   --color-success-hover: oklch(45% 0.18 149);
 
-
   --color-border: oklch(91% 0.01 269);
+  --color-selected: oklch(93% 0.01 269);
   --color-table-bg-alt: oklch(98% 0.01 269);
   --color-shadow: oklch(27% 0.01 269 / 5%);
 
@@ -29,11 +29,12 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --color-elevated: oklch(23% 0.01 269);
-    --color-text: oklch(91% 0.01 269);
-    --color-text-light: oklch(71% 0.01 269);
+    --color-text: oklch(85% 0.01 269);
+    --color-text-light: oklch(70% 0.01 269);
     --color-bg: oklch(19% 0.01 269);
     --color-border: oklch(28% 0.01 269);
     --color-table-bg-alt: oklch(26% 0.01 269);
+    --color-selected: oklch(32% 0.01 269);
   
     --color-primary: oklch(0.85 0.18 29);
     --color-primary-hover: oklch(87% 0.18 29);
@@ -54,7 +55,7 @@ html {
 body {
   background: var(--color-bg);
   color: var(--color-text);
-  padding: 56px 0;
+  padding: 64px 0;
   margin: 0;
   position: relative;
 }
@@ -83,14 +84,20 @@ h1, h2, h3 {
   cursor: pointer;
 }
 
-.btn-inverse {
-  background-color: var(--color-border);
-  color: inherit;
-}
-
 .btn:hover {
   background: var(--color-primary-hover);
   color: var(--color-bg);
+}
+
+.btn-inverse {
+  background-color: transparent;
+  box-shadow: 0 0 0 1px var(--color-border) inset;
+  color: inherit;
+}
+
+.btn-inverse:hover {
+  background-color: transparent;
+  color: var(--color-primary);
 }
 
 .live-poll-stop {
@@ -128,6 +135,7 @@ h1, h2, h3 {
   right: 0;
 }
 
+
 .navbar .container-fluid,
 .navbar .nav {
   display: flex;
@@ -162,7 +170,7 @@ h1, h2, h3 {
 
 .navbar-nav li.active {
   border-radius: var(--space-1-2);
-  background: var(--color-border);
+  background: var(--color-selected);
 }
 
 .navbar-nav li :any-link:not(.btn) {
@@ -178,6 +186,17 @@ h1, h2, h3 {
   list-style-type: none;
   margin: 0;
   padding: 0;
+}
+
+.navbar-fixed-bottom .nav {
+  gap: var(--space-2x);
+  color: var(--color-text-light);
+  font-size: var(--font-size-small);
+  align-items: center;
+}
+
+.navbar-fixed-bottom .nav li {
+  line-height: 24px;
 }
 
 .navbar .nav p { margin: 0; }
@@ -276,7 +295,7 @@ section > header .filter { margin-left: auto; }
 }
 
 .history-graph.active {
-  background: var(--color-border);
+  background: var(--color-selected);
   color: var(--color-text);
 }
 
@@ -289,10 +308,11 @@ table {
 }
 
 thead {
-  box-shadow: 0 2px 0 0 var(--color-shadow);
+  border-bottom: 2px solid var(--color-border);
 }
 
 th {
+  font-weight: normal;
   text-align: left;
   padding: var(--space);
   font-size: var(--font-size-small);
@@ -309,10 +329,11 @@ tbody tr:nth-child(odd) { background-color: var(--color-table-bg-alt); }
 td { padding: var(--space); }
 
 .label:not(:empty) {
-  background: var(--color-border);
+  background: var(--color-selected);
   padding: 0 var(--space);
   border-radius: 4px;
   font-size: var(--font-size-small);
+  box-shadow: 0 0 0 1px var(--color-shadow);
 }
 
 .info-circle {
@@ -344,6 +365,22 @@ form label {
   display: inline-block;
   line-height: var(--space-2x);
   height: 24px;
+}
+
+.interval-slider {
+  text-align: right;
+  font-size: var(--font-size-small);
+  color: var(--color-text-light);
+}
+
+.interval-slider .current-interval {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+input[type="range"] {
+  accent-color: var(--color-primary);
+  width: 160px;
 }
 
 .alert {
