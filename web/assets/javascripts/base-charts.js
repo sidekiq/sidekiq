@@ -1,27 +1,26 @@
 if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-  Chart.defaults.borderColor = "#333";
-  Chart.defaults.color = "#aaa";
+  Chart.defaults.borderColor = "oklch(28% 0.01 269)";
+  Chart.defaults.color = "oklch(71% 0.01 269)";
 }
 
 class Colors {
   constructor() {
     this.assignments = {};
-    this.success = "#006f68";
-    this.failure = "#af0014";
-    this.fallback = "#999";
-    this.primary = "#537bc4";
+    this.success = "oklch(0.5 0.18 179)";
+    this.failure = "oklch(0.5 0.18 29)";
+    this.fallback = "oklch(0.5 0.02 269)";
+    this.primary = "oklch(0.5 0.18 269)";
     this.available = [
-      // Colors taken from https://www.chartjs.org/docs/latest/samples/utils.html
-      "#537bc4",
-      "#4dc9f6",
-      "#f67019",
-      "#f53794",
-      "#acc236",
-      "#166a8f",
-      "#00a950",
-      "#58595b",
-      "#8549ba",
-      "#991b1b",
+      "oklch(0.5 0.18 269)",
+      "oklch(0.5 0.18 209)",
+      "#oklch(0.5 0.18 59)",
+      "oklch(0.5 0.18 329)",
+      "oklch(0.5 0.18 119)",
+      "oklch(0.5 0.18 239)",
+      "oklch(0.5 0.18 149)",
+      "oklch(50% 0.02 269)",
+      "oklch(0.5 0.18 299)",
+      "oklch(0.5 0.18 29)",
     ];
   }
 
@@ -95,7 +94,7 @@ class BaseChart {
           type: "line",
           xMin: bucket,
           xMax: bucket,
-          borderColor: "rgba(220, 38, 38, 0.4)",
+          borderColor: "oklch(91% 0.002 269)",
           borderWidth: 2,
         };
       });
