@@ -31,7 +31,6 @@ function addListeners() {
     node.addEventListener("click", addDataToggleListeners)
   })
 
-  addShiftClickListeners()
   updateFuzzyTimes();
   updateNumbers();
   updateProgressBars();
@@ -74,23 +73,6 @@ function addDataToggleListeners(event) {
   } else {
     full.style.display = 'block';
   }
-}
-
-function addShiftClickListeners() {
-  let checkboxes = Array.from(document.querySelectorAll(".shift_clickable"));
-  let lastChecked = null;
-  checkboxes.forEach(checkbox => {
-    checkbox.addEventListener("click", (e) => {
-      if (e.shiftKey && lastChecked) {
-        let myIndex = checkboxes.indexOf(checkbox);
-        let lastIndex = checkboxes.indexOf(lastChecked);
-        let [min, max] = [myIndex, lastIndex].sort();
-        let newState = checkbox.checked;
-        checkboxes.slice(min, max).forEach(c => c.checked = newState);
-      }
-      lastChecked = checkbox;
-    });
-  });
 }
 
 function updateFuzzyTimes() {

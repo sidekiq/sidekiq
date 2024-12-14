@@ -283,16 +283,3 @@ if (hbc != null) {
   var bc = new HistBubbleChart(hbc, JSON.parse(hbc.textContent));
   window.histBubbleChart = bc
 }
-
-var form = document.getElementById("metrics-form")
-document.querySelectorAll("#period-selector").forEach(node => {
-  node.addEventListener("input", debounce(() => form.submit()))
-})
-
-function debounce(func, timeout = 300) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => { func.apply(this, args); }, timeout);
-  };
-}

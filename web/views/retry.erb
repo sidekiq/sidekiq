@@ -1,8 +1,9 @@
 <%= erb :_job_info, locals: { job: @retry, type: :retry } %>
 
-<h3><%= t('Error') %></h3>
-<div class="table_container">
-  <table class="error table table-bordered table-striped table-hover">
+<section>
+  <h3><%= t('Error') %></h3>
+
+  <table class="striped">
     <tbody>
       <tr>
         <th><%= t('ErrorClass') %></th>
@@ -24,11 +25,16 @@
       <% end %>
     </tbody>
   </table>
-</div>
 
-<form class="form-horizontal" action="<%= root_path %>retries/<%= job_params(@retry, @retry.score) %>" method="post">
-  <%= csrf_tag %>
-  <a class="btn btn-default" href="<%= root_path %>retries"><%= t('GoBack') %></a>
-  <input class="btn btn-primary" type="submit" name="retry" value="<%= t('RetryNow') %>" />
-  <input class="btn btn-danger" type="submit" name="delete" value="<%= t('Delete') %>" />
-</form>
+  <div class="grid">
+    <a href="<%= root_path %>retries"><%= t('GoBack') %></a>
+    <div><!-- spacer --></div>
+    <form action="<%= root_path %>retries/<%= job_params(@retry, @retry.score) %>" method="post">
+      <%= csrf_tag %>
+      <fieldset class="grid">
+        <input type="submit" name="retry" value="<%= t('RetryNow') %>" />
+        <input class="danger" type="submit" name="delete" value="<%= t('Delete') %>" />
+      </fieldset>
+    </form>
+  </div>
+</section>

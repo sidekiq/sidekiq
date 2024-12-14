@@ -1,6 +1,4 @@
-<div>
-  <form method="get" class="form-inline" action='<%= root_path %><%= which %>'>
-    <label for="substr"><%= t('Filter') %></label>
-    <input class="search form-control" type="search" name="substr" value="<%= h url_params("substr") %>" placeholder="<%= t('AnyJobContent') %>"/>
-  </form>
-</div>
+<form role="search" method="get" action='<%= root_path %><%= which %>'>
+  <input type="search" name="substr" value="<%= h url_params("substr") %>" placeholder="<%= t('AnyJobContent') %>"/>
+  <input type="submit" value="<%= t('Search') %>" />
+</form>

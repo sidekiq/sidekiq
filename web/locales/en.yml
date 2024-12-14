@@ -92,11 +92,13 @@ en:
   active: active
   idle: idle
   Metrics: Metrics
+  MetricsPeriod: Period
   NoDataFound: No data found
   TotalExecutionTime: Total Execution Time
   AvgExecutionTime: Average Execution Time
   Context: Context
   NoJobMetricsFound: No recent job metrics were found
+  Search: Search
   Filter: Filter
   AnyJobContent: Any job content
   Profiles: Profiles

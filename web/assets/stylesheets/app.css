@@ -1,0 +1,179 @@
+@media (min-width: 576px) {
+  :root {
+    --pico-font-size: 100%;
+  }
+}
+@media (min-width: 768px) {
+  :root {
+    --pico-font-size: 100%;
+  }
+}
+@media (min-width: 1024px) {
+  :root {
+    --pico-font-size: 100%;
+  }
+}
+@media (min-width: 1280px) {
+  :root {
+    --pico-font-size: 100%;
+  }
+}
+@media (min-width: 1536px) {
+  :root {
+    --pico-font-size: 100%;
+  }
+}
+:root {
+  --pico-spacing: 0.7rem;
+}
+section {
+  margin-bottom: 2rem;
+}
+
+@media only screen and (prefers-color-scheme: dark) {
+  :root {
+    --pico-primary: #b1003e !important;
+    --pico-primary-color: #eee !important;
+    --pico-primary-background: #b1003e !important;
+    --pico-primary-border-color: #444 !important;
+    --pico-primary-hover: #e36 !important;
+    --pico-primary-hover-background: #e36 !important;
+    --pico-background-color: #141414 !important;
+    --pico-card-background-color: #333 !important;
+    --pico-card-sectioning-background-color: #222 !important;
+    --pico-card-border-color: #444 !important;
+  }
+}
+article {
+  text-align: center;
+}
+article .count {
+  font-size: x-large;
+}
+a.brand {
+  font-size: xx-large;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+body > header {
+  border-bottom: 1px solid var(--pico-muted-border-color);
+}
+body > main {
+  margin: 2rem;
+  flex: 1;
+}
+body > footer {
+  border-top: 1px solid var(--pico-muted-border-color);
+}
+body > header, body > footer {
+  padding: 0 1rem !important;
+  background-color: var(--pico-table-row-stripped-background-color);
+}
+
+pill {
+  border: 1px solid white;
+  border-radius: var(--pico-border-radius);
+  padding: 0.1rem 0.2rem;
+  color: var(--pico-primary-color);
+  background-color: var(--pico-primary-background);
+  border-color: var(--pico-primary-border-color);
+}
+pill.muted {
+  color: var(--pico-muted-border-color);
+  background-color: var(--pico-muted-color);
+  border-color: var(--pico-muted-border-color);
+}
+pill.contrast {
+  color: var(--pico-contrast-border-color);
+  background-color: var(--pico-contrast-color);
+  border-color: var(--pico-contrast-border-color);
+}
+
+.sr-only { 
+  position:absolute;
+  left:-10000px;
+  top:auto;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+}
+
+/* make links look like buttons */
+.btn {
+  border: 0;
+  border-radius: var(--pico-border-radius);
+  padding: var(--pico-spacing);
+  color: var(--pico-primary-color);
+  background-color: var(--pico-primary-background);
+  border-color: var(--pico-primary-border-color);
+  text-decoration: none;
+}
+.btn:hover {
+  background-color: var(--pico-primary-hover);
+}
+.linkgroup {
+  padding: var(--pico-spacing);
+}
+
+canvas {
+  margin: 2rem 0;
+}
+
+.metrics-swatch-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.metrics-swatch[type=checkbox] {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border-radius: 2px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: 1px solid #bbb;
+  color: white;
+  background-color: currentColor;
+}
+
+/* We need to add the checkmark since we've taken over the appearance */
+.metrics-swatch[type=checkbox]:checked {
+  border-color: currentColor;
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.metrics-swatch[type=checkbox]:focus {
+  outline: 1px solid #888;
+  outline-offset: 2px;
+}
+
+#realtime-legend {
+  margin-top: -20px;
+  padding-left: 30px;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+}
+#realtime-legend > * {
+  min-width: 14rem;
+}
+#realtime-legend .swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: 0 5px;
+}
+#realtime-legend .time {
+  min-width: auto;
+  text-align: right;
+}

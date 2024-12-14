@@ -1,45 +1,30 @@
-<div class="navbar navbar-default navbar-fixed-top">
-  <div class="container-fluid">
-    <div class="navbar-header" data-navbar="static">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="navbar-menu" data-target="#navbar-menu">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <div class="navbar-toggle collapsed navbar-livereload">
-        <%= erb :_poll_link %>
-        <% if config.app_url %>
-          <a class="btn btn-inverse" href="<%= config.app_url %>"><%= t('BackToApp') %></a>
-        <% end %>
-      </div>
-      <a class="navbar-brand" href="<%= root_path %>">
-        <%= Sidekiq::NAME %>
-      </a>
-    </div>
+<nav>
+  <ul><li><strong>
+    <a class="brand" href="<%= root_path %>"><%= Sidekiq::NAME %></strong></a>
+  </li></ul>
+  <ul>
+  <% config.tabs.each do |title, url| %>
+    <% if url == '' %>
+      <li>
+        <%= current_path == url ? '<a aria-current="page"' : '<a ' %>
+        href="<%= root_path %><%= url %>"><%= t(title) %></a>
+      </li>
+    <% else %>
+      <li>
+        <%= current_path.start_with?(url) ? '<a aria-current="page"' : '<a ' %>
+         href="<%= root_path %><%= url %>"><%= t(title) %></a>
+      </li>
+    <% end %>
+  <% end %>
+  </ul>
 
-    <div class="collapse navbar-collapse" id="navbar-menu">
-      <ul class="nav navbar-nav" data-navbar="static">
-        <% config.tabs.each do |title, url| %>
-          <% if url == '' %>
-            <li class="<%= current_path == url ? 'active' : '' %>">
-            <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
-            </li>
-          <% else %>
-            <li class="<%= current_path.start_with?(url) ? 'active' : '' %>">
-            <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
-            </li>
-          <% end %>
-        <% end %>
-
-        <li class="navbar-livereload">
-          <div class="poll-wrapper">
-            <%= erb :_poll_link %>
-            <% if config.app_url %>
-              <a class="btn btn-inverse" href="<%= config.app_url %>"><%= t('BackToApp') %></a>
-            <% end %>
-          </div>
-        </li>
-      </ul>
-    </div>
-  </div>
-</div>
+  <ul><li>
+  <% if pollable? %>
+    <button class="live-poll-start live-poll"><%= t('LivePoll') %></button>
+    <button class="live-poll-stop live-poll secondary" style="display: none"><%= t('StopPolling') %></button>
+  <% end %>
+  <% if config.app_url %>
+    <a class="contrast" href="<%= config.app_url %>"><%= t('BackToApp') %></a>
+  <% end %>
+  </li></ul>
+</nav>
