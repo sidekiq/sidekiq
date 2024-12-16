@@ -488,38 +488,15 @@ describe Sidekiq::Client do
     end
 
     it "push bulk sends worker in correct queue" do
-      aggregator = Hash.new do |hash, key|
-        hash[key] = Hash.new do |inner_hash, inner_key|
-          inner_hash[inner_key] = []
-        end
-      end
-      pool = Sidekiq::RedisConnection.create(size: 1)
-      pool.with do |conn|
-        pipeline = Object.new
-
-        conn.define_singleton_method(:pipelined) do |&block|
-          block.call(pipeline)
-        end
-
-        pipeline.define_singleton_method(:sadd) do |set, elements|
-          aggregator[:sadd][set].push(*elements)
-        end
-
-        pipeline.define_singleton_method(:lpush) do |list, elements|
-          aggregator[:lpush][list].push(*elements)
-        end
+      @client.middleware do |chain|
+        chain.add MiddlewareDynamicQueue
       end
 
-      Sidekiq::Client.via(pool) do
-        client = Sidekiq::Client.new
-        client.middleware do |chain|
-          chain.add MiddlewareDynamicQueue
-        end
-        client.push_bulk("class" => MyJob, "args" => 10.times.map { [_1] })
-      end
-      assert_equal ["even_queue", "odd_queue"], aggregator[:sadd]["queues"]
-      assert_equal 5, aggregator[:lpush]["queue:even_queue"].size
-      assert_equal 5, aggregator[:lpush]["queue:odd_queue"].size
+      @client.push_bulk("class" => MyJob, "args" => 3.times.map { [_1] })
+      even_queue = Sidekiq::Queue.new("even_queue")
+      odd_queue = Sidekiq::Queue.new("odd_queue")
+      assert_equal 2, even_queue.size
+      assert_equal 1, odd_queue.size
     end
   end
 
