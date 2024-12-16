@@ -63,11 +63,13 @@ body {
   overflow-x: hidden;
   padding: 64px 0;
   position: relative;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3 {
   font-size: var(--font-size-large);
   font-weight: normal;
+  overflow-wrap: break-word;
   margin: 0;
   padding: 0;
 }
