@@ -44,8 +44,6 @@
     </div>
   </header>
 
-
-
   <canvas id="history-chart">
     <%= to_json({
       processedLabel: t('Processed'),
@@ -60,43 +58,41 @@
   <header>
     <h3>Redis</h3>
   </header>
-  <div class="stats-wrapper">
-    <div class="stats-container">
-      <% if @redis_info.fetch("redis_version", nil) %>
-        <div class="stat">
-          <h3 id="redis_version"><%= @redis_info.fetch("redis_version") %></h3>
-          <p><%= t('Version') %></p>
-        </div>
-      <% end %>
+  <div class="cards-container">
+    <% if @redis_info.fetch("redis_version", nil) %>
+      <article>
+        <h3 id="redis_version"><%= @redis_info.fetch("redis_version") %></h3>
+        <p><%= t('Version') %></p>
+      </article>
+    <% end %>
 
-      <% if @redis_info.fetch("uptime_in_days", nil) %>
-        <div class="stat">
-          <h3 id="uptime_in_days"><%= @redis_info.fetch("uptime_in_days") %></h3>
-          <p><%= t('Uptime') %></p>
-        </div>
-      <% end %>
+    <% if @redis_info.fetch("uptime_in_days", nil) %>
+      <article>
+        <h3 id="uptime_in_days"><%= @redis_info.fetch("uptime_in_days") %></h3>
+        <p><%= t('Uptime') %></p>
+      </article>
+    <% end %>
 
-      <% if @redis_info.fetch("connected_clients", nil) %>
-        <div class="stat">
-          <h3 id="connected_clients"><%= @redis_info.fetch("connected_clients") %></h3>
-          <p><%= t('Connections') %></p>
-        </div>
-      <% end %>
+    <% if @redis_info.fetch("connected_clients", nil) %>
+      <article>
+        <h3 id="connected_clients"><%= @redis_info.fetch("connected_clients") %></h3>
+        <p><%= t('Connections') %></p>
+      </article>
+    <% end %>
 
-      <% if @redis_info.fetch("used_memory_human", nil) %>
-        <div class="stat">
-          <h3 id="used_memory_human"><%= @redis_info.fetch("used_memory_human") %></h3>
-          <p><%= t('MemoryUsage') %></p>
-        </div>
-      <% end %>
+    <% if @redis_info.fetch("used_memory_human", nil) %>
+      <article>
+        <h3 id="used_memory_human"><%= @redis_info.fetch("used_memory_human") %></h3>
+        <p><%= t('MemoryUsage') %></p>
+      </article>
+    <% end %>
 
-      <% if @redis_info.fetch("used_memory_peak_human", nil) %>
-        <div class="stat">
-          <h3 id="used_memory_peak_human"><%= @redis_info.fetch("used_memory_peak_human") %></h3>
-          <p><%= t('PeakMemoryUsage') %></p>
-        </div>
-      <% end %>
-    </div>
+    <% if @redis_info.fetch("used_memory_peak_human", nil) %>
+      <article>
+        <h3 id="used_memory_peak_human"><%= @redis_info.fetch("used_memory_peak_human") %></h3>
+        <p><%= t('PeakMemoryUsage') %></p>
+      </article>
+    <% end %>
   </div>
 </section>
 
