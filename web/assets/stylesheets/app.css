@@ -1,31 +1,39 @@
-@media (min-width: 576px) {
-  :root {
-    --pico-font-size: 100%;
-  }
-}
-@media (min-width: 768px) {
-  :root {
-    --pico-font-size: 100%;
-  }
-}
-@media (min-width: 1024px) {
-  :root {
-    --pico-font-size: 100%;
-  }
-}
-@media (min-width: 1280px) {
-  :root {
-    --pico-font-size: 100%;
-  }
-}
-@media (min-width: 1536px) {
-  :root {
-    --pico-font-size: 100%;
-  }
-}
 :root {
-  --pico-spacing: 0.7rem;
+  --pico-font-family-sans-serif: Inter, system-ui, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, Helvetica, Arial, "Helvetica Neue", sans-serif, var(--pico-font-family-emoji);
+  --pico-font-size: 87.5%;
+  /* Original: 100% */
+  --pico-line-height: 1.25;
+  /* Original: 1.5 */
+  --pico-form-element-spacing-vertical: 0.5rem;
+  /* Original: 1rem */
+  --pico-form-element-spacing-horizontal: 1.0rem;
+  /* Original: 1.25rem */
+  --pico-border-radius: 0.375rem;
+  /* Original: 0.25rem */
 }
+@media (min-width: 576px) {
+  :root { --pico-font-size: 85%; }
+}
+
+@media (min-width: 768px) {
+  :root { --pico-font-size: 90%; }
+}
+
+@media (min-width: 1024px) {
+  :root { --pico-font-size: 95%; }
+}
+
+@media (min-width: 1280px) {
+  :root { --pico-font-size: 100%; }
+}
+
+@media (min-width: 1536px) {
+  :root { --pico-font-size: 100%; }
+}
+h1, h2, h3, h4, h5, h6 {
+  --pico-font-weight: 600;
+}
+
 section {
   margin-bottom: 2rem;
 }
@@ -43,15 +51,6 @@ section {
     --pico-card-sectioning-background-color: #222 !important;
     --pico-card-border-color: #444 !important;
   }
-}
-article {
-  text-align: center;
-}
-article .count {
-  font-size: x-large;
-}
-a.brand {
-  font-size: xx-large;
 }
 
 body {
@@ -72,6 +71,28 @@ body > footer {
 body > header, body > footer {
   padding: 0 1rem !important;
   background-color: var(--pico-table-row-stripped-background-color);
+}
+
+a.brand {
+  font-size: xx-large;
+}
+
+article {
+  border: 1px solid var(--pico-muted-border-color);
+  /* Original doesn't have a border */
+  border-radius: calc(var(--pico-border-radius) * 2);
+  /* Original: var(--pico-border-radius) */
+}
+
+article>footer {
+  border-radius: calc(var(--pico-border-radius) * 2);
+  /* Original: var(--pico-border-radius) */
+}
+article {
+  text-align: center;
+}
+article .count {
+  font-size: x-large;
 }
 
 pill {

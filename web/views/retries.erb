@@ -58,7 +58,7 @@
       <input type="submit" name="retry" value="<%= t('RetryNow') %>" />
       <input class="danger" type="submit" name="delete" value="<%= t('Delete') %>" />
       <input class="danger" type="submit" name="kill" value="<%= t('Kill') %>" />
-      <div><!-- spacer --></div>
+      <div><!--spacer--></div>
       <% if @retries.size > 0 && @total_size > @count %>
         <%= erb :_paging, locals: { url: "#{root_path}retries" } %>
       <% else %>
