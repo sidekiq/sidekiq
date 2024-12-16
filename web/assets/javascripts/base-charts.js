@@ -1,26 +1,33 @@
 if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-  Chart.defaults.borderColor = "oklch(28% 0.01 269)";
+  Chart.defaults.borderColor = "oklch(25% 0.01 269)";
   Chart.defaults.color = "oklch(71% 0.01 269)";
 }
 
 class Colors {
   constructor() {
     this.assignments = {};
-    this.success = "oklch(0.5 0.18 179)";
-    this.failure = "oklch(0.5 0.18 29)";
-    this.fallback = "oklch(0.5 0.02 269)";
-    this.primary = "oklch(0.5 0.18 269)";
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      this.light = "75%";
+      this.chroma = "0.1";
+    } else {
+      this.light = "50%";
+      this.chroma = "0.2";
+    }
+    this.success = "oklch(" + this.light + " " + this.chroma + " 179)";
+    this.failure = "oklch(" + this.light + " " + this.chroma + " 29)";
+    this.fallback = "oklch(" + this.light + " 0.02 269)";
+    this.primary = "oklch(" + this.light + " " + this.chroma + " 269)";
     this.available = [
-      "oklch(0.5 0.18 269)",
-      "oklch(0.5 0.18 209)",
-      "#oklch(0.5 0.18 59)",
-      "oklch(0.5 0.18 329)",
-      "oklch(0.5 0.18 119)",
-      "oklch(0.5 0.18 239)",
-      "oklch(0.5 0.18 149)",
-      "oklch(50% 0.02 269)",
-      "oklch(0.5 0.18 299)",
-      "oklch(0.5 0.18 29)",
+      "oklch(" + this.light + " " + this.chroma + " 269)",
+      "oklch(" + this.light + " " + this.chroma + " 209)",
+      "oklch(" + this.light + " " + this.chroma + " 59)",
+      "oklch(" + this.light + " " + this.chroma + " 329)",
+      "oklch(" + this.light + " " + this.chroma + " 119)",
+      "oklch(" + this.light + " " + this.chroma + " 239)",
+      "oklch(" + this.light + " " + this.chroma + " 149)",
+      "oklch(" + this.light + " 0.02 269)",
+      "oklch(" + this.light + " " + this.chroma + " 299)",
+      "oklch(" + this.light + " " + this.chroma + " 29)",
     ];
   }
 
@@ -94,7 +101,7 @@ class BaseChart {
           type: "line",
           xMin: bucket,
           xMax: bucket,
-          borderColor: "oklch(91% 0.002 269)",
+          borderColor: "oklch(95% 0.006 269)",
           borderWidth: 2,
         };
       });

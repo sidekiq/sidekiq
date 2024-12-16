@@ -8,9 +8,8 @@
   bucket_labels = Sidekiq::Metrics::Histogram::LABELS
   bucket_intervals = Sidekiq::Metrics::Histogram::BUCKET_INTERVALS
 %>
-
-<% if job_result.totals["s"] > 0 %>
-  <section>
+<section>
+  <% if job_result.totals["s"] > 0 %>
     <header>
       <h1>
         <a href="<%= root_path %>metrics?period=<%= @period %>"><%= t('Metrics') %></a> /

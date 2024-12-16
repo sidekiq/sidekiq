@@ -69,11 +69,7 @@ function addDataToggleListeners(event) {
   var source = event.target || event.srcElement;
   var targName = source.getAttribute("data-toggle");
   var full = document.getElementById(targName);
-  if (full.style.display == "block") {
-    full.style.display = 'none';
-  } else {
-    full.style.display = 'block';
-  }
+  full.classList.toggle("is-open");
 }
 
 function addShiftClickListeners() {
