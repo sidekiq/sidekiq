@@ -1,20 +1,20 @@
-<footer class="navbar navbar-fixed-bottom navbar-inverse ltr">
+<footer>
   <div class="container">
     <ul class="nav">
       <li>
-        <p class="product-version"><%= product_version %></p>
+        <p><%= product_version %></p>
       </li>
       <li>
-        <p class="redis-url" title="<%= redis_url %>"><%= redis_url %></p>
+        <p title="<%= redis_url %>"><%= redis_url %></p>
       </li>
       <li>
-        <p id="serverUtcTime" class="server-utc-time"><%= server_utc_time %></p>
+        <p id="serverUtcTime"><%= server_utc_time %></p>
       </li>
       <li>
         <p><a rel=help href="https://github.com/sidekiq/sidekiq/wiki">docs</a></p>
       </li>
       <li>
-        <form id="locale-form" class="form-inline" action="<%= root_path %>change_locale" method="post">
+        <form id="locale-form" action="<%= root_path %>change_locale" method="post">
           <%= csrf_tag %>
           <label class="sr-only" for="locale">Language</label>
           <select id="locale-select" class="form-control" name="locale">

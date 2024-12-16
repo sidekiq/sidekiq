@@ -1,5 +1,5 @@
-<div class="navbar navbar-fixed-top">
-  <div class="container-fluid">
+<header>
+  <div class="container">
     <div class="navbar-header" data-navbar="static">
       <button type="button" class="btn navbar-toggle" data-toggle="navbar-menu" data-target="#navbar-menu">
         <span class="icon-bar"></span>
@@ -17,7 +17,7 @@
       </a>
     </div>
 
-    <div class="collapse navbar-collapse" id="navbar-menu">
+    <div class="navbar-collapse" id="navbar-menu">
       <ul class="nav navbar-nav" data-navbar="static">
         <% config.tabs.each do |title, url| %>
           <% if url == '' %>
@@ -42,4 +42,4 @@
       </ul>
     </div>
   </div>
-</div>
+</header>
