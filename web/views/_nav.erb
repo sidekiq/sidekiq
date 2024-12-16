@@ -18,15 +18,15 @@
     </div>
 
     <div class="navbar-collapse" id="navbar-menu">
-      <ul class="nav navbar-nav" data-navbar="static">
+      <ul class="nav" data-navbar="static">
         <% config.tabs.each do |title, url| %>
           <% if url == '' %>
             <li class="<%= current_path == url ? 'active' : '' %>">
-            <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
+              <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
             </li>
           <% else %>
             <li class="<%= current_path.start_with?(url) ? 'active' : '' %>">
-            <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
+              <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
             </li>
           <% end %>
         <% end %>
