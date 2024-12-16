@@ -58,6 +58,13 @@ class MiddlewareArguments
   end
 end
 
+class MiddlewareDynamicQueue
+  def call(worker_class, job, queue, redis)
+    job["queue"] = job["args"].first.odd? ? "odd_queue" : "even_queue"
+    yield
+  end
+end
+
 class DJob < BaseJob
 end
 
@@ -478,6 +485,18 @@ describe Sidekiq::Client do
       assert_equal 2, result.size
       refute result[0]
       assert_match(/[0-9a-f]{12}/, result[1])
+    end
+
+    it "push bulk sends worker in correct queue" do
+      @client.middleware do |chain|
+        chain.add MiddlewareDynamicQueue
+      end
+
+      @client.push_bulk("class" => MyJob, "args" => 3.times.map { [_1] })
+      even_queue = Sidekiq::Queue.new("even_queue")
+      odd_queue = Sidekiq::Queue.new("odd_queue")
+      assert_equal 2, even_queue.size
+      assert_equal 1, odd_queue.size
     end
   end
 
