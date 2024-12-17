@@ -4,7 +4,13 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-HEAD
+7.3.4
+---------
+
+- Tune `inspect` to avoid huge output [#6553]
+- Use backported APIs for Web extension
+
+7.3.3
 ---------
 
 - Call `Process.warmup` before fork in sidekiqswarm, use `RUBY_DISABLE_WARMUP=1` to disable [#6279]
