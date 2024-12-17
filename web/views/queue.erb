@@ -1,15 +1,13 @@
-<div class="header-container">
-  <h1><%= t('CurrentMessagesInQueue', :queue => h(@name)) %>
+<section>
+  <% url = "#{root_path}queues/#{CGI.escape(@name)}" %>
+  <h2><%= t('CurrentMessagesInQueue', :queue => h(@name)) %>
     <% if @queue.paused? %>
-      <span class="label label-danger"><%= t('Paused') %></span>
+      <pill><%= t('Paused') %></pill>
     <% end %>
-    <span class="badge badge-secondary"><%= number_with_delimiter(@total_size) %></span>
-  </h1>
-  <%= erb :_paging, locals: { url: "#{root_path}queues/#{CGI.escape(@name)}" } %>
-</div>
+    <pill class="muted"><%= number_with_delimiter(@total_size) %></pill>
+  </h2>
 
-<div class="table_container">
-  <table class="queue table table-hover table-bordered table-striped">
+  <table class="striped">
     <thead>
       <th><a href="<%= url %>?direction=<%= url_params("direction") == 'asc' ? 'desc' : 'asc' %>"># <%= sort_direction_label %></a></th>
       <th><%= t('Job') %></th>
@@ -32,7 +30,7 @@
           <% a = job.display_args %>
           <% if a.inspect.size > 100 %>
             <span id="job_<%= index %>"><%= h(a.inspect[0..100]) + "... " %></span>
-            <button data-toggle="job_<%= index %>_full" class="btn btn-default btn-xs"><%= t('ShowAll') %></button>
+            <button data-toggle="job_<%= index %>_full"><%= t('ShowAll') %></button>
             <div class="toggle" id="job_<%= index %>_full"><%= display_args(a) %></div>
           <% else %>
             <%= display_args(job.display_args) %>
@@ -45,11 +43,11 @@
           <form action="<%= root_path %>queues/<%= CGI.escape(@name) %>/delete" method="post">
             <%= csrf_tag %>
             <input name="key_val" value="<%= h job.value %>" type="hidden" />
-            <input class="btn btn-danger btn-xs" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSure') %>" />
+            <input class="danger" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSure') %>" />
           </form>
         </td>
       </tr>
     <% end %>
   </table>
-</div>
-<%= erb :_paging, locals: { url: "#{root_path}queues/#{CGI.escape(@name)}" } %>
+  <%= erb :_paging, locals: { url: url} %>
+</section>

@@ -20,8 +20,8 @@ module Sidekiq
       "Dashboard" => "",
       "Busy" => "busy",
       "Queues" => "queues",
-      "Retries" => "retries",
       "Scheduled" => "scheduled",
+      "Retries" => "retries",
       "Dead" => "morgue",
       "Metrics" => "metrics",
       "Profiles" => "profiles"

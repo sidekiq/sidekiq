@@ -122,7 +122,7 @@ module Sidekiq
 
     def display_tags(job, within = "retries")
       job.tags.map { |tag|
-        "<span class='label label-info jobtag'>#{filter_link(tag, within)}</span>"
+        "<pill class='muted jobtag'>#{filter_link(tag, within)}</pill>"
       }.join(" ")
     end
 
@@ -307,6 +307,7 @@ module Sidekiq
     def display_args(args, truncate_after_chars = 2000)
       return "Invalid job payload, args is nil" if args.nil?
       return "Invalid job payload, args must be an Array, not #{args.class.name}" unless args.is_a?(Array)
+      return "[]" if args.empty?
 
       begin
         args.map { |arg|
@@ -421,6 +422,16 @@ module Sidekiq
         job.delete
       elsif params["add_to_queue"]
         job.add_to_queue
+      end
+    end
+
+    def period_link(currentval)
+      paramval = url_params("period") || "1h"
+      substr = url_params("substr")
+      if paramval == currentval
+        currentval
+      else
+        "<a href='?period=#{currentval}&substr=#{CGI.escape(substr || "")}'>#{currentval}</a>"
       end
     end
   end

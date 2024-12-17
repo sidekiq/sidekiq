@@ -186,15 +186,9 @@ module Sidekiq
         redirect_with_query("#{root_path}morgue")
       end
 
-      post "/morgue/all/delete" do
-        Sidekiq::DeadSet.new.clear
-
-        redirect "#{root_path}morgue"
-      end
-
-      post "/morgue/all/retry" do
-        Sidekiq::DeadSet.new.retry_all
-
+      post "/morgue/all" do
+        Sidekiq::DeadSet.new.clear if url_params("delete")
+        Sidekiq::DeadSet.new.retry_all if url_params("retry")
         redirect "#{root_path}morgue"
       end
 
@@ -245,18 +239,10 @@ module Sidekiq
         redirect_with_query("#{root_path}retries")
       end
 
-      post "/retries/all/delete" do
-        Sidekiq::RetrySet.new.clear
-        redirect "#{root_path}retries"
-      end
-
-      post "/retries/all/retry" do
-        Sidekiq::RetrySet.new.retry_all
-        redirect "#{root_path}retries"
-      end
-
-      post "/retries/all/kill" do
-        Sidekiq::RetrySet.new.kill_all
+      post "/retries/all" do
+        Sidekiq::RetrySet.new.clear if url_params("delete")
+        Sidekiq::RetrySet.new.retry_all if url_params("retry")
+        Sidekiq::RetrySet.new.kill_all if url_params("kill")
         redirect "#{root_path}retries"
       end
 

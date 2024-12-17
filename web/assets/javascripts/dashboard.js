@@ -22,11 +22,6 @@ var updateFooterUTCTime = function(time) {
   document.getElementById('serverUtcTime').innerText = time;
 }
 
-var pulseBeacon = function() {
-  document.getElementById('beacon').classList.add('pulse');
-  window.setTimeout(() => { document.getElementById('beacon').classList.remove('pulse'); }, 1000);
-}
-
 var setSliderLabel = function(val) {
   document.getElementById('sldr-text').innerText = Math.round(parseFloat(val) / 1000) + ' s';
 }

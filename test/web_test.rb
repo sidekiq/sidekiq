@@ -396,7 +396,7 @@ describe Sidekiq::Web do
   it "can delete all retries" do
     3.times { add_retry }
 
-    post "/retries/all/delete", "delete" => "Delete"
+    post "/retries/all", "delete" => "Delete"
     assert_equal 0, Sidekiq::RetrySet.new.size
     assert_equal 302, last_response.status
     assert_equal "http://example.org/retries", last_response.headers["Location"]
@@ -405,7 +405,7 @@ describe Sidekiq::Web do
   it "can kill all retries" do
     3.times { add_retry }
 
-    post "/retries/all/kill"
+    post "/retries/all", "kill" => "Kill"
     assert_equal 0, Sidekiq::RetrySet.new.size
     assert_equal 3, Sidekiq::DeadSet.new.size
     assert_equal 302, last_response.status
@@ -537,7 +537,7 @@ describe Sidekiq::Web do
     msg = add_retry.first
     add_retry
 
-    post "/retries/all/retry", "retry" => "Retry"
+    post "/retries/all", "retry" => "Retry"
     assert_equal 302, last_response.status
     assert_equal "http://example.org/retries", last_response.headers["Location"]
     assert_equal 2, Sidekiq::Queue.new("default").size
@@ -557,8 +557,8 @@ describe Sidekiq::Web do
     assert_includes last_response.body, "fail message: &lt;a&gt;hello&lt;/a&gt;"
     refute_includes last_response.body, "fail message: <a>hello</a>"
 
-    assert_includes last_response.body, "args\">&quot;&lt;a&gt;hello&lt;/a&gt;&quot;<"
-    refute_includes last_response.body, "args\"><a>hello</a><"
+    assert_includes last_response.body, ">&quot;&lt;a&gt;hello&lt;/a&gt;&quot;<"
+    refute_includes last_response.body, "<a>hello</a>"
 
     # on /workers page
     @config.redis do |conn|
@@ -751,7 +751,7 @@ describe Sidekiq::Web do
       3.times { add_dead }
 
       assert_equal 3, Sidekiq::DeadSet.new.size
-      post "/morgue/all/delete"
+      post "/morgue/all", "delete" => "Delete"
       assert_equal 0, Sidekiq::DeadSet.new.size
       assert_equal 302, last_response.status
       assert_equal "http://example.org/morgue", last_response.headers["Location"]
@@ -776,7 +776,7 @@ describe Sidekiq::Web do
 
       assert_equal 0, Sidekiq::Queue.new("foo").size
       assert_equal 3, Sidekiq::DeadSet.new.size
-      post "/morgue/all/retry"
+      post "/morgue/all", "retry" => "Retry"
       assert_equal 0, Sidekiq::DeadSet.new.size
       assert_equal 3, Sidekiq::Queue.new("foo").size
       assert_equal 302, last_response.status

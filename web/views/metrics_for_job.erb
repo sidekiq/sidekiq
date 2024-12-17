@@ -7,20 +7,29 @@
   hist_totals = job_result.hist.values.first.zip(*job_result.hist.values[1..-1]).map(&:sum).reverse
   bucket_labels = Sidekiq::Metrics::Histogram::LABELS
   bucket_intervals = Sidekiq::Metrics::Histogram::BUCKET_INTERVALS
+
+  def period_link(currentval)
+    paramval = url_params("period") || "1h"
+    paramval == currentval ? currentval : "<a href='?period=#{currentval}'>#{currentval}</a>"
+  end
 %>
 
+<section>
 <% if job_result.totals["s"] > 0 %>
-  <div class="header-container">
-    <div class="page-title-container">
-      <h1>
-        <a href="<%= root_path %>metrics?period=<%= @period %>"><%= t('Metrics') %></a> /
-        <%= h @name %>
-      </h1>
-
-      <a target="blank" href="https://github.com/sidekiq/sidekiq/wiki/Metrics"><span class="info-circle" title="Click to learn more about metrics">?</span></a>
-    </div>
-
-    <%= erb :_metrics_period_select, locals: { periods: @periods, period: @period, path: "#{root_path}metrics/#{@name}" } %>
+  <div class="grid">
+    <h3>
+      <a href="<%= root_path %>metrics?period=<%= @period %>"><%= t('Metrics') %></a> &gt; <%= h @name %>
+    </h3>
+    <div><!-- spacer --></div>
+    <nav>
+      <ul>
+        <li><%= t('MetricsPeriod') %>:</li>
+        <li><%= period_link("1h") %></li>
+        <li><%= period_link("2h") %></li>
+        <li><%= period_link("4h") %></li>
+        <li><%= period_link("8h") %></li>
+      </ul>
+    </nav>
   </div>
 
   <canvas id="hist-totals-chart">
@@ -46,14 +55,13 @@
     }) %>
   </canvas>
 
-  <!--p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p-->
 <% else %>
   <h1>
-    <a href="<%= root_path %>/metrics"><%= t('Metrics') %></a> /
-    <%= h @name %>
+    <a href="<%= root_path %>/metrics"><%= t('Metrics') %></a> / <%= h @name %>
   </h1>
 
-  <div class="alert alert-success"><%= t('NoJobMetricsFound') %></div>
+  <p><%= t('NoJobMetricsFound') %></p>
 <% end %>
+</section>
 
 <script type="text/javascript" src="<%= root_path %>javascripts/metrics.js" nonce="<%= csp_nonce %>"></script>

@@ -1,9 +1,7 @@
-<div class="header-container">
+<section>
   <h1><%= t('Queues') %></h1>
-</div>
 
-<div class="table_container">
-  <table class="queues table table-hover table-bordered table-striped">
+  <table class="striped">
     <thead>
       <th><%= t('Queue') %></th>
       <th><%= t('Size') %></th>
@@ -15,7 +13,7 @@
         <td>
           <a href="<%= root_path %>queues/<%= CGI.escape(queue.name) %>"><%= h queue.name %></a>
           <% if queue.paused? %>
-            <span class="label label-danger"><%= t('Paused') %></span>
+            <pill class="primary"><%= t('Paused') %></pill>
           <% end %>
         </td>
         <td class="num"><%= number_with_delimiter(queue.size) %> </td>
@@ -24,21 +22,23 @@
           <%= (queue_latency < 60) ? '' : " (#{relative_time(Time.at(Time.now.to_f - queue_latency))})" %>
           <%= number_with_delimiter(queue_latency, precision: 2) %>
         </td>
-        <td class="delete-confirm">
+        <td>
           <form action="<%=root_path %>queues/<%= CGI.escape(queue.name) %>" method="post">
             <%= csrf_tag %>
-            <input class="btn btn-danger" type="submit" name="delete" title="This will delete all jobs within the queue, it will reappear if you push more jobs to it in the future." value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSureDeleteQueue', :queue => h(queue.name)) %>" />
+            <fieldset class="grid">
+              <input class="danger" type="submit" name="delete" title="This will delete all jobs within the queue, it will reappear if you push more jobs to it in the future." value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSureDeleteQueue', :queue => h(queue.name)) %>" />
 
-            <% if Sidekiq.pro? %>
-              <% if queue.paused? %>
-                <input class="btn btn-danger" type="submit" name="unpause" value="<%= t('Unpause') %>" />
-              <% else %>
-                <input class="btn btn-danger" type="submit" name="pause" value="<%= t('Pause') %>" />
+              <% if Sidekiq.pro? %>
+                <% if queue.paused? %>
+                  <input type="submit" name="unpause" value="<%= t('Unpause') %>" />
+                <% else %>
+                  <input type="submit" name="pause" value="<%= t('Pause') %>" />
+                <% end %>
               <% end %>
-            <% end %>
+            </fieldset>
           </form>
         </td>
       </tr>
     <% end %>
   </table>
-</div>
+</section>

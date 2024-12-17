@@ -1,8 +1,8 @@
 <%= erb :_job_info, locals: { job: @dead, type: :dead } %>
 
-<h3><%= t('Error') %></h3>
-<div class="table_container">
-  <table class="error table table-bordered table-striped table-hover">
+<section>
+  <h3><%= t('Error') %></h3>
+  <table class="striped"
     <tbody>
       <tr>
         <th><%= t('ErrorClass') %></th>
@@ -24,11 +24,14 @@
       <% end %>
     </tbody>
   </table>
-</div>
 
-<form class="form-horizontal" action="<%= root_path %>morgue/<%= job_params(@dead, @dead.score) %>" method="post">
-  <%= csrf_tag %>
-  <a class="btn btn-default" href="<%= root_path %>morgue"><%= t('GoBack') %></a>
-  <input class="btn btn-primary" type="submit" name="retry" value="<%= t('RetryNow') %>" />
-  <input class="btn btn-danger" type="submit" name="delete" value="<%= t('Delete') %>" />
-</form>
+  <form action="<%= root_path %>morgue/<%= job_params(@dead, @dead.score) %>" method="post">
+    <%= csrf_tag %>
+    <fieldset class="grid">
+      <a href="<%= root_path %>morgue"><%= t('GoBack') %></a>
+      <div><!-- spacer --></div>
+      <input type="submit" name="retry" value="<%= t('RetryNow') %>" />
+      <input class="danger" type="submit" name="delete" value="<%= t('Delete') %>" />
+    </fieldset>
+  </form>
+</section>

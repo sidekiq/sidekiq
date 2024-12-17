@@ -1,16 +1,8 @@
-<div class="header-container">
-  <h3><%= t('Job') %></h3>
-</div>
+<section>
+  <h2><%= t('Job') %></h2>
 
-<div class="table_container">
-  <table class="table table-bordered table-striped table-hover">
+  <table class="striped">
     <tbody>
-      <tr>
-        <th><%= t('Queue') %></th>
-        <td>
-          <a href="<%= root_path %>queues/<%= job.queue %>"><%= job.queue %></a>
-        </td>
-      </tr>
       <tr>
         <th><%= t('Job') %></th>
         <td>
@@ -19,18 +11,24 @@
         </td>
       </tr>
       <tr>
-        <th><%= t('Arguments') %></th>
-        <td>
-          <code class="code-wrap">
-            <!-- We don't want to truncate any job arguments when viewing a single job's status page -->
-            <div class="args-extended"><%= display_args(job.display_args, nil) %></div>
-          </code>
-        </td>
-      </tr>
-      <tr>
         <th>JID</th>
         <td>
           <code><%= job.jid %></code>
+        </td>
+      </tr>
+      <tr>
+        <th><%= t('Queue') %></th>
+        <td>
+          <a href="<%= root_path %>queues/<%= job.queue %>"><%= job.queue %></a>
+        </td>
+      </tr>
+      <tr>
+        <th><%= t('Arguments') %></th>
+        <td>
+          <code>
+            <!-- We don't want to truncate any job arguments when viewing a single job's status page -->
+            <%= display_args(job.display_args, nil) %>
+          </code>
         </td>
       </tr>
       <% if job.bid %>
@@ -102,4 +100,4 @@
       <% end %>
     </tbody>
   </table>
-</div>
+</section>
