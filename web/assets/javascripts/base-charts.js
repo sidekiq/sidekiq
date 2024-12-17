@@ -96,12 +96,18 @@ class BaseChart {
     };
 
     if (this.options.marks) {
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        this.Borderlight = "35%";
+      } else {
+        this.Borderlight = "65%";
+      }
+
       this.options.marks.forEach(([bucket, label], i) => {
         chartOptions.plugins.annotation.annotations[`deploy-${i}`] = {
           type: "line",
           xMin: bucket,
           xMax: bucket,
-          borderColor: "oklch(95% 0.006 269)",
+          borderColor: "oklch(" + this.Borderlight + " 0.01 269)",
           borderWidth: 2,
         };
       });
