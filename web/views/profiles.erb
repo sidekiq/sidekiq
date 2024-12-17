@@ -9,7 +9,7 @@
   <% @profiles = Sidekiq::ProfileSet.new %>
   <% if @profiles.size > 0 %>
   <div class="table_container">
-    <table class="table table-hover table-bordered table-striped">
+    <table>
       <thead>
         <th><%= t('CreatedAt') %></th>
         <th><%= t('Type') %></th>
