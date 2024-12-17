@@ -29,9 +29,9 @@
           <td><%= number_with_delimiter(record.elapsed, precision: 2) %> </td>
           <td>
             <% if config[:profile_store_url] %>
-              <a target="_blank" class="btn btn-sm" href="<%= root_path %>profiles/<%= CGI.escape(record.key) %>"><%= t("View") %></a>
+              <a target="_blank" class="btn" href="<%= root_path %>profiles/<%= CGI.escape(record.key) %>"><%= t("View") %></a>
             <% end %>
-            <a class="btn btn-sm" href="<%= root_path %>profiles/<%= CGI.escape(record.key) %>/data"><%= t("Data") %></a>
+            <a class="btn" href="<%= root_path %>profiles/<%= CGI.escape(record.key) %>/data"><%= t("Data") %></a>
           </td>
         </tr>
       <% end %>

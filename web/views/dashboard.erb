@@ -2,10 +2,10 @@
 
 <section>
   <header>
-    <h3>
+    <h1>
       <%= t('Dashboard') %>
       <span id="beacon" class="beacon"></span>
-    </h3>
+    </h1>
     <div class="filter interval-slider">
       <span class="interval-slider-label"><%= t('PollingInterval') %>:</span>
       <span id="sldr-text" class="current-interval">5 s</span>
@@ -33,7 +33,7 @@
 
 <section>
   <header>
-    <h3><%= t('History') %></h3>
+    <h2><%= t('History') %></h2>
 
     <div class="filter">
       <% d = url_params("days") %>
@@ -56,7 +56,7 @@
 
 <section>
   <header>
-    <h3>Redis</h3>
+    <h2>Redis</h2>
   </header>
   <div class="cards-container">
     <% if @redis_info.fetch("redis_version", nil) %>

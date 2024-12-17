@@ -46,7 +46,7 @@
             <form action="<%= root_path %>queues/<%= CGI.escape(@name) %>/delete" method="post">
               <%= csrf_tag %>
               <input name="key_val" value="<%= h job.value %>" type="hidden" />
-              <input class="btn btn-danger btn-xs" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSure') %>" />
+              <input class="btn btn-danger" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSure') %>" />
             </form>
           </td>
         </tr>
