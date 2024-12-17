@@ -23,6 +23,7 @@ HEAD / main
 - Backport `Sidekiq::Web.configure` for compatibility with 8.0 [#6532]
 - Backport `url_params(key)` and `route_params(key)` for compatibility with 8.0 [#6532]
 - Various fixes for UI filtering [#6508]
+- Tune `inspect` for internal S::Components to keep size managable [#6553]
 
 7.3.6
 ----------

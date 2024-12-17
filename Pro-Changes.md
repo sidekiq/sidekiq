@@ -17,6 +17,7 @@ HEAD (8.0)
 - Fix queue pause affecting all applications using the same Redis instance,
   even if using different DB indexes. [#6528]
 - Fix broken filter links on Batch details page
+- Use backported APIs for Web extension
 
 7.3.3
 ---------
