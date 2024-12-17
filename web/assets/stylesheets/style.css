@@ -135,9 +135,10 @@ h1, h2, h3 {
   color: var(--color-primary);
 }
 
-.live-poll-stop {
-  background-color: var(--color-primary);
-  color: var(--color-bg);
+.live-poll { display: none; }
+
+.live-poll.active {
+  display: inline-block;
 }
 
 /* nav */
@@ -432,6 +433,8 @@ td.num span {
 .label-default { background: var(--color-selected); }
 
 .label-success { background: var(--color-selected-success); }
+
+.label-danger { background: var(--color-primary-pulse); }
 
 input[type="checkbox"] {
   background-color: var(--color-bg);

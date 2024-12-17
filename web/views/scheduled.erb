@@ -14,7 +14,7 @@
         <table>
           <thead>
             <tr>
-              <th class="table-checkbox checkbox-column">
+              <th>
                 <label>
                   <input type="checkbox" class="check_all" />
                 </label>
@@ -27,7 +27,7 @@
           </thead>
           <% @scheduled.each do |entry| %>
             <tr>
-              <td class="table-checkbox">
+              <td>
                 <label>
                   <input type='checkbox' name='key[]' value='<%= job_params(entry.item, entry.score) %>' class='shift_clickable' />
                 </label>
@@ -49,8 +49,8 @@
           <% end %>
         </table>
       </div>
-      <input class="btn btn-danger pull-right flip" type="submit" name="delete" value="<%= t('Delete') %>" />
-      <input class="btn btn-danger pull-right flip" type="submit" name="add_to_queue" value="<%= t('AddToQueue') %>" />
+      <input class="btn btn-danger" type="submit" name="delete" value="<%= t('Delete') %>" />
+      <input class="btn btn-danger" type="submit" name="add_to_queue" value="<%= t('AddToQueue') %>" />
     </form>
   <% else %>
     <div class="alert alert-success"><%= t('NoScheduledFound') %></div>

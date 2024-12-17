@@ -14,7 +14,7 @@
         <table>
           <thead>
             <tr>
-              <th class="table-checkbox checkbox-column">
+              <th>
                 <label>
                   <input type="checkbox" class="check_all" />
                 </label>
@@ -28,7 +28,7 @@
           </thead>
           <% @dead.each do |entry| %>
             <tr>
-              <td class="table-checkbox">
+              <td>
                 <label>
                   <input type='checkbox' name='key[]' value='<%= job_params(entry.item, entry.score) %>' class='shift_clickable' />
                 </label>

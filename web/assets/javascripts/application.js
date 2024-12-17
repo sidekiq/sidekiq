@@ -126,11 +126,11 @@ function setLivePollFromUrl() {
 
 function updateLivePollButton() {
   if (localStorage.sidekiqLivePoll == "enabled") {
-    document.querySelectorAll('.live-poll-stop').forEach(box => { box.style.display = "inline-block" })
-    document.querySelectorAll('.live-poll-start').forEach(box => { box.style.display = "none" })
+    document.querySelectorAll('.live-poll-stop').forEach(box => { box.classList.add("active") })
+    document.querySelectorAll('.live-poll-start').forEach(box => { box.classList.remove("active") })
   } else {
-    document.querySelectorAll('.live-poll-start').forEach(box => { box.style.display = "inline-block" })
-    document.querySelectorAll('.live-poll-stop').forEach(box => { box.style.display = "none" })
+    document.querySelectorAll('.live-poll-start').forEach(box => { box.classList.add("active") })
+    document.querySelectorAll('.live-poll-stop').forEach(box => { box.classList.remove("active") })
   }
 }
 
