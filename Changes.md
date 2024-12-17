@@ -14,6 +14,8 @@ HEAD / main
 - CI now runs against Redis, Dragonfly and Valkey.
 - The Web UI's language picker now shows options in the native language
 - Remove global variable usage within the codebase
+- Adjust Sidekiq's default thread priority to -1 for a 50ms timeslice. This can help avoid TimeoutErrors
+  when Sidekiq is overloaded. [#6543]
 
 7.3.7
 ----------

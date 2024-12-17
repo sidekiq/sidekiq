@@ -63,6 +63,7 @@ module Sidekiq
 
     def_delegators :@options, :[], :[]=, :fetch, :key?, :has_key?, :merge!, :dig
     attr_reader :capsules
+    attr_accessor :thread_priority
 
     def to_json(*)
       Sidekiq.dump_json(@options)

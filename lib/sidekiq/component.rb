@@ -1,6 +1,23 @@
 # frozen_string_literal: true
 
 module Sidekiq
+  # Ruby's default thread priority is 0, which uses 100ms time slices.
+  # This can lead to some surprising thread starvation; if using a lot of
+  # CPU-heavy concurrency, it may take several seconds before a Thread gets
+  # on the CPU.
+  #
+  # Negative priorities lower the timeslice by half, so -1 = 50ms, -2 = 25ms, etc.
+  # With more frequent timeslices, we reduce the risk of unintentional timeouts
+  # and starvation.
+  #
+  # Customize like so:
+  #
+  #   Sidekiq.configure_server do |cfg|
+  #     cfg.thread_priority = 0
+  #   end
+  #
+  DEFAULT_THREAD_PRIORITY = -1
+
   ##
   # Sidekiq::Component assumes a config instance is available at @config
   module Component # :nodoc:
@@ -13,11 +30,11 @@ module Sidekiq
       raise ex
     end
 
-    def safe_thread(name, &block)
+    def safe_thread(name, priority: nil, &block)
       Thread.new do
         Thread.current.name = "sidekiq.#{name}"
         watchdog(name, &block)
-      end
+      end.tap { |t| t.priority = (priority || config.thread_priority || DEFAULT_THREAD_PRIORITY) }
     end
 
     def logger
