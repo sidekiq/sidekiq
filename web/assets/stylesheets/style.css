@@ -89,7 +89,7 @@ h1, h2, h3 {
   font-size: var(--font-size-large);
   font-weight: normal;
   overflow-wrap: break-word;
-  margin: 0;
+  margin: var(--space-3x) 0 var(--space);
   padding: 0;
 }
 
@@ -214,6 +214,12 @@ section > header {
   align-items: center;
   gap: var(--space);
   margin: var(--space-3x) 0 var(--space);
+}
+
+section > header h1,
+section > header h2,
+section > header h3 {
+  margin: 0;
 }
 
 section > header .filter { margin-left: auto; }
