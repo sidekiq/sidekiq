@@ -17,7 +17,14 @@ module Sidekiq
       ending = starting + page_size - 1
 
       Sidekiq.redis do |conn|
-        type = TYPE_CACHE[key] ||= conn.type(key)
+        # horrible, think you can make this cleaner?
+        type = TYPE_CACHE[key]
+        if type
+        elsif key.start_with?("queue:")
+          type = TYPE_CACHE[key] = "list"
+        else
+          type = TYPE_CACHE[key] = conn.type(key)
+        end
         rev = opts && opts[:reverse]
 
         case type
