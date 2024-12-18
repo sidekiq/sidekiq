@@ -52,11 +52,11 @@ module Sidekiq
     end
 
     def strings(lang)
-      @strings ||= {}
+      @@strings ||= {}
 
       # Allow sidekiq-web extensions to add locale paths
       # so extensions can be localized
-      @strings[lang] ||= settings.locales.each_with_object({}) do |path, global|
+      @@strings[lang] ||= settings.locales.each_with_object({}) do |path, global|
         find_locale_files(lang).each do |file|
           strs = YAML.safe_load(File.read(file))
           global.merge!(strs[lang])
@@ -77,19 +77,19 @@ module Sidekiq
     end
 
     def clear_caches
-      @strings = nil
-      @locale_files = nil
-      @available_locales = nil
+      @@strings = nil
+      @@locale_files = nil
+      @@available_locales = nil
     end
 
     def locale_files
-      @locale_files ||= settings.locales.flat_map { |path|
+      @@locale_files ||= settings.locales.flat_map { |path|
         Dir["#{path}/*.yml"]
       }
     end
 
     def available_locales
-      @available_locales ||= Set.new(locale_files.map { |path| File.basename(path, ".yml") })
+      @@available_locales ||= Set.new(locale_files.map { |path| File.basename(path, ".yml") })
     end
 
     def find_locale_files(lang)
