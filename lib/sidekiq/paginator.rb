@@ -17,7 +17,7 @@ module Sidekiq
       ending = starting + page_size - 1
 
       Sidekiq.redis do |conn|
-        type = TYPE_CACHE[key] ||= conn.type(key)
+        type = conn.type(key)
         rev = opts && opts[:reverse]
 
         case type
