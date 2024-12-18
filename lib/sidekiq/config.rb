@@ -65,6 +65,12 @@ module Sidekiq
     attr_reader :capsules
     attr_accessor :thread_priority
 
+    def inspect
+      "#<#{self.class.name} @options=#{
+        @options.except(:lifecycle_events, :reloader, :death_handlers, :error_handlers).inspect
+      }>"
+    end
+
     def to_json(*)
       Sidekiq.dump_json(@options)
     end

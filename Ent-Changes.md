@@ -8,9 +8,15 @@ HEAD (8.0)
 ---------
 
 - Move from SHA1 to SHA256 internally. Unique locks are now SHA256 but only take 10% more
-  space due to using a more efficient encoding (base64 vs hex).
+  space due to a more efficient encoding (base64 vs hex).
 - Sidekiq::Web internal refactoring [#6532]
 - Limiter factory methods now raise ArgumentError if you pass them a block [#6512]
+
+7.3.4
+---------
+
+- Tune `inspect` to avoid huge output [#6553]
+- Use backported APIs for Web extension
 
 7.3.3
 ---------

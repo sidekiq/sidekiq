@@ -307,22 +307,11 @@ module Sidekiq # :nodoc:
         end
         require "sidekiq/rails"
         require File.expand_path("#{@config[:require]}/config/environment.rb")
-        @config[:tag] ||= default_tag
+        @config[:tag] ||= default_tag(::Rails.root)
       else
         require @config[:require]
+        @config[:tag] ||= default_tag
       end
-    end
-
-    def default_tag
-      dir = ::Rails.root
-      name = File.basename(dir)
-      prevdir = File.dirname(dir) # Capistrano release directory?
-      if name.to_i != 0 && prevdir
-        if File.basename(prevdir) == "releases"
-          return File.basename(File.dirname(prevdir))
-        end
-      end
-      name
     end
 
     def validate!
@@ -399,7 +388,12 @@ module Sidekiq # :nodoc:
     end
 
     def initialize_logger
-      @config.logger.level = ::Logger::DEBUG if @config[:verbose]
+      if @config[:verbose] || ENV["DEBUG_INVOCATION"] == "1"
+        # DEBUG_INVOCATION is a systemd-ism triggered by
+        # RestartMode=debug. We turn on debugging when the
+        # sidekiq process crashes and is restarted with this flag.
+        @config.logger.level = ::Logger::DEBUG
+      end
     end
 
     def parse_config(path)
