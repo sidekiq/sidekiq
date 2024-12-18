@@ -388,7 +388,12 @@ module Sidekiq # :nodoc:
     end
 
     def initialize_logger
-      @config.logger.level = ::Logger::DEBUG if @config[:verbose]
+      if @config[:verbose] || ENV["DEBUG_INVOCATION"] == "1"
+        # DEBUG_INVOCATION is a systemd-ism triggered by
+        # RestartMode=debug. We turn on debugging when the
+        # sidekiq process crashes and is restarted with this flag.
+        @config.logger.level = ::Logger::DEBUG
+      end
     end
 
     def parse_config(path)
