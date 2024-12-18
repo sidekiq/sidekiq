@@ -17,6 +17,12 @@ HEAD / main
 - Adjust Sidekiq's default thread priority to -1 for a 50ms timeslice. This can help avoid TimeoutErrors
   when Sidekiq is overloaded. [#6543]
 
+7.3.8
+----------
+
+- Fix dead tag links [#6554]
+- Massive Web UI performance improvement, some pages up to 15x faster [#6555]
+
 7.3.7
 ----------
 
