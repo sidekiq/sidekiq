@@ -2,6 +2,12 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+7.3.8
+----------
+
+- Fix dead tag links [#6554]
+- Massive Web UI performance improvement, some pages up to 15x faster [#6555]
+
 7.3.7
 ----------
 
