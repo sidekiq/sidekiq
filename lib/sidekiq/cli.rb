@@ -307,22 +307,11 @@ module Sidekiq # :nodoc:
         end
         require "sidekiq/rails"
         require File.expand_path("#{@config[:require]}/config/environment.rb")
-        @config[:tag] ||= default_tag
+        @config[:tag] ||= default_tag(::Rails.root)
       else
         require @config[:require]
+        @config[:tag] ||= default_tag
       end
-    end
-
-    def default_tag
-      dir = ::Rails.root
-      name = File.basename(dir)
-      prevdir = File.dirname(dir) # Capistrano release directory?
-      if name.to_i != 0 && prevdir
-        if File.basename(prevdir) == "releases"
-          return File.basename(File.dirname(prevdir))
-        end
-      end
-      name
     end
 
     def validate!

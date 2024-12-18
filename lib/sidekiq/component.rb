@@ -103,5 +103,16 @@ module Sidekiq
         end.join(", ")
       }>"
     end
+
+    def default_tag(dir = Dir.pwd)
+      name = File.basename(dir)
+      prevdir = File.dirname(dir) # Capistrano release directory?
+      if name.to_i != 0 && prevdir
+        if File.basename(prevdir) == "releases"
+          return File.basename(File.dirname(prevdir))
+        end
+      end
+      name
+    end
   end
 end
