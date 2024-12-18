@@ -16,7 +16,7 @@
       <li>
         <form id="locale-form" action="<%= root_path %>change_locale" method="post">
           <%= csrf_tag %>
-          <label class="sr-only" for="locale">Language</label>
+          <label class="sr-only" for="locale-select">Language</label>
           <select id="locale-select" class="form-control" name="locale">
             <% available_locales.each do |locale_option| %>
               <% if locale_option == locale %>
