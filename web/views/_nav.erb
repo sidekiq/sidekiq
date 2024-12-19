@@ -1,12 +1,12 @@
-<div class="navbar navbar-default navbar-fixed-top">
-  <div class="container-fluid">
+<header>
+  <div class="container">
     <div class="navbar-header" data-navbar="static">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="navbar-menu" data-target="#navbar-menu">
+      <button type="button" class="btn navbar-toggle" data-toggle="navbar-menu" data-target="#navbar-menu">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <div class="navbar-toggle collapsed navbar-livereload">
+      <div class="navbar-livereload">
         <%= erb :_poll_link %>
         <% if config.app_url %>
           <a class="btn btn-inverse" href="<%= config.app_url %>"><%= t('BackToApp') %></a>
@@ -17,16 +17,16 @@
       </a>
     </div>
 
-    <div class="collapse navbar-collapse" id="navbar-menu">
-      <ul class="nav navbar-nav" data-navbar="static">
+    <div class="navbar-collapse" id="navbar-menu">
+      <ul class="nav" data-navbar="static">
         <% config.tabs.each do |title, url| %>
           <% if url == '' %>
             <li class="<%= current_path == url ? 'active' : '' %>">
-            <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
+              <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
             </li>
           <% else %>
             <li class="<%= current_path.start_with?(url) ? 'active' : '' %>">
-            <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
+              <a href="<%= root_path %><%= url %>"><%= t(title) %></a>
             </li>
           <% end %>
         <% end %>
@@ -42,4 +42,4 @@
       </ul>
     </div>
   </div>
-</div>
+</header>
