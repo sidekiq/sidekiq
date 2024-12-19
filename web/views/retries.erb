@@ -46,7 +46,9 @@
                 <%= display_tags(entry, "retries") %>
               </td>
               <td>
-                <div class="args"><%= display_args(entry.display_args) %></div>
+                <code>
+                  <div class="args"><%= display_args(entry.display_args) %></div>
+                </code>
               </td>
               <td>
                 <div><%= h truncate("#{entry['error_class']}: #{entry['error_message']}", 200) %></div>

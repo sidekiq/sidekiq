@@ -36,7 +36,7 @@
               <button data-toggle="job_<%= index %>_full" class="btn btn-default btn-xs"><%= t('ShowAll') %></button>
               <div class="toggle" id="job_<%= index %>_full"><%= display_args(a) %></div>
             <% else %>
-              <%= display_args(job.display_args) %>
+              <code><%= display_args(job.display_args) %></code>
             <% end %>
           </td>
           <td>

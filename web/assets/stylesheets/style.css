@@ -19,6 +19,7 @@
   --space-3x: 24px;
 
   --font-sans: system-ui, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   --font-size: 16px;
   --font-size-large: 1.728rem;
   --font-size-small: 0.833rem;
@@ -92,6 +93,21 @@ h1, h2, h3 {
   margin: var(--space-3x) 0 var(--space);
   padding: 0;
 }
+
+code {
+  background-color: var(--color-bg);
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--color-border);
+  color: var(--color-text-light);
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  padding: var(--space-1-2);
+}
+
+time { color: var(--color-text-light); }
+
+:any-link time { color: inherit; }
 
 /* links and buttons */
 :any-link { color: inherit; }
@@ -408,6 +424,8 @@ th {
 tr { border-top: 1px solid var(--color-border); }
 
 tbody tr:nth-child(odd) { background-color: var(--color-table-bg-alt); }
+
+tbody tr:hover { background-color: var(--color-border); }
 
 td { padding: var(--space); }
 
