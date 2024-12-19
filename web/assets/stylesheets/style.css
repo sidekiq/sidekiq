@@ -114,11 +114,13 @@ time { color: var(--color-text-light); }
 
 :any-link:hover { color: var(--color-primary-hover); }
 
-.btn {
-  background: var(--color-primary);
+.btn,
+.btn-primary {
+  background-color: var(--color-text);
+  background: linear-gradient(oklch(from var(--color-text) calc(l + 0.06) c h), var(--color-text));
   border: none;
   border-radius: var(--space-1-2);
-  box-shadow: none;
+  box-shadow: 0 1px 1px 1px var(--color-shadow);
   color: var(--color-bg);
   cursor: pointer;
   display: inline-block;
@@ -130,12 +132,19 @@ time { color: var(--color-text-light); }
   white-space: nowrap;
 }
 
-.btn-primary { background: var(--color-text); }
-.btn-default { background: var(--color-text); }
-.btn-warn { background: var(--color-warn); }
+.btn-danger { 
+  background-color: var(--color-primary);
+  background: linear-gradient(oklch(from var(--color-primary) calc(l + 0.06) c h), var(--color-primary));
+}
+
+.btn-warn {
+  background-color: var(--color-warn);
+  background: linear-gradient(oklch(from var(--color-warn) calc(l + 0.06) c h), var(--color-warn));
+}
 
 .btn:hover {
-  background: var(--color-primary-hover);
+  background-color: var(--color-primary-hover);
+  background: linear-gradient(oklch(from var(--color-primary-hover) calc(l + 0.06) c h), var(--color-primary-hover));
   color: var(--color-bg);
 }
 
@@ -146,7 +155,7 @@ time { color: var(--color-text-light); }
 }
 
 .btn-inverse:hover {
-  background-color: transparent;
+  background: transparent;
   box-shadow: 0 0 0 1px var(--color-selected) inset;
   color: var(--color-primary);
 }
@@ -530,7 +539,7 @@ body > footer .nav {
     min-height: 40px;
     margin: var(--space) 0 0;
     padding: var(--space);
-    background-color: transparent;
+    background: transparent;
     box-shadow: 0 0 0 1px var(--color-border) inset;
   }
 
