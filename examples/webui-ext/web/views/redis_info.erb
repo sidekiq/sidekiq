@@ -7,16 +7,12 @@
 
   <div class="table_container">
     <table>
-      <thead>
-        <th class="keys" data-width="25"><%= t('Key') %></th>
-        <th class="values"><%= t('Value') %></th>
-      </thead>
       <tbody>
         <% @info.each do |k, v| %>
-        <tr>
-          <td><%= h k %></td>
-          <td><%= h v %></td>
-        </tr>
+          <tr>
+            <th><%= h k %></td>
+            <td><%= h v %></td>
+          </tr>
         <% end %>
       </tbody>
     </table>
