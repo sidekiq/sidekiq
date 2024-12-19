@@ -8,7 +8,7 @@ class Colors {
     this.assignments = {};
     if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
       this.light = "75%";
-      this.chroma = "0.1";
+      this.chroma = "0.12";
     } else {
       this.light = "50%";
       this.chroma = "0.2";

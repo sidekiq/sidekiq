@@ -27,20 +27,20 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg: oklch(19% 0.01 269);
-    --color-elevated: oklch(22% 0.01 269);
-    --color-border: oklch(24% 0.01 269);
-    --color-selected: oklch(30% 0.01 269);
-    --color-table-bg-alt: oklch(21% 0.01 269);
-    --color-shadow: oklch(12% 0.01 269 / 10%);
-    --color-text: oklch(75% 0.01 269);
-    --color-text-light: oklch(55% 0.01 269);
+    --color-bg: oklch(19% 0.02 269);
+    --color-elevated: oklch(22% 0.02 269);
+    --color-border: oklch(24% 0.02 269);
+    --color-selected: oklch(30% 0.02 269);
+    --color-table-bg-alt: oklch(21% 0.02 269);
+    --color-shadow: oklch(12% 0.02 269 / 10%);
+    --color-text: oklch(75% 0.02 269);
+    --color-text-light: oklch(55% 0.02 269);
       
-    --color-primary: oklch(75% 0.1 29);
-    --color-primary-hover: oklch(85% 0.1 29);
-    --color-primary-pulse: oklch(75% 0.1 29 / 20%);
-    --color-selected-success: oklch(30% 0.1 149);
-    --color-warn: oklch(75% 0.1 89);
+    --color-primary: oklch(75% 0.12 29);
+    --color-primary-hover: oklch(85% 0.12 29);
+    --color-primary-pulse: oklch(75% 0.12 29 / 20%);
+    --color-selected-success: oklch(30% 0.12 149);
+    --color-warn: oklch(75% 0.12 89);
   }
 }
 
