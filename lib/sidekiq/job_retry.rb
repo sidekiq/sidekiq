@@ -149,7 +149,7 @@ module Sidekiq
 
       m = exception_message(exception)
       if m.respond_to?(:scrub!)
-        m.force_encoding("utf-8")
+        m.force_encoding(Encoding::UTF_8)
         m.scrub!
       end
 
