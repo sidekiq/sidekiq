@@ -346,6 +346,8 @@ select {
   box-shadow: 0 0 0 1px var(--color-border);
 }
 
+input[type="checkbox"] { appearance: auto; }
+
 .form-control {
   background-color: var(--color-elevated);
   border: none;
