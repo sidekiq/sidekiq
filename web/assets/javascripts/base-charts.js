@@ -1,16 +1,16 @@
 if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-  Chart.defaults.borderColor = "oklch(25% 0.01 269)";
-  Chart.defaults.color = "oklch(71% 0.01 269)";
+  Chart.defaults.borderColor = "oklch(20% 0.01 256)";
+  Chart.defaults.color = "oklch(65% 0.01 256)";
 }
 
 class Colors {
   constructor() {
     this.assignments = {};
     if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      this.light = "75%";
-      this.chroma = "0.12";
+      this.light = "65%";
+      this.chroma = "0.15";
     } else {
-      this.light = "50%";
+      this.light = "48%";
       this.chroma = "0.2";
     }
     this.success = "oklch(" + this.light + " " + this.chroma + " 179)";
@@ -18,16 +18,16 @@ class Colors {
     this.fallback = "oklch(" + this.light + " 0.02 269)";
     this.primary = "oklch(" + this.light + " " + this.chroma + " 269)";
     this.available = [
-      "oklch(" + this.light + " " + this.chroma + " 269)",
-      "oklch(" + this.light + " " + this.chroma + " 209)",
-      "oklch(" + this.light + " " + this.chroma + " 59)",
-      "oklch(" + this.light + " " + this.chroma + " 329)",
-      "oklch(" + this.light + " " + this.chroma + " 119)",
-      "oklch(" + this.light + " " + this.chroma + " 239)",
-      "oklch(" + this.light + " " + this.chroma + " 149)",
+      "oklch(" + this.light + " " + this.chroma + " 256)",
+      "oklch(" + this.light + " " + this.chroma + " 196)",
+      "oklch(" + this.light + " " + this.chroma + " 46)",
+      "oklch(" + this.light + " " + this.chroma + " 316)",
+      "oklch(" + this.light + " " + this.chroma + " 106)",
+      "oklch(" + this.light + " " + this.chroma + " 226)",
+      "oklch(" + this.light + " " + this.chroma + " 136)",
       "oklch(" + this.light + " 0.02 269)",
-      "oklch(" + this.light + " " + this.chroma + " 299)",
-      "oklch(" + this.light + " " + this.chroma + " 29)",
+      "oklch(" + this.light + " " + this.chroma + " 286)",
+      "oklch(" + this.light + " " + this.chroma + " 16)",
     ];
   }
 
@@ -97,7 +97,7 @@ class BaseChart {
 
     if (this.options.marks) {
       if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        this.Borderlight = "35%";
+        this.Borderlight = "30%";
       } else {
         this.Borderlight = "65%";
       }
@@ -107,7 +107,7 @@ class BaseChart {
           type: "line",
           xMin: bucket,
           xMax: bucket,
-          borderColor: "oklch(" + this.Borderlight + " 0.01 269)",
+          borderColor: "oklch(" + this.Borderlight + " 0.01 256)",
           borderWidth: 2,
         };
       });

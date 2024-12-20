@@ -1,17 +1,15 @@
 :root {
-  --color-bg: oklch(99% 0.005 269);
-  --color-elevated: oklch(100% 0 269);
-  --color-border: oklch(95% 0.005 269);
-  --color-selected: oklch(93% 0.005 269);
-  --color-table-bg-alt: oklch(99% 0.005 269);
-  --color-shadow: oklch(27% 0.05 269 / 5%);
-  --color-text: oklch(27% 0.005 269);
-  --color-text-light: oklch(52% 0.005 269);
-  --color-primary: oklch(0.5 0.2 29);
-  --color-primary-hover: oklch(44% 0.2 29);
-  --color-primary-pulse: oklch(50% 0.2 29 / 20%);
-  --color-selected-success: oklch(93% 0.1 149);
-  --color-warn: oklch(50% 0.2 89);
+  --color-bg: oklch(99% 0.005 256);
+  --color-elevated: oklch(100% 0 256);
+  --color-border: oklch(95% 0.005 256);
+  --color-selected: oklch(93% 0.005 256);
+  --color-table-bg-alt: oklch(99% 0.005 256);
+  --color-shadow: oklch(27% 0.005 256 / 5%);
+  --color-text: oklch(27% 0.005 256);
+  --color-text-light: oklch(52% 0.005 256);
+
+  --color-primary: oklch(48% 0.2 13);
+  --color-selected-success: oklch(93% 0.1 136);
 
   --space-1-2: 4px;
   --space: 8px;
@@ -27,20 +25,17 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg: oklch(19% 0.02 269);
-    --color-elevated: oklch(22% 0.02 269);
-    --color-border: oklch(24% 0.02 269);
-    --color-selected: oklch(30% 0.02 269);
-    --color-table-bg-alt: oklch(21% 0.02 269);
-    --color-shadow: oklch(12% 0.02 269 / 10%);
-    --color-text: oklch(75% 0.02 269);
-    --color-text-light: oklch(55% 0.02 269);
-      
-    --color-primary: oklch(75% 0.12 29);
-    --color-primary-hover: oklch(85% 0.12 29);
-    --color-primary-pulse: oklch(75% 0.12 29 / 20%);
-    --color-selected-success: oklch(30% 0.12 149);
-    --color-warn: oklch(75% 0.12 89);
+    --color-bg: oklch(15% 0.01 256);
+    --color-elevated: oklch(18% 0.01 256);
+    --color-border: oklch(20% 0.01 256);
+    --color-selected: oklch(26% 0.01 256);
+    --color-table-bg-alt: oklch(17% 0.01 256);
+    --color-shadow: oklch(8% 0.01 256 / 10%);
+    --color-text: oklch(75% 0.01 256);
+    --color-text-light: oklch(65% 0.01 256);
+
+    --color-primary: oklch(65% 0.15 13);
+    --color-selected-success: oklch(30% 0.15 136);
   }
 }
 
@@ -112,11 +107,11 @@ time { color: var(--color-text-light); }
 /* links and buttons */
 :any-link { color: inherit; }
 
-:any-link:hover { color: var(--color-primary-hover); }
+:any-link:hover { color: oklch(from var(--color-primary) calc(l + 0.06) c h); }
 
 .btn,
-.btn-primary {
-  background-color: var(--color-text);
+.btn-primary,
+input[type="submit"] {
   background: linear-gradient(oklch(from var(--color-text) calc(l + 0.06) c h), var(--color-text));
   border: none;
   border-radius: var(--space-1-2);
@@ -132,20 +127,29 @@ time { color: var(--color-text-light); }
   white-space: nowrap;
 }
 
-.btn-danger { 
-  background-color: var(--color-primary);
+.btn:hover,
+input[type="submit"]:hover { 
+  background: linear-gradient(oklch(from var(--color-text) calc(l + 0.16) c h), oklch(from var(--color-text) calc(l + 0.1) c h));
+}
+
+.btn-danger,
+input[type="submit"].btn-danger {
   background: linear-gradient(oklch(from var(--color-primary) calc(l + 0.06) c h), var(--color-primary));
 }
 
-.btn-warn {
-  background-color: var(--color-warn);
-  background: linear-gradient(oklch(from var(--color-warn) calc(l + 0.06) c h), var(--color-warn));
+.btn-danger:hover,
+input[type="submit"].btn-danger:hover {
+  background: linear-gradient(oklch(from var(--color-primary) calc(l + 0.16) c h), oklch(from var(--color-primary) calc(l + 0.1) c h));
 }
 
-.btn:hover {
-  background-color: var(--color-primary-hover);
-  background: linear-gradient(oklch(from var(--color-primary-hover) calc(l + 0.06) c h), var(--color-primary-hover));
-  color: var(--color-bg);
+.btn-warn,
+input[type="submit"].btn-warn {
+  background: linear-gradient(oklch(from var(--color-primary) calc(l + 0.06) c calc(h + 60)), oklch(from var(--color-primary) l c calc(h + 60)));
+}
+
+.btn-warn:hover,
+input[type="submit"].btn-warn:hover {
+  background: linear-gradient(oklch(from var(--color-primary) calc(l + 0.16) c calc(h + 60)), oklch(from var(--color-primary) calc(l + 0.1) c calc(h + 60)));
 }
 
 .btn-inverse {
@@ -164,6 +168,37 @@ time { color: var(--color-text-light); }
 
 .live-poll.active {
   display: inline-block;
+}
+
+@media (prefers-color-scheme: dark) {
+  .btn-danger,
+  input[type="submit"].btn-danger {
+    background: linear-gradient(oklch(from var(--color-primary) calc(l - 0.2) c h), oklch(from var(--color-primary) calc(l - 0.25) c h));
+    color: var(--color-text);
+  }
+
+  .btn-danger:hover,
+  input[type="submit"].btn-danger:hover {
+    background: linear-gradient(oklch(from var(--color-primary) calc(l - 0.15) c h), oklch(from var(--color-primary) calc(l - 0.2) c h));
+    color: var(--color-text);
+  }
+
+  .btn-warn,
+  input[type="submit"].btn-warn {
+    background: linear-gradient(oklch(from var(--color-primary) calc(l - 0.2) c calc(h + 60)), oklch(from var(--color-primary) calc(l - 0.25) c calc(h + 60)));
+    color: var(--color-text);
+  }
+
+  .btn-warn:hover,
+  input[type="submit"].btn-warn:hover {
+    background: linear-gradient(oklch(from var(--color-primary) calc(l - 0.15) c calc(h + 60)), oklch(from var(--color-primary) calc(l - 0.2) c calc(h + 60)));
+  }
+
+  .btn-inverse {
+    background: transparent;
+    box-shadow: 0 0 0 1px var(--color-border) inset;
+    color: inherit;
+  }
 }
 
 /* nav */
@@ -227,7 +262,7 @@ body > header .nav li :any-link:not(.btn) {
   text-decoration: none;
 }
 
-body > header .nav li :any-link:not(.btn):hover { color: var(--color-primary-hover); }
+body > header .nav li :any-link:not(.btn):hover { color: oklch(from var(--color-primary) calc(l + 0.06) c h); }
 
 body > header .nav li.navbar-livereload { margin-left: auto; padding-right: 0; }
 
@@ -277,7 +312,7 @@ section > header .filter:has(.history-graph) { display: inline-flex; }
 }
 
 @keyframes pulse-animation {
-  0% { box-shadow: 0 0 0 0px var(--color-primary-pulse); }
+  0% { box-shadow: 0 0 0 0px oklch(from var(--color-primary) l c h / 20%); }
   100% { box-shadow: 0 0 0 8px rgba(0, 0, 0, 0); }
 }
 
@@ -467,7 +502,7 @@ td.num span {
 
 .label-success { background: var(--color-selected-success); }
 
-.label-danger { background: var(--color-primary-pulse); }
+.label-danger { background: oklch(from var(--color-primary) l c h / 20%); }
 
 input[type="checkbox"] {
   background-color: var(--color-bg);
