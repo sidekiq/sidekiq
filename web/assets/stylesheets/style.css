@@ -181,6 +181,7 @@ body > header {
   right: 0;
   top: 0;
   overflow-x: auto;
+  z-index: 10;
 }
 
 body > header .container {
@@ -639,7 +640,6 @@ body > footer .nav {
   .navbar-collapse {
     display: none;
     position: fixed;
-    z-index: 100;
     background-color: var(--color-bg);
     border-bottom: 1px solid var(--color-border);
     padding-top: var(--space);
@@ -652,6 +652,8 @@ body > footer .nav {
     box-shadow: 0 2px 4px 0 var(--color-shadow);
     display: flex; 
     padding-bottom: var(--space-2x);
+    max-height: calc(100svh - 56px);
+    overflow: auto;
   }
 
   body > header .nav li.navbar-livereload { margin: var(--space) 0 0; }
