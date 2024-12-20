@@ -191,6 +191,7 @@ body > header .container {
 .navbar-header {
   display: flex;
   gap: var(--space);
+  position: relative;
 }
 
 .navbar-toggle,
@@ -342,6 +343,7 @@ select {
 }
 
 input[type="range"] {
+  appearance: none;
   accent-color: var(--color-text);
   width: 160px;
   height: 0.5em;
@@ -456,15 +458,10 @@ tbody tr:hover { background-color: var(--color-border); }
 
 td { padding: var(--space); }
 
-td:has(.btn) {
-  text-align: right;
-}
-
 td .btn {
   font-size: var(--font-size-small);
   line-height: 1.5;
   padding: var(--space-1-2) var(--space);
-  margin-left: auto;
 }
 
 td .btn:hover { color: inherit; }
@@ -651,9 +648,13 @@ body > footer .nav {
     right: 0;
   }
 
-  .navbar-collapse.is-open { display: flex; padding-bottom: var(--space-2x); }
+  .navbar-collapse.is-open {
+    box-shadow: 0 2px 4px 0 var(--color-shadow);
+    display: flex; 
+    padding-bottom: var(--space-2x);
+  }
 
-  body > header .nav li.navbar-livereload { margin: 0; }
+  body > header .nav li.navbar-livereload { margin: var(--space) 0 0; }
 
   body > footer {
     position: relative;
