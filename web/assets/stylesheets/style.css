@@ -462,9 +462,6 @@ th {
   padding: var(--space);
 }
 
-.keys,
-.values { color: var(--color-text-light) !important; }
-
 tr { border-top: 1px solid var(--color-border); }
 
 tbody tr:nth-child(odd) { background-color: var(--color-table-bg-alt); }
