@@ -25,12 +25,12 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg: oklch(15% 0.01 256);
-    --color-elevated: oklch(18% 0.01 256);
-    --color-border: oklch(20% 0.01 256);
-    --color-selected: oklch(26% 0.01 256);
-    --color-table-bg-alt: oklch(17% 0.01 256);
-    --color-shadow: oklch(8% 0.01 256 / 10%);
+    --color-bg: oklch(16% 0.01 256);
+    --color-elevated: oklch(19% 0.01 256);
+    --color-border: oklch(21% 0.01 256);
+    --color-selected: oklch(27% 0.01 256);
+    --color-table-bg-alt: oklch(18% 0.01 256);
+    --color-shadow: oklch(9% 0.01 256 / 10%);
     --color-text: oklch(75% 0.01 256);
     --color-text-light: oklch(65% 0.01 256);
 
