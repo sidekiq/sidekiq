@@ -130,6 +130,7 @@ input[type="submit"] {
 .btn:hover,
 input[type="submit"]:hover { 
   background: linear-gradient(oklch(from var(--color-text) calc(l + 0.16) c h), oklch(from var(--color-text) calc(l + 0.1) c h));
+  color: var(--color-bg);
 }
 
 .btn-danger,
