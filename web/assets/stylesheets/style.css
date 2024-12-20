@@ -27,7 +27,7 @@
   :root {
     --color-bg: oklch(16% 0.01 256);
     --color-elevated: oklch(19% 0.01 256);
-    --color-border: oklch(21% 0.01 256);
+    --color-border: oklch(22% 0.01 256);
     --color-selected: oklch(27% 0.01 256);
     --color-table-bg-alt: oklch(18% 0.01 256);
     --color-shadow: oklch(9% 0.01 256 / 10%);
@@ -42,6 +42,10 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 ::selection { background: var(--color-selected); }
+
+:focus-visible {
+  outline: 1px solid oklch(from var(--color-primary) l c h / 50%);
+}
 
 .sr-only {
   border: 0 !important;
@@ -244,7 +248,7 @@ body > header .container {
 .navbar-brand {
   color: var(--color-primary);
   font-weight: 700;
-  padding: var(--space-2x) var(--space-2x) 0 0;
+  margin: var(--space-2x) var(--space-2x) 0 0;
   text-decoration: none;
 }
 
@@ -334,6 +338,14 @@ form label {
   font-size: var(--font-size-small);
 }
 
+input,
+select {
+  appearance: none;
+  background-color: var(--color-selected);
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px var(--color-border);
+}
+
 .form-control {
   background-color: var(--color-elevated);
   border: none;
@@ -344,6 +356,11 @@ form label {
   height: 24px;
   line-height: var(--space-2x);
   padding: var(--space-1-2) var(--space);
+}
+
+::placeholder { 
+  color: var(--color-text-light); 
+  opacity: 0.6
 }
 
 .interval-slider {
@@ -360,6 +377,7 @@ form label {
 input[type="range"] {
   accent-color: var(--color-text);
   width: 160px;
+  height: 0.5em;
 }
 
 #realtime-legend {
@@ -610,7 +628,7 @@ body > footer .nav {
 }
 
 [dir="rtl"] {
-  .navbar-brand { padding: var(--space-2x) 0 0 var(--space-2x); }
+  .navbar-brand { margin: var(--space-2x) 0 0 var(--space-2x); }
 
   body > header .nav li.navbar-livereload {
     margin: 0 auto 0 0;
