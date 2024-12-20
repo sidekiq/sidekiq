@@ -1,4 +1,5 @@
 :root {
+  --color-primary: oklch(48% 0.2 13);
   --color-bg: oklch(99% 0.005 256);
   --color-elevated: oklch(100% 0 256);
   --color-border: oklch(95% 0.005 256);
@@ -8,9 +9,6 @@
   --color-shadow: oklch(27% 0.005 256 / 5%);
   --color-text: oklch(27% 0.005 256);
   --color-text-light: oklch(52% 0.005 256);
-
-  --color-primary: oklch(48% 0.2 13);
-  --color-selected-success: oklch(93% 0.1 136);
 
   --space-1-2: 4px;
   --space: 8px;
@@ -187,7 +185,7 @@ body > header {
 
 body > header .container {
   display: flex;
-  padding: 0 var(--space-2x)
+  padding: var(--space) var(--space-2x)
 }
 
 .navbar-header {
@@ -205,12 +203,13 @@ body > header .container {
   font-size: 1.125rem;
   line-height: 24px;
   font-weight: 700;
-  margin: var(--space-2x) var(--space-2x) 0 0;
+  margin: var(--space) var(--space-2x) 0 0;
   text-decoration: none;
 }
 
 body > header .nav li {
-  padding: var(--space);
+  padding: 0 var(--space);
+  line-height: 40px;
   white-space: nowrap;
 }
 
@@ -226,7 +225,10 @@ body > header .nav li :any-link:not(.btn) {
 
 body > header .nav li :any-link:not(.btn):hover { color: oklch(from var(--color-primary) calc(l + 0.06) c h); }
 
-body > header .nav li.navbar-livereload { margin-left: auto; padding-right: 0; }
+body > header .nav li.navbar-livereload { 
+  margin-left: auto;
+  padding-right: 0;
+}
 
 .navbar-collapse { flex: 1; }
 
@@ -297,17 +299,14 @@ form label {
 
 input,
 select {
-  appearance: none;
   background-color: transparent;
   color: var(--color-text);
   border-radius: 4px;
   box-shadow: 0 0 0 1px var(--color-border);
-  position: relative;
 }
 
-input[type="checkbox"] { appearance: auto; }
-
-select { 
+select {
+  appearance: none;
   font-weight: 700;
   background-color: var(--color-selected);
   box-shadow: 0 0 0 1px var(--color-input-border);
@@ -457,12 +456,18 @@ tbody tr:hover { background-color: var(--color-border); }
 
 td { padding: var(--space); }
 
+td:has(.btn) {
+  text-align: right;
+}
+
 td .btn {
-  color: var(--color-bg);
   font-size: var(--font-size-small);
   line-height: 1.5;
   padding: var(--space-1-2) var(--space);
+  margin-left: auto;
 }
+
+td .btn:hover { color: inherit; }
 
 td.num {
   color: var(--color-text-light);
@@ -484,14 +489,15 @@ td.num span {
 
 .label-default { background: var(--color-selected); }
 
-.label-success { background: var(--color-selected-success); }
+.label-success { background: oklch(from var(--color-primary) calc(l + 0.35) c calc(h + 120)); }
 
-.label-danger { background: oklch(from var(--color-primary) l c h / 20%); }
+.label-info { background: oklch(from var(--color-primary) calc(l + 0.35) c calc(h - 120)); }
 
-input[type="checkbox"] {
-  background-color: var(--color-bg);
-  accent-color: var(--color-primary);
-}
+.label-danger { background: oklch(from var(--color-primary) calc(l + 0.35) c h); }
+
+.label-warning { background: oklch(from var(--color-primary) calc(l + 0.35) c calc(h + 75)); }
+
+input[type="checkbox"] { accent-color: var(--color-primary); }
 
 .alert {
   background-color: var(--color-table-bg-alt);
@@ -537,6 +543,7 @@ body > footer .nav {
 /* media queries */
 @media (prefers-color-scheme: dark) {
   :root {
+    --color-primary: oklch(65% 0.15 13);
     --color-bg: oklch(16% 0.01 256);
     --color-elevated: oklch(19% 0.01 256);
     --color-border: oklch(22% 0.01 256);
@@ -546,9 +553,6 @@ body > footer .nav {
     --color-shadow: oklch(9% 0.01 256 / 10%);
     --color-text: oklch(75% 0.01 256);
     --color-text-light: oklch(65% 0.01 256);
-
-    --color-primary: oklch(65% 0.15 13);
-    --color-selected-success: oklch(30% 0.15 136);
   }
 
   .btn-danger,
@@ -587,6 +591,14 @@ body > footer .nav {
   .form-control:hover {
     box-shadow: 0 0 0 1px oklch(from var(--color-input-border) calc(l + 0.1) c h);
   }
+
+  .label-success { background: oklch(from var(--color-primary) calc(l - 0.3) c calc(h + 120)); }
+
+  .label-info { background: oklch(from var(--color-primary) calc(l - 0.3) c calc(h - 120)); }
+
+  .label-danger { background: oklch(from var(--color-primary) calc(l - 0.3) c h); }
+
+  .label-warning { background: oklch(from var(--color-primary) calc(l - 0.3) c calc(h + 75)); }
 }
 
 @media (max-width: 800px) { :root { --font-size: 14px; } }
@@ -610,7 +622,7 @@ body > footer .nav {
     flex-direction: column;
     gap: 4px;
     min-height: 40px;
-    margin: var(--space) 0 0;
+    margin: 0;
     padding: var(--space);
     background: transparent;
     box-shadow: 0 0 0 1px var(--color-border) inset;
@@ -639,7 +651,7 @@ body > footer .nav {
     right: 0;
   }
 
-  .navbar-collapse.is-open { display: flex; }
+  .navbar-collapse.is-open { display: flex; padding-bottom: var(--space-2x); }
 
   body > header .nav li.navbar-livereload { margin: 0; }
 
