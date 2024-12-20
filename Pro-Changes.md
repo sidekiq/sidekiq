@@ -9,6 +9,11 @@ HEAD (8.0)
 
 - Sidekiq::Web internal refactoring [#6532]
 
+7.3.5
+---------
+
+- Relax metric connection pool sizing [#6560]
+
 7.3.4
 ---------
 
