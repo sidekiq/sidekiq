@@ -235,11 +235,19 @@ body > header .nav li.navbar-livereload {
 .navbar-collapse { flex: 1; }
 
 /* main */
+section + section {
+  margin-top: var(--space-3x);
+}
+
 section > header {
   display: flex;
   align-items: center;
   gap: var(--space);
   margin: var(--space-3x) 0 var(--space);
+}
+
+section + section > header {
+  margin-top: 0;
 }
 
 section > header h1,
@@ -430,6 +438,7 @@ canvas + .table_container {
 .buttons-row {
   margin-top: var(--space-3x);
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 

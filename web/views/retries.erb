@@ -63,16 +63,15 @@
         <input class="btn btn-danger" type="submit" name="kill" value="<%= t('Kill') %>" />
       </div>
     </form>
-
     <% unfiltered? do %>
       <div class="buttons-row">
+        <form action="<%= root_path %>retries/all/retry" method="post">
+          <%= csrf_tag %>
+          <input class="btn btn-primary" type="submit" name="retry" value="<%= t('RetryAll') %>" data-confirm="<%= t('AreYouSure') %>" />
+        </form>
         <form action="<%= root_path %>retries/all/delete" method="post">
           <%= csrf_tag %>
           <input class="btn btn-danger" type="submit" name="delete" value="<%= t('DeleteAll') %>" data-confirm="<%= t('AreYouSure') %>" />
-        </form>
-        <form action="<%= root_path %>retries/all/retry" method="post">
-          <%= csrf_tag %>
-          <input class="btn btn-danger" type="submit" name="retry" value="<%= t('RetryAll') %>" data-confirm="<%= t('AreYouSure') %>" />
         </form>
         <form action="<%= root_path %>retries/all/kill" method="post">
           <%= csrf_tag %>
@@ -80,7 +79,7 @@
         </form>
       </div>
     <% end %>
-
+    
   <% else %>
     <div class="alert alert-success"><%= t('NoRetriesFound') %></div>
   <% end %>
