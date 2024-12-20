@@ -2,6 +2,7 @@
   --color-bg: oklch(99% 0.005 256);
   --color-elevated: oklch(100% 0 256);
   --color-border: oklch(95% 0.005 256);
+  --color-input-border: oklch(90% 0.005 256);
   --color-selected: oklch(93% 0.005 256);
   --color-table-bg-alt: oklch(99% 0.005 256);
   --color-shadow: oklch(27% 0.005 256 / 5%);
@@ -15,28 +16,13 @@
   --space: 8px;
   --space-2x: 16px;
   --space-3x: 24px;
+  --space-4x: 32px;
 
   --font-sans: system-ui, sans-serif;
   --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   --font-size: 16px;
   --font-size-large: 1.728rem;
   --font-size-small: 0.833rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: oklch(16% 0.01 256);
-    --color-elevated: oklch(19% 0.01 256);
-    --color-border: oklch(22% 0.01 256);
-    --color-selected: oklch(27% 0.01 256);
-    --color-table-bg-alt: oklch(18% 0.01 256);
-    --color-shadow: oklch(9% 0.01 256 / 10%);
-    --color-text: oklch(75% 0.01 256);
-    --color-text-light: oklch(65% 0.01 256);
-
-    --color-primary: oklch(65% 0.15 13);
-    --color-selected-success: oklch(30% 0.15 136);
-  }
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -149,23 +135,23 @@ input[type="submit"].btn-danger:hover {
 
 .btn-warn,
 input[type="submit"].btn-warn {
-  background: linear-gradient(oklch(from var(--color-primary) calc(l + 0.06) c calc(h + 60)), oklch(from var(--color-primary) l c calc(h + 60)));
+  background: linear-gradient(oklch(from var(--color-primary) calc(l + 0.06) c calc(h + 75)), oklch(from var(--color-primary) l c calc(h + 90)));
 }
 
 .btn-warn:hover,
 input[type="submit"].btn-warn:hover {
-  background: linear-gradient(oklch(from var(--color-primary) calc(l + 0.16) c calc(h + 60)), oklch(from var(--color-primary) calc(l + 0.1) c calc(h + 60)));
+  background: linear-gradient(oklch(from var(--color-primary) calc(l + 0.16) c calc(h + 75)), oklch(from var(--color-primary) calc(l + 0.1) c calc(h + 90)));
 }
 
 .btn-inverse {
   background: transparent;
-  box-shadow: 0 0 0 1px var(--color-border) inset;
+  box-shadow: 0 0 0 1px var(--color-input-border) inset;
   color: inherit;
 }
 
 .btn-inverse:hover {
   background: transparent;
-  box-shadow: 0 0 0 1px var(--color-selected) inset;
+  box-shadow: 0 0 0 1px oklch(from var(--color-input-border) calc(l - 0.1) c h) inset;
   color: var(--color-primary);
 }
 
@@ -173,37 +159,6 @@ input[type="submit"].btn-warn:hover {
 
 .live-poll.active {
   display: inline-block;
-}
-
-@media (prefers-color-scheme: dark) {
-  .btn-danger,
-  input[type="submit"].btn-danger {
-    background: linear-gradient(oklch(from var(--color-primary) calc(l - 0.2) c h), oklch(from var(--color-primary) calc(l - 0.25) c h));
-    color: var(--color-text);
-  }
-
-  .btn-danger:hover,
-  input[type="submit"].btn-danger:hover {
-    background: linear-gradient(oklch(from var(--color-primary) calc(l - 0.15) c h), oklch(from var(--color-primary) calc(l - 0.2) c h));
-    color: var(--color-text);
-  }
-
-  .btn-warn,
-  input[type="submit"].btn-warn {
-    background: linear-gradient(oklch(from var(--color-primary) calc(l - 0.2) c calc(h + 60)), oklch(from var(--color-primary) calc(l - 0.25) c calc(h + 60)));
-    color: var(--color-text);
-  }
-
-  .btn-warn:hover,
-  input[type="submit"].btn-warn:hover {
-    background: linear-gradient(oklch(from var(--color-primary) calc(l - 0.15) c calc(h + 60)), oklch(from var(--color-primary) calc(l - 0.2) c calc(h + 60)));
-  }
-
-  .btn-inverse {
-    background: transparent;
-    box-shadow: 0 0 0 1px var(--color-border) inset;
-    color: inherit;
-  }
 }
 
 /* nav */
@@ -247,6 +202,8 @@ body > header .container {
 
 .navbar-brand {
   color: var(--color-primary);
+  font-size: 1.125rem;
+  line-height: 24px;
   font-weight: 700;
   margin: var(--space-2x) var(--space-2x) 0 0;
   text-decoration: none;
@@ -341,23 +298,32 @@ form label {
 input,
 select {
   appearance: none;
-  background-color: var(--color-selected);
+  background-color: transparent;
+  color: var(--color-text);
   border-radius: 4px;
   box-shadow: 0 0 0 1px var(--color-border);
+  position: relative;
 }
 
 input[type="checkbox"] { appearance: auto; }
 
+select { 
+  font-weight: 700;
+  background-color: var(--color-selected);
+  box-shadow: 0 0 0 1px var(--color-input-border);
+}
+
 .form-control {
-  background-color: var(--color-elevated);
   border: none;
-  box-shadow: 0 0 0 1px var(--color-border);
   border-radius: var(--space-1-2);
-  color: inherit;
   display: inline-block;
   height: 24px;
   line-height: var(--space-2x);
   padding: var(--space-1-2) var(--space);
+}
+
+.form-control:hover {
+  box-shadow: 0 0 0 1px oklch(from var(--color-input-border) calc(l - 0.1) c h);
 }
 
 ::placeholder { 
@@ -424,7 +390,7 @@ article {
 article h3 {
   display: block;
   font-size: var(--font-size-large);
-  line-height: 1;
+  line-height: 1.125;
   margin: 0;
   padding: 0;
   white-space: nowrap;
@@ -456,7 +422,7 @@ article .count {
 .table_container + form,
 .table_container + input,
 canvas + .table_container {
-  margin-top: var(--space-3x);
+  margin-top: var(--space-4x);
 }
 
 .buttons-row {
@@ -569,6 +535,60 @@ body > footer .nav {
 }
 
 /* media queries */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: oklch(16% 0.01 256);
+    --color-elevated: oklch(19% 0.01 256);
+    --color-border: oklch(22% 0.01 256);
+    --color-input-border: oklch(31% 0.01 256);
+    --color-selected: oklch(27% 0.01 256);
+    --color-table-bg-alt: oklch(18% 0.01 256);
+    --color-shadow: oklch(9% 0.01 256 / 10%);
+    --color-text: oklch(75% 0.01 256);
+    --color-text-light: oklch(65% 0.01 256);
+
+    --color-primary: oklch(65% 0.15 13);
+    --color-selected-success: oklch(30% 0.15 136);
+  }
+
+  .btn-danger,
+  input[type="submit"].btn-danger {
+    background: linear-gradient(oklch(from var(--color-primary) calc(l - 0.2) c h), oklch(from var(--color-primary) calc(l - 0.25) c h));
+    color: var(--color-text);
+  }
+
+  .btn-danger:hover,
+  input[type="submit"].btn-danger:hover {
+    background: linear-gradient(oklch(from var(--color-primary) calc(l - 0.15) c h), oklch(from var(--color-primary) calc(l - 0.2) c h));
+    color: var(--color-text);
+  }
+
+  .btn-warn,
+  input[type="submit"].btn-warn {
+    background: linear-gradient(oklch(from var(--color-primary) calc(l - 0.2) c calc(h + 75)), oklch(from var(--color-primary) calc(l - 0.25) c calc(h + 75)));
+    color: var(--color-text);
+  }
+
+  .btn-warn:hover,
+  input[type="submit"].btn-warn:hover {
+    background: linear-gradient(oklch(from var(--color-primary) calc(l - 0.15) c calc(h + 75)), oklch(from var(--color-primary) calc(l - 0.2) c calc(h + 75)));
+  }
+
+  .btn-inverse {
+    background: transparent;
+    box-shadow: 0 0 0 1px var(--color-input-border) inset;
+    color: inherit;
+  }
+
+  .btn-inverse:hover {
+    box-shadow: 0 0 0 1px oklch(from var(--color-input-border) calc(l + 0.1) c h) inset;
+  }
+
+  .form-control:hover {
+    box-shadow: 0 0 0 1px oklch(from var(--color-input-border) calc(l + 0.1) c h);
+  }
+}
+
 @media (max-width: 800px) { :root { --font-size: 14px; } }
 
 @media (max-width: 1000px) {
