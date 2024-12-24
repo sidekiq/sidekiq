@@ -93,7 +93,7 @@ describe "Sidekiq::Testing.fake" do
   it "stubs the async call" do
     assert_equal 0, DirectJob.jobs.size
     assert DirectJob.perform_async(1, 2)
-    assert_in_delta Time.now.to_f, DirectJob.jobs.last["enqueued_at"], 0.1
+    assert_in_delta (Time.now.to_f * 1000).floor, DirectJob.jobs.last["enqueued_at"], 0.1
     assert_equal 1, DirectJob.jobs.size
     assert DirectJob.perform_in(10, 1, 2)
     refute DirectJob.jobs.last["enqueued_at"]

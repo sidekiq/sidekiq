@@ -87,7 +87,7 @@ module Sidekiq
       if Sidekiq::Testing.fake?
         payloads.each do |job|
           job = Sidekiq.load_json(Sidekiq.dump_json(job))
-          job["enqueued_at"] = Time.now.to_f unless job["at"]
+          job["enqueued_at"] = (Time.now.to_f * 1000).floor unless job["at"]
           Queues.push(job["queue"], job["class"], job)
         end
         true
