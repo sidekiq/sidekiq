@@ -57,14 +57,14 @@
           <% end %>
         </table>
       </div>
-      <div class="buttons-row">
+      <div class="buttons-row is-hidden" id="buttons-some">
         <input class="btn btn-primary" type="submit" name="retry" value="<%= t('RetryNow') %>" />
         <input class="btn btn-danger" type="submit" name="delete" value="<%= t('Delete') %>" />
         <input class="btn btn-danger" type="submit" name="kill" value="<%= t('Kill') %>" />
       </div>
     </form>
     <% unfiltered? do %>
-      <div class="buttons-row">
+      <div class="buttons-row" id="buttons-all">
         <form action="<%= root_path %>retries/all/retry" method="post">
           <%= csrf_tag %>
           <input class="btn btn-primary" type="submit" name="retry" value="<%= t('RetryAll') %>" data-confirm="<%= t('AreYouSure') %>" />

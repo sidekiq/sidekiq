@@ -129,6 +129,7 @@ input[type="submit"].btn-danger {
 .btn-danger:hover,
 input[type="submit"].btn-danger:hover {
   background: linear-gradient(oklch(from var(--color-primary) calc(l + 0.16) c h), oklch(from var(--color-primary) calc(l + 0.1) c h));
+  color: var(--color-bg);
 }
 
 .btn-warn,
@@ -139,6 +140,7 @@ input[type="submit"].btn-warn {
 .btn-warn:hover,
 input[type="submit"].btn-warn:hover {
   background: linear-gradient(oklch(from var(--color-primary) calc(l + 0.16) c calc(h + 75)), oklch(from var(--color-primary) calc(l + 0.1) c calc(h + 90)));
+  color: var(--color-bg);
 }
 
 .btn-inverse {
@@ -441,6 +443,8 @@ canvas + .table_container {
   flex-wrap: wrap;
   gap: 8px;
 }
+
+.buttons-row.is-hidden { display: none; }
 
 table {
   background-color: var(--color-elevated);
