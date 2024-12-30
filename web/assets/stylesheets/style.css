@@ -587,6 +587,7 @@ body > footer .nav {
   .btn-warn:hover,
   input[type="submit"].btn-warn:hover {
     background: linear-gradient(oklch(from var(--color-primary) calc(l - 0.15) c calc(h + 75)), oklch(from var(--color-primary) calc(l - 0.2) c calc(h + 75)));
+    color: var(--color-text);
   }
 
   .btn-inverse {
