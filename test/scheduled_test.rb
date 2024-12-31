@@ -71,7 +71,7 @@ describe Sidekiq::Scheduled do
           %w[queue:queue_1 queue:queue_2 queue:queue_4 queue:queue_5].each do |queue_name|
             assert_equal 1, conn.llen(queue_name)
             job = Sidekiq.load_json(conn.lrange(queue_name, 0, -1)[0])
-            assert_equal enqueued_time.to_f, job["enqueued_at"]
+            assert_equal enqueued_time.to_i * 1000, job["enqueued_at"]
             assert_equal created_time.to_f, job["created_at"]
           end
         end
