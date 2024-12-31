@@ -5,6 +5,10 @@
 HEAD / main
 ----------
 
+- **BREAKING** The `created_at` and `enqueued_at` attributes are now stored as
+  integer milliseconds, rather than epoch floats. This is meant to avoid precision
+  issues with JSON and JavaScript's 53-bit Floats. Example:
+  `"created_at" => 1234567890.123` -> `"created_at" => 1234567890123`.
 - **NEW FEATURE** Job Profiling is now supported with [Vernier](https://vernier.prof)
   which makes it really easy to performance tune your slow jobs.
   The Web UI contains a new **Profiles** tab to view any collected profile data.

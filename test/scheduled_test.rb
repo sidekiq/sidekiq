@@ -55,29 +55,31 @@ describe Sidekiq::Scheduled do
       created_time = Time.new(2013, 2, 3)
       enqueued_time = Time.new(2013, 2, 4)
 
-      Time.stub(:now, created_time) do
-        @retry.schedule (enqueued_time - 60).to_f, @error_1.merge!("created_at" => created_time.to_f)
-        @retry.schedule (enqueued_time - 50).to_f, @error_2.merge!("created_at" => created_time.to_f)
-        @retry.schedule (enqueued_time + 60).to_f, @error_3.merge!("created_at" => created_time.to_f)
-        @scheduled.schedule (enqueued_time - 60).to_f, @future_1.merge!("created_at" => created_time.to_f)
-        @scheduled.schedule (enqueued_time - 50).to_f, @future_2.merge!("created_at" => created_time.to_f)
-        @scheduled.schedule (enqueued_time + 60).to_f, @future_3.merge!("created_at" => created_time.to_f)
-      end
+      created_millis = (created_time.to_f * 1000).floor
+      enqueued_millis = (enqueued_time.to_f * 1000).floor
+      @retry.schedule (enqueued_time - 60).to_f, @error_1.merge!("created_at" => created_millis)
+      @retry.schedule (enqueued_time - 50).to_f, @error_2.merge!("created_at" => created_millis)
+      @retry.schedule (enqueued_time + 60).to_f, @error_3.merge!("created_at" => created_millis)
+      @scheduled.schedule (enqueued_time - 60).to_f, @future_1.merge!("created_at" => created_millis)
+      @scheduled.schedule (enqueued_time - 50).to_f, @future_2.merge!("created_at" => created_millis)
+      @scheduled.schedule (enqueued_time + 60).to_f, @future_3.merge!("created_at" => created_millis)
 
       Time.stub(:now, enqueued_time) do
-        @poller.enqueue
+        ::Process.stub(:clock_gettime, enqueued_millis) do
+          @poller.enqueue
 
-        @config.redis do |conn|
-          %w[queue:queue_1 queue:queue_2 queue:queue_4 queue:queue_5].each do |queue_name|
-            assert_equal 1, conn.llen(queue_name)
-            job = Sidekiq.load_json(conn.lrange(queue_name, 0, -1)[0])
-            assert_equal enqueued_time.to_i * 1000, job["enqueued_at"]
-            assert_equal created_time.to_f, job["created_at"]
+          @config.redis do |conn|
+            %w[queue:queue_1 queue:queue_2 queue:queue_4 queue:queue_5].each do |queue_name|
+              assert_equal 1, conn.llen(queue_name)
+              job = Sidekiq.load_json(conn.lrange(queue_name, 0, -1)[0])
+              assert_in_delta enqueued_millis / 1000, job["enqueued_at"] / 1000, 1
+              assert_in_delta created_millis / 1000, job["created_at"] / 1000, 1
+            end
           end
-        end
 
-        assert_equal 1, @retry.size
-        assert_equal 1, @scheduled.size
+          assert_equal 1, @retry.size
+          assert_equal 1, @scheduled.size
+        end
       end
     end
 

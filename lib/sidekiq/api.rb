@@ -100,14 +100,15 @@ module Sidekiq
           {}
         end
 
-        now = Time.now.to_f
         enqueued_at = job["enqueued_at"]
         if enqueued_at
           if enqueued_at.is_a?(Float)
             # old format
+            now = Time.now.to_f
             now - enqueued_at
           else
-            now - enqueued_at / 1000.0
+            now = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond)
+            (now - enqueued_at) / 1000.0
           end
         else
           0.0
@@ -276,14 +277,15 @@ module Sidekiq
       return 0.0 unless entry
 
       job = Sidekiq.load_json(entry)
-      now = Time.now.to_f
       enqueued_at = job["enqueued_at"]
       if enqueued_at
         if enqueued_at.is_a?(Float)
           # old format
+          now = Time.now.to_f
           now - enqueued_at
         else
-          now - enqueued_at / 1000.0
+          now = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond)
+          (now - enqueued_at) / 1000.0
         end
       else
         0.0
@@ -466,12 +468,11 @@ module Sidekiq
     def latency
       timestamp = @item["enqueued_at"] || @item["created_at"]
       if timestamp
-        now = Time.now.to_f
         if timestamp.is_a?(Float)
           # old format
-          now - timestamp
+          Time.now.to_f - timestamp
         else
-          now - timestamp / 1000.0
+          (::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond) - timestamp) / 1000.0
         end
       else
         0.0

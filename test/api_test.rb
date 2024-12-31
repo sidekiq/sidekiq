@@ -142,13 +142,13 @@ describe "API" do
     describe "enqueued" do
       it "handles latency for good jobs" do
         @cfg.redis do |conn|
-          conn.rpush "queue:default", "{\"enqueued_at\": #{(Time.now.to_f * 1000).floor}}"
+          conn.rpush "queue:default", "{\"enqueued_at\": #{(Time.now.to_f * 1000 - 50).floor}}"
           conn.sadd "queues", ["default"]
         end
         s = Sidekiq::Stats.new
-        assert s.default_queue_latency > 0
+        assert_operator s.default_queue_latency, :>, 0.04
         q = Sidekiq::Queue.new
-        assert q.latency > 0
+        assert_operator q.latency, :>, 0.04
       end
 
       it "handles latency for incomplete jobs" do
@@ -255,14 +255,15 @@ describe "API" do
 
     it "can enumerate jobs" do
       q = Sidekiq::Queue.new
-      Time.stub(:now, Time.new(2012, 12, 26)) do
+      backthen = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond) - (365 * 24 * 60 * 60 * 1000)
+      ::Process.stub(:clock_gettime, backthen) do
         ApiJob.perform_async(1, "mike")
         assert_equal [ApiJob.name], q.map(&:klass)
 
         job = q.first
         assert_equal 24, job.jid.size
         assert_equal [1, "mike"], job.args
-        assert_equal Time.new(2012, 12, 26), job.enqueued_at
+        assert_equal Time.at(backthen.to_s[0..-4].to_i), Time.at(job.enqueued_at.to_i)
       end
       assert q.latency > 10_000_000
 

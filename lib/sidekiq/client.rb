@@ -269,7 +269,7 @@ module Sidekiq
           [at, Sidekiq.dump_json(hash)]
         })
       else
-        now = (Time.now.to_f * 1000).floor # milliseconds since the epoch
+        now = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond) # milliseconds since the epoch
         grouped_queues = payloads.group_by { |job| job["queue"] }
         conn.sadd("queues", grouped_queues.keys)
         grouped_queues.each do |queue, grouped_payloads|
