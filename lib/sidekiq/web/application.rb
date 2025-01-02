@@ -16,7 +16,7 @@ module Sidekiq
         "default-src 'self' https: http:",
         "child-src 'self'",
         "connect-src 'self' https: http: wss: ws:",
-        "font-src 'self' https: http:",
+        "font-src 'none'",
         "frame-src 'self'",
         "img-src 'self' https: http: data:",
         "manifest-src 'self'",
