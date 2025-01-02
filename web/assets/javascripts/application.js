@@ -15,6 +15,8 @@ function addListeners() {
   document.querySelectorAll(".check_all").forEach(node => {
     node.addEventListener("click", event => {
       node.closest('table').querySelectorAll('input[type=checkbox]').forEach(inp => { inp.checked = !!node.checked; });
+      document.getElementById("buttons-some").classList.add("is-hidden");
+      document.getElementById("buttons-all").classList.remove("is-hidden");
     })
   });
 
@@ -31,7 +33,8 @@ function addListeners() {
     node.addEventListener("click", addDataToggleListeners)
   })
 
-  addShiftClickListeners()
+  addShiftClickListeners();
+  hideCheckboxButtons();
   updateFuzzyTimes();
   updateNumbers();
   updateProgressBars();
@@ -69,11 +72,7 @@ function addDataToggleListeners(event) {
   var source = event.target || event.srcElement;
   var targName = source.getAttribute("data-toggle");
   var full = document.getElementById(targName);
-  if (full.style.display == "block") {
-    full.style.display = 'none';
-  } else {
-    full.style.display = 'block';
-  }
+  full.classList.toggle("is-open");
 }
 
 function addShiftClickListeners() {
@@ -88,9 +87,24 @@ function addShiftClickListeners() {
         let newState = checkbox.checked;
         checkboxes.slice(min, max).forEach(c => c.checked = newState);
       }
+      hideCheckboxButtons();
       lastChecked = checkbox;
     });
   });
+}
+
+function hideCheckboxButtons() {
+  let checkboxes = Array.from(document.querySelectorAll(".shift_clickable"));
+  let anyChecked = checkboxes.some(cb => cb.checked);
+  if (anyChecked) {
+    console.log('At least one checkbox is checked');
+    document.getElementById("buttons-some").classList.remove("is-hidden");
+    document.getElementById("buttons-all").classList.add("is-hidden");
+  } else {
+    console.log('No checkbox is checked');
+    document.getElementById("buttons-some").classList.add("is-hidden");
+    document.getElementById("buttons-all").classList.remove("is-hidden");
+  }
 }
 
 function updateFuzzyTimes() {
@@ -130,11 +144,11 @@ function setLivePollFromUrl() {
 
 function updateLivePollButton() {
   if (localStorage.sidekiqLivePoll == "enabled") {
-    document.querySelectorAll('.live-poll-stop').forEach(box => { box.style.display = "inline-block" })
-    document.querySelectorAll('.live-poll-start').forEach(box => { box.style.display = "none" })
+    document.querySelectorAll('.live-poll-stop').forEach(box => { box.classList.add("active") })
+    document.querySelectorAll('.live-poll-start').forEach(box => { box.classList.remove("active") })
   } else {
-    document.querySelectorAll('.live-poll-start').forEach(box => { box.style.display = "inline-block" })
-    document.querySelectorAll('.live-poll-stop').forEach(box => { box.style.display = "none" })
+    document.querySelectorAll('.live-poll-start').forEach(box => { box.classList.add("active") })
+    document.querySelectorAll('.live-poll-stop').forEach(box => { box.classList.remove("active") })
   }
 }
 

@@ -39,7 +39,7 @@ class JobMetricsOverviewChart extends BaseChart {
   updateSwatch(kls, checked) {
     const el = this.swatches[kls];
     el.checked = checked;
-    el.style.color = this.colors.assignments[kls] || "";
+    el.style.accentColor = this.colors.assignments[kls] || "";
   }
 
   toggleKls(kls, visible) {

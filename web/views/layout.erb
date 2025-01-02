@@ -5,16 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
 
-    <link href="<%= root_path %>stylesheets/bootstrap.css" media="screen" rel="stylesheet" type="text/css" nonce="<%= csp_nonce %>" />
-    <% if rtl? %>
-    <link href="<%= root_path %>stylesheets/bootstrap-rtl.min.css" media="screen" rel="stylesheet" type="text/css" nonce="<%= csp_nonce %>"/>
-    <% end %>
-
-    <link href="<%= root_path %>stylesheets/application.css" media="screen" rel="stylesheet" type="text/css" nonce="<%= csp_nonce %>" />
-    <link href="<%= root_path %>stylesheets/application-dark.css" media="screen and (prefers-color-scheme: dark)" rel="stylesheet" type="text/css" nonce="<%= csp_nonce %>" />
-    <% if rtl? %>
-    <link href="<%= root_path %>stylesheets/application-rtl.css" media="screen" rel="stylesheet" type="text/css" nonce="<%= csp_nonce %>" />
-    <% end %>
+    <link href="<%= root_path %>stylesheets/style.css" media="screen" rel="stylesheet" type="text/css" nonce="<%= csp_nonce %>" />
 
     <link rel="apple-touch-icon" href="<%= root_path %>images/apple-touch-icon.png">
     <link rel="shortcut icon" type="image/ico" href="<%= root_path %>images/favicon.ico" />
@@ -24,19 +15,12 @@
   </head>
   <body class="admin" data-locale="<%= locale %>">
     <%= erb :_nav %>
-    <div id="page">
+    <main id="page">
       <div class="container">
-        <div class="row">
-          <div class="col-sm-12 summary_bar">
-            <%= erb :_summary %>
-          </div>
-
-          <div class="col-sm-12">
-            <%= yield %>
-          </div>
-        </div>
+        <%= erb :_summary %>
+        <%= yield %>
       </div>
-    </div>
+    </main>
     <%= erb :_footer %>
   </body>
 </html>
