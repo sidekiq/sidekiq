@@ -21,6 +21,8 @@ class CurrentAttributesJob
   end
 end
 
+Serializer = ActiveJob::Arguments
+
 describe "Current attributes" do
   before do
     @config = reset!
@@ -32,11 +34,11 @@ describe "Current attributes" do
       "cattr_1" => "Myapp::OtherCurrent"
     })
     job = {}
-    with_context("Myapp::Current", :user_id, 123) do
-      with_context("Myapp::OtherCurrent", :other_id, 789) do
+    with_context("Myapp::Current", "user_id", 123) do
+      with_context("Myapp::OtherCurrent", "other_id", 789) do
         cm.call(nil, job, nil, nil) do
-          assert_equal 123, job["cattr"][:user_id]
-          assert_equal 789, job["cattr_1"][:other_id]
+          assert_equal 123, Serializer.deserialize(job["cattr"]).to_h[:user_id]
+          assert_equal 789, Serializer.deserialize(job["cattr_1"]).to_h[:other_id]
         end
       end
     end
@@ -44,8 +46,8 @@ describe "Current attributes" do
     with_context("Myapp::Current", :user_id, 456) do
       with_context("Myapp::OtherCurrent", :other_id, 999) do
         cm.call(nil, job, nil, nil) do
-          assert_equal 123, job["cattr"][:user_id]
-          assert_equal 789, job["cattr_1"][:other_id]
+          assert_equal 123, Serializer.deserialize(job["cattr"]).to_h[:user_id]
+          assert_equal 789, Serializer.deserialize(job["cattr_1"]).to_h[:other_id]
         end
       end
     end
@@ -72,7 +74,7 @@ describe "Current attributes" do
     job_hash = {}
     with_context("Myapp::Current", :user_id, 16) do
       @config.client_middleware.invoke(nil, job_hash, nil, nil) do
-        assert_equal 16, job_hash["cattr"][:user_id]
+        assert_equal 16, Serializer.deserialize(job_hash["cattr"]).to_h[:user_id]
       end
     end
 
@@ -94,8 +96,8 @@ describe "Current attributes" do
     with_context("Myapp::Current", :user_id, 16) do
       with_context("Myapp::OtherCurrent", :other_id, 17) do
         @config.client_middleware.invoke(nil, job_hash, nil, nil) do
-          assert_equal 16, job_hash["cattr"][:user_id]
-          assert_equal 17, job_hash["cattr_1"][:other_id]
+          assert_equal 16, Serializer.deserialize(job_hash["cattr"]).to_h[:user_id]
+          assert_equal 17, Serializer.deserialize(job_hash["cattr_1"]).to_h[:other_id]
         end
       end
     end
