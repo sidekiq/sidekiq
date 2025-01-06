@@ -444,8 +444,6 @@ canvas + .table_container {
   gap: 8px;
 }
 
-.buttons-row.is-hidden { display: none; }
-
 table {
   background-color: var(--color-elevated);
   border: 1px solid var(--color-border);

@@ -15,8 +15,6 @@ function addListeners() {
   document.querySelectorAll(".check_all").forEach(node => {
     node.addEventListener("click", event => {
       node.closest('table').querySelectorAll('input[type=checkbox]').forEach(inp => { inp.checked = !!node.checked; });
-      document.getElementById("buttons-some").classList.add("is-hidden");
-      document.getElementById("buttons-all").classList.remove("is-hidden");
     })
   });
 
@@ -34,7 +32,6 @@ function addListeners() {
   })
 
   addShiftClickListeners();
-  hideCheckboxButtons();
   updateFuzzyTimes();
   updateNumbers();
   updateProgressBars();
@@ -87,24 +84,9 @@ function addShiftClickListeners() {
         let newState = checkbox.checked;
         checkboxes.slice(min, max).forEach(c => c.checked = newState);
       }
-      hideCheckboxButtons();
       lastChecked = checkbox;
     });
   });
-}
-
-function hideCheckboxButtons() {
-  let checkboxes = Array.from(document.querySelectorAll(".shift_clickable"));
-  let anyChecked = checkboxes.some(cb => cb.checked);
-  if (anyChecked) {
-    console.log('At least one checkbox is checked');
-    document.getElementById("buttons-some").classList.remove("is-hidden");
-    document.getElementById("buttons-all").classList.add("is-hidden");
-  } else {
-    console.log('No checkbox is checked');
-    document.getElementById("buttons-some").classList.add("is-hidden");
-    document.getElementById("buttons-all").classList.remove("is-hidden");
-  }
 }
 
 function updateFuzzyTimes() {
