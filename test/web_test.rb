@@ -166,8 +166,8 @@ describe Sidekiq::Web do
     refute_match(/datetime/, last_response.body)
     Sidekiq::Queue.new("foo").clear
 
-    Time.stub(:now, Time.now - 65) do
-      assert Sidekiq::Client.push("queue" => :foo, "class" => WebJob, "args" => [1, 3])
+    ::Process.stub(:clock_gettime, ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond) - 65000) do
+      assert Sidekiq::Client.push("queue" => :foo, "class" => WebJob, "args" => [1, 3], "enqueued_at" => (Time.now.to_f * 1000).floor)
     end
 
     get "/queues"

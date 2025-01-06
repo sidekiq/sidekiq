@@ -5,17 +5,28 @@
 HEAD / main
 ----------
 
+- **WARNING** The underlying class name for Active Jobs has changed from `ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper` to `Sidekiq::ActiveJob::Wrapper`.
+- **WARNING** The `created_at` and `enqueued_at` attributes are now stored as
+  integer milliseconds, rather than epoch floats. This is meant to avoid precision
+  issues with JSON and JavaScript's 53-bit Floats. Example:
+  `"created_at" => 1234567890.123456` -> `"created_at" => 1234567890123`.
 - **NEW FEATURE** Job Profiling is now supported with [Vernier](https://vernier.prof)
   which makes it really easy to performance tune your slow jobs.
   The Web UI contains a new **Profiles** tab to view any collected profile data.
   Please read the new [Profiling](https://github.com/sidekiq/sidekiq/wiki/Profiling) wiki page for details.
-- Refactor Sidekiq::Web to simplify the code and improve security [#6532]
+- Refactor `Sidekiq::Web` to simplify the code and improve security [#6532]
 - Default error logging has been modified to use Ruby's `Exception#detailed_message` and `#full_message` APIs.
 - CI now runs against Redis, Dragonfly and Valkey.
 - The Web UI's language picker now shows options in the native language
 - Remove global variable usage within the codebase
-- Adjust Sidekiq's default thread priority to -1 for a 50ms timeslice. This can help avoid TimeoutErrors
-  when Sidekiq is overloaded. [#6543]
+- Adjust Sidekiq's default thread priority to -1 for a 50ms timeslice.
+  This can help avoid TimeoutErrors when Sidekiq is overloaded. [#6543]
+
+7.3.8
+----------
+
+- Fix dead tag links [#6554]
+- Massive Web UI performance improvement, some pages up to 15x faster [#6555]
 
 7.3.7
 ----------

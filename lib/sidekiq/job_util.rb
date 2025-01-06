@@ -58,8 +58,12 @@ module Sidekiq
       item["class"] = item["class"].to_s
       item["queue"] = item["queue"].to_s
       item["retry_for"] = item["retry_for"].to_i if item["retry_for"]
-      item["created_at"] ||= Time.now.to_f
+      item["created_at"] ||= now_in_millis
       item
+    end
+
+    def now_in_millis
+      ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond)
     end
 
     def normalized_hash(item_class)

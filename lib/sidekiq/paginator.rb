@@ -2,6 +2,12 @@
 
 module Sidekiq
   module Paginator
+    TYPE_CACHE = {
+      "dead" => "zset",
+      "retry" => "zset",
+      "schedule" => "zset"
+    }
+
     def page(key, pageidx = 1, page_size = 25, opts = nil)
       current_page = (pageidx.to_i < 1) ? 1 : pageidx.to_i
       pageidx = current_page - 1
@@ -11,7 +17,14 @@ module Sidekiq
       ending = starting + page_size - 1
 
       Sidekiq.redis do |conn|
-        type = conn.type(key)
+        # horrible, think you can make this cleaner?
+        type = TYPE_CACHE[key]
+        if type
+        elsif key.start_with?("queue:")
+          type = TYPE_CACHE[key] = "list"
+        else
+          type = TYPE_CACHE[key] = conn.type(key)
+        end
         rev = opts && opts[:reverse]
 
         case type
