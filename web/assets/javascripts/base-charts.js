@@ -1,27 +1,33 @@
 if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-  Chart.defaults.borderColor = "#333";
-  Chart.defaults.color = "#aaa";
+  Chart.defaults.borderColor = "oklch(22% 0.01 256)";
+  Chart.defaults.color = "oklch(65% 0.01 256)";
 }
 
 class Colors {
   constructor() {
     this.assignments = {};
-    this.success = "#006f68";
-    this.failure = "#af0014";
-    this.fallback = "#999";
-    this.primary = "#537bc4";
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      this.light = "65%";
+      this.chroma = "0.15";
+    } else {
+      this.light = "48%";
+      this.chroma = "0.2";
+    }
+    this.success = "oklch(" + this.light + " " + this.chroma + " 179)";
+    this.failure = "oklch(" + this.light + " " + this.chroma + " 29)";
+    this.fallback = "oklch(" + this.light + " 0.02 269)";
+    this.primary = "oklch(" + this.light + " " + this.chroma + " 269)";
     this.available = [
-      // Colors taken from https://www.chartjs.org/docs/latest/samples/utils.html
-      "#537bc4",
-      "#4dc9f6",
-      "#f67019",
-      "#f53794",
-      "#acc236",
-      "#166a8f",
-      "#00a950",
-      "#58595b",
-      "#8549ba",
-      "#991b1b",
+      "oklch(" + this.light + " " + this.chroma + " 256)",
+      "oklch(" + this.light + " " + this.chroma + " 196)",
+      "oklch(" + this.light + " " + this.chroma + " 46)",
+      "oklch(" + this.light + " " + this.chroma + " 316)",
+      "oklch(" + this.light + " " + this.chroma + " 106)",
+      "oklch(" + this.light + " " + this.chroma + " 226)",
+      "oklch(" + this.light + " " + this.chroma + " 136)",
+      "oklch(" + this.light + " 0.02 269)",
+      "oklch(" + this.light + " " + this.chroma + " 286)",
+      "oklch(" + this.light + " " + this.chroma + " 16)",
     ];
   }
 
@@ -90,12 +96,18 @@ class BaseChart {
     };
 
     if (this.options.marks) {
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        this.Borderlight = "30%";
+      } else {
+        this.Borderlight = "65%";
+      }
+
       this.options.marks.forEach(([bucket, label], i) => {
         chartOptions.plugins.annotation.annotations[`deploy-${i}`] = {
           type: "line",
           xMin: bucket,
           xMax: bucket,
-          borderColor: "rgba(220, 38, 38, 0.4)",
+          borderColor: "oklch(" + this.Borderlight + " 0.01 256)",
           borderWidth: 2,
         };
       });

@@ -31,7 +31,7 @@ function addListeners() {
     node.addEventListener("click", addDataToggleListeners)
   })
 
-  addShiftClickListeners()
+  addShiftClickListeners();
   updateFuzzyTimes();
   updateNumbers();
   updateProgressBars();
@@ -69,11 +69,7 @@ function addDataToggleListeners(event) {
   var source = event.target || event.srcElement;
   var targName = source.getAttribute("data-toggle");
   var full = document.getElementById(targName);
-  if (full.style.display == "block") {
-    full.style.display = 'none';
-  } else {
-    full.style.display = 'block';
-  }
+  full.classList.toggle("is-open");
 }
 
 function addShiftClickListeners() {
@@ -130,11 +126,11 @@ function setLivePollFromUrl() {
 
 function updateLivePollButton() {
   if (localStorage.sidekiqLivePoll == "enabled") {
-    document.querySelectorAll('.live-poll-stop').forEach(box => { box.style.display = "inline-block" })
-    document.querySelectorAll('.live-poll-start').forEach(box => { box.style.display = "none" })
+    document.querySelectorAll('.live-poll-stop').forEach(box => { box.classList.add("active") })
+    document.querySelectorAll('.live-poll-start').forEach(box => { box.classList.remove("active") })
   } else {
-    document.querySelectorAll('.live-poll-start').forEach(box => { box.style.display = "inline-block" })
-    document.querySelectorAll('.live-poll-stop').forEach(box => { box.style.display = "none" })
+    document.querySelectorAll('.live-poll-start').forEach(box => { box.classList.add("active") })
+    document.querySelectorAll('.live-poll-stop').forEach(box => { box.classList.remove("active") })
   }
 }
 
