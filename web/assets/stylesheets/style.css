@@ -311,7 +311,7 @@ form label {
 
 input,
 select {
-  background-color: transparent;
+  background-color: var(--color-elevated);
   color: var(--color-text);
   border-radius: 4px;
   box-shadow: 0 0 0 1px var(--color-border);
@@ -596,13 +596,9 @@ body > footer .nav {
     color: inherit;
   }
 
-  .btn-inverse:hover {
-    box-shadow: 0 0 0 1px oklch(from var(--color-input-border) calc(l + 0.1) c h) inset;
-  }
+  .btn-inverse:hover { box-shadow: 0 0 0 1px oklch(from var(--color-input-border) calc(l + 0.1) c h) inset; }
 
-  .form-control:hover {
-    box-shadow: 0 0 0 1px oklch(from var(--color-input-border) calc(l + 0.1) c h);
-  }
+  .form-control:hover { box-shadow: 0 0 0 1px oklch(from var(--color-input-border) calc(l + 0.1) c h); }
 
   .label-success { background: oklch(from var(--color-primary) calc(l - 0.3) c calc(h + 120)); }
 
