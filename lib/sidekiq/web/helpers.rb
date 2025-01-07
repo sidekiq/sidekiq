@@ -8,6 +8,20 @@ module Sidekiq
   # These methods are available to pages within the Web UI and UI extensions.
   # They are not public APIs for applications to use.
   module WebHelpers
+    def store_name
+      hash = redis_info
+      return "Dragonfly" if hash.has_key?("dragonfly_version")
+      return "Valkey" if hash.has_key?("valkey_version")
+      return "Redis"
+    end
+
+    def store_version
+      hash = redis_info
+      return hash["dragonfly_version"] if hash.has_key?("dragonfly_version")
+      return hash["valkey_version"] if hash.has_key?("valkey_version")
+      return hash["redis_version"]
+    end
+
     def style_tag(location, **kwargs)
       global = location.match?(/:\/\//)
       location = root_path + location if !global && !location.start_with?(root_path)
@@ -256,7 +270,7 @@ module Sidekiq
     end
 
     def redis_info
-      Sidekiq.default_configuration.redis_info
+      @info ||= Sidekiq.default_configuration.redis_info
     end
 
     def root_path

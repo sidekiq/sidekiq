@@ -56,15 +56,13 @@
 
 <section>
   <header>
-    <h2>Redis</h2>
+    <h2><%= store_name %></h2>
   </header>
   <div class="cards-container">
-    <% if @redis_info.fetch("redis_version", nil) %>
-      <article>
-        <h3 id="redis_version"><%= @redis_info.fetch("redis_version") %></h3>
-        <p><%= t('Version') %></p>
-      </article>
-    <% end %>
+    <article>
+      <h3 id="redis_version"><%= store_version %></h3>
+      <p><%= t('Version') %></p>
+    </article>
 
     <% if @redis_info.fetch("uptime_in_days", nil) %>
       <article>
