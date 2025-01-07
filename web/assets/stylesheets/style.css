@@ -321,6 +321,10 @@ select {
   box-shadow: 0 0 0 1px var(--color-border);
 }
 
+input[type=search] {
+  border-radius: 1em;
+}
+
 select {
   appearance: none;
   font-weight: 700;
