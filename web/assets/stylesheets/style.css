@@ -9,6 +9,10 @@
   --color-shadow: oklch(27% 0.005 256 / 5%);
   --color-text: oklch(27% 0.005 256);
   --color-text-light: oklch(52% 0.005 256);
+  --color-success: oklch(from var(--color-primary) calc(l + 0.35) c calc(h + 120));
+  --color-info: oklch(from var(--color-primary) calc(l + 0.35) c calc(h - 120));
+  --color-danger: oklch(from var(--color-primary) calc(l + 0.35) c h);
+  --color-warning: oklch(from var(--color-primary) calc(l + 0.35) c calc(h + 75));
 
   --space-1-2: 4px;
   --space: 8px;
@@ -497,14 +501,10 @@ td.num span {
 }
 
 .label-default { background: var(--color-selected); }
-
-.label-success { background: oklch(from var(--color-primary) calc(l + 0.35) c calc(h + 120)); }
-
-.label-info { background: oklch(from var(--color-primary) calc(l + 0.35) c calc(h - 120)); }
-
-.label-danger { background: oklch(from var(--color-primary) calc(l + 0.35) c h); }
-
-.label-warning { background: oklch(from var(--color-primary) calc(l + 0.35) c calc(h + 75)); }
+.label-success { background: var(--color-success); }
+.label-info { background: var(--color-info); }
+.label-danger { background: var(--color-danger); }
+.label-warning { background: var(--color-warning); }
 
 input[type="checkbox"] { accent-color: var(--color-primary); }
 
@@ -562,6 +562,10 @@ body > footer .nav {
     --color-shadow: oklch(9% 0.01 256 / 10%);
     --color-text: oklch(75% 0.01 256);
     --color-text-light: oklch(65% 0.01 256);
+    --color-success: oklch(from var(--color-primary) calc(l - 0.3) c calc(h + 120));
+    --color-info: oklch(from var(--color-primary) calc(l - 0.3) c calc(h - 120));
+    --color-danger: oklch(from var(--color-primary) calc(l - 0.3) c h);
+    --color-warning: oklch(from var(--color-primary) calc(l - 0.3) c calc(h + 75));
   }
 
   .btn-danger,
@@ -598,13 +602,10 @@ body > footer .nav {
 
   .form-control:hover { box-shadow: 0 0 0 1px oklch(from var(--color-input-border) calc(l + 0.1) c h); }
 
-  .label-success { background: oklch(from var(--color-primary) calc(l - 0.3) c calc(h + 120)); }
-
-  .label-info { background: oklch(from var(--color-primary) calc(l - 0.3) c calc(h - 120)); }
-
-  .label-danger { background: oklch(from var(--color-primary) calc(l - 0.3) c h); }
-
-  .label-warning { background: oklch(from var(--color-primary) calc(l - 0.3) c calc(h + 75)); }
+  .label-success { background: var(--color-success); }
+  .label-info { background: var(--color-info); }
+  .label-danger { background: var(--color-danger); }
+  .label-warning { background: var(--color-warning); }
 }
 
 @media (max-width: 800px) { :root { --font-size: 14px; } }
@@ -690,4 +691,55 @@ body > footer .nav {
   #realtime-legend .swatch { margin: 0 0 0 4px; }
 
   .interval-slider { text-align: left; }
+}
+
+/* progress bars */
+@keyframes progress-bar-stripes {
+  from {
+    background-position: 40px 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+.progress {
+  width: 100%;
+  display: inline-block;
+  vertical-align: baseline;
+  height: 20px;
+  margin-bottom: 0px;
+  overflow: hidden;
+  background-color: #f5f5f5;
+  border-radius: 1em;
+}
+.progress-bar {
+  float: left;
+  width: 0;
+  height: 100%;
+  font-size: 12px;
+  line-height: 20px;
+  color: #fff;
+  text-align: center;
+  background-color: #337ab7;
+}
+.progress-striped .progress-bar,
+.progress-bar-striped {
+  background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+  background-size: 40px 40px;
+}
+.bg-success {
+  background-color: var(--color-success);
+}
+.bg-warning {
+  background-color: var(--color-warning);
+}
+.bg-danger {
+  background-color: var(--color-danger);
+}
+.bg-info {
+  background-color: var(--color-info);
+}
+
+.w-50 {
+  width: 50%;
 }
