@@ -461,7 +461,7 @@ thead { border-bottom: 2px solid var(--color-border); }
 th {
   color: var(--color-text-light);
   font-size: var(--font-size-small);
-  font-weight: normal;
+  font-weight: bold;
   text-align: left;
   padding: var(--space);
 }
@@ -552,20 +552,21 @@ body > footer .nav {
 /* media queries */
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-primary: oklch(65% 0.15 13);
-    --color-bg: oklch(16% 0.01 256);
+    /* --color-primary: oklch(65% 0.15 13); */
+    --color-primary: oklch(60% 0.22 13);
+    --color-bg: oklch(22% 0.01 256);
     --color-elevated: oklch(19% 0.01 256);
-    --color-border: oklch(22% 0.01 256);
+    --color-border: oklch(25% 0.01 256);
     --color-input-border: oklch(31% 0.01 256);
     --color-selected: oklch(27% 0.01 256);
-    --color-table-bg-alt: oklch(18% 0.01 256);
+    --color-table-bg-alt: oklch(24% 0.01 256);
     --color-shadow: oklch(9% 0.01 256 / 10%);
     --color-text: oklch(75% 0.01 256);
     --color-text-light: oklch(65% 0.01 256);
     --color-success: oklch(from var(--color-primary) calc(l - 0.3) c calc(h + 120));
     --color-info: oklch(from var(--color-primary) calc(l - 0.3) c calc(h - 120));
     --color-danger: oklch(from var(--color-primary) calc(l - 0.3) c h);
-    --color-warning: oklch(from var(--color-primary) calc(l - 0.3) c calc(h + 75));
+    --color-warning: oklch(55% 0.11 45);
   }
 
   .btn-danger,
