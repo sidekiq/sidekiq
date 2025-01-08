@@ -38,9 +38,9 @@ module Sidekiq
     #     end
     #   end
     initializer "sidekiq.active_job_integration" do
-      ActiveSupport.on_load(:active_job) do
-        require "active_job/queue_adapters/sidekiq_adapter"
+      require "active_job/queue_adapters/sidekiq_adapter"
 
+      ActiveSupport.on_load(:active_job) do
         include ::Sidekiq::Job::Options unless respond_to?(:sidekiq_options)
       end
     end
