@@ -12,14 +12,14 @@ module Sidekiq
       hash = redis_info
       return "Dragonfly" if hash.has_key?("dragonfly_version")
       return "Valkey" if hash.has_key?("valkey_version")
-      return "Redis"
+      "Redis"
     end
 
     def store_version
       hash = redis_info
       return hash["dragonfly_version"] if hash.has_key?("dragonfly_version")
       return hash["valkey_version"] if hash.has_key?("valkey_version")
-      return hash["redis_version"]
+      hash["redis_version"]
     end
 
     def style_tag(location, **kwargs)

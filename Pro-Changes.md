@@ -12,6 +12,7 @@ HEAD (8.0)
 7.3.5
 ---------
 
+- Fix pause/unpause [#6574]
 - Relax metric connection pool sizing [#6560]
 
 7.3.4
