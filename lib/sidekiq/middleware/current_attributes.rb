@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "active_job/arguments"
 require "active_support/current_attributes"
 
 module Sidekiq
@@ -20,6 +21,8 @@ module Sidekiq
   #   Sidekiq::CurrentAttributes.persist(["Myapp::Current", "Myapp::OtherCurrent"])
   #
   module CurrentAttributes
+    Serializer = ::ActiveJob::Arguments
+
     class Save
       include Sidekiq::ClientMiddleware
 
@@ -33,25 +36,10 @@ module Sidekiq
             attrs = strklass.constantize.attributes
             # Retries can push the job N times, we don't
             # want retries to reset cattr. #5692, #5090
-            if attrs.any?
-              # Older rails has a bug that `CurrentAttributes#attributes` always returns
-              # the same hash instance. We need to dup it to avoid being accidentally mutated.
-              job[key] = if returns_same_object?
-                attrs.dup
-              else
-                attrs
-              end
-            end
+            job[key] = Serializer.serialize(attrs) if attrs.any?
           end
         end
         yield
-      end
-
-      private
-
-      def returns_same_object?
-        ActiveSupport::VERSION::MAJOR < 8 ||
-          (ActiveSupport::VERSION::MAJOR == 8 && ActiveSupport::VERSION::MINOR == 0)
       end
     end
 
@@ -68,7 +56,7 @@ module Sidekiq
         @cattrs.each do |(key, strklass)|
           next unless job.has_key?(key)
 
-          klass_attrs[strklass.constantize] = job[key]
+          klass_attrs[strklass.constantize] = Serializer.deserialize(job[key]).to_h
         end
 
         wrap(klass_attrs.to_a, &block)
