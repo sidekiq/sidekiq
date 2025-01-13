@@ -114,14 +114,14 @@ describe "logger" do
 
   it "tests forwards logger kwards" do
     assert_silent do
-      logger = Sidekiq::Logger.new("/dev/null", level: Logger::INFO)
+      logger = Sidekiq::Logger.new(File::NULL, level: Logger::INFO)
 
       assert_equal Logger::INFO, logger.level
     end
   end
 
   it "tests log level query methods" do
-    logger = Sidekiq::Logger.new("/dev/null", level: Logger::INFO)
+    logger = Sidekiq::Logger.new(File::NULL, level: Logger::INFO)
 
     refute_predicate logger, :debug?
     assert_predicate logger, :info?
