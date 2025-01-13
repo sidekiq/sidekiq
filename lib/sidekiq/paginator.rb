@@ -2,13 +2,6 @@
 
 module Sidekiq
   module Paginator
-    TYPE_CACHE = {
-      "dead" => "zset",
-      "retry" => "zset",
-      "schedule" => "zset",
-      "batches" => "zset"
-    }
-
     def page(key, pageidx = 1, page_size = 25, opts = nil)
       current_page = (pageidx.to_i < 1) ? 1 : pageidx.to_i
       pageidx = current_page - 1
