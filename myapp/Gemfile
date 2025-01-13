@@ -21,3 +21,4 @@ gem "sidekiq-redis_info", path: "../examples/webui-ext"
 
 gem "vernier", "~> 1.2"
 gem "debug"
+gem "msgpack"

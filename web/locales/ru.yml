@@ -1,5 +1,6 @@
 # elements like %{queue} are variables and should not be translated
 ru:
+  LanguageName: Русский
   Actions: Действия
   AddToQueue: Добавить в очередь
   AreYouSure: Вы уверены?

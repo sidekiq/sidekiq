@@ -67,7 +67,7 @@ module Sidekiq
       @thread ||= safe_thread("#{config.name}/processor", &method(:run))
     end
 
-    private unless $TESTING
+    private
 
     def run
       # By setting this thread-local, Sidekiq.redis will access +Sidekiq::Capsule#redis_pool+
@@ -113,7 +113,6 @@ module Sidekiq
     def handle_fetch_exception(ex)
       unless @down
         @down = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
-        logger.error("Error fetching job: #{ex}")
         handle_exception(ex)
       end
       sleep(1)
@@ -173,7 +172,6 @@ module Sidekiq
       begin
         job_hash = Sidekiq.load_json(jobstr)
       rescue => ex
-        handle_exception(ex, {context: "Invalid JSON for job", jobstr: jobstr})
         now = Time.now.to_f
         redis do |conn|
           conn.multi do |xa|
@@ -182,6 +180,7 @@ module Sidekiq
             xa.zremrangebyrank("dead", 0, - @capsule.config[:dead_max_jobs])
           end
         end
+        handle_exception(ex, {context: "Invalid JSON for job", jobstr: jobstr})
         return uow.acknowledge
       end
 

@@ -26,5 +26,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency "redis-client", ">= 0.22.2"
   gem.add_dependency "connection_pool", ">= 2.4.0"
   gem.add_dependency "rack", ">= 3.1.0"
+  gem.add_dependency "json", ">= 2.9.0"
   gem.add_dependency "logger"
+  gem.add_dependency "base64"
 end

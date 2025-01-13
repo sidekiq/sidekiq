@@ -40,7 +40,7 @@ describe Sidekiq::Launcher do
     end
 
     it "stores process info in redis" do
-      @launcher.beat
+      @launcher.send(:beat)
 
       assert_equal "sidekiq #{Sidekiq::VERSION} myapp [1 of 3 busy]", $0
       workers, rtt = @config.redis { |c| c.hmget(@id, "busy", "rtt_us") }
@@ -68,11 +68,11 @@ describe Sidekiq::Launcher do
 
     it "quiets" do
       @launcher.quiet
-      @launcher.beat
+      @launcher.send(:beat)
 
       assert_equal "sidekiq #{Sidekiq::VERSION} myapp [1 of 3 busy] stopping", $0
 
-      @launcher.beat
+      @launcher.send(:beat)
       info = @config.redis { |c| c.hmget(@id, "busy") }
       assert_equal ["1"], info
 
@@ -82,7 +82,7 @@ describe Sidekiq::Launcher do
 
     it "allows arbitrary proctitle extensions" do
       Sidekiq::Launcher::PROCTITLES << proc { "xyz" }
-      @launcher.beat
+      @launcher.send(:beat)
       Sidekiq::Launcher::PROCTITLES.pop
       assert_equal "sidekiq #{Sidekiq::VERSION} myapp [1 of 3 busy] xyz", $0
     end

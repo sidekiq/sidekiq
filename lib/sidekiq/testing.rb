@@ -87,7 +87,7 @@ module Sidekiq
       if Sidekiq::Testing.fake?
         payloads.each do |job|
           job = Sidekiq.load_json(Sidekiq.dump_json(job))
-          job["enqueued_at"] = Time.now.to_f unless job["at"]
+          job["enqueued_at"] = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond) unless job["at"]
           Queues.push(job["queue"], job["class"], job)
         end
         true
@@ -329,6 +329,6 @@ module Sidekiq
   end
 end
 
-if defined?(::Rails) && Rails.respond_to?(:env) && !Rails.env.test? && !$TESTING
+if defined?(::Rails) && Rails.respond_to?(:env) && !Rails.env.test? && !$TESTING # rubocop:disable Style/GlobalVars
   warn("⛔️ WARNING: Sidekiq testing API enabled, but this is not the test environment.  Your jobs will not go to Redis.", uplevel: 1)
 end

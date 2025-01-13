@@ -17,11 +17,11 @@ describe "filtering" do
 
   before do
     @config = reset!
-    app.middlewares.clear
+    Sidekiq::Web.middlewares.clear
   end
 
   def app
-    Sidekiq::Web
+    Sidekiq::Web.new
   end
 
   it "finds retries matching substring" do

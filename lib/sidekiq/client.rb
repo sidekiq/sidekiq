@@ -67,9 +67,7 @@ module Sidekiq
         c.pipelined do |p|
           p.hsetnx(key, "cancelled", Time.now.to_i)
           p.hget(key, "cancelled")
-          p.expire(key, Sidekiq::Job::Iterable::STATE_TTL)
-          # TODO When Redis 7.2 is required
-          # p.expire(key, Sidekiq::Job::Iterable::STATE_TTL, "nx")
+          p.expire(key, Sidekiq::Job::Iterable::STATE_TTL, "nx")
         end
       end
       result.to_i
@@ -271,14 +269,16 @@ module Sidekiq
           [at, Sidekiq.dump_json(hash)]
         })
       else
-        queue = payloads.first["queue"]
-        now = Time.now.to_f
-        to_push = payloads.map { |entry|
-          entry["enqueued_at"] = now
-          Sidekiq.dump_json(entry)
-        }
-        conn.sadd("queues", [queue])
-        conn.lpush("queue:#{queue}", to_push)
+        now = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond) # milliseconds since the epoch
+        grouped_queues = payloads.group_by { |job| job["queue"] }
+        conn.sadd("queues", grouped_queues.keys)
+        grouped_queues.each do |queue, grouped_payloads|
+          to_push = grouped_payloads.map { |entry|
+            entry["enqueued_at"] = now
+            Sidekiq.dump_json(entry)
+          }
+          conn.lpush("queue:#{queue}", to_push)
+        end
       end
     end
   end

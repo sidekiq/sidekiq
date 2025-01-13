@@ -149,7 +149,7 @@ module Sidekiq
 
       m = exception_message(exception)
       if m.respond_to?(:scrub!)
-        m.force_encoding("utf-8")
+        m.force_encoding(Encoding::UTF_8)
         m.scrub!
       end
 
@@ -189,7 +189,7 @@ module Sidekiq
 
       # Logging here can break retries if the logging device raises ENOSPC #3979
       # logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
-      jitter = rand(10) * (count + 1)
+      jitter = rand(10 * (count + 1))
       retry_at = Time.now.to_f + delay + jitter
       payload = Sidekiq.dump_json(msg)
       redis do |conn|

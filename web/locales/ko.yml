@@ -1,5 +1,6 @@
 # elements like %{queue} are variables and should not be translated
 ko:
+  LanguageName: 한국어
   Actions: 동작
   AddToQueue: 큐 추가
   AreYouSure: 정말입니까?

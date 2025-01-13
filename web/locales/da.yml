@@ -1,5 +1,6 @@
 # elements like %{queue} are variables and should not be translated
 da:
+  LanguageName: Dansk
   Actions: Handlinger
   AddToQueue: Tilføj til kø
   AreYouSure: Er du sikker?

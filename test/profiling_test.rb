@@ -10,9 +10,11 @@ describe "profiling" do
     @config = reset!
 
     # Ensure we don't touch external systems in our test suite
-    Sidekiq::Web::PROFILE_OPTIONS.clear
-    Sidekiq::Web::PROFILE_OPTIONS[:view_url] = "https://localhost/public/%s"
-    Sidekiq::Web::PROFILE_OPTIONS[:store_url] = "https://localhost/store"
+    Sidekiq::Web.configure do |config|
+      config.middlewares.clear
+      config[:profile_view_url] = "https://localhost/public/%s"
+      config[:profile_store_url] = "https://localhost/store"
+    end
   end
 
   it "profiles" do
@@ -44,7 +46,7 @@ describe "profiling" do
     assert_equal %w[bob-5678 mike-1234], profiles.map(&:key)
     assert_equal %w[5678 1234], profiles.map(&:jid)
 
-    header = "\x1f\x8b".force_encoding("BINARY")
+    header = "\x1f\x8b".b
     profiles.each do |pr|
       assert pr.started_at
       assert_operator pr.size, :>, 2
@@ -71,7 +73,10 @@ describe "profiling" do
     assert_equal header, last_response.body[0..1]
 
     # Verify we can turn off remote viewing by removing the store url
-    Sidekiq::Web::PROFILE_OPTIONS[:store_url] = nil
+    Sidekiq::Web.configure do |config|
+      config.tabs.delete "Profiles"
+      config[:profile_store_url] = nil
+    end
 
     get "/profiles"
     assert_match(/mike-1234/, last_response.body)

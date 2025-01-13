@@ -49,6 +49,7 @@ def capture_logging(cfg, lvl = Logger::INFO)
     out = StringIO.new
     logger = ::Logger.new(out)
     logger.level = lvl
+    logger.formatter = Sidekiq::Logger::Formatters::Pretty.new
     cfg.logger = logger
     yield logger
     out.string

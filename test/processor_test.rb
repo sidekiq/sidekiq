@@ -73,6 +73,7 @@ describe Sidekiq::Processor do
   before do
     $invokes = 0
     @config = reset!
+    @config.thread_priority = 0
     @processor = ::Sidekiq::Processor.new(@config.default_capsule) { |*args| }
   end
 
@@ -82,20 +83,20 @@ describe Sidekiq::Processor do
 
   it "processes as expected" do
     msg = Sidekiq.dump_json({"class" => MockJob.to_s, "args" => ["myarg"]})
-    @processor.process(work(msg))
+    @processor.send(:process, work(msg))
     assert_equal 1, $invokes
   end
 
   it "processes iterable job as expected" do
     msg = Sidekiq.dump_json({"class" => MockIterableJob.to_s})
-    @processor.process(work(msg))
+    @processor.send(:process, work(msg))
     assert_equal 10, $invokes
   end
 
   it "executes a worker as expected" do
     worker = Minitest::Mock.new
     worker.expect(:perform, nil, [1, 2, 3])
-    @processor.execute_job(worker, [1, 2, 3])
+    @processor.send(:execute_job, worker, [1, 2, 3])
   end
 
   it "re-raises exceptions after handling" do
@@ -103,7 +104,7 @@ describe Sidekiq::Processor do
     re_raise = false
 
     begin
-      @processor.process(work(msg))
+      @processor.send(:process, work(msg))
       flunk "Expected exception"
     rescue TestProcessorException
       re_raise = true
@@ -116,7 +117,7 @@ describe Sidekiq::Processor do
   it "does not modify original arguments" do
     msg = {"class" => MockJob.to_s, "args" => [["myarg"]]}
     msgstr = Sidekiq.dump_json(msg)
-    @processor.process(work(msgstr))
+    @processor.send(:process, work(msgstr))
     assert_equal [["myarg"]], msg["args"]
   end
 
@@ -146,7 +147,7 @@ describe Sidekiq::Processor do
       assert_equal 0, ds.size
       begin
         @processor.instance_variable_set(:@job, job)
-        @processor.process(job)
+        @processor.send(:process, job)
       rescue JSON::ParserError
       end
       assert_equal 1, ds.size
@@ -158,7 +159,7 @@ describe Sidekiq::Processor do
       job = work(msg)
       begin
         @processor.instance_variable_set(:@job, job)
-        @processor.process(job)
+        @processor.send(:process, job)
       rescue TestProcessorException
       end
       assert_equal 1, errors.count
@@ -173,7 +174,7 @@ describe Sidekiq::Processor do
       job = work(msg)
       begin
         @processor.instance_variable_set(:@job, job)
-        @processor.process(job)
+        @processor.send(:process, job)
       rescue TestProcessorException
       end
       assert_equal 1, errors.count
@@ -186,7 +187,7 @@ describe Sidekiq::Processor do
       # swallow logging because actually care about the added exception handler
       capture_logging(@config) do
         @processor.capsule.fetcher.stub(:retrieve_work, fetch_stub) do
-          @processor.process_one
+          @processor.send(:process_one)
         end
       end
 
@@ -220,7 +221,7 @@ describe Sidekiq::Processor do
         work.expect(:acknowledge, nil)
         begin
           @processor.config.logger.level = Logger::ERROR
-          @processor.process(work)
+          @processor.send(:process, work)
           flunk "Expected #process to raise exception"
         rescue TestProcessorException
         end
@@ -234,7 +235,7 @@ describe Sidekiq::Processor do
         work.expect(:acknowledge, nil)
         begin
           @processor.config.logger.level = Logger::ERROR
-          @processor.process(work)
+          @processor.send(:process, work)
           flunk "Expected #process to raise exception"
         rescue TestProcessorException
         end
@@ -246,7 +247,7 @@ describe Sidekiq::Processor do
 
       it "acks the job" do
         work.expect(:acknowledge, nil)
-        @processor.process(work)
+        @processor.send(:process, work)
       end
     end
 
@@ -257,7 +258,7 @@ describe Sidekiq::Processor do
         work.expect(:acknowledge, nil)
         begin
           @processor.config.logger.level = Logger::ERROR
-          @processor.process(work)
+          @processor.send(:process, work)
           flunk "Expected #process to raise exception"
         rescue TestProcessorException
         end
@@ -267,7 +268,7 @@ describe Sidekiq::Processor do
     describe "everything goes well" do
       it "acks the job" do
         work.expect(:acknowledge, nil)
-        @processor.process(work)
+        @processor.send(:process, work)
       end
     end
   end
@@ -295,7 +296,7 @@ describe Sidekiq::Processor do
         @processor.instance_variable_get(:@retrier).stub(:process_retry, retry_stub) do
           msg = Sidekiq.dump_json(job_data)
           begin
-            @processor.process(work(msg))
+            @processor.send(:process, work(msg))
             flunk "Expected exception"
           rescue TestProcessorException
           end
@@ -314,7 +315,7 @@ describe Sidekiq::Processor do
 
     it "is called instead default Sidekiq::JobLogger" do
       msg = Sidekiq.dump_json({"class" => MockJob.to_s, "args" => ["myarg"]})
-      @processor.process(work(msg))
+      @processor.send(:process, work(msg))
       assert_equal 2, $invokes
     end
   end
@@ -326,7 +327,7 @@ describe Sidekiq::Processor do
 
     def successful_job
       msg = Sidekiq.dump_json({"class" => MockJob.to_s, "args" => ["myarg"]})
-      @processor.process(work(msg))
+      @processor.send(:process, work(msg))
     end
 
     it "increments processed stat" do

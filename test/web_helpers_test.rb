@@ -22,6 +22,10 @@ class Helpers
     ["web/locales"]
   end
 
+  def config
+    self
+  end
+
   def env
     @thehash
   end
@@ -32,6 +36,10 @@ class Helpers
 
   def session
     {}
+  end
+
+  def csp_nonce
+    "12345678deadbeef"
   end
 
   def path_info
@@ -46,12 +54,12 @@ describe "Web helpers" do
 
   it "tests script_tag" do
     obj = Helpers.new
-    assert_equal '<script type="text/javascript" src="/sidekiq.js"></script>', obj.script_tag("sidekiq.js")
+    assert_equal "<script type=\"text/javascript\" nonce=\"12345678deadbeef\" src=\"/sidekiq.js\"></script>", obj.script_tag("sidekiq.js")
   end
 
   it "tests style_tag" do
     obj = Helpers.new
-    assert_equal '<link type="text/css" media="screen" rel="stylesheet" href="/sidekiq.css" />', obj.style_tag("sidekiq.css")
+    assert_equal ["<link type=\"text/css\" media=\"screen\" rel=\"stylesheet\" nonce=\"12345678deadbeef\" href=\"/sidekiq.css\" />"], obj.style_tag("sidekiq.css")
   end
 
   it "tests locale determination" do
@@ -62,7 +70,10 @@ describe "Web helpers" do
     assert_equal "fr", obj.locale
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2")
-    assert_equal "zh-cn", obj.locale
+    assert_equal "zh-CN", obj.locale
+
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2")
+    assert_equal "zh-TW", obj.locale
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "en-US,sv-SE;q=0.8,sv;q=0.6,en;q=0.4")
     assert_equal "en", obj.locale
@@ -77,13 +88,13 @@ describe "Web helpers" do
     assert_equal "sv", obj.locale
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4")
-    assert_equal "pt-br", obj.locale
+    assert_equal "pt-BR", obj.locale
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "pt-PT,pt;q=0.8,en-US;q=0.6,en;q=0.4")
     assert_equal "pt", obj.locale
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "pt-br")
-    assert_equal "pt-br", obj.locale
+    assert_equal "pt", obj.locale
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "pt-pt")
     assert_equal "pt", obj.locale
@@ -110,6 +121,13 @@ describe "Web helpers" do
     assert_equal "en", obj.locale
   end
 
+  it "returns language name from locale" do
+    obj = Helpers.new
+    assert_equal "English", obj.language_name("en")
+    assert_equal "Português", obj.language_name("pt")
+    assert_equal "missing", obj.language_name("missing")
+  end
+
   it "handles invalid locales" do
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "*")
     obj.instance_eval do
@@ -134,8 +152,8 @@ describe "Web helpers" do
     obj = Helpers.new
     expected = %w[
       ar cs da de el en es fa fr gd he hi it ja
-      ko lt nb nl pl pt pt-br ru sv ta tr uk ur
-      vi zh-cn zh-tw
+      ko lt nb nl pl pt pt-BR ru sv ta tr uk ur
+      vi zh-CN zh-TW
     ]
     assert_equal expected, obj.available_locales.sort
   end

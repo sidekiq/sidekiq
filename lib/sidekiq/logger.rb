@@ -81,13 +81,9 @@ module Sidekiq
           Thread.current["sidekiq_tid"] ||= (Thread.current.object_id ^ ::Process.pid).to_s(36)
         end
 
-        def ctx
-          Sidekiq::Context.current
-        end
-
-        def format_context
-          if ctx.any?
-            " " + ctx.compact.map { |k, v|
+        def format_context(ctxt = Sidekiq::Context.current)
+          if ctxt.size > 0
+            ctxt.map { |k, v|
               case v
               when Array
                 "#{k}=#{v.join(",")}"
@@ -101,13 +97,13 @@ module Sidekiq
 
       class Pretty < Base
         def call(severity, time, program_name, message)
-          "#{time.utc.iso8601(3)} pid=#{::Process.pid} tid=#{tid}#{format_context} #{severity}: #{message}\n"
+          "#{time.utc.iso8601(3)} pid=#{::Process.pid} tid=#{tid} #{format_context} #{severity}: #{message}\n"
         end
       end
 
       class WithoutTimestamp < Pretty
         def call(severity, time, program_name, message)
-          "pid=#{::Process.pid} tid=#{tid}#{format_context} #{severity}: #{message}\n"
+          "pid=#{::Process.pid} tid=#{tid} #{format_context} #{severity}: #{message}\n"
         end
       end
 
@@ -120,7 +116,7 @@ module Sidekiq
             lvl: severity,
             msg: message
           }
-          c = ctx
+          c = Sidekiq::Context.current
           hash["ctx"] = c unless c.empty?
 
           Sidekiq.dump_json(hash) << "\n"

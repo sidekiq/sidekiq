@@ -4,6 +4,27 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD (8.0)
+---------
+
+- Sidekiq::Web internal refactoring [#6532]
+
+7.3.5
+---------
+
+- Fix pause/unpause [#6574]
+- Relax metric connection pool sizing [#6560]
+
+7.3.4
+---------
+
+- Add new `distribution` and `distribution_time` metrics [#6534]
+- `time` metrics no longer hold a Statsd connection while timing the block
+- Fix queue pause affecting all applications using the same Redis instance,
+  even if using different DB indexes. [#6528]
+- Fix broken filter links on Batch details page
+- Use backported APIs for Web extension
+
 7.3.3
 ---------
 

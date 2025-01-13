@@ -3,7 +3,6 @@
 $stdout.sync = true
 
 require "yaml"
-require "singleton"
 require "optparse"
 require "erb"
 require "fileutils"
@@ -17,7 +16,6 @@ require "sidekiq/launcher"
 module Sidekiq # :nodoc:
   class CLI
     include Sidekiq::Component
-    include Singleton unless $TESTING
 
     attr_accessor :launcher
     attr_accessor :environment
@@ -29,6 +27,10 @@ module Sidekiq # :nodoc:
       setup_options(args)
       initialize_logger
       validate!
+    end
+
+    def self.instance
+      @instance ||= new
     end
 
     def jruby?
@@ -74,7 +76,7 @@ module Sidekiq # :nodoc:
       # fire startup and start multithreading.
       info = @config.redis_info
       ver = Gem::Version.new(info["redis_version"])
-      raise "You are connecting to Redis #{ver}, Sidekiq requires Redis 6.2.0 or greater" if ver < Gem::Version.new("6.2.0")
+      raise "You are connected to Redis #{ver}, Sidekiq requires Redis 7.2.0 or greater" if ver < Gem::Version.new("7.2.0")
 
       maxmemory_policy = info["maxmemory_policy"]
       if maxmemory_policy != "noeviction" && maxmemory_policy != ""
@@ -298,27 +300,16 @@ module Sidekiq # :nodoc:
 
       if File.directory?(@config[:require])
         require "rails"
-        if ::Rails::VERSION::MAJOR < 6
-          warn "Sidekiq #{Sidekiq::VERSION} only supports Rails 6+"
+        if ::Rails::VERSION::MAJOR < 7
+          warn "Sidekiq #{Sidekiq::VERSION} only supports Rails 7+"
         end
         require "sidekiq/rails"
         require File.expand_path("#{@config[:require]}/config/environment.rb")
-        @config[:tag] ||= default_tag
+        @config[:tag] ||= default_tag(::Rails.root)
       else
         require @config[:require]
+        @config[:tag] ||= default_tag
       end
-    end
-
-    def default_tag
-      dir = ::Rails.root
-      name = File.basename(dir)
-      prevdir = File.dirname(dir) # Capistrano release directory?
-      if name.to_i != 0 && prevdir
-        if File.basename(prevdir) == "releases"
-          return File.basename(File.dirname(prevdir))
-        end
-      end
-      name
     end
 
     def validate!
@@ -395,7 +386,12 @@ module Sidekiq # :nodoc:
     end
 
     def initialize_logger
-      @config.logger.level = ::Logger::DEBUG if @config[:verbose]
+      if @config[:verbose] || ENV["DEBUG_INVOCATION"] == "1"
+        # DEBUG_INVOCATION is a systemd-ism triggered by
+        # RestartMode=debug. We turn on debugging when the
+        # sidekiq process crashes and is restarted with this flag.
+        @config.logger.level = ::Logger::DEBUG
+      end
     end
 
     def parse_config(path)

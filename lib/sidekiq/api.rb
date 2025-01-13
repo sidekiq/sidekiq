@@ -99,11 +99,22 @@ module Sidekiq
         rescue
           {}
         end
-        now = Time.now.to_f
-        thence = job["enqueued_at"] || now
-        now - thence
+
+        enqueued_at = job["enqueued_at"]
+        if enqueued_at
+          if enqueued_at.is_a?(Float)
+            # old format
+            now = Time.now.to_f
+            now - enqueued_at
+          else
+            now = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond)
+            (now - enqueued_at) / 1000.0
+          end
+        else
+          0.0
+        end
       else
-        0
+        0.0
       end
 
       @stats = {
@@ -263,11 +274,22 @@ module Sidekiq
       entry = Sidekiq.redis { |conn|
         conn.lindex(@rname, -1)
       }
-      return 0 unless entry
+      return 0.0 unless entry
+
       job = Sidekiq.load_json(entry)
-      now = Time.now.to_f
-      thence = job["enqueued_at"] || now
-      now - thence
+      enqueued_at = job["enqueued_at"]
+      if enqueued_at
+        if enqueued_at.is_a?(Float)
+          # old format
+          now = Time.now.to_f
+          now - enqueued_at
+        else
+          now = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond)
+          (now - enqueued_at) / 1000.0
+        end
+      else
+        0.0
+      end
     end
 
     def each
@@ -420,11 +442,13 @@ module Sidekiq
     end
 
     def enqueued_at
-      self["enqueued_at"] ? Time.at(self["enqueued_at"]).utc : nil
+      if self["enqueued_at"]
+        time_from_timestamp(self["enqueued_at"])
+      end
     end
 
     def created_at
-      Time.at(self["created_at"] || self["enqueued_at"] || 0).utc
+      time_from_timestamp(self["created_at"] || self["enqueued_at"] || 0)
     end
 
     def tags
@@ -442,8 +466,17 @@ module Sidekiq
     end
 
     def latency
-      now = Time.now.to_f
-      now - (@item["enqueued_at"] || @item["created_at"] || now)
+      timestamp = @item["enqueued_at"] || @item["created_at"]
+      if timestamp
+        if timestamp.is_a?(Float)
+          # old format
+          Time.now.to_f - timestamp
+        else
+          (::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond) - timestamp) / 1000.0
+        end
+      else
+        0.0
+      end
     end
 
     # Remove this job from the queue
@@ -491,6 +524,15 @@ module Sidekiq
       strict_base64_decoded = backtrace.unpack1("m")
       uncompressed = Zlib::Inflate.inflate(strict_base64_decoded)
       Sidekiq.load_json(uncompressed)
+    end
+
+    def time_from_timestamp(timestamp)
+      if timestamp.is_a?(Float)
+        # old format, timestamps were stored as fractional seconds since the epoch
+        Time.at(timestamp).utc
+      else
+        Time.at(timestamp / 1000, timestamp % 1000, :millisecond)
+      end
     end
   end
 
@@ -1222,10 +1264,8 @@ module Sidekiq
       @records = Sidekiq.redis do |c|
         # This throws away expired profiles
         c.zremrangebyscore("profiles", "-inf", Time.now.to_f.to_s)
-        # TODO I'd like to use "REV" here and avoid the reverse_each
-        # below but it's not working for me in 7.2.3
-        # c.zrange("profiles", 0, "+inf", "byscore", "rev")
-        c.zrange("profiles", 0, "+inf", "byscore")
+        # retreive records, newest to oldest
+        c.zrange("profiles", "+inf", 0, "byscore", "rev")
       end
     end
 
@@ -1243,7 +1283,7 @@ module Sidekiq
         end
       end
 
-      arrays.compact.map { |arr| ProfileRecord.new(arr) }.reverse_each(&block)
+      arrays.compact.map { |arr| ProfileRecord.new(arr) }.each(&block)
     end
   end
 

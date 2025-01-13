@@ -8,6 +8,20 @@ module Sidekiq
   # These methods are available to pages within the Web UI and UI extensions.
   # They are not public APIs for applications to use.
   module WebHelpers
+    def store_name
+      hash = redis_info
+      return "Dragonfly" if hash.has_key?("dragonfly_version")
+      return "Valkey" if hash.has_key?("valkey_version")
+      "Redis"
+    end
+
+    def store_version
+      hash = redis_info
+      return hash["dragonfly_version"] if hash.has_key?("dragonfly_version")
+      return hash["valkey_version"] if hash.has_key?("valkey_version")
+      hash["redis_version"]
+    end
+
     def style_tag(location, **kwargs)
       global = location.match?(/:\/\//)
       location = root_path + location if !global && !location.start_with?(root_path)
@@ -18,7 +32,9 @@ module Sidekiq
         nonce: csp_nonce,
         href: location
       }
-      html_tag(:link, attrs.merge(kwargs))
+      add_to_head do
+        html_tag(:link, attrs.merge(kwargs))
+      end
     end
 
     def script_tag(location, **kwargs)
@@ -51,11 +67,11 @@ module Sidekiq
     end
 
     def strings(lang)
-      @strings ||= {}
+      @@strings ||= {}
 
       # Allow sidekiq-web extensions to add locale paths
       # so extensions can be localized
-      @strings[lang] ||= settings.locales.each_with_object({}) do |path, global|
+      @@strings[lang] ||= config.locales.each_with_object({}) do |path, global|
         find_locale_files(lang).each do |file|
           strs = YAML.safe_load_file(file)
           global.merge!(strs[lang])
@@ -76,23 +92,27 @@ module Sidekiq
     end
 
     def clear_caches
-      @strings = nil
-      @locale_files = nil
-      @available_locales = nil
+      @@strings = nil
+      @@locale_files = nil
+      @@available_locales = nil
     end
 
     def locale_files
-      @locale_files ||= settings.locales.flat_map { |path|
+      @@locale_files ||= config.locales.flat_map { |path|
         Dir["#{path}/*.yml"]
       }
     end
 
     def available_locales
-      @available_locales ||= Set.new(locale_files.map { |path| File.basename(path, ".yml") })
+      @@available_locales ||= Set.new(locale_files.map { |path| File.basename(path, ".yml") })
     end
 
     def find_locale_files(lang)
       locale_files.select { |file| file =~ /\/#{lang}\.yml$/ }
+    end
+
+    def language_name(locale)
+      strings(locale).fetch("LanguageName", locale)
     end
 
     def search(jobset, substr)
@@ -110,7 +130,7 @@ module Sidekiq
       if within.nil?
         ::Rack::Utils.escape_html(jid)
       else
-        "<a href='#{root_path}filter/#{within}?substr=#{jid}'>#{::Rack::Utils.escape_html(jid)}</a>"
+        "<a href='#{root_path}#{within}?substr=#{jid}'>#{::Rack::Utils.escape_html(jid)}</a>"
       end
     end
 
@@ -148,7 +168,7 @@ module Sidekiq
     # See https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.4
     def user_preferred_languages
       languages = env["HTTP_ACCEPT_LANGUAGE"]
-      languages.to_s.downcase.gsub(/\s+/, "").split(",").map { |language|
+      languages.to_s.gsub(/\s+/, "").split(",").map { |language|
         locale, quality = language.split(";q=", 2)
         locale = nil if locale == "*" # Ignore wildcards
         quality = quality ? quality.to_f : 1.0
@@ -167,7 +187,13 @@ module Sidekiq
       @locale ||= if (l = session&.fetch(:locale, nil)) && available_locales.include?(l)
         l
       else
-        matched_locale = user_preferred_languages.map { |preferred|
+
+        # exactly match with preferred like "pt-BR, zh-CN, zh-TW..." first
+        matched_locale = user_preferred_languages.find { |preferred|
+          available_locales.include?(preferred) if preferred.length == 5
+        }
+
+        matched_locale ||= user_preferred_languages.map { |preferred|
           preferred_language = preferred.split("-", 2).first
 
           lang_group = available_locales.select { |available|
@@ -183,7 +209,8 @@ module Sidekiq
 
     # sidekiq/sidekiq#3243
     def unfiltered?
-      yield unless env["PATH_INFO"].start_with?("/filter/")
+      s = url_params("substr")
+      yield unless s && s.size > 0
     end
 
     def get_locale
@@ -200,7 +227,7 @@ module Sidekiq
     end
 
     def sort_direction_label
-      (params[:direction] == "asc") ? "&uarr;" : "&darr;"
+      (url_params("direction") == "asc") ? "&uarr;" : "&darr;"
     end
 
     def workset
@@ -243,7 +270,7 @@ module Sidekiq
     end
 
     def redis_info
-      Sidekiq.default_configuration.redis_info
+      @info ||= Sidekiq.default_configuration.redis_info
     end
 
     def root_path
@@ -267,8 +294,8 @@ module Sidekiq
       "#{score}-#{job["jid"]}"
     end
 
-    def parse_params(params)
-      score, jid = params.split("-", 2)
+    def parse_key(key)
+      score, jid = key.split("-", 2)
       [score.to_f, jid]
     end
 
@@ -278,11 +305,11 @@ module Sidekiq
     def qparams(options)
       stringified_options = options.transform_keys(&:to_s)
 
-      to_query_string(params.merge(stringified_options))
+      to_query_string(request.params.merge(stringified_options))
     end
 
-    def to_query_string(params)
-      params.map { |key, value|
+    def to_query_string(hash)
+      hash.map { |key, value|
         SAFE_QPARAMS.include?(key) ? "#{key}=#{CGI.escape(value.to_s)}" : next
       }.compact.join("&")
     end
