@@ -5,8 +5,7 @@ module Sidekiq
     TYPE_CACHE = {
       "dead" => "zset",
       "retry" => "zset",
-      "schedule" => "zset",
-      "batches" => "zset"
+      "schedule" => "zset"
     }
 
     def page(key, pageidx = 1, page_size = 25, opts = nil)
@@ -33,7 +32,7 @@ module Sidekiq
           total_size, items = conn.multi { |transaction|
             transaction.zcard(key)
             if rev
-              transaction.zrange(key, ending, starting, "REV", "withscores")
+              transaction.zrange(key, starting, ending, "REV", "withscores")
             else
               transaction.zrange(key, starting, ending, "withscores")
             end
