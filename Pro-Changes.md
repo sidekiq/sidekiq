@@ -7,6 +7,7 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 HEAD (8.0)
 ---------
 
+- Sidekiq::Batch's `created_at` is now stored as Integer milliseconds rather than a Float.
 - Sidekiq::Web internal refactoring [#6532]
 
 7.3.5
