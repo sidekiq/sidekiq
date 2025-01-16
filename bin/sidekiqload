@@ -204,8 +204,8 @@ class Loader
     monitor
 
     if ENV["PROFILE"]
-      RubyProf.exclude_threads = [@monitor]
-      RubyProf.start
+      $profile = RubyProf::Profile.new(exclude_threads: [@monitor])
+      $profile.start
     elsif ENV["GC"]
       GC.start
       GC.compact
@@ -236,7 +236,7 @@ class Loader
     Sidekiq.logger.error("GC End RSS: #{Process.rss}") if ENV["GC"]
     if ENV["PROFILE"]
       Sidekiq.logger.error("Profiling...")
-      result = RubyProf.stop
+      result = $profile.stop
       printer = RubyProf::GraphHtmlPrinter.new(result)
       printer.print(File.new("output.html", "w"), min_percent: 1)
     end
