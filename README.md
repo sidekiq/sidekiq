@@ -14,12 +14,12 @@ Rails to make background processing dead simple.
 Requirements
 -----------------
 
-- Redis: Redis 7.2+, Valkey 8.0+ or Dragonfly 1.13+
+- Redis: Redis 7.2+, Valkey 7.2+ or Dragonfly 1.13+
 - Ruby: MRI 3.2+ or JRuby 9.4+.
 
 Sidekiq 8.0 supports Rails 7.0+ but does not require it.
 
-Sidekiq supports Valkey and Dragonfly as Redis alternatives but
+Sidekiq supports [Valkey](https://valkey.io) and [Dragonfly](https://www.dragonflydb.io) as Redis alternatives but
 Redis 7.2.4 is considered to be the canonical implementation.
 Incompatibilities with that version are considered bugs.
 
