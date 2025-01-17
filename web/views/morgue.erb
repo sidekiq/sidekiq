@@ -48,7 +48,7 @@
               </td>
               <td>
                 <% if entry.error? %>
-                <div><%= h truncate("#{entry['error_class']}: #{entry['error_message']}", 200) %></div>
+                  <div><a href="<%= root_path %>morgue/<%= job_params(entry.item, entry.score) %>"><%= h truncate("#{entry['error_class']}: #{entry['error_message']}", 200) %></a></div>
                 <% end %>
               </td>
             </tr>
