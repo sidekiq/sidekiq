@@ -28,7 +28,7 @@ require "ruby-prof" if ENV["PROFILE"]
 require "bundler/setup"
 Bundler.require(:default, :load_test)
 
-latency = Integer(ENV["LATENCY"] || 1)
+latency = Integer(ENV["LATENCY"] || 0)
 if latency > 0
   # brew tap shopify/shopify
   # brew install toxiproxy
@@ -86,7 +86,7 @@ class Loader
   def initialize
     @iter = ENV["GC"] ? 10 : 500
     @count = Integer(ENV["COUNT"] || 1_000)
-    @latency = Integer(ENV["LATENCY"] || 1)
+    @latency = Integer(ENV["LATENCY"] || 0)
   end
 
   def configure
@@ -137,7 +137,7 @@ class Loader
   end
 
   def setup
-    Sidekiq.logger.error("Setup RSS: #{Process.rss}")
+    Sidekiq.logger.warn("Setup RSS: #{Process.rss}")
     Sidekiq.redis { |c| c.flushdb }
     start = Time.now
     if ENV["AJ"]
@@ -167,9 +167,9 @@ class Loader
         if total == 0
           ending = Time.now - @start
           size = @iter * @count
-          Sidekiq.logger.error("Done, #{size} jobs in #{ending} sec, #{(size / ending).to_i} jobs/sec")
-          Sidekiq.logger.error("Ending RSS: #{Process.rss}")
-          Sidekiq.logger.error("Now here's the latency for three jobs")
+          Sidekiq.logger.warn("Done, #{size} jobs in #{ending} sec, #{(size / ending).to_i} jobs/sec")
+          Sidekiq.logger.warn("Ending RSS: #{Process.rss}")
+          Sidekiq.logger.warn("Now here's the latency for three jobs")
 
           if ENV["AJ"]
             LoadJob.perform_later("", 1, {}, Time.now.to_f)
@@ -191,7 +191,7 @@ class Loader
   end
 
   def with_latency(latency, &block)
-    Sidekiq.logger.error "Simulating #{latency}ms of latency between Sidekiq and redis"
+    Sidekiq.logger.warn "Simulating #{latency}ms of latency between Sidekiq and redis"
     if latency > 0
       Toxiproxy[:redis].downstream(:latency, latency: latency).apply(&block)
     else
