@@ -4,6 +4,17 @@ require "sidekiq/job"
 require "rails"
 
 module Sidekiq
+  module ActiveJob
+    # @api private
+    class Wrapper
+      include Sidekiq::Job
+
+      def perform(job_data)
+        ::ActiveJob::Base.execute(job_data.merge("provider_job_id" => jid))
+      end
+    end
+  end
+
   class Rails < ::Rails::Engine
     class Reloader
       def initialize(app = ::Rails.application)
@@ -38,9 +49,8 @@ module Sidekiq
     #     end
     #   end
     initializer "sidekiq.active_job_integration" do
-      require "active_job/queue_adapters/sidekiq_adapter"
-
       ActiveSupport.on_load(:active_job) do
+        require "active_job/queue_adapters/sidekiq_adapter"
         include ::Sidekiq::Job::Options unless respond_to?(:sidekiq_options)
       end
     end
