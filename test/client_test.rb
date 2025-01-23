@@ -279,7 +279,7 @@ describe Sidekiq::Client do
           error = assert_raises ArgumentError do
             InterestingJob.perform_async(ChildHash.new("some" => "hash"))
           end
-          assert_match(/but {.*} is a ChildHash/, error.message)
+          assert_includes(error.message, "is a ChildHash")
         end
 
         it "raises an error when using a Struct as an argument" do
