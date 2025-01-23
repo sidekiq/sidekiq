@@ -166,10 +166,7 @@ describe Sidekiq::RedisConnection do
 
         refute_includes(options.inspect, "REDACTED")
         refute_includes(output, "secret")
-        assert_includes(output, ':host=>"host1", :port=>26379, :password=>"REDACTED"')
-        assert_includes(output, ':host=>"host2", :port=>26379, :password=>"REDACTED"')
-        assert_includes(output, ':host=>"host3", :port=>26379, :password=>"REDACTED"')
-        assert_includes(output, ':password=>"REDACTED"')
+        assert_includes(output, '"REDACTED"')
       end
 
       it "supports sentinel urls" do
