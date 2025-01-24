@@ -35,6 +35,7 @@ en:
   Jobs: Jobs
   Kill: Kill
   KillAll: Kill All
+  Language: Language
   LastRetry: Last Retry
   Latency: Latency
   LivePoll: Live Poll
@@ -54,6 +55,7 @@ en:
   PeakMemoryUsage: Peak Memory Usage
   Plugins: Plugins
   PollingInterval: Polling interval
+  PollingIntervalMilliseconds: Polling interval milliseconds
   Process: Process
   Processed: Processed
   Processes: Processes
