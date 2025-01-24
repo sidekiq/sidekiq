@@ -1212,13 +1212,14 @@ module Sidekiq
     #
     # @param jid [String] the job identifier
     # @return [Sidekiq::Work] the work or nil
-    def find_work_by_jid(jid)
+    def find_work(jid)
       each do |_process_id, _thread_id, work|
         job = work.job
         return work if job.jid == jid
       end
       nil
     end
+    alias_method :find_work_by_jid, :find_work
   end
 
   # Sidekiq::Work represents a job which is currently executing.
