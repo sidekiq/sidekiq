@@ -6,19 +6,19 @@
       <span class="ring"></span>
       <span class="dot"></span>
     </span>
-
-    <span id="sr-last-dashboard-update-template" hidden="hidden"><%= t("LastDashboardUpdateTemplateLiteral") %></span>
-    <span id="sr-last-dashboard-update" class="sr-only" role="status"></span>
   </h3>
   <div class="interval-slider ltr">
     <span class="interval-slider-label"><%= t('PollingInterval') %>:</span>
     <span id="sldr-text" class="current-interval">5 s</span>
     <br/>
-    <input id="sldr" type="range" min="2000" max="20000" step="1000" value="5000"/>
+    <input id="sldr" aria-label="<%= t("PollingIntervalMilliseconds") %>" type="range" min="2000" max="20000" step="1000" value="5000"/>
   </div>
 </div>
 
 <div class="row chart">
+  <span id="sr-last-dashboard-update-template" hidden="hidden"><%= t("LastDashboardUpdateTemplateLiteral") %></span>
+  <span id="sr-last-dashboard-update" class="sr-only" role="status"></span>
+
   <canvas id="realtime-chart">
     <%= to_json({
       processedLabel: t('Processed'),

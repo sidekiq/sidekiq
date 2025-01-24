@@ -34,6 +34,7 @@ en:
   Jobs: Jobs
   Kill: Kill
   KillAll: Kill All
+  Language: Language
   LastDashboardUpdateTemplateLiteral: "Latest poll: Processed: PROCESSED_COUNT. Failed: FAILED_COUNT."
   LastRetry: Last Retry
   Latency: Latency
@@ -54,6 +55,7 @@ en:
   PeakMemoryUsage: Peak Memory Usage
   Plugins: Plugins
   PollingInterval: Polling interval
+  PollingIntervalMilliseconds: Polling interval milliseconds
   Process: Process
   Processed: Processed
   Processes: Processes
