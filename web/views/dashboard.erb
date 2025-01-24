@@ -4,13 +4,13 @@
   <header>
     <h1>
       <%= t('Dashboard') %>
-      <span id="beacon" class="beacon"></span>
+      <span id="beacon" class="beacon" aria-label="<%= t("LivePoll") %>" role="status"></span>
     </h1>
     <div class="filter interval-slider">
       <span class="interval-slider-label"><%= t('PollingInterval') %>:</span>
       <span id="sldr-text" class="current-interval">5 s</span>
       <br/>
-      <input id="sldr" type="range" min="2000" max="20000" step="1000" value="5000"/>
+      <input id="sldr" aria-label="<%= t("PollingIntervalMilliseconds") %>" role="slider" type="range" min="2000" max="20000" step="1000" value="5000"/>
     </div>
   </header>
 
