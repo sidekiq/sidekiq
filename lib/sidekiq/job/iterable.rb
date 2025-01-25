@@ -200,7 +200,7 @@ module Sidekiq
           if ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - state_flushed_at >= STATE_FLUSH_INTERVAL || is_interrupted
             _, _, cancelled = flush_state
             state_flushed_at = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
-            if cancelled == 1
+            if cancelled
               @_cancelled = true
               logger.info { "Job cancelled" }
               return true
