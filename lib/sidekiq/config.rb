@@ -40,15 +40,20 @@ module Sidekiq
 
     ERROR_HANDLER = ->(ex, ctx, cfg = Sidekiq.default_configuration) {
       Sidekiq::Context.with(ctx) do
-        fancy = cfg[:environment] == "development" && $stdout.tty?
-        if cfg.logger.debug?
-          cfg.logger.debug do
-            ex.full_message(highlight: fancy)
-          end
+        dev = cfg[:environment] == "development"
+        fancy = dev && $stdout.tty? # 🎩
+        # Weird logic here but we want to show the backtrace in local
+        # development or if verbose logging is enabled.
+        #
+        # `full_message` contains the error class, message and backtrace
+        # `detailed_message` contains the error class and message
+        #
+        # Absolutely terrible API names. Not useful at all to have two
+        # methods with similar but obscure names.
+        if dev || cfg.logger.debug?
+          cfg.logger.info { ex.full_message(highlight: fancy) }
         else
-          cfg.logger.info do
-            ex.detailed_message(highlight: fancy)
-          end
+          cfg.logger.info { ex.detailed_message(highlight: fancy) }
         end
       end
     }
