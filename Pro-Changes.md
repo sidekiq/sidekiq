@@ -10,6 +10,14 @@ HEAD (8.0)
 - Sidekiq::Batch's `created_at` is now stored as Integer milliseconds rather than a Float.
 - Sidekiq::Web internal refactoring [#6532]
 
+HEAD / 7.x
+---------
+
+- Batch data model forward compatibility [#6594]
+  Make sure you update to this version and run it for several weeks before upgrading to 8.0.
+  8.0 will not work with batch data created before this version.
+- Fix batch pagination [#6577]
+
 7.3.5
 ---------
 
