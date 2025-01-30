@@ -7,16 +7,22 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 HEAD (8.0)
 ---------
 
+- **BREAKING** All Pro/Enterprise Statsd metrics are now prefixed with `sidekiq.`. [#6337]
+  Customers are advised to remove `namespace: 'sidekiq'` or similar from their Statsd configration.
+- **BREAKING** Batch's `failure_info` structure and API have been replaced
+  with `failed_jids` in order to reduce duplicate data within Redis. [#6580]
+- Batch's callback tracking has been refactored to use modern Redis commands and structures.
 - Sidekiq::Batch's `created_at` is now stored as Integer milliseconds rather than a Float.
 - Sidekiq::Web internal refactoring [#6532]
 
-HEAD / 7.x
+7.3.6
 ---------
 
 - Batch data model forward compatibility [#6594]
   Make sure you update to this version and run it for several weeks before upgrading to 8.0.
   8.0 will not work with batch data created before this version.
 - Fix batch pagination [#6577]
+- Fix super_fetch script when running on DragonflyDB
 
 7.3.5
 ---------
