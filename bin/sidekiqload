@@ -43,6 +43,14 @@ if latency > 0
   }])
 end
 
+require 'fiddle'
+libc = Fiddle.dlopen(nil)
+$sched_getcpu = Fiddle::Function.new(
+  libc['sched_getcpu'],
+  [],
+  Fiddle::TYPE_INT
+)
+
 if ENV["AJ"]
   require "active_job"
   puts "Using ActiveJob #{ActiveJob::VERSION::STRING}"
@@ -60,7 +68,7 @@ class LoadWorker
   include Sidekiq::Job
   $count = 0
   $lock = Mutex.new
- 
+
   sidekiq_options retry: 1
   sidekiq_retry_in do |x|
     1
@@ -139,6 +147,7 @@ class Loader
   def setup
     Sidekiq.logger.warn("Setup RSS: #{Process.rss}")
     Sidekiq.redis { |c| c.flushdb }
+    Sidekiq.logger.info "Sidekiq worker starting on CPU #{$sched_getcpu.call}"
     start = Time.now
     if ENV["AJ"]
       @iter.times do
@@ -190,6 +199,20 @@ class Loader
     end
   end
 
+  def monitor_task_migration
+    @monitor_task = Thread.new do
+      last_cpu = $sched_getcpu.call
+      loop do
+        sleep 0.01
+        current_cpu = $sched_getcpu.call
+        if current_cpu != last_cpu
+          Sidekiq.logger.warn "[#{Process.pid}] Migrated from CPU #{last_cpu} to CPU #{current_cpu} at #{Time.now.strftime('%Y-%m-%d %H:%M:%S.%L')}"
+          last_cpu = current_cpu
+        end
+      end
+    end
+  end
+
   def with_latency(latency, &block)
     Sidekiq.logger.warn "Simulating #{latency}ms of latency between Sidekiq and redis"
     if latency > 0
@@ -202,9 +225,10 @@ class Loader
   def run(name)
     Sidekiq.logger.warn("Starting #{name}")
     monitor
+    monitor_task_migration
 
     if ENV["PROFILE"]
-      $profile = RubyProf::Profile.new(exclude_threads: [@monitor])
+      $profile = RubyProf::Profile.new(exclude_threads: [@monitor, @monitor_task])
       $profile.start
     elsif ENV["GC"]
       GC.start

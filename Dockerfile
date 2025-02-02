@@ -8,9 +8,6 @@ COPY . .
 # Install dependencies
 RUN bundle install
 
-# Add our CPU monitoring
-COPY cpu_monitor.rb /app/cpu_monitor.rb
-
 # Script to start both Redis and run our test
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
