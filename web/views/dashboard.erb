@@ -4,7 +4,7 @@
   <header>
     <h1>
       <%= t('Dashboard') %>
-      <span id="beacon" class="beacon" aria-label="<%= t("LivePoll") %>" role="status"></span>
+      <span id="beacon" class="beacon"></span>
     </h1>
     <div class="filter interval-slider">
       <span class="interval-slider-label"><%= t('PollingInterval') %>:</span>
@@ -15,6 +15,9 @@
   </header>
 
   <div class="chart">
+    <span id="sr-last-dashboard-update-template" hidden="hidden"><%= t("LastDashboardUpdateTemplateLiteral") %></span>
+    <span id="sr-last-dashboard-update" class="sr-only" role="status"></span>
+
     <canvas id="realtime-chart">
       <%= to_json({
         processedLabel: t('Processed'),

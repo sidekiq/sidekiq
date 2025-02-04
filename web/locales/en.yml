@@ -36,6 +36,7 @@ en:
   Kill: Kill
   KillAll: Kill All
   Language: Language
+  LastDashboardUpdateTemplateLiteral: "Latest poll: Processed: PROCESSED_COUNT. Failed: FAILED_COUNT."
   LastRetry: Last Retry
   Latency: Latency
   LivePoll: Live Poll
