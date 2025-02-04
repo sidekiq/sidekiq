@@ -83,6 +83,8 @@ class RealtimeChart extends DashboardChart {
     this.chart.data.datasets[1].data.push(failed);
     this.chart.update();
 
+    updateScreenReaderDashboardValues(processed, failed);
+
     updateStatsSummary(this.stats.sidekiq);
     updateRedisStats(this.stats.redis);
     updateFooterUTCTime(this.stats.server_utc_time);

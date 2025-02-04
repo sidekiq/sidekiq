@@ -36,6 +36,12 @@ var ready = (callback) => {
   else document.addEventListener("DOMContentLoaded", callback);
 }
 
+var updateScreenReaderDashboardValues = function(processed, failed) {
+  let lastDashboardUpdateSpan = document.getElementById("sr-last-dashboard-update");
+  var updateText = document.getElementById("sr-last-dashboard-update-template").innerText;
+  lastDashboardUpdateSpan.innerText = updateText.replace("PROCESSED_COUNT", processed).replace("FAILED_COUNT", failed);
+}
+
 ready(() => {
   var sldr = document.getElementById('sldr');
   if (typeof localStorage.sidekiqTimeInterval !== 'undefined') {
