@@ -16,7 +16,7 @@ HEAD / main
   Please read the new [Profiling](https://github.com/sidekiq/sidekiq/wiki/Profiling) wiki page for details.
 - CurrentAttribute support now uses `ActiveJob::Arguments` to serialize the context object, supporting Symbols and GlobalID.
   The change should be backwards compatible. [#6510]
-- Refactor `Sidekiq::Web` to simplify the code and improve security [#6532]
+- Freshen up `Sidekiq::Web` to simplify the code and improve security [#6532]
   The CSS has been rewritten from scratch to remove the Bootstrap framework.
 - Default error logging has been modified to use Ruby's `Exception#detailed_message` and `#full_message` APIs.
 - CI now runs against Redis, Dragonfly and Valkey.
@@ -24,6 +24,7 @@ HEAD / main
 - Remove global variable usage within the codebase
 - Adjust Sidekiq's default thread priority to -1 for a 50ms timeslice.
   This can help avoid TimeoutErrors when Sidekiq is overloaded. [#6543]
+- Support: Redis 7.2+, Ruby 3.2+, Rails 7.0+
 
 7.3.8
 ----------
