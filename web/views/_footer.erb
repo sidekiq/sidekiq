@@ -17,8 +17,7 @@
           <li>
             <form id="locale-form" class="form-inline" action="<%= root_path %>change_locale" method="post">
               <%= csrf_tag %>
-              <label class="sr-only" for="locale">Language</label>
-              <select id="locale-select" class="form-control" name="locale">
+              <select id="locale-select" class="form-control" aria-label="<%= t("Language") %>" name="locale">
                 <% available_locales.each do |locale_option| %>
                   <% if locale_option == locale %>
                     <option selected value="<%= locale_option %>"><%= locale_option %></option>
