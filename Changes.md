@@ -20,6 +20,7 @@ HEAD / main
   The CSS has been rewritten from scratch to remove the Bootstrap framework.
 - Default error logging has been modified to use Ruby's `Exception#detailed_message` and `#full_message` APIs.
 - CI now runs against Redis, Dragonfly and Valkey.
+- Job tags now allow custom CSS display [#6595]
 - The Web UI's language picker now shows options in the native language
 - Remove global variable usage within the codebase
 - Adjust Sidekiq's default thread priority to -1 for a 50ms timeslice.

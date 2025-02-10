@@ -94,7 +94,7 @@ describe Sidekiq::Web do
         conn.sadd("processes", ["foo:1234"])
         conn.hset("foo:1234", "info", Sidekiq.dump_json("hostname" => "foo", "started_at" => Time.now.to_f, "queues" => [], "concurrency" => 10), "at", Time.now.to_f, "busy", 4)
         identity = "foo:1234:work"
-        hash = {queue: "critical", payload: Sidekiq.dump_json({"class" => WebJob.name, "args" => [1, "abc"]}), run_at: Time.now.to_i}
+        hash = {queue: "critical", payload: Sidekiq.dump_json({"class" => WebJob.name, "args" => [1, "abc"], "tags" => %w[foobar_100 <eviltag/>]}), run_at: Time.now.to_i}
         conn.hset(identity, 1001, Sidekiq.dump_json(hash))
       end
       assert_equal ["1001"], Sidekiq::WorkSet.new.map { |pid, tid, data| tid }
@@ -103,6 +103,8 @@ describe Sidekiq::Web do
       assert_equal 200, last_response.status
       assert_match(/critical/, last_response.body)
       assert_match(/WebJob/, last_response.body)
+      assert_match(/jobtag-foobar_100/, last_response.body)
+      assert_match(/jobtag-&lt;eviltag\/&gt;/, last_response.body)
     end
 
     it "can quiet all processes" do
