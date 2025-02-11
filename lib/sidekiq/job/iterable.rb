@@ -64,6 +64,10 @@ module Sidekiq
         @_cancelled
       end
 
+      def cursor
+        @_cursor.freeze
+      end
+
       # A hook to override that will be called when the job starts iterating.
       #
       # It is called only once, for the first time.
