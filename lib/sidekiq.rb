@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "sidekiq/version"
-fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 2.7.0." if RUBY_PLATFORM != "java" && Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.7.0")
+fail "Sidekiq #{Sidekiq::VERSION} does not support Ruby versions below 3.2.0." if RUBY_PLATFORM != "java" && Gem::Version.new(RUBY_VERSION) < Gem::Version.new("3.2.0")
 
 begin
   require "sidekiq-ent/version"
