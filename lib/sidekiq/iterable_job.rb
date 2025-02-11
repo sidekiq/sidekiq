@@ -46,6 +46,7 @@ module Sidekiq
     # def on_start
     # def on_resume
     # def on_stop
+    # def on_cancel
     # def on_complete
     # def around_iteration
     #

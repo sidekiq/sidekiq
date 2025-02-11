@@ -259,6 +259,7 @@ describe Sidekiq::Job::Iterable do
       assert_equal 1, ArrayIterableJob.on_start_called
       assert_equal 1, ArrayIterableJob.on_stop_called
       assert_equal 0, ArrayIterableJob.on_resume_called
+      assert_equal 0, ArrayIterableJob.on_cancel_called
       assert_equal 0, ArrayIterableJob.on_complete_called
 
       x = ArrayIterableJob.new
@@ -274,6 +275,7 @@ describe Sidekiq::Job::Iterable do
       assert_equal 1, ArrayIterableJob.on_start_called
       assert_equal 2, ArrayIterableJob.on_stop_called
       assert_equal 1, ArrayIterableJob.on_resume_called
+      assert_equal 1, ArrayIterableJob.on_cancel_called
       assert_equal 1, ArrayIterableJob.on_complete_called
     end
   end
