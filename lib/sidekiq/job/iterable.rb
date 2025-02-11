@@ -91,6 +91,11 @@ module Sidekiq
       def on_stop
       end
 
+      # A hook to override that will be called when the job is cancelled.
+      #
+      def on_cancel
+      end
+
       # A hook to override that will be called when the job finished iterating.
       #
       def on_complete
@@ -182,6 +187,7 @@ module Sidekiq
 
       def iterate_with_enumerator(enumerator, arguments)
         if is_cancelled?
+          on_cancel
           logger.info { "Job cancelled" }
           return true
         end
@@ -200,6 +206,7 @@ module Sidekiq
             state_flushed_at = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
             if cancelled
               @_cancelled = true
+              on_cancel
               logger.info { "Job cancelled" }
               return true
             end
