@@ -14,6 +14,7 @@ HEAD (8.0)
 - Batch's callback tracking has been refactored to use modern Redis commands and structures.
 - Sidekiq::Batch's `created_at` is now stored as Integer milliseconds rather than a Float.
 - Sidekiq::Web internal refactoring [#6532]
+- Atomic scheduler performance tuning [#6609]
 
 7.3.6
 ---------
