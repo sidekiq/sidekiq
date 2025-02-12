@@ -845,7 +845,7 @@ describe Sidekiq::Web do
            "error_message" => "Some fake message",
            "error_class" => "RuntimeError",
            "retry_count" => 0,
-           "failed_at" => Time.now.utc,
+           "failed_at" => Time.now.to_f,
            "jid" => jid}
     score = Time.now.to_f
     @config.redis do |conn|
@@ -870,7 +870,7 @@ describe Sidekiq::Web do
            "error_message" => "fail message: <a>hello</a>",
            "error_class" => "RuntimeError",
            "retry_count" => 0,
-           "failed_at" => Time.now.to_f,
+           "failed_at" => Time.now.to_i * 1000,
            "jid" => SecureRandom.hex(12)}
     score = Time.now.to_f
     @config.redis do |conn|

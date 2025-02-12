@@ -6,10 +6,10 @@ HEAD / main
 ----------
 
 - **WARNING** The underlying class name for Active Jobs has changed from `ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper` to `Sidekiq::ActiveJob::Wrapper`.
-- **WARNING** The `created_at` and `enqueued_at` attributes are now stored as
-  integer milliseconds, rather than epoch floats. This is meant to avoid precision
-  issues with JSON and JavaScript's 53-bit Floats. Example:
-  `"created_at" => 1234567890.123456` -> `"created_at" => 1234567890123`.
+  The old name will still work in 8.x.
+- **WARNING** The `created_at`, `enqueued_at`, `failed_at` and `retried_at` attributes are now stored as epoch milliseconds, rather than epoch floats.
+  This is meant to avoid precision issues with JSON and JavaScript's 53-bit Floats.
+  Example: `"created_at" => 1234567890.123456` -> `"created_at" => 1234567890123`.
 - **NEW FEATURE** Job Profiling is now supported with [Vernier](https://vernier.prof)
   which makes it really easy to performance tune your slow jobs.
   The Web UI contains a new **Profiles** tab to view any collected profile data.
@@ -18,6 +18,7 @@ HEAD / main
   The change should be backwards compatible. [#6510]
 - Freshen up `Sidekiq::Web` to simplify the code and improve security [#6532]
   The CSS has been rewritten from scratch to remove the Bootstrap framework.
+- Add `on_cancel` callback for iterable jobs [#6607]
 - Default error logging has been modified to use Ruby's `Exception#detailed_message` and `#full_message` APIs.
 - CI now runs against Redis, Dragonfly and Valkey.
 - Job tags now allow custom CSS display [#6595]

@@ -441,6 +441,18 @@ module Sidekiq
       self["bid"]
     end
 
+    def failed_at
+      if self["failed_at"]
+        time_from_timestamp(self["failed_at"])
+      end
+    end
+
+    def retried_at
+      if self["retried_at"]
+        time_from_timestamp(self["retried_at"])
+      end
+    end
+
     def enqueued_at
       if self["enqueued_at"]
         time_from_timestamp(self["enqueued_at"])

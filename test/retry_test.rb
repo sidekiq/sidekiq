@@ -135,7 +135,7 @@ describe Sidekiq::JobRetry do
       assert_equal 0, Sidekiq::DeadSet.new.size
 
       assert_raises RuntimeError do
-        handler.local(worker, jobstr("retry_for" => 60, "retry_count" => 0, "failed_at" => (Time.now.to_f - 61)), "default") do
+        handler.local(worker, jobstr("retry_for" => 60, "retry_count" => 0, "failed_at" => (Time.now.to_i * 1000) - 61000), "default") do
           raise "kerblammo!"
         end
       end
@@ -311,7 +311,7 @@ describe Sidekiq::JobRetry do
     end
 
     it "handles a recurring failed message" do
-      now = Time.now.to_f
+      now = Time.now.to_i * 1000
       msg = {"queue" => "default", "error_message" => "kerblammo!", "error_class" => "RuntimeError", "failed_at" => now, "retry_count" => 10}
       assert_raises RuntimeError do
         handler.local(worker, jobstr(msg), "default") do
@@ -333,7 +333,7 @@ describe Sidekiq::JobRetry do
       assert_equal 0, q.size
       assert_equal 0, rs.size
       assert_equal 0, ds.size
-      now = Time.now.to_f
+      now = Time.now.to_i * 1000
       msg = {"queue" => "default", "error_message" => "kerblammo!", "error_class" => "RuntimeError", "failed_at" => now, "retry_count" => 25}
       assert_raises RuntimeError do
         handler.local(worker, jobstr(msg), "default") do

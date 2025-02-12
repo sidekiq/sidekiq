@@ -68,12 +68,12 @@
             </tr>
             <tr>
               <th><%= t('LastRetry') %></th>
-              <td><%= relative_time(Time.at(job['retried_at'])) %></td>
+              <td><%= relative_time(job.retried_at) %></td>
             </tr>
           <% else %>
             <tr>
               <th><%= t('OriginallyFailed') %></th>
-              <td><%= relative_time(Time.at(job['failed_at'])) %></td>
+              <td><%= relative_time(job.failed_at) %></td>
             </tr>
           <% end %>
           <tr>

@@ -139,6 +139,10 @@ module Sidekiq
 
     private
 
+    def now_ms
+      ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond)
+    end
+
     # Note that +jobinst+ can be nil here if an error is raised before we can
     # instantiate the job instance.  All access must be guarded and
     # best effort.
@@ -156,10 +160,10 @@ module Sidekiq
       msg["error_message"] = m
       msg["error_class"] = exception.class.name
       count = if msg["retry_count"]
-        msg["retried_at"] = Time.now.to_f
+        msg["retried_at"] = now_ms
         msg["retry_count"] += 1
       else
-        msg["failed_at"] = Time.now.to_f
+        msg["failed_at"] = now_ms
         msg["retry_count"] = 0
       end
 
@@ -177,7 +181,7 @@ module Sidekiq
       return retries_exhausted(jobinst, msg, exception) if count >= max_retry_attempts
 
       rf = msg["retry_for"]
-      return retries_exhausted(jobinst, msg, exception) if rf && ((msg["failed_at"] + rf) < Time.now.to_f)
+      return retries_exhausted(jobinst, msg, exception) if rf && (time_for(msg["failed_at"]) + rf) < Time.now
 
       strategy, delay = delay_for(jobinst, count, exception, msg)
       case strategy
@@ -194,6 +198,14 @@ module Sidekiq
       payload = Sidekiq.dump_json(msg)
       redis do |conn|
         conn.zadd("retry", retry_at.to_s, payload)
+      end
+    end
+
+    def time_for(item)
+      if item.is_a?(Float)
+        Time.at(item)
+      else
+        Time.at(item / 1000, item % 1000)
       end
     end
 
