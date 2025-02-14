@@ -28,6 +28,13 @@ HEAD / main
   This can help avoid TimeoutErrors when Sidekiq is overloaded. [#6543]
 - Support: Redis 7.2+, Ruby 3.2+, Rails 7.0+
 
+7.3.9
+----------
+
+- Only require activejob if necessary [#6584]
+- Fix iterable job cancellation [#6589]
+- Web UI accessibility improvements [#6604]
+
 7.3.8
 ----------
 
