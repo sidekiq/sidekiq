@@ -2,6 +2,13 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+7.3.9
+----------
+
+- Only require activejob if necessary [#6584]
+- Fix iterable job cancellation [#6589]
+- Web UI accessibility improvements [#6604]
+
 7.3.8
 ----------
 
