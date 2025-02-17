@@ -557,7 +557,7 @@ body > footer .nav {
 @media (prefers-color-scheme: dark) {
   :root {
     /* --color-primary: oklch(65% 0.15 13); */
-    --color-primary: oklch(60% 0.22 13);
+    --color-primary: oklch(65% 0.22 13);
     --color-bg: oklch(22% 0.01 256);
     --color-elevated: oklch(19% 0.01 256);
     --color-border: oklch(25% 0.01 256);
