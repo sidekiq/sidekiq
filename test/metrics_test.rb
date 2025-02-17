@@ -36,7 +36,7 @@ describe Sidekiq::Metrics do
 
   it "tracks metrics" do
     count = create_known_metrics
-    assert_equal 4, count
+    assert_equal 8, count
   end
 
   it "does not track failures for interrupted iterable jobs" do

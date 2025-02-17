@@ -10,7 +10,7 @@ module Sidekiq
     # Caller sets a set of attributes to act as filters. {#fetch} will call
     # Redis and return a Hash of results.
     #
-    # NB: all metrics and times/dates are UTC only. We specifically do not
+    # NB: all metrics and times/dates are UTC only. We explicitly do not
     # support timezones.
     class Query
       def initialize(pool: nil, now: Time.now)
@@ -21,17 +21,29 @@ module Sidekiq
 
       # Get metric data for all jobs from the last hour
       #  +class_filter+: return only results for classes matching filter
-      def top_jobs(class_filter: nil, minutes: 60)
+      #  +minutes+: the number of fine-grained minute buckets to retrieve
+      #  +hours+: the number of coarser-grained 10-minute buckets to retrieve, in hours
+      def top_jobs(class_filter: nil, minutes: nil, hours: nil)
         result = Result.new
-
+        minutes = 60 unless minutes || hours
+        count = hours ? hours * 6 : minutes
         time = @time
+        minutely = ->(time) { "j|#{time.strftime("%y%m%d")}|#{time.hour}:#{time.min}" }
+        tenly = ->(time) do
+          m = time.min
+          mins = (m < 10) ? "0" : m.to_s[0]
+          "j|#{time.strftime("%y%m%d")}|#{time.hour}:#{mins}"
+        end
+        keyproc = minutes ? minutely : tenly
+        advance = minutes ? 60 : 600
+
         redis_results = @pool.with do |conn|
           conn.pipelined do |pipe|
-            minutes.times do |idx|
-              key = "j|#{time.strftime("%Y%m%d")}|#{time.hour}:#{time.min}"
+            count.times do |idx|
+              key = keyproc.call(time)
               pipe.hgetall key
               result.prepend_bucket time
-              time -= 60
+              time -= advance
             end
           end
         end
@@ -43,25 +55,34 @@ module Sidekiq
             next if class_filter && !class_filter.match?(kls)
             result.job_results[kls].add_metric metric, time, v.to_i
           end
-          time -= 60
+          time -= advance
         end
 
         result.marks = fetch_marks(result.starts_at..result.ends_at)
-
         result
       end
 
-      def for_job(klass, minutes: 60)
+      def for_job(klass, minutes: nil, hours: nil)
         result = Result.new
-
+        minutes = 60 unless minutes || hours
+        count = hours ? hours * 6 : minutes
         time = @time
+        minutely = ->(time) { "j|#{time.strftime("%y%m%d")}|#{time.hour}:#{time.min}" }
+        tenly = ->(time) do
+          m = time.min
+          mins = (m < 10) ? "0" : m.to_s[0]
+          "j|#{time.strftime("%y%m%d")}|#{time.hour}:#{mins}"
+        end
+        keyproc = minutes ? minutely : tenly
+        advance = minutes ? 60 : 600
+
         redis_results = @pool.with do |conn|
           conn.pipelined do |pipe|
-            minutes.times do |idx|
-              key = "j|#{time.strftime("%Y%m%d")}|#{time.hour}:#{time.min}"
+            count.times do |idx|
+              key = keyproc.call(time)
               pipe.hmget key, "#{klass}|ms", "#{klass}|p", "#{klass}|f"
               result.prepend_bucket time
-              time -= 60
+              time -= advance
             end
           end
         end
@@ -72,13 +93,12 @@ module Sidekiq
             result.job_results[klass].add_metric "ms", time, ms.to_i if ms
             result.job_results[klass].add_metric "p", time, p.to_i if p
             result.job_results[klass].add_metric "f", time, f.to_i if f
-            result.job_results[klass].add_hist time, Histogram.new(klass).fetch(conn, time).reverse
-            time -= 60
+            result.job_results[klass].add_hist time, Histogram.new(klass).fetch(conn, time).reverse if minutes
+            time -= advance
           end
         end
 
         result.marks = fetch_marks(result.starts_at..result.ends_at)
-
         result
       end
 
