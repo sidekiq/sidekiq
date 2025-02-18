@@ -11,12 +11,12 @@ module Sidekiq
   # This capsule will pull jobs from the "single" queue and process
   # the jobs with one thread, meaning the jobs will be processed serially.
   #
-  # Sidekiq.configure_server do |config|
-  #   config.capsule("single-threaded") do |cap|
-  #     cap.concurrency = 1
-  #     cap.queues = %w(single)
+  #   Sidekiq.configure_server do |config|
+  #     config.capsule("single-threaded") do |cap|
+  #       cap.concurrency = 1
+  #       cap.queues = %w(single)
+  #     end
   #   end
-  # end
   class Capsule
     include Sidekiq::Component
     extend Forwardable
