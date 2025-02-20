@@ -20,8 +20,10 @@ module Sidekiq
       end
 
       ROLLUPS = {
+        # minutely aggregates per minute
         minutely: [60, ->(time) { time.strftime("j|%y%m%d|%-H:%M") }],
-        ten_minutely: [600, ->(time) {
+        # hourly aggregates every 10 minutes so we'll have six data points per hour
+        hourly: [600, ->(time) {
           m = time.min
           mins = (m < 10) ? "0" : m.to_s[0]
           time.strftime("j|%y%m%d|%-H:#{mins}")
@@ -34,9 +36,9 @@ module Sidekiq
       #  +hours+: the number of coarser-grained 10-minute buckets to retrieve, in hours
       def top_jobs(class_filter: nil, minutes: nil, hours: nil)
         time = @time
-        result = Result.new
+        result = Result.new(hours ? :hourly : :minutely)
         minutes = 60 unless minutes || hours
-        rollup = hours ? :ten_minutely : :minutely
+        rollup = hours ? :hourly : :minutely
         count = hours ? hours * 6 : minutes
         stride, keyproc = ROLLUPS[rollup]
 
@@ -67,9 +69,9 @@ module Sidekiq
 
       def for_job(klass, minutes: nil, hours: nil)
         time = @time
-        result = Result.new
         minutes = 60 unless minutes || hours
-        rollup = hours ? :ten_minutely : :minutely
+        result = Result.new(hours ? :hourly : :minutely)
+        rollup = hours ? :hourly : :minutely
         count = hours ? hours * 6 : minutes
         stride, keyproc = ROLLUPS[rollup]
 
@@ -99,24 +101,38 @@ module Sidekiq
         result
       end
 
-      class Result < Struct.new(:starts_at, :ends_at, :size, :buckets, :job_results, :marks)
-        def initialize
+      class Result < Struct.new(:granularity, :starts_at, :ends_at, :size, :buckets, :job_results, :marks)
+        def initialize(granularity = :minutely)
           super
+          self.granularity = granularity
           self.buckets = []
           self.marks = []
-          self.job_results = Hash.new { |h, k| h[k] = JobResult.new }
+          self.job_results = Hash.new { |h, k| h[k] = JobResult.new(granularity) }
         end
 
         def prepend_bucket(time)
-          buckets.unshift time.strftime("%H:%M")
+          buckets.unshift bkt_time_s(time)
           self.ends_at ||= time
           self.starts_at = time
         end
+
+        def bkt_time_s(time)
+          # hourly buckets should be rounded to ten ("8:40", not "8:43")
+          # and include day
+          if granularity == :hourly
+            time.strftime("%d %-H:%M").tap do |s|
+              s[-1] = "0"
+            end
+          else
+            time.strftime("%-H:%M")
+          end
+        end
       end
 
-      class JobResult < Struct.new(:series, :hist, :totals)
-        def initialize
+      class JobResult < Struct.new(:granularity, :series, :hist, :totals)
+        def initialize(granularity = :minutely)
           super
+          self.granularity = granularity
           self.series = Hash.new { |h, k| h[k] = Hash.new(0) }
           self.hist = Hash.new { |h, k| h[k] = [] }
           self.totals = Hash.new(0)
@@ -124,14 +140,14 @@ module Sidekiq
 
         def add_metric(metric, time, value)
           totals[metric] += value
-          series[metric][time.strftime("%H:%M")] += value
+          series[metric][bkt_time_s(time)] += value
 
           # Include timing measurements in seconds for convenience
           add_metric("s", time, value / 1000.0) if metric == "ms"
         end
 
         def add_hist(time, hist_result)
-          hist[time.strftime("%H:%M")] = hist_result
+          hist[bkt_time_s(time)] = hist_result
         end
 
         def total_avg(metric = "ms")
@@ -144,6 +160,17 @@ module Sidekiq
           series[metric].each_with_object(Hash.new(0)) do |(bucket, value), result|
             completed = series.dig("p", bucket) - series.dig("f", bucket)
             result[bucket] = (completed == 0) ? 0 : value.to_f / completed
+          end
+        end
+
+        def bkt_time_s(time)
+          if granularity == :hourly
+            # hourly buckets should be rounded to ten ("8:40", not "8:43")
+            time.strftime("%d %H:%M").tap do |s|
+              s[-1] = "0"
+            end
+          else
+            time.strftime("%H:%M")
           end
         end
       end

@@ -29,10 +29,13 @@ module Sidekiq
       ].join("; ").freeze
 
       METRICS_PERIODS = {
-        "1h" => 60,
-        "2h" => 120,
-        "4h" => 240,
-        "8h" => 480
+        "1h" => {minutes: 60},
+        "2h" => {minutes: 120},
+        "4h" => {minutes: 240},
+        "8h" => {minutes: 480},
+        "24h" => {hours: 24},
+        "48h" => {hours: 48},
+        "72h" => {hours: 72}
       }
 
       def initialize(inst)
@@ -63,21 +66,21 @@ module Sidekiq
         class_filter = (x.nil? || x == "") ? nil : Regexp.new(Regexp.escape(x), Regexp::IGNORECASE)
 
         q = Sidekiq::Metrics::Query.new
-        @period = h((url_params("period") || "")[0..1])
+        @period = h(url_params("period") || "1h")
         @periods = METRICS_PERIODS
-        minutes = @periods.fetch(@period, @periods.values.first)
-        @query_result = q.top_jobs(minutes: minutes, class_filter: class_filter)
+        args = @periods.fetch(@period, @periods.values.first)
+        @query_result = q.top_jobs(**args.merge(class_filter: class_filter))
 
         erb(:metrics)
       end
 
       get "/metrics/:name" do
         @name = route_params(:name)
-        @period = h((url_params("period") || "")[0..1])
+        @period = h(url_params("period") || "1h")
         q = Sidekiq::Metrics::Query.new
         @periods = METRICS_PERIODS
-        minutes = @periods.fetch(@period, @periods.values.first)
-        @query_result = q.for_job(@name, minutes: minutes)
+        args = @periods.fetch(@period, @periods.values.first)
+        @query_result = q.for_job(@name, **args)
         erb(:metrics_for_job)
       end
 
