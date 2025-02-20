@@ -32,6 +32,10 @@ describe Sidekiq::Metrics do
     smet.track("critical", "App::FooJob") { sleep 0.001 }
     smet.track("critical", "App::SomeJob") { sleep 0.001 }
     smet.flush(time - 60)
+    smet.track("critical", "App::FooJob") { sleep 0.020 }
+    smet.track("critical", "App::FooJob") { sleep 0.001 }
+    smet.track("critical", "App::SomeJob") { sleep 0.001 }
+    smet.flush(time - 6000)
   end
 
   it "tracks metrics" do
@@ -165,6 +169,13 @@ describe Sidekiq::Metrics do
       # Execution time is not consistent, so these assertions are not exact
       assert job_result.total_avg("ms").between?(0.5, 2), job_result.total_avg("ms")
       assert job_result.series_avg("s")["22:03"].between?(0.0005, 0.002), job_result.series_avg("s")
+
+      q = Sidekiq::Metrics::Query.new(now: fixed_time)
+      result = q.top_jobs(hours: 24)
+      assert_equal :hourly, result.granularity
+      assert_equal 144, result.buckets.size
+      assert result.job_results["App::SomeJob"]
+      assert_equal({"22 22:00" => 3, "22 20:20" => 1}, result.job_results["App::SomeJob"].series["p"])
     end
 
     it "fetches job-specific data" do
@@ -194,6 +205,13 @@ describe Sidekiq::Metrics do
       assert_equal 4, job_result.totals["p"]
       assert_equal 2, job_result.hist.dig("22:02", -1)
       assert_equal 1, job_result.hist.dig("22:02", -2)
+
+      q = Sidekiq::Metrics::Query.new(now: fixed_time)
+      result = q.for_job("App::FooJob", hours: 24)
+      assert_equal :hourly, result.granularity
+      assert_equal 144, result.buckets.size
+      assert result.job_results["App::FooJob"]
+      assert_equal({"22 22:00" => 4, "22 20:20" => 2}, result.job_results["App::FooJob"].series["p"])
     end
   end
 end

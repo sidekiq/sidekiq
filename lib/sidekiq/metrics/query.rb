@@ -36,11 +36,16 @@ module Sidekiq
       #  +hours+: the number of coarser-grained 10-minute buckets to retrieve, in hours
       def top_jobs(class_filter: nil, minutes: nil, hours: nil)
         time = @time
-        result = Result.new(hours ? :hourly : :minutely)
         minutes = 60 unless minutes || hours
-        rollup = hours ? :hourly : :minutely
+
+        # DoS protection, sanity check
+        minutes = 60 if minutes && minutes > 480
+        hours = 72 if hours && hours > 72
+
+        granularity = hours ? :hourly : :minutely
+        result = Result.new(granularity)
         count = hours ? hours * 6 : minutes
-        stride, keyproc = ROLLUPS[rollup]
+        stride, keyproc = ROLLUPS[granularity]
 
         redis_results = @pool.with do |conn|
           conn.pipelined do |pipe|
@@ -70,10 +75,15 @@ module Sidekiq
       def for_job(klass, minutes: nil, hours: nil)
         time = @time
         minutes = 60 unless minutes || hours
-        result = Result.new(hours ? :hourly : :minutely)
-        rollup = hours ? :hourly : :minutely
+
+        # DoS protection, sanity check
+        minutes = 60 if minutes && minutes > 480
+        hours = 72 if hours && hours > 72
+
+        granularity = hours ? :hourly : :minutely
+        result = Result.new(granularity)
         count = hours ? hours * 6 : minutes
-        stride, keyproc = ROLLUPS[rollup]
+        stride, keyproc = ROLLUPS[granularity]
 
         redis_results = @pool.with do |conn|
           conn.pipelined do |pipe|
