@@ -20,12 +20,12 @@ module Sidekiq
       end
 
       ROLLUPS = {
-        :minutely => [60, ->(time) { time.strftime("j|%y%m%d|%H:%M") }],
-        :ten_minutely => [600, ->(time) {
+        minutely: [60, ->(time) { time.strftime("j|%y%m%d|%-H:%M") }],
+        ten_minutely: [600, ->(time) {
           m = time.min
           mins = (m < 10) ? "0" : m.to_s[0]
-          "j|#{time.strftime("%y%m%d")}|#{time.hour}:#{mins}"
-        }],
+          time.strftime("j|%y%m%d|%-H:#{mins}")
+        }]
       }
 
       # Get metric data for all jobs from the last hour
