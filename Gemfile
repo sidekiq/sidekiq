@@ -24,6 +24,7 @@ gem "webrick"
 group :test do
   gem "maxitest"
   gem "simplecov"
+  gem "debug"
 end
 
 group :development, :test do

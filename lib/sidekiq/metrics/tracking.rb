@@ -62,9 +62,9 @@ module Sidekiq
 
         now = time.utc
         # nowdate = now.strftime("%Y%m%d")
-        # "250214|8:4" is the 10 minute bucket for Feb 14 2025, 08:40
+        # "250214|8:4" is the 10 minute bucket for Feb 14 2025, 08:43
         nowmid = now.strftime("%y%m%d|%-H:%M")[0..-2]
-        # "250214|8:40" is the 1 minute bucket for Feb 14 2025, 08:40
+        # "250214|8:43" is the 1 minute bucket for Feb 14 2025, 08:43
         nowshort = now.strftime("%y%m%d|%-H:%M")
         count = 0
 

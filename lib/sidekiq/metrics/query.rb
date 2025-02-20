@@ -19,23 +19,26 @@ module Sidekiq
         @klass = nil
       end
 
+      ROLLUPS = {
+        :minutely => [60, ->(time) { time.strftime("j|%y%m%d|%H:%M") }],
+        :ten_minutely => [600, ->(time) {
+          m = time.min
+          mins = (m < 10) ? "0" : m.to_s[0]
+          "j|#{time.strftime("%y%m%d")}|#{time.hour}:#{mins}"
+        }],
+      }
+
       # Get metric data for all jobs from the last hour
       #  +class_filter+: return only results for classes matching filter
       #  +minutes+: the number of fine-grained minute buckets to retrieve
       #  +hours+: the number of coarser-grained 10-minute buckets to retrieve, in hours
       def top_jobs(class_filter: nil, minutes: nil, hours: nil)
+        time = @time
         result = Result.new
         minutes = 60 unless minutes || hours
+        rollup = hours ? :ten_minutely : :minutely
         count = hours ? hours * 6 : minutes
-        time = @time
-        minutely = ->(time) { "j|#{time.strftime("%y%m%d")}|#{time.hour}:#{time.min}" }
-        tenly = ->(time) do
-          m = time.min
-          mins = (m < 10) ? "0" : m.to_s[0]
-          "j|#{time.strftime("%y%m%d")}|#{time.hour}:#{mins}"
-        end
-        keyproc = minutes ? minutely : tenly
-        advance = minutes ? 60 : 600
+        stride, keyproc = ROLLUPS[rollup]
 
         redis_results = @pool.with do |conn|
           conn.pipelined do |pipe|
@@ -43,7 +46,7 @@ module Sidekiq
               key = keyproc.call(time)
               pipe.hgetall key
               result.prepend_bucket time
-              time -= advance
+              time -= stride
             end
           end
         end
@@ -55,7 +58,7 @@ module Sidekiq
             next if class_filter && !class_filter.match?(kls)
             result.job_results[kls].add_metric metric, time, v.to_i
           end
-          time -= advance
+          time -= stride
         end
 
         result.marks = fetch_marks(result.starts_at..result.ends_at)
@@ -63,18 +66,12 @@ module Sidekiq
       end
 
       def for_job(klass, minutes: nil, hours: nil)
+        time = @time
         result = Result.new
         minutes = 60 unless minutes || hours
+        rollup = hours ? :ten_minutely : :minutely
         count = hours ? hours * 6 : minutes
-        time = @time
-        minutely = ->(time) { "j|#{time.strftime("%y%m%d")}|#{time.hour}:#{time.min}" }
-        tenly = ->(time) do
-          m = time.min
-          mins = (m < 10) ? "0" : m.to_s[0]
-          "j|#{time.strftime("%y%m%d")}|#{time.hour}:#{mins}"
-        end
-        keyproc = minutes ? minutely : tenly
-        advance = minutes ? 60 : 600
+        stride, keyproc = ROLLUPS[rollup]
 
         redis_results = @pool.with do |conn|
           conn.pipelined do |pipe|
@@ -82,7 +79,7 @@ module Sidekiq
               key = keyproc.call(time)
               pipe.hmget key, "#{klass}|ms", "#{klass}|p", "#{klass}|f"
               result.prepend_bucket time
-              time -= advance
+              time -= stride
             end
           end
         end
@@ -94,7 +91,7 @@ module Sidekiq
             result.job_results[klass].add_metric "p", time, p.to_i if p
             result.job_results[klass].add_metric "f", time, f.to_i if f
             result.job_results[klass].add_hist time, Histogram.new(klass).fetch(conn, time).reverse if minutes
-            time -= advance
+            time -= stride
           end
         end
 
