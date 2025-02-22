@@ -68,7 +68,7 @@ module Sidekiq
           time -= stride
         end
 
-        result.marks = fetch_marks(result.starts_at..result.ends_at)
+        result.marks = fetch_marks(result.starts_at..result.ends_at, granularity)
         result
       end
 
@@ -107,7 +107,7 @@ module Sidekiq
           end
         end
 
-        result.marks = fetch_marks(result.starts_at..result.ends_at)
+        result.marks = fetch_marks(result.starts_at..result.ends_at, granularity)
         result
       end
 
@@ -162,11 +162,7 @@ module Sidekiq
         end
       end
 
-      class MarkResult < Struct.new(:time, :label)
-        def bucket
-          time.strftime("%H:%M")
-        end
-      end
+      MarkResult = Struct.new(:time, :label, :bucket)
 
       def self.bkt_time_s(time, granularity)
         # hourly buckets should be rounded to ten ("8:40", not "8:43")
@@ -182,14 +178,14 @@ module Sidekiq
 
       private
 
-      def fetch_marks(time_range)
+      def fetch_marks(time_range, granularity)
         [].tap do |result|
           marks = @pool.with { |c| c.hgetall("#{@time.strftime("%Y%m%d")}-marks") }
 
           marks.each do |timestamp, label|
             time = Time.parse(timestamp)
             if time_range.cover? time
-              result << MarkResult.new(time, label)
+              result << MarkResult.new(time, label, Query.bkt_time_s(time, granularity))
             end
           end
         end
