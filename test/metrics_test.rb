@@ -175,7 +175,7 @@ describe Sidekiq::Metrics do
       assert_equal :hourly, result.granularity
       assert_equal 144, result.buckets.size
       assert result.job_results["App::SomeJob"]
-      assert_equal({"22 22:00" => 3, "22 20:20" => 1}, result.job_results["App::SomeJob"].series["p"])
+      assert_equal({"22 Jul 22:00" => 3, "22 Jul 20:20" => 1}, result.job_results["App::SomeJob"].series["p"])
     end
 
     it "fetches job-specific data" do

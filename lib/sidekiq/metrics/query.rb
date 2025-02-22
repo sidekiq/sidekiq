@@ -121,21 +121,9 @@ module Sidekiq
         end
 
         def prepend_bucket(time)
-          buckets.unshift bkt_time_s(time)
+          buckets.unshift Query.bkt_time_s(time, granularity)
           self.ends_at ||= time
           self.starts_at = time
-        end
-
-        def bkt_time_s(time)
-          # hourly buckets should be rounded to ten ("8:40", not "8:43")
-          # and include day
-          if granularity == :hourly
-            time.strftime("%d %-H:%M").tap do |s|
-              s[-1] = "0"
-            end
-          else
-            time.strftime("%-H:%M")
-          end
         end
       end
 
@@ -150,14 +138,14 @@ module Sidekiq
 
         def add_metric(metric, time, value)
           totals[metric] += value
-          series[metric][bkt_time_s(time)] += value
+          series[metric][Query.bkt_time_s(time, granularity)] += value
 
           # Include timing measurements in seconds for convenience
           add_metric("s", time, value / 1000.0) if metric == "ms"
         end
 
         def add_hist(time, hist_result)
-          hist[bkt_time_s(time)] = hist_result
+          hist[Query.bkt_time_s(time, granularity)] = hist_result
         end
 
         def total_avg(metric = "ms")
@@ -172,22 +160,23 @@ module Sidekiq
             result[bucket] = (completed == 0) ? 0 : value.to_f / completed
           end
         end
-
-        def bkt_time_s(time)
-          if granularity == :hourly
-            # hourly buckets should be rounded to ten ("8:40", not "8:43")
-            time.strftime("%d %H:%M").tap do |s|
-              s[-1] = "0"
-            end
-          else
-            time.strftime("%H:%M")
-          end
-        end
       end
 
       class MarkResult < Struct.new(:time, :label)
         def bucket
           time.strftime("%H:%M")
+        end
+      end
+
+      def self.bkt_time_s(time, granularity)
+        # hourly buckets should be rounded to ten ("8:40", not "8:43")
+        # and include month & day to disambiguate the same time on different days
+        if granularity == :hourly
+          time.strftime("%d %b %H:%M").tap do |s|
+            s[-1] = "0"
+          end
+        else
+          time.strftime("%-H:%M")
         end
       end
 
