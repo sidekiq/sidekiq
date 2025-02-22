@@ -83,9 +83,10 @@ class JobMetricsOverviewChart extends BaseChart {
   }
 
   buildTooltipTitle(items) {
-    const [first, ...rest] = this.labelBuckets.find((labels) => labels[0] === items[0].label);
-    const title = [first, rest[rest.length - 1]].filter(v => v).join(" - ");
-    return `${title} UTC`
+    // The items grouped at this point might have slightly different times,
+    // so we'll use the earliest time for the tooltip title.
+    const time = items.map(i => i.label).sort()[0]
+    return `${time} UTC`
   }
 
   get chartOptions() {
