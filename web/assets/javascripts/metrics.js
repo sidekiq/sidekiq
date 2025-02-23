@@ -62,7 +62,6 @@ class JobMetricsOverviewChart extends BaseChart {
 
   dataFromSeries(series) {
     // Chart.js expects `data` to be an array of objects with `x` and `y` values.
-    // For a time chart, the `x` value is milliseconds since epoch.
     return Object.entries(series).map(([isoTime, val]) => ({ x: isoTime, y: val }));
   }
 
@@ -75,8 +74,8 @@ class JobMetricsOverviewChart extends BaseChart {
         x: {
           ...super.chartOptions.scales.x,
           type: "time",
-          min: new Date(this.options.bounds[0]).getTime(),
-          max: new Date(this.options.bounds[1]).getTime(),
+          min: this.options.starts_at,
+          max: this.options.ends_at,
         },
         y: {
           ...super.chartOptions.scales.y,
@@ -214,8 +213,8 @@ class HistBubbleChart extends BaseChart {
         x: {
           ...super.chartOptions.scales.x,
           type: "time",
-          min: new Date(this.options.bounds[0]).getTime(),
-          max: new Date(this.options.bounds[1]).getTime(),
+          min: this.options.starts_at,
+          max: this.options.ends_at,
         },
         y: {
           ...super.chartOptions.scales.y,

@@ -25,7 +25,8 @@
       <%= to_json({
         series: job_results.map { |(kls, jr)| [kls, jr.dig("series", "s")] }.to_h,
         marks: @query_result.marks.map { |m| [m.bucket, m.label] },
-        bounds: [@query_result.starts_at.iso8601, @query_result.ends_at.iso8601],
+        starts_at: @query_result.starts_at.iso8601,
+        ends_at: @query_result.ends_at.iso8601,
         visibleKls: visible_kls,
         yLabel: t('TotalExecutionTime'),
         units: t('Seconds').downcase,

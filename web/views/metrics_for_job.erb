@@ -34,7 +34,8 @@
       <%= to_json({
         hist: job_result.hist,
         marks: @query_result.marks.map { |m| [m.bucket, m.label] },
-        bounds: [@query_result.starts_at.iso8601, @query_result.ends_at.iso8601],
+        starts_at: @query_result.starts_at.iso8601,
+        ends_at: @query_result.ends_at.iso8601,
         histIntervals: bucket_intervals,
         yLabel: t('ExecutionTime'),
         markLabel: t('Deploy'),
