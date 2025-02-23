@@ -975,6 +975,8 @@ describe Sidekiq::Web do
           assert_equal 200, last_response.status
           assert_match(/Metrics/, last_response.body)
           assert_match(/FooJob/, last_response.body)
+          assert_match(/8h/, last_response.body)
+          refute_match(/24h/, last_response.body)
         end
       end
     end
