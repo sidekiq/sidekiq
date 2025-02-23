@@ -1,5 +1,6 @@
 <script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js" nonce="<%= csp_nonce %>"></script>
 <script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js" nonce="<%= csp_nonce %>"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/chartjs-adapter-date-fns.min.js" nonce="<%= csp_nonce %>"></script>
 <script type="text/javascript" src="<%= root_path %>javascripts/base-charts.js" nonce="<%= csp_nonce %>"></script>
 
 <%
@@ -33,7 +34,7 @@
       <%= to_json({
         hist: job_result.hist,
         marks: @query_result.marks.map { |m| [m.bucket, m.label] },
-        labels: @query_result.buckets,
+        bounds: [@query_result.starts_at.iso8601, @query_result.ends_at.iso8601],
         histIntervals: bucket_intervals,
         yLabel: t('ExecutionTime'),
         markLabel: t('Deploy'),

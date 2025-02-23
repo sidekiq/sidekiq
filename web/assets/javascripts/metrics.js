@@ -4,14 +4,6 @@ class JobMetricsOverviewChart extends BaseChart {
     this.swatches = [];
     this.visibleKls = options.visibleKls;
 
-    const countBuckets = this.options.labels.length / 60;
-    this.labelBuckets = this.options.labels.reduce((acc, label, index) => {
-      const bucket = Math.floor(index / countBuckets);
-      acc[bucket] = acc[bucket] || [];
-      acc[bucket].push(label);
-      return acc;
-    }, []);
-
     this.init();
   }
 
@@ -60,7 +52,7 @@ class JobMetricsOverviewChart extends BaseChart {
 
     return {
       label: kls,
-      data: this.buildSeries(kls),
+      data: this.dataFromSeries(this.options.series[kls]),
       borderColor: color,
       backgroundColor: color,
       borderWidth: 2,
@@ -68,25 +60,10 @@ class JobMetricsOverviewChart extends BaseChart {
     };
   }
 
-  buildSeries(kls) {
-    // `series` is an object that maps labels to counts => { "20:15" => 2, "20:16" => 3, ... }
-    const series = this.options.series[kls];
-    return this.labelBuckets.reduce((acc, labels) => {
-      const bucketValues = labels.map(label => series[label]).filter(v => v);
-      if (bucketValues.length > 0) {
-        // Sum up the values for each bucket that has data.
-        // The new label is the bucket's first label, its start time.
-        acc[labels[0]] = bucketValues.reduce((a, b) => a + b, 0);
-      }
-      return acc;
-    }, {});
-  }
-
-  buildTooltipTitle(items) {
-    // The items grouped at this point might have slightly different times,
-    // so we'll use the earliest time for the tooltip title.
-    const time = items.map(i => i.label).sort()[0]
-    return `${time} UTC`
+  dataFromSeries(series) {
+    // Chart.js expects `data` to be an array of objects with `x` and `y` values.
+    // For a time chart, the `x` value is milliseconds since epoch.
+    return Object.entries(series).map(([isoTime, val]) => ({ x: isoTime, y: val }));
   }
 
   get chartOptions() {
@@ -95,6 +72,12 @@ class JobMetricsOverviewChart extends BaseChart {
       aspectRatio: 4,
       scales: {
         ...super.chartOptions.scales,
+        x: {
+          ...super.chartOptions.scales.x,
+          type: "time",
+          min: new Date(this.options.bounds[0]).getTime(),
+          max: new Date(this.options.bounds[1]).getTime(),
+        },
         y: {
           ...super.chartOptions.scales.y,
           beginAtZero: true,
@@ -109,12 +92,11 @@ class JobMetricsOverviewChart extends BaseChart {
         tooltip: {
           ...super.chartOptions.plugins.tooltip,
           callbacks: {
-            title: (items) => this.buildTooltipTitle(items),
             label: (item) =>
               `${item.dataset.label}: ${item.parsed.y.toFixed(1)} ` +
               `${this.options.units}`,
             footer: (items) => {
-              const bucket = items[0].label;
+              const bucket = items[0].raw.x;
               const marks = this.options.marks.filter(([b, _]) => b == bucket);
               return marks.map(
                 ([b, msg]) => `${this.options.markLabel}: ${msg}`
@@ -207,7 +189,7 @@ class HistBubbleChart extends BaseChart {
     });
 
     // Chart.js will not calculate the bubble size. We have to do that.
-    const maxRadius = this.el.offsetWidth / this.options.labels.length;
+    const maxRadius = this.el.offsetWidth / 100;
     const minRadius = 1;
     const multiplier = (maxRadius / maxCount) * 1.5;
     data.forEach((entry) => {
@@ -231,8 +213,9 @@ class HistBubbleChart extends BaseChart {
         ...super.chartOptions.scales,
         x: {
           ...super.chartOptions.scales.x,
-          type: "category",
-          labels: this.options.labels,
+          type: "time",
+          min: new Date(this.options.bounds[0]).getTime(),
+          max: new Date(this.options.bounds[1]).getTime(),
         },
         y: {
           ...super.chartOptions.scales.y,
@@ -247,7 +230,6 @@ class HistBubbleChart extends BaseChart {
         tooltip: {
           ...super.chartOptions.plugins.tooltip,
           callbacks: {
-            title: (items) => `${items[0].raw.x} UTC`,
             label: (item) =>
               `${item.parsed.y} ${this.options.yUnits}: ${item.raw.count} ${this.options.zUnits}`,
             footer: (items) => {

@@ -165,12 +165,9 @@ module Sidekiq
       MarkResult = Struct.new(:time, :label, :bucket)
 
       def self.bkt_time_s(time, granularity)
-        # hourly buckets should be truncated to ten minutes ("8:40", not "8:43")
-        if granularity == :hourly
-          time = Time.at(time.to_i - time.to_i % 600).utc
-        end
-
-        time.iso8601
+        # truncate time to ten minutes ("8:40", not "8:43") or one minute
+        truncation = (granularity == :hourly) ? 600 : 60
+        Time.at(time.to_i - time.to_i % truncation).utc.iso8601
       end
 
       private
