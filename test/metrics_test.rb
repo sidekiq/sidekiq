@@ -134,8 +134,8 @@ describe Sidekiq::Metrics do
       assert_equal fixed_time, result.ends_at
 
       assert_equal 60, result.buckets.size
-      assert_equal "21:04", result.buckets.first
-      assert_equal "22:03", result.buckets.last
+      assert_equal "2022-07-22T21:04:00Z", result.buckets.first
+      assert_equal "2022-07-22T22:03:00Z", result.buckets.last
 
       assert_equal %w[App::SomeJob].sort, result.job_results.keys.sort
       job_result = result.job_results["App::SomeJob"]
@@ -153,32 +153,32 @@ describe Sidekiq::Metrics do
       assert_equal fixed_time, result.ends_at
       assert_equal 1, result.marks.size
       assert_equal "cafed00d - some git summary line", result.marks[0].label
-      assert_equal "21:58", result.marks[0].bucket
+      assert_equal "2022-07-22T21:58:00Z", result.marks[0].bucket
 
       assert_equal 60, result.buckets.size
-      assert_equal "21:04", result.buckets.first
-      assert_equal "22:03", result.buckets.last
+      assert_equal "2022-07-22T21:04:00Z", result.buckets.first
+      assert_equal "2022-07-22T22:03:00Z", result.buckets.last
 
       assert_equal %w[App::SomeJob App::FooJob].sort, result.job_results.keys.sort
       job_result = result.job_results["App::SomeJob"]
       refute_nil job_result
       assert_equal %w[p f ms s].sort, job_result.series.keys.sort
       assert_equal %w[p f ms s].sort, job_result.totals.keys.sort
-      assert_equal 2, job_result.series.dig("p", "22:03")
+      assert_equal 2, job_result.series.dig("p", "2022-07-22T22:03:00Z")
       assert_equal 3, job_result.totals["p"]
       # Execution time is not consistent, so these assertions are not exact
       assert job_result.total_avg("ms").between?(0.5, 2), job_result.total_avg("ms")
-      assert job_result.series_avg("s")["22:03"].between?(0.0005, 0.002), job_result.series_avg("s")
+      assert job_result.series_avg("s")["2022-07-22T22:03:00Z"].between?(0.0005, 0.002), job_result.series_avg("s")
 
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
       result = q.top_jobs(hours: 24)
       assert_equal :hourly, result.granularity
       assert_equal 144, result.buckets.size
       assert result.job_results["App::SomeJob"]
-      assert_equal({"22 Jul 22:00" => 3, "22 Jul 20:20" => 1}, result.job_results["App::SomeJob"].series["p"])
+      assert_equal({"2022-07-22T22:00:00Z" => 3, "2022-07-22T20:20:00Z" => 1}, result.job_results["App::SomeJob"].series["p"])
       assert_equal 1, result.marks.size
       assert_equal "cafed00d - some git summary line", result.marks[0].label
-      assert_equal "22 Jul 21:50", result.marks[0].bucket
+      assert_equal "2022-07-22T21:50:00Z", result.marks[0].bucket
     end
 
     it "fetches job-specific data" do
@@ -192,11 +192,11 @@ describe Sidekiq::Metrics do
       assert_equal fixed_time, result.ends_at
       assert_equal 1, result.marks.size
       assert_equal "cafed00d - some git summary line", result.marks[0].label
-      assert_equal "21:58", result.marks[0].bucket
+      assert_equal "2022-07-22T21:58:00Z", result.marks[0].bucket
 
       assert_equal 60, result.buckets.size
-      assert_equal "21:04", result.buckets.first
-      assert_equal "22:03", result.buckets.last
+      assert_equal "2022-07-22T21:04:00Z", result.buckets.first
+      assert_equal "2022-07-22T22:03:00Z", result.buckets.last
 
       # from create_known_data
       assert_equal %w[App::FooJob], result.job_results.keys
@@ -204,17 +204,17 @@ describe Sidekiq::Metrics do
       refute_nil job_result
       assert_equal %w[p ms s].sort, job_result.series.keys.sort
       assert_equal %w[p ms s].sort, job_result.totals.keys.sort
-      assert_equal 1, job_result.series.dig("p", "22:03")
+      assert_equal 1, job_result.series.dig("p", "2022-07-22T22:03:00Z")
       assert_equal 4, job_result.totals["p"]
-      assert_equal 2, job_result.hist.dig("22:02", -1)
-      assert_equal 1, job_result.hist.dig("22:02", -2)
+      assert_equal 2, job_result.hist.dig("2022-07-22T22:02:00Z", -1)
+      assert_equal 1, job_result.hist.dig("2022-07-22T22:02:00Z", -2)
 
       q = Sidekiq::Metrics::Query.new(now: fixed_time)
       result = q.for_job("App::FooJob", hours: 24)
       assert_equal :hourly, result.granularity
       assert_equal 144, result.buckets.size
       assert result.job_results["App::FooJob"]
-      assert_equal({"22 Jul 22:00" => 4, "22 Jul 20:20" => 2}, result.job_results["App::FooJob"].series["p"])
+      assert_equal({"2022-07-22T22:00:00Z" => 4, "2022-07-22T20:20:00Z" => 2}, result.job_results["App::FooJob"].series["p"])
     end
   end
 end
