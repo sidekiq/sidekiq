@@ -44,6 +44,7 @@ module Sidekiq
 
         granularity = hours ? :hourly : :minutely
         result = Result.new(granularity)
+        result.ends_at = time
         count = hours ? hours * 6 : minutes
         stride, keyproc = ROLLUPS[granularity]
 
@@ -52,12 +53,12 @@ module Sidekiq
             count.times do |idx|
               key = keyproc.call(time)
               pipe.hgetall key
-              result.prepend_bucket time
               time -= stride
             end
           end
         end
 
+        result.starts_at = time
         time = @time
         redis_results.each do |hash|
           hash.each do |k, v|
@@ -82,6 +83,7 @@ module Sidekiq
 
         granularity = hours ? :hourly : :minutely
         result = Result.new(granularity)
+        result.ends_at = time
         count = hours ? hours * 6 : minutes
         stride, keyproc = ROLLUPS[granularity]
 
@@ -90,12 +92,12 @@ module Sidekiq
             count.times do |idx|
               key = keyproc.call(time)
               pipe.hmget key, "#{klass}|ms", "#{klass}|p", "#{klass}|f"
-              result.prepend_bucket time
               time -= stride
             end
           end
         end
 
+        result.starts_at = time
         time = @time
         @pool.with do |conn|
           redis_results.each do |(ms, p, f)|
@@ -111,19 +113,12 @@ module Sidekiq
         result
       end
 
-      class Result < Struct.new(:granularity, :starts_at, :ends_at, :size, :buckets, :job_results, :marks)
+      class Result < Struct.new(:granularity, :starts_at, :ends_at, :size, :job_results, :marks)
         def initialize(granularity = :minutely)
           super
           self.granularity = granularity
-          self.buckets = []
           self.marks = []
           self.job_results = Hash.new { |h, k| h[k] = JobResult.new(granularity) }
-        end
-
-        def prepend_bucket(time)
-          buckets.unshift Query.bkt_time_s(time, granularity)
-          self.ends_at ||= time
-          self.starts_at = time
         end
       end
 
