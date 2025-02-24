@@ -14,6 +14,7 @@ HEAD / main
   which makes it really easy to performance tune your slow jobs.
   The Web UI contains a new **Profiles** tab to view any collected profile data.
   Please read the new [Profiling](https://github.com/sidekiq/sidekiq/wiki/Profiling) wiki page for details.
+- **NEW FEATURE** Job Metrics now store up to 72 hours of data and the Web UI allows display of 24/48/72 hours. [#6614]
 - CurrentAttribute support now uses `ActiveJob::Arguments` to serialize the context object, supporting Symbols and GlobalID.
   The change should be backwards compatible. [#6510]
 - Freshen up `Sidekiq::Web` to simplify the code and improve security [#6532]

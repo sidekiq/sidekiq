@@ -934,24 +934,9 @@ describe Sidekiq::Web do
 
     describe "/metrics" do
       it "calls the Sidekiq::Metrics::Query and renders correctly" do
-        result_mock = Minitest::Mock.new
-        result_mock.expect(:job_results, {})
-        result_mock.expect(:marks, [])
-        result_mock.expect(:buckets, [])
-        result_mock.expect(:starts_at, Time.now - 3600)
-        result_mock.expect(:ends_at, Time.now)
-
-        query_mock = Minitest::Mock.new
-        query_mock.expect :top_jobs, result_mock do |minutes:, class_filter:|
-          assert_equal minutes, 240
-          assert_nil class_filter
-        end
-
-        Sidekiq::Metrics::Query.stub :new, query_mock do
-          get "/metrics", {period: "4h"}.compact
-          assert_equal 200, last_response.status
-          assert_match(/Metrics/, last_response.body)
-        end
+        get "/metrics", {period: "4h"}.compact
+        assert_equal 200, last_response.status
+        assert_match(/Metrics/, last_response.body)
       end
 
       it "supports filtering" do
@@ -974,9 +959,10 @@ describe Sidekiq::Web do
         result_mock = Minitest::Mock.new
         result_mock.expect(:job_results, {"FooJob" => job_result_mock})
         result_mock.expect(:starts_at, Time.now - 3600)
+        result_mock.expect(:starts_at, Time.now - 3600)
+        result_mock.expect(:ends_at, Time.now)
         result_mock.expect(:ends_at, Time.now)
         result_mock.expect(:marks, [])
-        result_mock.expect(:buckets, [])
 
         query_mock = Minitest::Mock.new
         query_mock.expect :for_job, result_mock do |job, minutes:|
@@ -989,6 +975,8 @@ describe Sidekiq::Web do
           assert_equal 200, last_response.status
           assert_match(/Metrics/, last_response.body)
           assert_match(/FooJob/, last_response.body)
+          assert_match(/8h/, last_response.body)
+          refute_match(/24h/, last_response.body)
         end
       end
     end

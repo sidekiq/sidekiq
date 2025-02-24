@@ -1,5 +1,6 @@
 <script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js" nonce="<%= csp_nonce %>"></script>
 <script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js" nonce="<%= csp_nonce %>"></script>
+<script type="text/javascript" src="<%= root_path %>javascripts/chartjs-adapter-date-fns.min.js" nonce="<%= csp_nonce %>"></script>
 <script type="text/javascript" src="<%= root_path %>javascripts/base-charts.js" nonce="<%= csp_nonce %>"></script>
 
 <section>
@@ -8,22 +9,8 @@
       <%= t('Metrics') %>
       <a target="blank" href="https://github.com/sidekiq/sidekiq/wiki/Metrics"><span class="info-circle" title="Click to learn more about metrics">?</span></a>
     </h1>
-      
-    <div class="filter">
-      <form id="metrics-form" class="form-inline" action="<%= root_path %>metrics" method="get">
-        <label for="substr"><%= t('Filter') %></label>
-        <input id="class-filter" class="form-control" type="text" name="substr" placeholder="<%= t('Name') %>" value="<%= h url_params("substr") %>">
-        <select id="period-selector" class="form-control" name="period">
-          <% @periods.each_key do |code| %>
-            <% if code == @period %>
-              <option selected value="<%= code %>"><%= code %></option>
-            <% else %>
-              <option value="<%= code %>"><%= code %></option>
-            <% end %>
-          <% end %>
-        </select>
-      </form>
-    </div>
+
+    <%= erb :_metrics_period_select, locals: { periods: @periods, period: @period, path: "#{root_path}metrics" } %>
   </header>
 
   <%
@@ -38,7 +25,8 @@
       <%= to_json({
         series: job_results.map { |(kls, jr)| [kls, jr.dig("series", "s")] }.to_h,
         marks: @query_result.marks.map { |m| [m.bucket, m.label] },
-        labels: @query_result.buckets,
+        starts_at: @query_result.starts_at.iso8601,
+        ends_at: @query_result.ends_at.iso8601,
         visibleKls: visible_kls,
         yLabel: t('TotalExecutionTime'),
         units: t('Seconds').downcase,

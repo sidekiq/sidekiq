@@ -19,13 +19,13 @@ module Sidekiq
       end
 
       def track(queue, klass)
-        start = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :millisecond)
+        start = mono_ms
         time_ms = 0
         begin
           begin
             yield
           ensure
-            finish = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :millisecond)
+            finish = mono_ms
             time_ms = finish - start
           end
           # We don't track time for failed jobs as they can have very unpredictable
@@ -51,7 +51,7 @@ module Sidekiq
       end
 
       # LONG_TERM = 90 * 24 * 60 * 60
-      # MID_TERM = 7 * 24 * 60 * 60
+      MID_TERM = 3 * 24 * 60 * 60
       SHORT_TERM = 8 * 60 * 60
 
       def flush(time = Time.now)
@@ -62,8 +62,10 @@ module Sidekiq
 
         now = time.utc
         # nowdate = now.strftime("%Y%m%d")
-        # nowhour = now.strftime("%Y%m%d|%-H")
-        nowmin = now.strftime("%Y%m%d|%-H:%-M")
+        # "250214|8:4" is the 10 minute bucket for Feb 14 2025, 08:43
+        nowmid = now.strftime("%y%m%d|%-H:%M")[0..-2]
+        # "250214|8:43" is the 1 minute bucket for Feb 14 2025, 08:43
+        nowshort = now.strftime("%y%m%d|%-H:%M")
         count = 0
 
         redis do |conn|
@@ -81,8 +83,8 @@ module Sidekiq
           # daily or hourly rollups.
           [
             # ["j", jobs, nowdate, LONG_TERM],
-            # ["j", jobs, nowhour, MID_TERM],
-            ["j", jobs, nowmin, SHORT_TERM]
+            ["j", jobs, nowmid, MID_TERM],
+            ["j", jobs, nowshort, SHORT_TERM]
           ].each do |prefix, data, bucket, ttl|
             conn.pipelined do |xa|
               stats = "#{prefix}|#{bucket}"

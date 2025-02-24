@@ -25,7 +25,10 @@ module Sidekiq
     #
     # To store this data, we use Redis' BITFIELD command to store unsigned 16-bit counters
     # per bucket per klass per minute. It's unlikely that most people will be executing more
-    # than 1000 job/sec for a full minute of a specific type.
+    # than 1000 job/sec for a full minute of a specific type (i.e. overflow 65,536).
+    #
+    # Histograms are only stored at the fine-grained level, they are not rolled up
+    # for longer-term buckets.
     class Histogram
       include Enumerable
 
