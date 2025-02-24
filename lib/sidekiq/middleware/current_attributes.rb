@@ -20,6 +20,17 @@ module Sidekiq
   #   # or multiple current attributes
   #   Sidekiq::CurrentAttributes.persist(["Myapp::Current", "Myapp::OtherCurrent"])
   #
+  # To pass only specific attributes from the current attributes into the Sidekiq thread,
+  # include Sidekiq::Concerns::CurrentAttributes::Persistable in the current attribute class
+  # and set the specified keys in sidekiq_persist :only option
+  #
+  # @example
+  #
+  #   # in the current attributes class, include the module:
+  #   include Sidekiq::Concerns::CurrentAttributes::Persistable
+  #   # then, set :only option in the sidekiq_persist method:
+  #   sidekiq_persist only: [:my_attribute_key]
+  #
   module CurrentAttributes
     Serializer = ::ActiveJob::Arguments
 

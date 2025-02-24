@@ -1,6 +1,20 @@
 module Sidekiq
   module Concerns
     module CurrentAttributes
+      ##
+      # This module adds the ability to specify Rails current attributes to pass into the Sidekiq jobs
+      # Works alongside with +Sidekiq::CurrentAttributes+ middleware
+      #
+      # @example
+      #
+      #   class MyApp::Current < ActiveSupport::CurrentAttributes
+      #      include Sidekiq::Concerns::CurrentAttributes::Persistable
+      #
+      #      attribute :my_attribute, :my_other_attribute
+      #
+      #      sidekiq_persist only: [:my_attribute]
+      #   end
+      #
       module Persistable
         extend ActiveSupport::Concern
 
