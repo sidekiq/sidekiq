@@ -13,3 +13,42 @@ task seed_jobs: :environment do
     end
   end
 end
+
+task seed_metrics: :environment do
+  seed = 1287612348271
+  srand(seed)
+  jobs = %w[FooJob BarJob StoreCardJob OrderJunkJob SpamUserJob FastJob SlowJob]
+
+  now = Time.now.utc
+  stride = 60
+  count = 4800 # 80 hours
+  count.times do |idx|
+    nowmid = now.strftime("%y%m%d|%-H:%M")[0..-2]
+    nowshort = now.strftime("%y%m%d|%-H:%M")
+
+    data = {}
+    jobs.each do |klass|
+      data["#{klass}|ms"] = klass == "SlowJob" ? rand(5_000_000) : rand(1_000_000)
+      data["#{klass}|p"] = rand(1000)
+      data["#{klass}|f"] = rand(100)
+    end
+    mid_term = 3 * 24 * 60 * 60
+    short_term = 8 * 60 * 60
+    Sidekiq.redis do |conn|
+      [
+        [data, nowmid, mid_term],
+        [data, nowshort, short_term]
+      ].each do |xdata, bucket, ttl|
+        conn.pipelined do |xa|
+          stats = "j|#{bucket}"
+          xdata.each_pair do |key, value|
+            xa.hincrby stats, key, value
+          end
+          xa.expire(stats, ttl)
+        end
+      end
+    end
+
+    now -= stride
+  end
+end
