@@ -4,14 +4,6 @@ class JobMetricsOverviewChart extends BaseChart {
     this.swatches = [];
     this.visibleKls = options.visibleKls;
 
-    const countBuckets = this.options.labels.length / 60;
-    this.labelBuckets = this.options.labels.reduce((acc, label, index) => {
-      const bucket = Math.floor(index / countBuckets);
-      acc[bucket] = acc[bucket] || [];
-      acc[bucket].push(label);
-      return acc;
-    }, []);
-
     this.init();
   }
 
@@ -60,7 +52,7 @@ class JobMetricsOverviewChart extends BaseChart {
 
     return {
       label: kls,
-      data: this.buildSeries(kls),
+      data: this.dataFromSeries(this.options.series[kls]),
       borderColor: color,
       backgroundColor: color,
       borderWidth: 2,
@@ -68,24 +60,9 @@ class JobMetricsOverviewChart extends BaseChart {
     };
   }
 
-  buildSeries(kls) {
-    // `series` is an object that maps labels to counts => { "20:15" => 2, "20:16" => 3, ... }
-    const series = this.options.series[kls];
-    return this.labelBuckets.reduce((acc, labels) => {
-      const bucketValues = labels.map(label => series[label]).filter(v => v);
-      if (bucketValues.length > 0) {
-        // Sum up the values for each bucket that has data.
-        // The new label is the bucket's first label, its start time.
-        acc[labels[0]] = bucketValues.reduce((a, b) => a + b, 0);
-      }
-      return acc;
-    }, {});
-  }
-
-  buildTooltipTitle(items) {
-    const [first, ...rest] = this.labelBuckets.find((labels) => labels[0] === items[0].label);
-    const title = [first, rest[rest.length - 1]].filter(v => v).join(" - ");
-    return `${title} UTC`
+  dataFromSeries(series) {
+    // Chart.js expects `data` to be an array of objects with `x` and `y` values.
+    return Object.entries(series).map(([isoTime, val]) => ({ x: isoTime, y: val }));
   }
 
   get chartOptions() {
@@ -94,6 +71,12 @@ class JobMetricsOverviewChart extends BaseChart {
       aspectRatio: 4,
       scales: {
         ...super.chartOptions.scales,
+        x: {
+          ...super.chartOptions.scales.x,
+          type: "time",
+          min: this.options.starts_at,
+          max: this.options.ends_at,
+        },
         y: {
           ...super.chartOptions.scales.y,
           beginAtZero: true,
@@ -108,12 +91,11 @@ class JobMetricsOverviewChart extends BaseChart {
         tooltip: {
           ...super.chartOptions.plugins.tooltip,
           callbacks: {
-            title: (items) => this.buildTooltipTitle(items),
             label: (item) =>
               `${item.dataset.label}: ${item.parsed.y.toFixed(1)} ` +
               `${this.options.units}`,
             footer: (items) => {
-              const bucket = items[0].label;
+              const bucket = items[0].raw.x;
               const marks = this.options.marks.filter(([b, _]) => b == bucket);
               return marks.map(
                 ([b, msg]) => `${this.options.markLabel}: ${msg}`
@@ -206,7 +188,7 @@ class HistBubbleChart extends BaseChart {
     });
 
     // Chart.js will not calculate the bubble size. We have to do that.
-    const maxRadius = this.el.offsetWidth / this.options.labels.length;
+    const maxRadius = this.el.offsetWidth / 100;
     const minRadius = 1;
     const multiplier = (maxRadius / maxCount) * 1.5;
     data.forEach((entry) => {
@@ -230,8 +212,9 @@ class HistBubbleChart extends BaseChart {
         ...super.chartOptions.scales,
         x: {
           ...super.chartOptions.scales.x,
-          type: "category",
-          labels: this.options.labels,
+          type: "time",
+          min: this.options.starts_at,
+          max: this.options.ends_at,
         },
         y: {
           ...super.chartOptions.scales.y,
@@ -246,7 +229,6 @@ class HistBubbleChart extends BaseChart {
         tooltip: {
           ...super.chartOptions.plugins.tooltip,
           callbacks: {
-            title: (items) => `${items[0].raw.x} UTC`,
             label: (item) =>
               `${item.parsed.y} ${this.options.yUnits}: ${item.raw.count} ${this.options.zUnits}`,
             footer: (items) => {

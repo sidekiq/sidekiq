@@ -959,9 +959,10 @@ describe Sidekiq::Web do
         result_mock = Minitest::Mock.new
         result_mock.expect(:job_results, {"FooJob" => job_result_mock})
         result_mock.expect(:starts_at, Time.now - 3600)
+        result_mock.expect(:starts_at, Time.now - 3600)
+        result_mock.expect(:ends_at, Time.now)
         result_mock.expect(:ends_at, Time.now)
         result_mock.expect(:marks, [])
-        result_mock.expect(:buckets, [])
 
         query_mock = Minitest::Mock.new
         query_mock.expect :for_job, result_mock do |job, minutes:|
@@ -974,6 +975,8 @@ describe Sidekiq::Web do
           assert_equal 200, last_response.status
           assert_match(/Metrics/, last_response.body)
           assert_match(/FooJob/, last_response.body)
+          assert_match(/8h/, last_response.body)
+          refute_match(/24h/, last_response.body)
         end
       end
     end

@@ -44,6 +44,7 @@ module Sidekiq
 
         granularity = hours ? :hourly : :minutely
         result = Result.new(granularity)
+        result.ends_at = time
         count = hours ? hours * 6 : minutes
         stride, keyproc = ROLLUPS[granularity]
 
@@ -52,12 +53,12 @@ module Sidekiq
             count.times do |idx|
               key = keyproc.call(time)
               pipe.hgetall key
-              result.prepend_bucket time
               time -= stride
             end
           end
         end
 
+        result.starts_at = time
         time = @time
         redis_results.each do |hash|
           hash.each do |k, v|
@@ -68,7 +69,7 @@ module Sidekiq
           time -= stride
         end
 
-        result.marks = fetch_marks(result.starts_at..result.ends_at)
+        result.marks = fetch_marks(result.starts_at..result.ends_at, granularity)
         result
       end
 
@@ -82,6 +83,7 @@ module Sidekiq
 
         granularity = hours ? :hourly : :minutely
         result = Result.new(granularity)
+        result.ends_at = time
         count = hours ? hours * 6 : minutes
         stride, keyproc = ROLLUPS[granularity]
 
@@ -90,12 +92,12 @@ module Sidekiq
             count.times do |idx|
               key = keyproc.call(time)
               pipe.hmget key, "#{klass}|ms", "#{klass}|p", "#{klass}|f"
-              result.prepend_bucket time
               time -= stride
             end
           end
         end
 
+        result.starts_at = time
         time = @time
         @pool.with do |conn|
           redis_results.each do |(ms, p, f)|
@@ -107,35 +109,16 @@ module Sidekiq
           end
         end
 
-        result.marks = fetch_marks(result.starts_at..result.ends_at)
+        result.marks = fetch_marks(result.starts_at..result.ends_at, granularity)
         result
       end
 
-      class Result < Struct.new(:granularity, :starts_at, :ends_at, :size, :buckets, :job_results, :marks)
+      class Result < Struct.new(:granularity, :starts_at, :ends_at, :size, :job_results, :marks)
         def initialize(granularity = :minutely)
           super
           self.granularity = granularity
-          self.buckets = []
           self.marks = []
           self.job_results = Hash.new { |h, k| h[k] = JobResult.new(granularity) }
-        end
-
-        def prepend_bucket(time)
-          buckets.unshift bkt_time_s(time)
-          self.ends_at ||= time
-          self.starts_at = time
-        end
-
-        def bkt_time_s(time)
-          # hourly buckets should be rounded to ten ("8:40", not "8:43")
-          # and include day
-          if granularity == :hourly
-            time.strftime("%d %-H:%M").tap do |s|
-              s[-1] = "0"
-            end
-          else
-            time.strftime("%-H:%M")
-          end
         end
       end
 
@@ -150,14 +133,14 @@ module Sidekiq
 
         def add_metric(metric, time, value)
           totals[metric] += value
-          series[metric][bkt_time_s(time)] += value
+          series[metric][Query.bkt_time_s(time, granularity)] += value
 
           # Include timing measurements in seconds for convenience
           add_metric("s", time, value / 1000.0) if metric == "ms"
         end
 
         def add_hist(time, hist_result)
-          hist[bkt_time_s(time)] = hist_result
+          hist[Query.bkt_time_s(time, granularity)] = hist_result
         end
 
         def total_avg(metric = "ms")
@@ -172,35 +155,26 @@ module Sidekiq
             result[bucket] = (completed == 0) ? 0 : value.to_f / completed
           end
         end
-
-        def bkt_time_s(time)
-          if granularity == :hourly
-            # hourly buckets should be rounded to ten ("8:40", not "8:43")
-            time.strftime("%d %H:%M").tap do |s|
-              s[-1] = "0"
-            end
-          else
-            time.strftime("%H:%M")
-          end
-        end
       end
 
-      class MarkResult < Struct.new(:time, :label)
-        def bucket
-          time.strftime("%H:%M")
-        end
+      MarkResult = Struct.new(:time, :label, :bucket)
+
+      def self.bkt_time_s(time, granularity)
+        # truncate time to ten minutes ("8:40", not "8:43") or one minute
+        truncation = (granularity == :hourly) ? 600 : 60
+        Time.at(time.to_i - time.to_i % truncation).utc.iso8601
       end
 
       private
 
-      def fetch_marks(time_range)
+      def fetch_marks(time_range, granularity)
         [].tap do |result|
           marks = @pool.with { |c| c.hgetall("#{@time.strftime("%Y%m%d")}-marks") }
 
           marks.each do |timestamp, label|
             time = Time.parse(timestamp)
             if time_range.cover? time
-              result << MarkResult.new(time, label)
+              result << MarkResult.new(time, label, Query.bkt_time_s(time, granularity))
             end
           end
         end

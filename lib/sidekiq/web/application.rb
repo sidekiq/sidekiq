@@ -77,9 +77,11 @@ module Sidekiq
       get "/metrics/:name" do
         @name = route_params(:name)
         @period = h(url_params("period") || "1h")
-        q = Sidekiq::Metrics::Query.new
-        @periods = METRICS_PERIODS
+        # Periods larger than 8 hours are not supported for histogram chart
+        @period = "8h" if @period.to_i > 8
+        @periods = METRICS_PERIODS.reject { |k, v| k.to_i > 8 }
         args = @periods.fetch(@period, @periods.values.first)
+        q = Sidekiq::Metrics::Query.new
         @query_result = q.for_job(@name, **args)
         erb(:metrics_for_job)
       end
