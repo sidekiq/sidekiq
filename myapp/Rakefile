@@ -21,7 +21,10 @@ task seed_metrics: :environment do
 
   now = Time.now.utc
   stride = 60
-  count = 4800 # 80 hours
+  count = 72 * 60
+  mid_term = 3.days.to_i
+  short_term = 8.hours.to_i
+
   count.times do |idx|
     nowmid = now.strftime("%y%m%d|%-H:%M")[0..-2]
     nowshort = now.strftime("%y%m%d|%-H:%M")
@@ -32,20 +35,19 @@ task seed_metrics: :environment do
       data["#{klass}|p"] = rand(1000)
       data["#{klass}|f"] = rand(100)
     end
-    mid_term = 3 * 24 * 60 * 60
-    short_term = 8 * 60 * 60
     Sidekiq.redis do |conn|
-      [
-        [data, nowmid, mid_term],
-        [data, nowshort, short_term]
-      ].each do |xdata, bucket, ttl|
-        conn.pipelined do |xa|
-          stats = "j|#{bucket}"
-          xdata.each_pair do |key, value|
-            xa.hincrby stats, key, value
-          end
-          xa.expire(stats, ttl)
+      conn.pipelined do |xa|
+        stats = "j|#{nowmid}"
+        data.each_pair do |key, value|
+          xa.hincrby stats, key, value
         end
+        xa.expire(stats, mid_term)
+
+        stats = "j|#{nowshort}"
+        data.each_pair do |key, value|
+          xa.hincrby stats, key, value
+        end
+        xa.expire(stats, short_term)
       end
     end
 
