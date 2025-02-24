@@ -20,6 +20,17 @@ module Sidekiq
   #   # or multiple current attributes
   #   Sidekiq::CurrentAttributes.persist(["Myapp::Current", "Myapp::OtherCurrent"])
   #
+  # To pass only specific attributes from the current attributes into the Sidekiq thread,
+  # include Sidekiq::Concerns::CurrentAttributes::Persistable in the current attribute class
+  # and set the specified keys in sidekiq_persist :only option
+  #
+  # @example
+  #
+  #   # in the current attributes class, include the module:
+  #   include Sidekiq::Concerns::CurrentAttributes::Persistable
+  #   # then, set :only option in the sidekiq_persist method:
+  #   sidekiq_persist only: [:my_attribute_key]
+  #
   module CurrentAttributes
     Serializer = ::ActiveJob::Arguments
 
@@ -33,7 +44,13 @@ module Sidekiq
       def call(_, job, _, _)
         @cattrs.each do |(key, strklass)|
           if !job.has_key?(key)
-            attrs = strklass.constantize.attributes
+            klass = strklass.constantize
+            attrs = if klass.include?(Sidekiq::Concerns::CurrentAttributes::Persistable)
+              klass.persisted_attributes
+            else
+              klass.attributes
+            end
+
             # Retries can push the job N times, we don't
             # want retries to reset cattr. #5692, #5090
             job[key] = Serializer.serialize(attrs) if attrs.any?
