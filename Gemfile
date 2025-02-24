@@ -8,6 +8,7 @@ gem "actionmailer", RAILS_VERSION
 gem "actionpack", RAILS_VERSION
 gem "activejob", RAILS_VERSION
 gem "activerecord", RAILS_VERSION
+gem "activesupport", RAILS_VERSION
 gem "railties", RAILS_VERSION
 gem "redis-client"
 # gem "bumbler"

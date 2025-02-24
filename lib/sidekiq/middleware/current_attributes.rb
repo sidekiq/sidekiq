@@ -33,7 +33,13 @@ module Sidekiq
       def call(_, job, _, _)
         @cattrs.each do |(key, strklass)|
           if !job.has_key?(key)
-            attrs = strklass.constantize.attributes
+            klass = strklass.constantize
+            attrs = if klass.include?(Sidekiq::Concerns::CurrentAttributes::Persistable)
+              klass.persisted_attributes
+            else
+              klass.attributes
+            end
+
             # Retries can push the job N times, we don't
             # want retries to reset cattr. #5692, #5090
             job[key] = Serializer.serialize(attrs) if attrs.any?
