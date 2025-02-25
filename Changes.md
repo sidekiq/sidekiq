@@ -20,6 +20,7 @@ HEAD / main
 - Freshen up `Sidekiq::Web` to simplify the code and improve security [#6532]
   The CSS has been rewritten from scratch to remove the Bootstrap framework.
 - Add `on_cancel` callback for iterable jobs [#6607]
+- Add `cursor` reader to get the current cursor inside iterable jobs [#6606]
 - Default error logging has been modified to use Ruby's `Exception#detailed_message` and `#full_message` APIs.
 - CI now runs against Redis, Dragonfly and Valkey.
 - Job tags now allow custom CSS display [#6595]
