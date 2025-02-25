@@ -31,7 +31,7 @@ task seed_metrics: :environment do
 
     data = {}
     jobs.each do |klass|
-      data["#{klass}|ms"] = klass == "SlowJob" ? rand(5_000_000) : rand(1_000_000)
+      data["#{klass}|ms"] = (klass == "SlowJob") ? rand(5_000_000) : rand(1_000_000)
       data["#{klass}|p"] = rand(1000)
       data["#{klass}|f"] = rand(100)
     end
