@@ -33,6 +33,10 @@ module Sidekiq
         throw :halt, [302, {"Location" => url}, []]
       end
 
+      def header(key, value)
+        env["response_headers"][key] = value
+      end
+
       # internal redirect
       def redirect(location)
         throw :halt, [302, {"Location" => "#{request.base_url}#{location}"}, []]

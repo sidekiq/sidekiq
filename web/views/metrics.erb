@@ -1,7 +1,7 @@
-<script type="text/javascript" src="<%= root_path %>javascripts/chart.min.js" nonce="<%= csp_nonce %>"></script>
-<script type="text/javascript" src="<%= root_path %>javascripts/chartjs-plugin-annotation.min.js" nonce="<%= csp_nonce %>"></script>
-<script type="text/javascript" src="<%= root_path %>javascripts/chartjs-adapter-date-fns.min.js" nonce="<%= csp_nonce %>"></script>
-<script type="text/javascript" src="<%= root_path %>javascripts/base-charts.js" nonce="<%= csp_nonce %>"></script>
+<%= script_tag "javascripts/chart.min.js" %>
+<%= script_tag "javascripts/chartjs-plugin-annotation.min.js" %>
+<%= script_tag "javascripts/chartjs-adapter-date-fns.min.js" %>
+<%= script_tag "javascripts/base-charts.js" %>
 
 <section>
   <header>
@@ -76,6 +76,9 @@
     </table>
   </div>
 
-  <!--p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %></small></p-->
+<% if job_results.any? %>
+  <p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %>.<% if @period == "1h" %> Auto-refreshing every 60 seconds.<% end %></small></p>
+<% end %>
+
 </section>
-<script type="text/javascript" src="<%= root_path %>javascripts/metrics.js" nonce="<%= csp_nonce %>"></script>
+<%= script_tag "javascripts/metrics.js" %>

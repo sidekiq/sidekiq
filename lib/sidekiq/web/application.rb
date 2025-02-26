@@ -71,6 +71,7 @@ module Sidekiq
         args = @periods.fetch(@period, @periods.values.first)
         @query_result = q.top_jobs(**args.merge(class_filter: class_filter))
 
+        header "Refresh", 60 if @period == "1h"
         erb(:metrics)
       end
 
@@ -83,6 +84,7 @@ module Sidekiq
         args = @periods.fetch(@period, @periods.values.first)
         q = Sidekiq::Metrics::Query.new
         @query_result = q.for_job(@name, **args)
+        header "Refresh", 60
         erb(:metrics_for_job)
       end
 
@@ -404,6 +406,14 @@ module Sidekiq
         action = match(env)
         return [404, {"content-type" => "text/plain", "x-cascade" => "pass"}, ["Not Found"]] unless action
 
+        headers = {
+          "content-type" => "text/html",
+          "cache-control" => "private, no-store",
+          "content-language" => action.locale,
+          "content-security-policy" => process_csp(env, CSP_HEADER_TEMPLATE),
+          "x-content-type-options" => "nosniff"
+        }
+        env["response_headers"] = headers
         resp = catch(:halt) do
           Thread.current[:sidekiq_redis_pool] = env[:redis_pool]
           action.instance_exec env, &action.block
@@ -417,15 +427,8 @@ module Sidekiq
           resp
         else
           # rendered content goes here
-          headers = {
-            "content-type" => "text/html",
-            "cache-control" => "private, no-store",
-            "content-language" => action.locale,
-            "content-security-policy" => process_csp(env, CSP_HEADER_TEMPLATE),
-            "x-content-type-options" => "nosniff"
-          }
           # we'll let Rack calculate Content-Length for us.
-          [200, headers, [resp]]
+          [200, env["response_headers"], [resp]]
         end
       end
 
