@@ -1,6 +1,8 @@
 if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-  Chart.defaults.borderColor = "oklch(22% 0.01 256)";
-  Chart.defaults.color = "oklch(65% 0.01 256)";
+  Chart.defaults.borderColor = "#333";
+  Chart.defaults.color = "#aaa";
+  // Chart.defaults.borderColor = "oklch(22% 0.01 256)";
+  // Chart.defaults.color = "oklch(65% 0.01 256)";
 }
 
 class Colors {

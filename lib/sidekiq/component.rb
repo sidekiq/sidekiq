@@ -23,6 +23,16 @@ module Sidekiq
   module Component # :nodoc:
     attr_reader :config
 
+    # This is epoch milliseconds, appropriate for persistence
+    def real_ms
+      ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond)
+    end
+
+    # used for time difference and relative comparisons, not persistence.
+    def mono_ms
+      ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :millisecond)
+    end
+
     def watchdog(last_words)
       yield
     rescue Exception => ex

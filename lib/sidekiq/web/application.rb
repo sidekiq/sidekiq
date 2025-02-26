@@ -29,10 +29,13 @@ module Sidekiq
       ].join("; ").freeze
 
       METRICS_PERIODS = {
-        "1h" => 60,
-        "2h" => 120,
-        "4h" => 240,
-        "8h" => 480
+        "1h" => {minutes: 60},
+        "2h" => {minutes: 120},
+        "4h" => {minutes: 240},
+        "8h" => {minutes: 480},
+        "24h" => {hours: 24},
+        "48h" => {hours: 48},
+        "72h" => {hours: 72}
       }
 
       def initialize(inst)
@@ -63,21 +66,26 @@ module Sidekiq
         class_filter = (x.nil? || x == "") ? nil : Regexp.new(Regexp.escape(x), Regexp::IGNORECASE)
 
         q = Sidekiq::Metrics::Query.new
-        @period = h((url_params("period") || "")[0..1])
+        @period = h(url_params("period") || "1h")
         @periods = METRICS_PERIODS
-        minutes = @periods.fetch(@period, @periods.values.first)
-        @query_result = q.top_jobs(minutes: minutes, class_filter: class_filter)
+        args = @periods.fetch(@period, @periods.values.first)
+        @query_result = q.top_jobs(**args.merge(class_filter: class_filter))
 
+        header "refresh", 60 if @period == "1h"
         erb(:metrics)
       end
 
       get "/metrics/:name" do
         @name = route_params(:name)
-        @period = h((url_params("period") || "")[0..1])
+        @period = h(url_params("period") || "1h")
+        # Periods larger than 8 hours are not supported for histogram chart
+        @period = "8h" if @period.to_i > 8
+        @periods = METRICS_PERIODS.reject { |k, v| k.to_i > 8 }
+        args = @periods.fetch(@period, @periods.values.first)
         q = Sidekiq::Metrics::Query.new
-        @periods = METRICS_PERIODS
-        minutes = @periods.fetch(@period, @periods.values.first)
-        @query_result = q.for_job(@name, minutes: minutes)
+        @query_result = q.for_job(@name, **args)
+
+        header "refresh", 60 if @period == "1h"
         erb(:metrics_for_job)
       end
 
@@ -399,6 +407,14 @@ module Sidekiq
         action = match(env)
         return [404, {"content-type" => "text/plain", "x-cascade" => "pass"}, ["Not Found"]] unless action
 
+        headers = {
+          "content-type" => "text/html",
+          "cache-control" => "private, no-store",
+          "content-language" => action.locale,
+          "content-security-policy" => process_csp(env, CSP_HEADER_TEMPLATE),
+          "x-content-type-options" => "nosniff"
+        }
+        env["response_headers"] = headers
         resp = catch(:halt) do
           Thread.current[:sidekiq_redis_pool] = env[:redis_pool]
           action.instance_exec env, &action.block
@@ -412,15 +428,8 @@ module Sidekiq
           resp
         else
           # rendered content goes here
-          headers = {
-            "content-type" => "text/html",
-            "cache-control" => "private, no-store",
-            "content-language" => action.locale,
-            "content-security-policy" => process_csp(env, CSP_HEADER_TEMPLATE),
-            "x-content-type-options" => "nosniff"
-          }
           # we'll let Rack calculate Content-Length for us.
-          [200, headers, [resp]]
+          [200, env["response_headers"], [resp]]
         end
       end
 
