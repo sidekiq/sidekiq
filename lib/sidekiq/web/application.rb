@@ -71,7 +71,7 @@ module Sidekiq
         args = @periods.fetch(@period, @periods.values.first)
         @query_result = q.top_jobs(**args.merge(class_filter: class_filter))
 
-        header "Refresh", 60 if @period == "1h"
+        header "refresh", 60 if @period == "1h"
         erb(:metrics)
       end
 
@@ -84,7 +84,8 @@ module Sidekiq
         args = @periods.fetch(@period, @periods.values.first)
         q = Sidekiq::Metrics::Query.new
         @query_result = q.for_job(@name, **args)
-        header "Refresh", 60
+
+        header "refresh", 60 if @period == "1h"
         erb(:metrics_for_job)
       end
 
