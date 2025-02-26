@@ -34,6 +34,8 @@ HEAD / main
 ----------
 
 - Only require activejob if necessary [#6584]
+  You might get `uninitialized constant Sidekiq::ActiveJob` if you
+  `require 'sidekiq'` before `require 'rails'`.
 - Fix iterable job cancellation [#6589]
 - Web UI accessibility improvements [#6604]
 
