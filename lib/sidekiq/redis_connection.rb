@@ -57,13 +57,13 @@ module Sidekiq
         # Deep clone so we can muck with these options all we want and exclude
         # params from dump-and-load that may contain objects that Marshal is
         # unable to safely dump.
-        keys = options.keys - [:logger, :ssl_params]
+        keys = options.keys - [:logger, :ssl_params, :password]
         scrubbed_options = Marshal.load(Marshal.dump(options.slice(*keys)))
         if scrubbed_options[:url] && (uri = URI.parse(scrubbed_options[:url])) && uri.password
           uri.password = redacted
           scrubbed_options[:url] = uri.to_s
         end
-        scrubbed_options[:password] = redacted if scrubbed_options[:password]
+        scrubbed_options[:password] = redacted if options.key?(:password)
         scrubbed_options[:sentinel_password] = redacted if scrubbed_options[:sentinel_password]
         scrubbed_options[:sentinels]&.each do |sentinel|
           if sentinel.is_a?(String)
