@@ -169,6 +169,28 @@ describe Sidekiq::RedisConnection do
         assert_includes(output, '"REDACTED"')
       end
 
+      it "redacts password when passed in as a proc" do
+        options = {
+          role: "master",
+          master_name: "mymaster",
+          sentinel_password: "secret",
+          sentinels: [
+            {host: "host1", port: 26379, password: "secret"},
+            {host: "host2", port: 26379, password: "secret"},
+            {host: "host3", port: 26379, password: "secret"}
+          ],
+          password: -> { "secret" }
+        }
+
+        output = capture_logging(@config) do |logger|
+          Sidekiq::RedisConnection.create(options.merge(logger: logger))
+        end
+
+        refute_includes(options.inspect, "REDACTED")
+        refute_includes(output, "secret")
+        assert_includes(output, '"REDACTED"')
+      end
+
       it "supports sentinel urls" do
         options = {
           url: "rediss://user:secret@mymaster",
