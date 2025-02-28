@@ -30,6 +30,13 @@ module Sidekiq
       "error" => 3,
       "fatal" => 4
     }
+    COLORS = {
+      "DEBUG" => "\e[1;32mDEBUG\e[0m", # green
+      "INFO" => "\e[1;34mINFO \e[0m", # blue
+      "WARN" => "\e[1;33mWARN \e[0m", # yellow
+      "ERROR" => "\e[1;31mERROR\e[0m", # red
+      "FATAL" => "\e[1;35mFATAL\e[0m" # pink
+    }
     LEVELS.default_proc = proc do |_, level|
       puts("Invalid log level: #{level.inspect}")
       nil
@@ -82,28 +89,26 @@ module Sidekiq
         end
 
         def format_context(ctxt = Sidekiq::Context.current)
-          if ctxt.size > 0
-            ctxt.map { |k, v|
-              case v
-              when Array
-                "#{k}=#{v.join(",")}"
-              else
-                "#{k}=#{v}"
-              end
-            }.join(" ")
-          end
+          (ctxt.size == 0) ? "" : " #{ctxt.map { |k, v|
+            case v
+            when Array
+              "#{k}=#{v.join(",")}"
+            else
+              "#{k}=#{v}"
+            end
+          }.join(" ")}"
         end
       end
 
       class Pretty < Base
         def call(severity, time, program_name, message)
-          "#{time.utc.iso8601(3)} pid=#{::Process.pid} tid=#{tid} #{format_context} #{severity}: #{message}\n"
+          "#{LoggingUtils::COLORS[severity]} #{time.utc.iso8601(3)} pid=#{::Process.pid} tid=#{tid}#{format_context}: #{message}\n"
         end
       end
 
       class WithoutTimestamp < Pretty
         def call(severity, time, program_name, message)
-          "pid=#{::Process.pid} tid=#{tid} #{format_context} #{severity}: #{message}\n"
+          "#{LoggingUtils::COLORS[severity]} pid=#{::Process.pid} tid=#{tid} #{format_context}: #{message}\n"
         end
       end
 
