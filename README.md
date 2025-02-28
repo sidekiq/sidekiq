@@ -13,7 +13,7 @@ same process. Sidekiq can be used by any Ruby application.
 Requirements
 -----------------
 
-- Redis: Redis 7.2+, Valkey 7.2+ or Dragonfly 1.13+
+- Redis: Redis 7.2+, Valkey 7.2+ or Dragonfly 1.27+
 - Ruby: MRI 3.2+ or JRuby 9.4+.
 
 Sidekiq 8.0 supports Rails and Active Job 7.0+.
