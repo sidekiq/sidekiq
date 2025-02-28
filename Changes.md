@@ -2,6 +2,12 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+7.3.10
+----------
+
+- Deprecate Redis :password as a String to avoid log disclosure. [#6625]
+  Use a Proc instead: `config.redis = { password: ->(username) { "password" } }`
+
 7.3.9
 ----------
 
