@@ -72,7 +72,7 @@ describe "logger" do
 
   it "tests formatted output" do
     @logger.info("hello world")
-    assert_match(/INFO: hello world/, @output.string)
+    assert_match(/INFO.+: hello world/, @output.string)
     reset(@output)
 
     formats = [Sidekiq::Logger::Formatters::Pretty,

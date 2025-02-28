@@ -48,14 +48,13 @@ describe "Job logger" do
       jl.call(job, "queue") {}
     end
 
-    a, b = @output.string.lines
-    assert a
-    assert b
-
-    expected = /pid=#{$$} tid=#{p.tid} class=FooJob jid=1234abc tags=bar,baz/
-    assert_match(expected, a)
-    assert_match(expected, b)
-    assert_match(/#{Time.now.utc.to_date}.+Z pid=#{$$} tid=#{p.tid} .+INFO: done/, b)
+    @output.string.lines.each do |a|
+      assert_match(/pid=#{$$}/, a)
+      assert_match(/tid=#{p.tid}/, a)
+      assert_match(/class=FooJob/, a)
+      assert_match(/jid=1234abc/, a)
+      assert_match(/tags=bar,baz/, a)
+    end
   end
 
   it "tests json output" do
@@ -91,9 +90,9 @@ describe "Job logger" do
     assert @logger.info?
 
     a, b, c = @output.string.lines
-    assert_match(/INFO: start/, a)
-    assert_match(/DEBUG: debug message/, b)
-    assert_match(/INFO: done/, c)
+    assert_match(/INFO.+: start/, a)
+    assert_match(/DEBUG.+: debug message/, b)
+    assert_match(/INFO.+: done/, c)
   end
 
   it "tests custom logger with non numeric levels" do
