@@ -26,9 +26,16 @@ HEAD / main
 - Job tags now allow custom CSS display [#6595]
 - The Web UI's language picker now shows options in the native language
 - Remove global variable usage within the codebase
+- Colorize and adjust logging for easier reading
 - Adjust Sidekiq's default thread priority to -1 for a 50ms timeslice.
   This can help avoid TimeoutErrors when Sidekiq is overloaded. [#6543]
-- Support: Redis 7.2+, Ruby 3.2+, Rails 7.0+
+- Support: (Dragonfly 1.27+, Valkey 7.2+, Redis 7.2+), Ruby 3.2+, Rails 7.0+
+
+7.3.10
+----------
+
+- Deprecate Redis :password as a String to avoid log disclosure. [#6625]
+  Use a Proc instead: `config.redis = { password: ->(username) { "password" } }`
 
 7.3.9
 ----------
