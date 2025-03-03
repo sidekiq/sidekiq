@@ -5,8 +5,9 @@
 7.3.10
 ----------
 
-- Deprecate Redis :password as a String to avoid log disclosure. [#6625]
-  Use a Proc instead: `config.redis = { password: ->(username) { "password" } }`
+- Allow Redis :password as a Proc [#6625]
+  `config.redis = { password: ->(username) { "password" } }`
+- Bump required redis-client version to 0.23
 
 7.3.9
 ----------
