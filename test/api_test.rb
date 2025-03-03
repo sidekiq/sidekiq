@@ -848,7 +848,7 @@ def add_profile(count, token, jid)
   @cfg.redis do |conn|
     conn.multi do |m|
       m.zadd("profiles", Time.now.to_f + 60, key)
-      m.hset(key, rundata.merge(data: Base64.decode64(FAKE_DATA)))
+      m.hset(key, rundata.merge(data: FAKE_DATA.unpack1("m")))
       m.expire(key, 60)
     end
   end

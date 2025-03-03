@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "base64"
 require "sidekiq/paginator"
 require "sidekiq/web/helpers"
 
@@ -368,7 +367,8 @@ module Sidekiq
             {"Accept" => "application/vnd.firefox-profiler+json;version=1.0",
              "User-Agent" => "Sidekiq #{Sidekiq::VERSION} job profiler"})
           # https://raw.githubusercontent.com/firefox-devtools/profiler-server/master/tools/decode_jwt_payload.py
-          sid = Sidekiq.load_json(Base64.decode64(resp.body.split(".")[1]))["profileToken"]
+          rawjson = resp.body.split(".")[1].unpack1("m")
+          sid = Sidekiq.load_json(rawjson)["profileToken"]
           Sidekiq.redis { |c| c.hset(key, "sid", sid) }
         end
         url = config[:profile_view_url] % sid

@@ -30,6 +30,7 @@ HEAD / main
 - Adjust Sidekiq's default thread priority to -1 for a 50ms timeslice.
   This can help avoid TimeoutErrors when Sidekiq is overloaded. [#6543]
 - Use `Logger#with_level`, remove Sidekiq's custom impl
+- Remove `base64` gem dependency
 - Support: (Dragonfly 1.27+, Valkey 7.2+, Redis 7.2+), Ruby 3.2+, Rails 7.0+
 
 7.3.10
