@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Sidekiq
-  VERSION = "8.0.0.beta2"
+  VERSION = "8.0.0"
   MAJOR = 8
 
   def self.gem_version
