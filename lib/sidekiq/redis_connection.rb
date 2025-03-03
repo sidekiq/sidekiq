@@ -10,6 +10,8 @@ module Sidekiq
       def create(options = {})
         symbolized_options = deep_symbolize_keys(options)
         symbolized_options[:url] ||= determine_redis_provider
+        symbolized_options[:password] = wrap(symbolized_options[:password]) if symbolized_options.key?(:password)
+        symbolized_options[:sentinel_password] = wrap(symbolized_options[:sentinel_password]) if symbolized_options.key?(:sentinel_password)
 
         logger = symbolized_options.delete(:logger)
         logger&.info { "Sidekiq #{Sidekiq::VERSION} connecting to Redis with options #{scrub(symbolized_options)}" }
@@ -18,17 +20,6 @@ module Sidekiq
 
         safe = !!symbolized_options.delete(:cluster_safe)
         raise ":nodes not allowed, Sidekiq is not safe to run on Redis Cluster" if !safe && symbolized_options.key?(:nodes)
-
-        pwd = symbolized_options[:password]
-        if pwd.is_a?(String)
-          logger&.warn {
-            "\nDEPRECATION: The :password option in your Redis configuration should change from String to Proc, see issue sidekiq/sidekiq#6625" \
-            "\nOld:  config.redis = { password: 'mypassword' }" \
-            "\nNew:  config.redis = { password: ->(username) { 'mypassword' } }" \
-            "\nThis will ensure your password is not logged in the future."
-          }
-          symbolized_options[:password] = ->(_) { pwd }
-        end
 
         size = symbolized_options.delete(:size) || 5
         pool_timeout = symbolized_options.delete(:pool_timeout) || 1
@@ -49,6 +40,15 @@ module Sidekiq
 
       private
 
+      # Wrap hard-coded passwords in a Proc to avoid logging the value
+      def wrap(pwd)
+        if pwd.is_a?(String)
+          ->(username) { pwd }
+        else
+          pwd
+        end
+      end
+
       def deep_symbolize_keys(object)
         case object
         when Hash
@@ -68,14 +68,14 @@ module Sidekiq
         # Deep clone so we can muck with these options all we want and exclude
         # params from dump-and-load that may contain objects that Marshal is
         # unable to safely dump.
-        keys = options.keys - [:logger, :ssl_params, :password]
+        keys = options.keys - [:logger, :ssl_params, :password, :sentinel_password]
         scrubbed_options = Marshal.load(Marshal.dump(options.slice(*keys)))
         if scrubbed_options[:url] && (uri = URI.parse(scrubbed_options[:url])) && uri.password
           uri.password = redacted
           scrubbed_options[:url] = uri.to_s
         end
         scrubbed_options[:password] = redacted if options.key?(:password)
-        scrubbed_options[:sentinel_password] = redacted if scrubbed_options[:sentinel_password]
+        scrubbed_options[:sentinel_password] = redacted if options.key?(:sentinel_password)
         scrubbed_options[:sentinels]&.each do |sentinel|
           if sentinel.is_a?(String)
             if (uri = URI(sentinel)) && uri.password
