@@ -22,67 +22,15 @@ module Sidekiq
     end
   end
 
-  module LoggingUtils
-    LEVELS = {
-      "debug" => 0,
-      "info" => 1,
-      "warn" => 2,
-      "error" => 3,
-      "fatal" => 4
-    }
-    COLORS = {
-      "DEBUG" => "\e[1;32mDEBUG\e[0m", # green
-      "INFO" => "\e[1;34mINFO \e[0m", # blue
-      "WARN" => "\e[1;33mWARN \e[0m", # yellow
-      "ERROR" => "\e[1;31mERROR\e[0m", # red
-      "FATAL" => "\e[1;35mFATAL\e[0m" # pink
-    }
-    LEVELS.default_proc = proc do |_, level|
-      puts("Invalid log level: #{level.inspect}")
-      nil
-    end
-
-    LEVELS.each do |level, numeric_level|
-      define_method(:"#{level}?") do
-        local_level.nil? ? super() : local_level <= numeric_level
-      end
-    end
-
-    def local_level
-      Thread.current[:sidekiq_log_level]
-    end
-
-    def local_level=(level)
-      case level
-      when Integer
-        Thread.current[:sidekiq_log_level] = level
-      when Symbol, String
-        Thread.current[:sidekiq_log_level] = LEVELS[level.to_s]
-      when nil
-        Thread.current[:sidekiq_log_level] = nil
-      else
-        raise ArgumentError, "Invalid log level: #{level.inspect}"
-      end
-    end
-
-    def level
-      local_level || super
-    end
-
-    # Change the thread-local level for the duration of the given block.
-    def log_at(level)
-      old_local_level = local_level
-      self.local_level = level
-      yield
-    ensure
-      self.local_level = old_local_level
-    end
-  end
-
   class Logger < ::Logger
-    include LoggingUtils
-
     module Formatters
+      COLORS = {
+        "DEBUG" => "\e[1;32mDEBUG\e[0m", # green
+        "INFO" => "\e[1;34mINFO \e[0m", # blue
+        "WARN" => "\e[1;33mWARN \e[0m", # yellow
+        "ERROR" => "\e[1;31mERROR\e[0m", # red
+        "FATAL" => "\e[1;35mFATAL\e[0m" # pink
+      }
       class Base < ::Logger::Formatter
         def tid
           Thread.current["sidekiq_tid"] ||= (Thread.current.object_id ^ ::Process.pid).to_s(36)
@@ -102,13 +50,13 @@ module Sidekiq
 
       class Pretty < Base
         def call(severity, time, program_name, message)
-          "#{LoggingUtils::COLORS[severity]} #{time.utc.iso8601(3)} pid=#{::Process.pid} tid=#{tid}#{format_context}: #{message}\n"
+          "#{Formatters::COLORS[severity]} #{time.utc.iso8601(3)} pid=#{::Process.pid} tid=#{tid}#{format_context}: #{message}\n"
         end
       end
 
       class WithoutTimestamp < Pretty
         def call(severity, time, program_name, message)
-          "#{LoggingUtils::COLORS[severity]} pid=#{::Process.pid} tid=#{tid} #{format_context}: #{message}\n"
+          "#{Formatters::COLORS[severity]} pid=#{::Process.pid} tid=#{tid} #{format_context}: #{message}\n"
         end
       end
 

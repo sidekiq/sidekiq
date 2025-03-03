@@ -27,6 +27,6 @@ Gem::Specification.new do |gem|
   gem.add_dependency "connection_pool", ">= 2.5.0"
   gem.add_dependency "rack", ">= 3.1.0"
   gem.add_dependency "json", ">= 2.9.0"
-  gem.add_dependency "logger"
+  gem.add_dependency "logger", ">= 1.6.2"
   gem.add_dependency "base64"
 end
