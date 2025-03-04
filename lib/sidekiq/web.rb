@@ -63,8 +63,7 @@ module Sidekiq
       def use(*args, &block) = @@config.middlewares << [args, block]
 
       def register(*args, **kw, &block)
-        # TODO
-        puts "`Sidekiq::Web.register` is deprecated, use `Sidekiq::Web.configure {|cfg| cfg.register(...) }`"
+        Sidekiq.logger.warn { "`Sidekiq::Web.register` is deprecated, use `Sidekiq::Web.configure {|cfg| cfg.register(...) }`" }
         @@config.register(*args, **kw, &block)
       end
     end

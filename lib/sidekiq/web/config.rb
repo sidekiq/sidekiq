@@ -14,7 +14,8 @@ module Sidekiq
     #
     # This should go in your `config/routes.rb` or similar. It
     # does not belong in your initializer since Web should not be
-    # loaded in some processes (like an actual Sidekiq process)
+    # loaded in some processes (like an actual Sidekiq process).
+    # See `examples/webui-ext` for a sample web extension.
     class Config
       extend Forwardable
 
