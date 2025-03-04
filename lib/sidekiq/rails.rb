@@ -4,17 +4,6 @@ require "sidekiq/job"
 require "rails"
 
 module Sidekiq
-  module ActiveJob
-    # @api private
-    class Wrapper
-      include Sidekiq::Job
-
-      def perform(job_data)
-        ::ActiveJob::Base.execute(job_data.merge("provider_job_id" => jid))
-      end
-    end
-  end
-
   class Rails < ::Rails::Engine
     class Reloader
       def initialize(app = ::Rails.application)
