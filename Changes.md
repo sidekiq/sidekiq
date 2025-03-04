@@ -2,7 +2,7 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD / main
+8.0.0
 ----------
 
 - **WARNING** The underlying class name for Active Jobs has changed from `ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper` to `Sidekiq::ActiveJob::Wrapper`.
