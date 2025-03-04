@@ -85,15 +85,15 @@ module Sidekiq
       end
 
       def fetch(conn, now = Time.now)
-        window = now.utc.strftime("%d-%H:%-M")
-        key = "#{@klass}-#{window}"
+        window = now.utc.strftime("%-d-%-H:%-M")
+        key = "h|#{@klass}-#{window}"
         conn.bitfield_ro(key, *FETCH)
       end
 
       def persist(conn, now = Time.now)
         buckets, @buckets = @buckets, []
-        window = now.utc.strftime("%d-%H:%-M")
-        key = "#{@klass}-#{window}"
+        window = now.utc.strftime("%-d-%-H:%-M")
+        key = "h|#{@klass}-#{window}"
         cmd = [key, "OVERFLOW", "SAT"]
         buckets.each_with_index do |counter, idx|
           val = counter.value

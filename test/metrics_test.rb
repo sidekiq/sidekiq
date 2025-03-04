@@ -102,7 +102,7 @@ describe Sidekiq::Metrics do
       end
       assert_equal 0, h.sum
       refute_nil key
-      assert_equal "App::FooJob-22-22:3", key
+      assert_equal "h|App::FooJob-22-22:3", key
 
       h = Sidekiq::Metrics::Histogram.new("App::FooJob")
       data = @config.redis { |c| h.fetch(c, fixed_time) }
