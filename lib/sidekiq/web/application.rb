@@ -49,7 +49,7 @@ module Sidekiq
       end
 
       get "/" do
-        @redis_info = redis_info.select { |k, v| REDIS_KEYS.include? k }
+        @redis_info = redis_info.slice(*REDIS_KEYS)
         days = (url_params("days") || 30).to_i
         return halt(401) if days < 1 || days > 180
 
@@ -326,7 +326,7 @@ module Sidekiq
 
       get "/stats" do
         sidekiq_stats = Sidekiq::Stats.new
-        redis_stats = redis_info.select { |k, v| REDIS_KEYS.include? k }
+        redis_stats = redis_info.slice(*REDIS_KEYS)
         json(
           sidekiq: {
             processed: sidekiq_stats.processed,
