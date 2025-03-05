@@ -15,6 +15,7 @@ HEAD (8.0)
 - Sidekiq::Batch's `created_at` is now stored as Integer milliseconds rather than a Float.
 - Sidekiq::Web internal refactoring [#6532]
 - Atomic scheduler performance tuning [#6609]
+- Discard poison pill jobs with `dead: false` [#6628]
 
 7.3.6
 ---------
