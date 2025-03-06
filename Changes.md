@@ -2,6 +2,11 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+8.0.1
+----------
+
+- Relax Redis requirement to 7.0 for compatibility with AWS and Ubuntu 24.04 LTS. [#6630]
+
 8.0.0
 ----------
 
