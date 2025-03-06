@@ -21,9 +21,6 @@ end
 
 describe Sidekiq::Web do
   include Rack::Test::Methods
-  def session_secret
-    "v3rys3cr31v3rys3cr31v3rys3cr31v3rys3cr31v3rys3cr31v3rys3cr31mike!"
-  end
 
   def app
     @app ||= Sidekiq::Web.new
