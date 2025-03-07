@@ -20,7 +20,7 @@ jobs:
       matrix:
         ruby: ["ruby-3.2", "ruby-3.3", "ruby-3.4"]
         database: [
-          { image: "redis", version: "7.2.4" }, # last BSD-licensed version
+          { image: "redis", version: "7.0.10" },
           { image: "valkey/valkey", version: "8" },
           { image: "docker.dragonflydb.io/dragonflydb/dragonfly", version: "v1.27.0" },
           { image: "docker.dragonflydb.io/dragonflydb/dragonfly", version: "latest" }
