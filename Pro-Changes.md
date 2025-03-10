@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD (8.0)
+8.0.0
 ---------
 
 - **BREAKING** All Pro/Enterprise Statsd metrics are now prefixed with `sidekiq.`. [#6337]
