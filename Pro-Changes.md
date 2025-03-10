@@ -7,6 +7,8 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 8.0.0
 ---------
 
+- Please read the **[upgrade notes](https://github.com/sidekiq/sidekiq/blob/main/docs/Pro-8.0-Upgrade.md)** before upgrading major versions.
+  The Sidekiq::Batch data model has changed and requires you to run the latest 7.3.x to ensure data compatibility.
 - **BREAKING** All Pro/Enterprise Statsd metrics are now prefixed with `sidekiq.`. [#6337]
   Customers are advised to remove `namespace: 'sidekiq'` or similar from their Statsd configration.
 - **BREAKING** Batch's `failure_info` structure and API have been replaced
