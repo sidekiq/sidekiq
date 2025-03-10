@@ -15,6 +15,7 @@ Sidekiq.configure_server do |config|
     # RubyProf::CallTreePrinter.new(result).print(f, :min_percent => 1)
     # end
   end
+  config.on(:exit) {}
 end
 
 class EmptyJob
