@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-HEAD (8.0)
+8.0.0
 ---------
 
 - Move from SHA1 to SHA256 internally. Unique locks are now SHA256 but only take 10% more
