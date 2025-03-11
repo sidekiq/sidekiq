@@ -7,6 +7,9 @@ Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 8.0.0
 ---------
 
+- Please note the [upgrade docs](https://github.com/sidekiq/sidekiq/blob/main/docs/Pro-8.0-Upgrade.md) if you use
+Sidekiq Batches.
+  You need to run Sidekiq Pro 7.3.x long enough to ensure all persistent batch data in Redis is compatible with Batch 8.0.
 - Move from SHA1 to SHA256 internally. Unique locks are now SHA256 but only take 10% more
   space due to a more efficient encoding (base64 vs hex).
 - Sidekiq::Web internal refactoring [#6532]

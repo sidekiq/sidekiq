@@ -8,7 +8,17 @@ Sidekiq Pro 8.0 contains some breaking changes which refactor internals, remove 
 
 Portions of Sidekiq::Batch have been refactored to use modern Redis commands and structures.
 This change in data model means that customers should upgrade to 7.3.x and run that version for several weeks to ensure no Batch data remains in Redis before upgrading to 8.0.
+
 If you have an empty Batches page, you're safe to upgrade.
+If you've run for a month, you're safe to upgrade.
+If every `failinfo` key in Redis has a matching `failed` key, you're safe to upgrade.
+
+```
+% redis-cli
+127.0.0.1:6379> keys b-*-fail*
+1) "b-VWYf44jVYsZARw-failinfo"
+2) "b-VWYf44jVYsZARw-failed"
+```
 
 Batches no longer store the error backtraces associated with their jobs, as these error backtraces are redundant with the job retry and can take a lot of space within Redis.
 
