@@ -4,5 +4,6 @@ parallel: true
 ignore:
   - '**/*':
     - Lint/RescueException
+    - Lint/UselessConstantScoping
   - 'test/**/*':
     - Style/GlobalVars
