@@ -2,6 +2,11 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+HEAD
+----------
+
+- Metrics page crashes with Rack 3.1+ [#6646]
+
 8.0.1
 ----------
 
