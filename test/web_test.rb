@@ -23,7 +23,7 @@ describe Sidekiq::Web do
   include Rack::Test::Methods
 
   def app
-    @app ||= Sidekiq::Web.new
+    @app ||= Rack::Lint.new(Sidekiq::Web.new)
   end
 
   def job_params(job, score)
@@ -81,7 +81,7 @@ describe Sidekiq::Web do
     assert_equal 1, Sidekiq::Queue.new.size
 
     head "/", {}
-    assert_equal "1", last_response.body.to_s
+    assert_equal "", last_response.body.to_s
   end
 
   describe "busy" do

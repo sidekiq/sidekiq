@@ -30,16 +30,16 @@ module Sidekiq
 
       # external redirect
       def redirect_to(url)
-        throw :halt, [302, {"Location" => url}, []]
+        throw :halt, [302, {"location" => url}, []]
       end
 
       def header(key, value)
-        env["response_headers"][key] = value
+        env["response_headers"][key] = value.to_s
       end
 
       # internal redirect
       def redirect(location)
-        throw :halt, [302, {"Location" => "#{request.base_url}#{location}"}, []]
+        throw :halt, [302, {"location" => "#{request.base_url}#{location}"}, []]
       end
 
       def reload_page

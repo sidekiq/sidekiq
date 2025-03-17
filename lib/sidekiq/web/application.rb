@@ -43,9 +43,9 @@ module Sidekiq
 
       head "/" do
         # HEAD / is the cheapest heartbeat possible,
-        # it hits Redis to ensure connectivity and returns
-        # the size of the default queue
-        Sidekiq.redis { |c| c.llen("queue:default") }.to_s
+        # it hits Redis to ensure connectivity
+        _ = Sidekiq.redis { |c| c.llen("queue:default") }
+        ""
       end
 
       get "/" do
