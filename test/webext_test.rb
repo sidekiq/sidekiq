@@ -24,7 +24,7 @@ describe Sidekiq::Web::Config do
   include Rack::Test::Methods
 
   def app
-    @app ||= Sidekiq::Web.new
+    @app ||= Rack::Lint.new(Sidekiq::Web.new)
   end
 
   before do
