@@ -68,6 +68,7 @@ module Sidekiq
       stoppers.each(&:join)
 
       clear_heartbeat
+      fire_event(:exit, reverse: true)
     end
 
     def stopping?

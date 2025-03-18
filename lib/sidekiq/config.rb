@@ -27,6 +27,7 @@ module Sidekiq
         startup: [],
         quiet: [],
         shutdown: [],
+        exit: [],
         # triggers when we fire the first heartbeat on startup OR repairing a network partition
         heartbeat: [],
         # triggers on EVERY heartbeat call, every 10 seconds
@@ -258,7 +259,7 @@ module Sidekiq
     end
 
     # Register a block to run at a point in the Sidekiq lifecycle.
-    # :startup, :quiet or :shutdown are valid events.
+    # :startup, :quiet, :shutdown, or :exit are valid events.
     #
     #   Sidekiq.configure_server do |config|
     #     config.on(:shutdown) do
