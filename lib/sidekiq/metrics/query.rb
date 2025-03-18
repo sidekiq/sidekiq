@@ -101,9 +101,9 @@ module Sidekiq
         time = @time
         @pool.with do |conn|
           redis_results.each do |(ms, p, f)|
-            result.job_results[klass].add_metric "ms", time, ms.to_i if ms
-            result.job_results[klass].add_metric "p", time, p.to_i if p
-            result.job_results[klass].add_metric "f", time, f.to_i if f
+            result.job_results[klass].add_metric "ms", time, ms.to_i
+            result.job_results[klass].add_metric "p", time, p.to_i
+            result.job_results[klass].add_metric "f", time, f.to_i
             result.job_results[klass].add_hist time, Histogram.new(klass).fetch(conn, time).reverse if minutes
             time -= stride
           end
