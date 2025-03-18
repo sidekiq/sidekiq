@@ -5,6 +5,7 @@
 HEAD
 ----------
 
+- Add `on(:exit)` event to run code right before the Sidekiq process exits [#6637]
 - Metrics page crashes with Rack 3.1+ [#6646]
 
 8.0.1
