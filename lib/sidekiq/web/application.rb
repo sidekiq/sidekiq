@@ -240,8 +240,6 @@ module Sidekiq
       end
 
       post "/retries" do
-        route_params("mike")
-        url_params(:mike)
         redirect(request.path) unless url_params("key")
 
         url_params("key").each do |key|
