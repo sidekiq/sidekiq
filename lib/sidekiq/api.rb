@@ -1166,8 +1166,8 @@ module Sidekiq
   #    works.each do |process_id, thread_id, work|
   #      # process_id is a unique identifier per Sidekiq process
   #      # thread_id is a unique identifier per thread
-  #      # work is a Hash which looks like:
-  #      # { 'queue' => name, 'run_at' => timestamp, 'payload' => job_hash }
+  #      # work is a `Sidekiq::Work` instance that has the following accessor methods.
+  #      # [work.queue, work.run_at, work.payload]
   #      # run_at is an epoch Integer.
   #    end
   #
