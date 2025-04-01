@@ -154,7 +154,7 @@ module Sidekiq
       Thread.current[:sidekiq_redis_pool] || Thread.current[:sidekiq_capsule]&.redis_pool || local_redis_pool
     end
 
-    private def local_redis_pool
+    def local_redis_pool
       # this is our internal client/housekeeping pool. each capsule has its
       # own pool for executing threads.
       @redis ||= new_redis_pool(10, "internal")
