@@ -145,6 +145,11 @@ module Sidekiq
       @redis_config = @redis_config.merge(hash)
     end
 
+    def reap_idle_redis_connections(timeout = 300)
+      self[:reap_connections] = timeout
+    end
+    alias_method :reap, :reap_idle_redis_connections
+
     def redis_pool
       Thread.current[:sidekiq_redis_pool] || Thread.current[:sidekiq_capsule]&.redis_pool || local_redis_pool
     end

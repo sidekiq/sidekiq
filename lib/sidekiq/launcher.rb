@@ -142,6 +142,12 @@ module Sidekiq
       key = identity
       fails = procd = 0
 
+      idle = config[:reap_connections]
+      if idle
+        @config.capsules.values.each {|cap| cap.local_redis_pool.reap(idle, &:close) }
+        @config.send(:local_redis_pool).reap(idle, &:close)
+      end
+
       begin
         flush_stats
 
