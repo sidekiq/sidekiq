@@ -144,7 +144,7 @@ module Sidekiq
 
       idle = config[:reap_connections]
       if idle
-        config.capsules.values.each {|cap| cap.local_redis_pool.reap(idle, &:close) }
+        config.capsules.values.each { |cap| cap.local_redis_pool.reap(idle, &:close) }
         config.local_redis_pool.reap(idle, &:close)
       end
 
