@@ -146,4 +146,4 @@ module Sidekiq
   class Shutdown < Interrupt; end
 end
 
-require "sidekiq/rails" if defined?(::Rails::Engine)
+require "sidekiq/rails"
