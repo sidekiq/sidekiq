@@ -35,6 +35,7 @@ it:
   Jobs: Lavori
   Kill: Uccidere
   KillAll: Uccidere tutti
+  Language: Lingua
   LastRetry: Ultimo tentativo
   Latency: Latenza
   LivePoll: Live poll
@@ -54,6 +55,7 @@ it:
   PeakMemoryUsage: Memoria utilizzata (max.)
   Plugins: Plugins
   PollingInterval: Intervallo di polling
+  PollingIntervalMilliseconds: Intervallo di polling in millisecondi
   Process: Processo
   Processed: Processato
   Processes: Processi
@@ -99,3 +101,8 @@ it:
   NoJobMetricsFound: Metriche recenti di lavoro non trovate
   Filter: Filtro
   AnyJobContent: Qualsiasi contenuto di lavoro
+  Profiles: Profili
+  Data: Dati
+  View: Vista
+  Token: Token
+  ElapsedTime: Tempo Trascorso
