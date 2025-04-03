@@ -1,25 +1,13 @@
 # frozen_string_literal: true
 
 require "sidekiq/job"
+require_relative "../active_job/queue_adapters/sidekiq_adapter"
 
 module Sidekiq
-  if defined?(::ActiveJob)
-    # By including the Options module, we allow AJs to directly control sidekiq features
-    # via the *sidekiq_options* class method and, for instance, not use AJ's retry system.
-    # AJ retries don't show up in the Sidekiq UI Retries tab, don't save any error data, can't be
-    # manually retried, don't automatically die, etc.
-    #
-    #   class SomeJob < ActiveJob::Base
-    #     queue_as :default
-    #     sidekiq_options retry: 3, backtrace: 10
-    #     def perform
-    #     end
-    #   end
-    require_relative "../active_job/queue_adapters/sidekiq_adapter"
-    ::ActiveJob::Base.include ::Sidekiq::Job::Options unless ::ActiveJob::Base.respond_to?(:sidekiq_options)
-  end
+  begin
+    gem "railties", ">= 7.0"
+    require "rails"
 
-  if defined?(::Rails::Engine)
     class Rails < ::Rails::Engine
       class Reloader
         def initialize(app = ::Rails.application)
@@ -27,7 +15,7 @@ module Sidekiq
         end
 
         def call
-          params = (::Rails::VERSION::STRING >= "7.1") ? { source: "job.sidekiq" } : {}
+          params = (::Rails::VERSION::STRING >= "7.1") ? {source: "job.sidekiq"} : {}
           @app.reloader.wrap(**params) do
             yield
           end
@@ -38,7 +26,7 @@ module Sidekiq
         end
 
         def to_hash
-          { app: @app.class.name }
+          {app: @app.class.name}
         end
       end
 
@@ -68,5 +56,7 @@ module Sidekiq
         end
       end
     end
+  rescue Gem::LoadError
+    # Rails not available or version requirement not met
   end
 end
