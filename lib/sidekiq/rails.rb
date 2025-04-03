@@ -17,16 +17,6 @@ module Sidekiq
     #   end
     require_relative "../active_job/queue_adapters/sidekiq_adapter"
     ::ActiveJob::Base.include ::Sidekiq::Job::Options unless ::ActiveJob::Base.respond_to?(:sidekiq_options)
-    module ActiveJob
-      # @api private
-      class Wrapper
-        include Sidekiq::Job
-
-        def perform(job_data)
-          ::ActiveJob::Base.execute(job_data.merge("provider_job_id" => jid))
-        end
-      end
-    end
   end
 
   if defined?(::Rails::Engine)
