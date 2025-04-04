@@ -15,6 +15,11 @@ Sidekiq Batches.
 - Sidekiq::Web internal refactoring [#6532]
 - Limiter factory methods now raise ArgumentError if you pass them a block [#6512]
 
+7-x
+---------
+
+- Backport leaky limiter fix for #6641
+
 7.3.4
 ---------
 
