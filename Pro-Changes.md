@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+8.0.1
 ---------
 
 - Standardize batch callback timestamps as integer millis [#6644]
