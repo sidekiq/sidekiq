@@ -19,6 +19,6 @@ gem "after_commit_everywhere"
 
 gem "sidekiq-redis_info", path: "../examples/webui-ext"
 
-gem "vernier", "~> 1.2"
+gem "vernier"
 gem "debug"
 gem "msgpack"
