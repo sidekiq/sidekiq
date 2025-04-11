@@ -13,7 +13,7 @@ module Sidekiq
     include Sidekiq::Component
     def initialize(config)
       @config = config
-      @profiles_dir = ENV.fetch('PROFILES_DIR') { Dir.tmpdir }
+      @vernier_output_dir = ENV.fetch('VERNIER_OUTPUT_DIR') { Dir.tmpdir }
     end
 
     def call(job, &block)
@@ -30,7 +30,10 @@ module Sidekiq
         type: type,
         jid: jid,
         # .gz extension tells Vernier to compress the data
-        filename: File.join(@profiles_dir, "#{token}-#{type}-#{jid}-#{started_at.strftime("%Y%m%d-%H%M%S")}.json.gz")
+        filename: File.join(
+          @vernier_output_dir,
+          "#{token}-#{type}-#{jid}-#{started_at.strftime("%Y%m%d-%H%M%S")}.json.gz"
+        )
       }
       profiler_options = profiler_options(job, rundata)
 
