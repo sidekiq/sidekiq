@@ -17,6 +17,7 @@
     <main id="page">
       <div class="container">
         <%= erb :_summary %>
+        <% if flash? %><p class="flash"><%= get_flash %></p><% end %>
         <%= yield %>
       </div>
     </main>

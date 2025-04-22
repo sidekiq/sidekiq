@@ -70,6 +70,25 @@ module Sidekiq
         env["rack.session"]
       end
 
+      def logger
+        Sidekiq.logger
+      end
+
+      # flash { "Some message to show on redirect" }
+      def flash
+        msg = yield
+        logger.info msg
+        session[:flash] = msg
+      end
+
+      def flash?
+        session&.[](:flash)
+      end
+
+      def get_flash
+        @flash ||= session.delete(:flash)
+      end
+
       def erb(content, options = {})
         if content.is_a? Symbol
           unless respond_to?(:"_erb_#{content}")
