@@ -6,6 +6,7 @@ HEAD
 ----------
 
 - Rework Rails integration [#6669]
+- Implement flash messages for the Web UI [#6675]
 
 8.0.2
 ----------

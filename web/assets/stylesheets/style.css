@@ -748,3 +748,10 @@ body > footer .nav {
 .w-50 {
   width: 50%;
 }
+
+.flash {
+  width: 100%;
+  text-align: center;
+  padding: 20px;
+  background: var(--color-success);
+}
