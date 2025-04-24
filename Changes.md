@@ -5,6 +5,7 @@
 HEAD
 ----------
 
+- Configure Vernier output directory [#6674]
 - Rework Rails integration [#6669]
 - Implement flash messages for the Web UI [#6675]
 

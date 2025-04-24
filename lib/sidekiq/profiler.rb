@@ -13,7 +13,7 @@ module Sidekiq
     include Sidekiq::Component
     def initialize(config)
       @config = config
-      @vernier_output_dir = ENV.fetch('VERNIER_OUTPUT_DIR') { Dir.tmpdir }
+      @vernier_output_dir = ENV.fetch("VERNIER_OUTPUT_DIR") { Dir.tmpdir }
     end
 
     def call(job, &block)
@@ -63,10 +63,10 @@ module Sidekiq
     private
 
     def profiler_options(job, rundata)
-      profiler_options = (job['profiler_options'] || {}).transform_keys(&:to_sym)
+      profiler_options = (job["profiler_options"] || {}).transform_keys(&:to_sym)
       profiler_options[:mode] = profiler_options[:mode].to_sym if profiler_options[:mode]
 
-      DEFAULT_OPTIONS.merge(profiler_options, { out: rundata[:filename] })
+      DEFAULT_OPTIONS.merge(profiler_options, {out: rundata[:filename]})
     end
   end
 end
