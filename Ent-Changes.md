@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+8.0.1
+---------
+
+- The Web UI can now pause, unpause and manually enqueue periodic jobs. [#6675]
+
 8.0.0
 ---------
 
