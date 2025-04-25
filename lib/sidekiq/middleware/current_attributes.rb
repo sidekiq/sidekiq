@@ -71,11 +71,14 @@ module Sidekiq
         retried = false
 
         begin
+          set_succeeded = false
           klass.set(attrs) do
+            set_succeeded = true
             wrap(klass_attrs, &block)
           end
-        rescue NoMethodError
-          raise if retried
+        rescue NoMethodError => e
+          # Don't retry if the no method error didn't come from current attributes
+          raise if retried || set_succeeded
 
           # It is possible that the `CurrentAttributes` definition
           # was changed before the job started processing.
