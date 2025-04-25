@@ -360,10 +360,16 @@ module Sidekiq
         unless sid
           require "net/http"
           data = Sidekiq.redis { |c| c.hget(key, "data") }
-          resp = Net::HTTP.post(URI(store),
-            data,
-            {"Accept" => "application/vnd.firefox-profiler+json;version=1.0",
-             "User-Agent" => "Sidekiq #{Sidekiq::VERSION} job profiler"})
+
+          store_uri = URI(store)  
+          http = Net::HTTP.new(store_uri.host, store_uri.port)
+          http.use_ssl = store_uri.scheme == 'https'
+          request = Net::HTTP::Post.new(store_uri.request_uri)
+          request.body = data
+          request["Accept"] = "application/vnd.firefox-profiler+json;version=1.0"
+          request["User-Agent"] = "Sidekiq #{Sidekiq::VERSION} job profiler"
+
+          resp = http.request(request)
           # https://raw.githubusercontent.com/firefox-devtools/profiler-server/master/tools/decode_jwt_payload.py
           rawjson = resp.body.split(".")[1].unpack1("m")
           sid = Sidekiq.load_json(rawjson)["profileToken"]
