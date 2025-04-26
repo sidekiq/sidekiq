@@ -124,6 +124,23 @@ describe "Current attributes" do
     end
   end
 
+  it "doesn't swallow errors raised in the job" do
+    cm = Sidekiq::CurrentAttributes::Load.new({
+      "cattr" => "Myapp::Current"
+    })
+
+    job = {"cattr" => {"user_id" => 123}}
+    assert_raises do
+      first_time = true
+      cm.call(nil, job, nil) do
+        if first_time
+          first_time = false
+          raise nil.this_method_is_undefined
+        end
+      end
+    end
+  end
+
   private
 
   def with_context(strklass, attr, value)
