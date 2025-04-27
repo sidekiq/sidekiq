@@ -57,7 +57,7 @@ module Sidekiq
         @locales = LOCALES
         @views = VIEWS
         @tabs = DEFAULT_TABS.dup
-        @middlewares = [Sidekiq::Web::CsrfProtection]
+        @middlewares = []
         @custom_job_info_rows = []
       end
 

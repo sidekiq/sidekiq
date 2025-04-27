@@ -109,6 +109,7 @@ module Sidekiq
           cascade: true,
           header_rules: rules
         m.each { |middleware, block| use(*middleware, &block) }
+        use CsrfProtection unless $TESTING # rubocop:disable Style/GlobalVars
         run Sidekiq::Web::Application.new(self.class)
       end
     end
