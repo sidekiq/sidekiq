@@ -361,9 +361,9 @@ module Sidekiq
           require "net/http"
           data = Sidekiq.redis { |c| c.hget(key, "data") }
 
-          store_uri = URI(store)  
+          store_uri = URI(store)
           http = Net::HTTP.new(store_uri.host, store_uri.port)
-          http.use_ssl = store_uri.scheme == 'https'
+          http.use_ssl = store_uri.scheme == "https"
           request = Net::HTTP::Post.new(store_uri.request_uri)
           request.body = data
           request["Accept"] = "application/vnd.firefox-profiler+json;version=1.0"

@@ -76,7 +76,7 @@ module Sidekiq
             set_succeeded = true
             wrap(klass_attrs, &block)
           end
-        rescue NoMethodError => e
+        rescue NoMethodError
           # Don't retry if the no method error didn't come from current attributes
           raise if retried || set_succeeded
 
