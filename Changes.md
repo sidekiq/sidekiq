@@ -5,6 +5,13 @@
 HEAD
 ----------
 
+- Adjust CSRF middleware ordering [#6688]
+- Support proxies when POSTing profiles to profiler.firefox.com [#6687]
+- Dont swallow NoMethodErrors in CurrentAttributes [#6685]
+
+8.0.3
+----------
+
 - Configure Vernier output directory [#6674]
 - Rework Rails integration [#6669]
 - Implement flash messages for the Web UI [#6675]
