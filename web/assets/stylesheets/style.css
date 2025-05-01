@@ -437,7 +437,10 @@ article .count {
 }
 
 /* table */
-.table_container { overflow-x: auto; }
+.table_container {
+  overflow-x: auto;
+  margin-bottom: var(--space-2x);
+}
 
 .table_container + form,
 .table_container + input,
