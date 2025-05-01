@@ -69,7 +69,7 @@ body {
 
 .container {
   margin: 0 auto;
-  max-width: 1440px;
+  /* max-width: 1440px; */
   padding: var(--space-2x);
 }
 

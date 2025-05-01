@@ -5,6 +5,7 @@
 HEAD
 ----------
 
+- Remove fixed-width in Web UI [#6686]
 - Adjust CSRF middleware ordering [#6688]
 - Support proxies when POSTing profiles to profiler.firefox.com [#6687]
 - Dont swallow NoMethodErrors in CurrentAttributes [#6685]
