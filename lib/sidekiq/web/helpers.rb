@@ -2,7 +2,7 @@
 
 require "uri"
 require "yaml"
-require "cgi"
+require "cgi/escape"
 
 module Sidekiq
   # These methods are available to pages within the Web UI and UI extensions.
