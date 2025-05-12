@@ -1,6 +1,6 @@
 # Welcome to Sidekiq Enterprise 8.0
 
-Sidekiq Pro 8.0 contains some breaking changes which refactor internals, remove deprecated features and update required dependency versions.
+Sidekiq Enterprise 8.0 contains some breaking changes which refactor internals, remove deprecated features and update required dependency versions. See also [[8.0-Upgrade.md]] and [[Pro-8.0-Upgrade.md]].
 
 ## What's New
 
