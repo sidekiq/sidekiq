@@ -210,6 +210,21 @@ describe Sidekiq::Job::Iterable do
     assert_equal 1, ArrayIterableJob.on_complete_called
   end
 
+  it "flushes iteration state and resumes after failure" do
+    jid = FailedIterableJob.perform_async
+
+    begin
+      iterate_exact_times(FailedIterableJob, nil, jid: jid)
+    rescue RuntimeError
+    end
+
+    assert_equal [10, 11, 12, 13, 14], FailedIterableJob.iterated_objects
+
+    previous_state = fetch_iteration_state(jid)
+    assert_equal 1, previous_state["ex"].to_i
+    assert_equal 5, Sidekiq.load_json(previous_state["c"])
+  end
+
   it "reschedules itself when sidekiq is stopping" do
     jid = iterate_exact_times(ArrayIterableJob, 2)
 
