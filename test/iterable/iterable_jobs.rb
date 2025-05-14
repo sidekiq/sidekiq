@@ -201,3 +201,10 @@ class LongRunningIterableJob < ArrayIterableJob
     sleep(0.01)
   end
 end
+
+class FailedIterableJob < ArrayIterableJob
+  def each_iteration(number)
+    raise if number == 15
+    super
+  end
+end

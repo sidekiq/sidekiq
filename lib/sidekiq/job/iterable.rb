@@ -221,6 +221,9 @@ module Sidekiq
           verify_iteration_time(time_limit, object) do
             around_iteration do
               each_iteration(object, *arguments)
+            rescue Exception
+              flush_state
+              raise
             end
           end
         end
