@@ -17,7 +17,7 @@ begin
     end
   end
 
-  unless ActiveJob::Base.respond_to?(:sidekiq_options)
+  ActiveSupport.on_load(:active_job) do
     # By including the Options module, we allow AJs to directly control sidekiq features
     # via the *sidekiq_options* class method and, for instance, not use AJ's retry system.
     # AJ retries don't show up in the Sidekiq UI Retries tab, don't save any error data, can't be
@@ -29,7 +29,7 @@ begin
     #     def perform
     #     end
     #   end
-    ActiveJob::Base.include Sidekiq::Job::Options
+    include Sidekiq::Job::Options unless respond_to?(:sidekiq_options)
   end
 
   # Patch the ActiveJob module
