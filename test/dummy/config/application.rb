@@ -8,6 +8,7 @@ require "action_controller/railtie"
 require "action_mailer/railtie"
 require "action_view/railtie"
 require "rails/test_unit/railtie"
+require "sidekiq"
 
 module Dummy
   class Application < Rails::Application
@@ -16,8 +17,5 @@ module Dummy
     config.load_defaults "7.0"
     config.active_job.queue_adapter = :sidekiq
     config.active_support.to_time_preserves_timezone = :zone # 8.0 deprecation
-
-    # Do not print logs when running tests.
-    Sidekiq.logger.level = :fatal
   end
 end

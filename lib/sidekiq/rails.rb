@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
-require "sidekiq/job"
-require_relative "../active_job/queue_adapters/sidekiq_adapter"
-
 module Sidekiq
   begin
     gem "railties", ">= 7.0"
     require "rails"
+    require "sidekiq/job"
+    require_relative "../active_job/queue_adapters/sidekiq_adapter"
 
     class Rails < ::Rails::Engine
       class Reloader
