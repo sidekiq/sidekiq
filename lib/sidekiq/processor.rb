@@ -4,6 +4,7 @@ require "sidekiq/fetch"
 require "sidekiq/job_logger"
 require "sidekiq/job_retry"
 require "sidekiq/profiler"
+require "sidekiq/serializers"
 
 module Sidekiq
   ##
@@ -188,6 +189,7 @@ module Sidekiq
       Thread.handle_interrupt(IGNORE_SHUTDOWN_INTERRUPTS) do
         Thread.handle_interrupt(ALLOW_SHUTDOWN_INTERRUPTS) do
           dispatch(job_hash, queue, jobstr) do |instance|
+            job_hash = Sidekiq::Serializers.deserialize(job_hash)
             config.server_middleware.invoke(instance, job_hash, queue) do
               execute_job(instance, job_hash["args"])
             end

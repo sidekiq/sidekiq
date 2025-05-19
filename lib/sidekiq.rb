@@ -137,6 +137,10 @@ module Sidekiq
     yield default_configuration unless server?
   end
 
+  def self.serialize_as(type)
+    default_configuration.serialize_as(type)
+  end
+
   # We are shutting down Sidekiq but what about threads that
   # are working on some long job?  This error is
   # raised in jobs that have not finished within the hard
