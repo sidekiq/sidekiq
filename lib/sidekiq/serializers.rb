@@ -26,17 +26,17 @@ module Sidekiq
     end
 
     def self.deserialize(job)
-      serializer =
+      _, deserializer =
         serializers.find do |name, serializer|
           next if serializer == Sidekiq::Serializers::Basic
           serializer.valid_for_deserialization?(job)
         end
 
-      if serializer.nil?
-        serializer = Sidekiq::Serializers::Basic
+      if deserializer.nil?
+        deserializer = Sidekiq::Serializers::Basic
       end
 
-      serializer.deserialize(job)
+      deserializer.deserialize(job)
     end
   end
 end
