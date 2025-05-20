@@ -19,7 +19,7 @@ module Sidekiq
           displayer.valid_for?(job)
         end
       if displayer.nil?
-        displayer = Sidekiq::Serializers::Basic
+        displayer = Sidekiq::Displayers::Basic
       end
 
       displayer
