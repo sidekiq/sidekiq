@@ -12,6 +12,7 @@ module Sidekiq
       end
 
       def self.display_args(job)
+        # Unwrap known wrappers so they show up in a human-friendly manner
         klass = job["class"]
         if klass == "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper" || klass == "Sidekiq::ActiveJob::Wrapper"
           job_args = job["wrapped"] ? deserialize_argument(job["args"][0]["arguments"]) : []

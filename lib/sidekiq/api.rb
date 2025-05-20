@@ -409,7 +409,6 @@ module Sidekiq
     end
 
     def display_args
-      # Unwrap known wrappers so they show up in a human-friendly manner in the Web UI
       @display_args ||= begin
         job_args = Sidekiq::Displayers.display_args(item)
 
