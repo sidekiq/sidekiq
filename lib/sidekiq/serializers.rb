@@ -25,7 +25,7 @@ module Sidekiq
       serializer.serialize(job)
     end
 
-    def self.deserialize(job)
+    def self.deserializer_for(job)
       _, deserializer =
         serializers.find do |name, serializer|
           next if serializer == Sidekiq::Serializers::Basic
@@ -36,7 +36,11 @@ module Sidekiq
         deserializer = Sidekiq::Serializers::Basic
       end
 
-      deserializer.deserialize(job)
+      deserializer
+    end
+
+    def self.deserialize(job)
+      deserializer_for(job).deserialize(job)
     end
   end
 end

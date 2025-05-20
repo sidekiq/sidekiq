@@ -4,6 +4,7 @@ require "zlib"
 
 require "sidekiq"
 require "sidekiq/metrics/query"
+require "sidekiq/displayers"
 
 #
 # Sidekiq's Data API provides a Ruby object model on top
@@ -409,23 +410,15 @@ module Sidekiq
 
     def display_args
       # Unwrap known wrappers so they show up in a human-friendly manner in the Web UI
-      @display_args ||= if klass == "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper" || klass == "Sidekiq::ActiveJob::Wrapper"
-        job_args = self["wrapped"] ? deserialize_argument(args[0]["arguments"]) : []
-        if (self["wrapped"] || args[0]) == "ActionMailer::DeliveryJob"
-          # remove MailerClass, mailer_method and 'deliver_now'
-          job_args.drop(3)
-        elsif (self["wrapped"] || args[0]) == "ActionMailer::MailDeliveryJob"
-          # remove MailerClass, mailer_method and 'deliver_now'
-          job_args.drop(3).first.values_at("params", "args")
-        else
-          job_args
-        end
-      else
+      @display_args ||= begin
+        job_args = Sidekiq::Displayers.display_args(item)
+
         if self["encrypt"]
           # no point in showing 150+ bytes of random garbage
-          args[-1] = "[encrypted data]"
+          job_args[-1] = "[encrypted data]"
         end
-        args
+
+        job_args
       end
     end
 
@@ -508,29 +501,6 @@ module Sidekiq
     end
 
     private
-
-    ACTIVE_JOB_PREFIX = "_aj_"
-    GLOBALID_KEY = "_aj_globalid"
-
-    def deserialize_argument(argument)
-      case argument
-      when Array
-        argument.map { |arg| deserialize_argument(arg) }
-      when Hash
-        if serialized_global_id?(argument)
-          argument[GLOBALID_KEY]
-        else
-          argument.transform_values { |v| deserialize_argument(v) }
-            .reject { |k, _| k.start_with?(ACTIVE_JOB_PREFIX) }
-        end
-      else
-        argument
-      end
-    end
-
-    def serialized_global_id?(hash)
-      hash.size == 1 && hash.include?(GLOBALID_KEY)
-    end
 
     def uncompress_backtrace(backtrace)
       strict_base64_decoded = backtrace.unpack1("m")
