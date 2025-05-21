@@ -410,7 +410,7 @@ module Sidekiq
 
     def display_args
       @display_args ||= begin
-        job_args = Sidekiq::Displayers.display_args(item)
+        job_args = Sidekiq::Displayers.display_args(self)
 
         if self["encrypt"]
           # no point in showing 150+ bytes of random garbage

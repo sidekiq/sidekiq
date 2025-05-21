@@ -6,28 +6,26 @@ module Sidekiq
       SYMBOL_KEYS_KEY = "_aj_symbol_keys"
       RUBY2_KEYWORDS_KEY = "_aj_ruby2_keywords"
 
-      def self.valid_for?(job)
-        klass = job["class"]
-        klass == "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper" || klass == "Sidekiq::ActiveJob::Wrapper" || job["_f"] == "aj"
+      def self.valid_for?(job_record)
+        job_record.klass == "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper" || job_record.klass == "Sidekiq::ActiveJob::Wrapper" || job_record["_f"] == "aj"
       end
 
-      def self.display_args(job)
+      def self.display_args(job_record)
         # Unwrap known wrappers so they show up in a human-friendly manner
-        klass = job["class"]
-        if klass == "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper" || klass == "Sidekiq::ActiveJob::Wrapper"
-          job_args = job["wrapped"] ? deserialize_argument(job["args"][0]["arguments"]) : []
+        if job_record.klass == "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper" || job_record.klass == "Sidekiq::ActiveJob::Wrapper"
+          job_args = job_record["wrapped"] ? deserialize_argument(job_record.args[0]["arguments"]) : []
 
-          if (job["wrapped"] || job["args"][0]) == "ActionMailer::DeliveryJob"
+          if (job_record["wrapped"] || job_record.args[0]) == "ActionMailer::DeliveryJob"
             # remove MailerClass, mailer_method and 'deliver_now'
             job_args.drop(3)
-          elsif (job["wrapped"] || job["args"][0]) == "ActionMailer::MailDeliveryJob"
+          elsif (job_record["wrapped"] || job_record.args[0]) == "ActionMailer::MailDeliveryJob"
             # remove MailerClass, mailer_method and 'deliver_now'
             job_args.drop(3).first.values_at(:params, :args)
           else
             job_args
           end
         else
-          deserialize_argument(job["args"])
+          deserialize_argument(job_record.args)
         end
       end
 

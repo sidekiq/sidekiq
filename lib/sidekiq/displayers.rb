@@ -12,11 +12,11 @@ module Sidekiq
       displayers[name] = displayer
     end
 
-    def self.displayer_for(job)
+    def self.displayer_for(job_record)
       _, displayer =
         displayers.find do |name, displayer|
           next if displayer == Sidekiq::Displayers::Basic
-          displayer.valid_for?(job)
+          displayer.valid_for?(job_record)
         end
       if displayer.nil?
         displayer = Sidekiq::Displayers::Basic
@@ -25,8 +25,8 @@ module Sidekiq
       displayer
     end
 
-    def self.display_args(job)
-      displayer_for(job).display_args(job)
+    def self.display_args(job_record)
+      displayer_for(job_record).display_args(job_record)
     end
   end
 end
