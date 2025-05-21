@@ -4,20 +4,31 @@ module Sidekiq
       def self.validate(job)
       end
 
-      def self.serialize(job)
+      def self.serialize_job(job)
         job["_f"] = "aj"
         job["args"] = ::ActiveJob::Arguments.serialize(job["args"])
         job
       end
 
-      def self.valid_for_deserialization?(job)
-        job["_f"] == "aj"
+      def self.serialize_hash(hash)
+        {
+          "_f" => "aj",
+          "args" => ::ActiveJob::Arguments.serialize([hash])
+        }
       end
 
-      def self.deserialize(job)
+      def self.valid_for_deserialization?(type:, item:)
+        item["_f"] == "aj"
+      end
+
+      def self.deserialize_job(job)
         job["args"] = ::ActiveJob::Arguments.deserialize(job["args"])
         job.delete("_f")
         job
+      end
+
+      def self.deserialize_hash(hash)
+        ::ActiveJob::Arguments.deserialize(hash["args"]).first
       end
     end
   end

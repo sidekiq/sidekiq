@@ -21,15 +21,19 @@ module Sidekiq
       serializer.validate(job)
     end
 
-    def self.serialize(job)
-      serializer.serialize(job)
+    def self.serialize_job(job)
+      serializer.serialize_job(job)
     end
 
-    def self.deserializer_for(job)
+    def self.serialize_hash(hash)
+      serializer.serialize_hash(hash)
+    end
+
+    def self.deserializer_for(type:, item:)
       _, deserializer =
         serializers.find do |name, serializer|
           next if serializer == Sidekiq::Serializers::Basic
-          serializer.valid_for_deserialization?(job)
+          serializer.valid_for_deserialization?(type:, item:)
         end
 
       if deserializer.nil?
@@ -39,8 +43,12 @@ module Sidekiq
       deserializer
     end
 
-    def self.deserialize(job)
-      deserializer_for(job).deserialize(job)
+    def self.deserialize_job(job)
+      deserializer_for(type: :job, item: job).deserialize_job(job)
+    end
+
+    def self.deserialize_hash(hash)
+      deserializer_for(type: :hash, item: hash).deserialize_hash(hash)
     end
   end
 end

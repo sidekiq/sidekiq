@@ -102,7 +102,7 @@ module Sidekiq
     def push(item)
       normed = normalize_item(item)
       payload = middleware.invoke(item["class"], normed, normed["queue"], @redis_pool) do
-        Sidekiq::Serializers.serialize(normed)
+        Sidekiq::Serializers.serialize_job(normed)
       end
       if payload
         verify_json(payload)
@@ -149,7 +149,7 @@ module Sidekiq
           copy = normed.merge("args" => job_args, "jid" => SecureRandom.hex(12))
           copy["at"] = (at.is_a?(Array) ? at[slice_index + index] : at) if at
           result = middleware.invoke(items["class"], copy, copy["queue"], @redis_pool) do
-            copy = Sidekiq::Serializers.serialize(copy)
+            copy = Sidekiq::Serializers.serialize_job(copy)
             verify_json(copy)
             copy
           end

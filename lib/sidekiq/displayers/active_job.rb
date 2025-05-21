@@ -6,8 +6,15 @@ module Sidekiq
       SYMBOL_KEYS_KEY = "_aj_symbol_keys"
       RUBY2_KEYWORDS_KEY = "_aj_ruby2_keywords"
 
-      def self.valid_for?(job_record)
-        job_record.klass == "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper" || job_record.klass == "Sidekiq::ActiveJob::Wrapper" || job_record["_f"] == "aj"
+      def self.valid_for?(type:, item:)
+        case type
+        when :job
+          job_record = item
+          job_record.klass == "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper" || job_record.klass == "Sidekiq::ActiveJob::Wrapper" || job_record["_f"] == "aj"
+        when :hash
+          hash = item
+          hash["_f"] == "aj"
+        end
       end
 
       def self.display_args(job_record)
@@ -27,6 +34,10 @@ module Sidekiq
         else
           deserialize_argument(job_record.args)
         end
+      end
+
+      def self.display_hash(hash)
+        deserialize_argument(hash["args"]).first
       end
 
       def self.deserialize_argument(argument)
