@@ -1,12 +1,43 @@
 module Sidekiq
-  module Displayers
+  module Flavors
     module ActiveJob
       ACTIVE_JOB_PREFIX = "_aj_"
       GLOBALID_KEY = "_aj_globalid"
       SYMBOL_KEYS_KEY = "_aj_symbol_keys"
       RUBY2_KEYWORDS_KEY = "_aj_ruby2_keywords"
 
-      def self.valid_for?(type:, item:)
+      def self.validate_job(job)
+        # TODO
+      end
+
+      def self.flavor_job(job)
+        job["_f"] = "aj"
+        job["args"] = ::ActiveJob::Arguments.serialize(job["args"])
+        job
+      end
+
+      def self.flavor_hash(hash)
+        {
+          "_f" => "aj",
+          "args" => ::ActiveJob::Arguments.serialize([hash])
+        }
+      end
+
+      def self.valid_for_unflavor?(type:, item:)
+        item["_f"] == "aj"
+      end
+
+      def self.unflavor_job(job)
+        job["args"] = ::ActiveJob::Arguments.deserialize(job["args"])
+        job.delete("_f")
+        job
+      end
+
+      def self.unflavor_hash(hash)
+        ::ActiveJob::Arguments.deserialize(hash["args"]).first
+      end
+
+      def self.valid_for_display?(type:, item:)
         case type
         when :job
           job_record = item
@@ -83,4 +114,4 @@ module Sidekiq
   end
 end
 
-Sidekiq::Displayers.register_displayer(:active_job, Sidekiq::Displayers::ActiveJob)
+Sidekiq.default_configuration.register_flavor(:active_job, Sidekiq::Flavors::ActiveJob)

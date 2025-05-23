@@ -16,7 +16,7 @@ module Sidekiq
       raise(ArgumentError, "Job tags must be an Array: `#{item}`") if item["tags"] && !item["tags"].is_a?(Array)
       raise(ArgumentError, "retry_for must be a relative amount of time, e.g. 48.hours `#{item}`") if item["retry_for"] && item["retry_for"] > 1_000_000_000
 
-      Sidekiq::Serializers.validate(item)
+      Sidekiq::Flavors.validate_job(item)
     end
 
     def verify_json(item)

@@ -37,7 +37,10 @@ module Sidekiq
       dead_timeout_in_seconds: 180 * 24 * 60 * 60, # 6 months
       reloader: proc { |&block| block.call },
       backtrace_cleaner: ->(backtrace) { backtrace },
-      serialize_as: :basic
+      flavor_with: :basic,
+      flavors: {
+        basic: Sidekiq::Flavors::Basic.new
+      }
     }
 
     ERROR_HANDLER = ->(ex, ctx, cfg = Sidekiq.default_configuration) {
@@ -96,9 +99,21 @@ module Sidekiq
       capsules.each_value.sum(&:concurrency)
     end
 
-    def serialize_as(type)
-      # TODO: Do we want to validate this input or let it blow up later?
-      @options[:serialize_as] = type
+    def flavor_with(type)
+      @options[:flavor_with] = type
+    end
+
+    def flavors
+      @options[:flavors]
+    end
+
+    def register_flavor(name, flavor)
+      flavors[name] = flavor
+    end
+
+    def flavor
+      flavors[@options[:flavor_with]] ||
+        raise(ArgumentError, "Invalid flavor: #{@options[:flavor_with]}")
     end
 
     # Edit the default capsule.

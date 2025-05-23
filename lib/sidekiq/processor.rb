@@ -189,7 +189,7 @@ module Sidekiq
       Thread.handle_interrupt(IGNORE_SHUTDOWN_INTERRUPTS) do
         Thread.handle_interrupt(ALLOW_SHUTDOWN_INTERRUPTS) do
           dispatch(job_hash, queue, jobstr) do |instance|
-            job_hash = Sidekiq::Serializers.deserialize_job(job_hash)
+            job_hash = Sidekiq::Flavors.unflavor_job(job_hash)
             config.server_middleware.invoke(instance, job_hash, queue) do
               execute_job(instance, job_hash["args"])
             end
