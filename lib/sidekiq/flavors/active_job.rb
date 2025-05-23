@@ -11,9 +11,17 @@ module Sidekiq
       end
 
       def self.flavor_job(job)
-        job["_f"] = "aj"
-        job["args"] = ::ActiveJob::Arguments.serialize(job["args"])
-        job
+        if job["class"] == "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper" || job["class"] == "Sidekiq::ActiveJob::Wrapper"
+          # Don't flavor jobs that came from ActiveJob itself.
+          job
+        elsif job["_f"] == "aj"
+          # Don't flavor jobs that are already flavored.
+          job
+        else
+          job["_f"] = "aj"
+          job["args"] = ::ActiveJob::Arguments.serialize(job["args"])
+          job
+        end
       end
 
       def self.flavor_hash(hash)
