@@ -331,6 +331,17 @@ module Sidekiq
       end
     end
 
+    def display_hash(hash, truncate_after_chars = 2000)
+      return "Invalid job payload, hash is nil" if hash.nil?
+      return "Invalid job payload, hash must be a Hash, not #{hash.class.name}" unless hash.is_a?(Hash)
+
+      begin
+        h(truncate(to_display(hash), truncate_after_chars))
+      rescue
+        "Illegal job arguments: #{h hash.inspect}"
+      end
+    end
+
     def csrf_tag
       "<input type='hidden' name='authenticity_token' value='#{env[:csrf_token]}'/>"
     end
