@@ -90,6 +90,7 @@ code {
   font-family: var(--font-mono);
   font-size: var(--font-size-small);
   padding: var(--space-1-2);
+  word-wrap: anywhere;
 }
 
 time { color: var(--color-text-light); }
