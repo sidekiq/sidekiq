@@ -4,7 +4,7 @@ require "sidekiq/fetch"
 require "sidekiq/job_logger"
 require "sidekiq/job_retry"
 require "sidekiq/profiler"
-require "sidekiq/serializers"
+require "sidekiq/flavors"
 
 module Sidekiq
   ##

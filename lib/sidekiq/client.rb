@@ -2,7 +2,7 @@
 
 require "securerandom"
 require "sidekiq/middleware/chain"
-require "sidekiq/serializers"
+require "sidekiq/flavors"
 require "sidekiq/job_util"
 
 module Sidekiq

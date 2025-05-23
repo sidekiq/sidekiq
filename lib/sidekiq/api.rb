@@ -4,7 +4,7 @@ require "zlib"
 
 require "sidekiq"
 require "sidekiq/metrics/query"
-require "sidekiq/displayers"
+require "sidekiq/flavors"
 
 #
 # Sidekiq's Data API provides a Ruby object model on top

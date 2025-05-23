@@ -2,6 +2,7 @@
 
 require "forwardable"
 require "sidekiq/redis_connection"
+require "sidekiq/flavors"
 
 module Sidekiq
   # Sidekiq::Config represents the global configuration for an instance of Sidekiq.
@@ -39,7 +40,7 @@ module Sidekiq
       backtrace_cleaner: ->(backtrace) { backtrace },
       flavor_with: :basic,
       flavors: {
-        basic: Sidekiq::Flavors::Basic.new
+        basic: Sidekiq::Flavors::Basic
       }
     }
 
@@ -77,7 +78,7 @@ module Sidekiq
 
     def inspect
       "#<#{self.class.name} @options=#{
-        @options.except(:lifecycle_events, :reloader, :death_handlers, :error_handlers).inspect
+        @options.except(:lifecycle_events, :reloader, :death_handlers, :error_handlers, :flavors).inspect
       }>"
     end
 

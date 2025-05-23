@@ -41,7 +41,7 @@ module Sidekiq
       #
       # None of this matters on the client-side, only within the Sidekiq process itself.
       config.after_initialize do
-        require "sidekiq/serializers/active_job"
+        require "sidekiq/flavors/active_job"
 
         Sidekiq.configure_server do |config|
           config[:reloader] = Sidekiq::Rails::Reloader.new
