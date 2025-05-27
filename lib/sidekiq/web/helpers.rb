@@ -165,7 +165,10 @@ module Sidekiq
       text_direction == "rtl"
     end
 
-    # See https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.4
+    # See https://www.rfc-editor.org/rfc/rfc9110.html#section-12.5.4
+    # Returns an array of language tags ordered by their quality value
+    #
+    # Inspiration taken from https://github.com/iain/http_accept_language/blob/master/lib/http_accept_language/parser.rb
     def user_preferred_languages
       languages = env["HTTP_ACCEPT_LANGUAGE"]
       languages.to_s.gsub(/\s+/, "").split(",").map { |language|
@@ -180,28 +183,30 @@ module Sidekiq
 
     # Given an Accept-Language header like "fr-FR,fr;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2"
     # this method will try to best match the available locales to the user's preferred languages.
-    #
-    # Inspiration taken from https://github.com/iain/http_accept_language/blob/master/lib/http_accept_language/parser.rb
     def locale
       # session[:locale] is set via the locale selector from the footer
       @locale ||= if (l = session&.fetch(:locale, nil)) && available_locales.include?(l)
         l
       else
+        matched_locale = nil
+        # Attempt to find a case-insensitive exact match first
+        user_preferred_languages.each do |preferred|
+          # We only care about the language and primary subtag
+          # "en-GB-oxendict" becomes "en-GB"
+          language_tag = preferred.split("-")[0..1].join("-")
+          matched_locale = available_locales.find { |available_locale| available_locale.casecmp?(language_tag) }
+          break if matched_locale
+        end
 
-        # exactly match with preferred like "pt-BR, zh-CN, zh-TW..." first
-        matched_locale = user_preferred_languages.find { |preferred|
-          available_locales.include?(preferred) if preferred.length == 5
-        }
+        return matched_locale if matched_locale
 
-        matched_locale ||= user_preferred_languages.map { |preferred|
-          preferred_language = preferred.split("-", 2).first
-
-          lang_group = available_locales.select { |available|
-            preferred_language == available.split("-", 2).first
-          }
-
-          lang_group.find { |lang| lang == preferred } || lang_group.min_by(&:length)
-        }.compact.first
+        # Find the first base language match
+        # "en-US,es-MX;q=0.9" matches "en"
+        user_preferred_languages.each do |preferred|
+          base_language = preferred.split("-", 2).first
+          matched_locale = available_locales.find { |available_locale| available_locale.casecmp?(base_language) }
+          break if matched_locale
+        end
 
         matched_locale || "en"
       end
