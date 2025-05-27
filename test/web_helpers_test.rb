@@ -66,6 +66,15 @@ describe "Web helpers" do
     obj = Helpers.new
     assert_equal "en", obj.locale
 
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "en-US,EN;q=0.9,es;q=0.8,zh-TW;q=0.7,zh;q=0.6")
+    assert_equal "en", obj.locale
+
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "en-US,es-MX;q=0.9")
+    assert_equal "en", obj.locale
+
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "ES-MX,EN-CA;q=0.9")
+    assert_equal "es", obj.locale
+
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "fr-FR,fr;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2")
     assert_equal "fr", obj.locale
 
@@ -75,13 +84,20 @@ describe "Web helpers" do
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4,ru;q=0.2")
     assert_equal "zh-TW", obj.locale
 
-    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "en-US,sv-SE;q=0.8,sv;q=0.6,en;q=0.4")
-    assert_equal "en", obj.locale
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "zh-HK,zh;q=0.9,ja-JP;q=0.8")
+    assert_equal "ja", obj.locale
+
+    # "en" comes first but "sv" has a higher quality value
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "en-US,en;q=0.4,sv-SE;q=0.8,sv;q=0.6")
+    assert_equal "sv", obj.locale
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "nb-NO,nb;q=0.2")
     assert_equal "nb", obj.locale
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "en-us")
+    assert_equal "en", obj.locale
+
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "en-GB-oxendict")
     assert_equal "en", obj.locale
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "sv-se")
@@ -94,7 +110,7 @@ describe "Web helpers" do
     assert_equal "pt", obj.locale
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "pt-br")
-    assert_equal "pt", obj.locale
+    assert_equal "pt-BR", obj.locale
 
     obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "pt-pt")
     assert_equal "pt", obj.locale
@@ -139,7 +155,7 @@ describe "Web helpers" do
   end
 
   it "uses the user selected locale" do
-    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "*")
+    obj = Helpers.new("HTTP_ACCEPT_LANGUAGE" => "en")
     obj.instance_eval do
       def session
         {locale: "es"}
