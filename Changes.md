@@ -2,9 +2,12 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+8.0.4
 ----------
 
+- Adjust Rails integration for various edge cases [6713]
+- Flush job iteration state when an error is raised [#6704]
+- Update Accept-Language parsing in Web UI [#6721]
 - Remove fixed-width in Web UI [#6686]
 - Adjust CSRF middleware ordering [#6688]
 - Support proxies when POSTing profiles to profiler.firefox.com [#6687]
