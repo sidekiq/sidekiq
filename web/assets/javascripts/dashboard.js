@@ -11,7 +11,7 @@ var updateStatsSummary = function(data) {
 }
 
 var updateRedisStats = function(data) {
-  document.getElementById('redis_version').innerText = data.redis_version;
+  document.getElementById('redis_version').innerText = data.store_version;
   document.getElementById('uptime_in_days').innerText = data.uptime_in_days;
   document.getElementById('connected_clients').innerText = data.connected_clients;
   document.getElementById('used_memory_human').innerText = data.used_memory_human;

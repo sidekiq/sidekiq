@@ -325,6 +325,8 @@ module Sidekiq
       get "/stats" do
         sidekiq_stats = Sidekiq::Stats.new
         redis_stats = redis_info.slice(*REDIS_KEYS)
+        redis_stats["store_name"] = store_name
+        redis_stats["store_version"] = store_version
         json(
           sidekiq: {
             processed: sidekiq_stats.processed,
