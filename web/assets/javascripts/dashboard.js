@@ -11,11 +11,21 @@ var updateStatsSummary = function(data) {
 }
 
 var updateRedisStats = function(data) {
-  document.getElementById('redis_version').innerText = data.redis_version;
+  document.getElementById('redis_version').innerText = getStoreVersion(data);
   document.getElementById('uptime_in_days').innerText = data.uptime_in_days;
   document.getElementById('connected_clients').innerText = data.connected_clients;
   document.getElementById('used_memory_human').innerText = data.used_memory_human;
   document.getElementById('used_memory_peak_human').innerText = data.used_memory_peak_human;
+}
+
+var getStoreVersion = function(data) {
+  if (data.dragonfly_version) {
+    return data.dragonfly_version;
+  }
+  if (data.valkey_version) {
+    return data.valkey_version;
+  }
+  return data.redis_version;
 }
 
 var updateFooterUTCTime = function(time) {

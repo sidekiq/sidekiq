@@ -9,7 +9,7 @@ module Sidekiq
       extend Router
       include Router
 
-      REDIS_KEYS = %w[redis_version uptime_in_days connected_clients used_memory_human used_memory_peak_human]
+      REDIS_KEYS = %w[dragonfly_version redis_version valkey_version uptime_in_days connected_clients used_memory_human used_memory_peak_human]
 
       CSP_HEADER_TEMPLATE = [
         "default-src 'self' https: http:",
