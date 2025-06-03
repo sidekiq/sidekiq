@@ -43,7 +43,7 @@ begin
       # To use Sidekiq set the queue_adapter config to +:sidekiq+.
       #
       #   Rails.application.config.active_job.queue_adapter = :sidekiq
-      class SidekiqAdapter
+      class SidekiqAdapter < AbstractAdapter
         # Defines whether enqueuing should happen implicitly to after commit when called
         # from inside a transaction.
         # @api private
