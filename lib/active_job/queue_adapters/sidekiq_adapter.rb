@@ -44,6 +44,13 @@ begin
       #
       #   Rails.application.config.active_job.queue_adapter = :sidekiq
       class SidekiqAdapter < AbstractAdapter
+        @@stopping = false
+
+        callback = -> { @@stopping = true }
+
+        Sidekiq.configure_client { |config| config.on(:quiet, &callback) }
+        Sidekiq.configure_server { |config| config.on(:quiet, &callback) }
+
         # Defines whether enqueuing should happen implicitly to after commit when called
         # from inside a transaction.
         # @api private
@@ -99,10 +106,12 @@ begin
           enqueued_count
         end
 
+        # @api private
+        def stopping? = !!@@stopping
+
         # Defines a class alias for backwards compatibility with enqueued Active Job jobs.
         # @api private
-        class JobWrapper < Sidekiq::ActiveJob::Wrapper
-        end
+        JobWrapper = Sidekiq::ActiveJob::Wrapper
       end
     end
   end
