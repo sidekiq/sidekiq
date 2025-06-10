@@ -567,6 +567,7 @@ body > footer .nav {
     --color-border: oklch(25% 0.01 256);
     --color-input-border: oklch(31% 0.01 256);
     --color-selected: oklch(27% 0.01 256);
+    --color-selected-text: oklch(55% 0.11 45);
     --color-table-bg-alt: oklch(24% 0.01 256);
     --color-shadow: oklch(9% 0.01 256 / 10%);
     --color-text: oklch(75% 0.01 256);
@@ -615,6 +616,10 @@ body > footer .nav {
   .label-info { background: var(--color-info); }
   .label-danger { background: var(--color-danger); }
   .label-warning { background: var(--color-warning); }
+
+  td.box::selection {
+    background-color: var(--color-selected-text);
+  }
 }
 
 @media (max-width: 800px) { :root { --font-size: 14px; } }
