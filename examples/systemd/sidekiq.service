@@ -82,9 +82,17 @@ Environment=MALLOC_ARENA_MAX=2
 RestartSec=1
 Restart=always
 
+# Use syslog for log output
 # output goes to /var/log/syslog (Ubuntu) or /var/log/messages (CentOS)
 StandardOutput=syslog
 StandardError=syslog
+
+# ...OR...
+# Log stdout to a local file, make sure the directory exists and is
+# writable by user!
+#StandardOutput=append:/home/user/log1.log
+# Use the same file for stderr
+#StandardError=inherit
 
 # This will default to "bundler" if we don't specify it
 SyslogIdentifier=sidekiq
