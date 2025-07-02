@@ -13,18 +13,22 @@ jobs:
   test:
 
     runs-on: ubuntu-latest
-    name: "${{ matrix.ruby }} / ${{ matrix.database.image }}-${{ matrix.database.version }}"
+    name: "${{ matrix.ruby }} / rails ${{ matrix.rails }} / ${{ matrix.database.image }}-${{ matrix.database.version }}"
 
     strategy:
       fail-fast: false
       matrix:
         ruby: ["ruby-3.2", "ruby-3.3", "ruby-3.4"]
+        rails: ["7.0", "7.1", "7.2", "8.0"]
         database: [
           { image: "redis", version: "7.0.15" },
           { image: "valkey/valkey", version: "8" },
           { image: "docker.dragonflydb.io/dragonflydb/dragonfly", version: "v1.27.0" },
           { image: "docker.dragonflydb.io/dragonflydb/dragonfly", version: "latest" }
         ]
+
+    env:
+      RAILS_VERSION: ${{ matrix.rails }}
 
     steps:
     - uses: actions/checkout@v4
