@@ -3,7 +3,7 @@ source "https://rubygems.org"
 gemspec
 
 gem "rake"
-RAILS_VERSION = "~> #{ENV.fetch('RAILS_VERSION', '8.0')}.0"
+RAILS_VERSION = "~> #{ENV.fetch('RAILS_VERSION', '8')}.0"
 gem "actionmailer", RAILS_VERSION
 gem "actionpack", RAILS_VERSION
 gem "activejob", RAILS_VERSION

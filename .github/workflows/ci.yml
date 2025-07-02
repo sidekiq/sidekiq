@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby: ["ruby-3.2", "ruby-3.3", "ruby-3.4"]
-        rails: ["7.0", "7.1", "7.2", "8.0"]
+        rails: ["7.0", "8"] # we test latest and earliest supported versions
         database: [
           { image: "redis", version: "7.0.15" },
           { image: "valkey/valkey", version: "8" },
