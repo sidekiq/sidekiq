@@ -43,7 +43,8 @@ begin
       # To use Sidekiq set the queue_adapter config to +:sidekiq+.
       #
       #   Rails.application.config.active_job.queue_adapter = :sidekiq
-      class SidekiqAdapter < AbstractAdapter
+      parent = const_defined?(:AbstractAdapter) ? AbstractAdapter : Object
+      class SidekiqAdapter < parent
         @@stopping = false
 
         callback = -> { @@stopping = true }
