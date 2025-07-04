@@ -10,10 +10,11 @@ describe "profiling" do
     @config = reset!
 
     # Ensure we don't touch external systems in our test suite
-    Sidekiq::Web.configure do |config|
-      config.middlewares.clear
-      config[:profile_view_url] = "https://localhost/public/%s"
-      config[:profile_store_url] = "https://localhost/store"
+    Sidekiq::Web.configure do |c|
+      c.middlewares.clear
+      c.use Rack::Session::Cookie, secrets: "35c5108120cb479eecb4e947e423cad6da6f38327cf0ebb323e30816d74fa01f"
+      c[:profile_view_url] = "https://localhost/public/%s"
+      c[:profile_store_url] = "https://localhost/store"
     end
   end
 
