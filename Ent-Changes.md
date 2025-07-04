@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+HEAD
+---------
+
+- Handle fractional values for SIDEKIQ_COUNT, e.g. "0.25" [#6244]
+
 8.0.1
 ---------
 
