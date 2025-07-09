@@ -4,6 +4,26 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Statsd middleware now sends a new `sidekiq.jobs.perform_dist`
+  distribution metric. This type is proprietary to Datadog but provides
+  much better statistical visibility into job timing across a cluster.
+  You can disable this metric type with:
+```ruby
+Sidekiq.configure_server { |c| c[:use_datadog_extensions] = false }
+```
+- Batch success now sends `sidekiq.batch.duration` and `sidekiq.batch.duration_dist`
+  metrics for monitoring the total time to execute a batch. You can add tags for
+  visibility and filtering within the UI when defining your `success` callback:
+```ruby
+batch.on(:success, ..., {tags: ["batchtype:OrderProcess"]})
+```
+- Statsd middleware no longer sends the `sidekiq.jobs.perform` timing
+  metric when a job fails since failure can happen for so many reasons;
+  timing data is typically not useful for detecting or fixing failures.
+
 8.0.1
 ---------
 

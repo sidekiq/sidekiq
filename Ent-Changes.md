@@ -7,7 +7,8 @@ Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 HEAD
 ---------
 
-- Handle fractional values for SIDEKIQ_COUNT, e.g. "0.25" [#6244]
+- Handle fractional values for SIDEKIQ_COUNT, e.g. "0.25", when running
+  on low-end VMs allocated only a partial core. [#6244]
 
 8.0.1
 ---------
