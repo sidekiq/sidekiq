@@ -286,6 +286,7 @@ module Sidekiq
         instance = new
         instance.jid = job["jid"]
         instance.bid = job["bid"] if instance.respond_to?(:bid=)
+        job = Sidekiq::Flavors.unflavor_job(job)
         Sidekiq::Testing.server_middleware.invoke(instance, job, job["queue"]) do
           execute_job(instance, job["args"])
         end
