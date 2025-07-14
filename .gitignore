@@ -19,3 +19,6 @@ Gemfile.lock
 *.DS_Store
 doc/
 .yardoc/
+
+# HERB log files
+*_erb_parsing_result_*.log
