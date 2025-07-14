@@ -117,7 +117,7 @@ module Sidekiq
         if content.is_a? Symbol
           unless respond_to?(:"_erb_#{content}")
             views = options[:views] || Web.views
-            filename = "#{views}/#{content}.erb"
+            filename = "#{views}/#{content}.html.erb"
             src = ERB.new(File.read(filename)).src
 
             # Need to use lineno less by 1 because erb generates a
