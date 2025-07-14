@@ -16,4 +16,12 @@ Rake::TestTask.new(:test) do |test|
   test.pattern = "test/**/*.rb"
 end
 
-task default: [:standard, :test]
+namespace :lint do
+  desc "Lint ERB files with HERB"
+  task :herb do
+    exit_code = system("bundle exec herb analyze web/views")
+    exit exit_code unless exit_code
+  end
+end
+
+task default: [:standard, "lint:herb", :test]
