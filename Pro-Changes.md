@@ -23,6 +23,7 @@ batch.on(:success, ..., {tags: ["batchtype:OrderProcess"]})
 - Statsd middleware no longer sends the `sidekiq.jobs.perform` timing
   metric when a job fails since failure can happen for so many reasons;
   timing data is typically not useful for detecting or fixing failures.
+- Poison pill logging now accounts for wrapped class names [#6756]
 
 8.0.1
 ---------
