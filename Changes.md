@@ -6,6 +6,7 @@
 ----------
 
 - Fix Rails 7.0 and 7.1 compatibility [#6746, mlarraz]
+- Flush metrics at :exit [#6764]
 
 8.0.5
 ----------
