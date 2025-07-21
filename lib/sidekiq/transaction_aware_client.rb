@@ -7,6 +7,12 @@ module Sidekiq
   class TransactionAwareClient
     def initialize(pool: nil, config: nil)
       @redis_client = Client.new(pool: pool, config: config)
+      @transaction_backend =
+        if ActiveRecord.version >= Gem::Version.new("7.2")
+          ActiveRecord.method(:after_all_transactions_commit)
+        else
+          AfterCommitEverywhere.method(:after_commit)
+        end
     end
 
     def batching?
@@ -20,7 +26,7 @@ module Sidekiq
       # pre-allocate the JID so we can return it immediately and
       # save it to the database as part of the transaction.
       item["jid"] ||= SecureRandom.hex(12)
-      AfterCommitEverywhere.after_commit { @redis_client.push(item) }
+      @transaction_backend.call { @redis_client.push(item) }
       item["jid"]
     end
 
@@ -38,10 +44,12 @@ end
 # Use `Sidekiq.transactional_push!` in your sidekiq.rb initializer
 module Sidekiq
   def self.transactional_push!
-    begin
-      require "after_commit_everywhere"
-    rescue LoadError
-      raise %q(You need to add `gem "after_commit_everywhere"` to your Gemfile to use Sidekiq's transactional client)
+    if ActiveRecord.version < Gem::Version.new("7.2")
+      begin
+        require "after_commit_everywhere"
+      rescue LoadError
+        raise %q(You need ActiveRecord >= 7.2 or to add `gem "after_commit_everywhere"` to your Gemfile to use Sidekiq's transactional client)
+      end
     end
 
     Sidekiq.default_job_options["client_class"] = Sidekiq::TransactionAwareClient
