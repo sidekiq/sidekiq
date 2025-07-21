@@ -5,8 +5,10 @@
 8.0.6
 ----------
 
+- Adjust transactional client to use ActiveRecord 7.2's support for
+  `after_all_transactions_commit` when available. [#6765, rewritten]
 - Fix Rails 7.0 and 7.1 compatibility [#6746, mlarraz]
-- Flush metrics at :exit [#6764]
+- Flush metrics at `:exit` [#6764]
 
 8.0.5
 ----------
