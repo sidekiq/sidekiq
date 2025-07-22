@@ -50,7 +50,7 @@ module Sidekiq
         @cattrs = cattrs
       end
 
-      def call(_, job, _, &block)
+      def call(_, job, *, &block)
         klass_attrs = {}
 
         @cattrs.each do |(key, strklass)|
@@ -93,6 +93,7 @@ module Sidekiq
       def persist(klass_or_array, config = Sidekiq.default_configuration)
         cattrs = build_cattrs_hash(klass_or_array)
 
+        config.client_middleware.prepend Load, cattrs
         config.client_middleware.add Save, cattrs
         config.server_middleware.prepend Load, cattrs
       end
