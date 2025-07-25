@@ -18,15 +18,6 @@ function addListeners() {
     })
   });
 
-  document.querySelectorAll("input[data-confirm]").forEach(node => {
-    node.addEventListener("click", event => {
-      if (!window.confirm(node.getAttribute("data-confirm"))) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-    })
-  })
-
   document.querySelectorAll("[data-toggle]").forEach(node => {
     node.addEventListener("click", addDataToggleListeners)
   })
@@ -179,3 +170,19 @@ function updateLocale(event) {
 function updateProgressBars() {
   document.querySelectorAll('.progress-bar').forEach(bar => { bar.style.width = bar.dataset.width + "%"})
 }
+
+function handleConfirmDialog (event) {
+  const target = event.target
+
+  if (target.localName !== "input") { return }
+  if (!target.hasAttribute("data-confirm")) { return }
+
+  const confirmMessage = target.getAttribute("data-confirm")
+
+  if (!window.confirm(confirmMessage)) {
+    event.preventDefault()
+    event.stopPropagation()
+  }
+}
+
+document.addEventListener("click", handleConfirmDialog)
