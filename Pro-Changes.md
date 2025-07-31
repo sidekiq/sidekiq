@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+8.0.2
 ---------
 
 - Statsd middleware now sends a new `sidekiq.jobs.perform_dist`
