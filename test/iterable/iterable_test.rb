@@ -297,15 +297,15 @@ describe Sidekiq::Job::Iterable do
 
   describe "job arguments" do
     it "are available to all callbacks" do
-      $args = {}
+      args = {}
       DynamicCallbackJob.reset
-      DynamicCallbackJob::CB[:on_stop] << -> { $args[:on_stop] = arguments }
-      DynamicCallbackJob::CB[:on_start] << -> { $args[:on_start] = arguments }
-      DynamicCallbackJob::CB[:on_complete] << -> { $args[:on_complete] = arguments }
-      DynamicCallbackJob::CB[:on_resume] << -> { $args[:on_resume] = arguments }
+      DynamicCallbackJob::CB[:on_stop] << -> { args[:on_stop] = arguments }
+      DynamicCallbackJob::CB[:on_start] << -> { args[:on_start] = arguments }
+      DynamicCallbackJob::CB[:on_complete] << -> { args[:on_complete] = arguments }
+      DynamicCallbackJob::CB[:on_resume] << -> { args[:on_resume] = arguments }
 
       DynamicCallbackJob.perform_inline("mike", 123)
-      assert_equal($args, {on_start: ["mike", 123], on_stop: ["mike", 123], on_complete: ["mike", 123]})
+      assert_equal(args, {on_start: ["mike", 123], on_stop: ["mike", 123], on_complete: ["mike", 123]})
     end
 
     it "are frozen" do
@@ -316,12 +316,20 @@ describe Sidekiq::Job::Iterable do
       end
     end
 
-    it "mangles keyword arguments, per JSON" do
-      $args = {}
+    it "provides current_object to around_iteration" do
+      objects = []
       DynamicCallbackJob.reset
-      DynamicCallbackJob::CB[:on_start] << -> { $args[:on_start] = arguments }
+      DynamicCallbackJob::CB[:around_iteration] << -> { objects << current_object }
+      DynamicCallbackJob.perform_inline("mike", 123)
+      assert_equal [0, 1], objects
+    end
+
+    it "mangles keyword arguments, per JSON" do
+      args = {}
+      DynamicCallbackJob.reset
+      DynamicCallbackJob::CB[:on_start] << -> { args[:on_start] = arguments }
       DynamicCallbackJob.perform_inline("first", mike: 456, bob: "string")
-      assert_equal($args, {on_start: ["first", {"mike" => 456, "bob" => "string"}]})
+      assert_equal(args, {on_start: ["first", {"mike" => 456, "bob" => "string"}]})
     end
   end
 

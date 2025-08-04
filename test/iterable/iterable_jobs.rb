@@ -165,7 +165,7 @@ end
 class DynamicCallbackJob < IterableJobWithArguments
   CB = {}
 
-  %w[on_start on_complete on_stop on_resume].each do |cb|
+  %w[on_start on_complete on_stop on_resume around_iteration].each do |cb|
     name = cb.to_sym
     CB[name] = []
     define_method(name) do
@@ -177,6 +177,7 @@ class DynamicCallbackJob < IterableJobWithArguments
     CB[:on_stop] = []
     CB[:on_resume] = []
     CB[:on_complete] = []
+    CB[:around_iteration] = []
   end
 end
 

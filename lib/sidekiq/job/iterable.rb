@@ -32,7 +32,13 @@ module Sidekiq
         @_runtime = 0
         @_args = nil
         @_cancelled = nil
+        @current_object = nil
       end
+
+      # Access to the current object while iterating.
+      # This value is not reset so the latest element is
+      # explicitly available to cleanup/complete callbacks.
+      attr_reader :current_object
 
       def arguments
         @_args
@@ -203,6 +209,7 @@ module Sidekiq
         enumerator.each do |object, cursor|
           found_record = true
           @_cursor = cursor
+          @current_object = object
 
           is_interrupted = interrupted?
           if ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - state_flushed_at >= STATE_FLUSH_INTERVAL || is_interrupted
