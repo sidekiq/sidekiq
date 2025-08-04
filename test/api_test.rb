@@ -545,7 +545,8 @@ describe "API" do
         "key" => identity_string,
         "identity" => identity_string,
         "started_at" => Time.now.to_f - 15,
-        "capsules" => {"default" => {"mode" => "weighted", "concurrency" => 5, "weights" => {"foo" => 1, "bar" => 1}}},
+        "capsules" => {"default" => {"mode" => "weighted", "concurrency" => 5, "weights" => {"foo" => 1, "bar" => 1}},
+                       "single" => {"mode" => "strict", "concurrency" => 1, "weights" => {"single" => 0}}},
         "version" => Sidekiq::VERSION,
         "embedded" => false
       }
@@ -565,8 +566,9 @@ describe "API" do
       assert_equal 10, data["busy"]
       assert_equal time, data["beat"]
       assert_equal 123, data["pid"]
-      assert_equal ["foo", "bar"], data.queues
-      assert_equal({"foo" => 1, "bar" => 1}, data.weights)
+      assert_equal %w[foo bar single], data.queues
+      assert_equal({"foo" => 1, "bar" => 1, "single" => 0}, data.weights)
+      assert_equal({"default" => {"mode" => "weighted", "concurrency" => 5, "weights" => {"foo" => 1, "bar" => 1}}, "single" => {"mode" => "strict", "concurrency" => 1, "weights" => {"single" => 0}}}, data.capsules)
       assert_equal Sidekiq::VERSION, data.version
       assert_equal false, data.embedded?
       data.quiet!
