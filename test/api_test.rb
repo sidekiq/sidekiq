@@ -545,8 +545,7 @@ describe "API" do
         "key" => identity_string,
         "identity" => identity_string,
         "started_at" => Time.now.to_f - 15,
-        "queues" => ["foo", "bar"],
-        "weights" => {"foo" => 1, "bar" => 1},
+        "capsules" => {"default" => {"mode" => "weighted", "concurrency" => 5, "weights" => {"foo" => 1, "bar" => 1}}},
         "version" => Sidekiq::VERSION,
         "embedded" => false
       }
@@ -585,8 +584,7 @@ describe "API" do
         "key" => identity_string,
         "identity" => identity_string,
         "started_at" => Time.now.to_f - 15,
-        "queues" => ["foo", "bar"],
-        "weights" => {"foo" => 1, "bar" => 1},
+        "capsules" => {"default" => {"mode" => "weighted", "concurrency" => 5, "weights" => {"foo" => 1, "bar" => 1}}},
         "version" => Sidekiq::VERSION,
         "embedded" => true
       }
