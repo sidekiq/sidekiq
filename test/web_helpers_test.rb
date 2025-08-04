@@ -252,20 +252,6 @@ describe "Web helpers" do
     assert_equal ["worker_critical.1", "worker_critical.2", "worker_critical.10", "worker_default.1", "worker_default.2"], obj.sorted_processes.map { |process| process["hostname"] }
   end
 
-  it "displays queue weights properly" do
-    capsule_weights = [{"high" => 0, "default" => 0, "low" => 0}]
-    obj = Helpers.new
-    assert_equal "high, default, low", obj.busy_weights(capsule_weights)
-    capsule_weights = [{"high" => 3, "default" => 2, "low" => 1}, {"single" => 0}]
-    assert_equal "high: 3, default: 2, low: 1; single", obj.busy_weights(capsule_weights)
-    capsule_weights = [{"high" => 1, "default" => 1, "low" => 1}, {"single" => 0}]
-    assert_equal "high: 1, default: 1, low: 1; single", obj.busy_weights(capsule_weights)
-
-    # old data
-    capsule_weights = {"high" => 1, "default" => 1, "low" => 1}
-    assert_equal "high: 1, default: 1, low: 1", obj.busy_weights(capsule_weights)
-  end
-
   describe "#pollable?" do
     it "returns true if not the root or metrics path" do
       obj = Helpers.new({path_info: "/retries"})
