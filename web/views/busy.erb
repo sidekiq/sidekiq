@@ -69,11 +69,7 @@
             <% end %>
             <br>
             <b><%= "#{t('Queues')}: " %></b>
-            <% if process.weights %>
-              <%= busy_weights(process.weights) %>
-            <% else %>
-              <%= process.queues.sort.join(", ") %>
-            <% end %>
+            <%= process.queues.sort.join(", ") %>
             <% if process.version != Sidekiq::VERSION %>
               <br>
               <b><%= "#{t('Version')}: " %></b>

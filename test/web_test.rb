@@ -89,7 +89,7 @@ describe Sidekiq::Web do
       @config.redis do |conn|
         conn.incr("busy")
         conn.sadd("processes", ["foo:1234"])
-        conn.hset("foo:1234", "info", Sidekiq.dump_json("hostname" => "foo", "started_at" => Time.now.to_f, "queues" => [], "concurrency" => 10), "at", Time.now.to_f, "busy", 4)
+        conn.hset("foo:1234", "info", Sidekiq.dump_json("hostname" => "foo", "started_at" => Time.now.to_f, "capsules" => {}, "concurrency" => 10), "at", Time.now.to_f, "busy", 4)
         identity = "foo:1234:work"
         hash = {queue: "critical", payload: Sidekiq.dump_json({"class" => WebJob.name, "args" => [1, "abc"], "tags" => %w[foobar_100 <eviltag/>]}), run_at: Time.now.to_i}
         conn.hset(identity, 1001, Sidekiq.dump_json(hash))
@@ -563,7 +563,7 @@ describe Sidekiq::Web do
     @config.redis do |conn|
       pro = "foo:1234"
       conn.sadd("processes", [pro])
-      conn.hset(pro, "info", Sidekiq.dump_json("started_at" => Time.now.to_f, "labels" => ["frumduz"], "queues" => [], "concurrency" => 10), "busy", 1, "beat", Time.now.to_f)
+      conn.hset(pro, "info", Sidekiq.dump_json("started_at" => Time.now.to_f, "labels" => ["frumduz"], "capsules" => {}, "concurrency" => 10), "busy", 1, "beat", Time.now.to_f)
       identity = "#{pro}:work"
       hash = {queue: "critical", payload: Sidekiq.dump_json({"class" => "FailJob", "args" => ["<a>hello</a>"]}), run_at: Time.now.to_i}
       conn.hset(identity, 100001, Sidekiq.dump_json(hash))

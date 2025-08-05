@@ -38,6 +38,10 @@ module Sidekiq
       @mode = :strict
     end
 
+    def to_h
+      {concurrency: concurrency, mode: mode, weights: weights}
+    end
+
     def fetcher
       @fetcher ||= begin
         instance = (config[:fetch_class] || Sidekiq::BasicFetch).new(self)
