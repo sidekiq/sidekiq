@@ -49,14 +49,10 @@ class Sidekiq::Monitor
       puts "---- Processes (#{process_set.size}) ----"
       process_set.each_with_index do |process, index|
         # Keep compatibility with legacy versions since we don't want to break sidekiqmon during rolling upgrades or downgrades.
-        #
-        # Before:
-        #   ["default", "critical"]
-        #
-        # After:
-        #   {"default" => 1, "critical" => 10}
         queues =
-          if process["weights"]
+          if process["capsules"] # 8.0.6+
+            process["capsules"].values.map { |x| x["weights"].keys.join(", ") }
+          elsif process["weights"]
             process["weights"].sort_by { |queue| queue[0] }.map { |capsule| capsule.map { |name, weight| (weight > 0) ? "#{name}: #{weight}" : name }.join(", ") }
           else
             process["queues"].sort
@@ -105,7 +101,7 @@ class Sidekiq::Monitor
           out << line
           line = " " * pad
         end
-        line << value + ", "
+        line << value + "; "
       end
       out << line[0..-3]
       out.join("\n")

@@ -256,7 +256,7 @@ module Sidekiq
           memo[name] = cap.to_h
         },
         #####
-        # TODO deprecated, remove in 8.1
+        # TODO deprecated, remove in 9.0
         # This data is now found in the `capsules` element above
         "queues" => @config.capsules.values.flat_map { |cap| cap.queues }.uniq,
         "weights" => @config.capsules.values.map(&:weights),
