@@ -46,17 +46,25 @@ module Sidekiq
             end
           }.join(" ")}"
         end
+
+        def coloured_severity(severity)
+          if ::Rails.application.config.colorize_logging
+            Formatters::COLORS[severity]
+          else
+            severity
+          end
+        end
       end
 
       class Pretty < Base
         def call(severity, time, program_name, message)
-          "#{Formatters::COLORS[severity]} #{time.utc.iso8601(3)} pid=#{::Process.pid} tid=#{tid}#{format_context}: #{message}\n"
+          "#{coloured_severity(severity)} #{time.utc.iso8601(3)} pid=#{::Process.pid} tid=#{tid}#{format_context}: #{message}\n"
         end
       end
 
       class WithoutTimestamp < Pretty
         def call(severity, time, program_name, message)
-          "#{Formatters::COLORS[severity]} pid=#{::Process.pid} tid=#{tid} #{format_context}: #{message}\n"
+          "#{coloured_severity(severity)} pid=#{::Process.pid} tid=#{tid} #{format_context}: #{message}\n"
         end
       end
 

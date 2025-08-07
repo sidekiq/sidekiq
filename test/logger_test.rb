@@ -132,6 +132,15 @@ describe "logger" do
     assert_predicate logger, :warn?
   end
 
+  it 'tests coloured severity' do
+    context 'when colorize_logging is true' do
+      assert_equal "\e[1;34mINFO \e[0m", @logger.formatter.coloured_severity('INFO')
+    end
+    context 'when colorize_logging is false' do
+      assert_equal 'INFO', @logger.formatter.coloured_severity('INFO')
+    end
+  end
+
   def reset(io)
     io.truncate(0)
     io.rewind
