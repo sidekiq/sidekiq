@@ -57,6 +57,8 @@ class Singler
 end
 
 Sidekiq.configure_server do |config|
+  # config.logger.formatter = ::Sidekiq::Logger::Formatters::Plain.new
+
   config.capsule("single_threaded") do |cap|
     cap.concurrency = 1
     cap.queues = %w[single]
