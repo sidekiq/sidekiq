@@ -255,8 +255,8 @@ module Sidekiq
         handle_exception(e, {context: "Error calling retries_exhausted", job: msg})
       end
 
-      return if rv == :discard # poof!
-      send_to_morgue(msg) unless msg["dead"] == false
+      to_morgue = !(msg["dead"] == false || rv == :discard)
+      send_to_morgue(msg) if to_morgue
 
       @capsule.config.death_handlers.each do |handler|
         handler.call(msg, exception)
