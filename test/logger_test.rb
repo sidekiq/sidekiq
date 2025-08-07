@@ -100,13 +100,13 @@ describe "logger" do
     a, b = @output.string.lines
     hash = JSON.parse(a)
     keys = hash.keys.sort
-    assert_equal ["lvl", "msg", "pid", "tid", "ts"], keys
+    assert_equal %w[lvl msg pid tid ts], keys
     assert_nil hash["ctx"]
     assert_equal hash["lvl"], "DEBUG"
 
     hash = JSON.parse(b)
     keys = hash.keys.sort
-    assert_equal ["ctx", "lvl", "msg", "pid", "tid", "ts"], keys
+    assert_equal %w[ctx lvl msg pid tid ts], keys
     refute_nil hash["ctx"]
     assert_equal "1234abc", hash["ctx"]["jid"]
     assert_equal "INFO", hash["lvl"]
@@ -132,12 +132,31 @@ describe "logger" do
     assert_predicate logger, :warn?
   end
 
-  it 'tests coloured severity' do
-    context 'when colorize_logging is true' do
-      assert_equal "\e[1;34mINFO \e[0m", @logger.formatter.coloured_severity('INFO')
+  it "tests coloured severity" do
+    describe "when colorize_logging is true" do
+      before do
+        @output = StringIO.new
+        @logger = Sidekiq::Logger.new(@output)
+        @logger.formatter = Sidekiq::Logger::Formatters::Pretty.new
+      end
+      it "should be coloured" do
+        @logger.info("hello world")
+        assert_match(/\e\[1;34mINFO.+: hello world/, @output.string)
+        reset(@output)
+      end
     end
-    context 'when colorize_logging is false' do
-      assert_equal 'INFO', @logger.formatter.coloured_severity('INFO')
+    describe "when colorize_logging is false" do
+      before do
+        @output = StringIO.new
+        @logger = Sidekiq::Logger.new(@output)
+        @logger.formatter = Sidekiq::Logger::Formatters::Pretty.new
+      end
+
+      it "should not be coloured" do
+        @logger.info("hello world")
+        assert_match(/INFO.+: hello world/, @output.string)
+        reset(@output)
+      end
     end
   end
 
