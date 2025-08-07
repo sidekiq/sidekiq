@@ -14,8 +14,8 @@ uk:
   CreatedAt: Створено
   CurrentMessagesInQueue: Поточні задачі у черзі <span class='title'>%{queue}</span>
   Dashboard: Панель керування
-  Dead: Вбитих
-  DeadJobs: Вбиті задачі
+  Dead: Зупинених
+  DeadJobs: Зупинені задачі
   Delete: Видалити
   DeleteAll: Видалити усі
   Deploy: Деплой
@@ -33,8 +33,8 @@ uk:
   History: Історія
   Job: Задача
   Jobs: Задачі
-  Kill: Вбити
-  KillAll: Вбити все
+  Kill: Зупинити
+  KillAll: Зупинити все
   LastRetry: Остання спроба
   Latency: Затримка
   LivePoll: Постійне опитування
@@ -42,7 +42,7 @@ uk:
   Name: Назва
   Namespace: Простір імен
   NextRetry: Наступна спроба
-  NoDeadJobsFound: Вбитих задач не знайдено
+  NoDeadJobsFound: Зупинених задач не знайдено
   NoRetriesFound: Спроб не знайдено
   NoScheduledFound: Запланованих задач не знайдено
   NotYetEnqueued: Ще не в черзі
