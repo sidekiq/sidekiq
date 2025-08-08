@@ -186,7 +186,7 @@ module Sidekiq
       strategy, delay = delay_for(jobinst, count, exception, msg)
       case strategy
       when :discard
-        return # poof!
+        return run_death_handlers(msg, exception)
       when :kill
         return retries_exhausted(jobinst, msg, exception)
       end
@@ -257,11 +257,14 @@ module Sidekiq
 
       to_morgue = !(msg["dead"] == false || rv == :discard)
       send_to_morgue(msg) if to_morgue
+      run_death_handlers(msg, exception)
+    end
 
+    def run_death_handlers(job, exception)
       @capsule.config.death_handlers.each do |handler|
-        handler.call(msg, exception)
+        handler.call(job, exception)
       rescue => e
-        handle_exception(e, {context: "Error calling death handler", job: msg})
+        handle_exception(e, {context: "Error calling death handler", job: job})
       end
     end
 

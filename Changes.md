@@ -5,7 +5,9 @@
 HEAD
 ----------
 
-- The `:discard` option for `sidekiq_retries_exhausted` now calls death handlers [#6741]
+- The `:discard` option for `sidekiq_retries_exhausted` and `sidekiq_retry_in`
+  now calls death handlers, otherwise it could break other Sidekiq
+  functionality. [#6741]
 - Provide a Plain log formatter which does not colorize output [#6778]
 - Job iteration now exposes `current_object` for easy access within the `around_iteration` callback [#6774]
 - Fix JS race condition which could skip confirmation dialogs when Live Polling [#6768]
