@@ -2,7 +2,7 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+8.0.7
 ----------
 
 - The `:discard` option for `sidekiq_retries_exhausted` and `sidekiq_retry_in`
@@ -12,6 +12,7 @@ HEAD
 - Job iteration now exposes `current_object` for easy access within the `around_iteration` callback [#6774]
 - Fix JS race condition which could skip confirmation dialogs when Live Polling [#6768]
 - Fix edge case which could lose CurrentAttributes [#6767]
+- Update UK locale [#6776]
 
 8.0.6
 ----------
