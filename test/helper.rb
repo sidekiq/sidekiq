@@ -3,8 +3,8 @@
 require "bundler/setup"
 Bundler.require(:default, :test)
 
-require "minitest/pride"
 require "maxitest/autorun"
+require "minitest/pride"
 require "maxitest/threads"
 
 $TESTING = true
