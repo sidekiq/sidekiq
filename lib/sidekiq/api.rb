@@ -441,14 +441,13 @@ module Sidekiq
     # Reads Redis key "it-<jid>" set by Sidekiq::Job::Iterable and decodes cursor JSON.
     # Includes executions (Integer), runtime (Float), cursor (Object), cancelled (Integer timestamp or nil).
     def iterable_state
-      j = jid
-      return nil if j.nil? || j == ""
+      return nil unless jid
 
-      state = Sidekiq.redis { |c| c.hgetall("it-#{j}") }
-      return nil if state.nil? || state.empty?
+      state = Sidekiq.redis { |c| c.hgetall("it-#{jid}") }
+      return unless state
 
       cursor = begin
-        Sidekiq.load_json(state["c"]) if state.key?("c")
+        Sidekiq.load_json(state["c"])
       rescue
         state["c"]
       end
