@@ -144,11 +144,9 @@
             <code><div class="args"><%= display_args(job.display_args) %></div></code>
           </td>
           <td>
-            <% istate = job.iterable_state %>
-            <% if istate %>
-              <% cursor_s = h(truncate(istate["cursor"].inspect, 120)) %>
-              <% rt_s = number_with_delimiter(istate["runtime"], precision: 3) %>
-              <code>cursor=<%= cursor_s %>; exec=<%= istate["executions"] %>; rt=<%= rt_s %>s</code>
+            <% iterable_state = job.iterable_state %>
+            <% if iterable_state %>
+              <code>cursor=<%= h(truncate(istate["cursor"].inspect, 120)) %>; exec=<%= iterable_state["executions"] %>; rt=<%= number_with_delimiter(iterable_state["runtime"], precision: 3) %>s</code>
             <% end %>
           </td>
           <td><%= relative_time(work.run_at) %></td>
