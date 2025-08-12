@@ -369,7 +369,6 @@ module Sidekiq
       end
     end
 
-
     def format_memory(rss_kb)
       return "0" if rss_kb.nil? || rss_kb == 0
 
