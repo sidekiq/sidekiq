@@ -275,10 +275,12 @@ module Sidekiq
 
       def flush_state
         key = iteration_key
+        now = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+        current_runtime = @_start_time ? (@_runtime + (now - @_start_time)) : @_runtime
         state = {
           "ex" => @_executions,
           "c" => Sidekiq.dump_json(@_cursor),
-          "rt" => @_runtime
+          "rt" => current_runtime
         }
 
         Sidekiq.redis do |conn|

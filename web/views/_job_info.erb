@@ -34,6 +34,18 @@
             <code><%= job.jid %></code>
           </td>
         </tr>
+        <% if (state = job.iterable_state) %>
+        <tr>
+          <th>Iterable</th>
+          <td>
+            <code>
+              cursor=<%= h(state["cursor"].inspect) %>; executions=<%= state["executions"] %>; runtime=<%= number_with_delimiter(state["runtime"], precision: 3) %>s<%=
+                state["cancelled"] ? "; cancelled_at=#{Time.at(state["cancelled"]).utc}" : ""
+              %>
+            </code>
+          </td>
+        </tr>
+        <% end %>
         <% if job.bid %>
         <tr>
           <th>BID</th>

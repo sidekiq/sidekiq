@@ -40,7 +40,16 @@
             <% end %>
           </td>
           <td>
-            <%= h(job["cattr"].inspect) if job["cattr"]&.any? %>
+            <% cattr_s = job["cattr"]&.any? ? h(job["cattr"].inspect) : nil %>
+            <% istate = job.iterable_state %>
+            <% if istate %>
+              <% cursor_s = h(truncate(istate["cursor"].inspect, 120)) %>
+              <% rt_s = number_with_delimiter(istate["runtime"], precision: 3) %>
+              <% details = "cursor=#{cursor_s}; exec=#{istate["executions"]}; rt=#{rt_s}s" %>
+              <%= [cattr_s, details].compact.join(" | ") %>
+            <% else %>
+              <%= cattr_s %>
+            <% end %>
           </td>
           <td>
             <form action="<%= root_path %>queues/<%= CGI.escape(@name) %>/delete" method="post">
