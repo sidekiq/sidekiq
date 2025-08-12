@@ -369,55 +369,6 @@ module Sidekiq
       end
     end
 
-    # Returns persisted iteration state for an iterable job, if any.
-    # Reads Redis key "it-<jid>" set by Sidekiq::Job::Iterable.
-    # Includes executions (Integer), runtime (Float), cursor (Object), cancelled (Integer timestamp or nil).
-    def iterable_state(job)
-      jid = job.respond_to?(:jid) ? job.jid : job["jid"]
-      return nil if jid.nil? || jid == ""
-
-      state = Sidekiq.redis { |c| c.hgetall("it-#{jid}") }
-      decode_iterable_state_map(state)
-    end
-
-    # Keep it simple: no bulk-loading helpers for now.
-
-    private def decode_iterable_state_map(state)
-      return nil if state.nil? || state.empty?
-
-      cursor = begin
-        Sidekiq.load_json(state["c"]) if state.key?("c")
-      rescue
-        state["c"]
-      end
-
-      {
-        "executions" => state["ex"].to_i,
-        "runtime" => state["rt"].to_f,
-        "cursor" => cursor,
-        "cancelled" => state["cancelled"]&.to_i
-      }
-    end
-
-    private def iterable_states_for_jids(jids)
-      return {} unless jids && jids.any?
-
-      uniq_jids = jids.compact.uniq
-      return {} if uniq_jids.empty?
-
-      results = Sidekiq.redis do |c|
-        c.pipelined do |p|
-          uniq_jids.each { |jid| p.hgetall("it-#{jid}") }
-        end
-      end
-
-      states = {}
-      results.each_with_index do |state, idx|
-        decoded = decode_iterable_state_map(state)
-        states[uniq_jids[idx]] = decoded if decoded
-      end
-      states
-    end
 
     def format_memory(rss_kb)
       return "0" if rss_kb.nil? || rss_kb == 0
