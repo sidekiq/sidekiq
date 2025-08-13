@@ -426,6 +426,14 @@ describe Sidekiq::Client do
         assert_equal 1_001, jids.size
       end
 
+      it "pushes a large set of jobs with custom schedules" do
+        jids = MyJob.perform_bulk((1..1_001).to_a.map { |x| Array(x) }, at: [1] * 1_001)
+        assert_equal 1_001, jids.size
+
+        q = Sidekiq::ScheduledSet.new
+        assert_equal 1_001, q.size
+      end
+
       it "handles no jobs" do
         jids = MyJob.perform_bulk([])
         assert_equal 0, jids.size

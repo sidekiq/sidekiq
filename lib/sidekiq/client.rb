@@ -131,7 +131,7 @@ module Sidekiq
     def push_bulk(items)
       batch_size = items.delete(:batch_size) || items.delete("batch_size") || 1_000
       args = items["args"]
-      at = items.delete("at")
+      at = items.delete("at") || items.delete(:at)
       raise ArgumentError, "Job 'at' must be a Numeric or an Array of Numeric timestamps" if at && (Array(at).empty? || !Array(at).all? { |entry| entry.is_a?(Numeric) })
       raise ArgumentError, "Job 'at' Array must have same size as 'args' Array" if at.is_a?(Array) && at.size != args.size
 
