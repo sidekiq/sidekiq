@@ -395,6 +395,22 @@ describe Sidekiq::Client do
       assert_equal 0, result.size
     end
 
+    it "spreads jobs over the interval" do
+      now = Time.parse("2012-12-26 1:00:00 -0500")
+
+      Time.stub(:now, now) do
+        jids = Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => [[1], [2], [3], [4]], :spread_interval => 10)
+        assert_equal 4, jids.size
+
+        q = Sidekiq::ScheduledSet.new
+        assert_equal 4, q.size
+
+        q.each do |job|
+          assert (now..now + 10).cover?(job.at)
+        end
+      end
+    end
+
     describe "errors" do
       it "raises ArgumentError with invalid params" do
         assert_raises ArgumentError do
@@ -411,6 +427,18 @@ describe Sidekiq::Client do
 
         assert_raises ArgumentError do
           Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => [[1]], "at" => [Time.now.to_f, Time.now.to_f])
+        end
+
+        assert_raises ArgumentError do
+          Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => [[1]], "at" => [Time.now.to_f], "spread_interval" => 10)
+        end
+
+        assert_raises ArgumentError do
+          Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => [[1]], "spread_interval" => -10)
+        end
+
+        assert_raises ArgumentError do
+          Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => [[1]], "spread_interval" => :not_a_numeric)
         end
       end
     end
