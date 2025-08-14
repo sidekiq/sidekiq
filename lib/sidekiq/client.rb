@@ -117,6 +117,9 @@ module Sidekiq
     # larger than 1000 but YMMV based on network quality, size of job args, etc.
     # A large number of jobs can cause a bit of Redis command processing latency.
     #
+    # Accepts an additional `:spread_interval` option (in seconds) to randomly spread
+    # the jobs schedule times over the specified interval.
+    #
     # Takes the same arguments as #push except that args is expected to be
     # an Array of Arrays.  All other keys are duplicated for each job.  Each job
     # is run through the client middleware pipeline and each job gets its own Job ID
@@ -137,6 +140,17 @@ module Sidekiq
 
       jid = items.delete("jid")
       raise ArgumentError, "Explicitly passing 'jid' when pushing more than one job is not supported" if jid && args.size > 1
+
+      spread_interval = items.delete(:spread_interval) || items.delete("spread_interval")
+      raise ArgumentError, "Jobs 'spread_interval' must be a positive Numeric" if spread_interval && (!spread_interval.is_a?(Numeric) || spread_interval <= 0)
+      raise ArgumentError, "Only one of 'at' or 'spread_interval' can be provided" if at && spread_interval
+
+      if !at && spread_interval
+        # Do not use spread interval smaller than pooling interval.
+        spread_interval = [spread_interval, 5].max
+        now = Time.now.to_f
+        at = args.map { now + rand * spread_interval }
+      end
 
       normed = normalize_item(items)
       slice_index = 0
