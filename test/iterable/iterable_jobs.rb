@@ -152,6 +152,16 @@ class CsvBatchesIterableJob < SimpleIterableJob
   end
 end
 
+class ArrayBatchesIterableJob < SimpleIterableJob
+  def build_enumerator(cursor:)
+    array_batches_enumerator((1..10).to_a, cursor: cursor, batch_size: 3)
+  end
+
+  def each_iteration(batch)
+    self.class.iterated_objects << batch
+  end
+end
+
 class IterableJobWithArguments < SimpleIterableJob
   def build_enumerator(_one_arg, _another_arg, cursor:)
     array_enumerator([0, 1], cursor: cursor)

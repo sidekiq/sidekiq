@@ -24,6 +24,26 @@ module Sidekiq
           x.to_enum { x.size }
         end
 
+        # Builds Enumerator from a given array and enumerates on batches of elements.
+        # Each Enumerator tick moves the cursor `:batch_size` elements forward.
+        #
+        # @param array [Array]
+        # @param cursor [Integer] batch offset to start iteration from
+        # @option options :batch_size [Integer] (100) size of the batch
+        #
+        # @return [Enumerator]
+        #
+        # @example
+        #   array_batches_enumerator((1..10).to_a, cursor: cursor, batch_size: 3)
+        #
+        def array_batches_enumerator(array, cursor:, batch_size: 100)
+          raise ArgumentError, "array must be an Array" unless array.is_a?(Array)
+
+          total_batches = (array.size.to_f / batch_size).ceil
+          x = array.each_slice(batch_size).with_index.drop(cursor || 0)
+          x.to_enum { total_batches }
+        end
+
         # Builds Enumerator from `ActiveRecord::Relation`.
         # Each Enumerator tick moves the cursor one row forward.
         #
