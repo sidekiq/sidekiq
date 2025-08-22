@@ -225,7 +225,7 @@ module Sidekiq
 
           return false if is_interrupted
 
-          verify_iteration_time(time_limit, object) do
+          verify_iteration_time(time_limit) do
             around_iteration do
               each_iteration(object, *arguments)
             rescue Exception
@@ -241,13 +241,13 @@ module Sidekiq
         @_runtime += (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @_start_time)
       end
 
-      def verify_iteration_time(time_limit, object)
+      def verify_iteration_time(time_limit)
         start = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
         yield
         finish = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
         total = finish - start
         if total > time_limit
-          logger.warn { "Iteration took longer (%.2f) than Sidekiq's shutdown timeout (%d) when processing `%s`. This can lead to job processing problems during deploys" % [total, time_limit, object] }
+          logger.warn { "Iteration took longer (%.2f) than Sidekiq's shutdown timeout (%d). This can lead to job processing problems during deploys" % [total, time_limit] }
         end
       end
 
