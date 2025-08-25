@@ -131,6 +131,15 @@ describe Sidekiq::Job::Iterable do
     assert_equal (1..11).to_a, shop_ids
   end
 
+  it "iterates over array batches" do
+    ArrayBatchesIterableJob.perform_inline
+    batches = ArrayBatchesIterableJob.iterated_objects
+
+    assert_equal [3, 3, 3, 1], batches.map(&:size)
+    values = batches.flatten
+    assert_equal (1..10).to_a, values
+  end
+
   it "supports jobs with arguments" do
     IterableJobWithArguments.perform_inline("arg one", ["arg", "two"])
 
