@@ -124,8 +124,7 @@
         <th><%= t('Queue') %></th>
         <th><%= t('Job') %></th>
         <th><%= t('Arguments') %></th>
-        <th><%= t('Context') %></th>
-        <th><%= t('Started') %></th>
+        <th><%= t('Status') %></th>
       </thead>
       <% @workset.each do |process, thread, work| %>
         <% job = work.job %>
@@ -144,11 +143,15 @@
             <code><div class="args"><%= display_args(job.display_args) %></div></code>
           </td>
           <td>
-            <% if (state = job.iterable_state) %>
-              <code>cursor=<%= h(truncate(state["cursor"].inspect, 120)) %>; exec=<%= state["executions"] %>; rt=<%= number_with_delimiter(state["runtime"], precision: 3) %>s</code>
+            Started: <%= relative_time(work.run_at) %>
+            <% if (state = job.iterable_state) && state["cursor"] %>
+              <br/>
+              <small>
+                cursor=<%= h(truncate(state["cursor"].inspect, 100)) %>;
+                executions=<%= h(state["executions"]) %>
+              </small>
             <% end %>
           </td>
-          <td><%= relative_time(work.run_at) %></td>
         </tr>
       <% end %>
     </table>
