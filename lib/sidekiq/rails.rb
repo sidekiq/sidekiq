@@ -51,7 +51,7 @@ module Sidekiq
             elsif ::ActiveSupport::Logger.respond_to?(:broadcast)
               ::Rails.logger.extend(::ActiveSupport::Logger.broadcast(config.logger))
             else
-              ::Rails.logger = ::ActiveSupport::BroadcastLogger.new(Rails.logger, config.logger)
+              ::Rails.logger = ::ActiveSupport::BroadcastLogger.new(::Rails.logger, config.logger)
             end
           end
         end
