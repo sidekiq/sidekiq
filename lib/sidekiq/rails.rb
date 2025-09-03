@@ -48,8 +48,10 @@ module Sidekiq
           unless ::Rails.logger == config.logger || ::ActiveSupport::Logger.logger_outputs_to?(::Rails.logger, $stdout)
             if ::Rails.logger.respond_to?(:broadcast_to)
               ::Rails.logger.broadcast_to(config.logger)
-            else
+            elsif ::ActiveSupport::Logger.respond_to?(:broadcast)
               ::Rails.logger.extend(::ActiveSupport::Logger.broadcast(config.logger))
+            else
+              ::Rails.logger = ::ActiveSupport::BroadcastLogger.new(::Rails.logger, config.logger)
             end
           end
         end
