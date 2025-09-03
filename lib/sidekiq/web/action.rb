@@ -102,15 +102,15 @@ module Sidekiq
       def flash
         msg = yield
         logger.info msg
-        session[:flash] = msg
+        session[:skq_flash] = msg
       end
 
       def flash?
-        session&.[](:flash)
+        session&.[](:skq_flash)
       end
 
       def get_flash
-        @flash ||= session.delete(:flash)
+        @flash ||= session.delete(:skq_flash)
       end
 
       def erb(content, options = {})
