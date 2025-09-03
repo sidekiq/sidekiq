@@ -690,18 +690,20 @@ describe "API" do
       add_retry("foo1")
       add_retry("foo2")
 
+      now = Time.now.to_f
       retries = Sidekiq::RetrySet.new
       assert_equal 2, retries.size
-      refute(retries.map { |r| r.score > (Time.now.to_f + 9) }.any?)
+      assert_equal(0, retries.count { |r| r.score > (now + 9) })
 
       retries.each do |retri|
-        retri.reschedule(Time.now + 15) if retri.jid == "foo1"
-        retri.reschedule(Time.now.to_f + 10) if retri.jid == "foo2"
+        retri.reschedule(now + 15) if retri.jid == "foo1"
+        retri.reschedule(now + 10) if retri.jid == "foo2"
       end
 
+      now = Time.now.to_f
       assert_equal 2, retries.size
-      assert(retries.map { |r| r.score > (Time.now.to_f + 9) }.any?)
-      assert(retries.map { |r| r.score > (Time.now.to_f + 14) }.any?)
+      assert_equal(2, retries.count { |r| r.score > (now + 9) })
+      assert_equal(1, retries.count { |r| r.score > (now + 14) })
     end
 
     it "prunes processes which have died" do
