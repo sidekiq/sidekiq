@@ -178,6 +178,9 @@ module Sidekiq
         msg["error_backtrace"] = compress_backtrace(lines)
       end
 
+      # Check if job should be quarantined before checking retry exhaustion
+      return send_to_quarantine(jobinst, msg, exception) if should_quarantine?(jobinst, msg, exception)
+
       return retries_exhausted(jobinst, msg, exception) if count >= max_retry_attempts
 
       rf = msg["retry_for"]
@@ -312,6 +315,39 @@ module Sidekiq
       serialized = Sidekiq.dump_json(backtrace)
       compressed = Zlib::Deflate.deflate(serialized)
       [compressed].pack("m0") # Base64.strict_encode64
+    end
+
+    # Check if the job should be quarantined based on configured criteria
+    def should_quarantine?(jobinst, msg, exception)
+      return false unless jobinst
+
+      criteria = jobinst.class.sidekiq_quarantine_criteria
+      return false unless criteria && !criteria.empty?
+
+      exception_class_name = exception.class.name
+      current_retry_count = msg["retry_count"] || 0
+
+      # Check if any quarantine criteria matches
+      criteria.any? do |criterion|
+        criterion[:exception] == exception_class_name && 
+          current_retry_count >= criterion[:counts] - 1 # -1 because we're about to increment
+      end
+    end
+
+    # Send job to quarantine queue
+    def send_to_quarantine(jobinst, msg, exception)
+      logger.info { "Quarantining #{msg["class"]} job #{msg["jid"]} due to #{exception.class.name}" }
+      
+      # Mark job as quarantined
+      msg["quarantined_at"] = now_ms
+      msg["quarantine_reason"] = "#{exception.class.name}: #{exception.message}"
+      
+      payload = Sidekiq.dump_json(msg)
+      now = Time.now.to_f
+
+      redis do |conn|
+        conn.zadd("quarantine", now.to_s, payload)
+      end
     end
   end
 end

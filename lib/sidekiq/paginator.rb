@@ -5,7 +5,8 @@ module Sidekiq
     TYPE_CACHE = {
       "dead" => "zset",
       "retry" => "zset",
-      "schedule" => "zset"
+      "schedule" => "zset",
+      "quarantine" => "zset"
     }
 
     def page(key, pageidx = 1, page_size = 25, opts = nil)
