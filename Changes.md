@@ -2,6 +2,15 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+HEAD
+----------
+
+- `perform_bulk` now accepts an `:at` array of times to schedule each job at the corresponding time.
+  `perform_bulk(args: [[1], [2]], at: [Time.now, Time.now + 1])` [#6790, fatkodima]
+- `perform_bulk` now accepts a `:spread_interval` value to schedule jobs over
+  the next N seconds. `perform_bulk(..., spread_interval: 60)` [#6792, fatkodima]
+- Fix unintended display of flash messages in the Web UI due to session key collision
+
 8.0.7
 ----------
 
