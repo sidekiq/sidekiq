@@ -239,6 +239,14 @@ describe Sidekiq::Job::Iterable do
     assert_equal (10..20).to_a, ArrayIterableJob.iterated_objects.uniq
   end
 
+  it "runs no more than max_iteration_runtime" do
+    @config[:max_iteration_runtime] = 0.01
+
+    assert_raises Sidekiq::Job::Interrupted do
+      LongRunningIterableJob.perform_inline
+    end
+  end
+
   it "reschedules batches when sidekiq is stopping" do
     jid = iterate_exact_times(ActiveRecordBatchesJob, 1)
 
