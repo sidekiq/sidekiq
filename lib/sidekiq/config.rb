@@ -17,10 +17,9 @@ module Sidekiq
       poll_interval_average: nil,
       average_scheduled_poll_interval: 5,
       on_complex_arguments: :raise,
-      iteration: {
-        max_job_runtime: nil,
-        retry_backoff: 0
-      },
+      # if the Iterable job runs longer than this value (in seconds), then the job
+      # will be interrupted after the current iteration and re-enqueued at the back of the queue
+      max_iteration_runtime: nil,
       error_handlers: [],
       death_handlers: [],
       lifecycle_events: {

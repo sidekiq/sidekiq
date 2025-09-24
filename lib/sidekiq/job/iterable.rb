@@ -143,7 +143,7 @@ module Sidekiq
         fetch_previous_iteration_state
 
         @_executions += 1
-        @_start_time = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+        @_start_time = mono_now
 
         enumerator = build_enumerator(*args, cursor: @_cursor)
         unless enumerator
@@ -204,17 +204,17 @@ module Sidekiq
 
         time_limit = Sidekiq.default_configuration[:timeout]
         found_record = false
-        state_flushed_at = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+        state_flushed_at = mono_now
 
         enumerator.each do |object, cursor|
           found_record = true
           @_cursor = cursor
           @current_object = object
 
-          is_interrupted = interrupted?
-          if ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - state_flushed_at >= STATE_FLUSH_INTERVAL || is_interrupted
+          interrupt_job = interrupted? || should_interrupt?
+          if mono_now - state_flushed_at >= STATE_FLUSH_INTERVAL || interrupt_job
             _, _, cancelled = flush_state
-            state_flushed_at = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+            state_flushed_at = mono_now
             if cancelled
               @_cancelled = true
               on_cancel
@@ -223,7 +223,7 @@ module Sidekiq
             end
           end
 
-          return false if is_interrupted
+          return false if interrupt_job
 
           verify_iteration_time(time_limit) do
             around_iteration do
@@ -238,13 +238,13 @@ module Sidekiq
         logger.debug("Enumerator found nothing to iterate!") unless found_record
         true
       ensure
-        @_runtime += (::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @_start_time)
+        @_runtime += (mono_now - @_start_time)
       end
 
       def verify_iteration_time(time_limit)
-        start = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+        start = mono_now
         yield
-        finish = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+        finish = mono_now
         total = finish - start
         if total > time_limit
           logger.warn { "Iteration took longer (%.2f) than Sidekiq's shutdown timeout (%d). This can lead to job processing problems during deploys" % [total, time_limit] }
@@ -271,6 +271,11 @@ module Sidekiq
               end
           MSG
         end
+      end
+
+      def should_interrupt?
+        max_iteration_runtime = Sidekiq.default_configuration[:max_iteration_runtime]
+        max_iteration_runtime && (mono_now - @_start_time > max_iteration_runtime)
       end
 
       def flush_state
@@ -307,6 +312,10 @@ module Sidekiq
         else
           raise "Unexpected thrown value: #{completed.inspect}"
         end
+      end
+
+      def mono_now
+        ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
       end
     end
   end
