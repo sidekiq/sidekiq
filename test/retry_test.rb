@@ -418,6 +418,7 @@ describe Sidekiq::JobRetry do
         end
         assert_equal 0, ds.size
         assert @job
+        assert @job["discarded_at"]
       end
 
       it "kills when configured on special exceptions" do
