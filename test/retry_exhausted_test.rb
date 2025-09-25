@@ -202,6 +202,7 @@ describe "sidekiq_retries_exhausted" do
     end
 
     assert exhausted_job
+    assert exhausted_job["discarded_at"]
     assert exhausted_exception
   end
 
@@ -224,6 +225,7 @@ describe "sidekiq_retries_exhausted" do
     assert DiscardJob.exhausted_called
     assert_equal 0, Sidekiq::DeadSet.new.size
     refute_nil exhausted_job
+    assert exhausted_job["discarded_at"]
     refute_nil exhausted_exception
   end
 
