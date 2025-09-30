@@ -5,6 +5,15 @@
 HEAD
 ----------
 
+- Allow an optional global iteration max runtime. After executing for this length of time,
+  Sidekiq will re-queue the job to continue execution at a later time [#6819, fatkodima]
+```ruby
+Sidekiq.configure_server do |cfg|
+  cfg[:max_iteration_runtime] = 600 # ten minutes
+end
+```
+- Add `discarded_at` attribute when discarding a job so death handlers can distinguish between
+  a job which was killed and one that was discarded. [#6820, gstokkink]
 - `perform_bulk` now accepts an `:at` array of times to schedule each job at the corresponding time.
   `perform_bulk(args: [[1], [2]], at: [Time.now, Time.now + 1])` [#6790, fatkodima]
 - `perform_bulk` now accepts a `:spread_interval` value to schedule jobs over
