@@ -1,4 +1,6 @@
 module Sidekiq
+  require "sidekiq/component"
+
   class Loader
     include Sidekiq::Component
 
@@ -45,14 +47,11 @@ module Sidekiq
         @load_hooks.delete(name)
       end
 
-      hks.each do |blk|
-        begin
-          blk.call
-        rescue => ex
-          handle_exception(ex, :hook => name)
-        end
+      hks&.each do |blk|
+        blk.call
+      rescue => ex
+        handle_exception(ex, hook: name)
       end
     end
-
   end
 end
