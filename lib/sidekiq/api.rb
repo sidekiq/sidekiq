@@ -1321,3 +1321,5 @@ module Sidekiq
     end
   end
 end
+
+Sidekiq.loader.run_load_hooks(:api)
