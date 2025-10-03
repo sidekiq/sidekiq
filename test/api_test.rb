@@ -828,6 +828,12 @@ describe "API" do
       end
     end
   end
+
+  it "runs load hooks" do
+    ran = false
+    Sidekiq.loader.on_load(:api) { ran = true }
+    assert(ran)
+  end
 end
 
 FAKE_DATA = "H4sICNrWI2cAA3NvbWUuanNvbgCrVlDKTq1UslJQKkvMKU1V0lFQSiwqSgSJRBvqKBjpKBjHKtRyAQDd7Kt/JwAAAA=="
