@@ -1,8 +1,14 @@
 module Sidekiq
+  require "sidekiq/component"
+
   class Loader
-    def initialize
+    include Sidekiq::Component
+
+    def initialize(cfg = Sidekiq.default_configuration)
+      @config = cfg
       @load_hooks = Hash.new { |h, k| h[k] = [] }
       @loaded = Set.new
+      @lock = Mutex.new
     end
 
     # Declares a block that will be executed when a Sidekiq component is fully
@@ -14,11 +20,19 @@ module Sidekiq
     #   end
     #
     def on_load(name, &block)
-      @load_hooks[name] << block
+      # we don't want to hold the lock while calling the block
+      to_run = nil
 
-      if @loaded.include?(name)
-        @load_hooks[name].each(&:call)
+      @lock.synchronize do
+        if @loaded.include?(name)
+          to_run = block
+        else
+          @load_hooks[name] << block
+        end
       end
+
+      to_run&.call
+      nil
     end
 
     # Executes all blocks registered to +name+ via on_load.
@@ -28,8 +42,16 @@ module Sidekiq
     # In the case of the above example, it will execute all hooks registered for +:api+.
     #
     def run_load_hooks(name)
-      @loaded << name
-      @load_hooks[name].each(&:call)
+      hks = @lock.synchronize do
+        @loaded << name
+        @load_hooks.delete(name)
+      end
+
+      hks&.each do |blk|
+        blk.call
+      rescue => ex
+        handle_exception(ex, hook: name)
+      end
     end
   end
 end

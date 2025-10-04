@@ -19,7 +19,8 @@ module Sidekiq
   DEFAULT_THREAD_PRIORITY = -1
 
   ##
-  # Sidekiq::Component assumes a config instance is available at @config
+  # Sidekiq::Component provides a set of utility methods depending only
+  # on Sidekiq::Config. It assumes a config instance is available at @config.
   module Component # :nodoc:
     attr_reader :config
 

@@ -2,7 +2,7 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+8.0.8
 ----------
 
 - Allow an optional global iteration max runtime. After executing for this length of time,
@@ -19,6 +19,7 @@ end
 - `perform_bulk` now accepts a `:spread_interval` value to schedule jobs over
   the next N seconds. `perform_bulk(..., spread_interval: 60)` [#6792, fatkodima]
 - Fix unintended display of flash messages in the Web UI due to session key collision
+- Add support for lazy load hooks [#6825]
 
 8.0.7
 ----------
