@@ -177,7 +177,7 @@ module Sidekiq
       private
 
       def is_cancelled?
-        @_cancelled = Sidekiq.redis { |c| c.hget("it-#{jid}", "cancelled") }
+        @_cancelled = Sidekiq.redis { |c| c.hget(iteration_key, "cancelled") }
       end
 
       def fetch_previous_iteration_state
