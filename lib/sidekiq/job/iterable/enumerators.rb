@@ -2,6 +2,7 @@
 
 require_relative "active_record_enumerator"
 require_relative "csv_enumerator"
+require_relative "array_enumerator"
 
 module Sidekiq
   module Job
@@ -18,10 +19,23 @@ module Sidekiq
         #   array_enumerator(['build', 'enumerator', 'from', 'any', 'array'], cursor: cursor)
         #
         def array_enumerator(array, cursor:)
-          raise ArgumentError, "array must be an Array" unless array.is_a?(Array)
+          ArrayEnumerator.new(array).elements(cursor: cursor)
+        end
 
-          x = array.each_with_index.drop(cursor || 0)
-          x.to_enum { x.size }
+        # Builds Enumerator from a given array and enumerates on batches of elements.
+        # Each Enumerator tick moves the cursor `:batch_size` elements forward.
+        #
+        # @param array [Array]
+        # @param cursor [Integer] batch offset to start iteration from
+        # @option options :batch_size [Integer] (100) size of the batch
+        #
+        # @return [Enumerator]
+        #
+        # @example
+        #   array_batches_enumerator((1..10).to_a, cursor: cursor, batch_size: 3)
+        #
+        def array_batches_enumerator(array, cursor:, **options)
+          ArrayEnumerator.new(array).batches(cursor: cursor, **options)
         end
 
         # Builds Enumerator from `ActiveRecord::Relation`.
