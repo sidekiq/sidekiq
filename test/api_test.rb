@@ -304,7 +304,7 @@ describe "API" do
 
           expected_args_by_version = {
             "5.x" => [1, 2, 3],
-            "6.x" => [{"user" => "gid://app/User/1"}, [1, 2, 3]],
+            "6.x" => [{user: "gid://app/User/1"}, [1, 2, 3]],
             "8.x" => [nil, [1, 2, 3]]
           }
           assert_equal "#{ApiMailer.name}#test_email", x.display_class

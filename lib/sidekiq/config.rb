@@ -2,6 +2,7 @@
 
 require "forwardable"
 require "sidekiq/redis_connection"
+require "sidekiq/flavors"
 
 module Sidekiq
   # Sidekiq::Config represents the global configuration for an instance of Sidekiq.
@@ -35,7 +36,11 @@ module Sidekiq
       dead_max_jobs: 10_000,
       dead_timeout_in_seconds: 180 * 24 * 60 * 60, # 6 months
       reloader: proc { |&block| block.call },
-      backtrace_cleaner: ->(backtrace) { backtrace }
+      backtrace_cleaner: ->(backtrace) { backtrace },
+      flavor_with: :basic,
+      flavors: {
+        basic: Sidekiq::Flavors::Basic
+      }
     }
 
     ERROR_HANDLER = ->(ex, ctx, cfg = Sidekiq.default_configuration) {
@@ -72,7 +77,7 @@ module Sidekiq
 
     def inspect
       "#<#{self.class.name} @options=#{
-        @options.except(:lifecycle_events, :reloader, :death_handlers, :error_handlers).inspect
+        @options.except(:lifecycle_events, :reloader, :death_handlers, :error_handlers, :flavors).inspect
       }>"
     end
 
@@ -92,6 +97,23 @@ module Sidekiq
 
     def total_concurrency
       capsules.each_value.sum(&:concurrency)
+    end
+
+    def flavor_with(type)
+      @options[:flavor_with] = type
+    end
+
+    def flavors
+      @options[:flavors]
+    end
+
+    def register_flavor(name, flavor)
+      flavors[name] = flavor
+    end
+
+    def flavor
+      flavors[@options[:flavor_with]] ||
+        raise(ArgumentError, "Invalid flavor: #{@options[:flavor_with]}")
     end
 
     # Edit the default capsule.
