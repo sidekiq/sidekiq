@@ -22,6 +22,7 @@ module Sidekiq
       "Queues" => "queues",
       "Retries" => "retries",
       "Scheduled" => "scheduled",
+      "Quarantine" => "quarantine",
       "Dead" => "morgue",
       "Metrics" => "metrics",
       "Profiles" => "profiles"

@@ -45,6 +45,7 @@ en:
   Namespace: Namespace
   NextRetry: Next Retry
   NoDeadJobsFound: No dead jobs were found
+  NoQuarantineFound: No quarantined jobs were found
   NoRetriesFound: No retries were found
   NoScheduledFound: No scheduled jobs were found
   NotYetEnqueued: Not yet enqueued
@@ -60,6 +61,7 @@ en:
   Process: Process
   Processed: Processed
   Processes: Processes
+  Quarantine: Quarantine
   Queue: Queue
   Queues: Queues
   Quiet: Quiet
@@ -70,6 +72,8 @@ en:
   RetryCount: Retry Count
   RetryNow: Retry Now
   Scheduled: Scheduled
+  QuarantinedAt: Quarantined At
+  QuarantineJobs: Quarantine Jobs
   ScheduledJobs: Scheduled Jobs
   Seconds: Seconds
   ShowAll: Show All

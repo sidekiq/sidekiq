@@ -318,6 +318,31 @@ module Sidekiq
         redirect_with_query("#{root_path}scheduled")
       end
 
+      get "/quarantine" do
+        x = url_params("substr")
+
+        if x && x != ""
+          @quarantine = search(Sidekiq::QuarantineSet.new, x)
+        else
+          @count = (url_params("count") || 25).to_i
+          (@current_page, @total_size, @quarantine) = page("quarantine", url_params("page"), @count)
+          @quarantine = @quarantine.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+        end
+
+        erb(:quarantine)
+      end
+
+      post "/quarantine" do
+        redirect(request.path) unless url_params("key")
+
+        url_params("key").each do |key|
+          job = Sidekiq::QuarantineSet.new.fetch(*parse_key(key)).first
+          retry_or_delete_or_kill job, request.params if job
+        end
+
+        redirect_with_query("#{root_path}quarantine")
+      end
+
       get "/dashboard/stats" do
         redirect "#{root_path}stats"
       end

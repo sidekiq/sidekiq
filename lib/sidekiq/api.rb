@@ -47,6 +47,10 @@ module Sidekiq
       stat :dead_size
     end
 
+    def quarantine_size
+      stat :quarantine_size
+    end
+
     def enqueued
       stat :enqueued
     end
@@ -88,12 +92,13 @@ module Sidekiq
           pipeline.zcard("schedule")
           pipeline.zcard("retry")
           pipeline.zcard("dead")
+          pipeline.zcard("quarantine")
           pipeline.scard("processes")
           pipeline.lindex("queue:default", -1)
         end
       }
 
-      default_queue_latency = if (entry = pipe1_res[6])
+      default_queue_latency = if (entry = pipe1_res[7])
         job = begin
           Sidekiq.load_json(entry)
         rescue
@@ -123,7 +128,8 @@ module Sidekiq
         scheduled_size: pipe1_res[2],
         retry_size: pipe1_res[3],
         dead_size: pipe1_res[4],
-        processes_size: pipe1_res[5],
+        quarantine_size: pipe1_res[5],
+        processes_size: pipe1_res[6],
 
         default_queue_latency: default_queue_latency
       }
@@ -867,6 +873,17 @@ module Sidekiq
   class RetrySet < JobSet
     def initialize
       super("retry")
+    end
+  end
+
+  ##
+  # The set of quarantined jobs within Sidekiq. Quarantined jobs have
+  # reached their quarantine criteria and are held in this set pending
+  # manual intervention.
+  #
+  class QuarantineSet < JobSet
+    def initialize
+      super("quarantine")
     end
   end
 

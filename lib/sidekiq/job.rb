@@ -51,6 +51,7 @@ module Sidekiq
         base.sidekiq_class_attribute :sidekiq_options_hash
         base.sidekiq_class_attribute :sidekiq_retry_in_block
         base.sidekiq_class_attribute :sidekiq_retries_exhausted_block
+        base.sidekiq_class_attribute :sidekiq_quarantine_criteria
       end
 
       module ClassMethods
@@ -83,6 +84,20 @@ module Sidekiq
 
         def sidekiq_retries_exhausted(&block)
           self.sidekiq_retries_exhausted_block = block
+        end
+
+        ##
+        # Configure quarantine criteria for this job.
+        # When a job fails with the specified exception for the specified count,
+        # it will be moved to the quarantine queue instead of being retried.
+        #
+        # Example:
+        #   quarantine_on HttpClient::ServerError, counts: 3
+        #
+        def quarantine_on(exception_class, counts:)
+          criteria = self.sidekiq_quarantine_criteria || []
+          criteria << { exception: exception_class.name, counts: counts }
+          self.sidekiq_quarantine_criteria = criteria
         end
 
         def get_sidekiq_options # :nodoc:
