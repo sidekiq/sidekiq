@@ -61,6 +61,10 @@
         <input class="btn btn-primary" type="submit" name="retry" value="<%= t('RetryNow') %>" />
         <input class="btn btn-danger" type="submit" name="delete" value="<%= t('Delete') %>" />
         <input class="btn btn-danger" type="submit" name="kill" value="<%= t('Kill') %>" />
+        <!-- Retry all -->
+        <button class="btn btn-primary" type="submit" name="action" value="retry_all" formaction="<%= "#{root_path}retries/all/retry" %>"><%= t('RetryAll') %></button>
+        <button class="btn btn-danger" type="submit" name="action" value="delete_all" formaction="<%= "#{root_path}retries/all/delete" %>"><%= t('DeleteAll') %></button>
+        <button class="btn btn-danger" type="submit" name="action" value="kill_all" formaction="<%= "#{root_path}retries/all/kill" %>"><%= t('KillAll') %></button>
       </div>
     </form>
     
