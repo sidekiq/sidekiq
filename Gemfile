@@ -29,6 +29,7 @@ end
 
 group :development, :test do
   gem "standard", require: false
+  gem "herb", require: false
 end
 
 group :load_test do
