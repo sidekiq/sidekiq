@@ -16,7 +16,7 @@
             <tr>
               <th>
                 <label>
-                  <input type="checkbox" class="check_all" />
+                  <input type="checkbox" class="check_all check-all-retries" />
                 </label>
               </th>
               <th><%= t('NextRetry') %></th>
@@ -31,7 +31,7 @@
             <tr>
               <td>
                 <label>
-                  <input type='checkbox' name='key[]' value='<%= job_params(entry.item, entry.score) %>' class='shift_clickable' />
+                  <input type='checkbox' name='key[]' value='<%= job_params(entry.item, entry.score) %>' class='shift_clickable retry-item-checkbox' />
                 </label>
               </td>
               <td>
@@ -62,9 +62,9 @@
         <input class="btn btn-danger" type="submit" name="delete" value="<%= t('Delete') %>" />
         <input class="btn btn-danger" type="submit" name="kill" value="<%= t('Kill') %>" />
         <!-- Retry all -->
-        <button class="btn btn-primary" type="submit" name="action" value="retry_all" formaction="<%= "#{root_path}retries/all/retry" %>"><%= t('RetryAll') %></button>
-        <button class="btn btn-danger" type="submit" name="action" value="delete_all" formaction="<%= "#{root_path}retries/all/delete" %>"><%= t('DeleteAll') %></button>
-        <button class="btn btn-danger" type="submit" name="action" value="kill_all" formaction="<%= "#{root_path}retries/all/kill" %>"><%= t('KillAll') %></button>
+        <button class="btn btn-primary bulk-retry-buttons retry-all-button" type="submit" name="action" value="retry_all" formaction="<%= "#{root_path}retries/all/retry" %>"><%= t('RetryAll') %></button>
+        <button class="btn btn-danger bulk-retry-buttons" type="submit" name="action" value="delete_all" formaction="<%= "#{root_path}retries/all/delete" %>"><%= t('DeleteAll') %></button>
+        <button class="btn btn-danger bulk-retry-buttons" type="submit" name="action" value="kill_all" formaction="<%= "#{root_path}retries/all/kill" %>"><%= t('KillAll') %></button>
       </div>
     </form>
     

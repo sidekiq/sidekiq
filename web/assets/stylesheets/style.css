@@ -454,6 +454,10 @@ canvas + .table_container {
   gap: 8px;
 }
 
+.bulk-retry-buttons.retry-all-button {
+  margin-left: auto;
+}
+
 table {
   background-color: var(--color-elevated);
   border: 1px solid var(--color-border);
