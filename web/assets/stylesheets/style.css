@@ -761,3 +761,16 @@ body > footer .nav {
   padding: 20px;
   background: var(--color-success);
 }
+
+.args {
+  overflow-y: auto;
+  max-height: 50px;
+  word-break: break-word
+} 
+.args-extended {
+  overflow-y: scroll;
+  max-height: 500px;
+}
+
+.toggle { display: none; }
+.toggle.is-open { display: block; }
