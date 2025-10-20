@@ -16,7 +16,7 @@
             <tr>
               <th>
                 <label>
-                  <input type="checkbox" class="check_all" />
+                  <input type="checkbox" class="check_all check-all-scheduled" />
                 </label>
               </th>
               <th><%= t('When') %></th>
@@ -29,7 +29,7 @@
             <tr>
               <td>
                 <label>
-                  <input type='checkbox' name='key[]' value='<%= job_params(entry.item, entry.score) %>' class='shift_clickable' />
+                  <input type='checkbox' name='key[]' value='<%= job_params(entry.item, entry.score) %>' class='shift_clickable scheduled-item-checkbox' />
                 </label>
               </td>
               <td>
@@ -51,8 +51,12 @@
           <% end %>
         </table>
       </div>
-      <input class="btn btn-danger" type="submit" name="delete" value="<%= t('Delete') %>" />
-      <input class="btn btn-danger" type="submit" name="add_to_queue" value="<%= t('AddToQueue') %>" />
+      <div class="buttons-row">
+        <input class="btn btn-danger" type="submit" name="delete" value="<%= t('Delete') %>" />
+        <input class="btn btn-danger" type="submit" name="add_to_queue" value="<%= t('AddToQueue') %>" />
+        <button class="btn btn-danger bulk-scheduled-buttons delete-all-button" type="submit" name="action" value="delete_all" formaction="<%= "#{root_path}scheduled/all/delete" %>"><%= t('DeleteAll') %></button>
+        <button class="btn btn-danger bulk-scheduled-buttons" type="submit" name="action" value="add_all_to_queue" formaction="<%= "#{root_path}scheduled/all/add_to_queue" %>"><%= t('AddAllToQueue') %></button>
+      </div>
     </form>
   <% else %>
     <div class="alert alert-success"><%= t('NoScheduledFound') %></div>

@@ -3,6 +3,7 @@ tr:
   LanguageName: Türkçe
   Actions: Eylemler
   AddToQueue: Kuyruğa ekle
+  AddAllToQueue: Hepsini kuyruğa ekle
   AreYouSure: Emin misiniz?
   AreYouSureDeleteJob: Bu işi silmek istediğinizden emin misiniz?
   AreYouSureDeleteQueue: "%{queue} kuyruğunu silmek istediğinizden emin misiniz?"

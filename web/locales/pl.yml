@@ -3,6 +3,7 @@ pl:
   LanguageName: Polski
   Actions: Akcje
   AddToQueue: dodaj do kolejki
+  AddAllToQueue: dodaj wszystko do kolejki
   AreYouSure: Na pewno?
   AreYouSureDeleteJob: Czy na pewno usunąć to zadanie?
   AreYouSureDeleteQueue: Czy na pewno usunąć kolejkę %{queue}?

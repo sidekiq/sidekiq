@@ -3,6 +3,7 @@ zh-CN: # <---- change this to your locale code
   LanguageName: 中文
   Actions: 操作
   AddToQueue: 添加至队列
+  AddAllToQueue: 添加所有至队列
   AreYouSure: 你确定？
   AreYouSureDeleteJob: 你确定要删除这个任务么？
   AreYouSureDeleteQueue: 你确定要删除 %{queue} 队列吗？这将删除当前队列中的所有任务，当新的任务添加到该队列时，它会重新出现。

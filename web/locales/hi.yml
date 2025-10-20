@@ -3,6 +3,7 @@ hi:
   LanguageName: हिन्दी
   Actions: कार्रवाई
   AddToQueue: कतार मे जोड़ें
+  AddAllToQueue: सभी को कतार मे जोड़ें
   AreYouSure: क्या आपको यकीन है?
   AreYouSureDeleteJob: क्या आप इस कार्य को हटाना चाहते है?
   AreYouSureDeleteQueue: क्या आप %{queue} कतार को हटाना चाहते है?

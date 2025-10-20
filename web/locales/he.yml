@@ -3,6 +3,7 @@ he:
   LanguageName: עברית
   Actions: פעולות
   AddToQueue: הוסף לתור
+  AddAllToQueue: הוסף הכל לתור
   AreYouSure: אתם בטוחים?
   AreYouSureDeleteJob: האם אתם בטוחים שברצונכם למחוק את העבודה הזאת?
   AreYouSureDeleteQueue: האם אתם בטוחים שברצונכם למחוק את התור %{queue}?

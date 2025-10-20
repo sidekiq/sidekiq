@@ -454,7 +454,7 @@ canvas + .table_container {
   gap: 8px;
 }
 
-.bulk-retry-buttons.retry-all-button {
+.bulk-scheduled-buttons.delete-all-button, .bulk-morgue-buttons.morgue-all-button, .bulk-retry-buttons.retry-all-button {
   margin-left: auto;
 }
 
