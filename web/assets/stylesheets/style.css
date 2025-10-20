@@ -455,7 +455,7 @@ canvas + .table_container {
 }
 
 .bulk-scheduled-buttons.delete-all-button, .bulk-morgue-buttons.morgue-all-button, .bulk-retry-buttons.retry-all-button {
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 table {
