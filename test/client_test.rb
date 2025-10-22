@@ -10,6 +10,7 @@ end
 
 class QueuedJob
   include Sidekiq::Job
+
   sidekiq_options queue: :flimflam
 end
 
@@ -27,6 +28,7 @@ end
 
 class BaseJob
   include Sidekiq::Job
+
   sidekiq_options "retry" => "base"
 end
 

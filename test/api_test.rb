@@ -21,6 +21,7 @@ end
 
 class JobWithTags
   include Sidekiq::Job
+
   sidekiq_options tags: ["foo"]
 end
 
