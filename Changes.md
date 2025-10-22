@@ -5,6 +5,7 @@
 HEAD
 ----------
 
+- Restore bulk action buttons on Scheduled, Retry and Dead tabs [#6833, deve1212]
 - Fix display of long job args [#6836]
 
 8.0.8

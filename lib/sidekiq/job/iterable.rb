@@ -55,7 +55,7 @@ module Sidekiq
       def cancel!
         return @_cancelled if cancelled?
 
-        key = "it-#{jid}"
+        key = iteration_key
         _, result, _ = Sidekiq.redis do |c|
           c.pipelined do |p|
             p.hsetnx(key, "cancelled", Time.now.to_i)
@@ -177,7 +177,7 @@ module Sidekiq
       private
 
       def is_cancelled?
-        @_cancelled = Sidekiq.redis { |c| c.hget("it-#{jid}", "cancelled") }
+        @_cancelled = Sidekiq.redis { |c| c.hget(iteration_key, "cancelled") }
       end
 
       def fetch_previous_iteration_state
