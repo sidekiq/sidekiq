@@ -2,6 +2,7 @@
   LanguageName: Português (Brasil)
   Actions: Ações
   AddToQueue: Adicionar à fila
+  AddAllToQueue: Adicionar tudo à fila
   AreYouSure: Tem certeza?
   AreYouSureDeleteJob: Deseja deletar esta tarefa?
   AreYouSureDeleteQueue: Deseja deletar a fila %{queue}? Isso irá deletar todas as tarefas desta fila.

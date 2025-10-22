@@ -318,6 +318,16 @@ module Sidekiq
         redirect_with_query("#{root_path}scheduled")
       end
 
+      post '/scheduled/all/delete' do
+        Sidekiq::ScheduledSet.new.clear
+        redirect "#{root_path}scheduled"
+      end
+
+      post '/scheduled/all/add_to_queue' do
+        Sidekiq::ScheduledSet.new.each(&:add_to_queue)
+        redirect "#{root_path}scheduled"
+      end
+
       get "/dashboard/stats" do
         redirect "#{root_path}stats"
       end

@@ -3,6 +3,7 @@ nb:
   LanguageName: Norsk
   Actions: Handlinger
   AddToQueue: Legg til i kø
+  AddAllToQueue: Legg alt til i kø
   AreYouSure: Er du sikker?
   AreYouSureDeleteJob: Er du sikker på at du vil slette denne jobben?
   AreYouSureDeleteQueue: Er du sikker på at du vil slette køen %{queue}?

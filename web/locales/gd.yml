@@ -3,6 +3,7 @@ gd:
   LanguageName: Gaeilge
   Actions: Gnìomhan
   AddToQueue: Cuir ris a’ chiutha
+  AddAllToQueue: Cuir a h-uile ris a’ chiutha
   AreYouSure: A bheil thu cinnteach?
   AreYouSureDeleteJob: A bheil thu cinnteach gu bheil thu airson an obair seo a sguabadh às?
   AreYouSureDeleteQueue: A bheil thu cinnteach gu bheil thu airson ciutha %{queue} a sguabadh às? Sguabaidh seo às gach obair sa chiutha seo, nochdaidh e a-rithist nuair a phutas tu barrachd obraichean dha an uairsin.
