@@ -5,6 +5,9 @@
 HEAD
 ----------
 
+- Updated `Sidekiq::Process` API to provide capsule data. The `queues` and `weights` 
+  data will be removed from Redis in Sidekiq 8.1, as this data can now be found in the
+  `capsules` element. [#6295]
 - Restore bulk action buttons on Scheduled, Retry and Dead tabs [#6833, deve1212]
 - Fix display of long job args [#6836]
 

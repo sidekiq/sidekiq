@@ -252,17 +252,20 @@ module Sidekiq
         "pid" => ::Process.pid,
         "tag" => @config[:tag] || "",
         "concurrency" => @config.total_concurrency,
+        "capsules" => @config.capsules.each_with_object({}) { |(name, cap), memo|
+          memo[name] = cap.to_h
+        },
+        #####
+        # TODO deprecated, remove in 9.0
+        # This data is now found in the `capsules` element above
         "queues" => @config.capsules.values.flat_map { |cap| cap.queues }.uniq,
-        "weights" => to_weights,
+        "weights" => @config.capsules.values.map(&:weights),
+        #####
         "labels" => @config[:labels].to_a,
         "identity" => identity,
         "version" => Sidekiq::VERSION,
         "embedded" => @embedded
       }
-    end
-
-    def to_weights
-      @config.capsules.values.map(&:weights)
     end
 
     def to_json
