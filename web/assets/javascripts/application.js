@@ -67,11 +67,11 @@ function addDataToggleListeners(event) {
 //on change function for checkboxes to toggle bulk retry buttons
 function toggleBulkRetryButtons() {
   // Select all relevant checkboxes: individual ones and the "check_all"
-  const checkboxes = document.querySelectorAll('.scheduled-item-checkbox, .check-all-scheduled, .morgue-item-checkbox, .check-all-morgues,.retry-item-checkbox, .check-all-retries');
+  const checkboxes = document.querySelectorAll('.select-item-checkbox, .check-all-items');
   // Check if any checkbox is selected
   const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
-  // Select elements with class "bulk-retry-buttons"
-  const buttons = document.querySelectorAll('.bulk-retry-buttons, .bulk-morgue-buttons, .bulk-scheduled-buttons');
+  // Select elements with class "bulk-action-buttons"
+  const buttons = document.querySelectorAll('.bulk-action-buttons');
   buttons.forEach(btn => {
     btn.style.display = anyChecked ? 'none' : 'block';
   });
@@ -79,7 +79,7 @@ function toggleBulkRetryButtons() {
 
 // Add event listeners to all checkboxes in retries screen for the 'change' event
 function initializeBulkRetryToggle(){
-  document.querySelectorAll('.check-all-scheduled, .scheduled-item-checkbox, .check-all-morgues, .morgue-item-checkbox,.retry-item-checkbox, .check-all-retries').forEach(cb => {
+  document.querySelectorAll('.check-all-items, .select-item-checkbox').forEach(cb => {
     cb.addEventListener('change', toggleBulkRetryButtons);
   });
 }
