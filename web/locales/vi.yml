@@ -3,6 +3,7 @@ vi:
   LanguageName: Tiếng Việt
   Actions: Những hành động
   AddToQueue: Thêm vào hàng đợi
+  AddAllToQueue: Thêm tất cả vào hàng đợi
   AreYouSure: Bạn chắc chứ?
   AreYouSureDeleteJob: Bạn có chắc là muốn xóa tác vụ này?
   AreYouSureDeleteQueue: Bạn có chắc là muốn xóa %{queue} này?

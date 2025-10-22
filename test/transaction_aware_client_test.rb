@@ -8,12 +8,14 @@ require_relative "dummy/config/environment"
 
 class PostJob
   include Sidekiq::Job
+
   def perform
   end
 end
 
 class AlwaysDeferredJob
   include Sidekiq::Job
+
   sidekiq_options client_class: Sidekiq::TransactionAwareClient
 
   def perform
@@ -22,6 +24,7 @@ end
 
 class AlwaysPushedJob
   include Sidekiq::Job
+
   sidekiq_options client_class: Sidekiq::Client
 
   def perform

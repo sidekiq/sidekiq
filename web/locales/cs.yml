@@ -3,6 +3,7 @@ cs:
   LanguageName: Čeština
   Actions: Akce
   AddToQueue: Přidat do fronty
+  AddAllToQueue: Přidat vše do fronty
   AreYouSure: Jste si jisti?
   AreYouSureDeleteJob: Jste si jisti, že chcete odstranit tento úkol?
   AreYouSureDeleteQueue: Jste si jisti, že chcete odstranit frontu %{queue}?

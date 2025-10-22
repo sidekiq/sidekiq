@@ -3,6 +3,7 @@ sv:
   LanguageName: Svenska
   Actions: Åtgärder
   AddToQueue: Lägg till i kö
+  AddAllToQueue: Lägg till allt i kö
   AreYouSure: Är du säker?
   AreYouSureDeleteJob: Är du säker på att du vill ta bort detta jobb?
   AreYouSureDeleteQueue: Är du säker på att du vill ta bort kön %{queue}?

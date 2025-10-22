@@ -22,6 +22,7 @@ function addListeners() {
     node.addEventListener("click", addDataToggleListeners)
   })
 
+  initializeBulkToggle();
   addShiftClickListeners();
   updateFuzzyTimes();
   updateNumbers();
@@ -58,9 +59,24 @@ function addPollingListeners(_event)  {
 
 function addDataToggleListeners(event) {
   var source = event.target || event.srcElement;
-  var targName = source.getAttribute("data-toggle");
+  var targName = source.dataset.toggle;
   var full = document.getElementById(targName);
   full.classList.toggle("is-open");
+}
+
+function toggleBulkButtons() {
+  const checkboxes = document.querySelectorAll('.select-item-checkbox, .check-all-items');
+  const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+  const buttons = document.querySelectorAll('.bulk-action-buttons');
+  buttons.forEach(btn => {
+    btn.style.display = anyChecked ? 'none' : 'block';
+  });
+}
+
+function initializeBulkToggle(){
+  document.querySelectorAll('.check-all-items, .select-item-checkbox').forEach(cb => {
+    cb.addEventListener('change', toggleBulkButtons);
+  });
 }
 
 function addShiftClickListeners() {
@@ -81,7 +97,7 @@ function addShiftClickListeners() {
 }
 
 function updateFuzzyTimes() {
-  var locale = document.body.getAttribute("data-locale");
+  var locale = document.body.dataset.locale;
   var parts = locale.split('-');
   if (typeof parts[1] !== 'undefined') {
     parts[1] = parts[1].toUpperCase();
@@ -96,7 +112,7 @@ function updateFuzzyTimes() {
 function updateNumbers() {
   document.querySelectorAll("[data-nwp]").forEach(node => {
     let number = parseFloat(node.textContent);
-    let precision = parseInt(node.dataset["nwp"] || 0);
+    let precision = parseInt(node.dataset.nwp || 0);
     if (typeof number === "number") {
       let formatted = number.toLocaleString(undefined, {
         minimumFractionDigits: precision,
@@ -175,9 +191,9 @@ function handleConfirmDialog (event) {
   const target = event.target
 
   if (target.localName !== "input") { return }
-  if (!target.hasAttribute("data-confirm")) { return }
+  const confirmMessage = target.dataset.confirm
 
-  const confirmMessage = target.getAttribute("data-confirm")
+  if (confirmMessage === undefined) { return }
 
   if (!window.confirm(confirmMessage)) {
     event.preventDefault()

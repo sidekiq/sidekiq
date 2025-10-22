@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-HEAD
+8.0.2
 ---------
 
 - Rewrite swarm memory tracking to use the `get_process_mem` gem which should allow

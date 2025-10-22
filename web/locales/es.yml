@@ -3,6 +3,7 @@ es:
   LanguageName: Español
   Actions: Acciones
   AddToQueue: Añadir a la cola
+  AddAllToQueue: Añadir todo a la cola
   AreYouSure: ¿Estás seguro?
   AreYouSureDeleteJob: ¿Estás seguro de eliminar este trabajo?
   AreYouSureDeleteQueue: ¿Estás seguro de eliminar la cola %{queue}?

@@ -1181,7 +1181,6 @@ module Sidekiq
   #      # thread_id is a unique identifier per thread
   #      # work is a `Sidekiq::Work` instance that has the following accessor methods.
   #      # [work.queue, work.run_at, work.payload]
-  #      # run_at is an epoch Integer.
   #    end
   #
   class WorkSet
@@ -1335,3 +1334,5 @@ module Sidekiq
     end
   end
 end
+
+Sidekiq.loader.run_load_hooks(:api)

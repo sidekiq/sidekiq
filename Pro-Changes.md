@@ -4,6 +4,17 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Warn if passing a single value as options in `batch.on(event, target, options)`.
+  Callback options were always meant to be a Hash but the API never validated it.
+  This will raise an `ArgumentError` in Pro 9.0. [#6789]
+```ruby
+batch.on(:success, MyCallback, 1234) # bad
+batch.on(:success, MyCallback, "document_id" => 1234) # good
+```
+
 8.0.2
 ---------
 

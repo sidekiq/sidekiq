@@ -51,12 +51,15 @@ end
 
 class Singler
   include Sidekiq::ServerMiddleware
+
   def call(w, j, q)
     puts "single-threaded #{w.class.name}!"
   end
 end
 
 Sidekiq.configure_server do |config|
+  # config.logger.formatter = ::Sidekiq::Logger::Formatters::Plain.new
+
   config.capsule("single_threaded") do |cap|
     cap.concurrency = 1
     cap.queues = %w[single]
@@ -68,6 +71,7 @@ end
 # you will need to restart if you change any of these
 class FooJob
   include Sidekiq::Job
+
   def perform(*)
     raise "boom" if rand < 0.1
     sleep(rand)
@@ -76,6 +80,7 @@ end
 
 class BarJob
   include Sidekiq::Job
+
   def perform(*)
     raise "boom" if rand < 0.1
     sleep(rand)
@@ -84,6 +89,7 @@ end
 
 class StoreCardJob
   include Sidekiq::Job
+
   def perform(*)
     raise "boom" if rand < 0.1
     sleep(rand)
@@ -92,6 +98,7 @@ end
 
 class OrderJunkJob
   include Sidekiq::Job
+
   def perform(*)
     raise "boom" if rand < 0.1
     sleep(rand)
@@ -100,6 +107,7 @@ end
 
 class SpamUserJob
   include Sidekiq::Job
+
   def perform(*)
     raise "boom" if rand < 0.1
     sleep(rand)
@@ -108,6 +116,7 @@ end
 
 class FastJob
   include Sidekiq::Job
+
   def perform(*)
     raise "boom" if rand < 0.2
     sleep(rand * 0.1)
@@ -116,6 +125,7 @@ end
 
 class SlowJob
   include Sidekiq::Job
+
   def perform(*)
     raise "boom" if rand < 0.3
     sleep(rand * 10)

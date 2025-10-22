@@ -3,6 +3,7 @@ ja:
   LanguageName: 日本語
   Actions: アクション
   AddToQueue: キューに追加
+  AddAllToQueue: すべてをキューに追加
   AreYouSure: よろしいですか？
   AreYouSureDeleteJob: このジョブを削除しますか？
   AreYouSureDeleteQueue: この %{queue} キューを削除しますか?

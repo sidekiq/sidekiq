@@ -532,6 +532,40 @@ describe Sidekiq::Web do
     end
   end
 
+  it "can delete all scheduled jobs" do
+    3.times { add_scheduled }
+
+    assert_equal 3, Sidekiq::ScheduledSet.new.size
+    post "/scheduled/all/delete"
+    assert_equal 0, Sidekiq::ScheduledSet.new.size
+    assert_equal 302, last_response.status
+    assert_equal "http://example.org/scheduled", last_response.headers["Location"]
+  end
+
+  it "can add all scheduled jobs to queue" do
+    msg1 = add_scheduled.first
+    msg2 = add_scheduled.first
+    msg3 = add_scheduled.first
+
+    assert_equal 3, Sidekiq::ScheduledSet.new.size
+    assert_equal 0, Sidekiq::Queue.new("default").size
+
+    post "/scheduled/all/add_to_queue"
+    assert_equal 302, last_response.status
+    assert_equal "http://example.org/scheduled", last_response.headers["Location"]
+
+    # All scheduled jobs should be moved to the default queue
+    assert_equal 0, Sidekiq::ScheduledSet.new.size
+    assert_equal 3, Sidekiq::Queue.new("default").size
+
+    # Verify jobs are in the queue
+    get "/queues/default"
+    assert_equal 200, last_response.status
+    assert_match(/#{msg1["args"][2]}/, last_response.body)
+    assert_match(/#{msg2["args"][2]}/, last_response.body)
+    assert_match(/#{msg3["args"][2]}/, last_response.body)
+  end
+
   it "can retry all retries" do
     msg = add_retry.first
     add_retry

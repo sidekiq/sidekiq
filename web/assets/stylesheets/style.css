@@ -29,8 +29,6 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-::selection { background: var(--color-selected); }
-
 :focus-visible {
   outline: 1px solid oklch(from var(--color-primary) l c h / 50%);
 }
@@ -456,6 +454,10 @@ canvas + .table_container {
   gap: 8px;
 }
 
+.bulk-action-buttons.bulk-lead-button {
+  margin-inline-start: auto;
+}
+
 table {
   background-color: var(--color-elevated);
   border: 1px solid var(--color-border);
@@ -567,7 +569,6 @@ body > footer .nav {
     --color-border: oklch(25% 0.01 256);
     --color-input-border: oklch(31% 0.01 256);
     --color-selected: oklch(27% 0.01 256);
-    --color-selected-text: oklch(55% 0.11 45);
     --color-table-bg-alt: oklch(24% 0.01 256);
     --color-shadow: oklch(9% 0.01 256 / 10%);
     --color-text: oklch(75% 0.01 256);
@@ -616,10 +617,6 @@ body > footer .nav {
   .label-info { background: var(--color-info); }
   .label-danger { background: var(--color-danger); }
   .label-warning { background: var(--color-warning); }
-
-  td.box::selection {
-    background-color: var(--color-selected-text);
-  }
 }
 
 @media (max-width: 800px) { :root { --font-size: 14px; } }
@@ -764,3 +761,16 @@ body > footer .nav {
   padding: 20px;
   background: var(--color-success);
 }
+
+.args {
+  overflow-y: auto;
+  max-height: 50px;
+  word-break: break-word
+} 
+.args-extended {
+  overflow-y: scroll;
+  max-height: 500px;
+}
+
+.toggle { display: none; }
+.toggle.is-open { display: block; }

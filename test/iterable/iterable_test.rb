@@ -68,6 +68,7 @@ describe Sidekiq::Job::Iterable do
     e = assert_raises(RuntimeError) do
       Class.new do
         include Sidekiq::IterableJob
+
         def perform(*)
         end
       end
@@ -237,6 +238,14 @@ describe Sidekiq::Job::Iterable do
 
     continue_iterating(ArrayIterableJob, jid: jid)
     assert_equal (10..20).to_a, ArrayIterableJob.iterated_objects.uniq
+  end
+
+  it "runs no more than max_iteration_runtime" do
+    @config[:max_iteration_runtime] = 0.01
+
+    assert_raises Sidekiq::Job::Interrupted do
+      LongRunningIterableJob.perform_inline
+    end
   end
 
   it "reschedules batches when sidekiq is stopping" do

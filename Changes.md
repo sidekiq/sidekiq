@@ -5,10 +5,42 @@
 HEAD
 ----------
 
-- Updated `Sidekiq::Process` API to provide capsule data. The `queues` and `weights` data will be removed from Redis in Sidekiq 8.1, as this data can now be found in the `capsules` element. [#6295]
+- Updated `Sidekiq::Process` API to provide capsule data. The `queues` and `weights` 
+  data will be removed from Redis in Sidekiq 8.1, as this data can now be found in the
+  `capsules` element. [#6295]
+- Restore bulk action buttons on Scheduled, Retry and Dead tabs [#6833, deve1212]
+- Fix display of long job args [#6836]
+
+8.0.8
+----------
+
+- Allow an optional global iteration max runtime. After executing for this length of time,
+  Sidekiq will re-queue the job to continue execution at a later time [#6819, fatkodima]
+```ruby
+Sidekiq.configure_server do |cfg|
+  cfg[:max_iteration_runtime] = 600 # ten minutes
+end
+```
+- Add `discarded_at` attribute when discarding a job so death handlers can distinguish between
+  a job which was killed and one that was discarded. [#6820, gstokkink]
+- `perform_bulk` now accepts an `:at` array of times to schedule each job at the corresponding time.
+  `perform_bulk(args: [[1], [2]], at: [Time.now, Time.now + 1])` [#6790, fatkodima]
+- `perform_bulk` now accepts a `:spread_interval` value to schedule jobs over
+  the next N seconds. `perform_bulk(..., spread_interval: 60)` [#6792, fatkodima]
+- Fix unintended display of flash messages in the Web UI due to session key collision
+- Add support for lazy load hooks [#6825]
+
+8.0.7
+----------
+
+- The `:discard` option for `sidekiq_retries_exhausted` and `sidekiq_retry_in`
+  now calls death handlers, otherwise it could break other Sidekiq
+  functionality. [#6741]
+- Provide a Plain log formatter which does not colorize output [#6778]
 - Job iteration now exposes `current_object` for easy access within the `around_iteration` callback [#6774]
 - Fix JS race condition which could skip confirmation dialogs when Live Polling [#6768]
 - Fix edge case which could lose CurrentAttributes [#6767]
+- Update UK locale [#6776]
 
 8.0.6
 ----------

@@ -11,6 +11,7 @@ module Sidekiq
     }
 
     include Sidekiq::Component
+
     def initialize(config)
       @config = config
       @vernier_output_dir = ENV.fetch("VERNIER_OUTPUT_DIR") { Dir.tmpdir }

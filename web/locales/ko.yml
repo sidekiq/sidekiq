@@ -3,6 +3,7 @@ ko:
   LanguageName: 한국어
   Actions: 동작
   AddToQueue: 큐 추가
+  AddAllToQueue: 모든 것을 큐에 추가
   AreYouSure: 정말입니까?
   AreYouSureDeleteJob: 이 작업을 삭제하시겠습니까?
   AreYouSureDeleteQueue: 이 %{queue} 큐를 삭제하시겠습니까?

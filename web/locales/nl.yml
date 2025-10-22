@@ -3,6 +3,7 @@ nl:
   LanguageName: Nederlands
   Actions: Acties
   AddToQueue: Toevoegen aan wachtrij
+  AddAllToQueue: Alles toevoegen aan wachtrij
   AreYouSure: Weet u het zeker?
   AreYouSureDeleteJob: Weet u zeker dat u deze taak wilt verwijderen?
   AreYouSureDeleteQueue: Weet u zeker dat u wachtrij %{queue} wilt verwijderen?
