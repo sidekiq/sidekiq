@@ -324,7 +324,7 @@ module Sidekiq
       end
 
       post '/scheduled/all/add_to_queue' do
-        Sidekiq::ScheduledSet.new.add_all_to_queue
+        Sidekiq::ScheduledSet.new.each(&:add_to_queue)
         redirect "#{root_path}scheduled"
       end
 

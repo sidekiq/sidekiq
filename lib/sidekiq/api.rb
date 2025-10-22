@@ -740,14 +740,6 @@ module Sidekiq
       end
     end
 
-    def add_all_to_queue
-      c = Sidekiq::Client.new
-      pop_each do |msg, _|
-        job = Sidekiq.load_json(msg)
-        c.push(job)
-      end
-    end
-
     # Move all jobs from this Set to the Dead Set.
     # See DeadSet#kill
     def kill_all(notify_failure: false, ex: nil)
