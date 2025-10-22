@@ -21,6 +21,7 @@ end
 class CustomJob
   $recorder = []
   include Sidekiq::Job
+
   def perform(recorder)
     $recorder << ["job_performed"]
   end
@@ -65,6 +66,7 @@ end
 
 class FooC
   include Sidekiq::ClientMiddleware
+
   def initialize(*args)
     @args = args
   end

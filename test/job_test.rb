@@ -6,6 +6,7 @@ require "active_support/core_ext/numeric/time"
 
 class MySetJob
   include Sidekiq::Job
+
   queue_as :foo
   sidekiq_options "retry" => 12
   def perform

@@ -10,6 +10,7 @@ end
 
 class ShardMiddleware
   include Sidekiq::ClientMiddleware
+
   def call(wrkr, job, q, pool)
     # set a flag so we can inspect which shard is active
     redis { |c| c.set("flag", job["jid"]) }

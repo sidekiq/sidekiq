@@ -1,5 +1,6 @@
 class HardJob
   include Sidekiq::Job
+
   sidekiq_options backtrace: 5
 
   def perform(name, count, salt)
