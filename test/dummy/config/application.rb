@@ -14,7 +14,7 @@ module Dummy
   class Application < Rails::Application
     config.root = File.expand_path("../..", __FILE__)
     config.eager_load = false
-    config.load_defaults "8.1"
+    config.load_defaults "#{RAILS::VERSION::MAJOR}.#{Rails::VERSION::MINOR}"
     config.active_job.queue_adapter = :sidekiq
   end
 end
