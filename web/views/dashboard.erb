@@ -9,13 +9,13 @@
     <div class="filter interval-slider">
       <span class="interval-slider-label"><%= t('PollingInterval') %>:</span>
       <span id="sldr-text" class="current-interval">5 s</span>
-      <br/>
-      <input id="sldr" aria-label="<%= t("PollingIntervalMilliseconds") %>" role="slider" type="range" min="2000" max="20000" step="1000" value="5000"/>
+      <br>
+      <input id="sldr" aria-label="<%= t("PollingIntervalMilliseconds") %>" role="slider" type="range" min="2000" max="20000" step="1000" value="5000" autocomplete="off">
     </div>
   </header>
 
   <div class="chart">
-    <span id="sr-last-dashboard-update-template" hidden="hidden"><%= t("LastDashboardUpdateTemplateLiteral") %></span>
+    <span id="sr-last-dashboard-update-template" hidden><%= t("LastDashboardUpdateTemplateLiteral") %></span>
     <span id="sr-last-dashboard-update" class="sr-only" role="status"></span>
 
     <canvas id="realtime-chart">

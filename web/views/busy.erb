@@ -33,8 +33,8 @@
     <form method="POST" class="filter warning-messages">
       <%= csrf_tag %>
       <div class="btn-group pull-right flip">
-        <input class="btn btn-warn" type="submit" name="quiet" value="<%= t('QuietAll') %>" data-confirm="<%= t('AreYouSure') %>"/>
-        <input class="btn btn-danger" type="submit" name="stop" value="<%= t('StopAll') %>" data-confirm="<%= t('AreYouSure') %>"/>
+        <input class="btn btn-warn" type="submit" name="quiet" value="<%= t('QuietAll') %>" data-confirm="<%= t('AreYouSure') %>">
+        <input class="btn btn-danger" type="submit" name="stop" value="<%= t('StopAll') %>" data-confirm="<%= t('AreYouSure') %>">
       </div>
     </form>
   </header>
@@ -88,7 +88,7 @@
             <% unless process.embedded? %>
               <form method="POST">
                 <%= csrf_tag %>
-                <input type="hidden" name="identity" value="<%= process['identity'] %>"/>
+                <input type="hidden" name="identity" value="<%= process['identity'] %>">
 
                 <div class="btn-group">
                   <% unless process.stopping? %><button class="btn btn-warn" type="submit" name="quiet" value="1"><%= t('Quiet') %></button><% end %>

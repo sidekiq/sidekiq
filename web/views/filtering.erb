@@ -1,6 +1,6 @@
 <div class="filter">
-  <form role="search" method="get" class="form-inline" action='<%= root_path %><%= which %>'>
+  <form role="search" method="get" class="form-inline" action="<%= root_path %><%= which %>">
     <label for="substr"><%= t('Filter') %></label>
-    <input class="form-control" type="search" name="substr" value="<%= h url_params("substr") %>" placeholder="<%= t('AnyJobContent') %>"/>
+    <input class="form-control" type="search" name="substr" value="<%= h url_params("substr") %>" placeholder="<%= t('AnyJobContent') %>" autocomplete="off">
   </form>
 </div>

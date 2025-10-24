@@ -59,7 +59,7 @@
                     class="metrics-swatch"
                     value="<%= kls %>"
                     <%= visible_kls.include?(kls) ? 'checked' : '' %>
-                  />
+                  >
                   <code><a href="<%= root_path %>metrics/<%= kls %>?period=<%= @period %>"><%= kls %></a></code>
                 </div>
               </td>
@@ -70,15 +70,15 @@
             </tr>
           <% end %>
         <% else %>
-            <tr><td colspan=5><%= t("NoDataFound") %></td></tr>
+          <tr><td colspan="5"><%= t("NoDataFound") %></td></tr>
         <% end %>
       </tbody>
     </table>
   </div>
 
-<% if job_results.any? %>
-  <p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %>.<% if @period == "1h" %> Auto-refreshing every 60 seconds.<% end %></small></p>
-<% end %>
-
+  <% if job_results.any? %>
+    <p><small>Data from <%= @query_result.starts_at %> to <%= @query_result.ends_at %>.<% if @period == "1h" %> Auto-refreshing every 60 seconds.<% end %></small></p>
+  <% end %>
 </section>
+
 <%= script_tag "javascripts/metrics.js" %>
