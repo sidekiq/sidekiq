@@ -48,7 +48,7 @@ module Sidekiq
   end
 
   def self.server?
-    defined?(Sidekiq::CLI)
+    !!defined?(Sidekiq::CLI)
   end
 
   def self.load_json(string)
@@ -60,11 +60,11 @@ module Sidekiq
   end
 
   def self.pro?
-    defined?(Sidekiq::Pro)
+    !!defined?(Sidekiq::Pro)
   end
 
   def self.ent?
-    defined?(Sidekiq::Enterprise)
+    !!defined?(Sidekiq::Enterprise)
   end
 
   def self.redis_pool
