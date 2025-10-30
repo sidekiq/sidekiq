@@ -1,11 +1,11 @@
-## Sidekiq's software development lifecycle
+# Sidekiq's software development lifecycle
 
-1. Introduction
+## 1. Introduction
 
 This document outlines the Software Development Lifecycle (SDLC) process for Sidekiq and its related commercial siblings, Sidekiq Pro and Sidekiq Enterprise.
 This documents how we provide a clear, repeatable, and transparent process for all contributors in order to maintain Sidekiq's high-quality, secure, and maintainable codebase. 
 
-2. Guiding principles
+## 2. Guiding principles
 
 * Open and transparent: All discussion is done publicly.
 * Community-oriented: The community always has an opportunity to give feedback.
@@ -14,7 +14,7 @@ This documents how we provide a clear, repeatable, and transparent process for a
 * Automate everything: We use GitHub's built-in features to automate checks and reduce manual overhead. 
 * Pragmatism: Decisions are always contextual but code should avoid unnecessary complexity if it can depend on conventions.
 
-3. Workflow on GitHub
+## 3. Workflow on GitHub
 
 Our workflow is centered around the standard GitHub process of issues, branches, commits, and pull requests.
 
@@ -43,22 +43,22 @@ A PR will not be merged until all automated checks pass and it has been approved
 All PRs require a review.
 Reviewers should focus on code quality, test coverage, and adherence to security best practices. 
 
-4. The development lifecycle
+## 4. The development lifecycle
 
-Phase 1: Planning and requirements
+### Phase 1: Planning and requirements
 
 Every significant release (major or minor) should have an associated milestone in GitHub.
 Ideas and feature requests are discussed in issues.
 The maintainers evaluate and prioritize issues, linking them to a milestone.
 The milestone provides a clear roadmap and status for the upcoming release.
 
-Phase 2: Development and coding
+### Phase 2: Development and coding
 
 Contributors should create a new branch for their changes.
 Changes are committed frequently with clear commit messages. 
 Pull request are opened once code is ready for review and public discussion.
 
-Phase 3: Testing and quality assurance
+### Phase 3: Testing and quality assurance
 
 All code must be accompanied by relevant automated tests.
 Code changes must also include testing for a substantial percentage of their code and not reduce the project's overall code coverage.
@@ -66,30 +66,21 @@ All code is automatically reformatted when the test suite is run with Bundler.
 GitHub Actions automatically runs our test suite, code linters (standard), and security scanners on every push to main.
 For new features, contributors and reviewers should perform basic manual testing to ensure functionality. 
 
-Phase 4: Release and deployment
+### Phase 4: Release and deployment
 
 The project does not use semantic versioning but we take all reasonable measures to ensure that "substantial" breaking changes only occur at major version changes.
-Minor changes with potential for breakage can happen at minor version bumps (e.g. internal API refactoring0).
-Changelog entries are added to Changes.md, Pro-Changes.md and Ent-Changes.md and must explain changes, bug fixes, and new features and point to relevant issues.
-New Git tags are created for each release (e.g., v1.2.3) when the gem is pushed to the gem server. 
+Minor changes with potential for breakage can happen at minor version bumps (e.g. internal API refactoring).
+Changelog entries are added to `Changes.md`, `Pro-Changes.md` and `Ent-Changes.md` and must explain changes, bug fixes, and new features and point to relevant issues.
+New Git tags are created for each release (e.g., `v1.2.3`) when the gem is pushed to the gem server. 
 Major releases must also provide migration / upgrade documentation to guide users in any necessary application changes.
 
-Phase 5: Maintenance and support
+### Phase 5: Maintenance and support
 
 New bugs reported in issues are fixed by maintainers or community in new PRs.
 When a vulnerability is reported, a maintainer will open a private vulnerability report on GitHub to coordinate a fix before disclosing it publicly.
 Please see `SECURITY.md` for specific security policies.
 
-5. Tools and technology
-
-Version control: Git, with GitHub as the canonical host.
-Programming language: Ruby
-Dependency management: Dependencies should be minimized with a strong preference for Ruby's standard library. Any native dependencies must be optional.
-Testing framework: minitest / maxitest
-Code style: Enforced with standardrb
-CI/CD: GitHub Actions
-
-6. Policy changes
+## 5. Policy changes
 
 This policy is a living document.
 Any changes to our workflow should be proposed and discussed via a GitHub Issue or a pull request, following the same contribution guidelines outlined in this document. 
