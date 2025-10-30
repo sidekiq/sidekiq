@@ -35,7 +35,8 @@ module Sidekiq
       dead_max_jobs: 10_000,
       dead_timeout_in_seconds: 180 * 24 * 60 * 60, # 6 months
       reloader: proc { |&block| block.call },
-      backtrace_cleaner: ->(backtrace) { backtrace }
+      backtrace_cleaner: ->(backtrace) { backtrace },
+      logged_job_attributes: ["bid", "tags"]
     }
 
     ERROR_HANDLER = ->(ex, ctx, cfg = Sidekiq.default_configuration) {
@@ -289,6 +290,10 @@ module Sidekiq
       end
 
       @logger = logger
+    end
+
+    def logged_job_attributes
+      @options[:logged_job_attributes]
     end
 
     private def parameter_size(handler)
