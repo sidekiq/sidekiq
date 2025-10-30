@@ -9,6 +9,7 @@ HEAD
   data will be removed from Redis in Sidekiq 8.1, as this data can now be found in the
   `capsules` element. [#6295]
 - Restore bulk action buttons on Scheduled, Retry and Dead tabs [#6833, deve1212]
+- Support logging additional job attributes [#6846, bschrag620]
 - Fix display of long job args [#6836]
 
 8.0.8
