@@ -80,6 +80,17 @@ New bugs reported in issues are fixed by maintainers or community in new PRs.
 When a vulnerability is reported, a maintainer will open a private vulnerability report on GitHub to coordinate a fix before disclosing it publicly.
 Please see `SECURITY.md` for specific security policies.
 
+## 5. Adjustments for commercial products
+
+Sidekiq Pro and Sidekiq Enterprise are not Open Source but will follow the same workflow
+as above where possible.
+Issues should be opened in the `sidekiq/sidekiq` repo to represent any change in commercial functionality and provide a place for public discussion.
+The private repositories should only contain the actual code and associated pull requests from those maintainers who have access to the private repos.
+Not all Open Source maintainers will have access to the private repos, however maintainers who have shown an interest or expertise in an area of commercial functionality may be granted access.
+Customers who have an interest in a change to the commercial functionality should open an issue to propose the change.
+If the maintainers are positive on the change, the customer may send a private git patch via email as an example implementation with the understanding that they grant all legal rights to that code to Contributed Systems.
+**Sidekiq Enterprise customers with an unlimited license may ask for and be granted read-only access to the private repositories for one GitHub user of their choice as long as their license remains in good standing.**
+
 ## 5. Policy changes
 
 This policy is a living document.
