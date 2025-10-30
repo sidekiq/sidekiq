@@ -87,9 +87,13 @@ as above where possible.
 Issues should be opened in the `sidekiq/sidekiq` repo to represent any change in commercial functionality and provide a place for public discussion.
 The private repositories should only contain the actual code and associated pull requests from those maintainers who have access to the private repos.
 Not all Open Source maintainers will have access to the private repos, however maintainers who have shown an interest or expertise in an area of commercial functionality may be granted access.
+All commercial changes are reviewed by @mperham unless explicitly delegated.
+
 Customers who have an interest in a change to the commercial functionality should open an issue to propose the change.
-If the maintainers are positive on the change, the customer may send a private git patch via email as an example implementation with the understanding that they grant all legal rights to that code to Contributed Systems.
+If the maintainers are positive on the change, the customer may send a private git patch via email to support@contribsys.com as an example implementation with the understanding that they grant all legal rights to that code to Contributed Systems.
+
 **Sidekiq Enterprise customers with an unlimited license may ask for and be granted read-only access to the private repositories for one GitHub user of their choice as long as their license remains in good standing.**
+This access is intended to provide oversight by interested parties that nothing malevolent sneaks into the private codebases and that we make a good faith effort to follow these policies in private also.
 
 ## 5. Policy changes
 
