@@ -30,7 +30,7 @@ module Sidekiq
         class: job_hash["wrapped"] || job_hash["class"]
       }
 
-      @config.logged_job_attributes.each do |attr|
+      @config[:logged_job_attributes].each do |attr|
         h[attr.to_sym] = job_hash[attr] if job_hash.has_key?(attr)
       end
 

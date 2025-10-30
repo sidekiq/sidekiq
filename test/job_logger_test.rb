@@ -96,7 +96,7 @@ describe "Job logger" do
   end
 
   it "tests custom log attributes" do
-    @cfg.logged_job_attributes << "trace_id"
+    @cfg[:logged_job_attributes] << "trace_id"
     jl = Sidekiq::JobLogger.new(@cfg)
     job = {"class" => "FooJob", "trace_id" => "xxx"}
     jl.prepare(job) do

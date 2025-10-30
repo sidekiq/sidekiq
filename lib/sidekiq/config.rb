@@ -292,10 +292,6 @@ module Sidekiq
       @logger = logger
     end
 
-    def logged_job_attributes
-      @options[:logged_job_attributes]
-    end
-
     private def parameter_size(handler)
       target = handler.is_a?(Proc) ? handler : handler.method(:call)
       target.parameters.size
