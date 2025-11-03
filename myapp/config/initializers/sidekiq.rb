@@ -16,6 +16,8 @@ Sidekiq.configure_server do |config|
     # end
   end
   config.on(:exit) {}
+
+  config.reap_idle_redis_connections
 end
 
 class EmptyJob

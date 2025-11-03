@@ -145,11 +145,16 @@ module Sidekiq
       @redis_config = @redis_config.merge(hash)
     end
 
+    def reap_idle_redis_connections(timeout = nil)
+      self[:reap_connections] = timeout
+    end
+    alias_method :reap, :reap_idle_redis_connections
+
     def redis_pool
       Thread.current[:sidekiq_redis_pool] || Thread.current[:sidekiq_capsule]&.redis_pool || local_redis_pool
     end
 
-    private def local_redis_pool
+    def local_redis_pool
       # this is our internal client/housekeeping pool. each capsule has its
       # own pool for executing threads.
       @redis ||= new_redis_pool(10, "internal")

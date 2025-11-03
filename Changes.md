@@ -5,6 +5,7 @@
 HEAD
 ----------
 
+- Implement idle Redis connection reaping [#6663]
 - Updated `Sidekiq::Process` API to provide capsule data. The `queues` and `weights` 
   data will be removed from Redis in Sidekiq 8.1, as this data can now be found in the
   `capsules` element. [#6295]
