@@ -12,6 +12,8 @@
 - Restore bulk action buttons on Scheduled, Retry and Dead tabs [#6833, deve1212]
 - Support logging additional job attributes [#6846, bschrag620]
 - Fix display of long job args [#6836]
+- Create development lifecycle (`docs/sdlc.md`) and security (`docs/SECURITY.md`) policy
+  documentation for Sidekiq's current workflows
 
 8.0.8
 ----------
