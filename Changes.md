@@ -2,10 +2,10 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+8.0.9
 ----------
 
-- Implement idle Redis connection reaping [#6663]
+- Implement idle Redis connection reaping, will be activated in 8.1 [#6663]
 - Updated `Sidekiq::Process` API to provide capsule data. The `queues` and `weights` 
   data will be removed from Redis in Sidekiq 8.1, as this data can now be found in the
   `capsules` element. [#6295]
