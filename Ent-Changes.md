@@ -4,6 +4,19 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+8.0.2
+---------
+
+- Rewrite swarm memory tracking to use the `get_process_mem` gem which should allow
+  operation on Alpine Linux, Windows, etc. [#6752]
+- Handle fractional values for SIDEKIQ_COUNT, e.g. "0.25", when running
+  on low-end VMs allocated only a partial core. [#6244]
+
+8.0.1
+---------
+
+- The Web UI can now pause, unpause and manually enqueue periodic jobs. [#6675]
+
 8.0.0
 ---------
 
@@ -14,6 +27,11 @@ Sidekiq Batches.
   space due to a more efficient encoding (base64 vs hex).
 - Sidekiq::Web internal refactoring [#6532]
 - Limiter factory methods now raise ArgumentError if you pass them a block [#6512]
+
+7-x
+---------
+
+- Backport leaky limiter fix for #6641
 
 7.3.4
 ---------

@@ -3,6 +3,7 @@ ENV["SIDEKIQ_WEB_TESTING"] = "1"
 
 require "sidekiq/web"
 Sidekiq::Web.configure do |config|
+  config[:csrf] = false
   config.app_url = "/"
   # config.custom_job_info_rows << RowHelper.new
 end

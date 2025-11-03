@@ -17,10 +17,9 @@ module Sidekiq
       poll_interval_average: nil,
       average_scheduled_poll_interval: 5,
       on_complex_arguments: :raise,
-      iteration: {
-        max_job_runtime: nil,
-        retry_backoff: 0
-      },
+      # if the Iterable job runs longer than this value (in seconds), then the job
+      # will be interrupted after the current iteration and re-enqueued at the back of the queue
+      max_iteration_runtime: nil,
       error_handlers: [],
       death_handlers: [],
       lifecycle_events: {
@@ -36,7 +35,8 @@ module Sidekiq
       dead_max_jobs: 10_000,
       dead_timeout_in_seconds: 180 * 24 * 60 * 60, # 6 months
       reloader: proc { |&block| block.call },
-      backtrace_cleaner: ->(backtrace) { backtrace }
+      backtrace_cleaner: ->(backtrace) { backtrace },
+      logged_job_attributes: ["bid", "tags"]
     }
 
     ERROR_HANDLER = ->(ex, ctx, cfg = Sidekiq.default_configuration) {
@@ -145,7 +145,7 @@ module Sidekiq
       @redis_config = @redis_config.merge(hash)
     end
 
-    def reap_idle_redis_connections(timeout = 300)
+    def reap_idle_redis_connections(timeout = nil)
       self[:reap_connections] = timeout
     end
     alias_method :reap, :reap_idle_redis_connections

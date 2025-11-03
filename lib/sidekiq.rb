@@ -29,6 +29,7 @@ end
 
 require "sidekiq/config"
 require "sidekiq/logger"
+require "sidekiq/loader"
 require "sidekiq/client"
 require "sidekiq/transaction_aware_client"
 require "sidekiq/job"
@@ -92,6 +93,10 @@ module Sidekiq
 
   def self.logger
     default_configuration.logger
+  end
+
+  def self.loader
+    @loader ||= Loader.new
   end
 
   def self.configure_server(&block)

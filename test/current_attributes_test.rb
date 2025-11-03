@@ -28,6 +28,11 @@ describe "Current attributes" do
     @config = reset!
   end
 
+  around do |t|
+    # Rails reloader auto-clears context
+    Rails.application.reloader.wrap { t.call }
+  end
+
   it "saves" do
     cm = Sidekiq::CurrentAttributes::Save.new({
       "cattr" => "Myapp::Current",
@@ -124,13 +129,28 @@ describe "Current attributes" do
     end
   end
 
+  it "doesn't swallow errors raised in the job" do
+    cm = Sidekiq::CurrentAttributes::Load.new({
+      "cattr" => "Myapp::Current"
+    })
+
+    job = {"cattr" => {"user_id" => 123}}
+    assert_raises do
+      first_time = true
+      cm.call(nil, job, nil) do
+        if first_time
+          first_time = false
+          raise nil.this_method_is_undefined
+        end
+      end
+    end
+  end
+
   private
 
   def with_context(strklass, attr, value)
     constklass = strklass.constantize
     constklass.send(:"#{attr}=", value)
     yield
-  ensure
-    constklass.reset_all
   end
 end

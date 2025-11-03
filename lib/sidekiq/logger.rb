@@ -24,14 +24,15 @@ module Sidekiq
 
   class Logger < ::Logger
     module Formatters
-      COLORS = {
-        "DEBUG" => "\e[1;32mDEBUG\e[0m", # green
-        "INFO" => "\e[1;34mINFO \e[0m", # blue
-        "WARN" => "\e[1;33mWARN \e[0m", # yellow
-        "ERROR" => "\e[1;31mERROR\e[0m", # red
-        "FATAL" => "\e[1;35mFATAL\e[0m" # pink
-      }
       class Base < ::Logger::Formatter
+        COLORS = {
+          "DEBUG" => "\e[1;32mDEBUG\e[0m", # green
+          "INFO" => "\e[1;34mINFO \e[0m", # blue
+          "WARN" => "\e[1;33mWARN \e[0m", # yellow
+          "ERROR" => "\e[1;31mERROR\e[0m", # red
+          "FATAL" => "\e[1;35mFATAL\e[0m" # pink
+        }
+
         def tid
           Thread.current["sidekiq_tid"] ||= (Thread.current.object_id ^ ::Process.pid).to_s(36)
         end
@@ -50,13 +51,19 @@ module Sidekiq
 
       class Pretty < Base
         def call(severity, time, program_name, message)
-          "#{Formatters::COLORS[severity]} #{time.utc.iso8601(3)} pid=#{::Process.pid} tid=#{tid}#{format_context}: #{message}\n"
+          "#{COLORS[severity]} #{time.utc.iso8601(3)} pid=#{::Process.pid} tid=#{tid}#{format_context}: #{message}\n"
+        end
+      end
+
+      class Plain < Base
+        def call(severity, time, program_name, message)
+          "#{severity} #{time.utc.iso8601(3)} pid=#{::Process.pid} tid=#{tid}#{format_context}: #{message}\n"
         end
       end
 
       class WithoutTimestamp < Pretty
         def call(severity, time, program_name, message)
-          "#{Formatters::COLORS[severity]} pid=#{::Process.pid} tid=#{tid} #{format_context}: #{message}\n"
+          "#{COLORS[severity]} pid=#{::Process.pid} tid=#{tid}#{format_context}: #{message}\n"
         end
       end
 

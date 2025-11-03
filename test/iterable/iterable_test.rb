@@ -68,6 +68,7 @@ describe Sidekiq::Job::Iterable do
     e = assert_raises(RuntimeError) do
       Class.new do
         include Sidekiq::IterableJob
+
         def perform(*)
         end
       end
@@ -210,6 +211,21 @@ describe Sidekiq::Job::Iterable do
     assert_equal 1, ArrayIterableJob.on_complete_called
   end
 
+  it "flushes iteration state and resumes after failure" do
+    jid = FailedIterableJob.perform_async
+
+    begin
+      iterate_exact_times(FailedIterableJob, nil, jid: jid)
+    rescue RuntimeError
+    end
+
+    assert_equal [10, 11, 12, 13, 14], FailedIterableJob.iterated_objects
+
+    previous_state = fetch_iteration_state(jid)
+    assert_equal 1, previous_state["ex"].to_i
+    assert_equal 5, Sidekiq.load_json(previous_state["c"])
+  end
+
   it "reschedules itself when sidekiq is stopping" do
     jid = iterate_exact_times(ArrayIterableJob, 2)
 
@@ -222,6 +238,14 @@ describe Sidekiq::Job::Iterable do
 
     continue_iterating(ArrayIterableJob, jid: jid)
     assert_equal (10..20).to_a, ArrayIterableJob.iterated_objects.uniq
+  end
+
+  it "runs no more than max_iteration_runtime" do
+    @config[:max_iteration_runtime] = 0.01
+
+    assert_raises Sidekiq::Job::Interrupted do
+      LongRunningIterableJob.perform_inline
+    end
   end
 
   it "reschedules batches when sidekiq is stopping" do
@@ -282,15 +306,15 @@ describe Sidekiq::Job::Iterable do
 
   describe "job arguments" do
     it "are available to all callbacks" do
-      $args = {}
+      args = {}
       DynamicCallbackJob.reset
-      DynamicCallbackJob::CB[:on_stop] << -> { $args[:on_stop] = arguments }
-      DynamicCallbackJob::CB[:on_start] << -> { $args[:on_start] = arguments }
-      DynamicCallbackJob::CB[:on_complete] << -> { $args[:on_complete] = arguments }
-      DynamicCallbackJob::CB[:on_resume] << -> { $args[:on_resume] = arguments }
+      DynamicCallbackJob::CB[:on_stop] << -> { args[:on_stop] = arguments }
+      DynamicCallbackJob::CB[:on_start] << -> { args[:on_start] = arguments }
+      DynamicCallbackJob::CB[:on_complete] << -> { args[:on_complete] = arguments }
+      DynamicCallbackJob::CB[:on_resume] << -> { args[:on_resume] = arguments }
 
       DynamicCallbackJob.perform_inline("mike", 123)
-      assert_equal($args, {on_start: ["mike", 123], on_stop: ["mike", 123], on_complete: ["mike", 123]})
+      assert_equal(args, {on_start: ["mike", 123], on_stop: ["mike", 123], on_complete: ["mike", 123]})
     end
 
     it "are frozen" do
@@ -301,12 +325,20 @@ describe Sidekiq::Job::Iterable do
       end
     end
 
-    it "mangles keyword arguments, per JSON" do
-      $args = {}
+    it "provides current_object to around_iteration" do
+      objects = []
       DynamicCallbackJob.reset
-      DynamicCallbackJob::CB[:on_start] << -> { $args[:on_start] = arguments }
+      DynamicCallbackJob::CB[:around_iteration] << -> { objects << current_object }
+      DynamicCallbackJob.perform_inline("mike", 123)
+      assert_equal [0, 1], objects
+    end
+
+    it "mangles keyword arguments, per JSON" do
+      args = {}
+      DynamicCallbackJob.reset
+      DynamicCallbackJob::CB[:on_start] << -> { args[:on_start] = arguments }
       DynamicCallbackJob.perform_inline("first", mike: 456, bob: "string")
-      assert_equal($args, {on_start: ["first", {"mike" => 456, "bob" => "string"}]})
+      assert_equal(args, {on_start: ["first", {"mike" => 456, "bob" => "string"}]})
     end
   end
 

@@ -75,13 +75,14 @@ describe Sidekiq::Monitor do
           "started_at" => Time.now,
           "concurrency" => 5,
           "busy" => 2,
-          "queues" => %w[low medium high]
+          "capsules" => {"mike" => {"weights" => {"low" => 1, "default" => 2, "high" => 3}},
+                         "single" => {"weights" => {"single" => 0}}}
         }]
         Sidekiq::ProcessSet.stub(:new, mock_processes) do
           assert_includes output, "foobar [baz]"
           assert_includes output, "Started: #{mock_processes.first["started_at"]} (just now)"
           assert_includes output, "Threads: 5 (2 busy)"
-          assert_includes output, "Queues: high, low, medium"
+          assert_includes output, "Queues: low, default, high; single"
         end
       end
     end

@@ -78,3 +78,8 @@ require "sidekiq/rails"
 ActiveJob::Base.queue_adapter = :sidekiq
 ActiveJob::Base.logger = nil
 ActiveJob::Base.send(:include, ::Sidekiq::Job::Options) unless ActiveJob::Base.respond_to?(:sidekiq_options)
+
+require "sidekiq/web"
+Sidekiq::Web.configure do |cfg|
+  cfg[:csrf] = false
+end

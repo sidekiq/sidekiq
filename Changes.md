@@ -6,6 +6,78 @@ HEAD
 ----------
 
 - Implement idle Redis connection reaping [#6663]
+- Updated `Sidekiq::Process` API to provide capsule data. The `queues` and `weights` 
+  data will be removed from Redis in Sidekiq 8.1, as this data can now be found in the
+  `capsules` element. [#6295]
+- Restore bulk action buttons on Scheduled, Retry and Dead tabs [#6833, deve1212]
+- Support logging additional job attributes [#6846, bschrag620]
+- Fix display of long job args [#6836]
+
+8.0.8
+----------
+
+- Allow an optional global iteration max runtime. After executing for this length of time,
+  Sidekiq will re-queue the job to continue execution at a later time [#6819, fatkodima]
+```ruby
+Sidekiq.configure_server do |cfg|
+  cfg[:max_iteration_runtime] = 600 # ten minutes
+end
+```
+- Add `discarded_at` attribute when discarding a job so death handlers can distinguish between
+  a job which was killed and one that was discarded. [#6820, gstokkink]
+- `perform_bulk` now accepts an `:at` array of times to schedule each job at the corresponding time.
+  `perform_bulk(args: [[1], [2]], at: [Time.now, Time.now + 1])` [#6790, fatkodima]
+- `perform_bulk` now accepts a `:spread_interval` value to schedule jobs over
+  the next N seconds. `perform_bulk(..., spread_interval: 60)` [#6792, fatkodima]
+- Fix unintended display of flash messages in the Web UI due to session key collision
+- Add support for lazy load hooks [#6825]
+
+8.0.7
+----------
+
+- The `:discard` option for `sidekiq_retries_exhausted` and `sidekiq_retry_in`
+  now calls death handlers, otherwise it could break other Sidekiq
+  functionality. [#6741]
+- Provide a Plain log formatter which does not colorize output [#6778]
+- Job iteration now exposes `current_object` for easy access within the `around_iteration` callback [#6774]
+- Fix JS race condition which could skip confirmation dialogs when Live Polling [#6768]
+- Fix edge case which could lose CurrentAttributes [#6767]
+- Update UK locale [#6776]
+
+8.0.6
+----------
+
+- Adjust transactional client to use ActiveRecord 7.2's support for
+  `after_all_transactions_commit` when available. [#6765, rewritten]
+- Fix Rails 7.0 and 7.1 compatibility [#6746, mlarraz]
+- Flush metrics at `:exit` [#6764]
+
+8.0.5
+----------
+
+- Add `stopping?` method to AJ adapter for compatibility with the new AJ::Continuations feature [#6732]
+- Further improvements to Rails boot compatibility [#6710]
+- Add ability to disable CSRF middleware. SameSite cookies prevent
+  CSRF in a cleaner manner and are default in most browsers now.
+  CSRF code will be removed in Sidekiq 9.0. [#6739]
+
+8.0.4
+----------
+
+- Adjust Rails integration for various edge cases [6713]
+- Flush job iteration state when an error is raised [#6704]
+- Update Accept-Language parsing in Web UI [#6721]
+- Remove fixed-width in Web UI [#6686]
+- Adjust CSRF middleware ordering [#6688]
+- Support proxies when POSTing profiles to profiler.firefox.com [#6687]
+- Dont swallow NoMethodErrors in CurrentAttributes [#6685]
+
+8.0.3
+----------
+
+- Configure Vernier output directory [#6674]
+- Rework Rails integration [#6669]
+- Implement flash messages for the Web UI [#6675]
 
 8.0.2
 ----------

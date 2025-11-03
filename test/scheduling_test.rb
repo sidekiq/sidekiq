@@ -6,6 +6,7 @@ require "active_support/core_ext/integer/time"
 
 class SomeScheduledJob
   include Sidekiq::Job
+
   sidekiq_options queue: :custom_queue
   def perform(x)
   end

@@ -21,6 +21,7 @@ end
 
 class JobWithTags
   include Sidekiq::Job
+
   sidekiq_options tags: ["foo"]
 end
 
@@ -545,8 +546,8 @@ describe "API" do
         "key" => identity_string,
         "identity" => identity_string,
         "started_at" => Time.now.to_f - 15,
-        "queues" => ["foo", "bar"],
-        "weights" => {"foo" => 1, "bar" => 1},
+        "capsules" => {"default" => {"mode" => "weighted", "concurrency" => 5, "weights" => {"foo" => 1, "bar" => 1}},
+                       "single" => {"mode" => "strict", "concurrency" => 1, "weights" => {"single" => 0}}},
         "version" => Sidekiq::VERSION,
         "embedded" => false
       }
@@ -566,8 +567,9 @@ describe "API" do
       assert_equal 10, data["busy"]
       assert_equal time, data["beat"]
       assert_equal 123, data["pid"]
-      assert_equal ["foo", "bar"], data.queues
-      assert_equal({"foo" => 1, "bar" => 1}, data.weights)
+      assert_equal %w[foo bar single], data.queues
+      assert_equal({"foo" => 1, "bar" => 1, "single" => 0}, data.weights)
+      assert_equal({"default" => {"mode" => "weighted", "concurrency" => 5, "weights" => {"foo" => 1, "bar" => 1}}, "single" => {"mode" => "strict", "concurrency" => 1, "weights" => {"single" => 0}}}, data.capsules)
       assert_equal Sidekiq::VERSION, data.version
       assert_equal false, data.embedded?
       data.quiet!
@@ -585,8 +587,7 @@ describe "API" do
         "key" => identity_string,
         "identity" => identity_string,
         "started_at" => Time.now.to_f - 15,
-        "queues" => ["foo", "bar"],
-        "weights" => {"foo" => 1, "bar" => 1},
+        "capsules" => {"default" => {"mode" => "weighted", "concurrency" => 5, "weights" => {"foo" => 1, "bar" => 1}}},
         "version" => Sidekiq::VERSION,
         "embedded" => true
       }
@@ -690,18 +691,20 @@ describe "API" do
       add_retry("foo1")
       add_retry("foo2")
 
+      now = Time.now.to_f
       retries = Sidekiq::RetrySet.new
       assert_equal 2, retries.size
-      refute(retries.map { |r| r.score > (Time.now.to_f + 9) }.any?)
+      assert_equal(0, retries.count { |r| r.score > (now + 9) })
 
       retries.each do |retri|
-        retri.reschedule(Time.now + 15) if retri.jid == "foo1"
-        retri.reschedule(Time.now.to_f + 10) if retri.jid == "foo2"
+        retri.reschedule(now + 15) if retri.jid == "foo1"
+        retri.reschedule(now + 10) if retri.jid == "foo2"
       end
 
+      now = Time.now.to_f
       assert_equal 2, retries.size
-      assert(retries.map { |r| r.score > (Time.now.to_f + 9) }.any?)
-      assert(retries.map { |r| r.score > (Time.now.to_f + 14) }.any?)
+      assert_equal(2, retries.count { |r| r.score > (now + 9) })
+      assert_equal(1, retries.count { |r| r.score > (now + 14) })
     end
 
     it "prunes processes which have died" do
@@ -825,6 +828,12 @@ describe "API" do
         assert record.jid
       end
     end
+  end
+
+  it "runs load hooks" do
+    ran = false
+    Sidekiq.loader.on_load(:api) { ran = true }
+    assert(ran)
   end
 end
 

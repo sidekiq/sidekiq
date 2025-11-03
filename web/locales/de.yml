@@ -3,6 +3,7 @@ de:
   LanguageName: Deutsch
   Actions: Aktionen
   AddToQueue: In Warteschlange einreihen
+  AddAllToQueue: Alle in Warteschlange einreihen
   AreYouSure: Bist du sicher?
   AreYouSureDeleteJob: Möchtest du diesen Job wirklich löschen?
   AreYouSureDeleteQueue: Möchtest du %{queue} wirklich löschen?

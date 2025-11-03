@@ -3,6 +3,7 @@ ta:
   LanguageName: தமிழ்
   Actions: செயல்கள்
   AddToQueue: வரிசையில் சேர்
+  AddAllToQueue: அனைத்தையும் வரிசையில் சேர்
   AreYouSure: நீங்கள் உறுதியாக இருக்கிறீர்களா?
   AreYouSureDeleteJob: நீ இந்த வேலையை நீக்க வேண்டும் என்று உறுதியாக இருக்கிறீர்களா?
   AreYouSureDeleteQueue: நீங்கள் %{queue} வரிசையில் நீக்க வேண்டும் என்பதில் உறுதியாக இருக்கிறீர்களா?

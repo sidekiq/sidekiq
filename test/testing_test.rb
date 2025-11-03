@@ -4,6 +4,7 @@ require_relative "helper"
 
 class AttributeJob
   include Sidekiq::Job
+
   sidekiq_class_attribute :count
   self.count = 0
   attr_accessor :foo

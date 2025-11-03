@@ -3,6 +3,7 @@
 require_relative "helper"
 require "sidekiq/web"
 require "rack/test"
+require "rack/lint"
 
 class FilterJob
   include Sidekiq::Job
@@ -17,11 +18,14 @@ describe "filtering" do
 
   before do
     @config = reset!
-    Sidekiq::Web.middlewares.clear
+    Sidekiq::Web.configure do |c|
+      c.middlewares.clear
+      c.use Rack::Session::Cookie, secrets: "35c5108120cb479eecb4e947e423cad6da6f38327cf0ebb323e30816d74fa01f"
+    end
   end
 
   def app
-    Sidekiq::Web.new
+    Rack::Lint.new(Sidekiq::Web.new)
   end
 
   it "finds retries matching substring" do

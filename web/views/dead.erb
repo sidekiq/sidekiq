@@ -32,7 +32,7 @@
   <form action="<%= root_path %>morgue/<%= job_params(@dead, @dead.score) %>" method="post">
     <%= csrf_tag %>
     <a class="btn btn-default" href="<%= root_path %>morgue"><%= t('GoBack') %></a>
-    <input class="btn btn-primary" type="submit" name="retry" value="<%= t('RetryNow') %>" />
-    <input class="btn btn-danger" type="submit" name="delete" value="<%= t('Delete') %>" />
+    <input class="btn btn-primary" type="submit" name="retry" value="<%= t('RetryNow') %>">
+    <input class="btn btn-danger" type="submit" name="delete" value="<%= t('Delete') %>">
   </form>
 </section>

@@ -147,4 +147,7 @@ Sidekiq.configure_server do |config|
   config.on(:beat) do
     exec.flush
   end
+  config.on(:exit) do
+    exec.flush
+  end
 end

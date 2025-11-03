@@ -24,7 +24,10 @@ module Sidekiq
         # and very difficult for us to vendor or provide ourselves. If you are worried
         # about data security and wish to self-host, you can change these URLs.
         profile_view_url: "https://profiler.firefox.com/public/%s",
-        profile_store_url: "https://api.profiler.firefox.com/compressed-store"
+        profile_store_url: "https://api.profiler.firefox.com/compressed-store",
+        # Will be false in Sidekiq 9.0.
+        # CSRF is unnecessary if you are using SameSite=(Strict|Lax) cookies.
+        csrf: true
       }
 
       ##
@@ -57,7 +60,7 @@ module Sidekiq
         @locales = LOCALES
         @views = VIEWS
         @tabs = DEFAULT_TABS.dup
-        @middlewares = [Sidekiq::Web::CsrfProtection]
+        @middlewares = []
         @custom_job_info_rows = []
       end
 

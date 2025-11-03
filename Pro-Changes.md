@@ -7,6 +7,38 @@ Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 HEAD
 ---------
 
+- Warn if passing a single value as options in `batch.on(event, target, options)`.
+  Callback options were always meant to be a Hash but the API never validated it.
+  This will raise an `ArgumentError` in Pro 9.0. [#6789]
+```ruby
+batch.on(:success, MyCallback, 1234) # bad
+batch.on(:success, MyCallback, "document_id" => 1234) # good
+```
+
+8.0.2
+---------
+
+- Statsd middleware now sends a new `sidekiq.jobs.perform_dist`
+  distribution metric. This type is proprietary to Datadog but provides
+  much better statistical visibility into job timing across a cluster.
+  You can disable this metric type with:
+```ruby
+Sidekiq.configure_server { |c| c[:use_datadog_extensions] = false }
+```
+- Batch success now sends `sidekiq.batch.duration` and `sidekiq.batch.duration_dist`
+  metrics for monitoring the total time to execute a batch. You can add tags for
+  visibility and filtering within the UI when defining your `success` callback:
+```ruby
+batch.on(:success, ..., {tags: ["batchtype:OrderProcess"]})
+```
+- Statsd middleware no longer sends the `sidekiq.jobs.perform` timing
+  metric when a job fails since failure can happen for so many reasons;
+  timing data is typically not useful for detecting or fixing failures.
+- Poison pill logging now accounts for wrapped class names [#6756]
+
+8.0.1
+---------
+
 - Standardize batch callback timestamps as integer millis [#6644]
 
 8.0.0

@@ -27,6 +27,7 @@ zh-TW: # <---- change this to your locale code
   CurrentMessagesInQueue: 目前在<span class='title'>%{queue}</span>的工作
   Delete: 刪除
   AddToQueue: 增加至佇列
+  AddAllToQueue: 增加所有至佇列
   AreYouSureDeleteJob: 確定要刪除這個工作嗎？
   AreYouSureDeleteQueue: 確定要刪除%{queue}佇列？這會刪除佇列裡的所有工作，佇列將會在有新工作時重新出現。
   Queues: 佇列

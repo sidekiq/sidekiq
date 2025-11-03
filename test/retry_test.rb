@@ -405,6 +405,22 @@ describe Sidekiq::JobRetry do
           output, "Log entry missing for sidekiq_retry_in")
       end
 
+      it "calls death handlers even for :discard" do
+        @job = nil
+        @config.death_handlers << ->(job, exception) { @job = job }
+
+        ds = Sidekiq::DeadSet.new
+        assert_equal 0, ds.size
+        assert_raises Sidekiq::JobRetry::Handled do
+          handler.local(CustomJobWithException, jobstr({"class" => "CustomJobWithException"}), "default") do
+            raise Interrupt
+          end
+        end
+        assert_equal 0, ds.size
+        assert @job
+        assert @job["discarded_at"]
+      end
+
       it "kills when configured on special exceptions" do
         ds = Sidekiq::DeadSet.new
         assert_equal 0, ds.size

@@ -11,8 +11,10 @@ module Sidekiq
     }
 
     include Sidekiq::Component
+
     def initialize(config)
       @config = config
+      @vernier_output_dir = ENV.fetch("VERNIER_OUTPUT_DIR") { Dir.tmpdir }
     end
 
     def call(job, &block)
@@ -22,7 +24,6 @@ module Sidekiq
       type = job["class"]
       jid = job["jid"]
       started_at = Time.now
-      options = DEFAULT_OPTIONS.merge((job["profiler_options"] || {}).transform_keys!(&:to_sym))
 
       rundata = {
         started_at: started_at.to_i,
@@ -30,13 +31,17 @@ module Sidekiq
         type: type,
         jid: jid,
         # .gz extension tells Vernier to compress the data
-        filename: "#{token}-#{type}-#{jid}-#{started_at.strftime("%Y%m%d-%H%M%S")}.json.gz"
+        filename: File.join(
+          @vernier_output_dir,
+          "#{token}-#{type}-#{jid}-#{started_at.strftime("%Y%m%d-%H%M%S")}.json.gz"
+        )
       }
+      profiler_options = profiler_options(job, rundata)
 
       require "vernier"
       begin
         a = Time.now
-        rc = Vernier.profile(**options.merge(out: rundata[:filename]), &block)
+        rc = Vernier.profile(**profiler_options, &block)
         b = Time.now
 
         # Failed jobs will raise an exception on previous line and skip this
@@ -54,6 +59,15 @@ module Sidekiq
       ensure
         FileUtils.rm_f(rundata[:filename])
       end
+    end
+
+    private
+
+    def profiler_options(job, rundata)
+      profiler_options = (job["profiler_options"] || {}).transform_keys(&:to_sym)
+      profiler_options[:mode] = profiler_options[:mode].to_sym if profiler_options[:mode]
+
+      DEFAULT_OPTIONS.merge(profiler_options, {out: rundata[:filename]})
     end
   end
 end

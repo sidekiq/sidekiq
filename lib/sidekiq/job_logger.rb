@@ -27,10 +27,12 @@ module Sidekiq
       # attribute to expose the underlying thing.
       h = {
         jid: job_hash["jid"],
-        class: job_hash["display_class"] || job_hash["wrapped"] || job_hash["class"]
+        class: job_hash["wrapped"] || job_hash["class"]
       }
-      h[:bid] = job_hash["bid"] if job_hash.has_key?("bid")
-      h[:tags] = job_hash["tags"] if job_hash.has_key?("tags")
+
+      @config[:logged_job_attributes].each do |attr|
+        h[attr.to_sym] = job_hash[attr] if job_hash.has_key?(attr)
+      end
 
       Thread.current[:sidekiq_context] = h
       level = job_hash["log_level"]

@@ -1059,9 +1059,9 @@ module Sidekiq
   #   'started_at' => <process start time>,
   #   'pid' => 12345,
   #   'tag' => 'myapp'
-  #   'concurrency' => 25,
-  #   'queues' => ['default', 'low'],
-  #   'busy' => 10,
+  #   'concurrency' => 5,
+  #   'capsules' => {"default" => {"mode" => "weighted", "concurrency" => 5, "weights" => {"default" => 2, "low" => 1}}},
+  #   'busy' => 3,
   #   'beat' => <last heartbeat>,
   #   'identity' => <unique string identifying the process>,
   #   'embedded' => true,
@@ -1089,12 +1089,25 @@ module Sidekiq
       self["identity"]
     end
 
+    # deprecated, use capsules below
     def queues
-      self["queues"]
+      capsules.values.flat_map { |x| x["weights"].keys }.uniq
     end
 
+    # deprecated, use capsules below
     def weights
-      self["weights"]
+      hash = {}
+      capsules.values.each do |cap|
+        # Note: will lose data if two capsules are processing the same named queue
+        cap["weights"].each_pair do |queue, weight|
+          hash[queue] = weight
+        end
+      end
+      hash
+    end
+
+    def capsules
+      self["capsules"]
     end
 
     def version
@@ -1168,7 +1181,6 @@ module Sidekiq
   #      # thread_id is a unique identifier per thread
   #      # work is a `Sidekiq::Work` instance that has the following accessor methods.
   #      # [work.queue, work.run_at, work.payload]
-  #      # run_at is an epoch Integer.
   #    end
   #
   class WorkSet
@@ -1322,3 +1334,5 @@ module Sidekiq
     end
   end
 end
+
+Sidekiq.loader.run_load_hooks(:api)

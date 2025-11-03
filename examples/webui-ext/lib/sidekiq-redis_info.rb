@@ -3,6 +3,7 @@ require "sidekiq"
 module SidekiqExt
   class RedisInfo
     include Enumerable
+
     def initialize
       @info = Sidekiq.default_configuration.redis_info
     end

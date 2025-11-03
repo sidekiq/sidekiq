@@ -3,6 +3,7 @@ fr:
   LanguageName: Français
   Actions: Actions
   AddToQueue: Ajouter à la queue
+  AddAllToQueue: Ajouter tout à la queue
   AreYouSure: Êtes-vous certain ?
   AreYouSureDeleteJob: Êtes-vous certain de vouloir supprimer cette tâche ?
   AreYouSureDeleteQueue: Êtes-vous certain de vouloir supprimer la queue %{queue} ?

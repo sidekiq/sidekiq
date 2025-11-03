@@ -248,9 +248,9 @@ module Sidekiq
       end
       alias_method :perform_sync, :perform_inline
 
-      def perform_bulk(args, batch_size: 1_000)
+      def perform_bulk(args, **options)
         client = @klass.build_client
-        client.push_bulk(@opts.merge("class" => @klass, "args" => args, :batch_size => batch_size))
+        client.push_bulk(@opts.merge({"class" => @klass, "args" => args}, options))
       end
 
       # +interval+ must be a timestamp, numeric or something that acts

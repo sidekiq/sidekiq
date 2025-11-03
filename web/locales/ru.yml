@@ -3,6 +3,7 @@ ru:
   LanguageName: Русский
   Actions: Действия
   AddToQueue: Добавить в очередь
+  AddAllToQueue: Добавить все в очередь
   AreYouSure: Вы уверены?
   AreYouSureDeleteJob: Вы уверены, что хотите удалить эту задачу?
   AreYouSureDeleteQueue: Вы уверены, что хотите удалить очередь %{queue}?
