@@ -24,7 +24,6 @@ jobs:
           { image: "redis", version: "7.0.15" },
           { image: "redis", version: "latest" },
           { image: "valkey/valkey", version: "8" },
-          { image: "docker.dragonflydb.io/dragonflydb/dragonfly", version: "v1.27.0" },
           { image: "docker.dragonflydb.io/dragonflydb/dragonfly", version: "latest" }
         ]
 
