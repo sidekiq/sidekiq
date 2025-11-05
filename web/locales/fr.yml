@@ -8,7 +8,7 @@ fr:
   AreYouSureDeleteJob: Êtes-vous certain de vouloir supprimer cette tâche ?
   AreYouSureDeleteQueue: Êtes-vous certain de vouloir supprimer la queue %{queue} ?
   Arguments: Arguments
-  Back to App: Retour à l'application
+  BackToApp: Retour à l'application
   Busy: En cours
   Class: Classe
   Connections: Connexions
