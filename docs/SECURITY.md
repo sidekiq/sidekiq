@@ -64,7 +64,6 @@ Severity is determined using the **CVSS v3.1** scoring system.
 
 ## Continuous Monitoring and Improvement
 
-- Automated scans (`bundle audit`, `brakeman`) run in CI pipelines.
 - Annual review of this policy or after any major incident.
 
 ---
