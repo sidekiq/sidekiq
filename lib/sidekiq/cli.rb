@@ -221,7 +221,7 @@ module Sidekiq # :nodoc:
             cli.logger.warn "<no backtrace available>"
           end
         end
-      },
+      }
     }
 
     def handle_signal(sig)
