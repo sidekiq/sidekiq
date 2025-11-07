@@ -36,7 +36,8 @@ module Sidekiq
       dead_timeout_in_seconds: 180 * 24 * 60 * 60, # 6 months
       reloader: proc { |&block| block.call },
       backtrace_cleaner: ->(backtrace) { backtrace },
-      logged_job_attributes: ["bid", "tags"]
+      logged_job_attributes: ["bid", "tags"],
+      reap_connections: nil, # TODO Enable by default
     }
 
     ERROR_HANDLER = ->(ex, ctx, cfg = Sidekiq.default_configuration) {
