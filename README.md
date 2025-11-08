@@ -1,109 +1,86 @@
 Sidekiq
 ==============
 
-[![Gem Version](https://badge.fury.io/rb/sidekiq.svg)](https://rubygems.org/gems/sidekiq)
-![Build](https://github.com/sidekiq/sidekiq/workflows/CI/badge.svg)
-
-Simple, efficient background jobs for Ruby.
-
-Sidekiq uses threads to handle many jobs at the same time in the
-same process. Sidekiq can be used by any Ruby application.
+  - [![Gem Version](https://badge.fury.io/rb/sidekiq.png)](https://rubygems.org/gems/sidekiq)
+  - [![Code Climate](https://codeclimate.com/github/mperham/sidekiq.png)](https://codeclimate.com/github/mperham/sidekiq)
+  - [![Build Status](https://travis-ci.org/mperham/sidekiq.png)](https://travis-ci.org/mperham/sidekiq)
+  - [![Coverage Status](https://coveralls.io/repos/mperham/sidekiq/badge.png?branch=master)](https://coveralls.io/r/mperham/sidekiq)
 
 
-Requirements
+Ruby用のシンプルで効率的なメッセージ処理ライブラリ
+
+Sidekiqはスレッドを使用して、同じプロセス内で多数のメッセージを同時に処理します。
+Railsは必須ではありませんが、Rails 3と緊密に統合してバックグラウンドメッセージ処理を
+非常にシンプルにすることができます。
+
+SidekiqはResqueと互換性があります。Resqueと全く同じメッセージフォーマットを使用するため、
+既存のResque処理ファームに統合することができます。SidekiqとResqueを同時に並行して実行し、
+ResqueクライアントでRedisにメッセージをエンキューしてSidekiqで処理することができます。
+
+同時に、Sidekiqはマルチスレッディングを使用するため、Resque（ジョブごとに新しいプロセスを
+フォークする）よりもメモリ効率が大幅に優れています。CPUを100%使用するためには50個の200MBの
+Resqueプロセスが必要なところ、1個の300MBのSidekiqプロセスで同じCPUを100%使用し、
+同じ量の作業を実行できます。[Resqueのメモリ効率に関する私のブログ投稿](http://blog.carbonfive.com/2011/09/16/improving-resques-memory-efficiency/)
+と、Carbon Fiveクライアントのresque処理ファームを9台のマシンから1台のマシンに縮小できた方法をご覧ください。
+
+
+必要要件
 -----------------
 
-- Redis: Redis 7.0+, Valkey 7.2+ or Dragonfly 1.27+
-- Ruby: MRI 3.2+ or JRuby 9.4+.
+Ruby 1.9.3およびJRuby 1.6.x（1.9モード）でテストしています。他のバージョン/VMは
+未テストですが、できる限りサポートします。Ruby 1.8はサポートされていません。
 
-Sidekiq 8.0 supports Rails and Active Job 7.0+.
+Redis 2.0以上が必要です。
 
 Sidekiq supports [Valkey](https://valkey.io) and [Dragonfly](https://www.dragonflydb.io) as Redis alternatives.
 Redis 7.2.4 is considered to be the canonical implementation.
 Incompatibilities with that version are considered bugs.
 
-Installation
+インストール
 -----------------
 
     bundle add sidekiq
 
 
-Getting Started
+はじめ方
 -----------------
 
-See the [Getting Started wiki page](https://github.com/sidekiq/sidekiq/wiki/Getting-Started) and follow the simple setup process.
-You can watch [this YouTube playlist](https://www.youtube.com/playlist?list=PLjeHh2LSCFrWGT5uVjUuFKAcrcj5kSai1) to learn all about
-Sidekiq and see its features in action.  Here's the Web UI:
+シンプルな3ステップのプロセスについては、[sidekiqホームページ](http://mperham.github.com/sidekiq)をご覧ください。
+[Railscast #366](http://railscasts.com/episodes/366-sidekiq)を視聴して、Sidekiqの動作を確認できます。すべてが正しく設定されていれば、次のように表示されます：
 
 ![Web UI](https://github.com/sidekiq/sidekiq/raw/main/examples/web-ui.png)
 
-Performance
----------------
-
-The benchmark in `bin/sidekiqload` creates 500,000 no-op jobs and drains them as fast as possible, assuming a fixed Redis network latency of 1ms.
-This requires a lot of Redis network I/O and JSON parsing.
-This benchmark is IO-bound so we increase the concurrency to 25.
-If your application is sending lots of emails or performing other network-intensive work, you could see a similar benefit but be careful not to saturate the CPU.
-Real world applications will rarely if ever need to use concurrency greater than 10.
-
-Version | Time to process 500k jobs | Throughput (jobs/sec) | Ruby | Concurrency | Job Type
------------------|------|---------|---------|------------------------|---
-Sidekiq 7.0.3 | 21.3 sec| 23,500 | 3.2.0+yjit | 30 | Sidekiq::Job
-Sidekiq 7.0.3 | 33.8 sec| 14,700 | 3.2.0+yjit | 30 | ActiveJob 7.0.4
-Sidekiq 7.0.3 | 23.5 sec| 21,300 | 3.2.0 | 30 | Sidekiq::Job
-Sidekiq 7.0.3 | 46.5 sec| 10,700 | 3.2.0 | 30 | ActiveJob 7.0.4
-Sidekiq 7.0.3 | 23.0 sec| 21,700 | 2.7.5 | 30 | Sidekiq::Job
-Sidekiq 7.0.3 | 46.5 sec| 10,850 | 2.7.5 | 30 | ActiveJob 7.0.4
-
-Most of Sidekiq's overhead is Redis network I/O.
-ActiveJob adds a notable amount of CPU overhead due to argument deserialization and callbacks.
-Concurrency of 30 was determined experimentally to maximize one CPU without saturating it.
-
-Want to Upgrade?
--------------------
-
-Use `bundle up sidekiq` to upgrade Sidekiq and all its dependencies.
-Upgrade notes between each major version can be found in the `docs/` directory.
-
-I also sell [Sidekiq Pro](https://billing.contribsys.com/spro/) and [Sidekiq Enterprise](https://billing.contribsys.com/sent/new.cgi), extensions to Sidekiq which provide more
-features, a commercial-friendly license and allow you to support high
-quality open source development all at the same time.  Please see the
-[Sidekiq](https://sidekiq.org/) homepage for more detail.
 
 
-Problems?
+詳細情報
 -----------------
 
-**Do not directly email any Sidekiq committers with questions or problems.**
-A community is best served when discussions are held in public.
+詳細については、[sidekiq wiki](https://github.com/mperham/sidekiq/wiki)をご覧ください。
+[irc.freenode.netの#sidekiq](irc://irc.freenode.net/#sidekiq)はこのプロジェクト専用ですが、
+バグレポートや機能リクエストの提案は[Githubのissues](https://github.com/mperham/sidekiq/issues)を通じて行ってください。
 
-If you have a problem, please review the [FAQ](https://github.com/sidekiq/sidekiq/wiki/FAQ) and [Troubleshooting](https://github.com/sidekiq/sidekiq/wiki/Problems-and-Troubleshooting) wiki pages.
-Searching the [issues](https://github.com/sidekiq/sidekiq/issues) for your problem is also a good idea.
+[Librelist](http://librelist.org)経由のメーリングリストもあり、<sidekiq@librelist.org>に
+本文に挨拶を含めたメールを送信することで購読できます。購読解除するには、
+<sidekiq-unsubscribe@librelist.org>にメールを送信するだけです。
+アーカイブが開始されたら、[アーカイブ](http://librelist.com/browser/sidekiq/)にアクセスして過去のスレッドを確認できます。
 
-Sidekiq Pro and Sidekiq Enterprise customers get private email support.
-You can purchase at https://sidekiq.org; email support@contribsys.com for help.
 
-Useful resources:
-
-* Product documentation is in the [wiki](https://github.com/sidekiq/sidekiq/wiki).
-* Occasional announcements are made to the [@sidekiq](https://ruby.social/@sidekiq) Mastodon account.
-* The [Sidekiq tag](https://stackoverflow.com/questions/tagged/sidekiq) on Stack Overflow has lots of useful Q &amp; A.
-
-Every Thursday morning is Sidekiq Office Hour: I video chat and answer questions.
-See the [Sidekiq support page](https://sidekiq.org/support.html) for details.
-
-Contributing
+問題が発生した場合
 -----------------
 
-See [the contributing guidelines](https://github.com/sidekiq/sidekiq/blob/main/.github/contributing.md).
+**質問や問題について、Sidekiqのコミッターに直接メールを送らないでください。** コミュニティは公開の場で議論が行われるときに最もよく機能します。
 
-License
+問題が発生した場合は、[FAQ](https://github.com/mperham/sidekiq/wiki/FAQ)と[トラブルシューティング](https://github.com/mperham/sidekiq/wiki/Problems-and-Troubleshooting)のwikiページを確認してください。問題についてissuesを検索するのも良いアイデアです。それでも解決しない場合は、Sidekiqメーリングリストにメールを送信するか、新しいissueを開いてください。
+メーリングリストは使用方法に関する質問をするのに最適な場所です。バグだと思われる問題に遭遇した場合は、issueを開いてください。
+
+
+ライセンス
 -----------------
 
-See [LICENSE.txt](https://github.com/sidekiq/sidekiq/blob/main/LICENSE.txt) for licensing details.
-The license for Sidekiq Pro and Sidekiq Enterprise can be found in [COMM-LICENSE.txt](https://github.com/sidekiq/sidekiq/blob/main/COMM-LICENSE.txt).
+ライセンスの詳細については、LICENSEを参照してください。
 
-Author
+
+著者
 -----------------
 
-Mike Perham, [mastodon](https://ruby.social/@getajobmike), [https://www.mikeperham.com](https://www.mikeperham.com) / [https://www.contribsys.com](https://www.contribsys.com)
+Mike Perham, [@mperham](https://twitter.com/mperham), [http://mikeperham.com](http://mikeperham.comkakuni)
