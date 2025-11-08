@@ -1,119 +1,89 @@
-require 'sidekiq'
-require 'celluloid'
+# frozen_string_literal: true
 
-module Sidekiq
-  ##
-  # The Fetcher blocks on Redis, waiting for a message to process
-  # from the queues.  It gets the message and hands it to the Manager
-  # to assign to a ready Processor.
-  class Fetcher
-    include Celluloid
-    include Sidekiq::Util
+require "sidekiq"
+require "sidekiq/component"
+require "sidekiq/capsule"
 
-    TIMEOUT = 1
-
-    def initialize(mgr, options)
-      @mgr = mgr
-      @strategy = Fetcher.strategy.new(options)
-    end
-
-    # Fetching is straightforward: the Manager makes a fetch
-    # request for each idle processor when Sidekiq starts and
-    # then issues a new fetch request every time a Processor
-    # finishes a message.
-    #
-    # Because we have to shut down cleanly, we can't block
-    # forever and we can't loop forever.  Instead we reschedule
-    # a new fetch if the current fetch turned up nothing.
-    def fetch
-      watchdog('Fetcher#fetch died') do
-        return if Sidekiq::Fetcher.done?
-
-        begin
-          work = @strategy.retrieve_work
-
-          if work
-            @mgr.async.assign(work)
-          else
-            after(0) { fetch }
-          end
-        rescue => ex
-          logger.error("Error fetching message: #{ex}")
-          logger.error(ex.backtrace.first)
-          sleep(TIMEOUT)
-          after(0) { fetch }
-        end
-      end
-    end
-
-    # Ugh.  Say hello to a bloody hack.
-    # Can't find a clean way to get the fetcher to just stop processing
-    # its mailbox when shutdown starts.
-    def self.done!
-      @done = true
-    end
-
-    def self.done?
-      @done
-    end
-
-    def self.strategy
-      Sidekiq.options[:fetch] || BasicFetch
-    end
-  end
-
+module Sidekiq # :nodoc:
   class BasicFetch
-    def initialize(options)
-      @strictly_ordered_queues = !!options[:strict]
-      @queues = options[:queues].map { |q| "queue:#{q}" }
-      @unique_queues = @queues.uniq
-    end
+    include Sidekiq::Component
 
-    def retrieve_work
-      work = Sidekiq.redis { |conn| conn.brpop(*queues_cmd) }
-      UnitOfWork.new(*work) if work
-    end
+    # We want the fetch operation to timeout every few seconds so the thread
+    # can check if the process is shutting down.
+    TIMEOUT = 2
 
-    def self.bulk_requeue(inprogress)
-      Sidekiq.logger.debug { "Re-queueing terminated jobs" }
-      jobs_to_requeue = {}
-      inprogress.each do |unit_of_work|
-        jobs_to_requeue[unit_of_work.queue_name] ||= []
-        jobs_to_requeue[unit_of_work.queue_name] << unit_of_work.message
-      end
-
-      Sidekiq.redis do |conn|
-        jobs_to_requeue.each do |queue, jobs|
-          conn.rpush("queue:#{queue}", jobs)
-        end
-      end
-      Sidekiq.logger.info("Pushed #{inprogress.size} messages back to Redis")
-    end
-
-    UnitOfWork = Struct.new(:queue, :message) do
+    UnitOfWork = Struct.new(:queue, :job, :config) {
       def acknowledge
         # nothing to do
       end
 
       def queue_name
-        queue.gsub(/.*queue:/, '')
+        queue.delete_prefix("queue:")
       end
 
       def requeue
-        Sidekiq.redis do |conn|
-          conn.rpush("queue:#{queue_name}", message)
+        config.redis do |conn|
+          conn.rpush(queue, job)
         end
       end
+    }
+
+    def initialize(cap)
+      raise ArgumentError, "missing queue list" unless cap.queues
+      @config = cap
+      @strictly_ordered_queues = cap.mode == :strict
+      @queues = config.queues.map { |q| "queue:#{q}" }
+      @queues.uniq! if @strictly_ordered_queues
     end
 
-    # Creating the Redis#blpop command takes into account any
-    # configured queue weights. By default Redis#blpop returns
+    def retrieve_work
+      qs = queues_cmd
+      # 4825 Sidekiq Pro with all queues paused will return an
+      # empty set of queues
+      if qs.size <= 0
+        sleep(TIMEOUT)
+        return nil
+      end
+
+      queue, job = redis { |conn| conn.blocking_call(TIMEOUT, "brpop", *qs, TIMEOUT) }
+      UnitOfWork.new(queue, job, config) if queue
+    end
+
+    def bulk_requeue(inprogress)
+      return if inprogress.empty?
+
+      logger.debug { "Re-queueing terminated jobs" }
+      jobs_to_requeue = {}
+      inprogress.each do |unit_of_work|
+        jobs_to_requeue[unit_of_work.queue] ||= []
+        jobs_to_requeue[unit_of_work.queue] << unit_of_work.job
+      end
+
+      redis do |conn|
+        conn.pipelined do |pipeline|
+          jobs_to_requeue.each do |queue, jobs|
+            pipeline.rpush(queue, jobs)
+          end
+        end
+      end
+      logger.info("Pushed #{inprogress.size} jobs back to Redis")
+    rescue => ex
+      logger.warn("Failed to requeue #{inprogress.size} jobs: #{ex.message}")
+    end
+
+    # Creating the Redis#brpop command takes into account any
+    # configured queue weights. By default Redis#brpop returns
     # data from the first queue that has pending elements. We
-    # recreate the queue command each time we invoke Redis#blpop
+    # recreate the queue command each time we invoke Redis#brpop
     # to honor weights and avoid queue starvation.
     def queues_cmd
-      queues = @strictly_ordered_queues ? @unique_queues.dup : @queues.shuffle.uniq
-      queues << Sidekiq::Fetcher::TIMEOUT
+      if @strictly_ordered_queues
+        @queues
+      else
+        permute = @queues.shuffle
+        permute.uniq!
+        permute
+      end
     end
   end
 end

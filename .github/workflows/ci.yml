@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+    name: "${{ matrix.ruby }} / rails ${{ matrix.rails }} / ${{ matrix.database.image }}-${{ matrix.database.version }}"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ["ruby-3.2", "ruby-3.3", "ruby-3.4"]
+        rails: ["7.1", "8"] # we test latest and earliest supported versions
+        database: [
+          { image: "redis", version: "7.0.15" },
+          { image: "valkey/valkey", version: "8" },
+          { image: "docker.dragonflydb.io/dragonflydb/dragonfly", version: "v1.27.0" },
+          { image: "docker.dragonflydb.io/dragonflydb/dragonfly", version: "latest" }
+        ]
+
+    env:
+      RAILS_VERSION: ${{ matrix.rails }}
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Set up Ruby ${{ matrix.ruby }}
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+        ruby-version: ${{ matrix.ruby }}
+
+    - name: Start Redis
+      uses: supercharge/redis-github-action@1.8.0
+      with:
+        redis-image: ${{ matrix.database.image }}
+        redis-version: ${{ matrix.database.version }}
+
+    - name: Run tests
+      run: bundle exec rake test

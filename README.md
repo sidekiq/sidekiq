@@ -32,11 +32,14 @@ Ruby 1.9.3およびJRuby 1.6.x（1.9モード）でテストしています。�
 
 Redis 2.0以上が必要です。
 
+Sidekiq supports [Valkey](https://valkey.io) and [Dragonfly](https://www.dragonflydb.io) as Redis alternatives.
+Redis 7.2.4 is considered to be the canonical implementation.
+Incompatibilities with that version are considered bugs.
 
 インストール
 -----------------
 
-    gem install sidekiq
+    bundle add sidekiq
 
 
 はじめ方
@@ -45,7 +48,7 @@ Redis 2.0以上が必要です。
 シンプルな3ステップのプロセスについては、[sidekiqホームページ](http://mperham.github.com/sidekiq)をご覧ください。
 [Railscast #366](http://railscasts.com/episodes/366-sidekiq)を視聴して、Sidekiqの動作を確認できます。すべてが正しく設定されていれば、次のように表示されます：
 
-![Web UI](https://github.com/mperham/sidekiq/raw/master/examples/web-ui.png)
+![Web UI](https://github.com/sidekiq/sidekiq/raw/main/examples/web-ui.png)
 
 
 

@@ -1,0 +1,58 @@
+#!/usr/bin/env ruby
+
+# Use this binary to boot your application exactly how Sidekiq Enterprise's
+# swarm functionality does it. This allows you to test compatibility with
+# Bundler's gem preloading and Sidekiq's app preloading.
+#
+# Installation
+#
+# * If you have a Rails app, put this file in your `bin/` directory.
+# * Your app's Gemfile should list `sidekiq` already
+# * Use `SIDEKIQ_PRELOAD=...` and `SIDEKIQ_PRELOAD_APP=1` to configure how you
+#   want Sidekiq to boot your app.
+#
+# Usage
+#
+# Run `bundle exec bin/sidekiq_boot` and the process should quickly exit.
+# If there's an error, you should see it and get exit code 1. Success is
+# exit code 0.
+#
+
+#
+# % time SIDEKIQ_PRELOAD_APP=1 bundle exec ruby examples/testing/sidekiq_boot -r ./empty.rb
+# 0.29s user 0.10s system 97% cpu 0.405 total
+#
+
+# Control Bundler groups to preload with:
+#
+#   SIDEKIQ_PRELOAD=default,assets bin/sidekiq_boot ...
+#
+# Preload no groups (for maximum compatibility) like so:
+#
+#   SIDEKIQ_PRELOAD= bin/sidekiq_boot ...
+#
+groups = (ENV["SIDEKIQ_PRELOAD"] || "default").split(",")
+preload_app = !!ENV["SIDEKIQ_PRELOAD_APP"]
+
+# must require the CLI before booting Bundler so the
+# gems know that we are in server-mode
+require "sidekiq/cli"
+require "bundler/setup"
+if groups.size > 0
+  puts "Preloading Bundler groups #{groups.inspect}"
+  Bundler.require(*groups)
+end
+
+cli = Sidekiq::CLI.instance.tap { |c| c.parse }
+if preload_app
+  puts "Preloading application"
+  cli.send(:boot_application)
+end
+# the more code we can load before here, the more memory we can share
+# between all child processes.
+
+# at this point, sidekiqswarm forks and sidekiq starts signal handling, talking to Redis and
+# launching services.
+
+# If the app boots without issue, Ruby will exit with code 0.
+# If an error is raised, the exit code will be != 0.

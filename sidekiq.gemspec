@@ -1,30 +1,31 @@
-# -*- encoding: utf-8 -*-
-require File.expand_path('../lib/sidekiq/version', __FILE__)
+require_relative "lib/sidekiq/version"
 
 Gem::Specification.new do |gem|
-  gem.authors       = ["Mike Perham"]
-  gem.email         = ["mperham@gmail.com"]
-  gem.description   = gem.summary = "Simple, efficient message processing for Ruby"
-  gem.homepage      = "http://sidekiq.org"
-  gem.license       = "LGPL-3.0"
+  gem.authors = ["Mike Perham"]
+  gem.email = ["info@contribsys.com"]
+  gem.summary = "Simple, efficient background processing for Ruby"
+  gem.description = "Simple, efficient background processing for Ruby."
+  gem.homepage = "https://sidekiq.org"
+  gem.license = "LGPL-3.0"
 
-  gem.executables   = ['sidekiq', 'sidekiqctl']
-  gem.files         = `git ls-files | grep -Ev '^(myapp|examples)'`.split("\n")
-  gem.test_files    = `git ls-files -- test/*`.split("\n")
-  gem.name          = "sidekiq"
-  gem.require_paths = ["lib"]
-  gem.version       = Sidekiq::VERSION
-  gem.add_dependency                  'redis', '~> 3'
-  gem.add_dependency                  'redis-namespace'
-  gem.add_dependency                  'connection_pool', '~> 1.0'
-  gem.add_dependency                  'celluloid', '~> 0.12.0'
-  gem.add_dependency                  'multi_json', '~> 1'
-  gem.add_dependency                  'sinatra'
-  gem.add_dependency                  'slim'
-  gem.add_dependency                  'i18n'
-  gem.add_development_dependency      'minitest', '~> 4'
-  gem.add_development_dependency      'rake'
-  gem.add_development_dependency      'actionmailer', '~> 3'
-  gem.add_development_dependency      'activerecord', '~> 3'
-  gem.add_development_dependency      'coveralls'
+  gem.executables = ["sidekiq", "sidekiqmon"]
+  gem.files = %w[sidekiq.gemspec README.md Changes.md LICENSE.txt] + `git ls-files | grep -E '^(bin|lib|web)'`.split("\n")
+  gem.name = "sidekiq"
+  gem.version = Sidekiq::VERSION
+  gem.required_ruby_version = ">= 3.2.0"
+
+  gem.metadata = {
+    "homepage_uri" => "https://sidekiq.org",
+    "bug_tracker_uri" => "https://github.com/sidekiq/sidekiq/issues",
+    "documentation_uri" => "https://github.com/sidekiq/sidekiq/wiki",
+    "changelog_uri" => "https://github.com/sidekiq/sidekiq/blob/main/Changes.md",
+    "source_code_uri" => "https://github.com/sidekiq/sidekiq",
+    "rubygems_mfa_required" => "true"
+  }
+
+  gem.add_dependency "redis-client", ">= 0.23.2"
+  gem.add_dependency "connection_pool", ">= 2.5.0"
+  gem.add_dependency "rack", ">= 3.1.0"
+  gem.add_dependency "json", ">= 2.9.0"
+  gem.add_dependency "logger", ">= 1.6.2"
 end

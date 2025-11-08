@@ -1,164 +1,133 @@
-require 'celluloid'
+# frozen_string_literal: true
 
-require 'sidekiq/util'
-require 'sidekiq/processor'
-require 'sidekiq/fetch'
+require "sidekiq/processor"
 
 module Sidekiq
-
   ##
-  # The main router in the system.  This
-  # manages the processor state and accepts messages
-  # from Redis to be dispatched to an idle processor.
+  # The Manager is the central coordination point in Sidekiq, controlling
+  # the lifecycle of the Processors.
+  #
+  # Tasks:
+  #
+  # 1. start: Spin up Processors.
+  # 3. processor_died: Handle job failure, throw away Processor, create new one.
+  # 4. quiet: shutdown idle Processors.
+  # 5. stop: hard stop the Processors by deadline.
+  #
+  # Note that only the last task requires its own Thread since it has to monitor
+  # the shutdown process.  The other tasks are performed by other threads.
   #
   class Manager
-    include Util
-    include Celluloid
+    include Sidekiq::Component
 
-    trap_exit :processor_died
+    attr_reader :workers
+    attr_reader :capsule
 
-    def initialize(options={})
-      logger.debug { options.inspect }
-      @count = options[:concurrency] || 25
-      @done_callback = nil
+    def initialize(capsule)
+      @config = @capsule = capsule
+      @count = capsule.concurrency
+      raise ArgumentError, "Concurrency of #{@count} is not supported" if @count < 1
 
-      @in_progress = {}
       @done = false
-      @busy = []
-      @fetcher = Fetcher.new(current_actor, options)
-      @ready = @count.times.map { Processor.new_link(current_actor) }
-    end
-
-    def stop(options={})
-      watchdog('Manager#stop died') do
-        shutdown = options[:shutdown]
-        timeout = options[:timeout]
-
-        @done = true
-        Sidekiq::Fetcher.done!
-        @fetcher.async.terminate if @fetcher.alive?
-
-        logger.info { "Shutting down #{@ready.size} quiet workers" }
-        @ready.each { |x| x.terminate if x.alive? }
-        @ready.clear
-
-        return after(0) { signal(:shutdown) } if @busy.empty?
-        logger.info { "Pausing up to #{timeout} seconds to allow workers to finish..." }
-        hard_shutdown_in timeout if shutdown
+      @workers = Set.new
+      @plock = Mutex.new
+      @count.times do
+        @workers << Processor.new(@config, &method(:processor_result))
       end
     end
 
     def start
-      @ready.each { dispatch }
+      @workers.each(&:start)
     end
 
-    def when_done(&blk)
-      @done_callback = blk
+    def quiet
+      return if @done
+      @done = true
+
+      logger.info { "Terminating quiet threads for #{capsule.name} capsule" }
+      @workers.each(&:terminate)
     end
 
-    def processor_done(processor)
-      watchdog('Manager#processor_done died') do
-        @done_callback.call(processor) if @done_callback
-        @in_progress.delete(processor.object_id)
-        @busy.delete(processor)
-        if stopped?
-          processor.terminate if processor.alive?
-          signal(:shutdown) if @busy.empty?
-        else
-          @ready << processor if processor.alive?
-        end
-        dispatch
-      end
+    def stop(deadline)
+      quiet
+
+      # some of the shutdown events can be async,
+      # we don't have any way to know when they're done but
+      # give them a little time to take effect
+      sleep PAUSE_TIME
+      return if @workers.empty?
+
+      logger.info { "Pausing to allow jobs to finish..." }
+      wait_for(deadline) { @workers.empty? }
+      return if @workers.empty?
+
+      hard_shutdown
+    ensure
+      capsule.stop
     end
 
-    def processor_died(processor, reason)
-      watchdog("Manager#processor_died died") do
-        @in_progress.delete(processor.object_id)
-        @busy.delete(processor)
-
-        unless stopped?
-          @ready << Processor.new_link(current_actor)
-          dispatch
-        else
-          signal(:shutdown) if @busy.empty?
-        end
-      end
-    end
-
-    def assign(work)
-      watchdog("Manager#assign died") do
-        if stopped?
-          # Race condition between Manager#stop if Fetcher
-          # is blocked on redis and gets a message after
-          # all the ready Processors have been stopped.
-          # Push the message back to redis.
-          work.requeue
-        else
-          processor = @ready.pop
-          @in_progress[processor.object_id] = work
-          @busy << processor
-          processor.async.process(work)
+    def processor_result(processor, reason = nil)
+      @plock.synchronize do
+        @workers.delete(processor)
+        unless @done
+          p = Processor.new(@config, &method(:processor_result))
+          @workers << p
+          p.start
         end
       end
-    end
-
-    def procline(tag)
-      "sidekiq #{Sidekiq::VERSION} #{tag}[#{@busy.size} of #{@count} busy]#{stopped? ? ' stopping' : ''}"
-    end
-
-    private
-
-    def hard_shutdown_in(delay)
-      after(delay) do
-        watchdog("Manager#hard_shutdown_in died") do
-          # We've reached the timeout and we still have busy workers.
-          # They must die but their messages shall live on.
-          logger.info("Still waiting for #{@busy.size} busy workers")
-
-          # Re-enqueue terminated jobs
-          # NOTE: You may notice that we may push a job back to redis before
-          # the worker thread is terminated. This is ok because Sidekiq's
-          # contract says that jobs are run AT LEAST once. Process termination
-          # is delayed until we're certain the jobs are back in Redis because
-          # it is worse to lose a job than to run it twice.
-          Sidekiq::Fetcher.strategy.bulk_requeue(@in_progress.values)
-
-          # Clearing workers in Redis
-          # NOTE: we do this before terminating worker threads because the
-          # process will likely receive a hard shutdown soon anyway, which
-          # means the threads will killed.
-          logger.debug { "Clearing workers in redis" }
-          Sidekiq.redis do |conn|
-            workers = conn.smembers('workers')
-            workers_to_remove = workers.select do |worker_name|
-              worker_name =~ /:#{process_id}-/
-            end
-            conn.srem('workers', workers_to_remove) if !workers_to_remove.empty?
-          end
-
-          logger.debug { "Terminating worker threads" }
-          @busy.each do |processor|
-            t = processor.bare_object.actual_work_thread
-            t.raise Shutdown if processor.alive?
-          end
-
-          after(0) { signal(:shutdown) }
-        end
-      end
-    end
-
-    def dispatch
-      return if stopped?
-      # This is a safety check to ensure we haven't leaked
-      # processors somehow.
-      raise "BUG: No processors, cannot continue!" if @ready.empty? && @busy.empty?
-      raise "No ready processor!?" if @ready.empty?
-
-      @fetcher.async.fetch
     end
 
     def stopped?
       @done
+    end
+
+    private
+
+    def hard_shutdown
+      # We've reached the timeout and we still have busy threads.
+      # They must die but their jobs shall live on.
+      cleanup = nil
+      @plock.synchronize do
+        cleanup = @workers.dup
+      end
+
+      if cleanup.size > 0
+        jobs = cleanup.map { |p| p.job }.compact
+
+        logger.warn { "Terminating #{cleanup.size} busy threads" }
+        logger.debug { "Jobs still in progress #{jobs.inspect}" }
+
+        # Re-enqueue unfinished jobs
+        # NOTE: You may notice that we may push a job back to redis before
+        # the thread is terminated. This is ok because Sidekiq's
+        # contract says that jobs are run AT LEAST once. Process termination
+        # is delayed until we're certain the jobs are back in Redis because
+        # it is worse to lose a job than to run it twice.
+        capsule.fetcher.bulk_requeue(jobs)
+      end
+
+      cleanup.each do |processor|
+        processor.kill
+      end
+
+      # when this method returns, we immediately call `exit` which may not give
+      # the remaining threads time to run `ensure` blocks, etc. We pause here up
+      # to 3 seconds to give threads a minimal amount of time to run `ensure` blocks.
+      deadline = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) + 3
+      wait_for(deadline) { @workers.empty? }
+    end
+
+    # hack for quicker development / testing environment #2774
+    PAUSE_TIME = $stdout.tty? ? 0.1 : 0.5
+
+    # Wait for the orblock to be true or the deadline passed.
+    def wait_for(deadline, &condblock)
+      remaining = deadline - ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+      while remaining > PAUSE_TIME
+        return if condblock.call
+        sleep PAUSE_TIME
+        remaining = deadline - ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+      end
     end
   end
 end

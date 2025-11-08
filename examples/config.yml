@@ -1,11 +1,29 @@
 # Sample configuration file for Sidekiq.
+#
 # Options here can still be overridden by cmd line args.
-#   sidekiq -C config.yml
+# Place this file at config/sidekiq.yml and Sidekiq will pick it up automatically.
 ---
-:verbose: false
-:pidfile: ./tmp/pids/sidekiq.pid
-:concurrency:  25
+# :verbose: false
+# :timeout: 25
+
+# Raising concurrency can cause CPU overload. For example, Heroku's basic dynos have very little CPU compared to modern servers.
+# :concurrency: 5
+
+# Concurrency can be overridden based on environment as well.
+# production:
+#   :concurrency: 5
+# staging:
+#   :concurrency: 5
+
+# Sidekiq will run this file through ERB when reading it so you can even put in dynamic logic, like a host-specific queue.
+# http://www.mikeperham.com/2013/11/13/advanced-sidekiq-host-specific-queues/
 :queues:
-  - [often, 7]
-  - [default, 5]
-  - [seldom, 3]
+  - critical
+  - default
+  - <%= `hostname`.strip %>
+  - mailers
+  - active_storage_analysis
+  - active_storage_purge
+  - action_mailbox_routing
+  - action_mailbox_incineration
+  - low

@@ -1,0 +1,2 @@
+# Run "git config --global merge.ours.driver true" to set up
+lib/sidekiq/version.rb merge=ours

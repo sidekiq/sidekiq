@@ -1,20 +1,24 @@
-source 'https://rubygems.org'
+# frozen_string_literal: true
 
-platforms :ruby do
-  gem 'sqlite3'
-end
+source "https://gem.coop"
+git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-platforms :jruby do
-  gem 'jruby-openssl'
-  gem 'activerecord-jdbcsqlite3-adapter'
-end
+RAILS_VERSION = "~> 8.0"
+gem "actionmailer", RAILS_VERSION
+gem "actionpack", RAILS_VERSION
+gem "activejob", RAILS_VERSION
+gem "activerecord", RAILS_VERSION
+gem "railties", RAILS_VERSION
 
-gem 'rails', '3.2.12'
-gem 'sidekiq', :path => '..'
-gem 'capistrano'
+gem "puma"
+gem "sidekiq", path: ".."
+gem "sqlite3", "~> 2.2"
+gem "json"
 
-# sidekiq-web dependencies
-gem 'slim'
-gem 'sinatra'
-gem 'compass'
-gem 'sprockets'
+gem "after_commit_everywhere"
+
+gem "sidekiq-redis_info", path: "../examples/webui-ext"
+
+gem "vernier"
+gem "debug"
+gem "msgpack"

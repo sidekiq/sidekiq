@@ -1,0 +1,1 @@
+document.querySelectorAll('.keys').forEach(col => { col.style.width = col.dataset.width + "%"})
