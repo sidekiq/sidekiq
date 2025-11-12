@@ -122,8 +122,8 @@ module Sidekiq
       resultset
     end
 
-    def filtering(which)
-      erb(:filtering, locals: {which: which})
+    def filtering(which, placeholder_key: "AnyJobContent", label_key: "Filter")
+      erb(:filtering, locals: {which:, placeholder_key:, label_key:})
     end
 
     def filter_link(jid, within = "retries")

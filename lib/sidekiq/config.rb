@@ -37,7 +37,7 @@ module Sidekiq
       reloader: proc { |&block| block.call },
       backtrace_cleaner: ->(backtrace) { backtrace },
       logged_job_attributes: ["bid", "tags"],
-      reap_connections: nil, # TODO Enable by default
+      reap_connections: nil # TODO Enable by default
     }
 
     ERROR_HANDLER = ->(ex, ctx, cfg = Sidekiq.default_configuration) {
