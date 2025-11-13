@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+HEAD
+---------
+
+- Fix Herb lint warnings in ERB templates
+- Historical metrics subsystem now immediately shuts down upon TERM
+
 8.0.2
 ---------
 
