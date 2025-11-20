@@ -42,6 +42,12 @@ module Sidekiq
         @@config.app_url = url
       end
 
+      def assets_path=(path)
+        @@config.assets_path = path
+      end
+
+      def assets_path = @@config.assets_path
+
       def tabs = @@config.tabs
 
       def locales = @@config.locales
@@ -105,7 +111,7 @@ module Sidekiq
 
       ::Rack::Builder.new do
         use Rack::Static, urls: ["/stylesheets", "/images", "/javascripts"],
-          root: ASSETS,
+          root: cfg.assets_path,
           cascade: true,
           header_rules: rules
         m.each { |middleware, block| use(*middleware, &block) }
