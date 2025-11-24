@@ -5,6 +5,7 @@
 HEAD
 ----------
 
+- Backwards compatibility fix for <8.0.9 process data in Redis [#6870]
 - Backtrace dump can now be triggered with the INFO signal, since Puma uses the
   same signal [#6857]
 
