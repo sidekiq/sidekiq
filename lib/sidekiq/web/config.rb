@@ -27,7 +27,7 @@ module Sidekiq
         profile_store_url: "https://api.profiler.firefox.com/compressed-store",
         # Will be false in Sidekiq 9.0.
         # CSRF is unnecessary if you are using SameSite=(Strict|Lax) cookies.
-        csrf: true
+        csrf: false
       }
 
       ##
