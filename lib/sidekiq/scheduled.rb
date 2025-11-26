@@ -155,7 +155,7 @@ module Sidekiq
         else
           # With 10+ processes, we should have enough randomness to get decent polling
           # across the entire timespan
-          interval * rand
+          interval * rand * 2
         end
       end
 

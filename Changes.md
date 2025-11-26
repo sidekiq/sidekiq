@@ -5,6 +5,7 @@
 HEAD
 ----------
 
+- Adjust scheduler to run closer to poll average [#6866]
 - Forward compatibility changes for connection_pool 3.0.0
 - Backwards compatibility fix for <8.0.9 process data in Redis [#6870]
 - Backtrace dump can now be triggered with the INFO signal, since Puma uses the
