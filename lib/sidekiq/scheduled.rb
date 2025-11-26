@@ -115,9 +115,9 @@ module Sidekiq
       private
 
       def wait
-        @sleeper.pop(random_poll_interval)
+        @sleeper.pop(timeout: random_poll_interval)
       rescue Timeout::Error
-        # expected
+        # TODO move to exception: false
       rescue => ex
         # if poll_interval_average hasn't been calculated yet, we can
         # raise an error trying to reach Redis.
@@ -223,7 +223,7 @@ module Sidekiq
         total += INITIAL_WAIT unless @config[:poll_interval_average]
         total += (5 * rand)
 
-        @sleeper.pop(total)
+        @sleeper.pop(timeout: total)
       rescue Timeout::Error
       ensure
         # periodically clean out the `processes` set in Redis which can collect
