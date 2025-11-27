@@ -2,9 +2,10 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+8.0.10
 ----------
 
+- Add confirm dialog for Delete All buttons in Web UI [#6853]
 - Adjust scheduler to run closer to poll average [#6866]
 - Forward compatibility changes for connection_pool 3.0.0
 - Backwards compatibility fix for <8.0.9 process data in Redis [#6870]
