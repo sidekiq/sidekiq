@@ -190,7 +190,7 @@ function updateProgressBars() {
 function handleConfirmDialog (event) {
   const target = event.target
 
-  if (target.localName !== "input") { return }
+  if (target.localName !== "input" && target.localName !== "button" ) { return }
   const confirmMessage = target.dataset.confirm
 
   if (confirmMessage === undefined) { return }

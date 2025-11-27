@@ -54,7 +54,7 @@
       <div class="buttons-row">
         <input class="btn btn-danger" type="submit" name="delete" value="<%= t('Delete') %>">
         <input class="btn btn-danger" type="submit" name="add_to_queue" value="<%= t('AddToQueue') %>">
-        <button class="btn btn-danger bulk-action-buttons bulk-lead-button" type="submit" name="action" value="delete_all" formaction="<%= "#{root_path}scheduled/all/delete" %>"><%= t('DeleteAll') %></button>
+        <button class="btn btn-danger bulk-action-buttons bulk-lead-button" type="submit" name="action" value="delete_all" formaction="<%= "#{root_path}scheduled/all/delete" %>" data-confirm="<%= t('AreYouSure') %>"><%= t('DeleteAll') %></button>
         <button class="btn btn-danger bulk-action-buttons" type="submit" name="action" value="add_all_to_queue" formaction="<%= "#{root_path}scheduled/all/add_to_queue" %>"><%= t('AddAllToQueue') %></button>
       </div>
     </form>
