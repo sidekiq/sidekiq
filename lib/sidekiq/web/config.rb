@@ -54,11 +54,13 @@ module Sidekiq
 
       # Adds the "Back to App" link in the header
       attr_accessor :app_url
+      attr_accessor :assets_path
 
       def initialize
         @options = OPTIONS.dup
         @locales = LOCALES
         @views = VIEWS
+        @assets_path = ASSETS
         @tabs = DEFAULT_TABS.dup
         @middlewares = []
         @custom_job_info_rows = []
