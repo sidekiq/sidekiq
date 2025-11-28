@@ -32,9 +32,8 @@ describe Sidekiq::Web do
 
   before do
     @config = reset!
-
-    # setting for lax cookies tests
     env "HTTP_SEC_FETCH_SITE", "same-origin"
+
     Sidekiq::Web.configure do |c|
       c.middlewares.clear
       c.use Rack::Session::Cookie, secrets: "35c5108120cb479eecb4e947e423cad6da6f38327cf0ebb323e30816d74fa01f"
