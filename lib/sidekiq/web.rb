@@ -100,7 +100,7 @@ module Sidekiq
 
     def safe_request?(env)
       return true if safe_methods?(env)
-      "same-origin" ==  env["HTTP_SEC_FETCH_SITE"]
+      env["HTTP_SEC_FETCH_SITE"] == "same-origin"
     end
 
     def deny(env)
