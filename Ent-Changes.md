@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
-HEAD
+8.0.3
 ---------
 
 - Fix Herb lint warnings in ERB templates
