@@ -72,6 +72,7 @@ module Sidekiq
       include Sidekiq::Component
 
       INITIAL_WAIT = 10
+      attr_accessor :rnd
 
       def initialize(config)
         @config = config
@@ -80,6 +81,7 @@ module Sidekiq
         @done = false
         @thread = nil
         @count_calls = 0
+        @rnd = Random.new
       end
 
       # Shut down this instance, will pause until the thread is dead.
@@ -151,11 +153,11 @@ module Sidekiq
 
         if count < 10
           # For small clusters, calculate a random interval that is ±50% the desired average.
-          interval * rand + interval.to_f / 2
+          interval * @rnd.rand + interval.to_f / 2
         else
           # With 10+ processes, we should have enough randomness to get decent polling
           # across the entire timespan
-          interval * rand * 2
+          interval * @rnd.rand * 2
         end
       end
 

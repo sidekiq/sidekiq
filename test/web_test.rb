@@ -32,6 +32,7 @@ describe Sidekiq::Web do
 
   before do
     @config = reset!
+    env "HTTP_SEC_FETCH_SITE", "same-origin"
 
     Sidekiq::Web.configure do |c|
       c.middlewares.clear
