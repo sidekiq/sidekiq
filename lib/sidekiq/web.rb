@@ -93,11 +93,25 @@ module Sidekiq
       env[:web_config] = Sidekiq::Web.configure
       env[:csp_nonce] = SecureRandom.hex(8)
       env[:redis_pool] = self.class.redis_pool
-      app.call(env)
+      safe_request?(env) ? app.call(env) : deny(env)
     end
 
     def app
       @app ||= build(@@config)
+    end
+
+    def safe_methods?(env)
+      %w[GET HEAD OPTIONS TRACE].include? env["REQUEST_METHOD"]
+    end
+
+    def safe_request?(env)
+      return true if safe_methods?(env)
+      env["HTTP_SEC_FETCH_SITE"] == "same-origin"
+    end
+
+    def deny(env)
+      Sidekiq.logger.warn "attack prevented by #{self.class}"
+      [403, {Rack::CONTENT_TYPE => "text/plain"}, ["Forbidden"]]
     end
 
     private
