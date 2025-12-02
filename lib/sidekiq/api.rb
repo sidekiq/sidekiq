@@ -1091,19 +1091,29 @@ module Sidekiq
 
     # deprecated, use capsules below
     def queues
-      capsules.values.flat_map { |x| x["weights"].keys }.uniq
+      # Backwards compatibility with <8.0.8
+      if !self["capsules"]
+        self["queues"]
+      else
+        capsules.values.flat_map { |x| x["weights"].keys }.uniq
+      end
     end
 
     # deprecated, use capsules below
     def weights
-      hash = {}
-      capsules.values.each do |cap|
-        # Note: will lose data if two capsules are processing the same named queue
-        cap["weights"].each_pair do |queue, weight|
-          hash[queue] = weight
+      # Backwards compatibility with <8.0.8
+      if !self["capsules"]
+        self["weights"]
+      else
+        hash = {}
+        capsules.values.each do |cap|
+          # Note: will lose data if two capsules are processing the same named queue
+          cap["weights"].each_pair do |queue, weight|
+            hash[queue] = weight
+          end
         end
+        hash
       end
-      hash
     end
 
     def capsules

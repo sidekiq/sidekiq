@@ -130,7 +130,7 @@ describe Sidekiq::Scheduled do
 
     it "generates random intervals based on the number of known Sidekiq processes" do
       with_sidekiq_option(:average_scheduled_poll_interval, 10) do
-        intervals_count = 500
+        intervals_count = 1000
 
         # Start with 10 processes
         10.times do |i|
@@ -140,7 +140,9 @@ describe Sidekiq::Scheduled do
         end
 
         intervals = Array.new(intervals_count) { @poller.send(:random_poll_interval) }
-        assert intervals.all? { |x| x.between?(0, 100) }
+        assert intervals.all? { |x| x.between?(0, 200) }
+        # flaky assertion, depends on law of large numbers
+        assert_in_delta(intervals.sum / intervals_count, 100, 5)
 
         # Reduce to 3 processes
         (3..9).each do |i|
