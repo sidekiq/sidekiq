@@ -10,12 +10,4 @@ require "bundler/setup"
 puts "🔍 Running HERB linting on ERB files..."
 puts
 
-exit_code = system("bundle exec herb analyze web/views")
-
-if exit_code
-  puts "🎉 All ERB files passed HERB linting!"
-else
-  puts "💥 Some ERB files failed HERB linting. Please fix the issues above."
-end
-
-exit exit_code
+exec("bundle exec herb analyze web/views -n --no-log-file")
