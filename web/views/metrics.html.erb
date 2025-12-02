@@ -58,8 +58,9 @@
                     id="<%= id %>"
                     class="metrics-swatch"
                     value="<%= kls %>"
-                    <%= visible_kls.include?(kls) ? 'checked' : '' %>
-                  >
+                    <% if visible_kls.include?(kls) %>
+                    checked
+                    <% end %>>
                   <code><a href="<%= root_path %>metrics/<%= kls %>?period=<%= @period %>"><%= kls %></a></code>
                 </div>
               </td>
