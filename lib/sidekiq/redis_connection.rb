@@ -23,7 +23,7 @@ module Sidekiq
 
         size = symbolized_options.delete(:size) || 5
         pool_timeout = symbolized_options.delete(:pool_timeout) || 1
-        pool_name = symbolized_options.delete(:pool_name)
+        symbolized_options.delete(:pool_name)
 
         # Default timeout in redis-client is 1 second, which can be too aggressive
         # if the Sidekiq process is CPU-bound. With 10-15 threads and a thread quantum of 100ms,
@@ -33,7 +33,7 @@ module Sidekiq
         symbolized_options[:timeout] ||= 3
 
         redis_config = Sidekiq::RedisClientAdapter.new(symbolized_options)
-        ConnectionPool.new(timeout: pool_timeout, size: size, name: pool_name) do
+        ConnectionPool.new(timeout: pool_timeout, size: size) do
           redis_config.new_client
         end
       end

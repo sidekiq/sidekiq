@@ -63,7 +63,7 @@
         <input class="btn btn-danger" type="submit" name="kill" value="<%= t('Kill') %>">
         <!-- Retry all -->
         <button class="btn btn-primary bulk-action-buttons bulk-lead-button" type="submit" name="action" value="retry_all" formaction="<%= "#{root_path}retries/all/retry" %>"><%= t('RetryAll') %></button>
-        <button class="btn btn-danger bulk-action-buttons" type="submit" name="action" value="delete_all" formaction="<%= "#{root_path}retries/all/delete" %>"><%= t('DeleteAll') %></button>
+        <button class="btn btn-danger bulk-action-buttons" type="submit" name="action" value="delete_all" formaction="<%= "#{root_path}retries/all/delete" %>" data-confirm="<%= t('AreYouSure') %>"><%= t('DeleteAll') %></button>
         <button class="btn btn-danger bulk-action-buttons" type="submit" name="action" value="kill_all" formaction="<%= "#{root_path}retries/all/kill" %>"><%= t('KillAll') %></button>
       </div>
     </form>

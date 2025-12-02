@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+8.0.3
 ---------
 
 - Warn if passing a single value as options in `batch.on(event, target, options)`.

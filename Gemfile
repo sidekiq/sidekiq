@@ -1,6 +1,7 @@
 source "https://gem.coop"
 
 gemspec
+# gem "connection_pool", path: "../connection_pool"
 
 gem "rake"
 RAILS_VERSION = "~> #{ENV.fetch("RAILS_VERSION", "8")}.0"

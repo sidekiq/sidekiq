@@ -31,7 +31,7 @@ jobs:
       RAILS_VERSION: ${{ matrix.rails }}
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Ruby ${{ matrix.ruby }}
       uses: ruby/setup-ruby@v1
@@ -40,7 +40,7 @@ jobs:
         ruby-version: ${{ matrix.ruby }}
 
     - name: Start Redis
-      uses: supercharge/redis-github-action@1.8.0
+      uses: supercharge/redis-github-action@1.8.1
       with:
         redis-image: ${{ matrix.database.image }}
         redis-version: ${{ matrix.database.version }}
