@@ -2,10 +2,28 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+8.0.10
 ----------
 
+- Add confirm dialog for Delete All buttons in Web UI [#6853]
+- Adjust scheduler to run closer to poll average [#6866]
+- Forward compatibility changes for connection_pool 3.0.0
+- Backwards compatibility fix for <8.0.9 process data in Redis [#6870]
+- Backtrace dump can now be triggered with the INFO signal, since Puma uses the
+  same signal [#6857]
+
+8.0.9
+----------
+
+- Implement idle Redis connection reaping, will be activated in 8.1 [#6663]
+- Updated `Sidekiq::Process` API to provide capsule data. The `queues` and `weights` 
+  data will be removed from Redis in Sidekiq 8.1, as this data can now be found in the
+  `capsules` element. [#6295]
+- Restore bulk action buttons on Scheduled, Retry and Dead tabs [#6833, deve1212]
+- Support logging additional job attributes [#6846, bschrag620]
 - Fix display of long job args [#6836]
+- Create development lifecycle (`docs/sdlc.md`) and security (`docs/SECURITY.md`) policy
+  documentation for Sidekiq's current workflows
 
 8.0.8
 ----------

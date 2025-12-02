@@ -35,7 +35,9 @@ module Sidekiq
       dead_max_jobs: 10_000,
       dead_timeout_in_seconds: 180 * 24 * 60 * 60, # 6 months
       reloader: proc { |&block| block.call },
-      backtrace_cleaner: ->(backtrace) { backtrace }
+      backtrace_cleaner: ->(backtrace) { backtrace },
+      logged_job_attributes: ["bid", "tags"],
+      reap_connections: nil # TODO Enable by default
     }
 
     ERROR_HANDLER = ->(ex, ctx, cfg = Sidekiq.default_configuration) {
@@ -144,11 +146,16 @@ module Sidekiq
       @redis_config = @redis_config.merge(hash)
     end
 
+    def reap_idle_redis_connections(timeout = nil)
+      self[:reap_connections] = timeout
+    end
+    alias_method :reap, :reap_idle_redis_connections
+
     def redis_pool
       Thread.current[:sidekiq_redis_pool] || Thread.current[:sidekiq_capsule]&.redis_pool || local_redis_pool
     end
 
-    private def local_redis_pool
+    def local_redis_pool
       # this is our internal client/housekeeping pool. each capsule has its
       # own pool for executing threads.
       @redis ||= new_redis_pool(10, "internal")

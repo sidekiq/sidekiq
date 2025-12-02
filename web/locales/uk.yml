@@ -3,6 +3,7 @@ uk:
   LanguageName: Українська
   Actions: Дії
   AddToQueue: Додати до черги
+  AddAllToQueue: Додати все до черги
   AreYouSure: Ви впевнені?
   AreYouSureDeleteJob: Ви впевнені у тому, що хочете видалити задачу?
   AreYouSureDeleteQueue: Ви впевнені у тому, що хочете видалити чергу %{queue}?

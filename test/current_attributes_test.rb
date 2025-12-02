@@ -28,6 +28,11 @@ describe "Current attributes" do
     @config = reset!
   end
 
+  around do |t|
+    # Rails reloader auto-clears context
+    Rails.application.reloader.wrap { t.call }
+  end
+
   it "saves" do
     cm = Sidekiq::CurrentAttributes::Save.new({
       "cattr" => "Myapp::Current",
@@ -147,7 +152,5 @@ describe "Current attributes" do
     constklass = strklass.constantize
     constklass.send(:"#{attr}=", value)
     yield
-  ensure
-    constklass.reset_all
   end
 end

@@ -49,7 +49,7 @@ module Sidekiq # :nodoc:
       logger.info "Booted Rails #{::Rails.version} application in #{environment} environment" if rails_app?
 
       self_read, self_write = IO.pipe
-      sigs = %w[INT TERM TTIN TSTP]
+      sigs = %w[INT TERM INFO TTIN TSTP]
       # USR1 and USR2 don't work on the JVM
       sigs << "USR2" if Sidekiq.pro? && !jruby?
       sigs.each do |sig|
@@ -201,7 +201,18 @@ module Sidekiq # :nodoc:
         cli.logger.info "Received TSTP, no longer accepting new work"
         cli.launcher.quiet
       },
+      # deprecated, use INFO
       "TTIN" => ->(cli) {
+        Thread.list.each do |thread|
+          cli.logger.warn "Thread TID-#{(thread.object_id ^ ::Process.pid).to_s(36)} #{thread.name}"
+          if thread.backtrace
+            cli.logger.warn thread.backtrace.join("\n")
+          else
+            cli.logger.warn "<no backtrace available>"
+          end
+        end
+      },
+      "INFO" => ->(cli) {
         Thread.list.each do |thread|
           cli.logger.warn "Thread TID-#{(thread.object_id ^ ::Process.pid).to_s(36)} #{thread.name}"
           if thread.backtrace
@@ -212,12 +223,12 @@ module Sidekiq # :nodoc:
         end
       }
     }
-    UNHANDLED_SIGNAL_HANDLER = ->(cli) { cli.logger.info "No signal handler registered, ignoring" }
-    SIGNAL_HANDLERS.default = UNHANDLED_SIGNAL_HANDLER
 
     def handle_signal(sig)
       logger.debug "Got #{sig} signal"
-      SIGNAL_HANDLERS[sig].call(self)
+      hndlr = SIGNAL_HANDLERS[sig]
+      hndlr ? hndlr.call(self) :
+        logger.warn("No #{sig} signal handler registered, ignoring")
     end
 
     private

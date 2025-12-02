@@ -3,6 +3,7 @@ fa:
   LanguageName: فارسى
   Actions: اعمال
   AddToQueue: افزودن به صف
+  AddAllToQueue: افزودن همه به صف
   AreYouSure: آیا مطمعن هستید?
   AreYouSureDeleteJob: آیا شما مطمعن هستید از حذف این کار ؟
   AreYouSureDeleteQueue: ایا شما مطمعنید از حذف %{queue} ?

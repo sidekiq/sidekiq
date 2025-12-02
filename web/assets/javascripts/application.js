@@ -22,6 +22,7 @@ function addListeners() {
     node.addEventListener("click", addDataToggleListeners)
   })
 
+  initializeBulkToggle();
   addShiftClickListeners();
   updateFuzzyTimes();
   updateNumbers();
@@ -61,6 +62,21 @@ function addDataToggleListeners(event) {
   var targName = source.dataset.toggle;
   var full = document.getElementById(targName);
   full.classList.toggle("is-open");
+}
+
+function toggleBulkButtons() {
+  const checkboxes = document.querySelectorAll('.select-item-checkbox, .check-all-items');
+  const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+  const buttons = document.querySelectorAll('.bulk-action-buttons');
+  buttons.forEach(btn => {
+    btn.style.display = anyChecked ? 'none' : 'block';
+  });
+}
+
+function initializeBulkToggle(){
+  document.querySelectorAll('.check-all-items, .select-item-checkbox').forEach(cb => {
+    cb.addEventListener('change', toggleBulkButtons);
+  });
 }
 
 function addShiftClickListeners() {
@@ -174,7 +190,7 @@ function updateProgressBars() {
 function handleConfirmDialog (event) {
   const target = event.target
 
-  if (target.localName !== "input") { return }
+  if (target.localName !== "input" && target.localName !== "button" ) { return }
   const confirmMessage = target.dataset.confirm
 
   if (confirmMessage === undefined) { return }

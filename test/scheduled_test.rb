@@ -6,6 +6,7 @@ require "sidekiq/api"
 
 class ScheduledJob
   include Sidekiq::Job
+
   def perform(x)
   end
 end
@@ -128,8 +129,9 @@ describe Sidekiq::Scheduled do
     end
 
     it "generates random intervals based on the number of known Sidekiq processes" do
+      @poller.rnd = Random.new(42) # use known seed for random calculations
       with_sidekiq_option(:average_scheduled_poll_interval, 10) do
-        intervals_count = 500
+        intervals_count = 10
 
         # Start with 10 processes
         10.times do |i|
@@ -139,7 +141,10 @@ describe Sidekiq::Scheduled do
         end
 
         intervals = Array.new(intervals_count) { @poller.send(:random_poll_interval) }
-        assert intervals.all? { |x| x.between?(0, 100) }
+        assert intervals.all? { |x| x.between?(0, 200) }
+        # assert we get pretty close to the expected value 100 with
+        # random jitter based on the seed above, only 4% off.
+        assert_in_delta(intervals.sum / intervals_count, 100, 4.1)
 
         # Reduce to 3 processes
         (3..9).each do |i|
@@ -150,6 +155,10 @@ describe Sidekiq::Scheduled do
 
         intervals = Array.new(intervals_count) { @poller.send(:random_poll_interval) }
         assert intervals.all? { |x| x.between?(15, 45) }
+        # assert we get pretty close to the expected value 100 with
+        # random jitter based on the seed above, fewer processes means
+        # less accuracy so 10% off
+        assert_in_delta(intervals.sum / intervals_count, 30, 3.15)
       end
     end
 

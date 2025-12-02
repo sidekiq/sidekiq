@@ -122,8 +122,8 @@ module Sidekiq
       resultset
     end
 
-    def filtering(which)
-      erb(:filtering, locals: {which: which})
+    def filtering(which, placeholder_key: "AnyJobContent", label_key: "Filter")
+      erb(:filtering, locals: {which:, placeholder_key:, label_key:})
     end
 
     def filter_link(jid, within = "retries")
@@ -254,14 +254,6 @@ module Sidekiq
           process["hostname"].split(/(\d+)/).map { |a| /\d+/.match?(a) ? a.to_i : a }
         end
       end
-    end
-
-    def busy_weights(capsule_weights)
-      # backwards compat with 7.0.0, remove in 7.1
-      cw = [capsule_weights].flatten
-      cw.map { |hash|
-        hash.map { |name, weight| (weight > 0) ? +name << ": " << weight.to_s : name }.join(", ")
-      }.join("; ")
     end
 
     def stats

@@ -25,7 +25,7 @@ module Sidekiq
         # about data security and wish to self-host, you can change these URLs.
         profile_view_url: "https://profiler.firefox.com/public/%s",
         profile_store_url: "https://api.profiler.firefox.com/compressed-store",
-        # Will be false in Sidekiq 9.0.
+        # TODO Will be false in Sidekiq 9.0.
         # CSRF is unnecessary if you are using SameSite=(Strict|Lax) cookies.
         csrf: false
       }
@@ -54,11 +54,13 @@ module Sidekiq
 
       # Adds the "Back to App" link in the header
       attr_accessor :app_url
+      attr_accessor :assets_path
 
       def initialize
         @options = OPTIONS.dup
         @locales = LOCALES
         @views = VIEWS
+        @assets_path = ASSETS
         @tabs = DEFAULT_TABS.dup
         @middlewares = []
         @custom_job_info_rows = []

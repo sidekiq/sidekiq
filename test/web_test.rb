@@ -90,7 +90,7 @@ describe Sidekiq::Web do
       @config.redis do |conn|
         conn.incr("busy")
         conn.sadd("processes", ["foo:1234"])
-        conn.hset("foo:1234", "info", Sidekiq.dump_json("hostname" => "foo", "started_at" => Time.now.to_f, "queues" => [], "concurrency" => 10), "at", Time.now.to_f, "busy", 4)
+        conn.hset("foo:1234", "info", Sidekiq.dump_json("hostname" => "foo", "started_at" => Time.now.to_f, "capsules" => {}, "concurrency" => 10), "at", Time.now.to_f, "busy", 4)
         identity = "foo:1234:work"
         hash = {queue: "critical", payload: Sidekiq.dump_json({"class" => WebJob.name, "args" => [1, "abc"], "tags" => %w[foobar_100 <eviltag/>]}), run_at: Time.now.to_i}
         conn.hset(identity, 1001, Sidekiq.dump_json(hash))
@@ -533,6 +533,40 @@ describe Sidekiq::Web do
     end
   end
 
+  it "can delete all scheduled jobs" do
+    3.times { add_scheduled }
+
+    assert_equal 3, Sidekiq::ScheduledSet.new.size
+    post "/scheduled/all/delete"
+    assert_equal 0, Sidekiq::ScheduledSet.new.size
+    assert_equal 302, last_response.status
+    assert_equal "http://example.org/scheduled", last_response.headers["Location"]
+  end
+
+  it "can add all scheduled jobs to queue" do
+    msg1 = add_scheduled.first
+    msg2 = add_scheduled.first
+    msg3 = add_scheduled.first
+
+    assert_equal 3, Sidekiq::ScheduledSet.new.size
+    assert_equal 0, Sidekiq::Queue.new("default").size
+
+    post "/scheduled/all/add_to_queue"
+    assert_equal 302, last_response.status
+    assert_equal "http://example.org/scheduled", last_response.headers["Location"]
+
+    # All scheduled jobs should be moved to the default queue
+    assert_equal 0, Sidekiq::ScheduledSet.new.size
+    assert_equal 3, Sidekiq::Queue.new("default").size
+
+    # Verify jobs are in the queue
+    get "/queues/default"
+    assert_equal 200, last_response.status
+    assert_match(/#{msg1["args"][2]}/, last_response.body)
+    assert_match(/#{msg2["args"][2]}/, last_response.body)
+    assert_match(/#{msg3["args"][2]}/, last_response.body)
+  end
+
   it "can retry all retries" do
     msg = add_retry.first
     add_retry
@@ -564,7 +598,7 @@ describe Sidekiq::Web do
     @config.redis do |conn|
       pro = "foo:1234"
       conn.sadd("processes", [pro])
-      conn.hset(pro, "info", Sidekiq.dump_json("started_at" => Time.now.to_f, "labels" => ["frumduz"], "queues" => [], "concurrency" => 10), "busy", 1, "beat", Time.now.to_f)
+      conn.hset(pro, "info", Sidekiq.dump_json("started_at" => Time.now.to_f, "labels" => ["frumduz"], "capsules" => {}, "concurrency" => 10), "busy", 1, "beat", Time.now.to_f)
       identity = "#{pro}:work"
       hash = {queue: "critical", payload: Sidekiq.dump_json({"class" => "FailJob", "args" => ["<a>hello</a>"]}), run_at: Time.now.to_i}
       conn.hset(identity, 100001, Sidekiq.dump_json(hash))

@@ -454,6 +454,10 @@ canvas + .table_container {
   gap: 8px;
 }
 
+.bulk-action-buttons.bulk-lead-button {
+  margin-inline-start: auto;
+}
+
 table {
   background-color: var(--color-elevated);
   border: 1px solid var(--color-border);

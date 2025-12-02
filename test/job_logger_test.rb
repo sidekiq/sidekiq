@@ -95,6 +95,19 @@ describe "Job logger" do
     assert_match(/INFO.+: done/, c)
   end
 
+  it "tests custom log attributes" do
+    @cfg[:logged_job_attributes] << "trace_id"
+    jl = Sidekiq::JobLogger.new(@cfg)
+    job = {"class" => "FooJob", "trace_id" => "xxx"}
+    jl.prepare(job) do
+      assert_equal Sidekiq::Context.current[:trace_id], "xxx"
+    end
+    job = {"class" => "FooJob"}
+    jl.prepare(job) do
+      refute(Sidekiq::Context.current.key?(:trace_id))
+    end
+  end
+
   it "tests custom logger with non numeric levels" do
     @logger = Logger.new(@output, level: :info)
     @cfg.logger = @logger
