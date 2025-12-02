@@ -45,5 +45,8 @@ jobs:
         redis-image: ${{ matrix.database.image }}
         redis-version: ${{ matrix.database.version }}
 
+    - name: Lint ERB files with HERB
+      run: bundle exec rake lint:herb
+
     - name: Run tests
       run: bundle exec rake test

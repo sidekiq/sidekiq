@@ -13,7 +13,7 @@ module Sidekiq
     ROOT = File.expand_path("#{File.dirname(__FILE__)}/../../web")
     VIEWS = "#{ROOT}/views"
     LOCALES = ["#{ROOT}/locales"]
-    LAYOUT = "#{VIEWS}/layout.erb"
+    LAYOUT = "#{VIEWS}/layout.html.erb"
     ASSETS = "#{ROOT}/assets"
 
     DEFAULT_TABS = {

@@ -97,6 +97,21 @@ Contributing
 
 See [the contributing guidelines](https://github.com/sidekiq/sidekiq/blob/main/.github/contributing.md).
 
+### ERB Linting with HERB
+
+This project uses [HERB](https://herb-tools.dev/) for ERB file linting and formatting. All ERB files have been renamed to use the `.html.erb` extension for better tooling support.
+
+**Local Development:**
+```bash
+# Run HERB linting
+bundle exec rake lint:herb
+# or
+bin/lint-herb
+```
+
+**CI Integration:**
+HERB linting is automatically run in CI to ensure all ERB files are properly formatted and free of parse errors.
+
 License
 -----------------
 
