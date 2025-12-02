@@ -437,6 +437,29 @@ module Sidekiq
       self["jid"]
     end
 
+    # Returns persisted iteration state for an iterable job, if any.
+    # Reads Redis key "it-<jid>" set by Sidekiq::Job::Iterable and decodes cursor JSON.
+    # Includes executions (Integer), runtime (Float), cursor (Object), cancelled (Integer timestamp or nil).
+    def iterable_state
+      return nil unless jid
+
+      state = Sidekiq.redis { |c| c.hgetall("it-#{jid}") }
+      return unless state
+
+      cursor = begin
+        Sidekiq.load_json(state["c"])
+      rescue
+        state["c"]
+      end
+
+      {
+        "executions" => state["ex"].to_i,
+        "runtime" => state["rt"].to_f,
+        "cursor" => cursor,
+        "cancelled" => state["cancelled"]&.to_i
+      }
+    end
+
     def bid
       self["bid"]
     end
