@@ -448,9 +448,7 @@ canvas + .table_container {
 }
 
 .buttons-row {
-  margin-top: var(--space-3x);
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
 }
 
