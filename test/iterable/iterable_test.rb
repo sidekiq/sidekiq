@@ -333,11 +333,11 @@ describe Sidekiq::Job::Iterable do
       assert_equal [0, 1], objects
     end
 
-    it "mangles keyword arguments, per JSON" do
+    it "passes hash arguments through JSON round-trip" do
       args = {}
       DynamicCallbackJob.reset
       DynamicCallbackJob::CB[:on_start] << -> { args[:on_start] = arguments }
-      DynamicCallbackJob.perform_inline("first", mike: 456, bob: "string")
+      DynamicCallbackJob.perform_inline("first", {"mike" => 456, "bob" => "string"})
       assert_equal(args, {on_start: ["first", {"mike" => 456, "bob" => "string"}]})
     end
   end
