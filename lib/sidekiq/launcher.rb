@@ -142,10 +142,10 @@ module Sidekiq
       key = identity
       fails = procd = 0
 
-      idle = config[:reap_connections]
-      if idle
-        config.capsules.each_value { |cap| cap.local_redis_pool.reap(idle, &:close) }
-        config.local_redis_pool.reap(idle, &:close)
+      idle_timeout = config[:redis_idle_timeout]
+      if idle_timeout
+        config.capsules.each_value { |cap| cap.local_redis_pool.reap(idle_seconds: idle_timeout, &:close) }
+        config.local_redis_pool.reap(idle_seconds: idle_timeout, &:close)
       end
 
       begin

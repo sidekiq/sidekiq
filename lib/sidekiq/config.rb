@@ -37,7 +37,7 @@ module Sidekiq
       reloader: proc { |&block| block.call },
       backtrace_cleaner: ->(backtrace) { backtrace },
       logged_job_attributes: ["bid", "tags"],
-      reap_connections: nil # TODO Enable by default
+      redis_idle_timeout: nil
     }
 
     ERROR_HANDLER = ->(ex, ctx, cfg = Sidekiq.default_configuration) {
@@ -146,10 +146,9 @@ module Sidekiq
       @redis_config = @redis_config.merge(hash)
     end
 
-    def reap_idle_redis_connections(timeout = nil)
-      self[:reap_connections] = timeout
+    def reap_idle_redis_connections(timeout = 60)
+      self[:redis_idle_timeout] = timeout
     end
-    alias_method :reap, :reap_idle_redis_connections
 
     def redis_pool
       Thread.current[:sidekiq_redis_pool] || Thread.current[:sidekiq_capsule]&.redis_pool || local_redis_pool
