@@ -183,8 +183,8 @@ module Sidekiq
       rf = msg["retry_for"]
       if rf
         return retries_exhausted(jobinst, msg, exception) if (time_for(msg["failed_at"]) + rf) < Time.now
-      else
-        return retries_exhausted(jobinst, msg, exception) if count >= max_retry_attempts
+      elsif count >= max_retry_attempts
+        return retries_exhausted(jobinst, msg, exception)
       end
 
       strategy, delay = delay_for(jobinst, count, exception, msg)
