@@ -226,6 +226,8 @@ module Sidekiq
         end
         return nil unless result
 
+        verify_json(item)
+
         # round-trip the payload via JSON
         msg = Sidekiq.load_json(Sidekiq.dump_json(item))
 

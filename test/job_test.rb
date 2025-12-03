@@ -183,5 +183,12 @@ describe Sidekiq::Job do
       MyCustomJob.perform_inline($my_recorder)
       assert_equal $my_recorder.flatten, %w[1-client-before 1-client-after 1-server-before work_performed 1-server-after]
     end
+
+    it "raises an error when using a symbol as an argument" do
+      error = assert_raises ArgumentError do
+        MySetJob.perform_inline(:symbol)
+      end
+      assert_match(/but :symbol is a Symbol/, error.message)
+    end
   end
 end
