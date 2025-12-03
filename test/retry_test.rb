@@ -147,6 +147,22 @@ describe Sidekiq::JobRetry do
       assert_equal 172800, rfj["retry_for"]
     end
 
+    it "retry_for ignores max_retries setting" do
+      # Set a low max_retries that would normally exhaust retries
+      @config[:max_retries] = 2
+
+      # Job has retry_for set and retry_count exceeds max_retries,
+      # but retry_for duration has NOT expired - should still retry
+      assert_raises RuntimeError do
+        handler.local(worker, jobstr("retry_for" => 3600, "retry_count" => 5, "failed_at" => Time.now.to_i * 1000), "default") do
+          raise "kerblammo!"
+        end
+      end
+      # Job should be in retry set, not dead set (retry_for takes precedence)
+      assert_equal 1, Sidekiq::RetrySet.new.size
+      assert_equal 0, Sidekiq::DeadSet.new.size
+    end
+
     it "allows 0 retry => no retry and dead queue" do
       assert_raises RuntimeError do
         handler.local(worker, jobstr("retry" => 0), "default") do

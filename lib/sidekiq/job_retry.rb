@@ -178,10 +178,14 @@ module Sidekiq
         msg["error_backtrace"] = compress_backtrace(lines)
       end
 
-      return retries_exhausted(jobinst, msg, exception) if count >= max_retry_attempts
-
+      # retry_for and retry are mutually exclusive - if retry_for is set,
+      # we exclusively use duration-based retry logic and ignore count-based logic
       rf = msg["retry_for"]
-      return retries_exhausted(jobinst, msg, exception) if rf && (time_for(msg["failed_at"]) + rf) < Time.now
+      if rf
+        return retries_exhausted(jobinst, msg, exception) if (time_for(msg["failed_at"]) + rf) < Time.now
+      else
+        return retries_exhausted(jobinst, msg, exception) if count >= max_retry_attempts
+      end
 
       strategy, delay = delay_for(jobinst, count, exception, msg)
       case strategy
