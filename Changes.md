@@ -2,6 +2,25 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+HEAD (8.1.0)
+----------
+
+- `retry_for` and `retry` are now mutually exclusive [#6878, Saidbek]
+- `perform_inline` now enforces `strict_args!` [#6718, Saidbek]
+- Integrate Herb linting for ERB templates [#6760, Saidbek]
+- Remove CSRF code, use `Sec-Fetch-Site` header [#6874, deve1212]
+- Allow custom Web UI `assets_path` for CDN purposes [#6865, stanhu]
+- Upgrade to connection_pool 3.0
+- Allow idle connection reaping after N seconds.
+You can activate this **beta** feature like below.
+Feedback requested: is this feature stable and useful for you in production?
+This feature may or may not be enabled by default in Sidekiq 9.0.
+```ruby
+Sidekiq.configure_server do |cfg|
+  cfg.reap_idle_redis_connections(60)
+end
+```
+
 8.0.10
 ----------
 
