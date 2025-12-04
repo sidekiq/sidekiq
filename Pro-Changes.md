@@ -4,6 +4,22 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD (8.1.0)
+---------
+
+- Support batch tagging and search via API or within the Web UI [#6860]
+**Batch tagging requires Redis 7.4 or Valkey 9.0**
+```ruby
+b = Sidekiq::Batch.new
+b.tags = %w(customer:12345 france)
+
+require "sidekiq/api"
+Sidekiq::BatchSet.new.scan_tags("12345") do |bid|
+  st = Sidekiq::Batch::Status.new(bid)
+end
+```
+- Adjust metrics timing calculations to be more accurate
+
 8.0.3
 ---------
 
