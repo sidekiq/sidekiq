@@ -329,7 +329,7 @@ module Sidekiq
     end
 
     def csrf_tag
-      "<input type='hidden' name='authenticity_token' value='#{env[:csrf_token]}'/>"
+      ""
     end
 
     def csp_nonce

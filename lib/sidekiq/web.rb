@@ -129,7 +129,6 @@ module Sidekiq
           cascade: true,
           header_rules: rules
         m.each { |middleware, block| use(*middleware, &block) }
-        use CsrfProtection if cfg[:csrf]
         run Sidekiq::Web::Application.new(self.class)
       end
     end

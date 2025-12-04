@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "sidekiq/web/csrf_protection"
-
 module Sidekiq
   class Web
     ##
@@ -24,10 +22,7 @@ module Sidekiq
         # and very difficult for us to vendor or provide ourselves. If you are worried
         # about data security and wish to self-host, you can change these URLs.
         profile_view_url: "https://profiler.firefox.com/public/%s",
-        profile_store_url: "https://api.profiler.firefox.com/compressed-store",
-        # TODO Will be false in Sidekiq 9.0.
-        # CSRF is unnecessary if you are using SameSite=(Strict|Lax) cookies.
-        csrf: false
+        profile_store_url: "https://api.profiler.firefox.com/compressed-store"
       }
 
       ##
