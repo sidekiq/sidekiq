@@ -40,7 +40,7 @@ jobs:
         ruby-version: ${{ matrix.ruby }}
 
     - name: Start Redis
-      uses: supercharge/redis-github-action@1.8.1
+      uses: supercharge/redis-github-action@v2
       with:
         redis-image: ${{ matrix.database.image }}
         redis-version: ${{ matrix.database.version }}
