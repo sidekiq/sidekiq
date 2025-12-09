@@ -23,9 +23,9 @@ Gem::Specification.new do |gem|
     "rubygems_mfa_required" => "true"
   }
 
-  gem.add_dependency "redis-client", ">= 0.23.0"
-  gem.add_dependency "connection_pool", ">= 2.3.0"
-  gem.add_dependency "rack", ">= 2.2.4"
+  gem.add_dependency "redis-client", ">= 0.23.0", "<1"
+  gem.add_dependency "connection_pool", ">= 2.3.0", "<3"
+  gem.add_dependency "rack", ">= 2.2.4", "<3.3"
   gem.add_dependency "logger"
   gem.add_dependency "base64"
 end

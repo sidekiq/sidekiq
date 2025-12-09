@@ -8,6 +8,7 @@
 - Allow Redis :password as a Proc [#6625]
   `config.redis = { password: ->(username) { "password" } }`
 - Bump required redis-client version to 0.23
+- Lock dependencies to known good major versions
 
 7.3.9
 ----------
