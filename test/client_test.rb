@@ -364,7 +364,7 @@ describe Sidekiq::Client do
     [1, 2, 3].each do |job_count|
       it "can push #{job_count} jobs scheduled at different times" do
         times = job_count.times.map { |i| Time.new(2019, 1, i + 1) }
-        args = job_count.times.map { |i| [i] }
+        args = job_count.times.zip
 
         jids = Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => args, "at" => times.map(&:to_f))
 
@@ -570,7 +570,7 @@ describe Sidekiq::Client do
   it "can specify different times when there are more jobs than the batch size" do
     job_count = 5
     times = job_count.times.map { |i| Time.new(2019, 1, i + 1).utc }
-    args = job_count.times.map { |i| [i] }
+    args = job_count.times.zip
     # When there are 3 jobs, we want to use `times[2]` for the final job.
     batch_size = 2
 
@@ -619,7 +619,7 @@ describe Sidekiq::Client do
 
       Sidekiq::Client.via(pool) do
         client = Sidekiq::Client.new
-        client.push_bulk("class" => MyJob, "args" => (1..10).map { [_1] }, "at" => 10)
+        client.push_bulk("class" => MyJob, "args" => (1..10).zip, "at" => 10)
       end
 
       # 20 since the array of [at, dumped_payload] elements gets flattened.
