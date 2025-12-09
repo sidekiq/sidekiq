@@ -9,6 +9,7 @@ require "sidekiq/api"
 
 class JoeJob
   include Sidekiq::Job
+
   def perform(slp)
     raise "boom" if slp == "boom"
     sleep(slp) if slp > 0

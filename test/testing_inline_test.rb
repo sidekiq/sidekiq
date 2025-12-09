@@ -8,6 +8,7 @@ class ParameterIsNotString < RuntimeError; end
 
 class InlineJob
   include Sidekiq::Job
+
   def perform(pass)
     raise ArgumentError, "no jid" unless jid
     raise InlineError unless pass
@@ -16,6 +17,7 @@ end
 
 class InlineJobWithTimeParam
   include Sidekiq::Job
+
   def perform(time)
     raise ParameterIsNotString unless time.is_a?(String) || time.is_a?(Numeric)
   end

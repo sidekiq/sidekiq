@@ -10,6 +10,7 @@ TEST_EXCEPTION = ExceptionHandlerTestException.new("Something didn't work!")
 
 class Thing
   include Sidekiq::Component
+
   attr_reader :config
 
   def initialize(config)

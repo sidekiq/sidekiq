@@ -7,6 +7,7 @@ require "sidekiq/capsule"
 module Sidekiq # :nodoc:
   class BasicFetch
     include Sidekiq::Component
+
     # We want the fetch operation to timeout every few seconds so the thread
     # can check if the process is shutting down.
     TIMEOUT = 2

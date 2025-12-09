@@ -347,7 +347,7 @@ module Sidekiq
       elsif rss_kb < 10_000_000
         "#{number_with_delimiter((rss_kb / 1024.0).to_i)} MB"
       else
-        "#{number_with_delimiter((rss_kb / (1024.0 * 1024.0)), precision: 1)} GB"
+        "#{number_with_delimiter(rss_kb / (1024.0 * 1024.0), precision: 1)} GB"
       end
     end
 

@@ -68,6 +68,7 @@ describe Sidekiq::Job::Iterable do
     e = assert_raises(RuntimeError) do
       Class.new do
         include Sidekiq::IterableJob
+
         def perform(*)
         end
       end

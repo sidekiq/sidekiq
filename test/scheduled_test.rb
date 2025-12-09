@@ -6,6 +6,7 @@ require "sidekiq/api"
 
 class ScheduledJob
   include Sidekiq::Job
+
   def perform(x)
   end
 end
