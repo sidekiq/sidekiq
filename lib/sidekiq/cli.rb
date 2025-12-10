@@ -203,6 +203,7 @@ module Sidekiq # :nodoc:
       },
       # deprecated, use INFO
       "TTIN" => ->(cli) {
+        cli.logger.error { "DEPRECATED: Please use the INFO signal for backtraces, support for TTIN will be removed in Sidekiq 9.0." }
         Thread.list.each do |thread|
           cli.logger.warn "Thread TID-#{(thread.object_id ^ ::Process.pid).to_s(36)} #{thread.name}"
           if thread.backtrace
