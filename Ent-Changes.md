@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+8.1.0
+---------
+
+- Better periodic UI styling
+- Integrate herb, connection_pool 3.0
+
 8.0.3
 ---------
 

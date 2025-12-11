@@ -4,10 +4,9 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD (8.1.0)
+8.1.0
 ---------
 
-- Remove non-idempotent operation leading to duplicate batch callbacks [#6852]
 - Support batch tagging and search via API or within the Web UI [#6860]
   **Batch tagging requires Redis 7.4 or Valkey 9.0**
 ```ruby
@@ -19,6 +18,7 @@ Sidekiq::BatchSet.new.scan_tags("12345") do |bid|
   st = Sidekiq::Batch::Status.new(bid)
 end
 ```
+- Remove non-idempotent operation leading to duplicate batch callbacks [#6852]
 - Adjust metrics timing calculations to be more accurate
 
 8.0.3
