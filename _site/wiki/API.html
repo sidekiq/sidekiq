@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>API</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Sidekiq has a public API allowing access to real-time information about
+workers, queues and jobs.  See
+<a href="https://github.com/sidekiq/sidekiq/blob/master/lib/sidekiq/api.rb"><code class="language-plaintext highlighter-rouge">sidekiq/api</code></a> for RDoc.  Require the API to get access to all of the functionality described below.</p>
+
+<pre><code class="language-Ruby">require 'sidekiq/api'
+</code></pre>
+
+<p>The Web UI uses the API exclusively - <strong>anything you can do in the UI can be scripted with the API</strong>.</p>
+
+<h2 id="overview">Overview</h2>
+
+<p>See my blog post at <a href="https://www.mikeperham.com/2021/04/20/a-tour-of-the-sidekiq-api/">https://www.mikeperham.com/2021/04/20/a-tour-of-the-sidekiq-api/</a> for a good introduction to the API and its ethos.</p>
+
+<h2 id="queue">Queue</h2>
+
+<p>Get all queues</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Queue</span><span class="p">.</span><span class="nf">all</span>
+</code></pre></div></div>
+
+<p>Get a queue</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Queue</span><span class="p">.</span><span class="nf">new</span> <span class="c1"># the "default" queue</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Queue</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s2">"mailer"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Gets the number of jobs within a queue.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Queue</span><span class="p">.</span><span class="nf">new</span><span class="p">.</span><span class="nf">size</span> <span class="c1"># =&gt; 4</span>
+</code></pre></div></div>
+
+<p>Deletes all Jobs in a Queue, by removing the queue.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Queue</span><span class="p">.</span><span class="nf">new</span><span class="p">.</span><span class="nf">clear</span>
+</code></pre></div></div>
+
+<p>Deletes jobs within the queue <code class="language-plaintext highlighter-rouge">mailer</code> with a <code class="language-plaintext highlighter-rouge">jid</code> of <code class="language-plaintext highlighter-rouge">'abcdef1234567890'</code></p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">queue</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Queue</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s2">"mailer"</span><span class="p">)</span>
+<span class="n">queue</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">job</span><span class="o">|</span>
+  <span class="n">job</span><span class="p">.</span><span class="nf">klass</span> <span class="c1"># =&gt; 'MyWorker'</span>
+  <span class="n">job</span><span class="p">.</span><span class="nf">args</span> <span class="c1"># =&gt; [1, 2, 3]</span>
+  <span class="c1"># See also `display_class` and `display_args` methods if your job is wrapped by the ActiveJob adapter some other extension.</span>
+  <span class="c1"># to get the original job class and only the job arguments.</span>
+  <span class="n">job</span><span class="p">.</span><span class="nf">delete</span> <span class="k">if</span> <span class="n">job</span><span class="p">.</span><span class="nf">jid</span> <span class="o">==</span> <span class="s1">'abcdef1234567890'</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p><strong>NOTE:</strong> The retrieval process is prone to race conditions. For example <code class="language-plaintext highlighter-rouge">Sidekiq::Queue.new.each { |job| puts job.id }</code> may skip jobs or print the same job(s) multiple times if other processes are updating the queue at the same time. This is expected behavior when mutating a shared data structure (i.e. the queue within Redis) without a lock.</p>
+
+<p>Calculate the latency (in seconds) of a queue (now - when the oldest job was enqueued):</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Queue</span><span class="p">.</span><span class="nf">new</span><span class="p">.</span><span class="nf">latency</span>
+<span class="mf">14.5</span>
+</code></pre></div></div>
+
+<p>Find a job by JID (WARNING: this is very inefficient if your queue is big!)</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt; Sidekiq::Queue.new.find_job(somejid)
+</code></pre></div></div>
+
+<p>Sidekiq Pro adds a few <a href="/wiki/Pro-API.html">API extensions</a>, including <code class="language-plaintext highlighter-rouge">Sidekiq::Queue#delete_job</code> and <code class="language-plaintext highlighter-rouge">Sidekiq::Queue#delete_by_class</code>.</p>
+
+<h2 id="named-queues">Named Queues</h2>
+
+<h3 id="scheduled">Scheduled</h3>
+
+<p>The scheduled sorted set holds all scheduled jobs in chronologically-sorted order.  There’s much more in the code, see <code class="language-plaintext highlighter-rouge">sidekiq/api</code> for more detail.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ss</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">ScheduledSet</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">ss</span><span class="p">.</span><span class="nf">size</span>
+<span class="n">ss</span><span class="p">.</span><span class="nf">clear</span>
+</code></pre></div></div>
+
+<p>Allows enumeration of scheduled jobs within Sidekiq.
+Based on this, you can search/filter for jobs.  Here’s an
+example where I’m selecting all jobs of a certain type
+and deleting them from the scheduled queue (<strong>inefficient</strong>).</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ss</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">ScheduledSet</span><span class="p">.</span><span class="nf">new</span>
+<span class="c1"># Use `scan` to filter elements in Redis, much faster</span>
+<span class="c1"># This will return any job payloads that match "*SomeWorker*"</span>
+<span class="n">jobs</span> <span class="o">=</span> <span class="n">ss</span><span class="p">.</span><span class="nf">scan</span><span class="p">(</span><span class="s2">"SomeWorker"</span><span class="p">).</span><span class="nf">select</span> <span class="p">{</span><span class="o">|</span><span class="n">retri</span><span class="o">|</span> <span class="n">retri</span><span class="p">.</span><span class="nf">display_class</span> <span class="o">==</span> <span class="s1">'SomeWorker'</span> <span class="p">}</span>
+<span class="c1"># slower, pulls everything into Ruby</span>
+<span class="n">jobs</span> <span class="o">=</span> <span class="n">ss</span><span class="p">.</span><span class="nf">select</span> <span class="p">{</span><span class="o">|</span><span class="n">retri</span><span class="o">|</span> <span class="n">retri</span><span class="p">.</span><span class="nf">display_class</span> <span class="o">==</span> <span class="s1">'SomeWorker'</span> <span class="p">}</span>
+<span class="n">jobs</span><span class="p">.</span><span class="nf">each</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:delete</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Deleting a job by jid:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">jid</span> <span class="o">=</span> <span class="s1">'80b1e7e46381a20c0c567285'</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">ScheduledSet</span><span class="p">.</span><span class="nf">new</span><span class="p">.</span><span class="nf">find_job</span><span class="p">(</span><span class="n">jid</span><span class="p">)</span> <span class="p">{</span><span class="o">|</span><span class="n">j</span><span class="o">|</span> <span class="n">j</span><span class="p">.</span><span class="nf">delete</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="retries">Retries</h3>
+
+<p>When a job raises an error, Sidekiq places it in the RetrySet for automatic retry later. Jobs are sorted based on when they will next retry.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">rs</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">RetrySet</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">rs</span><span class="p">.</span><span class="nf">size</span>
+<span class="n">rs</span><span class="p">.</span><span class="nf">clear</span>
+</code></pre></div></div>
+
+<p>Allows enumeration of retries within Sidekiq.
+Based on this, you can search/filter for jobs.  Here’s an
+example where I’m selecting all jobs of a certain type
+and deleting them from the retry queue (<strong>inefficient</strong>).</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">query</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">RetrySet</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">query</span><span class="p">.</span><span class="nf">select</span> <span class="k">do</span> <span class="o">|</span><span class="n">job</span><span class="o">|</span>
+  <span class="n">job</span><span class="p">.</span><span class="nf">klass</span> <span class="o">==</span> <span class="s1">'Sidekiq::Extensions::DelayedClass'</span> <span class="o">&amp;&amp;</span>
+    <span class="c1"># For Sidekiq::Extensions (e.g., Foo.delay.bar(*args)),</span>
+    <span class="c1"># the context is serialized to YAML, and must</span>
+    <span class="c1"># be deserialized to get to the original args</span>
+    <span class="p">((</span><span class="n">klass</span><span class="p">,</span> <span class="nb">method</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="o">=</span> <span class="no">YAML</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="n">job</span><span class="p">.</span><span class="nf">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">&amp;&amp;</span>
+    <span class="n">klass</span> <span class="o">==</span> <span class="no">User</span> <span class="o">&amp;&amp;</span>
+    <span class="nb">method</span> <span class="o">==</span> <span class="ss">:setup_new_subscriber</span>
+<span class="k">end</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:delete</span><span class="p">)</span>
+
+<span class="c1"># a better approach using 6.0's `scan` to pre-filter</span>
+<span class="n">query</span><span class="p">.</span><span class="nf">scan</span><span class="p">(</span><span class="s2">"setup_new_subscriber"</span><span class="p">).</span><span class="nf">select</span> <span class="k">do</span> <span class="o">|</span><span class="n">job</span><span class="o">|</span>
+  <span class="n">job</span><span class="p">.</span><span class="nf">klass</span> <span class="o">==</span> <span class="s1">'Sidekiq::Extensions::DelayedClass'</span> <span class="o">&amp;&amp;</span>
+    <span class="c1"># For Sidekiq::Extensions (e.g., Foo.delay.bar(*args)),</span>
+    <span class="c1"># the context is serialized to YAML, and must</span>
+    <span class="c1"># be deserialized to get to the original args</span>
+    <span class="p">((</span><span class="n">klass</span><span class="p">,</span> <span class="nb">method</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="o">=</span> <span class="no">YAML</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="n">job</span><span class="p">.</span><span class="nf">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">&amp;&amp;</span>
+    <span class="n">klass</span> <span class="o">==</span> <span class="no">User</span> <span class="o">&amp;&amp;</span>
+    <span class="nb">method</span> <span class="o">==</span> <span class="ss">:setup_new_subscriber</span>
+<span class="k">end</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:delete</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="dead">Dead</h3>
+
+<p>Like RetrySet and ScheduledSet, the DeadSet holds all jobs considered dead by Sidekiq, ordered by when they died.  It supports the same basic operations as the others.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ds</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">DeadSet</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">ds</span><span class="p">.</span><span class="nf">size</span>
+<span class="n">ds</span><span class="p">.</span><span class="nf">clear</span>
+</code></pre></div></div>
+
+<p>Maybe you just deployed a long-overdue bugfix?  Iterate through the DeadSet, find jobs of a certain characteristic and retry them.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ds</span><span class="p">.</span><span class="nf">select</span> <span class="k">do</span> <span class="o">|</span><span class="n">job</span><span class="o">|</span>
+  <span class="n">job</span><span class="p">.</span><span class="nf">display_class</span> <span class="o">==</span> <span class="s1">'FixedWorker'</span> <span class="o">&amp;&amp;</span> <span class="n">job</span><span class="p">.</span><span class="nf">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">123</span>
+<span class="k">end</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:retry</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="scan">Scan</h3>
+
+<p>Sidekiq 6.0 adds support for scanning the named sets by glob pattern, allowing you to filter out irrelevant jobs within Redis, much faster than doing it in Ruby. Scanning operates on the raw JSON payload so you need to ensure you are using an accurate pattern:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ss</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">ScheduledSet</span><span class="p">.</span><span class="nf">new</span>
+<span class="c1"># match jobs of the given class</span>
+<span class="n">ss</span><span class="p">.</span><span class="nf">scan</span><span class="p">(</span><span class="s2">"</span><span class="se">\"</span><span class="s2">class</span><span class="se">\"</span><span class="s2">:</span><span class="se">\"</span><span class="s2">HardWorker</span><span class="se">\"</span><span class="s2">"</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">job</span><span class="o">|</span> <span class="o">...</span> <span class="p">}</span>
+
+<span class="c1"># cleaner but not quite the same: "HardWorker" might appear in arguments or other elements of the job payload</span>
+<span class="n">ss</span><span class="p">.</span><span class="nf">scan</span><span class="p">(</span><span class="s2">"HardWorker"</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">job</span><span class="o">|</span> <span class="o">...</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>If you don’t pass a block, scan returns an Enumerator.</p>
+
+<p>See <a href="https://redis.io/commands/keys">Redis docs</a> for more details on glob pattern matching - full regular expressions are not supported. For convenience Sidekiq wraps your pattern with a splat (<code class="language-plaintext highlighter-rouge">*</code>) on either side unless you include a <code class="language-plaintext highlighter-rouge">*</code>, in which case you must wrap the string yourself if you need it.</p>
+
+<h2 id="processes">Processes</h2>
+
+<p><code class="language-plaintext highlighter-rouge">Sidekiq::ProcessSet</code> gets you access to near real-time (updated every 5 sec) info about the current set of Sidekiq processes running.  You can remotely control the processes also:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ps</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">ProcessSet</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">ps</span><span class="p">.</span><span class="nf">size</span> <span class="c1"># =&gt; 2</span>
+<span class="n">ps</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">process</span><span class="o">|</span>
+  <span class="nb">p</span> <span class="n">process</span><span class="p">[</span><span class="s1">'busy'</span><span class="p">]</span>     <span class="c1"># =&gt; 3</span>
+  <span class="nb">p</span> <span class="n">process</span><span class="p">[</span><span class="s1">'hostname'</span><span class="p">]</span> <span class="c1"># =&gt; 'myhost.local'</span>
+  <span class="nb">p</span> <span class="n">process</span><span class="p">[</span><span class="s1">'pid'</span><span class="p">]</span>      <span class="c1"># =&gt; 16131</span>
+<span class="k">end</span>
+<span class="n">ps</span><span class="p">.</span><span class="nf">each</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:quiet!</span><span class="p">)</span> <span class="c1"># equivalent to the TSTP signal (USR1 for version &lt; 5)</span>
+<span class="n">ps</span><span class="p">.</span><span class="nf">each</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:stop!</span><span class="p">)</span> <span class="c1"># equivalent to the TERM signal</span>
+<span class="n">ps</span><span class="p">.</span><span class="nf">each</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:dump_threads</span><span class="p">)</span> <span class="c1"># equivalent to the TTIN signal</span>
+</code></pre></div></div>
+
+<p>Remote control can be useful in situations where signals are not supported: Windows, JRuby and the JVM or Heroku for instance.</p>
+
+<h2 id="workers">Workers</h2>
+
+<p>Programmatic access to the current active worker set for all Sidekiq processes.  A ‘worker’ is defined as a thread currently processing a job.</p>
+
+<p>Note: This data changes asynchronously, updating every 5 seconds.  It is not millisecond-precise.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">worker_set</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">WorkSet</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">worker_set</span><span class="p">.</span><span class="nf">size</span> <span class="c1"># =&gt; 2</span>
+<span class="n">worker_set</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">process_id</span><span class="p">,</span> <span class="n">thread_id</span><span class="p">,</span> <span class="n">work</span><span class="o">|</span>
+  <span class="c1"># process_id is a unique identifier per Sidekiq process</span>
+  <span class="c1"># thread_id is a unique identifier per thread</span>
+  <span class="c1"># work is a Sidekiq::Work instance with accessors for 'queue', 'run_at', and 'payload'</span>
+  <span class="c1"># run_at is an epoch Integer.</span>
+  <span class="c1"># payload is a JSON String which can be decoded to the job hash, like:</span>
+  <span class="c1"># { 'retry' =&gt; true,</span>
+  <span class="c1">#   'queue' =&gt; 'default',</span>
+  <span class="c1">#   'class' =&gt; 'Redacted',</span>
+  <span class="c1">#   'args' =&gt; [1, 2, 'foo'],</span>
+  <span class="c1">#   'jid' =&gt; '80b1e7e46381a20c0c567285',</span>
+  <span class="c1">#   'enqueued_at' =&gt; 14278110332067 }</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="stats">Stats</h2>
+
+<p>Various stats about your Sidekiq installation.</p>
+
+<pre><code class="language-Ruby">stats = Sidekiq::Stats.new
+stats.processed # =&gt; 100
+stats.failed # =&gt; 3
+stats.queues # =&gt; { "default" =&gt; 1001, "email" =&gt; 50 }
+</code></pre>
+
+<p>Gets the number of jobs enqueued in all queues (does NOT include retries and scheduled jobs).</p>
+
+<pre><code class="language-Ruby">stats.enqueued # =&gt; 5 
+</code></pre>
+
+<h2 id="stats-history">Stats History</h2>
+
+<p>All dates are UTC and history stats are cleared after 5 years.</p>
+
+<p>Get history of failed/processed stats:</p>
+
+<pre><code class="language-Ruby">s = Sidekiq::Stats::History.new(2) # Indicates how many days of data you want starting from today (UTC)
+s.failed # =&gt; { "2012-12-05" =&gt; 120, "2012-12-04" =&gt; 234 }
+s.processed # =&gt; { "2012-12-05" =&gt; 1010, "2012-12-04" =&gt; 1500 }
+</code></pre>
+
+<p>Start from a different date:</p>
+
+<pre><code class="language-Ruby">s = Sidekiq::Stats::History.new( 3, Date.parse("2012-12-3") )
+s.failed # =&gt; { "2012-12-03" =&gt; 10, "2012-12-02" =&gt; 24, "2012-12-01" =&gt; 4 }
+s.processed # =&gt; { "2012-12-03" =&gt; 124, "2012-12-02" =&gt; 345, "2012-12-01" =&gt; 355 }
+</code></pre>
+
+<h2 id="notes">Notes</h2>
+
+<ul>
+  <li>The API exposes some operations which are <strong>not</strong> scalable and should not be used in an automated fashion or in bulk as part of your application functionality.</li>
+  <li>The API, at its core, is operating on shared mutable data structures within Redis <strong>without locks</strong>. This means that any iteration through the structure is best effort and results cannot be guaranteed.  For example, if you call <code class="language-plaintext highlighter-rouge">Sidekiq::Queue#find_job(jid)</code>, the call might miss a job if the queue is mutated during iteration.</li>
+  <li>A mostly quiet system may never notice these race conditions but a large, busy system likely will. You should not be scanning through queues/sets and deleting jobs unless something has gone wrong and you need to repair data manually.</li>
+  <li>Sidekiq Pro adds a few <a href="/wiki/Pro-API.html">API extensions</a>, such as <code class="language-plaintext highlighter-rouge">Sidekiq::Queue#delete_job</code>, <code class="language-plaintext highlighter-rouge">Sidekiq::Queue#delete_by_class</code>, and an ability to pause queues.</li>
+</ul>
+
+<p>Previous: <a href="/wiki/Monitoring.html">Monitoring</a> Next: <a href="/wiki/Middleware.html">Middleware</a></p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

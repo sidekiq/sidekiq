@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Error Handling</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>I hate to say it but some of your jobs will raise exceptions when executing.  It’s true.</p>
+
+<p>Sidekiq has a number of features to handle errors of all types.</p>
+
+<p><a href="https://www.youtube.com/watch?v=dGpbYqP5lr8&amp;list=PLjeHh2LSCFrWGT5uVjUuFKAcrcj5kSai1&amp;index=2" title="Error Handling"><img src="http://img.youtube.com/vi/dGpbYqP5lr8/0.jpg" alt="Error Handling" /></a></p>
+
+<h2 id="ethos">Ethos</h2>
+
+<p>Sidekiq retries are for <strong>unexpected</strong> errors: bugs, 3rd party service downtime, etc. If you have a system which needs a business process to handle expected errors, that’s not appropriate for retries. Use a state machine and other application logic to handle those expected errors.</p>
+
+<h2 id="best-practices">Best Practices</h2>
+
+<ol>
+  <li>Use an error service - Honeybadger, Airbrake, Rollbar, BugSnag, Sentry, Exceptiontrap, Raygun, etc. They’re all similar in feature sets and pricing <strong>but pick one and use it</strong>. The error service will send you an email every time there is an exception in a job (Smarter ones like Honeybadger will send email on the 1st, 3rd and 10th identical error so your inbox won’t be overwhelmed if 1000s of jobs are failing).</li>
+  <li>Let Sidekiq catch errors raised by your jobs. Sidekiq’s built-in retry mechanism will catch those exceptions and retry the jobs regularly. The error service will notify you of the exception. You fix the bug, deploy the fix and Sidekiq will retry your job successfully.</li>
+  <li>If you don’t fix the bug within 25 retries (about 21 days), Sidekiq will stop retrying and move your job to the Dead set. You can fix the bug and retry the job manually anytime within the next 6 months using the Web UI.</li>
+  <li>After 6 months, Sidekiq will discard the job.</li>
+</ol>
+
+<h2 id="error-handlers">Error Handlers</h2>
+
+<p>Gems can attach to Sidekiq’s global error handlers so they will be informed any time there is an error inside Sidekiq.  Error services should all provide integration automatically by including their gem within your application’s Gemfile.</p>
+
+<p>You can create your own error handler by providing something which responds to <code class="language-plaintext highlighter-rouge">call(exception, context_hash, config)</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">error_handlers</span> <span class="o">&lt;&lt;</span> <span class="nb">proc</span> <span class="p">{</span><span class="o">|</span><span class="n">ex</span><span class="p">,</span><span class="n">ctx_hash</span><span class="p">,</span><span class="n">config</span><span class="o">|</span> <span class="no">MyErrorService</span><span class="p">.</span><span class="nf">notify</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="n">ctx_hash</span><span class="p">)</span> <span class="p">}</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">ex</code> is the actual Exception raised. <code class="language-plaintext highlighter-rouge">context_hash</code> is an optional hash with the job payload and any additional context for the error. <code class="language-plaintext highlighter-rouge">config</code> gives you access to Sidekiq’s configuration.</p>
+
+<p>Note that error handlers are only relevant to the Sidekiq server process. They aren’t active in Rails console, for instance.</p>
+
+<h2 id="backtrace-logging">Backtrace Logging</h2>
+
+<p>Enabling <code class="language-plaintext highlighter-rouge">backtrace</code> logging for a job will cause the backtrace to be persisted throughout the lifetime of the job. <strong>Beware</strong>: backtraces can take 1-4k of memory in Redis each so large amounts of failing jobs can significantly increase your Redis memory usage.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sidekiq_options</span> <span class="ss">backtrace: </span><span class="kp">true</span>
+</code></pre></div></div>
+
+<p>You should use caution when enabling <code class="language-plaintext highlighter-rouge">backtrace</code> by limiting it to a couple of lines, or use an error service to keep track of failures and associated backtraces.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sidekiq_options</span> <span class="ss">backtrace: </span><span class="mi">20</span> <span class="c1"># top 20 lines</span>
+</code></pre></div></div>
+
+<h2 id="automatic-job-retry">Automatic job retry</h2>
+
+<p>Sidekiq will retry failures with an exponential backoff using the
+formula <code class="language-plaintext highlighter-rouge">(retry_count ** 4) + 15 + (rand(10) * (retry_count + 1))</code> (i.e.
+15, 16, 31, 96, 271, … seconds + a <a href="https://github.com/sidekiq/sidekiq/issues/480">random amount of
+time</a>).  It will perform 25 retries over approximately 20 days.  Assuming you deploy a bug fix within that time, the job will get retried and successfully processed.  After 25 times, Sidekiq will move that job to the Dead Job queue, assuming that it will need manual intervention to work.</p>
+
+<p>The maximum number of retries can be globally configured by adding the following to your <code class="language-plaintext highlighter-rouge">sidekiq.yml</code>:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">:max_retries: </span><span class="m">1</span>
+</code></pre></div></div>
+
+<details>
+<summary>This table contains approximate retry waiting times (click to expand).</summary>
+<pre>
+ # | Next retry backoff | Total waiting time
+ -------------------------------------------
+ 1 |       0d 0h 0m 20s |       0d 0h 0m 20s
+ 2 |       0d 0h 0m 26s |       0d 0h 0m 46s
+ 3 |       0d 0h 0m 46s |       0d 0h 1m 32s
+ 4 |       0d 0h 1m 56s |       0d 0h 3m 28s
+ 5 |       0d 0h 4m 56s |       0d 0h 8m 24s
+ 6 |      0d 0h 11m 10s |      0d 0h 19m 34s
+ 7 |      0d 0h 22m 26s |       0d 0h 42m 0s
+ 8 |      0d 0h 40m 56s |      0d 1h 22m 56s
+ 9 |       0d 1h 9m 16s |      0d 2h 32m 12s
+10 |      0d 1h 50m 26s |      0d 4h 22m 38s
+11 |      0d 2h 47m 50s |      0d 7h 10m 28s
+12 |       0d 4h 5m 16s |     0d 11h 15m 44s
+13 |      0d 5h 46m 56s |      0d 17h 2m 40s
+14 |      0d 7h 57m 26s |        1d 1h 0m 6s
+15 |     0d 10h 41m 46s |     1d 11h 41m 52s
+16 |      0d 14h 5m 20s |      2d 1h 47m 12s
+17 |     0d 18h 13m 56s |       2d 20h 1m 8s
+18 |     0d 23h 13m 46s |     3d 19h 14m 54s
+19 |      1d 5h 11m 26s |      5d 0h 26m 20s
+20 |     1d 12h 13m 56s |     6d 12h 40m 16s
+21 |     1d 20h 28m 40s |       8d 9h 8m 56s
+22 |       2d 6h 3m 26s |    10d 15h 12m 22s
+23 |      2d 17h 6m 26s |     13d 8h 18m 48s
+24 |      3d 5h 46m 16s |      16d 14h 5m 4s
+25 |     3d 20h 11m 56s |     20d 10h 17m 0s
+</pre>
+Hint: This table was calculated under the assumption that `rand(10)` always returns 5. See `Sidekiq::JobRetry#delay_for` for the current formula.
+</details>
+
+<h2 id="web-ui">Web UI</h2>
+
+<p>The Sidekiq Web UI has a “Retries” and “Dead” tab which lists failed jobs and allows you to run them, inspect them or delete them.</p>
+
+<h2 id="dead-set">Dead set</h2>
+
+<p>The Dead set is a holding pen for jobs which have failed all their retries.  Sidekiq will not retry those jobs, you must manually retry them via the UI.  The Dead set is limited by default to 10,000 jobs or 6 months so it doesn’t grow infinitely.  <strong>Only jobs configured with 0 or greater retries will go to the Dead set.</strong>  Use <code class="language-plaintext highlighter-rouge">retry: false</code> if you want a particular type of job to be executed only once, no matter what happens.</p>
+
+<h2 id="configuration">Configuration</h2>
+
+<p>You can specify the number of retries for a particular worker if 25 is too many:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">LessRetryableJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+  <span class="n">sidekiq_options</span> <span class="ss">retry: </span><span class="mi">5</span> <span class="c1"># Only five retries and then to the Dead Job Queue</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Configure job retries to use a lower priority queue so new jobs take precedence:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">LowPriorityRetryJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+  <span class="n">sidekiq_options</span> <span class="ss">queue: </span><span class="s1">'default'</span><span class="p">,</span> <span class="ss">retry_queue: </span><span class="s1">'bulk'</span> <span class="c1"># send retries to the 'bulk' queue</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>You can disable retry support for a particular worker.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">NonRetryableJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+  <span class="n">sidekiq_options</span> <span class="ss">retry: </span><span class="kp">false</span> <span class="c1"># job will be discarded if it fails</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Skip retries, send a failed job straight to the Dead set:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">NonRetryableJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+  <span class="n">sidekiq_options</span> <span class="ss">retry: </span><span class="mi">0</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>As of Sidekiq 7.1.3, you can retry for a period of time:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">NonRetryableJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+  <span class="n">sidekiq_options</span> <span class="ss">retry_for: </span><span class="mi">48</span><span class="p">.</span><span class="nf">hours</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>You can disable a job going to the Dead set:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">NoDeathJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+  <span class="n">sidekiq_options</span> <span class="ss">retry: </span><span class="mi">5</span><span class="p">,</span> <span class="ss">dead: </span><span class="kp">false</span> <span class="c1"># will retry 5 times and then disappear</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>The retry delay can be dynamically calculated by defining a <code class="language-plaintext highlighter-rouge">sidekiq_retry_in</code> method in your job class. Support for <code class="language-plaintext highlighter-rouge">:kill</code> and <code class="language-plaintext highlighter-rouge">:discard</code> was added in v6.5.2. Support for the third block parameter, jobhash, was added in v7.0.8.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">JobWithCustomRetry</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+  <span class="n">sidekiq_options</span> <span class="ss">retry: </span><span class="mi">5</span>
+
+  <span class="c1"># The current retry count, exception and job hash is yielded. The return value of the</span>
+  <span class="c1"># block can be an integer to be used as the the delay in seconds, :kill to</span>
+  <span class="c1"># send the job to the DeadSet, or :discard  to throw away the job. A</span>
+  <span class="c1"># return value of nil will use the default delay. </span>
+  <span class="n">sidekiq_retry_in</span> <span class="k">do</span> <span class="o">|</span><span class="n">count</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="n">jobhash</span><span class="o">|</span>
+    <span class="k">case</span> <span class="n">exception</span>
+    <span class="k">when</span> <span class="no">SpecialException</span>
+      <span class="mi">10</span> <span class="o">*</span> <span class="p">(</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># (i.e. 10, 20, 30, 40, 50)</span>
+    <span class="k">when</span> <span class="no">ExceptionToKillFor</span>
+      <span class="ss">:kill</span>
+    <span class="k">when</span> <span class="no">ExceptionToForgetAbout</span>
+      <span class="ss">:discard</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>After retrying so many times, Sidekiq will call the <code class="language-plaintext highlighter-rouge">sidekiq_retries_exhausted</code> hook on your Job <strong>if you’ve defined it</strong>. The hook receives the queued job hash as an argument and is called right before Sidekiq moves the job to the Dead set. Return <code class="language-plaintext highlighter-rouge">:discard</code> if you don’t want to bother saving it.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">FailingJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+
+  <span class="n">sidekiq_retries_exhausted</span> <span class="k">do</span> <span class="o">|</span><span class="n">job</span><span class="p">,</span> <span class="n">ex</span><span class="o">|</span>
+    <span class="no">Sidekiq</span><span class="p">.</span><span class="nf">logger</span><span class="p">.</span><span class="nf">warn</span> <span class="s2">"Failed </span><span class="si">#{</span><span class="n">job</span><span class="p">[</span><span class="s1">'class'</span><span class="p">]</span><span class="si">}</span><span class="s2"> with </span><span class="si">#{</span><span class="n">job</span><span class="p">[</span><span class="s1">'args'</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">#{</span><span class="n">job</span><span class="p">[</span><span class="s1">'error_message'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+  <span class="k">end</span>
+  
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="s2">"or I don't work"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="death-notification">Death Notification</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">sidekiq_retries_exhausted</code> callback is specific to a Job class.  Starting in v5.1, Sidekiq can also fire a global callback when a job dies:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># this goes in your initializer</span>
+<span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">death_handlers</span> <span class="o">&lt;&lt;</span> <span class="o">-&gt;</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">ex</span><span class="p">)</span> <span class="k">do</span>
+    <span class="nb">puts</span> <span class="s2">"Uh oh, </span><span class="si">#{</span><span class="n">job</span><span class="p">[</span><span class="s1">'class'</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">job</span><span class="p">[</span><span class="s2">"jid"</span><span class="p">]</span><span class="si">}</span><span class="s2"> just died with error </span><span class="si">#{</span><span class="n">ex</span><span class="p">.</span><span class="nf">message</span><span class="si">}</span><span class="s2">."</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>With this callback, you can email yourself, send a Slack message, etc so you know there is something wrong.</p>
+
+<h2 id="process-crashes">Process Crashes</h2>
+
+<p>Sidekiq uses the exact same Redis logic as Resque for fetching jobs. This has a serious consequence: If the Sidekiq process segfaults or crashes the Ruby VM, any jobs that were executing will be lost. If the Sidekiq process is killed due to CPU or memory limits, any jobs that were executing will be lost. <a href="https://sidekiq.org/products/pro.html">Sidekiq Pro</a> offers a <a href="/wiki/Reliability.html">reliable queueing</a> feature which does not lose those jobs.</p>
+
+<h2 id="no-more-bike-shedding">No More Bike Shedding</h2>
+
+<p>Sidekiq’s retry mechanism is a set of best practices but many people have suggested various knobs and options to tweak in order to handle their own edge case.  This way lies madness.  Design your code to work well with Sidekiq’s retry mechanism as it exists today or patch the JobRetry class to add your own logic.  I’m no longer accepting any functional changes to the retry mechanism unless you make an <strong>extremely</strong> compelling case for why Sidekiq’s thousands of users would want that change.</p>
+
+<p>Previous: [[Using Redis]] Next: [[Advanced Options]]</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

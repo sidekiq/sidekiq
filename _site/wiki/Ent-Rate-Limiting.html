@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Ent Rate Limiting</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Often 3rd party APIs will enforce a <strong>rate limit</strong>, meaning you cannot call them faster than your SLA allows.  Sidekiq Enterprise contains a rate limiting API supporting various styles of rate limiting.</p>
+
+<p>The rate limiting API works in any Ruby process.  It’s not specific to Sidekiq jobs or limited to use within <code class="language-plaintext highlighter-rouge">perform</code>.  For example, you can use this API to rate limit requests within Puma. Rate limiting is shared by ALL processes using the same Redis configuration. If you have 50 Ruby processes connected to the same Redis instance, they will all use the same rate limits.</p>
+
+<p>Note: limiters can be expensive to create. Create limiter instances once during startup and reuse them (as with <code class="language-plaintext highlighter-rouge">ERP_LIMIT</code> below). They are thread-safe and designed to be shared.</p>
+
+<h2 id="concurrent">Concurrent</h2>
+
+<p>The concurrent style means that only N concurrent operations can happen at any moment in time.  For instance, I’ve used an ERP SaaS which limited each customer to 50 concurrent operations.  Use a concurrent rate limiter to ensure your jobs or other processes all stay within that global rate limit:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">ERP_LIMIT</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">concurrent</span><span class="p">(</span><span class="s1">'erp'</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="ss">wait_timeout: </span><span class="mi">5</span><span class="p">,</span> <span class="ss">lock_timeout: </span><span class="mi">30</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+  <span class="no">ERP_LIMIT</span><span class="p">.</span><span class="nf">within_limit</span> <span class="k">do</span>
+    <span class="c1"># call ERP</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Each limiter must have a name, consisting only of letters, numbers, hyphens and underscores.
+<code class="language-plaintext highlighter-rouge">name</code> can be static (e.g. <code class="language-plaintext highlighter-rouge">"erp"</code>) for a global limiter or dynamic (e.g. <code class="language-plaintext highlighter-rouge">"stripe-#{userid}"</code>) to create multiple context-specific limiters.</p>
+
+<p>Since concurrent access has to hold a lock, the <code class="language-plaintext highlighter-rouge">lock_timeout</code> option ensures a crashed Ruby process does not hold a lock forever.
+You must ensure that your operations take less than this number of seconds.
+After <code class="language-plaintext highlighter-rouge">lock_timeout</code> seconds, the lock can be reclaimed by another thread wanting to perform an operation.</p>
+
+<p>You can use a concurrent limiter of size 1 to make a distributed mutex, ensuring that only one process can execute a block at a time.</p>
+
+<p>Concurrent limiters will pause up to <code class="language-plaintext highlighter-rouge">wait_timeout</code> seconds for a lock to become available.
+<strong>This API is blocking and as efficient as possible: it does not poll unlike most other locking or mutex libraries for Redis.</strong>
+Blocking ensures the lock will be made available to a waiter within milliseconds of it being released.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">policy</code> option can be set to:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">:raise</code> (the default) – raise <code class="language-plaintext highlighter-rouge">OverLimit</code> if a token cannot be obtained within <code class="language-plaintext highlighter-rouge">wait_timeout</code></li>
+  <li><code class="language-plaintext highlighter-rouge">:ignore</code> – if the block should be skipped if the rate limit can’t be fulfilled</li>
+</ul>
+
+<p>The concurrent limiter does <em>not</em> limit the number of jobs that will be executed.
+If you have 20 threads available, 20 jobs will be taken from the queue and executed.
+However, if you have a concurrent limiter set to 5 concurrent jobs, for example, only 5 of those 20 jobs will be able to execute the code inside the <code class="language-plaintext highlighter-rouge">within_limit</code> block.
+The other 15 will wait for up to <code class="language-plaintext highlighter-rouge">wait_timeout</code> seconds for a lock to become available before erroring and retrying.</p>
+
+<h4 id="concurrent-metrics">Concurrent Metrics</h4>
+
+<p>The concurrent rate limiter tracks the following metrics:</p>
+
+<ul>
+  <li><strong>Held</strong> - the number of times this limiter held a lock, meaning the block was executed.</li>
+  <li><strong>Held Time</strong> - total time a lock was held, in seconds.</li>
+  <li><strong>Immediate</strong> - the number of times a lock was available immediately, without waiting</li>
+  <li><strong>Waited</strong> - the number of times a thread had to wait for a lock to become available</li>
+  <li><strong>Wait Time</strong> - total time threads waited for a lock</li>
+  <li><strong>Overages</strong> - number of times the block took longer than <code class="language-plaintext highlighter-rouge">lock_timeout</code> to execute, <strong>this is bad</strong></li>
+  <li><strong>Reclaimed</strong> - number of times another thread reclaimed a lock that was over timeout, <strong>this is very bad and can lead to rate limit violations</strong></li>
+</ul>
+
+<h2 id="bucket">Bucket</h2>
+
+<p>Bucket means that each interval is a bucket: you can perform 5 operations at 12:42:51.999 and then another 5 operations at 12:42:52.000 because they are tracked in a different bucket.</p>
+
+<p>Here’s an example using a bucket limiter of 30 per second (notice how the name includes the user’s ID, making it a user-specific limiter).
+Let’s say we want to call Stripe on behalf of a user:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+  <span class="n">user_throttle</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">bucket</span><span class="p">(</span><span class="s2">"stripe-</span><span class="si">#{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="ss">:second</span><span class="p">,</span> <span class="ss">wait_timeout: </span><span class="mi">5</span><span class="p">)</span>
+  <span class="n">user_throttle</span><span class="p">.</span><span class="nf">within_limit</span> <span class="k">do</span>
+    <span class="c1"># call stripe with user's account creds</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>The limiter will try to perform the operation once per second until <code class="language-plaintext highlighter-rouge">wait_timeout</code> is passed or the rate limit is satisfied.
+It calls <code class="language-plaintext highlighter-rouge">sleep</code> to achieve this so the thread is paused during that sleep time.
+If the <code class="language-plaintext highlighter-rouge">wait_timeout</code> duration is passed, the limiter will raise <code class="language-plaintext highlighter-rouge">Sidekiq::Limiter::OverLimit</code> — that exception is caught in server middleware and will automatically reschedule the job in the future based on the limiter’s <code class="language-plaintext highlighter-rouge">config.backoff</code> result.
+If an individual job is rescheduled by the limiter more than 20 times (approximately one day with the default linear backoff), the <code class="language-plaintext highlighter-rouge">OverLimit</code> will be re-<code class="language-plaintext highlighter-rouge">raise</code>d as if it were a job failure and the job retried as usual.</p>
+
+<p>You can also use <code class="language-plaintext highlighter-rouge">:minute</code>, <code class="language-plaintext highlighter-rouge">:hour</code> or <code class="language-plaintext highlighter-rouge">:day</code> buckets but they will not sleep until the next interval and retry the operation.
+They immediately raise <code class="language-plaintext highlighter-rouge">Sidekiq::Limiter::OverLimit</code> and the job will be rescheduled as above.</p>
+
+<p>You can see recent usage history for bucket limiters in the Web UI.</p>
+
+<h2 id="window">Window</h2>
+
+<p>Window means that each interval is started at time of use: you can perform N operations at 12:42:51.773 but can’t perform another N operations until 12:42:52.773. This moves bursting from cardinal time boundaries where bucket resets.</p>
+
+<p>Here’s an example using a window limiter of 5 per second (notice how the name includes the user’s ID, making it a user-specific limiter).
+Let’s say we want to call Stripe on behalf of a user:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+  <span class="n">user_throttle</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">window</span><span class="p">(</span><span class="s2">"stripe-</span><span class="si">#{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">:second</span><span class="p">,</span> <span class="ss">wait_timeout: </span><span class="mi">5</span><span class="p">)</span>
+  <span class="n">user_throttle</span><span class="p">.</span><span class="nf">within_limit</span> <span class="k">do</span>
+    <span class="c1"># call stripe with user's account creds</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>In addition to <code class="language-plaintext highlighter-rouge">:second</code>, you can also use <code class="language-plaintext highlighter-rouge">:minute</code>, <code class="language-plaintext highlighter-rouge">:hour</code>, or <code class="language-plaintext highlighter-rouge">:day</code> intervals.
+No matter which interval is used, <code class="language-plaintext highlighter-rouge">sleep(0.5)</code> will be called until <code class="language-plaintext highlighter-rouge">wait_timeout</code> is passed or the rate limiter is satisfied.
+Because it calls <code class="language-plaintext highlighter-rouge">sleep</code> to achieve this, the thread is paused during that sleep time.
+If the <code class="language-plaintext highlighter-rouge">wait_timeout</code> duration is passed, the limiter will raise <code class="language-plaintext highlighter-rouge">Sidekiq::Limiter::OverLimit</code> — that exception is caught in server middleware and automatically reschedules the job in the future based on the limiter’s <code class="language-plaintext highlighter-rouge">config.backoff</code> result.
+If an individual job is scheduled by the limiter more than 20 times, the <code class="language-plaintext highlighter-rouge">OverLimit</code> will be re-<code class="language-plaintext highlighter-rouge">raise</code>d as if it were a job failure and the job retried as usual.</p>
+
+<p>Note that if the <code class="language-plaintext highlighter-rouge">wait_timeout</code> value is shorter than the interval in seconds, the limiter will immediately raise <code class="language-plaintext highlighter-rouge">Sidekiq::Limiter::OverLimit</code> and the job will be rescheduled as above, subject to the limit of 20 reschedules.
+For example, with an interval of <code class="language-plaintext highlighter-rouge">:minute</code>, any <code class="language-plaintext highlighter-rouge">wait_timeout</code> value below 60 will cause an immediate <code class="language-plaintext highlighter-rouge">OverLimit</code>.</p>
+
+<p>In addition to the <code class="language-plaintext highlighter-rouge">:second</code>, <code class="language-plaintext highlighter-rouge">:minute</code>, <code class="language-plaintext highlighter-rouge">:hour</code> and <code class="language-plaintext highlighter-rouge">:day</code> symbols, window limiters can accept an arbitrary amount of seconds for the window:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># allow 5 operations within a 30 second window</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">window</span><span class="p">(</span><span class="s2">"stripe-</span><span class="si">#{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="leaky-bucket">Leaky Bucket</h2>
+
+<p>Sidekiq Enterprise v2.2 adds the “leaky bucket” rate limiter.
+The idea is that you can fill the bucket very quickly but then have to slow down further calls to match the pace of the “drip” so the bucket doesn’t overflow.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">leaky</span><span class="p">(</span><span class="s2">"shopify-</span><span class="si">#{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">leaky</span><span class="p">(</span><span class="s2">"shopify-</span><span class="si">#{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="ss">:minute</span><span class="p">)</span> <span class="c1"># equivalent</span>
+</code></pre></div></div>
+
+<p>Here we’ve declared a limiter which allows 60 operations in a bucket that drains in one minute.
+The caller may call the limiter 60 times as fast as they want (the “burst”) but after those 60 calls the bucket is full and they will be limited to one call every second (the “drip”).
+If they wait 5 seconds, they will be able to make 5 calls.
+After 60 seconds, the bucket will be empty and they can make the full burst of 60 calls again.</p>
+
+<p>Note that you could declare the limiter like this:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">leaky</span><span class="p">(</span><span class="s2">"shopify-</span><span class="si">#{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">leaky</span><span class="p">(</span><span class="s2">"shopify-</span><span class="si">#{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">:second</span><span class="p">)</span> <span class="c1"># equivalent</span>
+</code></pre></div></div>
+
+<p>which gets you the same drip rate as before <strong>but the burst is only one</strong>.
+This is very likely not what you want as it would be very caller-unfriendly.
+It’s normal for callers to make occasional bursts of API calls so it’s better to declare something like <code class="language-plaintext highlighter-rouge">60,60</code> rather than <code class="language-plaintext highlighter-rouge">1,1</code>.</p>
+
+<p>A more complex example from a customer: a bucket size of 40 with leak rate of 2/sec.
+The first parameter is the bucket size so that will be 40.
+The second parameter is the seconds required to empty a full bucket: 40 / 2.
+The leaky limiter for this example would be <code class="language-plaintext highlighter-rouge">leaky(name, 40, 20)</code>.</p>
+
+<p>Leaky limiters default to <code class="language-plaintext highlighter-rouge">wait_timeout: 5</code> and will sleep and call Redis for each drip within that timeout period.
+If you have a limiter of <code class="language-plaintext highlighter-rouge">60, 60</code>, each drip is one second and the limiter will <code class="language-plaintext highlighter-rouge">sleep 1</code> until there is space in the bucket or 5 seconds have passed.
+Set <code class="language-plaintext highlighter-rouge">wait_timeout: 0</code> if you don’t want any sleep; the limiter will instead raise an <code class="language-plaintext highlighter-rouge">OverLimit</code> exception and, if in a Sidekiq job, schedule a retry later.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">leaky</span><span class="p">(</span><span class="s2">"shopify-</span><span class="si">#{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="ss">:minute</span><span class="p">,</span> <span class="ss">wait_timeout: </span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Leaky limiters track hit and miss counts along with the amount of time the caller spent sleeping while waiting.</p>
+
+<h2 id="points">Points</h2>
+
+<p>Sidekiq Enterprise 7.1 adds a “points-based” leaky bucket rate limiter, which is useful for various GraphQL query endpoints at Shopify, GitHub, etc which rate limit based on query complexity.
+See issue <a href="https://github.com/sidekiq/sidekiq/issues/5757">#5757</a> for a usecase and links to real-world rate limited endpoints and docs.</p>
+
+<p>Your bucket has 1000 points initially and refills at 50 points per second. This looks like this:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">lmt</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">points</span><span class="p">(</span><span class="s2">"shopify"</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Now every call needs to provide an <code class="language-plaintext highlighter-rouge">estimate</code> of the points required for a call, along with an optional step to correct the estimate after the fact.
+The remote service’s query result will usually include the amount of points consumed by the query.
+You report that value back to the limiter with <code class="language-plaintext highlighter-rouge">points_used(actual)</code> to keep the rate limiting as accurate as possible:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">query_estimate</span> <span class="o">=</span> <span class="mi">200</span> <span class="c1"># use endpoint docs for logic to determine needed points</span>
+<span class="n">lmt</span><span class="p">.</span><span class="nf">within_limit</span><span class="p">(</span><span class="ss">estimate: </span><span class="n">query_estimate</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">handle</span><span class="o">|</span>
+  <span class="c1"># make the actual query here #</span>
+  <span class="n">actual</span> <span class="o">=</span> <span class="mi">50</span> <span class="c1"># maybe our estimate was pessimistic</span>
+  <span class="n">handle</span><span class="p">.</span><span class="nf">points_used</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>For instance, <a href="https://shopify.dev/docs/api/usage/rate-limits#graphql-admin-api-rate-limits">here’s the documentation for calculating the points required for a Shopify GraphQL query</a>.</p>
+
+<h2 id="unlimited">Unlimited</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">unlimited</code> limiter is a rate limiter which always executes its block.
+This useful for conditional rate limiting – for example, admin users or customers at a certain tier of service don’t have a rate limit.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">ERP</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">concurrent</span><span class="p">(</span><span class="s2">"erp"</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+  <span class="n">lmtr</span> <span class="o">=</span> <span class="n">current_user</span><span class="p">.</span><span class="nf">admin?</span> <span class="p">?</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">unlimited</span> <span class="p">:</span> <span class="no">ERP</span>
+  <span class="n">lmtr</span><span class="p">.</span><span class="nf">within_limit</span> <span class="k">do</span>
+    <span class="c1"># always executes for admins</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="limiting-is-not-throttling">Limiting is not Throttling</h2>
+
+<p>Rate limiters do <strong>not</strong> slow down Sidekiq’s job processing.
+If you push 1000 jobs to Redis, Sidekiq will run those jobs as fast as possible which may cause many of those jobs to fail with an OverLimit error.
+If you want to trickle jobs into Sidekiq slowly, the only way to do that is with manual scheduling.
+Here’s how you can schedule 1 job per second to ensure that Sidekiq doesn’t run all jobs immediately:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="mi">1000</span><span class="p">.</span><span class="nf">times</span> <span class="k">do</span> <span class="o">|</span><span class="n">index</span><span class="o">|</span>
+  <span class="no">SomeWorker</span><span class="p">.</span><span class="nf">perform_in</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">some_args</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Remember that Sidekiq’s <a href="https://github.com/sidekiq/sidekiq/wiki/Scheduled-Jobs#checking-for-new-jobs">scheduler checks every 5 seconds on
+average</a> so you can get a small clump of jobs running concurrently.</p>
+
+<h2 id="reschedules-and-backoff">Reschedules and Backoff</h2>
+
+<p>If the rate limit is breached and cannot be satisfied within <code class="language-plaintext highlighter-rouge">wait_timeout</code>, the Limiter will raise <code class="language-plaintext highlighter-rouge">Sidekiq::Limiter::OverLimit</code>.</p>
+
+<p>If you violate a rate limit within a Sidekiq job, Sidekiq will reschedule the job to run again soon using a linear backoff policy, growing approximately five minutes every time.
+After 20 rate limit failures (approx one day), the middleware will treat the failing job as a retry.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2015-05-28T23:25:23.159Z 73456 TID-oxf94yioo LimitedWorker JID-41c51a2123eef30dbad4544a INFO: erp over rate limit, rescheduling for later
+</code></pre></div></div>
+
+<h2 id="limiters-are-not-composable">Limiters are not Composable</h2>
+
+<p>The Rate Limiting API can enforce “no more than 5 per minute” but it cannot enforce “no more than 100 per hour AND no more than 5 per minute”. This will not work correctly:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">window</span><span class="p">(</span><span class="s2">"hourly"</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="ss">:hour</span><span class="p">)</span> <span class="k">do</span>
+  <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">window</span><span class="p">(</span><span class="s2">"minutely"</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="ss">:minute</span><span class="p">)</span> <span class="k">do</span>
+    <span class="c1"># all good? nope!</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>In this case, our recommendation is to enforce the smaller timespan limit (in this case, per minute) and let the remote side raise an error if you violate the hourly limit. See the “Custom Errors” section below to treat those remote exceptions as an OverLimit error.</p>
+
+<h2 id="advanced-options">Advanced Options</h2>
+
+<p>Place the <code class="language-plaintext highlighter-rouge">Sidekiq::Limiter.configure</code> block in your initializer to configure these options.</p>
+
+<h3 id="back-off">Back off</h3>
+
+<p>You can configure how the limiter middleware backs off by providing your own custom proc:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="c1"># job is the job hash, 'overrated' is the number of times we've failed due to rate limiting</span>
+  <span class="c1"># limiter is the associated limiter that raised the OverLimit error</span>
+  <span class="c1"># exception is the exception that triggered the rate limiting (Sidekiq::Limiter::OverLimit or one of your configured error classes)</span>
+  <span class="c1"># By default, back off 5 minutes for each rate limit failure</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">backoff</span> <span class="o">=</span> <span class="o">-&gt;</span><span class="p">(</span><span class="n">limiter</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">exception</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">(</span><span class="mi">300</span> <span class="o">*</span> <span class="n">job</span><span class="p">[</span><span class="s1">'overrated'</span><span class="p">])</span> <span class="o">+</span> <span class="nb">rand</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>You can also configure the backoff policy per limiter:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">window</span><span class="p">(</span><span class="s2">"some-name"</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="ss">:minute</span><span class="p">,</span> <span class="ss">backoff: </span><span class="o">-&gt;</span><span class="p">(</span><span class="n">limiter</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">exception</span><span class="p">)</span> <span class="p">{</span> <span class="p">(</span><span class="mi">300</span> <span class="o">*</span> <span class="n">job</span><span class="p">[</span><span class="s1">'overrated'</span><span class="p">])</span> <span class="o">+</span> <span class="nb">rand</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">})</span>
+</code></pre></div></div>
+
+<h3 id="redis">Redis</h3>
+
+<p>Rate limiting is unusually hard on Redis for a Sidekiq feature.
+For this reason, you might want to use a different Redis instance for the rate limiting subsystem as you scale up.</p>
+
+<p>Rate limiting is shared by <strong>ALL</strong> processes using the same Redis configuration.
+If you have 50 Ruby processes connected to the same Redis instance, they will all use the same rate limits.
+You can configure the Redis instance used by rate limiting:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">redis</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">size: </span><span class="mi">10</span><span class="p">,</span> <span class="ss">url: </span><span class="s1">'redis://localhost/15'</span> <span class="p">}</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>By default, the Sidekiq::Limiter API uses Sidekiq’s default Redis pool so you don’t need to configure anything.
+As of Sidekiq Enterprise 7.1, the rate limiter data model is <a href="https://github.com/sidekiq/sidekiq/issues/5800">Cluster-safe</a> so you can use a cluster of Redis instances to <a href="https://www.mikeperham.com/2023/05/08/scaling-huge-transactional-datasets-with-redis-cluster/">scale huge transactional datasets with millions/billions of rate limiters</a>.</p>
+
+<h3 id="testing">Testing</h3>
+
+<p>The unlimited limiter does not use Redis so you can conditionally use it anywhere (like a test suite) where you don’t want to require Redis or accidentally trip rate limits.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">test_myworker</span>
+  <span class="n">my</span> <span class="o">=</span> <span class="no">MyWorker</span><span class="p">.</span><span class="nf">new</span>
+  <span class="n">my</span><span class="p">.</span><span class="nf">limiter</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">unlimited</span>
+  <span class="n">my</span><span class="p">.</span><span class="nf">perform</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>You can also use simple stubs like this on your <code class="language-plaintext highlighter-rouge">test_helper.rb</code> file.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ActiveSupport::TestCase</span>
+  <span class="k">def</span> <span class="nf">noop_window_limiter</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+    <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">stub</span><span class="p">(</span><span class="ss">:window</span><span class="p">,</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">unlimited</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h3 id="custom-errors">Custom Errors</h3>
+
+<p>If you have a library which raises a custom exception to signify a rate limit failure, you can add it to the list of errors which trigger backoff:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">errors</span> <span class="o">&lt;&lt;</span> <span class="no">SomeLib</span><span class="o">::</span><span class="no">SlowDownPlease</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h3 id="ttl">TTL</h3>
+
+<p>By default, Limiter metadata expires after 90 days.
+If you are creating lots of dynamic limiters and want to minimize the memory overhead of having millions of unused limiters, you can pass in a <code class="language-plaintext highlighter-rouge">ttl</code> option with the number of seconds to live.
+<a href="https://github.com/sidekiq/sidekiq/issues/3981#issuecomment-608698448">I don’t recommend a value lower than 24 hours</a>.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">window</span><span class="p">(</span><span class="s2">"stripe-</span><span class="si">#{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="ss">ttl: </span><span class="mi">2</span><span class="p">.</span><span class="nf">weeks</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="reschedules">Reschedules</h3>
+
+<p>By default, the limiter middleware will reschedule any job that raises <code class="language-plaintext highlighter-rouge">OverLimit</code> up to 20 times with a linear backoff policy.
+You can configure the reschedule policy:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">window</span><span class="p">(</span><span class="s2">"stripe-</span><span class="si">#{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="ss">reschedule: </span><span class="mi">20</span><span class="p">)</span> <span class="c1"># default, 20 times</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">window</span><span class="p">(</span><span class="s2">"stripe-</span><span class="si">#{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="ss">reschedule: </span><span class="mi">10</span><span class="p">)</span> <span class="c1"># only 10 times</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Limiter</span><span class="p">.</span><span class="nf">window</span><span class="p">(</span><span class="s2">"stripe-</span><span class="si">#{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="ss">reschedule: </span><span class="mi">0</span><span class="p">)</span> <span class="c1"># don't reschedule at all</span>
+</code></pre></div></div>
+
+<p>If the limiter fails that many times in a row, the middleware will give up and raise the exception to be handled by Sidekiq’s standard retry subsystem.</p>
+
+<h2 id="web-ui">Web UI</h2>
+
+<p>The Web UI contains a “Limits” tab which lists all limits configured in the system.
+Require the Enterprise web extensions in <code class="language-plaintext highlighter-rouge">config/routes.rb</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'sidekiq-ent/web'</span>
+</code></pre></div></div>
+
+<p>Concurrent limiters track a number of metrics and expose those metrics in the UI.</p>
+
+<p><img src="https://github.com/sidekiq/sidekiq/raw/main/examples/ent-concurrent.png" alt="screenshot" /></p>
+
+<h2 id="notes">Notes</h2>
+
+<ul>
+  <li><strong>Limiters are clock-sensitive.</strong> All your machines running Sidekiq should use NTP to sync their clocks. (Redis can’t be used as a definitive source of time as Lua functions cannot access the clock.)</li>
+  <li>The same concurrent limiter (based on the name) may be used with different <code class="language-plaintext highlighter-rouge">lock_timeout</code> values which allows for different blocks of code to lock on the same resource with a different <code class="language-plaintext highlighter-rouge">lock_timeout</code>.</li>
+</ul>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

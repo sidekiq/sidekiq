@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Profiling</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Job profiling is an amazing superpower for those who have mastered its complexities. Sidekiq makes it as easy as possible to profile your jobs.</p>
+
+<p>Profiling allows you to see the code executed by your job and how much time it took to execute. This makes it really easy to find slow spots in your job where you can optimize, e.g. you might find a slow query which is missing a database index.</p>
+
+<p>Teaching you how to use a profiler is beyond the scope of this wiki page but I recommend watching this Youtube video by the author of Vernier:</p>
+
+<p><a href="https://www.youtube.com/watch?v=0LMjx3xkjlY"><img src="https://img.youtube.com/vi/0LMjx3xkjlY/0.jpg" alt="Using Vernier" /></a></p>
+
+<h2 id="prepare">Prepare</h2>
+
+<p>Add <a href="https://vernier.prof">Vernier</a> to your <code class="language-plaintext highlighter-rouge">Gemfile</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gem</span> <span class="s2">"vernier"</span>
+</code></pre></div></div>
+
+<h2 id="profiling-cpu-usage">Profiling CPU usage</h2>
+
+<ol>
+  <li>Start Sidekiq in production.</li>
+  <li>Open a console in production.</li>
+  <li>Pick a job type you wish to profile and kick off a job with the special <code class="language-plaintext highlighter-rouge">profile</code> token in IRB:</li>
+</ol>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span> <span class="no">SomeJob</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="ss">profile: </span><span class="s2">"token"</span><span class="p">).</span><span class="nf">perform_async</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The purpose of <code class="language-plaintext highlighter-rouge">token</code> is to associate profile data to <strong>you</strong>, making it easier to find your profiles if other team members are also profiling their jobs. Typically I just use “mike” as my token.</p>
+
+<h2 id="profiling-memory">Profiling Memory</h2>
+
+<p>You can profile memory usage with <code class="language-plaintext highlighter-rouge">:retained</code> mode:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span> <span class="no">SomeJob</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="ss">profile: </span><span class="s2">"token"</span><span class="p">,</span> <span class="ss">profile_options: </span><span class="p">{</span> <span class="ss">mode: </span><span class="s2">"retained"</span><span class="p">,</span> <span class="ss">gc: </span><span class="kp">true</span> <span class="p">}).</span><span class="nf">perform_async</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>See the <a href="https://github.com/jhawthorn/vernier#README">Vernier documentation</a> for more details.</p>
+
+<h2 id="notes">Notes</h2>
+
+<ul>
+  <li>Vernier requires Ruby 3.2.1+.</li>
+  <li>Profiling works fine with Active Jobs.</li>
+  <li>Your profiling data is uploaded to <code class="language-plaintext highlighter-rouge">profiler.firefox.com</code> when you click the View button in the Web UI. Click “Invert call stack” to quickly find hotspots.</li>
+  <li>Remember to profile in <strong>production</strong> mode. Development mode will add a lot of noise and won’t reflect production exactly.</li>
+  <li>Never add <code class="language-plaintext highlighter-rouge">profile</code> to a job’s default <code class="language-plaintext highlighter-rouge">sidekiq_options</code>. Profiling slows down execution and adds a large chunk of data to Redis; you want to profile manually only.</li>
+</ul>
+
+<h2 id="web-ui">Web UI</h2>
+
+<p>The Web UI provides a new Profiles tab with a listing of all profile recordings in Redis. You can click the View button and see your profile in the Firefox Viewer. You can click the Data button to see or download the profile’s raw JSON.</p>
+
+<p><img width="947" alt="Screenshot 2024-11-19 at 10 59 43 AM" src="https://github.com/user-attachments/assets/e8410f59-2417-42bf-9a47-f058ab466da8" /></p>
+
+<h2 id="api">API</h2>
+
+<p>You can access profile data via <code class="language-plaintext highlighter-rouge">Sidekiq::ProfileSet</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ps</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">ProfileSet</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">ps</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">profile</span><span class="o">|</span>
+  <span class="nb">p</span> <span class="n">profile</span> <span class="c1"># profile.started_at, profile.jid, profile.token, etc</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>The profiled data is stored in Redis as a Hash with key “token-jid”, e.g. “mike-1234567890abcdef”.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#{token}-#{jid}:
+{
+  started_at: &lt;timestamp&gt;,
+  token: &lt;token&gt;,
+  data: &lt;gzip'd JSON&gt;,
+  jid: &lt;jid&gt;,
+  type: &lt;jobtype&gt;,
+  size: 50123, # data size in bytes
+  elapsed: 24.345 # seconds
+  sid: &lt;storeid&gt; # the profile's storage id at profiler.firefox.com
+}
+</code></pre></div></div>
+
+<p>Vernier’s profiler output can be large so Sidekiq uses gzip to compress it for storage. Be careful not to profile every job and quickly fill up your Redis! Profiling data expires after 24 hours.</p>
+
+<p>Profiling only saves data if the job is successful. Failures will retry as normal.</p>
+
+<h2 id="profile-data-and-security">Profile Data and Security</h2>
+
+<p>Firefox Profiler is a complex JavaScript single page application which can’t be maintained or distributed by the Sidekiq project. Instead Sidekiq uses the public instance at <code class="language-plaintext highlighter-rouge">profiler.firefox.com</code> which is run and maintained by Mozilla. When you click the View button in the Web UI, your profile data is uploaded to p.f.c for viewing. Profiling data generally does not contain anything sensitive but it does contain the names of your application classes and methods. It should never contain any application data.</p>
+
+<p>I’m not aware of any official data retention policy from Mozilla for your uploaded profiles but your profiling data does not leave your system until you click View. You can use the Data button to access the raw JSON should you wish to run your own Firefox Profiler instance locally.</p>
+
+<h3 id="disabling-uploads">Disabling Uploads</h3>
+
+<p>If you wish to disable remote profile uploads, adjust your <code class="language-plaintext highlighter-rouge">config/routes.rb</code> like this:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s2">"sidekiq/web"</span>
+
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">[</span><span class="ss">:profile_store_url</span><span class="p">]</span> <span class="o">=</span> <span class="kp">nil</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>The View button will disappear in the Web UI. Downloading the JSON data directly via the Data button will be your only option.</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

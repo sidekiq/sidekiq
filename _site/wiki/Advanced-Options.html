@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Advanced Options</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><h2 id="the-sidekiq-configuration-file">The Sidekiq Configuration File</h2>
+
+<p>The Sidekiq configuration file is a YAML file that Sidekiq server uses to configure itself, by default located at <code class="language-plaintext highlighter-rouge">config/sidekiq.yml</code>. It is only necessary to create the file if you need to set advanced options, such as concurrency pool size, named queues, etc.  Here is an example configuration file:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="s">:concurrency: </span><span class="m">5</span>
+<span class="na">staging</span><span class="pi">:</span>
+  <span class="s">:concurrency: </span><span class="m">10</span>
+<span class="na">production</span><span class="pi">:</span>
+  <span class="s">:concurrency: </span><span class="m">10</span>
+<span class="s">:queues:</span>
+  <span class="s">- critical</span>
+  <span class="s">- default</span>
+  <span class="s">- low</span>
+</code></pre></div></div>
+
+<p>Note the use of environment-specific subsections.  These values will override top-level values.  If you don’t use the default location, use the <code class="language-plaintext highlighter-rouge">-C</code> flag to tell Sidekiq where the file is:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sidekiq -C config/myapp_sidekiq.yml
+</code></pre></div></div>
+
+<p>Options passed on the command line will also override options specified in the config file.</p>
+
+<h2 id="queues">Queues</h2>
+
+<p>By default, sidekiq uses a single queue called “default” in Redis.  If
+you want to use multiple queues, you can either specify them as
+arguments to the <code class="language-plaintext highlighter-rouge">sidekiq</code> command, or set them in the Sidekiq
+<a href="https://github.com/sidekiq/sidekiq/blob/main/examples/config.yml">configuration file</a>. Each queue can be configured with an optional weight.  A queue with a weight of 2 will be checked twice as often as a queue with a weight of 1:</p>
+
+<p>As arguments…</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sidekiq -q critical,2 -q default
+</code></pre></div></div>
+<p>In the configuration file…</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># ...</span>
+<span class="s">:queues:</span>
+  <span class="s">- [critical, 2]</span>
+  <span class="s">- default</span>
+</code></pre></div></div>
+
+<p>If you want queues always processed in a specific order, just declare them in order without weights:</p>
+
+<p>As arguments…</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sidekiq -q critical -q default -q low
+</code></pre></div></div>
+<p>In the configuration file…</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># ...</span>
+<span class="s">:queues:</span>
+  <span class="s">- critical</span>
+  <span class="s">- default</span>
+  <span class="s">- low</span>
+</code></pre></div></div>
+
+<p>This means that any job in the default queue will be processed only when the critical queue is empty.</p>
+
+<p>You can get random queue priorities by declaring each queue with a weight of 1, so each queue has an equal chance of being processed:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># ...</span>
+<span class="s">:queues:</span>
+  <span class="s">- ["foo", 1]</span>
+  <span class="s">- ["bar", 1]</span>
+  <span class="s">- ["xyzzy", 1]</span>
+</code></pre></div></div>
+
+<p>You can specify a queue to use for a given job class by declaring it:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ImportantJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+  <span class="n">sidekiq_options</span> <span class="ss">queue: </span><span class="s1">'critical'</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">*</span><span class="n">important_args</span><span class="p">)</span>
+    <span class="nb">puts</span> <span class="s2">"Doing critical work"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Note: Sidekiq does not support mixing ordered and weighted queue modes. If, for example, you need a critical queue that is processed first, and would like other queues to be weighted, you would dedicate a Sidekiq process exclusively to the critical queue, and other Sidekiq processes to service the rest of the queues.</p>
+
+<p>I don’t recommend having more than a handful of queues <strong>per Sidekiq process</strong>. Having lots of queues means you should start grouping Sidekiq processes into roles (e.g. image_worker, email_worker, etc) or simplify your queue setup. Lots of queues makes for a more complex system and <a href="https://github.com/redis/redis/issues/1785">Sidekiq Pro cannot reliably</a> handle multiple queues without polling. M Sidekiq Pro processes polling N queues means O(M*N) operations per second slamming Redis.</p>
+
+<p>If you use the sidekiq web interface, newly added queues will first appear there when a job has been enqueued for this queue.</p>
+
+<h4 id="reserved-queues">Reserved Queues</h4>
+
+<p>If you’d like to “reserve” a queue so it only handles certain jobs, the easiest way is to run two sidekiq processes, each handling different queues:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sidekiq -q critical # Only handles jobs on the "critical" queue
+sidekiq -q default -q low -q critical # Handles critical jobs only after checking for other jobs
+</code></pre></div></div>
+
+<h2 id="jobs">Jobs</h2>
+
+<p>Sidekiq offers a number of options for controlling a job behavior.</p>
+
+<ul>
+  <li><strong>queue:</strong> use a named queue for this Job, default <code class="language-plaintext highlighter-rouge">default</code></li>
+  <li><strong>retry:</strong> enable retries for this Job, default <code class="language-plaintext highlighter-rouge">true</code>. Alternatively, you can specify
+        the max number of times a job is retried (ie. retry: 3)</li>
+  <li><strong>dead:</strong> whether a failing job should go to the Dead queue if it fails retries, default: true</li>
+  <li><strong>backtrace:</strong> whether to save any error backtrace in the retry payload to display in web UI,
+            can be true, false or an integer number of lines to save, default <code class="language-plaintext highlighter-rouge">false</code>. Be careful, backtraces are big and can take up a lot of space in Redis if you have a large number of retries. You should be using an error service like Honeybadger.</li>
+  <li><strong>pool:</strong> use the given Redis connection pool to push this type of job to a given shard.</li>
+  <li><strong>tags:</strong> add an Array of tags to each job. You can filter by tag within the Web UI.</li>
+</ul>
+
+<p>These are the options that are supported out of the box.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">HardJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+  <span class="n">sidekiq_options</span> <span class="ss">queue: :crawler</span><span class="p">,</span> <span class="ss">tags: </span><span class="p">[</span><span class="s1">'alpha'</span><span class="p">,</span> <span class="s1">'🥇'</span><span class="p">]</span>
+  
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="nb">name</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Default options for all jobs can be set using <code class="language-plaintext highlighter-rouge">Sidekiq.default_job_options=</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">default_job_options</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">'backtrace'</span> <span class="o">=&gt;</span> <span class="kp">true</span> <span class="p">}</span>
+</code></pre></div></div>
+<p>Options can also be overridden per call:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">HardJob</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="ss">queue: :critical</span><span class="p">).</span><span class="nf">perform_async</span><span class="p">(</span><span class="nb">name</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="concurrency">Concurrency</h2>
+
+<p>You can tune the amount of concurrency in your Sidekiq process.  By default, one sidekiq process creates <strong>5 threads</strong>.  If that’s crushing your machine with I/O, you can adjust it down:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle exec sidekiq -c 4
+RAILS_MAX_THREADS=3 bundle exec sidekiq
+</code></pre></div></div>
+
+<p>I don’t recommend setting concurrency higher than 50.  Starting in Rails 5, <code class="language-plaintext highlighter-rouge">RAILS_MAX_THREADS</code> can be used to configure Rails and Sidekiq concurrency.  Note that ActiveRecord has a connection pool which needs to be properly configured in <code class="language-plaintext highlighter-rouge">config/database.yml</code> to work well with heavy concurrency.  Set <code class="language-plaintext highlighter-rouge">pool</code> equal to the number of threads:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">production</span><span class="pi">:</span>
+  <span class="na">adapter</span><span class="pi">:</span> <span class="s">mysql2</span>
+  <span class="na">database</span><span class="pi">:</span> <span class="s">foo_production</span>
+  <span class="na">pool</span><span class="pi">:</span> <span class="s">&lt;%= ENV['RAILS_MAX_THREADS'] || 10 %&gt;</span>
+</code></pre></div></div>
+
+<h2 id="capsules">Capsules</h2>
+
+<p>Starting in 7.0, Sidekiq allows you to declare Capsules which can provide single-threaded or serial execution of a queue.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">capsule</span><span class="p">(</span><span class="s2">"unsafe"</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">cap</span><span class="o">|</span>
+    <span class="n">cap</span><span class="p">.</span><span class="nf">concurrency</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">cap</span><span class="p">.</span><span class="nf">queues</span> <span class="o">=</span> <span class="sx">%w[queue_a queue_b]</span> <span class="c1"># strict priority</span>
+    <span class="c1"># cap.queues = %w[queue_a,3 queue_b,1] # weighted</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p><strong>Do not declare a capsule for each queue.</strong> Instead, “normal” queues should be declared in the config file or via the command line <code class="language-plaintext highlighter-rouge">-q</code> argument. More detailed Capsule documentation can be found here: <a href="https://github.com/sidekiq/sidekiq/blob/main/docs/capsule.md">capsule.md</a>.</p>
+
+<h2 id="connection-pooling">Connection Pooling</h2>
+
+<p>Sidekiq includes the <a href="/mperham/connection_pool">connection_pool gem</a> which your Jobs can use.  With a connection pool, you can share a limited number of I/O connections among a larger number of threads.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">HardJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+
+  <span class="no">MEMCACHED_POOL</span> <span class="o">=</span> <span class="no">ConnectionPool</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">size: </span><span class="mi">10</span><span class="p">,</span> <span class="ss">timeout: </span><span class="mi">3</span><span class="p">)</span> <span class="p">{</span> <span class="no">Dalli</span><span class="o">::</span><span class="no">Client</span><span class="p">.</span><span class="nf">new</span> <span class="p">}</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="no">MEMCACHED_POOL</span><span class="p">.</span><span class="nf">with</span> <span class="k">do</span> <span class="o">|</span><span class="n">dalli</span><span class="o">|</span>
+      <span class="n">dalli</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="s1">'foo'</span><span class="p">,</span> <span class="s1">'bar'</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>This ensures that even if you have lots of concurrency, you’ll only have 10 connections open to memcached per Sidekiq process.</p>
+
+<h2 id="environment">Environment</h2>
+
+<p>Sidekiq allows you to use <code class="language-plaintext highlighter-rouge">-e production</code>, <code class="language-plaintext highlighter-rouge">RAILS_ENV=production</code> or <code class="language-plaintext highlighter-rouge">APP_ENV=production</code> to control the current environment. APP_ENV is nice because the name is not tech-specific (unlike RAILS_ENV or RACK_ENV).</p>
+
+<h2 id="transactional-push">Transactional Push</h2>
+
+<p>Transactional push enqueues Sidekiq jobs only when any surrounding Active Record transaction successfully commits. Transactional push doesn’t support <code class="language-plaintext highlighter-rouge">push_bulk</code> to prevent potential excessive memory utilization.</p>
+
+<p>Be careful if you are using multiple databases. Sidekiq has no context to determine which connection pool to use so the database connection associated with <code class="language-plaintext highlighter-rouge">ActiveRecord::Base</code> is always used.</p>
+
+<p>Place this in your Sidekiq initializer:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/initializers/sidekiq.rb</span>
+<span class="no">Sidekiq</span><span class="p">.</span><span class="nf">transactional_push!</span>
+</code></pre></div></div>
+
+<p>For Rails &lt;7.2, include <code class="language-plaintext highlighter-rouge">after_commit_everywhere</code> in your <code class="language-plaintext highlighter-rouge">Gemfile</code>.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Gemfile</span>
+<span class="n">gem</span> <span class="s2">"after_commit_everywhere"</span>
+</code></pre></div></div>
+
+<p>Previous: <a href="/wiki/Error-Handling.html">Error Handling</a> Next: <a href="/wiki/Scheduled-Jobs.html">Scheduled Jobs</a></p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

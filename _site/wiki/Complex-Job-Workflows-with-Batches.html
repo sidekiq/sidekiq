@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Complex Job Workflows with Batches</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Whenever you use an asynchronous system, workflow becomes much harder to control.  It’s easy to create a lot of work in parallel, to fire and forget 10 jobs, but synchronizing based on those parallel jobs in a more complex workflow can quickly become a hard problem to solve yourself. Let’s consider an example.</p>
+
+<h1 id="the-naive-approach">The Naive Approach</h1>
+
+<p>You want to upload 10 product images to S3 and only mark the product as visible to customers once the images are available on S3.  We don’t want the customer to see broken images, right?  Conceptually that’s simple: upload them one at a time.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ProductImageUploader</span>
+  <span class="k">def</span> <span class="nf">upload</span><span class="p">(</span><span class="n">product</span><span class="p">,</span> <span class="n">image_ids</span><span class="p">)</span>
+    <span class="n">image_ids</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">image_id</span><span class="o">|</span>
+      <span class="n">s3_upload</span><span class="p">(</span><span class="n">data_for_image</span><span class="p">(</span><span class="n">image_id</span><span class="p">))</span>
+    <span class="k">end</span>
+    <span class="n">product</span><span class="p">.</span><span class="nf">mark_visible!</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>The problem is that it’s <strong>slow</strong> because we’re performing the work sequentially.</p>
+
+<h1 id="the-sidekiq-approach">The Sidekiq Approach</h1>
+
+<p>Sidekiq allows you to split that work easily.  Instead of processing 10 images in a loop, you create a job for each image and have your Sidekiq workers process the jobs in parallel. The resulting upload process will finish much quicker.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ProductImageUploader</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span>
+    <span class="n">s3_upload</span><span class="p">(</span><span class="n">data_for_image</span><span class="p">(</span><span class="n">image_id</span><span class="p">))</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">upload</span><span class="p">(</span><span class="n">product</span><span class="p">,</span> <span class="n">image_ids</span><span class="p">)</span>
+    <span class="n">image_ids</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">image_id</span><span class="o">|</span>
+      <span class="n">perform_async</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span>
+    <span class="k">end</span>
+    <span class="c1"># Can't do this here!</span>
+    <span class="c1">#product.mark_visible!</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>That speed comes at a price though: we’ve lost the ability to mark the product as visible! Because the image upload happens asynchronously, we don’t know when all of the images have finished uploading.  We’d like to register a callback to be executed when all of the jobs have completed.</p>
+
+<h1 id="the-sidekiq-pro-approach">The Sidekiq Pro Approach</h1>
+
+<p>That’s <strong>synchronization</strong> in workflow terms: we don’t want to change product visibility until the previous parallel jobs have all completed.  It’s not too hard to implement when all of your work is in one process or on one machine but Sidekiq is designed to run across many machines.  Sidekiq Pro allows you to synchronize very easily: it introduces the notion of a Batch of jobs with callbacks that fire when all jobs in that Batch are finished.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ImageUploader</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span>
+    <span class="n">s3_upload</span><span class="p">(</span><span class="n">data_for_image</span><span class="p">(</span><span class="n">image_id</span><span class="p">))</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">on_success</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="no">Product</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s1">'pid'</span><span class="p">])</span>
+    <span class="n">product</span><span class="p">.</span><span class="nf">mark_visible!</span>
+  <span class="k">end</span>
+
+  <span class="c1"># Kick off this entire workflow by calling something like:</span>
+  <span class="c1"># ImageUploader.upload(product, product.images.map(&amp;:id))</span>
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">upload</span><span class="p">(</span><span class="n">product</span><span class="p">,</span> <span class="n">image_ids</span><span class="p">)</span>
+    <span class="n">batch</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span>
+    <span class="n">batch</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="ss">:success</span><span class="p">,</span> <span class="nb">self</span><span class="p">,</span> <span class="s1">'pid'</span> <span class="o">=&gt;</span> <span class="n">product</span><span class="p">.</span><span class="nf">id</span><span class="p">)</span>
+    <span class="n">batch</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+      <span class="n">image_ids</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">image_id</span><span class="o">|</span>
+        <span class="n">perform_async</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>The on_success callback is called once the last image upload job executes successfully.  Now we have the best of both worlds: the speed of parallel execution with proper synchronization ensuring no broken images for your users!</p>
+
+<p>Remember: Sidekiq allows you to go from serial to parallel.  Sidekiq Pro allows you to go from serial to parallel and back to serial.  Easy.</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

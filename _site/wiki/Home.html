@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Home</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Sidekiq is a full-featured background job framework for Ruby.  It aims to be simple to integrate with any modern Rails application and much higher performance than other existing solutions.</p>
+
+<p>Read for more info:</p>
+
+<ul>
+  <li><a href="/wiki/Getting-Started.html">Getting Started</a></li>
+  <li><a href="/wiki/The-Basics.html">The Basics</a></li>
+  <li><a href="/wiki/Best-Practices.html">Best Practices</a></li>
+  <li><a href="/wiki/Job-Lifecycle.html">Job Lifecycle</a></li>
+  <li><a href="/wiki/Using-Redis.html">Using Redis</a></li>
+  <li><a href="/wiki/Using-Dragonfly.html">Using Dragonfly</a> - ⚡️7.3 ⚡️</li>
+  <li><a href="/wiki/Error-Handling.html">Error Handling</a></li>
+  <li><a href="/wiki/Advanced-Options.html">Advanced Options</a></li>
+  <li><a href="/wiki/Scheduled-Jobs.html">Scheduled Jobs</a></li>
+  <li><a href="/wiki/Active-Job.html">Active Job</a></li>
+  <li><a href="/wiki/Logging.html">Logging</a></li>
+  <li><a href="/wiki/Iteration.html">Iteration</a> - ⚡️7.3 ⚡️</li>
+  <li><a href="/wiki/Profiling.html">Profiling</a> - ⚡️8.0 ⚡️</li>
+  <li><a href="/wiki/Signals.html">Signals</a></li>
+  <li><a href="/wiki/Deployment.html">Deployment</a></li>
+  <li><a href="/wiki/Scaling.html">Scaling</a></li>
+  <li><a href="/wiki/Monitoring.html">Monitoring</a></li>
+  <li><a href="/wiki/Metrics.html">Metrics</a> - ⚡️7.0 ⚡️</li>
+  <li><a href="/wiki/API.html">API</a></li>
+  <li><a href="/wiki/Middleware.html">Middleware</a></li>
+  <li><a href="/wiki/Testing.html">Testing</a></li>
+  <li><a href="/wiki/Sharding.html">Sharding</a></li>
+  <li><a href="/wiki/Embedding.html">Embedding</a> - ⚡️7.0 ⚡️</li>
+  <li><a href="/wiki/Problems-and-Troubleshooting.html">Problems and Troubleshooting</a></li>
+  <li><a href="/wiki/Related-Projects.html">Related Projects</a> - 3rd party add-ons for Sidekiq</li>
+  <li><a href="/wiki/FAQ.html">FAQ</a></li>
+</ul>
+
+<h2 id="sidekiq-pro">Sidekiq Pro</h2>
+
+<p><a href="https://billing.contribsys.com/spro/">Purchase Sidekiq Pro</a></p>
+
+<ul>
+  <li><a href="/wiki/Batches.html">Batches</a>
+    <ul>
+      <li><a href="/wiki/Complex-Job-Workflows-with-Batches.html">Complex Workflows</a></li>
+      <li><a href="/wiki/Really-Complex-Workflows-with-Batches.html">Really Complex Workflows</a></li>
+    </ul>
+  </li>
+  <li><a href="/wiki/Reliability.html">Reliability</a></li>
+  <li><a href="/wiki/Pro-Reliability-Client.html">Client-side Reliability</a></li>
+  <li><a href="/wiki/Pro-Metrics.html">Metrics</a></li>
+  <li><a href="/wiki/Pro-Expiring-Jobs.html">Expiring Jobs</a></li>
+  <li><a href="/wiki/Pro-Web-UI.html">Web UI extensions</a></li>
+  <li><a href="/wiki/Pro-API.html">API extensions</a></li>
+</ul>
+
+<h2 id="sidekiq-enterprise">Sidekiq Enterprise</h2>
+
+<p><a href="https://billing.contribsys.com/sent/">Purchase Sidekiq Enterprise</a></p>
+
+<ul>
+  <li><a href="/wiki/Ent-Rolling-Restarts.html">Rolling Restarts and Long-Running Jobs</a></li>
+  <li><a href="/wiki/Ent-Rate-Limiting.html">Rate Limiting</a></li>
+  <li><a href="/wiki/Ent-Periodic-Jobs.html">Periodic Jobs</a></li>
+  <li><a href="/wiki/Ent-Unique-Jobs.html">Unique Jobs</a></li>
+  <li><a href="/wiki/Ent-Leader-Election.html">Leader Election</a></li>
+  <li><a href="/wiki/Ent-Historical-Metrics.html">Historical Metrics</a></li>
+  <li><a href="/wiki/Ent-Multi-Process.html">Multi-Process</a></li>
+  <li><a href="/wiki/Ent-Encryption.html">Job Argument Encryption</a></li>
+  <li><a href="/wiki/Ent-Web-UI.html">Web UI Authorization</a></li>
+</ul>
+
+<h2 id="commercial-aspects">Commercial Aspects</h2>
+
+<ul>
+  <li><a href="/wiki/Commercial-Support.html">Commercial Support</a></li>
+  <li><a href="/wiki/Commercial-FAQ.html">Commercial FAQ</a></li>
+  <li><a href="/wiki/Commercial-collaboration.html">Commercial Collaboration</a></li>
+</ul>
+
+<h2 id="top-posts-from-mperham">Top Posts from @mperham</h2>
+
+<p><a href="https://www.mikeperham.com">https://www.mikeperham.com</a> has many good Sidekiq blog posts with various tips and tricks. Some highlights:</p>
+
+<ul>
+  <li><a href="https://www.mikeperham.com/how-sidekiq-works/">How Sidekiq Works</a></li>
+  <li><a href="https://www.mikeperham.com/2019/12/17/workload-isolation-with-queue-sharding/">Queue Fairness with Multi-tenancy</a></li>
+  <li><a href="https://www.mikeperham.com/2013/11/13/advanced-sidekiq-host-specific-queues/">Host-specific Queues</a></li>
+  <li><a href="https://www.mikeperham.com/2015/09/24/storing-data-with-redis/">Storing Data with Redis</a></li>
+  <li><a href="https://www.mikeperham.com/2021/04/20/a-tour-of-the-sidekiq-api/">A Tour of the Sidekiq API</a></li>
+  <li><a href="https://www.mikeperham.com/2022/07/29/sidekiq-and-request-specific-context/">Sidekiq and Request-Specific Context</a></li>
+  <li><a href="https://www.mikeperham.com/2024/07/03/iteration-and-sidekiq-7.3.0/">Job Iteration in Sidekiq</a></li>
+</ul>
+
+<h2 id="other-excellent-links">Other Excellent Links</h2>
+
+<ul>
+  <li><a href="https://engineering.gusto.com/scaling-sidekiq-at-gusto-3f9e3279e63">Scaling Sidekiq at Gusto</a></li>
+  <li><a href="https://engineering.gusto.com/scaling-sidekiq-at-gusto-vol-2-52a67cc31002">Scaling Sidekiq at Gusto, vol. 2</a></li>
+  <li><a href="https://chartmogul.com/blog/autoscaling-sidekiq/">Autoscaling Sidekiq at ChartMogul</a></li>
+  <li><a href="https://judoscale.com/blog/ultimate-guide-scaling-sidekiq">The Ultimate Guide to Scaling Sidekiq</a></li>
+</ul>
+
+<p>Next: <a href="/wiki/Getting-Started.html">Getting Started</a></p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Ent Encryption</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Certain industries have strong regulation around the storage of personal data.  Private medical data, financial data, social security numbers, credit card numbers, all of these things are sensitive. Sidekiq Enterprise v1.3.0+ supports transparent encryption of the <strong>last</strong> job argument (aka the secret bag) so sensitive data at rest in Redis cannot be seen.</p>
+
+<h2 id="enable-encryption">Enable Encryption</h2>
+
+<p>In your initializer, activate the feature.  I recommend putting this as the last item in your initializer:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Enterprise</span><span class="o">::</span><span class="no">Crypto</span><span class="p">.</span><span class="nf">enable</span><span class="p">(</span><span class="ss">active_version: </span><span class="mi">1</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">version</span><span class="o">|</span>
+  <span class="c1"># this block should return the key for the version N</span>
+  <span class="c1">#</span>
+  <span class="c1"># every time you need to rotate the crypto key, you should bump</span>
+  <span class="c1"># the active_version. this block should always return the key for </span>
+  <span class="c1"># the given version.</span>
+  <span class="c1">#</span>
+  <span class="c1"># You can store the key for each version in a file, in an ENV variable or on a remote</span>
+  <span class="c1"># keystore - it's up to you how to do key management.</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>You can create a new random key in <code class="language-plaintext highlighter-rouge">irb</code> like so:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'openssl'</span>
+<span class="no">File</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="s2">"/var/crypto/secret.1.key"</span><span class="p">,</span> <span class="s2">"w:ASCII-8BIT"</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="n">file</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="no">OpenSSL</span><span class="o">::</span><span class="no">Cipher</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s2">"aes-256-gcm"</span><span class="p">).</span><span class="nf">random_key</span><span class="p">)</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="configure-your-private-jobs">Configure your Private Jobs</h2>
+
+<p>Sidekiq uses a special pattern to keep sensitive data private while also allowing some arguments to be cleartext to help with debugging job failures in the Web UI.  The <strong>last</strong> argument for an encrypted job should be a Hash; it is the <strong>secret bag</strong> and will be encrypted - <strong>all other arguments are cleartext to aid with debugging</strong>.</p>
+
+<p>This has one special side effect: all encrypted jobs must take &gt;= 2 arguments.  If you don’t wish to have any cleartext, you can use <code class="language-plaintext highlighter-rouge">perform(nil, secret_bag)</code>.</p>
+
+<p>Tell Sidekiq to keep a job’s arguments private:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">PrivateJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+  <span class="n">sidekiq_options</span> <span class="ss">encrypt: </span><span class="kp">true</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">secret_bag</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Now create a new job with the secret bag as the last parameter:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">SecretJob</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">{</span><span class="s2">"ssn"</span> <span class="o">=&gt;</span> <span class="s2">"123-45-6789"</span><span class="p">})</span>
+</code></pre></div></div>
+
+<p>Within Redis, the job data will look something like this:</p>
+
+<blockquote>
+  <p>{“class”=&gt;”SecretJob”, “args”=&gt;[1, 2, “BAhTOhFTaWRla2lxOjpFbmMIOgdpdiIVo1mbHmnVxiOITRFamysuBzoGdmkGOglibG9iIjUsYKydz73NLUB952KmES-K2LURDF6I_dWTBtzOX6493OaqNl6KZta19vWTKRwX9KQ=”], “retry”=&gt;true, “queue”=&gt;”default”, “encrypt”=&gt;true, “jid”=&gt;”b5f7df591b368910db3fc2d2”, “created_at”=&gt;1468597911.397162, “enqueued_at”=&gt;1468597911.3972108}</p>
+</blockquote>
+
+<h2 id="notes">Notes</h2>
+
+<ul>
+  <li>The implementation uses OpenSSL’s <code class="language-plaintext highlighter-rouge">aes-256-gcm</code> Cipher, which is the strongest widely available cipher as of 2016.  This cipher requires OpenSSL 1.0.1; the code will fallback to using <code class="language-plaintext highlighter-rouge">aes-256-cbc</code> if running on an older OpenSSL version.  The code can decrypt jobs using either cipher - you may upgrade without worry.</li>
+  <li>The secret bag will be encrypted in the Web UI, when returned from the API, etc.  Only when your job is actually executed will it be decrypted.</li>
+  <li>The encryption header adds about 150 bytes to the size of arguments plus 30% Base64 encoding overhead. Arguments which are 1000 bytes in plaintext are about 1500 bytes when encrypted.  The Base64 encoding is necessary as JSON content must be valid UTF8 and the encrypted data is binary.</li>
+  <li><strong>ONLY</strong> the last argument is encrypted.  Any error message and backtrace will still be plaintext within a job.  Be careful not to expose any sensitive data when raising errors.</li>
+  <li>The unique jobs feature will not work on encrypted jobs, since the encrypted argument is always unique.  If a Worker has both <code class="language-plaintext highlighter-rouge">encrypt</code> and <code class="language-plaintext highlighter-rouge">unique_for</code> options, Sidekiq will raise an error.</li>
+</ul>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

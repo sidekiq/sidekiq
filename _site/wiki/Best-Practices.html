@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Best Practices</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Follow these rules to improve your Sidekiq experience:</p>
+
+<h2 id="1-make-your-job-parameters-small-and-simple">1. Make your job parameters small and simple</h2>
+
+<p>Sidekiq persists the arguments to <code class="language-plaintext highlighter-rouge">perform_async</code> to Redis as JSON. Sometimes people are tempted to make the following kind of mistake:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># MISTAKE</span>
+<span class="n">quote</span> <span class="o">=</span> <span class="no">Quote</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">quote_id</span><span class="p">)</span>
+<span class="no">SomeJob</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="n">quote</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Complex Ruby objects do not convert to JSON, by default it will convert with <code class="language-plaintext highlighter-rouge">to_s</code> and look like <code class="language-plaintext highlighter-rouge">#&lt;Quote:0x0000000006e57288&gt;</code>.  Even if they did serialize correctly, what happens if your queue backs up and that quote object changes in the meantime?  <strong>Don’t save state to Sidekiq, save simple identifiers</strong>.  Look up the objects once you actually need them in your perform method.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">SomeJob</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="n">quote_id</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The arguments you pass to <code class="language-plaintext highlighter-rouge">perform_async</code> <strong>must</strong> be composed of simple JSON datatypes: <strong>string</strong>, <strong>integer</strong>, <strong>float</strong>, <strong>boolean</strong>, <strong>null(nil)</strong>, <strong>array</strong> and <strong>hash</strong>. This means you <strong>must not</strong> use ruby symbols as arguments.  The Sidekiq client API uses <code class="language-plaintext highlighter-rouge">JSON.dump</code> to send the data to Redis.  The Sidekiq server pulls that JSON data from Redis and uses <code class="language-plaintext highlighter-rouge">JSON.load</code> to convert the data back into Ruby types to pass to your perform method.  <strong>Don’t pass symbols, named parameters, keyword arguments or complex Ruby objects (like Date or Time!)</strong> as those will not survive the dump/load round trip correctly. You can use methods like <a href="https://apidock.com/rails/Hash/stringify_keys">Hash#stringify_keys</a> to convert Symbol keys when passing a Hash to <code class="language-plaintext highlighter-rouge">perform_async</code>: <code class="language-plaintext highlighter-rouge">MyJob.perform_async(hash.stringify_keys)</code>.</p>
+
+<h2 id="2-make-your-job-idempotent-and-transactional">2. Make your job idempotent and transactional</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/Idempotence">Idempotency</a> means that your job can safely execute multiple times.  For instance, with the error retry functionality, your job might be half-processed, throw an error, and then be re-executed over and over until it successfully completes.  Let’s say you have a job which voids a credit card transaction and emails the user to let them know the charge has been refunded:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="n">card_charge_id</span><span class="p">)</span>
+  <span class="n">charge</span> <span class="o">=</span> <span class="no">CardCharge</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">card_charge_id</span><span class="p">)</span>
+  <span class="n">charge</span><span class="p">.</span><span class="nf">void_transaction</span>
+  <span class="no">Emailer</span><span class="p">.</span><span class="nf">charge_refunded</span><span class="p">(</span><span class="n">charge</span><span class="p">).</span><span class="nf">deliver</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>What happens when the email fails to render due to a bug?  Will the <code class="language-plaintext highlighter-rouge">void_transaction</code> method handle the case where a charge has already been refunded?  You can use a database transaction to ensure data changes are rolled back if there is an error or you can write your code to be resilient in the face of errors.</p>
+
+<p>Just remember that Sidekiq will execute your job <strong>at least</strong> once, not <strong>exactly</strong> once. Even a job which has completed can be re-run. Redis can go down between the point where your job finished but before Sidekiq has acknowledged it in Redis. Sidekiq makes no exactly-once guarantee at all.</p>
+
+<h2 id="3-embrace-concurrency">3. Embrace Concurrency</h2>
+
+<p>Sidekiq is designed for parallel execution so design your jobs so you can run lots of them in parallel.  It has basic features for tuning concurrency (e.g. targeting a sidekiq process at a queue with a defined number of threads) but your system architecture is much simpler if you don’t have such specialization.</p>
+
+<p>You can use a <a href="https://github.com/sidekiq/sidekiq/wiki/Advanced-Options#concurrency">connection pool</a> to limit the overall number of connections to a resource-limited server if your Sidekiq processes are overwhelming it with traffic.</p>
+
+<p>Sidekiq will not provide features which hack around a lack of concurrency in your jobs.</p>
+
+<h2 id="4-use-precise-terminology">4. Use Precise Terminology</h2>
+
+<p>Within the Sidekiq ecosystem, the term <code class="language-plaintext highlighter-rouge">worker</code> is ambiguous and thus meaningless.</p>
+
+<ul>
+  <li>Sidekiq::Job is a module included in a job class.</li>
+  <li>If you have 10 “workers” executing jobs, you have 10 threads.</li>
+  <li>If you start a “worker”, you have a process.</li>
+  <li>If you have 10 “workers” enqueued, you have 10 jobs.</li>
+</ul>
+
+<p>Use those terms: job class, thread, process or job. Dump “worker” from your vocabulary.</p>
+
+<p>Next: <a href="/wiki/Using-Redis.html">Using Redis</a></p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

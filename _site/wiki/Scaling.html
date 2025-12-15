@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Scaling</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Sidekiq’s architecture makes it easy to scale up to thousands of jobs per second and millions of jobs per day. Scaling Sidekiq can simply be a matter of “adding more servers”, but how do you optimize each server, how “big” do the servers need to be, and how do you know when to add more? Those are the questions this guide will answer.</p>
+
+<h2 id="concepts-and-terms">Concepts and terms</h2>
+
+<p>Let’s start with an overview of Sidekiq’s architecture and the various “levers” we have available to us. We’ll also define some terms we’ll use throughout this guide.</p>
+
+<ul>
+  <li><strong>Concurrency</strong> - The Sidekiq setting that controls the number of threads available to a single Sidekiq process.</li>
+  <li><strong>Swarm</strong> - A feature of <a href="/wiki/Ent-Multi-Process.html">Sidekiq Enterprise</a> that supports running multiple Sidekiq processes on a single container.</li>
+  <li><strong>Container</strong> - A container instance running one or more Sidekiq processes. You might call this a server, service, dyno, pod, etc. We’ll just call them containers.</li>
+  <li><strong>Total concurrency</strong> - The total number of Sidekiq threads across all containers and processes.</li>
+</ul>
+
+<p>Here’s a diagram that shows the relationship between these concepts:</p>
+
+<p><img src="https://github.com/sidekiq/sidekiq/assets/372/b16f4c81-17eb-470d-8d87-d710fc13c0e6" alt="Relationship between concurrency, containers, and process swarms" /></p>
+
+<p>Sidekiq is of course all about queues, so let’s clarify some terms here.</p>
+
+<ul>
+  <li><strong>Queues</strong> - You put your jobs into queues (which live in Redis), and Sidekiq processes the jobs in the queue, oldest first (FIFO). When starting a Sidekiq process, you tell it which queues to monitor and how to prioritize them.</li>
+  <li><strong>Queue assignment</strong> - You can assign queues (or groups of queues) to specific Sidekiq processes, or you can have a single queue assignment used by all Sidekiq processes.</li>
+  <li><strong>Queue priority</strong> - When assigning multiple queues to a process, Sidekiq has a couple <a href="https://github.com/sidekiq/sidekiq/wiki/Reliability#fetch-algorithms">fetch algorithms</a> that dictate how it pulls jobs from those queues: strict and weighted. We’ll call those the queue priority.</li>
+</ul>
+
+<p><img src="https://github.com/sidekiq/sidekiq/assets/372/35137361-df39-42c7-9393-e3b374e0560f" alt="Relationship between Sidekiq queue assignments and priority" /></p>
+
+<p>And finally we have our connection pools. Yes, multiple connection pools.</p>
+
+<ul>
+  <li><strong>Database connection pool</strong> - A pool of database connections shared by all Sidekiq threads within a process. This is managed by Rails and configured in <code class="language-plaintext highlighter-rouge">database.yml</code>.</li>
+  <li><strong>Redis connection pool</strong> - A pool of Redis connections shared by all Sidekiq threads and Sidekiq internals within a process. This is managed by <a href="https://github.com/redis-rb/redis-client#configuration">redis-client</a> and is configured automatically by Sidekiq based on your concurrency.</li>
+</ul>
+
+<p><img src="https://github.com/sidekiq/sidekiq/assets/372/22f3501b-9b01-4e23-b6f1-631f179df584" alt="Diagram of connection pools used by Sidekiq" /></p>
+
+<p>In total this is a lot of concepts and configurations. The good news is most of them are handled for us or are straightforward to configure ourselves.</p>
+
+<h2 id="a-sidekiq-starting-point">A Sidekiq starting point</h2>
+
+<p>These are some general recommendations that will help things run smoothly in the beginning of an app and prepare you to scale later.</p>
+
+<p><strong>The fewer queues the better.</strong> Don’t make your life harder than it needs to be. Two or three queues are <em>plenty</em> for a new app. We’ll talk later about when it makes sense to add more queues, but scaling will generally be more challenging the more queues you have.</p>
+
+<p><strong>Name your queues based on priority or urgency.</strong> Some teams name their queues using domain specific terms that are no help at all when it comes to planning queue priority or latency requirements. “Urgent”, “default”, and “low” are much easier to work with. You might take a step further and embrace <a href="https://engineering.gusto.com/scaling-sidekiq-at-gusto-3f9e3279e63">Gusto’s approach</a> of latency-based queue names such as “within_30_seconds”, “within_5_minutes”, etc. This approach makes it <em>very</em> clear which queues have priority and when queue latency is unacceptable.</p>
+
+<p><strong>Keep your jobs as small as possible!</strong> <a href="https://naildrivin5.com/blog/2023/11/09/fan-out-sidekiq-jobs-to-manage-large-workloads.html">Fan out large jobs into many small jobs.</a> Smaller jobs are much easier to scale, but we’ll talk later about strategies to use when this isn’t possible.</p>
+
+<p><strong>Run a single Sidekiq process per container.</strong> You can add Sidekiq Swarm later, but don’t assume you’ll need it. This is one less variable to juggle when scaling. Keep it simple.</p>
+
+<p><strong>Choose a container size based on memory.</strong> If you’re working with a lot of large files, such as generating PDF’s or importing large CSV files, you’ll need more memory. If you’re not doing that, you can probably get away with 1GB or less.</p>
+
+<p><strong>Start with five threads per process (concurrency).</strong> This is just a starting point—you will need to tweak it. Many teams get too ambitious with their concurrency, saturating their CPU and slowing down all jobs. The good news is <em>five is the Sidekiq default</em>, so if you don’t do anything, you’ll have a good starting point.</p>
+
+<p>These guidelines will get you started, but what about optimizing your configuration and scaling beyond the basics? That’s what we’ll tackle in the following sections.</p>
+
+<h2 id="find-your-concurrency-sweet-spot">Find your concurrency sweet spot</h2>
+
+<p>Depending on your container CPU and the type of work your jobs are doing (mainly the percentage of time spent in I/O), you’ll probably need to tweak your concurrency setting. As a very simple rule, you want to CPU usage to be <em>high but not 100%</em> when all threads are in use.</p>
+
+<p>If CPU is hitting 100%, you need to reduce your concurrency. If your CPU usage never goes above 50% as max throughput, you probably want to increases your concurrency.</p>
+
+<p><strong>Use <code class="language-plaintext highlighter-rouge">RAILS_MAX_THREADS</code> to tweak concurrency.</strong> When you decide to tweak your concurrency, you <em>could</em> configure it with the <code class="language-plaintext highlighter-rouge">-c</code> CLI flag, but Sidekiq will also respect the <code class="language-plaintext highlighter-rouge">RAILS_MAX_THREADS</code> environment variable. This is what Rails uses by default to configure your database pool in <code class="language-plaintext highlighter-rouge">database.yml</code>, so <em>by embracing this convention, your database pool will always be correctly sized for your Sidekiq process</em>.</p>
+
+<h2 id="autoscale-your-sidekiq-containers">Autoscale your Sidekiq containers</h2>
+
+<p>Don’t waste your energy calculating how many containers you need to run. Sidekiq loads are highly variable by nature, and you don’t want to pay for a cluster of 10 containers when no jobs are enqueued. Autoscaling solves this problem by automatically scaling your containers up and down, but what metric should you use for autoscaling?</p>
+
+<p>Sidekiq workloads are more often I/O-bound than CPU-bound—in other words, you can easily encounter a queue backlog even when CPU utilization is low. This makes CPU an inappropriate and frustrating metric to use for autoscaling, even though it’s the most commonly-used metric used by tools like AWS CloudWatch.</p>
+
+<p>Instead, you should autoscale your Sidekiq containers using queue latency. Your business requirements will have an implicit (or hopefully explicit) expectation how long each job can reasonably wait before being processed. This expectation makes queue latency the perfect metric for autoscaling. (And if you’re using latency-based queue names, you’ve already identified those latency expectations!)</p>
+
+<p>Several services exist for autoscaling Sidekiq based on queue latency:</p>
+
+<ul>
+  <li>Heroku: <a href="https://judoscale.com">Judoscale</a>, <a href="https://hirefire.io">HireFire</a></li>
+  <li>Render: Judoscale</li>
+  <li>AWS: CloudWatch*, Judoscale</li>
+  <li>Kubernetes: <a href="https://github.com/sidekiq/sidekiq/wiki/Kubernetes#autoscaling">HPA*</a></li>
+</ul>
+
+<p><em>(*) You’ll need to measure queue latency yourself and report it to CloudWatch or HPA.</em></p>
+
+<h2 id="assign-queues-to-dedicated-processes">Assign queues to dedicated processes</h2>
+
+<p>Sometimes it makes sense to add a queue for a specific job or a particular “shape” of job. Some examples:</p>
+
+<ul>
+  <li>If you’re unable to break down large jobs into smaller jobs, you might not want those long-running jobs to become a bottleneck in your queue.</li>
+  <li>If you have some jobs that use lots of memory, you might need a larger container for those jobs.</li>
+  <li>If you have jobs that can’t be processed in parallel, you might need those jobs on a dedicated queue that run single-threaded.</li>
+</ul>
+
+<p>These aren’t ideal scenarios, but they’re real-world scenarios that many apps will encounter. It’s best to treat these queues as the anomalies they are and dedicate them to their own Sidekiq process. This way your long-running jobs will only block other long-running jobs, and your memory-hungry jobs won’t require all of your jobs to run on larger, higher-priced containers.</p>
+
+<p>This isolation makes scaling easier because you’re scaling your “special” queues separately from your “normal” queues. Here’s what it might look like in a <code class="language-plaintext highlighter-rouge">Procfile</code>, using <code class="language-plaintext highlighter-rouge">RAILS_MAX_THREADS</code> to force the memory-hungry jobs to be processed single-threaded (reducing memory bloat):</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>web: bundle <span class="nb">exec </span>rails s
+worker: bundle <span class="nb">exec </span>sidekiq <span class="nt">-q</span> within_30_sec <span class="nt">-q</span> within_5_min <span class="nt">-q</span> within_5_hours
+worker_high_mem: <span class="nv">RAILS_MAX_THREADS</span><span class="o">=</span>1 bundle <span class="nb">exec </span>sidekiq <span class="nt">-q</span> high_mem
+</code></pre></div></div>
+
+<h2 id="scaling-problems--solutions">Scaling problems &amp; solutions</h2>
+
+<p>The best way to make scaling easy is by keeping it simple: a few queues with small jobs. But of course keeping it simple isn’t always easy, especially in a legacy codebase or a large team. Here are some of the problems or anti-patterns you’ll generally want to avoid:</p>
+
+<ul>
+  <li><strong>Not enough connections in your database pool.</strong> If you’re seeing the dreaded <a href="https://github.com/sidekiq/sidekiq/wiki/Problems-and-Troubleshooting#cannot-get-database-connection-within-500-seconds"><code class="language-plaintext highlighter-rouge">ActiveRecord::ConnectionTimeoutError</code></a> in your Sidekiq jobs, chances are you’ve misconfigured your database connection pool. Make sure your <code class="language-plaintext highlighter-rouge">database.yml</code> is using <code class="language-plaintext highlighter-rouge">RAILS_MAX_THREADS</code> as the pool size, and use <code class="language-plaintext highlighter-rouge">RAILS_MAX_THREADS</code> instead of <code class="language-plaintext highlighter-rouge">-c</code> to configure your concurrency.</li>
+  <li><strong>ERR max number of clients reached.</strong> Unlike the error above, this error is coming from Redis, and it usually means you’re using a Redis service with an extremely <a href="https://github.com/sidekiq/sidekiq/wiki/Problems-and-Troubleshooting#heroku-err-max-number-of-clients-reached">limited number of connections available</a>. You can either upgrade your Redis service or reduce your concurrency setting.</li>
+  <li><strong>Slow job performance / saturated CPU.</strong> These go hand-in-hand when you’ve set your concurrency too high. Reduce your concurrency or use a more powerful container.</li>
+  <li><strong>Sporadic queue backlogs.</strong> Most apps have extremely variable load patterns for background jobs. If you don’t have autoscaling in place, you’ll need to run more containers to avoid these backlogs.</li>
+  <li><strong>Unreliable autoscaling.</strong> If you’re not scaling up and down when expected, you’re probably autoscaling based on CPU. Autoscale based on queue latency instead.</li>
+  <li><strong>Memory bloat.</strong> If your worker containers are using way more memory than you expect, you can either <a href="https://github.com/sidekiq/sidekiq/wiki/Problems-and-Troubleshooting#memory-bloat">fix the memory bloat</a>, or isolate those jobs to their own queue and process, potentially processing them single-threaded.</li>
+  <li><strong>Upstream (database) slow-down.</strong> It’s easy to scale Sidekiq to the point that you’re overloading your database. There’s no Sidekiq fix here—you either need to reduce total concurrency to alleviate DB pressure, upgrade your database, or make your queries more efficient.</li>
+</ul>
+
+<h2 id="scaling-redis">Scaling Redis</h2>
+
+<p>The short answer is here is that Redis is almost never the problem when scaling Sidekiq. But for very high-scale apps, you might hit the limits of what’s possible with a single Redis server. The <a href="/wiki/Sharding.html">sharding wiki article</a> walks you through some options here, and now <a href="/wiki/Using-Dragonfly.html">Dragonfly</a> might be an even better option.</p>
+
+<p>Just remember that <em>most apps don’t need this</em>! Make sure you’ve worked through the earlier suggestions and confirmed that Redis is your bottleneck before proceeding down these paths.</p>
+
+<h2 id="further-reading">Further reading</h2>
+
+<p>Nate Berkopec dives deep into many of the ideas discussed above in his excellent book <a href="https://nateberk.gumroad.com/l/sidekiqinpractice">Sidekiq in Practice</a>. He also has an in-depth article that explains the relationship between <a href="https://www.speedshop.co/2020/05/11/the-ruby-gvl-and-scaling.html">processes, threads, and the GVL</a>. For more on latency-based queue names, check out <a href="https://engineering.gusto.com/scaling-sidekiq-at-gusto-3f9e3279e63">Scaling Sidekiq at Gusto</a>.</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

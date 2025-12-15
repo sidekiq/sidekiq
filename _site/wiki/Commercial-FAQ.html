@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Commercial FAQ</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><h2 id="what-are-sidekiq-pro-and-sidekiq-enterprise">What are Sidekiq Pro and Sidekiq Enterprise?</h2>
+
+<p>Sidekiq Pro and Sidekiq Enterprise are extensions to Sidekiq which add more functionality and provide additional support options for customers.</p>
+
+<h2 id="is-there-a-trial-version">Is there a trial version?</h2>
+
+<p>We do not have pre-sales demos or free trials. Sidekiq is free, well-known and widely available. If Sidekiq is working for you, you can purchase one month of Pro or Enterprise and try it in development and/or production. If you are not happy with the result, please write to support@contribsys.com and we will refund your month.</p>
+
+<p>There are several thousand customers using Sidekiq Pro or Enterprise across the globe, including most of the “big” Ruby users. The largest scale I’m aware of is one customer running a peak of 250,000 jobs per second or 20 billion jobs per day across ~100 Redis shards.</p>
+
+<h2 id="can-i-get-a-discount">Can I get a discount?</h2>
+
+<p>For Sidekiq Pro, there are no discounts or deals.  For Sidekiq Enterprise, discounts are available for larger volumes.  The <a href="https://billing.contribsys.com/sent/">Sidekiq Enterprise purchase page</a> will show you those discounts as you select larger options.</p>
+
+<h2 id="what-is-the-license">What is the license?</h2>
+
+<p>See <a href="https://raw.githubusercontent.com/sidekiq/sidekiq/master/COMM-LICENSE.txt">COMM-LICENSE.txt</a> in the root of the Sidekiq repo.</p>
+
+<h2 id="how-does-pro-licensing-work">How does Pro licensing work?</h2>
+
+<p>Every organization running Sidekiq Pro on its own servers must purchase a subscription.  There’s no limit to the number of servers or environments used by that organization. Your subscription will automatically renew every year.</p>
+
+<h2 id="how-does-enterprise-licensing-work">How does Enterprise licensing work?</h2>
+
+<p>Every organization running Sidekiq Enterprise on its own servers must purchase a subscription.  The price is based on the number of worker threads running in production environment in processes using the Sidekiq Pro or Sidekiq Enterprise gems.  You can use Sidekiq Enterprise with any number of apps and processes and machines as long as their total worker thread count <strong>in production</strong> is &lt;= the licensed amount.  Development and staging environments are free and unlimited. Your subscription will automatically renew every term (annual, quarterly, monthly).</p>
+
+<p>Any Sidekiq Enterprise process with <code class="language-plaintext highlighter-rouge">RAILS_ENV=production</code> or <code class="language-plaintext highlighter-rouge">sidekiq -e production</code> will count on your license.</p>
+
+<p>For autoscaling and one-off processing tasks, you are allowed to double your licensed count for up to one hour per day, e.g. to handle a temporary spike in traffic.</p>
+
+<p>If you wish to expand your Sidekiq Enterprise thread count beyond your current license, email <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#038;&#035;&#054;&#052;&#059;&#099;&#111;&#110;&#116;&#114;&#105;&#098;&#115;&#121;&#115;&#046;&#099;&#111;&#109;">support@contribsys.com</a> so we can update your account and let you know how we will bill you.</p>
+
+<p>An unlimited license (unlimited usage for your organization) for Sidekiq Enterprise is available for $79,500/yr.  Please email <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#038;&#035;&#054;&#052;&#059;&#099;&#111;&#110;&#116;&#114;&#105;&#098;&#115;&#121;&#115;&#046;&#099;&#111;&#109;">support@contribsys.com</a> to purchase.</p>
+
+<h2 id="how-do-i-determine-my-sidekiq-enterprise-license-size">How do I determine my Sidekiq Enterprise license size?</h2>
+
+<p>As of Sidekiq v6.2.0, you can also see the total concurrency for an application on the Busy page:</p>
+
+<p><img src="https://user-images.githubusercontent.com/2911/112665717-967bff00-8e18-11eb-917e-7b429b9e7e46.png" alt="threads count location" /></p>
+
+<p>Alternatively you can find your current thread usage by running this Ruby code in the <strong>production</strong> console for each app which uses or will use Sidekiq Enterprise.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">app1</span> <span class="err">$</span> <span class="n">bundle</span> <span class="nb">exec</span> <span class="n">rails</span> <span class="n">console</span>
+<span class="o">&gt;</span> <span class="nb">require</span> <span class="s1">'sidekiq/api'</span><span class="p">;</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">ProcessSet</span><span class="p">.</span><span class="nf">new</span><span class="p">.</span><span class="nf">total_concurrency</span>
+<span class="o">=&gt;</span> <span class="mi">75</span>
+<span class="n">app2</span> <span class="err">$</span> <span class="n">bundle</span> <span class="nb">exec</span> <span class="n">rails</span> <span class="n">console</span>
+<span class="o">&gt;</span> <span class="nb">require</span> <span class="s1">'sidekiq/api'</span><span class="p">;</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">ProcessSet</span><span class="p">.</span><span class="nf">new</span><span class="p">.</span><span class="nf">total_concurrency</span>
+<span class="o">=&gt;</span> <span class="mi">60</span>
+</code></pre></div></div>
+
+<p>That’s a total of 135 threads for two apps.</p>
+
+<h2 id="what-happens-if-my-subscription-lapses">What happens if my subscription lapses?</h2>
+
+<p>We email you a reminder one week before an annual subscription renewal so you can update your card.</p>
+
+<p>If we cannot charge your card, we will email you and try three more times over a week. If it still fails, your subscription will be cancelled. You’ll lose access to the gem server and priority support, you won’t get any more updates or bug fixes and <code class="language-plaintext highlighter-rouge">bundle install</code> won’t work anymore.</p>
+
+<p><strong>Please note that pricing can change.</strong>  Once you purchase a Stripe subscription, you get that price for at least one year <strong>as long as you continue to pay on time</strong>. If your subscription expires for non-payment, you will lose that pricing and need to repurchase at current pricing. If you wish to retain your old credentials, please purchase and then <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#064;&#099;&#111;&#110;&#116;&#114;&#105;&#098;&#115;&#121;&#115;&#046;&#099;&#111;&#109;&#063;&#115;&#117;&#098;&#106;&#101;&#099;&#116;&#061;&#067;&#114;&#101;&#100;&#101;&#110;&#116;&#105;&#097;&#108;&#115;">send an email</a> to request retaining the old credentials.</p>
+
+<h2 id="how-do-i-buy-sidekiq-enterprise">How do I buy Sidekiq Enterprise?</h2>
+
+<p>You can get a quote on the <a href="https://billing.contribsys.com/sent/">Sidekiq Enterprising purchase page</a> and purchase in seconds.</p>
+
+<h2 id="can-i-upgrade-from-sidekiq-pro">Can I upgrade from Sidekiq Pro?</h2>
+
+<p>Yes:</p>
+
+<ol>
+  <li>Purchase a new Sidekiq Enterprise subscription at [[https://billing.contribsys.com/sent/new.cgi]].</li>
+  <li>Migrate your Bundler configuration and Gemfile according to the emailed instructions.</li>
+  <li>Email support@contribsys.com, I will cancel your Pro subscription and prorate your account.</li>
+</ol>
+
+<p>Sidekiq Pro is included with Sidekiq Enterprise so your application code should not need to change at all.</p>
+
+<p>Any applications which access the gems via an Enterprise URL count in the Enterprise subscription thread count. If you wish to continue using Sidekiq Pro in some applications without counting against your Enterprise thread count, you must maintain a separate Pro subscription and the Sidekiq Pro processes must use a separate Redis database.</p>
+
+<h2 id="can-i-distribute-sidekiq-pro-or-enterprise-to-my-customers">Can I distribute Sidekiq Pro or Enterprise to my customers?</h2>
+
+<p>This is a common requirement for “on-site installs” or “appliances” sold to large corporations.</p>
+
+<p>The default commercial license is only appropriate for SaaS usage as it does not allow distribution.  Sidekiq Pro and Enterprise have an Appliance license option which <strong>does</strong> allow you to distribute them.  The Appliance license is $14,995/yr for Pro and $39,995/yr for Enterprise.  It allows you to distribute the Pro or Enterprise gems as part of your application and each of your customers to run Sidekiq Pro or Enterprise with up to 100 threads <strong>as part of your application only</strong>. Email <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#038;&#035;&#054;&#052;&#059;&#099;&#111;&#110;&#116;&#114;&#105;&#098;&#115;&#121;&#115;&#046;&#099;&#111;&#109;">support@contribsys.com</a> to purchase.</p>
+
+<h2 id="can-you-transfer-a-license">Can you transfer a license?</h2>
+
+<p>Licenses are <strong>not</strong> transferrable to another company.  You can transfer the license from a user-specific email to a group email address (e.g. john_smith@example.com -&gt; tech@example.com) but only for <strong>the same domain</strong> by changing the email in your <a href="https://billing.contribsys.com/">Contributed Systems billing portal</a>.  It is strongly recommended that you buy the license using a group email address so the license is not attached to any one employee’s email address.</p>
+
+<h2 id="what-does-the-license-require-me-to-do">What does the license require me to do?</h2>
+
+<p>Your purchase gets you unique access credentials for downloading the Pro and/or Enterprise gems.  The license agreement requires you to keep these access credentials private.  If we find your access credentials are ever publicized:</p>
+
+<ol>
+  <li>We’ll send you a warning email with details.</li>
+  <li><a href="https://billing.contribsys.com/rotate.cgi">Rotate your credentials</a>. The old credentials will stop working immediately.</li>
+  <li>Remove the content and reply to the email so I know the content has been removed.</li>
+</ol>
+
+<p>If your credentials are publicized a second time, we reserve the right to permanently remove access (but won’t unless it’s really egregious - sloppy contractors happen). If you don’t respond within 24 hours, the account will be locked until you email us.</p>
+
+<p>You can rotate your credentials at any time with the <a href="https://billing.contribsys.com/rotate.cgi">Rotate Credentials</a> page.</p>
+
+<h2 id="do-i-have-to-share-the-credentials-with-all-of-my-developers">Do I have to share the credentials with all of my developers?</h2>
+
+<p>In general, yes. The credentials are required to download the gems and your developers will need the gems to use the commercial features. You can use <a href="https://github.com/bkeepers/dotenv">dotenv</a> to load the unencrypted credentials in <code class="language-plaintext highlighter-rouge">.env</code> into each process, or you can use <a href="https://github.com/StackExchange/blackbox">blackbox</a> or <a href="https://github.com/thekompanee/chamber">chamber</a> to manage encrypted secrets. But the result should always be the same: set an environment variable for Bundler to use when it needs to access the Contributed Systems gem server.</p>
+
+<p>You can rotate your own credentials using our <a href="https://billing.contribsys.com/rotate.cgi">Rotate Credentials</a> page.</p>
+
+<h2 id="how-do-i-debug-a-401-access-denied-error">How do I debug a 401 Access Denied error?</h2>
+
+<ol>
+  <li>Check the account email’s Spam/Junk folder for any billing or payment emails. If your subscription was cancelled, you will need to purchase a new subscription at <a href="https://billing.contribsys.com">billing.contribsys.com</a>.</li>
+  <li>Verify the gem server is up with <a href="https://status.sidekiq.org">status.sidekiq.org</a>.</li>
+  <li>Upgrade Bundler. Versions before 2.3.x are buggy with the gem server.</li>
+  <li>Use <code class="language-plaintext highlighter-rouge">bundle config</code> and <code class="language-plaintext highlighter-rouge">DEBUG=1 bundle</code> to verify your credentials are available in the current environment and that Bundler is using them with Contributed Systems’ gem server.</li>
+</ol>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> % bundle config
+gems.contribsys.com
+Set for the current user (/Users/mperham/.bundle/config): "1234abcd:[REDACTED]"
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% DEBUG=1 bundle up
+Running `bundle update` with bundler 2.2.32
+Found changes from the lockfile, re-resolving dependencies because bundler is unlocking HTTP GET https://1234abcd@gems.contribsys.com/versions
+HTTP 206 Partial Content https://1234abcd@gems.contribsys.com/versions
+HTTP GET https://1234abcd@gems.contribsys.com/versions
+HTTP 200 OK https://1234abcd@gems.contribsys.com/versions
+Fetching gem metadata from https://gems.contribsys.com/
+Looking up gems ["sidekiq-pro"]
+</code></pre></div></div>
+
+<p>Verify <code class="language-plaintext highlighter-rouge">curl</code> can use your <code class="language-plaintext highlighter-rouge">username:password</code> credentials:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># Sidekiq Pro customers
+% curl -I https://username:password@gems.contribsys.com/gems/sidekiq-pro-5.5.0.gem
+HTTP/1.1 200 OK
+
+# Sidekiq Enterprise customers
+% curl -I https://username:password@enterprise.contribsys.com/gems/sidekiq-ent-2.2.3.gem
+% curl -I https://username:password@enterprise.contribsys.com/gems/sidekiq-pro-5.5.0.gem
+HTTP/1.1 200 OK
+</code></pre></div></div>
+
+<h2 id="how-do-i-upgrade-sidekiq-pro-or-sidekiq-enterprise">How do I upgrade Sidekiq Pro or Sidekiq Enterprise?</h2>
+
+<p>Make sure you’ve locked Sidekiq to a specific major version in your <code class="language-plaintext highlighter-rouge">Gemfile</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gem</span> <span class="s2">"sidekiq"</span><span class="p">,</span> <span class="s2">"~&gt;7.2"</span> <span class="c1"># Version locked to &lt;8, &gt;=7.2.0</span>
+<span class="n">source</span> <span class="s2">"hostname"</span> <span class="k">do</span>
+  <span class="n">gem</span> <span class="s2">"sidekiq-pro"</span>
+  <span class="n">gem</span> <span class="s2">"sidekiq-ent"</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Now ask Bundler to upgrade the commercial gem (it will also upgrade all dependencies “underneath” the gem):</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle up sidekiq-pro <span class="c"># Sidekiq Pro</span>
+bundle up sidekiq-ent <span class="c"># Sidekiq Enterprise</span>
+</code></pre></div></div>
+
+<p>Warning: Running only <code class="language-plaintext highlighter-rouge">bundle up sidekiq</code> can lead to errors due to version mismatch. If your subscription has lapsed, you will get a <code class="language-plaintext highlighter-rouge">401 Error</code> from Bundler.</p>
+
+<h2 id="can-i-use-sidekiq-pro-or-enterprise-in-an-open-source-app">Can I use Sidekiq Pro or Enterprise in an Open Source app?</h2>
+
+<p>That’s tricky. First you need to determine your Open Source requirements:</p>
+
+<ul>
+  <li>Do you just want support? You can purchase a license to ensure private email support without using any features. This can work well if you want to use 3rd party open source Sidekiq extensions (in order to keep everything open source) but want help debugging integration or runtime issues.</li>
+  <li>Is your app Open Source so anyone can fork and run the app themselves? If so, everyone would need to purchase their own license and that’s generally not going to work. Not recommended.</li>
+  <li>Is your app Open Source so anyone can see the source but the app is really only maintained and run by one organization? If so, you can make it work but it can be tricky, especially if you want to have public CI.</li>
+</ul>
+
+<p>In your initializer, you’d conditionally activate any commercial features:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">reliable!</span> <span class="k">if</span> <span class="k">defined?</span><span class="p">(</span><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Pro</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>In your Gemfile you can have an <code class="language-plaintext highlighter-rouge">optional</code> group:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">group</span> <span class="ss">:commercial</span><span class="p">,</span> <span class="ss">optional: </span><span class="kp">true</span> <span class="k">do</span>
+  <span class="n">source</span> <span class="o">...</span> <span class="k">do</span>
+    <span class="n">gem</span> <span class="s2">"sidekiq-pro"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Then <code class="language-plaintext highlighter-rouge">bundle install --with commercial</code>. Some CI services support encrypted secrets which are available to each build, perfect for this usecase.</p>
+
+<h2 id="can-i-get-a-refund">Can I get a refund?</h2>
+
+<p>Yes, up to two weeks after purchase.  Let us know the reason and maybe we can help but either way it’s not a problem.  Email <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#038;&#035;&#054;&#052;&#059;&#099;&#111;&#110;&#116;&#114;&#105;&#098;&#115;&#121;&#115;&#046;&#099;&#111;&#109;">support@contribsys.com</a>.</p>
+
+<h2 id="how-do-i-update-my-info">How do I update my info?</h2>
+
+<p>For the vast majority of customers, you will use the <a href="https://billing.contribsys.com/">Contributed Systems billing portal</a>.</p>
+
+<p>If you purchased Sidekiq Enterprise years ago via Quickbooks invoice, each annual invoice is paid separately so you’ll enter your CC info each time.  Email support@contribsys.com if you need to update the email or other info.</p>
+
+<h2 id="can-i-request-a-change-to-the-license-terms">Can I request a change to the license terms?</h2>
+
+<p>Sidekiq Pro is sold as is, no change to terms.  Sidekiq Enterprise customers purchasing 400 threads or more can ask for changes to the terms and conditions.  Email your concerns and we can negotiate something.</p>
+
+<h2 id="can-i-pay-via-invoice-and-purchase-order">Can I pay via invoice and purchase order?</h2>
+
+<p>Sidekiq Pro is credit card only, no exceptions.</p>
+
+<p>See the <a href="https://billing.contribsys.com/sent/">purchase page</a> for Sidekiq Enterprise billing options. An annual emailed invoice is available for licenses 400 threads and up. Connect with Contributed Systems on <a href="https://app.bill.com/network/contribsys">bill.com</a> or <a href="https://supplier.coupahost.com/suppliers/public/contributed-systems-xoZ0k">Coupa</a> for easy ACH payment. Customers are limited to five separate invoices per year. Beyond five licenses, the unlimited license is required.</p>
+
+<h2 id="disputing-a-charge">Disputing a Charge</h2>
+
+<p>Customers occasionally dispute a charge, especially if on an annual subscription; team turnover can mean that an infrequent charge is not recognized. I never fight disputes; the charge will be refunded and the subscription cancelled immediately.</p>
+
+<p>If a customer wishes to regain access they must acknowledge their error in disputing the charge and pay any fees associated with the dispute.</p>
+
+<h2 id="purchasing-via-resellers">Purchasing via Resellers</h2>
+
+<p>Resellers are welcome to purchase Sidekiq Pro or Sidekiq Enterprise at https://billing.contribsys.com/ for their customers. They must provide a distinct email address for each customer and be able to pay via credit card or invoice with no manual process on our part. We will not allow resellers (or any customers) who require annual handholding or manual processing for payment.</p>
+
+<h2 id="can-you-fill-out-my-security-or-compliance-documentation">Can you fill out my security or compliance documentation?</h2>
+
+<p>Not for Sidekiq Pro or a base Sidekiq Enterprise license. If you wish for us to fill out any paperwork, you must have at least a 400 thread Enterprise license.</p>
+
+<h2 id="anonymous-purchase">Anonymous Purchase</h2>
+
+<p>We reserve the right to refuse sales to any anonymous email accounts or generic email providers (e.g. <code class="language-plaintext highlighter-rouge">someguy@gmail.com</code>). Use an email address domain for an existing organization (<code class="language-plaintext highlighter-rouge">someguy@acme-widgets.com</code>).</p>
+
+<h2 id="security-privacy-and-information-usage">Security, Privacy and Information Usage</h2>
+
+<p>Contributed Systems only collects enough customer information to fill out a standard invoice for billing purposes. Customer information is never shared or sold to anyone.</p>
+
+<p>We do not provide SOC2 or other data security reports because <strong>the Sidekiq software runs on your servers</strong>. Contributed Systems never has access to any private user data. Sidekiq Enterprise does phone home daily with aggregate usage numbers for billing purposes, per Section 11 of the COMM-LICENSE.</p>
+
+<p>Per ISO 27001, we have documented our <a href="https://github.com/sidekiq/sidekiq/blob/main/docs/sdlc.md">software development lifecycle</a> and <a href="https://github.com/sidekiq/sidekiq/blob/main/docs/SECURITY.md">vulnerability management</a> policies.</p>
+
+<h2 id="contact-info">Contact Info</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Contributed Systems LLC
+PO Box 247
+Lake Oswego, OR 97034
+
+Federal EIN: 47-1292117
+DUNS: 06-399-4983
+LEI: 984500FB5F9XE88E5957
+</code></pre></div></div>
+
+<p>All billing/support inquiries: info@contribsys.com</p>
+
+<p>Please find our W9 here: [[https://www.icloud.com/iclouddrive/0cc1qaBi6az1Eg93JYwrLZzDQ#contribsys-w9]]</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

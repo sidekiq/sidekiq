@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Using Redis</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Sidekiq uses Redis to store all of its job and operational data.</p>
+
+<p>By default, Sidekiq tries to connect to Redis at <code class="language-plaintext highlighter-rouge">localhost:6379</code>.  This typically works great during development but needs tuning in production.</p>
+
+<h2 id="using-an-env-variable">Using an ENV variable</h2>
+
+<p>You can set the Redis URL using an environment variable. The easiest option is to set <code class="language-plaintext highlighter-rouge">REDIS_URL</code>. Sidekiq will pick it up and use it. A Redis URL looks like <code class="language-plaintext highlighter-rouge">redis://[hostname]:[port]/[dbnumber]</code>, e.g. <code class="language-plaintext highlighter-rouge">redis://redis.example.com:7777/11</code>.</p>
+
+<p>If you’re on Heroku, set the <code class="language-plaintext highlighter-rouge">REDIS_PROVIDER</code> env var to the <strong>name</strong> of the env var containing the Redis server URL. 
+(Example with RedisCloud: set <code class="language-plaintext highlighter-rouge">REDIS_PROVIDER=REDISCLOUD_URL</code> and Sidekiq will use the value of the <code class="language-plaintext highlighter-rouge">REDISCLOUD_URL</code> env var when connecting to Redis.)</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>heroku config:set REDIS_PROVIDER=REDISCLOUD_URL
+</code></pre></div></div>
+
+<h2 id="using-an-initializer">Using an initializer</h2>
+
+<p>Prefer to use the ENV variables above. If you have to use logic in Ruby, you can configure Redis in the initializer. Note that to configure the location of Redis, you must define <em>both</em> the <code class="language-plaintext highlighter-rouge">Sidekiq.configure_server</code> and <code class="language-plaintext highlighter-rouge">Sidekiq.configure_client</code> blocks. To do this put the following code into <code class="language-plaintext highlighter-rouge">config/initializers/sidekiq.rb</code>.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">redis</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">url: </span><span class="s1">'redis://:password@redis.example.com:6379/0'</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_client</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">redis</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">url: </span><span class="s1">'redis://:password@redis.example.com:6379/0'</span> <span class="p">}</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>Unknown parameters are passed to the underlying Redis client so any parameters supported by the driver can go in the Hash. Keys can be strings or symbols and will be unified before being passed on to the Redis client.</p>
+
+<p>In 7.0, Sidekiq does not allow you to directly create your own connection pool anymore. Sidekiq creates and manages any connection pools internally. See the <a href="https://github.com/redis-rb/redis-client#configuration">redis-client docs</a> for the configuration options you can add to the <code class="language-plaintext highlighter-rouge">config.redis</code> hash.</p>
+
+<h2 id="life-in-the-cloud">Life in the Cloud</h2>
+
+<p>One problem with cloud-based systems like EC2 and Heroku can be multi-tenancy and unpredictable network performance.  You should tune your network and pool timeouts to be a little more lenient if you are seeing occasional timeout errors, it defaults to 1 second.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">config</span><span class="p">.</span><span class="nf">redis</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">url: </span><span class="s1">'redis://...'</span><span class="p">,</span> <span class="ss">network_timeout: </span><span class="mi">5</span><span class="p">,</span> <span class="ss">pool_timeout: </span><span class="mi">5</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>REMEMBER: THIS IS A BANDAID</strong> You are not solving the actual cause of the slow performance.</p>
+
+<p>If you are seeing Redis timeout errors, you should check your Redis latency by using the <code class="language-plaintext highlighter-rouge">redis-cli</code> <code class="language-plaintext highlighter-rouge">--latency</code> and <code class="language-plaintext highlighter-rouge">--latency-history</code> flags:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ redis-cli --latency-history localhost
+min: 0, max: 1, avg: 0.20 (1359 samples) -- 15.01 seconds range
+min: 0, max: 1, avg: 0.18 (1356 samples) -- 15.01 seconds range
+min: 0, max: 1, avg: 0.18 (1355 samples) -- 15.01 seconds range
+min: 0, max: 1, avg: 0.17 (1359 samples) -- 15.01 seconds range
+min: 0, max: 1, avg: 0.19 (1358 samples) -- 15.00 seconds range
+min: 0, max: 1, avg: 0.18 (1353 samples) -- 15.01 seconds range
+min: 0, max: 1, avg: 0.19 (1357 samples) -- 15.01 seconds range
+</code></pre></div></div>
+
+<p>This says my average latency to localhost is 0.2ms or 200 microseconds: excellent.  With users seeing odd Redis behavior, I regularly see setups with latency over 5 seconds: terrible.  You can move to a different Redis provider or run your own Redis server on a dedicated machine but there’s nothing Sidekiq can do if the network performance is terrible.  Contact your Redis provider and ask about your available options.</p>
+
+<h2 id="lockdown">Lockdown</h2>
+
+<p>If your IT organization insists on locking down Sidekiq’s Redis user, you can use this configuration as a starting point:</p>
+
+<blockquote>
+  <p>acl setuser sidekiquser +@all -@admin -@dangerous +info allkeys</p>
+</blockquote>
+
+<p>I believe those restrictions work with all Sidekiq functionality today.</p>
+
+<h2 id="client-naming">Client naming</h2>
+
+<p>If your Redis server supports it, you may instruct Sidekiq to use <code class="language-plaintext highlighter-rouge">CLIENT SETNAME</code> when establishing connections. This will make it easier to identify Sidekiq clients when debugging with <code class="language-plaintext highlighter-rouge">CLIENT LIST</code>.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">config</span><span class="p">.</span><span class="nf">redis</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">id: </span><span class="s2">"Sidekiq-server-PID-</span><span class="si">#{</span><span class="o">::</span><span class="no">Process</span><span class="p">.</span><span class="nf">pid</span><span class="si">}</span><span class="s2">"</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>This is disabled by default because many SaaS Redis hosts do not support it.</p>
+
+<h2 id="architecture">Architecture</h2>
+
+<p>Redis offers many different topologies:</p>
+
+<ul>
+  <li>Single node – offers no fault tolerence</li>
+  <li>Redis Sentinel – offers fault tolerence, fails over to a replica in case of primary failure</li>
+  <li>Redis Cluster – multi-master keyspace spread across many instances</li>
+</ul>
+
+<p>Cluster is designed for large-scale datasets, like caches, that can spread evenly across machines.  <strong>Cluster is NOT appropriate for Sidekiq</strong> as Sidekiq has a few very hot keys which are constantly changing (aka queues) and Cluster cannot guarantee high-performance transactions, necessary to keep your job system fast and consistent. I recommend using Sentinel or use a Redis SaaS which has built-in support for failover.</p>
+
+<h2 id="tuning">Tuning</h2>
+
+<p>You can see Redis’s config variables with the command <code class="language-plaintext highlighter-rouge">redis-cli info</code>.</p>
+
+<h2 id="scale">Scale</h2>
+
+<p>Customers have reported processing 20,000+ jobs/sec with a single Redis instance. Ensure you are running a recent version; Redis 6 has significant performance improvements with the <code class="language-plaintext highlighter-rouge">--io-threads</code> option.</p>
+
+<h2 id="memory">Memory</h2>
+
+<p>Redis runs best when all data fits in memory.  You should set <code class="language-plaintext highlighter-rouge">maxmemory-policy noeviction</code> in redis.conf so Redis doesn’t drop Sidekiq’s data silently.</p>
+
+<h2 id="multiple-redis-instances">Multiple Redis instances</h2>
+
+<p>Many people use <a href="http://redis.io/topics/lru-cache">Redis as a cache</a> (it works great as a <a href="http://guides.rubyonrails.org/caching_with_rails.html#activesupport-cache-rediscachestore">Rails cache store</a>) but it’s important that Sidekiq be run against a Redis instance that is <strong>not</strong> configured as a cache but as a persistent store.  I recommend using two separate Redis instances, each configured appropriately, if you wish to use Redis for caching and Sidekiq. Redis namespaces do not allow for this configuration and come with <a href="http://www.mikeperham.com/2015/09/24/storing-data-with-redis/">many other problems</a>, so using discrete Redis instances is always preferred.</p>
+
+<h2 id="timeouts">Timeouts</h2>
+
+<p>The most common reasons for Redis networking timeouts are:</p>
+
+<ol>
+  <li>CPU overload - you’ve configured your concurrency way too high and threads are starving for CPU time. Reduce your concurrency, create more processes.</li>
+  <li>swapping - you are running out of RAM and disk swapping is causing massive latency spikes.  Using Redis to hold cache data can take a lot of RAM, configure Sidekiq to use a separate Redis instance if necessary.</li>
+  <li>command latency - you are running a Redis command which is taking a large amount of time.  Read the Monitoring blog post below.</li>
+</ol>
+
+<h2 id="notes">Notes</h2>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">redis-cli --help</code> shows several useful options, including <code class="language-plaintext highlighter-rouge">--latency-history</code> and <code class="language-plaintext highlighter-rouge">--bigkeys</code>.</li>
+  <li><a href="https://github.com/sripathikrishnan/redis-rdb-tools">redis-rdb-tools</a> has a few options to introspect a dumped RDB file.</li>
+  <li><a href="http://www.mikeperham.com/2017/04/20/monitoring-redis/">Monitoring Redis</a> covers the most important things you should monitor when using Redis.</li>
+  <li><a href="https://www.datadoghq.com/pdf/Understanding-the-Top-5-Redis-Performance-Metrics.pdf">Datadog has a nice whitepaper on Redis internals and monitoring</a>.</li>
+  <li>BRPOPLPUSH and other B* commands are <strong>blocking</strong>; large latency spikes with them are <strong>normal</strong> and not a cause for concern.</li>
+</ul>
+
+<p>Previous: [[Best Practices]] Next: [[Error Handling]]</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

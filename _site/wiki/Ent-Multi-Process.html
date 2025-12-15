@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Ent Multi Process</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Sidekiq Enterprise has the ability to start and manage multiple Sidekiq child processes, like Unicorn or Puma.  With multi-process mode, you get several advantages:</p>
+
+<ol>
+  <li>modest memory savings by sharing memory between processes</li>
+  <li>running multiple processes on a single Heroku dyno, allowing you to minimize your dyno costs</li>
+  <li>easy to create a single service in Upstart or Systemd which scales to all machine cores</li>
+  <li>automated memory monitoring and restart for bloated child processes</li>
+</ol>
+
+<p>The term for running multi-process is <strong>swarm</strong>.  A swarm has a parent process and N child processes.</p>
+
+<h2 id="starting-a-swarm">Starting a Swarm</h2>
+
+<p>Sidekiq Enterprise provides a <code class="language-plaintext highlighter-rouge">sidekiqswarm</code> binary.  This binary is designed to run under Upstart, Systemd or Foreman as a service.  It does not allow old-style options like –daemonize, –logfile or –pidfile.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sidekiqswarm [options]
+
+Start and supervise a swarm of Sidekiq processes.
+All arguments are passed to each Sidekiq instance.
+
+You may not use the `-d`, `-L` or `-P` options.
+
+Use the SIDEKIQ_* environment variables to control sidekiqswarm.
+
+SIDEKIQ_COUNT	        Number of Sidekiq child processes to start, defaults to number of cores
+SIDEKIQ_MAXMEM_MB	Max RSS size in MB of child process before the parent will restart it
+SIDEKIQ_PRELOAD         Comma-separated list of Bundler groups to preload before forking
+SIDEKIQ_PRELOAD_APP	Preload application for increased memory savings
+
+Example:
+SIDEKIQ_COUNT=5 SIDEKIQ_MAXMEM_MB=300 bundle exec sidekiqswarm -r ./myworker.rb
+</code></pre></div></div>
+
+<h2 id="heroku">Heroku</h2>
+
+<p>Change <code class="language-plaintext highlighter-rouge">sidekiq</code> to <code class="language-plaintext highlighter-rouge">sidekiqswarm</code> in your Procfile:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>worker: SIDEKIQ_MAXMEM_MB=1700 bundle exec sidekiqswarm
+</code></pre></div></div>
+
+<p>Add a <code class="language-plaintext highlighter-rouge">SIDEKIQ_MAXMEM_MB</code> variable like above if you want to gracefully restart bloated Sidekiq processes. If you are using <code class="language-plaintext highlighter-rouge">-c</code>, do not set it higher than 10.</p>
+
+<p>Note the swarm feature is not useful on 1x and 2x dynos which don’t have enough memory to run multiple large app processes. It has a HUGE positive impact on Performance-L dynos because P-L dynos have eight CPUs: a Sidekiq process will only utilize 12.5% of a P-L dyno whereas swarm will utilize 100%. Since P-L dynos have 8 cores and 14GB of memory, note SIDEKIQ_MAXMEM_MB: <code class="language-plaintext highlighter-rouge">8 * 1700MB ~= 14GB</code></p>
+
+<h2 id="running-via-init">Running via init</h2>
+
+<h3 id="systemd">systemd</h3>
+
+<p>Sidekiq has a <a href="/sidekiq/sidekiq/blob/main/examples/systemd/sidekiq.service">sample systemd unit file here</a>.  Starting sidekiqswarm instead is almost identical, just update the <code class="language-plaintext highlighter-rouge">ExecStart</code> line and configure the environment as necessary:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># if you want to override the default number of processes
+Environment=SIDEKIQ_COUNT=2
+ExecStart=/usr/local/bin/bundle exec sidekiqswarm -e production
+</code></pre></div></div>
+
+<h2 id="signals-and-controlling-a-swarm">Signals and Controlling a Swarm</h2>
+
+<p>Use the standard upstart and systemd tools to manage the service for your swarm, e.g. <code class="language-plaintext highlighter-rouge">systemctl restart sidekiq</code>.</p>
+
+<p>You can send the USR2, TERM and TSTP signals to the parent process and it will pass those signals to the underlying children.  Once the parent process has received USR2, TSTP or TERM, it will not spawn any more children; it must be restarted.  The parent process does not handle the TTIN signal.</p>
+
+<h2 id="bundler-preload">Bundler Preload</h2>
+
+<p>Sidekiq forks the child processes after running <code class="language-plaintext highlighter-rouge">Bundler.require(:default)</code> so the children can share the memory consumed by loading the gems.  Your Gemfile should eager load gems where possible; using <code class="language-plaintext highlighter-rouge">gem 'something', require: false</code> in your Gemfile will limit any memory savings.</p>
+
+<p>If you find that sidekiqswarm’s default Bundler require is breaking your app on boot, you can control which groups get preloaded or disable preload completely:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># preload both the default and production groups
+SIDEKIQ_PRELOAD=default,production bundle exec sidekiqswarm ...
+# disable gem preload completely
+SIDEKIQ_PRELOAD= bundle exec sidekiqswarm ...
+</code></pre></div></div>
+
+<p>The most frequent reason why preload breaks is if a gem requires Rails to already be loaded when it is required. You can fix this by preloading Rails explicitly:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gem</span> <span class="s2">"rails"</span><span class="p">,</span> <span class="ss">require: </span><span class="s2">"rails/all"</span>
+</code></pre></div></div>
+
+<p>This supercedes the require at the top of <code class="language-plaintext highlighter-rouge">config/application.rb</code>. See
+<a href="/sidekiq/sidekiq/issues/4766">#4766</a> for a discussion on preload breakage.</p>
+
+<h2 id="application-preload">Application Preload</h2>
+
+<p>As of Sidekiq Enterprise 2.1.1, <code class="language-plaintext highlighter-rouge">sidekiqswarm</code> can preload your entire application before forking each child process, leading to substantial memory savings (20-30% is not uncommon). App preload can be dangerous so it is opt-in.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SIDEKIQ_PRELOAD_APP=1 bundle exec sidekiqswarm ...
+</code></pre></div></div>
+
+<p>If your application initializers use network connections, spawn threads or create shared Mutexes, this can lead to problems. You can define “after fork” callbacks to clean up these resources, e.g.:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="ss">:fork</span><span class="p">)</span> <span class="k">do</span>
+    <span class="c1"># re-open a socket</span>
+    <span class="c1"># respawn a thread</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p><strong>Note</strong>: Connection pools from <code class="language-plaintext highlighter-rouge">connection_pool</code> v2.4+ are fork-safe and do not need any special logic. Rails’s ActiveRecord connection pools are fork-safe as of v5.2.</p>
+
+<p>If you see weird behavior with preload enabled and normal behavior without it, search the issues and open a new issue if you don’t find anything relevant, we’ll help you out.</p>
+
+<h2 id="memory-monitoring">Memory Monitoring</h2>
+
+<p>The parent process can watch all children and restart any that get above a certain memory usage.  Set the <code class="language-plaintext highlighter-rouge">SIDEKIQ_MAXMEM_MB</code> environment variable with the maximum memory in megabytes.  If a child goes over that limit, the parent will detect it and do the following:</p>
+
+<ol>
+  <li>Send USR2 to child</li>
+  <li>Child will stop fetching new jobs, finish existing jobs and exit (this is the rolling restart feature)</li>
+  <li>Parent waits for the child to exit and forks a new child</li>
+</ol>
+
+<p>Please see the [[Problems and Troubleshooting]] page for more tips on taming process bloat.</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

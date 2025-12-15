@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Logging</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Sidekiq is a multi-threaded system which means you have a lot of things happening concurrently.  To make for easier debugging in that type of environment, Sidekiq uses a custom logger which outputs additional information:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>UTC Timestamp----------- PID------ Thread----- JobType--------- JID------------------------- More...
+2019-08-31T15:36:07.569Z pid=82859 tid=11cy9br class=HardWorker jid=528f1b0ddc4a9d0690464fe4 INFO: start
+2019-08-31T15:36:07.573Z pid=82859 tid=119pz7z class=HardWorker jid=b7f805c545c78770d30dc1fd elapsed=0.089 INFO: done
+2019-08-31T15:36:07.573Z pid=82859 tid=119pz7z class=HardWorker jid=16925b0f545a15a75d391f3b INFO: start
+2019-08-31T15:36:07.576Z pid=82859 tid=119py7b class=HardWorker jid=398d4bc5563b1f1b4cce846d elapsed=0.089 INFO: done
+2019-08-31T15:36:07.585Z pid=82859 tid=11cy98z class=HardWorker jid=fe849e00b8371b33a1e8f16f elapsed=0.081 INFO: done
+2019-08-31T15:36:07.586Z pid=82859 tid=119puzr class=HardWorker jid=7cdac3a6c25d13233bfb3f00 elapsed=0.076 INFO: done
+2019-08-31T15:36:07.587Z pid=82859 tid=11cy8t7 class=HardWorker jid=ec7e77e8b1013659469d96fa elapsed=0.072 INFO: done
+</code></pre></div></div>
+
+<p>The Sidekiq process logs only to STDOUT. <a href="https://www.mikeperham.com/2014/09/22/dont-daemonize-your-daemons/">This is the way modern daemons should work</a>.</p>
+
+<p>All timestamps are in UTC. Timezones suck.</p>
+
+<h2 id="logger">Logger</h2>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">logger</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Logger</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="vg">$stdout</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>I recommend you log to STDOUT and let systemd or your process manager collect and rotate the log output. Don’t replace Sidekiq’s logger just to log directly to a file.</p>
+
+<h2 id="writing-to-the-log">Writing to the log</h2>
+
+<p>Jobs can use <code class="language-plaintext highlighter-rouge">logger</code>.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">YourJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">info</span> <span class="s2">"Things are happening."</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">debug</span> <span class="p">{</span> <span class="s2">"My args: </span><span class="si">#{</span><span class="n">args</span><span class="p">.</span><span class="nf">inspect</span><span class="si">}</span><span class="s2">"</span> <span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="log-redirection">Log Redirection</h2>
+
+<p>As of Sidekiq 6.0, Sidekiq does not directly support log redirection.  Your process manager should have a way to redirect log output or you can use redirection via shell to redirect Sidekiq’s output to the <code class="language-plaintext highlighter-rouge">logger</code> UNIX command to send it to syslog with a ‘sidekiq’ tag (ideally this should be done via systemd instead).</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle exec sidekiq 2&gt;&amp;1 | logger -t sidekiq
+</code></pre></div></div>
+
+<p>This will not work correctly with Upstart. If using Upstart, <a href="https://github.com/sidekiq/sidekiq/issues/2957">take a
+look at this issue</a>.</p>
+
+<h2 id="default-logger-and-verboseness">Default logger and verboseness</h2>
+
+<p>Sidekiq defaults to using Ruby’s standard <a href="https://docs.ruby-lang.org/en/3.4/Logger.html"><code class="language-plaintext highlighter-rouge">Logger</code></a>.</p>
+
+<p>In production environments, a log level of <code class="language-plaintext highlighter-rouge">INFO</code> may be too verbose for your needs. For quieter logs that use less disk space, you can change the log level to only show <code class="language-plaintext highlighter-rouge">WARN</code> and higher:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">logger</span><span class="p">.</span><span class="nf">level</span> <span class="o">=</span> <span class="no">Logger</span><span class="o">::</span><span class="no">WARN</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="per-worker-log-level">Per worker log level</h2>
+
+<p>If you need to adjust the log level for a specific worker:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">YourJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+
+  <span class="n">sidekiq_options</span> <span class="ss">log_level: :warn</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="output-format">Output Format</h2>
+
+<p>Sidekiq’s logger has configurable formatters; you can enable the optional JSON format if, for example, you are sending log output to Elasticache for indexing:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">logger</span><span class="p">.</span><span class="nf">formatter</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Logger</span><span class="o">::</span><span class="no">Formatters</span><span class="o">::</span><span class="no">JSON</span><span class="p">.</span><span class="nf">new</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Results:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ bundle exec sidekiq
+{"ts":"2019-09-01T22:34:59.778Z","pid":90069,"tid":"104v8ph","lvl":"INFO","msg":"Running in ruby 2.5.1p57 (2018-03-29 revision 63029) [x86_64-darwin17]"}
+{"ts":"2019-09-01T22:34:59.778Z","pid":90069,"tid":"104v8ph","lvl":"INFO","msg":"See LICENSE and the LGPL-3.0 for licensing details."}
+{"ts":"2019-09-01T22:34:59.778Z","pid":90069,"tid":"104v8ph","lvl":"INFO","msg":"Upgrade to Sidekiq Pro for more features and support: http://sidekiq.org"}
+{"ts":"2019-09-01T22:34:59.778Z","pid":90069,"tid":"104v8ph","lvl":"INFO","msg":"Booting Sidekiq 6.0.0 with redis options {:id=&gt;\"Sidekiq-server-PID-90069\", :url=&gt;nil}"}
+{"ts":"2019-09-01T22:34:59.807Z","pid":90069,"tid":"104v8ph","lvl":"INFO","msg":"Starting processing, hit Ctrl-C to stop"}
+</code></pre></div></div>
+
+<p>See <code class="language-plaintext highlighter-rouge">sidekiq/logger</code> for implementation details. To define a custom log format, for example one that changes the JSON keys, add the following to your Sidekiq configuration file:</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">Sidekiq</span>
+  <span class="k">class</span> <span class="nc">Logger</span> <span class="o">&lt;</span> <span class="o">::</span><span class="no">Logger</span>
+    <span class="k">module</span> <span class="nn">Formatters</span>
+      <span class="k">class</span> <span class="nc">CustomJson</span> <span class="o">&lt;</span> <span class="no">Base</span>
+        <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">severity</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">program_name</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+          <span class="nb">hash</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">'@timestamp'</span><span class="p">:</span> <span class="n">time</span><span class="p">.</span><span class="nf">utc</span><span class="p">.</span><span class="nf">iso8601</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+            <span class="ss">pid: </span><span class="o">::</span><span class="no">Process</span><span class="p">.</span><span class="nf">pid</span><span class="p">,</span>
+            <span class="ss">tid: </span><span class="n">tid</span><span class="p">,</span>
+            <span class="ss">level: </span><span class="n">severity</span><span class="p">,</span>
+            <span class="ss">message: </span><span class="n">message</span><span class="p">,</span>
+            <span class="ss">origin: </span><span class="s2">"sidekiq"</span><span class="p">,</span>
+          <span class="p">}</span>
+          <span class="n">c</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Context</span><span class="p">.</span><span class="nf">current</span>
+          <span class="nb">hash</span><span class="p">[</span><span class="s2">"ctx"</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span> <span class="k">unless</span> <span class="n">c</span><span class="p">.</span><span class="nf">empty?</span>
+          <span class="no">Sidekiq</span><span class="p">.</span><span class="nf">dump_json</span><span class="p">(</span><span class="nb">hash</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c1"># ...</span>
+
+<span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">logger</span> <span class="o">=</span> <span class="no">Logger</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="no">STDOUT</span><span class="p">)</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">logger</span><span class="p">.</span><span class="nf">formatter</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Logger</span><span class="o">::</span><span class="no">Formatters</span><span class="o">::</span><span class="no">CustomJson</span><span class="p">.</span><span class="nf">new</span>
+  <span class="c1"># other config here</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="skipping-default-job-logging">Skipping default job logging</h2>
+
+<p>As of v7.3.0, you can skip Sidekiq’s default start/finish job logging.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">[</span><span class="ss">:skip_default_job_logging</span><span class="p">]</span> <span class="o">=</span> <span class="kp">true</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="backtrace-cleaning">Backtrace Cleaning</h2>
+
+<p>You can provide a backtrace cleaner for any backtraces which go through Sidekiq’s global exception handlers like this:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">[</span><span class="ss">:backtrace_cleaner</span><span class="p">]</span> <span class="o">=</span> <span class="o">-&gt;</span><span class="p">(</span><span class="n">bt</span><span class="p">)</span> <span class="p">{</span> <span class="n">bt</span><span class="p">[</span><span class="mi">0</span><span class="o">..</span><span class="mi">5</span><span class="p">]</span> <span class="p">}</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="api-changes">API Changes</h2>
+
+<p>The old <code class="language-plaintext highlighter-rouge">Sidekiq::Logging</code> class was removed in Sidekiq 6.0.  You should not be accessing any Sidekiq internal classes to use the logger.  Use <code class="language-plaintext highlighter-rouge">logger</code> directly in your jobs or use <code class="language-plaintext highlighter-rouge">Sidekiq.logger</code> elsewhere.</p>
+
+<p>Previous: [[Middleware]] Next: [[Signals]]</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Really Complex Workflows with Batches</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Sidekiq Pro’s Batches feature can handle job workflows of any complexity.  This page shows how to implement a  complex workflow given to me by one Sidekiq Pro customer.</p>
+
+<p>The workflow looks like this, where jobs are blue circles and orange boxes hold jobs which can execute in parallel.  All jobs within a orange box must succeed before the workflow can move “down”.</p>
+
+<p><img src="https://raw.githubusercontent.com/sidekiq/sidekiq/main/examples/complex_batch_workflow.svg" alt="complex workflow" /></p>
+
+<p>Let’s call this workflow the Order workflow.  Perhaps it represents the series of steps necessary to ship a customer’s order.</p>
+
+<p>First of all, we’re going to create an overall Batch to represent the entire workflow and then create a child batch to represent the first step in the workflow.  That child batch will use a success callback to schedule step 2 in the workflow:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">order</span> <span class="o">=</span> <span class="o">...</span>
+<span class="n">overall</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">overall</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="ss">:success</span><span class="p">,</span> <span class="s1">'FulfillmentCallbacks#shipped'</span><span class="p">,</span> <span class="s1">'oid'</span> <span class="o">=&gt;</span> <span class="n">order</span><span class="p">.</span><span class="nf">id</span><span class="p">)</span>
+<span class="n">overall</span><span class="p">.</span><span class="nf">description</span> <span class="o">=</span> <span class="s2">"Fulfillment for Order </span><span class="si">#{</span><span class="n">order</span><span class="p">.</span><span class="nf">id</span><span class="si">}</span><span class="s2">"</span>
+<span class="n">overall</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+  <span class="no">StartWorkflow</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="n">order</span><span class="p">.</span><span class="nf">id</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">StartWorkflow</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="n">order_id</span><span class="p">)</span>
+    <span class="n">batch</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+      <span class="n">step1</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span>
+      <span class="n">step1</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="ss">:success</span><span class="p">,</span> <span class="s1">'FulfillmentCallbacks#step1_done'</span><span class="p">,</span> <span class="s1">'oid'</span> <span class="o">=&gt;</span> <span class="n">order_id</span><span class="p">)</span>
+      <span class="n">step1</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+        <span class="no">A</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="n">order_id</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Note that we create a StartWorkflow job in the overall batch which creates Step 1 batch.  This is because all batches <strong>must</strong> have one job to be valid, otherwise their behavior is not defined.  That one job can create further child batches with their own jobs.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">FulfillmentCallbacks</span>
+  <span class="k">def</span> <span class="nf">step1_done</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="n">oid</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">'oid'</span><span class="p">]</span>
+    <span class="n">overall</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">status</span><span class="p">.</span><span class="nf">parent_bid</span><span class="p">)</span>
+    <span class="n">overall</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+      <span class="n">step2</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span>
+      <span class="n">step2</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="ss">:success</span><span class="p">,</span> <span class="s1">'FulfillmentCallbacks#step2_done'</span><span class="p">,</span> <span class="s1">'oid'</span> <span class="o">=&gt;</span> <span class="n">oid</span><span class="p">)</span>
+      <span class="n">step2</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+        <span class="no">B</span><span class="p">.</span><span class="nf">perform_async</span>
+        <span class="no">C</span><span class="p">.</span><span class="nf">perform_async</span>
+        <span class="no">D</span><span class="p">.</span><span class="nf">perform_async</span>
+        <span class="no">E</span><span class="p">.</span><span class="nf">perform_async</span>
+        <span class="no">F</span><span class="p">.</span><span class="nf">perform_async</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">step2_done</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="n">oid</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">'oid'</span><span class="p">]</span>
+    <span class="n">overall</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">status</span><span class="p">.</span><span class="nf">parent_bid</span><span class="p">)</span>
+    <span class="n">overall</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+      <span class="n">step3</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span>
+      <span class="n">step3</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="ss">:success</span><span class="p">,</span> <span class="s1">'FulfillmentCallbacks#step3_done'</span><span class="p">,</span> <span class="s1">'oid'</span> <span class="o">=&gt;</span> <span class="n">oid</span><span class="p">)</span>
+      <span class="n">step3</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+        <span class="no">G</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="n">oid</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">step3_done</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="n">oid</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">'oid'</span><span class="p">]</span>
+    <span class="n">overall</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">status</span><span class="p">.</span><span class="nf">parent_bid</span><span class="p">)</span>
+    <span class="n">overall</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+      <span class="n">step4</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span>
+      <span class="n">step4</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="ss">:success</span><span class="p">,</span> <span class="s1">'FulfillmentCallbacks#step4_done'</span><span class="p">,</span> <span class="s1">'oid'</span> <span class="o">=&gt;</span> <span class="n">oid</span><span class="p">)</span>
+      <span class="n">step4</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+        <span class="no">H</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="n">oid</span><span class="p">)</span>
+        <span class="no">I</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="n">oid</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">step4_done</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="n">oid</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">'oid'</span><span class="p">]</span>
+    <span class="n">overall</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">status</span><span class="p">.</span><span class="nf">parent_bid</span><span class="p">)</span>
+    <span class="n">overall</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+      <span class="no">J</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="n">oid</span><span class="p">)</span>
+      <span class="no">K</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="n">oid</span><span class="p">)</span>
+      <span class="no">L</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="n">oid</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">shipped</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="c1"># this callback will fire once M has succeeded</span>
+    <span class="n">oid</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">'oid'</span><span class="p">]</span>
+    <span class="nb">puts</span> <span class="s2">"Order </span><span class="si">#{</span><span class="n">oid</span><span class="si">}</span><span class="s2"> has shipped!"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">L</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="n">oid</span><span class="p">)</span>
+    <span class="c1"># do stuff</span>
+    <span class="k">if</span> <span class="n">bid</span>
+      <span class="c1"># if we belong to a batch, assume we're within the fulfillment workflow</span>
+      <span class="c1"># and need to kick off job M</span>
+      <span class="n">batch</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+        <span class="no">M</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="n">oid</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>In this manner, we can implement serial steps in the workflow, with the jobs in each step executing in parallel.</p>
+
+<h2 id="tips">Tips</h2>
+
+<p>Using the Batch API can be complex, these tips can help you avoid some of the more insidious gotchas.</p>
+
+<h3 id="adding-jobs-to-the-current-batch-and-child-batches-to-a-parent-batch">Adding jobs to the current batch and child batches to a parent batch</h3>
+
+<ul>
+  <li>Once a batch is created, you cannot edit it except to add more jobs to it.  Jobs can only be dynamically added to a Batch within another job in that Batch.</li>
+  <li>Callbacks should never, ever change the associated batch.  Notably you cannot add more jobs to the Batch once its callbacks are running.  Callbacks are fired when all jobs have executed, what does it mean to add more jobs now?</li>
+</ul>
+
+<p>Adding more jobs to the current batch:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">some_condition</span>
+    <span class="c1"># Sidekiq::Job#bid and #batch are methods which give you access </span>
+    <span class="c1"># to the current BID and batch for this job. Use the lonely operator</span>
+    <span class="c1"># to optionally fire another job if some_condition is truthy.</span>
+    <span class="n">batch</span><span class="o">&amp;</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+      <span class="no">AnotherWorker</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Once a step in a workflow is complete, it’s idiomatic to reopen the <strong>parent</strong> batch within a callback and add another step to that workflow.  This is how we get sequential execution (“don’t execute this job until these 3 jobs are complete”).</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">step1_done</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+  <span class="n">parent</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">status</span><span class="p">.</span><span class="nf">parent_bid</span><span class="p">)</span>
+  <span class="n">parent</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+    <span class="c1"># add a new child batch which represents all the jobs</span>
+    <span class="c1"># necessary for Step 2, the batch picks up its parent </span>
+    <span class="c1"># automatically since it is defined within the parent's `jobs`.</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span>
+    <span class="n">b</span><span class="p">.</span><span class="nf">description</span> <span class="o">=</span> <span class="s2">"Step 2"</span>
+    <span class="n">b</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="ss">:success</span><span class="p">,</span> <span class="s1">'SomeClass#step2_done'</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="n">b</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+      <span class="no">MoreWork</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p><strong>Rule of thumb: jobs only open their own batch, callbacks only open their parent batch.</strong></p>
+
+<h3 id="ordering-of-callbacks-between-parent-and-child-batches">Ordering of callbacks between parent and child batches</h3>
+
+<p>Complete and success callbacks do not provide any causality guarantees between the two.</p>
+
+<ul>
+  <li>Child <code class="language-plaintext highlighter-rouge">success</code> always runs before parent <code class="language-plaintext highlighter-rouge">success</code>.</li>
+  <li>Child <code class="language-plaintext highlighter-rouge">complete</code> always runs before parent <code class="language-plaintext highlighter-rouge">complete</code>.</li>
+  <li>There is no such guarantee that child <code class="language-plaintext highlighter-rouge">success</code> always runs before parent <code class="language-plaintext highlighter-rouge">complete</code>.</li>
+</ul>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

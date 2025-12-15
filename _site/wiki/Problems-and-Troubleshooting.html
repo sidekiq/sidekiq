@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Problems and Troubleshooting</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><h1 id="help">Help!</h1>
+
+<p>Read below for tips.  If you still need help, you can:</p>
+
+<ul>
+  <li>Ask your question in <a href="https://groups.google.com/forum/#!forum/sidekiq">The Sidekiq Google Group</a></li>
+  <li><a href="../issues/new">Open a GitHub issue</a>.  (Don’t be afraid to open an issue, even if it’s not a Sidekiq bug.  An issue is just a conversation, not an accusation!)</li>
+</ul>
+
+<p>You <strong>should not</strong> email any Sidekiq committer privately.  Please respect our time and efforts by sticking to one of the two above.  Remember also that Sidekiq is free, open source software: support is not guaranteed, it’s best effort according to the availability of the Sidekiq committers.  Sidekiq Pro and Enterprise customers get guaranteed support.</p>
+
+<h1 id="threading">Threading</h1>
+
+<p>Sidekiq is multithreaded so your jobs must be thread-safe.</p>
+
+<h2 id="use-only-thread-safe-libraries">Use only thread-safe libraries!</h2>
+
+<p>Most popular Rubygems are thread-safe in my experience.  A few exceptions to this rule…</p>
+
+<h3 id="thread-unsafe-gems-do-not-use">Thread-unsafe gems, do not use:</h3>
+
+<ul>
+  <li>therubyracer <a href="https://github.com/cowboyd/therubyracer/issues/270">#270</a>, try mini_racer instead</li>
+</ul>
+
+<p>Some gems can be troublesome:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">scout_apm</code>: <code class="language-plaintext highlighter-rouge">bundle up scout_apm</code> to get a fixed version.</li>
+  <li>RMagick (see <a href="../issues/338">#338</a>, try mini_magick instead)</li>
+  <li>mail (use <code class="language-plaintext highlighter-rouge">Mail.eager_autoload!</code> per https://github.com/mikel/mail/issues/912)</li>
+  <li><code class="language-plaintext highlighter-rouge">oj</code> and <code class="language-plaintext highlighter-rouge">yajl-ruby</code> both have compatibility issues with <code class="language-plaintext highlighter-rouge">json</code> that
+can <a href="/sidekiq/sidekiq/issues/4751">break Sidekiq</a>.</li>
+  <li>In Rails 6.0, <a href="https://github.com/rails/rails/issues/36810">ActionText can lock up Sidekiq</a>. It is fixed in Rails 6.1 but has not been backported as of Rails 6.0.3.5.</li>
+</ul>
+
+<h2 id="writing-thread-safe-code">Writing thread-safe code</h2>
+
+<p>Well-factored code is typically thread-safe without any changes. Use instance variables and methods, never use class variables. Require all necessary classes on startup so you aren’t requiring code while executing jobs.</p>
+
+<h2 id="executing-child-processes">Executing child processes</h2>
+
+<p>Shelling out to an external program is a common need for things like PDF or image processing but can be very tricky to get right. I suggest using a gem like <a href="https://rubygems.org/gems/childprocess">childprocess</a> or <a href="https://rubygems.org/gems/posix-spawn">posix_spawn</a> to help with this. Make sure you add timeouts to the commands – no one likes debugging a hung job.</p>
+
+<h2 id="add-timeouts-to-everything">Add Timeouts to Everything</h2>
+
+<p>If Sidekiq or a job is hanging, it’s often due to a lack of timeouts.  Step 1: use the TTIN signal to get backtraces from Sidekiq, deciphering the output will give you a good idea of what’s wrong.  Step 2: use the <a href="https://github.com/ankane/the-ultimate-guide-to-ruby-timeouts">Ultimate Guide to Ruby Timeouts</a> to add timeouts where necessary.</p>
+
+<p>Don’t use Ruby’s <code class="language-plaintext highlighter-rouge">Timeout</code> module. You can get <a href="http://www.mikeperham.com/2015/05/08/timeout-rubys-most-dangerous-api">mysterious stuck or hung processes</a> randomly.</p>
+
+<h2 id="autoloading">Autoloading</h2>
+
+<p>Rails autoloading and eager loading is a frequent cause of problems but remember that all Sidekiq does is boot Rails.  If you have a problem, it’s between <strong>your code and Rails</strong> and Rails is about <strong>convention over configuration</strong>.  If you follow the Rails code loading conventions in laying out your classes, your code should load correctly.  <strong><a href="http://guides.rubyonrails.org/autoloading_and_reloading_constants.html">Read and learn the Rails conventions</a></strong> for code loading and follow them.</p>
+
+<p>Some tips:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Foo::Bar</code> goes in app/models/foo/bar.rb and should be defined in expanded form like:
+    <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">Foo</span>
+<span class="k">class</span> <span class="nc">Bar</span>
+</code></pre></div>    </div>
+  </li>
+  <li>Don’t configure extra paths in autoload_paths or eager_load_paths.  That’s a hack; follow the conventions!
+Any directory underneath <code class="language-plaintext highlighter-rouge">app/</code> may contain Ruby code, you don’t need to explicitly configure anything.</li>
+  <li>A <code class="language-plaintext highlighter-rouge">lib/</code> directory will only cause pain.  Move the code to <code class="language-plaintext highlighter-rouge">app/lib/</code> and make sure the code inside follows the class/filename conventions.</li>
+  <li>See <a href="https://guides.rubyonrails.org/autoloading_and_reloading_constants_classic_mode.html#common-gotchas">common gotchas</a>.</li>
+  <li>See <a href="https://stackoverflow.com/a/37412823/6962">more details about the issues with autoloading and thread-safety in Rails</a>.</li>
+  <li>Enable <a href="https://guides.rubyonrails.org/v6.1.0/autoloading_and_reloading_constants.html#troubleshooting">Zeitwerk and turn on logging</a> to debug loading issues.</li>
+</ul>
+
+<p>Please don’t open a Sidekiq issue for a code loading problem unless you can point to a bug in Sidekiq.</p>
+
+<h3 id="sidekiq-loses-jobs-on-deployment">Sidekiq loses jobs on deployment</h3>
+
+<p>This is frequently due to using a bash script to start Sidekiq:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+
+<span class="nv">SIDEKIQ_PRELOAD</span><span class="o">=</span> bundle <span class="nb">exec </span>sidekiqswarm
+</code></pre></div></div>
+
+<p>Bash <strong>does not forward signals to child processes by default</strong> so this process will never get TERM in order to shutdown gracefully! You must use <code class="language-plaintext highlighter-rouge">exec</code> (or more complex Bash code using <code class="language-plaintext highlighter-rouge">trap</code> and <code class="language-plaintext highlighter-rouge">wait</code>) to receive signals:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+
+<span class="nb">exec env </span><span class="nv">SIDEKIQ_PRELOAD</span><span class="o">=</span> bundle <span class="nb">exec </span>sidekiqswarm
+</code></pre></div></div>
+
+<h3 id="job-status-polling-works-in-development-not-in-production">Job status polling works in development, not in production</h3>
+
+<p>If you poll your model periodically (say, from an ajax request) to determine when your background job has completed, and your background completes in less than a second, you may run into an issue where your job polling logic works in development mode but sporadically in production.</p>
+
+<p>This may be caused by rails’ use of <code class="language-plaintext highlighter-rouge">Rails.cache</code>. By default, <code class="language-plaintext highlighter-rouge">Model.cache_key</code> is only precise to the second. Updates that start and finish during the same second may cause your status polling to return a stale record. In databases that support sub-second time values (such as postgres), set <code class="language-plaintext highlighter-rouge">config.active_record.cache_timestamp_format = :nsec</code> in <code class="language-plaintext highlighter-rouge">config/application.rb</code> to increase the cache precision and avoid stale records.</p>
+
+<h3 id="cannot-find-modelname-with-id12345">“Cannot find ModelName with ID=12345”</h3>
+
+<p>Sidekiq is so fast that it is quite easy to get transactional race conditions where a job will try to access a database record that has not committed yet. One solution is to use an <code class="language-plaintext highlighter-rouge">after_commit</code> callback:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">after_commit</span> <span class="ss">:greet</span><span class="p">,</span> <span class="ss">on: :create</span>
+
+  <span class="k">def</span> <span class="nf">greet</span>
+    <span class="no">UserMailer</span><span class="p">.</span><span class="nf">delay</span><span class="p">.</span><span class="nf">send_welcome_email</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="nf">id</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>You can also enable <a href="Advanced-Options#transactional-push">transactional push</a> so jobs are only enqueued upon commit.</p>
+
+<p>It’s a bit of a hack, but you can also schedule the job to run in a few seconds so the transaction has time to commit:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">MyWorker</span><span class="p">.</span><span class="nf">perform_in</span><span class="p">(</span><span class="mi">5</span><span class="p">.</span><span class="nf">seconds</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Either way, Sidekiq’s retry mechanism’s got your back.  The first time might fail with RecordNotFound but the retry will succeed.</p>
+
+<h3 id="heroku-err-max-number-of-clients-reached">Heroku “ERR max number of clients reached”</h3>
+
+<p>You’ve hit the max number of Redis connections allowed by your plan.</p>
+
+<p>Limit the number of redis connections per process in config/sidekiq.yml. For example, if you’re on Redis To Go’s free Nano plan and want to use the Sidekiq web client, you’ll have to set the concurrency down to 3.</p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">:concurrency:  </span><span class="m">3</span>
+</code></pre></div></div>
+
+<p>See <a href="https://github.com/sidekiq/sidekiq/issues/117">#117</a> for a discussion on the topic.  See <a href="http://manuelvanrijn.nl/sidekiq-heroku-redis-calc/">this calculator</a> which can help you determine the right sizing for you.</p>
+
+<h2 id="sidekiq-web-is-not-reachable-and-rails-returns-an-actioncontrollerroutingerror">Sidekiq Web is not reachable, and Rails returns an ActionController::RoutingError</h2>
+
+<p>Sidekiq::Web is built over Rack::Builder. It uses Rack::URLMap to map endpoints.
+URLMap performs a <a href="https://github.com/rack/rack/blob/master/lib/rack/urlmap.rb#L54">check</a> between SERVER_NAME and HTTP_HOST headers.</p>
+
+<p>You must be sure that your webserver send you the same value in SERVER_NAME and HTTP_HOST.
+Nginx, for example may be using the <a href="http://nginx.org/en/docs/http/server_names.html">catch-all</a> config instead of setting SERVER_NAME to $http_host.
+Heroku is already sending the good header.</p>
+
+<h2 id="sending-email-leads-to-lots-of-stuck-jobs-on-the-busy-tab">Sending email leads to lots of “stuck” jobs on the Busy tab</h2>
+
+<p><a href="https://github.com/rails/rails/pull/41248">Rails 6.1 and earlier</a> did not put network timeouts on SMTP connections. A honeypot or malicious SMTP server can lead to lingering network connections and idle jobs. Add this to an initializer:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># gem "mail", "&gt;= 2.7.0"</span>
+<span class="no">Mail</span><span class="o">::</span><span class="no">SMTP</span><span class="o">::</span><span class="no">DEFAULTS</span><span class="p">[</span><span class="ss">:read_timeout</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="no">Mail</span><span class="o">::</span><span class="no">SMTP</span><span class="o">::</span><span class="no">DEFAULTS</span><span class="p">[</span><span class="ss">:open_timeout</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
+</code></pre></div></div>
+
+<p>Always <a href="https://github.com/ankane/the-ultimate-guide-to-ruby-timeouts">put timeouts</a> on every network connection.</p>
+
+<h2 id="the-threads-are-not-processing-jobs">The threads are not processing jobs</h2>
+
+<p>If you enable autoloading in production, Sidekiq will lock up. Code reloading is for development only. In <code class="language-plaintext highlighter-rouge">config/environments/production.rb</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">config</span><span class="p">.</span><span class="nf">cache_classes</span> <span class="o">=</span> <span class="kp">true</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">eager_load</span> <span class="o">=</span> <span class="kp">true</span>
+</code></pre></div></div>
+
+<p>Another common problem is that you might have defined a namespace in <code class="language-plaintext highlighter-rouge">Sidekiq.configure_server</code> but not in <code class="language-plaintext highlighter-rouge">Sidekiq.configure_client</code> or named it something else. Make sure you configure both!</p>
+
+<p>Another issue that some have experienced is caused by <code class="language-plaintext highlighter-rouge">rspec-sidekiq</code>. You need to make sure that <code class="language-plaintext highlighter-rouge">rspec-sidekiq</code> is under the <code class="language-plaintext highlighter-rouge">test</code> group <strong>ONLY</strong> :</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">group</span> <span class="ss">:test</span> <span class="k">do</span>
+  <span class="n">gem</span> <span class="s1">'rspec-sidekiq'</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Related stackoverflow question can be found at <a href="http://stackoverflow.com/a/17065723/1965817">http://stackoverflow.com/a/17065723/1965817</a></p>
+
+<h2 id="cannot-get-database-connection-within-500-seconds">Cannot get database connection within 5.00 seconds</h2>
+
+<p>If your ActiveRecord connection pool size is smaller than Sidekiq’s concurrency, you can easily get connection checkout timeouts.  You need to make sure your <code class="language-plaintext highlighter-rouge">config/database.yml</code>’s <code class="language-plaintext highlighter-rouge">pool</code> attribute is equal to Sidekiq’s concurrency.  Remember that database.yml may contain ERB so you can do this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pool: &lt;%= ENV['RAILS_MAX_THREADS'] || Sidekiq.options[:concurrency] %&gt;
+</code></pre></div></div>
+
+<p>Here’s a great Youtube video (and <a href="https://judoscale.com/blog/active-record-connection-pool">blog post</a>) from @adamlogic on how to resolve these errors:</p>
+
+<p><a href="https://www.youtube.com/watch?v=XOfELjqm188" title="Connection Errors"><img src="http://img.youtube.com/vi/XOfELjqm188/0.jpg" alt="Connection Errors" /></a></p>
+
+<h2 id="postgres-connection-corruption">Postgres connection corruption</h2>
+
+<p>If you see strange postgres connection errors, try using ActiveRecord’s reaper to clean up connections.  Add this to your database.yml:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reaping_frequency: 10
+</code></pre></div></div>
+
+<h2 id="my-sidekiq-process-is-disappearing">My Sidekiq process is disappearing!?</h2>
+
+<p>Linux’s OOM killer might kill Sidekiq if your machine is running low on memory and can’t swap.  Use <code class="language-plaintext highlighter-rouge">dmesg | egrep -i 'killed process'</code> to search for OOM activity:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[102335.319388] Killed process 6567 (ruby) total-vm:1333004kB, anon-rss:355088kB, file-rss:688kB
+</code></pre></div></div>
+
+<p>The solution is to get more memory or optimize your workers.  See <a href="#memory-bloat">Memory Bloat</a> below for tips.</p>
+
+<h2 id="my-sidekiq-process-is-crashing-what-do-i-do">My Sidekiq process is crashing, what do I do?</h2>
+
+<p>Only two things can cause a Ruby VM to crash: a VM bug or a native gem bug.  Sidekiq is pure Ruby and cannot crash the Ruby VM on its own.  A couple of notes:</p>
+
+<ul>
+  <li>Ruby can have a bug - make sure you are running the latest Ruby version</li>
+  <li>native gem bugs can cause crashes - <strong>make sure you are running the latest version of all native gems so you have the latest fixes</strong></li>
+  <li>every time the Sidekiq process crashes, any messages being processed are lost.  You can avoid this with Sidekiq Pro’s [[Reliability]] feature.</li>
+</ul>
+
+<p>You can get a list of all native gems in your app with this command:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle exec ruby -e 'puts Gem.loaded_specs.values.select{ |i| !i.extensions.empty? }.map{ |i| i.name }'
+</code></pre></div></div>
+
+<h2 id="jobs-are-mysteriously-disappearing-or-failing-without-anything-in-the-logs">Jobs are mysteriously disappearing or failing without anything in the logs!</h2>
+
+<p>Often this is due to an old, left-over Sidekiq process that is still running.  Make sure old processes are killed.
+Also, you can have this issue on multi-app server, if you don’t properly
+set <a href="/wiki/Using-Redis.html">redis namespaces</a> for each sidekiq instance.</p>
+
+<h2 id="why-isnt-sidekiq-using-all-of-the-available-cores">Why isn’t Sidekiq using all of the available cores?</h2>
+
+<p>Each Sidekiq process running on MRI will only use one core, regardless of the number of threads. To get the benefit of multiple cores, you should run several Sidekiq processes. Sidekiq Enterprise will do this automatically with the multi-process feature.</p>
+
+<h1 id="memory-bloat">Memory bloat</h1>
+
+<p>If you have a memory bloating and your Sidekiq process goes from X MB to BIG MB over time, there are many different possible causes.  Here’s a few I’ve seen.</p>
+
+<h3 id="activerecord-queries">ActiveRecord queries</h3>
+
+<p>It’s very easy to write an inefficient query in ActiveRecord which loads 1000s of items unnecessarily.  Example:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># See if product search returns no results</span>
+<span class="c1"># Terrible, do not do this!</span>
+<span class="k">return</span> <span class="s2">"No results"</span> <span class="k">if</span> <span class="no">Product</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="o">...</span><span class="p">).</span><span class="nf">blank?</span>
+</code></pre></div></div>
+
+<p>If the product search returns 10,000 results, this query will create 10,000 objects and then immediately throw them away.  This will expand the heap and cause VM bloat.  For more information about how the Ruby heap works, check out <a href="http://www.schneems.com/2015/05/11/how-ruby-uses-memory.html">these slides</a></p>
+
+<p>The right way:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># See if product search returns no results</span>
+<span class="c1"># Much faster!</span>
+<span class="k">return</span> <span class="s2">"No results"</span> <span class="k">if</span> <span class="no">Product</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="o">...</span><span class="p">).</span><span class="nf">count</span> <span class="o">==</span> <span class="mi">0</span>
+</code></pre></div></div>
+
+<p>Unfortunately it’s up to you to determine which worker and query is causing the bloat.  Another example:</p>
+
+<p><strong>Wrong, might load millions of user objects in memory</strong>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">User</span><span class="p">.</span><span class="nf">all</span><span class="p">.</span><span class="nf">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">u</span><span class="o">|</span> <span class="n">u</span><span class="p">.</span><span class="nf">something</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>Right, will iterate through 1000 users at a time</strong>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">User</span><span class="p">.</span><span class="nf">find_each</span> <span class="p">{</span> <span class="o">|</span><span class="n">u</span><span class="o">|</span> <span class="n">u</span><span class="p">.</span><span class="nf">something</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>In short, it is really easy to use ActiveRecord inefficiently.  Read through your queries and make sure you understand exactly what each will do.</p>
+
+<h3 id="activerecord-query-cache">ActiveRecord query cache</h3>
+
+<p>Even when performing batched reads correctly, as above, the ActiveRecord query cache can cause memory bloat by storing query resultsets unnecessarily. Since Rails 5.0, the query cache is enabled by default for background jobs, including Sidekiq workers. If your job performs a large number of batched reads and is still using lots of memory, try <a href="http://api.rubyonrails.org/classes/ActiveRecord/QueryCache/ClassMethods.html">disabling the query cache</a> or clear query cache manually:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span><span class="p">.</span><span class="nf">uncached</span> <span class="k">do</span>
+  <span class="no">User</span><span class="p">.</span><span class="nf">find_each</span> <span class="p">{</span> <span class="o">|</span><span class="n">u</span><span class="o">|</span> <span class="n">u</span><span class="p">.</span><span class="nf">something</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># Clear query cache</span>
+<span class="no">User</span><span class="p">.</span><span class="nf">find_in_batches</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">users</span><span class="o">|</span>
+  <span class="n">users</span><span class="p">.</span><span class="nf">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">u</span><span class="o">|</span> <span class="n">u</span><span class="p">.</span><span class="nf">something</span> <span class="p">}</span>
+  <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span><span class="p">.</span><span class="nf">connection</span><span class="p">.</span><span class="nf">clear_query_cache</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Since Rails 6.0.2.1, the query cache is skipped for <code class="language-plaintext highlighter-rouge">find_each</code>, <code class="language-plaintext highlighter-rouge">find_in_batches</code> and <code class="language-plaintext highlighter-rouge">in_batches</code> queries (see https://github.com/rails/rails/pull/28867). Anyway, queries inside the block of these methods will still use the query cache, so depending on your implementation you still may find appropriate to follow the guidelines above.</p>
+
+<h3 id="memory-fragmentation">Memory Fragmentation</h3>
+
+<p>On Linux, Ruby uses the default glibc implementation for allocating all memory.  This implementation is very prone to memory fragmentation and can lead to huge bloat.  <strong>The simplest thing to do is to add <code class="language-plaintext highlighter-rouge">MALLOC_ARENA_MAX=2</code> to the environment for your Ruby processes.</strong>  A more complete solution requires you to switch to jemalloc.  See <a href="https://www.mikeperham.com/2018/04/25/taming-rails-memory-bloat/">my blog post</a> and <a href="https://www.speedshop.co/2017/12/04/malloc-doubles-ruby-memory.html">Nate Berkopec’s blog post</a> on the subject.</p>
+
+<h3 id="apm-tracing">APM Tracing</h3>
+
+<p>APM services like Datadog and New Relic can collect detailed trace data for requests and job and upload that trace data after completion. However if you have a long-running job, tracing can collect minutes or even hours of data before uploading the entire massive trace, bloating your process. With Datadog, you can enable partial flushing in an initializer:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Datadog</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span>
+  <span class="n">c</span><span class="p">.</span><span class="nf">tracing</span><span class="p">.</span><span class="nf">partial_flush</span><span class="p">.</span><span class="nf">enabled</span> <span class="o">=</span> <span class="kp">true</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h3 id="debugging-memory-bloat">Debugging Memory Bloat</h3>
+
+<p>If none of the above seem to be your issue you can try to investigate further by using the below worker or integrating part of it into one of your own workers.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'objspace'</span>
+
+<span class="k">class</span> <span class="nc">HeapDumpJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="no">File</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span>
+      <span class="no">ObjectSpace</span><span class="p">.</span><span class="nf">dump_all</span><span class="p">(</span><span class="ss">output: </span><span class="n">f</span><span class="p">,</span> <span class="ss">full: </span><span class="kp">true</span><span class="p">)</span>
+    <span class="k">end</span>
+    <span class="nb">puts</span> <span class="s2">"done!"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Once your output has been written to a file you can then use <a href="https://github.com/djudd/reap">reap</a>, a tool for parsing Ruby heap dumps, to parse the heap.</p>
+
+<h2 id="frozen-processes">Frozen Processes</h2>
+
+<p>If your Sidekiq process is not performing any work, send it the TTIN signal to dump backtraces to the log.  That will show you where the threads are stuck.  Most commonly a remote network call is hanging:</p>
+
+<ul>
+  <li>DNS lookup - resolving a hostname might stall.</li>
+  <li>Net::HTTP - unresponsive remote servers can cause a Net::HTTP call to hang and worker threads to pause for long periods.  Set <code class="language-plaintext highlighter-rouge">open_timeout</code> to ensure your code raises an exception rather than hanging forever.</li>
+</ul>
+
+<p>Rule of thumb: use TTIN to find where the threads are blocked and ensure those calls have proper timeouts set.</p>
+
+<p>If the Sidekiq process is not responding to signals at all (nothing appears in the logs when you send TTIN), you can use GDB to dump backtraces for all threads:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo gdb `rbenv which ruby` [PID]
+&lt;snip&gt;
+(gdb) info threads
+  Id   Target Id         Frame 
+  37   Thread 0x7f8b289d8700 (LWP 7994) "ruby-timer-thr" 0x00007f8b27a20d13 in *__GI___poll (fds=&lt;optimized out&gt;, fds@entry=0x7f8b289d7ec0, nfds=&lt;optimized out&gt;, 
+    nfds@entry=1, timeout=timeout@entry=100) at ../sysdeps/unix/sysv/linux/poll.c:87
+  36   Thread 0x7f8b23eb0700 (LWP 7995) "ruby" pthread_cond_wait@@GLIBC_2.3.2 () at ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S:162
+  35   Thread 0x7f8b23c2e700 (LWP 7996) "ruby" pthread_cond_wait@@GLIBC_2.3.2 () at ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S:162
+  34   Thread 0x7f8b239ac700 (LWP 7997) "ruby" pthread_cond_wait@@GLIBC_2.3.2 () at ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S:162
+  33   Thread 0x7f8b237aa700 (LWP 7998) "ruby" pthread_cond_wait@@GLIBC_2.3.2 () at ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S:162
+  32   Thread 0x7f8b28844700 (LWP 8002) "SignalSender" sem_wait () at ../nptl/sysdeps/unix/sysv/linux/x86_64/sem_wait.S:86
+  31   Thread 0x7f8b1e1bf700 (LWP 8003) "ruby" pthread_cond_wait@@GLIBC_2.3.2 () at ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S:162
+  30   Thread 0x7f8b1e0be700 (LWP 8006) "ruby" pthread_cond_wait@@GLIBC_2.3.2 () at ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S:162
+  29   Thread 0x7f8b1dd81700 (LWP 8009) "ruby" pthread_cond_wait@@GLIBC_2.3.2 () at ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S:162
+  28   Thread 0x7f8b1dc80700 (LWP 8010) "ruby" pthread_cond_wait@@GLIBC_2.3.2 () at ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S:162
+  27   Thread 0x7f8b1db7f700 (LWP 8011) "ruby" pthread_cond_wait@@GLIBC_2.3.2 () at ../nptl/sysdeps/unix/sysv/linux/x86_64/pthread_cond_wait.S:162
+...
+
+(gdb) set logging file gdb_output.txt
+(gdb) set logging on
+(gdb) set height 10000
+(gdb) t a a bt
+(gdb) quit
+</code></pre></div></div>
+
+<p>Now put the contents of gdb_output.txt into a gist and open a Sidekiq issue.</p>
+
+<p>You can get the Ruby backtrace of the current (hung) thread by running this in GDB.  Note: it will print to the process’s stdout, which might be a logfile, and will print upside down from the normal Ruby backtrace.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(gdb) call (void)rb_backtrace()
+</code></pre></div></div>
+
+<p>This is an excellent blog post about <a href="https://newrelic.com/blog/best-practices/debugging-stuck-ruby-processes-what-to-do-before-you-kill-9">using GDB with Ruby</a>.</p>
+
+<h2 id="fixed-race-condition-in-heartbeat-which-could-rarely-lead-to-lingering-processes-on-the-busy-tab-2982">Fixed race condition in heartbeat which could rarely lead to lingering processes on the Busy tab. [#2982]</h2>
+
+<p>to clean up lingering processes, modify this as necessary to connect to your Redis. After 60 seconds, lingering processes should disappear from the Busy page.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'redis'</span>
+<span class="n">r</span> <span class="o">=</span> <span class="no">Redis</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">url: </span><span class="s2">"redis://localhost:6379/0"</span><span class="p">)</span>
+<span class="c1"># uncomment if you need a namespace</span>
+<span class="c1">#require 'redis-namespace'</span>
+<span class="c1">#r = Redis::Namespace.new("foo", redis: r)</span>
+<span class="n">r</span><span class="p">.</span><span class="nf">smembers</span><span class="p">(</span><span class="s2">"processes"</span><span class="p">).</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">pro</span><span class="o">|</span>
+  <span class="n">r</span><span class="p">.</span><span class="nf">expire</span><span class="p">(</span><span class="n">pro</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+  <span class="n">r</span><span class="p">.</span><span class="nf">expire</span><span class="p">(</span><span class="s2">"</span><span class="si">#{</span><span class="n">pro</span><span class="si">}</span><span class="s2">:workers"</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="bundler-cannot-fetch-specs">Bundler cannot fetch specs</h2>
+
+<p>If you are using the commercial versions of Sidekiq, you might get <code class="language-plaintext highlighter-rouge">Bundler::HTTPError Could not fetch specs from https://&lt;hostname&gt;</code>.  This is usually due to your commercial subscription expiring.  The easy solution is to purchase a new subscription at <a href="https://billing.contribsys.com">the billing site</a>.</p>
+
+<p>If you believe your subscription is still in good standing, ensure you don’t have firewall rules blocking access and enable Bundler debugging to get more data with <code class="language-plaintext highlighter-rouge">DEBUG=1 bundle install</code>.  You can also verify that the gem servers are available via the <a href="https://status.sidekiq.org">Sidekiq status page</a>.</p>
+
+<h2 id="no-leak-issues-please">No leak issues please</h2>
+
+<p>I don’t accept generic memory leak issues for Sidekiq.  <strong>Memory leaks can be caused by any part of the Ruby VM or gem in your application.</strong>  Unless you can show evidence that Sidekiq is actually the root problem, please don’t open an issue.  Things like ActiveRecord’s <a href="https://github.com/rails/rails/issues/27002#issuecomment-260086170">query cache</a> have been shown to cause bloat (<a href="#activerecord-query-cache">see above</a>).</p>
+
+<p>Read <a href="http://samsaffron.com/archive/2015/03/31/debugging-memory-leaks-in-ruby">Sam Saffron’s blog post about memory leaks</a> for how to instrument and track down any leaks in your Sidekiq processes.</p>
+
+<p>Previous: [[Sharding]] Next: [[Testimonials]]</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

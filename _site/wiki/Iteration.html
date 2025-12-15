@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Iteration</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Starting with v7.3, Sidekiq allows jobs to declare themselves as Iterable. This means that the job can be decomposed into a sequence of elements to process; Sidekiq can stop and restart the job anywhere within this sequence using a cursor. This makes deployments with long-running jobs safer and cleaner, as long as those long-running jobs are Iterable.</p>
+
+<blockquote>
+  <p>This functionality was donated and adapted from @fatkodima’s <code class="language-plaintext highlighter-rouge">sidekiq-iteration</code> gem which itself was heavily influenced by Shopify’s <code class="language-plaintext highlighter-rouge">job-iteration</code> gem. Many thanks to him and the Shopify engineers who designed and developed this API.</p>
+</blockquote>
+
+<h2 id="setup">Setup</h2>
+
+<p>Your job class must include the <code class="language-plaintext highlighter-rouge">Sidekiq::IterableJob</code> module, not <code class="language-plaintext highlighter-rouge">Sidekiq::Job</code>. You will need to provide two methods:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">build_enumerator</code> accepts any arguments to the job along with a <code class="language-plaintext highlighter-rouge">cursor</code> keyword argument. You return an Enumerator which yields <code class="language-plaintext highlighter-rouge">(item, updated_cursor)</code> for each item to process.</li>
+  <li><code class="language-plaintext highlighter-rouge">each_iteration</code> accepts an item along with the array of job arguments.</li>
+</ul>
+
+<p>Here we create 50 PostCreator jobs, each of which creates 1000 DB records. Those 50 jobs may execute concurrently but each can be interrupted at any time during that 1000 record loop. Job 0 creates Posts 0-999, Job 1 creates Post 1000-1999, etc.</p>
+
+<blockquote>
+  <table>
+    <tbody>
+      <tr>
+        <td>50.times {</td>
+        <td>idx</td>
+        <td>PostCreator.perform_async(idx*1000, 1000) }</td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">PostCreator</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">IterableJob</span>
+
+  <span class="c1"># Each PostCreator job creates N Posts but is interruptible; upon Ctrl-C</span>
+  <span class="c1"># it will save the Post it is creating, save the current cursor</span>
+  <span class="c1"># and schedule itself to restart shortly in the future.</span>
+  <span class="c1"># It will resume at the next cursor value, not at 0.</span>
+  <span class="k">def</span> <span class="nf">build_enumerator</span><span class="p">(</span><span class="n">start_at</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="vi">@start_at</span> <span class="o">=</span> <span class="n">start_at</span>
+    <span class="vi">@count</span> <span class="o">=</span> <span class="n">count</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">info</span> <span class="p">{</span> <span class="s2">"Creating posts for </span><span class="si">#{</span><span class="n">start_at</span><span class="si">}</span><span class="s2">"</span> <span class="p">}</span>
+    <span class="n">array_enumerator</span><span class="p">((</span><span class="n">start_at</span><span class="o">...</span><span class="p">(</span><span class="n">start_at</span> <span class="o">+</span> <span class="n">count</span><span class="p">)).</span><span class="nf">to_a</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">each_iteration</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="o">*</span><span class="n">_unused_args</span><span class="p">)</span>
+    <span class="no">Post</span><span class="p">.</span><span class="nf">create!</span><span class="p">(</span><span class="ss">id: </span><span class="n">pid</span><span class="p">,</span> <span class="ss">title: </span><span class="s2">"Post </span><span class="si">#{</span><span class="n">pid</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="ss">body: </span><span class="s2">"Body of post </span><span class="si">#{</span><span class="n">pid</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="c1"># Once our 1000 Posts have been created, we can do some operation to</span>
+  <span class="c1"># those 1000 Posts in bulk. Keep in mind that only the 1000 for this job are done,</span>
+  <span class="c1"># not all 50,000. If you want to know when all 50k of the Posts have been created,</span>
+  <span class="c1"># you'll need Sidekiq Pro's Batch feature.</span>
+  <span class="k">def</span> <span class="nf">on_complete</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">info</span> <span class="p">{</span> <span class="s2">"</span><span class="si">#{</span><span class="vi">@start_at</span><span class="si">}</span><span class="s2"> complete, updating..."</span> <span class="p">}</span>
+    <span class="no">PostUpdater</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="vi">@start_at</span><span class="p">,</span> <span class="vi">@count</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="enumerator-support">Enumerator Support</h2>
+
+<p>The iteration subsystem provides helper methods to create Enumerators for a few common usecases. See <a href="https://github.com/sidekiq/sidekiq/blob/main/lib/sidekiq/job/iterable/enumerators.rb"><code class="language-plaintext highlighter-rouge">lib/sidekiq/job/iterable/enumerators.rb</code></a> for APIs for ActiveRecord queries, batched AR queries, CSV file processing, etc. If you want to efficiently process millions of DB records in groups of 1000 at a time, there’s an API for you!</p>
+
+<h2 id="cancellation">Cancellation</h2>
+
+<p>Iterable jobs can be very long-running so Sidekiq provides the option to cancel the job mid-execution. This will stop the job after the current iteration step and return immediately, counting it as a successful execution. This can be executed in any process but it is asynchronous, the job will stop at some point in the near future:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">job</span> <span class="o">=</span> <span class="no">MyIterableJob</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">job</span><span class="p">.</span><span class="nf">jid</span> <span class="o">=</span> <span class="s2">"12345"</span>
+<span class="n">job</span><span class="p">.</span><span class="nf">cancel!</span>
+</code></pre></div></div>
+
+<h2 id="callbacks">Callbacks</h2>
+
+<p><code class="language-plaintext highlighter-rouge">Sidekiq::IterableJob</code> includes callback methods you can override:</p>
+
+<ul>
+  <li>on_start - the first time this job is started</li>
+  <li>on_resume - any future time this job is started after interruption</li>
+  <li>on_stop - when we are done processing for now, can be due to completion or interruption</li>
+  <li>on_cancel - if the job was cancelled during execution</li>
+  <li>on_complete - when your Enumerator has finished</li>
+</ul>
+
+<h2 id="how-it-works">How It Works</h2>
+
+<p>Sidekiq stores a Hash of iteration data in Redis at the key <code class="language-plaintext highlighter-rouge">it-#{jid}</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span>
+  <span class="s2">"ex"</span> <span class="o">=&gt;</span> <span class="vi">@_executions</span><span class="p">,</span>               <span class="c1"># number of times this job has been started</span>
+  <span class="s2">"c"</span> <span class="o">=&gt;</span> <span class="no">Sidekiq</span><span class="p">.</span><span class="nf">dump_json</span><span class="p">(</span><span class="vi">@_cursor</span><span class="p">),</span> <span class="c1"># serialized cursor</span>
+  <span class="s2">"rt"</span> <span class="o">=&gt;</span> <span class="vi">@_runtime</span>                   <span class="c1"># total job runtime in seconds</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The cursor stores the current point in the dataset being processed. For instance, if you are processing a CSV file, the cursor might be a row number. For an Array, it would be the current index.</p>
+
+<p>When the job is executing, the cursor is persisted to Redis if the job raises an error or every five seconds. The cursor can be anything, an Integer index, a more complex Hash structure, etc. but it must be serializable to JSON. See <strong>Enumerator Support</strong> for examples.</p>
+
+<p>After every iteration, Sidekiq calls <code class="language-plaintext highlighter-rouge">Sidekiq::Job#interrupted?</code>. This is a new method available to all Sidekiq::Jobs which returns true if the Sidekiq process is in the process of shutting down. If interrupted? is true, the IterableJob will flush its current state to Redis and raise <code class="language-plaintext highlighter-rouge">Sidekiq::Job::Interrupted</code>, so it can be re-enqueued and restarted with the latest cursor. The retry subsystem ignores this exception but other subsystems (like Batches) will treat it as a failure.</p>
+
+<p>Since Sidekiq gives jobs 25 seconds to finish by default (<code class="language-plaintext highlighter-rouge">-t 25</code>), each iteration in your Job must not take more than 25 seconds or the process supervisor (i.e. systemd, heroku, k8s) may kill -9 your Sidekiq process, causing job loss.</p>
+
+<p>If your job crashes the Sidekiq process, it’s possible for the cursor to be reset to the last savepoint and items to be processed more than once. As always, leverage DB transactions to ensure idempotency and consistent data.</p>
+
+<p>The iteration data in Redis is removed after <code class="language-plaintext highlighter-rouge">on_complete</code> is fired. It will expire after 30 days if the job dies.</p>
+
+<h2 id="more-examples">More Examples</h2>
+
+<blockquote>
+  <p>Have a good example of an IterableJob in your app? Open an issue and include your code, we’ll clean it up and post it here!</p>
+</blockquote>
+
+<h3 id="csv">CSV</h3>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ExampleJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">IterableJob</span>
+
+  <span class="c1"># Here we have a Record in our DB which has an associated CSV file.</span>
+  <span class="c1"># We want to iterate through that file and create a child record for each row.</span>
+  <span class="k">def</span> <span class="nf">build_enumerator</span><span class="p">(</span><span class="n">record_id</span><span class="p">,</span> <span class="n">cursor</span><span class="p">:)</span>
+    <span class="vi">@record</span> <span class="o">=</span> <span class="no">Example</span><span class="o">::</span><span class="no">Record</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
+
+    <span class="c1"># Download the file locally to process</span>
+    <span class="no">Tempfile</span><span class="p">.</span><span class="nf">create</span> <span class="k">do</span> <span class="o">|</span><span class="n">tempfile</span><span class="o">|</span>
+      <span class="n">tempfile</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="vi">@record</span><span class="p">.</span><span class="nf">file</span><span class="p">.</span><span class="nf">download</span><span class="p">)</span>
+      <span class="n">csv</span> <span class="o">=</span> <span class="no">CSV</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="n">tempfile</span><span class="p">.</span><span class="nf">path</span><span class="p">,</span> <span class="ss">headers: </span><span class="kp">true</span><span class="p">,</span> <span class="ss">col_sep: </span><span class="s1">';'</span><span class="p">)</span>
+      <span class="no">CsvEnumerator</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">csv</span><span class="p">).</span><span class="nf">rows</span><span class="p">(</span><span class="n">cursor</span><span class="p">:)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">each_iteration</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">_record_id</span><span class="p">)</span>
+    <span class="nb">name</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">status_code</span> <span class="o">=</span> <span class="n">row</span><span class="p">.</span><span class="nf">values_at</span><span class="p">(</span><span class="s1">'name'</span><span class="p">,</span> <span class="s1">'identifier'</span><span class="p">,</span> <span class="s1">'status_code'</span><span class="p">)</span>
+    <span class="no">ApplicationRecord</span><span class="p">.</span><span class="nf">transaction</span> <span class="k">do</span>
+      <span class="no">Example</span><span class="o">::</span><span class="no">Creator</span><span class="p">.</span><span class="nf">create!</span><span class="p">(</span>
+        <span class="ss">source: </span><span class="no">Example</span><span class="o">::</span><span class="no">Source</span><span class="p">.</span><span class="nf">create!</span><span class="p">(</span>
+          <span class="ss">response_type: </span><span class="s1">'batch_webhook'</span><span class="p">,</span>
+          <span class="n">identifier</span><span class="p">:,</span>
+          <span class="ss">data: </span><span class="p">{</span>
+            <span class="ss">example_id: </span><span class="vi">@record</span><span class="p">.</span><span class="nf">example_id</span><span class="p">,</span>
+            <span class="ss">record_id: </span><span class="vi">@record</span><span class="p">.</span><span class="nf">id</span><span class="p">,</span>
+            <span class="nb">name</span><span class="p">:,</span>
+            <span class="ss">status_code:
+          </span><span class="p">}</span>
+        <span class="p">)</span>
+      <span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">on_complete</span>
+    <span class="n">verified_file_path</span> <span class="o">=</span> <span class="s2">"</span><span class="si">#{</span><span class="no">VERIFIED_PATH</span><span class="si">}#{</span><span class="vi">@record</span><span class="p">.</span><span class="nf">file_name</span><span class="si">}</span><span class="s2">"</span>
+
+    <span class="c1"># Once processed, we move the CSV file to the verified bucket.</span>
+    <span class="no">Tempfile</span><span class="p">.</span><span class="nf">create</span> <span class="k">do</span> <span class="o">|</span><span class="n">tempfile</span><span class="o">|</span>
+      <span class="n">tempfile</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="vi">@record</span><span class="p">.</span><span class="nf">file</span><span class="p">.</span><span class="nf">download</span><span class="p">)</span>
+      <span class="no">YourCloud</span><span class="p">.</span><span class="nf">bucket</span><span class="p">(</span><span class="no">BUCKET</span><span class="p">).</span><span class="nf">create_file</span><span class="p">(</span>
+        <span class="n">tempfile</span><span class="p">.</span><span class="nf">path</span><span class="p">,</span>
+        <span class="n">verified_file_path</span>
+      <span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="notes">Notes</h2>
+
+<ul>
+  <li>Shopify’s <a href="https://github.com/Shopify/job-iteration">job-iteration</a> gem.</li>
+  <li>fatkodima’s <a href="https://github.com/fatkodima/sidekiq-iteration">sidekiq-iteration</a> gem.</li>
+  <li>Judoscale’s thorough <a href="https://judoscale.com/blog/sidekiq-iterable-jobs">blog post on Iterable Jobs</a></li>
+  <li>My blog post on <a href="https://www.mikeperham.com/2024/07/03/iteration-and-sidekiq-7.3.0/">Iteration in Sidekiq 7.3.0</a></li>
+</ul>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

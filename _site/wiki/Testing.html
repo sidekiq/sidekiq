@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Testing</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Sidekiq provides a few options for testing your workers.</p>
+
+<h3 id="setup">Setup</h3>
+
+<p>Sidekiq provides the following three testing modes:</p>
+<ul>
+  <li>A test fake that pushes all jobs into a <code class="language-plaintext highlighter-rouge">jobs</code> array</li>
+  <li>An inline mode that runs the job immediately instead of enqueuing it</li>
+  <li>The test harness can be disabled. Jobs are pushed to redis.</li>
+</ul>
+
+<p>Sidekiq allows you to dynamically configure the testing harness mode with the following methods:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'sidekiq/testing'</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Testing</span><span class="p">.</span><span class="nf">fake!</span> <span class="c1"># fake is the default mode</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Testing</span><span class="p">.</span><span class="nf">inline!</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Testing</span><span class="p">.</span><span class="nf">disable!</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Warning: Requiring <code class="language-plaintext highlighter-rouge">sidekiq/testing</code> will automatically call <code class="language-plaintext highlighter-rouge">Sidekiq::Testing.fake!</code>,
+so your jobs will not go to Redis. Don’t require <code class="language-plaintext highlighter-rouge">sidekiq/testing</code> in any production code.</p>
+</blockquote>
+
+<p>Each of the above methods also accepts a block. When passing a block, the mode change only
+applies to the current Thread and is not process-wide.
+An example:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'sidekiq/testing'</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Testing</span><span class="p">.</span><span class="nf">fake!</span>
+
+<span class="c1"># Some tests</span>
+
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Testing</span><span class="p">.</span><span class="nf">inline!</span> <span class="k">do</span>
+  <span class="c1"># Some other tests</span>
+<span class="k">end</span>
+
+<span class="c1"># Here we're back to fake testing again. Note that `inline` will only be</span>
+<span class="c1"># active during the block for the current Thread. Other Threads (e.g.</span>
+<span class="c1"># Capybara) will see `fake` mode.</span>
+</code></pre></div></div>
+
+<p>To query the current state, use the following methods:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Testing</span><span class="p">.</span><span class="nf">enabled?</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Testing</span><span class="p">.</span><span class="nf">disabled?</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Testing</span><span class="p">.</span><span class="nf">fake?</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Testing</span><span class="p">.</span><span class="nf">inline?</span>
+</code></pre></div></div>
+
+<h3 id="testing-worker-queueing-fake">Testing Worker Queueing (Fake)</h3>
+
+<p>Similar to the <code class="language-plaintext highlighter-rouge">ActionMailer</code> testing API, instead of pushing jobs to Redis, Sidekiq pushes them into a <code class="language-plaintext highlighter-rouge">jobs</code> array which you can access. Require the <code class="language-plaintext highlighter-rouge">sidekiq/testing</code> file in your <code class="language-plaintext highlighter-rouge">{test,spec}_helper.rb</code> and set the mode:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'sidekiq/testing'</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Testing</span><span class="p">.</span><span class="nf">fake!</span>
+</code></pre></div></div>
+
+<p>Then assert that jobs were pushed on to the queue:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">expect</span> <span class="p">{</span>
+  <span class="no">HardWorker</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">}.</span><span class="nf">to</span> <span class="n">change</span><span class="p">(</span><span class="no">HardWorker</span><span class="p">.</span><span class="nf">jobs</span><span class="p">,</span> <span class="ss">:size</span><span class="p">).</span><span class="nf">by</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">assert_equal</span> <span class="mi">0</span><span class="p">,</span> <span class="no">HardWorker</span><span class="p">.</span><span class="nf">jobs</span><span class="p">.</span><span class="nf">size</span>
+<span class="no">HardWorker</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">assert_equal</span> <span class="mi">1</span><span class="p">,</span> <span class="no">HardWorker</span><span class="p">.</span><span class="nf">jobs</span><span class="p">.</span><span class="nf">size</span>
+</code></pre></div></div>
+
+<p>You can execute all queued jobs by draining the queue:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">HardWorker</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="no">HardWorker</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">assert_equal</span> <span class="mi">2</span><span class="p">,</span> <span class="no">HardWorker</span><span class="p">.</span><span class="nf">jobs</span><span class="p">.</span><span class="nf">size</span>
+<span class="no">HardWorker</span><span class="p">.</span><span class="nf">drain</span>
+<span class="n">assert_equal</span> <span class="mi">0</span><span class="p">,</span> <span class="no">HardWorker</span><span class="p">.</span><span class="nf">jobs</span><span class="p">.</span><span class="nf">size</span>
+</code></pre></div></div>
+
+<p>To execute all workers’ queued jobs:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Worker</span><span class="p">.</span><span class="nf">drain_all</span>
+</code></pre></div></div>
+
+<p>If you would like to remove jobs from the queue without actually performing them:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">HardWorker</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="no">HardWorker</span><span class="p">.</span><span class="nf">clear</span>
+<span class="n">assert_equal</span> <span class="mi">0</span><span class="p">,</span> <span class="no">HardWorker</span><span class="p">.</span><span class="nf">jobs</span><span class="p">.</span><span class="nf">size</span>
+</code></pre></div></div>
+
+<p>To clear all workers’ jobs:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Worker</span><span class="p">.</span><span class="nf">clear_all</span>
+</code></pre></div></div>
+
+<p>This can be useful to make sure jobs don’t linger between tests:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">RSpec</span><span class="p">.</span><span class="nf">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">before</span><span class="p">(</span><span class="ss">:each</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Worker</span><span class="p">.</span><span class="nf">clear_all</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">SidekiqMinitestSupport</span>
+  <span class="k">def</span> <span class="nf">after_teardown</span>
+    <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Worker</span><span class="p">.</span><span class="nf">clear_all</span>
+    <span class="k">super</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">MiniTest::Spec</span>
+  <span class="kp">include</span> <span class="no">SidekiqMinitestSupport</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">MiniTest::Unit::TestCase</span>
+  <span class="kp">include</span> <span class="no">SidekiqMinitestSupport</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h4 id="queue-api">Queue API</h4>
+
+<p>A testing API for queues is helpful when the Worker class does not exist in the application being tested. One might enqueue a job using <code class="language-plaintext highlighter-rouge">Sidekiq::Client</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Client</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span>
+  <span class="s1">'class'</span> <span class="o">=&gt;</span> <span class="s1">'NonExistentWorker'</span><span class="p">,</span>
+  <span class="s1">'queue'</span> <span class="o">=&gt;</span> <span class="s1">'other'</span><span class="p">,</span>
+  <span class="s1">'args'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="p">)</span>
+
+</code></pre></div></div>
+
+<p>Since the <code class="language-plaintext highlighter-rouge">NonExistentWorker</code> doesn’t exist in the application, we can assert the job made it to the queue:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">assert_equal</span> <span class="mi">0</span><span class="p">,</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Queues</span><span class="p">[</span><span class="s2">"other"</span><span class="p">].</span><span class="nf">size</span>
+
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Client</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span>
+  <span class="s1">'class'</span> <span class="o">=&gt;</span> <span class="s1">'NonExistentWorker'</span><span class="p">,</span>
+  <span class="s1">'queue'</span> <span class="o">=&gt;</span> <span class="s1">'other'</span><span class="p">,</span>
+  <span class="s1">'args'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">assert_equal</span> <span class="mi">1</span><span class="p">,</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Queues</span><span class="p">[</span><span class="s2">"other"</span><span class="p">].</span><span class="nf">size</span>
+<span class="n">assert_equal</span> <span class="s2">"NonExistentWorker"</span><span class="p">,</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Queues</span><span class="p">[</span><span class="s2">"other"</span><span class="p">].</span><span class="nf">first</span><span class="p">[</span><span class="s2">"class"</span><span class="p">]</span>
+
+<span class="c1"># Clear an individual queue</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Queues</span><span class="p">[</span><span class="s2">"other"</span><span class="p">].</span><span class="nf">clear</span>
+
+<span class="c1"># Clear all queues (equivalent to Sidekiq::Worker.clear_all)</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Queues</span><span class="p">.</span><span class="nf">clear_all</span>
+</code></pre></div></div>
+
+<h3 id="testing-workers-directly">Testing Workers Directly</h3>
+
+<p>To test your worker directly, just treat it like a ruby object. Easy!</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">work</span> <span class="o">=</span> <span class="no">HardWorker</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">work</span><span class="p">.</span><span class="nf">perform</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="testing-workers-inline">Testing Workers Inline</h3>
+
+<p>You can run Sidekiq workers inline in your tests by requiring the <code class="language-plaintext highlighter-rouge">sidekiq/testing</code> file in your <code class="language-plaintext highlighter-rouge">{test,spec}_helper.rb</code> and setting the mode:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'sidekiq/testing'</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Testing</span><span class="p">.</span><span class="nf">inline!</span>
+
+<span class="c1"># or use block mode to avoid leaking the setting into other tests</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Testing</span><span class="p">.</span><span class="nf">inline!</span> <span class="k">do</span>
+  <span class="no">HardWorker</span><span class="p">.</span><span class="nf">perform_async</span>
+  <span class="n">assert_worked_hard</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Jobs will then be executed immediately.</p>
+
+<h3 id="testing-middleware">Testing Middleware</h3>
+
+<h4 id="server-middleware">Server Middleware</h4>
+
+<p>By default, the test harness (in either mode) does not run any server side middleware.
+You can add middleware to the harness with the following:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Testing</span><span class="p">.</span><span class="nf">server_middleware</span> <span class="k">do</span> <span class="o">|</span><span class="n">chain</span><span class="o">|</span>
+  <span class="n">chain</span><span class="p">.</span><span class="nf">add</span> <span class="no">AwesomeMiddleware</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Middleware in the <code class="language-plaintext highlighter-rouge">Sidekiq::Testing.server_middleware</code> stack will be run in <code class="language-plaintext highlighter-rouge">inline</code> mode whenever jobs are run and in <code class="language-plaintext highlighter-rouge">fake</code> mode whenever <code class="language-plaintext highlighter-rouge">.drain</code> or <code class="language-plaintext highlighter-rouge">.perform_one</code> are called.</p>
+
+<p>Note that if your middleware is located at
+<code class="language-plaintext highlighter-rouge">lib/sidekiq/middleware/server/awesome_middleware.rb</code>, as described
+<a href="/wiki/Middleware.html">here</a>, you’ll need to require the class like <code class="language-plaintext highlighter-rouge">chain.add Sidekiq::Middleware::Server::AwesomeMiddleware</code> and define it like this in order for it to load properly into the testing chain:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">Sidekiq::Middleware::Server</span>
+  <span class="k">class</span> <span class="nc">AwesomeMiddleware</span>
+    <span class="c1"># do stuff</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Defining the class like <code class="language-plaintext highlighter-rouge">class Sidekiq::Middleware::Server::AwesomeMiddleware</code> won’t work properly in the test environment because <code class="language-plaintext highlighter-rouge">Sidekiq::Middleware::Server</code> isn’t loaded automatically. You’ll probably also have to require the middleware file explicitly.</p>
+
+<h4 id="client-middleware">Client Middleware</h4>
+
+<p>Depending on how you’ve configured your test harness and what initialization has been run, the <code class="language-plaintext highlighter-rouge">Sidekiq::Client</code>’s middleware chain might not be empty.
+This is often fine, but can be problematic if you want to test some custom client middleware in isolation.
+The simplest way to do that is go get a fresh <code class="language-plaintext highlighter-rouge">Sidekiq::Client</code> instance, add your middleware to it, and then <code class="language-plaintext highlighter-rouge">.push</code> a job to it.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">client</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Client</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">chain: </span><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Middleware</span><span class="o">::</span><span class="no">Chain</span><span class="p">.</span><span class="nf">new</span><span class="p">)</span>
+<span class="n">client</span><span class="p">.</span><span class="nf">middleware</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="no">MyMiddleware</span><span class="p">)</span>
+<span class="n">client</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="s2">"class"</span> <span class="o">=&gt;</span> <span class="no">MyJob</span><span class="p">,</span> <span class="s2">"args"</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s2">"what"</span><span class="p">,</span> <span class="s2">"ever"</span><span class="p">])</span>
+
+<span class="n">assert_equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="no">MyJob</span><span class="p">.</span><span class="nf">jobs</span><span class="p">.</span><span class="nf">size</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Notice that we explicitly pass a new <code class="language-plaintext highlighter-rouge">chain:</code> to <code class="language-plaintext highlighter-rouge">Sidekiq::Client.new</code>.
+This is necessary to ensure we get a fresh, empty middleware chain, rather than defaulting to the <code class="language-plaintext highlighter-rouge">Sidekiq.default_configuration.client_middleware</code> instance, which might have other middleware in it.</p>
+
+<h3 id="api">API</h3>
+
+<p>Sidekiq’s API does not have a testing mode, e.g. something like <code class="language-plaintext highlighter-rouge">Sidekiq::ScheduledSet.new.each(...)</code> will always hit Redis.  You can use <code class="language-plaintext highlighter-rouge">Sidekiq::Testing.disable!</code> to set up jobs in order to use the API in your tests against a real Redis instance.</p>
+
+<h3 id="rspec">RSpec</h3>
+
+<p>See the <a href="https://github.com/philostler/rspec-sidekiq">rspec-sidekiq</a> gem.</p>
+
+<h3 id="capybara-feature-tests-with-backend-running-in-parallel">Capybara feature tests, with backend running in parallel</h3>
+<p>From https://makandracards.com/makandra/28125-perform-sidekiq-jobs-immediately-in-development</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/environment/test.rb</span>
+
+<span class="c1"># perform jobs immediately</span>
+<span class="n">config</span><span class="p">.</span><span class="nf">active_job</span><span class="p">.</span><span class="nf">queue_adapter</span> <span class="o">=</span> <span class="ss">:sidekiq</span>
+<span class="nb">require</span> <span class="s1">'sidekiq/testing'</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Testing</span><span class="p">.</span><span class="nf">inline!</span>
+<span class="o">...</span>
+</code></pre></div></div>
+
+<p>Previous: [[FAQ]] Next: [[Sharding]]</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Kubernetes</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>From a network architecture perspective, Sidekiq runs as a cluster of worker processes “around” a Redis server. This page provides information on how to operate a Sidekiq cluster using Kubernetes.</p>
+
+<h2 id="basic-setup">Basic Setup</h2>
+
+<p>Running and connecting to Redis…</p>
+
+<h2 id="safe-shutdown">Safe Shutdown</h2>
+
+<p>How to configure k8s to get a clean shutdown with TSTP and TERM…</p>
+
+<p>During the termination lifecycle, <a href="https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-terminating-with-grace">k8s will send a SIGTERM to the root process on each pod</a>:</p>
+
+<blockquote>
+  <p>In practice, this means your application needs to handle the SIGTERM message and begin shutting down when it receives it. This means saving all data that needs to be saved, closing down network connections, finishing any work that is left, and other similar tasks.</p>
+</blockquote>
+
+<p><a href="https://github.com/sidekiq/sidekiq/wiki/Signals#term">Sidekiq uses the TERM signal to start shutting down within the
+<code class="language-plaintext highlighter-rouge">timeout</code>/<code class="language-plaintext highlighter-rouge">-t</code> seconds</a>.</p>
+
+<p>k8s also has its own concept of a grace period, indicated by the <a href="https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#hook-handler-execution"><code class="language-plaintext highlighter-rouge">terminationGracePeriodSeconds</code></a> in the pod’s configuration. k8s will wait this amount of time before sending a SIGKILL to the container, forcefully terminating all processes.</p>
+
+<p>It’s recommend to have the Sidekiq timeout set to a value <strong>less than</strong> the k8s <code class="language-plaintext highlighter-rouge">terminationGracePeriodSeconds</code>. If using the default Sidekiq timeout of 25 seconds, setting <code class="language-plaintext highlighter-rouge">terminationGracePeriodSeconds</code> in k8s to 30 seconds is recommended (the k8s default).</p>
+
+<p><strong>ATTENTION</strong></p>
+
+<p><strong>Do not run sidekiq with a shell command like this:</strong> <code class="language-plaintext highlighter-rouge">command: ["/bin/sh","-c", "bundle exec sidekiq -t 100 -e production --config config/sidekiq_custom.yml"]</code></p>
+
+<p>If you use this approach, the <code class="language-plaintext highlighter-rouge">TERM</code> signal gets delivered only to the shell process, not to sidekiq directly (and therefore sidekiq doesn’t terminate reliably - but only via the <code class="language-plaintext highlighter-rouge">SIGKILL</code> command which is triggered after <code class="language-plaintext highlighter-rouge">terminationGracePeriodSeconds</code> (default 30 seconds)). If you have a longer <code class="language-plaintext highlighter-rouge">terminationGracePeriodSeconds</code> sidekiq will continue to run until it get’s <code class="language-plaintext highlighter-rouge">SIGKILL</code>-ed!</p>
+
+<p>Better use following approach:</p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">apps/v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Deployment</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">sidekiq-deployment</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="s">...</span>
+  <span class="s">template</span><span class="err">:</span>
+    <span class="s">...</span>
+    <span class="s">spec</span><span class="err">:</span>
+      <span class="na">terminationGracePeriodSeconds</span><span class="pi">:</span> <span class="m">120</span> <span class="c1"># wait a bit longer to shut it down</span>
+      <span class="na">containers</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">sidekiq</span>
+          <span class="s">...</span>
+          <span class="na">command</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">bundle"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">exec"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">sidekiq"</span><span class="pi">]</span>
+          <span class="na">args</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">-t"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">100"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">-e"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">production"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">-C"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">config/custom_sidekiq_config.yml"</span><span class="pi">]</span>
+      <span class="s">...</span>
+</code></pre></div></div>
+
+<p>With this setup, you also don’t need the often mentioned <code class="language-plaintext highlighter-rouge">preStop</code>-hook:</p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># NOT NEEDED!</span>
+<span class="na">lifecycle</span><span class="pi">:</span>
+  <span class="na">preStop</span><span class="pi">:</span>
+    <span class="na">exec</span><span class="pi">:</span>
+      <span class="c1"># SIGTERM triggers a quick exit; gracefully terminate with TSTP instead</span>
+      <span class="na">command</span><span class="pi">:</span> 
+        <span class="pi">-</span> <span class="s">/bin/sh</span>
+        <span class="pi">-</span> <span class="s">-c</span>
+        <span class="pi">-</span> <span class="s">echo 'kill -TERM $(ps aux | grep sidekiq | grep busy | awk '{ print $2 }')</span>
+</code></pre></div></div>
+
+<h2 id="health-checks">Health Checks</h2>
+
+<p>Each time k8s brings up a new pod, it needs to assert the pod is “healthy” before considering the action complete. “Healthy” for something serving web requests might mean that that pod responds with <code class="language-plaintext highlighter-rouge">200 OK</code> to a health check endpoint.</p>
+
+<h2 id="sidekiq-enterprise">Sidekiq Enterprise</h2>
+
+<p>Sidekiq Enterprise 7.1.2 added support for a Kubernetes health check HTTP endpoint. Enable it like this:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">health_check</span><span class="p">(</span><span class="mi">7433</span><span class="p">)</span> <span class="c1"># port Integer</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">health_check</span><span class="p">(</span><span class="s2">"127.0.0.1:7433"</span><span class="p">)</span> <span class="c1"># interface String</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Or in <code class="language-plaintext highlighter-rouge">config/sidekiq.yml</code>:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="na">health_check</span><span class="pi">:</span> <span class="s2">"</span><span class="s">127.0.0.1:7433"</span>
+</code></pre></div></div>
+
+<p>And then you can do this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -v http://localhost:7433/
+HTTP/1.0 200 OK
+Server: Sidekiq::HttpServer (Ruby 3.2.0)
+Content-type: application/json
+Content-length: 366
+Connection: close
+Date: Mon, 11 Sep 2023 17:41:46 GMT
+
+{"quiet":"false","info":{"hostname":"Mikes-MacBook-Pro.local","started_at":1694453901.020213,"pid":36477,"tag":"myapp","concurrency":5,"queues":["default"],"weights":[{"default":0}],"labels":["reliable"],"identity":"Mikes-MacBook-Pro.local:36477:8520a2e76d09","version":"7.1.3","embedded":false},"rss":"127808","beat":"1694453921.079236","busy":"0","rtt_us":"259"}
+$
+</code></pre></div></div>
+
+<p>The health check has several limitations: it does not support https/TLS as it is meant to be used within a private network only and not exposed publicly. It is incompatible with <code class="language-plaintext highlighter-rouge">sidekiqswarm</code> since one port cannot map onto multiple processes.</p>
+
+<h2 id="sidekiq">Sidekiq</h2>
+
+<p>For Sidekiq processes, we need a different approach. Instead of using a web request, you can use a combination of Sidekiq lifecycle hooks and a <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">file-based <code class="language-plaintext highlighter-rouge">readinessProbe</code></a>.</p>
+
+<p>Keep in mind that Sidekiq will begin processing jobs from its Redis instance as soon as it is able to. It will not wait for a signal from k8s or another system to enable it to start processing jobs. Contrast this with k8s pods serving web traffic, where k8s might not route requests to them until a readiness probe has passed.</p>
+
+<p>By writing to a file after the Sidekiq process starts, we’re able to signal to k8s “Hey, we’re healthy.” Here’s how that looks:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/initializers/sidekiq.rb</span>
+<span class="no">SIDEKIQ_WILL_PROCESSES_JOBS_FILE</span> <span class="o">=</span> <span class="no">Rails</span><span class="p">.</span><span class="nf">root</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="s1">'tmp/sidekiq_process_has_started_and_will_begin_processing_jobs'</span><span class="p">).</span><span class="nf">freeze</span>
+
+<span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="c1"># We touch and destroy files in the Sidekiq lifecycle to provide a</span>
+  <span class="c1"># signal to Kubernetes that we are ready to process jobs or not.</span>
+  <span class="c1">#</span>
+  <span class="c1"># Doing this gives us a better sense of when a process is actually</span>
+  <span class="c1"># alive and healthy, rather than just beginning the boot process.</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="ss">:startup</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">FileUtils</span><span class="p">.</span><span class="nf">touch</span><span class="p">(</span><span class="no">SIDEKIQ_WILL_PROCESSES_JOBS_FILE</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="n">config</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="ss">:shutdown</span><span class="p">)</span> <span class="k">do</span>
+    <span class="no">FileUtils</span><span class="p">.</span><span class="nf">rm_f</span><span class="p">(</span><span class="no">SIDEKIQ_WILL_PROCESSES_JOBS_FILE</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>And then later in your pod’s YAML, assuming your Rails application is deployed to <code class="language-plaintext highlighter-rouge">/var/www</code> within the pod and takes about 10 seconds to start:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">readinessProbe</span><span class="pi">:</span>
+  <span class="na">failureThreshold</span><span class="pi">:</span> <span class="m">10</span>
+  <span class="na">exec</span><span class="pi">:</span>
+    <span class="na">command</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">cat</span>
+    <span class="pi">-</span> <span class="s">/var/www/tmp/sidekiq_process_has_started_and_will_begin_processing_jobs</span>
+  <span class="na">initialDelaySeconds</span><span class="pi">:</span> <span class="m">10</span>
+  <span class="na">periodSeconds</span><span class="pi">:</span> <span class="m">2</span>
+  <span class="na">successThreshold</span><span class="pi">:</span> <span class="m">2</span>
+  <span class="na">timeoutSeconds</span><span class="pi">:</span> <span class="m">1</span>
+</code></pre></div></div>
+
+<h2 id="autoscaling">Autoscaling</h2>
+
+<p>One of the primitives k8s provides is the <a href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/">Horizontal Pod Autoscaler (HPA)</a>.</p>
+
+<p>This is a mechanism to add capacity to a set of pods “horizontally” a.k.a by adding more machines. Things can scale up and down based on “observed CPU utilization (or, with custom metrics support, on some other application-provided metrics)”.</p>
+
+<p>Sidekiq’s one-job-per-thread model along with <a href="https://www.speedshop.co/2020/05/11/the-ruby-gvl-and-scaling.html">Ruby’s Global Virtual Machine Lock (GVL)</a> is an assumption that Sidekiq workloads <strong>are not</strong> CPU-bound, so an observed CPU utilization metric is inappropriate for autoscaling.</p>
+
+<p>Autoscaling adds a new dimension of complexity to an application, and should not be deployed lightly. Sidekiq will often be easier and more predictable to operate without autoscaling. Because Sidekiq processes jobs off of a queue, it’s usually better to keep a fixed capacity around to ensure consistent progress through the queue.</p>
+
+<p>If you do decide to implement autoscaling, there are several things to keep in mind:</p>
+
+<ul>
+  <li>Implementing a HorizonalPodAutoscaler is likely best done on an individual queue based on that <strong>queue’s latency</strong>. When the latency begins to spike, you may choose to scale up a given queue’s k8s deployment. This assumes that each queue has latency thresholds of “okay” and “we need to scale up or we will miss our latency target.”</li>
+  <li>Scaling up or down within k8s is not an instant operation. There will be latency when scaling up from k8s and the Sidekiq process starting. Sometimes, a scale up operation will finish but the queue has been empty for a few seconds (or minutes).</li>
+  <li>Sidekiq at high levels of concurrency can be dangerous to other systems, like your database or third parties. In the event of a scale-up event, you may start processing jobs faster at the expense of the health of your database. Be careful with write-heavy workloads and more than ~10 k8s pods consuming from a queue.</li>
+</ul>
+
+<p>Your HPA will need to use an <a href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#autoscaling-on-metrics-not-related-to-kubernetes-objects">“external”
+metric</a>.
+The configuration of these metrics will vary from setup to setup, but
+you’ll likely need something reporting the latency of each queue to a
+system that k8s can read from. <a href="https://github.com/sidekiq/sidekiq/wiki/Ent-Leader-Election#running-code-on-the-leader">A Sidekiq Enterprise Leader with a small
+snippet of code</a> is a good place to publish latency metrics from.</p>
+
+<h2 id="cloud-providers">Cloud Providers</h2>
+
+<p>Notes about using AWS, GCP, DO and other KaaS providers…?</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

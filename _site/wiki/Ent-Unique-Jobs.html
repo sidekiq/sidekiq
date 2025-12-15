@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Ent Unique Jobs</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>If your application code creates duplicate jobs, the unique jobs feature in Sidekiq Enterprise makes it easy to ensure only a single copy of a job is in Redis.  For instance, perhaps you create a job to sync an address change with a 3rd party system every time a form is submitted.  If the form is submitted twice, you don’t need to create the second job if the first job is still pending.</p>
+
+<p>See unique jobs in action here:</p>
+
+<p><a href="https://www.youtube.com/watch?v=1ZFTul0AEjU&amp;list=PLjeHh2LSCFrWGT5uVjUuFKAcrcj5kSai1"><img src="http://img.youtube.com/vi/1ZFTul0AEjU/0.jpg" alt="Unique Jobs" /></a></p>
+
+<h2 id="enable">Enable</h2>
+
+<p>First, enable the unique subsystem:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Disable uniqueness in testing, this has the potential to cause much head scratching...</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Enterprise</span><span class="p">.</span><span class="nf">unique!</span> <span class="k">unless</span> <span class="no">Rails</span><span class="p">.</span><span class="nf">env</span><span class="p">.</span><span class="nf">test?</span>
+</code></pre></div></div>
+
+<h2 id="use">Use</h2>
+
+<p>Then, each job which needs uniqueness must declare a time period during which the job should be considered unique:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MyJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+  <span class="n">sidekiq_options</span> <span class="ss">unique_for: </span><span class="mi">10</span><span class="p">.</span><span class="nf">minutes</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>This means that a second job can be pushed to Redis after 10 minutes or after the first job has successfully processed.  If your job retries for a while, 10 minutes can pass, thus allowing another copy of the same job to be pushed to Redis.  <strong>Design your jobs so that uniqueness is considered best effort, not a 100% guarantee</strong>
+A time limit is mandatory so that if a process crashes, any locks it is holding won’t last forever.</p>
+
+<p>Jobs are considered unique based on <code class="language-plaintext highlighter-rouge">(class, args, queue)</code>, meaning a job with the same args can be pushed to different queues.</p>
+
+<p>Keep your <code class="language-plaintext highlighter-rouge">unique_for</code> period short. A lock period of more than a few minutes should be considered a code smell. You can reduce the number of retries so a failing job quickly dies and does not cause concurrent execution: <code class="language-plaintext highlighter-rouge">unique_for: 10.minutes, retry: 4</code>.</p>
+
+<h2 id="scheduled-jobs">Scheduled Jobs</h2>
+
+<p>The uniqueness period for a scheduled job includes the delay time.  If you use <code class="language-plaintext highlighter-rouge">MyWorker.perform_in(1.hour, ...)</code>, the uniqueness for this job will last 70 minutes (1.hour + the 10.minutes unique_for TTL).  You won’t be able to push the same job until it runs successfully or 70 minutes have passed.</p>
+
+<h2 id="retries">Retries</h2>
+
+<p>A job that is pending retry will still hold the unique lock and prevent further jobs from being enqueued until the retry succeeds or the timeout passes.  Manually removing the job from the retry queue will not remove the lock.</p>
+
+<p>If the lock expires for a job while pending retry, a second duplicate job can be enqueued with the same lock.</p>
+
+<p>Sidekiq will remove the lock for any job which automatically dies. Jobs which are manually killed via the Web UI do not have their lock removed.</p>
+
+<h2 id="unlock-policy">Unlock Policy</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">unique_until</code> option allows you to control when the unique lock is removed.  The default value is <code class="language-plaintext highlighter-rouge">success</code>: the job will not unlock until it executes successfully, it will remain locked even if it raises an error and goes into the retry queue.</p>
+
+<p>The alternative value is <code class="language-plaintext highlighter-rouge">start</code>: the job will unlock right before it
+starts executing.  This fixes the possibility of a race condition for
+some unique jobs between the finish of the job and unlocking: read
+<a href="/sidekiq/sidekiq/issues/3471#issuecomment-300866335">#3471</a> for detail.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sidekiq_options</span> <span class="ss">unique_for: </span><span class="mi">20</span><span class="p">.</span><span class="nf">minutes</span><span class="p">,</span> <span class="ss">unique_until: :start</span>
+</code></pre></div></div>
+
+<p>If the job raises an error, it will <strong>not</strong> try to retake the lock and may be duplicate enqueued.  I recommend avoiding the <code class="language-plaintext highlighter-rouge">start</code> policy unless you know your job is affected by the race condition.</p>
+
+<h2 id="bypassing-or-dynamically-setting-uniqueness">Bypassing or Dynamically Setting Uniqueness</h2>
+
+<p>If you declare <code class="language-plaintext highlighter-rouge">unique_for</code> in the Worker’s class-level <code class="language-plaintext highlighter-rouge">sidekiq_options</code> but want to push a one-off job that bypasses the uniqueness check, use <code class="language-plaintext highlighter-rouge">set</code> to dynamically override the <code class="language-plaintext highlighter-rouge">unique_for</code> option:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># disable uniqueness</span>
+<span class="no">MyWorker</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="ss">unique_for: </span><span class="kp">false</span><span class="p">).</span><span class="nf">perform_async</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="c1"># set a custom unique time</span>
+<span class="no">MyWorker</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="ss">unique_for: </span><span class="mi">300</span><span class="p">).</span><span class="nf">perform_async</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>NB: The <code class="language-plaintext highlighter-rouge">set</code> API can be used to dynamically override any job option!</p>
+
+<h2 id="lock-context">Lock Context</h2>
+
+<p>Unique locks are based on <code class="language-plaintext highlighter-rouge">(class, queue, args)</code> but as of Sidekiq Enterprise 7.0.3, you can override this context. For example here’s how to exclude the last argument in a job:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SomeJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+  <span class="n">sidekiq_options</span> <span class="ss">unique_for: </span><span class="mi">10</span><span class="p">.</span><span class="nf">minutes</span>
+
+  <span class="c1"># Assume we want the unique lock to ignore the `c` argument.</span>
+  <span class="c1"># NB: any mutation of `args` here will *not* affect what is pushed to Redis.</span>
+  <span class="c1"># NB: will not work for ActiveJobs, which use a slightly different</span>
+  <span class="c1"># payload format for their arguments.</span>
+  <span class="c1">#</span>
+  <span class="c1"># @param job Hash</span>
+  <span class="c1"># @return Array</span>
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">sidekiq_unique_context</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">job</span><span class="p">[</span><span class="s2">"args"</span><span class="p">]</span>
+    <span class="c1"># remove the last argument</span>
+    <span class="n">a</span><span class="p">.</span><span class="nf">pop</span> <span class="k">if</span> <span class="n">a</span><span class="p">.</span><span class="nf">size</span> <span class="o">==</span> <span class="mi">3</span>
+
+    <span class="p">[</span><span class="n">job</span><span class="p">[</span><span class="s2">"class"</span><span class="p">],</span> <span class="n">job</span><span class="p">[</span><span class="s2">"queue"</span><span class="p">],</span> <span class="n">a</span><span class="p">]</span>
+  <span class="k">end</span>
+
+  <span class="c1"># if you add a `d` argument, you'd better remember to update the code</span>
+  <span class="c1"># above or you'll have some strange behavior!</span>
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="query">Query</h2>
+
+<p>You can query for the state of a lock with the <code class="language-plaintext highlighter-rouge">locked?</code> API:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Enterprise</span><span class="o">::</span><span class="no">Unique</span><span class="p">.</span><span class="nf">locked?</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span><span class="kp">nil</span><span class="p">,</span> <span class="n">klass</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="c1"># jid | nil</span>
+</code></pre></div></div>
+
+<p>It will return the JID holding the lock or <code class="language-plaintext highlighter-rouge">nil</code> if unlocked. Queue is optional; Sidekiq will check <code class="language-plaintext highlighter-rouge">sidekiq_options</code> if you do not pass it in.</p>
+
+<h2 id="reliability">Reliability</h2>
+
+<p>The uniqueness feature makes an extra call to Redis before pushing the job.  This network call is not protected by <code class="language-plaintext highlighter-rouge">reliable_push</code> so uniqueness can raise network errors in your webapp and cause the push to Redis to fail.  This is a trait of any client middleware that makes a network call and not specific to uniqueness.</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

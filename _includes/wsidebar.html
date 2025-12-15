@@ -1,0 +1,7 @@
+<h4>Wiki Pages</h4>
+<ul>
+{% assign wikipages = site.pages || where: "menu", "wiki" || sort: "title" %}
+{% for wpage in wikipages %}
+  <li class="wiki-link"><a href='{{ wpage.url }}'>{{ wpage.title }}</a></li>
+{% endfor %}
+</ul>

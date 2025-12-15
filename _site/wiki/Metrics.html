@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Metrics</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Sidekiq 7.0 introduces a new subsystem for gathering job execution data along with a new Metrics tab within the Web UI to explore this data. The data is designed to help you answer a few questions:</p>
+
+<ul>
+  <li>Which type of jobs executed?</li>
+  <li>Which type of jobs took the most amount of time to execute?</li>
+  <li>How has the performance of Job X changed recently?</li>
+  <li>When did any deploys occur during this time?</li>
+</ul>
+
+<p>The graphs show data for <strong>the last hour</strong> by default. The data is retained in Redis for 8 hours. The Metrics tab isn’t meant to replace a full-blown APM like AppSignal, DataDog, New Relic, Scout, Skylight, etc.</p>
+
+<h2 id="metrics-home">Metrics Home</h2>
+
+<p><img src="https://raw.githubusercontent.com/sidekiq/sidekiq/main/examples/metrics.png" alt="metrics" /></p>
+
+<p>The Metrics home page shows a graph and table, focused on the Total Execution Time per Job Class. Lower is better.</p>
+
+<p>A successful job is one which runs without raising an error to Sidekiq and we only track execution time for successful jobs.
+You can see a Failure job count in the table but since failures can have unpredictable performance, tracking their time might cause a false sense of performance regression.
+Average execution time is simply (Total Execution Time / Success).</p>
+
+<p>In the graph above we can see most of the job types look very healthy but one type <code class="language-plaintext highlighter-rouge">SlowJob</code> looks very suspicious. Click its name in the table row to get more detail.</p>
+
+<h2 id="metrics-job-detail">Metrics Job Detail</h2>
+
+<p><img src="https://raw.githubusercontent.com/sidekiq/sidekiq/main/examples/metrics_job.png" alt="metrics" /></p>
+
+<p>The detail page shows an overall histogram of execution times for the past hour along with a bubble graph of fine-grained data per minute for the given job type.</p>
+
+<p>In the bar graph, we want to see big bars on the left. In the bubble graph, lower is faster and fatter bubbles mean more executions. Ideally you want nice fat bubbles at the bottom of the graph with little variation.</p>
+
+<p>We can see that SlowJob has a bunch of executions which are very fast (see the 20ms bar) but a mound of slower executions ranging from 750ms to 13sec. Very fast executions usually mean you are returning early in the <code class="language-plaintext highlighter-rouge">perform</code> method, that’s normal and ok. The slower group indicates unpredictable job execution time and something you might want to diagnose in order to better understand your application performance.</p>
+
+<p><strong>Remember that some job execution time variance is normal</strong>. Ruby will unpredictably switch to other threads or garbage collect, CPU and network performance can vary based on load, 3rd party services can vary in performance, etc.</p>
+
+<p>Sidekiq stores execution times using a “bucket histogram”. Each bucket represents the count of jobs which executed within the timespan represented by that bucket. The first bucket represents 0-20 ms and each bucket increases by 1.5x, the second bucket is 20-30 ms, the third is 30-45 ms, etc. See <code class="language-plaintext highlighter-rouge">lib/sidekiq/metrics/</code> for implementation details.</p>
+
+<h2 id="tracking-deployments">Tracking Deployments</h2>
+
+<p>Sidekiq provides a simple Deploy API so capistrano scripts or similar can mark a deploy. The Metrics graphs will show a vertical line at that point in time so sudden changes can be correlated. If the current directory is a Git repo, here’s a simple script which will label each deploy with the current git SHA and commit subject (e.g. “d0f12ab3 Add foo to bar”):</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s2">"sidekiq/deploy"</span>
+<span class="n">gitdesc</span> <span class="o">=</span> <span class="sb">`git log -1 --format="%h %s"`</span><span class="p">.</span><span class="nf">strip</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Deploy</span><span class="p">.</span><span class="nf">mark!</span><span class="p">(</span><span class="n">gitdesc</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>You’ll see a vertical red line for every deploy in the graphs and the legend for that point in the X-axis will display the deploy label.</p>
+
+<p><img src="https://user-images.githubusercontent.com/2911/189455943-18e898af-ee51-4b4c-9dd7-9bbc37d304bd.png" alt="deploy marks" /></p>
+
+<h2 id="contributing">Contributing</h2>
+
+<p>The Metrics subsystem is brand new right now which means it’s ripe for improvement!
+I’m especially interested in high-quality graphs and visualizations in the Web UI.
+Here’s how to contribute:</p>
+
+<ol>
+  <li>Fork and clone the repo: <code class="language-plaintext highlighter-rouge">git clone git@github.com:USERNAME/sidekiq.git</code></li>
+  <li>Pull down all dependencies: <code class="language-plaintext highlighter-rouge">bundle &amp;&amp; cd myapp &amp;&amp; bundle</code></li>
+  <li>Make sure Foreman is installed: <code class="language-plaintext highlighter-rouge">gem install foreman</code></li>
+  <li>Start all subsystems (Web UI, Sidekiq, job seeder) with Foreman: <code class="language-plaintext highlighter-rouge">foreman start</code></li>
+  <li>Open [[http://localhost:3000/sidekiq/metrics]]</li>
+</ol>
+
+<p>Refresh the Metrics page over the next few minutes as jobs are performed and metrics data streams into Redis.
+The Ruby code is in <code class="language-plaintext highlighter-rouge">lib/sidekiq/metrics</code>. The Web UI is in <code class="language-plaintext highlighter-rouge">web/views/metrics*.erb</code>.</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

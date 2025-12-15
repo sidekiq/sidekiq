@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Reliability</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Reliability encompasses Sidekiq’s ability to withstand network problems without loss of data. There are three aspects of reliability with Sidekiq and Redis:</p>
+
+<ol>
+  <li>pushing jobs to Redis, see the <a href="/wiki/Pro-Reliability-Client.html">client reliability</a> page.</li>
+  <li>fetching jobs from Redis, see below.</li>
+  <li>scheduling jobs, see below.</li>
+</ol>
+
+<h2 id="setup">Setup</h2>
+
+<p>TL;DR To use the Reliability features in Sidekiq Pro, add this to your initializer:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Client</span><span class="p">.</span><span class="nf">reliable_push!</span> <span class="k">unless</span> <span class="no">Rails</span><span class="p">.</span><span class="nf">env</span><span class="p">.</span><span class="nf">test?</span>
+
+<span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">super_fetch!</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">reliable_scheduler!</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Read on for more detail. This screencast gives a quick overview:</p>
+
+<p><a href="https://www.youtube.com/watch?v=3HY6lcAvuhU&amp;list=PLjeHh2LSCFrWGT5uVjUuFKAcrcj5kSai1" title="Reliability"><img src="http://img.youtube.com/vi/3HY6lcAvuhU/0.jpg" alt="Reliability" /></a></p>
+
+<p>Note: this video is somewhat out of date as it discusses previous reliability solutions (<code class="language-plaintext highlighter-rouge">reliable_fetch</code>, <code class="language-plaintext highlighter-rouge">timed_fetch</code>) which are no longer available. <code class="language-plaintext highlighter-rouge">super_fetch</code> has replaced both.</p>
+
+<h2 id="using-super_fetch">Using super_fetch</h2>
+
+<p>Sidekiq uses BRPOP to fetch a job from the queue in Redis.  This is very efficient and simple but it has one drawback: the job is now removed from Redis.  If Sidekiq crashes while processing that job, it is lost forever.  This is not a problem for many but some businesses need absolute reliability when processing jobs.</p>
+
+<p>Sidekiq does its best to never lose jobs but it can’t guarantee it; the only way to guarantee job durability is to <strong>not remove it from Redis until it is complete</strong>.  For instance, if Sidekiq is restarted mid-job, it will try to push the unfinished jobs back to Redis but networking issues can prevent this.</p>
+
+<p>Sidekiq Pro offers an alternative fetch strategy, super_fetch, for job processing using Redis’ <a href="http://redis.io/commands/lmove">LMOVE</a> command which keeps jobs in Redis. To enable super_fetch:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="c1"># This needs to be within the configure_server block</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">super_fetch!</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>When Sidekiq starts, you should see SuperFetch activated:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>INFO: Sidekiq Pro 3.5.0, commercially licensed.  Thanks for your support!
+INFO: Booting Sidekiq 5.0.0 with redis options {:url=&gt;nil}
+INFO: Starting processing, hit Ctrl-C to stop
+INFO: SuperFetch activated
+</code></pre></div></div>
+
+<h3 id="recovering-jobs">Recovering Jobs</h3>
+
+<p>When a Sidekiq process dies without warning (e.g. <code class="language-plaintext highlighter-rouge">kill -9</code> or a Ruby VM crash), its jobs in progress become orphans.  On process startup, super_fetch will look for orphaned jobs for all registered processes:</p>
+
+<ol>
+  <li>if the process’s heartbeat has expired (it takes 60 seconds to expire); AND</li>
+  <li>if a minute has passed since the last orphan check</li>
+</ol>
+
+<p>Additionally the orphan check will run a complete SCAN of the Redis database for orphaned queues once an hour; it can take a substantial amount of time (i.e. over a few seconds) if your Redis database has a lot of keys. As always, I recommend using a separate Redis database or instance for cache data vs job data. The hour buffer prevents Sidekiq from slamming Redis with heavyweight SCANs. The minute buffer in (2) ensures that you don’t have a vicious cycle of process death due to recovered jobs which are poison pills.</p>
+
+<p>In summary, super_fetch might recover jobs in 5 minutes or 3 hours, there’s no guarantee. Restarting a process is the best way to signal Sidekiq Pro to look for orphans.</p>
+
+<h3 id="notification">Notification</h3>
+
+<p>As of v5.2, Sidekiq Pro can fire a callback when super_fetch rescues an orphaned job.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">config</span><span class="p">.</span><span class="nf">super_fetch!</span> <span class="k">do</span> <span class="o">|</span><span class="n">jobstr</span><span class="p">,</span> <span class="n">pill</span><span class="o">|</span>
+  <span class="c1"># jobstr is a raw String of JSON. Sidekiq does not parse the JSON string</span>
+  <span class="c1"># as this could have been the cause of the crash!</span>
+  <span class="nb">puts</span> <span class="s2">"Uh oh, Sidekiq Pro just recovered this job! </span><span class="si">#{</span><span class="n">jobstr</span><span class="si">}</span><span class="s2">"</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h3 id="poison-pills">Poison Pills</h3>
+
+<p>A job which triggers a process crash is known as a “poison pill”. When super_fetch recovers an orphaned job, it notes this recovery. If the same job is recovered three times in 72 hours, it will be classified as a poison pill and automatically killed (i.e. placed in the Dead set). You will need to fix the crash and manually rerun the job. Sidekiq Pro will provide information about the pill in the callback. If the job has not yet been classified as a poison pill, <code class="language-plaintext highlighter-rouge">pill</code> will be nil.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">config</span><span class="p">.</span><span class="nf">super_fetch!</span> <span class="k">do</span> <span class="o">|</span><span class="n">jobstr</span><span class="p">,</span> <span class="n">pill</span><span class="o">|</span>
+  <span class="nb">puts</span> <span class="s2">"Killed poison pill: </span><span class="si">#{</span><span class="n">pill</span><span class="p">.</span><span class="nf">jid</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">pill</span><span class="p">.</span><span class="nf">klass</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">pill</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h3 id="fetch-algorithms">Fetch algorithms</h3>
+
+<p>super_fetch supports the same two queue prioritization mechanisms as Sidekiq’s basic fetch: strict priority and weighted random.</p>
+
+<h4 id="strict-ordering">Strict ordering</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sidekiq -e production -q critical -q default -q bulk
+</code></pre></div></div>
+
+<p>Beware that strict ordering can lead to starvation: <code class="language-plaintext highlighter-rouge">bulk</code> jobs will only be processed once the <code class="language-plaintext highlighter-rouge">critical</code> and <code class="language-plaintext highlighter-rouge">default</code> queues are empty.  You can switch ordering for different processes to ensure everyone gets processed:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sidekiq -e production -q critical -q default -q bulk
+sidekiq -e production -q bulk -q default -q critical
+</code></pre></div></div>
+
+<h4 id="weighted-random">Weighted random</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sidekiq -e production -q critical,3 -q default,2 -q bulk,1
+</code></pre></div></div>
+
+<p>When using weighted ordering, sidekiq will randomly choose a queue to check, without blocking, using weighted random choice. For example, in the command given above, sidekiq will <code class="language-plaintext highlighter-rouge">sample</code> from the array <code class="language-plaintext highlighter-rouge">["critical", "critical", "critical", "default", "default", "bulk"]</code> so critical will be checked first 50% of the time.</p>
+
+<h3 id="limitations">Limitations</h3>
+
+<p>Because of <a href="https://github.com/redis/redis/issues/1785">Redis limits</a>, super_fetch has to poll the queues in Redis for jobs, rather than blocking. If you have M queues being processed by N processes, you will get M * N Redis calls per second which can lead to a lot of traffic and CPU burn.</p>
+
+<p>The solution is to reduce the number of queues or specialize your Sidekiq processes: have each process only handle 3-4 queues.</p>
+
+<h2 id="metrics">Metrics</h2>
+
+<p>super_fetch increments the <code class="language-plaintext highlighter-rouge">jobs.poison</code> and <code class="language-plaintext highlighter-rouge">jobs.recovered.fetch</code>
+<a href="https://github.com/sidekiq/sidekiq/wiki/Pro-Metrics#commercial-metrics">Statsd metrics</a> when it kills a poison pill job and recovers an orphaned job. When killing a poison pill, super_fetch logs this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>warn("Killed poison pill #{klass} #{jid}")
+</code></pre></div></div>
+
+<h2 id="scheduler">Scheduler</h2>
+
+<p>Sidekiq’s default scheduler is not atomic, it pops jobs off the scheduled queue and enqueues them with two network round trips.  Sidekiq Pro offers a reliable scheduler which uses Lua to perform the same task atomically:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">reliable_scheduler!</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>This feature is optional but highly recommended to enable.  It does have
+the drawback that client-side middleware is not invoked when enqueuing
+the scheduled jobs, since the entire operation takes place within Redis.
+<strong>It is not safe to enable if you are running Redis Cluster.</strong>  <a href="https://github.com/sidekiq/sidekiq/wiki/Using-Redis#architecture">More
+detail</a></p>
+
+<h3 id="notes">Notes</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">super_fetch</code> is more sensitive to Redis network latency than Sidekiq’s default <code class="language-plaintext highlighter-rouge">basic_fetch</code>, especially if you have lots of queues and high concurrency. This can result in idle processor threads, starved for jobs. Check out [[Using Redis]] for tips on measuring Redis latency.</li>
+</ul>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

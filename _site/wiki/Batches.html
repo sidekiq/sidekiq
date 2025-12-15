@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Batches</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Batches are Sidekiq Pro’s term for a collection of jobs which can be monitored as a group.  You can create a set of jobs to execute in parallel and then execute a callback when all the jobs are finished.</p>
+
+<p>See batches in action here:</p>
+
+<p><a href="https://www.youtube.com/watch?v=b2fI0vGf3Bo&amp;list=PLjeHh2LSCFrWGT5uVjUuFKAcrcj5kSai1"><img src="http://img.youtube.com/vi/b2fI0vGf3Bo/0.jpg" alt="Batches" /></a></p>
+
+<h2 id="overview">Overview</h2>
+
+<p>Some businesses upload a lot of Excel spreadsheets to load data into their database.  These spreadsheets might have hundreds of rows, each row requiring a few seconds of processing.  I don’t want to process the file synchronously (the web browser will time out after 60 seconds) and I don’t want to spin off the upload as a single Sidekiq job (there’s no performance benefit to serial execution).  Instead I want to break up the Excel spreadsheet into one job per row and get the benefit of parallelism to massively speed up the data load time.  But how do I know when the entire thing is done?  How do I track the progress?</p>
+
+<p>This is what <strong>batches</strong> allow you to do!</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">batch</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">batch</span><span class="p">.</span><span class="nf">description</span> <span class="o">=</span> <span class="s2">"Batch description (this is optional)"</span>
+<span class="n">batch</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="ss">:success</span><span class="p">,</span> <span class="no">MyCallback</span><span class="p">,</span> <span class="ss">:to</span> <span class="o">=&gt;</span> <span class="n">user</span><span class="p">.</span><span class="nf">email</span><span class="p">)</span>
+<span class="n">batch</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+  <span class="n">rows</span><span class="p">.</span><span class="nf">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">row</span><span class="o">|</span> <span class="no">RowJob</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="p">}</span>
+<span class="k">end</span>
+<span class="nb">puts</span> <span class="s2">"Just started Batch </span><span class="si">#{</span><span class="n">batch</span><span class="p">.</span><span class="nf">bid</span><span class="si">}</span><span class="s2">"</span>
+</code></pre></div></div>
+
+<p>Here we’ve created a new Batch, told it to fire a callback when all jobs are successful and then filled it with jobs to perform.  The <code class="language-plaintext highlighter-rouge">bid</code>, or Batch ID, is the unique identifier for a Batch.</p>
+
+<p>You can dynamically add jobs to a batch from within an executing job:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SomeJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="nb">puts</span> <span class="s2">"Working within batch </span><span class="si">#{</span><span class="n">bid</span><span class="si">}</span><span class="s2">"</span>
+    <span class="n">batch</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+      <span class="c1"># add more jobs</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">bid</code> is a method on Sidekiq::Job which gives access to the ID of the Batch associated with this job.  <code class="language-plaintext highlighter-rouge">batch</code> is a method on Sidekiq::Job that gives access to the Batch associated to this job.</p>
+
+<h2 id="adding-jobs">Adding Jobs</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">jobs</code> method is <strong>atomic</strong>. All jobs created in the block are actually pushed atomically to Redis at the end of the block. If an error is raised, <em>none</em> of the jobs will go to Redis.</p>
+
+<p>Note that it is <strong>not safe</strong> to call <code class="language-plaintext highlighter-rouge">batch.jobs</code> more than once when defining the batch. Jobs are asynchronous and once you’ve sent the jobs to Redis, those jobs can complete at any moment. Calling <code class="language-plaintext highlighter-rouge">batch.jobs</code> again or calling it N times can lead to errors where the batch has already completed due to this race condition. It is safe to “reopen” the batch and add more jobs from within a job in that batch. See the section on Huge Batches for further discussion on safely loading batch jobs.</p>
+
+<p>Bad, calling <code class="language-plaintext highlighter-rouge">batch.jobs</code> 10 times:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">batch</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span>
+<span class="mi">10</span><span class="p">.</span><span class="nf">times</span> <span class="k">do</span>
+  <span class="n">batch</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+    <span class="no">MyJob</span><span class="p">.</span><span class="nf">perform_async</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Good, one call:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">batch</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">batch</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+  <span class="mi">10</span><span class="p">.</span><span class="nf">times</span> <span class="k">do</span>
+    <span class="no">MyJob</span><span class="p">.</span><span class="nf">perform_async</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Batch#jobs does not support Sidekiq’s transactional push feature. Batch jobs <strong>always</strong> push at the end of the <code class="language-plaintext highlighter-rouge">jobs</code> block, even in a transaction.</p>
+
+<h2 id="status">Status</h2>
+
+<p>To fetch the status for a Batch programmatically, you use <code class="language-plaintext highlighter-rouge">Sidekiq::Batch::Status</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">status</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="o">::</span><span class="no">Status</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">bid</span><span class="p">)</span>
+<span class="n">status</span><span class="p">.</span><span class="nf">total</span> <span class="c1"># jobs in the batch =&gt; 98</span>
+<span class="n">status</span><span class="p">.</span><span class="nf">failures</span> <span class="c1"># failed jobs so far =&gt; 5</span>
+<span class="n">status</span><span class="p">.</span><span class="nf">pending</span> <span class="c1"># jobs which have not succeeded yet =&gt; 17</span>
+<span class="n">status</span><span class="p">.</span><span class="nf">created_at</span> <span class="c1"># =&gt; 2012-09-04 21:15:05 -0700</span>
+<span class="n">status</span><span class="p">.</span><span class="nf">complete?</span> <span class="c1"># if all jobs have executed at least once =&gt; false</span>
+<span class="n">status</span><span class="p">.</span><span class="nf">join</span> <span class="c1"># blocks until the batch is considered complete, note that some jobs might have failed</span>
+<span class="n">status</span><span class="p">.</span><span class="nf">failure_info</span>  <span class="c1"># an array of failed jobs (Sidekiq &lt;8)</span>
+<span class="n">status</span><span class="p">.</span><span class="nf">failed_jids</span>   <span class="c1"># an array of failed JIDs (Sidekiq 8+)</span>
+<span class="n">status</span><span class="p">.</span><span class="nf">data</span> <span class="c1"># a hash of data about the batch which can easily be converted to JSON for javascript usage</span>
+</code></pre></div></div>
+
+<h2 id="callbacks">Callbacks</h2>
+
+<p>Sidekiq can notify you when a Batch is complete or successful with <code class="language-plaintext highlighter-rouge">batch.on(event, klass, options={})</code>:</p>
+
+<ol>
+  <li>complete - when all jobs in the batch have run once, successful or not.</li>
+  <li>success - when all jobs in the batch have completed <strong>successfully</strong>.</li>
+  <li>death - the first time a batch job dies</li>
+</ol>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SomeClass</span>
+  <span class="k">def</span> <span class="nf">on_complete</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="nb">puts</span> <span class="s2">"Uh oh, batch has failures"</span> <span class="k">if</span> <span class="n">status</span><span class="p">.</span><span class="nf">failures</span> <span class="o">!=</span> <span class="mi">0</span>
+  <span class="k">end</span>
+  <span class="k">def</span> <span class="nf">on_success</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="nb">puts</span> <span class="s2">"</span><span class="si">#{</span><span class="n">options</span><span class="p">[</span><span class="s1">'uid'</span><span class="p">]</span><span class="si">}</span><span class="s2">'s batch succeeded.  Kudos!"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+<span class="n">batch</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span>
+<span class="c1"># this will call "SomeClass.new.on_success"</span>
+<span class="n">batch</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="ss">:success</span><span class="p">,</span> <span class="no">SomeClass</span><span class="p">,</span> <span class="s1">'uid'</span> <span class="o">=&gt;</span> <span class="n">current_user</span><span class="p">.</span><span class="nf">id</span><span class="p">)</span>
+<span class="c1"># You can also use Class#method notation which is like calling "AnotherClass.new.method"</span>
+<span class="n">batch</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="ss">:complete</span><span class="p">,</span> <span class="s1">'AnotherClass#method'</span><span class="p">,</span> <span class="s1">'uid'</span> <span class="o">=&gt;</span> <span class="n">current_user</span><span class="p">.</span><span class="nf">id</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Callback methods receive two parameters: a Status object for the Batch and the set of options which you provided when declaring the callback. Note that options are marshalled through JSON so use only basic types.</p>
+
+<p>Regarding success, if a job fails continually <strong>it’s possible the success event will never fire</strong>. If a job fails all retries and dies, it will fire any :death callbacks. The :death callback is always fired for first job in the batch that fails and does not retry. Even if you configure jobs to disable retries or job death, it will still fire the :death callback.</p>
+
+<p>:death and :success are not mutually exclusive but the death callback firing means that the batch will not fire success without manual intervention. If you deploy a fix and manually re-enqueue a dead batch job, the batch can still fire :success.</p>
+
+<p>As of Sidekiq Pro 7.1, empty Batches are legal and allowed. An empty batch will automatically create a <code class="language-plaintext highlighter-rouge">Sidekiq::Batch::Empty</code> job which fires any callbacks.</p>
+
+<h2 id="linger-and-expiration">Linger and Expiration</h2>
+
+<p>Normally batches complete quickly. Upon success, Sidekiq will remove the batch from the Web UI listing but the batch data will linger in Redis for 24 hours so any status or polling API calls you make for that BID will still work during that window of time.</p>
+
+<p>Pending batches will expire in Redis after 30 days. Callbacks won’t trigger and you will have to deal with performing any cleanup work manually.</p>
+
+<h2 id="manually-deleting-a-job-for-a-batch">Manually deleting a job for a batch</h2>
+
+<p>Say you have a batch <code class="language-plaintext highlighter-rouge">b</code> with three jobs, <code class="language-plaintext highlighter-rouge">j1</code>, <code class="language-plaintext highlighter-rouge">j2</code> and <code class="language-plaintext highlighter-rouge">j3</code>. Suppose <code class="language-plaintext highlighter-rouge">b</code> has a success callback. <code class="language-plaintext highlighter-rouge">j1</code> and <code class="language-plaintext highlighter-rouge">j2</code> complete successfully but <code class="language-plaintext highlighter-rouge">j3</code> fails for some reason. If you delete the job <code class="language-plaintext highlighter-rouge">j3</code> manually, then the batch callback will <em>never automatically complete</em>. (It is recommended that you allow jobs to <a href="FAQ#how-do-i-cancel-a-sidekiq-job">cancel themselves</a>.)</p>
+
+<p>In this case, the batch data will remain in Redis until it expires. The Web UI will show the batch as waiting on a job that has now been deleted. This is another reason to avoid directly deleting jobs – cancellation does not suffer from this problem.</p>
+
+<h2 id="callback-details">Callback Details</h2>
+
+<p>Batch callbacks run in their own job, they are enqueued in the queue used by the final job in the batch to execute. If there are errors in the batch callback, it will retry like any other job. You can specify a different queue for the callback jobs so they have a higher priority:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">batch</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">batch</span><span class="p">.</span><span class="nf">callback_queue</span> <span class="o">=</span> <span class="s1">'critical'</span>
+<span class="n">batch</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="ss">:success</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<span class="n">batch</span><span class="p">.</span><span class="nf">jobs</span> <span class="o">...</span>
+</code></pre></div></div>
+
+<h2 id="monitoring">Monitoring</h2>
+
+<p>Sidekiq Pro contains extensions for the Sidekiq Web UI, including an overview for Batches which shows the current status of all Batches along with a Batch details page listing any errors associated with jobs in the Batch.  Require the Pro extension where you require the standard Web UI:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'sidekiq/pro/web'</span>
+<span class="n">mount</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span> <span class="o">=&gt;</span> <span class="s1">'/sidekiq'</span>
+</code></pre></div></div>
+
+<p>Note that the UI shows all in-progress batches.  Successful batches are removed so as to not fill up the UI.</p>
+
+<h2 id="polling">Polling</h2>
+
+<p>You can poll for the status of a batch (perhaps to show a progress bar as the batch is processed) using the built-in Rack endpoint.  Add it to your application’s <code class="language-plaintext highlighter-rouge">config.ru</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'sidekiq/pro/batch_status'</span>
+<span class="n">use</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Pro</span><span class="o">::</span><span class="no">BatchStatus</span>
+<span class="n">run</span> <span class="no">Myapp</span><span class="o">::</span><span class="no">Application</span>
+</code></pre></div></div>
+
+<p>Then you can query the server to get a JSON blob of data about a batch by passing the BID.  For example:</p>
+
+<p>http://localhost:3000/batch_status/bc7f822afbb40747.json</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="nl">"complete"</span><span class="p">:</span><span class="kc">true</span><span class="p">,</span><span class="nl">"bid"</span><span class="p">:</span><span class="s2">"bc7f822afbb40747"</span><span class="p">,</span><span class="nl">"total"</span><span class="p">:</span><span class="mi">10</span><span class="p">,</span><span class="nl">"pending"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nl">"description"</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nl">"failures"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nl">"created_at"</span><span class="p">:</span><span class="mf">1367700200.1111438</span><span class="p">,</span><span class="nl">"fail_info"</span><span class="p">:[]}</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="huge-batches">Huge Batches</h2>
+
+<p><strong>Warning</strong>: this functionality is only available if you use the <code class="language-plaintext highlighter-rouge">Sidekiq::Job</code> API; it does not work with ActiveJob.</p>
+
+<p>Batches can contain hundreds of thousands of jobs but loading all those jobs in serial can take a long time.  There’s no reason why you can’t parallelize the loading of a batch by first creating a batch with an initial set of jobs whose only purpose is to <em>load other jobs into the batch</em>, perhaps 1000 each:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">b</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">b</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="ss">:success</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<span class="n">b</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+  <span class="mi">200</span><span class="p">.</span><span class="nf">times</span> <span class="k">do</span> <span class="o">|</span><span class="n">idx</span><span class="o">|</span>
+    <span class="c1"># each loader job will push 1000 jobs of some other type</span>
+    <span class="no">Loader</span><span class="p">.</span><span class="nf">perform_async</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">Loader</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+  <span class="no">SIZE</span> <span class="o">=</span> <span class="mi">1000</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+    <span class="c1"># assume we want to create a job for each of 200,000 database records</span>
+    <span class="c1"># query for our set of 1000 records</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="no">SomeModel</span><span class="p">.</span><span class="nf">limit</span><span class="p">(</span><span class="no">SIZE</span><span class="p">).</span><span class="nf">offset</span><span class="p">(</span><span class="n">idx</span><span class="o">*</span><span class="no">SIZE</span><span class="p">).</span><span class="nf">select</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span>
+    <span class="c1"># reopen our own batch to add more jobs to it</span>
+    <span class="n">batch</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+      <span class="c1"># push 1000 jobs in one network call to Redis, saves 999 round trips</span>
+      <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Client</span><span class="p">.</span><span class="nf">push_bulk</span><span class="p">(</span><span class="s1">'class'</span> <span class="o">=&gt;</span> <span class="no">SomeJob</span><span class="p">,</span> <span class="s1">'args'</span> <span class="o">=&gt;</span> <span class="n">results</span><span class="p">.</span><span class="nf">map</span><span class="p">{</span><span class="o">|</span><span class="n">x</span><span class="o">|</span> <span class="p">[</span><span class="n">x</span><span class="p">.</span><span class="nf">id</span><span class="p">]})</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>By parallelizing the load and using <code class="language-plaintext highlighter-rouge">push_bulk</code>, creating large batches should go from minutes to seconds!</p>
+
+<h2 id="canceling-a-batch">Canceling a Batch</h2>
+
+<p>If a batch of jobs is no longer valid, can you cancel them or remove them from Redis?</p>
+
+<p>Sidekiq’s internal data structures don’t make it efficient to remove a job in Redis.  Instead I recommend you have each job check if it is still valid when it executes.  This way the jobs don’t do any extra work and Redis is happy.  The Batch API makes this pretty easy to do.</p>
+
+<p><strong>Step 1</strong> Create the batch as normal:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">batch</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">batch</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+  <span class="c1"># define your work</span>
+<span class="k">end</span>
+<span class="c1"># save batch.bid somewhere</span>
+</code></pre></div></div>
+
+<p><strong>Step 2</strong> Cancel the batch due to some user action</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">batch</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">bid</span><span class="p">)</span>
+<span class="n">batch</span><span class="p">.</span><span class="nf">invalidate_all</span>
+</code></pre></div></div>
+
+<p><strong>Step 3</strong> Each job verifies its own validity</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MyJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+
+  <span class="k">def</span> <span class="nf">perform</span>
+    <span class="k">return</span> <span class="k">unless</span> <span class="n">valid_within_batch?</span> <span class="c1"># this method is on Sidekiq::Job</span>
+    <span class="c1"># do actual work</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="api">API</h2>
+
+<p>You can iterate through all known Batches, getting a <code class="language-plaintext highlighter-rouge">Sidekiq::Batch::Status</code> for each entry:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">bs</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">BatchSet</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">bs</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">status</span><span class="o">|</span>
+  <span class="nb">puts</span> <span class="n">status</span><span class="p">.</span><span class="nf">bid</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">Sidekiq::BatchSet</code> will contain only Batches with outstanding jobs.</p>
+
+<p>In some rare cases, you no longer need a batch in Redis. To remove batch data from Redis, use <code class="language-plaintext highlighter-rouge">delete</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">bs</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">BatchSet</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">bs</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">batch</span><span class="o">|</span>
+  <span class="n">batch</span><span class="p">.</span><span class="nf">delete</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">batch</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="o">::</span><span class="no">Status</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">bid</span><span class="p">)</span> <span class="c1"># bid is the batch ID</span>
+<span class="n">batch</span><span class="p">.</span><span class="nf">delete</span>
+</code></pre></div></div>
+
+<p>Deleting a batch will break Sidekiq if there are still jobs associated with that batch in Redis.</p>
+
+<h2 id="tagging">Tagging</h2>
+
+<p>In 8.1, Batches can be tagged to make them searchable or visible to users. You provide an Array of Strings which will be indexed in Redis. <strong>This feature requires Redis 7.4 or Valkey 9.0</strong>. Tags must be regexp “word” characters, with an optional colon to separate key/values, more precisely: <code class="language-plaintext highlighter-rouge">\A\w+(:\w+)?\z</code>. No emoji, sorry! 😢</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">b</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">b</span><span class="p">.</span><span class="nf">tags</span> <span class="o">=</span> <span class="sx">%w(customer:1234 lang:fr acme_corp)</span>
+</code></pre></div></div>
+
+<p>You can filter batches in the Web UI or use the API:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">BatchSet</span><span class="p">.</span><span class="nf">new</span><span class="p">.</span><span class="nf">scan_tags</span><span class="p">(</span><span class="s2">"customer:1234"</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">bid</span><span class="o">|</span>
+  <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="o">::</span><span class="no">Status</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">bid</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="complex-workflows">Complex Workflows</h2>
+
+<p>Learn how Batches can enable some <a href="/wiki/Complex-Job-Workflows-with-Batches.html">complex
+workflows</a>
+and <a href="/wiki/Really-Complex-Workflows-with-Batches.html">really complex workflows</a>.</p>
+
+<h2 id="testing">Testing</h2>
+
+<p>Batches always require Redis to be running. Your test code can create a batch and execute those jobs (even with inline mode) but the batch will never run the :complete or :success callbacks until you add the middleware manually to the testing environment like this:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">before</span> <span class="ss">:suite</span> <span class="k">do</span>
+  <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Testing</span><span class="p">.</span><span class="nf">server_middleware</span> <span class="k">do</span> <span class="o">|</span><span class="n">chain</span><span class="o">|</span>
+    <span class="n">chain</span><span class="p">.</span><span class="nf">add</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="o">::</span><span class="no">Server</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Now your batch callbacks will run once all batch jobs have run.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Testing</span><span class="p">.</span><span class="nf">inline!</span>
+<span class="n">b</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">b</span><span class="p">.</span><span class="nf">on</span><span class="p">(</span><span class="ss">:success</span><span class="p">,</span> <span class="s2">"Something#done"</span><span class="p">,</span> <span class="s2">"foo"</span> <span class="o">=&gt;</span> <span class="s2">"bar"</span><span class="p">)</span>
+<span class="n">b</span><span class="p">.</span><span class="nf">jobs</span> <span class="k">do</span>
+  <span class="no">SomeJob</span><span class="p">.</span><span class="nf">perform_async</span>
+  <span class="no">SomeJob</span><span class="p">.</span><span class="nf">perform_async</span>
+<span class="k">end</span>
+<span class="c1"># Something#done should be called</span>
+</code></pre></div></div>
+
+<h2 id="death">Death</h2>
+
+<p>If any job within a batch dies, the Batch will never run its success callback and will be considered “dead” also.  As of Sidekiq Pro 4.0, you can enumerate all dead batches via API:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">bds</span> <span class="o">=</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Batch</span><span class="o">::</span><span class="no">DeadSet</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">bds</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">status</span><span class="o">|</span>
+  <span class="n">status</span><span class="p">.</span><span class="nf">dead_jids</span> <span class="c1"># =&gt; ["abcdef123456", ...]</span>
+  <span class="c1"># ...recover somehow...</span>
+  <span class="n">status</span><span class="p">.</span><span class="nf">delete</span> <span class="c1"># removes the batch from Redis</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>and perform any necessary manual repair.  This API is still pretty rudimentary; suggestions for improvement are welcome.</p>
+
+<p>As of Sidekiq Pro 5.2.1, the death of a job in a child batch will cause its parent batch’s death callback to run.</p>
+
+<h2 id="stuck-batches">“Stuck” Batches</h2>
+
+<p>Some customers have seen batches which get “stuck” with pending jobs which can’t be found. There’s generally one of several reasons:</p>
+
+<ol>
+  <li>A job was lost due to a process crash. If you have super_fetch enabled, this job should be eventually rescued and retried.
+If you don’t have super_fetch activated, please activate it ASAP!</li>
+  <li>A job was lost due to the process being killed during a deploy. This can be caused by long-running jobs which don’t allow    Sidekiq to shut down within 30 seconds. Use a gem like <a href="https://github.com/fatkodima/sidekiq-iteration"><code class="language-plaintext highlighter-rouge">sidekiq-iteration</code></a> to    create well-behaved jobs which can shut down quickly and safely.</li>
+  <li>A job was registered with a Batch but was never pushed to Redis. This can happen when you create a Batch but are using the    transactional client feature which delays the actual push to Redis until the current database transaction has committed. This    delay creates a window of time where process death leads to a corrupt batch (fixed in Sidekiq 7.2.2).</li>
+</ol>
+
+<p>Stuck batches are almost always due to forced process death. Remember to use the TSTP signal to give your processes as much time as possible to stop and never use <code class="language-plaintext highlighter-rouge">kill -9</code> in production.</p>
+
+<h2 id="notes">Notes</h2>
+
+<ul>
+  <li>Before Sidekiq Pro 7.1, a Batch with zero jobs was invalid, its behavior was undefined. As of 7.1, empty Batches will push a Sidekiq::Batch::Empty job which will execute any callbacks.</li>
+  <li>If you find that batches are stuck with Pending jobs, especially right around a deployment, verify you are gracefully restarting Sidekiq as designed: send TSTP as early as possible, TERM as late as possible, and never use <code class="language-plaintext highlighter-rouge">kill -9</code>.</li>
+  <li>You can dynamically add jobs to a Batch but <strong>only</strong> by another job within that batch (or child batch).  It is not safe to modify a Batch outside of the batch or within its callbacks.</li>
+  <li>Batches don’t work well with ActiveJob because an ActiveJob retry looks like a success to Sidekiq. Please use native Sidekiq::Jobs.</li>
+  <li>Don’t ever disable retries in a batch job.  If the job fails, it disappears and the batch will never succeed. You need retries to diagnose and fix the job so the batch succeeds.</li>
+  <li>Be careful using job uniqueness with a batch. If an error is raised while defining the batch jobs, the lock will remain in Redis but the job will never be pushed to Redis. See <a href="/sidekiq/sidekiq/issues/3662">sidekiq/sidekiq#3662</a> for details.</li>
+  <li>Batches can contain scheduled jobs too, e.g. <code class="language-plaintext highlighter-rouge">perform_in(10.minutes)</code>.  This will prevent the batch from finishing until that scheduled job runs.</li>
+  <li>I’ve heard from multiple customers using batches with millions of jobs.  It is not known how high Batches scale but I recommend verifying your Redis instance sizing before pushing the envelope.</li>
+  <li>Seeing “negative pending” batches?  Make sure you’ve configured Redis
+with <a href="https://github.com/sidekiq/sidekiq/wiki/Using-Redis#memory"><code class="language-plaintext highlighter-rouge">maxmemory-policy noeviction</code></a>.</li>
+  <li>Seeing “positive pending” batches but can’t find those pending jobs? They may be in a super_fetch private queue. This can happen if your deploys are misconfigured and creating orphaned jobs. Check your <code class="language-plaintext highlighter-rouge">-t</code> shutdown timeout value (default: 25) and make sure your deploy tool is giving Sidekiq at least N+5 (i.e. 30) seconds before killing the process.</li>
+</ul>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

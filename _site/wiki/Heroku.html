@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Heroku</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Using sidekiq with Heroku is simple, use <code class="language-plaintext highlighter-rouge">Procfile</code> with your Rails app to start a worker process:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>web: bundle exec puma ...
+worker: bundle exec sidekiq -c 10
+</code></pre></div></div>
+
+<p>See <a href="http://devcenter.heroku.com/articles/procfile">this page</a> for more details about Procfiles, Foreman and Heroku.</p>
+
+<p><strong>WARNING: don’t ever use a concurrency value greater than 10 without thorough testing.</strong> I’ve seen dozens of customers crushing their dyno CPUs with <code class="language-plaintext highlighter-rouge">concurrency: 25</code> or higher. This will only make jobs slower.</p>
+
+<h2 id="redis">Redis</h2>
+
+<p>To connect to your Redis addon, you’ll need to tell Sidekiq which
+environment variable name to use by setting REDIS_PROVIDER to the name
+of that variable, e.g. <code class="language-plaintext highlighter-rouge">heroku config:set REDIS_PROVIDER=REDISTOGO_URL</code>.
+Make sure you’re using <a href="https://github.com/sidekiq/sidekiq/wiki/Using-Redis#multiple-redis-instances">discrete Redis
+instances</a> for any other purposes such as a <a href="http://guides.rubyonrails.org/caching_with_rails.html#activesupport-cache-rediscachestore">Rails cache store</a>. Lacking the REDIS_PROVIDER variable Sidekiq can also use the REDIS_URL environment variable.</p>
+
+<p>Heroku Redis 6.0 and later on production tiers requires TLS encryption
+but uses self-signed certificates. With the default SSL configuration,
+connections will fail with a self-signed-certificate error. This
+behavior can be configured for Sidekiq in an initializer file. See
+<a href="https://github.com/sidekiq/sidekiq/wiki/Using-Redis#using-an-initializer">Using Redis: Using an Initializer</a>.</p>
+
+<p>An example:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">SIDEKIQ_REDIS_CONFIGURATION</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="ss">url: </span><span class="no">ENV</span><span class="p">.</span><span class="nf">fetch</span><span class="p">(</span><span class="no">ENV</span><span class="p">.</span><span class="nf">fetch</span><span class="p">(</span><span class="s2">"REDIS_PROVIDER"</span><span class="p">,</span> <span class="s2">"REDIS_URL"</span><span class="p">),</span> <span class="kp">nil</span><span class="p">),</span> <span class="c1"># use REDIS_PROVIDER for Redis environment variable name, defaulting to REDIS_URL </span>
+  <span class="ss">ssl_params: </span><span class="p">{</span> <span class="ss">verify_mode: </span><span class="no">OpenSSL</span><span class="o">::</span><span class="no">SSL</span><span class="o">::</span><span class="no">VERIFY_NONE</span> <span class="p">},</span> <span class="c1"># we must trust Heroku and AWS here</span>
+<span class="p">}</span>
+
+<span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">redis</span> <span class="o">=</span> <span class="no">SIDEKIQ_REDIS_CONFIGURATION</span>
+<span class="k">end</span>
+
+<span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_client</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">redis</span> <span class="o">=</span> <span class="no">SIDEKIQ_REDIS_CONFIGURATION</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Earlier versions of Heroku Redis use stunnel to secure their connection, in conjunction with the <code class="language-plaintext highlighter-rouge">heroku/redis</code> buildpack; this requires no custom configuration in Sidekiq, but the buildpack will attempt to stunnel all Heroku Redis connections, including any Redis 6 instances. It is much simpler to keep all Redis instances on the later generation.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">redis</code> gem has supported the <code class="language-plaintext highlighter-rouge">verify_mode</code> key since version 4.0.2. The <code class="language-plaintext highlighter-rouge">hiredis</code> gem does not work in this environment, so do not include it in your Gemfile if you are using <code class="language-plaintext highlighter-rouge">redis</code> with <code class="language-plaintext highlighter-rouge">rediss://</code> and <code class="language-plaintext highlighter-rouge">OpenSSL::SSL::VERIFY_NONE</code>.</p>
+
+<h2 id="configuration">Configuration</h2>
+
+<h3 id="memory">Memory</h3>
+
+<p>Setting this environment variable will greatly <a href="https://www.mikeperham.com/2018/04/25/taming-rails-memory-bloat/">reduce Sidekiq’s memory usage</a> and is highly recommended:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>heroku config:set MALLOC_ARENA_MAX=2
+</code></pre></div></div>
+
+<p>As of September 2019 Heroku <a href="https://devcenter.heroku.com/changelog-items/1683">changed</a> <code class="language-plaintext highlighter-rouge">MALLOC_ARENA_MAX</code> to default to <code class="language-plaintext highlighter-rouge">2</code> for <strong>new</strong> Ruby applications. Ruby apps created after then shouldn’t need to set this environment variable.</p>
+
+<h3 id="concurrency">Concurrency</h3>
+
+<p>I don’t recommend setting Sidekiq’s concurrency greater than 10. At larger values, you will see poor performance due to CPU contention. With <code class="language-plaintext highlighter-rouge">1x</code> and <code class="language-plaintext highlighter-rouge">2x</code> dynos, I would set concurrency to 5.</p>
+
+<h3 id="environment-variables">Environment Variables</h3>
+
+<p>Sidekiq will pay attention to a few well-known environment variables:</p>
+
+<ul>
+  <li>REDIS_PROVIDER - should contain the name of the environment variable for your chosen Redis provider</li>
+  <li>RAILS_ENV - “production”, “staging”, “development”, alternative to <code class="language-plaintext highlighter-rouge">-e</code></li>
+  <li>RAILS_MAX_THREADS - controls process concurrency, alternative to <code class="language-plaintext highlighter-rouge">-c</code></li>
+</ul>
+
+<h3 id="dyno-types">Dyno Types</h3>
+
+<p>The best value dyno types for Rails apps are the <a href="https://judoscale.com/guides/how-many-dynos"><code class="language-plaintext highlighter-rouge">2x</code> and <code class="language-plaintext highlighter-rouge">Performance-L</code> dynos</a>. I don’t suggest using <code class="language-plaintext highlighter-rouge">1x</code> or <code class="language-plaintext highlighter-rouge">Performance-M</code> dynos unless you have a specific reason. If you wish to use a <code class="language-plaintext highlighter-rouge">2x</code> dyno, keep your concurrency low, e.g. <code class="language-plaintext highlighter-rouge">-c 3</code>, as 1GB is not much memory for large Rails app. If you are using a <code class="language-plaintext highlighter-rouge">Performance-L</code> dyno, Sidekiq will only utilize one of the eight cores of the dyno unless you are using Sidekiq Enterprise’s <a href="/wiki/Ent-Multi-Process.html">Multi-Process</a> feature.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>worker: SIDEKIQ_MAXMEM_MB=1750 bundle exec sidekiqswarm ...
+</code></pre></div></div>
+
+<p>With SIDEKIQ_MAXMEM_MB, the swarm parent process will restart any Sidekiq child processes which bloat past 1.75GB of memory. Since P-Ls have 14GB of memory (8 * 1.75 = 14), this should keep the entire thing within RAM with no more R14 memory errors.</p>
+
+<h3 id="connection-pool-sizing">Connection Pool Sizing</h3>
+
+<p>Don’t tune the pool manually. All modern connection pools in Ruby are lazy, they will use as many connections as they need but no more. Lower Sidekiq’s concurrency if you need to use fewer connections.</p>
+
+<h3 id="shutdown-timeout">Shutdown Timeout</h3>
+
+<p>Heroku puts a hard limit of 30 seconds on a process restart, Sidekiq’s default of <code class="language-plaintext highlighter-rouge">-t 25</code> gives jobs 25 seconds to finish before starting the “force shutdown” procedure. After 25 seconds, Sidekiq will push any remaining unfinished jobs back to Redis and exit.
+Make sure your jobs are <a href="/wiki/Best-Practices.html">idempotent</a> so they will safely restart when the process starts back up.</p>
+
+<p>You can optionally use <code class="language-plaintext highlighter-rouge">require
+'sidekiq/api';Sidekiq::ProcessSet.new.each(&amp;:quiet!)</code> in a pre-deploy
+hook to give your jobs even more time to finish. If your pre-deploy
+process fails for some reason, you must still terminate Sidekiq using
+<code class="language-plaintext highlighter-rouge">Sidekiq::ProcessSet.new.each(&amp;:stop!)</code>. Heroku will start new processes
+and they will start fetching jobs again. See
+<a href="https://github.com/sidekiq/sidekiq/issues/5047">#5047</a>.</p>
+
+<h3 id="debugging">Debugging</h3>
+
+<p>If you need to get backtraces from a running Heroku worker process, you can use the Sidekiq API to deliver a TTIN signal:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">❯</span> <span class="n">bundle</span> <span class="nb">exec</span> <span class="n">rails</span> <span class="n">c</span>
+<span class="n">irb</span><span class="p">(</span><span class="n">main</span><span class="p">):</span><span class="mo">001</span><span class="p">:</span><span class="mi">0</span><span class="o">&gt;</span> <span class="nb">require</span> <span class="s1">'sidekiq/api'</span>
+<span class="n">irb</span><span class="p">(</span><span class="n">main</span><span class="p">):</span><span class="mo">003</span><span class="p">:</span><span class="mi">0</span><span class="o">&gt;</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">ProcessSet</span><span class="p">.</span><span class="nf">new</span><span class="p">.</span><span class="nf">each</span> <span class="p">{</span><span class="o">|</span><span class="n">ps</span><span class="o">|</span> <span class="n">ps</span><span class="p">.</span><span class="nf">dump_threads</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>Within 5 seconds, the process should log a backtrace for every thread in the process.</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

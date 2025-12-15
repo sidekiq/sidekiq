@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Pro Metrics</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Sidekiq Pro can send runtime metrics to Statsd for distribution.  Set up a global metrics handler and add the [[middleware]] to track job execution.</p>
+
+<h2 id="enabling-metrics">Enabling Metrics</h2>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Add gem 'dogstatsd-ruby' to your Gemfile</span>
+<span class="nb">require</span> <span class="s1">'datadog/statsd'</span>
+
+<span class="c1"># WARNING Be careful here. I've found that when using UDP, Statsd can perform a DNS lookup</span>
+<span class="c1"># on the hostname for every single packet. This can lead to mysterious but severe</span>
+<span class="c1"># performance issues.</span>
+<span class="c1">#</span>
+<span class="c1"># You might consider installing a local caching DNS resolver instead (e.g. dnsmasq)</span>
+<span class="c1"># or performing the DNS resolution once, here in the initializer.</span>
+<span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+
+  <span class="c1"># As of Sidekiq Pro 8.0, this is the recommended Statsd tag/namespace configuration.</span>
+  <span class="c1"># Read more about global tags: https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging/</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">dogstatsd</span> <span class="o">=</span> <span class="o">-&gt;</span><span class="p">{</span> 
+    <span class="no">Datadog</span><span class="o">::</span><span class="no">Statsd</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s2">"metrics.example.com"</span><span class="p">,</span> <span class="mi">8125</span><span class="p">,</span>
+      <span class="ss">tags: </span><span class="p">[</span><span class="s2">"env:</span><span class="si">#{</span><span class="n">config</span><span class="p">[</span><span class="ss">:environment</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"service:sidekiq"</span><span class="p">],</span>
+      <span class="ss">namespace: </span><span class="no">Rails</span><span class="p">.</span><span class="nf">application</span><span class="p">.</span><span class="nf">name</span>
+    <span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="n">config</span><span class="p">.</span><span class="nf">server_middleware</span> <span class="k">do</span> <span class="o">|</span><span class="n">chain</span><span class="o">|</span>
+    <span class="nb">require</span> <span class="s1">'sidekiq/middleware/server/statsd'</span>
+    <span class="n">chain</span><span class="p">.</span><span class="nf">add</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Middleware</span><span class="o">::</span><span class="no">Server</span><span class="o">::</span><span class="no">Statsd</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="importing-statsd">Importing Statsd</h2>
+
+<p>Other metrics systems will have ingesters for importing Statsd metric data into their native format:</p>
+
+<ul>
+  <li><a href="https://github.com/prometheus/statsd_exporter">Prometheus</a></li>
+  <li><a href="https://github.com/influxdata/telegraf/tree/master/plugins/inputs/statsd">InfluxDB</a></li>
+</ul>
+
+<h2 id="metrics">Metrics</h2>
+
+<p>Sidekiq Pro will send the following metrics for each job:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jobs.count =&gt; counter
+jobs.success =&gt; counter
+jobs.failure =&gt; counter
+jobs.perform =&gt; gauge (time)
+jobs.perform_dist =&gt; distribution (time)
+</code></pre></div></div>
+
+<p>i.e. <code class="language-plaintext highlighter-rouge">count</code> will always be incremented.  <code class="language-plaintext highlighter-rouge">success</code> or <code class="language-plaintext highlighter-rouge">failure</code> will be incremented based on the outcome.  <code class="language-plaintext highlighter-rouge">perform</code> tracks the amount of time (in milliseconds) spent in the worker. Your Statsd system may provide additional metrics based on these explicit ones..</p>
+
+<h2 id="tags">Tags</h2>
+
+<p>Sidekiq Pro sends several tags with each metric.  Some Statsd platforms will accept these tags and allow you to visualize/report the <code class="language-plaintext highlighter-rouge">perform</code> metrics based on these additional dimensions:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tags: ["worker:VideoEncodeWorker", "queue:bulk"] 
+</code></pre></div></div>
+
+<h2 id="dynamic-options">Dynamic Options</h2>
+
+<p>If you want to set per-job options for the metrics, you can customize the options used within the middleware:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">server_middleware</span> <span class="k">do</span> <span class="o">|</span><span class="n">chain</span><span class="o">|</span>
+    <span class="nb">require</span> <span class="s1">'sidekiq/middleware/server/statsd'</span>
+    <span class="n">chain</span><span class="p">.</span><span class="nf">add</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Middleware</span><span class="o">::</span><span class="no">Server</span><span class="o">::</span><span class="no">Statsd</span>
+  <span class="k">end</span>
+
+  <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Middleware</span><span class="o">::</span><span class="no">Server</span><span class="o">::</span><span class="no">Statsd</span><span class="p">.</span><span class="nf">options</span> <span class="o">=</span> <span class="o">-&gt;</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span> <span class="k">do</span>
+    <span class="p">{</span>
+      <span class="ss">tags: </span><span class="p">[</span><span class="s2">"worker:</span><span class="si">#{</span><span class="n">w</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"queue:</span><span class="si">#{</span><span class="n">q</span><span class="si">}</span><span class="s2">"</span><span class="p">],</span>
+      <span class="ss">sample_rate: </span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="s1">'dd_rate'</span><span class="p">]</span> <span class="o">||</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Note how we are using an attribute within the job payload to control the <code class="language-plaintext highlighter-rouge">sample_rate</code> option, like so:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Myapp::HighVolumeJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+  <span class="n">sidekiq_options</span> <span class="ss">dd_rate: </span><span class="mf">0.1</span>
+</code></pre></div></div>
+
+<p>Slick!</p>
+
+<h2 id="commercial-metrics">Commercial Metrics</h2>
+
+<p>Several other metrics are sent for various Pro features:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jobs.expired - when a job is expired
+jobs.recovered.push - when a job is recovered by reliable_push after network outage
+jobs.recovered.fetch - when a job is recovered by super_fetch after process crash
+jobs.poison - when a poison pill job is detected and killed by super_fetch
+batch.created - when a batch is created
+batch.complete - when a batch is completed
+batch.success - when a batch is successful
+batches.duration =&gt; gauge (time)
+batches.duration_dist =&gt; distribution (time)
+</code></pre></div></div>
+
+<h2 id="historical-data">Historical Data</h2>
+
+<p>Sidekiq Pro is limited to metrics which are focused on individual job executions. For global historical data (e.g. charting the numbers you see in the Web UI) please read [[Ent-Historical-Metrics]].</p>
+
+<h2 id="distributions">Distributions</h2>
+
+<p>All <code class="language-plaintext highlighter-rouge">*_dist</code> metrics use the <a href="https://docs.datadoghq.com/metrics/distributions/">proprietary Datadog <code class="language-plaintext highlighter-rouge">distribution</code> datatype</a>, which provide much better histograms for monitoring. You can disable these datatypes if you wish to avoid proprietary extensions:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="p">{</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span>
+  <span class="n">c</span><span class="p">[</span><span class="ss">:use_datadog_extensions</span><span class="p">]</span> <span class="o">=</span> <span class="kp">false</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="notes">Notes</h2>
+
+<ul>
+  <li>As of Sidekiq Pro 7.0, the <code class="language-plaintext highlighter-rouge">dogstatsd-ruby</code> gem is the only supported Statsd client library. <code class="language-plaintext highlighter-rouge">statsd-ruby</code> support was removed as it was not getting nearly as much maintenance and it does not support features like tagging.</li>
+  <li>As of Sidekiq Pro 8.0, all metrics are prefixed with <code class="language-plaintext highlighter-rouge">sidekiq.</code> so you do not need to declare a <code class="language-plaintext highlighter-rouge">sidekiq</code> namespace anymore.</li>
+</ul>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

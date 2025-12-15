@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Testimonials</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Have a great success story in rolling out Sidekiq?  Add it here!</p>
+
+<p>Andre Arko, @indirect, <a href="http://plexapp.com">Plex</a>:</p>
+
+<blockquote>
+  <p>we replaced 12-15 EC2 medium instances running 4 delayed_job processes each with a single EC2 medium instance running 4 sidekiq workers with 25 concurrency each. The final tally is something like $2500 less per month in EC2 costs.</p>
+</blockquote>
+
+<p>James Hu, @axsuul, <a href="http://jellibug.com">Jellibug</a>:</p>
+
+<blockquote>
+  <p>We process <strong>millions</strong> of jobs everyday just on the data we get from social media providers like Twitter and Instagram. Sidekiq allows us to do it all on one VPS.</p>
+</blockquote>
+
+<p>Fredrik Bjork, @fbjork, <a href="http://ban.jo">Banjo</a>:</p>
+
+<blockquote>
+  <p>we went from around 160 dynos down to 10 now.</p>
+</blockquote>
+
+<p>Jacob Gillespie, @jacobwg, <a href="http://checkafilm.com">Check a Film</a>:</p>
+
+<blockquote>
+  <p>We load movie release and review information in real-time for any movie using Sidekiq - it’s really fast.</p>
+</blockquote>
+
+<p>Mooktakim Ahmed, @mooktakim, <a href="http://tweet-a-lot.com">tweet-a-lot.com</a>:</p>
+
+<blockquote>
+  <p>We process all twitter stream posts incredibly fast using only a couple of Sidekiq workers.</p>
+</blockquote>
+
+<p>Mustafa Turan, @mustafaturan, <a href="http://dakick.com">dakick.com</a>:</p>
+
+<blockquote>
+  <p>We process all event recommendation mailings with sidekiq. We processed all the job with 1/4 time with same number of resque workers and with 1/10 of CPU requirements. Thanks sidekiq!</p>
+</blockquote>
+
+<p>Kevin Menard, @nirvdrum, <a href="http://mogotest.com">Mogotest</a>:</p>
+
+<blockquote>
+  <p>We perform a lot of work as we test Web sites, including lots of I/O wait on external services and some rigorous calculations during data analysis.  We segment logical “test runs” (what our customers see) into many subtasks to run in parallel.  With Sidekiq we can process 3.5x - 5x as many jobs per EC2 c1.medium than we could with Resque.  Plus with a long-lived process, we benefit from JITing on the JVM over the length of a deploy, speeding up our calculations.  The switch was a big win all around.</p>
+</blockquote>
+
+<p>Geoff Wright, @geoffw8, <a href="http://weartolook.com">weartolook</a></p>
+
+<blockquote>
+  <p>We run a lot of jobs: image fetching and processing, mail sending, product classification on lots of different fronts and checking if a product is still available. We had jobs running via Resque on our main app server, we could run ~10 workers before things started affecting the web experience. We have just set up a second, dedicated job server running Sidekiq (32GB RAM, 3.2 Quad-core i7) and I’m yet to find our upper limit. I am currently running 200 jobs, the load average is just over 1 and I’m using around 6.5GB RAM.</p>
+</blockquote>
+
+<p>Avishai Weiss, @apartable, <a href="http://apartable.com">Apartable</a></p>
+
+<blockquote>
+  <p>We run several background jobs to process images, update stats and the like. Prior to Sidekiq, I was using Resque, and very quickly hit a wall, but migrating to Sidekiq helped reduce the load on the utility machine tremendously. So far so good!</p>
+</blockquote>
+
+<p>David Celis, @davidcelis, <a href="https://goodbre.ws/about">goodbre.ws</a></p>
+
+<blockquote>
+  <p>Went from having only two resque workers processing jobs to being able to have 25 workers in one process with a much lower memory footprint.</p>
+</blockquote>
+
+<p>Vito Botta, @vitobotta, <a href="http://onapp.com">onapp.com</a></p>
+
+<blockquote>
+  <p>If you were here and were a hot blonde I’d kiss you :D At OnApp we process asynchronously tons of jobs concerning data from all the clouds managed by our clients, plus CDN data, and a lot more. Simply switching from Resque to Sidekiq has made everything so much lighter and faster. Thanks!</p>
+</blockquote>
+
+<p>Glenn Goodrich, @ruprict, <a href="http://kyck.com">kyck.com</a></p>
+
+<blockquote>
+  <p>We had 4 Resque queues with multiple workers on heroku and Sidekiq allowed us to shave those by half. After the switch, a bunch of other issues seem to have mysteriously disappeared. Yay!</p>
+</blockquote>
+
+<p>Marcelo Silveira, @mhfsilveira, <a href="http://140proof.com">140Proof</a></p>
+
+<blockquote>
+  <p>At the moment we switched from Resque to Sidekiq, we had 7 busy m1.large boxes running 70 Resque workers. A single Sidekiq process with 25 threads was able to handle all of the load alone. We’re now running 2 boxes with 1 process each, just for the sake of redundancy, and planning on reducing the instance type since they’re using very few resources.</p>
+</blockquote>
+
+<p>Piotr Usewicz, @pusewicz, <a href="http://www.homestay.com">Homestay.com</a>:</p>
+
+<blockquote>
+  <p>We had to quickly spawn more machines to process over 200k image optimisations with various sizes. Adding more Sidekiq workers and making the whole process last much shorter was super easy!</p>
+</blockquote>
+
+<p>Kyle Drake, @kyledrake, <a href="https://neocities.org">Neocities</a>:</p>
+
+<blockquote>
+  <p>Neocities has used Sidekiq since day one for our endless async worker requirements: Site screenshotting, CDN cache purging, site archiving, thumbnails for images, emails, anti-spam machine learning algorithms, and much more. Simply put, Neocities would not have been possible without Sidekiq. I mean, I literally built another Geocities in an insanely hostile modern web with <em>one person</em> using it, WTF. It’s stable, it’s reliable, and I can trust it to do the work. It’s one of the greatest power toys in Ruby’s arsenal, and is the killer app of Tony Arcieri’s infrastructure work to improve Ruby concurrency without resorting to the flaming tire fire that is EventMachine. Most importantly, it completely challenges the popular notion that Ruby Can’t Scale. Absolutely brilliant.</p>
+</blockquote>
+
+<p>Previous: [[Problems and Troubleshooting]] Next: [[Related Projects]]</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

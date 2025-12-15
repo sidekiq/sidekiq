@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Monitoring</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>I recommend using a tool to monitor your Sidekiq processes in production to ensure they are always up and aren’t using too much memory or CPU. My recommendations:</p>
+
+<ol>
+  <li>Use <a href="https://github.com/sidekiq/sidekiq/tree/main/examples/systemd">Systemd</a> to start/stop Sidekiq.  This ensures if the Ruby VM crashes, the process will respawn immediately.</li>
+  <li>Sidekiq Enterprise has <a href="/wiki/Ent-Multi-Process.html">multi-process</a> mode which can monitor memory usage and restart bloated worker processes.</li>
+</ol>
+
+<h1 id="web-ui">Web UI</h1>
+
+<p>Sidekiq comes with a web application that can display the current state of a Sidekiq installation.</p>
+
+<h2 id="rails">Rails</h2>
+
+<p>Add the following to your <code class="language-plaintext highlighter-rouge">config/routes.rb</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'sidekiq/web'</span>
+<span class="c1"># or require 'sidekiq/pro/web'</span>
+<span class="c1"># or require 'sidekiq-ent/web'</span>
+
+<span class="no">Myapp</span><span class="o">::</span><span class="no">Application</span><span class="p">.</span><span class="nf">routes</span><span class="p">.</span><span class="nf">draw</span> <span class="k">do</span>
+  <span class="n">mount</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span> <span class="o">=&gt;</span> <span class="s2">"/sidekiq"</span> <span class="c1"># mount Sidekiq::Web in your Rails app</span>
+  <span class="o">...</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>It must be mounted within the <code class="language-plaintext highlighter-rouge">draw</code> block so it can reuse the same Rails session. If you still get a session error, it’s possible your Rails app is API-only. You must <a href="https://guides.rubyonrails.org/api_app.html#using-session-middlewares">enable sessions in an API-only Rails app</a>.</p>
+
+<h2 id="standalone">Standalone</h2>
+
+<p>Here’s sample code to run Sidekiq::Web by itself. Note we are configuring a cookie store for the session.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># This is sidekiq_web.ru</span>
+<span class="c1"># Run with `bundle exec rackup sidekiq_web.ru` or similar.</span>
+
+<span class="nb">require</span> <span class="s2">"securerandom"</span>
+<span class="nb">require</span> <span class="s2">"rack/session"</span>
+<span class="nb">require</span> <span class="s2">"sidekiq/web"</span>
+
+<span class="c1"># In a multi-process deployment, all Web UI instances should share</span>
+<span class="c1"># this secret key so they can all decode the encrypted browser cookies</span>
+<span class="c1"># and provide a working session.</span>
+<span class="c1"># Rails does this in /config/initializers/secret_token.rb</span>
+<span class="n">secret_key</span> <span class="o">=</span> <span class="no">SecureRandom</span><span class="p">.</span><span class="nf">hex</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+<span class="n">use</span> <span class="no">Rack</span><span class="o">::</span><span class="no">Session</span><span class="o">::</span><span class="no">Cookie</span><span class="p">,</span> <span class="ss">secret: </span><span class="n">secret_key</span><span class="p">,</span> <span class="ss">same_site: </span><span class="kp">true</span><span class="p">,</span> <span class="ss">max_age: </span><span class="mi">86400</span>
+<span class="n">run</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span>
+</code></pre></div></div>
+
+<h2 id="proxying-the-web-ui">Proxying the Web UI</h2>
+
+<p>If you put nginx in front of Sidekiq’s Web UI, make sure you set <code class="language-plaintext highlighter-rouge">X-Script-Name</code> to the root location so that the Web UI can properly construct URLs to the necessary CSS/JS assets:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>location /myapp/admin/sidekiq {
+  proxy_set_header X-Script-Name /myapp/admin/sidekiq;
+  proxy_pass http://myapp.example.com/sidekiq;
+
+  proxy_set_header Host $host;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header X-Scheme $scheme;
+  proxy_set_header X-Real-IP $remote_addr;
+}
+</code></pre></div></div>
+
+<h3 id="authentication">Authentication</h3>
+
+<p>In a production application you’ll likely want to protect access to this information. You can use the constraints feature of routing (in the <em>config/routes.rb</em> file) to accomplish this:</p>
+
+<h4 id="devise">Devise</h4>
+
+<p>Allow any authenticated <code class="language-plaintext highlighter-rouge">User</code></p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/routes.rb</span>
+<span class="n">authenticate</span> <span class="ss">:user</span> <span class="k">do</span>
+  <span class="n">mount</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span> <span class="o">=&gt;</span> <span class="s1">'/sidekiq'</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Same as above but also ensures that <code class="language-plaintext highlighter-rouge">User#admin?</code> returns true</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/routes.rb</span>
+<span class="n">authenticate</span> <span class="ss">:user</span><span class="p">,</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="o">|</span><span class="n">u</span><span class="o">|</span> <span class="n">u</span><span class="p">.</span><span class="nf">admin?</span> <span class="p">}</span> <span class="k">do</span>
+  <span class="n">mount</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span> <span class="o">=&gt;</span> <span class="s1">'/sidekiq'</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h4 id="clearance">Clearance</h4>
+
+<p>Clearance provides <a href="https://github.com/thoughtbot/clearance#access-control">routing constraints</a> to restrict access to routes.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Blog</span><span class="o">::</span><span class="no">Application</span><span class="p">.</span><span class="nf">routes</span><span class="p">.</span><span class="nf">draw</span> <span class="k">do</span>
+  <span class="c1"># Restricts access to all authenticated users</span>
+  <span class="n">constraints</span> <span class="no">Clearance</span><span class="o">::</span><span class="no">Constraints</span><span class="o">::</span><span class="no">SignedIn</span><span class="p">.</span><span class="nf">new</span> <span class="k">do</span>
+    <span class="n">mount</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span><span class="p">,</span> <span class="ss">at: </span><span class="s1">'/sidekiq'</span>
+  <span class="k">end</span>
+
+  <span class="c1"># Restricts access to all authenticated admins</span>
+  <span class="n">constraints</span> <span class="no">Clearance</span><span class="o">::</span><span class="no">Constraints</span><span class="o">::</span><span class="no">SignedIn</span><span class="p">.</span><span class="nf">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">user</span><span class="o">|</span> <span class="n">user</span><span class="p">.</span><span class="nf">admin?</span> <span class="p">}</span> <span class="k">do</span>
+    <span class="n">mount</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span><span class="p">,</span> <span class="ss">at: </span><span class="s1">'/sidekiq'</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h4 id="authlogic">Authlogic</h4>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># lib/admin_constraint.rb</span>
+<span class="k">class</span> <span class="nc">AdminConstraint</span>
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">matches?</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">request</span><span class="p">.</span><span class="nf">cookie_jar</span><span class="p">[</span><span class="s1">'user_credentials'</span><span class="p">].</span><span class="nf">present?</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="p">.</span><span class="nf">find_by_persistence_token</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="nf">cookie_jar</span><span class="p">[</span><span class="s1">'user_credentials'</span><span class="p">].</span><span class="nf">split</span><span class="p">(</span><span class="s1">':'</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">user</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="p">.</span><span class="nf">admin?</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c1"># config/routes.rb</span>
+<span class="nb">require</span> <span class="s2">"admin_constraint"</span>
+<span class="n">mount</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span> <span class="o">=&gt;</span> <span class="s1">'/sidekiq'</span><span class="p">,</span> <span class="ss">:constraints</span> <span class="o">=&gt;</span> <span class="no">AdminConstraint</span><span class="p">.</span><span class="nf">new</span>
+</code></pre></div></div>
+<h5 id="authlogic-4">Authlogic 4+</h5>
+<p>Since Authlogic 4.0.0 turned on secure cookies then AdminConstraint reading ‘user_credentials’ from cookies will fail in default developer setup. Instead you can read it from session directly.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># lib/admin_constraint.rb</span>
+<span class="k">class</span> <span class="nc">AdminConstraint</span>
+  <span class="k">def</span> <span class="nf">matches?</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">request</span><span class="p">.</span><span class="nf">session</span><span class="p">.</span><span class="nf">has_key?</span><span class="p">(</span><span class="ss">:user_credentials</span><span class="p">)</span>
+
+    <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="p">.</span><span class="nf">find_by_persistence_token</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="nf">session</span><span class="p">.</span><span class="nf">fetch</span><span class="p">(</span><span class="ss">:user_credentials</span><span class="p">))</span>
+    <span class="n">user</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="p">.</span><span class="nf">admin?</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h4 id="restful-authentication-or-sorcery">Restful Authentication or Sorcery</h4>
+
+<p>Checks a <code class="language-plaintext highlighter-rouge">User</code> model instance that responds to <code class="language-plaintext highlighter-rouge">admin?</code></p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># lib/admin_constraint.rb</span>
+<span class="k">class</span> <span class="nc">AdminConstraint</span>
+  <span class="k">def</span> <span class="nf">matches?</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">request</span><span class="p">.</span><span class="nf">session</span><span class="p">[</span><span class="ss">:user_id</span><span class="p">]</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="p">.</span><span class="nf">find</span> <span class="n">request</span><span class="p">.</span><span class="nf">session</span><span class="p">[</span><span class="ss">:user_id</span><span class="p">]</span>
+    <span class="n">user</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="p">.</span><span class="nf">admin?</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c1"># config/routes.rb</span>
+<span class="nb">require</span> <span class="s1">'sidekiq/web'</span>
+<span class="nb">require</span> <span class="s1">'admin_constraint'</span>
+<span class="n">mount</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span> <span class="o">=&gt;</span> <span class="s1">'/sidekiq'</span><span class="p">,</span> <span class="ss">:constraints</span> <span class="o">=&gt;</span> <span class="no">AdminConstraint</span><span class="p">.</span><span class="nf">new</span>
+</code></pre></div></div>
+
+<h4 id="custom-external-authentication">Custom External Authentication</h4>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">AuthConstraint</span>
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">admin?</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="p">(</span><span class="n">cookie</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="nf">cookie_jar</span><span class="p">[</span><span class="s1">'auth'</span><span class="p">])</span>
+
+    <span class="no">Rails</span><span class="p">.</span><span class="nf">cache</span><span class="p">.</span><span class="nf">fetch</span><span class="p">(</span><span class="n">cookie</span><span class="p">[</span><span class="s1">'user'</span><span class="p">],</span> <span class="ss">:expires_in</span> <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">.</span><span class="nf">minute</span><span class="p">)</span> <span class="k">do</span>
+      <span class="n">auth_data</span> <span class="o">=</span> <span class="no">JSON</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="no">Base64</span><span class="p">.</span><span class="nf">decode64</span><span class="p">(</span><span class="n">cookie</span><span class="p">[</span><span class="s1">'data'</span><span class="p">]))</span>
+      <span class="n">response</span> <span class="o">=</span> <span class="no">HTTParty</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="no">Auth</span><span class="p">.</span><span class="nf">validate_url</span><span class="p">,</span> <span class="ss">:query</span> <span class="o">=&gt;</span> <span class="n">auth_data</span><span class="p">)</span>
+
+      <span class="n">response</span><span class="p">.</span><span class="nf">code</span> <span class="o">==</span> <span class="mi">200</span> <span class="o">&amp;&amp;</span> <span class="no">JSON</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="nf">body</span><span class="p">)[</span><span class="s1">'roles'</span><span class="p">].</span><span class="nf">to_a</span><span class="p">.</span><span class="nf">include?</span><span class="p">(</span><span class="s1">'Admin'</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c1"># config/routes.rb</span>
+<span class="n">constraints</span> <span class="nb">lambda</span> <span class="p">{</span><span class="o">|</span><span class="n">request</span><span class="o">|</span> <span class="no">AuthConstraint</span><span class="p">.</span><span class="nf">admin?</span><span class="p">(</span><span class="n">request</span><span class="p">)</span> <span class="p">}</span> <span class="k">do</span>
+  <span class="n">mount</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span> <span class="o">=&gt;</span> <span class="s1">'/admin/sidekiq'</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h4 id="rails-with-google-authentication">Rails with Google authentication</h4>
+
+<p>@jonhyman breaks down <a href="https://github.com/sidekiq/sidekiq/issues/2460#issuecomment-125694743">how Appboy uses Google to protect access to
+Sidekiq</a>.</p>
+
+<h4 id="github-authentication-with-wardengithub">Github authentication with <code class="language-plaintext highlighter-rouge">warden/github</code></h4>
+
+<p>See <a href="https://gist.github.com/badosu/5a6bb42cc0c0a7ae6e9b01313c61a5b9">Gist</a> from the creator of the rack-based <code class="language-plaintext highlighter-rouge">Sidekiq::Web</code> UI (since Sidekiq 4.2.0)</p>
+
+<h4 id="rails-http-basic-auth-from-routes">Rails HTTP Basic Auth from Routes</h4>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># config/routes.rb</span>
+<span class="nb">require</span> <span class="s2">"sidekiq/web"</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span><span class="p">.</span><span class="nf">use</span> <span class="no">Rack</span><span class="o">::</span><span class="no">Auth</span><span class="o">::</span><span class="no">Basic</span> <span class="k">do</span> <span class="o">|</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">|</span>
+  <span class="c1"># Protect against timing attacks:</span>
+  <span class="c1"># - See https://codahale.com/a-lesson-in-timing-attacks/</span>
+  <span class="c1"># - See https://thisdata.com/blog/timing-attacks-against-string-comparison/</span>
+  <span class="c1"># - Use &amp; (do not use &amp;&amp;) so that it doesn't short circuit.</span>
+  <span class="c1"># - Use digests to stop length information leaking (see also ActiveSupport::SecurityUtils.variable_size_secure_compare)</span>
+  <span class="no">ActiveSupport</span><span class="o">::</span><span class="no">SecurityUtils</span><span class="p">.</span><span class="nf">secure_compare</span><span class="p">(</span><span class="o">::</span><span class="no">Digest</span><span class="o">::</span><span class="no">SHA256</span><span class="p">.</span><span class="nf">hexdigest</span><span class="p">(</span><span class="n">username</span><span class="p">),</span> <span class="o">::</span><span class="no">Digest</span><span class="o">::</span><span class="no">SHA256</span><span class="p">.</span><span class="nf">hexdigest</span><span class="p">(</span><span class="no">ENV</span><span class="p">[</span><span class="s2">"SIDEKIQ_USERNAME"</span><span class="p">]))</span> <span class="o">&amp;</span>
+    <span class="no">ActiveSupport</span><span class="o">::</span><span class="no">SecurityUtils</span><span class="p">.</span><span class="nf">secure_compare</span><span class="p">(</span><span class="o">::</span><span class="no">Digest</span><span class="o">::</span><span class="no">SHA256</span><span class="p">.</span><span class="nf">hexdigest</span><span class="p">(</span><span class="n">password</span><span class="p">),</span> <span class="o">::</span><span class="no">Digest</span><span class="o">::</span><span class="no">SHA256</span><span class="p">.</span><span class="nf">hexdigest</span><span class="p">(</span><span class="no">ENV</span><span class="p">[</span><span class="s2">"SIDEKIQ_PASSWORD"</span><span class="p">]))</span>
+<span class="k">end</span> <span class="k">if</span> <span class="no">Rails</span><span class="p">.</span><span class="nf">env</span><span class="p">.</span><span class="nf">production?</span>
+<span class="n">mount</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span><span class="p">,</span> <span class="ss">at: </span><span class="s2">"/sidekiq"</span>
+</code></pre></div></div>
+
+<p>If you get an <code class="language-plaintext highlighter-rouge">ActionDispatch::Request::Session</code> error, you’ve hit an incompatibility between Rails and Rack.  See <a href="https://github.com/rails/rails/issues/15843#issuecomment-125784043">this comment</a> for a workaround.</p>
+
+<p>If you use Warden and set <code class="language-plaintext highlighter-rouge">failure_app</code> globally (such as in <code class="language-plaintext highlighter-rouge">application.rb</code> of a Rails project), you won’t see the browser HTTP Basic prompt as Warden will intercept the 401 and invoke your <code class="language-plaintext highlighter-rouge">failed_app</code> proc. To bypass this, you can define something like this:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">AllowBasicAuthPrompt</span>
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">app</span><span class="p">);</span> <span class="vi">@app</span> <span class="o">=</span> <span class="n">app</span><span class="p">;</span> <span class="k">end</span>
+  <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+    <span class="c1"># Tell Warden to not intercept the 401</span>
+    <span class="n">env</span><span class="p">[</span><span class="s1">'warden'</span><span class="p">].</span><span class="nf">custom_failure!</span><span class="p">;</span> <span class="vi">@app</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span><span class="p">.</span><span class="nf">use</span> <span class="no">AllowBasicAuthPrompt</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span><span class="p">.</span><span class="nf">use</span> <span class="no">Rack</span><span class="o">::</span><span class="no">Auth</span><span class="o">::</span><span class="no">Basic</span> <span class="k">do</span> <span class="o">|</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">|</span>
+  <span class="o">...</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>One click standalone app deploy on Heroku: <a href="https://heroku.com/deploy?template=https://github.com/honeypotio/sidekiq_dashboard"><img src="https://www.herokucdn.com/deploy/button.svg" alt="Heroku Deploy" /></a></p>
+
+<p>You can mount sidekiq to existing Rack application as well:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'your_app'</span>
+
+<span class="nb">require</span> <span class="s1">'sidekiq/web'</span>
+<span class="n">run</span> <span class="no">Rack</span><span class="o">::</span><span class="no">URLMap</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s1">'/'</span> <span class="o">=&gt;</span> <span class="no">Sinatra</span><span class="o">::</span><span class="no">Application</span><span class="p">,</span> <span class="s1">'/sidekiq'</span> <span class="o">=&gt;</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="rack-session-and-protection-against-web-attacks">Rack session and protection against web attacks</h3>
+
+<p>Note that Sidekiq::Web requires a valid Rack session to work.  If you see a <code class="language-plaintext highlighter-rouge">Forbidden</code> error when clicking a button in the Web UI, it’s because the Rack session is not configured correctly.  Sidekiq cannot configure a session for you.  If you do not know how to set up a valid session in your system, your best option is to search StackOverflow or post a question there with the code you are using to run the Web UI.</p>
+
+<p>If you have wildcard domains with your Rails app and want to access the Web UI from all of them, you will want to configure the <code class="language-plaintext highlighter-rouge">domain</code> option of your cookiestore.</p>
+
+<h4 id="rails-api-application-session-configuration">Rails API Application Session Configuration</h4>
+
+<p>To access the Web UI from a Rails API application, you may need to configure sessions for Sidekiq specifically.</p>
+
+<p>Update <code class="language-plaintext highlighter-rouge">config/application.rb</code> to configure the cookie session store:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">config</span><span class="p">.</span><span class="nf">session_store</span> <span class="ss">:cookie_store</span><span class="p">,</span> <span class="ss">key: </span><span class="s1">'_interslice_session'</span>
+</code></pre></div></div>
+
+<p>Update <code class="language-plaintext highlighter-rouge">config/routes.rb</code> to set up session middleware for <code class="language-plaintext highlighter-rouge">Sidekiq::Web</code> prior to calling <code class="language-plaintext highlighter-rouge">mount Sidekiq::Web</code>:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'sidekiq/web'</span>
+
+<span class="c1"># Configure Sidekiq-specific session middleware</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span><span class="p">.</span><span class="nf">use</span> <span class="no">ActionDispatch</span><span class="o">::</span><span class="no">Cookies</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span><span class="p">.</span><span class="nf">use</span> <span class="no">Rails</span><span class="p">.</span><span class="nf">application</span><span class="p">.</span><span class="nf">config</span><span class="p">.</span><span class="nf">session_store</span><span class="p">,</span> <span class="no">Rails</span><span class="p">.</span><span class="nf">application</span><span class="p">.</span><span class="nf">config</span><span class="p">.</span><span class="nf">session_options</span>
+
+<span class="no">Myapp</span><span class="o">::</span><span class="no">Application</span><span class="p">.</span><span class="nf">routes</span><span class="p">.</span><span class="nf">draw</span> <span class="k">do</span>
+  <span class="n">mount</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span> <span class="o">=&gt;</span> <span class="s2">"/sidekiq"</span>
+  <span class="c1"># ...</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<hr />
+
+<p>If you do everything right, you should see this in your browser:</p>
+
+<p><img src="https://github.com/sidekiq/sidekiq/blob/07acfad11df40b15f1408748be50a4d182daf5e6/examples/web-ui.png" alt="Web UI" /></p>
+
+<h2 id="standalone-with-basic-auth">Standalone with Basic Auth</h2>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># this code goes in your config.ru</span>
+<span class="nb">require</span> <span class="s1">'sidekiq'</span>
+
+<span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_client</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">redis</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">:size</span> <span class="o">=&gt;</span> <span class="mi">1</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="nb">require</span> <span class="s1">'sidekiq/web'</span>
+<span class="n">map</span> <span class="s1">'/sidekiq'</span> <span class="k">do</span>
+  <span class="n">use</span> <span class="no">Rack</span><span class="o">::</span><span class="no">Auth</span><span class="o">::</span><span class="no">Basic</span><span class="p">,</span> <span class="s2">"Protected Area"</span> <span class="k">do</span> <span class="o">|</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">|</span>
+    <span class="c1"># Protect against timing attacks:</span>
+    <span class="c1"># - See https://codahale.com/a-lesson-in-timing-attacks/</span>
+    <span class="c1"># - See https://thisdata.com/blog/timing-attacks-against-string-comparison/</span>
+    <span class="c1"># - Use &amp; (do not use &amp;&amp;) so that it doesn't short circuit.</span>
+    <span class="c1"># - Use digests to stop length information leaking</span>
+    <span class="no">Rack</span><span class="o">::</span><span class="no">Utils</span><span class="p">.</span><span class="nf">secure_compare</span><span class="p">(</span><span class="o">::</span><span class="no">Digest</span><span class="o">::</span><span class="no">SHA256</span><span class="p">.</span><span class="nf">hexdigest</span><span class="p">(</span><span class="n">username</span><span class="p">),</span> <span class="o">::</span><span class="no">Digest</span><span class="o">::</span><span class="no">SHA256</span><span class="p">.</span><span class="nf">hexdigest</span><span class="p">(</span><span class="no">ENV</span><span class="p">[</span><span class="s2">"SIDEKIQ_USERNAME"</span><span class="p">]))</span> <span class="o">&amp;</span>
+      <span class="no">Rack</span><span class="o">::</span><span class="no">Utils</span><span class="p">.</span><span class="nf">secure_compare</span><span class="p">(</span><span class="o">::</span><span class="no">Digest</span><span class="o">::</span><span class="no">SHA256</span><span class="p">.</span><span class="nf">hexdigest</span><span class="p">(</span><span class="n">password</span><span class="p">),</span> <span class="o">::</span><span class="no">Digest</span><span class="o">::</span><span class="no">SHA256</span><span class="p">.</span><span class="nf">hexdigest</span><span class="p">(</span><span class="no">ENV</span><span class="p">[</span><span class="s2">"SIDEKIQ_PASSWORD"</span><span class="p">]))</span>
+  <span class="k">end</span>
+
+  <span class="n">run</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h1 id="nagios">Nagios</h1>
+
+<p>Below is a collection of nagios checks that includes <a href="https://github.com/wanelo/nagios-checks/blob/master/check_sidekiq_queue">check_sidekiq_queue</a> script, which validates that a given queue depth is within a particular range. It’s a simple shell script that uses redis-cli command line tool, and does not have any dependency on ruby.</p>
+
+<p><a href="https://github.com/wanelo/nagios-checks">https://github.com/wanelo/nagios-checks</a></p>
+
+<h1 id="scout">Scout</h1>
+
+<p><a href="http://scoutapp.com">Scout</a>, a Rails app monitoring service, provides:</p>
+
+<ol>
+  <li>Key metrics for each Sidekiq worker (mean and 95th percentile execution time, latency, error rate, etc).</li>
+  <li>GitHub-enhanced transaction traces of both timing and memory allocations for individual jobs.</li>
+</ol>
+
+<p><a href="https://scoutapm.com/blog/monitor-sidekiq-jobs">Scout Sidekiq Monitoring</a></p>
+
+<h1 id="datadog">Datadog</h1>
+
+<p><a href="https://www.datadoghq.com/">Datadog</a>, a monitoring service, provides:</p>
+
+<ol>
+  <li><a href="https://docs.datadoghq.com/integrations/sidekiq/">A Sidekiq integration which collects Sidekiq metrics through Datadog’s Dogstatsd Ruby client.</a></li>
+  <li><a href="https://docs.datadoghq.com/tracing/setup/ruby/#sidekiq">An APM integration which will trace job queuing and executions respectively.</a></li>
+</ol>
+
+<h1 id="pingdom-server-monitoring">Pingdom Server Monitoring</h1>
+
+<p><a href="http://server-monitor.pingdom.com/">Pingdom Server Monitoring</a> has a <a href="https://server-monitor.pingdom.com/plugin_urls/7111-sidekiq-monitor">plugin</a> for monitoring Sidekiq workers.</p>
+
+<p>This plugin monitors enqueued, failed, and processed job counts, as well as scheduled jobs and retries. You can also set up alerts for the available metrics.</p>
+
+<h1 id="monitoring-queue-backlog">Monitoring Queue Backlog</h1>
+
+<p>You can use a simple HTTP endpoint with Pingdom to check the size of your Sidekiq ‘default’ queue backlog.  Put this in <code class="language-plaintext highlighter-rouge">config/routes.rb</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'sidekiq/api'</span>
+<span class="n">match</span> <span class="s2">"queue-status"</span> <span class="o">=&gt;</span> <span class="nb">proc</span> <span class="p">{</span> <span class="p">[</span><span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="s2">"Content-Type"</span> <span class="o">=&gt;</span> <span class="s2">"text/plain"</span><span class="p">},</span> <span class="p">[</span><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Queue</span><span class="p">.</span><span class="nf">new</span><span class="p">.</span><span class="nf">size</span> <span class="o">&lt;</span> <span class="mi">100</span> <span class="p">?</span> <span class="s2">"OK"</span> <span class="p">:</span> <span class="s2">"UHOH"</span> <span class="p">]]</span> <span class="p">},</span> <span class="ss">via: :get</span>
+</code></pre></div></div>
+
+<p>Now when you hit http://example.com/queue-status, the body of the response will be either ‘OK’ or ‘UHOH’.  We have a Pingdom check every minute which fires off an email if the response == ‘UHOH’.</p>
+
+<h1 id="monitoring-queue-latency">Monitoring Queue Latency</h1>
+
+<h2 id="using-a-custom-end-point">Using a custom end-point</h2>
+
+<p>If you throw a lot of jobs into the queue, you can get false positives when monitoring the queue backlog.  Instead, monitor the queue latency.  Queue latency is the difference between when the oldest job was pushed onto the queue versus the current time.  This code will check that jobs don’t spend more than 30 seconds enqueued.  Put this in <code class="language-plaintext highlighter-rouge">config/routes.rb</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'sidekiq/api'</span>
+<span class="n">match</span> <span class="s2">"queue-latency"</span> <span class="o">=&gt;</span> <span class="nb">proc</span> <span class="p">{</span> <span class="p">[</span><span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="s2">"Content-Type"</span> <span class="o">=&gt;</span> <span class="s2">"text/plain"</span><span class="p">},</span> <span class="p">[</span><span class="no">Sidekiq</span><span class="o">::</span><span class="no">Queue</span><span class="p">.</span><span class="nf">new</span><span class="p">.</span><span class="nf">latency</span> <span class="o">&lt;</span> <span class="mi">30</span> <span class="p">?</span> <span class="s2">"OK"</span> <span class="p">:</span> <span class="s2">"UHOH"</span> <span class="p">]]</span> <span class="p">},</span> <span class="ss">via: :get</span>
+</code></pre></div></div>
+
+<p>Now when you hit http://example.com/queue-latency, the body of the response will be either ‘OK’ or ‘UHOH’.</p>
+
+<h2 id="using-the-web-ui">Using the Web UI</h2>
+
+<p>The Web UI provides overall system data at <code class="language-plaintext highlighter-rouge">/stats</code>:</p>
+
+<p><code class="language-plaintext highlighter-rouge">% curl http://localhost:3000/sidekiq/stats</code></p>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"sidekiq"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"processed"</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"failed"</span><span class="p">:</span><span class="w"> </span><span class="mi">56</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"busy"</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"enqueued"</span><span class="p">:</span><span class="w"> </span><span class="mi">178</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"scheduled"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"retries"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"default_latency"</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"redis"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"connected_clients"</span><span class="p">:</span><span class="w"> </span><span class="s2">"120"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"uptime_in_days"</span><span class="p">:</span><span class="w"> </span><span class="s2">"35"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"used_memory_human"</span><span class="p">:</span><span class="w"> </span><span class="s2">"602.31M"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"used_memory_peak_human"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.01G"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>…and provides queue size data at <code class="language-plaintext highlighter-rouge">/stats/queues</code>:</p>
+
+<p><code class="language-plaintext highlighter-rouge">% curl http://localhost:3000/sidekiq/stats/queues</code></p>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"default"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"bulk"</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"critical"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="sidekiqmon"><code class="language-plaintext highlighter-rouge">sidekiqmon</code></h2>
+
+<p>Sidekiq 6.0 ships with a new <code class="language-plaintext highlighter-rouge">sidekiqmon</code> binary which will print out basic stats to your terminal.  Use REDIS_URL to point <code class="language-plaintext highlighter-rouge">sidekiqmon</code> to your Redis instance.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt; sidekiqmon # uses localhost:6379
+...
+&gt; REDIS_URL=redis://redis.example.com:6380/5 sidekiqmon
+...
+</code></pre></div></div>
+
+<h3 id="forbidden">Forbidden</h3>
+
+<p><strong>This is only relevant for Sidekiq &gt;=4.2.0, &lt;6.2</strong></p>
+
+<p>If you receive a <code class="language-plaintext highlighter-rouge">Forbidden</code> error and see <code class="language-plaintext highlighter-rouge">attack prevented by Rack::Protection::AuthenticityToken</code> in your logs when trying to submit a form, you do not have a valid session configured.  A valid session is required to prevent CSRF attacks.  You must configure the webapp to share the same session with Rails.  Try putting this in your initializer:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'sidekiq/web'</span> <span class="c1"># Require at the top of the initializer</span>
+
+<span class="c1"># Rails &lt; 4:</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span><span class="p">.</span><span class="nf">set</span> <span class="ss">:session_secret</span><span class="p">,</span> <span class="no">Rails</span><span class="p">.</span><span class="nf">configuration</span><span class="p">.</span><span class="nf">secret_token</span>
+<span class="c1"># 5.2 &gt; Rails &gt;= 4:</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span><span class="p">.</span><span class="nf">set</span> <span class="ss">:session_secret</span><span class="p">,</span> <span class="no">Rails</span><span class="p">.</span><span class="nf">application</span><span class="p">.</span><span class="nf">secrets</span><span class="p">[</span><span class="ss">:secret_key_base</span><span class="p">]</span>
+<span class="c1"># Rails ~&gt; 5.2:</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span><span class="p">.</span><span class="nf">set</span> <span class="ss">:session_secret</span><span class="p">,</span> <span class="no">Rails</span><span class="p">.</span><span class="nf">application</span><span class="p">.</span><span class="nf">credentials</span><span class="p">[</span><span class="ss">:secret_key_base</span><span class="p">]</span>
+<span class="c1"># Rails &gt;= 6.0:</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span><span class="p">.</span><span class="nf">set</span> <span class="ss">:session_secret</span><span class="p">,</span> <span class="no">Rails</span><span class="p">.</span><span class="nf">application</span><span class="p">.</span><span class="nf">secret_key_base</span>
+</code></pre></div></div>
+
+<p>Previous: [[Deployment]] Next: [[API]]</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

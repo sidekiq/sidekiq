@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+{% include head.html %}
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  {% include wheader.html %}
+  <main class="container">
+    <h1>{{ page["title"] }}</h1>
+    <p class="small">Last synchronized at {{ page["syncAt"] }}</p>
+    <div class="row">
+      <div class="col-md-9">{{ content }}</div>
+      <div class="col-md-3">{% include wsidebar.html %}</div>
+    </div>
+  </main>
+</body>
+</html>

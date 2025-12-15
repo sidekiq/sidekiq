@@ -1,3 +1,19 @@
 url: "https://sidekiq.org"
 plugins:
   - jekyll-sitemap
+wikiToJekyll:
+  user_name: sidekiq
+  repository_name: sidekiq
+  deploy_remote: "origin"
+  deploy_branch: "gh-pages"
+  wiki_repository_url: https://github.com/sidekiq/sidekiq.wiki.git
+
+  # wiki submodule folder
+  # the underscore makes sure that this folder is ignored by Jekyll
+  wiki_source: "_wiki"
+  wiki_dest: "wiki"
+  commit_and_push: false
+exclude:
+  - README.md
+  - Gemfile
+  - Rakefile

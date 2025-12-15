@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>Middleware</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><p>Sidekiq has a similar notion of middleware to Rack: these are small bits of code that can implement functionality.  Sidekiq breaks middleware into client-side and server-side.</p>
+
+<ul>
+  <li><strong>Client middleware</strong> runs before the pushing of the job to Redis and allows you to modify/stop the job 
+before it gets pushed.</li>
+  <li><strong>Server middleware</strong> runs ‘around’ job processing.</li>
+</ul>
+
+<p>If you call <code class="language-plaintext highlighter-rouge">perform_inline</code> both client and server middleware will run.</p>
+
+<h2 id="custom-middleware">Custom middleware</h2>
+
+<p>Sidekiq 5+ ships with no middleware out of the box.  Various gems and services will install middleware to track jobs or provide additional features. You may also add your own (note that as of Sidekiq 7, you must include <code class="language-plaintext highlighter-rouge">Sidekiq::ClientMiddleware</code> or <code class="language-plaintext highlighter-rouge">Sidekiq::ServerMiddleware</code> in your client or server middleware, respectively)</p>
+
+<h3 id="client-middleware">Client middleware</h3>
+
+<p>You can use client middleware to add job metadata to the job before pushing it to Redis. The same job data will be available to the server middleware before the job is executed, if you need to set up some global state, e.g. current locale, current tenant in a multi-tenant app, etc.</p>
+
+<p>Client middleware may receive the class argument as a Class object <em>or</em> a String containing the name of the class.</p>
+
+<p>Not calling <code class="language-plaintext highlighter-rouge">yield</code> or returning anything other than <code class="language-plaintext highlighter-rouge">job</code> will result in no further middleware being called and the job will not be pushed to the queue. <em>(Note that <code class="language-plaintext highlighter-rouge">yield</code> will return an equivalent value to <code class="language-plaintext highlighter-rouge">job</code>)</em></p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">MyMiddleware</span>
+  <span class="k">module</span> <span class="nn">Client</span>
+    <span class="k">class</span> <span class="nc">CustomerJobAttribute</span>
+      <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">ClientMiddleware</span>
+
+      <span class="c1"># @param [String, Class] job_class_or_string the class or string representation</span>
+      <span class="c1">#    of the class of the job being queued</span>
+      <span class="c1"># @param [Hash] job the full job payload</span>
+      <span class="c1">#   * @see https://github.com/sidekiq/sidekiq/wiki/Job-Format</span>
+      <span class="c1"># @param [String] queue the name of the queue the job was pulled from</span>
+      <span class="c1"># @param [ConnectionPool] redis_pool the redis pool</span>
+      <span class="c1"># @return [Hash, FalseClass, nil] if false or nil is returned,</span>
+      <span class="c1">#   the job is not to be enqueued into redis, otherwise the block's</span>
+      <span class="c1">#   return value is returned</span>
+      <span class="c1"># @yield the next middleware in the chain or the enqueuing of the job</span>
+      <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">job_class_or_string</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">queue</span><span class="p">,</span> <span class="n">redis_pool</span><span class="p">)</span>
+        <span class="c1"># return false/nil to stop the job from going to redis</span>
+        <span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">queue</span> <span class="o">!=</span> <span class="s1">'default'</span>
+        <span class="n">job</span><span class="p">[</span><span class="s1">'customer'</span><span class="p">]</span> <span class="o">=</span> <span class="no">Customer</span><span class="p">.</span><span class="nf">current_id</span>
+        <span class="k">yield</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h3 id="server-middleware">Server middleware</h3>
+
+<p>You can use server middleware to do something around the execution of any job. The example below logs any exception from any job.</p>
+
+<p>Not calling <code class="language-plaintext highlighter-rouge">yield</code> will result in no further middleware being called and the job’s <code class="language-plaintext highlighter-rouge">perform</code> method will not be called.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MyMiddleware::Server::ErrorLogger</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">ServerMiddleware</span>
+
+  <span class="c1"># @param [Object] job_instance the instance of the job that was queued</span>
+  <span class="c1"># @param [Hash] job_payload the full job payload</span>
+  <span class="c1">#   * @see https://github.com/sidekiq/sidekiq/wiki/Job-Format</span>
+  <span class="c1"># @param [String] queue the name of the queue the job was pulled from</span>
+  <span class="c1"># @yield the next middleware in the chain or worker `perform` method</span>
+  <span class="c1"># @return [Void]</span>
+  <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">job_instance</span><span class="p">,</span> <span class="n">job_payload</span><span class="p">,</span> <span class="n">queue</span><span class="p">)</span>
+    <span class="k">begin</span>
+      <span class="k">yield</span>
+    <span class="k">rescue</span> <span class="o">=&gt;</span> <span class="n">ex</span>
+      <span class="nb">puts</span> <span class="n">ex</span><span class="p">.</span><span class="nf">message</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>You may also pass options to the Middleware initializer when you register the middleware:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MyMiddleware::Server::ErrorLogger</span>
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="kp">nil</span><span class="p">)</span>
+    <span class="c1"># options == { :foo =&gt; 1, :bar =&gt; 2 }</span>
+  <span class="k">end</span>
+  <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">job_instance</span><span class="p">,</span> <span class="n">job_payload</span><span class="p">,</span> <span class="n">queue</span><span class="p">)</span>
+    <span class="k">begin</span>
+      <span class="k">yield</span>
+    <span class="k">rescue</span> <span class="o">=&gt;</span> <span class="n">ex</span>
+      <span class="nb">puts</span> <span class="n">ex</span><span class="p">.</span><span class="nf">message</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h3 id="registering-middleware">Registering Middleware</h3>
+
+<p>Register your middleware as part of the chain:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_client</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">client_middleware</span> <span class="k">do</span> <span class="o">|</span><span class="n">chain</span><span class="o">|</span>
+    <span class="n">chain</span><span class="p">.</span><span class="nf">add</span> <span class="no">MyMiddleware</span><span class="o">::</span><span class="no">Client</span><span class="o">::</span><span class="no">CustomerJobAttribute</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">server_middleware</span> <span class="k">do</span> <span class="o">|</span><span class="n">chain</span><span class="o">|</span>
+    <span class="n">chain</span><span class="p">.</span><span class="nf">add</span> <span class="no">MyMiddleware</span><span class="o">::</span><span class="no">Server</span><span class="o">::</span><span class="no">ErrorLogger</span><span class="p">,</span> <span class="ss">:foo</span> <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">:bar</span> <span class="o">=&gt;</span> <span class="mi">2</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>I’d suggest putting this code in <code class="language-plaintext highlighter-rouge">config/initializers/sidekiq.rb</code> in your Rails app.</p>
+
+<h4 id="client-middleware-registered-in-both-places">Client middleware registered in both places</h4>
+
+<p>The jobs running in the Sidekiq server can themselves push new jobs to Sidekiq, thus acting as clients. You must configure your client middleware within the <code class="language-plaintext highlighter-rouge">configure_server</code> block <strong>also</strong> in that case:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_client</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">client_middleware</span> <span class="k">do</span> <span class="o">|</span><span class="n">chain</span><span class="o">|</span>
+    <span class="n">chain</span><span class="p">.</span><span class="nf">add</span> <span class="no">MyMiddleware</span><span class="o">::</span><span class="no">Client</span><span class="o">::</span><span class="no">CustomerJobAttribute</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">client_middleware</span> <span class="k">do</span> <span class="o">|</span><span class="n">chain</span><span class="o">|</span>
+    <span class="n">chain</span><span class="p">.</span><span class="nf">add</span> <span class="no">MyMiddleware</span><span class="o">::</span><span class="no">Client</span><span class="o">::</span><span class="no">CustomerJobAttribute</span>
+  <span class="k">end</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">server_middleware</span> <span class="k">do</span> <span class="o">|</span><span class="n">chain</span><span class="o">|</span>
+    <span class="n">chain</span><span class="p">.</span><span class="nf">add</span> <span class="no">MyMiddleware</span><span class="o">::</span><span class="no">Server</span><span class="o">::</span><span class="no">ErrorLogger</span><span class="p">,</span> <span class="ss">:foo</span> <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">:bar</span> <span class="o">=&gt;</span> <span class="mi">2</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h3 id="removing-middleware">Removing middleware</h3>
+
+<p>If you need to remove a middleware for some reason, you can do this in your configuration:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Sidekiq</span><span class="p">.</span><span class="nf">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">server_middleware</span> <span class="k">do</span> <span class="o">|</span><span class="n">chain</span><span class="o">|</span>
+    <span class="n">chain</span><span class="p">.</span><span class="nf">remove</span> <span class="no">Some</span><span class="o">::</span><span class="no">Middleware</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="request-specific-context">Request-Specific Context</h2>
+
+<p>Sidekiq 6.3 adds support for serializing Rails’ <code class="language-plaintext highlighter-rouge">ActiveSupport::CurrentAttributes</code> which ensures a job will have access to the same request-specific context as the HTTP request which created the job. See my <a href="https://www.mikeperham.com/2022/07/29/sidekiq-and-request-specific-context/">blog post for details</a>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s2">"sidekiq/middleware/current_attributes"</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">CurrentAttributes</span><span class="p">.</span><span class="nf">persist</span><span class="p">(</span><span class="no">Myapp</span><span class="o">::</span><span class="no">Current</span><span class="p">)</span> <span class="c1"># Your AS::CurrentAttributes singleton, or...</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">CurrentAttributes</span><span class="p">.</span><span class="nf">persist</span><span class="p">(</span><span class="s2">"Myapp::Current"</span><span class="p">)</span> <span class="c1"># initializers shouldn't load classes so we use the class name instead, or...</span>
+<span class="no">Sidekiq</span><span class="o">::</span><span class="no">CurrentAttributes</span><span class="p">.</span><span class="nf">persist</span><span class="p">([</span><span class="s2">"Myapp::Current"</span><span class="p">,</span> <span class="s2">"Another::Current"</span><span class="p">])</span> <span class="c1"># if you have multiple globals...</span>
+</code></pre></div></div>
+
+<h3 id="middleware-ordering">Middleware Ordering</h3>
+
+<p>Sidekiq will print out the configured client and server middleware
+chains when started with <code class="language-plaintext highlighter-rouge">-v</code>.  Ordering can be critical if multiple
+middleware can conflict somehow. The <a href="https://github.com/sidekiq/sidekiq/blob/master/lib/sidekiq/middleware/chain.rb">chain</a> class has the various APIs allowing you to adjust middleware ordering in your initializer.</p>
+
+<p>Previous: [[API]] Next: [[Logging]]</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Sidekiq</title>
+  <meta name="description" content="Simple, efficient background jobs for Ruby">
+  <meta name="twitter:site" content="@sidekiq">
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Sidekiq">
+  <meta property="og:type" content="company">
+  <meta property="og:title" content="Simple, efficient background jobs for Ruby">
+  <meta property="og:url" content="//sidekiq.org">
+  <meta property="og:image" content="//sidekiq.org/assets/sidekiq.png">
+  <meta property="og:description" content="Sidekiq is a simple, efficient framework for background jobs in Ruby">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata|Montserrat:400,700">
+  <link rel="shortcut icon" type="image/ico" href="/favicon.ico">
+  <link rel="me" href="https://ruby.social/@getajobmike">
+  <script defer src="/js/jquery.min.js"></script>
+  <script defer src="/js/bootstrap.min.js"></script>
+  <script defer src="/js/scrollingcarousel.2.0.min.js"></script>
+  <script defer src="/js/skq-global.js"></script>
+</head>
+
+<body>
+  <style>
+    h1, h2, h3 { border-bottom: 1px solid black; }
+    img { max-width:100%; height: auto; }
+  </style>
+  <header>
+  <nav role="navigation" class="navbar navbar-default navbar-fixed-top default">
+    <div class="container-fluid skq-header">
+      <div class="navbar-header">
+        <a href="/" class="skq navbar-brand">Sidekiq</a><span
+          class="default skq-tagline navbar-brand col-sm-5 hidden-md">Simple, efficient background jobs for Ruby.</span>
+      </div>
+      <div id="navbar-top-collapse-1" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="/" class="skq-nav-link">Back</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+  <main class="container">
+    <h1>FAQ</h1>
+    <p class="small">Last synchronized at 2025-12-15 15:43:00 -0800</p>
+    <div class="row">
+      <div class="col-md-9"><h1 id="frequently-asked-questions">Frequently Asked Questions</h1>
+
+<h2 id="how-does-sidekiq-compare-to-resque-or-delayed-job">How does Sidekiq compare to Resque or Delayed Job?</h2>
+
+<p>Essentially all three perform the same task, executing background jobs, but go about it differently:</p>
+
+<ol>
+  <li><strong>Delayed Job</strong> uses your SQL database for storage and processes jobs in a single-threaded process.  It’s simple to set up but the performance and scalability aren’t great.  I would not use delayed_job for systems processing 100,000s of jobs/day.</li>
+  <li><strong>Resque</strong> uses Redis for storage and processes messages in a single-threaded process.  The redis requirement makes it a little more difficult to set up, compared to delayed_job, but redis is far better as a queue than a SQL database.  Being single-threaded means that processing 20 jobs in parallel requires 20 processes, which can take a lot of memory.</li>
+  <li><strong>Sidekiq</strong> uses Redis for storage and processes jobs in a multi-threaded process.  It’s just as easy to set up as Resque but more efficient in terms of raw processing speed. <em>Your worker code has to be thread-safe.</em></li>
+</ol>
+
+<h2 id="what-kind-of-performance-can-i-expect-to-see-with-sidekiq">What kind of performance can I expect to see with Sidekiq?</h2>
+
+<p>Performance is too variable to give a simple answer.  Most server-side work is dominated by I/O time and Sidekiq shines when lots of I/O is present.  You should see an order of magnitude improvement or more with one Sidekiq process vs one Resque or Delayed Job process.</p>
+
+<p>One large customer I’m aware of is processing ~500,000 jobs/min with Sidekiq with another customer reporting a peak of ~50,000 jobs/sec across several Redis shards.  Note that on dedicated hardware, Redis should be able to handle anywhere from 5,000 to 20,000 jobs/sec depending on features in use.  After that, you’ll need to shard your application to use multiple Redis instances or use multiple independent applications.</p>
+
+<p>One busy Redis (output from <code class="language-plaintext highlighter-rouge">redis-cli info</code>):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>redis_version:4.0.9
+redis_mode:standalone
+os:Linux 4.15.0-1009-aws x86_64
+multiplexing_api:epoll
+atomicvar_api:atomic-builtin
+gcc_version:7.4.0
+uptime_in_seconds:3279660
+uptime_in_days:37
+hz:10
+
+# Clients
+connected_clients:3005
+blocked_clients:125
+
+# Memory
+used_memory:396704632
+used_memory_human:378.33M
+used_memory_rss:738783232
+used_memory_rss_human:704.56M
+used_memory_peak:8213446064
+used_memory_peak_human:7.65G
+used_memory_peak_perc:4.83%
+used_memory_overhead:105619133
+used_memory_startup:782448
+used_memory_dataset:291085499
+used_memory_dataset_perc:73.52%
+total_system_memory:32655642624
+total_system_memory_human:30.41G
+maxmemory:26214400000
+maxmemory_human:24.41G
+maxmemory_policy:noeviction
+mem_fragmentation_ratio:1.86
+mem_allocator:jemalloc-3.6.0
+
+# Stats
+total_connections_received:577443
+total_commands_processed:163849263454
+instantaneous_ops_per_sec:45476
+total_net_input_bytes:20173258216040
+total_net_output_bytes:24490441661513
+instantaneous_input_kbps:6749.39
+instantaneous_output_kbps:7769.90
+rejected_connections:0
+keyspace_hits:10854195921
+keyspace_misses:3763186978
+pubsub_channels:1
+pubsub_patterns:331
+latest_fork_usec:20204
+
+# Keyspace
+db0:keys=266128,expires=261259,avg_ttl=153283764
+</code></pre></div></div>
+
+<h2 id="wouldnt-it-be-awesome-if-sidekiq-supported-mongodb-postgresql-mysql-sqs--for-persistence">Wouldn’t it be awesome if Sidekiq supported {MongoDB, postgresql, mysql, SQS, …} for persistence?</h2>
+
+<p>Not really.  Redis provides me with an efficient set of data structures to build functionality on top of.  I’d need to abstract those structures to an API, write adapters for each system, test on various versions and then document functional and performance limitations of each system.  Just so some small percentage of my user base can avoid Redis. Sidekiq uses <strong>all</strong> of the data structures Redis provides: lists, sorted sets, hashes.</p>
+
+<p>If you want a queueing system that uses X, use a queuing system that uses X!  Sidekiq’s mantra is <strong>simple and efficient</strong>.  Redis is both. Abstracting data storage is neither.</p>
+
+<h2 id="why-am-i-seeing-a-lot-of-cant-find-modelname-with-id12345-errors-with-sidekiq">Why am I seeing a lot of “Can’t find ModelName with ID=12345” errors with Sidekiq?</h2>
+
+<p>Your client is creating the Model instance within a transaction and pushing a job to Sidekiq. Sidekiq is trying to execute your job before the transaction has actually committed. Enable <a href="https://github.com/sidekiq/sidekiq/wiki/Advanced-Options#transactional-push">Sidekiq’s <code class="language-plaintext highlighter-rouge">transactional_push</code> feature</a>.</p>
+
+<h2 id="how-can-i-process-a-certain-queue-in-serial">How can I process a certain queue in serial?</h2>
+
+<p>You can use a custom capsule to limit a queue to one Thread but this only limits per-process. If you have 20 Sidekiq processes, you could have 20 Threads, each processing jobs from that queue. In general it’s a bad idea to expect serial execution in a distributed system, especially with unpredictable Retries.</p>
+
+<p>If you need serial execution, look into <a href="/wiki/Iteration.html">Job Iteration</a>.</p>
+
+<h2 id="why-dont-cssjsimg-assets-load-properly-when-i-go-to-sidekiqs-web-ui">Why don’t CSS/JS/IMG assets load properly when I go to Sidekiq’s Web UI?</h2>
+
+<h3 id="issue-with-static-asset-serving">Issue with Static Asset Serving</h3>
+
+<p>This is <strong>always</strong> a web server configuration issue.  Your web server config probably has special rules for serving those static assets which don’t forward the request to Rails if the asset does not exist on the filesystem, causing a 404 response instead.  For example:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>location ~ /assets/  {
+  try_files $uri;
+}
+</code></pre></div></div>
+
+<p>This will search the filesystem for any uri that matches <code class="language-plaintext highlighter-rouge">/assets/</code>, which is fine for your Rails assets like <code class="language-plaintext highlighter-rouge">/assets/application.css</code> that live in <code class="language-plaintext highlighter-rouge">{Rails.root}/public/assets</code> but it also matches requests for Sidekiq’s assets <code class="language-plaintext highlighter-rouge">/sidekiq/assets/</code>.  Since Sidekiq’s assets live in the .gem file, a filesystem check will fail and return a 404.  The fix is simple:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>location ~ ^/assets/  {
+  try_files $uri;
+}
+</code></pre></div></div>
+
+<p>Use <code class="language-plaintext highlighter-rouge">^</code> to limit the scope of the match to top-level assets only.</p>
+
+<h3 id="issue-with-x-sendfile">Issue with X-SendFile</h3>
+
+<p>Rack uses the X-SendFile header to serve Sidekiq’s web UI assets out of the gem.  Since your gem installation is typically located outside of your deployed project root and some web servers do not serve files outside of the project root by default for security reasons, you may need to tweak your web server configuration.</p>
+
+<p>For example, in Apache you would need something like the following:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>XSendFile on
+XSendFilePath /mnt/my_project-production/shared/bundle/jruby/1.9/gems/sidekiq-2.5.3/web/assets/javascripts/vendor/
+</code></pre></div></div>
+
+<p>NB: the asset paths will change with each gem upgrade, so you’ll need to remember to update your server configuration whenever you update your Sidekiq installation or use a tool that can automate the process for you.</p>
+
+<h3 id="x-sendfile-on-heroku">X-SendFile on Heroku</h3>
+
+<p>If you are having issues with CSS/Images loading on the Sidekiq Web UI and you deploy your app to Heroku you will need to update the following in your production.rb environment config file.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>config.action_dispatch.x_sendfile_header = 'X-Accel-Redirect'
+</code></pre></div></div>
+<p>Heroku uses Nginx to server up static assets so it needs this specific x_sendfile_header to serve the Sidekiq assets correctly.</p>
+
+<h2 id="how-do-i-push-a-job-to-sidekiq-without-ruby">How do I push a job to Sidekiq without Ruby?</h2>
+
+<p>If you are integrating two different systems, you might want to kick off a job without the benefit of the Sidekiq::Client API.  The Sidekiq message format is quite simple and stable: it’s just a Hash in JSON format.  Here’s the bare bones way to do it in Ruby; you can translate to the language of your choice. A unique identifier must be generated and provided for the Job ID.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'securerandom'</span>
+<span class="nb">require</span> <span class="s1">'json'</span>
+
+<span class="n">now_millis</span> <span class="o">=</span> <span class="o">::</span><span class="no">Process</span><span class="p">.</span><span class="nf">clock_gettime</span><span class="p">(</span><span class="o">::</span><span class="no">Process</span><span class="o">::</span><span class="no">CLOCK_REALTIME</span><span class="p">,</span> <span class="ss">:millisecond</span><span class="p">)</span>
+<span class="n">redis</span> <span class="o">=</span> <span class="no">Redis</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">:url</span> <span class="o">=&gt;</span> <span class="s1">'redis://hostname:port/db'</span><span class="p">)</span>
+<span class="n">msg</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">"class"</span> <span class="o">=&gt;</span> <span class="s1">'MyJob'</span><span class="p">,</span>
+        <span class="s2">"queue"</span> <span class="o">=&gt;</span> <span class="s1">'default'</span><span class="p">,</span>
+        <span class="s2">"args"</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="s1">'retry'</span> <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">,</span>
+        <span class="s1">'jid'</span> <span class="o">=&gt;</span> <span class="no">SecureRandom</span><span class="p">.</span><span class="nf">hex</span><span class="p">(</span><span class="mi">12</span><span class="p">),</span>
+        <span class="s1">'created_at'</span> <span class="o">=&gt;</span> <span class="n">now_millis</span><span class="p">,</span>
+        <span class="s1">'enqueued_at'</span> <span class="o">=&gt;</span> <span class="n">now_millis</span> <span class="p">}</span>
+<span class="n">redis</span><span class="p">.</span><span class="nf">lpush</span><span class="p">(</span><span class="s2">"queue:default"</span><span class="p">,</span> <span class="no">JSON</span><span class="p">.</span><span class="nf">dump</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>To get the queue to show up under the “Queues” tab and the “Enqueued” count to be correct, you must also add the queue name to the <code class="language-plaintext highlighter-rouge">queues</code> set:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">redis</span><span class="p">.</span><span class="nf">sadd</span><span class="p">(</span><span class="s2">"queues"</span><span class="p">,</span> <span class="s2">"default"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>This is the simplest setup. Adding support for namespaces or ActiveJob is more complicated.</p>
+
+<h2 id="how-can-i-tell-when-a-job-has-finished">How can I tell when a job has finished?</h2>
+
+<p>You have two options:</p>
+
+<ol>
+  <li>
+    <p>Use a 3rd-party plugin to track the status of a given job; see the [[Related Projects]] page. If you want to surface the status of a job in your app’s UI, have your page poll the server every few seconds, and then leverage the functionality of one of these plugins to send the status back via JSON.</p>
+  </li>
+  <li>
+    <p><a href="http://sidekiq.org/pro">Sidekiq Pro</a>’s [[Batches]] feature can fire a callback in your code when one or more jobs has completed.</p>
+  </li>
+</ol>
+
+<h2 id="what-happens-to-long-running-jobs-when-sidekiq-restarts">What happens to long-running jobs when Sidekiq restarts?</h2>
+
+<p>By default, Sidekiq 6+ gives workers 25 seconds to shut down. This is carefully chosen because Heroku and AWS ECS give a process 30 seconds to shutdown before killing it. After 25 seconds, any remaining jobs still in progress are pushed back onto Redis so they can be immediately restarted when Sidekiq starts back up. Remember that Sidekiq will run your jobs AT LEAST once so they need to be <a href="/wiki/Best-Practices.html">idempotent</a>. This is one example of how a job can be run twice.</p>
+
+<p>If you have jobs which take longer than 30 seconds to process, these are considered “long-running” and should use the [[Iteration]] feature if possible to play nicely with Sidekiq.</p>
+
+<p>Sidekiq Enterprise supports <a href="/wiki/Ent-Rolling-Restarts.html">rolling restarts</a> where Sidekiq will wait as long as necessary for jobs to finish, hours if necessary.</p>
+
+<h2 id="how-do-i-ensure-a-job-processes-on-a-given-machine">How do I ensure a job processes on a given machine?</h2>
+
+<p>Example: you have job which processes a large uploaded file on the filesystem but you have Sidekiq running on several machines.  How do you ensure that a file uploaded to “app-1.example.com” is processed by a Sidekiq on “app-1.example.com”?</p>
+
+<p>Easy, use hostname-specific queues.  Start up Sidekiq with <code class="language-plaintext highlighter-rouge">-q `hostname` -q default</code> so Sidekiq will listen to a queue for the current hostname.</p>
+
+<p>Alternatively tell each Sidekiq process to listen to a queue named after the machine’s hostname. In your <code class="language-plaintext highlighter-rouge">config/sidekiq.yml</code>, do this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>---
+:verbose: false
+:concurrency: 25
+:queues:
+  - &lt;%= `hostname`.strip %&gt;
+</code></pre></div></div>
+<p>Sidekiq runs the YAML file through ERB automatically so you can easily add the queue dynamically.</p>
+
+<p>In your worker, configure jobs to go to the hostname-specific queue: <code class="language-plaintext highlighter-rouge">sidekiq_options :queue =&gt; Socket.gethostname</code>.  Just make sure that <code class="language-plaintext highlighter-rouge">hostname</code> returns the same value as <code class="language-plaintext highlighter-rouge">Socket.gethostname</code>.</p>
+
+<h2 id="how-do-i-cancel-a-sidekiq-job">How do I cancel a Sidekiq job?</h2>
+
+<p>An <a href="/wiki/Iteration.html">Iterable Job</a> can be cancelled.</p>
+
+<p>You can also implement something like this:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MyJob</span>
+  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Job</span>
+
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">return</span> <span class="k">if</span> <span class="n">cancelled?</span>
+    <span class="c1"># do stuff</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">cancelled?</span>
+    <span class="no">Sidekiq</span><span class="p">.</span><span class="nf">redis</span> <span class="p">{</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span> <span class="n">c</span><span class="p">.</span><span class="nf">exists</span><span class="p">(</span><span class="s2">"cancelled-</span><span class="si">#{</span><span class="n">jid</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">}</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">cancel!</span><span class="p">(</span><span class="n">jid</span><span class="p">)</span>
+    <span class="no">Sidekiq</span><span class="p">.</span><span class="nf">redis</span> <span class="p">{</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span> <span class="n">c</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="s2">"cancelled-</span><span class="si">#{</span><span class="n">jid</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">ex: </span><span class="mi">86_400</span><span class="p">)</span> <span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="how-do-i-safely-rename-a-job-class">How do I safely rename a Job class?</h2>
+
+<p>If you have jobs in Redis it is <strong>not safe</strong> to rename a Job class since the name is serialized into the job payload.  Here’s one weird trick they don’t want you to know to rename Jobs safely:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/jobs/my_new_job.rb</span>
+<span class="k">class</span> <span class="nc">MyNewJob</span>
+  <span class="o">...</span>
+<span class="k">end</span>
+
+<span class="c1"># app/jobs/my_old_job.rb</span>
+<span class="c1"># XXX Delete this file in a few weeks when old jobs are safely gone.</span>
+<span class="no">MyOldJob</span> <span class="o">=</span> <span class="no">MyNewJob</span>
+</code></pre></div></div>
+
+<p>You’re just aliasing the old class name to the new class. It’s that easy!</p>
+
+<h2 id="how-to-calculate-the-number-of-redis-connection-used-by-sidekiq">How to calculate the number of Redis connection used by Sidekiq?</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>web_connections = (web_dynos * (client_conn * web_threads))
+concurrency  = (max_connections - web_connections - (redis_reserved * worker_dynos)) / worker_dynos
+server_connections  = concurrency + redis_reserved
+</code></pre></div></div>
+
+<p><a href="https://github.com/sidekiq/sidekiq/issues/117">Source</a>, <a href="http://manuelvanrijn.nl/sidekiq-heroku-redis-calc/">tool</a>, <a href="https://medium.com/appaloosa-store-engineering/you-should-revise-your-redis-max-connections-setting-8136f063c916">additional resource</a></p>
+
+<p>Previous: [[Signals]] Next: [[Testing]]</p>
+</div>
+      <div class="col-md-3"><h4>Wiki Pages</h4>
+<ul>
+
+
+  <li class="wiki-link"><a href='/wiki/API.html'>API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Active-Job.html'>Active Job</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Advanced-Options.html'>Advanced Options</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Batches.html'>Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Best-Practices.html'>Best Practices</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Build-vs-Buy.html'>Build vs Buy</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Bulk-Queueing.html'>Bulk Queueing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Comm-Installation.html'>Comm Installation</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-FAQ.html'>Commercial FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-Support.html'>Commercial Support</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Commercial-collaboration.html'>Commercial collaboration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Complex-Job-Workflows-with-Batches.html'>Complex Job Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Delayed-extensions.html'>Delayed extensions</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Deployment.html'>Deployment</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Devise.html'>Devise</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Embedding.html'>Embedding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Encryption.html'>Ent Encryption</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Historical-Metrics.html'>Ent Historical Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Leader-Election.html'>Ent Leader Election</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Multi-Process.html'>Ent Multi Process</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Periodic-Jobs.html'>Ent Periodic Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rate-Limiting.html'>Ent Rate Limiting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Rolling-Restarts.html'>Ent Rolling Restarts</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Unique-Jobs.html'>Ent Unique Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Ent-Web-UI.html'>Ent Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Error-Handling.html'>Error Handling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/FAQ.html'>FAQ</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Getting-Started.html'>Getting Started</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Heroku.html'>Heroku</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Home.html'>Home</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Iteration.html'>Iteration</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Format.html'>Job Format</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Job-Lifecycle.html'>Job Lifecycle</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Kubernetes.html'>Kubernetes</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Logging.html'>Logging</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Memory.html'>Memory</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Metrics.html'>Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Middleware.html'>Middleware</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Miscellaneous-Features.html'>Miscellaneous Features</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Monitoring.html'>Monitoring</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-API.html'>Pro API</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Expiring-Jobs.html'>Pro Expiring Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Metrics.html'>Pro Metrics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Client.html'>Pro Reliability Client</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Reliability-Server.html'>Pro Reliability Server</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Pro-Web-UI.html'>Pro Web UI</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Problems-and-Troubleshooting.html'>Problems and Troubleshooting</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Profiling.html'>Profiling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Really-Complex-Workflows-with-Batches.html'>Really Complex Workflows with Batches</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Related-Projects.html'>Related Projects</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Reliability.html'>Reliability</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scaling.html'>Scaling</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Scheduled-Jobs.html'>Scheduled Jobs</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Sharding.html'>Sharding</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Signals.html'>Signals</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testimonials.html'>Testimonials</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Testing.html'>Testing</a></li>
+
+  <li class="wiki-link"><a href='/wiki/The-Basics.html'>The Basics</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Dragonfly.html'>Using Dragonfly</a></li>
+
+  <li class="wiki-link"><a href='/wiki/Using-Redis.html'>Using Redis</a></li>
+
+</ul></div>
+    </div>
+  </main>
+</body>
+</html>
