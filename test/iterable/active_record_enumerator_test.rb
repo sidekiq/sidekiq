@@ -10,7 +10,7 @@ class Product < ActiveRecord::Base
 end
 
 describe Sidekiq::Job::Iterable::ActiveRecordEnumerator do
-  before(:all) do
+  before do
     Product.connection.create_table(:products, force: true)
     products = [9, 1, 3, 2, 7, 6, 4, 5, 8, 10].map { |id| {id: id} }
     Product.insert_all!(products)
