@@ -2,7 +2,6 @@
 
 require_relative "helper"
 require "sidekiq/middleware/current_attributes"
-require "sidekiq/fetch"
 
 module Myapp
   class Current < ActiveSupport::CurrentAttributes
@@ -23,17 +22,17 @@ end
 
 Serializer = ActiveJob::Arguments
 
-describe "Current attributes" do
-  before do
+class TestCurrentAttributes < Minitest::Test
+  def setup
     @config = reset!
   end
 
-  around do |t|
+  def run
     # Rails reloader auto-clears context
-    Rails.application.reloader.wrap { t.call }
+    Rails.application.reloader.wrap { super }
   end
 
-  it "saves" do
+  def test_saves
     cm = Sidekiq::CurrentAttributes::Save.new({
       "cattr" => "Myapp::Current",
       "cattr_1" => "Myapp::OtherCurrent"
@@ -58,7 +57,7 @@ describe "Current attributes" do
     end
   end
 
-  it "loads" do
+  def test_loads
     cm = Sidekiq::CurrentAttributes::Load.new({
       "cattr" => "Myapp::Current",
       "cattr_1" => "Myapp::OtherCurrent"
@@ -74,7 +73,7 @@ describe "Current attributes" do
     # the Rails reloader is responsible for resetting Current after every unit of work
   end
 
-  it "persists with class argument" do
+  def test_persists_with_class_argument
     Sidekiq::CurrentAttributes.persist("Myapp::Current", @config)
     job_hash = {}
     with_context("Myapp::Current", :user_id, 16) do
@@ -94,7 +93,7 @@ describe "Current attributes" do
     #   Sidekiq.server_middleware.clear
   end
 
-  it "persists with hash argument" do
+  def test_persists_with_hash_argument
     cattrs = [Myapp::Current, "Myapp::OtherCurrent"]
     Sidekiq::CurrentAttributes.persist(cattrs, @config)
     job_hash = {}
@@ -108,7 +107,7 @@ describe "Current attributes" do
     end
   end
 
-  it "persists after perform_inline" do
+  def test_persists_after_perform_inline
     Sidekiq::CurrentAttributes.persist("Myapp::Current", @config)
     with_context("Myapp::Current", :user_id, 16) do
       assert_equal 16, Myapp::Current.user_id
@@ -117,7 +116,7 @@ describe "Current attributes" do
     end
   end
 
-  it "ignores non-existent attributes" do
+  def test_ignores_nonexistent_attributes
     cm = Sidekiq::CurrentAttributes::Load.new({
       "cattr" => "Myapp::Current"
     })
@@ -129,7 +128,7 @@ describe "Current attributes" do
     end
   end
 
-  it "doesn't swallow errors raised in the job" do
+  def test_doesnt_swallow_errors_raised_in_the_job
     cm = Sidekiq::CurrentAttributes::Load.new({
       "cattr" => "Myapp::Current"
     })

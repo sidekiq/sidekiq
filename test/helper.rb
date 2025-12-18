@@ -4,13 +4,12 @@ require "bundler/setup"
 Bundler.require(:default, :test)
 
 require "minitest/pride"
-require "maxitest/autorun"
-require "maxitest/threads"
+require "minitest/autorun"
+# require "maxitest/threads"
 
 $TESTING = true
 # disable minitest/parallel threads
 ENV["MT_CPU"] = "0"
-ENV["N"] = "0"
 # Disable any stupid backtrace cleansers
 ENV["BACKTRACE"] = "1"
 
