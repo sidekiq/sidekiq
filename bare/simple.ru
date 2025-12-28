@@ -1,6 +1,7 @@
 # Easiest way to run Sidekiq::Web.
 # Run with "bundle exec rackup simple.ru"
 
+require "rack/session"
 require "sidekiq/web"
 
 # A Web process always runs as client, no need to configure server
