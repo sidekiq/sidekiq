@@ -154,7 +154,7 @@ function livePollCallback() {
 
 function checkResponse(resp) {
   if (!resp.ok) {
-    throw response.error();
+    throw resp.error();
   }
   return resp
 }
