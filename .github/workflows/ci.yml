@@ -35,6 +35,13 @@ jobs:
     steps:
     - uses: actions/checkout@v6
 
+    # Needed to bypass docker pull rate limiter
+    - name: "Docker Login"
+      uses: docker/login-action@v3
+      with:
+        username: contribsys
+        password: ${{ secrets.DOCKER_TOKEN }}
+
     - name: Set up Ruby ${{ matrix.ruby }}
       uses: ruby/setup-ruby@v1
       with:
