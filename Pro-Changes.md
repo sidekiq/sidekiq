@@ -73,6 +73,12 @@ batch.on(:success, ..., {tags: ["batchtype:OrderProcess"]})
 - Atomic scheduler performance tuning [#6609]
 - Discard poison pill jobs with `dead: false` [#6628]
 
+7.3.7
+---------
+
+- Fix iterable job interruption within batch triggering premature :complete callback [#6889]
+- Fix super_fetch orphan recovery on Dragonfly
+
 7.3.6
 ---------
 
