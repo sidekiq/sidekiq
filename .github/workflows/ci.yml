@@ -35,6 +35,9 @@ jobs:
     services:
       redis:
         image: ${{ matrix.database.image }}:${{ matrix.database.version }}
+        credentials:
+          username: contribsys
+          password: ${{ startsWith(matrix.database.image, 'docker.dragonflydb.io') && '' || secrets.DOCKER_TOKEN }}
         ports:
           - 6379:6379
         options: >-
