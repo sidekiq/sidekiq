@@ -32,27 +32,25 @@ jobs:
     env:
       RAILS_VERSION: ${{ matrix.rails }}
 
+    services:
+      redis:
+        image: ${{ matrix.database.image }}:${{ matrix.database.version }}
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
     - uses: actions/checkout@v6
-
-    # Needed to bypass docker pull rate limiter
-    - name: "Docker Login"
-      uses: docker/login-action@v3
-      with:
-        username: contribsys
-        password: ${{ secrets.DOCKER_TOKEN }}
 
     - name: Set up Ruby ${{ matrix.ruby }}
       uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
         ruby-version: ${{ matrix.ruby }}
-
-    - name: Start Redis
-      uses: supercharge/redis-github-action@1.8.1
-      with:
-        redis-image: ${{ matrix.database.image }}
-        redis-version: ${{ matrix.database.version }}
 
     - name: Lint ERB files with HERB
       run: bundle exec rake lint:herb
