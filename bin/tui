@@ -1,0 +1,123 @@
+#!/usr/bin/env ruby
+
+require 'bundler/inline'
+
+gemfile do
+  source 'https://gem.coop'
+  gem "ratatui_ruby", path: "../ratatui_ruby"
+  gem "sidekiq"
+end
+
+# https://sr.ht/~kerrick/ratatui_ruby/
+# https://git.sr.ht/~kerrick/ratatui_ruby/tree/stable/item/examples/
+require "ratatui_ruby"
+require "sidekiq/api"
+
+module Sidekiq
+  class TUI
+    def initialize
+      @selected_tab = 0
+      @tabs = %w(Home Busy Queues Scheduled Retries Dead)
+      @base_style = nil
+    end
+
+    def run
+      RatatuiRuby.run do |tui|
+        @tui = tui
+        @highlight_style = @tui.style(fg: :red, modifiers: [:underlined])
+        @hotkey_style = @tui.style(modifiers: [:bold, :underlined])
+
+        loop do
+          render
+          break if handle_input == :quit
+        end
+      end
+    end
+
+    def render
+      @tui.draw do |frame|
+        main_area, controls_area = @tui.layout_split(
+          frame.area,
+          direction: :vertical,
+          constraints: [
+            @tui.constraint_fill(1),
+            @tui.constraint_length(5),
+          ]
+        )
+
+        # Center the tabs vertically in the main area
+        tabs_area, = @tui.layout_split(
+          main_area,
+          direction: :vertical,
+          constraints: [
+            @tui.constraint_length(3),
+          ]
+        )
+
+        tabs = @tui.tabs(
+          titles: @tabs,
+          selected_index: @selected_tab,
+          block: @tui.block(title: "SidekiqTUI", borders: [:all], title_style: @tui.style(fg: :red, modifiers: [:bold])),
+          divider: " | ",
+          highlight_style: @highlight_style,
+          style: @base_style,
+        )
+        frame.render_widget(tabs, tabs_area)
+
+        render_controls(frame, controls_area, tabs.width)
+      end
+    end
+
+    private def render_controls(frame, area, current_width)
+      controls = @tui.block(
+        title: "Controls",
+        borders: [:all],
+        children: [
+          @tui.paragraph(
+            text: [
+              @tui.text_line(spans: [
+                @tui.text_span(content: "←/→", style: @hotkey_style),
+                @tui.text_span(content: ": Select Tab  "),
+                @tui.text_span(content: "q", style: @hotkey_style),
+                @tui.text_span(content: ": Quit"),
+              ]),
+              # @tui.text_line(spans: [
+              #   @tui.text_span(content: "d", style: @hotkey_style),
+              #   @tui.text_span(content: ": Divider (#{@dividers[@divider_index]})  "),
+              #   @tui.text_span(content: "s", style: @hotkey_style),
+              #   @tui.text_span(content: ": Highlight (#{@highlight_styles[@highlight_style_index][:name]})  "),
+              #   @tui.text_span(content: "b", style: @hotkey_style),
+              #   @tui.text_span(content: ": Base Style (#{@base_styles[@base_style_index][:name]})  "),
+              # ]),
+              @tui.text_line(spans: [
+                @tui.text_span(content: "Redis: #{redis_url}"),
+              ]),
+            ]
+          ),
+        ]
+      )
+      frame.render_widget(controls, area)
+    end
+
+    def handle_input
+      case @tui.poll_event
+      in { type: :key, code: "q" } | { type: :key, code: "c", modifiers: ["ctrl"] }
+        :quit
+      in type: :key, code: "right"
+        @selected_tab = (@selected_tab + 1) % @tabs.size
+      in type: :key, code: "left"
+        @selected_tab = (@selected_tab - 1) % @tabs.size
+      else
+        # Ignore other events
+      end
+    end
+
+    def redis_url
+      Sidekiq.redis do |conn|
+        conn.config.server_url
+      end
+    end
+  end
+end
+
+Sidekiq::TUI.new.run
