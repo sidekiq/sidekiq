@@ -23,9 +23,9 @@ jobs:
         ruby: ["ruby-3.2", "ruby-4.0"]
         rails: ["7.1", "8.1"]
         database: [
-          { image: "redis", version: "7.0.15" },
-          { image: "redis", version: "latest" },
-          { image: "valkey/valkey", version: "9" },
+          { image: "redis", version: "7.0.15", credentials: { username: "contribsys", password: "${{ secrets.DOCKER_TOKEN }}" } },
+          { image: "redis", version: "latest", credentials: { username: "contribsys", password: "${{ secrets.DOCKER_TOKEN }}" } },
+          { image: "valkey/valkey", version: "9", credentials: { username: "contribsys", password: "${{ secrets.DOCKER_TOKEN }}" } },
           { image: "docker.dragonflydb.io/dragonflydb/dragonfly", version: "latest" }
         ]
 
@@ -35,9 +35,7 @@ jobs:
     services:
       redis:
         image: ${{ matrix.database.image }}:${{ matrix.database.version }}
-        credentials:
-          username: contribsys
-          password: ${{ startsWith(matrix.database.image, 'docker.dragonflydb.io') && null || secrets.DOCKER_TOKEN }}
+        credentials: ${{ matrix.database.credentials }}
         ports:
           - 6379:6379
         options: >-
