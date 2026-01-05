@@ -216,8 +216,8 @@ module Sidekiq
         area,
         direction: :vertical,
         constraints: [
-          @tui.constraint_length(12), # Stats section
-          @tui.constraint_fill(1),    # Redis info section
+          @tui.constraint_length(5), # Stats section (2 content lines + borders/title)
+          @tui.constraint_fill(1),   # Redis info section
         ]
       )
 
@@ -228,24 +228,24 @@ module Sidekiq
     def render_stats_section(frame, area)
       stats = @home_data[:stats]
 
-      rows = [
-        ["Processed", stats[:processed].to_s],
-        ["Failed", stats[:failed].to_s],
-        ["Busy", stats[:busy].to_s],
-        ["Enqueued", stats[:enqueued].to_s],
-        ["Retries", stats[:retries].to_s],
-        ["Scheduled", stats[:scheduled].to_s],
-        ["Dead", stats[:dead].to_s],
+      keys = ["Processed", "Failed", "Busy", "Enqueued", "Retries", "Scheduled", "Dead"]
+      values = [
+        stats[:processed].to_s,
+        stats[:failed].to_s,
+        stats[:busy].to_s,
+        stats[:enqueued].to_s,
+        stats[:retries].to_s,
+        stats[:scheduled].to_s,
+        stats[:dead].to_s
       ]
 
+      # Format keys and values with spacing
+      keys_line = keys.map { |k| k.ljust(12) }.join("  ")
+      values_line = values.map { |v| v.ljust(12) }.join("  ")
+
       frame.render_widget(
-        @tui.table(
-          header: ["Metric", "Value"],
-          rows: rows,
-          widths: [
-            @tui.constraint_percentage(50),
-            @tui.constraint_percentage(50)
-          ],
+        @tui.paragraph(
+          text: [keys_line, values_line],
           block: @tui.block(title: "Statistics", borders: [:all])
         ),
         area
@@ -255,22 +255,24 @@ module Sidekiq
     def render_redis_info_section(frame, area)
       redis_info = @home_data[:redis_info]
 
-      rows = [
-        ["Version", redis_info[:version].to_s],
-        ["Uptime", redis_info[:uptime_days] == "N/A" ? "N/A" : "#{redis_info[:uptime_days]} days"],
-        ["Connected Clients", redis_info[:connected_clients].to_s],
-        ["Memory Usage", redis_info[:used_memory].to_s],
-        ["Peak Memory", redis_info[:peak_memory].to_s],
+      uptime_value = redis_info[:uptime_days] == "N/A" ? "N/A" : "#{redis_info[:uptime_days]} days"
+
+      keys = ["Version", "Uptime", "Connected Clients", "Memory Usage", "Peak Memory"]
+      values = [
+        redis_info[:version].to_s,
+        uptime_value,
+        redis_info[:connected_clients].to_s,
+        redis_info[:used_memory].to_s,
+        redis_info[:peak_memory].to_s
       ]
 
+      # Format keys and values with spacing
+      keys_line = keys.map { |k| k.ljust(18) }.join("  ")
+      values_line = values.map { |v| v.ljust(18) }.join("  ")
+
       frame.render_widget(
-        @tui.table(
-          header: ["Property", "Value"],
-          rows: rows,
-          widths: [
-            @tui.constraint_percentage(50),
-            @tui.constraint_percentage(50)
-          ],
+        @tui.paragraph(
+          text: [keys_line, values_line],
           block: @tui.block(title: "Redis Information", borders: [:all])
         ),
         area
