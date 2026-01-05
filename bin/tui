@@ -13,6 +13,10 @@ end
 require "ratatui_ruby"
 require "sidekiq/api"
 
+# Suppress Sidekiq logger output to prevent interference with TUI rendering
+require "logger"
+Sidekiq.default_configuration.logger = Logger.new(IO::NULL)
+
 module Sidekiq
   class TUI
     REFRESH_INTERVAL_SECONDS = 5
