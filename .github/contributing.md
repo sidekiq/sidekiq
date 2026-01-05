@@ -72,25 +72,32 @@ redis-server
 cd myapp/
 ```
 
-#### 8. Run required migration in order to launch Rails app
+#### 8. Install necessary gems for Rails app
+
+```
+bundle install
+```
+
+#### 9. Run required migration in order to launch Rails app
 
 ```
 rake db:migrate
 ```
 
-#### 9. Launch Rails app
+#### 10. Launch Rails app
 
 ```
 rails s
 ```
 
-#### 10. Create feature branch and start contributing!
+#### 11. Create feature branch and start contributing!
 
 ```
 git checkout -b new_feature_name
 ```
 
-### 11. Keep your forked branch up to date with changes in main repo
+#### 12. Keep your forked branch up to date with changes in main repo
+
 ```
 git pull upstream main
 ```
