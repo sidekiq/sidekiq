@@ -13,12 +13,21 @@ end
 require "ratatui_ruby"
 require "sidekiq/api"
 
+# Suppress Sidekiq logger output to prevent interference with TUI rendering
+require "logger"
+Sidekiq.default_configuration.logger = Logger.new(IO::NULL)
+
 module Sidekiq
   class TUI
+    REFRESH_INTERVAL_SECONDS = 5
+
+    TABS = %w(Home Busy Queues Scheduled Retries Dead).freeze
+
     def initialize
-      @selected_tab = 0
-      @tabs = %w(Home Busy Queues Scheduled Retries Dead)
+      @current_tab = "Home"
       @base_style = nil
+      @home_data = nil
+      @last_refresh = Time.now
     end
 
     def run
@@ -27,7 +36,10 @@ module Sidekiq
         @highlight_style = @tui.style(fg: :red, modifiers: [:underlined])
         @hotkey_style = @tui.style(modifiers: [:bold, :underlined])
 
+        refresh_data
+
         loop do
+          refresh_data if should_refresh?
           render
           break if handle_input == :quit
         end
@@ -45,24 +57,39 @@ module Sidekiq
           ]
         )
 
-        # Center the tabs vertically in the main area
-        tabs_area, = @tui.layout_split(
+        # Split main area into tabs and content
+        tabs_area, content_area = @tui.layout_split(
           main_area,
           direction: :vertical,
           constraints: [
             @tui.constraint_length(3),
+            @tui.constraint_fill(1),
           ]
         )
 
         tabs = @tui.tabs(
-          titles: @tabs,
-          selected_index: @selected_tab,
+          titles: TABS,
+          selected_index: selected_tab_index,
           block: @tui.block(title: "SidekiqTUI", borders: [:all], title_style: @tui.style(fg: :red, modifiers: [:bold])),
           divider: " | ",
           highlight_style: @highlight_style,
           style: @base_style,
         )
         frame.render_widget(tabs, tabs_area)
+
+        case @current_tab
+        when "Home"
+          render_home(frame, content_area)
+        else
+          frame.render_widget(
+            @tui.paragraph(
+              text: "Tab '#{@current_tab}' - Coming soon",
+              alignment: :center,
+              block: @tui.block(title: @current_tab, borders: [:all])
+            ),
+            content_area
+          )
+        end
 
         render_controls(frame, controls_area, tabs.width)
       end
@@ -104,9 +131,13 @@ module Sidekiq
       in { type: :key, code: "q" } | { type: :key, code: "c", modifiers: ["ctrl"] }
         :quit
       in type: :key, code: "right"
-        @selected_tab = (@selected_tab + 1) % @tabs.size
+        old_tab = @current_tab
+        @current_tab = next_tab
+        refresh_data if switching_to_tab?("Home", old_tab)
       in type: :key, code: "left"
-        @selected_tab = (@selected_tab - 1) % @tabs.size
+        old_tab = @current_tab
+        @current_tab = previous_tab
+        refresh_data if switching_to_tab?("Home", old_tab)
       else
         # Ignore other events
       end
@@ -116,7 +147,149 @@ module Sidekiq
       Sidekiq.redis do |conn|
         conn.config.server_url
       end
+    rescue
+      "N/A"
     end
+
+    def should_refresh?
+      Time.now - @last_refresh >= REFRESH_INTERVAL_SECONDS
+    end
+
+    def selected_tab_index
+      TABS.index(@current_tab) || 0
+    end
+
+    def next_tab
+      current_index = selected_tab_index
+      TABS[(current_index + 1) % TABS.size]
+    end
+
+    def previous_tab
+      current_index = selected_tab_index
+      TABS[(current_index - 1) % TABS.size]
+    end
+
+    def current_tab?(tab_name)
+      @current_tab == tab_name
+    end
+
+    def switching_to_tab?(tab_name, old_tab)
+      current_tab?(tab_name) && old_tab != tab_name
+    end
+
+    def refresh_data
+      return unless current_tab?("Home")
+
+      begin
+        stats = Sidekiq::Stats.new
+        redis_info = Sidekiq.default_configuration.redis_info
+
+        @home_data = {
+          stats: {
+            processed: stats.processed,
+            failed: stats.failed,
+            busy: stats.workers_size,
+            enqueued: stats.enqueued,
+            retries: stats.retry_size,
+            scheduled: stats.scheduled_size,
+            dead: stats.dead_size,
+          },
+          redis_info: {
+            version: redis_info["redis_version"] || "N/A",
+            uptime_days: redis_info["uptime_in_days"] || "N/A",
+            connected_clients: redis_info["connected_clients"] || "N/A",
+            used_memory: redis_info["used_memory_human"] || "N/A",
+            peak_memory: redis_info["used_memory_peak_human"] || "N/A"
+          }
+        }
+        @last_refresh = Time.now
+      rescue => e
+        @home_data = { error: e.message }
+      end
+    end
+
+    def render_home(frame, area)
+      return render_error(frame, area, "Loading...") unless @home_data
+      return render_error(frame, area, "Error: #{@home_data[:error]}") if @home_data[:error]
+
+      chunks = @tui.layout_split(
+        area,
+        direction: :vertical,
+        constraints: [
+          @tui.constraint_length(5), # Stats section (2 content lines + borders/title)
+          @tui.constraint_fill(1),   # Redis info section
+        ]
+      )
+
+      render_stats_section(frame, chunks[0])
+      render_redis_info_section(frame, chunks[1])
+    end
+
+    def render_stats_section(frame, area)
+      stats = @home_data[:stats]
+
+      keys = ["Processed", "Failed", "Busy", "Enqueued", "Retries", "Scheduled", "Dead"]
+      values = [
+        stats[:processed].to_s,
+        stats[:failed].to_s,
+        stats[:busy].to_s,
+        stats[:enqueued].to_s,
+        stats[:retries].to_s,
+        stats[:scheduled].to_s,
+        stats[:dead].to_s
+      ]
+
+      # Format keys and values with spacing
+      keys_line = keys.map { |k| k.ljust(12) }.join("  ")
+      values_line = values.map { |v| v.ljust(12) }.join("  ")
+
+      frame.render_widget(
+        @tui.paragraph(
+          text: [keys_line, values_line],
+          block: @tui.block(title: "Statistics", borders: [:all])
+        ),
+        area
+      )
+    end
+
+    def render_redis_info_section(frame, area)
+      redis_info = @home_data[:redis_info]
+
+      uptime_value = redis_info[:uptime_days] == "N/A" ? "N/A" : "#{redis_info[:uptime_days]} days"
+
+      keys = ["Version", "Uptime", "Connected Clients", "Memory Usage", "Peak Memory"]
+      values = [
+        redis_info[:version].to_s,
+        uptime_value,
+        redis_info[:connected_clients].to_s,
+        redis_info[:used_memory].to_s,
+        redis_info[:peak_memory].to_s
+      ]
+
+      # Format keys and values with spacing
+      keys_line = keys.map { |k| k.ljust(18) }.join("  ")
+      values_line = values.map { |v| v.ljust(18) }.join("  ")
+
+      frame.render_widget(
+        @tui.paragraph(
+          text: [keys_line, values_line],
+          block: @tui.block(title: "Redis Information", borders: [:all])
+        ),
+        area
+      )
+    end
+
+    def render_error(frame, area, message)
+      frame.render_widget(
+        @tui.paragraph(
+          text: message,
+          alignment: :center,
+          block: @tui.block(title: "Error", borders: [:all], border_style: @tui.style(fg: :red))
+        ),
+        area
+      )
+    end
+
   end
 end
 
