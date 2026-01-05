@@ -96,7 +96,8 @@ rails s
 git checkout -b new_feature_name
 ```
 
-### 12. Keep your forked branch up to date with changes in main repo
+#### 12. Keep your forked branch up to date with changes in main repo
+
 ```
 git pull upstream main
 ```
