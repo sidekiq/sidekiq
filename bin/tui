@@ -53,7 +53,7 @@ module Sidekiq
           direction: :vertical,
           constraints: [
             @tui.constraint_fill(1),
-            @tui.constraint_length(5),
+            @tui.constraint_length(4),
           ]
         )
 
@@ -70,32 +70,35 @@ module Sidekiq
         tabs = @tui.tabs(
           titles: TABS,
           selected_index: selected_tab_index,
-          block: @tui.block(title: "SidekiqTUI", borders: [:all], title_style: @tui.style(fg: :red, modifiers: [:bold])),
+          block: @tui.block(title: Sidekiq::NAME, borders: [:all], title_style: @tui.style(fg: :red, modifiers: [:bold])),
           divider: " | ",
           highlight_style: @highlight_style,
           style: @base_style,
         )
         frame.render_widget(tabs, tabs_area)
 
-        case @current_tab
-        when "Home"
-          render_home(frame, content_area)
-        else
-          frame.render_widget(
-            @tui.paragraph(
-              text: "Tab '#{@current_tab}' - Coming soon",
-              alignment: :center,
-              block: @tui.block(title: @current_tab, borders: [:all])
-            ),
-            content_area
-          )
-        end
-
+        render_content_area(frame, content_area)
         render_controls(frame, controls_area, tabs.width)
       end
     end
 
-    private def render_controls(frame, area, current_width)
+    def render_content_area(frame, content_area)
+      case @current_tab
+      when "Home"
+        render_home(frame, content_area)
+      else
+        frame.render_widget(
+          @tui.paragraph(
+            text: "Tab '#{@current_tab}' - Coming soon",
+            alignment: :center,
+            block: @tui.block(title: @current_tab, borders: [:all])
+          ),
+          content_area
+        )
+      end
+    end
+
+    def render_controls(frame, area, current_width)
       controls = @tui.block(
         title: "Controls",
         borders: [:all],
@@ -216,13 +219,22 @@ module Sidekiq
         area,
         direction: :vertical,
         constraints: [
-          @tui.constraint_length(5), # Stats section (2 content lines + borders/title)
-          @tui.constraint_fill(1),   # Redis info section
+          @tui.constraint_length(4), # Stats
+          @tui.constraint_fill(1),   # Graph
+          @tui.constraint_length(4), # Redis
         ]
       )
 
       render_stats_section(frame, chunks[0])
-      render_redis_info_section(frame, chunks[1])
+      frame.render_widget(
+        @tui.paragraph(
+          text: "Graph coming soon",
+          alignment: :center,
+          block: @tui.block(title: "Dashboard", borders: [:all])
+        ),
+        chunks[1]
+      )
+      render_redis_info_section(frame, chunks[2])
     end
 
     def render_stats_section(frame, area)
