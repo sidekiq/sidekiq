@@ -28,7 +28,7 @@ module Sidekiq
       @base_style = nil
       @home_data = nil
       @last_refresh = Time.now
-      
+
       stats = Sidekiq::Stats.new
       @realtime_chart = {
         previous_stats: {
@@ -100,6 +100,8 @@ module Sidekiq
         render_home(frame, content_area)
       when "Busy"
         render_busy(frame, content_area)
+      when "Queues"
+        render_queues(frame, content_area)
       else
         frame.render_widget(
           @tui.paragraph(
@@ -148,13 +150,11 @@ module Sidekiq
       in { type: :key, code: "q" } | { type: :key, code: "c", modifiers: ["ctrl"] }
         :quit
       in type: :key, code: "right"
-        old_tab = @current_tab
         @current_tab = next_tab
-        refresh_data if switching_to_tab?("Home", old_tab)
+        refresh_data if @current_tab == "Home"
       in type: :key, code: "left"
-        old_tab = @current_tab
         @current_tab = previous_tab
-        refresh_data if switching_to_tab?("Home", old_tab)
+        refresh_data if @current_tab == "Home"
       else
         # Ignore other events
       end
@@ -186,55 +186,45 @@ module Sidekiq
       TABS[(current_index - 1) % TABS.size]
     end
 
-    def current_tab?(tab_name)
-      @current_tab == tab_name
-    end
-
-    def switching_to_tab?(tab_name, old_tab)
-      current_tab?(tab_name) && old_tab != tab_name
-    end
-
     def refresh_data
-      return unless current_tab?("Home")
+      return unless @current_tab == "Home"
 
-      begin
-        stats = Sidekiq::Stats.new
-        redis_info = Sidekiq.default_configuration.redis_info
+      stats = Sidekiq::Stats.new
+      redis_info = Sidekiq.default_configuration.redis_info
 
-        processed_delta = stats.processed - @realtime_chart[:previous_stats][:processed]
-        failed_delta = stats.failed - @realtime_chart[:previous_stats][:failed]
-        @realtime_chart[:deltas][:processed].shift
-        @realtime_chart[:deltas][:processed].push(processed_delta)
-        @realtime_chart[:deltas][:failed].shift
-        @realtime_chart[:deltas][:failed].push(failed_delta)
+      processed_delta = stats.processed - @realtime_chart[:previous_stats][:processed]
+      failed_delta = stats.failed - @realtime_chart[:previous_stats][:failed]
+      @realtime_chart[:deltas][:processed].shift
+      @realtime_chart[:deltas][:processed].push(processed_delta)
+      @realtime_chart[:deltas][:failed].shift
+      @realtime_chart[:deltas][:failed].push(failed_delta)
 
-        @realtime_chart[:previous_stats] = {
+      @realtime_chart[:previous_stats] = {
+        processed: stats.processed,
+        failed: stats.failed
+      }
+
+      @home_data = {
+        stats: {
           processed: stats.processed,
-          failed: stats.failed
+          failed: stats.failed,
+          busy: stats.workers_size,
+          enqueued: stats.enqueued,
+          retries: stats.retry_size,
+          scheduled: stats.scheduled_size,
+          dead: stats.dead_size,
+        },
+        redis_info: {
+          version: redis_info["redis_version"] || "N/A",
+          uptime_days: redis_info["uptime_in_days"] || "N/A",
+          connected_clients: redis_info["connected_clients"] || "N/A",
+          used_memory: redis_info["used_memory_human"] || "N/A",
+          peak_memory: redis_info["used_memory_peak_human"] || "N/A"
         }
-
-        @home_data = {
-          stats: {
-            processed: stats.processed,
-            failed: stats.failed,
-            busy: stats.workers_size,
-            enqueued: stats.enqueued,
-            retries: stats.retry_size,
-            scheduled: stats.scheduled_size,
-            dead: stats.dead_size,
-          },
-          redis_info: {
-            version: redis_info["redis_version"] || "N/A",
-            uptime_days: redis_info["uptime_in_days"] || "N/A",
-            connected_clients: redis_info["connected_clients"] || "N/A",
-            used_memory: redis_info["used_memory_human"] || "N/A",
-            peak_memory: redis_info["used_memory_peak_human"] || "N/A"
-          }
-        }
-        @last_refresh = Time.now
-      rescue => e
-        @home_data = { error: e.message }
-      end
+      }
+      @last_refresh = Time.now
+    rescue => e
+      @home_data = { error: e.message }
     end
 
     def render_busy(frame, area)
@@ -353,7 +343,7 @@ module Sidekiq
     def render_chart_section(frame, area)
       max_value = [@realtime_chart[:deltas][:processed].max, @realtime_chart[:deltas][:failed].max, 1].max
       y_max = [max_value, 5].max
-      
+
       processed_data = @realtime_chart[:deltas][:processed].each_with_index.map { |value, idx| [idx.to_f, value.to_f] }
       failed_data = @realtime_chart[:deltas][:failed].each_with_index.map { |value, idx| [idx.to_f, value.to_f] }
 
@@ -427,6 +417,44 @@ module Sidekiq
           block: @tui.block(title: "Redis Information", borders: [:all])
         ),
         area
+      )
+    end
+
+    def render_queues(frame, area)
+      chunks = @tui.layout_split(
+        area,
+        direction: :vertical,
+        constraints: [
+          @tui.constraint_length(4), # Stats
+          @tui.constraint_fill(1), # Table
+        ]
+      )
+
+      render_stats_section(frame, chunks[0])
+      frame.render_widget(
+        @tui.table(
+          header: ["Queue", "Size", "Latency", "Actions"],
+          widths: [
+            @tui.constraint_length(60),
+            @tui.constraint_length(10),
+            @tui.constraint_length(10),
+            @tui.constraint_length(10),
+          ],
+          rows: Sidekiq::Stats.new
+            .queues
+            .sort_by(&:first) # sort by queue name
+            .map { |name, size|
+              queue = Sidekiq::Queue.new(name)
+              [
+                name,
+                size.to_s,
+                number_with_delimiter(queue.latency, { precision: 2 }),
+                "TODO" # TODO: placeholder for actions; see lib/sidekiq/web/application.rb:137
+              ]
+            },
+          block: @tui.block(title: "Queues", borders: [:all])
+        ),
+        chunks[1]
       )
     end
 
