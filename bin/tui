@@ -28,6 +28,18 @@ module Sidekiq
       @base_style = nil
       @home_data = nil
       @last_refresh = Time.now
+      
+      stats = Sidekiq::Stats.new
+      @realtime_chart = {
+        previous_stats: {
+          processed: stats.processed,
+          failed: stats.failed
+        },
+        deltas: {
+          processed: Array.new(50, 0),
+          failed: Array.new(50, 0)
+        }
+      }
     end
 
     def run
@@ -189,6 +201,18 @@ module Sidekiq
         stats = Sidekiq::Stats.new
         redis_info = Sidekiq.default_configuration.redis_info
 
+        processed_delta = stats.processed - @realtime_chart[:previous_stats][:processed]
+        failed_delta = stats.failed - @realtime_chart[:previous_stats][:failed]
+        @realtime_chart[:deltas][:processed].shift
+        @realtime_chart[:deltas][:processed].push(processed_delta)
+        @realtime_chart[:deltas][:failed].shift
+        @realtime_chart[:deltas][:failed].push(failed_delta)
+
+        @realtime_chart[:previous_stats] = {
+          processed: stats.processed,
+          failed: stats.failed
+        }
+
         @home_data = {
           stats: {
             processed: stats.processed,
@@ -271,14 +295,7 @@ module Sidekiq
       )
 
       render_stats_section(frame, chunks[0])
-      frame.render_widget(
-        @tui.paragraph(
-          text: "Graph coming soon",
-          alignment: :center,
-          block: @tui.block(title: "Dashboard", borders: [:all])
-        ),
-        chunks[1]
-      )
+      render_chart_section(frame, chunks[1])
       render_redis_info_section(frame, chunks[2])
     end
 
@@ -331,6 +348,59 @@ module Sidekiq
         ),
         area
       )
+    end
+
+    def render_chart_section(frame, area)
+      max_value = [@realtime_chart[:deltas][:processed].max, @realtime_chart[:deltas][:failed].max, 1].max
+      y_max = [max_value, 5].max
+      
+      processed_data = @realtime_chart[:deltas][:processed].each_with_index.map { |value, idx| [idx.to_f, value.to_f] }
+      failed_data = @realtime_chart[:deltas][:failed].each_with_index.map { |value, idx| [idx.to_f, value.to_f] }
+
+      datasets = [
+        @tui.dataset(
+          name: "",
+          data: processed_data,
+          style: @tui.style(fg: :green),
+          marker: :dot,
+          graph_type: :line
+        ),
+        @tui.dataset(
+          name: "",
+          data: failed_data,
+          style: @tui.style(fg: :red),
+          marker: :dot,
+          graph_type: :line
+        )
+      ]
+
+      num_labels = 5
+      y_labels = (0...num_labels).map do |i|
+        value = ((y_max * i) / (num_labels - 1)).round
+        value.to_s
+      end
+
+      beacon_pulse = (Time.now.to_i % 2 == 0) ? "●" : " "
+
+      chart = @tui.chart(
+        datasets: datasets,
+        x_axis: @tui.axis(
+          bounds: [0.0, 49.0],
+          labels: [],
+          style: @tui.style(fg: :white)
+        ),
+        y_axis: @tui.axis(
+          bounds: [0.0, y_max.to_f],
+          labels: y_labels,
+          style: @tui.style(fg: :white)
+        ),
+        block: @tui.block(
+          title: "Dashboard #{beacon_pulse}",
+          borders: [:all],
+        )
+      )
+
+      frame.render_widget(chart, area)
     end
 
     def render_redis_info_section(frame, area)
