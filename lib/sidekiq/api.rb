@@ -17,6 +17,23 @@ require "sidekiq/metrics/query"
 #
 
 module Sidekiq
+  # @api private
+  # Calculate the latency in seconds for a job based on its enqueued timestamp
+  # @param job [Hash] the job hash
+  # @return [Float] latency in seconds
+  def self.calculate_latency(job)
+    timestamp = job["enqueued_at"] || job["created_at"]
+    return 0.0 unless timestamp
+
+    if timestamp.is_a?(Float)
+      # old format
+      Time.now.to_f - timestamp
+    else
+      now = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond)
+      (now - timestamp) / 1000.0
+    end
+  end
+
   # Retrieve runtime statistics from Redis regarding
   # this Sidekiq cluster.
   #
@@ -63,18 +80,45 @@ module Sidekiq
       stat :default_queue_latency
     end
 
-    def queues
+    def queues(with_latency: false)
       Sidekiq.redis do |conn|
         queues = conn.sscan("queues").to_a
+        return with_latency ? [] : {} if queues.empty?
 
-        lengths = conn.pipelined { |pipeline|
-          queues.each do |queue|
-            pipeline.llen("queue:#{queue}")
+        if with_latency
+          results = conn.pipelined { |pipeline|
+            queues.each do |queue|
+              pipeline.llen("queue:#{queue}")
+              pipeline.lindex("queue:#{queue}", -1)
+            end
+          }
+
+          queue_data = []
+          queues.each_with_index do |queue_name, idx|
+            length = results[idx * 2]
+            last_item = results[idx * 2 + 1]
+
+            latency = if last_item
+              job = Sidekiq.load_json(last_item)
+              Sidekiq.calculate_latency(job)
+            else
+              0.0
+            end
+
+            queue_data << [queue_name, length, latency]
           end
-        }
 
-        array_of_arrays = queues.zip(lengths).sort_by { |_, size| -size }
-        array_of_arrays.to_h
+          queue_data.sort_by { |_, size, _| -size }
+        else # just names + lengths, no latencies
+          lengths = conn.pipelined { |pipeline|
+            queues.each do |queue|
+              pipeline.llen("queue:#{queue}")
+            end
+          }
+
+          array_of_arrays = queues.zip(lengths).sort_by { |_, size| -size }
+          array_of_arrays.to_h
+        end
       end
     end
 
@@ -100,19 +144,7 @@ module Sidekiq
           {}
         end
 
-        enqueued_at = job["enqueued_at"]
-        if enqueued_at
-          if enqueued_at.is_a?(Float)
-            # old format
-            now = Time.now.to_f
-            now - enqueued_at
-          else
-            now = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond)
-            (now - enqueued_at) / 1000.0
-          end
-        else
-          0.0
-        end
+        Sidekiq.calculate_latency(job)
       else
         0.0
       end
@@ -277,19 +309,7 @@ module Sidekiq
       return 0.0 unless entry
 
       job = Sidekiq.load_json(entry)
-      enqueued_at = job["enqueued_at"]
-      if enqueued_at
-        if enqueued_at.is_a?(Float)
-          # old format
-          now = Time.now.to_f
-          now - enqueued_at
-        else
-          now = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond)
-          (now - enqueued_at) / 1000.0
-        end
-      else
-        0.0
-      end
+      Sidekiq.calculate_latency(job)
     end
 
     def each
@@ -478,17 +498,7 @@ module Sidekiq
     end
 
     def latency
-      timestamp = @item["enqueued_at"] || @item["created_at"]
-      if timestamp
-        if timestamp.is_a?(Float)
-          # old format
-          Time.now.to_f - timestamp
-        else
-          (::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond) - timestamp) / 1000.0
-        end
-      else
-        0.0
-      end
+      Sidekiq.calculate_latency(@item)
     end
 
     # Remove this job from the queue
