@@ -4,7 +4,7 @@ require 'bundler/inline'
 
 gemfile do
   source 'https://gem.coop'
-  gem "ratatui_ruby", "0.9.0"
+  gem "ratatui_ruby", "0.9.1"
   gem "sidekiq"
 end
 
@@ -102,6 +102,12 @@ module Sidekiq
         render_busy(frame, content_area)
       when "Queues"
         render_queues(frame, content_area)
+      when "Scheduled"
+        render_set(frame, content_area, Sidekiq::ScheduledSet.new)
+      when "Retries"
+        render_set(frame, content_area, Sidekiq::RetrySet.new)
+      when "Dead"
+        render_set(frame, content_area, Sidekiq::DeadSet.new)
       else
         frame.render_widget(
           @tui.paragraph(
@@ -262,6 +268,45 @@ module Sidekiq
                 format_memory(p['rss'].to_i),
                 number_with_delimiter(p['concurrency']),
                 number_with_delimiter(p['busy'])],
+              style: idx.even? ? nil : @tui.style(bg: :dark_gray))
+          }
+          h[:rows] = rows
+          h
+        end
+      end
+    end
+
+    def render_set(frame, area, set)
+      chunks = @tui.layout_split(
+        area,
+        direction: :vertical,
+        constraints: [
+          @tui.constraint_length(4), # Stats
+          @tui.constraint_fill(1),   # Table
+        ]
+      )
+
+      render_stats_section(frame, chunks[0])
+      render_table(frame, chunks[1]) do
+        {
+          title: set.name,
+          header: ["When", "Queue", "Job", "Arguments", "Actions"],
+          widths: [
+            @tui.constraint_length(20),
+            @tui.constraint_length(16),
+            @tui.constraint_length(20),
+            @tui.constraint_length(24),
+            @tui.constraint_length(20),
+          ],
+        }.tap do |h|
+          rows = set.map.with_index {|p, idx|
+            @tui.table_row(
+              cells: [
+                p.at,
+                p.queue,
+                p.display_class,
+                p.display_args,
+                "TODO"],
               style: idx.even? ? nil : @tui.style(bg: :dark_gray))
           }
           h[:rows] = rows
