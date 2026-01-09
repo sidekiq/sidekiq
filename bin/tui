@@ -244,13 +244,13 @@ module Sidekiq
         {
           title: "Processes",
           header: ["Name", "Started", "RSS", "Threads", "Busy"],
-          widths: [40, 16, 10, 6, 6],
-            # @tui.constraint_length(40),
-            # @tui.constraint_length(16),
-            # @tui.constraint_length(10),
-            # @tui.constraint_length(6),
-            # @tui.constraint_length(6),
-          # ],
+          widths: [
+            @tui.constraint_length(40),
+            @tui.constraint_length(16),
+            @tui.constraint_length(10),
+            @tui.constraint_length(6),
+            @tui.constraint_length(6),
+          ],
         # footer: ["Total: #{PROCESSES.length}", "Total CPU: #{PROCESSES.sum { |p| p[:cpu] }}%", ""]
         }.tap do |h|
           rows = []
@@ -492,13 +492,11 @@ module Sidekiq
         title: "TableName",
         highlight_symbol: "> ",
         selected_row: 0,
-        selection_label: "x ",
         row_highlight_style: @tui.style(fg: :yellow),
       }
       hash = defaults.merge(yield)
-      $stderr.puts hash.inspect
-      hash[:block] ||= @tui.block(title: hash[:title], borders: :all)
-      table = @tui.table(hash)
+      hash[:block] ||= @tui.block(title: hash.delete(:title), borders: :all)
+      table = @tui.table(**hash)
       frame.render_widget(table, area)
     end
   end
