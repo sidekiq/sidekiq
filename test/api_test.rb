@@ -138,8 +138,10 @@ describe "API" do
 
         assert_equal({"foo" => 1, "bar" => 3}, Sidekiq::Stats.new.queues)
       end
+    end
 
-      it "returns an array of arrays with queue name, size, and latency when with_latency is true" do
+    describe "queues_with_latency" do
+      it "returns an array of arrays with queue name, size, and latency" do
         @cfg.redis do |conn|
           conn.rpush "queue:foo", "{\"enqueued_at\": #{(Time.now.to_f * 1000 - 50).floor}}"
           conn.sadd "queues", ["foo"]
@@ -148,7 +150,7 @@ describe "API" do
           conn.sadd "queues", ["bar"]
         end
 
-        result = Sidekiq::Stats.new.queues(with_latency: true)
+        result = Sidekiq::Stats.new.queues_with_latency
 
         assert_equal 2, result.length
 

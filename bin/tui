@@ -5,7 +5,7 @@ require 'bundler/inline'
 gemfile do
   source 'https://gem.coop'
   gem "ratatui_ruby", "0.9.0"
-  gem "sidekiq", path: ".."
+  gem "sidekiq"
 end
 
 # https://sr.ht/~kerrick/ratatui_ruby/
@@ -441,7 +441,7 @@ module Sidekiq
             @tui.constraint_length(10),
           ],
           rows: Sidekiq::Stats.new
-            .queues(with_latency: true)
+            .queues_with_latency
             .sort_by(&:first) # sort by queue name
             .map { |name, size, latency|
               [

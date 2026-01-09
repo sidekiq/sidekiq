@@ -80,45 +80,52 @@ module Sidekiq
       stat :default_queue_latency
     end
 
-    def queues(with_latency: false)
+    # @return [Hash{String => Integer}] a hash of queue names to their lengths
+    def queues
       Sidekiq.redis do |conn|
         queues = conn.sscan("queues").to_a
-        return with_latency ? [] : {} if queues.empty?
 
-        if with_latency
-          results = conn.pipelined { |pipeline|
-            queues.each do |queue|
-              pipeline.llen("queue:#{queue}")
-              pipeline.lindex("queue:#{queue}", -1)
-            end
-          }
+        lengths = conn.pipelined { |pipeline|
+          queues.each do |queue|
+            pipeline.llen("queue:#{queue}")
+          end
+        }
 
-          queue_data = []
-          queues.each_with_index do |queue_name, idx|
-            length = results[idx * 2]
-            last_item = results[idx * 2 + 1]
+        array_of_arrays = queues.zip(lengths).sort_by { |_, size| -size }
+        array_of_arrays.to_h
+      end
+    end
 
-            latency = if last_item
-              job = Sidekiq.load_json(last_item)
-              Sidekiq.calculate_latency(job)
-            else
-              0.0
-            end
+    # @return [Array<Array(String, Integer, Float)>] an array of arrays containing
+    #   the queue name, its length, and the latency of the last job in the queue
+    def queues_with_latency
+      Sidekiq.redis do |conn|
+        queues = conn.sscan("queues").to_a
+        return [] if queues.empty?
 
-            queue_data << [queue_name, length, latency]
+        results = conn.pipelined { |pipeline|
+          queues.each do |queue|
+            pipeline.llen("queue:#{queue}")
+            pipeline.lindex("queue:#{queue}", -1)
+          end
+        }
+
+        queue_data = []
+        queues.each_with_index do |queue_name, idx|
+          length = results[idx * 2]
+          last_item = results[idx * 2 + 1]
+
+          latency = if last_item
+            job = Sidekiq.load_json(last_item)
+            Sidekiq.calculate_latency(job)
+          else
+            0.0
           end
 
-          queue_data.sort_by { |_, size, _| -size }
-        else # just names + lengths, no latencies
-          lengths = conn.pipelined { |pipeline|
-            queues.each do |queue|
-              pipeline.llen("queue:#{queue}")
-            end
-          }
-
-          array_of_arrays = queues.zip(lengths).sort_by { |_, size| -size }
-          array_of_arrays.to_h
+          queue_data << [queue_name, length, latency]
         end
+
+        queue_data.sort_by { |_, size, _| -size }
       end
     end
 
