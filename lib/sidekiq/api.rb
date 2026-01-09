@@ -17,20 +17,22 @@ require "sidekiq/metrics/query"
 #
 
 module Sidekiq
-  # @api private
-  # Calculate the latency in seconds for a job based on its enqueued timestamp
-  # @param job [Hash] the job hash
-  # @return [Float] latency in seconds
-  def self.calculate_latency(job)
-    timestamp = job["enqueued_at"] || job["created_at"]
-    return 0.0 unless timestamp
+  module ApiUtils
+    # @api private
+    # Calculate the latency in seconds for a job based on its enqueued timestamp
+    # @param job [Hash] the job hash
+    # @return [Float] latency in seconds
+    def self.calculate_latency(job)
+      timestamp = job["enqueued_at"] || job["created_at"]
+      return 0.0 unless timestamp
 
-    if timestamp.is_a?(Float)
-      # old format
-      Time.now.to_f - timestamp
-    else
-      now = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond)
-      (now - timestamp) / 1000.0
+      if timestamp.is_a?(Float)
+        # old format
+        Time.now.to_f - timestamp
+      else
+        now = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond)
+        (now - timestamp) / 1000.0
+      end
     end
   end
 
@@ -117,7 +119,7 @@ module Sidekiq
 
           latency = if last_item
             job = Sidekiq.load_json(last_item)
-            Sidekiq.calculate_latency(job)
+            ApiUtils.calculate_latency(job)
           else
             0.0
           end
@@ -151,7 +153,7 @@ module Sidekiq
           {}
         end
 
-        Sidekiq.calculate_latency(job)
+        ApiUtils.calculate_latency(job)
       else
         0.0
       end
@@ -316,7 +318,7 @@ module Sidekiq
       return 0.0 unless entry
 
       job = Sidekiq.load_json(entry)
-      Sidekiq.calculate_latency(job)
+      ApiUtils.calculate_latency(job)
     end
 
     def each
@@ -505,7 +507,7 @@ module Sidekiq
     end
 
     def latency
-      Sidekiq.calculate_latency(@item)
+      ApiUtils.calculate_latency(@item)
     end
 
     # Remove this job from the queue
