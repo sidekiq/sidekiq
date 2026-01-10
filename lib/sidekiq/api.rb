@@ -100,9 +100,9 @@ module Sidekiq
       end
     end
 
-    # @return [Array<Array(String, Integer, Float)>] an array of arrays containing
-    #   the queue name, its length, and the latency of the last job in the queue
-    def queues_with_latency
+    # @return [Array<Array(String, Integer, Float, Boolean)>] an array of arrays containing
+    #   the queue name, length, latency, and whether the queue is paused
+    def queues_detail
       Sidekiq.redis do |conn|
         queues = conn.sscan("queues").to_a
         return [] if queues.empty?
@@ -111,13 +111,15 @@ module Sidekiq
           queues.each do |queue|
             pipeline.llen("queue:#{queue}")
             pipeline.lindex("queue:#{queue}", -1)
+            pipeline.sismember("paused", queue)
           end
         }
 
-        queue_data = []
-        queues.each_with_index do |queue_name, idx|
-          length = results[idx * 2]
-          last_item = results[idx * 2 + 1]
+        queues_detail = []
+        queues.each_with_index do |name, idx|
+          length = results[idx * 3]
+          last_item = results[idx * 3 + 1]
+          paused = results[idx * 3 + 2] > 0
 
           latency = if last_item
             job = Sidekiq.load_json(last_item)
@@ -126,10 +128,10 @@ module Sidekiq
             0.0
           end
 
-          queue_data << [queue_name, length, latency]
+          queues_detail << [name, length, latency, paused]
         end
 
-        queue_data.sort_by { |_, size, _| -size }
+        queues_detail.sort_by { |_, size, *| -size }
       end
     end
 
