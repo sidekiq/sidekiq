@@ -17,12 +17,33 @@ require "sidekiq/metrics/query"
 #
 
 module Sidekiq
+  module ApiUtils
+    # @api private
+    # Calculate the latency in seconds for a job based on its enqueued timestamp
+    # @param job [Hash] the job hash
+    # @return [Float] latency in seconds
+    def calculate_latency(job)
+      timestamp = job["enqueued_at"] || job["created_at"]
+      return 0.0 unless timestamp
+
+      if timestamp.is_a?(Float)
+        # old format
+        Time.now.to_f - timestamp
+      else
+        now = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond)
+        (now - timestamp) / 1000.0
+      end
+    end
+  end
+
   # Retrieve runtime statistics from Redis regarding
   # this Sidekiq cluster.
   #
   #   stat = Sidekiq::Stats.new
   #   stat.processed
   class Stats
+    include ApiUtils
+
     def initialize
       fetch_stats_fast!
     end
@@ -63,6 +84,7 @@ module Sidekiq
       stat :default_queue_latency
     end
 
+    # @return [Hash{String => Integer}] a hash of queue names to their lengths
     def queues
       Sidekiq.redis do |conn|
         queues = conn.sscan("queues").to_a
@@ -75,6 +97,39 @@ module Sidekiq
 
         array_of_arrays = queues.zip(lengths).sort_by { |_, size| -size }
         array_of_arrays.to_h
+      end
+    end
+
+    # @return [Array<Array(String, Integer, Float)>] an array of arrays containing
+    #   the queue name, its length, and the latency of the last job in the queue
+    def queues_with_latency
+      Sidekiq.redis do |conn|
+        queues = conn.sscan("queues").to_a
+        return [] if queues.empty?
+
+        results = conn.pipelined { |pipeline|
+          queues.each do |queue|
+            pipeline.llen("queue:#{queue}")
+            pipeline.lindex("queue:#{queue}", -1)
+          end
+        }
+
+        queue_data = []
+        queues.each_with_index do |queue_name, idx|
+          length = results[idx * 2]
+          last_item = results[idx * 2 + 1]
+
+          latency = if last_item
+            job = Sidekiq.load_json(last_item)
+            calculate_latency(job)
+          else
+            0.0
+          end
+
+          queue_data << [queue_name, length, latency]
+        end
+
+        queue_data.sort_by { |_, size, _| -size }
       end
     end
 
@@ -100,19 +155,7 @@ module Sidekiq
           {}
         end
 
-        enqueued_at = job["enqueued_at"]
-        if enqueued_at
-          if enqueued_at.is_a?(Float)
-            # old format
-            now = Time.now.to_f
-            now - enqueued_at
-          else
-            now = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond)
-            (now - enqueued_at) / 1000.0
-          end
-        else
-          0.0
-        end
+        calculate_latency(job)
       else
         0.0
       end
@@ -235,6 +278,7 @@ module Sidekiq
   #   end
   class Queue
     include Enumerable
+    include ApiUtils
 
     ##
     # Fetch all known queues within Redis.
@@ -277,19 +321,7 @@ module Sidekiq
       return 0.0 unless entry
 
       job = Sidekiq.load_json(entry)
-      enqueued_at = job["enqueued_at"]
-      if enqueued_at
-        if enqueued_at.is_a?(Float)
-          # old format
-          now = Time.now.to_f
-          now - enqueued_at
-        else
-          now = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond)
-          (now - enqueued_at) / 1000.0
-        end
-      else
-        0.0
-      end
+      calculate_latency(job)
     end
 
     def each
@@ -352,6 +384,8 @@ module Sidekiq
   # The job should be considered immutable but may be
   # removed from the queue via JobRecord#delete.
   class JobRecord
+    include ApiUtils
+
     # the parsed Hash of job data
     # @!attribute [r] Item
     attr_reader :item
@@ -478,17 +512,7 @@ module Sidekiq
     end
 
     def latency
-      timestamp = @item["enqueued_at"] || @item["created_at"]
-      if timestamp
-        if timestamp.is_a?(Float)
-          # old format
-          Time.now.to_f - timestamp
-        else
-          (::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond) - timestamp) / 1000.0
-        end
-      else
-        0.0
-      end
+      calculate_latency(@item)
     end
 
     # Remove this job from the queue

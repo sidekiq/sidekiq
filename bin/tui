@@ -476,8 +476,9 @@ module Sidekiq
       )
 
       render_stats_section(frame, chunks[0])
-      frame.render_widget(
-        @tui.table(
+      render_table(frame, chunks[1]) do
+        {
+          title: "Queues",
           header: ["Queue", "Size", "Latency", "Actions"],
           widths: [
             @tui.constraint_length(60),
@@ -486,21 +487,21 @@ module Sidekiq
             @tui.constraint_length(10),
           ],
           rows: Sidekiq::Stats.new
-            .queues
+            .queues_with_latency
             .sort_by(&:first) # sort by queue name
-            .map { |name, size|
-              queue = Sidekiq::Queue.new(name)
-              [
-                name,
-                size.to_s,
-                number_with_delimiter(queue.latency, { precision: 2 }),
-                "TODO" # TODO: placeholder for actions; see lib/sidekiq/web/application.rb:137
-              ]
-            },
-          block: @tui.block(title: "Queues", borders: [:all])
-        ),
-        chunks[1]
-      )
+            .map.with_index { |(name, size, latency), idx|
+              @tui.table_row(
+                cells: [
+                  name,
+                  size.to_s,
+                  number_with_delimiter(latency, { precision: 2 }),
+                  "TODO" # TODO: placeholder for actions; see lib/sidekiq/web/application.rb:137
+                ],
+                style: idx.even? ? nil : @tui.style(bg: :dark_gray)
+              )
+            }
+        }
+      end
     end
 
     def render_error(frame, area, message)
