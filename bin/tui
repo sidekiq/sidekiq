@@ -25,6 +25,8 @@ module Sidekiq
 
     def initialize
       @current_tab = "Home"
+      @selected_row_index = 0
+      @table_row_ids = [] # containing the identifier of each row, e.g. queue name
       @base_style = nil
       @home_data = nil
       @last_refresh = Time.now
@@ -167,10 +169,20 @@ module Sidekiq
         :quit
       in type: :key, code: "right"
         @current_tab = next_tab
+        @selected_row_index = 0
         refresh_data if @current_tab == "Home"
       in type: :key, code: "left"
         @current_tab = previous_tab
+        @selected_row_index = 0
         refresh_data if @current_tab == "Home"
+      in type: :key, code: "up"
+        @selected_row_index = (@selected_row_index - 1) % @table_row_ids.count
+      in type: :key, code: "down"
+        @selected_row_index = (@selected_row_index + 1) % @table_row_ids.count
+      in type: :key, code: "d"
+        delete_queue! if @current_tab == "Queues"
+      in type: :key, code: "p"
+        pause_unpause_queue! if @current_tab == "Queues"
       else
         # Ignore other events
       end
@@ -287,6 +299,8 @@ module Sidekiq
     end
 
     def render_set(frame, area, set)
+      @table_row_ids = set.map { |job| [job.score, job["jid"]] }
+
       chunks = @tui.layout_split(
         area,
         direction: :vertical,
@@ -491,6 +505,7 @@ module Sidekiq
           row_cells << (paused ? "Yes" : "No") if Sidekiq.pro?
           row_cells
         }
+      @table_row_ids = cells.map(&:first)
 
       chunks = @tui.layout_split(
         area,
@@ -552,13 +567,33 @@ module Sidekiq
       defaults = {
         title: "TableName",
         highlight_symbol: "> ",
-        selected_row: 0,
+        selected_row: @selected_row_index,
         row_highlight_style: @tui.style(fg: :yellow),
       }
       hash = defaults.merge(yield)
       hash[:block] ||= @tui.block(title: hash.delete(:title), borders: :all)
       table = @tui.table(**hash)
       frame.render_widget(table, area)
+    end
+
+    def delete_queue!
+      return if @table_row_ids.empty?
+
+      queue_name = @table_row_ids[@selected_row_index]
+      Sidekiq::Queue.new(queue_name).clear
+    end
+
+    def pause_unpause_queue!
+      return if @table_row_ids.empty?
+      return unless Sidekiq.pro?
+
+      queue_name = @table_row_ids[@selected_row_index]
+      queue = Sidekiq::Queue.new(queue_name)
+      if queue.paused?
+        queue.unpause!
+      else
+        queue.pause!
+      end
     end
   end
 end
