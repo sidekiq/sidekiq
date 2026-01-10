@@ -22,7 +22,7 @@ module Sidekiq
     # Calculate the latency in seconds for a job based on its enqueued timestamp
     # @param job [Hash] the job hash
     # @return [Float] latency in seconds
-    def self.calculate_latency(job)
+    def calculate_latency(job)
       timestamp = job["enqueued_at"] || job["created_at"]
       return 0.0 unless timestamp
 
@@ -42,6 +42,8 @@ module Sidekiq
   #   stat = Sidekiq::Stats.new
   #   stat.processed
   class Stats
+    include ApiUtils
+
     def initialize
       fetch_stats_fast!
     end
@@ -119,7 +121,7 @@ module Sidekiq
 
           latency = if last_item
             job = Sidekiq.load_json(last_item)
-            ApiUtils.calculate_latency(job)
+            calculate_latency(job)
           else
             0.0
           end
@@ -153,7 +155,7 @@ module Sidekiq
           {}
         end
 
-        ApiUtils.calculate_latency(job)
+        calculate_latency(job)
       else
         0.0
       end
@@ -276,6 +278,7 @@ module Sidekiq
   #   end
   class Queue
     include Enumerable
+    include ApiUtils
 
     ##
     # Fetch all known queues within Redis.
@@ -318,7 +321,7 @@ module Sidekiq
       return 0.0 unless entry
 
       job = Sidekiq.load_json(entry)
-      ApiUtils.calculate_latency(job)
+      calculate_latency(job)
     end
 
     def each
@@ -381,6 +384,8 @@ module Sidekiq
   # The job should be considered immutable but may be
   # removed from the queue via JobRecord#delete.
   class JobRecord
+    include ApiUtils
+
     # the parsed Hash of job data
     # @!attribute [r] Item
     attr_reader :item
@@ -507,7 +512,7 @@ module Sidekiq
     end
 
     def latency
-      ApiUtils.calculate_latency(@item)
+      calculate_latency(@item)
     end
 
     # Remove this job from the queue
