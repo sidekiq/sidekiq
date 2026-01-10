@@ -121,18 +121,28 @@ module Sidekiq
     end
 
     def render_controls(frame, area, current_width)
+      hotkeys = {
+        "←/→" => "Select Tab",
+        "q" => "Quit"
+      }
+      hotkeys["↑/↓"] = "Select Row" unless @current_tab == "Home"
+      if @current_tab == "Queues"
+        hotkeys["d"] = "Delete Queue"
+        hotkeys["p"] = "Pause/Unpause Queue"
+      end
+
       controls = @tui.block(
         title: "Controls",
         borders: [:all],
         children: [
           @tui.paragraph(
             text: [
-              @tui.text_line(spans: [
-                @tui.text_span(content: "←/→", style: @hotkey_style),
-                @tui.text_span(content: ": Select Tab  "),
-                @tui.text_span(content: "q", style: @hotkey_style),
-                @tui.text_span(content: ": Quit"),
-              ]),
+              @tui.text_line(spans: hotkeys.map { |key, desc|
+                [
+                  @tui.text_span(content: key, style: @hotkey_style),
+                  @tui.text_span(content: ": #{desc}  ")
+                ]
+              }.flatten),
               # @tui.text_line(spans: [
               #   @tui.text_span(content: "d", style: @hotkey_style),
               #   @tui.text_span(content: ": Divider (#{@dividers[@divider_index]})  "),
