@@ -22,6 +22,39 @@ module Sidekiq
     REFRESH_INTERVAL_SECONDS = 5
 
     TABS = %w(Home Busy Queues Scheduled Retries Dead).freeze
+    # CONTROLS defines data for input handling and for displaying controls.
+    # :code is the key code for input handling.
+    # :display and :description are shown in the controls area, with different
+    #   styling between them. If :display is omitted, :code is displayed instead.
+    #   Duplicate :display and :description values are ignored, shown only once.
+    # :tabs is an array of tab names where the control is active.
+    # :action is a lambda to execute when the control is triggered.
+    CONTROLS = [
+      { code: "left", display: "←/→", description: "Select Tab", tabs: TABS,
+        action: ->(tui) { tui.navigate_tab(:left) }
+      },
+      { code: "right", display: "←/→", description: "Select Tab", tabs: TABS,
+        action: ->(tui) { tui.navigate_tab(:right) }
+      },
+      { code: "up", display: "↑/↓", description: "Select Row", tabs: TABS - ["Home"],
+        action: ->(tui) { tui.navigate_row(:up) }
+      },
+      { code: "down", display: "↑/↓", description: "Select Row", tabs: TABS - ["Home"],
+        action: ->(tui) { tui.navigate_row(:down) }
+      },
+      { code: "d", description: "Delete Queue", tabs: ["Queues"],
+        action: ->(tui) { tui.delete_queue! }
+      },
+      { code: "p", description: "Pause/Unpause Queue", tabs: ["Queues"],
+        action: ->(tui) { tui.toggle_pause_queue! }
+      },
+      { code: "q", display: "q", description: "Quit", tabs: TABS,
+        action: ->(tui) { :quit }
+      },
+      { code: "c", modifiers: ["ctrl"], display: "q", description: "Quit", tabs: TABS,
+        action: ->(tui) { :quit }
+      }
+    ].freeze
 
     def initialize
       @current_tab = "Home"
@@ -83,7 +116,7 @@ module Sidekiq
 
         tabs = @tui.tabs(
           titles: TABS,
-          selected_index: selected_tab_index,
+          selected_index: TABS.index(@current_tab),
           block: @tui.block(title: Sidekiq::NAME, borders: [:all], title_style: @tui.style(fg: :red, modifiers: [:bold])),
           divider: " | ",
           highlight_style: @highlight_style,
@@ -123,15 +156,12 @@ module Sidekiq
     end
 
     def render_controls(frame, area, current_width)
-      hotkeys = {
-        "←/→" => "Select Tab",
-        "q" => "Quit"
-      }
-      hotkeys["↑/↓"] = "Select Row" unless @current_tab == "Home"
-      if @current_tab == "Queues"
-        hotkeys["d"] = "Delete Queue"
-        hotkeys["p"] = "Pause/Unpause Queue"
-      end
+      keys_and_descriptions = CONTROLS
+        .select { |ctrl|
+          ctrl[:tabs].include?(@current_tab)
+        }.map { |ctrl|
+          [ctrl[:display] || ctrl[:code], ctrl[:description]]
+        }.to_h
 
       controls = @tui.block(
         title: "Controls",
@@ -139,7 +169,7 @@ module Sidekiq
         children: [
           @tui.paragraph(
             text: [
-              @tui.text_line(spans: hotkeys.map { |key, desc|
+              @tui.text_line(spans: keys_and_descriptions.map { |key, desc|
                 [
                   @tui.text_span(content: key, style: @hotkey_style),
                   @tui.text_span(content: ": #{desc}  ")
@@ -165,26 +195,54 @@ module Sidekiq
 
     def handle_input
       case @tui.poll_event
-      in { type: :key, code: "q" } | { type: :key, code: "c", modifiers: ["ctrl"] }
-        :quit
-      in type: :key, code: "right"
-        @current_tab = next_tab
-        @selected_row_index = 0
-        refresh_data if @current_tab == "Home"
-      in type: :key, code: "left"
-        @current_tab = previous_tab
-        @selected_row_index = 0
-        refresh_data if @current_tab == "Home"
-      in type: :key, code: "up"
-        @selected_row_index = (@selected_row_index - 1) % @table_row_ids.count
-      in type: :key, code: "down"
-        @selected_row_index = (@selected_row_index + 1) % @table_row_ids.count
-      in type: :key, code: "d"
-        delete_queue! if @current_tab == "Queues"
-      in type: :key, code: "p"
-        pause_unpause_queue! if @current_tab == "Queues"
+      in { type: :key, code:, modifiers: }
+        control = CONTROLS.find { |ctrl|
+          ctrl[:code] == code &&
+          (ctrl[:modifiers] || []) == (modifiers || []) &&
+          ctrl[:tabs].include?(@current_tab)
+        }
+        return unless control
+        control[:action].call(self)
       else
         # Ignore other events
+      end
+    end
+
+    # Navigate tabs to the left or right.
+    # @param direction [Symbol] :left or :right
+    def navigate_tab(direction)
+      index_change = direction == :right ? 1 : -1
+      @current_tab = TABS[(TABS.index(@current_tab) + index_change) % TABS.size]
+      @selected_row_index = 0
+      refresh_data if @current_tab == "Home"
+    end
+
+    # Navigate the row selection up or down in the current tab's table.
+    # @param direction [Symbol] :up or :down
+    def navigate_row(direction)
+      return if @table_row_ids.empty?
+
+      index_change = direction == :down ? 1 : -1
+      @selected_row_index = (@selected_row_index + index_change) % @table_row_ids.count
+    end
+
+    def delete_queue!
+      return if @table_row_ids.empty?
+
+      queue_name = @table_row_ids[@selected_row_index]
+      Sidekiq::Queue.new(queue_name).clear
+    end
+
+    def toggle_pause_queue!
+      return if @table_row_ids.empty?
+      return unless Sidekiq.pro?
+
+      queue_name = @table_row_ids[@selected_row_index]
+      queue = Sidekiq::Queue.new(queue_name)
+      if queue.paused?
+        queue.unpause!
+      else
+        queue.pause!
       end
     end
 
@@ -198,20 +256,6 @@ module Sidekiq
 
     def should_refresh?
       Time.now - @last_refresh >= REFRESH_INTERVAL_SECONDS
-    end
-
-    def selected_tab_index
-      TABS.index(@current_tab) || 0
-    end
-
-    def next_tab
-      current_index = selected_tab_index
-      TABS[(current_index + 1) % TABS.size]
-    end
-
-    def previous_tab
-      current_index = selected_tab_index
-      TABS[(current_index - 1) % TABS.size]
     end
 
     def refresh_data
@@ -505,7 +549,7 @@ module Sidekiq
           row_cells << (paused ? "Yes" : "No") if Sidekiq.pro?
           row_cells
         }
-      @table_row_ids = cells.map(&:first)
+      @table_row_ids = cells.map(&:first) # queue names
 
       chunks = @tui.layout_split(
         area,
@@ -574,26 +618,6 @@ module Sidekiq
       hash[:block] ||= @tui.block(title: hash.delete(:title), borders: :all)
       table = @tui.table(**hash)
       frame.render_widget(table, area)
-    end
-
-    def delete_queue!
-      return if @table_row_ids.empty?
-
-      queue_name = @table_row_ids[@selected_row_index]
-      Sidekiq::Queue.new(queue_name).clear
-    end
-
-    def pause_unpause_queue!
-      return if @table_row_ids.empty?
-      return unless Sidekiq.pro?
-
-      queue_name = @table_row_ids[@selected_row_index]
-      queue = Sidekiq::Queue.new(queue_name)
-      if queue.paused?
-        queue.unpause!
-      else
-        queue.pause!
-      end
     end
   end
 end
