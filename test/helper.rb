@@ -57,15 +57,19 @@ def capture_logging(cfg, lvl = Logger::INFO)
   end
 end
 
-Signal.trap("INFO") do
-  Thread.list.each do |thread|
-    puts "Thread TID-#{(thread.object_id ^ ::Process.pid).to_s(36)} #{thread.name}"
-    if thread.backtrace
-      puts thread.backtrace.join("\n")
-    else
-      puts "<no backtrace available>"
+begin
+  Signal.trap("INFO") do
+    Thread.list.each do |thread|
+      puts "Thread TID-#{(thread.object_id ^ ::Process.pid).to_s(36)} #{thread.name}"
+      if thread.backtrace
+        puts thread.backtrace.join("\n")
+      else
+        puts "<no backtrace available>"
+      end
     end
   end
+rescue ArgumentError
+  # INFO signal not supported in CI
 end
 
 require "active_job"
