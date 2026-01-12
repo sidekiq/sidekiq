@@ -42,6 +42,8 @@ module Sidekiq
   #   stat = Sidekiq::Stats.new
   #   stat.processed
   class Stats
+    QueueSummary = Data.define(:name, :length, :latency, :paused)
+
     include ApiUtils
 
     def initialize
@@ -100,9 +102,9 @@ module Sidekiq
       end
     end
 
-    # @return [Array<Array(String, Integer, Float)>] an array of arrays containing
-    #   the queue name, its length, and the latency of the last job in the queue
-    def queues_with_latency
+    # More detailed information about each queue: name, length, latency, paused status
+    # @return [Array<QueueSummary>]
+    def queue_summaries
       Sidekiq.redis do |conn|
         queues = conn.sscan("queues").to_a
         return [] if queues.empty?
@@ -111,13 +113,15 @@ module Sidekiq
           queues.each do |queue|
             pipeline.llen("queue:#{queue}")
             pipeline.lindex("queue:#{queue}", -1)
+            pipeline.sismember("paused", queue)
           end
         }
 
-        queue_data = []
-        queues.each_with_index do |queue_name, idx|
-          length = results[idx * 2]
-          last_item = results[idx * 2 + 1]
+        queue_summaries = []
+        queues.each_with_index do |name, idx|
+          length = results[idx * 3]
+          last_item = results[idx * 3 + 1]
+          paused = results[idx * 3 + 2] > 0
 
           latency = if last_item
             job = Sidekiq.load_json(last_item)
@@ -126,10 +130,10 @@ module Sidekiq
             0.0
           end
 
-          queue_data << [queue_name, length, latency]
+          queue_summaries << QueueSummary.new(name:, length:, latency:, paused:)
         end
 
-        queue_data.sort_by { |_, size, _| -size }
+        queue_summaries.sort_by { |qd| -qd.length }
       end
     end
 
