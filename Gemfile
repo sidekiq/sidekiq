@@ -23,8 +23,8 @@ gem "vernier" unless RUBY_VERSION < "3"
 gem "webrick"
 
 group :test do
-  # gem "maxitest"
-  gem "minitest", "<6"
+  gem "minitest"
+  gem "minitest-mock"
   gem "simplecov"
   gem "debug"
 end
