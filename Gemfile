@@ -23,8 +23,9 @@ gem "vernier" unless RUBY_VERSION < "3"
 gem "webrick"
 
 group :test do
-  gem "minitest"
-  gem "minitest-mock"
+  # Can't use minitest 6 until our oldest version of Rails works with it
+  gem "minitest", "<6"
+  # gem "minitest-mock"
   gem "simplecov"
   gem "debug"
 end
