@@ -21,7 +21,7 @@ jobs:
         # we test latest and earliest supported versions
         # to minimize our build matrix
         ruby: ["ruby-3.2", "ruby-4.0"]
-        rails: ["7.1", "8.1"]
+        rails: ["7.2", "8.1"]
         database: [
           { image: "redis", version: "7.0.15" },
           { image: "redis", version: "latest" },
