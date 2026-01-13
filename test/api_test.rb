@@ -140,8 +140,8 @@ describe "API" do
       end
     end
 
-    describe "queues_detail" do
-      it "returns an array of arrays with queue name, size, latency, and paused status" do
+    describe "queue_summaries" do
+      it "returns an object with queue name, size, latency, and paused status" do
         @cfg.redis do |conn|
           conn.rpush "queue:foo", "{\"enqueued_at\": #{(Time.now.to_f * 1000 - 50).floor}}"
           conn.sadd "queues", ["foo"]
@@ -151,19 +151,19 @@ describe "API" do
           conn.sadd "queues", ["bar"]
         end
 
-        result = Sidekiq::Stats.new.queues_detail
+        result = Sidekiq::Stats.new.queue_summaries
 
         assert_equal 2, result.length
 
-        assert_equal "bar", result[0][0]
-        assert_equal 3, result[0][1]
-        assert_in_delta 0.10, result[0][2], 0.01
-        assert_equal true, result[0][3]
+        assert_equal "bar", result[0].name
+        assert_equal 3, result[0].size
+        assert_in_delta 0.10, result[0].latency, 0.01
+        assert_equal true, result[0].paused?
 
-        assert_equal "foo", result[1][0]
-        assert_equal 1, result[1][1]
-        assert_in_delta 0.05, result[1][2], 0.01
-        assert_equal false, result[1][3]
+        assert_equal "foo", result[1].name
+        assert_equal 1, result[1].size
+        assert_in_delta 0.05, result[1].latency, 0.01
+        assert_equal false, result[1].paused?
       end
     end
 

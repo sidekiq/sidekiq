@@ -537,19 +537,19 @@ module Sidekiq
       header = ["Queue", "Size", "Latency"]
       header << "Paused?" if Sidekiq.pro?
 
-      cells = Sidekiq::Stats.new
-        .queues_detail
-        .sort_by(&:first) # sort by queue name
-        .map { |name, size, latency, paused|
+      queue_summaries = Sidekiq::Stats.new.queue_summaries.sort_by(&:name)
+      @table_row_ids = queue_summaries.map(&:name)
+
+      cells = queue_summaries
+        .map { |queue_summary|
           row_cells = [
-            name,
-            size.to_s,
-            number_with_delimiter(latency, { precision: 2 }),
+            queue_summary.name,
+            queue_summary.size.to_s,
+            number_with_delimiter(queue_summary.latency, { precision: 2 }),
           ]
-          row_cells << (paused ? "Yes" : "No") if Sidekiq.pro?
+          row_cells << (queue_summary.paused? ? "Yes" : "No") if Sidekiq.pro?
           row_cells
         }
-      @table_row_ids = cells.map(&:first) # queue names
 
       chunks = @tui.layout_split(
         area,

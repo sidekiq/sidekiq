@@ -42,6 +42,10 @@ module Sidekiq
   #   stat = Sidekiq::Stats.new
   #   stat.processed
   class Stats
+    QueueSummary = Data.define(:name, :size, :latency, :paused) do
+      alias_method :paused?, :paused
+    end
+
     include ApiUtils
 
     def initialize
@@ -100,9 +104,9 @@ module Sidekiq
       end
     end
 
-    # @return [Array<Array(String, Integer, Float, Boolean)>] an array of arrays containing
-    #   the queue name, length, latency, and whether the queue is paused
-    def queues_detail
+    # More detailed information about each queue: name, size, latency, paused status
+    # @return [Array<QueueSummary>]
+    def queue_summaries
       Sidekiq.redis do |conn|
         queues = conn.sscan("queues").to_a
         return [] if queues.empty?
@@ -115,9 +119,9 @@ module Sidekiq
           end
         }
 
-        queues_detail = []
+        queue_summaries = []
         queues.each_with_index do |name, idx|
-          length = results[idx * 3]
+          size = results[idx * 3]
           last_item = results[idx * 3 + 1]
           paused = results[idx * 3 + 2] > 0
 
@@ -128,10 +132,10 @@ module Sidekiq
             0.0
           end
 
-          queues_detail << [name, length, latency, paused]
+          queue_summaries << QueueSummary.new(name:, size:, latency:, paused:)
         end
 
-        queues_detail.sort_by { |_, size, *| -size }
+        queue_summaries.sort_by { |qd| -qd.size }
       end
     end
 
