@@ -547,7 +547,7 @@ module Sidekiq
             queue_summary.size.to_s,
             number_with_delimiter(queue_summary.latency, { precision: 2 }),
           ]
-          row_cells << (queue_summary.paused? ? "Yes" : "No") if Sidekiq.pro?
+          row_cells << (queue_summary.paused? ? "✅" : "") if Sidekiq.pro?
           row_cells
         }
 
