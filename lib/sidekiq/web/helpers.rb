@@ -287,7 +287,7 @@ module Sidekiq
       %(<time class="ltr" dir="ltr" title="#{stamp}" datetime="#{stamp}">#{time}</time>)
     end
 
-    def process_queues(pro)
+    def queue_names_by_capsule(pro)
       cap = pro.capsules
       if cap
         cap.map { |k, v| v["weights"].keys.join(", ") }.join("; ")
