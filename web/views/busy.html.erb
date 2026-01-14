@@ -69,7 +69,7 @@
             <% end %>
             <br>
             <b><%= "#{t('Queues')}: " %></b>
-            <%= process.queues.sort.join(", ") %>
+            <%= cap = process_queues(process) %>
             <% if process.version != Sidekiq::VERSION %>
               <br>
               <b><%= "#{t('Version')}: " %></b>

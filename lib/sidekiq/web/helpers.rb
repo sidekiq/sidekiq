@@ -287,6 +287,17 @@ module Sidekiq
       %(<time class="ltr" dir="ltr" title="#{stamp}" datetime="#{stamp}">#{time}</time>)
     end
 
+    def process_queues(pro)
+      cap = pro.capsules
+      if cap
+        cap.map { |k, v| v["weights"].keys.join(", ") }.join("; ")
+      else
+        # DEPRECATED Backwards compatibility with older processes.
+        # 'capsules' element added in v8.0.9
+        process.queues.join(", ")
+      end
+    end
+
     def job_params(job, score)
       "#{score}-#{job["jid"]}"
     end
