@@ -60,20 +60,8 @@ module Sidekiq
       @current_tab = "Home"
       @selected_row_index = 0
       @base_style = nil
-      @data = nil
+      @data = {}
       @last_refresh = Time.now
-
-      stats = Sidekiq::Stats.new
-      @realtime_chart = {
-        previous_stats: {
-          processed: stats.processed,
-          failed: stats.failed
-        },
-        deltas: {
-          processed: Array.new(50, 0),
-          failed: Array.new(50, 0)
-        }
-      }
     end
 
     def run
@@ -212,6 +200,7 @@ module Sidekiq
       index_change = direction == :right ? 1 : -1
       @current_tab = TABS[(TABS.index(@current_tab) + index_change) % TABS.size]
       @selected_row_index = 0
+      @data = {}
       refresh_data
     end
 
@@ -258,33 +247,43 @@ module Sidekiq
 
     def refresh_data
       stats = Sidekiq::Stats.new
-      @data = {
-        stats: {
-          processed: stats.processed,
-          failed: stats.failed,
-          busy: stats.workers_size,
-          enqueued: stats.enqueued,
-          retries: stats.retry_size,
-          scheduled: stats.scheduled_size,
-          dead: stats.dead_size,
-        }
+      @data[:stats] = {
+        processed: stats.processed,
+        failed: stats.failed,
+        busy: stats.workers_size,
+        enqueued: stats.enqueued,
+        retries: stats.retry_size,
+        scheduled: stats.scheduled_size,
+        dead: stats.dead_size,
       }
 
       case @current_tab
       when "Home"
-        redis_info = Sidekiq.default_configuration.redis_info
+        @data[:chart] ||= {
+          previous_stats: {
+            processed: stats.processed,
+            failed: stats.failed
+          },
+          deltas: {
+            processed: Array.new(50, 0),
+            failed: Array.new(50, 0)
+          }
+        }
 
-        processed_delta = stats.processed - @realtime_chart[:previous_stats][:processed]
-        failed_delta = stats.failed - @realtime_chart[:previous_stats][:failed]
-        @realtime_chart[:deltas][:processed].shift
-        @realtime_chart[:deltas][:processed].push(processed_delta)
-        @realtime_chart[:deltas][:failed].shift
-        @realtime_chart[:deltas][:failed].push(failed_delta)
+        processed_delta = stats.processed - @data[:chart][:previous_stats][:processed]
+        failed_delta = stats.failed - @data[:chart][:previous_stats][:failed]
 
-        @realtime_chart[:previous_stats] = {
+        @data[:chart][:deltas][:processed].shift
+        @data[:chart][:deltas][:processed].push(processed_delta)
+        @data[:chart][:deltas][:failed].shift
+        @data[:chart][:deltas][:failed].push(failed_delta)
+
+        @data[:chart][:previous_stats] = {
           processed: stats.processed,
           failed: stats.failed
         }
+
+        redis_info = Sidekiq.default_configuration.redis_info
 
         @data[:redis_info] = {
           version: redis_info["redis_version"] || "N/A",
@@ -502,11 +501,11 @@ module Sidekiq
     end
 
     def render_chart_section(frame, area)
-      max_value = [@realtime_chart[:deltas][:processed].max, @realtime_chart[:deltas][:failed].max, 1].max
+      max_value = [@data[:chart][:deltas][:processed].max, @data[:chart][:deltas][:failed].max, 1].max
       y_max = [max_value, 5].max
 
-      processed_data = @realtime_chart[:deltas][:processed].each_with_index.map { |value, idx| [idx.to_f, value.to_f] }
-      failed_data = @realtime_chart[:deltas][:failed].each_with_index.map { |value, idx| [idx.to_f, value.to_f] }
+      processed_data = @data[:chart][:deltas][:processed].each_with_index.map { |value, idx| [idx.to_f, value.to_f] }
+      failed_data = @data[:chart][:deltas][:failed].each_with_index.map { |value, idx| [idx.to_f, value.to_f] }
 
       datasets = [
         @tui.dataset(
