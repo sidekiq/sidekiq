@@ -646,6 +646,11 @@ module Sidekiq
 
     COLORS = %i(blue cyan yellow red green white gray)
 
+
+    # Run to generate metrics data:
+    #   cd myapp && bundle install
+    #   bundle exec rake seed_jobs
+    #   bundle exec sidekiq
     def render_metrics_chart(frame, area)
       y_max = 5
       csize = COLORS.size
