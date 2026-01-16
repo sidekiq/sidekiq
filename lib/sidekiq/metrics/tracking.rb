@@ -14,8 +14,12 @@ module Sidekiq
         @config = config
         @jobs = Hash.new(0)
         @totals = Hash.new(0)
-        @grams = Hash.new { |hash, key| hash[key] = Histogram.new(key) }
         @lock = Mutex.new
+        @grams = Hash.new do |hash, key| 
+          @lock.synchronize do 
+            hash[key] = Histogram.new(key)
+          end
+        end  
       end
 
       def track(queue, klass)
@@ -121,7 +125,11 @@ module Sidekiq
       def reset_instance_variables
         @totals = Hash.new(0)
         @jobs = Hash.new(0)
-        @grams = Hash.new { |hash, key| hash[key] = Histogram.new(key) }
+        @grams = Hash.new do |hash, key| 
+          @lock.synchronize do 
+            hash[key] = Histogram.new(key)
+          end
+        end
       end
     end
 
