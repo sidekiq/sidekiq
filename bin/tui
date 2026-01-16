@@ -18,11 +18,16 @@ require "sidekiq/api"
 require "logger"
 Sidekiq.default_configuration.logger = Logger.new(IO::NULL)
 
+DebugLogger = Logger.new("tui.log")
+def log(*x)
+  x.each {|item| DebugLogger.info { item } }
+end
+
 module Sidekiq
   class TUI
     REFRESH_INTERVAL_SECONDS = 5
 
-    TABS = %w(Home Busy Queues Scheduled Retries Dead).freeze
+    TABS = %w(Home Busy Queues Scheduled Retries Dead Metrics).freeze
     # CONTROLS defines data for input handling and for displaying controls.
     # :code is the key code for input handling.
     # :display and :description are shown in the controls area, with different
@@ -130,6 +135,8 @@ module Sidekiq
         render_queues(frame, content_area)
       when "Scheduled", "Retries", "Dead"
         render_set(frame, content_area)
+      when "Metrics"
+        render_metrics(frame, content_area)
       else
         frame.render_widget(
           @tui.paragraph(
@@ -353,6 +360,16 @@ module Sidekiq
           set:,
           table_row_ids: set.map { |job| [job.score, job["jid"]] }
         )
+      when "Metrics"
+        # only need to refresh every 60 seconds
+        if !@data[:metrics_refresh] || @data[:metrics_refresh] < Time.now
+          q = Sidekiq::Metrics::Query.new
+          query_result = q.top_jobs(minutes: 60)
+          @data.merge!(
+            metrics: query_result,
+            metrics_refresh: Time.now + 60
+          )
+        end
       end
 
       @last_refresh = Time.now
@@ -610,6 +627,94 @@ module Sidekiq
           }
         }
       end
+    end
+
+    def render_metrics(frame, area)
+      chunks = @tui.layout_split(
+        area,
+        direction: :vertical,
+        constraints: [
+          @tui.constraint_length(4), # Stats
+          @tui.constraint_fill(1), # Chart
+          # TOOD Table
+        ]
+      )
+
+      render_stats_section(frame, chunks[0])
+      render_metrics_chart(frame, chunks[1])
+    end
+
+    COLORS = %i(blue cyan yellow red green white gray)
+
+    def render_metrics_chart(frame, area)
+      y_max = 5
+      csize = COLORS.size
+      q = @data[:metrics]
+      job_results = q.job_results.sort_by { |(kls, jr)| jr.totals["s"] }.reverse.first(COLORS.size)
+      # visible_kls = job_results.first(5).map(&:first)
+      # chart_data = {
+      #   series: job_results.map { |(kls, jr)| [kls, jr.dig("series", "s")] }.to_h,
+      #   marks: query_result.marks.map { |m| [m.bucket, m.label] },
+      #   starts_at: query_result.starts_at.iso8601,
+      #   ends_at: query_result.ends_at.iso8601,
+      #   visibleKls: visible_kls,
+      #   yLabel: 'TotalExecutionTime',
+      #   units: 'seconds',
+      #   markLabel: '*',
+      # }
+
+      datasets = job_results.map.with_index do |(kls, data), idx|
+        # log kls, data, idx
+        hrdata = data.dig("series", "s")
+        tm = Time.now
+        tmi = tm.to_i
+        tm = Time.at(tmi - (tmi % 60)).utc
+        data = Array.new(60) {|idx| idx}.map do |bucket_idx|
+          jumpback = bucket_idx * 60
+          value = hrdata[(tm - jumpback).iso8601] || 0
+          y_max = value if value > y_max
+          [bucket_idx, value]
+        end
+        # log data
+
+        @tui.dataset(name: kls,
+          data: data,
+          style: @tui.style(fg: COLORS[idx % csize]),
+          marker: :dot,
+          graph_type: :line)
+      end
+
+      num_labels = 5
+      y_labels = (0...num_labels).map do |i|
+        value = ((y_max * i) / (num_labels - 1)).round
+        value.to_s
+      end
+      xlabels = [
+        q.starts_at.iso8601[11..15],
+        q.ends_at.iso8601[11..15]
+      ]
+
+      # beacon_pulse = (Time.now.to_i % 2 == 0) ? "●" : " "
+
+      chart = @tui.chart(
+        datasets: datasets,
+        x_axis: @tui.axis(
+          bounds: [0.0, 60.0],
+          labels: xlabels,
+          style: @tui.style(fg: :white)
+        ),
+        y_axis: @tui.axis(
+          bounds: [0.0, y_max.to_f],
+          labels: y_labels,
+          style: @tui.style(fg: :white)
+        ),
+        block: @tui.block(
+          title: "Metrics",
+          borders: [:all],
+        ),
+      )
+
+      frame.render_widget(chart, area)
     end
 
     def render_error(frame, area, message)
