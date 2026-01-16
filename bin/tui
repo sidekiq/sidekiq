@@ -59,9 +59,8 @@ module Sidekiq
     def initialize
       @current_tab = "Home"
       @selected_row_index = 0
-      @table_row_ids = [] # containing the identifier of each row, e.g. queue name
       @base_style = nil
-      @home_data = nil
+      @data = nil
       @last_refresh = Time.now
 
       stats = Sidekiq::Stats.new
@@ -130,6 +129,9 @@ module Sidekiq
     end
 
     def render_content_area(frame, content_area)
+      return render_error(frame, content_area, "Loading...") unless @data
+      return render_error(frame, content_area, "Error: #{@data[:error]}") if @data[:error]
+
       case @current_tab
       when "Home"
         render_home(frame, content_area)
@@ -137,12 +139,8 @@ module Sidekiq
         render_busy(frame, content_area)
       when "Queues"
         render_queues(frame, content_area)
-      when "Scheduled"
-        render_set(frame, content_area, Sidekiq::ScheduledSet.new)
-      when "Retries"
-        render_set(frame, content_area, Sidekiq::RetrySet.new)
-      when "Dead"
-        render_set(frame, content_area, Sidekiq::DeadSet.new)
+      when "Scheduled", "Retries", "Dead"
+        render_set(frame, content_area)
       else
         frame.render_widget(
           @tui.paragraph(
@@ -214,30 +212,30 @@ module Sidekiq
       index_change = direction == :right ? 1 : -1
       @current_tab = TABS[(TABS.index(@current_tab) + index_change) % TABS.size]
       @selected_row_index = 0
-      refresh_data if @current_tab == "Home"
+      refresh_data
     end
 
     # Navigate the row selection up or down in the current tab's table.
     # @param direction [Symbol] :up or :down
     def navigate_row(direction)
-      return if @table_row_ids.empty?
+      return if @data[:table_row_ids].empty?
 
       index_change = direction == :down ? 1 : -1
-      @selected_row_index = (@selected_row_index + index_change) % @table_row_ids.count
+      @selected_row_index = (@selected_row_index + index_change) % @data[:table_row_ids].count
     end
 
     def delete_queue!
-      return if @table_row_ids.empty?
+      return if @data[:table_row_ids].empty?
 
-      queue_name = @table_row_ids[@selected_row_index]
+      queue_name = @data[:table_row_ids][@selected_row_index]
       Sidekiq::Queue.new(queue_name).clear
     end
 
     def toggle_pause_queue!
-      return if @table_row_ids.empty?
+      return if @data[:table_row_ids].empty?
       return unless Sidekiq.pro?
 
-      queue_name = @table_row_ids[@selected_row_index]
+      queue_name = @data[:table_row_ids][@selected_row_index]
       queue = Sidekiq::Queue.new(queue_name)
       if queue.paused?
         queue.unpause!
@@ -259,24 +257,8 @@ module Sidekiq
     end
 
     def refresh_data
-      return unless @current_tab == "Home"
-
       stats = Sidekiq::Stats.new
-      redis_info = Sidekiq.default_configuration.redis_info
-
-      processed_delta = stats.processed - @realtime_chart[:previous_stats][:processed]
-      failed_delta = stats.failed - @realtime_chart[:previous_stats][:failed]
-      @realtime_chart[:deltas][:processed].shift
-      @realtime_chart[:deltas][:processed].push(processed_delta)
-      @realtime_chart[:deltas][:failed].shift
-      @realtime_chart[:deltas][:failed].push(failed_delta)
-
-      @realtime_chart[:previous_stats] = {
-        processed: stats.processed,
-        failed: stats.failed
-      }
-
-      @home_data = {
+      @data = {
         stats: {
           processed: stats.processed,
           failed: stats.failed,
@@ -285,18 +267,97 @@ module Sidekiq
           retries: stats.retry_size,
           scheduled: stats.scheduled_size,
           dead: stats.dead_size,
-        },
-        redis_info: {
+        }
+      }
+
+      case @current_tab
+      when "Home"
+        redis_info = Sidekiq.default_configuration.redis_info
+
+        processed_delta = stats.processed - @realtime_chart[:previous_stats][:processed]
+        failed_delta = stats.failed - @realtime_chart[:previous_stats][:failed]
+        @realtime_chart[:deltas][:processed].shift
+        @realtime_chart[:deltas][:processed].push(processed_delta)
+        @realtime_chart[:deltas][:failed].shift
+        @realtime_chart[:deltas][:failed].push(failed_delta)
+
+        @realtime_chart[:previous_stats] = {
+          processed: stats.processed,
+          failed: stats.failed
+        }
+
+        @data[:redis_info] = {
           version: redis_info["redis_version"] || "N/A",
           uptime_days: redis_info["uptime_in_days"] || "N/A",
           connected_clients: redis_info["connected_clients"] || "N/A",
           used_memory: redis_info["used_memory_human"] || "N/A",
           peak_memory: redis_info["used_memory_peak_human"] || "N/A"
         }
-      }
+      when "Busy"
+        busy = []
+        table_row_ids = []
+
+        Sidekiq::ProcessSet.new.each do |p|
+          busy << [
+            "#{p["hostname"]}:#{p["pid"]}",
+            Time.at(p['started_at']).utc.iso8601,
+            format_memory(p['rss'].to_i),
+            number_with_delimiter(p['concurrency']),
+            number_with_delimiter(p['busy'])
+          ]
+          table_row_ids << p.identity
+        end
+
+        @data.merge!(
+          busy:,
+          table_row_ids:
+        )
+      when "Queues"
+        queue_summaries = Sidekiq::Stats.new.queue_summaries.sort_by(&:name)
+
+        queues = queue_summaries
+          .map { |queue_summary|
+            row_cells = [
+              queue_summary.name,
+              queue_summary.size.to_s,
+              number_with_delimiter(queue_summary.latency, { precision: 2 }),
+            ]
+            row_cells << (queue_summary.paused? ? "✅" : "") if Sidekiq.pro?
+            row_cells
+          }
+
+        table_row_ids = queue_summaries.map(&:name)
+
+        @data.merge!(
+          queues:,
+          table_row_ids:
+        )
+      when "Scheduled"
+        set = Sidekiq::ScheduledSet.new
+
+        @data.merge!(
+          set:,
+          table_row_ids: set.map { |job| [job.score, job["jid"]] }
+        )
+      when "Retries"
+        set = Sidekiq::RetrySet.new
+
+        @data.merge!(
+          set:,
+          table_row_ids: set.map { |job| [job.score, job["jid"]] }
+        )
+      when "Dead"
+        set = Sidekiq::DeadSet.new
+
+        @data.merge!(
+          set:,
+          table_row_ids: set.map { |job| [job.score, job["jid"]] }
+        )
+      end
+
       @last_refresh = Time.now
     rescue => e
-      @home_data = { error: e.message }
+      @data = { error: e.message }
     end
 
     def render_busy(frame, area)
@@ -323,28 +384,18 @@ module Sidekiq
             @tui.constraint_length(6),
             @tui.constraint_length(6),
           ],
-        # footer: ["Total: #{PROCESSES.length}", "Total CPU: #{PROCESSES.sum { |p| p[:cpu] }}%", ""]
-        }.tap do |h|
-          rows = []
-          Sidekiq::ProcessSet.new.each_with_index {|p, idx|
-            rows << @tui.table_row(
-              cells: [
-                "#{p["hostname"]}:#{p["pid"]}",
-                Time.at(p['started_at']).utc.iso8601,
-                format_memory(p['rss'].to_i),
-                number_with_delimiter(p['concurrency']),
-                number_with_delimiter(p['busy'])],
-              style: idx.even? ? nil : @tui.style(bg: :dark_gray))
+          rows: @data[:busy].map.with_index { |cells, idx|
+            @tui.table_row(
+              cells:,
+              style: idx.even? ? nil : @tui.style(bg: :dark_gray)
+            )
           }
-          h[:rows] = rows
-          h
-        end
+        # footer: ["Total: #{PROCESSES.length}", "Total CPU: #{PROCESSES.sum { |p| p[:cpu] }}%", ""]
+        }
       end
     end
 
-    def render_set(frame, area, set)
-      @table_row_ids = set.map { |job| [job.score, job["jid"]] }
-
+    def render_set(frame, area)
       chunks = @tui.layout_split(
         area,
         direction: :vertical,
@@ -357,7 +408,7 @@ module Sidekiq
       render_stats_section(frame, chunks[0])
       render_table(frame, chunks[1]) do
         {
-          title: set.name,
+          title: @data[:set].name,
           header: ["When", "Queue", "Job", "Arguments", "Actions"],
           widths: [
             @tui.constraint_length(20),
@@ -367,7 +418,7 @@ module Sidekiq
             @tui.constraint_length(20),
           ],
         }.tap do |h|
-          rows = set.map.with_index {|p, idx|
+          rows = @data[:set].map.with_index {|p, idx|
             @tui.table_row(
               cells: [
                 p.at,
@@ -384,9 +435,6 @@ module Sidekiq
     end
 
     def render_home(frame, area)
-      return render_error(frame, area, "Loading...") unless @home_data
-      return render_error(frame, area, "Error: #{@home_data[:error]}") if @home_data[:error]
-
       chunks = @tui.layout_split(
         area,
         direction: :vertical,
@@ -427,7 +475,7 @@ module Sidekiq
     end
 
     def render_stats_section(frame, area)
-      stats = @home_data[:stats]
+      stats = @data[:stats]
 
       keys = ["Processed", "Failed", "Busy", "Enqueued", "Retries", "Scheduled", "Dead"]
       values = [
@@ -507,7 +555,7 @@ module Sidekiq
     end
 
     def render_redis_info_section(frame, area)
-      redis_info = @home_data[:redis_info]
+      redis_info = @data[:redis_info]
 
       uptime_value = redis_info[:uptime_days] == "N/A" ? "N/A" : "#{redis_info[:uptime_days]} days"
 
@@ -537,20 +585,6 @@ module Sidekiq
       header = ["Queue", "Size", "Latency"]
       header << "Paused?" if Sidekiq.pro?
 
-      queue_summaries = Sidekiq::Stats.new.queue_summaries.sort_by(&:name)
-      @table_row_ids = queue_summaries.map(&:name)
-
-      cells = queue_summaries
-        .map { |queue_summary|
-          row_cells = [
-            queue_summary.name,
-            queue_summary.size.to_s,
-            number_with_delimiter(queue_summary.latency, { precision: 2 }),
-          ]
-          row_cells << (queue_summary.paused? ? "✅" : "") if Sidekiq.pro?
-          row_cells
-        }
-
       chunks = @tui.layout_split(
         area,
         direction: :vertical,
@@ -568,9 +602,9 @@ module Sidekiq
           widths: header.map.with_index { |_, idx|
             @tui.constraint_length(idx.zero? ? 60 : 10)
           },
-          rows: cells.map.with_index { |row_cells, idx|
+          rows: @data[:queues].map.with_index { |cells, idx|
             @tui.table_row(
-              cells: row_cells,
+              cells:,
               style: idx.even? ? nil : @tui.style(bg: :dark_gray)
             )
           }
