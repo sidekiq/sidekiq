@@ -4,8 +4,7 @@ require 'bundler/inline'
 
 gemfile do
   source 'https://gem.coop'
-  gem "ratatui_ruby", "0.10.2"
-  gem "rexml" # bug in ratatui_ruby
+  gem "ratatui_ruby", "0.10.3"
   gem "sidekiq"
 end
 
