@@ -17,7 +17,6 @@ describe Sidekiq::Metrics do
     @whence ||= Time.utc(2022, 7, 22, 22, 3, 0)
   end
 
-  
   def create_known_metrics(time = fixed_time)
     smet = Sidekiq::Metrics::ExecutionTracker.new(@config)
     # Use deterministic timing by stubbing mono_ms to avoid flaky tests
@@ -41,26 +40,26 @@ describe Sidekiq::Metrics do
       # flush(time - 6000)
     ].each
     smet.stub(:mono_ms, -> { mono_times.next }) do
-      smet.track("critical", "App::SomeJob") { }
-      smet.track("critical", "App::FooJob") { }
+      smet.track("critical", "App::SomeJob") {}
+      smet.track("critical", "App::FooJob") {}
       assert_raises RuntimeError do
         smet.track("critical", "App::SomeJob") do
           raise "boom"
         end
       end
       smet.flush(time)
-      smet.track("critical", "App::FooJob") { }
-      smet.track("critical", "App::FooJob") { }
-      smet.track("critical", "App::FooJob") { }
-      smet.track("critical", "App::SomeJob") { }
+      smet.track("critical", "App::FooJob") {}
+      smet.track("critical", "App::FooJob") {}
+      smet.track("critical", "App::FooJob") {}
+      smet.track("critical", "App::SomeJob") {}
       smet.flush(time - 60)
-      smet.track("critical", "App::FooJob") { }
-      smet.track("critical", "App::FooJob") { }
-      smet.track("critical", "App::SomeJob") { }
+      smet.track("critical", "App::FooJob") {}
+      smet.track("critical", "App::FooJob") {}
+      smet.track("critical", "App::SomeJob") {}
       smet.flush(time - 6000)
     end
   end
-  
+
   it "tracks metrics" do
     count = create_known_metrics
     assert_equal 8, count
