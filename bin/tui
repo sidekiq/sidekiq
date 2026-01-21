@@ -12,6 +12,7 @@ end
 # https://git.sr.ht/~kerrick/ratatui_ruby/tree/stable/item/examples/
 require "ratatui_ruby"
 require "sidekiq/api"
+require "sidekiq/paginator"
 
 # Suppress Sidekiq logger output to prevent interference with TUI rendering
 require "logger"
@@ -24,6 +25,9 @@ end
 
 module Sidekiq
   class TUI
+    include Sidekiq::Paginator
+    PageOptions = Data.define(:page, :size)
+
     REFRESH_INTERVAL_SECONDS = 5
 
     TABS = %w(Home Busy Queues Scheduled Retries Dead Metrics).freeze
@@ -41,10 +45,16 @@ module Sidekiq
       { code: "right", display: "←/→", description: "Select Tab", tabs: TABS,
         action: ->(tui) { tui.navigate_tab(:right) }
       },
-      { code: "up", display: "↑/↓", description: "Select Row", tabs: TABS - ["Home"],
+      { code: "h", display: "h/l", description: "Prev/Next Page", tabs: TABS - ["Home"],
+        action: ->(tui) { tui.prev_page }
+      },
+      { code: "l", display: "h/l", description: "Prev/Next Page", tabs: TABS - ["Home"],
+        action: ->(tui) { tui.next_page }
+      },
+      { code: "k", display: "j/k", description: "Select Row", tabs: TABS - ["Home"],
         action: ->(tui) { tui.navigate_row(:up) }
       },
-      { code: "down", display: "↑/↓", description: "Select Row", tabs: TABS - ["Home"],
+      { code: "j", display: "j/k", description: "Select Row", tabs: TABS - ["Home"],
         action: ->(tui) { tui.navigate_row(:down) }
       },
       { code: "d", description: "Delete Queue", tabs: ["Queues"],
@@ -122,8 +132,7 @@ module Sidekiq
     end
 
     def render_content_area(frame, content_area)
-      return render_error(frame, content_area, "Loading...") unless @data
-      return render_error(frame, content_area, "Error: #{@data[:error]}") if @data[:error]
+      return render_error(frame, content_area, @data[:error]) if @data[:error]
 
       case @current_tab
       when "Home"
@@ -214,24 +223,46 @@ module Sidekiq
     # Navigate the row selection up or down in the current tab's table.
     # @param direction [Symbol] :up or :down
     def navigate_row(direction)
-      return if @data[:table_row_ids].empty?
+      ids = @data.dig(:table, :row_ids)
+      return if !ids || ids.empty?
 
       index_change = direction == :down ? 1 : -1
-      @selected_row_index = (@selected_row_index + index_change) % @data[:table_row_ids].count
+      @selected_row_index = (@selected_row_index + index_change) % ids.count
     end
 
     def delete_queue!
-      return if @data[:table_row_ids].empty?
+      ids = @data.dig(:table, :row_ids)
+      return if !ids || ids.empty?
 
-      queue_name = @data[:table_row_ids][@selected_row_index]
+      queue_name = ids[@selected_row_index]
       Sidekiq::Queue.new(queue_name).clear
     end
 
+    def prev_page
+      opts = @data.dig(:table, :pager)
+      return unless opts
+      return if opts.page < 2
+
+      @data[:table][:pager] = Sidekiq::TUI::PageOptions.new(opts.page - 1, opts.size)
+      refresh_data
+    end
+
+    def next_page
+      np = @data.dig(:table, :next_page)
+      return unless np
+      opts = @data.dig(:table, :pager)
+      return unless opts
+
+      @data[:table][:pager] = Sidekiq::TUI::PageOptions.new(np, opts.size)
+      refresh_data
+    end
+
     def toggle_pause_queue!
-      return if @data[:table_row_ids].empty?
+      ids = @data.dig(:table, :row_ids)
+      return if !ids || ids.empty?
       return unless Sidekiq.pro?
 
-      queue_name = @data[:table_row_ids][@selected_row_index]
+      queue_name = ids[@selected_row_index]
       queue = Sidekiq::Queue.new(queue_name)
       if queue.paused?
         queue.unpause!
@@ -339,25 +370,37 @@ module Sidekiq
           table_row_ids:
         )
       when "Scheduled"
-        set = Sidekiq::ScheduledSet.new
+        pager = @data.dig(:table, :pager) || Sidekiq::TUI::PageOptions.new(1, 25)
+        current, total, items = page("schedule", pager.page, pager.size)
+        rows = items.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
 
         @data.merge!(
-          set:,
-          table_row_ids: set.map { |job| [job.score, job["jid"]] }
+          table: { pager:, rows:, current_page: current,
+            next_page: (current * pager.size < total) ? pager.page + 1 : nil,
+            row_ids: rows.map { |job| [job.score, job["jid"]] }
+          }
         )
       when "Retries"
-        set = Sidekiq::RetrySet.new
+        pager = @data.dig(:table, :pager) || Sidekiq::TUI::PageOptions.new(1, 25)
+        current, total, items = page("retry", pager.page, pager.size)
+        rows = items.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
 
         @data.merge!(
-          set:,
-          table_row_ids: set.map { |job| [job.score, job["jid"]] }
+          table: { pager:, rows:, current_page: current,
+            next_page: (current * pager.size < total) ? pager.page + 1 : nil,
+            row_ids: rows.map { |job| [job.score, job["jid"]] }
+          }
         )
       when "Dead"
-        set = Sidekiq::DeadSet.new
+        pager = @data.dig(:table, :pager) || Sidekiq::TUI::PageOptions.new(1, 25)
+        current, total, items = page("dead", pager.page, pager.size)
+        rows = items.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
 
         @data.merge!(
-          set:,
-          table_row_ids: set.map { |job| [job.score, job["jid"]] }
+          table: { pager:, rows:, current_page: current,
+            next_page: (current * pager.size < total) ? pager.page + 1 : nil,
+            row_ids: rows.map { |job| [job.score, job["jid"]] }
+          }
         )
       when "Metrics"
         # only need to refresh every 60 seconds
@@ -373,7 +416,7 @@ module Sidekiq
 
       @last_refresh = Time.now
     rescue => e
-      @data = { error: e.message }
+      @data = { error: e }
     end
 
     def render_busy(frame, area)
@@ -424,7 +467,7 @@ module Sidekiq
       render_stats_section(frame, chunks[0])
       render_table(frame, chunks[1]) do
         {
-          title: @data[:set].name,
+          title: @current_tab,
           header: ["When", "Queue", "Job", "Arguments", "Actions"],
           widths: [
             @tui.constraint_length(20),
@@ -434,13 +477,13 @@ module Sidekiq
             @tui.constraint_length(20),
           ],
         }.tap do |h|
-          rows = @data[:set].map.with_index {|p, idx|
+          rows = @data[:table][:rows].map.with_index {|entry, idx|
             @tui.table_row(
               cells: [
-                p.at,
-                p.queue,
-                p.display_class,
-                p.display_args,
+                entry.at,
+                entry.queue,
+                entry.display_class,
+                entry.display_args,
                 "TODO"],
               style: idx.even? ? nil : @tui.style(bg: :dark_gray))
           }
@@ -721,10 +764,17 @@ module Sidekiq
       frame.render_widget(chart, area)
     end
 
-    def render_error(frame, area, message)
+    def render_error(frame, area, err)
+      log(err.message, err.backtrace)
+      header = [@tui.text_line(
+        spans: [@tui.text_span(content: err.message, style: @tui.style(modifiers: [:bold]))],
+        alignment: :center
+      )]
+      lines = err.backtrace.map {|line| @tui.text_line(spans: [@tui.text_span(content: line)])},
+
       frame.render_widget(
         @tui.paragraph(
-          text: message,
+          text: header + lines,
           alignment: :center,
           block: @tui.block(title: "Error", borders: [:all], border_style: @tui.style(fg: :red))
         ),
@@ -751,11 +801,15 @@ module Sidekiq
     end
 
     def render_table(frame, area)
+      page = @data.dig(:table, :pager)&.page || 1
+      footer = "Page #{page}"
+
       defaults = {
         title: "TableName",
         highlight_symbol: "> ",
         selected_row: @selected_row_index,
-        row_highlight_style: @tui.style(fg: :yellow),
+        row_highlight_style: @tui.style(fg: :white, bg: :blue),
+        footer: [footer],
       }
       hash = defaults.merge(yield)
       hash[:block] ||= @tui.block(title: hash.delete(:title), borders: :all)
