@@ -17,27 +17,50 @@ describe Sidekiq::Metrics do
     @whence ||= Time.utc(2022, 7, 22, 22, 3, 0)
   end
 
+  
   def create_known_metrics(time = fixed_time)
     smet = Sidekiq::Metrics::ExecutionTracker.new(@config)
-    smet.track("critical", "App::SomeJob") { sleep 0.001 }
-    smet.track("critical", "App::FooJob") { sleep 0.001 }
-    assert_raises RuntimeError do
-      smet.track("critical", "App::SomeJob") do
-        raise "boom"
+    # Use deterministic timing by stubbing mono_ms to avoid flaky tests
+    # mono_ms is called twice per track: once for start, once for finish
+    # time_ms = finish - start, so we control the difference
+    # Sequence: [start1, finish1, start2, finish2, ...]
+    # Each pair (start, finish) determines execution time
+    mono_times = [
+      0, 1,     # App::SomeJob: 1ms
+      2, 3,     # App::FooJob: 1ms
+      4, 5,     # App::SomeJob (raises): 1ms
+      # flush(time)
+      6, 7,     # App::FooJob: 1ms  -> bucket 0 (<20ms)
+      8, 28,    # App::FooJob: 20ms -> bucket 1 (20-30ms)
+      29, 30,   # App::FooJob: 1ms  -> bucket 0 (<20ms)
+      31, 32,   # App::SomeJob: 1ms
+      # flush(time - 60)
+      33, 53,   # App::FooJob: 20ms -> bucket 1
+      54, 55,   # App::FooJob: 1ms  -> bucket 0
+      56, 57    # App::SomeJob: 1ms
+      # flush(time - 6000)
+    ].each
+    smet.stub(:mono_ms, -> { mono_times.next }) do
+      smet.track("critical", "App::SomeJob") { }
+      smet.track("critical", "App::FooJob") { }
+      assert_raises RuntimeError do
+        smet.track("critical", "App::SomeJob") do
+          raise "boom"
+        end
       end
+      smet.flush(time)
+      smet.track("critical", "App::FooJob") { }
+      smet.track("critical", "App::FooJob") { }
+      smet.track("critical", "App::FooJob") { }
+      smet.track("critical", "App::SomeJob") { }
+      smet.flush(time - 60)
+      smet.track("critical", "App::FooJob") { }
+      smet.track("critical", "App::FooJob") { }
+      smet.track("critical", "App::SomeJob") { }
+      smet.flush(time - 6000)
     end
-    smet.flush(time)
-    smet.track("critical", "App::FooJob") { sleep 0.001 }
-    smet.track("critical", "App::FooJob") { sleep 0.020 }
-    smet.track("critical", "App::FooJob") { sleep 0.001 }
-    smet.track("critical", "App::SomeJob") { sleep 0.001 }
-    smet.flush(time - 60)
-    smet.track("critical", "App::FooJob") { sleep 0.020 }
-    smet.track("critical", "App::FooJob") { sleep 0.001 }
-    smet.track("critical", "App::SomeJob") { sleep 0.001 }
-    smet.flush(time - 6000)
   end
-
+  
   it "tracks metrics" do
     count = create_known_metrics
     assert_equal 8, count
