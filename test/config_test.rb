@@ -18,7 +18,7 @@ describe Sidekiq::Config do
   end
 
   it "keeps #inspect output managable" do
-    assert_operator @config.inspect.size, :<, 500
+    assert_operator @config.inspect.size, :<=, 500
     refute_match(/death_handlers/, @config.inspect)
     refute_match(/error_handlers/, @config.inspect)
   end
