@@ -28,7 +28,7 @@ module Sidekiq
     include Sidekiq::Paginator
     PageOptions = Data.define(:page, :size)
 
-    REFRESH_INTERVAL_SECONDS = 5
+    REFRESH_INTERVAL_SECONDS = 2
 
     TABS = %w(Home Busy Queues Scheduled Retries Dead Metrics).freeze
     # CONTROLS defines data for input handling and for displaying controls.
@@ -40,16 +40,16 @@ module Sidekiq
     # :action is a lambda to execute when the control is triggered.
     CONTROLS = [
       { code: "left", display: "←/→", description: "Select Tab", tabs: TABS,
-        action: ->(tui) { tui.navigate_tab(:left) }
+        action: ->(tui) { tui.navigate_tab(:left) }, refresh: true
       },
       { code: "right", display: "←/→", description: "Select Tab", tabs: TABS,
-        action: ->(tui) { tui.navigate_tab(:right) }
+        action: ->(tui) { tui.navigate_tab(:right) }, refresh: true
       },
       { code: "h", display: "h/l", description: "Prev/Next Page", tabs: TABS - ["Home"],
-        action: ->(tui) { tui.prev_page }
+        action: ->(tui) { tui.prev_page }, refresh: true
       },
       { code: "l", display: "h/l", description: "Prev/Next Page", tabs: TABS - ["Home"],
-        action: ->(tui) { tui.next_page }
+        action: ->(tui) { tui.next_page }, refresh: true
       },
       { code: "k", display: "j/k", description: "Select Row", tabs: TABS - ["Home"],
         action: ->(tui) { tui.navigate_row(:up) }
@@ -204,10 +204,14 @@ module Sidekiq
           ctrl[:tabs].include?(@current_tab)
         }
         return unless control
-        control[:action].call(self)
+        control[:action].call(self).tap {
+          refresh_data if control[:refresh]
+        }
       else
         # Ignore other events
       end
+    rescue => ex
+      log(ex.message, ex.backtrace)
     end
 
     # Navigate tabs to the left or right.
@@ -217,7 +221,6 @@ module Sidekiq
       @current_tab = TABS[(TABS.index(@current_tab) + index_change) % TABS.size]
       @selected_row_index = 0
       @data = {}
-      refresh_data
     end
 
     # Navigate the row selection up or down in the current tab's table.
@@ -244,7 +247,6 @@ module Sidekiq
       return if opts.page < 2
 
       @data[:table][:pager] = Sidekiq::TUI::PageOptions.new(opts.page - 1, opts.size)
-      refresh_data
     end
 
     def next_page
@@ -254,7 +256,6 @@ module Sidekiq
       return unless opts
 
       @data[:table][:pager] = Sidekiq::TUI::PageOptions.new(np, opts.size)
-      refresh_data
     end
 
     def toggle_pause_queue!
@@ -347,7 +348,7 @@ module Sidekiq
 
         @data.merge!(
           busy:,
-          table_row_ids:
+          table: { row_ids: table_row_ids },
         )
       when "Queues"
         queue_summaries = Sidekiq::Stats.new.queue_summaries.sort_by(&:name)
@@ -367,7 +368,7 @@ module Sidekiq
 
         @data.merge!(
           queues:,
-          table_row_ids:
+          table: { row_ids: table_row_ids }
         )
       when "Scheduled"
         pager = @data.dig(:table, :pager) || Sidekiq::TUI::PageOptions.new(1, 25)
