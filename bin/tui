@@ -51,11 +51,17 @@ module Sidekiq
       { code: "l", display: "h/l", description: "Prev/Next Page", tabs: TABS - ["Home"],
         action: ->(tui) { tui.next_page }, refresh: true
       },
-      { code: "k", display: "j/k", description: "Select Row", tabs: TABS - ["Home"],
+      { code: "k", display: "j/k", description: "Prev/Next Row", tabs: TABS - ["Home"],
         action: ->(tui) { tui.navigate_row(:up) }
       },
-      { code: "j", display: "j/k", description: "Select Row", tabs: TABS - ["Home"],
+      { code: "j", display: "j/k", description: "Prev/Next Row", tabs: TABS - ["Home"],
         action: ->(tui) { tui.navigate_row(:down) }
+      },
+      { code: "x", display: "x", description: "Select", tabs: TABS - ["Home"],
+        action: ->(tui) { tui.toggle_select }
+      },
+      { code: "A", modifiers: ["shift"], display: "A", description: "Select All", tabs: TABS - ["Home"],
+        action: ->(tui) { tui.toggle_select(:all) }
       },
       { code: "d", description: "Delete Queue", tabs: ["Queues"],
         action: ->(tui) { tui.delete_queue! }
@@ -220,7 +226,9 @@ module Sidekiq
       index_change = direction == :right ? 1 : -1
       @current_tab = TABS[(TABS.index(@current_tab) + index_change) % TABS.size]
       @selected_row_index = 0
-      @data = {}
+      @data = {
+        selected: [],
+      }
     end
 
     # Navigate the row selection up or down in the current tab's table.
@@ -256,6 +264,26 @@ module Sidekiq
       return unless opts
 
       @data[:table][:pager] = Sidekiq::TUI::PageOptions.new(np, opts.size)
+    end
+
+    def toggle_select(which = :current)
+      sel = @data[:selected]
+      log(which, sel)
+      if which == :current
+        x = @data[:table][:row_ids][@selected_row_index]
+        if sel.index(x)
+          # already checked, uncheck it
+          sel.delete(x)
+        else
+          sel << x
+        end
+      else
+        if sel.empty?
+          @data[:selected] = @data[:table][:row_ids]
+        else
+          sel.clear
+        end
+      end
     end
 
     def toggle_pause_queue!
@@ -353,16 +381,17 @@ module Sidekiq
       when "Queues"
         queue_summaries = Sidekiq::Stats.new.queue_summaries.sort_by(&:name)
 
-        queues = queue_summaries
-          .map { |queue_summary|
-            row_cells = [
-              queue_summary.name,
-              queue_summary.size.to_s,
-              number_with_delimiter(queue_summary.latency, { precision: 2 }),
-            ]
-            row_cells << (queue_summary.paused? ? "✅" : "") if Sidekiq.pro?
-            row_cells
-          }
+        selected = Array(@data[:selected])
+        queues = queue_summaries.map { |queue_summary|
+          row_cells = [
+            selected.index(queue_summary.name) ? "✅" : "",
+            queue_summary.name,
+            queue_summary.size.to_s,
+            number_with_delimiter(queue_summary.latency, { precision: 2 }),
+          ]
+          row_cells << (queue_summary.paused? ? "✅" : "") if Sidekiq.pro?
+          row_cells
+        }
 
         table_row_ids = queue_summaries.map(&:name)
 
@@ -378,7 +407,7 @@ module Sidekiq
         @data.merge!(
           table: { pager:, rows:, current_page: current,
             next_page: (current * pager.size < total) ? pager.page + 1 : nil,
-            row_ids: rows.map { |job| [job.score, job["jid"]] }
+            row_ids: rows.map { |job| [job.score, job["jid"]].join }
           }
         )
       when "Retries"
@@ -389,7 +418,7 @@ module Sidekiq
         @data.merge!(
           table: { pager:, rows:, current_page: current,
             next_page: (current * pager.size < total) ? pager.page + 1 : nil,
-            row_ids: rows.map { |job| [job.score, job["jid"]] }
+            row_ids: rows.map { |job| [job.score, job["jid"]].join }
           }
         )
       when "Dead"
@@ -400,7 +429,7 @@ module Sidekiq
         @data.merge!(
           table: { pager:, rows:, current_page: current,
             next_page: (current * pager.size < total) ? pager.page + 1 : nil,
-            row_ids: rows.map { |job| [job.score, job["jid"]] }
+            row_ids: rows.map { |job| [job.score, job["jid"]].join }
           }
         )
       when "Metrics"
@@ -469,8 +498,9 @@ module Sidekiq
       render_table(frame, chunks[1]) do
         {
           title: @current_tab,
-          header: ["When", "Queue", "Job", "Arguments", "Actions"],
+          header: ["☑️", "When", "Queue", "Job", "Arguments", "Actions"],
           widths: [
+            @tui.constraint_length(5),
             @tui.constraint_length(20),
             @tui.constraint_length(16),
             @tui.constraint_length(20),
@@ -481,6 +511,7 @@ module Sidekiq
           rows = @data[:table][:rows].map.with_index {|entry, idx|
             @tui.table_row(
               cells: [
+                selected?(entry) ? "✅" : "",
                 entry.at,
                 entry.queue,
                 entry.display_class,
@@ -492,6 +523,12 @@ module Sidekiq
           h
         end
       end
+    end
+
+    def selected?(entry)
+      roster = @data[:selected]
+      current = [entry.score, entry["jid"]].join
+      roster.index(current)
     end
 
     def render_home(frame, area)
@@ -642,7 +679,7 @@ module Sidekiq
     end
 
     def render_queues(frame, area)
-      header = ["Queue", "Size", "Latency"]
+      header = ["☑️", "Queue", "Size", "Latency"]
       header << "Paused?" if Sidekiq.pro?
 
       chunks = @tui.layout_split(
@@ -660,7 +697,7 @@ module Sidekiq
           title: "Queues",
           header:,
           widths: header.map.with_index { |_, idx|
-            @tui.constraint_length(idx.zero? ? 60 : 10)
+            @tui.constraint_length(idx == 1 ? 60 : 10)
           },
           rows: @data[:queues].map.with_index { |cells, idx|
             @tui.table_row(
@@ -771,7 +808,7 @@ module Sidekiq
         spans: [@tui.text_span(content: err.message, style: @tui.style(modifiers: [:bold]))],
         alignment: :center
       )]
-      lines = err.backtrace.map {|line| @tui.text_line(spans: [@tui.text_span(content: line)])},
+      lines = Array(err.backtrace).map {|line| @tui.text_line(spans: [@tui.text_span(content: line)])},
 
       frame.render_widget(
         @tui.paragraph(
@@ -802,7 +839,7 @@ module Sidekiq
     end
 
     def render_table(frame, area)
-      page = @data.dig(:table, :pager)&.page || 1
+      page = @data.dig(:table, :current_page) || 1
       footer = "Page #{page}"
 
       defaults = {
@@ -810,7 +847,7 @@ module Sidekiq
         highlight_symbol: "> ",
         selected_row: @selected_row_index,
         row_highlight_style: @tui.style(fg: :white, bg: :blue),
-        footer: [footer],
+        footer: ["", footer]
       }
       hash = defaults.merge(yield)
       hash[:block] ||= @tui.block(title: hash.delete(:title), borders: :all)
