@@ -8,6 +8,8 @@ gemfile do
   gem "sidekiq"
 end
 
+RatatuiRuby.debug_mode!
+
 # https://sr.ht/~kerrick/ratatui_ruby/
 # https://git.sr.ht/~kerrick/ratatui_ruby/tree/stable/item/examples/
 require "ratatui_ruby"
@@ -78,12 +80,15 @@ module Sidekiq
       { code: "Q", modifiers: ["shift"], description: "Quiet", tabs: ["Busy"],
         action: ->(tui) { tui.quiet! }
       },
+      { code: "/", display: "/", description: "Filter", tabs: %w(Scheduled Retries Dead),
+        action: ->(tui) { tui.start_filtering }
+      },
       { code: "q", display: "q", description: "Quit", tabs: TABS,
         action: ->(tui) { :quit }
       },
       { code: "c", modifiers: ["ctrl"], display: "q", description: "Quit", tabs: TABS,
         action: ->(tui) { :quit }
-      }
+      },
     ].freeze
 
     def initialize
@@ -142,7 +147,7 @@ module Sidekiq
         frame.render_widget(tabs, tabs_area)
 
         render_content_area(frame, content_area)
-        render_controls(frame, controls_area, tabs.width)
+        render_controls(frame, controls_area)
       end
     end
 
@@ -172,7 +177,7 @@ module Sidekiq
       end
     end
 
-    def render_controls(frame, area, current_width)
+    def render_controls(frame, area)
       keys_and_descriptions = CONTROLS
         .select { |ctrl|
           ctrl[:tabs].include?(@current_tab)
@@ -201,7 +206,8 @@ module Sidekiq
               #   @tui.text_span(content: ": Base Style (#{@base_styles[@base_style_index][:name]})  "),
               # ]),
               @tui.text_line(spans: [
-                @tui.text_span(content: "Redis: #{redis_url}"),
+                @tui.text_span(content: "Redis: #{redis_url} "),
+                @tui.text_span(content: "Current Time: #{Time.now.utc}"),
               ]),
             ]
           ),
@@ -212,6 +218,18 @@ module Sidekiq
 
     def handle_input
       case @tui.poll_event
+      in { type: :key, code: "backspace" } if @data[:filtering]
+        @data[:filter] = @data[:filter].empty? ? "" : @data[:filter][0..-2]
+      in { type: :key, code: "enter" } if @data[:filtering]
+        @data[:filtering] = nil
+        @data[:selected] = []
+      in { type: :key, code: "esc" } if @data[:filtering]
+        @data[:filtering] = nil
+        @data[:filter] = nil
+        @data[:selected] = []
+      in { type: :key, code: code } if @data[:filtering] && code.length == 1
+        @data[:filter] += code
+        @data[:selected] = []
       in { type: :key, code:, modifiers: }
         control = CONTROLS.find { |ctrl|
           ctrl[:code] == code &&
@@ -237,6 +255,7 @@ module Sidekiq
       @selected_row_index = 0
       @data = {
         selected: [],
+        filter: nil,
       }
     end
 
@@ -248,6 +267,15 @@ module Sidekiq
 
       index_change = direction == :down ? 1 : -1
       @selected_row_index = (@selected_row_index + index_change) % ids.count
+    end
+
+    def start_filtering
+      @data[:filtering] = true
+      @data[:filter] = ""
+    end
+
+    def stop_filtering
+      @data[:filtering] = false
     end
 
     def delete_queue!
@@ -432,9 +460,18 @@ module Sidekiq
           table: { row_ids: table_row_ids }
         )
       when "Scheduled"
-        pager = @data.dig(:table, :pager) || Sidekiq::TUI::PageOptions.new(1, 25)
-        current, total, items = page("schedule", pager.page, pager.size)
-        rows = items.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+        f = @data[:filter]
+        pager, rows, current, total = if f && f.size > 2
+          set = Sidekiq::ScheduledSet.new
+          rows = set.scan(f).to_a
+          sz = rows.size
+          [Sidekiq::TUI::PageOptions.new(1, sz), rows, 1, sz]
+        else
+          pager = @data.dig(:table, :pager) || Sidekiq::TUI::PageOptions.new(1, 25)
+          current, total, items = page("schedule", pager.page, pager.size)
+          rows = items.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+          [pager, rows, current, total]
+        end
 
         @data.merge!(
           table: { pager:, rows:, current_page: current,
@@ -511,7 +548,6 @@ module Sidekiq
               style: idx.even? ? nil : @tui.style(bg: :dark_gray)
             )
           }
-        # footer: ["Total: #{PROCESSES.length}", "Total CPU: #{PROCESSES.sum { |p| p[:cpu] }}%", ""]
         }
       end
     end
@@ -530,14 +566,13 @@ module Sidekiq
       render_table(frame, chunks[1]) do
         {
           title: @current_tab,
-          header: ["☑️", "When", "Queue", "Job", "Arguments", "Actions"],
+          header: ["☑️", "When", "Queue", "Job", "Arguments"],
           widths: [
             @tui.constraint_length(5),
-            @tui.constraint_length(20),
-            @tui.constraint_length(16),
-            @tui.constraint_length(20),
             @tui.constraint_length(24),
             @tui.constraint_length(20),
+            @tui.constraint_length(30),
+            @tui.constraint_fill(1),
           ],
         }.tap do |h|
           rows = @data[:table][:rows].map.with_index {|entry, idx|
@@ -548,7 +583,7 @@ module Sidekiq
                 entry.queue,
                 entry.display_class,
                 entry.display_args,
-                "TODO"],
+              ],
               style: idx.even? ? nil : @tui.style(bg: :dark_gray))
           }
           h[:rows] = rows
@@ -872,14 +907,22 @@ module Sidekiq
 
     def render_table(frame, area)
       page = @data.dig(:table, :current_page) || 1
-      footer = "Page #{page}"
+      rows = @data.dig(:table, :rows) || []
+      footer = ["", "Page: #{page}", "Count: #{rows.size}"]
+
+      @filter_style = @tui.style(fg: :white, bg: :dark_gray)
+      footer << @tui.text_line(spans: [
+        @tui.text_span(content: "Filter: ", style: @filter_style),
+        @tui.text_span(content: @data[:filter], style: @filter_style),
+        @tui.text_span(content: "_", style: @tui.style(fg: :white, bg: :dark_gray, modifiers: [:slow_blink]))
+      ]) if @data[:filter]
 
       defaults = {
         title: "TableName",
         highlight_symbol: "> ",
         selected_row: @selected_row_index,
         row_highlight_style: @tui.style(fg: :white, bg: :blue),
-        footer: ["", footer]
+        footer: footer,
       }
       hash = defaults.merge(yield)
       hash[:block] ||= @tui.block(title: hash.delete(:title), borders: :all)
