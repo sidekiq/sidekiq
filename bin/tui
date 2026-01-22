@@ -38,6 +38,9 @@ module Sidekiq
     #   Duplicate :display and :description values are ignored, shown only once.
     # :tabs is an array of tab names where the control is active.
     # :action is a lambda to execute when the control is triggered.
+    #
+    # Conventions: dangerous/irreversible actions should use UPPERCASE codes.
+    # The Shift button means "I'm sure".
     CONTROLS = [
       { code: "left", display: "←/→", description: "Select Tab", tabs: TABS,
         action: ->(tui) { tui.navigate_tab(:left) }, refresh: true
@@ -63,11 +66,17 @@ module Sidekiq
       { code: "A", modifiers: ["shift"], display: "A", description: "Select All", tabs: TABS - ["Home"],
         action: ->(tui) { tui.toggle_select(:all) }
       },
-      { code: "d", description: "Delete Queue", tabs: ["Queues"],
-        action: ->(tui) { tui.delete_queue! }
+      { code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: %w(Queues),
+        action: ->(tui) { tui.delete_queue! }, refresh: true
+      },
+      { code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: %w(Scheduled Retries Dead),
+        action: ->(tui) { tui.delete_rows! }, refresh: true
       },
       { code: "p", description: "Pause/Unpause Queue", tabs: ["Queues"],
         action: ->(tui) { tui.toggle_pause_queue! }
+      },
+      { code: "Q", modifiers: ["shift"], description: "Quiet", tabs: ["Busy"],
+        action: ->(tui) { tui.quiet! }
       },
       { code: "q", display: "q", description: "Quit", tabs: TABS,
         action: ->(tui) { :quit }
@@ -249,6 +258,29 @@ module Sidekiq
       Sidekiq::Queue.new(queue_name).clear
     end
 
+    def delete_rows!
+      ids = @data.dig(:selected)
+      return if !ids || ids.empty?
+
+      set = case @current_tab
+      when "Scheduled"
+        Sidekiq::ScheduledSet.new
+      when "Retries"
+        Sidekiq::RetrySet.new
+      when "Dead"
+        Sidekiq::DeadSet.new
+      else
+        nil
+      end
+      return unless set
+
+      ids.each do |id|
+        score, jid = id.split("|")
+        set.delete(score, jid)
+      end
+      @data[:selected] = []
+    end
+
     def prev_page
       opts = @data.dig(:table, :pager)
       return unless opts
@@ -407,7 +439,7 @@ module Sidekiq
         @data.merge!(
           table: { pager:, rows:, current_page: current,
             next_page: (current * pager.size < total) ? pager.page + 1 : nil,
-            row_ids: rows.map { |job| [job.score, job["jid"]].join }
+            row_ids: rows.map { |job| [job.score, job["jid"]].join("|") }
           }
         )
       when "Retries"
@@ -418,7 +450,7 @@ module Sidekiq
         @data.merge!(
           table: { pager:, rows:, current_page: current,
             next_page: (current * pager.size < total) ? pager.page + 1 : nil,
-            row_ids: rows.map { |job| [job.score, job["jid"]].join }
+            row_ids: rows.map { |job| [job.score, job["jid"]].join("|") }
           }
         )
       when "Dead"
@@ -429,7 +461,7 @@ module Sidekiq
         @data.merge!(
           table: { pager:, rows:, current_page: current,
             next_page: (current * pager.size < total) ? pager.page + 1 : nil,
-            row_ids: rows.map { |job| [job.score, job["jid"]].join }
+            row_ids: rows.map { |job| [job.score, job["jid"]].join("|") }
           }
         )
       when "Metrics"
@@ -527,7 +559,7 @@ module Sidekiq
 
     def selected?(entry)
       roster = @data[:selected]
-      current = [entry.score, entry["jid"]].join
+      current = [entry.score, entry["jid"]].join("|")
       roster.index(current)
     end
 
