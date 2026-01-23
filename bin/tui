@@ -879,12 +879,12 @@ module Sidekiq
         spans: [@tui.text_span(content: err.message, style: @tui.style(modifiers: [:bold]))],
         alignment: :center
       )]
-      lines = Array(err.backtrace).map {|line| @tui.text_line(spans: [@tui.text_span(content: line)])},
+      lines = Array(err.backtrace).map {|line| @tui.text_line(spans: [@tui.text_span(content: line)])}
 
       frame.render_widget(
         @tui.paragraph(
           text: header + lines,
-          alignment: :center,
+          alignment: :left,
           block: @tui.block(title: "Error", borders: [:all], border_style: @tui.style(fg: :red))
         ),
         area
