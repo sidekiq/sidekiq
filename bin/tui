@@ -278,12 +278,27 @@ module Sidekiq
       @data[:filtering] = false
     end
 
-    def delete_queue!
-      ids = @data.dig(:table, :row_ids)
-      return if !ids || ids.empty?
+    def quiet!
+      each_selection do |id|
+        Sidekiq::Process.new("identity" => id).quiet!
+      end
+    end
 
-      queue_name = ids[@selected_row_index]
-      Sidekiq::Queue.new(queue_name).clear
+    def each_selection(&)
+      sel = @data[:selected]
+      if !sel.empty?
+        sel.each(&)
+      else
+        ids = @data.dig(:table, :row_ids)
+        return if !ids || ids.empty?
+        yield ids[@selected_row_index]
+      end
+    end
+
+    def delete_queue!
+      each_selection do |qname|
+        Sidekiq::Queue.new(qname).clear
+      end
     end
 
     def delete_rows!
@@ -347,16 +362,15 @@ module Sidekiq
     end
 
     def toggle_pause_queue!
-      ids = @data.dig(:table, :row_ids)
-      return if !ids || ids.empty?
       return unless Sidekiq.pro?
 
-      queue_name = ids[@selected_row_index]
-      queue = Sidekiq::Queue.new(queue_name)
-      if queue.paused?
-        queue.unpause!
-      else
-        queue.pause!
+      each_selection do |qname|
+        queue = Sidekiq::Queue.new(qname)
+        if queue.paused?
+          queue.unpause!
+        else
+          queue.pause!
+        end
       end
     end
 
@@ -424,8 +438,11 @@ module Sidekiq
         table_row_ids = []
 
         Sidekiq::ProcessSet.new.each do |p|
+          name = "#{p["hostname"]}:#{p["pid"]}"
+          name += " ⭐️" if p.leader?
+          name += " 🛑" if p.stopping?
           busy << [
-            "#{p["hostname"]}:#{p["pid"]}",
+            name,
             Time.at(p['started_at']).utc.iso8601,
             format_memory(p['rss'].to_i),
             number_with_delimiter(p['concurrency']),

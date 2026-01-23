@@ -295,6 +295,7 @@ module Sidekiq
     end
 
     attr_reader :name
+    alias_method :id, :name
 
     # @param name [String] the name of the queue
     def initialize(name = "default")
@@ -583,15 +584,22 @@ module Sidekiq
   # could be the scheduled time for it to run (e.g. scheduled set),
   # or the expiration date after which the entry should be deleted (e.g. dead set).
   class SortedEntry < JobRecord
-    attr_reader :score
     attr_reader :parent
 
     # :nodoc:
     # @api private
     def initialize(parent, score, item)
       super(item)
-      @score = Float(score)
+      @score = score
       @parent = parent
+    end
+
+    def score
+      Float(@score)
+    end
+
+    def id
+      "#{@score}|#{item["jid"]}"
     end
 
     # The timestamp associated with this entry
@@ -604,7 +612,7 @@ module Sidekiq
       if @value
         @parent.delete_by_value(@parent.name, @value)
       else
-        @parent.delete_by_jid(score, jid)
+        @parent.delete_by_jid(@score, jid)
       end
     end
 
@@ -613,7 +621,7 @@ module Sidekiq
     # @param at [Time] the new timestamp for this job
     def reschedule(at)
       Sidekiq.redis do |conn|
-        conn.zincrby(@parent.name, at.to_f - @score, Sidekiq.dump_json(@item))
+        conn.zincrby(@parent.name, at.to_f - score, Sidekiq.dump_json(@item))
       end
     end
 
@@ -1118,6 +1126,7 @@ module Sidekiq
     def identity
       self["identity"]
     end
+    alias_method :id, :identity
 
     # deprecated, use capsules below
     def queues
@@ -1189,6 +1198,10 @@ module Sidekiq
     # @return [Boolean] true if this process is quiet or shutting down
     def stopping?
       self["quiet"] == "true"
+    end
+
+    def leader?
+      Sidekiq.redis { |c| c.get("dear-leader") == identity }
     end
 
     private
