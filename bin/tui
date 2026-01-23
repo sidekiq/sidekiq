@@ -825,10 +825,14 @@ module Sidekiq
           jumpback = bucket_idx * 60
           value = hrdata[(tm - jumpback).iso8601] || 0
           y_max = value if value > y_max
-          [bucket_idx, value]
+          # we have 60 data points, newest data should be
+          # at highest indexes so we have to rejigger the index
+          # here
+          [59 - bucket_idx, value]
         end
         # log data
 
+        log(data)
         @tui.dataset(name: kls,
           data: data,
           style: @tui.style(fg: COLORS[idx % csize]),
@@ -919,7 +923,7 @@ module Sidekiq
 
       defaults = {
         title: "TableName",
-        highlight_symbol: "> ",
+        highlight_symbol: "➡️",
         selected_row: @selected_row_index,
         row_highlight_style: @tui.style(fg: :white, bg: :blue),
         footer: footer,
