@@ -284,10 +284,16 @@ module Sidekiq
       end
     end
 
-    def each_selection(&)
+    def each_selection(unselect: true, &)
       sel = @data[:selected]
       if !sel.empty?
-        sel.each(&)
+        sel.each do |id|
+          yield id
+          # When processing multiple items in bulk, we want to unselect
+          # each row if its operation succeeds so our UI will not
+          # re-process rows 1-3 if row 4 fails.
+          sel.delete(id) if unselect
+        end
       else
         ids = @data.dig(:table, :row_ids)
         return if !ids || ids.empty?
@@ -302,9 +308,6 @@ module Sidekiq
     end
 
     def delete_rows!
-      ids = @data.dig(:selected)
-      return if !ids || ids.empty?
-
       set = case @current_tab
       when "Scheduled"
         Sidekiq::ScheduledSet.new
@@ -316,12 +319,10 @@ module Sidekiq
         nil
       end
       return unless set
-
-      ids.each do |id|
+      each_selection do |id|
         score, jid = id.split("|")
         set.delete(score, jid)
       end
-      @data[:selected] = []
     end
 
     def prev_page
@@ -442,8 +443,9 @@ module Sidekiq
           name += " ⭐️" if p.leader?
           name += " 🛑" if p.stopping?
           busy << [
+            selected?(p) ? "✅" : "",
             name,
-            Time.at(p['started_at']).utc.iso8601,
+            Time.at(p['started_at']).utc,
             format_memory(p['rss'].to_i),
             number_with_delimiter(p['concurrency']),
             number_with_delimiter(p['busy'])
@@ -551,10 +553,11 @@ module Sidekiq
       render_table(frame, chunks[2]) do
         {
           title: "Processes",
-          header: ["Name", "Started", "RSS", "Threads", "Busy"],
+          header: ["☑️", "Name", "Started", "RSS", "Threads", "Busy"],
           widths: [
-            @tui.constraint_length(40),
-            @tui.constraint_length(16),
+            @tui.constraint_length(5),
+            @tui.constraint_fill(1),
+            @tui.constraint_length(24),
             @tui.constraint_length(10),
             @tui.constraint_length(6),
             @tui.constraint_length(6),
@@ -610,9 +613,7 @@ module Sidekiq
     end
 
     def selected?(entry)
-      roster = @data[:selected]
-      current = [entry.score, entry["jid"]].join("|")
-      roster.index(current)
+      @data[:selected].index(entry.id)
     end
 
     def render_home(frame, area)
