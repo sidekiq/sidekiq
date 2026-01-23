@@ -286,19 +286,22 @@ module Sidekiq
 
     def each_selection(unselect: true, &)
       sel = @data[:selected]
+      finished = []
       if !sel.empty?
         sel.each do |id|
           yield id
           # When processing multiple items in bulk, we want to unselect
           # each row if its operation succeeds so our UI will not
           # re-process rows 1-3 if row 4 fails.
-          sel.delete(id) if unselect
+          finished << id
         end
       else
         ids = @data.dig(:table, :row_ids)
         return if !ids || ids.empty?
         yield ids[@selected_row_index]
       end
+    ensure
+      @data[:selected] = sel - finished if unselect
     end
 
     def delete_queue!
