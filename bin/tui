@@ -482,47 +482,11 @@ module Sidekiq
           table: { row_ids: table_row_ids }
         )
       when "Scheduled"
-        f = @data[:filter]
-        pager, rows, current, total = if f && f.size > 2
-          set = Sidekiq::ScheduledSet.new
-          rows = set.scan(f).to_a
-          sz = rows.size
-          [Sidekiq::TUI::PageOptions.new(1, sz), rows, 1, sz]
-        else
-          pager = @data.dig(:table, :pager) || Sidekiq::TUI::PageOptions.new(1, 25)
-          current, total, items = page("schedule", pager.page, pager.size)
-          rows = items.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
-          [pager, rows, current, total]
-        end
-
-        @data.merge!(
-          table: { pager:, rows:, current_page: current,
-            next_page: (current * pager.size < total) ? pager.page + 1 : nil,
-            row_ids: rows.map { |job| [job.score, job["jid"]].join("|") }
-          }
-        )
+        data_for_set(Sidekiq::ScheduledSet.new)
       when "Retries"
-        pager = @data.dig(:table, :pager) || Sidekiq::TUI::PageOptions.new(1, 25)
-        current, total, items = page("retry", pager.page, pager.size)
-        rows = items.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
-
-        @data.merge!(
-          table: { pager:, rows:, current_page: current,
-            next_page: (current * pager.size < total) ? pager.page + 1 : nil,
-            row_ids: rows.map { |job| [job.score, job["jid"]].join("|") }
-          }
-        )
+        data_for_set(Sidekiq::RetrySet.new)
       when "Dead"
-        pager = @data.dig(:table, :pager) || Sidekiq::TUI::PageOptions.new(1, 25)
-        current, total, items = page("dead", pager.page, pager.size)
-        rows = items.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
-
-        @data.merge!(
-          table: { pager:, rows:, current_page: current,
-            next_page: (current * pager.size < total) ? pager.page + 1 : nil,
-            row_ids: rows.map { |job| [job.score, job["jid"]].join("|") }
-          }
-        )
+        data_for_set(Sidekiq::DeadSet.new)
       when "Metrics"
         # only need to refresh every 60 seconds
         if !@data[:metrics_refresh] || @data[:metrics_refresh] < Time.now
@@ -538,6 +502,27 @@ module Sidekiq
       @last_refresh = Time.now
     rescue => e
       @data = { error: e }
+    end
+
+    def data_for_set(set)
+      f = @data[:filter]
+      pager, rows, current, total = if f && f.size > 2
+        rows = set.scan(f).to_a
+        sz = rows.size
+        [Sidekiq::TUI::PageOptions.new(1, sz), rows, 1, sz]
+      else
+        pager = @data.dig(:table, :pager) || Sidekiq::TUI::PageOptions.new(1, 25)
+        current, total, items = page(set.name, pager.page, pager.size)
+        rows = items.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+        [pager, rows, current, total]
+      end
+
+      @data.merge!(
+        table: { pager:, rows:, current_page: current, total:,
+          next_page: (current * pager.size < total) ? pager.page + 1 : nil,
+          row_ids: rows.map { |job| [job.score, job["jid"]].join("|") }
+        }
+      )
     end
 
     def render_busy(frame, area)
@@ -933,14 +918,19 @@ module Sidekiq
     def render_table(frame, area)
       page = @data.dig(:table, :current_page) || 1
       rows = @data.dig(:table, :rows) || []
-      footer = ["", "Page: #{page}", "Count: #{rows.size}"]
+      total = @data.dig(:table, :total) || 0
+      footer = ["", "Page: #{page}", "Count: #{rows.size}", "Total: #{total}"]
+      footer << "Selected: #{@data[:selected].size}" unless @data[:selected].empty?
 
-      @filter_style = @tui.style(fg: :white, bg: :dark_gray)
-      footer << @tui.text_line(spans: [
-        @tui.text_span(content: "Filter: ", style: @filter_style),
-        @tui.text_span(content: @data[:filter], style: @filter_style),
-        @tui.text_span(content: "_", style: @tui.style(fg: :white, bg: :dark_gray, modifiers: [:slow_blink]))
-      ]) if @data[:filter]
+      if @data[:filter]
+        @filter_style = @tui.style(fg: :white, bg: :dark_gray)
+        spans = [
+          @tui.text_span(content: "Filter: ", style: @filter_style),
+          @tui.text_span(content: @data[:filter], style: @filter_style),
+        ]
+        spans << @tui.text_span(content: "_", style: @tui.style(fg: :white, bg: :dark_gray, modifiers: [:slow_blink])) if @data[:filtering]
+        footer << @tui.text_line(spans: spans)
+      end
 
       defaults = {
         title: "TableName",
