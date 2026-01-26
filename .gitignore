@@ -19,6 +19,7 @@ Gemfile.lock
 *.DS_Store
 doc/
 .yardoc/
+tui.log
 
 # HERB log files
 *_erb_parsing_result_*.log

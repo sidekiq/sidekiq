@@ -1,0 +1,946 @@
+require 'bundler/inline'
+
+gemfile do
+  source 'https://gem.coop'
+  gem "ratatui_ruby", "0.10.3"
+  gem "sidekiq"
+end
+
+RatatuiRuby.debug_mode!
+
+# https://sr.ht/~kerrick/ratatui_ruby/
+# https://git.sr.ht/~kerrick/ratatui_ruby/tree/stable/item/examples/
+require "ratatui_ruby"
+require "sidekiq/api"
+require "sidekiq/paginator"
+
+# Suppress Sidekiq logger output to prevent interference with TUI rendering
+require "logger"
+Sidekiq.default_configuration.logger = Logger.new(IO::NULL)
+
+DebugLogger = Logger.new("tui.log")
+def log(*x)
+  x.each {|item| DebugLogger.info { item } }
+end
+
+module Sidekiq
+  class TUI
+    include Sidekiq::Paginator
+    PageOptions = Data.define(:page, :size)
+
+    REFRESH_INTERVAL_SECONDS = 2
+
+    TABS = %w(Home Busy Queues Scheduled Retries Dead Metrics).freeze
+    # CONTROLS defines data for input handling and for displaying controls.
+    # :code is the key code for input handling.
+    # :display and :description are shown in the controls area, with different
+    #   styling between them. If :display is omitted, :code is displayed instead.
+    #   Duplicate :display and :description values are ignored, shown only once.
+    # :tabs is an array of tab names where the control is active.
+    # :action is a lambda to execute when the control is triggered.
+    #
+    # Conventions: dangerous/irreversible actions should use UPPERCASE codes.
+    # The Shift button means "I'm sure".
+    CONTROLS = [
+      { code: "left", display: "←/→", description: "Select Tab", tabs: TABS,
+        action: ->(tui) { tui.navigate_tab(:left) }, refresh: true
+      },
+      { code: "right", display: "←/→", description: "Select Tab", tabs: TABS,
+        action: ->(tui) { tui.navigate_tab(:right) }, refresh: true
+      },
+      { code: "h", display: "h/l", description: "Prev/Next Page", tabs: TABS - ["Home"],
+        action: ->(tui) { tui.prev_page }, refresh: true
+      },
+      { code: "l", display: "h/l", description: "Prev/Next Page", tabs: TABS - ["Home"],
+        action: ->(tui) { tui.next_page }, refresh: true
+      },
+      { code: "k", display: "j/k", description: "Prev/Next Row", tabs: TABS - ["Home"],
+        action: ->(tui) { tui.navigate_row(:up) }
+      },
+      { code: "j", display: "j/k", description: "Prev/Next Row", tabs: TABS - ["Home"],
+        action: ->(tui) { tui.navigate_row(:down) }
+      },
+      { code: "x", display: "x", description: "Select", tabs: TABS - ["Home"],
+        action: ->(tui) { tui.toggle_select }
+      },
+      { code: "A", modifiers: ["shift"], display: "A", description: "Select All", tabs: TABS - ["Home"],
+        action: ->(tui) { tui.toggle_select(:all) }
+      },
+      { code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: %w(Queues),
+        action: ->(tui) { tui.delete_queue! }, refresh: true
+      },
+      { code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: %w(Scheduled Retries Dead),
+        action: ->(tui) { tui.delete_rows! }, refresh: true
+      },
+      { code: "p", description: "Pause/Unpause Queue", tabs: ["Queues"],
+        action: ->(tui) { tui.toggle_pause_queue! }
+      },
+      { code: "Q", modifiers: ["shift"], description: "Quiet", tabs: ["Busy"],
+        action: ->(tui) { tui.quiet! }
+      },
+      { code: "/", display: "/", description: "Filter", tabs: %w(Scheduled Retries Dead),
+        action: ->(tui) { tui.start_filtering }
+      },
+      { code: "q", display: "q", description: "Quit", tabs: TABS,
+        action: ->(tui) { :quit }
+      },
+      { code: "c", modifiers: ["ctrl"], display: "q", description: "Quit", tabs: TABS,
+        action: ->(tui) { :quit }
+      },
+    ].freeze
+
+    def initialize
+      @current_tab = "Home"
+      @selected_row_index = 0
+      @base_style = nil
+      @data = {}
+      @last_refresh = Time.now
+    end
+
+    def run
+      RatatuiRuby.run do |tui|
+        @tui = tui
+        @highlight_style = @tui.style(fg: :red, modifiers: [:underlined])
+        @hotkey_style = @tui.style(modifiers: [:bold, :underlined])
+
+        refresh_data
+
+        loop do
+          refresh_data if should_refresh?
+          render
+          break if handle_input == :quit
+        end
+      end
+    end
+
+    def render
+      @tui.draw do |frame|
+        main_area, controls_area = @tui.layout_split(
+          frame.area,
+          direction: :vertical,
+          constraints: [
+            @tui.constraint_fill(1),
+            @tui.constraint_length(4),
+          ]
+        )
+
+        # Split main area into tabs and content
+        tabs_area, content_area = @tui.layout_split(
+          main_area,
+          direction: :vertical,
+          constraints: [
+            @tui.constraint_length(3),
+            @tui.constraint_fill(1),
+          ]
+        )
+
+        tabs = @tui.tabs(
+          titles: TABS,
+          selected_index: TABS.index(@current_tab),
+          block: @tui.block(title: Sidekiq::NAME, borders: [:all], title_style: @tui.style(fg: :red, modifiers: [:bold])),
+          divider: " | ",
+          highlight_style: @highlight_style,
+          style: @base_style,
+        )
+        frame.render_widget(tabs, tabs_area)
+
+        render_content_area(frame, content_area)
+        render_controls(frame, controls_area)
+      end
+    end
+
+    def render_content_area(frame, content_area)
+      return render_error(frame, content_area, @data[:error]) if @data[:error]
+
+      case @current_tab
+      when "Home"
+        render_home(frame, content_area)
+      when "Busy"
+        render_busy(frame, content_area)
+      when "Queues"
+        render_queues(frame, content_area)
+      when "Scheduled", "Retries", "Dead"
+        render_set(frame, content_area)
+      when "Metrics"
+        render_metrics(frame, content_area)
+      else
+        frame.render_widget(
+          @tui.paragraph(
+            text: "Tab '#{@current_tab}' - Coming soon",
+            alignment: :center,
+            block: @tui.block(title: @current_tab, borders: [:all])
+          ),
+          content_area
+        )
+      end
+    end
+
+    def render_controls(frame, area)
+      keys_and_descriptions = CONTROLS
+        .select { |ctrl|
+          ctrl[:tabs].include?(@current_tab)
+        }.map { |ctrl|
+          [ctrl[:display] || ctrl[:code], ctrl[:description]]
+        }.to_h
+
+      controls = @tui.block(
+        title: "Controls",
+        borders: [:all],
+        children: [
+          @tui.paragraph(
+            text: [
+              @tui.text_line(spans: keys_and_descriptions.map { |key, desc|
+                [
+                  @tui.text_span(content: key, style: @hotkey_style),
+                  @tui.text_span(content: ": #{desc}  ")
+                ]
+              }.flatten),
+              # @tui.text_line(spans: [
+              #   @tui.text_span(content: "d", style: @hotkey_style),
+              #   @tui.text_span(content: ": Divider (#{@dividers[@divider_index]})  "),
+              #   @tui.text_span(content: "s", style: @hotkey_style),
+              #   @tui.text_span(content: ": Highlight (#{@highlight_styles[@highlight_style_index][:name]})  "),
+              #   @tui.text_span(content: "b", style: @hotkey_style),
+              #   @tui.text_span(content: ": Base Style (#{@base_styles[@base_style_index][:name]})  "),
+              # ]),
+              @tui.text_line(spans: [
+                @tui.text_span(content: "Redis: #{redis_url} "),
+                @tui.text_span(content: "Current Time: #{Time.now.utc}"),
+              ]),
+            ]
+          ),
+        ]
+      )
+      frame.render_widget(controls, area)
+    end
+
+    def handle_input
+      case @tui.poll_event
+      in { type: :key, code: "backspace" } if @data[:filtering]
+        @data[:filter] = @data[:filter].empty? ? "" : @data[:filter][0..-2]
+      in { type: :key, code: "enter" } if @data[:filtering]
+        @data[:filtering] = nil
+        @data[:selected] = []
+      in { type: :key, code: "esc" } if @data[:filtering]
+        @data[:filtering] = nil
+        @data[:filter] = nil
+        @data[:selected] = []
+      in { type: :key, code: code } if @data[:filtering] && code.length == 1
+        @data[:filter] += code
+        @data[:selected] = []
+      in { type: :key, code:, modifiers: }
+        control = CONTROLS.find { |ctrl|
+          ctrl[:code] == code &&
+          (ctrl[:modifiers] || []) == (modifiers || []) &&
+          ctrl[:tabs].include?(@current_tab)
+        }
+        return unless control
+        control[:action].call(self).tap {
+          refresh_data if control[:refresh]
+        }
+      else
+        # Ignore other events
+      end
+    rescue => ex
+      log(ex.message, ex.backtrace)
+    end
+
+    # Navigate tabs to the left or right.
+    # @param direction [Symbol] :left or :right
+    def navigate_tab(direction)
+      index_change = direction == :right ? 1 : -1
+      @current_tab = TABS[(TABS.index(@current_tab) + index_change) % TABS.size]
+      @selected_row_index = 0
+      @data = {
+        selected: [],
+        filter: nil,
+      }
+    end
+
+    # Navigate the row selection up or down in the current tab's table.
+    # @param direction [Symbol] :up or :down
+    def navigate_row(direction)
+      ids = @data.dig(:table, :row_ids)
+      return if !ids || ids.empty?
+
+      index_change = direction == :down ? 1 : -1
+      @selected_row_index = (@selected_row_index + index_change) % ids.count
+    end
+
+    def start_filtering
+      @data[:filtering] = true
+      @data[:filter] = ""
+    end
+
+    def stop_filtering
+      @data[:filtering] = false
+    end
+
+    def quiet!
+      each_selection do |id|
+        Sidekiq::Process.new("identity" => id).quiet!
+      end
+    end
+
+    def each_selection(unselect: true, &)
+      sel = @data[:selected]
+      finished = []
+      if !sel.empty?
+        sel.each do |id|
+          yield id
+          # When processing multiple items in bulk, we want to unselect
+          # each row if its operation succeeds so our UI will not
+          # re-process rows 1-3 if row 4 fails.
+          finished << id
+        end
+      else
+        ids = @data.dig(:table, :row_ids)
+        return if !ids || ids.empty?
+        yield ids[@selected_row_index]
+      end
+    ensure
+      @data[:selected] = sel - finished if unselect
+    end
+
+    def delete_queue!
+      each_selection do |qname|
+        Sidekiq::Queue.new(qname).clear
+      end
+    end
+
+    def delete_rows!
+      set = case @current_tab
+      when "Scheduled"
+        Sidekiq::ScheduledSet.new
+      when "Retries"
+        Sidekiq::RetrySet.new
+      when "Dead"
+        Sidekiq::DeadSet.new
+      else
+        nil
+      end
+      return unless set
+      each_selection do |id|
+        score, jid = id.split("|")
+        set.delete(score, jid)
+      end
+    end
+
+    def prev_page
+      opts = @data.dig(:table, :pager)
+      return unless opts
+      return if opts.page < 2
+
+      @data[:table][:pager] = Sidekiq::TUI::PageOptions.new(opts.page - 1, opts.size)
+    end
+
+    def next_page
+      np = @data.dig(:table, :next_page)
+      return unless np
+      opts = @data.dig(:table, :pager)
+      return unless opts
+
+      @data[:table][:pager] = Sidekiq::TUI::PageOptions.new(np, opts.size)
+    end
+
+    def toggle_select(which = :current)
+      sel = @data[:selected]
+      log(which, sel)
+      if which == :current
+        x = @data[:table][:row_ids][@selected_row_index]
+        if sel.index(x)
+          # already checked, uncheck it
+          sel.delete(x)
+        else
+          sel << x
+        end
+      else
+        if sel.empty?
+          @data[:selected] = @data[:table][:row_ids]
+        else
+          sel.clear
+        end
+      end
+    end
+
+    def toggle_pause_queue!
+      return unless Sidekiq.pro?
+
+      each_selection do |qname|
+        queue = Sidekiq::Queue.new(qname)
+        if queue.paused?
+          queue.unpause!
+        else
+          queue.pause!
+        end
+      end
+    end
+
+    def redis_url
+      Sidekiq.redis do |conn|
+        conn.config.server_url
+      end
+    rescue
+      "N/A"
+    end
+
+    def should_refresh?
+      Time.now - @last_refresh >= REFRESH_INTERVAL_SECONDS
+    end
+
+    def refresh_data
+      stats = Sidekiq::Stats.new
+      @data[:stats] = {
+        processed: stats.processed,
+        failed: stats.failed,
+        busy: stats.workers_size,
+        enqueued: stats.enqueued,
+        retries: stats.retry_size,
+        scheduled: stats.scheduled_size,
+        dead: stats.dead_size,
+      }
+
+      case @current_tab
+      when "Home"
+        @data[:chart] ||= {
+          previous_stats: {
+            processed: stats.processed,
+            failed: stats.failed
+          },
+          deltas: {
+            processed: Array.new(50, 0),
+            failed: Array.new(50, 0)
+          }
+        }
+
+        processed_delta = stats.processed - @data[:chart][:previous_stats][:processed]
+        failed_delta = stats.failed - @data[:chart][:previous_stats][:failed]
+
+        @data[:chart][:deltas][:processed].shift
+        @data[:chart][:deltas][:processed].push(processed_delta)
+        @data[:chart][:deltas][:failed].shift
+        @data[:chart][:deltas][:failed].push(failed_delta)
+
+        @data[:chart][:previous_stats] = {
+          processed: stats.processed,
+          failed: stats.failed
+        }
+
+        redis_info = Sidekiq.default_configuration.redis_info
+
+        @data[:redis_info] = {
+          version: redis_info["redis_version"] || "N/A",
+          uptime_days: redis_info["uptime_in_days"] || "N/A",
+          connected_clients: redis_info["connected_clients"] || "N/A",
+          used_memory: redis_info["used_memory_human"] || "N/A",
+          peak_memory: redis_info["used_memory_peak_human"] || "N/A"
+        }
+      when "Busy"
+        busy = []
+        table_row_ids = []
+
+        Sidekiq::ProcessSet.new.each do |p|
+          name = "#{p["hostname"]}:#{p["pid"]}"
+          name += " ⭐️" if p.leader?
+          name += " 🛑" if p.stopping?
+          busy << [
+            selected?(p) ? "✅" : "",
+            name,
+            Time.at(p['started_at']).utc,
+            format_memory(p['rss'].to_i),
+            number_with_delimiter(p['concurrency']),
+            number_with_delimiter(p['busy'])
+          ]
+          table_row_ids << p.identity
+        end
+
+        @data.merge!(
+          busy:,
+          table: { row_ids: table_row_ids },
+        )
+      when "Queues"
+        queue_summaries = Sidekiq::Stats.new.queue_summaries.sort_by(&:name)
+
+        selected = Array(@data[:selected])
+        queues = queue_summaries.map { |queue_summary|
+          row_cells = [
+            selected.index(queue_summary.name) ? "✅" : "",
+            queue_summary.name,
+            queue_summary.size.to_s,
+            number_with_delimiter(queue_summary.latency, { precision: 2 }),
+          ]
+          row_cells << (queue_summary.paused? ? "✅" : "") if Sidekiq.pro?
+          row_cells
+        }
+
+        table_row_ids = queue_summaries.map(&:name)
+
+        @data.merge!(
+          queues:,
+          table: { row_ids: table_row_ids }
+        )
+      when "Scheduled"
+        data_for_set(Sidekiq::ScheduledSet.new)
+      when "Retries"
+        data_for_set(Sidekiq::RetrySet.new)
+      when "Dead"
+        data_for_set(Sidekiq::DeadSet.new)
+      when "Metrics"
+        # only need to refresh every 60 seconds
+        if !@data[:metrics_refresh] || @data[:metrics_refresh] < Time.now
+          q = Sidekiq::Metrics::Query.new
+          query_result = q.top_jobs(minutes: 60)
+          @data.merge!(
+            metrics: query_result,
+            metrics_refresh: Time.now + 60
+          )
+        end
+      end
+
+      @last_refresh = Time.now
+    rescue => e
+      @data = { error: e }
+    end
+
+    def data_for_set(set)
+      f = @data[:filter]
+      pager, rows, current, total = if f && f.size > 2
+        rows = set.scan(f).to_a
+        sz = rows.size
+        [Sidekiq::TUI::PageOptions.new(1, sz), rows, 1, sz]
+      else
+        pager = @data.dig(:table, :pager) || Sidekiq::TUI::PageOptions.new(1, 25)
+        current, total, items = page(set.name, pager.page, pager.size)
+        rows = items.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+        [pager, rows, current, total]
+      end
+
+      @data.merge!(
+        table: { pager:, rows:, current_page: current, total:,
+          next_page: (current * pager.size < total) ? pager.page + 1 : nil,
+          row_ids: rows.map { |job| [job.score, job["jid"]].join("|") }
+        }
+      )
+    end
+
+    def render_busy(frame, area)
+      chunks = @tui.layout_split(
+        area,
+        direction: :vertical,
+        constraints: [
+          @tui.constraint_length(4), # Stats
+          @tui.constraint_length(4), # Status
+          @tui.constraint_fill(1),   # Graph
+        ]
+      )
+
+      render_stats_section(frame, chunks[0])
+      render_status_section(frame, chunks[1])
+      render_table(frame, chunks[2]) do
+        {
+          title: "Processes",
+          header: ["☑️", "Name", "Started", "RSS", "Threads", "Busy"],
+          widths: [
+            @tui.constraint_length(5),
+            @tui.constraint_fill(1),
+            @tui.constraint_length(24),
+            @tui.constraint_length(10),
+            @tui.constraint_length(6),
+            @tui.constraint_length(6),
+          ],
+          rows: @data[:busy].map.with_index { |cells, idx|
+            @tui.table_row(
+              cells:,
+              style: idx.even? ? nil : @tui.style(bg: :dark_gray)
+            )
+          }
+        }
+      end
+    end
+
+    def render_set(frame, area)
+      chunks = @tui.layout_split(
+        area,
+        direction: :vertical,
+        constraints: [
+          @tui.constraint_length(4), # Stats
+          @tui.constraint_fill(1),   # Table
+        ]
+      )
+
+      render_stats_section(frame, chunks[0])
+      render_table(frame, chunks[1]) do
+        {
+          title: @current_tab,
+          header: ["☑️", "When", "Queue", "Job", "Arguments"],
+          widths: [
+            @tui.constraint_length(5),
+            @tui.constraint_length(24),
+            @tui.constraint_length(20),
+            @tui.constraint_length(30),
+            @tui.constraint_fill(1),
+          ],
+        }.tap do |h|
+          rows = @data[:table][:rows].map.with_index {|entry, idx|
+            @tui.table_row(
+              cells: [
+                selected?(entry) ? "✅" : "",
+                entry.at,
+                entry.queue,
+                entry.display_class,
+                entry.display_args,
+              ],
+              style: idx.even? ? nil : @tui.style(bg: :dark_gray))
+          }
+          h[:rows] = rows
+          h
+        end
+      end
+    end
+
+    def selected?(entry)
+      @data[:selected].index(entry.id)
+    end
+
+    def render_home(frame, area)
+      chunks = @tui.layout_split(
+        area,
+        direction: :vertical,
+        constraints: [
+          @tui.constraint_length(4), # Stats
+          @tui.constraint_fill(1),   # Graph
+          @tui.constraint_length(4), # Redis
+        ]
+      )
+
+      render_stats_section(frame, chunks[0])
+      render_chart_section(frame, chunks[1])
+      render_redis_info_section(frame, chunks[2])
+    end
+
+    def render_status_section(frame, area)
+      keys = ["Processes", "Threads", "Busy", "Utilization", "RSS"]
+      values = []
+      processes = Sidekiq::ProcessSet.new
+      workset = Sidekiq::WorkSet.new
+      ws = workset.size
+      values << (s = processes.size; number_with_delimiter(s))
+      values << (x = processes.total_concurrency; number_with_delimiter(x))
+      values << number_with_delimiter(ws)
+      values << "#{x == 0 ? 0 : ((ws / x.to_f) * 100).round(0)}%"
+      values << format_memory(processes.total_rss)
+
+      keys_line = keys.map { |k| k.to_s.ljust(12) }.join("  ")
+      values_line = values.map { |v| v.to_s.ljust(12) }.join("  ")
+
+      frame.render_widget(
+        @tui.paragraph(
+          text: [keys_line, values_line],
+          block: @tui.block(title: "Status", borders: [:all])
+        ),
+        area
+      )
+    end
+
+    def render_stats_section(frame, area)
+      stats = @data[:stats]
+
+      keys = ["Processed", "Failed", "Busy", "Enqueued", "Retries", "Scheduled", "Dead"]
+      values = [
+        stats[:processed],
+        stats[:failed],
+        stats[:busy],
+        stats[:enqueued],
+        stats[:retries],
+        stats[:scheduled],
+        stats[:dead],
+      ]
+
+      # Format keys and values with spacing
+      keys_line = keys.map { |k| k.to_s.ljust(12) }.join("  ")
+      values_line = values.map { |v| v.to_s.ljust(12) }.join("  ")
+
+      frame.render_widget(
+        @tui.paragraph(
+          text: [keys_line, values_line],
+          block: @tui.block(title: "Statistics", borders: [:all])
+        ),
+        area
+      )
+    end
+
+    def render_chart_section(frame, area)
+      max_value = [@data[:chart][:deltas][:processed].max, @data[:chart][:deltas][:failed].max, 1].max
+      y_max = [max_value, 5].max
+
+      processed_data = @data[:chart][:deltas][:processed].each_with_index.map { |value, idx| [idx.to_f, value.to_f] }
+      failed_data = @data[:chart][:deltas][:failed].each_with_index.map { |value, idx| [idx.to_f, value.to_f] }
+
+      datasets = [
+        @tui.dataset(
+          name: "",
+          data: processed_data,
+          style: @tui.style(fg: :green),
+          marker: :dot,
+          graph_type: :line
+        ),
+        @tui.dataset(
+          name: "",
+          data: failed_data,
+          style: @tui.style(fg: :red),
+          marker: :dot,
+          graph_type: :line
+        )
+      ]
+
+      num_labels = 5
+      y_labels = (0...num_labels).map do |i|
+        value = ((y_max * i) / (num_labels - 1)).round
+        value.to_s
+      end
+
+      beacon_pulse = (Time.now.to_i % 2 == 0) ? "●" : " "
+
+      chart = @tui.chart(
+        datasets: datasets,
+        x_axis: @tui.axis(
+          bounds: [0.0, 49.0],
+          labels: [],
+          style: @tui.style(fg: :white)
+        ),
+        y_axis: @tui.axis(
+          bounds: [0.0, y_max.to_f],
+          labels: y_labels,
+          style: @tui.style(fg: :white)
+        ),
+        block: @tui.block(
+          title: "Dashboard #{beacon_pulse}",
+          borders: [:all],
+        )
+      )
+
+      frame.render_widget(chart, area)
+    end
+
+    def render_redis_info_section(frame, area)
+      redis_info = @data[:redis_info]
+
+      uptime_value = redis_info[:uptime_days] == "N/A" ? "N/A" : "#{redis_info[:uptime_days]} days"
+
+      keys = ["Version", "Uptime", "Connected Clients", "Memory Usage", "Peak Memory"]
+      values = [
+        redis_info[:version].to_s,
+        uptime_value,
+        redis_info[:connected_clients].to_s,
+        redis_info[:used_memory].to_s,
+        redis_info[:peak_memory].to_s
+      ]
+
+      # Format keys and values with spacing
+      keys_line = keys.map { |k| k.ljust(18) }.join("  ")
+      values_line = values.map { |v| v.ljust(18) }.join("  ")
+
+      frame.render_widget(
+        @tui.paragraph(
+          text: [keys_line, values_line],
+          block: @tui.block(title: "Redis Information", borders: [:all])
+        ),
+        area
+      )
+    end
+
+    def render_queues(frame, area)
+      header = ["☑️", "Queue", "Size", "Latency"]
+      header << "Paused?" if Sidekiq.pro?
+
+      chunks = @tui.layout_split(
+        area,
+        direction: :vertical,
+        constraints: [
+          @tui.constraint_length(4), # Stats
+          @tui.constraint_fill(1), # Table
+        ]
+      )
+
+      render_stats_section(frame, chunks[0])
+      render_table(frame, chunks[1]) do
+        {
+          title: "Queues",
+          header:,
+          widths: header.map.with_index { |_, idx|
+            @tui.constraint_length(idx == 1 ? 60 : 10)
+          },
+          rows: @data[:queues].map.with_index { |cells, idx|
+            @tui.table_row(
+              cells:,
+              style: idx.even? ? nil : @tui.style(bg: :dark_gray)
+            )
+          }
+        }
+      end
+    end
+
+    def render_metrics(frame, area)
+      chunks = @tui.layout_split(
+        area,
+        direction: :vertical,
+        constraints: [
+          @tui.constraint_length(4), # Stats
+          @tui.constraint_fill(1), # Chart
+          # TOOD Table
+        ]
+      )
+
+      render_stats_section(frame, chunks[0])
+      render_metrics_chart(frame, chunks[1])
+    end
+
+    COLORS = %i(blue cyan yellow red green white gray)
+
+
+    # Run to generate metrics data:
+    #   cd myapp && bundle install
+    #   bundle exec rake seed_jobs
+    #   bundle exec sidekiq
+    def render_metrics_chart(frame, area)
+      y_max = 5
+      csize = COLORS.size
+      q = @data[:metrics]
+      job_results = q.job_results.sort_by { |(kls, jr)| jr.totals["s"] }.reverse.first(COLORS.size)
+      # visible_kls = job_results.first(5).map(&:first)
+      # chart_data = {
+      #   series: job_results.map { |(kls, jr)| [kls, jr.dig("series", "s")] }.to_h,
+      #   marks: query_result.marks.map { |m| [m.bucket, m.label] },
+      #   starts_at: query_result.starts_at.iso8601,
+      #   ends_at: query_result.ends_at.iso8601,
+      #   visibleKls: visible_kls,
+      #   yLabel: 'TotalExecutionTime',
+      #   units: 'seconds',
+      #   markLabel: '*',
+      # }
+
+      datasets = job_results.map.with_index do |(kls, data), idx|
+        # log kls, data, idx
+        hrdata = data.dig("series", "s")
+        tm = Time.now
+        tmi = tm.to_i
+        tm = Time.at(tmi - (tmi % 60)).utc
+        data = Array.new(60) {|idx| idx}.map do |bucket_idx|
+          jumpback = bucket_idx * 60
+          value = hrdata[(tm - jumpback).iso8601] || 0
+          y_max = value if value > y_max
+          # we have 60 data points, newest data should be
+          # at highest indexes so we have to rejigger the index
+          # here
+          [59 - bucket_idx, value]
+        end
+        # log data
+
+        log(data)
+        @tui.dataset(name: kls,
+          data: data,
+          style: @tui.style(fg: COLORS[idx % csize]),
+          marker: :dot,
+          graph_type: :line)
+      end
+
+      num_labels = 5
+      y_labels = (0...num_labels).map do |i|
+        value = ((y_max * i) / (num_labels - 1)).round
+        value.to_s
+      end
+      xlabels = [
+        q.starts_at.iso8601[11..15],
+        q.ends_at.iso8601[11..15]
+      ]
+
+      # beacon_pulse = (Time.now.to_i % 2 == 0) ? "●" : " "
+
+      chart = @tui.chart(
+        datasets: datasets,
+        x_axis: @tui.axis(
+          bounds: [0.0, 60.0],
+          labels: xlabels,
+          style: @tui.style(fg: :white)
+        ),
+        y_axis: @tui.axis(
+          bounds: [0.0, y_max.to_f],
+          labels: y_labels,
+          style: @tui.style(fg: :white)
+        ),
+        block: @tui.block(
+          title: "Metrics",
+          borders: [:all],
+        ),
+      )
+
+      frame.render_widget(chart, area)
+    end
+
+    def render_error(frame, area, err)
+      log(err.message, err.backtrace)
+      header = [@tui.text_line(
+        spans: [@tui.text_span(content: err.message, style: @tui.style(modifiers: [:bold]))],
+        alignment: :center
+      )]
+      lines = Array(err.backtrace).map {|line| @tui.text_line(spans: [@tui.text_span(content: line)])}
+
+      frame.render_widget(
+        @tui.paragraph(
+          text: header + lines,
+          alignment: :left,
+          block: @tui.block(title: "Error", borders: [:all], border_style: @tui.style(fg: :red))
+        ),
+        area
+      )
+    end
+
+    # TODO Implement I18n delimiter
+    def number_with_delimiter(number, options = {})
+      precision = options[:precision] || 0
+      number.round(precision)
+    end
+
+    def format_memory(rss_kb)
+      return "0" if rss_kb.nil? || rss_kb == 0
+
+      if rss_kb < 100_000
+        "#{number_with_delimiter(rss_kb)} KB"
+      elsif rss_kb < 10_000_000
+        "#{number_with_delimiter((rss_kb / 1024.0).to_i)} MB"
+      else
+        "#{number_with_delimiter(rss_kb / (1024.0 * 1024.0), precision: 1)} GB"
+      end
+    end
+
+    def render_table(frame, area)
+      page = @data.dig(:table, :current_page) || 1
+      rows = @data.dig(:table, :rows) || []
+      total = @data.dig(:table, :total) || 0
+      footer = ["", "Page: #{page}", "Count: #{rows.size}", "Total: #{total}"]
+      footer << "Selected: #{@data[:selected].size}" unless @data[:selected].empty?
+
+      if @data[:filter]
+        @filter_style = @tui.style(fg: :white, bg: :dark_gray)
+        spans = [
+          @tui.text_span(content: "Filter: ", style: @filter_style),
+          @tui.text_span(content: @data[:filter], style: @filter_style),
+        ]
+        spans << @tui.text_span(content: "_", style: @tui.style(fg: :white, bg: :dark_gray, modifiers: [:slow_blink])) if @data[:filtering]
+        footer << @tui.text_line(spans: spans)
+      end
+
+      defaults = {
+        title: "TableName",
+        highlight_symbol: "➡️",
+        selected_row: @selected_row_index,
+        row_highlight_style: @tui.style(fg: :white, bg: :blue),
+        footer: footer,
+      }
+      hash = defaults.merge(yield)
+      hash[:block] ||= @tui.block(title: hash.delete(:title), borders: :all)
+      table = @tui.table(**hash)
+      frame.render_widget(table, area)
+    end
+  end
+end
