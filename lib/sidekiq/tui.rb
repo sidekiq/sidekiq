@@ -47,6 +47,11 @@ module Sidekiq
        action: ->(tui) { tui.navigate_tab(:left) }, refresh: true},
       {code: "right", display: "←/→", description: "Select Tab", tabs: TABS,
        action: ->(tui) { tui.navigate_tab(:right) }, refresh: true},
+      {code: "q", display: "q", description: "Quit", tabs: TABS,
+       action: ->(tui) { :quit }},
+      {code: "c", modifiers: ["ctrl"], display: "q", description: "Quit", tabs: TABS,
+       action: ->(tui) { :quit }},
+      #
       {code: "h", display: "h/l", description: "Prev/Next Page", tabs: TABS - ["Home"],
        action: ->(tui) { tui.prev_page }, refresh: true},
       {code: "l", display: "h/l", description: "Prev/Next Page", tabs: TABS - ["Home"],
@@ -59,8 +64,7 @@ module Sidekiq
        action: ->(tui) { tui.toggle_select }},
       {code: "A", modifiers: ["shift"], display: "A", description: "Select All", tabs: TABS - ["Home"],
        action: ->(tui) { tui.toggle_select(:all) }},
-      {code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: %w[Queues],
-       action: ->(tui) { tui.delete_queue! }, refresh: true},
+      #
       {code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: %w[Scheduled Retries Dead],
        action: ->(tui) { tui.alter_rows!(:delete) }, refresh: true},
       {code: "R", modifiers: ["shift"], display: "R", description: "Retry", tabs: %w[Retries],
@@ -69,16 +73,17 @@ module Sidekiq
        action: ->(tui) { tui.alter_rows!(:add_to_queue) }, refresh: true},
       {code: "K", modifiers: ["shift"], display: "K", description: "Kill", tabs: %w[Scheduled Retries],
        action: ->(tui) { tui.alter_rows!(:kill) }, refresh: true},
+      #
+      {code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: %w[Queues],
+       action: ->(tui) { tui.delete_queue! }, refresh: true},
       {code: "p", description: "Pause/Unpause Queue", tabs: ["Queues"],
        action: ->(tui) { tui.toggle_pause_queue! }},
+      {code: "T", modifiers: ["shift"], description: "Terminate", tabs: ["Busy"],
+       action: ->(tui) { tui.terminate! }},
       {code: "Q", modifiers: ["shift"], description: "Quiet", tabs: ["Busy"],
        action: ->(tui) { tui.quiet! }},
       {code: "/", display: "/", description: "Filter", tabs: %w[Scheduled Retries Dead],
        action: ->(tui) { tui.start_filtering }},
-      {code: "q", display: "q", description: "Quit", tabs: TABS,
-       action: ->(tui) { :quit }},
-      {code: "c", modifiers: ["ctrl"], display: "q", description: "Quit", tabs: TABS,
-       action: ->(tui) { :quit }}
     ].freeze
 
     def initialize
@@ -271,6 +276,12 @@ module Sidekiq
     def quiet!
       each_selection do |id|
         Sidekiq::Process.new("identity" => id).quiet!
+      end
+    end
+
+    def terminate!
+      each_selection do |id|
+        Sidekiq::Process.new("identity" => id).stop!
       end
     end
 
