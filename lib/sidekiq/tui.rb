@@ -1,5 +1,3 @@
-#!/usr/bin/env ruby
-
 require 'bundler/inline'
 
 gemfile do
@@ -946,5 +944,3 @@ module Sidekiq
     end
   end
 end
-
-Sidekiq::TUI.new.run

@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/sidekiq/tui"
+
+Sidekiq::TUI.new.run
