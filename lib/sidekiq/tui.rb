@@ -70,7 +70,16 @@ module Sidekiq
         action: ->(tui) { tui.delete_queue! }, refresh: true
       },
       { code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: %w(Scheduled Retries Dead),
-        action: ->(tui) { tui.delete_rows! }, refresh: true
+        action: ->(tui) { tui.alter_rows!(:delete) }, refresh: true
+      },
+      { code: "R", modifiers: ["shift"], display: "R", description: "Retry", tabs: %w(Retries),
+        action: ->(tui) { tui.alter_rows!(:retry) }, refresh: true
+      },
+      { code: "E", modifiers: ["shift"], display: "E", description: "Enqueue", tabs: %w(Scheduled Dead),
+        action: ->(tui) { tui.alter_rows!(:add_to_queue) }, refresh: true
+      },
+      { code: "K", modifiers: ["shift"], display: "K", description: "Kill", tabs: %w(Scheduled Retries),
+        action: ->(tui) { tui.alter_rows!(:kill) }, refresh: true
       },
       { code: "p", description: "Pause/Unpause Queue", tabs: ["Queues"],
         action: ->(tui) { tui.toggle_pause_queue! }
@@ -308,7 +317,8 @@ module Sidekiq
       end
     end
 
-    def delete_rows!
+    def alter_rows!(action = :add_to_queue)
+      log(@current_tab, @data[:selected])
       set = case @current_tab
       when "Scheduled"
         Sidekiq::ScheduledSet.new
@@ -322,7 +332,8 @@ module Sidekiq
       return unless set
       each_selection do |id|
         score, jid = id.split("|")
-        set.delete(score, jid)
+        item = set.fetch(score, jid)&.first
+        item&.send(action)
       end
     end
 
