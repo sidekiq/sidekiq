@@ -14,7 +14,10 @@ module Sidekiq
       end
 
       def create_job_file
-        template "job.rb.erb", File.join("app/sidekiq", class_path, "#{file_name}_job.rb")
+        template(
+          "job.rb.erb",
+          File.join(jobs_directory, class_path, "#{file_name}_job.rb")
+        )
       end
 
       def create_test_file
@@ -31,7 +34,8 @@ module Sidekiq
 
       def create_job_spec
         template_file = File.join(
-          "spec/sidekiq",
+          "spec",
+          jobs_directory.gsub("app/", ""),
           class_path,
           "#{file_name}_job_spec.rb"
         )
@@ -40,7 +44,8 @@ module Sidekiq
 
       def create_job_test
         template_file = File.join(
-          "test/sidekiq",
+          "test",
+          jobs_directory.gsub("app/", ""),
           class_path,
           "#{file_name}_job_test.rb"
         )
@@ -53,6 +58,10 @@ module Sidekiq
 
       def test_framework
         ::Rails.application.config.generators.options[:rails][:test_framework]
+      end
+
+      def jobs_directory
+        ::Rails.application.config.generators.options[:rails].fetch(:jobs_directory, "app/sidekiq")
       end
     end
   end
