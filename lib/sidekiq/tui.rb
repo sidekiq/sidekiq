@@ -1,7 +1,7 @@
-require 'bundler/inline'
+require "bundler/inline"
 
 gemfile do
-  source 'https://gem.coop'
+  source "https://gem.coop"
   gem "ratatui_ruby", "0.10.3"
   gem "sidekiq"
 end
@@ -20,17 +20,18 @@ Sidekiq.default_configuration.logger = Logger.new(IO::NULL)
 
 DebugLogger = Logger.new("tui.log")
 def log(*x)
-  x.each {|item| DebugLogger.info { item } }
+  x.each { |item| DebugLogger.info { item } }
 end
 
 module Sidekiq
   class TUI
     include Sidekiq::Paginator
+
     PageOptions = Data.define(:page, :size)
 
     REFRESH_INTERVAL_SECONDS = 2
 
-    TABS = %w(Home Busy Queues Scheduled Retries Dead Metrics).freeze
+    TABS = %w[Home Busy Queues Scheduled Retries Dead Metrics].freeze
     # CONTROLS defines data for input handling and for displaying controls.
     # :code is the key code for input handling.
     # :display and :description are shown in the controls area, with different
@@ -42,60 +43,42 @@ module Sidekiq
     # Conventions: dangerous/irreversible actions should use UPPERCASE codes.
     # The Shift button means "I'm sure".
     CONTROLS = [
-      { code: "left", display: "←/→", description: "Select Tab", tabs: TABS,
-        action: ->(tui) { tui.navigate_tab(:left) }, refresh: true
-      },
-      { code: "right", display: "←/→", description: "Select Tab", tabs: TABS,
-        action: ->(tui) { tui.navigate_tab(:right) }, refresh: true
-      },
-      { code: "h", display: "h/l", description: "Prev/Next Page", tabs: TABS - ["Home"],
-        action: ->(tui) { tui.prev_page }, refresh: true
-      },
-      { code: "l", display: "h/l", description: "Prev/Next Page", tabs: TABS - ["Home"],
-        action: ->(tui) { tui.next_page }, refresh: true
-      },
-      { code: "k", display: "j/k", description: "Prev/Next Row", tabs: TABS - ["Home"],
-        action: ->(tui) { tui.navigate_row(:up) }
-      },
-      { code: "j", display: "j/k", description: "Prev/Next Row", tabs: TABS - ["Home"],
-        action: ->(tui) { tui.navigate_row(:down) }
-      },
-      { code: "x", display: "x", description: "Select", tabs: TABS - ["Home"],
-        action: ->(tui) { tui.toggle_select }
-      },
-      { code: "A", modifiers: ["shift"], display: "A", description: "Select All", tabs: TABS - ["Home"],
-        action: ->(tui) { tui.toggle_select(:all) }
-      },
-      { code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: %w(Queues),
-        action: ->(tui) { tui.delete_queue! }, refresh: true
-      },
-      { code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: %w(Scheduled Retries Dead),
-        action: ->(tui) { tui.alter_rows!(:delete) }, refresh: true
-      },
-      { code: "R", modifiers: ["shift"], display: "R", description: "Retry", tabs: %w(Retries),
-        action: ->(tui) { tui.alter_rows!(:retry) }, refresh: true
-      },
-      { code: "E", modifiers: ["shift"], display: "E", description: "Enqueue", tabs: %w(Scheduled Dead),
-        action: ->(tui) { tui.alter_rows!(:add_to_queue) }, refresh: true
-      },
-      { code: "K", modifiers: ["shift"], display: "K", description: "Kill", tabs: %w(Scheduled Retries),
-        action: ->(tui) { tui.alter_rows!(:kill) }, refresh: true
-      },
-      { code: "p", description: "Pause/Unpause Queue", tabs: ["Queues"],
-        action: ->(tui) { tui.toggle_pause_queue! }
-      },
-      { code: "Q", modifiers: ["shift"], description: "Quiet", tabs: ["Busy"],
-        action: ->(tui) { tui.quiet! }
-      },
-      { code: "/", display: "/", description: "Filter", tabs: %w(Scheduled Retries Dead),
-        action: ->(tui) { tui.start_filtering }
-      },
-      { code: "q", display: "q", description: "Quit", tabs: TABS,
-        action: ->(tui) { :quit }
-      },
-      { code: "c", modifiers: ["ctrl"], display: "q", description: "Quit", tabs: TABS,
-        action: ->(tui) { :quit }
-      },
+      {code: "left", display: "←/→", description: "Select Tab", tabs: TABS,
+       action: ->(tui) { tui.navigate_tab(:left) }, refresh: true},
+      {code: "right", display: "←/→", description: "Select Tab", tabs: TABS,
+       action: ->(tui) { tui.navigate_tab(:right) }, refresh: true},
+      {code: "h", display: "h/l", description: "Prev/Next Page", tabs: TABS - ["Home"],
+       action: ->(tui) { tui.prev_page }, refresh: true},
+      {code: "l", display: "h/l", description: "Prev/Next Page", tabs: TABS - ["Home"],
+       action: ->(tui) { tui.next_page }, refresh: true},
+      {code: "k", display: "j/k", description: "Prev/Next Row", tabs: TABS - ["Home"],
+       action: ->(tui) { tui.navigate_row(:up) }},
+      {code: "j", display: "j/k", description: "Prev/Next Row", tabs: TABS - ["Home"],
+       action: ->(tui) { tui.navigate_row(:down) }},
+      {code: "x", display: "x", description: "Select", tabs: TABS - ["Home"],
+       action: ->(tui) { tui.toggle_select }},
+      {code: "A", modifiers: ["shift"], display: "A", description: "Select All", tabs: TABS - ["Home"],
+       action: ->(tui) { tui.toggle_select(:all) }},
+      {code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: %w[Queues],
+       action: ->(tui) { tui.delete_queue! }, refresh: true},
+      {code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: %w[Scheduled Retries Dead],
+       action: ->(tui) { tui.alter_rows!(:delete) }, refresh: true},
+      {code: "R", modifiers: ["shift"], display: "R", description: "Retry", tabs: %w[Retries],
+       action: ->(tui) { tui.alter_rows!(:retry) }, refresh: true},
+      {code: "E", modifiers: ["shift"], display: "E", description: "Enqueue", tabs: %w[Scheduled Dead],
+       action: ->(tui) { tui.alter_rows!(:add_to_queue) }, refresh: true},
+      {code: "K", modifiers: ["shift"], display: "K", description: "Kill", tabs: %w[Scheduled Retries],
+       action: ->(tui) { tui.alter_rows!(:kill) }, refresh: true},
+      {code: "p", description: "Pause/Unpause Queue", tabs: ["Queues"],
+       action: ->(tui) { tui.toggle_pause_queue! }},
+      {code: "Q", modifiers: ["shift"], description: "Quiet", tabs: ["Busy"],
+       action: ->(tui) { tui.quiet! }},
+      {code: "/", display: "/", description: "Filter", tabs: %w[Scheduled Retries Dead],
+       action: ->(tui) { tui.start_filtering }},
+      {code: "q", display: "q", description: "Quit", tabs: TABS,
+       action: ->(tui) { :quit }},
+      {code: "c", modifiers: ["ctrl"], display: "q", description: "Quit", tabs: TABS,
+       action: ->(tui) { :quit }}
     ].freeze
 
     def initialize
@@ -129,7 +112,7 @@ module Sidekiq
           direction: :vertical,
           constraints: [
             @tui.constraint_fill(1),
-            @tui.constraint_length(4),
+            @tui.constraint_length(4)
           ]
         )
 
@@ -139,7 +122,7 @@ module Sidekiq
           direction: :vertical,
           constraints: [
             @tui.constraint_length(3),
-            @tui.constraint_fill(1),
+            @tui.constraint_fill(1)
           ]
         )
 
@@ -149,7 +132,7 @@ module Sidekiq
           block: @tui.block(title: Sidekiq::NAME, borders: [:all], title_style: @tui.style(fg: :red, modifiers: [:bold])),
           divider: " | ",
           highlight_style: @highlight_style,
-          style: @base_style,
+          style: @base_style
         )
         frame.render_widget(tabs, tabs_area)
 
@@ -214,10 +197,10 @@ module Sidekiq
               # ]),
               @tui.text_line(spans: [
                 @tui.text_span(content: "Redis: #{redis_url} "),
-                @tui.text_span(content: "Current Time: #{Time.now.utc}"),
-              ]),
+                @tui.text_span(content: "Current Time: #{Time.now.utc}")
+              ])
             ]
-          ),
+          )
         ]
       )
       frame.render_widget(controls, area)
@@ -225,23 +208,23 @@ module Sidekiq
 
     def handle_input
       case @tui.poll_event
-      in { type: :key, code: "backspace" } if @data[:filtering]
+      in {type: :key, code: "backspace"} if @data[:filtering]
         @data[:filter] = @data[:filter].empty? ? "" : @data[:filter][0..-2]
-      in { type: :key, code: "enter" } if @data[:filtering]
+      in {type: :key, code: "enter"} if @data[:filtering]
         @data[:filtering] = nil
         @data[:selected] = []
-      in { type: :key, code: "esc" } if @data[:filtering]
+      in {type: :key, code: "esc"} if @data[:filtering]
         @data[:filtering] = nil
         @data[:filter] = nil
         @data[:selected] = []
-      in { type: :key, code: code } if @data[:filtering] && code.length == 1
+      in {type: :key, code: code} if @data[:filtering] && code.length == 1
         @data[:filter] += code
         @data[:selected] = []
-      in { type: :key, code:, modifiers: }
+      in {type: :key, code:, modifiers:}
         control = CONTROLS.find { |ctrl|
           ctrl[:code] == code &&
-          (ctrl[:modifiers] || []) == (modifiers || []) &&
-          ctrl[:tabs].include?(@current_tab)
+            (ctrl[:modifiers] || []) == (modifiers || []) &&
+            ctrl[:tabs].include?(@current_tab)
         }
         return unless control
         control[:action].call(self).tap {
@@ -257,12 +240,12 @@ module Sidekiq
     # Navigate tabs to the left or right.
     # @param direction [Symbol] :left or :right
     def navigate_tab(direction)
-      index_change = direction == :right ? 1 : -1
+      index_change = (direction == :right) ? 1 : -1
       @current_tab = TABS[(TABS.index(@current_tab) + index_change) % TABS.size]
       @selected_row_index = 0
       @data = {
         selected: [],
-        filter: nil,
+        filter: nil
       }
     end
 
@@ -272,7 +255,7 @@ module Sidekiq
       ids = @data.dig(:table, :row_ids)
       return if !ids || ids.empty?
 
-      index_change = direction == :down ? 1 : -1
+      index_change = (direction == :down) ? 1 : -1
       @selected_row_index = (@selected_row_index + index_change) % ids.count
     end
 
@@ -326,8 +309,6 @@ module Sidekiq
         Sidekiq::RetrySet.new
       when "Dead"
         Sidekiq::DeadSet.new
-      else
-        nil
       end
       return unless set
       each_selection do |id|
@@ -365,12 +346,10 @@ module Sidekiq
         else
           sel << x
         end
+      elsif sel.empty?
+        @data[:selected] = @data[:table][:row_ids]
       else
-        if sel.empty?
-          @data[:selected] = @data[:table][:row_ids]
-        else
-          sel.clear
-        end
+        sel.clear
       end
     end
 
@@ -408,7 +387,7 @@ module Sidekiq
         enqueued: stats.enqueued,
         retries: stats.retry_size,
         scheduled: stats.scheduled_size,
-        dead: stats.dead_size,
+        dead: stats.dead_size
       }
 
       case @current_tab
@@ -457,17 +436,17 @@ module Sidekiq
           busy << [
             selected?(p) ? "✅" : "",
             name,
-            Time.at(p['started_at']).utc,
-            format_memory(p['rss'].to_i),
-            number_with_delimiter(p['concurrency']),
-            number_with_delimiter(p['busy'])
+            Time.at(p["started_at"]).utc,
+            format_memory(p["rss"].to_i),
+            number_with_delimiter(p["concurrency"]),
+            number_with_delimiter(p["busy"])
           ]
           table_row_ids << p.identity
         end
 
         @data.merge!(
           busy:,
-          table: { row_ids: table_row_ids },
+          table: {row_ids: table_row_ids}
         )
       when "Queues"
         queue_summaries = Sidekiq::Stats.new.queue_summaries.sort_by(&:name)
@@ -478,7 +457,7 @@ module Sidekiq
             selected.index(queue_summary.name) ? "✅" : "",
             queue_summary.name,
             queue_summary.size.to_s,
-            number_with_delimiter(queue_summary.latency, { precision: 2 }),
+            number_with_delimiter(queue_summary.latency, {precision: 2})
           ]
           row_cells << (queue_summary.paused? ? "✅" : "") if Sidekiq.pro?
           row_cells
@@ -488,7 +467,7 @@ module Sidekiq
 
         @data.merge!(
           queues:,
-          table: { row_ids: table_row_ids }
+          table: {row_ids: table_row_ids}
         )
       when "Scheduled"
         data_for_set(Sidekiq::ScheduledSet.new)
@@ -510,7 +489,7 @@ module Sidekiq
 
       @last_refresh = Time.now
     rescue => e
-      @data = { error: e }
+      @data = {error: e}
     end
 
     def data_for_set(set)
@@ -527,10 +506,9 @@ module Sidekiq
       end
 
       @data.merge!(
-        table: { pager:, rows:, current_page: current, total:,
-          next_page: (current * pager.size < total) ? pager.page + 1 : nil,
-          row_ids: rows.map { |job| [job.score, job["jid"]].join("|") }
-        }
+        table: {pager:, rows:, current_page: current, total:,
+                next_page: (current * pager.size < total) ? pager.page + 1 : nil,
+                row_ids: rows.map { |job| [job.score, job["jid"]].join("|") }}
       )
     end
 
@@ -541,7 +519,7 @@ module Sidekiq
         constraints: [
           @tui.constraint_length(4), # Stats
           @tui.constraint_length(4), # Status
-          @tui.constraint_fill(1),   # Graph
+          @tui.constraint_fill(1)   # Graph
         ]
       )
 
@@ -557,7 +535,7 @@ module Sidekiq
             @tui.constraint_length(24),
             @tui.constraint_length(10),
             @tui.constraint_length(6),
-            @tui.constraint_length(6),
+            @tui.constraint_length(6)
           ],
           rows: @data[:busy].map.with_index { |cells, idx|
             @tui.table_row(
@@ -575,7 +553,7 @@ module Sidekiq
         direction: :vertical,
         constraints: [
           @tui.constraint_length(4), # Stats
-          @tui.constraint_fill(1),   # Table
+          @tui.constraint_fill(1)   # Table
         ]
       )
 
@@ -589,22 +567,22 @@ module Sidekiq
             @tui.constraint_length(24),
             @tui.constraint_length(20),
             @tui.constraint_length(30),
-            @tui.constraint_fill(1),
-          ],
+            @tui.constraint_fill(1)
+          ]
         }.tap do |h|
-          rows = @data[:table][:rows].map.with_index {|entry, idx|
+          rows = @data[:table][:rows].map.with_index { |entry, idx|
             @tui.table_row(
               cells: [
                 selected?(entry) ? "✅" : "",
                 entry.at,
                 entry.queue,
                 entry.display_class,
-                entry.display_args,
+                entry.display_args
               ],
-              style: idx.even? ? nil : @tui.style(bg: :dark_gray))
+              style: idx.even? ? nil : @tui.style(bg: :dark_gray)
+            )
           }
           h[:rows] = rows
-          h
         end
       end
     end
@@ -620,7 +598,7 @@ module Sidekiq
         constraints: [
           @tui.constraint_length(4), # Stats
           @tui.constraint_fill(1),   # Graph
-          @tui.constraint_length(4), # Redis
+          @tui.constraint_length(4) # Redis
         ]
       )
 
@@ -635,10 +613,12 @@ module Sidekiq
       processes = Sidekiq::ProcessSet.new
       workset = Sidekiq::WorkSet.new
       ws = workset.size
-      values << (s = processes.size; number_with_delimiter(s))
-      values << (x = processes.total_concurrency; number_with_delimiter(x))
+      values << (s = processes.size
+                 number_with_delimiter(s))
+      values << (x = processes.total_concurrency
+                 number_with_delimiter(x))
       values << number_with_delimiter(ws)
-      values << "#{x == 0 ? 0 : ((ws / x.to_f) * 100).round(0)}%"
+      values << "#{(x == 0) ? 0 : ((ws / x.to_f) * 100).round(0)}%"
       values << format_memory(processes.total_rss)
 
       keys_line = keys.map { |k| k.to_s.ljust(12) }.join("  ")
@@ -664,7 +644,7 @@ module Sidekiq
         stats[:enqueued],
         stats[:retries],
         stats[:scheduled],
-        stats[:dead],
+        stats[:dead]
       ]
 
       # Format keys and values with spacing
@@ -726,7 +706,7 @@ module Sidekiq
         ),
         block: @tui.block(
           title: "Dashboard #{beacon_pulse}",
-          borders: [:all],
+          borders: [:all]
         )
       )
 
@@ -736,7 +716,7 @@ module Sidekiq
     def render_redis_info_section(frame, area)
       redis_info = @data[:redis_info]
 
-      uptime_value = redis_info[:uptime_days] == "N/A" ? "N/A" : "#{redis_info[:uptime_days]} days"
+      uptime_value = (redis_info[:uptime_days] == "N/A") ? "N/A" : "#{redis_info[:uptime_days]} days"
 
       keys = ["Version", "Uptime", "Connected Clients", "Memory Usage", "Peak Memory"]
       values = [
@@ -769,7 +749,7 @@ module Sidekiq
         direction: :vertical,
         constraints: [
           @tui.constraint_length(4), # Stats
-          @tui.constraint_fill(1), # Table
+          @tui.constraint_fill(1) # Table
         ]
       )
 
@@ -779,7 +759,7 @@ module Sidekiq
           title: "Queues",
           header:,
           widths: header.map.with_index { |_, idx|
-            @tui.constraint_length(idx == 1 ? 60 : 10)
+            @tui.constraint_length((idx == 1) ? 60 : 10)
           },
           rows: @data[:queues].map.with_index { |cells, idx|
             @tui.table_row(
@@ -797,7 +777,7 @@ module Sidekiq
         direction: :vertical,
         constraints: [
           @tui.constraint_length(4), # Stats
-          @tui.constraint_fill(1), # Chart
+          @tui.constraint_fill(1) # Chart
           # TOOD Table
         ]
       )
@@ -806,8 +786,7 @@ module Sidekiq
       render_metrics_chart(frame, chunks[1])
     end
 
-    COLORS = %i(blue cyan yellow red green white gray)
-
+    COLORS = %i[blue cyan yellow red green white gray]
 
     # Run to generate metrics data:
     #   cd myapp && bundle install
@@ -836,7 +815,7 @@ module Sidekiq
         tm = Time.now
         tmi = tm.to_i
         tm = Time.at(tmi - (tmi % 60)).utc
-        data = Array.new(60) {|idx| idx}.map do |bucket_idx|
+        data = Array.new(60) { |idx| idx }.map do |bucket_idx|
           jumpback = bucket_idx * 60
           value = hrdata[(tm - jumpback).iso8601] || 0
           y_max = value if value > y_max
@@ -881,8 +860,8 @@ module Sidekiq
         ),
         block: @tui.block(
           title: "Metrics",
-          borders: [:all],
-        ),
+          borders: [:all]
+        )
       )
 
       frame.render_widget(chart, area)
@@ -894,7 +873,7 @@ module Sidekiq
         spans: [@tui.text_span(content: err.message, style: @tui.style(modifiers: [:bold]))],
         alignment: :center
       )]
-      lines = Array(err.backtrace).map {|line| @tui.text_line(spans: [@tui.text_span(content: line)])}
+      lines = Array(err.backtrace).map { |line| @tui.text_line(spans: [@tui.text_span(content: line)]) }
 
       frame.render_widget(
         @tui.paragraph(
@@ -935,7 +914,7 @@ module Sidekiq
         @filter_style = @tui.style(fg: :white, bg: :dark_gray)
         spans = [
           @tui.text_span(content: "Filter: ", style: @filter_style),
-          @tui.text_span(content: @data[:filter], style: @filter_style),
+          @tui.text_span(content: @data[:filter], style: @filter_style)
         ]
         spans << @tui.text_span(content: "_", style: @tui.style(fg: :white, bg: :dark_gray, modifiers: [:slow_blink])) if @data[:filtering]
         footer << @tui.text_line(spans: spans)
@@ -946,7 +925,7 @@ module Sidekiq
         highlight_symbol: "➡️",
         selected_row: @selected_row_index,
         row_highlight_style: @tui.style(fg: :white, bg: :blue),
-        footer: footer,
+        footer: footer
       }
       hash = defaults.merge(yield)
       hash[:block] ||= @tui.block(title: hash.delete(:title), borders: :all)
