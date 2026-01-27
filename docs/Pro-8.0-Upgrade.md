@@ -26,7 +26,7 @@ If you're fine with stopping sidekiq for a bit, you can run this migration to ma
 
 ```ruby
 Sidekiq.redis do |conn|
-  conn.scan(match:"b-*-failinfo", count: 100, type: "hash") do |key|
+  conn.scan(match: "b-*-failinfo", count: 100, type: "hash") do |key|
     bid = key.split("-")[1]
     jids, ttl = conn.pipelined do |pipeline|
       pipeline.hkeys(key)
