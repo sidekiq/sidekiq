@@ -61,7 +61,7 @@ module Sidekiq
       end
 
       def jobs_directory
-        ::Rails.application.config.generators.options[:rails].fetch(:jobs_directory, "app/sidekiq")
+        ::Rails.application.config.generators.options[:sidekiq].fetch(:jobs_directory, "app/sidekiq")
       end
     end
   end
