@@ -51,7 +51,6 @@ module Sidekiq
        action: ->(tui) { :quit }},
       {code: "c", modifiers: ["ctrl"], display: "q", description: "Quit", tabs: TABS,
        action: ->(tui) { :quit }},
-      #
       {code: "h", display: "h/l", description: "Prev/Next Page", tabs: TABS - ["Home"],
        action: ->(tui) { tui.prev_page }, refresh: true},
       {code: "l", display: "h/l", description: "Prev/Next Page", tabs: TABS - ["Home"],
@@ -64,7 +63,6 @@ module Sidekiq
        action: ->(tui) { tui.toggle_select }},
       {code: "A", modifiers: ["shift"], display: "A", description: "Select All", tabs: TABS - ["Home"],
        action: ->(tui) { tui.toggle_select(:all) }},
-      #
       {code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: %w[Scheduled Retries Dead],
        action: ->(tui) { tui.alter_rows!(:delete) }, refresh: true},
       {code: "R", modifiers: ["shift"], display: "R", description: "Retry", tabs: %w[Retries],
@@ -73,7 +71,6 @@ module Sidekiq
        action: ->(tui) { tui.alter_rows!(:add_to_queue) }, refresh: true},
       {code: "K", modifiers: ["shift"], display: "K", description: "Kill", tabs: %w[Scheduled Retries],
        action: ->(tui) { tui.alter_rows!(:kill) }, refresh: true},
-      #
       {code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: %w[Queues],
        action: ->(tui) { tui.delete_queue! }, refresh: true},
       {code: "p", description: "Pause/Unpause Queue", tabs: ["Queues"],
@@ -83,7 +80,7 @@ module Sidekiq
       {code: "Q", modifiers: ["shift"], description: "Quiet", tabs: ["Busy"],
        action: ->(tui) { tui.quiet! }},
       {code: "/", display: "/", description: "Filter", tabs: %w[Scheduled Retries Dead],
-       action: ->(tui) { tui.start_filtering }},
+       action: ->(tui) { tui.start_filtering }}
     ].freeze
 
     def initialize
@@ -455,10 +452,8 @@ module Sidekiq
           table_row_ids << p.identity
         end
 
-        @data.merge!(
-          busy:,
-          table: {row_ids: table_row_ids}
-        )
+        @data[:busy] = busy
+        @data[:table] = {row_ids: table_row_ids}
       when "Queues"
         queue_summaries = Sidekiq::Stats.new.queue_summaries.sort_by(&:name)
 
@@ -476,10 +471,8 @@ module Sidekiq
 
         table_row_ids = queue_summaries.map(&:name)
 
-        @data.merge!(
-          queues:,
-          table: {row_ids: table_row_ids}
-        )
+        @data[:queues] = queues
+        @data[:table] = {row_ids: table_row_ids}
       when "Scheduled"
         data_for_set(Sidekiq::ScheduledSet.new)
       when "Retries"
@@ -491,10 +484,8 @@ module Sidekiq
         if !@data[:metrics_refresh] || @data[:metrics_refresh] < Time.now
           q = Sidekiq::Metrics::Query.new
           query_result = q.top_jobs(minutes: 60)
-          @data.merge!(
-            metrics: query_result,
-            metrics_refresh: Time.now + 60
-          )
+          @data[:metrics] = query_result
+          @data[:metrics_refresh] = Time.now + 60
         end
       end
 
