@@ -22,6 +22,25 @@ If every `failinfo` key in Redis has a matching `failed` key, you're safe to upg
 
 Batches no longer store the error backtraces associated with their jobs, as these error backtraces are redundant with the job retry and can take a lot of space within Redis.
 
+If you're fine with stopping sidekiq for a bit, you can run this migration to make 7.x batches compatible with 8.x
+
+```ruby
+Sidekiq.redis do |conn|
+  conn.scan(match:"b-*-failinfo", count: 100, type: "hash") do |key|
+    bid = key.split("-")[1]
+    jids, ttl = conn.pipelined do |pipeline|
+      pipeline.hkeys(key)
+      pipeline.ttl(key)
+    end
+
+    conn.pipelined do |pipeline|
+      pipeline.sadd("b-#{bid}-failed", jids)
+      pipeline.expire("b-#{bid}-failed", ttl)
+    end
+  end
+end
+```
+
 ### Metric naming
 
 For clarity and consistency, all Statsd metrics have been prefixed with `sidekiq.`.
