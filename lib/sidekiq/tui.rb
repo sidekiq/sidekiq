@@ -2,7 +2,7 @@ require "bundler/inline"
 
 gemfile do
   source "https://gem.coop"
-  gem "ratatui_ruby", "0.10.3"
+  gem "ratatui_ruby", "1.3.0"
   gem "sidekiq"
 end
 
