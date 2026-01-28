@@ -43,6 +43,8 @@ module Sidekiq
     # Conventions: dangerous/irreversible actions should use UPPERCASE codes.
     # The Shift button means "I'm sure".
     CONTROLS = [
+      {code: "?", display: "?", description: "Help", tabs: TABS,
+       action: ->(tui) { tui.show_help }},
       {code: "left", display: "←/→", description: "Select Tab", tabs: TABS,
        action: ->(tui) { tui.navigate_tab(:left) }, refresh: true},
       {code: "right", display: "←/→", description: "Select Tab", tabs: TABS,
@@ -89,6 +91,7 @@ module Sidekiq
       @base_style = nil
       @data = {}
       @last_refresh = Time.now
+      @showing = :main
     end
 
     def run
@@ -140,7 +143,75 @@ module Sidekiq
 
         render_content_area(frame, content_area)
         render_controls(frame, controls_area)
-      end
+      end if @showing == :main
+
+      @tui.draw do |frame|
+        main_area, controls_area = @tui.layout_split(
+          frame.area,
+          direction: :vertical,
+          constraints: [
+            @tui.constraint_fill(1),
+            @tui.constraint_length(4)
+          ]
+        )
+        content = @tui.block(
+          title: Sidekiq::NAME,
+          borders: [:all],
+          title_style: @tui.style(fg: :red, modifiers: [:bold]),
+          children: [
+            # TODO convert to table
+            @tui.paragraph(
+              text: [
+                @tui.text_line(spans: ["Welcome to the Sidekiq Terminal UI"], alignment: :center),
+                @tui.text_line(spans: [
+                  @tui.text_span(content: "Esc", style: @hotkey_style),
+                  @tui.text_span(content: ": Close")
+                ]),
+                @tui.text_line(spans: [
+                  @tui.text_span(content: "←/→", style: @hotkey_style),
+                  @tui.text_span(content: ": Move between tabs")
+                ]),
+                @tui.text_line(spans: [
+                  @tui.text_span(content: "j/k", style: @hotkey_style),
+                  @tui.text_span(content: ": Use vim keys to move to prev/next row")
+                ]),
+                @tui.text_line(spans: [
+                  @tui.text_span(content: "x", style: @hotkey_style),
+                  @tui.text_span(content: ": Select/deselect current row")
+                ]),
+                @tui.text_line(spans: [
+                  @tui.text_span(content: "A", style: @hotkey_style),
+                  @tui.text_span(content: ": Select/deselect All visible rows")
+                ]),
+                @tui.text_line(spans: [
+                  @tui.text_span(content: "h/l", style: @hotkey_style),
+                  @tui.text_span(content: ": Use vim keys to move to prev/next page")
+                ]),
+                @tui.text_line(spans: [
+                  @tui.text_span(content: "q", style: @hotkey_style),
+                  @tui.text_span(content: ": Quit")
+                ]),
+              ]
+            )
+          ]
+        )
+        frame.render_widget(content, main_area)
+        controls = @tui.block(
+          title: "Controls",
+          borders: [:all],
+          children: [
+            @tui.paragraph(
+              text: [
+                @tui.text_line(spans: [
+                  @tui.text_span(content: "Esc", style: @hotkey_style),
+                  @tui.text_span(content: ": Close  ")
+                ])
+              ]
+            )
+          ]
+        )
+        frame.render_widget(controls, controls_area)
+      end if @showing == :help
     end
 
     def render_content_area(frame, content_area)
@@ -215,6 +286,8 @@ module Sidekiq
       in {type: :key, code: "enter"} if @data[:filtering]
         @data[:filtering] = nil
         @data[:selected] = []
+      in {type: :key, code: "esc"} if @showing == :help
+        @showing = :main
       in {type: :key, code: "esc"} if @data[:filtering]
         @data[:filtering] = nil
         @data[:filter] = nil
@@ -237,6 +310,10 @@ module Sidekiq
       end
     rescue => ex
       log(ex.message, ex.backtrace)
+    end
+
+    def show_help
+      @showing = :help
     end
 
     # Navigate tabs to the left or right.
