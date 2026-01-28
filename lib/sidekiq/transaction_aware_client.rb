@@ -26,6 +26,11 @@ module Sidekiq
       # pre-allocate the JID so we can return it immediately and
       # save it to the database as part of the transaction.
       item["jid"] ||= SecureRandom.hex(12)
+
+      current_middleware.each do |entry|
+        entry.call(nil, item, nil, nil) { }
+      end
+
       @transaction_backend.call { @redis_client.push(item) }
       item["jid"]
     end
@@ -36,6 +41,14 @@ module Sidekiq
     # a long running enqueue process.
     def push_bulk(items)
       @redis_client.push_bulk(items)
+    end
+
+    private
+
+    def current_middleware
+      @current_middleware ||= @redis_client.middleware.select do |entry|
+        entry.klass == Sidekiq::CurrentAttributes::Save
+      end.map(&:make_new)
     end
   end
 end
