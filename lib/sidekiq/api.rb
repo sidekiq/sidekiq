@@ -1134,6 +1134,8 @@ module Sidekiq
       if !self["capsules"]
         self["queues"]
       else
+        return self["queues"] unless capsules.is_a?(Hash)
+
         capsules.values.flat_map { |x| x["weights"].keys }.uniq
       end
     end
