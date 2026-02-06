@@ -909,3 +909,14 @@ def add_dead(jid = nil, at = Time.now.to_f)
     conn.zadd("dead", at.to_s, payload)
   end
 end
+
+def test_process_queues_falls_back_when_capsules_is_nil
+  process = Sidekiq::Process.new("identity")
+  process["capsules"] = {}
+
+  def process.capsules
+    nil
+  end
+
+  assert_equal process["queues"], process.queues
+end
