@@ -6,9 +6,47 @@ module Sidekiq
       class Home < BaseTab
         def self.order = 1
 
-        def self.render(data, tui, frame, area)
-          @data = data
+        def self.refresh_data
+          reset_data unless @data
+          refresh_data_for_stats
 
+          stats = Sidekiq::Stats.new
+          @data[:chart] ||= {
+            previous_stats: {
+              processed: stats.processed,
+              failed: stats.failed
+            },
+            deltas: {
+              processed: Array.new(50, 0),
+              failed: Array.new(50, 0)
+            }
+          }
+
+          processed_delta = stats.processed - @data[:chart][:previous_stats][:processed]
+          failed_delta = stats.failed - @data[:chart][:previous_stats][:failed]
+
+          @data[:chart][:deltas][:processed].shift
+          @data[:chart][:deltas][:processed].push(processed_delta)
+          @data[:chart][:deltas][:failed].shift
+          @data[:chart][:deltas][:failed].push(failed_delta)
+
+          @data[:chart][:previous_stats] = {
+            processed: stats.processed,
+            failed: stats.failed
+          }
+
+          redis_info = Sidekiq.default_configuration.redis_info
+
+          @data[:redis_info] = {
+            version: redis_info["redis_version"] || "N/A",
+            uptime_days: redis_info["uptime_in_days"] || "N/A",
+            connected_clients: redis_info["connected_clients"] || "N/A",
+            used_memory: redis_info["used_memory_human"] || "N/A",
+            peak_memory: redis_info["used_memory_peak_human"] || "N/A"
+          }
+        end
+
+        def self.render(tui, frame, area)
           chunks = tui.layout_split(
             area,
             direction: :vertical,

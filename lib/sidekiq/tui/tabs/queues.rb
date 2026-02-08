@@ -6,9 +6,50 @@ module Sidekiq
       class Queues < BaseTab
         def self.order = 3
 
-        def self.render(data, tui, frame, area)
-          @data = data
+        def self.delete_queue!
+          each_selection do |qname|
+            Sidekiq::Queue.new(qname).clear
+          end
+        end
 
+        def self.toggle_pause_queue!
+          return unless Sidekiq.pro?
+
+          each_selection do |qname|
+            queue = Sidekiq::Queue.new(qname)
+            if queue.paused?
+              queue.unpause!
+            else
+              queue.pause!
+            end
+          end
+        end
+
+        def self.refresh_data
+          @reset_data unless @data
+          refresh_data_for_stats
+
+          queue_summaries = Sidekiq::Stats.new.queue_summaries.sort_by(&:name)
+
+          selected = Array(@data[:selected])
+          queues = queue_summaries.map { |queue_summary|
+            row_cells = [
+              selected.index(queue_summary.name) ? "✅" : "",
+              queue_summary.name,
+              queue_summary.size.to_s,
+              number_with_delimiter(queue_summary.latency, {precision: 2})
+            ]
+            row_cells << (queue_summary.paused? ? "✅" : "") if Sidekiq.pro?
+            row_cells
+          }
+
+          table_row_ids = queue_summaries.map(&:name)
+
+          @data[:queues] = queues
+          @data[:table] = {row_ids: table_row_ids}
+        end
+
+        def self.render(tui, frame, area)
           header = ["☑️", "Queue", "Size", "Latency"]
           header << "Paused?" if Sidekiq.pro?
 
