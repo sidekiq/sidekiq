@@ -2,9 +2,61 @@ module Sidekiq
   class TUI
     module Tabs
       module SetTab
-        def render(data, tui, frame, area)
-          @data = data
+        include Sidekiq::Paginator
 
+        def filtering?
+          @data[:filtering]
+        end
+
+        def filter
+          @data[:filter]
+        end
+
+        def filter=(new_filter)
+          @data[:filter] = new_filter
+        end
+
+        def start_filtering
+          @data[:filtering] = true
+          @data[:filter] = ""
+        end
+
+        def stop_filtering
+          @data[:filtering] = false
+        end
+
+        def alter_rows!(action)
+          log(to_s, @data[:selected])
+          set = set_class.new
+          each_selection do |id|
+            score, jid = id.split("|")
+            item = set.fetch(score, jid)&.first
+            item&.send(action)
+          end
+        end
+
+        def refresh_data_for_set
+          set = set_class.new
+          f = @data[:filter]
+          pager, rows, current, total = if f && f.size > 2
+            rows = set.scan(f).to_a
+            sz = rows.size
+            [Sidekiq::TUI::PageOptions.new(1, sz), rows, 1, sz]
+          else
+            pager = @data.dig(:table, :pager) || Sidekiq::TUI::PageOptions.new(1, 25)
+            current, total, items = page(set.name, pager.page, pager.size)
+            rows = items.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
+            [pager, rows, current, total]
+          end
+
+          @data.merge!(
+            table: {pager:, rows:, current_page: current, total:,
+                    next_page: (current * pager.size < total) ? pager.page + 1 : nil,
+                    row_ids: rows.map { |job| [job.score, job["jid"]].join("|") }}
+          )
+        end
+
+        def render(tui, frame, area)
           chunks = tui.layout_split(
             area,
             direction: :vertical,

@@ -6,9 +6,45 @@ module Sidekiq
       class Busy < BaseTab
         def self.order = 2
 
-        def self.render(data, tui, frame, area)
-          @data = data
+        def self.quiet!
+          each_selection do |id|
+            Sidekiq::Process.new("identity" => id).quiet!
+          end
+        end
 
+        def self.terminate!
+          each_selection do |id|
+            Sidekiq::Process.new("identity" => id).stop!
+          end
+        end
+
+        def self.refresh_data
+          @reset_data unless @data
+          refresh_data_for_stats
+
+          busy = []
+          table_row_ids = []
+
+          Sidekiq::ProcessSet.new.each do |p|
+            name = "#{p["hostname"]}:#{p["pid"]}"
+            name += " ⭐️" if p.leader?
+            name += " 🛑" if p.stopping?
+            busy << [
+              selected?(p) ? "✅" : "",
+              name,
+              Time.at(p["started_at"]).utc,
+              format_memory(p["rss"].to_i),
+              number_with_delimiter(p["concurrency"]),
+              number_with_delimiter(p["busy"])
+            ]
+            table_row_ids << p.identity
+          end
+
+          @data[:busy] = busy
+          @data[:table] = {row_ids: table_row_ids}
+        end
+
+        def self.render(tui, frame, area)
           chunks = tui.layout_split(
             area,
             direction: :vertical,

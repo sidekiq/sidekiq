@@ -8,9 +8,20 @@ module Sidekiq
 
         def self.order = 7
 
-        def self.render(data, tui, frame, area)
-          @data = data
+        def self.refresh_data
+          @reset_data unless @data
+          refresh_data_for_stats
 
+          # only need to refresh every 60 seconds
+          if !@data[:metrics_refresh] || @data[:metrics_refresh] < Time.now
+            q = Sidekiq::Metrics::Query.new
+            query_result = q.top_jobs(minutes: 60)
+            @data[:metrics] = query_result
+            @data[:metrics_refresh] = Time.now + 60
+          end
+        end
+
+        def self.render(tui, frame, area)
           chunks = tui.layout_split(
             area,
             direction: :vertical,

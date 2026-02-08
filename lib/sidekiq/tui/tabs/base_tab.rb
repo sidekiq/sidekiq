@@ -3,11 +3,6 @@ module Sidekiq
     class BaseTab
       extend Comparable
 
-      # RM
-      def self.===(other)
-        self == other
-      end
-
       def self.<=>(other)
         self.order <=> other.order
       end
@@ -16,9 +11,102 @@ module Sidekiq
         name.split("::").last
       end
 
-      # TODO remove param, use @data
-      def self.error(data)
-        data[:error]
+      def self.reset_data
+        @data = {selected: [], selected_row_index: 0}
+      end
+
+      def self.error
+        @data[:error]
+      end
+
+      def self.error=(e)
+        @data[:error] = e
+      end
+
+      def self.selected?(entry)
+        @data[:selected].index(entry.id)
+      end
+
+      def self.reset_selected
+        @data[:selected] = []
+      end
+
+      def self.each_selection(unselect: true, &)
+        sel = @data[:selected]
+        finished = []
+        if !sel.empty?
+          sel.each do |id|
+            yield id
+            # When processing multiple items in bulk, we want to unselect
+            # each row if its operation succeeds so our UI will not
+            # re-process rows 1-3 if row 4 fails.
+            finished << id
+          end
+        else
+          ids = @data.dig(:table, :row_ids)
+          return if !ids || ids.empty?
+          yield ids[@data[:selected_row_index]]
+        end
+      ensure
+        @data[:selected] = sel - finished if unselect
+      end
+
+      # Navigate the row selection up or down in the current tab's table.
+      # @param direction [Symbol] :up or :down
+      def self.navigate_row(direction)
+        ids = @data.dig(:table, :row_ids)
+        return if !ids || ids.empty?
+
+        index_change = (direction == :down) ? 1 : -1
+        @data[:selected_row_index] = (@data[:selected_row_index] + index_change) % ids.count
+      end
+
+      def self.prev_page
+        opts = @data.dig(:table, :pager)
+        return unless opts
+        return if opts.page < 2
+
+        @data[:table][:pager] = Sidekiq::TUI::PageOptions.new(opts.page - 1, opts.size)
+      end
+
+      def self.next_page
+        np = @data.dig(:table, :next_page)
+        return unless np
+        opts = @data.dig(:table, :pager)
+        return unless opts
+
+        @data[:table][:pager] = Sidekiq::TUI::PageOptions.new(np, opts.size)
+      end
+
+      def self.toggle_select(which = :current)
+        sel = @data[:selected]
+        log(which, sel)
+        if which == :current
+          x = @data[:table][:row_ids][@data[:selected_row_index]]
+          if sel.index(x)
+            # already checked, uncheck it
+            sel.delete(x)
+          else
+            sel << x
+          end
+        elsif sel.empty?
+          @data[:selected] = @data[:table][:row_ids]
+        else
+          sel.clear
+        end
+      end
+
+      def self.refresh_data_for_stats
+        stats = Sidekiq::Stats.new
+        @data[:stats] = {
+          processed: stats.processed,
+          failed: stats.failed,
+          busy: stats.workers_size,
+          enqueued: stats.enqueued,
+          retries: stats.retry_size,
+          scheduled: stats.scheduled_size,
+          dead: stats.dead_size
+        }
       end
 
       def self.render_table(tui, frame, area)
@@ -41,7 +129,7 @@ module Sidekiq
         defaults = {
           title: "TableName",
           highlight_symbol: "➡️",
-          selected_row: @selected_row_index,
+          selected_row: @data[:selected_row_index],
           row_highlight_style: tui.style(fg: :white, bg: :blue),
           footer: footer
         }
@@ -76,10 +164,6 @@ module Sidekiq
           ),
           area
         )
-      end
-
-      def self.selected?(entry)
-        @data[:selected].index(entry.id)
       end
 
       # TODO Implement I18n delimiter

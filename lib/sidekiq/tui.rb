@@ -27,8 +27,6 @@ end
 
 module Sidekiq
   class TUI
-    include Sidekiq::Paginator
-
     PageOptions = Data.define(:page, :size)
 
     REFRESH_INTERVAL_SECONDS = 2
@@ -57,42 +55,42 @@ module Sidekiq
       {code: "c", modifiers: ["ctrl"], display: "q", description: "Quit", tabs: TABS,
        action: ->(tui) { :quit }},
       {code: "h", display: "h/l", description: "Prev/Next Page", tabs: TABS - [Tabs::Home],
-       action: ->(tui) { tui.prev_page }, refresh: true},
+       action: ->(tui) { tui.current_tab.prev_page }, refresh: true},
       {code: "l", display: "h/l", description: "Prev/Next Page", tabs: TABS - [Tabs::Home],
-       action: ->(tui) { tui.next_page }, refresh: true},
+       action: ->(tui) { tui.current_tab.next_page }, refresh: true},
       {code: "k", display: "j/k", description: "Prev/Next Row", tabs: TABS - [Tabs::Home],
-       action: ->(tui) { tui.navigate_row(:up) }},
+       action: ->(tui) { tui.current_tab.navigate_row(:up) }},
       {code: "j", display: "j/k", description: "Prev/Next Row", tabs: TABS - [Tabs::Home],
-       action: ->(tui) { tui.navigate_row(:down) }},
+       action: ->(tui) { tui.current_tab.navigate_row(:down) }},
       {code: "x", display: "x", description: "Select", tabs: TABS - [Tabs::Home],
-       action: ->(tui) { tui.toggle_select }},
+       action: ->(tui) { tui.current_tab.toggle_select }},
       {code: "A", modifiers: ["shift"], display: "A", description: "Select All", tabs: TABS - [Tabs::Home],
-       action: ->(tui) { tui.toggle_select(:all) }},
+       action: ->(tui) { tui.current_tab.toggle_select(:all) }},
       {code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: [Tabs::Scheduled, Tabs::Retries, Tabs::Dead],
-       action: ->(tui) { tui.alter_rows!(:delete) }, refresh: true},
+       action: ->(tui) { tui.current_tab.alter_rows!(:delete) }, refresh: true},
       {code: "R", modifiers: ["shift"], display: "R", description: "Retry", tabs: [Tabs::Retries],
-       action: ->(tui) { tui.alter_rows!(:retry) }, refresh: true},
+       action: ->(tui) { tui.current_tab.alter_rows!(:retry) }, refresh: true},
       {code: "E", modifiers: ["shift"], display: "E", description: "Enqueue", tabs: [Tabs::Scheduled, Tabs::Dead],
-       action: ->(tui) { tui.alter_rows!(:add_to_queue) }, refresh: true},
+       action: ->(tui) { tui.current_tab.alter_rows!(:add_to_queue) }, refresh: true},
       {code: "K", modifiers: ["shift"], display: "K", description: "Kill", tabs: [Tabs::Scheduled, Tabs::Retries],
-       action: ->(tui) { tui.alter_rows!(:kill) }, refresh: true},
+       action: ->(tui) { tui.current_tab.alter_rows!(:kill) }, refresh: true},
       {code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: [Tabs::Queues],
-       action: ->(tui) { tui.delete_queue! }, refresh: true},
+       action: ->(tui) { tui.current_tab.delete_queue! }, refresh: true},
       {code: "p", description: "Pause/Unpause Queue", tabs: [Tabs::Queues],
-       action: ->(tui) { tui.toggle_pause_queue! }},
+       action: ->(tui) { tui.current_tab.toggle_pause_queue! }},
       {code: "T", modifiers: ["shift"], description: "Terminate", tabs: [Tabs::Busy],
-       action: ->(tui) { tui.terminate! }},
+       action: ->(tui) { tui.current_tab.terminate! }},
       {code: "Q", modifiers: ["shift"], description: "Quiet", tabs: [Tabs::Busy],
-       action: ->(tui) { tui.quiet! }},
+       action: ->(tui) { tui.current_tab.quiet! }},
       {code: "/", display: "/", description: "Filter", tabs: [Tabs::Scheduled, Tabs::Retries, Tabs::Dead],
-       action: ->(tui) { tui.start_filtering }}
+       action: ->(tui) { tui.current_tab.start_filtering }}
     ].freeze
+
+    attr_reader :current_tab
 
     def initialize
       @current_tab = Tabs::Home
-      @selected_row_index = 0
       @base_style = nil
-      @data = {}
       @last_refresh = Time.now
       @showing = :main
     end
@@ -222,9 +220,9 @@ module Sidekiq
     end
 
     def render_content_area(frame, content_area)
-      return render_error(frame, content_area, @current_tab.error(@data)) if @current_tab.error(@data)
+      return render_error(frame, content_area, @current_tab.error) if @current_tab.error
 
-      @current_tab.render(@data, @tui, frame, content_area)
+      @current_tab.render(@tui, frame, content_area)
     end
 
     def render_controls(frame, area)
@@ -268,20 +266,20 @@ module Sidekiq
 
     def handle_input
       case @tui.poll_event
-      in {type: :key, code: "backspace"} if @data[:filtering]
-        @data[:filter] = @data[:filter].empty? ? "" : @data[:filter][0..-2]
-      in {type: :key, code: "enter"} if @data[:filtering]
-        @data[:filtering] = nil
-        @data[:selected] = []
+      in {type: :key, code: "backspace"} if @current_tab.respond_to?(:filtering) && @current_tab.filtering?
+        @current_tab.filter = @current_tab.filter.empty? ? "" : @current_tab.filter[0..-2]
+      in {type: :key, code: "enter"} if @current_tab.respond_to?(:filtering) && @current_tab.filtering?
+        @current_tab.stop_filtering
+        @current_tab.reset_selected
       in {type: :key, code: "esc"} if @showing == :help
         @showing = :main
-      in {type: :key, code: "esc"} if @data[:filtering]
-        @data[:filtering] = nil
-        @data[:filter] = nil
-        @data[:selected] = []
-      in {type: :key, code: code} if @data[:filtering] && code.length == 1
-        @data[:filter] += code
-        @data[:selected] = []
+      in {type: :key, code: "esc"} if @current_tab.respond_to?(:filtering) && @current_tab.filtering?
+        @current_tab.stop_filtering
+        @current_tab.filter = nil
+        @current_tab.reset_selected
+      in {type: :key, code: code} if @current_tab.respond_to?(:filtering) && @current_tab.filtering? && code.length == 1
+        @current_tab.filter += code
+        @current_tab.reset_selected
       in {type: :key, code:, modifiers:}
         control = CONTROLS.find { |ctrl|
           ctrl[:code] == code &&
@@ -308,134 +306,7 @@ module Sidekiq
     def navigate_tab(direction)
       index_change = (direction == :right) ? 1 : -1
       @current_tab = TABS[(TABS.index(@current_tab) + index_change) % TABS.size]
-      @selected_row_index = 0
-      @data = {
-        selected: [],
-        filter: nil
-      }
-    end
-
-    # Navigate the row selection up or down in the current tab's table.
-    # @param direction [Symbol] :up or :down
-    def navigate_row(direction)
-      ids = @data.dig(:table, :row_ids)
-      return if !ids || ids.empty?
-
-      index_change = (direction == :down) ? 1 : -1
-      @selected_row_index = (@selected_row_index + index_change) % ids.count
-    end
-
-    def start_filtering
-      @data[:filtering] = true
-      @data[:filter] = ""
-    end
-
-    def stop_filtering
-      @data[:filtering] = false
-    end
-
-    def quiet!
-      each_selection do |id|
-        Sidekiq::Process.new("identity" => id).quiet!
-      end
-    end
-
-    def terminate!
-      each_selection do |id|
-        Sidekiq::Process.new("identity" => id).stop!
-      end
-    end
-
-    def each_selection(unselect: true, &)
-      sel = @data[:selected]
-      finished = []
-      if !sel.empty?
-        sel.each do |id|
-          yield id
-          # When processing multiple items in bulk, we want to unselect
-          # each row if its operation succeeds so our UI will not
-          # re-process rows 1-3 if row 4 fails.
-          finished << id
-        end
-      else
-        ids = @data.dig(:table, :row_ids)
-        return if !ids || ids.empty?
-        yield ids[@selected_row_index]
-      end
-    ensure
-      @data[:selected] = sel - finished if unselect
-    end
-
-    def delete_queue!
-      each_selection do |qname|
-        Sidekiq::Queue.new(qname).clear
-      end
-    end
-
-    def alter_rows!(action = :add_to_queue)
-      log(@current_tab.to_s, @data[:selected])
-      set = case @current_tab
-      when Tabs::Scheduled
-        Sidekiq::ScheduledSet.new
-      when Tabs::Retries
-        Sidekiq::RetrySet.new
-      when Tabs::Dead
-        Sidekiq::DeadSet.new
-      end
-      return unless set
-      each_selection do |id|
-        score, jid = id.split("|")
-        item = set.fetch(score, jid)&.first
-        item&.send(action)
-      end
-    end
-
-    def prev_page
-      opts = @data.dig(:table, :pager)
-      return unless opts
-      return if opts.page < 2
-
-      @data[:table][:pager] = Sidekiq::TUI::PageOptions.new(opts.page - 1, opts.size)
-    end
-
-    def next_page
-      np = @data.dig(:table, :next_page)
-      return unless np
-      opts = @data.dig(:table, :pager)
-      return unless opts
-
-      @data[:table][:pager] = Sidekiq::TUI::PageOptions.new(np, opts.size)
-    end
-
-    def toggle_select(which = :current)
-      sel = @data[:selected]
-      log(which, sel)
-      if which == :current
-        x = @data[:table][:row_ids][@selected_row_index]
-        if sel.index(x)
-          # already checked, uncheck it
-          sel.delete(x)
-        else
-          sel << x
-        end
-      elsif sel.empty?
-        @data[:selected] = @data[:table][:row_ids]
-      else
-        sel.clear
-      end
-    end
-
-    def toggle_pause_queue!
-      return unless Sidekiq.pro?
-
-      each_selection do |qname|
-        queue = Sidekiq::Queue.new(qname)
-        if queue.paused?
-          queue.unpause!
-        else
-          queue.pause!
-        end
-      end
+      @current_tab.reset_data
     end
 
     def redis_url
@@ -451,135 +322,10 @@ module Sidekiq
     end
 
     def refresh_data
-      stats = Sidekiq::Stats.new
-      @data[:stats] = {
-        processed: stats.processed,
-        failed: stats.failed,
-        busy: stats.workers_size,
-        enqueued: stats.enqueued,
-        retries: stats.retry_size,
-        scheduled: stats.scheduled_size,
-        dead: stats.dead_size
-      }
-
-      case @current_tab
-      when Tabs::Home
-        @data[:chart] ||= {
-          previous_stats: {
-            processed: stats.processed,
-            failed: stats.failed
-          },
-          deltas: {
-            processed: Array.new(50, 0),
-            failed: Array.new(50, 0)
-          }
-        }
-
-        processed_delta = stats.processed - @data[:chart][:previous_stats][:processed]
-        failed_delta = stats.failed - @data[:chart][:previous_stats][:failed]
-
-        @data[:chart][:deltas][:processed].shift
-        @data[:chart][:deltas][:processed].push(processed_delta)
-        @data[:chart][:deltas][:failed].shift
-        @data[:chart][:deltas][:failed].push(failed_delta)
-
-        @data[:chart][:previous_stats] = {
-          processed: stats.processed,
-          failed: stats.failed
-        }
-
-        redis_info = Sidekiq.default_configuration.redis_info
-
-        @data[:redis_info] = {
-          version: redis_info["redis_version"] || "N/A",
-          uptime_days: redis_info["uptime_in_days"] || "N/A",
-          connected_clients: redis_info["connected_clients"] || "N/A",
-          used_memory: redis_info["used_memory_human"] || "N/A",
-          peak_memory: redis_info["used_memory_peak_human"] || "N/A"
-        }
-      when Tabs::Busy
-        busy = []
-        table_row_ids = []
-
-        Sidekiq::ProcessSet.new.each do |p|
-          name = "#{p["hostname"]}:#{p["pid"]}"
-          name += " ⭐️" if p.leader?
-          name += " 🛑" if p.stopping?
-          busy << [
-            selected?(p) ? "✅" : "",
-            name,
-            Time.at(p["started_at"]).utc,
-            format_memory(p["rss"].to_i),
-            number_with_delimiter(p["concurrency"]),
-            number_with_delimiter(p["busy"])
-          ]
-          table_row_ids << p.identity
-        end
-
-        @data[:busy] = busy
-        @data[:table] = {row_ids: table_row_ids}
-      when Tabs::Queues
-        queue_summaries = Sidekiq::Stats.new.queue_summaries.sort_by(&:name)
-
-        selected = Array(@data[:selected])
-        queues = queue_summaries.map { |queue_summary|
-          row_cells = [
-            selected.index(queue_summary.name) ? "✅" : "",
-            queue_summary.name,
-            queue_summary.size.to_s,
-            number_with_delimiter(queue_summary.latency, {precision: 2})
-          ]
-          row_cells << (queue_summary.paused? ? "✅" : "") if Sidekiq.pro?
-          row_cells
-        }
-
-        table_row_ids = queue_summaries.map(&:name)
-
-        @data[:queues] = queues
-        @data[:table] = {row_ids: table_row_ids}
-      when Tabs::Scheduled
-        data_for_set(Sidekiq::ScheduledSet.new)
-      when Tabs::Retries
-        data_for_set(Sidekiq::RetrySet.new)
-      when Tabs::Dead
-        data_for_set(Sidekiq::DeadSet.new)
-      when Tabs::Metrics
-        # only need to refresh every 60 seconds
-        if !@data[:metrics_refresh] || @data[:metrics_refresh] < Time.now
-          q = Sidekiq::Metrics::Query.new
-          query_result = q.top_jobs(minutes: 60)
-          @data[:metrics] = query_result
-          @data[:metrics_refresh] = Time.now + 60
-        end
-      end
-
+      @current_tab.refresh_data
       @last_refresh = Time.now
     rescue => e
-      @data = {error: e}
-    end
-
-    def data_for_set(set)
-      f = @data[:filter]
-      pager, rows, current, total = if f && f.size > 2
-        rows = set.scan(f).to_a
-        sz = rows.size
-        [Sidekiq::TUI::PageOptions.new(1, sz), rows, 1, sz]
-      else
-        pager = @data.dig(:table, :pager) || Sidekiq::TUI::PageOptions.new(1, 25)
-        current, total, items = page(set.name, pager.page, pager.size)
-        rows = items.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
-        [pager, rows, current, total]
-      end
-
-      @data.merge!(
-        table: {pager:, rows:, current_page: current, total:,
-                next_page: (current * pager.size < total) ? pager.page + 1 : nil,
-                row_ids: rows.map { |job| [job.score, job["jid"]].join("|") }}
-      )
-    end
-
-    def selected?(entry)
-      @data[:selected].index(entry.id)
+      @current_tab.error = e
     end
 
     def render_error(frame, area, err)
@@ -598,24 +344,6 @@ module Sidekiq
         ),
         area
       )
-    end
-
-    # TODO Implement I18n delimiter
-    def number_with_delimiter(number, options = {})
-      precision = options[:precision] || 0
-      number.round(precision)
-    end
-
-    def format_memory(rss_kb)
-      return "0" if rss_kb.nil? || rss_kb == 0
-
-      if rss_kb < 100_000
-        "#{number_with_delimiter(rss_kb)} KB"
-      elsif rss_kb < 10_000_000
-        "#{number_with_delimiter((rss_kb / 1024.0).to_i)} MB"
-      else
-        "#{number_with_delimiter(rss_kb / (1024.0 * 1024.0), precision: 1)} GB"
-      end
     end
   end
 end
