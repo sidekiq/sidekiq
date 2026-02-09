@@ -61,10 +61,13 @@ begin
 
         # @api private
         def enqueue(job)
-          job.provider_job_id = Sidekiq::ActiveJob::Wrapper.set(
+          # NB: Active Job only serializes keys it recognizes. We
+          # cannot set arbitrary key/values here.
+          wrapper = Sidekiq::ActiveJob::Wrapper.set(
             wrapped: job.class,
             queue: job.queue_name
-          ).perform_async(job.serialize)
+          )
+          job.provider_job_id = wrapper.perform_async(job.serialize)
         end
 
         # @api private
