@@ -138,15 +138,20 @@ module Sidekiq
     post "/queues/:name" do
       queue = Sidekiq::Queue.new(route_params[:name])
 
-      if Sidekiq.pro? && params["pause"]
-        queue.pause!
-      elsif Sidekiq.pro? && params["unpause"]
-        queue.unpause!
-      else
-        queue.clear
+      cookies = request.cookies || {}
+      if params['pause']
+        queue.pause!(cookies: cookies)
+      elsif params['unpause']
+        queue.unpause!(cookies: cookies)
+      elsif params['set_non_work_hour']
+        queue.set_non_work_hour_only!(cookies: cookies)
+      elsif params['unset_non_work_hour']
+        queue.unset_non_work_hour_only!(cookies: cookies)
+      elsif params['delete']
+        queue.clear(cookies: cookies)
       end
 
-      redirect "#{root_path}queues"
+      redirect "#{root_path}queues/#{route_params[:name]}"
     end
 
     post "/queues/:name/delete" do

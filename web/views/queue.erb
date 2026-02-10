@@ -1,11 +1,43 @@
+<style>
+  .btn-warning {
+    color: #fff !important;
+    background-color: #cc8015 !important;
+    border-color: #eea236 !important;
+    background-image: none !important;
+  }
+
+  .label-warning {
+    background-color: #cc8015 !important;
+  }
+</style>
 <div class="header-container">
   <h1><%= t('CurrentMessagesInQueue', :queue => h(@name)) %>
     <% if @queue.paused? %>
       <span class="label label-danger"><%= t('Paused') %></span>
     <% end %>
     <span class="badge badge-secondary"><%= number_with_delimiter(@total_size) %></span>
+    <form action="<%= root_path %>queues/<%= CGI.escape(@queue.name) %>" method="post" style="display:inline">
+      <%= csrf_tag %>
+      <% if @queue.respond_to?(:is_non_work_hour_only?) && @queue.is_non_work_hour_only? %>
+        <input class="btn btn-danger btn-xs" type="submit" name="unset_non_work_hour" value="<%= t('StartExecution') %>" data-confirm="<%= t('AreYouSureUnpauseNonWorkHourQueue', :queue => h(@queue.name)) %>"/>
+      <% elsif @queue.respond_to?(:is_non_work_hour_only?) %>
+        <input class="btn btn-danger btn-xs" type="submit" name="set_non_work_hour" value="<%= t('PauseTillNonWorkHours') %>" data-confirm="<%= t('AreYouSureNonWorkHourQueue', :queue => h(@queue.name)) %>"/>
+      <% end %>
+      <% unless @queue.respond_to?(:is_non_work_hour_only?) && @queue.is_non_work_hour_only? %>
+        <% if @queue.paused? %>
+          <input class="btn btn-warning btn-xs" type="submit" name="unpause" value="<%= t('Unpause') %>"/>
+        <% else %>
+          <input class="btn btn-warning btn-xs" type="submit" name="pause" value="<%= t('Pause') %>"/>
+        <% end %>
+      <% end %>
+      <input class="btn btn-danger btn-xs" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSureDeleteQueue', :queue => h(@queue.name)) %>"/>
+    </form>
   </h1>
-  <%= erb :_paging, locals: { url: "#{root_path}queues/#{CGI.escape(@name)}" } %>
+  <% if defined?(Sidekiq::Web::DynamicUiContent) %>
+    <%= Sidekiq::Web::DynamicUiContent.queue_page_header_right(@queue) %>
+  <% else %>
+    <%= erb :_paging, locals: { url: "#{root_path}queues/#{CGI.escape(@name)}" } %>
+  <% end %>
 </div>
 
 <div class="table_container">

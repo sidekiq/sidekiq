@@ -10,7 +10,10 @@
       <th><%= t('Latency') %></th>
       <th><%= t('Actions') %></th>
     </thead>
-    <% @queues.each do |queue| %>
+    <% @count = (params['per_page'] || 20).to_i %>
+    <% @current_page = (params['page'] || 1).to_i %>
+    <% @total_size = @queues.size %>
+    <% @queues.sort_by(&:name).each_slice(@count).to_a[@current_page - 1]&.each do |queue| %>
       <tr>
         <td>
           <a href="<%= root_path %>queues/<%= CGI.escape(queue.name) %>"><%= h queue.name %></a>
@@ -41,4 +44,5 @@
       </tr>
     <% end %>
   </table>
+  <%= erb :_paging, locals: { url: "#{root_path}queues" } %>
 </div>
