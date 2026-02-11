@@ -27,8 +27,8 @@ module Sidekiq
         @data[:selected].index(entry.id)
       end
 
-      def self.reset_selected
-        @data[:selected] = []
+      def self.filtering?
+        false
       end
 
       def self.each_selection(unselect: true, &)

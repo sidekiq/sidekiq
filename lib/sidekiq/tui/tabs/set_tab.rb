@@ -8,21 +8,37 @@ module Sidekiq
           @data[:filtering]
         end
 
-        def filter
-          @data[:filter]
-        end
-
-        def filter=(new_filter)
-          @data[:filter] = new_filter
-        end
-
         def start_filtering
           @data[:filtering] = true
           @data[:filter] = ""
         end
 
         def stop_filtering
+          return unless @data[:filtering]
+
           @data[:filtering] = false
+          @data[:selected] = []
+        end
+
+        def stop_and_clear_filtering
+          return unless @data[:filtering]
+
+          @data[:filtering] = false
+          @data[:filter] = nil
+          @data[:selected] = []
+        end
+
+        def remove_last_char_from_filter
+          return unless @data[:filtering]
+
+          @data[:filter] = @data[:filter].empty? ? "" : @data[:filter][0..-2]
+        end
+
+        def append_to_filter(string)
+          return unless @data[:filtering]
+
+          @data[:filter] += string
+          @data[:selected] = []
         end
 
         def alter_rows!(action)
