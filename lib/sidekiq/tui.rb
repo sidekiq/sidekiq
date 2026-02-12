@@ -31,8 +31,6 @@ module Sidekiq
 
     REFRESH_INTERVAL_SECONDS = 2
 
-    TABS = Tabs.all
-
     # CONTROLS defines data for input handling and for displaying controls.
     # :code is the key code for input handling.
     # :display and :description are shown in the controls area, with different
@@ -44,61 +42,57 @@ module Sidekiq
     # Conventions: dangerous/irreversible actions should use UPPERCASE codes.
     # The Shift button means "I'm sure".
     CONTROLS = [
-      {code: "?", display: "?", description: "Help", tabs: TABS,
-       action: ->(sidekiq_tui) { sidekiq_tui.show_help }},
-      {code: "left", display: "←/→", description: "Select Tab", tabs: TABS,
-       action: ->(sidekiq_tui) { sidekiq_tui.navigate_tab(:left) }, refresh: true},
-      {code: "right", display: "←/→", description: "Select Tab", tabs: TABS,
-       action: ->(sidekiq_tui) { sidekiq_tui.navigate_tab(:right) }, refresh: true},
-      {code: "q", display: "q", description: "Quit", tabs: TABS,
-       action: ->(sidekiq_tui) { :quit }},
-      {code: "c", modifiers: ["ctrl"], display: "q", description: "Quit", tabs: TABS,
-       action: ->(sidekiq_tui) { :quit }},
-      {code: "h", display: "h/l", description: "Prev/Next Page", tabs: TABS - [Tabs::Home],
-       action: ->(sidekiq_tui) { sidekiq_tui.current_tab.prev_page }, refresh: true},
-      {code: "l", display: "h/l", description: "Prev/Next Page", tabs: TABS - [Tabs::Home],
-       action: ->(sidekiq_tui) { sidekiq_tui.current_tab.next_page }, refresh: true},
-      {code: "k", display: "j/k", description: "Prev/Next Row", tabs: TABS - [Tabs::Home],
-       action: ->(sidekiq_tui) { sidekiq_tui.current_tab.navigate_row(:up) }},
-      {code: "j", display: "j/k", description: "Prev/Next Row", tabs: TABS - [Tabs::Home],
-       action: ->(sidekiq_tui) { sidekiq_tui.current_tab.navigate_row(:down) }},
-      {code: "x", display: "x", description: "Select", tabs: TABS - [Tabs::Home],
-       action: ->(sidekiq_tui) { sidekiq_tui.current_tab.toggle_select }},
-      {code: "A", modifiers: ["shift"], display: "A", description: "Select All", tabs: TABS - [Tabs::Home],
-       action: ->(sidekiq_tui) { sidekiq_tui.current_tab.toggle_select(:all) }},
+      {code: "?", display: "?", description: "Help", tabs: Tabs.all,
+       action: -> { Tabs.show_help }},
+      {code: "left", display: "←/→", description: "Select Tab", tabs: Tabs.all,
+       action: -> { Tabs.navigate(:left) }, refresh: true},
+      {code: "right", display: "←/→", description: "Select Tab", tabs: Tabs.all,
+       action: -> { Tabs.navigate(:right) }, refresh: true},
+      {code: "q", display: "q", description: "Quit", tabs: Tabs.all,
+       action: -> { :quit }},
+      {code: "c", modifiers: ["ctrl"], display: "q", description: "Quit", tabs: Tabs.all,
+       action: -> { :quit }},
+      {code: "h", display: "h/l", description: "Prev/Next Page", tabs: Tabs.all - [Tabs::Home],
+       action: -> { Tabs.current.prev_page }, refresh: true},
+      {code: "l", display: "h/l", description: "Prev/Next Page", tabs: Tabs.all - [Tabs::Home],
+       action: -> { Tabs.current.next_page }, refresh: true},
+      {code: "k", display: "j/k", description: "Prev/Next Row", tabs: Tabs.all - [Tabs::Home],
+       action: -> { Tabs.current.navigate_row(:up) }},
+      {code: "j", display: "j/k", description: "Prev/Next Row", tabs: Tabs.all - [Tabs::Home],
+       action: -> { Tabs.current.navigate_row(:down) }},
+      {code: "x", display: "x", description: "Select", tabs: Tabs.all - [Tabs::Home],
+       action: -> { Tabs.current.toggle_select }},
+      {code: "A", modifiers: ["shift"], display: "A", description: "Select All", tabs: Tabs.all - [Tabs::Home],
+       action: -> { Tabs.current.toggle_select(:all) }},
       {code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: [Tabs::Scheduled, Tabs::Retries, Tabs::Dead],
-       action: ->(sidekiq_tui) { sidekiq_tui.current_tab.alter_rows!(:delete) }, refresh: true},
+       action: -> { Tabs.current.alter_rows!(:delete) }, refresh: true},
       {code: "R", modifiers: ["shift"], display: "R", description: "Retry", tabs: [Tabs::Retries],
-       action: ->(sidekiq_tui) { sidekiq_tui.current_tab.alter_rows!(:retry) }, refresh: true},
+       action: -> { Tabs.current.alter_rows!(:retry) }, refresh: true},
       {code: "E", modifiers: ["shift"], display: "E", description: "Enqueue", tabs: [Tabs::Scheduled, Tabs::Dead],
-       action: ->(sidekiq_tui) { sidekiq_tui.current_tab.alter_rows!(:add_to_queue) }, refresh: true},
+       action: -> { Tabs.current.alter_rows!(:add_to_queue) }, refresh: true},
       {code: "K", modifiers: ["shift"], display: "K", description: "Kill", tabs: [Tabs::Scheduled, Tabs::Retries],
-       action: ->(sidekiq_tui) { sidekiq_tui.current_tab.alter_rows!(:kill) }, refresh: true},
+       action: -> { Tabs.current.alter_rows!(:kill) }, refresh: true},
       {code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: [Tabs::Queues],
-       action: ->(sidekiq_tui) { sidekiq_tui.current_tab.delete_queue! }, refresh: true},
+       action: -> { Tabs.current.delete_queue! }, refresh: true},
       {code: "p", description: "Pause/Unpause Queue", tabs: [Tabs::Queues],
-       action: ->(sidekiq_tui) { sidekiq_tui.current_tab.toggle_pause_queue! }},
+       action: -> { Tabs.current.toggle_pause_queue! }},
       {code: "T", modifiers: ["shift"], description: "Terminate", tabs: [Tabs::Busy],
-       action: ->(sidekiq_tui) { sidekiq_tui.current_tab.terminate! }},
+       action: -> { Tabs.current.terminate! }},
       {code: "Q", modifiers: ["shift"], description: "Quiet", tabs: [Tabs::Busy],
-       action: ->(sidekiq_tui) { sidekiq_tui.current_tab.quiet! }},
+       action: -> { Tabs.current.quiet! }},
       {code: "/", display: "/", description: "Filter", tabs: [Tabs::Scheduled, Tabs::Retries, Tabs::Dead],
-       action: ->(sidekiq_tui) { sidekiq_tui.current_tab.start_filtering }},
+       action: -> { Tabs.current.start_filtering }},
       {code: "backspace", tabs: [Tabs::Scheduled, Tabs::Retries, Tabs::Dead],
-        action: ->(sidekiq_tui) { sidekiq_tui.current_tab.remove_last_char_from_filter }},
+        action: -> { Tabs.current.remove_last_char_from_filter }},
       {code: "enter", tabs: [Tabs::Scheduled, Tabs::Retries, Tabs::Dead],
-        action: ->(sidekiq_tui) { sidekiq_tui.current_tab.stop_filtering }},
+        action: -> { Tabs.current.stop_filtering }},
       {code: "esc", tabs: [Tabs::Scheduled, Tabs::Retries, Tabs::Dead],
-        action: ->(sidekiq_tui) { sidekiq_tui.current_tab.stop_and_clear_filtering }}
+        action: -> { Tabs.current.stop_and_clear_filtering }}
     ].freeze
 
-    attr_reader :current_tab
-
     def initialize
-      @current_tab = Tabs::Home
       @base_style = nil
       @last_refresh = Time.now
-      @showing = :main
     end
 
     def run
@@ -118,7 +112,7 @@ module Sidekiq
     end
 
     def render
-      if @showing == :main
+      if Tabs.showing == :main
         @tui.draw do |frame|
           main_area, controls_area = @tui.layout_split(
             frame.area,
@@ -139,22 +133,22 @@ module Sidekiq
             ]
           )
 
-        tabs = @tui.tabs(
-          titles: TABS.map(&:to_s),
-          selected_index: TABS.index(@current_tab),
-          block: @tui.block(title: Sidekiq::NAME, borders: [:all], title_style: @tui.style(fg: :red, modifiers: [:bold])),
-          divider: " | ",
-          highlight_style: @highlight_style,
-          style: @base_style
-        )
-        frame.render_widget(tabs, tabs_area)
+          tabs = @tui.tabs(
+            titles: Tabs.all.map(&:to_s),
+            selected_index: Tabs.all.index(Tabs.current),
+            block: @tui.block(title: Sidekiq::NAME, borders: [:all], title_style: @tui.style(fg: :red, modifiers: [:bold])),
+            divider: " | ",
+            highlight_style: @highlight_style,
+            style: @base_style
+          )
+          frame.render_widget(tabs, tabs_area)
 
           render_content_area(frame, content_area)
           render_controls(frame, controls_area)
         end
       end
 
-      if @showing == :help
+      if Tabs.showing == :help
         @tui.draw do |frame|
           main_area, controls_area = @tui.layout_split(
             frame.area,
@@ -200,7 +194,7 @@ module Sidekiq
                   @tui.text_line(spans: [
                     @tui.text_span(content: "q", style: @hotkey_style),
                     @tui.text_span(content: ": Quit")
-                  ])
+                  ]),
                 ]
               )
             ]
@@ -226,15 +220,15 @@ module Sidekiq
     end
 
     def render_content_area(frame, content_area)
-      return render_error(frame, content_area, @current_tab.error) if @current_tab.error
+      return render_error(frame, content_area, Tabs.current.error) if Tabs.current.error
 
-      @current_tab.render(@tui, frame, content_area)
+      Tabs.current.render(@tui, frame, content_area)
     end
 
     def render_controls(frame, area)
       keys_and_descriptions = CONTROLS
         .select { |ctrl|
-          ctrl[:tabs].include?(@current_tab) && ctrl[:description]
+          ctrl[:tabs].include?(Tabs.current) && ctrl[:description]
         }.map { |ctrl|
           [ctrl[:display] || ctrl[:code], ctrl[:description]]
         }.to_h
@@ -272,18 +266,18 @@ module Sidekiq
 
     def handle_input
       case @tui.poll_event
-      in {type: :key, code: "esc"} if @showing == :help
-        @showing = :main
-      in {type: :key, code: code} if @current_tab.filtering? && code.length == 1
-        @current_tab.append_to_filter(code)
+      in {type: :key, code: "esc"} if Tabs.showing == :help
+        Tabs.show_main
+      in {type: :key, code: code} if Tabs.current.filtering? && code.length == 1
+        Tabs.current.append_to_filter(code)
       in {type: :key, code:, modifiers:}
         control = CONTROLS.find { |ctrl|
           ctrl[:code] == code &&
             (ctrl[:modifiers] || []) == (modifiers || []) &&
-            ctrl[:tabs].include?(@current_tab)
+            ctrl[:tabs].include?(Tabs.current)
         }
         return unless control
-        control[:action].call(self).tap {
+        control[:action].call.tap {
           refresh_data if control[:refresh]
         }
       else
@@ -291,18 +285,6 @@ module Sidekiq
       end
     rescue => ex
       log(ex.message, ex.backtrace)
-    end
-
-    def show_help
-      @showing = :help
-    end
-
-    # Navigate tabs to the left or right.
-    # @param direction [Symbol] :left or :right
-    def navigate_tab(direction)
-      index_change = (direction == :right) ? 1 : -1
-      @current_tab = TABS[(TABS.index(@current_tab) + index_change) % TABS.size]
-      @current_tab.reset_data
     end
 
     def redis_url
@@ -318,10 +300,10 @@ module Sidekiq
     end
 
     def refresh_data
-      @current_tab.refresh_data
+      Tabs.current.refresh_data
       @last_refresh = Time.now
     rescue => e
-      @current_tab.error = e
+      Tabs.current.error = e
     end
 
     def render_error(frame, area, err)
