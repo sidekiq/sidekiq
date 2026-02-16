@@ -77,9 +77,6 @@ module Sidekiq
     end
   end
 
-  # Default to fake testing to keep old behavior
-  Sidekiq::Testing.fake!
-
   class EmptyQueueError < RuntimeError; end
 
   module TestingClient

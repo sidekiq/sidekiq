@@ -48,7 +48,6 @@ module Sidekiq
   end
 
   def self.testing!(mode = :fake, &block)
-    raise "Sidekiq.testing not allowed in production" if Sidekiq.default_configuration[:environment] == "production"
     raise "Unknown testing mode: #{mode}" unless %i[fake disabled inline].include?(mode)
 
     require "sidekiq/test_api"
