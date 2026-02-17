@@ -111,107 +111,111 @@ module Sidekiq
     end
 
     def render
-      @tui.draw do |frame|
-        main_area, controls_area = @tui.layout_split(
-          frame.area,
-          direction: :vertical,
-          constraints: [
-            @tui.constraint_fill(1),
-            @tui.constraint_length(4)
-          ]
-        )
+      if @showing == :main
+        @tui.draw do |frame|
+          main_area, controls_area = @tui.layout_split(
+            frame.area,
+            direction: :vertical,
+            constraints: [
+              @tui.constraint_fill(1),
+              @tui.constraint_length(4)
+            ]
+          )
 
-        # Split main area into tabs and content
-        tabs_area, content_area = @tui.layout_split(
-          main_area,
-          direction: :vertical,
-          constraints: [
-            @tui.constraint_length(3),
-            @tui.constraint_fill(1)
-          ]
-        )
+          # Split main area into tabs and content
+          tabs_area, content_area = @tui.layout_split(
+            main_area,
+            direction: :vertical,
+            constraints: [
+              @tui.constraint_length(3),
+              @tui.constraint_fill(1)
+            ]
+          )
 
-        tabs = @tui.tabs(
-          titles: TABS,
-          selected_index: TABS.index(@current_tab),
-          block: @tui.block(title: Sidekiq::NAME, borders: [:all], title_style: @tui.style(fg: :red, modifiers: [:bold])),
-          divider: " | ",
-          highlight_style: @highlight_style,
-          style: @base_style
-        )
-        frame.render_widget(tabs, tabs_area)
+          tabs = @tui.tabs(
+            titles: TABS,
+            selected_index: TABS.index(@current_tab),
+            block: @tui.block(title: Sidekiq::NAME, borders: [:all], title_style: @tui.style(fg: :red, modifiers: [:bold])),
+            divider: " | ",
+            highlight_style: @highlight_style,
+            style: @base_style
+          )
+          frame.render_widget(tabs, tabs_area)
 
-        render_content_area(frame, content_area)
-        render_controls(frame, controls_area)
-      end if @showing == :main
+          render_content_area(frame, content_area)
+          render_controls(frame, controls_area)
+        end
+      end
 
-      @tui.draw do |frame|
-        main_area, controls_area = @tui.layout_split(
-          frame.area,
-          direction: :vertical,
-          constraints: [
-            @tui.constraint_fill(1),
-            @tui.constraint_length(4)
-          ]
-        )
-        content = @tui.block(
-          title: Sidekiq::NAME,
-          borders: [:all],
-          title_style: @tui.style(fg: :red, modifiers: [:bold]),
-          children: [
-            # TODO convert to table
-            @tui.paragraph(
-              text: [
-                @tui.text_line(spans: ["Welcome to the Sidekiq Terminal UI"], alignment: :center),
-                @tui.text_line(spans: [
-                  @tui.text_span(content: "Esc", style: @hotkey_style),
-                  @tui.text_span(content: ": Close")
-                ]),
-                @tui.text_line(spans: [
-                  @tui.text_span(content: "←/→", style: @hotkey_style),
-                  @tui.text_span(content: ": Move between tabs")
-                ]),
-                @tui.text_line(spans: [
-                  @tui.text_span(content: "j/k", style: @hotkey_style),
-                  @tui.text_span(content: ": Use vim keys to move to prev/next row")
-                ]),
-                @tui.text_line(spans: [
-                  @tui.text_span(content: "x", style: @hotkey_style),
-                  @tui.text_span(content: ": Select/deselect current row")
-                ]),
-                @tui.text_line(spans: [
-                  @tui.text_span(content: "A", style: @hotkey_style),
-                  @tui.text_span(content: ": Select/deselect All visible rows")
-                ]),
-                @tui.text_line(spans: [
-                  @tui.text_span(content: "h/l", style: @hotkey_style),
-                  @tui.text_span(content: ": Use vim keys to move to prev/next page")
-                ]),
-                @tui.text_line(spans: [
-                  @tui.text_span(content: "q", style: @hotkey_style),
-                  @tui.text_span(content: ": Quit")
-                ]),
-              ]
-            )
-          ]
-        )
-        frame.render_widget(content, main_area)
-        controls = @tui.block(
-          title: "Controls",
-          borders: [:all],
-          children: [
-            @tui.paragraph(
-              text: [
-                @tui.text_line(spans: [
-                  @tui.text_span(content: "Esc", style: @hotkey_style),
-                  @tui.text_span(content: ": Close  ")
-                ])
-              ]
-            )
-          ]
-        )
-        frame.render_widget(controls, controls_area)
-      end if @showing == :help
+      if @showing == :help
+        @tui.draw do |frame|
+          main_area, controls_area = @tui.layout_split(
+            frame.area,
+            direction: :vertical,
+            constraints: [
+              @tui.constraint_fill(1),
+              @tui.constraint_length(4)
+            ]
+          )
+          content = @tui.block(
+            title: Sidekiq::NAME,
+            borders: [:all],
+            title_style: @tui.style(fg: :red, modifiers: [:bold]),
+            children: [
+              # TODO convert to table
+              @tui.paragraph(
+                text: [
+                  @tui.text_line(spans: ["Welcome to the Sidekiq Terminal UI"], alignment: :center),
+                  @tui.text_line(spans: [
+                    @tui.text_span(content: "Esc", style: @hotkey_style),
+                    @tui.text_span(content: ": Close")
+                  ]),
+                  @tui.text_line(spans: [
+                    @tui.text_span(content: "←/→", style: @hotkey_style),
+                    @tui.text_span(content: ": Move between tabs")
+                  ]),
+                  @tui.text_line(spans: [
+                    @tui.text_span(content: "j/k", style: @hotkey_style),
+                    @tui.text_span(content: ": Use vim keys to move to prev/next row")
+                  ]),
+                  @tui.text_line(spans: [
+                    @tui.text_span(content: "x", style: @hotkey_style),
+                    @tui.text_span(content: ": Select/deselect current row")
+                  ]),
+                  @tui.text_line(spans: [
+                    @tui.text_span(content: "A", style: @hotkey_style),
+                    @tui.text_span(content: ": Select/deselect All visible rows")
+                  ]),
+                  @tui.text_line(spans: [
+                    @tui.text_span(content: "h/l", style: @hotkey_style),
+                    @tui.text_span(content: ": Use vim keys to move to prev/next page")
+                  ]),
+                  @tui.text_line(spans: [
+                    @tui.text_span(content: "q", style: @hotkey_style),
+                    @tui.text_span(content: ": Quit")
+                  ])
+                ]
+              )
+            ]
+          )
+          frame.render_widget(content, main_area)
+          controls = @tui.block(
+            title: "Controls",
+            borders: [:all],
+            children: [
+              @tui.paragraph(
+                text: [
+                  @tui.text_line(spans: [
+                    @tui.text_span(content: "Esc", style: @hotkey_style),
+                    @tui.text_span(content: ": Close  ")
+                  ])
+                ]
+              )
+            ]
+          )
+          frame.render_widget(controls, controls_area)
+        end
+      end
     end
 
     def render_content_area(frame, content_area)
