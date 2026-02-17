@@ -99,8 +99,8 @@ module Sidekiq
         if url_params("identity")
           pro = Sidekiq::ProcessSet[url_params("identity")]
 
-          pro.quiet! if url_params("quiet")
-          pro.stop! if url_params("stop")
+          pro&.quiet! if url_params("quiet")
+          pro&.stop! if url_params("stop")
         else
           processes.each do |pro|
             next if pro.embedded?
