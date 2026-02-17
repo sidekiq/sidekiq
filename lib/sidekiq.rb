@@ -47,6 +47,13 @@ module Sidekiq
     puts "Take a deep breath and count to ten..."
   end
 
+  def self.testing!(mode = :fake, &block)
+    raise "Unknown testing mode: #{mode}" unless %i[fake disabled inline].include?(mode)
+
+    require "sidekiq/test_api"
+    Sidekiq::Testing.__set_test_mode(mode, &block)
+  end
+
   def self.server?
     defined?(Sidekiq::CLI)
   end
