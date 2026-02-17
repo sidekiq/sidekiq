@@ -48,7 +48,7 @@ module Sidekiq
   end
 
   def self.testing!(mode = :fake, &block)
-    raise "Unknown testing mode: #{mode}" unless %i[fake disabled inline].include?(mode)
+    raise "Unknown testing mode: #{mode}" unless %i[fake disable inline].include?(mode)
 
     require "sidekiq/test_api"
     Sidekiq::Testing.__set_test_mode(mode, &block)
