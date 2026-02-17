@@ -2,9 +2,17 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+8.1.1
 ----------
 
+- Add new `Sidekiq.testing!(mode)` API [#6931]
+Requiring code should not enable process-wide changes.
+```ruby
+# Old, implicit
+require "sidekiq/testing"
+# New, more explicit
+Sidekiq.testing!(:fake)
+```
 - Fix race condition with Stop button in UI [#6935]
 - Fix javascript error handler [#6893]
 
