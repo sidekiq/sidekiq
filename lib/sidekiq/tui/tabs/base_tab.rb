@@ -1,14 +1,8 @@
 module Sidekiq
   class TUI
     class BaseTab
-      extend Comparable
-
       def initialize
         reset_data
-      end
-
-      def <=>(other)
-        order <=> other.order
       end
 
       def to_s

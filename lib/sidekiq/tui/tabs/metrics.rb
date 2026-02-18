@@ -6,8 +6,6 @@ module Sidekiq
       class Metrics < BaseTab
         COLORS = %i[blue cyan yellow red green white gray]
 
-        def order = 7
-
         def refresh_data
           refresh_data_for_stats
 

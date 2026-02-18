@@ -4,8 +4,6 @@ module Sidekiq
   class TUI
     module Tabs
       class Queues < BaseTab
-        def order = 3
-
         def delete_queue!
           each_selection do |qname|
             Sidekiq::Queue.new(qname).clear

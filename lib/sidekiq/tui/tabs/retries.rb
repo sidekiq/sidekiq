@@ -7,8 +7,6 @@ module Sidekiq
       class Retries < BaseTab
         include SetTab
 
-        def order = 5
-
         def set_class = Sidekiq::RetrySet
 
         def refresh_data

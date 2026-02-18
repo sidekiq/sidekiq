@@ -7,8 +7,6 @@ module Sidekiq
       class Dead < BaseTab
         include SetTab
 
-        def order = 6
-
         def set_class = Sidekiq::DeadSet
 
         def refresh_data

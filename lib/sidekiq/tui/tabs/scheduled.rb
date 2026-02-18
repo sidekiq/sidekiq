@@ -7,8 +7,6 @@ module Sidekiq
       class Scheduled < BaseTab
         include SetTab
 
-        def order = 4
-
         def set_class = Sidekiq::ScheduledSet
 
         def refresh_data

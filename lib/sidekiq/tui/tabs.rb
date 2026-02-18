@@ -2,11 +2,11 @@ module Sidekiq
   class TUI
     module Tabs
       def self.all
-        @all ||= BaseTab.subclasses.map(&:new).sort
+        @all ||= [Home, Busy, Queues, Scheduled, Retries, Dead, Metrics].map(&:new)
       end
 
       def self.current
-        @current ||= all.find { |tab| tab.is_a?(Tabs::Home) }
+        @current ||= all.find { |tab| tab.is_a?(Home) }
       end
 
       # Navigate tabs to the left or right.

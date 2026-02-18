@@ -4,8 +4,6 @@ module Sidekiq
   class TUI
     module Tabs
       class Busy < BaseTab
-        def order = 2
-
         def quiet!
           each_selection do |id|
             Sidekiq::Process.new("identity" => id).quiet!

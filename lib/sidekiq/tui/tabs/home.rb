@@ -4,8 +4,6 @@ module Sidekiq
   class TUI
     module Tabs
       class Home < BaseTab
-        def order = 1
-
         def refresh_data
           refresh_data_for_stats
 
