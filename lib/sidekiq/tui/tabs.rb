@@ -2,19 +2,19 @@ module Sidekiq
   class TUI
     module Tabs
       def self.all
-        @all ||= BaseTab.subclasses.sort_by(&:order)
+        @all ||= BaseTab.subclasses.map(&:new).sort
       end
 
       def self.current
-        @current ||= Tabs::Home
+        @current ||= all.find { |tab| tab.is_a?(Tabs::Home) }
       end
 
       # Navigate tabs to the left or right.
       # @param direction [Symbol] :left or :right
       def self.navigate(direction)
         index_change = (direction == :right) ? 1 : -1
-        @current = @all[(@all.index(@current) + index_change) % @all.size]
-        @current.reset_data
+        @current = all[(all.index(current) + index_change) % all.size]
+        current.reset_data
       end
 
       def self.showing

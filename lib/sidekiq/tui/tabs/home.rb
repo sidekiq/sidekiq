@@ -4,10 +4,9 @@ module Sidekiq
   class TUI
     module Tabs
       class Home < BaseTab
-        def self.order = 1
+        def order = 1
 
-        def self.refresh_data
-          reset_data unless @data
+        def refresh_data
           refresh_data_for_stats
 
           stats = Sidekiq::Stats.new
@@ -46,7 +45,7 @@ module Sidekiq
           }
         end
 
-        def self.render(tui, frame, area)
+        def render(tui, frame, area)
           chunks = tui.layout_split(
             area,
             direction: :vertical,
@@ -62,7 +61,7 @@ module Sidekiq
           render_redis_info_section(tui, frame, chunks[2])
         end
 
-        def self.render_chart_section(tui, frame, area)
+        def render_chart_section(tui, frame, area)
           max_value = [@data[:chart][:deltas][:processed].max, @data[:chart][:deltas][:failed].max, 1].max
           y_max = [max_value, 5].max
 
@@ -115,7 +114,7 @@ module Sidekiq
           frame.render_widget(chart, area)
         end
 
-        def self.render_redis_info_section(tui, frame, area)
+        def render_redis_info_section(tui, frame, area)
           redis_info = @data[:redis_info]
 
           uptime_value = (redis_info[:uptime_days] == "N/A") ? "N/A" : "#{redis_info[:uptime_days]} days"

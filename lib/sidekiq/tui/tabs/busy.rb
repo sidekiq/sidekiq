@@ -4,22 +4,21 @@ module Sidekiq
   class TUI
     module Tabs
       class Busy < BaseTab
-        def self.order = 2
+        def order = 2
 
-        def self.quiet!
+        def quiet!
           each_selection do |id|
             Sidekiq::Process.new("identity" => id).quiet!
           end
         end
 
-        def self.terminate!
+        def terminate!
           each_selection do |id|
             Sidekiq::Process.new("identity" => id).stop!
           end
         end
 
-        def self.refresh_data
-          @reset_data unless @data
+        def refresh_data
           refresh_data_for_stats
 
           busy = []
@@ -44,7 +43,7 @@ module Sidekiq
           @data[:table] = {row_ids: table_row_ids}
         end
 
-        def self.render(tui, frame, area)
+        def render(tui, frame, area)
           chunks = tui.layout_split(
             area,
             direction: :vertical,
@@ -79,7 +78,7 @@ module Sidekiq
           end
         end
 
-        def self.render_status_section(tui, frame, area)
+        def render_status_section(tui, frame, area)
           keys = ["Processes", "Threads", "Busy", "Utilization", "RSS"]
           values = []
           processes = Sidekiq::ProcessSet.new

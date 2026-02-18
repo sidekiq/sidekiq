@@ -5,14 +5,13 @@ module Sidekiq
   class TUI
     module Tabs
       class Retries < BaseTab
-        extend SetTab
+        include SetTab
 
-        def self.order = 5
+        def order = 5
 
-        def self.set_class = Sidekiq::RetrySet
+        def set_class = Sidekiq::RetrySet
 
-        def self.refresh_data
-          @reset_data unless @data
+        def refresh_data
           refresh_data_for_stats
           refresh_data_for_set
         end

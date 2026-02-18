@@ -6,10 +6,9 @@ module Sidekiq
       class Metrics < BaseTab
         COLORS = %i[blue cyan yellow red green white gray]
 
-        def self.order = 7
+        def order = 7
 
-        def self.refresh_data
-          @reset_data unless @data
+        def refresh_data
           refresh_data_for_stats
 
           # only need to refresh every 60 seconds
@@ -21,7 +20,7 @@ module Sidekiq
           end
         end
 
-        def self.render(tui, frame, area)
+        def render(tui, frame, area)
           chunks = tui.layout_split(
             area,
             direction: :vertical,
@@ -40,7 +39,7 @@ module Sidekiq
         #   cd myapp && bundle install
         #   bundle exec rake seed_jobs
         #   bundle exec sidekiq
-        def self.render_metrics_chart(tui, frame, area)
+        def render_metrics_chart(tui, frame, area)
           y_max = 5
           csize = COLORS.size
           q = @data[:metrics]

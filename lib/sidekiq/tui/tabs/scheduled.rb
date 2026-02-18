@@ -5,14 +5,13 @@ module Sidekiq
   class TUI
     module Tabs
       class Scheduled < BaseTab
-        extend SetTab
+        include SetTab
 
-        def self.order = 4
+        def order = 4
 
-        def self.set_class = Sidekiq::ScheduledSet
+        def set_class = Sidekiq::ScheduledSet
 
-        def self.refresh_data
-          @reset_data unless @data
+        def refresh_data
           refresh_data_for_stats
           refresh_data_for_set
         end

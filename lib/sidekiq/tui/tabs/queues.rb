@@ -4,15 +4,15 @@ module Sidekiq
   class TUI
     module Tabs
       class Queues < BaseTab
-        def self.order = 3
+        def order = 3
 
-        def self.delete_queue!
+        def delete_queue!
           each_selection do |qname|
             Sidekiq::Queue.new(qname).clear
           end
         end
 
-        def self.toggle_pause_queue!
+        def toggle_pause_queue!
           return unless Sidekiq.pro?
 
           each_selection do |qname|
@@ -25,8 +25,7 @@ module Sidekiq
           end
         end
 
-        def self.refresh_data
-          @reset_data unless @data
+        def refresh_data
           refresh_data_for_stats
 
           queue_summaries = Sidekiq::Stats.new.queue_summaries.sort_by(&:name)
@@ -49,7 +48,7 @@ module Sidekiq
           @data[:table] = {row_ids: table_row_ids}
         end
 
-        def self.render(tui, frame, area)
+        def render(tui, frame, area)
           header = ["☑️", "Queue", "Size", "Latency"]
           header << "Paused?" if Sidekiq.pro?
 

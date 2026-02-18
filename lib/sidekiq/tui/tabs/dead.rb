@@ -5,14 +5,13 @@ module Sidekiq
   class TUI
     module Tabs
       class Dead < BaseTab
-        extend SetTab
+        include SetTab
 
-        def self.order = 6
+        def order = 6
 
-        def self.set_class = Sidekiq::DeadSet
+        def set_class = Sidekiq::DeadSet
 
-        def self.refresh_data
-          @reset_data unless @data
+        def refresh_data
           refresh_data_for_stats
           refresh_data_for_set
         end

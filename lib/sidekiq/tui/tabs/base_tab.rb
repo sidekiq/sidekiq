@@ -3,35 +3,39 @@ module Sidekiq
     class BaseTab
       extend Comparable
 
-      def self.<=>(other)
-        self.order <=> other.order
+      def initialize
+        reset_data
       end
 
-      def self.to_s
-        name.split("::").last
+      def <=>(other)
+        order <=> other.order
       end
 
-      def self.reset_data
+      def to_s
+        self.class.name.split("::").last
+      end
+
+      def reset_data
         @data = {selected: [], selected_row_index: 0}
       end
 
-      def self.error
+      def error
         @data[:error]
       end
 
-      def self.error=(e)
+      def error=(e)
         @data[:error] = e
       end
 
-      def self.selected?(entry)
+      def selected?(entry)
         @data[:selected].index(entry.id)
       end
 
-      def self.filtering?
+      def filtering?
         false
       end
 
-      def self.each_selection(unselect: true, &)
+      def each_selection(unselect: true, &)
         sel = @data[:selected]
         finished = []
         if !sel.empty?
@@ -53,7 +57,7 @@ module Sidekiq
 
       # Navigate the row selection up or down in the current tab's table.
       # @param direction [Symbol] :up or :down
-      def self.navigate_row(direction)
+      def navigate_row(direction)
         ids = @data.dig(:table, :row_ids)
         return if !ids || ids.empty?
 
@@ -61,7 +65,7 @@ module Sidekiq
         @data[:selected_row_index] = (@data[:selected_row_index] + index_change) % ids.count
       end
 
-      def self.prev_page
+      def prev_page
         opts = @data.dig(:table, :pager)
         return unless opts
         return if opts.page < 2
@@ -69,7 +73,7 @@ module Sidekiq
         @data[:table][:pager] = Sidekiq::TUI::PageOptions.new(opts.page - 1, opts.size)
       end
 
-      def self.next_page
+      def next_page
         np = @data.dig(:table, :next_page)
         return unless np
         opts = @data.dig(:table, :pager)
@@ -78,7 +82,7 @@ module Sidekiq
         @data[:table][:pager] = Sidekiq::TUI::PageOptions.new(np, opts.size)
       end
 
-      def self.toggle_select(which = :current)
+      def toggle_select(which = :current)
         sel = @data[:selected]
         log(which, sel)
         if which == :current
@@ -96,7 +100,7 @@ module Sidekiq
         end
       end
 
-      def self.refresh_data_for_stats
+      def refresh_data_for_stats
         stats = Sidekiq::Stats.new
         @data[:stats] = {
           processed: stats.processed,
@@ -109,7 +113,7 @@ module Sidekiq
         }
       end
 
-      def self.render_table(tui, frame, area)
+      def render_table(tui, frame, area)
         page = @data.dig(:table, :current_page) || 1
         rows = @data.dig(:table, :rows) || []
         total = @data.dig(:table, :total) || 0
@@ -139,7 +143,7 @@ module Sidekiq
         frame.render_widget(table, area)
       end
 
-      def self.render_stats_section(tui, frame, area)
+      def render_stats_section(tui, frame, area)
         stats = @data[:stats]
 
         keys = ["Processed", "Failed", "Busy", "Enqueued", "Retries", "Scheduled", "Dead"]
@@ -167,12 +171,12 @@ module Sidekiq
       end
 
       # TODO Implement I18n delimiter
-      def self.number_with_delimiter(number, options = {})
+      def number_with_delimiter(number, options = {})
         precision = options[:precision] || 0
         number.round(precision)
       end
 
-      def self.format_memory(rss_kb)
+      def format_memory(rss_kb)
         return "0" if rss_kb.nil? || rss_kb == 0
 
         if rss_kb < 100_000
