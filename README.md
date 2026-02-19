@@ -90,7 +90,7 @@ Useful resources:
 * The [Sidekiq tag](https://stackoverflow.com/questions/tagged/sidekiq) on Stack Overflow has lots of useful Q &amp; A.
 
 Every Thursday morning is Sidekiq Office Hour: I video chat and answer questions.
-See the [Sidekiq support page](https://sidekiq.org/support.html) for details.
+See the [Sidekiq support page](https://sidekiq.org/support/) for details.
 
 Contributing
 -----------------

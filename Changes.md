@@ -2,16 +2,25 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+HEAD
+----------
+
+- Mutation during iteration in `SortedSet#each` caused it to miss half of the jobs [#6936]
+
 8.1.1
 ----------
 
-- Add new `Sidekiq.testing!(mode)` API [#6931]
-Requiring code should not enable process-wide changes.
+- **DEPRECATION** `require 'sidekiq/testing'` and
+  `require 'sidekiq/testing/inline'`.
+  Add new `Sidekiq.testing!(mode)` API [#6931]
+  Requiring code should not enable process-wide changes.
 ```ruby
 # Old, implicit
 require "sidekiq/testing"
+require "sidekiq/testing/inline"
 # New, more explicit
 Sidekiq.testing!(:fake)
+Sidekiq.testing!(:inline)
 ```
 - Fix race condition with Stop button in UI [#6935]
 - Fix javascript error handler [#6893]
