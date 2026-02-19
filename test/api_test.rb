@@ -397,6 +397,18 @@ describe "API" do
       refute_nil Sidekiq::ScheduledSet.new.find_job(remain_id)
     end
 
+    it "can enqueue many pages of jobs when paginated" do
+      jids = Sidekiq::Client.push_bulk("class" => ApiJob,
+        "args" => Array.new(200) { [] },
+        "at" => Time.now.to_f)
+
+      assert_equal 200, jids.size
+      ss = Sidekiq::ScheduledSet.new
+      assert_equal 200, ss.size
+      ss.each(&:add_to_queue)
+      assert_equal 0, ss.size
+    end
+
     it "can kill a scheduled job" do
       job_id = ApiJob.perform_in(100, 1, '{"foo":123}')
       job = Sidekiq::ScheduledSet.new.find_job(job_id)

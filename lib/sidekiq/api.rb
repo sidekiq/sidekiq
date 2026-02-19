@@ -657,38 +657,8 @@ module Sidekiq
 
     private
 
-    def remove_job
-      Sidekiq.redis do |conn|
-        results = conn.multi { |transaction|
-          transaction.zrange(parent.name, score, score, "BYSCORE")
-          transaction.zremrangebyscore(parent.name, score, score)
-        }.first
-
-        if results.size == 1
-          yield results.first
-        else
-          # multiple jobs with the same score
-          # find the one with the right JID and push it
-          matched, nonmatched = results.partition { |message|
-            if message.index(jid)
-              msg = Sidekiq.load_json(message)
-              msg["jid"] == jid
-            else
-              false
-            end
-          }
-
-          msg = matched.first
-          yield msg if msg
-
-          # push the rest back onto the sorted set
-          conn.multi do |transaction|
-            nonmatched.each do |message|
-              transaction.zadd(parent.name, score.to_f.to_s, message)
-            end
-          end
-        end
-      end
+    def remove_job(&)
+      parent.remove_job(self, &)
     end
   end
 
@@ -737,6 +707,46 @@ module Sidekiq
       true
     end
     alias_method :💣, :clear
+
+    def remove_job(entry)
+      score = entry.score
+      jid = entry.jid
+      Sidekiq.redis do |conn|
+        results = conn.multi { |transaction|
+          transaction.zrange(name, score, score, "BYSCORE")
+          transaction.zremrangebyscore(name, score, score)
+        }.first
+
+        if results.size == 1
+          yield results.first
+          @_size -= 1
+        else
+          # multiple jobs with the same score
+          # find the one with the right JID and push it
+          matched, nonmatched = results.partition { |message|
+            if message.index(jid)
+              msg = Sidekiq.load_json(message)
+              msg["jid"] == jid
+            else
+              false
+            end
+          }
+
+          msg = matched.first
+          if msg
+            yield msg
+            @_size -= 1
+          end
+
+          # push the rest back onto the sorted set
+          conn.multi do |transaction|
+            nonmatched.each do |message|
+              transaction.zadd(name, score.to_f.to_s, message)
+            end
+          end
+        end
+      end
+    end
 
     # :nodoc:
     # @api private
