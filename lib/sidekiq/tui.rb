@@ -1,20 +1,14 @@
-require "bundler/inline"
-
-gemfile do
-  source "https://gem.coop"
-  gem "ratatui_ruby", "1.3.0"
-  gem "sidekiq"
-end
+# https://sr.ht/~kerrick/ratatui_ruby/
+# https://git.sr.ht/~kerrick/ratatui_ruby/tree/stable/item/examples/
+gem "ratatui_ruby", ">=1.3.0"
+require "ratatui_ruby"
 
 RatatuiRuby.debug_mode!
 
-# https://sr.ht/~kerrick/ratatui_ruby/
-# https://git.sr.ht/~kerrick/ratatui_ruby/tree/stable/item/examples/
-require "ratatui_ruby"
 require "sidekiq/api"
 require "sidekiq/paginator"
 
-Dir[File.dirname(__FILE__) + "/tui/**/*.rb"].each { |file| require file }
+require_relative "tui/tabs"
 
 # Suppress Sidekiq logger output to prevent interference with TUI rendering
 require "logger"

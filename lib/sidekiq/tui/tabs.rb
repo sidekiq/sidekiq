@@ -1,12 +1,22 @@
+require_relative "tabs/home"
+require_relative "tabs/busy"
+require_relative "tabs/queues"
+require_relative "tabs/scheduled"
+require_relative "tabs/retries"
+require_relative "tabs/dead"
+require_relative "tabs/metrics"
+
 module Sidekiq
   class TUI
     module Tabs
+      Set = Set.new([Home, Busy, Queues, Scheduled, Retries, Dead, Metrics])
+
       def self.all
-        @all ||= [Home, Busy, Queues, Scheduled, Retries, Dead, Metrics].map(&:new)
+        @all ||= Set.map(&:new)
       end
 
       def self.current
-        @current ||= all.find { |tab| tab.is_a?(Home) }
+        @current ||= all.first
       end
 
       # Navigate tabs to the left or right.
