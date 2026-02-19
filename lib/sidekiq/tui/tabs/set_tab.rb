@@ -4,10 +4,6 @@ module Sidekiq
       module SetTab
         include Sidekiq::Paginator
 
-        def name
-          @name ||= self.class.name.split("::").last
-        end
-
         def filtering?
           @data[:filtering]
         end
@@ -89,7 +85,7 @@ module Sidekiq
           render_stats_section(tui, frame, chunks[0])
           render_table(tui, frame, chunks[1]) do
             {
-              title: name,
+              title: self,
               header: ["☑️", "When", "Queue", "Job", "Arguments"],
               widths: [
                 tui.constraint_length(5),

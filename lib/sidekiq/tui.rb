@@ -77,11 +77,11 @@ module Sidekiq
       {code: "/", display: "/", description: "Filter", tabs: [Tabs::Scheduled, Tabs::Retries, Tabs::Dead],
        action: -> { Tabs.current.start_filtering }},
       {code: "backspace", tabs: [Tabs::Scheduled, Tabs::Retries, Tabs::Dead],
-        action: -> { Tabs.current.remove_last_char_from_filter }},
+       action: -> { Tabs.current.remove_last_char_from_filter }},
       {code: "enter", tabs: [Tabs::Scheduled, Tabs::Retries, Tabs::Dead],
-        action: -> { Tabs.current.stop_filtering }},
+       action: -> { Tabs.current.stop_filtering }},
       {code: "esc", tabs: [Tabs::Scheduled, Tabs::Retries, Tabs::Dead],
-        action: -> { Tabs.current.stop_and_clear_filtering }}
+       action: -> { Tabs.current.stop_and_clear_filtering }}
     ].freeze
 
     def initialize
@@ -188,7 +188,7 @@ module Sidekiq
                   @tui.text_line(spans: [
                     @tui.text_span(content: "q", style: @hotkey_style),
                     @tui.text_span(content: ": Quit")
-                  ]),
+                  ])
                 ]
               )
             ]

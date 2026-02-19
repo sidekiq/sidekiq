@@ -83,9 +83,9 @@ module Sidekiq
           workset = Sidekiq::WorkSet.new
           ws = workset.size
           values << (s = processes.size
-                    number_with_delimiter(s))
+                     number_with_delimiter(s))
           values << (x = processes.total_concurrency
-                    number_with_delimiter(x))
+                     number_with_delimiter(x))
           values << number_with_delimiter(ws)
           values << "#{(x == 0) ? 0 : ((ws / x.to_f) * 100).round(0)}%"
           values << format_memory(processes.total_rss)
