@@ -89,6 +89,19 @@ describe "profiling" do
     assert_equal "/profiles", last_response.headers["Location"]
   end
 
+  it "configures the type as the wrapped job class for AJ" do
+    skip("Not a usable Ruby") if RUBY_VERSION < "3.3"
+
+    s = Sidekiq::Profiler.new(@config)
+    job = {"profile" => "oli", "class" => "Sidekiq::ActiveJob::Wrapper", "wrapped" => "MyActiveJob", "jid" => "1234"}
+    result = s.call(job) { nil }
+
+    assert_kind_of Vernier::Result, result
+
+    ps = Sidekiq::ProfileSet.new
+    assert_equal %w[MyActiveJob], ps.map(&:type)
+  end
+
   include Rack::Test::Methods
 
   def app

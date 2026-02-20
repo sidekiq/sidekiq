@@ -21,7 +21,7 @@ module Sidekiq
       return yield unless job["profile"]
 
       token = job["profile"]
-      type = job["class"]
+      type = job["wrapped"] || job["class"]
       jid = job["jid"]
       started_at = Time.now
 
