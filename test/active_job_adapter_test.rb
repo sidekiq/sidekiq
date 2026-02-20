@@ -31,6 +31,22 @@ class AjJob2 < ActiveJob::Base
   end
 end
 
+module ProfileableJob
+  attr_accessor :profile
+
+  def set(options = {})
+    self.profile = options[:profile] || options["profile"]
+    super
+  end
+end
+
+class ProfileableAjJob < ActiveJob::Base
+  include ProfileableJob
+
+  def perform
+  end
+end
+
 describe "SidekiqAdapter" do
   before do
     @config = reset!
@@ -118,6 +134,46 @@ describe "SidekiqAdapter" do
       end
 
       assert called
+    end
+  end
+
+  describe "profiling support" do
+    it "enqueues a job to be profiled" do
+      ProfileableAjJob.set(profile: "oli").perform_later
+      q = Sidekiq::Queue.new
+
+      assert_equal 1, q.size
+
+      job = q.first
+      assert_equal "ProfileableAjJob", job["wrapped"]
+      assert_equal "oli", job["profile"]
+    end
+
+    it "schedules a job to be profiled" do
+      instance = ProfileableAjJob.set(wait: 1.hour, profile: "oli").perform_later
+      ss = Sidekiq::ScheduledSet.new
+      assert_equal 1, ss.size
+
+      job = ss.find_job(instance.provider_job_id)
+      assert_equal "ProfileableAjJob", job["wrapped"]
+      assert_equal "oli", job["profile"]
+    end
+
+    it "does not add an extra 'profile' key to the payload when no profile is requested" do
+      ProfileableAjJob.perform_later
+      q = Sidekiq::Queue.new
+
+      assert_equal 1, q.size
+
+      job = q.first
+      refute_includes(job.item.keys, "profile")
+
+      scheduled_instance = ProfileableAjJob.set(wait: 1.hour).perform_later
+      ss = Sidekiq::ScheduledSet.new
+      assert_equal 1, ss.size
+
+      scheduled_job = ss.find_job(scheduled_instance.provider_job_id)
+      refute_includes(scheduled_job.item.keys, "profile")
     end
   end
 end
