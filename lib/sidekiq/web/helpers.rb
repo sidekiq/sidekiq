@@ -294,7 +294,7 @@ module Sidekiq
       else
         # DEPRECATED Backwards compatibility with older processes.
         # 'capsules' element added in v8.0.9
-        process.queues.join(", ")
+        pro.queues.join(", ")
       end
     end
 
