@@ -1040,19 +1040,20 @@ module Sidekiq
         # you'll be happier this way
         conn.pipelined do |pipeline|
           procs.each do |key|
-            pipeline.hmget(key, "info", "busy", "beat", "quiet", "rss", "rtt_us")
+            pipeline.hmget(key, "info", "concurrency", "busy", "beat", "quiet", "rss", "rtt_us")
           end
         end
       }
 
-      result.each do |info, busy, beat, quiet, rss, rtt_us|
+      result.each do |info, concurrency, busy, beat, quiet, rss, rtt_us|
         # If a process is stopped between when we query Redis for `procs` and
         # when we query for `result`, we will have an item in `result` that is
         # composed of `nil` values.
         next if info.nil?
 
         hash = Sidekiq.load_json(info)
-        yield Process.new(hash.merge("busy" => busy.to_i,
+        yield Process.new(hash.merge("concurrency" => concurrency.to_i,
+          "busy" => busy.to_i,
           "beat" => beat.to_f,
           "quiet" => quiet,
           "rss" => rss.to_i,

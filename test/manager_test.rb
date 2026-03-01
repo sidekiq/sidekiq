@@ -34,4 +34,16 @@ describe Sidekiq::Manager do
     assert_equal init_size - 1, mgr.workers.size
     refute mgr.workers.include?(processor)
   end
+
+  it "does not replace a dead processor when target count is lower than current worker count" do
+    mgr = new_manager
+    init_size = mgr.workers.size
+    processor = mgr.workers.first
+
+    mgr.instance_variable_set(:@count, init_size - 1)
+    mgr.processor_result(processor, "ignored")
+
+    assert_equal init_size - 1, mgr.workers.size
+    refute mgr.workers.include?(processor)
+  end
 end
