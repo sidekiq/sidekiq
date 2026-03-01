@@ -69,7 +69,7 @@ module Sidekiq
     def processor_result(processor, reason = nil)
       @plock.synchronize do
         @workers.delete(processor)
-        unless @done
+        if !@done && @count > @workers.size
           p = Processor.new(@config, &method(:processor_result))
           @workers << p
           p.start
