@@ -618,6 +618,31 @@ describe "API" do
       assert_equal "TSTP", @cfg.redis { |c| c.lpop(signals_string) }
     end
 
+    it "reads process concurrency from redis hash fields" do
+      identity_string = "identity_string"
+      odata = {
+        "pid" => 123,
+        "hostname" => Socket.gethostname,
+        "key" => identity_string,
+        "identity" => identity_string,
+        "started_at" => Time.now.to_f - 15,
+        "concurrency" => 99,
+        "capsules" => {"default" => {"mode" => "weighted", "concurrency" => 5, "weights" => {"foo" => 1, "bar" => 1}}},
+        "version" => Sidekiq::VERSION,
+        "embedded" => false
+      }
+
+      @cfg.redis do |conn|
+        conn.multi do |transaction|
+          transaction.sadd("processes", [odata["key"]])
+          transaction.hset(odata["key"], "info", Sidekiq.dump_json(odata), "concurrency", 7, "busy", 10, "beat", Time.now.to_f)
+        end
+      end
+
+      pro = Sidekiq::ProcessSet.new.to_a.first
+      assert_equal 7, pro["concurrency"]
+    end
+
     it "can find processes" do
       identity_string = "identity_string"
       odata = {

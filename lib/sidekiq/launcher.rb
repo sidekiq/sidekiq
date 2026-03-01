@@ -176,6 +176,7 @@ module Sidekiq
             transaction.sadd("processes", [key])
             transaction.exists(key)
             transaction.hset(key, "info", to_json,
+              "concurrency", @config.total_concurrency,
               "busy", curstate.size,
               "beat", Time.now.to_f,
               "rtt_us", rtt,
@@ -257,7 +258,6 @@ module Sidekiq
         "started_at" => Time.now.to_f,
         "pid" => ::Process.pid,
         "tag" => @config[:tag] || "",
-        "concurrency" => @config.total_concurrency,
         "capsules" => @config.capsules.each_with_object({}) { |(name, cap), memo|
           memo[name] = cap.to_h
         },
