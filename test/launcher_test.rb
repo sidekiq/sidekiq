@@ -43,9 +43,11 @@ describe Sidekiq::Launcher do
       @launcher.send(:beat)
 
       assert_equal "sidekiq #{Sidekiq::VERSION} myapp [1 of 3 busy]", $0
-      workers, rtt = @config.redis { |c| c.hmget(@id, "busy", "rtt_us") }
+      workers, concurrency, info, rtt = @config.redis { |c| c.hmget(@id, "busy", "concurrency", "info", "rtt_us") }
 
       assert_equal "1", workers
+      assert_equal "3", concurrency
+      refute_includes Sidekiq.load_json(info).keys, "concurrency"
       refute_nil rtt
       assert_in_delta 1000, rtt.to_i, 1000
 
