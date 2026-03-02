@@ -1,12 +1,10 @@
 module Sidekiq
   class TUI
     class BaseTab
+      attr_reader :name
       def initialize
         reset_data
-      end
-
-      def to_s
-        self.class.name.split("::").last
+        @name = self.class.name.split("::").last
       end
 
       def reset_data
@@ -78,7 +76,7 @@ module Sidekiq
 
       def toggle_select(which = :current)
         sel = @data[:selected]
-        log(which, sel)
+        # log(which, sel)
         if which == :current
           x = @data[:table][:row_ids][@data[:selected_row_index]]
           if sel.index(x)

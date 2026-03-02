@@ -42,7 +42,7 @@ module Sidekiq
         end
 
         def alter_rows!(action)
-          log(to_s, @data[:selected])
+          # log(to_s, @data[:selected])
           set = set_class.new
           each_selection do |id|
             score, jid = id.split("|")
@@ -85,7 +85,7 @@ module Sidekiq
           render_stats_section(tui, frame, chunks[0])
           render_table(tui, frame, chunks[1]) do
             {
-              title: self,
+              title: name,
               header: ["☑️", "When", "Queue", "Job", "Arguments"],
               widths: [
                 tui.constraint_length(5),

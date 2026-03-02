@@ -2,4 +2,9 @@
 
 require_relative "../lib/sidekiq/tui"
 
-Sidekiq::TUI.new.run
+# This allows Sidekiq Pro and Enterprise to register hooks
+# during the Bundler.setup phase that are run here.
+Sidekiq.loader.run_load_hooks(:tui)
+
+tt = Sidekiq::TUI.new
+tt.run
