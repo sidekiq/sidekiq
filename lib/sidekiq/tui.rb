@@ -10,17 +10,13 @@ require "sidekiq/paginator"
 
 require_relative "tui/tabs"
 
-# Suppress Sidekiq logger output to prevent interference with TUI rendering
-require "logger"
-Sidekiq.default_configuration.logger = Logger.new(IO::NULL)
-
-DebugLogger = Logger.new("tui.log")
 def log(*x)
-  x.each { |item| DebugLogger.info { item } }
+  x.each { |item| Sidekiq.logger.info { item } }
 end
 
 module Sidekiq
   class TUI
+    include Sidekiq::Component
     PageOptions = Data.define(:page, :size)
 
     REFRESH_INTERVAL_SECONDS = 2
@@ -36,27 +32,27 @@ module Sidekiq
     # Conventions: dangerous/irreversible actions should use UPPERCASE codes.
     # The Shift button means "I'm sure".
     CONTROLS = [
-      {code: "?", display: "?", description: "Help", tabs: Tabs.all,
+      {code: "?", display: "?", description: "Help", tabs: Tabs::All,
        action: -> { Tabs.show_help }},
-      {code: "left", display: "←/→", description: "Select Tab", tabs: Tabs.all,
+      {code: "left", display: "←/→", description: "Select Tab", tabs: Tabs::All,
        action: -> { Tabs.navigate(:left) }, refresh: true},
-      {code: "right", display: "←/→", description: "Select Tab", tabs: Tabs.all,
+      {code: "right", display: "←/→", description: "Select Tab", tabs: Tabs::All,
        action: -> { Tabs.navigate(:right) }, refresh: true},
-      {code: "q", display: "q", description: "Quit", tabs: Tabs.all,
+      {code: "q", display: "q", description: "Quit", tabs: Tabs::All,
        action: -> { :quit }},
-      {code: "c", modifiers: ["ctrl"], display: "q", description: "Quit", tabs: Tabs.all,
+      {code: "c", modifiers: ["ctrl"], display: "q", description: "Quit", tabs: Tabs::All,
        action: -> { :quit }},
-      {code: "h", display: "h/l", description: "Prev/Next Page", tabs: Tabs.all - [Tabs::Home],
+      {code: "h", display: "h/l", description: "Prev/Next Page", tabs: Tabs::All - [Tabs::Home],
        action: -> { Tabs.current.prev_page }, refresh: true},
-      {code: "l", display: "h/l", description: "Prev/Next Page", tabs: Tabs.all - [Tabs::Home],
+      {code: "l", display: "h/l", description: "Prev/Next Page", tabs: Tabs::All - [Tabs::Home],
        action: -> { Tabs.current.next_page }, refresh: true},
-      {code: "k", display: "j/k", description: "Prev/Next Row", tabs: Tabs.all - [Tabs::Home],
+      {code: "k", display: "j/k", description: "Prev/Next Row", tabs: Tabs::All - [Tabs::Home],
        action: -> { Tabs.current.navigate_row(:up) }},
-      {code: "j", display: "j/k", description: "Prev/Next Row", tabs: Tabs.all - [Tabs::Home],
+      {code: "j", display: "j/k", description: "Prev/Next Row", tabs: Tabs::All - [Tabs::Home],
        action: -> { Tabs.current.navigate_row(:down) }},
-      {code: "x", display: "x", description: "Select", tabs: Tabs.all - [Tabs::Home],
+      {code: "x", display: "x", description: "Select", tabs: Tabs::All - [Tabs::Home],
        action: -> { Tabs.current.toggle_select }},
-      {code: "A", modifiers: ["shift"], display: "A", description: "Select All", tabs: Tabs.all - [Tabs::Home],
+      {code: "A", modifiers: ["shift"], display: "A", description: "Select All", tabs: Tabs::All - [Tabs::Home],
        action: -> { Tabs.current.toggle_select(:all) }},
       {code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: [Tabs::Scheduled, Tabs::Retries, Tabs::Dead],
        action: -> { Tabs.current.alter_rows!(:delete) }, refresh: true},
@@ -85,14 +81,18 @@ module Sidekiq
     ].freeze
 
     def initialize
+      @config = Sidekiq.default_configuration
       @base_style = nil
       @last_refresh = Time.now
     end
 
     def run
+      # Must log to a file, terminal is now controlled by Ratatui
+      config.logger = Logger.new("tui.log")
+
       RatatuiRuby.run do |tui|
         @tui = tui
-        @highlight_style = @tui.style(fg: :red, modifiers: [:underlined])
+        @highlight_style = @tui.style(fg: :light_red, modifiers: [:underlined])
         @hotkey_style = @tui.style(modifiers: [:bold, :underlined])
 
         refresh_data
@@ -130,7 +130,7 @@ module Sidekiq
           tabs = @tui.tabs(
             titles: Tabs.all.map(&:name),
             selected_index: Tabs.all.index(Tabs.current),
-            block: @tui.block(title: Sidekiq::NAME, borders: [:all], title_style: @tui.style(fg: :red, modifiers: [:bold])),
+            block: @tui.block(title: Sidekiq::NAME, borders: [:all], title_style: @tui.style(fg: :light_red, modifiers: [:bold])),
             divider: " | ",
             highlight_style: @highlight_style,
             style: @base_style
@@ -155,7 +155,7 @@ module Sidekiq
           content = @tui.block(
             title: Sidekiq::NAME,
             borders: [:all],
-            title_style: @tui.style(fg: :red, modifiers: [:bold]),
+            title_style: @tui.style(fg: :light_red, modifiers: [:bold]),
             children: [
               # TODO convert to table
               @tui.paragraph(
@@ -222,7 +222,7 @@ module Sidekiq
     def render_controls(frame, area)
       keys_and_descriptions = CONTROLS
         .select { |ctrl|
-          ctrl[:tabs].include?(Tabs.current) && ctrl[:description]
+          ctrl[:tabs].include?(Tabs.current.class) && ctrl[:description]
         }.map { |ctrl|
           [ctrl[:display] || ctrl[:code], ctrl[:description]]
         }.to_h
@@ -268,7 +268,7 @@ module Sidekiq
         control = CONTROLS.find { |ctrl|
           ctrl[:code] == code &&
             (ctrl[:modifiers] || []) == (modifiers || []) &&
-            ctrl[:tabs].include?(Tabs.current)
+            ctrl[:tabs].include?(Tabs.current.class)
         }
         return unless control
         control[:action].call.tap {
@@ -297,11 +297,11 @@ module Sidekiq
       Tabs.current.refresh_data
       @last_refresh = Time.now
     rescue => e
+      handle_exception(e)
       Tabs.current.error = e
     end
 
     def render_error(frame, area, err)
-      log(err.message, err.backtrace)
       header = [@tui.text_line(
         spans: [@tui.text_span(content: err.message, style: @tui.style(modifiers: [:bold]))],
         alignment: :center
@@ -312,7 +312,7 @@ module Sidekiq
         @tui.paragraph(
           text: header + lines,
           alignment: :left,
-          block: @tui.block(title: "Error", borders: [:all], border_style: @tui.style(fg: :red))
+          block: @tui.block(title: "Error", borders: [:all], border_style: @tui.style(fg: :light_red))
         ),
         area
       )

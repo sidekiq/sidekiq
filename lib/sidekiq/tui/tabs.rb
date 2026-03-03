@@ -9,10 +9,10 @@ require_relative "tabs/metrics"
 module Sidekiq
   class TUI
     module Tabs
-      Set = Set.new([Home, Busy, Queues, Scheduled, Retries, Dead, Metrics])
+      All = Set.new([Home, Busy, Queues, Scheduled, Retries, Dead, Metrics])
 
       def self.all
-        @all ||= Set.map(&:new)
+        @all ||= All.map(&:new)
       end
 
       def self.current

@@ -4,7 +4,7 @@ module Sidekiq
   class TUI
     module Tabs
       class Metrics < BaseTab
-        COLORS = %i[blue cyan yellow red green white gray]
+        COLORS = %i[light_blue light_cyan light_yellow light_red light_green white gray]
 
         def refresh_data
           refresh_data_for_stats
@@ -71,7 +71,7 @@ module Sidekiq
             end
             # log data
 
-            log(data)
+            # log(data)
             tui.dataset(name: kls,
               data: data,
               style: tui.style(fg: COLORS[idx % csize]),
