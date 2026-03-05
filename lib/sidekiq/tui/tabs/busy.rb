@@ -4,6 +4,17 @@ module Sidekiq
   class TUI
     module Tabs
       class Busy < BaseTab
+        def features
+          %i[selectable]
+        end
+
+        def controls
+          @controls ||= super + [
+            {code: "T", modifiers: ["shift"], description: "Terminate", action: ->(tab) { tab.terminate! }},
+            {code: "Q", modifiers: ["shift"], description: "Quiet", action: ->(tab) { tab.quiet! }}
+          ]
+        end
+
         def quiet!
           each_selection do |id|
             Sidekiq::Process.new("identity" => id).quiet!

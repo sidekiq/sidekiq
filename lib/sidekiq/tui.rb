@@ -17,68 +17,10 @@ end
 module Sidekiq
   class TUI
     include Sidekiq::Component
+
     PageOptions = Data.define(:page, :size)
 
     REFRESH_INTERVAL_SECONDS = 2
-
-    # CONTROLS defines data for input handling and for displaying controls.
-    # :code is the key code for input handling.
-    # :display and :description are shown in the controls area, with different
-    #   styling between them. If :display is omitted, :code is displayed instead.
-    #   Duplicate :display and :description values are ignored, shown only once.
-    # :tabs is an array of tab names where the control is active.
-    # :action is a lambda to execute when the control is triggered.
-    #
-    # Conventions: dangerous/irreversible actions should use UPPERCASE codes.
-    # The Shift button means "I'm sure".
-    CONTROLS = [
-      {code: "?", display: "?", description: "Help", tabs: Tabs::All,
-       action: -> { Tabs.show_help }},
-      {code: "left", display: "←/→", description: "Select Tab", tabs: Tabs::All,
-       action: -> { Tabs.navigate(:left) }, refresh: true},
-      {code: "right", display: "←/→", description: "Select Tab", tabs: Tabs::All,
-       action: -> { Tabs.navigate(:right) }, refresh: true},
-      {code: "q", display: "q", description: "Quit", tabs: Tabs::All,
-       action: -> { :quit }},
-      {code: "c", modifiers: ["ctrl"], display: "q", description: "Quit", tabs: Tabs::All,
-       action: -> { :quit }},
-      {code: "h", display: "h/l", description: "Prev/Next Page", tabs: Tabs::All - [Tabs::Home],
-       action: -> { Tabs.current.prev_page }, refresh: true},
-      {code: "l", display: "h/l", description: "Prev/Next Page", tabs: Tabs::All - [Tabs::Home],
-       action: -> { Tabs.current.next_page }, refresh: true},
-      {code: "k", display: "j/k", description: "Prev/Next Row", tabs: Tabs::All - [Tabs::Home],
-       action: -> { Tabs.current.navigate_row(:up) }},
-      {code: "j", display: "j/k", description: "Prev/Next Row", tabs: Tabs::All - [Tabs::Home],
-       action: -> { Tabs.current.navigate_row(:down) }},
-      {code: "x", display: "x", description: "Select", tabs: Tabs::All - [Tabs::Home],
-       action: -> { Tabs.current.toggle_select }},
-      {code: "A", modifiers: ["shift"], display: "A", description: "Select All", tabs: Tabs::All - [Tabs::Home],
-       action: -> { Tabs.current.toggle_select(:all) }},
-      {code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: [Tabs::Scheduled, Tabs::Retries, Tabs::Dead],
-       action: -> { Tabs.current.alter_rows!(:delete) }, refresh: true},
-      {code: "R", modifiers: ["shift"], display: "R", description: "Retry", tabs: [Tabs::Retries],
-       action: -> { Tabs.current.alter_rows!(:retry) }, refresh: true},
-      {code: "E", modifiers: ["shift"], display: "E", description: "Enqueue", tabs: [Tabs::Scheduled, Tabs::Dead],
-       action: -> { Tabs.current.alter_rows!(:add_to_queue) }, refresh: true},
-      {code: "K", modifiers: ["shift"], display: "K", description: "Kill", tabs: [Tabs::Scheduled, Tabs::Retries],
-       action: -> { Tabs.current.alter_rows!(:kill) }, refresh: true},
-      {code: "D", modifiers: ["shift"], display: "D", description: "Delete", tabs: [Tabs::Queues],
-       action: -> { Tabs.current.delete_queue! }, refresh: true},
-      {code: "p", description: "Pause/Unpause Queue", tabs: [Tabs::Queues],
-       action: -> { Tabs.current.toggle_pause_queue! }},
-      {code: "T", modifiers: ["shift"], description: "Terminate", tabs: [Tabs::Busy],
-       action: -> { Tabs.current.terminate! }},
-      {code: "Q", modifiers: ["shift"], description: "Quiet", tabs: [Tabs::Busy],
-       action: -> { Tabs.current.quiet! }},
-      {code: "/", display: "/", description: "Filter", tabs: [Tabs::Scheduled, Tabs::Retries, Tabs::Dead],
-       action: -> { Tabs.current.start_filtering }},
-      {code: "backspace", tabs: [Tabs::Scheduled, Tabs::Retries, Tabs::Dead],
-       action: -> { Tabs.current.remove_last_char_from_filter }},
-      {code: "enter", tabs: [Tabs::Scheduled, Tabs::Retries, Tabs::Dead],
-       action: -> { Tabs.current.stop_filtering }},
-      {code: "esc", tabs: [Tabs::Scheduled, Tabs::Retries, Tabs::Dead],
-       action: -> { Tabs.current.stop_and_clear_filtering }}
-    ].freeze
 
     def initialize
       @config = Sidekiq.default_configuration
@@ -113,7 +55,7 @@ module Sidekiq
             direction: :vertical,
             constraints: [
               @tui.constraint_fill(1),
-              @tui.constraint_length(4)
+              @tui.constraint_length(5)
             ]
           )
 
@@ -220,41 +162,38 @@ module Sidekiq
     end
 
     def render_controls(frame, area)
-      keys_and_descriptions = CONTROLS
-        .select { |ctrl|
-          ctrl[:tabs].include?(Tabs.current.class) && ctrl[:description]
-        }.map { |ctrl|
-          [ctrl[:display] || ctrl[:code], ctrl[:description]]
-        }.to_h
+      active_keys = Tabs.current.controls.filter { |hash| hash[:description] }
 
-      controls = @tui.block(
-        title: "Controls",
-        borders: [:all],
-        children: [
-          @tui.paragraph(
-            text: [
-              @tui.text_line(spans: keys_and_descriptions.map { |key, desc|
-                [
-                  @tui.text_span(content: key, style: @hotkey_style),
-                  @tui.text_span(content: ": #{desc}  ")
-                ]
-              }.flatten),
-              # @tui.text_line(spans: [
-              #   @tui.text_span(content: "d", style: @hotkey_style),
-              #   @tui.text_span(content: ": Divider (#{@dividers[@divider_index]})  "),
-              #   @tui.text_span(content: "s", style: @hotkey_style),
-              #   @tui.text_span(content: ": Highlight (#{@highlight_styles[@highlight_style_index][:name]})  "),
-              #   @tui.text_span(content: "b", style: @hotkey_style),
-              #   @tui.text_span(content: ": Base Style (#{@base_styles[@base_style_index][:name]})  "),
-              # ]),
-              @tui.text_line(spans: [
-                @tui.text_span(content: "Redis: #{redis_url} "),
-                @tui.text_span(content: "Current Time: #{Time.now.utc}")
-              ])
-            ]
-          )
+      # Split controls into two lines, 8 is arbitrary
+      # TODO Dynamically split based on term width?
+      first = active_keys[...8]
+      lines = []
+      lines << @tui.text_line(spans: first.map { |hash|
+        [
+          @tui.text_span(content: hash[:display] || hash[:code], style: @hotkey_style),
+          @tui.text_span(content: ": #{hash[:description]}  ")
         ]
-      )
+      }.flatten)
+
+      last = active_keys[8...]
+      lines << if last && last.size > 0
+        @tui.text_line(spans: last.map { |hash|
+          [
+            @tui.text_span(content: hash[:display] || hash[:code], style: @hotkey_style),
+            @tui.text_span(content: ": #{hash[:description]}  ")
+          ]
+        }.flatten)
+      else
+        @tui.text_line(spans: [])
+      end
+
+      lines << @tui.text_line(spans: [
+        @tui.text_span(content: "Redis: #{redis_url}    "),
+        @tui.text_span(content: "Current Time: #{Time.now.utc}")
+      ])
+
+      controls = @tui.block(title: "Controls", borders: [:all],
+        children: [@tui.paragraph(text: lines)])
       frame.render_widget(controls, area)
     end
 
@@ -265,13 +204,13 @@ module Sidekiq
       in {type: :key, code: code} if Tabs.current.filtering? && code.length == 1
         Tabs.current.append_to_filter(code)
       in {type: :key, code:, modifiers:}
-        control = CONTROLS.find { |ctrl|
+        tab = Tabs.current
+        control = tab.controls.find { |ctrl|
           ctrl[:code] == code &&
-            (ctrl[:modifiers] || []) == (modifiers || []) &&
-            ctrl[:tabs].include?(Tabs.current.class)
+            (ctrl[:modifiers] || []) == (modifiers || [])
         }
         return unless control
-        control[:action].call.tap {
+        control[:action].call(Tabs.current).tap {
           refresh_data if control[:refresh]
         }
       else

@@ -6,6 +6,10 @@ module Sidekiq
       class Metrics < BaseTab
         COLORS = %i[light_blue light_cyan light_yellow light_red light_green white gray]
 
+        def features
+          %i[filterable] # TODO Implement filtering
+        end
+
         def refresh_data
           refresh_data_for_stats
 

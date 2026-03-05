@@ -4,6 +4,21 @@ module Sidekiq
       module SetTab
         include Sidekiq::Paginator
 
+        def features
+          %i[selectable pageable filterable]
+        end
+
+        def controls
+          @controls ||= super + [{code: "D", modifiers: ["shift"], display: "D", description: "Delete",
+                                  action: ->(tab) { tab.alter_rows!(:delete) }, refresh: true},
+            {code: "R", modifiers: ["shift"], display: "R", description: "Retry",
+             action: ->(tab) { tab.alter_rows!(:retry) }, refresh: true},
+            {code: "E", modifiers: ["shift"], display: "E", description: "Enqueue",
+             action: ->(tab) { tab.alter_rows!(:add_to_queue) }, refresh: true},
+            {code: "K", modifiers: ["shift"], display: "K", description: "Kill",
+             action: ->(tab) { tab.alter_rows!(:kill) }, refresh: true}]
+        end
+
         def filtering?
           @data[:filtering]
         end

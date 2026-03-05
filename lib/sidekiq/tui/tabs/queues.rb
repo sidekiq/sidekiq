@@ -4,6 +4,19 @@ module Sidekiq
   class TUI
     module Tabs
       class Queues < BaseTab
+        def features
+          %i[selectable]
+        end
+
+        def controls
+          @controls ||= super + [
+            {code: "D", modifiers: ["shift"], display: "D", description: "Delete",
+             action: ->(tab) { tab.delete_queue! }, refresh: true},
+            {code: "p", description: "Pause/Unpause Queue",
+             action: ->(tab) { tab.toggle_pause_queue! }}
+          ]
+        end
+
         def delete_queue!
           each_selection do |qname|
             Sidekiq::Queue.new(qname).clear
