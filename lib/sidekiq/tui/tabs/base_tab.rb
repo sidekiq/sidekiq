@@ -4,6 +4,7 @@ module Sidekiq
       include Controls
 
       attr_reader :name
+      attr_reader :data
 
       def initialize
         reset_data
@@ -114,16 +115,6 @@ module Sidekiq
         total = @data.dig(:table, :total) || 0
         footer = ["", "Page: #{page}", "Count: #{rows.size}", "Total: #{total}"]
         footer << "Selected: #{@data[:selected].size}" unless @data[:selected].empty?
-
-        if @data[:filter]
-          @filter_style = tui.style(fg: :white, bg: :dark_gray)
-          spans = [
-            tui.text_span(content: "Filter: ", style: @filter_style),
-            tui.text_span(content: @data[:filter], style: @filter_style)
-          ]
-          spans << tui.text_span(content: "_", style: tui.style(fg: :white, bg: :dark_gray, modifiers: [:slow_blink])) if @data[:filtering]
-          footer << tui.text_line(spans: spans)
-        end
 
         defaults = {
           title: "TableName",

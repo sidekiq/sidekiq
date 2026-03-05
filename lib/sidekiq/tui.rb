@@ -8,6 +8,7 @@ RatatuiRuby.debug_mode!
 require "sidekiq/api"
 require "sidekiq/paginator"
 
+require_relative "tui/filtering"
 require_relative "tui/controls"
 require_relative "tui/tabs"
 
@@ -188,10 +189,20 @@ module Sidekiq
         @tui.text_line(spans: [])
       end
 
-      lines << @tui.text_line(spans: [
+      footer = [
         @tui.text_span(content: "Redis: #{redis_url}    "),
         @tui.text_span(content: "Current Time: #{Time.now.utc}")
-      ])
+      ]
+
+      if Tabs.current.data[:filter]
+        @filter_style = @tui.style(fg: :white, bg: :dark_gray)
+        footer += [
+          @tui.text_span(content: "   Filter: ", style: @filter_style),
+          @tui.text_span(content: Tabs.current.data[:filter], style: @filter_style),
+          @tui.text_span(content: "_", style: @tui.style(fg: :white, bg: :dark_gray, modifiers: [:slow_blink]))
+        ]
+      end
+      lines << @tui.text_line(spans: footer)
 
       controls = @tui.block(title: "Controls", borders: [:all],
         children: [@tui.paragraph(text: lines)])
@@ -204,6 +215,7 @@ module Sidekiq
         Tabs.show_main
       in {type: :key, code: code} if Tabs.current.filtering? && code.length == 1
         Tabs.current.append_to_filter(code)
+        Tabs.current.refresh_data
       in {type: :key, code:, modifiers:}
         tab = Tabs.current
         control = tab.controls.find { |ctrl|

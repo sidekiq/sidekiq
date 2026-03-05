@@ -4,10 +4,20 @@ module Sidekiq
   class TUI
     module Tabs
       class Metrics < BaseTab
+        include Filtering
+
         COLORS = %i[light_blue light_cyan light_yellow light_red light_green white gray]
 
         def features
-          %i[filterable] # TODO Implement filtering
+          %i[filterable]
+        end
+
+        def on_filter_change
+          @data[:metrics_refresh] = nil
+        end
+
+        def regexp
+          filtering? ? Regexp.new(Regexp.escape(current_filter), Regexp::IGNORECASE) : nil
         end
 
         def refresh_data
@@ -16,7 +26,7 @@ module Sidekiq
           # only need to refresh every 60 seconds
           if !@data[:metrics_refresh] || @data[:metrics_refresh] < Time.now
             q = Sidekiq::Metrics::Query.new
-            query_result = q.top_jobs(minutes: 60)
+            query_result = q.top_jobs(class_filter: regexp, minutes: 60)
             @data[:metrics] = query_result
             @data[:metrics_refresh] = Time.now + 60
           end

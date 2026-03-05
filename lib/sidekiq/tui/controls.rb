@@ -1,14 +1,12 @@
 module Sidekiq
   class TUI
     module Controls
-
       # Defines data for input handling and for displaying controls.
       # :code is the key code for input handling.
       # :display and :description are shown in the controls area, with different
       #   styling between them. If :display is omitted, :code is displayed instead.
-      #   Duplicate :display and :description values are ignored, shown only once.
-      # :tabs is an array of tab names where the control is active.
       # :action is a lambda to execute when the control is triggered.
+      # :refresh means the action requires immediate refreshing of data
       #
       # Conventions: dangerous/irreversible actions should use UPPERCASE codes.
       # The Shift button means "I'm sure".
@@ -36,9 +34,9 @@ module Sidekiq
         ],
         filterable: [
           {code: "/", display: "/", description: "Filter", action: ->(tab) { tab.start_filtering }},
-          {code: "backspace", action: ->(tab) { tab.remove_last_char_from_filter }},
-          {code: "enter", action: ->(tab) { tab.stop_filtering }},
-          {code: "esc", action: ->(tab) { tab.stop_and_clear_filtering }}
+          {code: "backspace", action: ->(tab) { tab.remove_last_char_from_filter }, refresh: true},
+          {code: "enter", action: ->(tab) { tab.stop_filtering }, refresh: true},
+          {code: "esc", action: ->(tab) { tab.stop_and_clear_filtering }, refresh: true}
         ]
       }.freeze
 

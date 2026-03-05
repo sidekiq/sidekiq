@@ -3,6 +3,7 @@ module Sidekiq
     module Tabs
       module SetTab
         include Sidekiq::Paginator
+        include Filtering
 
         def features
           %i[selectable pageable filterable]
@@ -19,43 +20,6 @@ module Sidekiq
              action: ->(tab) { tab.alter_rows!(:kill) }, refresh: true}]
         end
 
-        def filtering?
-          @data[:filtering]
-        end
-
-        def start_filtering
-          @data[:filtering] = true
-          @data[:filter] = ""
-        end
-
-        def stop_filtering
-          return unless @data[:filtering]
-
-          @data[:filtering] = false
-          @data[:selected] = []
-        end
-
-        def stop_and_clear_filtering
-          return unless @data[:filtering]
-
-          @data[:filtering] = false
-          @data[:filter] = nil
-          @data[:selected] = []
-        end
-
-        def remove_last_char_from_filter
-          return unless @data[:filtering]
-
-          @data[:filter] = @data[:filter].empty? ? "" : @data[:filter][0..-2]
-        end
-
-        def append_to_filter(string)
-          return unless @data[:filtering]
-
-          @data[:filter] += string
-          @data[:selected] = []
-        end
-
         def alter_rows!(action)
           # log(to_s, @data[:selected])
           set = set_class.new
@@ -68,7 +32,7 @@ module Sidekiq
 
         def refresh_data_for_set
           set = set_class.new
-          f = @data[:filter]
+          f = current_filter
           pager, rows, current, total = if f && f.size > 2
             rows = set.scan(f).to_a
             sz = rows.size
