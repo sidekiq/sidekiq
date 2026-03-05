@@ -8,6 +8,7 @@ RatatuiRuby.debug_mode!
 require "sidekiq/api"
 require "sidekiq/paginator"
 
+require_relative "tui/controls"
 require_relative "tui/tabs"
 
 def log(*x)
