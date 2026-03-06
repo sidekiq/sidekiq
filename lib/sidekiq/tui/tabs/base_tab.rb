@@ -118,11 +118,15 @@ module Sidekiq
 
         defaults = {
           title: "TableName",
-          highlight_symbol: "➡️",
-          selected_row: @data[:selected_row_index],
-          row_highlight_style: tui.style(fg: :white, bg: :blue),
           footer: footer
         }
+        if features.include?(:selectable)
+          defaults.merge!({
+            highlight_symbol: "➡️",
+            selected_row: @data[:selected_row_index],
+            row_highlight_style: tui.style(fg: :white, bg: :blue)
+          })
+        end
         hash = defaults.merge(yield)
         hash[:block] ||= tui.block(title: hash.delete(:title), borders: :all)
         table = tui.table(**hash)
