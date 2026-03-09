@@ -11,19 +11,19 @@ module Sidekiq
     module Tabs
       All = Set.new([Home, Busy, Queues, Scheduled, Retries, Dead, Metrics])
 
-      def self.all
-        @all ||= All.map(&:new)
+      def self.all(parent)
+        @all ||= All.map { |kls| kls.new(parent) }
       end
 
       def self.current
-        @current ||= all.first
+        @current ||= @all.first
       end
 
       # Navigate tabs to the left or right.
       # @param direction [Symbol] :left or :right
       def self.navigate(direction)
         index_change = (direction == :right) ? 1 : -1
-        @current = all[(all.index(current) + index_change) % all.size]
+        @current = @all[(@all.index(current) + index_change) % @all.size]
         current.reset_data
       end
 

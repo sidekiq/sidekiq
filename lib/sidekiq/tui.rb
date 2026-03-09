@@ -20,6 +20,7 @@ module Sidekiq
   class TUI
     include Sidekiq::Component
 
+    LOCALE_DIRECTORIES = [File.expand_path("#{File.dirname(__FILE__)}/../../web/locales")]
     PageOptions = Data.define(:page, :size)
 
     REFRESH_INTERVAL_SECONDS = 2
@@ -28,6 +29,7 @@ module Sidekiq
       @config = Sidekiq.default_configuration
       @base_style = nil
       @last_refresh = Time.now
+      load_language
     end
 
     def run
@@ -38,6 +40,8 @@ module Sidekiq
         @tui = tui
         @highlight_style = @tui.style(fg: :light_red, modifiers: [:underlined])
         @hotkey_style = @tui.style(modifiers: [:bold, :underlined])
+        # eager load tabs
+        Tabs.all(self)
 
         refresh_data
 
@@ -71,9 +75,10 @@ module Sidekiq
             ]
           )
 
+          all_tabs = Tabs.all(self)
           tabs = @tui.tabs(
-            titles: Tabs.all.map(&:name),
-            selected_index: Tabs.all.index(Tabs.current),
+            titles: all_tabs.map { |tab| t(tab.name) },
+            selected_index: all_tabs.index(Tabs.current),
             block: @tui.block(title: " #{Sidekiq::NAME} ", borders: [:all], title_style: @tui.style(fg: :light_red, modifiers: [:bold])),
             divider: " | ",
             highlight_style: @highlight_style,
@@ -106,7 +111,7 @@ module Sidekiq
                 text: [
                   @tui.text_line(spans: ["Welcome to the Sidekiq Terminal UI"], alignment: :center),
                   @tui.text_line(spans: [
-                    @tui.text_span(content: "Global hotkeys"),
+                    @tui.text_span(content: "Global hotkeys")
                   ]),
                   @tui.text_line(spans: []),
                   @tui.text_line(spans: [
@@ -143,7 +148,7 @@ module Sidekiq
           )
           frame.render_widget(content, main_area)
           controls = @tui.block(
-            title: "Controls",
+            title: t("Controls"),
             borders: [:all],
             children: [
               @tui.paragraph(
@@ -177,7 +182,7 @@ module Sidekiq
       lines << @tui.text_line(spans: first.map { |hash|
         [
           @tui.text_span(content: hash[:display] || hash[:code], style: @hotkey_style),
-          @tui.text_span(content: ": #{hash[:description]}  ")
+          @tui.text_span(content: ": #{t(hash[:description])}  ")
         ]
       }.flatten)
 
@@ -186,7 +191,7 @@ module Sidekiq
         @tui.text_line(spans: last.map { |hash|
           [
             @tui.text_span(content: hash[:display] || hash[:code], style: @hotkey_style),
-            @tui.text_span(content: ": #{hash[:description]}  ")
+            @tui.text_span(content: ": #{t(hash[:description])}  ")
           ]
         }.flatten)
       else
@@ -195,20 +200,21 @@ module Sidekiq
 
       footer = [
         @tui.text_span(content: "Redis: #{redis_url}    "),
-        @tui.text_span(content: "Current Time: #{Time.now.utc}")
+        @tui.text_span(content: "#{t("Now")}: #{Time.now.utc}    "),
+        @tui.text_span(content: "#{t("Locale")}: #{@lang}")
       ]
 
       if Tabs.current.data[:filter]
         @filter_style = @tui.style(fg: :white, bg: :dark_gray)
         footer += [
-          @tui.text_span(content: "   Filter: ", style: @filter_style),
+          @tui.text_span(content: "   #{t("Filter")}: ", style: @filter_style),
           @tui.text_span(content: Tabs.current.data[:filter], style: @filter_style),
           @tui.text_span(content: "_", style: @tui.style(fg: :white, bg: :dark_gray, modifiers: [:slow_blink]))
         ]
       end
       lines << @tui.text_line(spans: footer)
 
-      controls = @tui.block(title: "Controls", borders: [:all],
+      controls = @tui.block(title: t("Controls"), borders: [:all],
         children: [@tui.paragraph(text: lines)])
       frame.render_widget(controls, area)
     end
@@ -268,10 +274,61 @@ module Sidekiq
         @tui.paragraph(
           text: header + lines,
           alignment: :left,
-          block: @tui.block(title: "Error", borders: [:all], border_style: @tui.style(fg: :light_red))
+          block: @tui.block(title: t("Error"), borders: [:all], border_style: @tui.style(fg: :light_red))
         ),
         area
       )
+    end
+
+    public def t(msg, options = nil)
+      string = @strings[msg] || msg
+      if options.nil?
+        string
+      else
+        string % options
+      end
+    end
+
+    def load_strings(lang)
+      {}.tap do |all|
+        find_locale_files(lang).each do |file|
+          strs = YAML.safe_load_file(file)
+          all.merge! strs[lang]
+        end
+      end
+    end
+
+    def locale_files
+      @@locale_files ||= LOCALE_DIRECTORIES.flat_map { |path|
+        Dir["#{path}/*.yml"]
+      }
+    end
+
+    def available_locales
+      @@available_locales ||= Set.new(locale_files.map { |path| File.basename(path, ".yml") })
+    end
+
+    def find_locale_files(lang)
+      locale_files.select { |file| file =~ /\/#{lang}\.yml$/ }
+    end
+
+    def load_language
+      require "yaml"
+      # LANG=en_US.utf-8
+      lang = (ENV["LANG"] || "en").split(".").first # "en_US"
+      while lang.size > 0
+        hash = load_strings(lang)
+        if hash.size > 0
+          # found a working language dataset
+          @lang = lang
+          @strings = hash
+          Sidekiq.logger.info { [@lang, @strings.size] }
+          break
+        end
+        # Try "en_US", "en_U", "en_", "en"
+        # It's ugly and bruteforce but it works
+        lang = lang[..-2]
+      end
     end
   end
 end

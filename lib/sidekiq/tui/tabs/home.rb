@@ -127,7 +127,7 @@ module Sidekiq
           ]
 
           # Format keys and values with spacing
-          keys_line = keys.map { |k| k.ljust(18) }.join("  ")
+          keys_line = keys.map { |k| t(k).ljust(18) }.join("  ")
           values_line = values.map { |v| v.ljust(18) }.join("  ")
 
           frame.render_widget(

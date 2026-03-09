@@ -118,7 +118,7 @@ module Sidekiq
               style: tui.style(fg: :white)
             ),
             block: tui.block(
-              title: "Metrics",
+              title: t(name),
               borders: [:all]
             )
           )

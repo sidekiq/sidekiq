@@ -6,9 +6,14 @@ module Sidekiq
       attr_reader :name
       attr_reader :data
 
-      def initialize
-        reset_data
+      def initialize(parent)
+        @parent = parent
         @name = self.class.name.split("::").last
+        reset_data
+      end
+
+      def t(*)
+        @parent.t(*)
       end
 
       def reset_data
@@ -148,7 +153,7 @@ module Sidekiq
         ]
 
         # Format keys and values with spacing
-        keys_line = keys.map { |k| k.to_s.ljust(12) }.join("  ")
+        keys_line = keys.map { |k| t(k).to_s.ljust(12) }.join("  ")
         values_line = values.map { |v| v.to_s.ljust(12) }.join("  ")
 
         frame.render_widget(

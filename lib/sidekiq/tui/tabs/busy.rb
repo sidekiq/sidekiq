@@ -67,8 +67,8 @@ module Sidekiq
           render_status_section(tui, frame, chunks[1])
           render_table(tui, frame, chunks[2]) do
             {
-              title: "Processes",
-              header: ["☑️", "Name", "Started", "RSS", "Threads", "Busy"],
+              title: t("Processes"),
+              header: ["☑️", "Name", "Started", "RSS", "Threads", "Busy"].map { |x| t(x) },
               widths: [
                 tui.constraint_length(5),
                 tui.constraint_fill(1),
@@ -88,7 +88,6 @@ module Sidekiq
         end
 
         def render_status_section(tui, frame, area)
-          keys = ["Processes", "Threads", "Busy", "Utilization", "RSS"]
           values = []
           processes = Sidekiq::ProcessSet.new
           workset = Sidekiq::WorkSet.new
@@ -101,13 +100,14 @@ module Sidekiq
           values << "#{(x == 0) ? 0 : ((ws / x.to_f) * 100).round(0)}%"
           values << format_memory(processes.total_rss)
 
-          keys_line = keys.map { |k| k.to_s.ljust(12) }.join("  ")
+          keys = %w[Processes Threads Busy Utilization RSS]
+          keys_line = keys.map { |k| t(k).to_s.ljust(12) }.join("  ")
           values_line = values.map { |v| v.to_s.ljust(12) }.join("  ")
 
           frame.render_widget(
             tui.paragraph(
               text: [keys_line, values_line],
-              block: tui.block(title: "Status", borders: [:all])
+              block: tui.block(title: t("Status"), borders: [:all])
             ),
             area
           )

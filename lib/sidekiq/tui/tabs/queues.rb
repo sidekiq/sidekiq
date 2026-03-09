@@ -60,7 +60,7 @@ module Sidekiq
         end
 
         def render(tui, frame, area)
-          header = ["☑️", "Queue", "Size", "Latency"]
+          header = ["☑️", "Queue", "Size", "Latency"].map { |x| t(x) }
           header << "Paused?" if Sidekiq.pro?
 
           chunks = tui.layout_split(
@@ -75,7 +75,7 @@ module Sidekiq
           render_stats_section(tui, frame, chunks[0])
           render_table(tui, frame, chunks[1]) do
             {
-              title: "Queues",
+              title: t(name),
               header:,
               widths: header.map.with_index { |_, idx|
                 tui.constraint_length((idx == 1) ? 60 : 10)
