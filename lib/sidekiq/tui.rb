@@ -74,7 +74,7 @@ module Sidekiq
           tabs = @tui.tabs(
             titles: Tabs.all.map(&:name),
             selected_index: Tabs.all.index(Tabs.current),
-            block: @tui.block(title: Sidekiq::NAME, borders: [:all], title_style: @tui.style(fg: :light_red, modifiers: [:bold])),
+            block: @tui.block(title: " #{Sidekiq::NAME} ", borders: [:all], title_style: @tui.style(fg: :light_red, modifiers: [:bold])),
             divider: " | ",
             highlight_style: @highlight_style,
             style: @base_style
