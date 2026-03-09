@@ -97,7 +97,7 @@ module Sidekiq
             ]
           )
           content = @tui.block(
-            title: Sidekiq::NAME,
+            title: " #{Sidekiq::NAME} ",
             borders: [:all],
             title_style: @tui.style(fg: :light_red, modifiers: [:bold]),
             children: [
@@ -106,16 +106,24 @@ module Sidekiq
                 text: [
                   @tui.text_line(spans: ["Welcome to the Sidekiq Terminal UI"], alignment: :center),
                   @tui.text_line(spans: [
+                    @tui.text_span(content: "Global hotkeys"),
+                  ]),
+                  @tui.text_line(spans: []),
+                  @tui.text_line(spans: [
                     @tui.text_span(content: "Esc", style: @hotkey_style),
-                    @tui.text_span(content: ": Close")
+                    @tui.text_span(content: ": Close this window")
                   ]),
                   @tui.text_line(spans: [
                     @tui.text_span(content: "←/→", style: @hotkey_style),
                     @tui.text_span(content: ": Move between tabs")
                   ]),
                   @tui.text_line(spans: [
+                    @tui.text_span(content: "h/l", style: @hotkey_style),
+                    @tui.text_span(content: ": Move to prev/next page of data")
+                  ]),
+                  @tui.text_line(spans: [
                     @tui.text_span(content: "j/k", style: @hotkey_style),
-                    @tui.text_span(content: ": Use vim keys to move to prev/next row")
+                    @tui.text_span(content: ": Move to prev/next row in current page")
                   ]),
                   @tui.text_line(spans: [
                     @tui.text_span(content: "x", style: @hotkey_style),
@@ -123,11 +131,7 @@ module Sidekiq
                   ]),
                   @tui.text_line(spans: [
                     @tui.text_span(content: "A", style: @hotkey_style),
-                    @tui.text_span(content: ": Select/deselect All visible rows")
-                  ]),
-                  @tui.text_line(spans: [
-                    @tui.text_span(content: "h/l", style: @hotkey_style),
-                    @tui.text_span(content: ": Use vim keys to move to prev/next page")
+                    @tui.text_span(content: ": Select/deselect All rows in current page")
                   ]),
                   @tui.text_line(spans: [
                     @tui.text_span(content: "q", style: @hotkey_style),
