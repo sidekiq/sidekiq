@@ -14,6 +14,7 @@ gem "puma"
 gem "sidekiq", path: ".."
 gem "sqlite3", "~> 2.2"
 gem "json"
+gem "ratatui_ruby"
 
 gem "after_commit_everywhere"
 
