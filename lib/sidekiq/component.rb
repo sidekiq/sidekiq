@@ -57,6 +57,9 @@ module Sidekiq
     end
 
     def tid
+      # We XOR with PID to ensure Thread IDs changes after fork.
+      # I'm unclear why we don't multiply the two values to better guarantee
+      # a unique value but it's been this way for quite a while now. #3685
       Thread.current["sidekiq_tid"] ||= (Thread.current.object_id ^ ::Process.pid).to_s(36)
     end
 
