@@ -43,7 +43,12 @@
             <%= h(job["cattr"].inspect) if job["cattr"]&.any? %>
           </td>
           <td>
-            <form action="<%= root_path %>queues/<%= CGI.escape(@name) %>/delete" method="post">
+            <form action="<%= root_path %>queues/<%= CGI.escape(@name) %>/run" method="post" style="display:inline">
+              <%= csrf_tag %>
+              <input name="key_val" value="<%= h job.value %>" type="hidden">
+              <input class="btn btn-primary" type="submit" name="run" value="Run" data-confirm="<%= t('AreYouSure') %>">
+            </form>
+            <form action="<%= root_path %>queues/<%= CGI.escape(@name) %>/delete" method="post" style="display:inline">
               <%= csrf_tag %>
               <input name="key_val" value="<%= h job.value %>" type="hidden">
               <input class="btn btn-danger" type="submit" name="delete" value="<%= t('Delete') %>" data-confirm="<%= t('AreYouSure') %>">

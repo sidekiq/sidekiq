@@ -155,6 +155,16 @@ module Sidekiq
         redirect_with_query("#{root_path}queues/#{CGI.escape(name)}")
       end
 
+      post "/queues/:name/run" do
+        name = route_params(:name)
+        job = Sidekiq::JobRecord.new(url_params("key_val"), name)
+        klass = Object.const_get(job.klass)
+        klass.new.perform(*job.args)
+        job.delete
+
+        redirect_with_query("#{root_path}queues/#{CGI.escape(name)}")
+      end
+
       get "/morgue" do
         x = url_params("substr")
 
