@@ -11,32 +11,32 @@ module Sidekiq
       # Conventions: dangerous/irreversible actions should use UPPERCASE codes.
       # The Shift button means "I'm sure".
       GLOBAL = [
-        {code: "?", display: "?", description: "Help", action: ->(tab) { Tabs.show_help }},
-        {code: "left", display: "←/→", description: "Select Tab", action: ->(tab) { Tabs.navigate(:left) }, refresh: true},
-        {code: "right", action: ->(tab) { Tabs.navigate(:right) }, refresh: true},
-        {code: "q", description: "Quit", action: ->(tab) { :quit }},
-        {code: "c", modifiers: ["ctrl"], action: ->(tab) { :quit }}
+        {code: "?", display: "?", description: "Help", action: ->(tui, tab) { tui.show_help }},
+        {code: "left", display: "←/→", description: "Select Tab", action: ->(tui, tab) { tui.navigate(:left) }, refresh: true},
+        {code: "right", action: ->(tui, tab) { tui.navigate(:right) }, refresh: true},
+        {code: "q", description: "Quit", action: ->(tui, tab) { :quit }},
+        {code: "c", modifiers: ["ctrl"], action: ->(tui, tab) { :quit }}
       ].freeze
 
       SHARED = {
         pageable: [
           {code: "h", display: "h/l", description: "Prev/Next Page",
-           action: ->(tab) { tab.prev_page }, refresh: true},
-          {code: "l", action: ->(tab) { tab.next_page }, refresh: true}
+           action: ->(tui, tab) { tab.prev_page }, refresh: true},
+          {code: "l", action: ->(tui, tab) { tab.next_page }, refresh: true}
         ],
         selectable: [
           {code: "k", display: "j/k", description: "Prev/Next Row",
-           action: ->(tab) { tab.navigate_row(:up) }},
-          {code: "j", action: ->(tab) { tab.navigate_row(:down) }},
-          {code: "x", description: "Select", action: ->(tab) { tab.toggle_select }},
+           action: ->(tui, tab) { tab.navigate_row(:up) }},
+          {code: "j", action: ->(tui, tab) { tab.navigate_row(:down) }},
+          {code: "x", description: "Select", action: ->(tui, tab) { tab.toggle_select }},
           {code: "A", modifiers: ["shift"], display: "A", description: "Select All",
-           action: ->(tab) { tab.toggle_select(:all) }}
+           action: ->(tui, tab) { tab.toggle_select(:all) }}
         ],
         filterable: [
-          {code: "/", display: "/", description: "Filter", action: ->(tab) { tab.start_filtering }},
-          {code: "backspace", action: ->(tab) { tab.remove_last_char_from_filter }, refresh: true},
-          {code: "enter", action: ->(tab) { tab.stop_filtering }, refresh: true},
-          {code: "esc", action: ->(tab) { tab.stop_and_clear_filtering }, refresh: true}
+          {code: "/", display: "/", description: "Filter", action: ->(tui, tab) { tab.start_filtering }},
+          {code: "backspace", action: ->(tui, tab) { tab.remove_last_char_from_filter }, refresh: true},
+          {code: "enter", action: ->(tui, tab) { tab.stop_filtering }, refresh: true},
+          {code: "esc", action: ->(tui, tab) { tab.stop_and_clear_filtering }, refresh: true}
         ]
       }.freeze
 

@@ -11,9 +11,9 @@ module Sidekiq
         def controls
           @controls ||= super + [
             {code: "D", modifiers: ["shift"], display: "D", description: "Delete",
-             action: ->(tab) { tab.delete_queue! }, refresh: true},
+             action: ->(tui, tab) { tab.delete_queue! }, refresh: true},
             {code: "p", description: "Pause/Unpause Queue",
-             action: ->(tab) { tab.toggle_pause_queue! }}
+             action: ->(tui, tab) { tab.toggle_pause_queue! }}
           ]
         end
 

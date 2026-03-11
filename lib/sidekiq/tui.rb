@@ -1,9 +1,9 @@
 # https://sr.ht/~kerrick/ratatui_ruby/
 # https://git.sr.ht/~kerrick/ratatui_ruby/tree/stable/item/examples/
-gem "ratatui_ruby", ">=1.3.0"
+gem "ratatui_ruby", ">=1.4.0"
 require "ratatui_ruby"
 
-RatatuiRuby.debug_mode! if ENV["DEBUG"]
+RatatuiRuby.debug_mode! if !!ENV["DEBUG"]
 
 require "sidekiq/api"
 require "sidekiq/paginator"
@@ -11,10 +11,6 @@ require "sidekiq/paginator"
 require_relative "tui/filtering"
 require_relative "tui/controls"
 require_relative "tui/tabs"
-
-def log(*x)
-  x.each { |item| Sidekiq.logger.info { item } }
-end
 
 module Sidekiq
   class TUI
@@ -34,10 +30,7 @@ module Sidekiq
       @last_refresh = Time.now
       @fps = Array.new(2) { 0 }
       @previous_fps = 0
-    end
-
-    def debugging?
-      !!ENV["DEBUG"]
+      @showing = :main
     end
 
     def prepare(tui)
@@ -47,7 +40,7 @@ module Sidekiq
       @highlight_style = @tui.style(fg: :light_red, modifiers: [:underlined])
       @hotkey_style = @tui.style(modifiers: [:bold, :underlined])
       # eager load tabs
-      Tabs.all(self)
+      all
       refresh_data
     end
 
@@ -64,7 +57,7 @@ module Sidekiq
 
     def render
       track_fps do
-        if Tabs.showing == :main
+        if @showing == :main
           @tui.draw do |frame|
             main_area, controls_area = @tui.layout_split(
               frame.area,
@@ -85,10 +78,10 @@ module Sidekiq
               ]
             )
 
-            all_tabs = Tabs.all(self)
+            all_tabs = all
             tabs = @tui.tabs(
               titles: all_tabs.map { |tab| t(tab.name) },
-              selected_index: all_tabs.index(Tabs.current),
+              selected_index: all_tabs.index(current_tab),
               block: @tui.block(title: " #{Sidekiq::NAME}", borders: [:all], title_style: @tui.style(fg: :light_red, modifiers: [:bold])),
               divider: " | ",
               highlight_style: @highlight_style,
@@ -101,7 +94,7 @@ module Sidekiq
           end
         end
 
-        if Tabs.showing == :help
+        if @showing == :help
           @tui.draw do |frame|
             main_area, controls_area = @tui.layout_split(
               frame.area,
@@ -178,13 +171,13 @@ module Sidekiq
     end
 
     def render_content_area(frame, content_area)
-      return render_error(frame, content_area, Tabs.current.error) if Tabs.current.error
+      return render_error(frame, content_area, current_tab.error) if current_tab.error
 
-      Tabs.current.render(@tui, frame, content_area)
+      current_tab.render(@tui, frame, content_area)
     end
 
     def render_controls(frame, area)
-      active_keys = Tabs.current.controls.filter { |hash| hash[:description] }
+      active_keys = current_tab.controls.filter { |hash| hash[:description] }
 
       # Split controls into two lines, 8 is arbitrary
       # TODO Dynamically split based on term width?
@@ -215,11 +208,11 @@ module Sidekiq
         @tui.text_span(content: "#{t("Locale")}: #{@lang}")
       ]
 
-      if Tabs.current.data[:filter]
+      if current_tab.data[:filter]
         @filter_style = @tui.style(fg: :white, bg: :dark_gray)
         footer += [
           @tui.text_span(content: "   #{t("Filter")}: ", style: @filter_style),
-          @tui.text_span(content: Tabs.current.data[:filter], style: @filter_style),
+          @tui.text_span(content: current_tab.data[:filter], style: @filter_style),
           @tui.text_span(content: "_", style: @tui.style(fg: :white, bg: :dark_gray, modifiers: [:slow_blink]))
         ]
       end
@@ -233,26 +226,25 @@ module Sidekiq
 
     def handle_input
       case @tui.poll_event
-      in {type: :key, code: "esc"} if Tabs.showing == :help
-        Tabs.show_main
-      in {type: :key, code: code} if Tabs.current.filtering? && code.length == 1
-        Tabs.current.append_to_filter(code)
-        Tabs.current.refresh_data
+      in {type: :key, code: "esc"} if @showing == :help
+        @showing = :main
+      in {type: :key, code: code} if current_tab.filtering? && code.length == 1
+        current_tab.append_to_filter(code)
+        current_tab.refresh_data
       in {type: :key, code:, modifiers:}
-        tab = Tabs.current
-        control = tab.controls.find { |ctrl|
+        control = current_tab.controls.find { |ctrl|
           ctrl[:code] == code &&
             (ctrl[:modifiers] || []) == (modifiers || [])
         }
         return unless control
-        control[:action].call(Tabs.current).tap {
+        control[:action].call(self, current_tab).tap {
           refresh_data if control[:refresh]
         }
       else
         # Ignore other events
       end
     rescue => ex
-      log(ex.message, ex.backtrace)
+      logger.error { [ex.message, ex.backtrace] }
     end
 
     def redis_url
@@ -268,11 +260,11 @@ module Sidekiq
     end
 
     def refresh_data
-      Tabs.current.refresh_data
+      current_tab.refresh_data
       @last_refresh = Time.now
     rescue => e
       handle_exception(e)
-      Tabs.current.error = e
+      current_tab.error = e
     end
 
     def render_error(frame, area, err)
@@ -290,6 +282,26 @@ module Sidekiq
         ),
         area
       )
+    end
+
+    def show_help
+      @showing = :help
+    end
+
+    def all
+      @all ||= Tabs::All.map { |kls| kls.new(self) }
+    end
+
+    def current_tab
+      @current ||= @all.first
+    end
+
+    # Navigate tabs to the left or right.
+    # @param direction [Symbol] :left or :right
+    def navigate(direction)
+      index_change = (direction == :right) ? 1 : -1
+      @current = @all[(@all.index(current_tab) + index_change) % @all.size]
+      @current.reset_data
     end
 
     public def t(msg, options = nil)
@@ -357,6 +369,10 @@ module Sidekiq
         @fps[prev] = 0
       end
       @previous_fps
+    end
+
+    def debugging?
+      !!ENV["DEBUG"]
     end
   end
 end

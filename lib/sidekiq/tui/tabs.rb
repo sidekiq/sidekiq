@@ -10,34 +10,6 @@ module Sidekiq
   class TUI
     module Tabs
       All = Set.new([Home, Busy, Queues, Scheduled, Retries, Dead, Metrics])
-
-      def self.all(parent)
-        @all ||= All.map { |kls| kls.new(parent) }
-      end
-
-      def self.current
-        @current ||= @all.first
-      end
-
-      # Navigate tabs to the left or right.
-      # @param direction [Symbol] :left or :right
-      def self.navigate(direction)
-        index_change = (direction == :right) ? 1 : -1
-        @current = @all[(@all.index(current) + index_change) % @all.size]
-        current.reset_data
-      end
-
-      def self.showing
-        @showing ||= :main
-      end
-
-      def self.show_main
-        @showing = :main
-      end
-
-      def self.show_help
-        @showing = :help
-      end
     end
   end
 end

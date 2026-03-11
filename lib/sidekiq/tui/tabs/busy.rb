@@ -10,8 +10,8 @@ module Sidekiq
 
         def controls
           @controls ||= super + [
-            {code: "T", modifiers: ["shift"], description: "Terminate", action: ->(tab) { tab.terminate! }},
-            {code: "Q", modifiers: ["shift"], description: "Quiet", action: ->(tab) { tab.quiet! }}
+            {code: "T", modifiers: ["shift"], description: "Terminate", action: ->(tui, tab) { tab.terminate! }},
+            {code: "Q", modifiers: ["shift"], description: "Quiet", action: ->(tui, tab) { tab.quiet! }}
           ]
         end
 
