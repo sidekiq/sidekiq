@@ -3,7 +3,7 @@
 gem "ratatui_ruby", ">=1.3.0"
 require "ratatui_ruby"
 
-RatatuiRuby.debug_mode!
+RatatuiRuby.debug_mode! if ENV["DEBUG"]
 
 require "sidekiq/api"
 require "sidekiq/paginator"
@@ -20,148 +20,159 @@ module Sidekiq
   class TUI
     include Sidekiq::Component
 
-    LOCALE_DIRECTORIES = [File.expand_path("#{File.dirname(__FILE__)}/../../web/locales")]
     PageOptions = Data.define(:page, :size)
 
     REFRESH_INTERVAL_SECONDS = 2
+    LOCALE_DIRECTORIES = [File.expand_path("#{File.dirname(__FILE__)}/../../web/locales")]
 
-    def initialize
-      @config = Sidekiq.default_configuration
+    # language is meant to be a locale code, e.g.
+    # LANG=en_US.utf-8
+    def initialize(cfg, language: ENV["LANG"] || "en")
+      @lang = language
+      @config = cfg
       @base_style = nil
       @last_refresh = Time.now
-      load_language
+      @fps = Array.new(2) { 0 }
+      @previous_fps = 0
     end
 
-    def run
+    def debugging?
+      !!ENV["DEBUG"]
+    end
+
+    def prepare(tui)
+      load_locale
+
+      @tui = tui
+      @highlight_style = @tui.style(fg: :light_red, modifiers: [:underlined])
+      @hotkey_style = @tui.style(modifiers: [:bold, :underlined])
+      # eager load tabs
+      Tabs.all(self)
+      refresh_data
+    end
+
+    def run_loop
       # Must log to a file, terminal is now controlled by Ratatui
       config.logger = Logger.new("tui.log")
 
-      RatatuiRuby.run do |tui|
-        @tui = tui
-        @highlight_style = @tui.style(fg: :light_red, modifiers: [:underlined])
-        @hotkey_style = @tui.style(modifiers: [:bold, :underlined])
-        # eager load tabs
-        Tabs.all(self)
-
-        refresh_data
-
-        loop do
-          refresh_data if should_refresh?
-          render
-          break if handle_input == :quit
-        end
+      loop do
+        refresh_data if should_refresh?
+        render
+        break if handle_input == :quit
       end
     end
 
     def render
-      if Tabs.showing == :main
-        @tui.draw do |frame|
-          main_area, controls_area = @tui.layout_split(
-            frame.area,
-            direction: :vertical,
-            constraints: [
-              @tui.constraint_fill(1),
-              @tui.constraint_length(5)
-            ]
-          )
+      track_fps do
+        if Tabs.showing == :main
+          @tui.draw do |frame|
+            main_area, controls_area = @tui.layout_split(
+              frame.area,
+              direction: :vertical,
+              constraints: [
+                @tui.constraint_fill(1),
+                @tui.constraint_length(5)
+              ]
+            )
 
-          # Split main area into tabs and content
-          tabs_area, content_area = @tui.layout_split(
-            main_area,
-            direction: :vertical,
-            constraints: [
-              @tui.constraint_length(3),
-              @tui.constraint_fill(1)
-            ]
-          )
+            # Split main area into tabs and content
+            tabs_area, content_area = @tui.layout_split(
+              main_area,
+              direction: :vertical,
+              constraints: [
+                @tui.constraint_length(3),
+                @tui.constraint_fill(1)
+              ]
+            )
 
-          all_tabs = Tabs.all(self)
-          tabs = @tui.tabs(
-            titles: all_tabs.map { |tab| t(tab.name) },
-            selected_index: all_tabs.index(Tabs.current),
-            block: @tui.block(title: " #{Sidekiq::NAME} ", borders: [:all], title_style: @tui.style(fg: :light_red, modifiers: [:bold])),
-            divider: " | ",
-            highlight_style: @highlight_style,
-            style: @base_style
-          )
-          frame.render_widget(tabs, tabs_area)
+            all_tabs = Tabs.all(self)
+            tabs = @tui.tabs(
+              titles: all_tabs.map { |tab| t(tab.name) },
+              selected_index: all_tabs.index(Tabs.current),
+              block: @tui.block(title: " #{Sidekiq::NAME}", borders: [:all], title_style: @tui.style(fg: :light_red, modifiers: [:bold])),
+              divider: " | ",
+              highlight_style: @highlight_style,
+              style: @base_style
+            )
+            frame.render_widget(tabs, tabs_area)
 
-          render_content_area(frame, content_area)
-          render_controls(frame, controls_area)
+            render_content_area(frame, content_area)
+            render_controls(frame, controls_area)
+          end
         end
-      end
 
-      if Tabs.showing == :help
-        @tui.draw do |frame|
-          main_area, controls_area = @tui.layout_split(
-            frame.area,
-            direction: :vertical,
-            constraints: [
-              @tui.constraint_fill(1),
-              @tui.constraint_length(4)
-            ]
-          )
-          content = @tui.block(
-            title: " #{Sidekiq::NAME} ",
-            borders: [:all],
-            title_style: @tui.style(fg: :light_red, modifiers: [:bold]),
-            children: [
-              # TODO convert to table
-              @tui.paragraph(
-                text: [
-                  @tui.text_line(spans: ["Welcome to the Sidekiq Terminal UI"], alignment: :center),
-                  @tui.text_line(spans: [
-                    @tui.text_span(content: "Global hotkeys")
-                  ]),
-                  @tui.text_line(spans: []),
-                  @tui.text_line(spans: [
-                    @tui.text_span(content: "Esc", style: @hotkey_style),
-                    @tui.text_span(content: ": Close this window")
-                  ]),
-                  @tui.text_line(spans: [
-                    @tui.text_span(content: "←/→", style: @hotkey_style),
-                    @tui.text_span(content: ": Move between tabs")
-                  ]),
-                  @tui.text_line(spans: [
-                    @tui.text_span(content: "h/l", style: @hotkey_style),
-                    @tui.text_span(content: ": Move to prev/next page of data")
-                  ]),
-                  @tui.text_line(spans: [
-                    @tui.text_span(content: "j/k", style: @hotkey_style),
-                    @tui.text_span(content: ": Move to prev/next row in current page")
-                  ]),
-                  @tui.text_line(spans: [
-                    @tui.text_span(content: "x", style: @hotkey_style),
-                    @tui.text_span(content: ": Select/deselect current row")
-                  ]),
-                  @tui.text_line(spans: [
-                    @tui.text_span(content: "A", style: @hotkey_style),
-                    @tui.text_span(content: ": Select/deselect All rows in current page")
-                  ]),
-                  @tui.text_line(spans: [
-                    @tui.text_span(content: "q", style: @hotkey_style),
-                    @tui.text_span(content: ": Quit")
-                  ])
-                ]
-              )
-            ]
-          )
-          frame.render_widget(content, main_area)
-          controls = @tui.block(
-            title: t("Controls"),
-            borders: [:all],
-            children: [
-              @tui.paragraph(
-                text: [
-                  @tui.text_line(spans: [
-                    @tui.text_span(content: "Esc", style: @hotkey_style),
-                    @tui.text_span(content: ": Close  ")
-                  ])
-                ]
-              )
-            ]
-          )
-          frame.render_widget(controls, controls_area)
+        if Tabs.showing == :help
+          @tui.draw do |frame|
+            main_area, controls_area = @tui.layout_split(
+              frame.area,
+              direction: :vertical,
+              constraints: [
+                @tui.constraint_fill(1),
+                @tui.constraint_length(4)
+              ]
+            )
+            content = @tui.block(
+              title: " #{Sidekiq::NAME} ",
+              borders: [:all],
+              title_style: @tui.style(fg: :light_red, modifiers: [:bold]),
+              children: [
+                # TODO convert to table
+                @tui.paragraph(
+                  text: [
+                    @tui.text_line(spans: ["Welcome to the Sidekiq Terminal UI"], alignment: :center),
+                    @tui.text_line(spans: [
+                      @tui.text_span(content: "Global hotkeys")
+                    ]),
+                    @tui.text_line(spans: []),
+                    @tui.text_line(spans: [
+                      @tui.text_span(content: "Esc", style: @hotkey_style),
+                      @tui.text_span(content: ": Close this window")
+                    ]),
+                    @tui.text_line(spans: [
+                      @tui.text_span(content: "←/→", style: @hotkey_style),
+                      @tui.text_span(content: ": Move between tabs")
+                    ]),
+                    @tui.text_line(spans: [
+                      @tui.text_span(content: "h/l", style: @hotkey_style),
+                      @tui.text_span(content: ": Move to prev/next page of data")
+                    ]),
+                    @tui.text_line(spans: [
+                      @tui.text_span(content: "j/k", style: @hotkey_style),
+                      @tui.text_span(content: ": Move to prev/next row in current page")
+                    ]),
+                    @tui.text_line(spans: [
+                      @tui.text_span(content: "x", style: @hotkey_style),
+                      @tui.text_span(content: ": Select/deselect current row")
+                    ]),
+                    @tui.text_line(spans: [
+                      @tui.text_span(content: "A", style: @hotkey_style),
+                      @tui.text_span(content: ": Select/deselect All rows in current page")
+                    ]),
+                    @tui.text_line(spans: [
+                      @tui.text_span(content: "q", style: @hotkey_style),
+                      @tui.text_span(content: ": Quit")
+                    ])
+                  ]
+                )
+              ]
+            )
+            frame.render_widget(content, main_area)
+            controls = @tui.block(
+              title: t("Controls"),
+              borders: [:all],
+              children: [
+                @tui.paragraph(
+                  text: [
+                    @tui.text_line(spans: [
+                      @tui.text_span(content: "Esc", style: @hotkey_style),
+                      @tui.text_span(content: ": Close  ")
+                    ])
+                  ]
+                )
+              ]
+            )
+            frame.render_widget(controls, controls_area)
+          end
         end
       end
     end
@@ -212,6 +223,7 @@ module Sidekiq
           @tui.text_span(content: "_", style: @tui.style(fg: :white, bg: :dark_gray, modifiers: [:slow_blink]))
         ]
       end
+      footer << @tui.text_span(content: "  FPS: #{previous_fps}") if debugging?
       lines << @tui.text_line(spans: footer)
 
       controls = @tui.block(title: t("Controls"), borders: [:all],
@@ -312,23 +324,39 @@ module Sidekiq
       locale_files.select { |file| file =~ /\/#{lang}\.yml$/ }
     end
 
-    def load_language
+    def load_locale
       require "yaml"
-      # LANG=en_US.utf-8
-      lang = (ENV["LANG"] || "en").split(".").first # "en_US"
+      lang = @lang.split(".").first # "en_US"
       while lang.size > 0
         hash = load_strings(lang)
         if hash.size > 0
           # found a working language dataset
           @lang = lang
           @strings = hash
-          Sidekiq.logger.info { [@lang, @strings.size] }
+          Sidekiq.logger.debug { "using the #{lang} locale" }
           break
         end
         # Try "en_US", "en_U", "en_", "en"
         # It's ugly and bruteforce but it works
         lang = lang[..-2]
       end
+    end
+
+    def track_fps
+      # We hold two fps buckets: one for current second, one for previous second
+      idx = Time.now.to_i % 2
+      @fps[idx] += 1
+      yield
+    end
+
+    def previous_fps
+      curidx = Time.now.to_i % 2
+      prev = curidx == 1 ? 0 : 1
+      if (val = @fps[prev]) != 0
+        @previous_fps = val
+        @fps[prev] = 0
+      end
+      @previous_fps
     end
   end
 end
