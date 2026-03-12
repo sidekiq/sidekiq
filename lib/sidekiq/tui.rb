@@ -225,7 +225,9 @@ module Sidekiq
     end
 
     def handle_input
-      case @tui.poll_event
+      # We shouldn't need more than 10 FPS for a data-oriented app.
+      # This throttles down our CPU usage. Default is 60 FPS.
+      case @tui.poll_event(timeout: 0.1)
       in {type: :key, code: "esc"} if @showing == :help
         @showing = :main
       in {type: :key, code: code} if current_tab.filtering? && code.length == 1
