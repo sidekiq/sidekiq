@@ -27,7 +27,7 @@ module Sidekiq
       @lang = language
       @config = cfg
       @base_style = nil
-      @last_refresh = Time.now
+      @last_refresh = Time.at(0)
       @fps = Array.new(2) { 0 }
       @previous_fps = 0
       @showing = :main
@@ -41,7 +41,6 @@ module Sidekiq
       @hotkey_style = @tui.style(modifiers: [:bold, :underlined])
       # eager load tabs
       all
-      refresh_data
     end
 
     def run_loop
@@ -262,6 +261,7 @@ module Sidekiq
     end
 
     def refresh_data
+      # logger.info GC.stat
       current_tab.refresh_data
       @last_refresh = Time.now
     rescue => e
