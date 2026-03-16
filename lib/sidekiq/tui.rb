@@ -365,7 +365,7 @@ module Sidekiq
 
     def previous_fps
       curidx = Time.now.to_i % 2
-      prev = curidx == 1 ? 0 : 1
+      prev = (curidx == 1) ? 0 : 1
       if (val = @fps[prev]) != 0
         @previous_fps = val
         @fps[prev] = 0
