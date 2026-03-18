@@ -62,7 +62,7 @@ module Sidekiq
       pageidx = current_page - 1
       starting = pageidx * page_size
       items = items.to_a
-      [current_page, items.size, items[starting, page_size]]
+      [current_page, items.size, items[starting, page_size] || []]
     end
   end
 end

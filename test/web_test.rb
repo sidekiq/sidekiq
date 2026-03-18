@@ -150,6 +150,11 @@ describe Sidekiq::Web do
       assert_equal 302, last_response.status
       assert_equal "TERM", @config.redis { |c| c.lpop signals_key }
     end
+
+    it "renders without error when requesting a page beyond available workers" do
+      get "/busy?page=99"
+      assert_equal 200, last_response.status
+    end
   end
 
   it "can display queues" do
