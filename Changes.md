@@ -6,6 +6,7 @@ HEAD
 ----------
 
 - Mutation during iteration in `SortedSet#each` caused it to miss half of the jobs [#6936]
+- Fix edge case resulting in nil crash on /busy page [#6954]
 
 8.1.1
 ----------

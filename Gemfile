@@ -13,8 +13,8 @@ gem "railties", RAILS_VERSION
 gem "redis-client"
 gem "ratatui_ruby"
 
-#gem "memory_profiler"
-#gem "derailed_benchmarks"
+# gem "memory_profiler"
+# gem "derailed_benchmarks"
 
 gem "activerecord-jdbcsqlite3-adapter", platforms: :jruby
 gem "after_commit_everywhere", require: false
