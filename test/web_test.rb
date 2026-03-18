@@ -86,6 +86,11 @@ describe Sidekiq::Web do
   end
 
   describe "busy" do
+    it "renders without error when requesting a page beyond available workers" do
+      get "/busy?page=99"
+      assert_equal 200, last_response.status
+    end
+
     it "can display workers" do
       @config.redis do |conn|
         conn.incr("busy")
