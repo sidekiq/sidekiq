@@ -116,9 +116,16 @@ input {
 .pagination > .disabled > span,
 .pagination > .disabled > span:focus,
 .pagination > .disabled > span:hover {
-  color: #ddd;
+  color: #777;
   background-color: #333;
   border-color: #444;
+}
+.pagination > .active > a,
+.pagination > .active > a:hover,
+.pagination > .active > a:focus {
+  color: #fff;
+  background-color: #b1003e;
+  border-color: #b1003e;
 }
 
 .stat {
