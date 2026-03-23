@@ -2,7 +2,7 @@
 
 # This requires the default gemset so Sidekiq Pro
 # and Sidekiq Enterprise can load any code extensions.
-Bundler.require(:default)
+Bundler.require(:default, :tui)
 
 require_relative "../lib/sidekiq/tui"
 
