@@ -2,9 +2,14 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+8.1.2
 ----------
 
+- Initial release for `kiq`, Sidekiq's official terminal UI:
+```
+bundle exec kiq
+```
+Use REDIS_URL or REDIS_PROVIDER to point `kiq` to Redis.
 - Mutation during iteration in `SortedSet#each` caused it to miss half of the jobs [#6936]
 - Fix edge case resulting in nil crash on /busy page [#6954]
 
