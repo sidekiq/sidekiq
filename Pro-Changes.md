@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+8.1.1
+---------
+
+- Interrupted iterable job should not trigger :complete callback [#6889]
+- Support for `kiq`
+
 8.1.0
 ---------
 

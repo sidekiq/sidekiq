@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+8.1.1
+---------
+
+- Support for `kiq`
+
 8.1.0
 ---------
 
