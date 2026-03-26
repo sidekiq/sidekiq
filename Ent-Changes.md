@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+8.1.2
+---------
+
+- Remove ActiveSupport dependency in 8.1.1 [#6965]
+
 8.1.1
 ---------
 
