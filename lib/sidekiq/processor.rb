@@ -170,7 +170,7 @@ module Sidekiq
       # Treat malformed JSON as a special case: job goes straight to the morgue.
       job_hash = nil
       begin
-        job_hash = Sidekiq.load_json(jobstr)
+        job_hash = config.flavor.load(jobstr)
       rescue => ex
         now = Time.now.to_f
         redis do |conn|
