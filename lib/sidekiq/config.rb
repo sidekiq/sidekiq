@@ -255,7 +255,7 @@ module Sidekiq
     # Register a proc to handle any error which occurs within the Sidekiq process.
     #
     #   Sidekiq.configure_server do |config|
-    #     config.error_handlers << proc {|ex,ctx_hash| MyErrorService.notify(ex, ctx_hash) }
+    #     config.error_handlers << proc {|ex,ctx_hash,config| MyErrorService.notify(ex, ctx_hash) }
     #   end
     #
     # The default error handler logs errors to @logger.
