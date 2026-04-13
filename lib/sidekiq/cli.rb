@@ -2,7 +2,6 @@
 
 $stdout.sync = true
 
-require "yaml"
 require "optparse"
 require "erb"
 require "fileutils"
@@ -409,6 +408,7 @@ module Sidekiq # :nodoc:
     def parse_config(path)
       erb = ERB.new(File.read(path), trim_mode: "-")
       erb.filename = File.expand_path(path)
+      require "yaml"
       opts = YAML.safe_load(erb.result, permitted_classes: [Symbol], aliases: true) || {}
 
       if opts.respond_to? :deep_symbolize_keys!

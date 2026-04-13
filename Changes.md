@@ -2,6 +2,13 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+HEAD
+----------
+
+- [SECURITY] Remove as much YAML usage as possible. [#6950]
+  Localization files in `web/locales` are now manually parsed.
+  Sidekiq::CLI will now only require YAML if you use a `-C` .yml file.
+
 8.1.2
 ----------
 

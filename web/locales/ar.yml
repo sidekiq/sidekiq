@@ -74,7 +74,7 @@ ar:
   Stop: إيقاف
   StopAll: إيقاف الكل
   StopPolling: إيقاف الاستعلامات
-  TextDirection: 'rtl'
+  TextDirection: rtl
   Thread: نيسب
   Threads: نياسب
   ThreeMonths: ثلاثة أشهر
