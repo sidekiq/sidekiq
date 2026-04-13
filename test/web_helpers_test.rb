@@ -268,5 +268,19 @@ describe "Web helpers" do
 
       assert_equal false, obj.pollable?
     end
+
+    it "can parse locale files" do
+      obj = Helpers.new
+      Dir["web/locales/*.yml"].each do |path|
+        # p path
+        # path = "web/locales/en.yml"
+        ex = obj.parse_yaml_old(path)
+        was = obj.parse_yaml_new(path)
+        assert_equal path, "web/locales/#{was.keys.first}.yml"
+        ex.values.first.zip(was.values.first).each do |expected, got|
+          assert_equal expected, got
+        end
+      end
+    end
   end
 end

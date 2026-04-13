@@ -4,6 +4,12 @@
 
 Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 
+HEAD
+---------
+
+- Vendor code to remove `gserver` gem dependency
+- Make the `einhorn` dependency optional since it is only required for rolling restarts
+
 8.1.2
 ---------
 

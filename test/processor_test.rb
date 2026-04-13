@@ -125,8 +125,8 @@ describe Sidekiq::Processor do
   describe "exception handling" do
     let(:errors) { [] }
     let(:error_handler) do
-      proc do |exception, context|
-        errors << {exception: exception, context: context}
+      proc do |exception, context, config|
+        errors << {exception: exception, context: context, config: config}
       end
     end
 

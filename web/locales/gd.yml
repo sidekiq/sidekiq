@@ -1,4 +1,4 @@
-﻿# elements like %{queue} are variables and should not be translated
+# elements like %{queue} are variables and should not be translated
 gd:
   LanguageName: Gaeilge
   Actions: Gnìomhan
