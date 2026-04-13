@@ -4,6 +4,22 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Add new `autoflush` mode to Batches to flush every N jobs. [#6967]
+  The `jobs` block collects all jobs for the Batch and pushes them
+  all atomically at the same time but this can use a massive amount of
+  memory if your batch has millions of jobs. Enabling autoflush will
+  push every N collected jobs but will lose the atomicity.
+```ruby
+b = Sidekiq::Batch.new
+b.autoflush = 1000 # flush to Redis every 1000 jobs
+b.jobs do
+  # push tons of jobs
+end
+```
+
 8.1.1
 ---------
 
