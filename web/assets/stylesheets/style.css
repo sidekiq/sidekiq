@@ -534,6 +534,8 @@ input[type="checkbox"] { accent-color: var(--color-primary); }
 
 .pagination a { text-decoration: none; }
 
+.pagination .active a { color: var(--color-primary); font-weight: 700; }
+
 .pagination .disabled { opacity: 0.3; }
 
 div:has(.pagination.pull-right) { margin-left: auto; }
