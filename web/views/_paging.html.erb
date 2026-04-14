@@ -10,7 +10,7 @@
           <a href="<%= url %>?<%= qparams(page: @current_page - 1) %>"><%= @current_page - 1 %></a>
         </li>
       <% end %>
-      <li class="disabled">
+      <li class="active">
         <a href="<%= url %>?<%= qparams(page: @current_page) %>"><%= @current_page %></a>
       </li>
       <% if @total_size > @current_page * @count %>
