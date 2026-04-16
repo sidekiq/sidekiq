@@ -8,9 +8,6 @@
   </header>
 
   <% if @dead.size > 0 %>
-    <% if @total_size && @total_size >= Sidekiq.default_configuration[:dead_max_jobs] %>
-      <div class="alert"><%= t('DeadMaxJobsWarning', dead_max: number_with_delimiter(Sidekiq.default_configuration[:dead_max_jobs])) %></div>
-    <% end %>
     <form action="<%= root_path %>morgue" method="post">
       <%= csrf_tag %>
       <div class="table_container">
