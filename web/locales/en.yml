@@ -17,6 +17,7 @@ en:
   Dashboard: Dashboard
   Dead: Dead
   DeadJobs: Dead Jobs
+  DeadMaxJobsWarning: "Dead set has reached its maximum of %{dead_max} jobs. Oldest entries are automatically removed. Adjust dead_max_jobs in your Sidekiq configuration to change this limit."
   Delete: Delete
   DeleteAll: Delete All
   Deploy: Deploy
