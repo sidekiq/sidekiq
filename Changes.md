@@ -2,9 +2,12 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
-HEAD
+8.1.3
 ----------
 
+- Fix edge case leading to duplicate, concurrent execution [#6379]
+  If 2 Capsules process jobs from the same queue, long-running
+  jobs could run in parallel during process shutdown.
 - [SECURITY] Remove as much YAML usage as possible. [#6950]
   Localization files in `web/locales` are now manually parsed.
   Sidekiq::CLI will now only require YAML if you use a `-C` .yml file.
