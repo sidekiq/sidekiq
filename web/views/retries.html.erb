@@ -52,6 +52,9 @@
               </td>
               <td>
                 <div><a href="<%= root_path %>retries/<%= job_params(entry.item, entry.score) %>"><%= h truncate("#{entry['error_class']}: #{entry['error_message']}", 200) %></a></div>
+                <% if (state = @iterable_states[entry.jid]) %>
+                  <div><small>cursor=<%= h(truncate(state.cursor.inspect, 100)) %>; exec=<%= state.executions %>; rt=<%= number_with_delimiter(state.runtime, precision: 3) %>s</small></div>
+                <% end %>
               </td>
             </tr>
           <% end %>
