@@ -479,9 +479,7 @@ module Sidekiq
     end
 
     def iterable_state
-      return @iterable_state if defined?(@iterable_state)
-
-      @iterable_state = Sidekiq::IterableJobState.fetch(jid)
+      @iterable_state ||= Sidekiq::IterableJobQuery.new(jid)[jid]
     end
 
     def bid
@@ -1405,15 +1403,21 @@ module Sidekiq
   end
 
   # Persisted iteration state from Redis for jobs using Sidekiq::IterableJob.
-  class IterableJobState
-    # Fetch iteration state for a single JID.
-    def self.fetch(jid)
-      bulk_fetch([jid])[jid]
+  class IterableJobQuery
+    def initialize(jids)
+      @cache = bulk_fetch(jids)
     end
 
-    # Batch-fetch iteration state for multiple JIDs in a single Redis pipeline.
+    def [](jid)
+      @cache[jid]
+    end
+
+    private
+
+    # Bulk-fetch iteration state for multiple JIDs in a single Redis pipeline.
     # Returns a Hash of { jid => IterableJobState } for JIDs that have iteration state.
-    def self.bulk_fetch(jids)
+    def bulk_fetch(jids)
+      raise ArgumentError unless jids
       jids_to_fetch = Array(jids).compact.uniq
       return {} if jids_to_fetch.empty?
 
@@ -1423,38 +1427,36 @@ module Sidekiq
         end
       end
 
-      states = {}
+      states = Hash.new(capacity: jids_to_fetch.size)
       jids_to_fetch.each_with_index do |jid, i|
         raw = results[i]
         next if raw.nil? || raw.empty?
 
-        states[jid] = new(raw)
+        states[jid] = State.new(jid, raw)
       end
       states
     end
 
-    def initialize(raw)
-      @raw = raw
-    end
-
-    def executions
-      @raw["ex"].to_i
-    end
-
-    def runtime
-      @raw["rt"].to_f
-    end
-
-    def cursor
-      @cursor ||= begin
-        Sidekiq.load_json(@raw["c"])
-      rescue JSON::ParserError
-        @raw["c"]
+    State = Struct.new(:jid, :raw) do
+      def executions
+        raw["ex"].to_i
       end
-    end
 
-    def cancelled
-      @raw["cancelled"]&.to_i
+      def runtime
+        raw["rt"].to_f
+      end
+
+      def cursor
+        @cursor ||= begin
+          Sidekiq.load_json(raw["c"])
+        rescue JSON::ParserError
+          @raw["c"]
+        end
+      end
+
+      def cancelled
+        raw["cancelled"]&.to_i
+      end
     end
   end
 end
