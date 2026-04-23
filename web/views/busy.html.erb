@@ -138,7 +138,12 @@
           <td>
             <code><div class="args"><%= display_args(job.display_args) %></div></code>
           </td>
-          <td><%= relative_time(work.run_at) %></td>
+          <td>
+            <%= relative_time(work.run_at) %>
+            <% if (state = @iterable_states[job.jid]) %>
+              <div><small>cursor=<%= h(truncate(state.cursor.inspect, 100)) %>; exec=<%= state.executions %>; rt=<%= number_with_delimiter(state.runtime, precision: 3) %>s</small></div>
+            <% end %>
+          </td>
         </tr>
       <% end %>
     </table>
