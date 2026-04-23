@@ -34,6 +34,14 @@
             <code><%= job.jid %></code>
           </td>
         </tr>
+        <% if (state = job.iterable_state) %>
+        <tr>
+          <th>Iteration</th>
+          <td>
+            <code>cursor=<%= h(state.cursor.inspect) %>; exec=<%= state.executions %>; rt=<%= number_with_delimiter(state.runtime, precision: 3) %>s</code>
+          </td>
+        </tr>
+        <% end %>
         <% if job.bid %>
         <tr>
           <th>BID</th>

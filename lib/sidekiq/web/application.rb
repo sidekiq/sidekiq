@@ -92,6 +92,8 @@ module Sidekiq
         @count = (url_params("count") || 100).to_i
         (@current_page, @total_size, @workset) = page_items(workset, url_params("page"), @count)
 
+        @iterable_states = Sidekiq::IterableJobQuery.new(workset.map { |_, _, work| work.job.jid })
+
         erb(:busy)
       end
 
@@ -225,6 +227,8 @@ module Sidekiq
           (@current_page, @total_size, @retries) = page("retry", url_params("page"), @count)
           @retries = @retries.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
         end
+
+        @iterable_states = Sidekiq::IterableJobQuery.new(@retries.map(&:jid))
 
         erb(:retries)
       end

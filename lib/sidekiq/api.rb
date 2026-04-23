@@ -479,6 +479,10 @@ module Sidekiq
       self["jid"]
     end
 
+    def iterable_state
+      @iterable_state ||= Sidekiq::IterableJobQuery.new(jid)[jid]
+    end
+
     def bid
       self["bid"]
     end
@@ -1396,6 +1400,64 @@ module Sidekiq
 
     def data
       Sidekiq.redis { |c| c.hget(key, "data") }
+    end
+  end
+
+  # Persisted iteration state from Redis for jobs using Sidekiq::IterableJob.
+  class IterableJobQuery
+    def initialize(jids)
+      @cache = bulk_fetch(jids)
+    end
+
+    def [](jid)
+      @cache[jid]
+    end
+
+    private
+
+    # Bulk-fetch iteration state for multiple JIDs in a single Redis pipeline.
+    # Returns a Hash of { jid => IterableJobState } for JIDs that have iteration state.
+    def bulk_fetch(jids)
+      raise ArgumentError unless jids
+      jids_to_fetch = Array(jids).compact.uniq
+      return {} if jids_to_fetch.empty?
+
+      results = Sidekiq.redis do |conn|
+        conn.pipelined do |pipe|
+          jids_to_fetch.each { |jid| pipe.hgetall("it-#{jid}") }
+        end
+      end
+
+      states = Hash.new(capacity: jids_to_fetch.size)
+      jids_to_fetch.each_with_index do |jid, i|
+        raw = results[i]
+        next if raw.nil? || raw.empty?
+
+        states[jid] = State.new(jid, raw)
+      end
+      states
+    end
+
+    State = Struct.new(:jid, :raw) do
+      def executions
+        raw["ex"].to_i
+      end
+
+      def runtime
+        raw["rt"].to_f
+      end
+
+      def cursor
+        @cursor ||= begin
+          Sidekiq.load_json(raw["c"])
+        rescue JSON::ParserError
+          @raw["c"]
+        end
+      end
+
+      def cancelled
+        raw["cancelled"]&.to_i
+      end
     end
   end
 end
