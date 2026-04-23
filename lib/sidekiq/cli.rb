@@ -200,9 +200,7 @@ module Sidekiq # :nodoc:
         cli.logger.info "Received TSTP, no longer accepting new work"
         cli.launcher.quiet
       },
-      # deprecated, use INFO
       "TTIN" => ->(cli) {
-        cli.logger.error { "DEPRECATED: Please use the INFO signal for backtraces, support for TTIN will be removed in Sidekiq 9.0." }
         Thread.list.each do |thread|
           cli.logger.warn "Thread TID-#{(thread.object_id ^ ::Process.pid).to_s(36)} #{thread.name}"
           if thread.backtrace
@@ -213,6 +211,7 @@ module Sidekiq # :nodoc:
         end
       },
       "INFO" => ->(cli) {
+        cli.logger.error { "DEPRECATED: the INFO signal does not work on Linux, use TTIN instead." }
         Thread.list.each do |thread|
           cli.logger.warn "Thread TID-#{(thread.object_id ^ ::Process.pid).to_s(36)} #{thread.name}"
           if thread.backtrace
