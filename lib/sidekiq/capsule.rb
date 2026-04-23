@@ -51,7 +51,6 @@ module Sidekiq
     end
 
     def stop
-      fetcher&.bulk_requeue([])
     end
 
     # Sidekiq checks queues in three modes:
