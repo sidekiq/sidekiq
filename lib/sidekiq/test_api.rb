@@ -82,17 +82,19 @@ module Sidekiq
   module TestingClient
     private def atomic_push(conn, payloads)
       if Sidekiq::Testing.fake?
+        flvr = @config.flavor
         payloads.each do |job|
-          job = Sidekiq.load_json(Sidekiq.dump_json(job))
+          job = flvr.load(flvr.dump(job))
           job["enqueued_at"] = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond) unless job["at"]
           Queues.push(job["queue"], job["class"], job)
         end
         true
       elsif Sidekiq::Testing.inline?
+        flvr = @config.flavor
         payloads.each do |job|
           klass = Object.const_get(job["class"])
           job["id"] ||= SecureRandom.hex(12)
-          job_hash = Sidekiq.load_json(Sidekiq.dump_json(job))
+          job_hash = flvr.load(flvr.dump(job))
           klass.process_job(job_hash)
         end
         true

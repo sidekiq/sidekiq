@@ -277,12 +277,13 @@ module Sidekiq
     end
 
     def atomic_push(conn, payloads)
+      flvr = @config.flavor
       if payloads.first.key?("at")
         conn.zadd("schedule", payloads.flat_map { |hash|
           at = hash["at"].to_s
           # ActiveJob sets enqueued_at but the job has not been enqueued yet
           hash = hash.except("enqueued_at", "at")
-          [at, Sidekiq.dump_json(hash)]
+          [at, flvr.dump(hash)]
         })
       else
         now = ::Process.clock_gettime(::Process::CLOCK_REALTIME, :millisecond) # milliseconds since the epoch
@@ -291,7 +292,7 @@ module Sidekiq
         grouped_queues.each do |queue, grouped_payloads|
           to_push = grouped_payloads.map { |entry|
             entry["enqueued_at"] = now
-            Sidekiq.dump_json(entry)
+            flvr.dump(entry)
           }
           conn.lpush("queue:#{queue}", to_push)
         end

@@ -36,7 +36,7 @@ module Sidekiq
             # going wrong between the time jobs are popped from the scheduled queue and when
             # they are pushed onto a work queue and losing the jobs.
             while !@done && (job = zpopbyscore(conn, keys: [sorted_set], argv: [Time.now.to_f.to_s]))
-              @client.push(Sidekiq.load_json(job))
+              @client.push(config.flavor.load(job))
               logger.debug { "enqueued #{sorted_set}: #{job}" }
             end
           end
