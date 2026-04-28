@@ -313,6 +313,11 @@ module Sidekiq
       #
       # +items+ must be an Array of Arrays.
       #
+      # The +:at+ option schedules the jobs for future execution. It accepts
+      # either a single Numeric timestamp (or seconds-from-now) applied to every
+      # job, or an Array of Numeric values with the same size as +items+ to
+      # schedule each job at its corresponding time.
+      #
       # For finer-grained control, use `Sidekiq::Client.push_bulk` directly.
       #
       # Example (3 Redis round trips):
@@ -324,6 +329,14 @@ module Sidekiq
       # Would instead become (1 Redis round trip):
       #
       #     SomeJob.perform_bulk([[1], [2], [3]])
+      #
+      # Scheduling every job 60 seconds from now (single Numeric +:at+):
+      #
+      #     SomeJob.perform_bulk([[1], [2], [3]], at: 60)
+      #
+      # Scheduling each job at its own time (Array +:at+):
+      #
+      #     SomeJob.perform_bulk([[1], [2]], at: [Time.now.to_f + 30, Time.now.to_f + 60])
       #
       def perform_bulk(*args, **kwargs)
         Setter.new(self, {}).perform_bulk(*args, **kwargs)

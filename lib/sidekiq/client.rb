@@ -117,6 +117,11 @@ module Sidekiq
     # larger than 1000 but YMMV based on network quality, size of job args, etc.
     # A large number of jobs can cause a bit of Redis command processing latency.
     #
+    # Accepts an `:at` option to schedule the jobs for future execution. It
+    # accepts either a single Numeric timestamp (or seconds-from-now) applied
+    # to every job, or an Array of Numeric values with the same size as `args`
+    # to schedule each job at its corresponding time.
+    #
     # Accepts an additional `:spread_interval` option (in seconds) to randomly spread
     # the jobs schedule times over the specified interval.
     #
