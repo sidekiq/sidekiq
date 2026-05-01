@@ -1427,7 +1427,7 @@ module Sidekiq
         end
       end
 
-      states = Hash.new(capacity: jids_to_fetch.size)
+      states = ::Hash.new(capacity: jids_to_fetch.size)
       jids_to_fetch.each_with_index do |jid, i|
         raw = results[i]
         next if raw.nil? || raw.empty?
