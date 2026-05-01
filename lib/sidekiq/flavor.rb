@@ -2,16 +2,22 @@
 
 module Sidekiq
   ##
-  # Flavor is the term for a custom job-argument
-  # serialization scheme. :default is Sidekiq's long-standing
-  # default argument serialization scheme which only supports pure JSON
-  # types. :marshal is one alternative which allows any Ruby object.
-  # Flavors should implement `to_j` and `from_j`.
+  # Flavor is the term for a custom job-argument serialization
+  # scheme. :json is Sidekiq's long-standing default argument
+  # serialization scheme which only supports pure JSON types.
+  # See Ruby below and the Asynq gem for an alternative which
+  # allows any Ruby object.
+  #
+  # Flavors should implement `to_j` and `from_j`. We avoid the
+  # name `to_json` because a dozen different gems try to define
+  # that method on Object.
+  #
+  # This is a new API and should be considered unstable, breaking
+  # changes may be necessary as usecases are fleshed out.
   class Flavor
     def initialize
       @known = {}
       @known.default = Default.new
-      @known["marshal"] = Marshal.new
     end
 
     ##
@@ -21,12 +27,12 @@ module Sidekiq
     #
     # Use a custom flavor:
     #
-    #   MyJob.set(flavor: :marshal).perform_async(SomeRubyObject.new)
+    #   MyJob.set(flavor: "rb").perform_async(SomeRubyObject.new)
     #
     # You can default a flavor in your job or a base class:
     #
     #   class MyJob
-    #     sidekiq_options flavor: :marshal
+    #     sidekiq_options flavor: :rb
     #
     def add(flvr)
       @known[flvr.name.to_s] = flvr
@@ -47,23 +53,9 @@ module Sidekiq
     end
     alias_method :load, :wire_to_rb
 
-    class Marshal
-      def name
-        "marshal"
-      end
-
-      def to_j(args)
-        Base64.urlsafe_encode64(::Marshal.dump(args))
-      end
-
-      def from_j(str)
-        ::Marshal.load(Base64.urlsafe_decode64(str))
-      end
-    end
-
     class Default
       def name
-        "default"
+        "json"
       end
 
       # The default flavor doesn't need to do anything because all
