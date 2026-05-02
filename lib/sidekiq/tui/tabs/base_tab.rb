@@ -154,7 +154,7 @@ module Sidekiq
 
         # Format keys and values with spacing
         keys_line = keys.map { |k| t(k).to_s.ljust(12) }.join("  ")
-        values_line = values.map { |v| v.to_s.ljust(12) }.join("  ")
+        values_line = values.map { |v| number_with_delimiter(v).ljust(12) }.join("  ")
 
         frame.render_widget(
           tui.paragraph(
@@ -165,10 +165,27 @@ module Sidekiq
         )
       end
 
-      # TODO Implement I18n delimiter
+      # [thousands_separator, decimal_separator] per locale.
+      # Locales not listed here use the English default [",", "."].
+      NUMERIC_SEPARATORS = {
+        # period thousands, comma decimal
+        "da" => [".", ","], "de" => [".", ","], "el" => [".", ","],
+        "es" => [".", ","], "it" => [".", ","], "nl" => [".", ","],
+        "pt" => [".", ","], "pt-BR" => [".", ","], "tr" => [".", ","],
+        "vi" => [".", ","],
+        # space thousands, comma decimal
+        "cs" => [" ", ","], "fr" => [" ", ","], "lt" => [" ", ","],
+        "nb" => [" ", ","], "pl" => [" ", ","], "ru" => [" ", ","],
+        "sv" => [" ", ","], "uk" => [" ", ","]
+      }.freeze
+
       def number_with_delimiter(number, options = {})
         precision = options[:precision] || 0
-        number.round(precision)
+        rounded = number.round(precision)
+        thousands, decimal = NUMERIC_SEPARATORS.fetch(@parent.lang, [",", "."])
+        integer_part, decimal_part = rounded.to_s.split(".")
+        integer_with_sep = integer_part.gsub(/(\d)(?=(\d{3})+(?!\d))/, "\\1#{thousands}")
+        precision > 0 ? "#{integer_with_sep}#{decimal}#{(decimal_part || "").ljust(precision, "0")}" : integer_with_sep
       end
 
       def format_memory(rss_kb)

@@ -21,6 +21,8 @@ module Sidekiq
     REFRESH_INTERVAL_SECONDS = 2
     LOCALE_DIRECTORIES = [File.expand_path("#{File.dirname(__FILE__)}/../../web/locales")]
 
+    attr_reader :lang
+
     # language is meant to be a locale code, e.g.
     # LANG=en_US.utf-8
     def initialize(cfg, language: ENV["LANG"] || "en")
