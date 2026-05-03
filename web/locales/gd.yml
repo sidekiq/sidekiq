@@ -1,6 +1,6 @@
 # elements like %{queue} are variables and should not be translated
 gd:
-  LanguageName: Gaeilge
+  LanguageName: Gàidhlig
   Actions: Gnìomhan
   AddToQueue: Cuir ris a’ chiutha
   AddAllToQueue: Cuir a h-uile ris a’ chiutha
