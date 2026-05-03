@@ -36,6 +36,8 @@ gd:
   Jobs: Obraichean
   Kill: Marbh
   KillAll: Marbh na h-uile
+  Language: Cànan
+  LastDashboardUpdateTemplateLiteral: "An t-ath-nuadhachadh mu dheireadh: Air pròiseasadh: PROCESSED_COUNT. Air fàilligeadh: FAILED_COUNT."
   LastRetry: An oidhirp mu dheireadh
   Latency: Foillidheachd
   LivePoll: Ath-nuadhachadh beò
@@ -55,6 +57,7 @@ gd:
   PeakMemoryUsage: Bàrr cleachdadh a’ chuimhne
   Plugins: Plugain
   PollingInterval: Eadaramh an ath-nuadhachaidh
+  PollingIntervalMilliseconds: Milidiogan eadaramh an ath-nuadhachaidh
   Process: Pròiseas
   Processed: Air pròiseasadh
   Processes: Pròiseasan
@@ -98,3 +101,10 @@ gd:
   AvgExecutionTime: Ùine cuibheasach nan gnìomhan
   Context: Co-theacsa
   NoJobMetricsFound: Cha deach meatraigeachd o chionn goirid air obair a lorg
+  Filter: Criathraich
+  AnyJobContent: Susbaint obrach sam bith
+  Profiles: Pròifilean
+  Data: Dàta
+  View: Seall
+  Token: Tòcan
+  ElapsedTime: An ùine a chaidh seachad
