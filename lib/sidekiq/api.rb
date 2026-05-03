@@ -1428,8 +1428,8 @@ module Sidekiq
       end
 
       # TODO Requires Ruby 4
-      #states = ::Hash.new(capacity: jids_to_fetch.size)
-      states = ::Hash.new
+      # states = ::Hash.new(capacity: jids_to_fetch.size)
+      states = {}
       jids_to_fetch.each_with_index do |jid, i|
         raw = results[i]
         next if raw.nil? || raw.empty?
