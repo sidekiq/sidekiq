@@ -146,6 +146,22 @@ describe Sidekiq::RedisConnection do
       end
     end
 
+    describe "driver_info" do
+      it "identifies sidekiq by default" do
+        pool = Sidekiq::RedisConnection.create
+        config = config_for(pool.checkout)
+
+        assert_equal "sidekiq_v#{Sidekiq::VERSION}", config.driver_info
+      end
+
+      it "preserves a user-provided driver_info" do
+        pool = Sidekiq::RedisConnection.create(driver_info: "custom-app-1.2.3")
+        config = config_for(pool.checkout)
+
+        assert_equal "custom-app-1.2.3", config.driver_info
+      end
+    end
+
     describe "logging redis options" do
       it "redacts credentials" do
         options = {

@@ -107,6 +107,10 @@ module Sidekiq
       # on by default.
       opts[:reconnect_attempts] ||= 1
 
+      # Identify ourselves to Redis via CLIENT SETINFO so connections
+      # are distinguishable in CLIENT LIST / CLIENT INFO output.
+      opts[:driver_info] ||= "sidekiq_v#{Sidekiq::VERSION}"
+
       opts
     end
   end
