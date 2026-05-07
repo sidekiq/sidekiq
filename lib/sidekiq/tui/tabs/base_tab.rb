@@ -185,7 +185,7 @@ module Sidekiq
         thousands, decimal = NUMERIC_SEPARATORS.fetch(@parent.lang, [",", "."])
         integer_part, decimal_part = rounded.to_s.split(".")
         integer_with_sep = integer_part.gsub(/(\d)(?=(\d{3})+(?!\d))/, "\\1#{thousands}")
-        precision > 0 ? "#{integer_with_sep}#{decimal}#{(decimal_part || "").ljust(precision, "0")}" : integer_with_sep
+        (precision > 0) ? "#{integer_with_sep}#{decimal}#{(decimal_part || "").ljust(precision, "0")}" : integer_with_sep
       end
 
       def format_memory(rss_kb)
