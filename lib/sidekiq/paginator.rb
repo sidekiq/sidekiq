@@ -23,7 +23,8 @@ module Sidekiq
         elsif key.start_with?("queue:")
           type = TYPE_CACHE[key] = "list"
         else
-          type = TYPE_CACHE[key] = conn.type(key)
+          type = conn.type(key)
+          TYPE_CACHE[key] = type unless type == "none"
         end
         rev = opts && opts[:reverse]
 
