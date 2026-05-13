@@ -4,7 +4,7 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+8.1.2
 ---------
 
 - Add new `autoflush` mode to Batches to flush every N jobs. [#6967]
