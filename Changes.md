@@ -5,6 +5,7 @@
 8.1.5
 ----------
 
+- Identify Sidekiq connnections in Redis with `CLIENT SETINFO` [#6986]
 - Fix edge case where Web UI could show an empty Batch set [#6987]
 
 8.1.4
