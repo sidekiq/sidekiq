@@ -27,7 +27,7 @@ module Sidekiq
     attr_reader :mode
     attr_reader :weights
 
-    def_delegators :@config, :[], :[]=, :fetch, :key?, :has_key?, :merge!, :dig, :thread_priority
+    def_delegators :@config, :[], :[]=, :fetch, :key?, :has_key?, :merge!, :dig, :thread_priority, :flavor
 
     def initialize(name, config)
       @name = name

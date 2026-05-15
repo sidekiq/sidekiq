@@ -92,7 +92,7 @@ module Sidekiq
       # ignore, will be pushed back onto queue during hard_shutdown
       raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
 
-      msg = Sidekiq.load_json(jobstr)
+      msg = config.flavor.load(jobstr)
       if msg["retry"]
         process_retry(nil, msg, queue, e)
       else
@@ -125,7 +125,7 @@ module Sidekiq
       # ignore, will be pushed back onto queue during hard_shutdown
       raise Sidekiq::Shutdown if exception_caused_by_shutdown?(e)
 
-      msg = Sidekiq.load_json(jobstr)
+      msg = config.flavor.load(jobstr)
       if msg["retry"].nil?
         msg["retry"] = jobinst.class.get_sidekiq_options["retry"]
       end
@@ -201,7 +201,7 @@ module Sidekiq
       # logger.debug { "Failure! Retry #{count} in #{delay} seconds" }
       jitter = rand(10 * (count + 1))
       retry_at = Time.now.to_f + delay + jitter
-      payload = Sidekiq.dump_json(msg)
+      payload = config.flavor.dump(msg)
       redis do |conn|
         conn.zadd("retry", retry_at.to_s, payload)
       end
@@ -282,7 +282,7 @@ module Sidekiq
 
     def send_to_morgue(msg)
       logger.info { "Adding dead #{msg["class"]} job #{msg["jid"]}" }
-      payload = Sidekiq.dump_json(msg)
+      payload = config.flavor.dump(msg)
       now = Time.now.to_f
 
       redis do |conn|
