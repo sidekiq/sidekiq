@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+8.1.3
+---------
+
+- Fix autoflush crash when mixing scheduled and immediate jobs [#6991]
+
 8.1.2
 ---------
 
