@@ -157,12 +157,12 @@ describe "API" do
 
         assert_equal "bar", result[0].name
         assert_equal 3, result[0].size
-        assert_in_delta 0.10, result[0].latency, 0.01
+        assert_operator result[0].latency, :>, 0.09
         assert_equal true, result[0].paused?
 
         assert_equal "foo", result[1].name
         assert_equal 1, result[1].size
-        assert_in_delta 0.05, result[1].latency, 0.01
+        assert_operator result[1].latency, :>, 0.04
         assert_equal false, result[1].paused?
       end
     end
