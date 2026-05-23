@@ -78,12 +78,6 @@ module Sidekiq
       end
     end
 
-    # TODO Remove
-    def parse_yaml_old(path)
-      require "yaml"
-      YAML.safe_load_file(path)
-    end
-
     def parse_yaml_new(path)
       locale = nil
       map = {}
