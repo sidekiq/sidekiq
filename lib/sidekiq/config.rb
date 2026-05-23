@@ -297,15 +297,11 @@ module Sidekiq
       @logger = logger
     end
 
-    private def parameter_size(handler)
-      target = handler.is_a?(Proc) ? handler : handler.method(:call)
-      target.parameters.size
-    end
-
     # INTERNAL USE ONLY
     def handle_exception(ex, ctx = {})
-      if @options[:error_handlers].size == 0
-        p ["!!!!!", ex]
+      if @options[:error_handlers].empty?
+        logger.error { "No error handlers configured, logging exception directly" }
+        logger.error { ex }
       end
       @options[:error_handlers].each do |handler|
         handler.call(ex, ctx, self)
