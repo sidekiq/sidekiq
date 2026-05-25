@@ -274,7 +274,7 @@ describe "Web helpers" do
       obj = Helpers.new
       Dir["web/locales/*.yml"].each do |path|
         ex = YAML.safe_load_file(path)
-        was = obj.parse_yaml_new(path)
+        was = obj.parse_yaml(path)
         assert_equal path, "web/locales/#{was.keys.first}.yml"
         ex.values.first.zip(was.values.first).each do |expected, got|
           assert_equal expected, got
