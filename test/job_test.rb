@@ -130,6 +130,19 @@ describe Sidekiq::Job do
       assert_equal "xyz", job["bar"]
     end
 
+    it "schedules jobs when wait is set in a chained call" do
+      q = Sidekiq::ScheduledSet.new
+      q.clear
+      assert_equal 0, q.size
+
+      assert MySetJob.set(queue: :bar).set(wait: 1.hour).perform_async(1)
+
+      assert_equal 1, q.size
+      job = q.first
+      assert_equal "bar", job["queue"]
+      assert_equal [1], job["args"]
+    end
+
     it "can detect when stopping" do
       refute MySetJob.new.interrupted?
     end

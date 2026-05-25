@@ -196,7 +196,7 @@ module Sidekiq
 
       def set(options)
         hash = options.transform_keys(&:to_s)
-        interval = hash.delete("wait_until") || @opts.delete("wait")
+        interval = hash.delete("wait_until") || hash.delete("wait")
         @opts.merge!(hash)
         at(interval) if interval
         self
