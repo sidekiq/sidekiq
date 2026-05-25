@@ -304,3 +304,19 @@ describe Sidekiq::RedisConnection do
     end
   end
 end
+
+describe Sidekiq::RedisClientAdapter do
+  before do
+    @config = reset!
+  end
+
+  # Commands not in USED_COMMANDS are routed through method_missing, which must
+  # forward a result-transformation block to redis-client. Regression guard: the
+  # block was being splatted as a positional argument instead of forwarded.
+  it "forwards a block through method_missing" do
+    @config.redis do |conn|
+      result = conn.echo("hello") { |reply| reply.upcase }
+      assert_equal "HELLO", result
+    end
+  end
+end
