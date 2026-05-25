@@ -72,19 +72,13 @@ module Sidekiq
       # so extensions can be localized
       @@strings[lang] ||= config.locales.each_with_object({}) do |path, global|
         find_locale_files(lang).each do |file|
-          strs = parse_yaml_new(file)
+          strs = parse_yaml(file)
           global.merge!(strs[lang])
         end
       end
     end
 
-    # TODO Remove
-    def parse_yaml_old(path)
-      require "yaml"
-      YAML.safe_load_file(path)
-    end
-
-    def parse_yaml_new(path)
+    def parse_yaml(path)
       locale = nil
       map = {}
       IO.readlines(path, chomp: true).each do |line|
