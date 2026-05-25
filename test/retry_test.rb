@@ -97,6 +97,18 @@ describe Sidekiq::JobRetry do
       Sidekiq::RetrySet.new.first
     end
 
+    describe "#time_for" do
+      it "converts integer millisecond timestamps with sub-second precision" do
+        ms = 1_700_000_000_500
+        assert_in_delta 1_700_000_000.5, handler.send(:time_for, ms).to_f, 0.0001
+      end
+
+      it "passes through legacy float (epoch seconds) timestamps" do
+        secs = 1_700_000_000.5
+        assert_in_delta secs, handler.send(:time_for, secs).to_f, 0.0001
+      end
+    end
+
     it "retries with a nil worker" do
       assert_raises RuntimeError do
         handler.global(jobstr, "default") do
