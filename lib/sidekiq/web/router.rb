@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "rack"
+require "uri"
 
 module Sidekiq
   class Web
@@ -28,7 +28,7 @@ module Sidekiq
 
       def match(env)
         request_method = env["REQUEST_METHOD"].downcase.to_sym
-        path_info = ::Rack::Utils.unescape_path env["PATH_INFO"]
+        path_info = ::URI::RFC2396_PARSER.unescape env["PATH_INFO"]
 
         # There are servers which send an empty string when requesting the root.
         # These servers should be ashamed of themselves.
