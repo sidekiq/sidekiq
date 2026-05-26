@@ -48,6 +48,7 @@ Use REDIS_URL or REDIS_PROVIDER to point `kiq` to Redis.
 require "sidekiq/testing"
 require "sidekiq/testing/inline"
 # New, more explicit
+require "sidekiq"
 Sidekiq.testing!(:fake)
 Sidekiq.testing!(:inline)
 ```
