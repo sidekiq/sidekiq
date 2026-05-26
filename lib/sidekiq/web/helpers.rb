@@ -332,7 +332,7 @@ module Sidekiq
       [score.to_f, jid]
     end
 
-    SAFE_QPARAMS = %w[page direction]
+    SAFE_QPARAMS = %w[page direction only]
 
     # Merge options with current params, filter safe params, and stringify to query string
     def qparams(options)
