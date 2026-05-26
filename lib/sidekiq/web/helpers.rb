@@ -150,17 +150,18 @@ module Sidekiq
       erb(:filtering, locals: {which:, placeholder_key:, label_key:})
     end
 
-    def filter_link(jid, within = "retries")
+    def filter_link(str, within = "retries")
+      hstr = h(str)
       if within.nil?
-        ::Rack::Utils.escape_html(jid)
+        hstr
       else
-        "<a href='#{root_path}#{within}?substr=#{jid}'>#{::Rack::Utils.escape_html(jid)}</a>"
+        "<a href='#{root_path}#{within}?substr=#{hstr}'>#{hstr}</a>"
       end
     end
 
     def display_tags(job, within = "retries")
       job.tags.map { |tag|
-        "<span class='label label-info jobtag jobtag-#{Rack::Utils.escape_html(tag)}'>#{filter_link(tag, within)}</span>"
+        "<span class='label label-info jobtag jobtag-#{h(tag)}'>#{filter_link(tag, within)}</span>"
       }.join(" ")
     end
 
@@ -414,7 +415,7 @@ module Sidekiq
     end
 
     def h(text)
-      ::Rack::Utils.escape_html(text.to_s)
+      ::CGI.escapeHTML(text.to_s)
     rescue ArgumentError => e
       raise unless e.message.eql?("invalid byte sequence in UTF-8")
       text.encode!("UTF-16", "UTF-8", invalid: :replace, replace: "").encode!("UTF-8", "UTF-16")
