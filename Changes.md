@@ -5,7 +5,9 @@
 HEAD
 ----------
 
+- Fix reported thread/memory leak when jobs fail [#7006]
 - Users can limit data displayed on Busy page with the `only` parameter `/busy?only=(jobs|processes)` [#6992]
+- Replace Rack::Utils usage with standard library APIs
 - Several minor fixes from AI scanners.
 
 8.1.5
