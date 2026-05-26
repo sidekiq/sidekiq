@@ -90,9 +90,18 @@ module Sidekiq
 
       get "/busy" do
         @count = (url_params("count") || 100).to_i
-        (@current_page, @total_size, @workset) = page_items(workset, url_params("page"), @count)
 
-        @iterable_states = Sidekiq::IterableJobQuery.new(workset.map { |_, _, work| work.job.jid })
+        # Use /busy?only=(jobs|processes) to limit page data
+        only = url_params("only")
+        halt 401, "Invalid value for only" unless only.nil? || only == "jobs" || only == "processes"
+
+        @show_jobs = (only != "processes")
+        @show_processes = (only != "jobs")
+
+        if @show_jobs
+          (@current_page, @total_size, @workset) = page_items(workset, url_params("page"), @count)
+          @iterable_states = Sidekiq::IterableJobQuery.new(workset.map { |_, _, work| work.job.jid })
+        end
 
         erb(:busy)
       end

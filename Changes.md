@@ -2,6 +2,12 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+HEAD
+----------
+
+- Users can limit data displayed on Busy page with the `only` parameter `/busy?only=(jobs|processes)` [#6992]
+- Several minor fixes from AI scanners.
+
 8.1.5
 ----------
 

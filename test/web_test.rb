@@ -86,29 +86,44 @@ describe Sidekiq::Web do
   end
 
   describe "busy" do
-    it "renders without error when requesting a page beyond available workers" do
-      get "/busy?page=99"
-      assert_equal 200, last_response.status
-    end
-
-    it "can display workers" do
-      jid = SecureRandom.hex(12)
+    before do
+      @jid = SecureRandom.hex(12)
       @config.redis do |conn|
         conn.incr("busy")
         conn.sadd("processes", ["foo:1234"])
         conn.hset("foo:1234", "info", Sidekiq.dump_json("hostname" => "foo", "started_at" => Time.now.to_f, "capsules" => {}, "concurrency" => 10), "at", Time.now.to_f, "busy", 4)
         identity = "foo:1234:work"
-        hash = {queue: "critical", payload: Sidekiq.dump_json({"class" => WebJob.name, "args" => [1, "abc"], "jid" => jid, "tags" => %w[foobar_100 <eviltag/>]}), run_at: Time.now.to_i}
+        hash = {queue: "critical", payload: Sidekiq.dump_json({"class" => WebJob.name, "args" => [1, "abc"], "jid" => @jid, "tags" => %w[foobar_100 <eviltag/>]}), run_at: Time.now.to_i}
         conn.hset(identity, 1001, Sidekiq.dump_json(hash))
       end
-      add_iteration_state(jid, cursor: {"offset" => 500}, executions: 7)
+      add_iteration_state(@jid, cursor: {"offset" => 500}, executions: 7)
+    end
+
+    it "renders without error when requesting a page beyond available workers" do
+      get "/busy?page=99"
+      assert_equal 200, last_response.status
+    end
+
+    it "renders only jobs" do
+      get "/busy?only=jobs"
+      assert_equal 200, last_response.status
+      assert_match(/WebJob/, last_response.body)
+    end
+
+    it "renders only processes" do
+      get "/busy?only=processes"
+      assert_equal 200, last_response.status
+      refute_match(/WebJob/, last_response.body)
+    end
+
+    it "can display workers" do
       assert_equal ["1001"], Sidekiq::WorkSet.new.map { |pid, tid, data| tid }
 
       get "/busy"
       assert_equal 200, last_response.status
       assert_match(/critical/, last_response.body)
       assert_match(/WebJob/, last_response.body)
-      assert_match(/#{jid}/, last_response.body)
+      assert_match(/#{@jid}/, last_response.body)
       assert_match(/jobtag-foobar_100/, last_response.body)
       assert_match(/jobtag-&lt;eviltag\/&gt;/, last_response.body)
       assert_match(/offset/, last_response.body)

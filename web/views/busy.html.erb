@@ -27,6 +27,7 @@
   </div>
 </section>
 
+<% if @show_processes %>
 <section>
   <header>
     <h2><%= t('Processes') %></h2>
@@ -102,50 +103,53 @@
     </table>
   </div>
 </section>
+<% end %>
 
-<section>
-  <header>
-    <h2><%= t('Jobs') %></h2>
-    <% if @workset.size > 0 && @total_size > @count %>
-      <%= erb :_paging, locals: { url: "#{root_path}busy" } %>
-    <% end %>
-  </header>
-
-  <div class="table_container">
-    <table>
-      <thead>
-        <th><%= t('Process') %></th>
-        <th><%= t('TID') %></th>
-        <th><%= t('JID') %></th>
-        <th><%= t('Queue') %></th>
-        <th><%= t('Job') %></th>
-        <th><%= t('Arguments') %></th>
-        <th><%= t('Started') %></th>
-      </thead>
-      <% @workset.each do |process, thread, work| %>
-        <% job = work.job %>
-        <tr>
-          <td><%= process %></td>
-          <td><%= thread %></td>
-          <td><%= job.jid %></td>
-          <td>
-            <a href="<%= root_path %>queues/<%= work.queue %>"><%= work.queue %></a>
-          </td>
-          <td>
-            <%= job.display_class %>
-            <%= display_tags(job, nil) %>
-          </td>
-          <td>
-            <code><div class="args"><%= display_args(job.display_args) %></div></code>
-          </td>
-          <td>
-            <%= relative_time(work.run_at) %>
-            <% if (state = @iterable_states[job.jid]) %>
-              <div><small>cursor=<%= h(truncate(state.cursor.inspect, 100)) %>; exec=<%= state.executions %>; rt=<%= number_with_delimiter(state.runtime, precision: 3) %>s</small></div>
-            <% end %>
-          </td>
-        </tr>
+<% if @show_jobs %>
+  <section>
+    <header>
+      <h2><%= t('Jobs') %></h2>
+      <% if @workset.size > 0 && @total_size > @count %>
+        <%= erb :_paging, locals: { url: "#{root_path}busy" } %>
       <% end %>
-    </table>
-  </div>
-</section>
+    </header>
+
+    <div class="table_container">
+      <table>
+        <thead>
+          <th><%= t('Process') %></th>
+          <th><%= t('TID') %></th>
+          <th><%= t('JID') %></th>
+          <th><%= t('Queue') %></th>
+          <th><%= t('Job') %></th>
+          <th><%= t('Arguments') %></th>
+          <th><%= t('Started') %></th>
+        </thead>
+        <% @workset.each do |process, thread, work| %>
+          <% job = work.job %>
+          <tr>
+            <td><%= process %></td>
+            <td><%= thread %></td>
+            <td><%= job.jid %></td>
+            <td>
+              <a href="<%= root_path %>queues/<%= work.queue %>"><%= work.queue %></a>
+            </td>
+            <td>
+              <%= job.display_class %>
+              <%= display_tags(job, nil) %>
+            </td>
+            <td>
+              <code><div class="args"><%= display_args(job.display_args) %></div></code>
+            </td>
+            <td>
+              <%= relative_time(work.run_at) %>
+              <% if (state = @iterable_states[job.jid]) %>
+                <div><small>cursor=<%= h(truncate(state.cursor.inspect, 100)) %>; exec=<%= state.executions %>; rt=<%= number_with_delimiter(state.runtime, precision: 3) %>s</small></div>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    </div>
+  </section>
+<% end %>
