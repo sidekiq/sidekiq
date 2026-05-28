@@ -187,6 +187,29 @@ describe "Web helpers" do
     assert_equal "Invalid job payload, args is nil", s
   end
 
+  describe "#to_display" do
+    it "falls back to to_s when inspect raises" do
+      arg = Object.new
+      def arg.inspect = raise("no inspect")
+      def arg.to_s = "fallback value"
+      assert_equal "fallback value", Helpers.new.to_display(arg)
+    end
+
+    it "returns a safe message when both inspect and to_s raise" do
+      arg = Object.new
+      def arg.inspect = raise("no inspect")
+      def arg.to_s = raise(ArgumentError, "no to_s")
+      assert_equal "Cannot display argument: [ArgumentError] no to_s", Helpers.new.to_display(arg)
+    end
+  end
+
+  it "renders an arg via the to_s fallback and escapes it" do
+    arg = Object.new
+    def arg.inspect = raise("no inspect")
+    def arg.to_s = "<danger>"
+    assert_equal "&lt;danger&gt;", Helpers.new.display_args([arg])
+  end
+
   it "query string escapes bad query input" do
     obj = Helpers.new
     assert_equal "page=B%3CH", obj.to_query_string("page" => "B<H")
