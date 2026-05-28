@@ -235,7 +235,7 @@ module Sidekiq
     MEMORY_GRABBER = case RUBY_PLATFORM
     when /linux/
       ->(pid) {
-        IO.readlines("/proc/#{$$}/status").each do |line|
+        IO.readlines("/proc/#{pid}/status").each do |line|
           next unless line.start_with?("VmRSS:")
           break line.split[1].to_i
         end

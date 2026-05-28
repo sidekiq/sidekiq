@@ -16,6 +16,15 @@ describe Sidekiq::Launcher do
       refute_nil kb
       assert kb > 0
     end
+
+    it "reads memory for the requested pid, not the current process" do
+      skip "Linux-only /proc memory grabber" unless RUBY_PLATFORM.match?(/linux/)
+      # A non-existent pid must hit /proc/<pid>/status and fail, proving the
+      # grabber honors its argument rather than always reading the current process.
+      assert_raises(Errno::ENOENT) do
+        Sidekiq::Launcher::MEMORY_GRABBER.call(999_999_999)
+      end
+    end
   end
 
   it "starts and stops" do
