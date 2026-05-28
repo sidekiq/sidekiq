@@ -128,6 +128,11 @@ describe Sidekiq::JobUtil do
       item = @util.normalize_item({"class" => "SomeJob", "args" => [], "retry_for" => 100.9})
       assert_equal 100, item["retry_for"]
     end
+
+    it "raises for a bare Class that is not a Sidekiq::Job" do
+      err = assert_raises(ArgumentError) { @util.normalize_item({"class" => String, "args" => []}) }
+      assert_match(/must include a Sidekiq::Job class/, err.message)
+    end
   end
 
   describe "#now_in_millis" do
@@ -189,6 +194,26 @@ describe Sidekiq::JobUtil do
         @util.verify_json({"class" => "Wrapper", "wrapped" => "RealJob", "args" => [:nope]})
       end
       assert_match(/RealJob/, err.message)
+    end
+
+    it "warns instead of raising in :warn mode" do
+      original = Sidekiq::Config::DEFAULTS[:on_complex_arguments]
+      Sidekiq.strict_args!(:warn)
+      assert_output(nil, /must be native JSON types/) do
+        @util.verify_json({"class" => "SomeJob", "args" => [:not_json]})
+      end
+    ensure
+      Sidekiq::Config::DEFAULTS[:on_complex_arguments] = original
+    end
+
+    it "does nothing when complex-argument checking is disabled" do
+      original = Sidekiq::Config::DEFAULTS[:on_complex_arguments]
+      Sidekiq.strict_args!(false)
+      assert_silent do
+        @util.verify_json({"class" => "SomeJob", "args" => [:not_json]})
+      end
+    ensure
+      Sidekiq::Config::DEFAULTS[:on_complex_arguments] = original
     end
   end
 end
