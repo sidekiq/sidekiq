@@ -202,6 +202,53 @@ describe "Web helpers" do
     assert_equal "direction=H%3EB&page=B%3CH", obj.qparams("page" => "B<H")
   end
 
+  describe "#h" do
+    it "escapes HTML special characters" do
+      obj = Helpers.new
+      assert_equal "&lt;a&gt; &amp; &quot;x&quot; &#39;y&#39;", obj.h(%q(<a> & "x" 'y'))
+    end
+
+    it "coerces non-strings before escaping" do
+      obj = Helpers.new
+      assert_equal "123", obj.h(123)
+    end
+  end
+
+  describe "#filter_link" do
+    it "escapes the value and wraps it in a filter link by default" do
+      obj = Helpers.new
+      assert_equal "<a href='/retries?substr=ab&lt;c'>ab&lt;c</a>", obj.filter_link("ab<c")
+    end
+
+    it "returns only the escaped value when within is nil" do
+      obj = Helpers.new
+      assert_equal "ab&lt;c", obj.filter_link("ab<c", nil)
+    end
+  end
+
+  describe "#display_tags" do
+    it "escapes tag content in both the label and the filter link" do
+      obj = Helpers.new
+      job = Struct.new(:tags).new(["a<b"])
+      result = obj.display_tags(job)
+      assert_includes result, "jobtag-a&lt;b"
+      assert_includes result, "substr=a&lt;b"
+    end
+  end
+
+  describe "#to_query_string" do
+    it "keeps safe params, drops unknown ones, and escapes values" do
+      obj = Helpers.new
+      qs = obj.to_query_string("page" => "2", "jid" => "abc", "direction" => "asc", "only" => "working")
+      assert_equal "page=2&direction=asc&only=working", qs
+    end
+
+    it "escapes reserved characters in values" do
+      obj = Helpers.new
+      assert_equal "page=a+b%26c", obj.to_query_string("page" => "a b&c")
+    end
+  end
+
   describe "#format_memory" do
     it "returns in KB" do
       obj = Helpers.new
