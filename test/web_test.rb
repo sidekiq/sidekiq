@@ -130,6 +130,11 @@ describe Sidekiq::Web do
       assert_match(/exec=7/, last_response.body)
     end
 
+    it "does not crash on a negative count parameter" do
+      get "/busy?count=-1"
+      assert_equal 200, last_response.status
+    end
+
     it "can quiet all processes" do
       identity = "identity"
       signals_key = "#{identity}-signals"
