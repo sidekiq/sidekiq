@@ -1453,7 +1453,7 @@ module Sidekiq
         @cursor ||= begin
           Sidekiq.load_json(raw["c"])
         rescue JSON::ParserError
-          @raw["c"]
+          raw["c"]
         end
       end
 
