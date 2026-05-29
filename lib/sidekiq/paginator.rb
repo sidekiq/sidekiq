@@ -60,6 +60,9 @@ module Sidekiq
 
     def page_items(items, pageidx = 1, page_size = 25)
       current_page = (pageidx.to_i < 1) ? 1 : pageidx.to_i
+      # A negative page_size makes Array#[] return nil instead of a slice, which
+      # would crash callers iterating the result (e.g. the Web UI Busy page).
+      page_size = 0 if page_size < 0
       pageidx = current_page - 1
       starting = pageidx * page_size
       items = items.to_a

@@ -62,6 +62,11 @@ describe Sidekiq::Paginator do
       assert_equal [1, 0, []], @pager.page_items([], 1, 25)
       assert_equal [1, 0, []], @pager.page_items([], 5, 25)
     end
+
+    it "returns an empty page for a negative page size rather than nil" do
+      assert_equal [1, 3, []], @pager.page_items((1..3).to_a, 1, -5)
+      assert_equal [1, 0, []], @pager.page_items([], 1, -5)
+    end
   end
 
   describe "#page" do
