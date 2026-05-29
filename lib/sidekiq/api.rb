@@ -627,6 +627,7 @@ module Sidekiq
       Sidekiq.redis do |conn|
         conn.zincrby(@parent.name, at.to_f - score, Sidekiq.dump_json(@item))
       end
+      @score = at.to_f
     end
 
     # Enqueue this job from the scheduled or dead set so it will
