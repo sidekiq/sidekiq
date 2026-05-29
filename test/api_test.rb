@@ -771,6 +771,17 @@ describe "API" do
       assert_equal(1, retries.count { |r| r.score > (now + 14) })
     end
 
+    it "keeps the in-memory entry consistent with Redis after reschedule" do
+      add_retry("foo1")
+      entry = Sidekiq::RetrySet.new.first
+      new_score = Time.now.to_f + 500
+
+      entry.reschedule(Time.at(new_score))
+
+      assert_in_delta new_score, entry.score, 0.001
+      assert_in_delta new_score, entry.at.to_f, 0.001
+    end
+
     it "prunes processes which have died" do
       data = {"pid" => rand(10_000), "hostname" => "app#{rand(1_000)}", "started_at" => Time.now.to_f}
       key = "#{data["hostname"]}:#{data["pid"]}"
