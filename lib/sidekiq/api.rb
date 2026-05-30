@@ -415,7 +415,8 @@ module Sidekiq
     # :nodoc:
     # @api private
     def parse(item)
-      Sidekiq.load_json(item)
+      Sidekiq.default_configuration.flavor.load(item)
+      # Sidekiq.load_json(item)
     rescue JSON::ParserError
       # If the job payload in Redis is invalid JSON, we'll load
       # the item as an empty hash and store the invalid JSON as

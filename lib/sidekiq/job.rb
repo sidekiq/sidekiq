@@ -228,8 +228,9 @@ module Sidekiq
 
         verify_json(item)
 
-        # round-trip the payload via JSON
-        msg = Sidekiq.load_json(Sidekiq.dump_json(item))
+        # round-trip the payload
+        flvr = cfg.flavor
+        msg = flvr.load(flvr.dump(item))
 
         # prepare the job instance
         klass = Object.const_get(msg["class"])

@@ -2,6 +2,7 @@
 
 require "forwardable"
 require "sidekiq/redis_connection"
+require "sidekiq/flavor"
 
 module Sidekiq
   # Sidekiq::Config represents the global configuration for an instance of Sidekiq.
@@ -14,6 +15,7 @@ module Sidekiq
       environment: nil,
       concurrency: 5,
       timeout: 25,
+      flavor: "default",
       poll_interval_average: nil,
       average_scheduled_poll_interval: 5,
       on_complex_arguments: :raise,
@@ -80,6 +82,10 @@ module Sidekiq
 
     def to_json(*)
       Sidekiq.dump_json(@options)
+    end
+
+    def flavor
+      @flavor ||= Sidekiq::Flavor.new
     end
 
     # LEGACY: edits the default capsule

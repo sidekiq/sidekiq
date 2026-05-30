@@ -19,6 +19,8 @@ module Sidekiq
     end
 
     def verify_json(item)
+      return if item["flavor"]
+
       job_class = item["wrapped"] || item["class"]
       args = item["args"]
       mode = Sidekiq::Config::DEFAULTS[:on_complex_arguments]
