@@ -137,6 +137,17 @@ describe "SidekiqAdapter" do
     end
   end
 
+  describe "#stopping?" do
+    it "can be called without arguments for compatibility with Rails <= 8.1" do
+      assert_equal false, SidekiqAdapter.new.stopping?
+    end
+
+    it "accepts a job argument" do
+      job = double("job")
+      assert_equal false, SidekiqAdapter.new.stopping?(job)
+    end
+  end
+
   describe "profiling support" do
     it "enqueues a job to be profiled" do
       ProfileableAjJob.set(profile: "oli").perform_later
