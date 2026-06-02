@@ -1416,7 +1416,7 @@ module Sidekiq
     private
 
     # Bulk-fetch iteration state for multiple JIDs in a single Redis pipeline.
-    # Returns a Hash of { jid => IterableJobState } for JIDs that have iteration state.
+    # Returns a Hash of { jid => State } for JIDs that have iteration state.
     def bulk_fetch(jids)
       raise ArgumentError unless jids
       jids_to_fetch = Array(jids).compact.uniq
