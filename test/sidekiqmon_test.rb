@@ -105,5 +105,83 @@ describe Sidekiq::Monitor do
         end
       end
     end
+
+    describe "display" do
+      it "reports an unknown section and lists valid ones" do
+        out = output("bogus")
+        assert_includes out, "I don't know how to check the status of 'bogus'!"
+        assert_includes out, "all, version, overview, processes, queues"
+      end
+    end
+
+    describe "helpers" do
+      before do
+        @status = Sidekiq::Monitor::Status.new
+      end
+
+      describe "#delimit" do
+        it "inserts thousands separators" do
+          assert_equal "0", @status.send(:delimit, 0)
+          assert_equal "999", @status.send(:delimit, 999)
+          assert_equal "1,000", @status.send(:delimit, 1_000)
+          assert_equal "1,234,567", @status.send(:delimit, 1_234_567)
+        end
+      end
+
+      describe "#split_multiline" do
+        it "returns 'none' when values is nil" do
+          assert_equal "none", @status.send(:split_multiline, nil)
+        end
+
+        it "joins short values onto a single line" do
+          assert_equal "a; b; c", @status.send(:split_multiline, %w[a b c])
+        end
+
+        it "wraps onto subsequent lines when max_length is exceeded" do
+          out = @status.send(:split_multiline, %w[aaaa bbbb cccc], max_length: 10, pad: 2)
+          lines = out.split("\n")
+          assert_operator lines.size, :>=, 2
+          assert lines[1..].all? { |l| l.start_with?("  ") }, "padded continuation lines"
+        end
+      end
+
+      describe "#tags_for" do
+        it "returns nil when there are no tags" do
+          assert_nil @status.send(:tags_for, "tag" => nil, "labels" => nil, "quiet" => "false")
+        end
+
+        it "formats tag, labels, and a quiet marker" do
+          formatted = @status.send(:tags_for, "tag" => "web", "labels" => ["fast", "infra"], "quiet" => "true")
+          assert_equal "[web] [fast] [infra] [quiet]", formatted
+        end
+
+        it "omits the quiet marker when the process is not quiet" do
+          formatted = @status.send(:tags_for, "tag" => "web", "labels" => nil, "quiet" => "false")
+          assert_equal "[web]", formatted
+        end
+      end
+
+      describe "#time_ago" do
+        it "returns 'just now' for timestamps under a minute old" do
+          assert_equal "just now", @status.send(:time_ago, Time.now.to_f - 30)
+        end
+
+        it "returns 'a minute ago' between 60 and 120 seconds" do
+          assert_equal "a minute ago", @status.send(:time_ago, Time.now.to_f - 90)
+        end
+
+        it "returns 'N minutes ago' under an hour" do
+          assert_equal "10 minutes ago", @status.send(:time_ago, Time.now.to_f - 600)
+        end
+
+        it "returns 'an hour ago' between 1 and 2 hours" do
+          assert_equal "an hour ago", @status.send(:time_ago, Time.now.to_f - 3700)
+        end
+
+        it "returns 'N hours ago' beyond two hours" do
+          assert_equal "3 hours ago", @status.send(:time_ago, Time.now.to_f - 3 * 3600)
+        end
+      end
+    end
   end
 end
