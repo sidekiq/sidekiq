@@ -239,6 +239,7 @@ module Sidekiq
         raise ArgumentError if days_previous < 1 || days_previous > (5 * 365)
         @days_previous = days_previous
         @start_date = start_date || Time.now.utc.to_date
+        @pool = pool
       end
 
       def processed
@@ -259,13 +260,17 @@ module Sidekiq
 
         keys = dates.map { |datestr| "stat:#{stat}:#{datestr}" }
 
-        Sidekiq.redis do |conn|
+        with_redis do |conn|
           conn.mget(keys).each_with_index do |value, idx|
             stat_hash[dates[idx]] = value ? value.to_i : 0
           end
         end
 
         stat_hash
+      end
+
+      def with_redis(&block)
+        @pool ? @pool.with(&block) : Sidekiq.redis(&block)
       end
     end
   end

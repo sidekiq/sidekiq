@@ -222,6 +222,29 @@ describe "API" do
           assert_raises(ArgumentError) { Sidekiq::Stats::History.new(2000) }
           assert Sidekiq::Stats::History.new(200)
         end
+
+        it "uses the provided pool instead of Sidekiq.redis" do
+          tracking_pool = Class.new {
+            attr_reader :with_calls
+
+            def initialize(real)
+              @real = real
+              @with_calls = 0
+            end
+
+            def with(&block)
+              @with_calls += 1
+              @real.with(&block)
+            end
+          }.new(@cfg.redis_pool)
+
+          today = Date.today.strftime("%Y-%m-%d")
+          @cfg.redis { |c| c.incrby("stat:processed:#{today}", 3) }
+
+          s = Sidekiq::Stats::History.new(1, pool: tracking_pool)
+          assert_equal({today => 3}, s.processed)
+          assert_operator tracking_pool.with_calls, :>, 0
+        end
       end
 
       describe "processed" do
