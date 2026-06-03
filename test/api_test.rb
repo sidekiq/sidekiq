@@ -355,6 +355,34 @@ describe "API" do
       assert_equal ["foo"], Sidekiq::Queue.new.find_job(job_id).tags
     end
 
+    describe "JobRecord parsing and display" do
+      it "renders a malformed Redis payload safely instead of raising" do
+        j = Sidekiq::JobRecord.new("not-json", "default")
+        assert_equal({}, j.item)
+        assert_equal ["not-json"], j.args
+        assert_nil j.klass
+      end
+
+      it "redacts the final argument when the job is marked encrypted" do
+        payload = {"class" => "X", "args" => ["a", "b", "secret"], "queue" => "default", "encrypt" => true}
+        j = Sidekiq::JobRecord.new(payload, "default")
+        assert_equal ["a", "b", "[encrypted data]"], j.display_args
+      end
+
+      it "passes a Hash payload through without re-parsing" do
+        payload = {"class" => "X", "args" => [1, 2], "queue" => "default"}
+        j = Sidekiq::JobRecord.new(payload, "default")
+        assert_same payload, j.item
+      end
+
+      it "parses a JSON string payload into the item hash" do
+        json = Sidekiq.dump_json("class" => "X", "args" => [1, 2], "queue" => "default")
+        j = Sidekiq::JobRecord.new(json, "default")
+        assert_equal "X", j.klass
+        assert_equal [1, 2], j.args
+      end
+    end
+
     it "can delete jobs" do
       q = Sidekiq::Queue.new
       ApiJob.perform_async(1, "mike")
