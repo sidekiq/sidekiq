@@ -2,6 +2,7 @@
 
 require_relative "helper"
 require "sidekiq/api"
+require "sidekiq/job_retry"
 require "active_job"
 require "action_mailer"
 
@@ -380,6 +381,45 @@ describe "API" do
         j = Sidekiq::JobRecord.new(json, "default")
         assert_equal "X", j.klass
         assert_equal [1, 2], j.args
+      end
+    end
+
+    describe "error information API" do
+      def compressed_backtrace(lines)
+        Sidekiq::JobRetry.new(@cfg).send(:compress_backtrace, lines)
+      end
+
+      it "decompresses the stored error_backtrace back into the original array" do
+        record = Sidekiq::JobRecord.new(
+          {"class" => "X", "args" => [], "error_backtrace" => compressed_backtrace(["a.rb:1", "b.rb:2"])},
+          "default"
+        )
+        assert_equal ["a.rb:1", "b.rb:2"], record.error_backtrace
+      end
+
+      it "returns nil for error_backtrace when none was stored, and memoizes the nil" do
+        record = Sidekiq::JobRecord.new({"class" => "X", "args" => []}, "default")
+        assert_nil record.error_backtrace
+        record.instance_variable_set(:@error_backtrace, "should-not-be-recomputed")
+        assert_equal "should-not-be-recomputed", record.error_backtrace
+      end
+
+      it "SortedEntry#error? reflects the presence of error_class" do
+        parent = Sidekiq::RetrySet.new
+        with_err = Sidekiq::SortedEntry.new(parent, Time.now.to_f,
+          Sidekiq.dump_json("class" => "X", "args" => [], "error_class" => "RuntimeError"))
+        without_err = Sidekiq::SortedEntry.new(parent, Time.now.to_f,
+          Sidekiq.dump_json("class" => "X", "args" => []))
+
+        assert with_err.error?
+        refute without_err.error?
+      end
+
+      it "SortedEntry inherits error_backtrace decompression from JobRecord" do
+        entry = Sidekiq::SortedEntry.new(Sidekiq::RetrySet.new, Time.now.to_f,
+          Sidekiq.dump_json("class" => "X", "args" => [],
+            "error_backtrace" => compressed_backtrace(["only-line.rb:1"])))
+        assert_equal ["only-line.rb:1"], entry.error_backtrace
       end
     end
 
