@@ -2,7 +2,6 @@
 
 require_relative "helper"
 require "sidekiq/job_retry"
-require "sidekiq/capsule"
 
 class NewJob
   include Sidekiq::Job
@@ -78,7 +77,7 @@ describe "sidekiq_retries_exhausted" do
   end
 
   def handler
-    @handler ||= Sidekiq::JobRetry.new(@config.default_capsule)
+    @handler ||= Sidekiq::JobRetry.new(@config)
   end
 
   def job(options = {})
