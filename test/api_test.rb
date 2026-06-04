@@ -869,6 +869,48 @@ describe "API" do
       assert_equal 1, ps.size
       assert_equal 1, ps.to_a.size
     end
+
+    describe "ProcessSet aggregates and leader" do
+      def add_process(key, info, concurrency: 0, rss: 0)
+        @cfg.redis do |conn|
+          conn.sadd("processes", [key])
+          conn.hset(key, "info", Sidekiq.dump_json(info),
+            "concurrency", concurrency,
+            "busy", 0,
+            "rss", rss,
+            "beat", Time.now.to_f)
+        end
+      end
+
+      it "totals concurrency across all registered processes" do
+        add_process("h1:1", {"pid" => 1, "hostname" => "h1"}, concurrency: 5)
+        add_process("h2:2", {"pid" => 2, "hostname" => "h2"}, concurrency: 12)
+
+        assert_equal 17, Sidekiq::ProcessSet.new(false).total_concurrency
+      end
+
+      it "totals RSS across all registered processes" do
+        add_process("h1:1", {"pid" => 1, "hostname" => "h1"}, rss: 1024)
+        add_process("h2:2", {"pid" => 2, "hostname" => "h2"}, rss: 2048)
+
+        ps = Sidekiq::ProcessSet.new(false)
+        assert_equal 3072, ps.total_rss_in_kb
+        assert_equal ps.total_rss_in_kb, ps.total_rss
+      end
+
+      it "returns the dear-leader identity and memoizes the lookup" do
+        @cfg.redis { |c| c.set("dear-leader", "leader-identity") }
+        ps = Sidekiq::ProcessSet.new(false)
+        assert_equal "leader-identity", ps.leader
+
+        @cfg.redis { |c| c.del("dear-leader") }
+        assert_equal "leader-identity", ps.leader, "expected leader to be memoized after first read"
+      end
+
+      it "returns an empty string for leader when no leader is set (OSS)" do
+        assert_equal "", Sidekiq::ProcessSet.new(false).leader
+      end
+    end
   end
 
   describe "dead set" do
