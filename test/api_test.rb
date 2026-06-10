@@ -754,6 +754,46 @@ describe "API" do
       assert_equal "Can't stop an embedded process", e.message
     end
 
+    describe "Process signal and status" do
+      def make_process(identity, attrs = {})
+        Sidekiq::Process.new({"identity" => identity}.merge(attrs))
+      end
+
+      it "quiet! pushes TSTP to the identity-signals list with a 60s TTL" do
+        make_process("h1:1").quiet!
+
+        signals, ttl = @cfg.redis { |c|
+          [c.lrange("h1:1-signals", 0, -1), c.ttl("h1:1-signals")]
+        }
+        assert_equal ["TSTP"], signals
+        assert_operator ttl, :>, 0
+        assert_operator ttl, :<=, 60
+      end
+
+      it "stop! pushes TERM and dump_threads pushes TTIN to the same signals list" do
+        proc1 = make_process("h2:2")
+        proc1.stop!
+        proc1.dump_threads
+
+        # lpush prepends, so newest signal is first
+        signals = @cfg.redis { |c| c.lrange("h2:2-signals", 0, -1) }
+        assert_equal ["TTIN", "TERM"], signals
+      end
+
+      it "stopping? reflects the 'quiet' flag in the process info" do
+        refute make_process("h3:3").stopping?
+        assert make_process("h3:3", "quiet" => "true").stopping?
+        refute make_process("h3:3", "quiet" => "false").stopping?
+      end
+
+      it "leader? returns true only when the process identity matches dear-leader" do
+        @cfg.redis { |c| c.set("dear-leader", "h4:4") }
+
+        assert make_process("h4:4").leader?
+        refute make_process("other:9").leader?
+      end
+    end
+
     it "can enumerate workers" do
       w = Sidekiq::Workers.new
       assert_equal 0, w.size
