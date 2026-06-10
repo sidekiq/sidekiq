@@ -4,6 +4,13 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+8.1.4
+---------
+
+- Garbage collect the `batch-died` data structure in Redis [#7033]
+- Enforce a floor of 30 seconds on Batch linger to prevent race conditions when
+  firing nested callbacks
+
 8.1.3
 ---------
 
