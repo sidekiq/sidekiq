@@ -22,4 +22,28 @@ describe Sidekiq::Config do
     refute_match(/death_handlers/, @config.inspect)
     refute_match(/error_handlers/, @config.inspect)
   end
+
+  describe "default logger formatter" do
+    def with_env(key, value)
+      original = ENV[key]
+      value.nil? ? ENV.delete(key) : ENV[key] = value
+      yield
+    ensure
+      original.nil? ? ENV.delete(key) : ENV[key] = original
+    end
+
+    it "uses WithoutTimestamp when running on Heroku (DYNO env var set)" do
+      with_env("DYNO", "web.1") do
+        cfg = Sidekiq::Config.new
+        assert_instance_of Sidekiq::Logger::Formatters::WithoutTimestamp, cfg.logger.formatter
+      end
+    end
+
+    it "uses Pretty when not running on Heroku" do
+      with_env("DYNO", nil) do
+        cfg = Sidekiq::Config.new
+        assert_instance_of Sidekiq::Logger::Formatters::Pretty, cfg.logger.formatter
+      end
+    end
+  end
 end

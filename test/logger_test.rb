@@ -132,6 +132,31 @@ describe "logger" do
     assert_predicate logger, :warn?
   end
 
+  it "emits plain (uncoloured) output with the Plain formatter" do
+    @logger.formatter = Sidekiq::Logger::Formatters::Plain.new
+    @logger.info("plain message")
+
+    line = @output.string
+    assert_match(/\AINFO \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z pid=#{$$} tid=\S+: plain message\n\z/, line)
+    refute_match(/\e\[/, line, "Plain formatter should not emit ANSI colour escapes")
+  end
+
+  it "joins Array context values with commas in format_context" do
+    fmt = Sidekiq::Logger::Formatters::Plain.new
+    formatted = fmt.send(:format_context, tags: ["a", "b", "c"], jid: "abc")
+    assert_equal " tags=a,b,c jid=abc", formatted
+  end
+
+  it "restores the previous Sidekiq::Context after Context.with even when the block raises" do
+    Sidekiq::Context.with(outer: "yes") do
+      assert_raises(RuntimeError) do
+        Sidekiq::Context.with(inner: "yes") { raise "boom" }
+      end
+      assert_equal({outer: "yes"}, Sidekiq::Context.current,
+        "Context.with must restore the prior context even on exception")
+    end
+  end
+
   def reset(io)
     io.truncate(0)
     io.rewind
