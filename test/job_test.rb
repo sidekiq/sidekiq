@@ -204,4 +204,41 @@ describe Sidekiq::Job do
       assert_match(/but :symbol is a Symbol/, error.message)
     end
   end
+
+  describe "#perform_in scheduling normalization" do
+    before { @config = reset! }
+
+    it "schedules a job into the future for a positive interval" do
+      MySetJob.perform_in(60)
+      assert_equal 1, Sidekiq::ScheduledSet.new.size
+      assert_equal 0, Sidekiq::Queue.new("foo").size
+    end
+
+    it "treats a number >= 1_000_000_000 as an absolute epoch timestamp" do
+      future_epoch = 2_000_000_000
+      MySetJob.perform_at(future_epoch)
+      entry = Sidekiq::ScheduledSet.new.first
+      refute_nil entry
+      assert_in_delta future_epoch, entry.at.to_f, 0.001
+    end
+
+    it "enqueues immediately instead of scheduling when the interval is in the past" do
+      MySetJob.perform_in(-60)
+      assert_equal 0, Sidekiq::ScheduledSet.new.size
+      assert_equal 1, Sidekiq::Queue.new("foo").size
+    end
+  end
+
+  describe ".delay / .delay_for / .delay_until" do
+    it "raise ArgumentError redirecting to perform_async / perform_in / perform_at" do
+      err = assert_raises(ArgumentError) { MySetJob.delay }
+      assert_match(/call \.perform_async/, err.message)
+
+      err = assert_raises(ArgumentError) { MySetJob.delay_for(10) }
+      assert_match(/call \.perform_in/, err.message)
+
+      err = assert_raises(ArgumentError) { MySetJob.delay_until(Time.now + 10) }
+      assert_match(/call \.perform_at/, err.message)
+    end
+  end
 end
