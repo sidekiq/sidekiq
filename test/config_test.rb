@@ -46,4 +46,17 @@ describe Sidekiq::Config do
       end
     end
   end
+
+  describe "#logger=" do
+    it "silences the existing logger by raising the level to FATAL when set to nil" do
+      cfg = Sidekiq::Config.new
+      existing = cfg.logger
+      refute_equal Logger::FATAL, existing.level
+
+      cfg.logger = nil
+
+      assert_same existing, cfg.logger, "expected logger= nil to keep the existing logger instance"
+      assert_equal Logger::FATAL, cfg.logger.level
+    end
+  end
 end
