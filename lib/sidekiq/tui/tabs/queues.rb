@@ -63,14 +63,7 @@ module Sidekiq
           header = ["☑️", "Queue", "Size", "Latency"].map { |x| t(x) }
           header << "Paused?" if Sidekiq.pro?
 
-          chunks = tui.layout_split(
-            area,
-            direction: :vertical,
-            constraints: [
-              tui.constraint_length(4), # Stats
-              tui.constraint_fill(1) # Table
-            ]
-          )
+          chunks = stats_content_split(tui, area)
 
           render_stats_section(tui, frame, chunks[0])
           render_table(tui, frame, chunks[1]) do
@@ -80,12 +73,7 @@ module Sidekiq
               widths: header.map.with_index { |_, idx|
                 tui.constraint_length((idx == 1) ? 60 : 10)
               },
-              rows: @data[:queues].map.with_index { |cells, idx|
-                tui.table_row(
-                  cells:,
-                  style: idx.even? ? nil : tui.style(bg: :dark_gray)
-                )
-              }
+              rows: striped_rows(tui, @data[:queues])
             }
           end
         end

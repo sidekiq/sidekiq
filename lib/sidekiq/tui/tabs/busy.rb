@@ -77,12 +77,7 @@ module Sidekiq
                 tui.constraint_length(6),
                 tui.constraint_length(6)
               ],
-              rows: @data[:busy].map.with_index { |cells, idx|
-                tui.table_row(
-                  cells:,
-                  style: idx.even? ? nil : tui.style(bg: :dark_gray)
-                )
-              }
+              rows: striped_rows(tui, @data[:busy])
             }
           end
         end
@@ -101,16 +96,7 @@ module Sidekiq
           values << format_memory(processes.total_rss)
 
           keys = %w[Processes Threads Busy Utilization RSS]
-          keys_line = keys.map { |k| t(k).to_s.ljust(12) }.join("  ")
-          values_line = values.map { |v| v.to_s.ljust(12) }.join("  ")
-
-          frame.render_widget(
-            tui.paragraph(
-              text: [keys_line, values_line],
-              block: tui.block(title: t("Status"), borders: [:all])
-            ),
-            area
-          )
+          render_kv_section(tui, frame, area, title: t("Status"), keys:, values:)
         end
       end
     end

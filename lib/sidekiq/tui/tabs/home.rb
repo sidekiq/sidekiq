@@ -63,31 +63,16 @@ module Sidekiq
           max_value = [@data[:chart][:deltas][:processed].max, @data[:chart][:deltas][:failed].max, 1].max
           y_max = [max_value, 5].max
 
-          processed_data = @data[:chart][:deltas][:processed].each_with_index.map { |value, idx| [idx.to_f, value.to_f] }
-          failed_data = @data[:chart][:deltas][:failed].each_with_index.map { |value, idx| [idx.to_f, value.to_f] }
-
-          datasets = [
+          datasets = {processed: :green, failed: :red}.map { |key, color|
+            data = @data[:chart][:deltas][key].each_with_index.map { |value, idx| [idx.to_f, value.to_f] }
             tui.dataset(
               name: "",
-              data: processed_data,
-              style: tui.style(fg: :green),
-              marker: :dot,
-              graph_type: :line
-            ),
-            tui.dataset(
-              name: "",
-              data: failed_data,
-              style: tui.style(fg: :red),
+              data: data,
+              style: tui.style(fg: color),
               marker: :dot,
               graph_type: :line
             )
-          ]
-
-          num_labels = 5
-          y_labels = (0...num_labels).map do |i|
-            value = ((y_max * i) / (num_labels - 1)).round
-            value.to_s
-          end
+          }
 
           beacon_pulse = (Time.now.to_i % 2 == 0) ? "●" : " "
 
@@ -98,11 +83,7 @@ module Sidekiq
               labels: [],
               style: tui.style(fg: :white)
             ),
-            y_axis: tui.axis(
-              bounds: [0.0, y_max.to_f],
-              labels: y_labels,
-              style: tui.style(fg: :white)
-            ),
+            y_axis: chart_y_axis(tui, y_max),
             block: tui.block(
               title: "Dashboard #{beacon_pulse}",
               borders: [:all]
@@ -119,24 +100,14 @@ module Sidekiq
 
           keys = ["Version", "Uptime", "Connected Clients", "Memory Usage", "Peak Memory"]
           values = [
-            redis_info[:version].to_s,
+            redis_info[:version],
             uptime_value,
-            redis_info[:connected_clients].to_s,
-            redis_info[:used_memory].to_s,
-            redis_info[:peak_memory].to_s
+            redis_info[:connected_clients],
+            redis_info[:used_memory],
+            redis_info[:peak_memory]
           ]
 
-          # Format keys and values with spacing
-          keys_line = keys.map { |k| t(k).ljust(18) }.join("  ")
-          values_line = values.map { |v| v.ljust(18) }.join("  ")
-
-          frame.render_widget(
-            tui.paragraph(
-              text: [keys_line, values_line],
-              block: tui.block(title: "Redis Information", borders: [:all])
-            ),
-            area
-          )
+          render_kv_section(tui, frame, area, title: "Redis Information", keys:, values:, width: 18)
         end
       end
     end

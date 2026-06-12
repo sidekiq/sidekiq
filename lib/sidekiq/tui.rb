@@ -118,34 +118,13 @@ module Sidekiq
                       @tui.text_span(content: "Global hotkeys")
                     ]),
                     @tui.text_line(spans: []),
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "Esc", style: @hotkey_style),
-                      @tui.text_span(content: ": Close this window")
-                    ]),
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "←/→", style: @hotkey_style),
-                      @tui.text_span(content: ": Move between tabs")
-                    ]),
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "h/l", style: @hotkey_style),
-                      @tui.text_span(content: ": Move to prev/next page of data")
-                    ]),
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "j/k", style: @hotkey_style),
-                      @tui.text_span(content: ": Move to prev/next row in current page")
-                    ]),
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "x", style: @hotkey_style),
-                      @tui.text_span(content: ": Select/deselect current row")
-                    ]),
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "A", style: @hotkey_style),
-                      @tui.text_span(content: ": Select/deselect All rows in current page")
-                    ]),
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "q", style: @hotkey_style),
-                      @tui.text_span(content: ": Quit")
-                    ])
+                    hotkey_line("Esc", "Close this window"),
+                    hotkey_line("←/→", "Move between tabs"),
+                    hotkey_line("h/l", "Move to prev/next page of data"),
+                    hotkey_line("j/k", "Move to prev/next row in current page"),
+                    hotkey_line("x", "Select/deselect current row"),
+                    hotkey_line("A", "Select/deselect All rows in current page"),
+                    hotkey_line("q", "Quit")
                   ]
                 )
               ]
@@ -156,12 +135,7 @@ module Sidekiq
               borders: [:all],
               children: [
                 @tui.paragraph(
-                  text: [
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "Esc", style: @hotkey_style),
-                      @tui.text_span(content: ": Close  ")
-                    ])
-                  ]
+                  text: [hotkey_line("Esc", "Close  ")]
                 )
               ]
             )
@@ -184,21 +158,11 @@ module Sidekiq
       # TODO Dynamically split based on term width?
       first = active_keys[...8]
       lines = []
-      lines << @tui.text_line(spans: first.map { |hash|
-        [
-          @tui.text_span(content: hash[:display] || hash[:code], style: @hotkey_style),
-          @tui.text_span(content: ": #{t(hash[:description])}  ")
-        ]
-      }.flatten)
+      lines << controls_line(first)
 
       last = active_keys[8...]
       lines << if last && last.size > 0
-        @tui.text_line(spans: last.map { |hash|
-          [
-            @tui.text_span(content: hash[:display] || hash[:code], style: @hotkey_style),
-            @tui.text_span(content: ": #{t(hash[:description])}  ")
-          ]
-        }.flatten)
+        controls_line(last)
       else
         @tui.text_line(spans: [])
       end
@@ -223,6 +187,22 @@ module Sidekiq
       controls = @tui.block(title: t("Controls"), borders: [:all],
         children: [@tui.paragraph(text: lines)])
       frame.render_widget(controls, area)
+    end
+
+    def hotkey_line(key, description)
+      @tui.text_line(spans: [
+        @tui.text_span(content: key, style: @hotkey_style),
+        @tui.text_span(content: ": #{description}")
+      ])
+    end
+
+    def controls_line(keys)
+      @tui.text_line(spans: keys.map { |hash|
+        [
+          @tui.text_span(content: hash[:display] || hash[:code], style: @hotkey_style),
+          @tui.text_span(content: ": #{t(hash[:description])}  ")
+        ]
+      }.flatten)
     end
 
     def handle_input
