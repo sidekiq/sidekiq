@@ -277,8 +277,7 @@ module Sidekiq
       @options[:instrumentation_handlers]
     end
 
-    # INTERNAL USE ONLY
-    def instrument(event, payload = {})
+    def instrument(event, payload = {}) # :nodoc:
       @options[:instrumentation_handlers].each do |handler|
         handler.call(event, payload, self)
       rescue => ex

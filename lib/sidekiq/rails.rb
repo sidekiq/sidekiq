@@ -43,12 +43,10 @@ module Sidekiq
         Sidekiq.configure_server do |config|
           config[:reloader] = Sidekiq::Rails::Reloader.new
 
-          if defined?(::ActiveSupport::Notifications)
-            require_relative "rails/instrumentation"
-            bridge = Sidekiq::Rails::Instrumentation::ActiveSupportBridge
-            unless config.instrumentation_handlers.any? { |h| h.is_a?(bridge) }
-              config.instrumentation_handlers << bridge.new
-            end
+          require_relative "rails/instrumentation"
+          bridge = Sidekiq::Rails::Instrumentation::ActiveSupportBridge
+          unless config.instrumentation_handlers.any? { |h| h.is_a?(bridge) }
+            config.instrumentation_handlers << bridge.new
           end
 
           # This is the integration code necessary so that if a job uses `Rails.logger.info "Hello"`,
