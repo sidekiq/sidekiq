@@ -47,6 +47,7 @@ module Sidekiq
 
       maxmemory_policy = info["maxmemory_policy"]
       if maxmemory_policy != "noeviction"
+        instrument(Sidekiq::Instrumentation::REDIS_EVICTION_POLICY, {policy: maxmemory_policy})
         logger.warn <<~EOM
 
 

@@ -43,6 +43,11 @@ module Sidekiq
         Sidekiq.configure_server do |config|
           config[:reloader] = Sidekiq::Rails::Reloader.new
 
+          require "sidekiq/instrumentation/active_support"
+          unless config.instrumentation_handlers.any? { |h| h.is_a?(Sidekiq::Instrumentation::ActiveSupportBridge) }
+            config.instrumentation_handlers << Sidekiq::Instrumentation::ActiveSupportBridge.new
+          end
+
           # This is the integration code necessary so that if a job uses `Rails.logger.info "Hello"`,
           # it will appear in the Sidekiq console with all of the job context.
           unless ::Rails.logger == config.logger || ::ActiveSupport::Logger.logger_outputs_to?(::Rails.logger, $stdout)

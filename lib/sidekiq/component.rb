@@ -79,6 +79,10 @@ module Sidekiq
       config.handle_exception(ex, ctx)
     end
 
+    def instrument(event, payload = {})
+      config.instrument(event, payload)
+    end
+
     def fire_event(event, options = {})
       oneshot = options.fetch(:oneshot, true)
       reverse = options[:reverse]

@@ -220,6 +220,11 @@ module Sidekiq
       # Workable is < 10,000µs
       # Log a warning if it's a disaster.
       if RTT_READINGS.all? { |x| x > RTT_WARNING_LEVEL }
+        instrument(Sidekiq::Instrumentation::SLOW_RTT, {
+          readings: RTT_READINGS.buffer.dup,
+          threshold: RTT_WARNING_LEVEL,
+          identity: identity
+        })
         logger.warn <<~EOM
           Your Redis network connection appears to be performing poorly.
           Last RTT readings were #{RTT_READINGS.buffer.inspect}, ideally these should be < 1000.

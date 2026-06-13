@@ -91,7 +91,9 @@ module Sidekiq
     def get_one
       uow = capsule.fetcher.retrieve_work
       if @down
-        logger.info { "Redis is online, #{::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @down} sec downtime" }
+        downtime = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - @down
+        instrument(Sidekiq::Instrumentation::REDIS_RECOVERED, {downtime: downtime})
+        logger.info { "Redis is online, #{downtime} sec downtime" }
         @down = nil
       end
       uow

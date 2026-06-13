@@ -22,6 +22,7 @@ module Sidekiq
       max_iteration_runtime: nil,
       error_handlers: [],
       death_handlers: [],
+      instrumentation_handlers: [],
       lifecycle_events: {
         startup: [],
         quiet: [],
@@ -74,7 +75,7 @@ module Sidekiq
 
     def inspect
       "#<#{self.class.name} @options=#{
-        @options.except(:lifecycle_events, :reloader, :death_handlers, :error_handlers).inspect
+        @options.except(:lifecycle_events, :reloader, :death_handlers, :error_handlers, :instrumentation_handlers).inspect
       }>"
     end
 
@@ -261,6 +262,31 @@ module Sidekiq
     # The default error handler logs errors to @logger.
     def error_handlers
       @options[:error_handlers]
+    end
+
+    # Register a proc to receive Sidekiq instrumentation events.
+    #
+    #   Sidekiq.configure_server do |config|
+    #     config.instrumentation_handlers << proc { |event, payload, config|
+    #       StatsD.increment(event)
+    #     }
+    #   end
+    #
+    # See Sidekiq::Instrumentation for event names published by OSS Sidekiq.
+    def instrumentation_handlers
+      @options[:instrumentation_handlers]
+    end
+
+    # INTERNAL USE ONLY
+    def instrument(event, payload = {})
+      @options[:instrumentation_handlers].each do |handler|
+        handler.call(event, payload, self)
+      rescue => ex
+        l = logger
+        l.error "!!! INSTRUMENTATION HANDLER THREW AN ERROR !!!"
+        l.error ex
+        l.error ex.backtrace.join("\n") unless ex.backtrace.nil?
+      end
     end
 
     # Register a block to run at a point in the Sidekiq lifecycle.
