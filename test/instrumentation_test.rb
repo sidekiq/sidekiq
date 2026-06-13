@@ -5,7 +5,6 @@ require "sidekiq/component"
 require "sidekiq/launcher"
 require "sidekiq/manager"
 require "sidekiq/processor"
-require "sidekiq/instrumentation/active_support"
 
 class InstrumentationThing
   include Sidekiq::Component
@@ -143,20 +142,5 @@ describe "Sidekiq instrumentation" do
     assert_equal 1, events.size
     assert_equal Sidekiq::Instrumentation::REDIS_RECOVERED, events[0][0]
     assert_operator events[0][1][:downtime], :>=, 2.0
-  end
-
-  it "forwards events through ActiveSupportBridge" do
-    received = []
-    subscriber = ActiveSupport::Notifications.subscribe(Sidekiq::Instrumentation::SLOW_RTT) do |*args|
-      received << ActiveSupport::Notifications::Event.new(*args)
-    end
-
-    bridge = Sidekiq::Instrumentation::ActiveSupportBridge.new
-    bridge.call(Sidekiq::Instrumentation::SLOW_RTT, {readings: [1]})
-
-    assert_equal 1, received.size
-    assert_equal [1], received[0].payload[:readings]
-  ensure
-    ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
   end
 end

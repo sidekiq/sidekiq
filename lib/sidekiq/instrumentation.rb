@@ -11,8 +11,6 @@ module Sidekiq
   #     end
   #   end
   #
-  # In Rails, ActiveSupport::Notifications is wired automatically.
-  #
   module Instrumentation
     SLOW_RTT = "slow_rtt.sidekiq"
     SLOW_ITERATION = "slow_iteration.sidekiq"
