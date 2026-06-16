@@ -80,7 +80,6 @@ module Sidekiq # :nodoc:
       maxmemory_policy = info["maxmemory_policy"]
       if maxmemory_policy != "noeviction" && maxmemory_policy != ""
         # Redis Enterprise Cloud returns "" for their policy 😳
-        instrument(Sidekiq::Instrumentation::REDIS_EVICTION_POLICY, {policy: maxmemory_policy})
         logger.warn <<~EOM
 
 

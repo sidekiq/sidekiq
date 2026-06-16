@@ -14,7 +14,6 @@ module Sidekiq
   module Instrumentation
     SLOW_RTT = "slow_rtt.sidekiq"
     SLOW_ITERATION = "slow_iteration.sidekiq"
-    REDIS_EVICTION_POLICY = "redis_eviction_policy.sidekiq"
     HARD_SHUTDOWN = "hard_shutdown.sidekiq"
     REDIS_RECOVERED = "redis_recovered.sidekiq"
   end
