@@ -39,7 +39,7 @@
               </td>
               <td><%= entry['retry_count'] %></td>
               <td>
-                <a href="<%= root_path %>queues/<%= entry.queue %>"><%= entry.queue %></a>
+                <a href="<%= root_path %>queues/<%= CGI.escape(entry.queue) %>"><%= h entry.queue %></a>
               </td>
               <td>
                 <%= entry.display_class %>

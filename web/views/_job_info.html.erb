@@ -9,7 +9,7 @@
         <tr>
           <th><%= t('Queue') %></th>
           <td>
-            <a href="<%= root_path %>queues/<%= job.queue %>"><%= job.queue %></a>
+            <a href="<%= root_path %>queues/<%= CGI.escape(job.queue) %>"><%= h job.queue %></a>
           </td>
         </tr>
         <tr>

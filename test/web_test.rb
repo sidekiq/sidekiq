@@ -888,6 +888,7 @@ describe Sidekiq::Web do
     msg = {"class" => "HardJob",
            "args" => ["bob", 1, Time.now.to_f],
            "jid" => jid,
+           "queue" => "default",
            "tags" => ["tag1", "tag2"]}
     @config.redis do |conn|
       conn.zadd("schedule", score, Sidekiq.dump_json(msg))

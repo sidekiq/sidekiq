@@ -132,7 +132,7 @@
             <td><%= thread %></td>
             <td><%= job.jid %></td>
             <td>
-              <a href="<%= root_path %>queues/<%= work.queue %>"><%= work.queue %></a>
+              <a href="<%= root_path %>queues/<%= CGI.escape(work.queue) %>"><%= h work.queue %></a>
             </td>
             <td>
               <%= job.display_class %>
