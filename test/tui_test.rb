@@ -25,6 +25,30 @@ class ConcreteTab < Sidekiq::TUI::BaseTab
   end
 end
 
+# Minimal stand-in that captures the args passed to the underlying TUI calls
+# so we can assert the structure of what BaseTab renders.
+class CapturingTUI
+  attr_reader :axis_args, :table_rows
+
+  def initialize
+    @table_rows = []
+  end
+
+  def axis(**kwargs)
+    @axis_args = kwargs
+  end
+
+  def table_row(cells:, style:)
+    row = {cells: cells, style: style}
+    @table_rows << row
+    row
+  end
+
+  def style(**kw)
+    kw
+  end
+end
+
 describe "Sidekiq::TUI::BaseTab" do
   describe "#number_with_delimiter" do
     it "returns small numbers as strings without modification" do
@@ -91,6 +115,51 @@ describe "Sidekiq::TUI::BaseTab" do
     it "uses locale-aware separators in memory formatting" do
       tab = ConcreteTab.new(FakeTUIParent.new("de"))
       assert_equal "99.999 KB", tab.format_memory(99_999)
+    end
+  end
+
+  describe "#chart_y_axis" do
+    it "emits evenly-spaced integer labels from 0 to y_max" do
+      tab = ConcreteTab.new(FakeTUIParent.new)
+      tui = CapturingTUI.new
+
+      tab.chart_y_axis(tui, 100, num_labels: 5)
+
+      assert_equal ["0", "25", "50", "75", "100"], tui.axis_args[:labels]
+      assert_equal [0.0, 100.0], tui.axis_args[:bounds]
+    end
+
+    it "scales the labels to the requested count" do
+      tab = ConcreteTab.new(FakeTUIParent.new)
+      tui = CapturingTUI.new
+
+      tab.chart_y_axis(tui, 200, num_labels: 3)
+
+      assert_equal ["0", "100", "200"], tui.axis_args[:labels]
+    end
+
+    it "emits all-zero labels when y_max is 0 (avoids divide-by-zero on an empty chart)" do
+      tab = ConcreteTab.new(FakeTUIParent.new)
+      tui = CapturingTUI.new
+
+      tab.chart_y_axis(tui, 0, num_labels: 4)
+
+      assert_equal ["0", "0", "0", "0"], tui.axis_args[:labels]
+    end
+  end
+
+  describe "#striped_rows" do
+    it "alternates background style: nil for even-indexed rows, dark_gray for odd" do
+      tab = ConcreteTab.new(FakeTUIParent.new)
+      tui = CapturingTUI.new
+
+      out = tab.striped_rows(tui, [["a", "b"], ["c", "d"], ["e", "f"]])
+
+      assert_equal 3, out.size
+      assert_nil out[0][:style]
+      assert_equal({bg: :dark_gray}, out[1][:style])
+      assert_nil out[2][:style]
+      assert_equal ["a", "b"], out[0][:cells]
     end
   end
 end
