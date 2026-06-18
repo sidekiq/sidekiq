@@ -255,9 +255,9 @@ module Sidekiq
             cursor: @_cursor
           }
           if _context
-            _context.instrument(Sidekiq::Instrumentation::SLOW_ITERATION, payload)
+            _context.fire_warning("slow_iteration.sidekiq", payload)
           else
-            Sidekiq.default_configuration.instrument(Sidekiq::Instrumentation::SLOW_ITERATION, payload)
+            Sidekiq.default_configuration.fire_warning("slow_iteration.sidekiq", payload)
           end
           logger.warn { "Iteration took longer (%.2f) than Sidekiq's shutdown timeout (%d). This can lead to job processing problems during deploys" % [total, time_limit] }
         end

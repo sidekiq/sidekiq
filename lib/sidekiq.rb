@@ -28,7 +28,6 @@ rescue LoadError
 end
 
 require "sidekiq/config"
-require "sidekiq/instrumentation"
 require "sidekiq/logger"
 require "sidekiq/loader"
 require "sidekiq/client"

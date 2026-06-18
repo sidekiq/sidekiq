@@ -6,7 +6,7 @@ require "sidekiq/launcher"
 require "sidekiq/manager"
 require "sidekiq/processor"
 
-class InstrumentationThing
+class WarningThing
   include Sidekiq::Component
 
   attr_reader :config
@@ -16,37 +16,37 @@ class InstrumentationThing
   end
 end
 
-describe "Sidekiq instrumentation" do
+describe "Sidekiq warnings" do
   before do
     @config = reset!
-    @config.instrumentation_handlers.clear
+    @config.warning_handlers.clear
   end
 
   it "has no handlers by default" do
-    assert_empty @config.instrumentation_handlers
+    assert_empty @config.warning_handlers
   end
 
-  it "calls instrumentation handlers" do
+  it "calls warning handlers" do
     events = []
-    @config.instrumentation_handlers << ->(event, payload, cfg) {
-      events << [event, payload, cfg]
+    @config.warning_handlers << ->(name, payload, cfg) {
+      events << [name, payload, cfg]
     }
 
-    @config.instrument(Sidekiq::Instrumentation::SLOW_RTT, {readings: [1, 2]})
+    @config.fire_warning("slow_rtt.sidekiq", {readings: [1, 2]})
 
     assert_equal 1, events.size
-    assert_equal Sidekiq::Instrumentation::SLOW_RTT, events[0][0]
+    assert_equal "slow_rtt.sidekiq", events[0][0]
     assert_equal({readings: [1, 2]}, events[0][1])
     assert_equal @config, events[0][2]
   end
 
   it "delegates through Sidekiq::Component" do
     events = []
-    @config.instrumentation_handlers << ->(event, payload, _cfg) {
-      events << [event, payload]
+    @config.warning_handlers << ->(name, payload, _cfg) {
+      events << [name, payload]
     }
 
-    InstrumentationThing.new(@config).instrument("test.sidekiq", {foo: "bar"})
+    WarningThing.new(@config).fire_warning("test.sidekiq", {foo: "bar"})
 
     assert_equal 1, events.size
     assert_equal ["test.sidekiq", {foo: "bar"}], events[0]
@@ -54,19 +54,19 @@ describe "Sidekiq instrumentation" do
 
   it "does not break when a handler raises" do
     output = capture_logging(@config, Logger::ERROR) do
-      @config.instrumentation_handlers << ->(_event, _payload, _cfg) { raise "boom" }
-      @config.instrumentation_handlers << ->(event, _payload, _cfg) { @seen = event }
-      @config.instrument(Sidekiq::Instrumentation::SLOW_RTT, {})
+      @config.warning_handlers << ->(_name, _payload, _cfg) { raise "boom" }
+      @config.warning_handlers << ->(name, _payload, _cfg) { @seen = name }
+      @config.fire_warning("slow_rtt.sidekiq", {})
     end
 
-    assert_equal Sidekiq::Instrumentation::SLOW_RTT, @seen
-    assert_match(/INSTRUMENTATION HANDLER THREW AN ERROR/, output)
+    assert_equal "slow_rtt.sidekiq", @seen
+    assert_match(/WARNING HANDLER THREW AN ERROR/, output)
   end
 
   it "publishes slow_rtt from the launcher" do
     events = []
-    @config.instrumentation_handlers << ->(event, payload, _cfg) {
-      events << [event, payload]
+    @config.warning_handlers << ->(name, payload, _cfg) {
+      events << [name, payload]
     }
 
     launcher = Sidekiq::Launcher.new(@config)
@@ -89,7 +89,7 @@ describe "Sidekiq instrumentation" do
     end
 
     assert_equal 1, events.size
-    assert_equal Sidekiq::Instrumentation::SLOW_RTT, events[0][0]
+    assert_equal "slow_rtt.sidekiq", events[0][0]
     assert_equal 50_000, events[0][1][:threshold]
     assert_equal 5, events[0][1][:readings].size
   ensure
@@ -98,8 +98,8 @@ describe "Sidekiq instrumentation" do
 
   it "publishes hard_shutdown from the manager" do
     events = []
-    @config.instrumentation_handlers << ->(event, payload, _cfg) {
-      events << [event, payload]
+    @config.warning_handlers << ->(name, payload, _cfg) {
+      events << [name, payload]
     }
 
     capsule = @config.default_capsule
@@ -117,7 +117,7 @@ describe "Sidekiq instrumentation" do
     end
 
     assert_equal 1, events.size
-    assert_equal Sidekiq::Instrumentation::HARD_SHUTDOWN, events[0][0]
+    assert_equal "hard_shutdown.sidekiq", events[0][0]
     assert_equal 1, events[0][1][:thread_count]
     assert_equal 1, events[0][1][:job_count]
     fetcher.verify
@@ -125,8 +125,8 @@ describe "Sidekiq instrumentation" do
 
   it "publishes redis_recovered from the processor" do
     events = []
-    @config.instrumentation_handlers << ->(event, payload, _cfg) {
-      events << [event, payload]
+    @config.warning_handlers << ->(name, payload, _cfg) {
+      events << [name, payload]
     }
 
     capsule = @config.default_capsule
@@ -140,7 +140,7 @@ describe "Sidekiq instrumentation" do
     processor.send(:get_one)
 
     assert_equal 1, events.size
-    assert_equal Sidekiq::Instrumentation::REDIS_RECOVERED, events[0][0]
+    assert_equal "redis_recovered.sidekiq", events[0][0]
     assert_operator events[0][1][:downtime], :>=, 2.0
   end
 end

@@ -2,9 +2,9 @@
 
 module Sidekiq
   class Rails
-    module Instrumentation
+    module Warnings
       ##
-      # Forwards Sidekiq instrumentation events to ActiveSupport::Notifications.
+      # Forwards Sidekiq operational warnings to ActiveSupport::Notifications.
       # Loaded only when Sidekiq runs inside Rails.
       #
       #   ActiveSupport::Notifications.subscribe("slow_rtt.sidekiq") do |*args|
@@ -13,8 +13,8 @@ module Sidekiq
       #   end
       #
       class ActiveSupportBridge
-        def call(event, payload, _cfg = nil)
-          ::ActiveSupport::Notifications.instrument(event, payload)
+        def call(name, payload, _cfg = nil)
+          ::ActiveSupport::Notifications.instrument(name, payload)
         end
       end
     end
