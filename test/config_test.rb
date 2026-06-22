@@ -21,6 +21,7 @@ describe Sidekiq::Config do
     assert_operator @config.inspect.size, :<=, 500
     refute_match(/death_handlers/, @config.inspect)
     refute_match(/error_handlers/, @config.inspect)
+    refute_match(/warning_handlers/, @config.inspect)
   end
 
   describe "default logger formatter" do

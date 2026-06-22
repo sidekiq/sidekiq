@@ -247,6 +247,18 @@ module Sidekiq
         finish = mono_now
         total = finish - start
         if total > time_limit
+          payload = {
+            class: self.class.name,
+            jid: jid,
+            duration: total,
+            timeout: time_limit,
+            cursor: @_cursor
+          }
+          if _context
+            _context.fire_warning("slow_iteration.sidekiq", payload)
+          else
+            Sidekiq.default_configuration.fire_warning("slow_iteration.sidekiq", payload)
+          end
           logger.warn { "Iteration took longer (%.2f) than Sidekiq's shutdown timeout (%d). This can lead to job processing problems during deploys" % [total, time_limit] }
         end
       end

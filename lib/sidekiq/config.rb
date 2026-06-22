@@ -22,6 +22,7 @@ module Sidekiq
       max_iteration_runtime: nil,
       error_handlers: [],
       death_handlers: [],
+      warning_handlers: [],
       lifecycle_events: {
         startup: [],
         quiet: [],
@@ -74,7 +75,7 @@ module Sidekiq
 
     def inspect
       "#<#{self.class.name} @options=#{
-        @options.except(:lifecycle_events, :reloader, :death_handlers, :error_handlers).inspect
+        @options.except(:lifecycle_events, :reloader, :death_handlers, :error_handlers, :warning_handlers).inspect
       }>"
     end
 
@@ -261,6 +262,30 @@ module Sidekiq
     # The default error handler logs errors to @logger.
     def error_handlers
       @options[:error_handlers]
+    end
+
+    # Register a proc to receive Sidekiq operational warnings.
+    #
+    #   Sidekiq.configure_server do |config|
+    #     config.warning_handlers << proc { |name, payload, config|
+    #       StatsD.increment(name)
+    #     }
+    #   end
+    #
+    # OSS publishes warnings such as "slow_rtt.sidekiq" and "slow_iteration.sidekiq".
+    def warning_handlers
+      @options[:warning_handlers]
+    end
+
+    def fire_warning(name, payload = {}) # :nodoc:
+      @options[:warning_handlers].each do |handler|
+        handler.call(name, payload, self)
+      rescue => ex
+        l = logger
+        l.error "!!! WARNING HANDLER THREW AN ERROR !!!"
+        l.error ex
+        l.error ex.backtrace.join("\n") unless ex.backtrace.nil?
+      end
     end
 
     # Register a block to run at a point in the Sidekiq lifecycle.
