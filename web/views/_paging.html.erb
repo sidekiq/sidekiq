@@ -19,7 +19,7 @@
         </li>
       <% end %>
       <li class="<%= 'disabled' if @total_size <= @current_page * @count %>">
-        <a href="<%= url %>?<%= qparams(page: (@total_size.to_f / @count).ceil) %>">&raquo;</a>
+        <a href="<%= url %>?<%= qparams(page: @count > 0 ? (@total_size.to_f / @count).ceil : 1) %>">&raquo;</a>
       </li>
     </ul>
   </div>
