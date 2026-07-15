@@ -105,31 +105,40 @@ module Sidekiq
                 @tui.constraint_length(4)
               ]
             )
-            content = @tui.block(
-              title: " #{Sidekiq::NAME} ",
-              borders: [:all],
-              title_style: @tui.style(fg: :light_red, modifiers: [:bold]),
-              children: [
-                # TODO convert to table
-                @tui.paragraph(
-                  text: [
-                    @tui.text_line(spans: ["Welcome to the Sidekiq Terminal UI"], alignment: :center),
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "Global hotkeys")
-                    ]),
-                    @tui.text_line(spans: []),
-                    hotkey_line("Esc", "Close this window"),
-                    hotkey_line("←/→", "Move between tabs"),
-                    hotkey_line("h/l", "Move to prev/next page of data"),
-                    hotkey_line("j/k", "Move to prev/next row in current page"),
-                    hotkey_line("x", "Select/deselect current row"),
-                    hotkey_line("A", "Select/deselect All rows in current page"),
-                    hotkey_line("q", "Quit")
-                  ]
-                )
-              ]
+            
+            help_data = [
+              ["Esc", "Close this window"],
+              ["←/→", "Move between tabs"],
+              ["h/l", "Move to prev/next page of data"],
+              ["j/k", "Move to prev/next row in current page"],
+              ["x", "Select/deselect current row"],
+              ["A", "Select/deselect All rows in current page"],
+              ["q", "Quit"]
+            ]
+            
+            # striped styling like other tables in the app
+            help_rows = help_data.map.with_index { |cells, idx|
+              @tui.table_row(
+                cells: cells,
+                style: idx.even? ? nil : @tui.style(bg: :dark_gray)
+              )
+            }
+            
+            table = @tui.table(
+              block: @tui.block(
+                title: " #{Sidekiq::NAME} - Welcome to the Sidekiq Terminal UI ",
+                borders: [:all],
+                title_style: @tui.style(fg: :light_red, modifiers: [:bold])
+              ),
+              header: ["Key", "Action"],
+              rows: help_rows,
+              widths: [
+                @tui.constraint_length(15),
+                @tui.constraint_fill(1)
+              ],
+              column_spacing: 1
             )
-            frame.render_widget(content, main_area)
+            frame.render_widget(table, main_area)
             controls = @tui.block(
               title: t("Controls"),
               borders: [:all],
