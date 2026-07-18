@@ -94,7 +94,7 @@ module Sidekiq
       if cleanup.size > 0
         jobs = cleanup.map { |p| p.job }.compact
 
-        fire_warning("hard_shutdown.sidekiq", {
+        instrument("hard_shutdown.sidekiq", {
           thread_count: cleanup.size,
           job_count: jobs.size
         })

@@ -22,7 +22,7 @@ module Sidekiq
       max_iteration_runtime: nil,
       error_handlers: [],
       death_handlers: [],
-      warning_handlers: [],
+      instrumentation_handlers: [],
       lifecycle_events: {
         startup: [],
         quiet: [],
@@ -75,7 +75,7 @@ module Sidekiq
 
     def inspect
       "#<#{self.class.name} @options=#{
-        @options.except(:lifecycle_events, :reloader, :death_handlers, :error_handlers, :warning_handlers).inspect
+        @options.except(:lifecycle_events, :reloader, :death_handlers, :error_handlers, :instrumentation_handlers).inspect
       }>"
     end
 
@@ -264,25 +264,26 @@ module Sidekiq
       @options[:error_handlers]
     end
 
-    # Register a proc to receive Sidekiq operational warnings.
+    # Register a proc to receive Sidekiq operational instrumentation events.
     #
     #   Sidekiq.configure_server do |config|
-    #     config.warning_handlers << proc { |name, payload, config|
+    #     config.instrumentation_handlers << proc { |name, payload, config|
     #       StatsD.increment(name)
     #     }
     #   end
     #
-    # OSS publishes warnings such as "slow_rtt.sidekiq" and "slow_iteration.sidekiq".
-    def warning_handlers
-      @options[:warning_handlers]
+    # OSS publishes events such as "slow_rtt.sidekiq" and "slow_iteration.sidekiq".
+    # Warnings are one category; Pro/Ent may publish additional instrumentation.
+    def instrumentation_handlers
+      @options[:instrumentation_handlers]
     end
 
-    def fire_warning(name, payload = {}) # :nodoc:
-      @options[:warning_handlers].each do |handler|
+    def instrument(name, payload = {}) # :nodoc:
+      @options[:instrumentation_handlers].each do |handler|
         handler.call(name, payload, self)
       rescue => ex
         l = logger
-        l.error "!!! WARNING HANDLER THREW AN ERROR !!!"
+        l.error "!!! INSTRUMENTATION HANDLER THREW AN ERROR !!!"
         l.error ex
         l.error ex.backtrace.join("\n") unless ex.backtrace.nil?
       end

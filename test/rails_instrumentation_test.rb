@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
 require_relative "helper"
-require "sidekiq/rails/warnings"
+require "sidekiq/rails/instrumentation"
 
-describe "Sidekiq::Rails warnings" do
-  it "forwards warnings through ActiveSupportBridge" do
+describe "Sidekiq::Rails instrumentation" do
+  it "forwards events through ActiveSupportBridge" do
     received = []
     subscriber = ActiveSupport::Notifications.subscribe("slow_rtt.sidekiq") do |*args|
       received << ActiveSupport::Notifications::Event.new(*args)
     end
 
-    bridge = Sidekiq::Rails::Warnings::ActiveSupportBridge.new
+    bridge = Sidekiq::Rails::Instrumentation::ActiveSupportBridge.new
     bridge.call("slow_rtt.sidekiq", {readings: [1]})
 
     assert_equal 1, received.size

@@ -6,7 +6,7 @@ require "sidekiq/launcher"
 require "sidekiq/manager"
 require "sidekiq/processor"
 
-class WarningThing
+class InstrumentationThing
   include Sidekiq::Component
 
   attr_reader :config
@@ -16,23 +16,23 @@ class WarningThing
   end
 end
 
-describe "Sidekiq warnings" do
+describe "Sidekiq instrumentation" do
   before do
     @config = reset!
-    @config.warning_handlers.clear
+    @config.instrumentation_handlers.clear
   end
 
   it "has no handlers by default" do
-    assert_empty @config.warning_handlers
+    assert_empty @config.instrumentation_handlers
   end
 
-  it "calls warning handlers" do
+  it "calls instrumentation handlers" do
     events = []
-    @config.warning_handlers << ->(name, payload, cfg) {
+    @config.instrumentation_handlers << ->(name, payload, cfg) {
       events << [name, payload, cfg]
     }
 
-    @config.fire_warning("slow_rtt.sidekiq", {readings: [1, 2]})
+    @config.instrument("slow_rtt.sidekiq", {readings: [1, 2]})
 
     assert_equal 1, events.size
     assert_equal "slow_rtt.sidekiq", events[0][0]
@@ -42,11 +42,11 @@ describe "Sidekiq warnings" do
 
   it "delegates through Sidekiq::Component" do
     events = []
-    @config.warning_handlers << ->(name, payload, _cfg) {
+    @config.instrumentation_handlers << ->(name, payload, _cfg) {
       events << [name, payload]
     }
 
-    WarningThing.new(@config).fire_warning("test.sidekiq", {foo: "bar"})
+    InstrumentationThing.new(@config).instrument("test.sidekiq", {foo: "bar"})
 
     assert_equal 1, events.size
     assert_equal ["test.sidekiq", {foo: "bar"}], events[0]
@@ -54,18 +54,18 @@ describe "Sidekiq warnings" do
 
   it "does not break when a handler raises" do
     output = capture_logging(@config, Logger::ERROR) do
-      @config.warning_handlers << ->(_name, _payload, _cfg) { raise "boom" }
-      @config.warning_handlers << ->(name, _payload, _cfg) { @seen = name }
-      @config.fire_warning("slow_rtt.sidekiq", {})
+      @config.instrumentation_handlers << ->(_name, _payload, _cfg) { raise "boom" }
+      @config.instrumentation_handlers << ->(name, _payload, _cfg) { @seen = name }
+      @config.instrument("slow_rtt.sidekiq", {})
     end
 
     assert_equal "slow_rtt.sidekiq", @seen
-    assert_match(/WARNING HANDLER THREW AN ERROR/, output)
+    assert_match(/INSTRUMENTATION HANDLER THREW AN ERROR/, output)
   end
 
   it "publishes slow_rtt from the launcher" do
     events = []
-    @config.warning_handlers << ->(name, payload, _cfg) {
+    @config.instrumentation_handlers << ->(name, payload, _cfg) {
       events << [name, payload]
     }
 
@@ -98,7 +98,7 @@ describe "Sidekiq warnings" do
 
   it "publishes hard_shutdown from the manager" do
     events = []
-    @config.warning_handlers << ->(name, payload, _cfg) {
+    @config.instrumentation_handlers << ->(name, payload, _cfg) {
       events << [name, payload]
     }
 
@@ -125,7 +125,7 @@ describe "Sidekiq warnings" do
 
   it "publishes redis_recovered from the processor" do
     events = []
-    @config.warning_handlers << ->(name, payload, _cfg) {
+    @config.instrumentation_handlers << ->(name, payload, _cfg) {
       events << [name, payload]
     }
 

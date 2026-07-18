@@ -79,8 +79,8 @@ module Sidekiq
       config.handle_exception(ex, ctx)
     end
 
-    def fire_warning(name, payload = {}) # :nodoc:
-      config.fire_warning(name, payload)
+    def instrument(name, payload = {}) # :nodoc:
+      config.instrument(name, payload)
     end
 
     def fire_event(event, options = {})

@@ -2,9 +2,9 @@
 
 module Sidekiq
   class Rails
-    module Warnings
+    module Instrumentation
       ##
-      # Forwards Sidekiq operational warnings to ActiveSupport::Notifications.
+      # Forwards Sidekiq instrumentation events to ActiveSupport::Notifications.
       # Loaded only when Sidekiq runs inside Rails.
       #
       #   ActiveSupport::Notifications.subscribe("slow_rtt.sidekiq") do |*args|
