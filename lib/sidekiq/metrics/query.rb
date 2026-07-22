@@ -169,7 +169,10 @@ module Sidekiq
 
       def fetch_marks(time_range, granularity)
         [].tap do |result|
-          marks = @pool.with { |c| c.hgetall("#{@time.strftime("%Y%m%d")}-marks") }
+          days = (time_range.begin.utc.to_date..time_range.end.utc.to_date)
+          marks = @pool.with { |c|
+            days.flat_map { |day| c.hgetall("#{day.strftime("%Y%m%d")}-marks").to_a }
+          }
 
           marks.each do |timestamp, label|
             time = Time.parse(timestamp)
