@@ -171,8 +171,10 @@ module Sidekiq
         [].tap do |result|
           days = (time_range.begin.utc.to_date..time_range.end.utc.to_date)
           marks = @pool.with { |c|
-            days.flat_map { |day| c.hgetall("#{day.strftime("%Y%m%d")}-marks").to_a }
-          }
+            c.pipelined { |pipeline|
+              days.each { |day| pipeline.hgetall("#{day.strftime("%Y%m%d")}-marks") }
+            }
+          }.flat_map(&:to_a)
 
           marks.each do |timestamp, label|
             time = Time.parse(timestamp)
