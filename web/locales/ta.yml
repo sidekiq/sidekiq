@@ -5,73 +5,107 @@ ta:
   AddToQueue: வரிசையில் சேர்
   AddAllToQueue: அனைத்தையும் வரிசையில் சேர்
   AreYouSure: நீங்கள் உறுதியாக இருக்கிறீர்களா?
-  AreYouSureDeleteJob: நீ இந்த வேலையை நீக்க வேண்டும் என்று உறுதியாக இருக்கிறீர்களா?
-  AreYouSureDeleteQueue: நீங்கள் %{queue} வரிசையில் நீக்க வேண்டும் என்பதில் உறுதியாக இருக்கிறீர்களா?
-  Arguments: வாதங்கள்,
-  Busy: பணிமிகுதி
+  AreYouSureDeleteJob: இந்த பணியை நீக்க விரும்புகிறீர்களா?
+  AreYouSureDeleteQueue: "%{queue} வரிசையை நீக்க விரும்புகிறீர்களா? இது வரிசையிலுள்ள அனைத்து பணிகளையும் நீக்கிவிடும், எதிர்காலத்தில் மேலும் பணிகளை அனுப்பினால் இது மீண்டும் தோன்றும்."
+  Arguments: அளவுருக்கள்
+  BackToApp: பயன்பாட்டிற்குத் திரும்பு
+  Busy: செயலில்
   Class: வகுப்பு
   Connections: இணைப்புகள்
-  CurrentMessagesInQueue: தற்போதைய வேலைகள் <span class='title'>%{queue}</span>
-  Dashboard: டாஷ்போர்டு
-  Dead: இறந்துபோன
-  DeadJobs: டெட் வேலைகள்
+  CreatedAt: உருவாக்கப்பட்ட நேரம்
+  CurrentMessagesInQueue: <span class='title'>%{queue}</span> இல் உள்ள தற்போதைய பணிகள்
+  Dashboard: தகவற்பலகை
+  Dead: முடிந்தது
+  DeadJobs: முடிந்த பணிகள்
   Delete: நீக்கு
-  DeleteAll: அனைத்து நீக்கு
-  Enqueued: வரிசைப்படுத்தப்பட்டவை
+  DeleteAll: அனைத்தையும் நீக்கு
+  Deploy: வரிசைப்படுத்து
+  Enqueued: வரிசையிடப்பட்டது
   Error: பிழை
-  ErrorBacktrace: பிழை பின்தேடுலை
+  ErrorBacktrace: பிழை பின்தடம்
   ErrorClass: பிழை வகுப்பு
   ErrorMessage: பிழை செய்தி
-  Extras: உபரி
-  Failed: தோல்வி
-  Failures: தோல்விகள்
-  GoBack: பின்புறம்
+  ExecutionTime: செயல்படுத்தும் நேரம்
+  Extras: கூடுதல்
+  Failed: தோல்வியடைந்தது
+  Failures: தோல்விகள்
+  Failure: தோல்வி
+  GoBack: ← பின் செல்
   History: வரலாறு
-  Job: வேலை
-  Jobs: வேலை வாய்ப்புகள்
-  Kill: கொல்
-  LastRetry: கடைசியாக, மீண்டும் முயற்சிக்கவும்
-  LivePoll: நேரடி கணிப்பு
+  Job: பணி
+  Jobs: பணிகள்
+  Kill: நிறுத்து
+  KillAll: அனைத்தையும் நிறுத்து
+  Language: மொழி
+  LastDashboardUpdateTemplateLiteral: "கடைசி சோதனை: செயலாக்கப்பட்டவை: PROCESSED_COUNT. தோல்வியடைந்தவை: FAILED_COUNT."
+  LastRetry: கடைசி மறுமுயற்சி
+  Latency: தாமதம்
+  LivePoll: நேரடி சோதனை
   MemoryUsage: நினைவக பயன்பாடு
+  Name: பெயர்
   Namespace: பெயர்வெளி
-  NextRetry: அடுத்த, மீண்டும் முயற்சிக்கவும்
-  NoDeadJobsFound: இறந்த வேலை எதுவும் இல்லை
-  NoRetriesFound: இல்லை மீண்டும் காணப்படவில்லை
-  NoScheduledFound: திட்டமிட்ட வேலைகள் காணப்படவில்லை
+  NextRetry: அடுத்த மறுமுயற்சி
+  NoDeadJobsFound: முடிந்த பணிகள் எதுவும் கிடைக்கவில்லை
+  NoRetriesFound: மறுமுயற்சிகள் எதுவும் கிடைக்கவில்லை
+  NoScheduledFound: திட்டமிடப்பட்ட பணிகள் எதுவும் கிடைக்கவில்லை
+  NotYetEnqueued: இன்னும் வரிசையிடப்படவில்லை
   OneMonth: 1 மாதம்
   OneWeek: 1 வாரம்
-  OriginallyFailed: முதலில் தோல்வி
-  Paused: தற்காலிக பணிநிறுத்தம்
-  PeakMemoryUsage: உச்ச நினைவக பயன்பாடு
-  PollingInterval: வாக்குப்பதிவு இடைவெளி
-  Processed: நிறையுற்றது
+  OriginallyFailed: முதலில் தோல்வியடைந்தது
+  Pause: இடைநிறுத்து
+  Paused: இடைநிறுத்தப்பட்டது
+  PeakMemoryUsage: அதிகபட்ச நினைவக பயன்பாடு
+  Plugins: செருகுநிரல்கள்
+  PollingInterval: சோதனை இடைவெளி
+  PollingIntervalMilliseconds: சோதனை இடைவெளி மில்லிவினாடிகள்
+  Process: செயல்முறை
+  Processed: செயலாக்கப்பட்டது
   Processes: செயல்முறைகள்
   Queue: வரிசை
-  Queues: வரிசை
-  Quiet: அமைதியான
-  QuietAll: அமைதியான அனைத்து
-  Realtime: நேரலை
-  Retries: மீண்டும் முயற்சிக்க,
-  RetryAll: அனைத்து, மீண்டும் முயற்சிக்கவும்
-  RetryCount: கணிப்பீடு, மீண்டும் முயற்சிக்கவும்
-  RetryNow: இப்போது மீண்டும் முயற்சி செய்க
-  Scheduled: திட்டமிடப்பட்ட
-  ScheduledJobs: திட்டமிட்ட வேலைகள்
-  ShowAll: அனைத்து காட்டு
+  Queues: வரிசைகள்
+  Quiet: அமைதி
+  QuietAll: அனைத்தையும் அமைதிப்படுத்து
+  Realtime: நிகழ்நேரம்
+  Retries: மறுமுயற்சிகள்
+  RetryAll: அனைத்தையும் மறுமுயற்சி செய்
+  RetryCount: மறுமுயற்சி எண்ணிக்கை
+  RetryNow: இப்போது மறுமுயற்சி செய்
+  Scheduled: திட்டமிடப்பட்டது
+  ScheduledJobs: திட்டமிடப்பட்ட பணிகள்
+  Seconds: வினாடிகள்
+  ShowAll: அனைத்தையும் காட்டு
   SixMonths: 6 மாதங்கள்
   Size: அளவு
-  Started: தொடங்குதல்
-  Status: நிலைமை
+  Started: தொடங்கப்பட்டது
+  Status: நிலை
   Stop: நிறுத்து
-  StopAll: நிறுத்து அனைத்து
-  StopPolling: நிறுத்து வாக்குப்பதிவு
+  StopAll: அனைத்தையும் நிறுத்து
+  StopPolling: சோதனையை நிறுத்து
+  Success: வெற்றி
+  Summary: சுருக்கம்
   Thread: நூல்
   Threads: நூல்கள்
   ThreeMonths: 3 மாதங்கள்
   Time: நேரம்
-  Uptime: இயக்க நேரம் (நாட்கள்)
+  Unpause: இடைநிறுத்தத்தை நீக்கு
+  Uptime: இயங்கிய நேரம் (நாட்கள்)
+  Utilization: பயன்பாட்டு விகிதம்
   Version: பதிப்பு
-  When: எப்பொழுது?
+  When: எப்போது
   Worker: பணியாளர்
   active: செயலில்
-  idle: முடங்கு நேரம்
+  idle: செயலற்று
+  Metrics: அளவீடுகள்
+  NoDataFound: தரவு எதுவும் கிடைக்கவில்லை
+  TotalExecutionTime: மொத்த செயல்படுத்தும் நேரம்
+  AvgExecutionTime: சராசரி செயல்படுத்தும் நேரம்
+  Context: சூழல்
+  NoJobMetricsFound: சமீபத்திய பணி அளவீடுகள் எதுவும் கிடைக்கவில்லை
+  Filter: வடிகட்டி
+  AnyJobContent: எந்த பணி உள்ளடக்கமும்
+  Profiles: சுயவிவரங்கள்
+  Data: தரவு
+  View: பார்வை
+  Token: டோக்கன்
+  ElapsedTime: கடந்த நேரம்
+  ClickToLearnMore: மேலும் அறிய கிளிக் செய்யவும்
