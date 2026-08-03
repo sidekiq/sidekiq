@@ -8,42 +8,57 @@ hi:
   AreYouSureDeleteJob: क्या आप इस कार्य को हटाना चाहते है?
   AreYouSureDeleteQueue: क्या आप %{queue} कतार को हटाना चाहते है?
   Arguments: अर्गुमेन्ट्स्
+  BackToApp: ऐप पर वापस जाएँ
   Busy: व्यस्थ
   Class: क्लास
   Connections: कनेक्श्न
+  CreatedAt: बनाया गया
   CurrentMessagesInQueue: <span class='title'>%{queue}</span> कतार मे वर्तमान कार्य
   Dashboard: डैशबोर्ड
   Dead: निष्प्राण
   DeadJobs: निष्प्राण कार्य
   Delete: हटाओ
   DeleteAll: सब हटाओ
+  Deploy: परिनियोजन
   Enqueued: कतारबद्ध
   Error: एरर
   ErrorBacktrace: एरर बैकट्रेस
   ErrorClass: एरर क्लास
   ErrorMessage: एरर संदेश
+  ExecutionTime: निष्पादन समय
   Extras: अतिरिक्त
   Failed: असफल
   Failures: असफलता
+  Failure: असफलता
   GoBack: ← पीछे
   History: वृत्तान्त
   Job: कार्य
   Jobs: कार्य
   Kill: नष्ट करे
+  KillAll: सभी को समाप्त करें
+  Language: भाषा
+  LastDashboardUpdateTemplateLiteral: "नवीनतम पोल: संसाधित: PROCESSED_COUNT. असफल: FAILED_COUNT."
   LastRetry: अंतिम पुन:प्रयास
+  Latency: विलंब
   LivePoll: लाईव सर्वेक्षण
   MemoryUsage: मेमरी उपयोग
+  Name: नाम
   Namespace: नामस्थान
   NextRetry: अगला पुन:प्रयास
   NoDeadJobsFound: कोई निष्प्राण कार्य नही पाए गए
   NoRetriesFound: कोई पुनर्प्रयास नही पाए गए
   NoScheduledFound: कोई परिगणित कार्य नही पाए गए
+  NotYetEnqueued: अभी तक कतार में नहीं जोड़ा गया
   OneMonth: १ महीना
   OneWeek: १ सप्ताह
   OriginallyFailed: पहिले से विफल
+  Pause: रोकें
   Paused: थमे हुए
   PeakMemoryUsage: अधिकतम मेमरी उपयोग
+  Plugins: प्लगइन्स
   PollingInterval: सर्वेक्षण अंतराल
+  PollingIntervalMilliseconds: सर्वेक्षण अंतराल (मिलीसेकंड)
+  Process: प्रक्रिया
   Processed: कार्रवाई कृत
   Processes: प्रोसेसेस्
   Queue: कतार
@@ -57,6 +72,7 @@ hi:
   RetryNow: पुन:प्रयास करे
   Scheduled: परिगणित
   ScheduledJobs: परिगणित कार्य
+  Seconds: सेकंड
   ShowAll: सब दिखाएं
   SixMonths: ६ महीने
   Size: आकार
@@ -65,13 +81,31 @@ hi:
   Stop: रोको
   StopAll: सब रोको
   StopPolling: सर्वेक्षण रोको
+  Success: सफल
+  Summary: सारांश
   Thread: थ्रेड
   Threads: थ्रेड्स्
   ThreeMonths: ३ महीने
   Time: समय
+  Unpause: पुनः प्रारंभ करें
   Uptime: उपरिकाल (दिवस)
+  Utilization: उपयोग
   Version: वर्जन
   When: कब
   Worker: वर्कर
   active: सक्रिय
   idle: निष्क्रिय
+  Metrics: मेट्रिक्स
+  NoDataFound: कोई डेटा नहीं मिला
+  TotalExecutionTime: कुल निष्पादन समय
+  AvgExecutionTime: औसत निष्पादन समय
+  Context: संदर्भ
+  NoJobMetricsFound: हाल के कार्यों के लिए कोई मेट्रिक्स नहीं मिले
+  Filter: फ़िल्टर
+  AnyJobContent: कोई भी कार्य सामग्री
+  Profiles: प्रोफ़ाइल
+  Data: डेटा
+  View: देखें
+  Token: टोकन
+  ElapsedTime: बीता हुआ समय
+  ClickToLearnMore: अधिक जानने के लिए क्लिक करें
