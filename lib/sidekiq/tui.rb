@@ -105,7 +105,7 @@ module Sidekiq
                 @tui.constraint_length(4)
               ]
             )
-            
+
             help_data = [
               ["Esc", "Close this window"],
               ["←/→", "Move between tabs"],
@@ -115,7 +115,7 @@ module Sidekiq
               ["A", "Select/deselect All rows in current page"],
               ["q", "Quit"]
             ]
-            
+
             # striped styling like other tables in the app
             help_rows = help_data.map.with_index { |cells, idx|
               @tui.table_row(
@@ -123,7 +123,7 @@ module Sidekiq
                 style: idx.even? ? nil : @tui.style(bg: :dark_gray)
               )
             }
-            
+
             table = @tui.table(
               block: @tui.block(
                 title: " #{Sidekiq::NAME} - Welcome to the Sidekiq Terminal UI ",
@@ -166,16 +166,16 @@ module Sidekiq
       # Dynamically split controls based on terminal width
       # Estimate space needed: each control needs ~key_length + description_length + 4 chars for ": " and spacing
       available_width = area.width - 4 # Account for borders
-      
+
       lines = []
       current_line = []
       current_width = 0
-      
+
       active_keys.each do |hash|
         # Estimate control width: key + ": " + description + "  " (spacing)
         key_text = hash[:display] || hash[:code]
         control_width = key_text.length + 2 + t(hash[:description]).length + 2
-        
+
         if current_width + control_width > available_width && !current_line.empty?
           # Start a new line
           lines << controls_line(current_line)
@@ -186,10 +186,10 @@ module Sidekiq
           current_width += control_width
         end
       end
-      
+
       # Add the last line
       lines << controls_line(current_line) unless current_line.empty?
-      
+
       # Ensure we have at least 2 lines for layout consistency
       while lines.length < 2
         lines << @tui.text_line(spans: [])
