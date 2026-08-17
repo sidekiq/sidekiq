@@ -60,7 +60,7 @@ describe "Sidekiq notification" do
     end
 
     assert_equal "sidekiq.slow_rtt", @seen
-    assert_match(/notification HANDLER THREW AN ERROR/, output)
+    assert_match(/Notification handler THREW AN ERROR/, output)
   end
 
   it "publishes slow_rtt from the launcher" do
