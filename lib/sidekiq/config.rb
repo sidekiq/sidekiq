@@ -22,7 +22,7 @@ module Sidekiq
       max_iteration_runtime: nil,
       error_handlers: [],
       death_handlers: [],
-      instrumentation_handlers: [],
+      notification_handlers: [],
       lifecycle_events: {
         startup: [],
         quiet: [],
@@ -75,7 +75,7 @@ module Sidekiq
 
     def inspect
       "#<#{self.class.name} @options=#{
-        @options.except(:lifecycle_events, :reloader, :death_handlers, :error_handlers, :instrumentation_handlers).inspect
+        @options.except(:lifecycle_events, :reloader, :death_handlers, :error_handlers, :notification_handlers).inspect
       }>"
     end
 
@@ -264,26 +264,29 @@ module Sidekiq
       @options[:error_handlers]
     end
 
-    # Register a proc to receive Sidekiq operational instrumentation events.
+    # Register a proc to receive Sidekiq operational notification events.
     #
     #   Sidekiq.configure_server do |config|
-    #     config.instrumentation_handlers << proc { |name, payload, config|
+    #     config.notification_handlers << proc { |event_name, hash, config|
     #       StatsD.increment(name)
     #     }
     #   end
     #
-    # OSS publishes events such as "slow_rtt.sidekiq" and "slow_iteration.sidekiq".
-    # Warnings are one category; Pro/Ent may publish additional instrumentation.
-    def instrumentation_handlers
-      @options[:instrumentation_handlers]
+    # Sidekiq will publish events such as "sidekiq.slow_rtt" and "sidekiq.slow_iteration".
+    # Hash will hold relevant contextual data which may be useful to diagnose the issue.
+    # Keep in mind that these handlers might run when the network or local process is
+    # in a questionable state. Your handlers should be conservative in what they do.
+    #
+    def notification_handlers
+      @options[:notification_handlers]
     end
 
-    def instrument(name, payload = {}) # :nodoc:
-      @options[:instrumentation_handlers].each do |handler|
-        handler.call(name, payload, self)
+    def notify(name, hash = {}) # :nodoc:
+      @options[:notification_handlers].each do |handler|
+        handler.call(name, hash, self)
       rescue => ex
         l = logger
-        l.error "!!! INSTRUMENTATION HANDLER THREW AN ERROR !!!"
+        l.error "!!! Notification handler THREW AN ERROR !!!"
         l.error ex
         l.error ex.backtrace.join("\n") unless ex.backtrace.nil?
       end
