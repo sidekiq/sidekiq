@@ -236,6 +236,13 @@ describe Sidekiq::Web do
     refute_match(/\b1003\b/, last_response.body)
   end
 
+  it "does not crash on a zero count parameter" do
+    @config.redis { |conn| conn.lpush("queue:default", Sidekiq.dump_json(args: [1])) }
+
+    get "/queues/default?count=0"
+    assert_equal 200, last_response.status
+  end
+
   it "can delete a queue" do
     @config.redis do |conn|
       conn.rpush("queue:foo", "{\"args\":[],\"enqueued_at\":1567894960}")
@@ -356,6 +363,13 @@ describe Sidekiq::Web do
     assert_equal 200, last_response.status
     refute_match(/found/, last_response.body)
     assert_match(/HardJob/, last_response.body)
+  end
+
+  it "does not crash on a zero count parameter" do
+    add_retry
+
+    get "/retries?count=0"
+    assert_equal 200, last_response.status
   end
 
   it "displays iteration state on retry detail page" do
@@ -488,6 +502,13 @@ describe Sidekiq::Web do
     assert_equal 200, last_response.status
     refute_match(/found/, last_response.body)
     assert_match(/HardJob/, last_response.body)
+  end
+
+  it "does not crash on a zero count parameter" do
+    add_scheduled
+
+    get "/scheduled?count=0"
+    assert_equal 200, last_response.status
   end
 
   it "can display a single scheduled job" do
@@ -810,6 +831,13 @@ describe Sidekiq::Web do
       get "morgue"
       assert_equal 200, last_response.status
       assert_match(/#{score}/, last_response.body)
+    end
+
+    it "does not crash on a zero count parameter" do
+      add_dead
+
+      get "/morgue?count=0"
+      assert_equal 200, last_response.status
     end
 
     it "can delete multiple dead" do
