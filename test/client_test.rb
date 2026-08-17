@@ -77,6 +77,28 @@ class ChildHash < Hash
   end
 end
 
+# Records the batches of commands sent to Redis via pipelining so tests can
+# observe how many round-trips an operation performed. Not registered globally:
+# attach it to a dedicated pool via RedisClient's `middlewares:` config option.
+module PipelinedCommandRecorder
+  class << self
+    attr_accessor :pipelines
+
+    def record
+      self.pipelines = []
+      yield
+      pipelines
+    ensure
+      self.pipelines = nil
+    end
+  end
+
+  def call_pipelined(commands, config)
+    PipelinedCommandRecorder.pipelines&.push(commands)
+    super
+  end
+end
+
 describe Sidekiq::Client do
   before do
     @config = reset!
@@ -410,6 +432,69 @@ describe Sidekiq::Client do
         q.each do |job|
           assert (now..now + 10).cover?(job.at)
         end
+      end
+    end
+
+    describe "default batch size" do
+      before do
+        @recorded_pool = Sidekiq::RedisConnection.create(size: 1, middlewares: [PipelinedCommandRecorder])
+        @recorded_client = Sidekiq::Client.new(pool: @recorded_pool)
+      end
+
+      after do
+        @recorded_pool.shutdown(&:close)
+      end
+
+      # Each raw_push round-trip for scheduled jobs issues a single ZADD with
+      # (score, payload) pairs: ["zadd", "schedule", score1, payload1, ...]
+      def jobs_per_zadd(pipelines)
+        pipelines.filter_map { |commands|
+          zadd = commands.find { |command| command.first.to_s.casecmp?("zadd") }
+          (zadd.size - 2) / 2 if zadd
+        }
+      end
+
+      # Immediate jobs issue a single LPUSH with one payload per job:
+      # ["lpush", "queue:default", payload1, payload2, ...]
+      def jobs_per_lpush(pipelines)
+        pipelines.filter_map { |commands|
+          lpush = commands.find { |command| command.first.to_s.casecmp?("lpush") }
+          lpush.size - 2 if lpush
+        }
+      end
+
+      it "slices scheduled jobs into batches of 100" do
+        pipelines = PipelinedCommandRecorder.record do
+          @recorded_client.push_bulk("class" => QueuedJob, "args" => (1..250).zip, "at" => Time.now.to_f + 60)
+        end
+
+        assert_equal [100, 100, 50], jobs_per_zadd(pipelines)
+        assert_equal 250, Sidekiq::ScheduledSet.new.size
+      end
+
+      it "slices jobs spread over an interval into batches of 100" do
+        pipelines = PipelinedCommandRecorder.record do
+          @recorded_client.push_bulk("class" => QueuedJob, "args" => (1..250).zip, "spread_interval" => 60)
+        end
+
+        assert_equal [100, 100, 50], jobs_per_zadd(pipelines)
+        assert_equal 250, Sidekiq::ScheduledSet.new.size
+      end
+
+      it "pushes immediate jobs in batches of 1000" do
+        pipelines = PipelinedCommandRecorder.record do
+          @recorded_client.push_bulk("class" => QueuedJob, "args" => (1..1_001).zip)
+        end
+
+        assert_equal [1_000, 1], jobs_per_lpush(pipelines)
+      end
+
+      it "honors an explicit batch_size for scheduled jobs" do
+        pipelines = PipelinedCommandRecorder.record do
+          @recorded_client.push_bulk("class" => QueuedJob, "args" => (1..250).zip, "at" => Time.now.to_f + 60, "batch_size" => 200)
+        end
+
+        assert_equal [200, 50], jobs_per_zadd(pipelines)
       end
     end
 
