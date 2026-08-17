@@ -95,6 +95,10 @@ module Sidekiq
       if cleanup.size > 0
         jobs = cleanup.map { |p| p.job }.compact
 
+        notify("sidekiq.hard_shutdown", {
+          job_count: jobs.size,
+          pid: ::Process.pid
+        })
         logger.warn { "Terminating #{cleanup.size} busy threads" }
         logger.debug { "Jobs still in progress #{jobs.inspect}" }
 

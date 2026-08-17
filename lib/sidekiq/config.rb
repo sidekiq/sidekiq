@@ -22,6 +22,7 @@ module Sidekiq
       max_iteration_runtime: nil,
       error_handlers: [],
       death_handlers: [],
+      notification_handlers: [],
       lifecycle_events: {
         startup: [],
         quiet: [],
@@ -74,7 +75,7 @@ module Sidekiq
 
     def inspect
       "#<#{self.class.name} @options=#{
-        @options.except(:lifecycle_events, :reloader, :death_handlers, :error_handlers).inspect
+        @options.except(:lifecycle_events, :reloader, :death_handlers, :error_handlers, :notification_handlers).inspect
       }>"
     end
 
@@ -261,6 +262,34 @@ module Sidekiq
     # The default error handler logs errors to @logger.
     def error_handlers
       @options[:error_handlers]
+    end
+
+    # Register a proc to receive Sidekiq operational notification events.
+    #
+    #   Sidekiq.configure_server do |config|
+    #     config.notification_handlers << proc { |event_name, hash, config|
+    #       StatsD.increment(name)
+    #     }
+    #   end
+    #
+    # Sidekiq will publish events such as "sidekiq.slow_rtt" and "sidekiq.slow_iteration".
+    # Hash will hold relevant contextual data which may be useful to diagnose the issue.
+    # Keep in mind that these handlers might run when the network or local process is
+    # in a questionable state. Your handlers should be conservative in what they do.
+    #
+    def notification_handlers
+      @options[:notification_handlers]
+    end
+
+    def notify(name, hash = {}) # :nodoc:
+      @options[:notification_handlers].each do |handler|
+        handler.call(name, hash, self)
+      rescue => ex
+        l = logger
+        l.error "!!! Notification handler THREW AN ERROR !!!"
+        l.error ex
+        l.error ex.backtrace.join("\n") unless ex.backtrace.nil?
+      end
     end
 
     # Register a block to run at a point in the Sidekiq lifecycle.

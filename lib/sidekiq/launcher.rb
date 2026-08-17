@@ -227,6 +227,12 @@ module Sidekiq
           your Sidekiq process is not CPU-saturated; reduce your concurrency and/or
           see https://github.com/sidekiq/sidekiq/discussions/5039
         EOM
+        notify("sidekiq.slow_rtt", {
+          readings: RTT_READINGS.buffer.dup,
+          threshold: RTT_WARNING_LEVEL,
+          identity: identity,
+          pid: ::Process.pid
+        })
         RTT_READINGS.reset
       end
       rtt
