@@ -234,7 +234,7 @@ module Sidekiq
     end
 
     class History
-      def initialize(days_previous, start_date = nil, pool: nil)
+      def initialize(days_previous, start_date = nil)
         # we only store five years of data in Redis
         raise ArgumentError if days_previous < 1 || days_previous > (5 * 365)
         @days_previous = days_previous
@@ -627,6 +627,7 @@ module Sidekiq
       Sidekiq.redis do |conn|
         conn.zincrby(@parent.name, at.to_f - score, Sidekiq.dump_json(@item))
       end
+      @score = at.to_f
     end
 
     # Enqueue this job from the scheduled or dead set so it will
@@ -1415,7 +1416,7 @@ module Sidekiq
     private
 
     # Bulk-fetch iteration state for multiple JIDs in a single Redis pipeline.
-    # Returns a Hash of { jid => IterableJobState } for JIDs that have iteration state.
+    # Returns a Hash of { jid => State } for JIDs that have iteration state.
     def bulk_fetch(jids)
       raise ArgumentError unless jids
       jids_to_fetch = Array(jids).compact.uniq
@@ -1427,7 +1428,9 @@ module Sidekiq
         end
       end
 
-      states = Hash.new(capacity: jids_to_fetch.size)
+      # TODO Requires Ruby 4
+      # states = ::Hash.new(capacity: jids_to_fetch.size)
+      states = {}
       jids_to_fetch.each_with_index do |jid, i|
         raw = results[i]
         next if raw.nil? || raw.empty?
@@ -1450,7 +1453,7 @@ module Sidekiq
         @cursor ||= begin
           Sidekiq.load_json(raw["c"])
         rescue JSON::ParserError
-          @raw["c"]
+          raw["c"]
         end
       end
 

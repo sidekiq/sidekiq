@@ -4,7 +4,6 @@ require_relative "helper"
 require "sidekiq/scheduled"
 require "sidekiq/job_retry"
 require "sidekiq/api"
-require "sidekiq/capsule"
 require "active_support/core_ext/numeric/time"
 
 class SomeJob
@@ -86,7 +85,7 @@ describe Sidekiq::JobRetry do
     end
 
     def handler
-      @handler ||= Sidekiq::JobRetry.new(@config.default_capsule)
+      @handler ||= Sidekiq::JobRetry.new(@config)
     end
 
     def jobstr(options = {})
@@ -95,6 +94,18 @@ describe Sidekiq::JobRetry do
 
     def job
       Sidekiq::RetrySet.new.first
+    end
+
+    describe "#time_for" do
+      it "converts integer millisecond timestamps with sub-second precision" do
+        ms = 1_700_000_000_500
+        assert_in_delta 1_700_000_000.5, handler.send(:time_for, ms).to_f, 0.0001
+      end
+
+      it "passes through legacy float (epoch seconds) timestamps" do
+        secs = 1_700_000_000.5
+        assert_in_delta secs, handler.send(:time_for, secs).to_f, 0.0001
+      end
     end
 
     it "retries with a nil worker" do

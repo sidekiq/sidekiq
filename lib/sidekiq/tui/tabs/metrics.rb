@@ -33,15 +33,7 @@ module Sidekiq
         end
 
         def render(tui, frame, area)
-          chunks = tui.layout_split(
-            area,
-            direction: :vertical,
-            constraints: [
-              tui.constraint_length(4), # Stats
-              tui.constraint_fill(1) # Chart
-              # TOOD Table
-            ]
-          )
+          chunks = stats_content_split(tui, area)
 
           render_stats_section(tui, frame, chunks[0])
           render_metrics_chart(tui, frame, chunks[1])
@@ -93,11 +85,6 @@ module Sidekiq
               graph_type: :line)
           end
 
-          num_labels = 5
-          y_labels = (0...num_labels).map do |i|
-            value = ((y_max * i) / (num_labels - 1)).round
-            value.to_s
-          end
           xlabels = [
             q.starts_at.iso8601[11..15],
             q.ends_at.iso8601[11..15]
@@ -112,11 +99,7 @@ module Sidekiq
               labels: xlabels,
               style: tui.style(fg: :white)
             ),
-            y_axis: tui.axis(
-              bounds: [0.0, y_max.to_f],
-              labels: y_labels,
-              style: tui.style(fg: :white)
-            ),
+            y_axis: chart_y_axis(tui, y_max),
             block: tui.block(
               title: t(name),
               borders: [:all]

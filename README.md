@@ -3,6 +3,7 @@ Sidekiq
 
 [![Gem Version](https://badge.fury.io/rb/sidekiq.svg)](https://rubygems.org/gems/sidekiq)
 ![Build](https://github.com/sidekiq/sidekiq/workflows/CI/badge.svg)
+[![Ruby Users Forum](https://img.shields.io/discourse/topics?server=https%3A%2F%2Fwww.rubyforum.org&style=flat&logo=discourse&label=Ruby%20Users%20Forum)](https://www.rubyforum.org/tag/sidekiq)
 
 Simple, efficient background jobs for Ruby.
 
@@ -88,6 +89,7 @@ Useful resources:
 * Product documentation is in the [wiki](https://github.com/sidekiq/sidekiq/wiki).
 * Occasional announcements are made to the [@sidekiq](https://ruby.social/@sidekiq) Mastodon account.
 * The [Sidekiq tag](https://stackoverflow.com/questions/tagged/sidekiq) on Stack Overflow has lots of useful Q &amp; A.
+* Join us in the `sidekiq` tag on the [Ruby Users Forum](https://www.rubyforum.org/tag/sidekiq).
 
 Every Thursday morning is Sidekiq Office Hour: I video chat and answer questions.
 See the [Sidekiq support page](https://sidekiq.org/support/) for details.

@@ -4,7 +4,25 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
-HEAD
+8.1.5
+---------
+
+- Coerce batch created_at to integer [#7049]
+- Fix incorrect batch total job count when using autoflush, thx Teddy!
+
+8.1.4
+---------
+
+- Garbage collect the `batch-died` data structure in Redis [#7033]
+- Enforce a floor of 30 seconds on Batch linger to prevent race conditions when
+  firing nested callbacks
+
+8.1.3
+---------
+
+- Fix autoflush crash when mixing scheduled and immediate jobs [#6991]
+
+8.1.2
 ---------
 
 - Add new `autoflush` mode to Batches to flush every N jobs. [#6967]

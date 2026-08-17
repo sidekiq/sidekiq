@@ -443,6 +443,34 @@ describe Sidekiq::Client do
           Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => [[1]], "spread_interval" => :not_a_numeric)
         end
       end
+
+      it "rejects a non-Numeric scalar 'at' with the documented message" do
+        err = assert_raises(ArgumentError) do
+          Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => [[1]], "at" => "soon")
+        end
+        assert_match(/Numeric or an Array of Numeric timestamps/, err.message)
+      end
+
+      it "rejects an empty Array 'at' with the documented message" do
+        err = assert_raises(ArgumentError) do
+          Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => [[1]], "at" => [])
+        end
+        assert_match(/Numeric or an Array of Numeric timestamps/, err.message)
+      end
+
+      it "rejects an explicit jid when pushing more than one job" do
+        err = assert_raises(ArgumentError) do
+          Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => [[1], [2]], "jid" => "abc")
+        end
+        assert_match(/Explicitly passing 'jid' when pushing more than one job/, err.message)
+      end
+
+      it "rejects providing both 'at' and 'spread_interval' with the documented message" do
+        err = assert_raises(ArgumentError) do
+          Sidekiq::Client.push_bulk("class" => QueuedJob, "args" => [[1]], "at" => Time.now.to_f, "spread_interval" => 10)
+        end
+        assert_match(/Only one of 'at' or 'spread_interval'/, err.message)
+      end
     end
 
     describe ".perform_bulk" do

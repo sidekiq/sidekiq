@@ -140,35 +140,78 @@ module Sidekiq
 
       def render_stats_section(tui, frame, area)
         stats = @data[:stats]
-
         keys = ["Processed", "Failed", "Busy", "Enqueued", "Retries", "Scheduled", "Dead"]
-        values = [
-          stats[:processed],
-          stats[:failed],
-          stats[:busy],
-          stats[:enqueued],
-          stats[:retries],
-          stats[:scheduled],
-          stats[:dead]
-        ]
+        values = %i[processed failed busy enqueued retries scheduled dead].map { |k| number_with_delimiter(stats[k]) }
+        render_kv_section(tui, frame, area, title: "Statistics", keys:, values:)
+      end
 
-        # Format keys and values with spacing
-        keys_line = keys.map { |k| t(k).to_s.ljust(12) }.join("  ")
-        values_line = values.map { |v| v.to_s.ljust(12) }.join("  ")
+      # Render a bordered paragraph with a line of (translated) keys over
+      # a line of preformatted values, each column ljust'ed to +width+.
+      def render_kv_section(tui, frame, area, title:, keys:, values:, width: 12)
+        keys_line = keys.map { |k| t(k).to_s.ljust(width) }.join("  ")
+        values_line = values.map { |v| v.to_s.ljust(width) }.join("  ")
 
         frame.render_widget(
           tui.paragraph(
             text: [keys_line, values_line],
-            block: tui.block(title: "Statistics", borders: [:all])
+            block: tui.block(title:, borders: [:all])
           ),
           area
         )
       end
 
-      # TODO Implement I18n delimiter
+      # Split a tab's area into the standard stats header and a fill
+      # area for the tab's main content.
+      def stats_content_split(tui, area)
+        tui.layout_split(
+          area,
+          direction: :vertical,
+          constraints: [
+            tui.constraint_length(4), # Stats
+            tui.constraint_fill(1) # Content
+          ]
+        )
+      end
+
+      def striped_rows(tui, rows)
+        rows.map.with_index { |cells, idx|
+          tui.table_row(
+            cells:,
+            style: idx.even? ? nil : tui.style(bg: :dark_gray)
+          )
+        }
+      end
+
+      def chart_y_axis(tui, y_max, num_labels: 5)
+        labels = (0...num_labels).map { |i| ((y_max * i) / (num_labels - 1)).round.to_s }
+        tui.axis(
+          bounds: [0.0, y_max.to_f],
+          labels: labels,
+          style: tui.style(fg: :white)
+        )
+      end
+
+      # [thousands_separator, decimal_separator] per locale.
+      # Locales not listed here use the English default [",", "."].
+      NUMERIC_SEPARATORS = {
+        # period thousands, comma decimal
+        "da" => [".", ","], "de" => [".", ","], "el" => [".", ","],
+        "es" => [".", ","], "it" => [".", ","], "nl" => [".", ","],
+        "pt" => [".", ","], "pt-BR" => [".", ","], "tr" => [".", ","],
+        "vi" => [".", ","],
+        # space thousands, comma decimal
+        "cs" => [" ", ","], "fr" => [" ", ","], "lt" => [" ", ","],
+        "nb" => [" ", ","], "pl" => [" ", ","], "ru" => [" ", ","],
+        "sv" => [" ", ","], "uk" => [" ", ","]
+      }.freeze
+
       def number_with_delimiter(number, options = {})
         precision = options[:precision] || 0
-        number.round(precision)
+        rounded = number.round(precision)
+        thousands, decimal = NUMERIC_SEPARATORS.fetch(@parent.lang, [",", "."])
+        integer_part, decimal_part = rounded.to_s.split(".")
+        integer_with_sep = integer_part.gsub(/(\d)(?=(\d{3})+(?!\d))/, "\\1#{thousands}")
+        (precision > 0) ? "#{integer_with_sep}#{decimal}#{(decimal_part || "").ljust(precision, "0")}" : integer_with_sep
       end
 
       def format_memory(rss_kb)

@@ -21,6 +21,8 @@ module Sidekiq
     REFRESH_INTERVAL_SECONDS = 2
     LOCALE_DIRECTORIES = [File.expand_path("#{File.dirname(__FILE__)}/../../web/locales")]
 
+    attr_reader :lang
+
     # language is meant to be a locale code, e.g.
     # LANG=en_US.utf-8
     def initialize(cfg, language: ENV["LANG"] || "en")
@@ -103,63 +105,46 @@ module Sidekiq
                 @tui.constraint_length(4)
               ]
             )
-            content = @tui.block(
-              title: " #{Sidekiq::NAME} ",
-              borders: [:all],
-              title_style: @tui.style(fg: :light_red, modifiers: [:bold]),
-              children: [
-                # TODO convert to table
-                @tui.paragraph(
-                  text: [
-                    @tui.text_line(spans: ["Welcome to the Sidekiq Terminal UI"], alignment: :center),
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "Global hotkeys")
-                    ]),
-                    @tui.text_line(spans: []),
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "Esc", style: @hotkey_style),
-                      @tui.text_span(content: ": Close this window")
-                    ]),
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "←/→", style: @hotkey_style),
-                      @tui.text_span(content: ": Move between tabs")
-                    ]),
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "h/l", style: @hotkey_style),
-                      @tui.text_span(content: ": Move to prev/next page of data")
-                    ]),
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "j/k", style: @hotkey_style),
-                      @tui.text_span(content: ": Move to prev/next row in current page")
-                    ]),
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "x", style: @hotkey_style),
-                      @tui.text_span(content: ": Select/deselect current row")
-                    ]),
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "A", style: @hotkey_style),
-                      @tui.text_span(content: ": Select/deselect All rows in current page")
-                    ]),
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "q", style: @hotkey_style),
-                      @tui.text_span(content: ": Quit")
-                    ])
-                  ]
-                )
-              ]
+
+            help_data = [
+              ["Esc", "Close this window"],
+              ["←/→", "Move between tabs"],
+              ["h/l", "Move to prev/next page of data"],
+              ["j/k", "Move to prev/next row in current page"],
+              ["x", "Select/deselect current row"],
+              ["A", "Select/deselect All rows in current page"],
+              ["q", "Quit"]
+            ]
+
+            # striped styling like other tables in the app
+            help_rows = help_data.map.with_index { |cells, idx|
+              @tui.table_row(
+                cells: cells,
+                style: idx.even? ? nil : @tui.style(bg: :dark_gray)
+              )
+            }
+
+            table = @tui.table(
+              block: @tui.block(
+                title: " #{Sidekiq::NAME} - Welcome to the Sidekiq Terminal UI ",
+                borders: [:all],
+                title_style: @tui.style(fg: :light_red, modifiers: [:bold])
+              ),
+              header: ["Key", "Action"],
+              rows: help_rows,
+              widths: [
+                @tui.constraint_length(15),
+                @tui.constraint_fill(1)
+              ],
+              column_spacing: 1
             )
-            frame.render_widget(content, main_area)
+            frame.render_widget(table, main_area)
             controls = @tui.block(
               title: t("Controls"),
               borders: [:all],
               children: [
                 @tui.paragraph(
-                  text: [
-                    @tui.text_line(spans: [
-                      @tui.text_span(content: "Esc", style: @hotkey_style),
-                      @tui.text_span(content: ": Close  ")
-                    ])
-                  ]
+                  text: [hotkey_line("Esc", "Close  ")]
                 )
               ]
             )
@@ -178,27 +163,36 @@ module Sidekiq
     def render_controls(frame, area)
       active_keys = current_tab.controls.filter { |hash| hash[:description] }
 
-      # Split controls into two lines, 8 is arbitrary
-      # TODO Dynamically split based on term width?
-      first = active_keys[...8]
-      lines = []
-      lines << @tui.text_line(spans: first.map { |hash|
-        [
-          @tui.text_span(content: hash[:display] || hash[:code], style: @hotkey_style),
-          @tui.text_span(content: ": #{t(hash[:description])}  ")
-        ]
-      }.flatten)
+      # Dynamically split controls based on terminal width
+      # Estimate space needed: each control needs ~key_length + description_length + 4 chars for ": " and spacing
+      available_width = area.width - 4 # Account for borders
 
-      last = active_keys[8...]
-      lines << if last && last.size > 0
-        @tui.text_line(spans: last.map { |hash|
-          [
-            @tui.text_span(content: hash[:display] || hash[:code], style: @hotkey_style),
-            @tui.text_span(content: ": #{t(hash[:description])}  ")
-          ]
-        }.flatten)
-      else
-        @tui.text_line(spans: [])
+      lines = []
+      current_line = []
+      current_width = 0
+
+      active_keys.each do |hash|
+        # Estimate control width: key + ": " + description + "  " (spacing)
+        key_text = hash[:display] || hash[:code]
+        control_width = key_text.length + 2 + t(hash[:description]).length + 2
+
+        if current_width + control_width > available_width && !current_line.empty?
+          # Start a new line
+          lines << controls_line(current_line)
+          current_line = [hash]
+          current_width = control_width
+        else
+          current_line << hash
+          current_width += control_width
+        end
+      end
+
+      # Add the last line
+      lines << controls_line(current_line) unless current_line.empty?
+
+      # Ensure we have at least 2 lines for layout consistency
+      while lines.length < 2
+        lines << @tui.text_line(spans: [])
       end
 
       footer = [
@@ -221,6 +215,22 @@ module Sidekiq
       controls = @tui.block(title: t("Controls"), borders: [:all],
         children: [@tui.paragraph(text: lines)])
       frame.render_widget(controls, area)
+    end
+
+    def hotkey_line(key, description)
+      @tui.text_line(spans: [
+        @tui.text_span(content: key, style: @hotkey_style),
+        @tui.text_span(content: ": #{description}")
+      ])
+    end
+
+    def controls_line(keys)
+      @tui.text_line(spans: keys.map { |hash|
+        [
+          @tui.text_span(content: hash[:display] || hash[:code], style: @hotkey_style),
+          @tui.text_span(content: ": #{t(hash[:description])}  ")
+        ]
+      }.flatten)
     end
 
     def handle_input

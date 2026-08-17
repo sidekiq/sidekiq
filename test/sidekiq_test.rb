@@ -110,4 +110,46 @@ describe Sidekiq do
       assert_includes output.keys, "redis_version"
     end
   end
+
+  describe ".testing!" do
+    it "rejects an unknown mode" do
+      err = assert_raises(RuntimeError) { Sidekiq.testing!(:bogus) }
+      assert_match(/Unknown testing mode: bogus/, err.message)
+    end
+  end
+
+  describe ".strict_args!" do
+    it "updates Sidekiq::Config::DEFAULTS[:on_complex_arguments]" do
+      original = Sidekiq::Config::DEFAULTS[:on_complex_arguments]
+
+      Sidekiq.strict_args!(false)
+      assert_equal false, Sidekiq::Config::DEFAULTS[:on_complex_arguments]
+
+      Sidekiq.strict_args!(:warn)
+      assert_equal :warn, Sidekiq::Config::DEFAULTS[:on_complex_arguments]
+
+      Sidekiq.strict_args!
+      assert_equal :raise, Sidekiq::Config::DEFAULTS[:on_complex_arguments]
+    ensure
+      Sidekiq::Config::DEFAULTS[:on_complex_arguments] = original
+    end
+  end
+
+  describe "edition predicates" do
+    it ".pro? / .ent? reflect whether the matching constant is defined" do
+      refute defined?(Sidekiq::Pro)
+      refute defined?(Sidekiq::Enterprise)
+      assert_nil Sidekiq.pro?
+      assert_nil Sidekiq.ent?
+
+      ::Sidekiq.const_set(:Pro, Module.new)
+      assert Sidekiq.pro?
+
+      ::Sidekiq.const_set(:Enterprise, Module.new)
+      assert Sidekiq.ent?
+    ensure
+      ::Sidekiq.send(:remove_const, :Pro) if defined?(Sidekiq::Pro)
+      ::Sidekiq.send(:remove_const, :Enterprise) if defined?(Sidekiq::Enterprise)
+    end
+  end
 end

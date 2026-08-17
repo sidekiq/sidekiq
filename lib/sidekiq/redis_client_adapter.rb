@@ -41,8 +41,8 @@ module Sidekiq
       # this allows us to use methods like `conn.hmset(...)` instead of having to use
       # redis-client's native `conn.call("hmset", ...)`
       def method_missing(*args, &block)
-        warn("[sidekiq#5788] Redis has deprecated the `#{args.first}`command, called at #{caller(1..1)}") if DEPRECATED_COMMANDS.include?(args.first)
-        @client.call(*args, *block)
+        warn("[sidekiq#5788] Redis has deprecated the `#{args.first}` command, called at #{caller(1..1)}") if DEPRECATED_COMMANDS.include?(args.first)
+        @client.call(*args, &block)
       end
       ruby2_keywords :method_missing if respond_to?(:ruby2_keywords, true)
 
@@ -106,6 +106,10 @@ module Sidekiq
       # than the reconnect silently fixing a problem; we keep it
       # on by default.
       opts[:reconnect_attempts] ||= 1
+
+      # Identify ourselves to Redis via CLIENT SETINFO so connections
+      # are distinguishable in CLIENT LIST / CLIENT INFO output.
+      opts[:driver_info] ||= "sidekiq_v#{Sidekiq::VERSION}"
 
       opts
     end

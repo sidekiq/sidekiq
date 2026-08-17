@@ -2,6 +2,33 @@
 
 [Sidekiq Changes](https://github.com/sidekiq/sidekiq/blob/main/Changes.md) | [Sidekiq Pro Changes](https://github.com/sidekiq/sidekiq/blob/main/Pro-Changes.md) | [Sidekiq Enterprise Changes](https://github.com/sidekiq/sidekiq/blob/main/Ent-Changes.md)
 
+8.1.7
+----------
+
+- Forward compatibililty with Active Job 8.1 [#7019]
+- Many minor fixes and test improvements [hammadxcm]
+
+8.1.6
+----------
+
+- Fix reported thread/memory leak when jobs fail [#7006]
+- Users can limit data displayed on Busy page with the `only` parameter `/busy?only=(jobs|processes)` [#6992]
+- Replace Rack::Utils usage with standard library APIs
+- Several minor fixes from AI scanners.
+
+8.1.5
+----------
+
+- Fix sub-second precision when computing the `retry_for` deadline [#7003]
+- Identify Sidekiq connnections in Redis with `CLIENT SETINFO` [#6986]
+- Fix edge case where Web UI could show an empty Batch set [#6987]
+
+8.1.4
+----------
+
+- The TTIN signal is undeprecated as the INFO signal is not supported on Linux
+- Show iteration job state on Busy page [#6978]
+
 8.1.3
 ----------
 
@@ -35,6 +62,7 @@ Use REDIS_URL or REDIS_PROVIDER to point `kiq` to Redis.
 require "sidekiq/testing"
 require "sidekiq/testing/inline"
 # New, more explicit
+require "sidekiq"
 Sidekiq.testing!(:fake)
 Sidekiq.testing!(:inline)
 ```

@@ -142,9 +142,6 @@ module Sidekiq
       raise ArgumentError, "Job 'at' must be a Numeric or an Array of Numeric timestamps" if at && (Array(at).empty? || !Array(at).all? { |entry| entry.is_a?(Numeric) })
       raise ArgumentError, "Job 'at' Array must have same size as 'args' Array" if at.is_a?(Array) && at.size != args.size
 
-      # Use a smaller batch size by default for scheduled jobs since adding to sorted sets is more costly.
-      batch_size = items.delete(:batch_size) || items.delete("batch_size") || (at ? 100 : 1_000)
-
       jid = items.delete("jid")
       raise ArgumentError, "Explicitly passing 'jid' when pushing more than one job is not supported" if jid && args.size > 1
 
@@ -158,6 +155,9 @@ module Sidekiq
         now = Time.now.to_f
         at = args.map { now + rand * spread_interval }
       end
+
+      # Use a smaller batch size by default for scheduled jobs since adding to sorted sets is more costly.
+      batch_size = items.delete(:batch_size) || items.delete("batch_size") || (at ? 100 : 1_000)
 
       normed = normalize_item(items)
       slice_index = 0

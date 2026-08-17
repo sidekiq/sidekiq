@@ -50,6 +50,7 @@ end
 describe "SidekiqAdapter" do
   before do
     @config = reset!
+    ActiveJob::QueueAdapters::SidekiqAdapter.class_variable_set(:@@stopping, false)
     JobBuffer.clear
 
     require "sidekiq/testing"
@@ -134,6 +135,17 @@ describe "SidekiqAdapter" do
       end
 
       assert called
+    end
+  end
+
+  describe "#stopping?" do
+    it "can be called without arguments for compatibility with Rails <= 8.1" do
+      assert_equal false, ActiveJob::QueueAdapters::SidekiqAdapter.new.stopping?
+    end
+
+    it "accepts a job argument" do
+      job = Object.new
+      assert_equal false, ActiveJob::QueueAdapters::SidekiqAdapter.new.stopping?(job)
     end
   end
 

@@ -131,4 +131,36 @@ describe "Job logger" do
       end
     end
   end
+
+  it "logs 'fail' and records elapsed when the job block raises" do
+    jl = Sidekiq::JobLogger.new(@cfg)
+    job = {"jid" => "1234abc", "class" => "FailJob"}
+    elapsed_seen = nil
+
+    assert_raises(RuntimeError) do
+      jl.prepare(job) do
+        jl.call(job, "queue") { raise "boom" }
+      ensure
+        elapsed_seen = Sidekiq::Context.current[:elapsed]
+      end
+    end
+
+    assert_match(/fail/, @output.string)
+    refute_match(/done/, @output.string)
+    assert_kind_of Float, elapsed_seen
+  end
+
+  it "records elapsed time on the happy path" do
+    jl = Sidekiq::JobLogger.new(@cfg)
+    job = {"jid" => "1234abc", "class" => "OkJob"}
+    elapsed_seen = nil
+
+    jl.prepare(job) do
+      jl.call(job, "queue") {}
+      elapsed_seen = Sidekiq::Context.current[:elapsed]
+    end
+
+    assert_kind_of Float, elapsed_seen
+    assert_operator elapsed_seen, :>=, 0
+  end
 end

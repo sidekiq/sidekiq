@@ -72,19 +72,13 @@ module Sidekiq
       # so extensions can be localized
       @@strings[lang] ||= config.locales.each_with_object({}) do |path, global|
         find_locale_files(lang).each do |file|
-          strs = parse_yaml_new(file)
+          strs = parse_yaml(file)
           global.merge!(strs[lang])
         end
       end
     end
 
-    # TODO Remove
-    def parse_yaml_old(path)
-      require "yaml"
-      YAML.safe_load_file(path)
-    end
-
-    def parse_yaml_new(path)
+    def parse_yaml(path)
       locale = nil
       map = {}
       IO.readlines(path, chomp: true).each do |line|
@@ -156,17 +150,18 @@ module Sidekiq
       erb(:filtering, locals: {which:, placeholder_key:, label_key:})
     end
 
-    def filter_link(jid, within = "retries")
+    def filter_link(str, within = "retries")
+      hstr = h(str)
       if within.nil?
-        ::Rack::Utils.escape_html(jid)
+        hstr
       else
-        "<a href='#{root_path}#{within}?substr=#{jid}'>#{::Rack::Utils.escape_html(jid)}</a>"
+        "<a href='#{root_path}#{within}?substr=#{hstr}'>#{hstr}</a>"
       end
     end
 
     def display_tags(job, within = "retries")
       job.tags.map { |tag|
-        "<span class='label label-info jobtag jobtag-#{Rack::Utils.escape_html(tag)}'>#{filter_link(tag, within)}</span>"
+        "<span class='label label-info jobtag jobtag-#{h(tag)}'>#{filter_link(tag, within)}</span>"
       }.join(" ")
     end
 
@@ -337,7 +332,7 @@ module Sidekiq
       [score.to_f, jid]
     end
 
-    SAFE_QPARAMS = %w[page direction]
+    SAFE_QPARAMS = %w[page direction only]
 
     # Merge options with current params, filter safe params, and stringify to query string
     def qparams(options)
@@ -420,7 +415,7 @@ module Sidekiq
     end
 
     def h(text)
-      ::Rack::Utils.escape_html(text.to_s)
+      ::CGI.escapeHTML(text.to_s)
     rescue ArgumentError => e
       raise unless e.message.eql?("invalid byte sequence in UTF-8")
       text.encode!("UTF-16", "UTF-8", invalid: :replace, replace: "").encode!("UTF-8", "UTF-16")

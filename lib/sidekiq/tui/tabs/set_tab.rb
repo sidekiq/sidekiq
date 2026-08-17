@@ -30,6 +30,11 @@ module Sidekiq
           end
         end
 
+        def refresh_data
+          refresh_data_for_stats
+          refresh_data_for_set
+        end
+
         def refresh_data_for_set
           set = set_class.new
           f = current_filter
@@ -52,14 +57,7 @@ module Sidekiq
         end
 
         def render(tui, frame, area)
-          chunks = tui.layout_split(
-            area,
-            direction: :vertical,
-            constraints: [
-              tui.constraint_length(4), # Stats
-              tui.constraint_fill(1)   # Table
-            ]
-          )
+          chunks = stats_content_split(tui, area)
 
           render_stats_section(tui, frame, chunks[0])
           render_table(tui, frame, chunks[1]) do
@@ -74,19 +72,16 @@ module Sidekiq
                 tui.constraint_fill(1)
               ]
             }.tap do |h|
-              rows = @data[:table][:rows].map.with_index { |entry, idx|
-                tui.table_row(
-                  cells: [
-                    selected?(entry) ? "✅" : "",
-                    entry.at,
-                    entry.queue,
-                    entry.display_class,
-                    entry.display_args
-                  ],
-                  style: idx.even? ? nil : tui.style(bg: :dark_gray)
-                )
+              cells = @data[:table][:rows].map { |entry|
+                [
+                  selected?(entry) ? "✅" : "",
+                  entry.at,
+                  entry.queue,
+                  entry.display_class,
+                  entry.display_args
+                ]
               }
-              h[:rows] = rows
+              h[:rows] = striped_rows(tui, cells)
             end
           end
         end

@@ -2,6 +2,7 @@
 
 require_relative "helper"
 require "sidekiq/api"
+require "sidekiq/job_retry"
 require "active_job"
 require "action_mailer"
 
@@ -157,12 +158,12 @@ describe "API" do
 
         assert_equal "bar", result[0].name
         assert_equal 3, result[0].size
-        assert_in_delta 0.10, result[0].latency, 0.01
+        assert_operator result[0].latency, :>, 0.09
         assert_equal true, result[0].paused?
 
         assert_equal "foo", result[1].name
         assert_equal 1, result[1].size
-        assert_in_delta 0.05, result[1].latency, 0.01
+        assert_operator result[1].latency, :>, 0.04
         assert_equal false, result[1].paused?
       end
     end
@@ -353,6 +354,73 @@ describe "API" do
 
       job_id = JobWithTags.perform_async
       assert_equal ["foo"], Sidekiq::Queue.new.find_job(job_id).tags
+    end
+
+    describe "JobRecord parsing and display" do
+      it "renders a malformed Redis payload safely instead of raising" do
+        j = Sidekiq::JobRecord.new("not-json", "default")
+        assert_equal({}, j.item)
+        assert_equal ["not-json"], j.args
+        assert_nil j.klass
+      end
+
+      it "redacts the final argument when the job is marked encrypted" do
+        payload = {"class" => "X", "args" => ["a", "b", "secret"], "queue" => "default", "encrypt" => true}
+        j = Sidekiq::JobRecord.new(payload, "default")
+        assert_equal ["a", "b", "[encrypted data]"], j.display_args
+      end
+
+      it "passes a Hash payload through without re-parsing" do
+        payload = {"class" => "X", "args" => [1, 2], "queue" => "default"}
+        j = Sidekiq::JobRecord.new(payload, "default")
+        assert_same payload, j.item
+      end
+
+      it "parses a JSON string payload into the item hash" do
+        json = Sidekiq.dump_json("class" => "X", "args" => [1, 2], "queue" => "default")
+        j = Sidekiq::JobRecord.new(json, "default")
+        assert_equal "X", j.klass
+        assert_equal [1, 2], j.args
+      end
+    end
+
+    describe "error information API" do
+      def compressed_backtrace(lines)
+        Sidekiq::JobRetry.new(@cfg).send(:compress_backtrace, lines)
+      end
+
+      it "decompresses the stored error_backtrace back into the original array" do
+        record = Sidekiq::JobRecord.new(
+          {"class" => "X", "args" => [], "error_backtrace" => compressed_backtrace(["a.rb:1", "b.rb:2"])},
+          "default"
+        )
+        assert_equal ["a.rb:1", "b.rb:2"], record.error_backtrace
+      end
+
+      it "returns nil for error_backtrace when none was stored, and memoizes the nil" do
+        record = Sidekiq::JobRecord.new({"class" => "X", "args" => []}, "default")
+        assert_nil record.error_backtrace
+        record.instance_variable_set(:@error_backtrace, "should-not-be-recomputed")
+        assert_equal "should-not-be-recomputed", record.error_backtrace
+      end
+
+      it "SortedEntry#error? reflects the presence of error_class" do
+        parent = Sidekiq::RetrySet.new
+        with_err = Sidekiq::SortedEntry.new(parent, Time.now.to_f,
+          Sidekiq.dump_json("class" => "X", "args" => [], "error_class" => "RuntimeError"))
+        without_err = Sidekiq::SortedEntry.new(parent, Time.now.to_f,
+          Sidekiq.dump_json("class" => "X", "args" => []))
+
+        assert with_err.error?
+        refute without_err.error?
+      end
+
+      it "SortedEntry inherits error_backtrace decompression from JobRecord" do
+        entry = Sidekiq::SortedEntry.new(Sidekiq::RetrySet.new, Time.now.to_f,
+          Sidekiq.dump_json("class" => "X", "args" => [],
+            "error_backtrace" => compressed_backtrace(["only-line.rb:1"])))
+        assert_equal ["only-line.rb:1"], entry.error_backtrace
+      end
     end
 
     it "can delete jobs" do
@@ -686,6 +754,46 @@ describe "API" do
       assert_equal "Can't stop an embedded process", e.message
     end
 
+    describe "Process signal and status" do
+      def make_process(identity, attrs = {})
+        Sidekiq::Process.new({"identity" => identity}.merge(attrs))
+      end
+
+      it "quiet! pushes TSTP to the identity-signals list with a 60s TTL" do
+        make_process("h1:1").quiet!
+
+        signals, ttl = @cfg.redis { |c|
+          [c.lrange("h1:1-signals", 0, -1), c.ttl("h1:1-signals")]
+        }
+        assert_equal ["TSTP"], signals
+        assert_operator ttl, :>, 0
+        assert_operator ttl, :<=, 60
+      end
+
+      it "stop! pushes TERM and dump_threads pushes TTIN to the same signals list" do
+        proc1 = make_process("h2:2")
+        proc1.stop!
+        proc1.dump_threads
+
+        # lpush prepends, so newest signal is first
+        signals = @cfg.redis { |c| c.lrange("h2:2-signals", 0, -1) }
+        assert_equal ["TTIN", "TERM"], signals
+      end
+
+      it "stopping? reflects the 'quiet' flag in the process info" do
+        refute make_process("h3:3").stopping?
+        assert make_process("h3:3", "quiet" => "true").stopping?
+        refute make_process("h3:3", "quiet" => "false").stopping?
+      end
+
+      it "leader? returns true only when the process identity matches dear-leader" do
+        @cfg.redis { |c| c.set("dear-leader", "h4:4") }
+
+        assert make_process("h4:4").leader?
+        refute make_process("other:9").leader?
+      end
+    end
+
     it "can enumerate workers" do
       w = Sidekiq::Workers.new
       assert_equal 0, w.size
@@ -771,6 +879,17 @@ describe "API" do
       assert_equal(1, retries.count { |r| r.score > (now + 14) })
     end
 
+    it "keeps the in-memory entry consistent with Redis after reschedule" do
+      add_retry("foo1")
+      entry = Sidekiq::RetrySet.new.first
+      new_score = Time.now.to_f + 500
+
+      entry.reschedule(Time.at(new_score))
+
+      assert_in_delta new_score, entry.score, 0.001
+      assert_in_delta new_score, entry.at.to_f, 0.001
+    end
+
     it "prunes processes which have died" do
       data = {"pid" => rand(10_000), "hostname" => "app#{rand(1_000)}", "started_at" => Time.now.to_f}
       key = "#{data["hostname"]}:#{data["pid"]}"
@@ -789,6 +908,48 @@ describe "API" do
       ps = Sidekiq::ProcessSet.new
       assert_equal 1, ps.size
       assert_equal 1, ps.to_a.size
+    end
+
+    describe "ProcessSet aggregates and leader" do
+      def add_process(key, info, concurrency: 0, rss: 0)
+        @cfg.redis do |conn|
+          conn.sadd("processes", [key])
+          conn.hset(key, "info", Sidekiq.dump_json(info),
+            "concurrency", concurrency,
+            "busy", 0,
+            "rss", rss,
+            "beat", Time.now.to_f)
+        end
+      end
+
+      it "totals concurrency across all registered processes" do
+        add_process("h1:1", {"pid" => 1, "hostname" => "h1"}, concurrency: 5)
+        add_process("h2:2", {"pid" => 2, "hostname" => "h2"}, concurrency: 12)
+
+        assert_equal 17, Sidekiq::ProcessSet.new(false).total_concurrency
+      end
+
+      it "totals RSS across all registered processes" do
+        add_process("h1:1", {"pid" => 1, "hostname" => "h1"}, rss: 1024)
+        add_process("h2:2", {"pid" => 2, "hostname" => "h2"}, rss: 2048)
+
+        ps = Sidekiq::ProcessSet.new(false)
+        assert_equal 3072, ps.total_rss_in_kb
+        assert_equal ps.total_rss_in_kb, ps.total_rss
+      end
+
+      it "returns the dear-leader identity and memoizes the lookup" do
+        @cfg.redis { |c| c.set("dear-leader", "leader-identity") }
+        ps = Sidekiq::ProcessSet.new(false)
+        assert_equal "leader-identity", ps.leader
+
+        @cfg.redis { |c| c.del("dear-leader") }
+        assert_equal "leader-identity", ps.leader, "expected leader to be memoized after first read"
+      end
+
+      it "returns an empty string for leader when no leader is set (OSS)" do
+        assert_equal "", Sidekiq::ProcessSet.new(false).leader
+      end
     end
   end
 

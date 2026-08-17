@@ -7,6 +7,7 @@ Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 HEAD
 ---------
 
+- Add Ukranian locale
 - Vendor code to remove `gserver` gem dependency
 - Make the `einhorn` dependency optional since it is only required for rolling restarts
 

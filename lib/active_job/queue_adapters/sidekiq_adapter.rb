@@ -111,7 +111,7 @@ begin
         end
 
         # @api private
-        def stopping? = !!@@stopping
+        def stopping?(job = nil) = !!@@stopping
 
         # Defines a class alias for backwards compatibility with enqueued Active Job jobs.
         # @api private

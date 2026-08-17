@@ -8,11 +8,6 @@ module Sidekiq
         include SetTab
 
         def set_class = Sidekiq::DeadSet
-
-        def refresh_data
-          refresh_data_for_stats
-          refresh_data_for_set
-        end
       end
     end
   end

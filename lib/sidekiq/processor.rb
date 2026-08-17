@@ -30,15 +30,16 @@ module Sidekiq
     attr_reader :capsule
 
     def initialize(capsule, &block)
-      @config = @capsule = capsule
+      @config = capsule.config
+      @capsule = capsule
       @callback = block
       @down = false
       @done = false
       @job = nil
       @thread = nil
       @reloader = Sidekiq.default_configuration[:reloader]
-      @job_logger = (capsule.config[:job_logger] || Sidekiq::JobLogger).new(capsule.config)
-      @retrier = Sidekiq::JobRetry.new(capsule)
+      @job_logger = (capsule.config[:job_logger] || Sidekiq::JobLogger).new(@config)
+      @retrier = Sidekiq::JobRetry.new(@capsule)
     end
 
     def terminate(wait = false)
@@ -64,7 +65,7 @@ module Sidekiq
     end
 
     def start
-      @thread ||= safe_thread("#{config.name}/processor", &method(:run))
+      @thread ||= safe_thread("#{capsule.name}/processor", &method(:run))
     end
 
     private

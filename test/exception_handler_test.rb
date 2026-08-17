@@ -53,11 +53,6 @@ VALID_ERROR_HANDLERS = %w[
   PROC_ERROR_HANDLER2
   PROC_ERROR_HANDLER3
 ]
-DEPRECATED_ERROR_HANDLERS = %w[
-  CLASSY_ERROR_HANDLER1
-  LAMBDA_ERROR_HANDLER1
-  PROC_ERROR_HANDLER1
-]
 
 describe Sidekiq::Component do
   describe "with mock logger" do
@@ -97,6 +92,22 @@ describe Sidekiq::Component do
         assert_nil exception.backtrace
 
         Thing.new(@config).handle_exception exception
+      end
+    end
+
+    describe "when there are no error handlers" do
+      it "logs the exception through the logger, not to stdout" do
+        @config[:error_handlers].clear
+
+        stdout = nil
+        logged = capture_logging(@config) do
+          stdout, = capture_io do
+            Thing.new(@config).invoke_exception(a: 1)
+          end
+        end
+
+        assert_match(/Something didn't work!/, logged, "didn't log the exception")
+        assert_empty stdout, "wrote to stdout instead of the logger"
       end
     end
   end

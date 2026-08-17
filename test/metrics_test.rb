@@ -104,6 +104,18 @@ describe Sidekiq::Metrics do
       assert_equal 1, rs.size
       assert_equal "cafed00d - some git summary line", rs[floor]
     end
+
+    it "returns marks from every day the queried window spans" do
+      whence = Time.utc(2022, 7, 22, 22, 3, 0)
+      d = Sidekiq::Deploy.new
+      d.mark!(at: whence - 26 * 60 * 60, label: "yesterday deploy")
+      d.mark!(at: whence, label: "today deploy")
+
+      q = Sidekiq::Metrics::Query.new(now: whence)
+      labels = q.top_jobs(hours: 72).marks.map(&:label)
+      assert_includes labels, "today deploy"
+      assert_includes labels, "yesterday deploy"
+    end
   end
 
   describe "histograms" do

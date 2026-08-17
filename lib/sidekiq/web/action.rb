@@ -24,8 +24,8 @@ module Sidekiq
         @request ||= ::Rack::Request.new(env)
       end
 
-      def halt(res)
-        throw :halt, [res, {"content-type" => "text/plain"}, [res.to_s]]
+      def halt(res, msg = nil)
+        throw :halt, [res, {"content-type" => "text/plain"}, [msg || res.to_s]]
       end
 
       # external redirect

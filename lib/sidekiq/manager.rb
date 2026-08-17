@@ -75,6 +75,7 @@ module Sidekiq
           p.start
         end
       end
+      nil
     end
 
     def stopped?
