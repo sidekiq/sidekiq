@@ -75,11 +75,11 @@ module Sidekiq
   end
 
   def self.redis_pool
-    (Thread.current[:sidekiq_capsule] || default_configuration).redis_pool
+    (Thread.current.thread_variable_get(:sidekiq_capsule) || default_configuration).redis_pool
   end
 
   def self.redis(&block)
-    (Thread.current[:sidekiq_capsule] || default_configuration).redis(&block)
+    (Thread.current.thread_variable_get(:sidekiq_capsule) || default_configuration).redis(&block)
   end
 
   def self.strict_args!(mode = :raise)

@@ -93,7 +93,7 @@ module Sidekiq
     end
 
     def redis_pool
-      Thread.current[:sidekiq_redis_pool] || local_redis_pool
+      Thread.current.thread_variable_get(:sidekiq_redis_pool) || local_redis_pool
     end
 
     def local_redis_pool

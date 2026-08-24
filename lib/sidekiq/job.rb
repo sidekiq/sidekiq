@@ -380,19 +380,19 @@ module Sidekiq
 
         # allow the user to dynamically re-target jobs to another shard using the "pool" attribute
         #   FooJob.set(pool: SOME_POOL).perform_async
-        old = Thread.current[:sidekiq_redis_pool]
+        old = Thread.current.thread_variable_get(:sidekiq_redis_pool)
         pool = item.delete("pool")
-        Thread.current[:sidekiq_redis_pool] = pool if pool
+        Thread.current.thread_variable_set(:sidekiq_redis_pool, pool) if pool
         begin
           build_client.push(item)
         ensure
-          Thread.current[:sidekiq_redis_pool] = old
+          Thread.current.thread_variable_set(:sidekiq_redis_pool, old)
         end
       end
 
       def build_client # :nodoc:
-        pool = Thread.current[:sidekiq_redis_pool] || get_sidekiq_options["pool"] || Sidekiq.default_configuration.redis_pool
-        client_class = Thread.current[:sidekiq_client_class] || get_sidekiq_options["client_class"] || Sidekiq::Client
+        pool = Thread.current.thread_variable_get(:sidekiq_redis_pool) || get_sidekiq_options["pool"] || Sidekiq.default_configuration.redis_pool
+        client_class = Thread.current.thread_variable_get(:sidekiq_client_class) || get_sidekiq_options["client_class"] || Sidekiq::Client
         client_class.new(pool: pool)
       end
     end

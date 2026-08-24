@@ -59,6 +59,23 @@ describe "Sharding" do
       assert_equal [nil, jid1, jid2], flags
     end
 
+    it "redirects the middleware pool to the current shard even from within a Fiber" do
+      # Thread.current[:key] is fiber-local, not thread-local: a Fiber created
+      # on a thread does not inherit values set with Thread.current[:key]=.
+      # Sidekiq::Client.via (and Processor's capsule tracking) must therefore
+      # use Thread#thread_variable_set/get so that code which spawns Fibers
+      # within a job (e.g. Fiber-based async HTTP clients) still routes to the
+      # correct shard. See https://github.com/sidekiq/sidekiq/issues/6370
+      @config.client_middleware.add ShardMiddleware
+
+      jid1 = nil
+      Sidekiq::Client.via(@sh1) do
+        Fiber.new { jid1 = ShardJob.perform_async }.resume
+        assert_equal [jid1, jid1, nil], flags
+      end
+      assert_equal [nil, jid1, nil], flags
+    end
+
     it "routes jobs to the proper shard" do
       q = Sidekiq::Queue.new
       ss = Sidekiq::ScheduledSet.new
@@ -99,16 +116,16 @@ describe "Sharding" do
       end
 
       it "restores the previous thread-local pool even when the block raises" do
-        Thread.current[:sidekiq_redis_pool] = :outer
+        Thread.current.thread_variable_set(:sidekiq_redis_pool, :outer)
 
         assert_raises(RuntimeError) do
           Sidekiq::Client.via(@sh1) { raise "boom" }
         end
 
-        assert_equal :outer, Thread.current[:sidekiq_redis_pool],
+        assert_equal :outer, Thread.current.thread_variable_get(:sidekiq_redis_pool),
           "expected Client.via to restore the prior thread-local pool on exception"
       ensure
-        Thread.current[:sidekiq_redis_pool] = nil
+        Thread.current.thread_variable_set(:sidekiq_redis_pool, nil)
       end
     end
   end

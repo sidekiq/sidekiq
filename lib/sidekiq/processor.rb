@@ -73,7 +73,10 @@ module Sidekiq
     def run
       # By setting this thread-local, Sidekiq.redis will access +Sidekiq::Capsule#redis_pool+
       # instead of the global pool in +Sidekiq::Config#redis_pool+.
-      Thread.current[:sidekiq_capsule] = @capsule
+      # NB: Thread.current[:key]= sets a *fiber*-local, not a thread-local; a Fiber spawned
+      # within a job (e.g. by a Fiber-based async HTTP client) would not see it. We use
+      # Thread#thread_variable_set here so the capsule remains visible to such Fibers too.
+      Thread.current.thread_variable_set(:sidekiq_capsule, @capsule)
 
       process_one until @done
       @callback.call(self)

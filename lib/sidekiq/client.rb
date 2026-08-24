@@ -52,7 +52,7 @@ module Sidekiq
       else
         # new calling method: keyword arguments
         @config = kwargs[:config] || Sidekiq.default_configuration
-        @redis_pool = kwargs[:pool] || Thread.current[:sidekiq_redis_pool] || @config&.redis_pool
+        @redis_pool = kwargs[:pool] || Thread.current.thread_variable_get(:sidekiq_redis_pool) || @config&.redis_pool
         @chain = kwargs[:chain] || @config&.client_middleware
         raise ArgumentError, "No Redis pool available for Sidekiq::Client" unless @redis_pool
       end
@@ -198,11 +198,11 @@ module Sidekiq
     # you cannot scale any other way (e.g. splitting your app into smaller apps).
     def self.via(pool)
       raise ArgumentError, "No pool given" if pool.nil?
-      current_sidekiq_pool = Thread.current[:sidekiq_redis_pool]
-      Thread.current[:sidekiq_redis_pool] = pool
+      current_sidekiq_pool = Thread.current.thread_variable_get(:sidekiq_redis_pool)
+      Thread.current.thread_variable_set(:sidekiq_redis_pool, pool)
       yield
     ensure
-      Thread.current[:sidekiq_redis_pool] = current_sidekiq_pool
+      Thread.current.thread_variable_set(:sidekiq_redis_pool, current_sidekiq_pool)
     end
 
     class << self

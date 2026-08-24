@@ -429,7 +429,7 @@ module Sidekiq
       end
 
       def redis(&)
-        Thread.current[:sidekiq_redis_pool].with(&)
+        Thread.current.thread_variable_get(:sidekiq_redis_pool).with(&)
       end
 
       def call(env)
@@ -445,10 +445,10 @@ module Sidekiq
         }
         env["response_headers"] = headers
         resp = catch(:halt) do
-          Thread.current[:sidekiq_redis_pool] = env[:redis_pool]
+          Thread.current.thread_variable_set(:sidekiq_redis_pool, env[:redis_pool])
           action.instance_exec env, &action.block
         ensure
-          Thread.current[:sidekiq_redis_pool] = nil
+          Thread.current.thread_variable_set(:sidekiq_redis_pool, nil)
         end
 
         case resp
