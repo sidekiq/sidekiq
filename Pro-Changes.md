@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+8.1.6
+---------
+
+- Ephemeral (discarded if they fail all retries, `dead: false`) jobs were not discarded if they behaved as poison pills, leading to job accumulation in Redis [#7063]
+
 8.1.5
 ---------
 
