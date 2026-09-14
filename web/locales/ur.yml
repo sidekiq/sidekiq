@@ -5,36 +5,44 @@ ur:
   AddToQueue: ﻗﻄﺎﺭ ميں شامل کريں
   AddAllToQueue: سب کو ﻗﻄﺎﺭ ميں شامل کريں
   AreYouSure: کيا یقین ؟
-  AreYouSureDeleteJob: کيا آپ یقین جاب حتم کرنا چاھتے ہيں ؟
-  AreYouSureDeleteQueue: کيا آپ یقین قطار حتم کرنا چاھتے ہيں ؟
+  AreYouSureDeleteJob: کيا آپ یقین جاب حتم کرنا چاھتے ہيں ؟
+  AreYouSureDeleteQueue: کيا آپ یقین قطار حتم کرنا چاھتے ہيں ؟
   Arguments: دلائل
   BackToApp: ﻭاپﺱ صفحۂ اﻭﻝ پر
   Busy: مصروف
   Class: کلاس
   Connections: کنکشنز
-  CreatedAt: ﺗﺎﺭﻳﺢ آﻏﺎﺯ
+  CreatedAt: ﺗﺎﺭﻳﺢ آﻏﺎﺯ
   CurrentMessagesInQueue: قطار ميں موجود تمام پيغامات <span class='title'>%{queue}</span>
   Dashboard: صفحۂ اول
   Dead: ختم شدہ
   DeadJobs: ختم شدہ جاب
   Delete: ﺣﺬﻑ
   DeleteAll: ﺗﻤﺎﻡ ﺣﺬﻑ کر ديں
+  Deploy: تعیناتی
   Enqueued: قطار ميں شامل
   Error: مسئلہ
   ErrorBacktrace: مسئلہ کی کی تحقیقات کريں
   ErrorClass: مسئلہ کی کلاس
   ErrorMessage: مسئلہ کی وجہ
+  ExecutionTime: عمل درآمد کا وقت
   Extras: اﺻﺎﻑی
   Failed: ﻧﺎکاﻡ ﺷﺪﮦ
   Failures: ناکامیاں
+  Failure: ناکامی
   GoBack: واپس جايں
   History: ﺗﺎﺭﻳﺦ
   Job: جاب
   Jobs: جابز
   Kill: ختم کرديں
+  KillAll: ﺗﻤﺎﻡ ختم کرديں
+  Language: زبان
+  LastDashboardUpdateTemplateLiteral: "تازہ ترین پول: مکمل شدہ: PROCESSED_COUNT. ناکام شدہ: FAILED_COUNT۔"
   LastRetry: گزشتہ کوشش
+  Latency: تاخیر
   LivePoll: ﺑﺮاﮦ ﺭاﺳﺖ
   MemoryUsage: یاداشت کا استعمال
+  Name: نام
   Namespace: Namespace
   NextRetry: اگلی کﻭﺷﻴﺶ
   NoDeadJobsFound: کویٔ ختم شدہ جاب نہيی ملی
@@ -43,11 +51,14 @@ ur:
   NotYetEnqueued: ﻗﺘﺎﺭميں شامل نھيں
   OneMonth: ایک مہینہ
   OneWeek: ایک ہفتہ
-  OriginallyFailed: ابتادائ ناکامی
+  OriginallyFailed: ابتادائ ناکامی
+  Pause: موقوف کريں
   Paused: موقوف
   PeakMemoryUsage: سب سے زيادہ یاداشت کا استعمال
   Plugins: پلگ انز
   PollingInterval: ﺑﺮاﮦ ﺭاﺳﺖ کا ﺩﻭﺭاﻧﻴﮧ
+  PollingIntervalMilliseconds: ﺑﺮاﮦ ﺭاﺳﺖ کا ﺩﻭﺭاﻧﻴﮧ (ملی سیکنڈ)
+  Process: عمل
   Processed: مکمل شدہ
   Processes: ﻋﻤﻠﻴﺎﺕ
   Queue: قطار
@@ -61,6 +72,7 @@ ur:
   RetryNow: ابھی دوبارہ کوشش
   Scheduled: ﻁےﺷﺪﮦ
   ScheduledJobs: ﻁےﺷﺪﮦجاب
+  Seconds: سیکنڈ
   ShowAll: سارے دکھاو
   SixMonths: چھ ماہ
   Size: ﺣﺠﻢ
@@ -69,14 +81,32 @@ ur:
   Stop: بند کرو
   StopAll: ﺗﻤﺎﻡ ﺑﻨﺪ کﺭﻭ
   StopPolling: ﺑﺮاﮦ ﺭاﺳﺖ روکيے
+  Success: کامیابی
+  Summary: خلاصہ
   TextDirection: rtl
   Thread: موضوع
   Threads: موضوع
   ThreeMonths: تین ماہ
   Time: ﻭﻗﺖ
+  Unpause: بحال کريں
   Uptime: اپ ٹائم
+  Utilization: استعمال کی شرح
   Version: ورژن
   When: ﺏک
   Worker: ورکر
   active: فعال
   idle: بیکار
+  Metrics: پیمائشیں
+  NoDataFound: کوئی ڈیٹا نہیں ملا
+  TotalExecutionTime: کل عمل درآمد کا وقت
+  AvgExecutionTime: اوسط عمل درآمد کا وقت
+  Context: سیاق و سباق
+  NoJobMetricsFound: کوئی حالیہ جاب پیمائش نہیں ملی
+  Filter: فلٹر
+  AnyJobContent: کوئی بھی جاب کا مواد
+  Profiles: پروفائلز
+  Data: ڈیٹا
+  View: دیکھیں
+  Token: ٹوکن
+  ElapsedTime: گزرا ہوا وقت
+  ClickToLearnMore: مزید جاننے کے لیے کلک کريں

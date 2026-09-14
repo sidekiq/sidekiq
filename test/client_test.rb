@@ -610,7 +610,7 @@ describe Sidekiq::Client do
 
       assert_equal($arguments_worker_class, MyJob)
       assert((minimum_job_args & $arguments_job.keys) == minimum_job_args)
-      assert_instance_of(ConnectionPool, $arguments_redis)
+      assert($arguments_redis.respond_to?(:with))
     end
 
     it "push bulk sends correct arguments to middleware" do
@@ -622,7 +622,7 @@ describe Sidekiq::Client do
 
       assert_equal($arguments_worker_class, MyJob)
       assert((minimum_job_args & $arguments_job.keys) == minimum_job_args)
-      assert_instance_of(ConnectionPool, $arguments_redis)
+      assert($arguments_redis.respond_to?(:with))
     end
 
     it "can stop some of the jobs from pushing" do

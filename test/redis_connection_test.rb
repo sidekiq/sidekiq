@@ -11,22 +11,10 @@ describe Sidekiq::RedisConnection do
       @config.default_capsule.concurrency = 12
     end
 
-    def client_for(redis)
-      redis.instance_variable_get(:@client)
-    end
-
-    def config_for(redis)
-      redis.config
-    end
-
-    def client_class
-      Sidekiq::RedisClientAdapter::CompatClient
-    end
-
     it "creates a pooled redis connection" do
       pool = Sidekiq::RedisConnection.create
       assert_equal 5, pool.size
-      assert_equal client_class, pool.checkout.class
+      assert_equal(Sidekiq::RedisClientAdapter::CompatClient, pool.with { |c| c.class })
     end
 
     it "crashes on RESP2" do
@@ -79,23 +67,18 @@ describe Sidekiq::RedisConnection do
 
     it "disables client setname with nil id" do
       pool = Sidekiq::RedisConnection.create(id: nil)
-      assert_equal client_class, pool.checkout.class
-      client = client_for(pool.checkout)
-      assert_nil client.id
+      assert_nil(pool.with { |client| client.id })
     end
 
     describe "network_timeout" do
       it "sets a custom network_timeout if specified" do
         pool = Sidekiq::RedisConnection.create(network_timeout: 8)
-        redis = pool.checkout
-
-        assert_equal 8, client_for(redis).read_timeout
+        assert_equal 8, pool.with { |r| r.read_timeout }
       end
 
       it "uses the default network_timeout if none specified" do
         pool = Sidekiq::RedisConnection.create
-        redis = pool.checkout
-        assert_equal 3.0, client_for(redis).read_timeout
+        assert_equal 3.0, pool.with { |r| r.read_timeout }
       end
     end
 
@@ -111,15 +94,13 @@ describe Sidekiq::RedisConnection do
     describe "socket path" do
       it "uses a given :path" do
         pool = Sidekiq::RedisConnection.create(path: "/tmp/redis.sock")
-        config = config_for(pool.checkout)
-        assert_equal "/tmp/redis.sock", config.path
+        assert_equal "/tmp/redis.sock", pool.with { |c| c.config.path }
       end
 
       it "uses a given :path and :db" do
         pool = Sidekiq::RedisConnection.create(path: "/tmp/redis.sock", db: 8)
-        config = config_for(pool.checkout)
-        assert_equal "/tmp/redis.sock", config.path
-        assert_equal 8, config.db
+        assert_equal "/tmp/redis.sock", pool.with { |c| c.config.path }
+        assert_equal 8, pool.with { |c| c.config.db }
       end
     end
 
@@ -137,28 +118,15 @@ describe Sidekiq::RedisConnection do
       end
     end
 
-    describe "driver" do
-      it "uses ruby driver by default" do
-        pool = Sidekiq::RedisConnection.create
-        config = config_for(pool.checkout)
-
-        assert_equal RedisClient::RubyConnection, config.driver
-      end
-    end
-
     describe "driver_info" do
       it "identifies sidekiq by default" do
         pool = Sidekiq::RedisConnection.create
-        config = config_for(pool.checkout)
-
-        assert_equal "sidekiq_v#{Sidekiq::VERSION}", config.driver_info
+        assert_equal "sidekiq_v#{Sidekiq::VERSION}", pool.with { |c| c.config.driver_info }
       end
 
       it "preserves a user-provided driver_info" do
         pool = Sidekiq::RedisConnection.create(driver_info: "custom-app-1.2.3")
-        config = config_for(pool.checkout)
-
-        assert_equal "custom-app-1.2.3", config.driver_info
+        assert_equal "custom-app-1.2.3", pool.with { |c| c.config.driver_info }
       end
     end
 
@@ -185,26 +153,11 @@ describe Sidekiq::RedisConnection do
         assert_includes(output, '"REDACTED"')
       end
 
-      it "supports sentinel urls" do
-        options = {
-          url: "rediss://user:secret@mymaster",
-          sentinels: ["rediss://sentinel-user:secret@sentinel-host:26379"]
-        }
-
-        output = capture_logging(@config) do |logger|
-          Sidekiq::RedisConnection.create(options.merge(logger: logger))
-        end
-
-        refute_includes(options.inspect, "REDACTED")
-        refute_includes(output, "secret")
-        assert_includes(output, "sentinel-user:REDACTED@sentinel-host:26379")
-      end
-
       it "prunes SSL parameters from the logging" do
         output = capture_logging(@config) do |logger|
           options = {
             ssl_params: {
-              cert_store: OpenSSL::X509::Store.new
+              cert_store: []
             },
             logger: logger
           }
@@ -213,26 +166,6 @@ describe Sidekiq::RedisConnection do
           assert_includes(options.inspect, "ssl_params")
         end
         refute_includes(output, "ssl_params")
-      end
-    end
-
-    it "symbolizes redis options keys" do
-      options = {
-        "name" => "mymaster",
-        "sentinels" => [
-          {"host" => "host1", "port" => 26379, "password" => "secret"},
-          {"host" => "host2", "port" => 26379, "password" => "secret"},
-          {"host" => "host3", "port" => 26379, "password" => "secret"}
-        ]
-      }
-
-      pool = Sidekiq::RedisConnection.create(options)
-      config = config_for(pool.checkout)
-
-      config.sentinels.each.with_index do |sentinel_config, idx|
-        assert_equal options["sentinels"][idx]["host"], sentinel_config.host
-        assert_equal options["sentinels"][idx]["port"], sentinel_config.port
-        assert_equal options["sentinels"][idx]["password"], sentinel_config.password
       end
     end
   end

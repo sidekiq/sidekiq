@@ -31,9 +31,11 @@ module Sidekiq
         zremrangebyrank zremrangebyscore]
 
       USED_COMMANDS.each do |name|
-        define_method(name) do |*args, **kwargs|
-          @client.call(name, *args, **kwargs)
-        end
+        class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
+          def #{name}(*args, **kwargs)
+            @client.call("#{name}", *args, **kwargs)
+          end
+        RUBY
       end
 
       private

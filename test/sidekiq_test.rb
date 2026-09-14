@@ -135,6 +135,28 @@ describe Sidekiq do
     end
   end
 
+  describe "ractor support" do
+    it "allows Redis access within a Ractor" do
+      skip "TODO"
+      cfg = Sidekiq::Config.new
+      pool = cfg.redis_pool
+      pool.with { |c| c.ping }
+
+      r = Ractor.new(cfg.instance_variable_get(:@redis_config)) do |cfgh|
+        po = Sidekiq::RedisConnection.create(cfgh)
+        po.with { |c| c.ping }
+      end
+      val = r.value
+      assert_equal "PONG", val
+
+      r = Ractor.new(pool) do |p|
+        p.with { |c| c.ping }
+      end
+      val = r.value
+      assert_equal "PONG", val
+    end
+  end
+
   describe "edition predicates" do
     it ".pro? / .ent? reflect whether the matching constant is defined" do
       refute defined?(Sidekiq::Pro)

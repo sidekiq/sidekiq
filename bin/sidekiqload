@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+ENV["RUBY_TCP_NO_FAST_FALLBACK"] = "1"
+
 #
 # bin/sidekiqload is a helpful script to load test and
 # performance tune Sidekiq's core. It creates 500,000 no-op
