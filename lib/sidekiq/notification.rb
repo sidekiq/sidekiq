@@ -18,25 +18,48 @@ module Sidekiq
   #    the graceful shutdown timeout, this can lead to duplicate job execution.
   #  - `sidekiq.hard_shutdown` One or more jobs did not finish in time for graceful
   #    shutdown and had to be killed mid-execution.
-  class Notification
-    # Name of the event, eg. "sidekiq.redis.slow_rtt"
-    attr_reader :name
-    # A hash of additional context which can be useful for debugging
-    # or analysis
-    attr_reader :context
-    # The Sidekiq process PID in which this event occurred
-    attr_reader :pid
+  module Notification
+    class Manager
+      def initialize
+        @notify_mutex = Mutex.new
+        @notify_times = {}
+      end
 
-    def initialize(name, ctx)
-      @name = name
-      @context = ctx
-      @pid = ::Process.pid
+      # Redis notifications can fire once per processor thread for a single outage.
+      # Debounce those by name so handlers see at most one event per window.
+      def allow?(name)
+        return true unless name.start_with?("sidekiq.redis.")
+
+        @notify_mutex.synchronize do
+          now = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+          last = @notify_times[name]
+          return false if last && (now - last) < 60
+          @notify_times[name] = now
+          true
+        end
+      end
     end
 
-    def ==(other)
-      @name == other.name &&
-        @pid == other.pid &&
-        @context == other.context
+    class Event
+      # Name of the event, eg. "sidekiq.redis.slow_rtt"
+      attr_reader :name
+      # A hash of additional context which can be useful for debugging
+      # or analysis
+      attr_reader :context
+      # The Sidekiq process PID in which this event occurred
+      attr_reader :pid
+
+      def initialize(name, ctx)
+        @name = name
+        @context = ctx
+        @pid = ::Process.pid
+      end
+
+      def ==(other)
+        @name == other.name &&
+          @pid == other.pid &&
+          @context == other.context
+      end
     end
   end
 end

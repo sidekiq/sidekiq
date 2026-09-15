@@ -49,7 +49,7 @@ describe "Sidekiq notification" do
     NotificationThing.new(@config).notify("test.sidekiq", {foo: "bar"})
 
     assert_equal 1, events.size
-    assert_equal Sidekiq::Notification.new("test.sidekiq", {foo: "bar"}), events[0]
+    assert_equal Sidekiq::Notification::Event.new("test.sidekiq", {foo: "bar"}), events[0]
   end
 
   it "does not break when a handler raises" do

@@ -61,18 +61,13 @@ module Sidekiq
       end
     }
 
-    # Redis notifications can fire once per processor thread for a single outage.
-    # Debounce those by name so handlers see at most one event per window.
-    NOTIFY_DEBOUNCE = 60 # seconds
-
     def initialize(options = {})
       @options = DEFAULTS.merge(options)
       @options[:error_handlers] << ERROR_HANDLER if @options[:error_handlers].empty?
       @directory = {}
       @redis_config = {}
       @capsules = {}
-      @notify_mutex = Mutex.new
-      @notify_times = {}
+      @notifier = Sidekiq::Notification::Manager.new
     end
 
     def_delegators :@options, :[], :[]=, :fetch, :key?, :has_key?, :merge!, :dig
@@ -297,9 +292,9 @@ module Sidekiq
     ##
     # Fire an operations notification to registered listeners.
     def notify(name, hash = {}) # :nodoc:
-      return unless allow_notify?(name)
+      return unless @notifier.allow?(name)
 
-      n = Sidekiq::Notification.new(name, hash)
+      n = Sidekiq::Notification::Event.new(name, hash)
       @options[:notification_handlers].each do |handler|
         handler.call(n, self)
       rescue => ex
@@ -309,19 +304,6 @@ module Sidekiq
         l.error ex.backtrace.join("\n") unless ex.backtrace.nil?
       end
     end
-
-    def allow_notify?(name)
-      return true unless name.start_with?("sidekiq.redis.")
-
-      @notify_mutex.synchronize do
-        now = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
-        last = @notify_times[name]
-        return false if last && (now - last) < NOTIFY_DEBOUNCE
-        @notify_times[name] = now
-        true
-      end
-    end
-    private :allow_notify?
 
     # Register a block to run at a point in the Sidekiq lifecycle.
     # :startup, :quiet, :shutdown, or :exit are valid events.

@@ -229,7 +229,7 @@ module Sidekiq
         EOM
         notify("sidekiq.redis.slow_rtt", {
           readings: RTT_READINGS.buffer.dup,
-          threshold: RTT_WARNING_LEVEL,
+          threshold: RTT_WARNING_LEVEL
         })
         RTT_READINGS.reset
       end
