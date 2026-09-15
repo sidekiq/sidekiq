@@ -470,5 +470,14 @@ module Sidekiq
         job.add_to_queue
       end
     end
+
+    def url_count(param_name: "count", default_count: 25)
+      p = url_params(param_name)
+      if p
+        c = p.to_i
+        return c if c > 0 && c < 1000
+      end
+      default_count
+    end
   end
 end

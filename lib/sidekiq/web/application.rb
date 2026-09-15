@@ -89,7 +89,7 @@ module Sidekiq
       end
 
       get "/busy" do
-        @count = (url_params("count") || 100).to_i
+        @count = url_count(default_count: 100)
 
         # Use /busy?only=(jobs|processes) to limit page data
         only = url_params("only")
@@ -137,7 +137,7 @@ module Sidekiq
 
         halt(404) if !@name || @name !~ QUEUE_NAME
 
-        @count = (url_params("count") || 25).to_i
+        @count = url_count
         @queue = Sidekiq::Queue.new(@name)
         (@current_page, @total_size, @jobs) = page("queue:#{@name}", url_params("page"), @count, reverse: url_params("direction") == "asc")
         @jobs = @jobs.map { |msg| Sidekiq::JobRecord.new(msg, @name) }
@@ -172,7 +172,7 @@ module Sidekiq
         if x && x != ""
           @dead = search(Sidekiq::DeadSet.new, x)
         else
-          @count = (url_params("count") || 25).to_i
+          @count = url_count
           (@current_page, @total_size, @dead) = page("dead", url_params("page"), @count, reverse: true)
           @dead = @dead.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
         end
@@ -232,7 +232,7 @@ module Sidekiq
         if x && x != ""
           @retries = search(Sidekiq::RetrySet.new, x)
         else
-          @count = (url_params("count") || 25).to_i
+          @count = url_count
           (@current_page, @total_size, @retries) = page("retry", url_params("page"), @count)
           @retries = @retries.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
         end
@@ -292,7 +292,7 @@ module Sidekiq
         if x && x != ""
           @scheduled = search(Sidekiq::ScheduledSet.new, x)
         else
-          @count = (url_params("count") || 25).to_i
+          @count = url_count
           (@current_page, @total_size, @scheduled) = page("schedule", url_params("page"), @count)
           @scheduled = @scheduled.map { |msg, score| Sidekiq::SortedEntry.new(nil, score, msg) }
         end
