@@ -339,7 +339,9 @@ describe "Web helpers" do
 
       assert_equal false, obj.pollable?
     end
+  end
 
+  describe "#parse_yaml" do
     it "can parse locale files" do
       obj = Helpers.new
       Dir["web/locales/*.yml"].each do |path|
@@ -350,6 +352,21 @@ describe "Web helpers" do
           assert_equal expected, got
         end
       end
+    end
+
+    it "can parse locale files when the external encoding is not UTF-8" do
+      obj = Helpers.new
+      previous = Encoding.default_external
+      verbose = $VERBOSE
+      $VERBOSE = false # setting default_external warns
+      Encoding.default_external = Encoding::US_ASCII
+
+      parsed = obj.parse_yaml("web/locales/en.yml")
+
+      assert_equal YAML.safe_load_file("web/locales/en.yml")["en"], parsed["en"]
+    ensure
+      Encoding.default_external = previous
+      $VERBOSE = verbose
     end
   end
 end
