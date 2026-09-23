@@ -22,6 +22,7 @@ module Sidekiq
       max_iteration_runtime: nil,
       error_handlers: [],
       death_handlers: [],
+      notification_handlers: [],
       lifecycle_events: {
         startup: [],
         quiet: [],
@@ -66,6 +67,7 @@ module Sidekiq
       @directory = {}
       @redis_config = {}
       @capsules = {}
+      @notifier = Sidekiq::Notification::Manager.new
     end
 
     def_delegators :@options, :[], :[]=, :fetch, :key?, :has_key?, :merge!, :dig
@@ -74,7 +76,7 @@ module Sidekiq
 
     def inspect
       "#<#{self.class.name} @options=#{
-        @options.except(:lifecycle_events, :reloader, :death_handlers, :error_handlers).inspect
+        @options.except(:lifecycle_events, :reloader, :death_handlers, :error_handlers, :notification_handlers).inspect
       }>"
     end
 
@@ -261,6 +263,46 @@ module Sidekiq
     # The default error handler logs errors to @logger.
     def error_handlers
       @options[:error_handlers]
+    end
+
+    ##
+    # Register a proc to receive Sidekiq operational notification events.
+    #
+    #   Sidekiq.configure_server do |config|
+    #     config.notification_handlers << proc { |note, config|
+    #       puts "Warning: #{note.name} in process #{note.pid}"
+    #       StatsD.increment(note.name)
+    #     }
+    #   end
+    #
+    # Sidekiq will publish events such as "sidekiq.redis.slow_rtt" and "sidekiq.job.slow_iteration".
+    # Hash will hold relevant contextual data which may be useful to diagnose the issue.
+    # Redis-related notifications (`sidekiq.redis.*`) are debounced to once per minute per
+    # name so concurrent processor threads do not fan out duplicate events for one outage.
+    # Events that are naturally singleton (`sidekiq.hard_shutdown`) or naturally multiple
+    # (`sidekiq.job.slow_iteration`, per-JID) are not debounced.
+    # Keep in mind that these handlers might run when the network or local process is
+    # in a questionable state. Your handlers should be conservative in what they do.
+    # See also +Sidekiq::Notification+
+    #
+    def notification_handlers
+      @options[:notification_handlers]
+    end
+
+    ##
+    # Fire an operations notification to registered listeners.
+    def notify(name, hash = {}) # :nodoc:
+      return unless @notifier.allow?(name)
+
+      n = Sidekiq::Notification::Event.new(name, hash)
+      @options[:notification_handlers].each do |handler|
+        handler.call(n, self)
+      rescue => ex
+        l = logger
+        l.error "!!! Notification handler THREW AN ERROR !!!"
+        l.error ex
+        l.error ex.backtrace.join("\n") unless ex.backtrace.nil?
+      end
     end
 
     # Register a block to run at a point in the Sidekiq lifecycle.
