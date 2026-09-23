@@ -118,7 +118,7 @@ module Sidekiq
           unless respond_to?(:"_erb_#{content}")
             views = options[:views] || Web.views
             filename = "#{views}/#{content}.html.erb"
-            src = ERB.new(File.read(filename)).src
+            src = ERB.new(File.read(filename, encoding: "UTF-8")).src
 
             # Need to use lineno less by 1 because erb generates a
             # comment before the source code.
@@ -170,7 +170,7 @@ module Sidekiq
 
       class_eval <<-RUBY, ::Sidekiq::Web::LAYOUT, -1 # standard:disable Style/EvalWithLocation
         def _render
-          #{ERB.new(File.read(::Sidekiq::Web::LAYOUT)).src}
+          #{ERB.new(File.read(::Sidekiq::Web::LAYOUT, encoding: "UTF-8")).src}
         end
       RUBY
     end

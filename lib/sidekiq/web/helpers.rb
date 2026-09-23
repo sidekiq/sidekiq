@@ -81,7 +81,7 @@ module Sidekiq
     def parse_yaml(path)
       locale = nil
       map = {}
-      IO.readlines(path, chomp: true).each do |line|
+      IO.readlines(path, chomp: true, encoding: "UTF-8").each do |line|
         case line
         when /\A\s*\#.*/
           # line comment
