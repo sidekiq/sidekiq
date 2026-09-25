@@ -122,6 +122,25 @@ describe "Sidekiq::TUI::BaseTab" do
       assert_nil result[2][:style]
     end
   end
+
+  describe "#control_rows" do
+    it "wraps controls onto as many rows as the width requires" do
+      tab = ConcreteTab.new(FakeTUIParent.new)
+      def tab.features = %i[selectable pageable filterable]
+      described = tab.controls.select { |hash| hash[:description] }
+
+      wide = tab.control_rows(1000)
+      assert_equal [described], wide
+
+      narrow = tab.control_rows(40)
+      assert_operator narrow.size, :>, 2
+      assert_equal described, narrow.flatten
+      narrow.each do |row|
+        width = row.sum { |hash| (hash[:display] || hash[:code]).length + hash[:description].length + 4 }
+        assert_operator width, :<=, 40
+      end
+    end
+  end
 end
 
 describe "Sidekiq::TUI Help Table" do

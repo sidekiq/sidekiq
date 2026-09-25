@@ -16,6 +16,25 @@ module Sidekiq
         @parent.t(*)
       end
 
+      # Splits the described controls into rows which fit within +width+ columns.
+      def control_rows(width)
+        rows = []
+        row_width = 0
+        controls.each do |hash|
+          next unless hash[:description]
+
+          # rendered as "key: description  "
+          control_width = (hash[:display] || hash[:code]).length + t(hash[:description]).length + 4
+          if rows.empty? || row_width + control_width > width
+            rows << []
+            row_width = 0
+          end
+          rows.last << hash
+          row_width += control_width
+        end
+        rows
+      end
+
       def reset_data
         @data = {selected: [], selected_row_index: 0}
       end
