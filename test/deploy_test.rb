@@ -19,7 +19,7 @@ describe Sidekiq::Deploy do
   it "rolls up multiple marks within the same minute into a single entry" do
     at = Time.utc(2026, 5, 29, 10, 15, 30)
     @deploy.mark!(at: at, label: "first")
-    @deploy.mark!(at: at + 20, label: "first")  # same label, same minute: locked out
+    @deploy.mark!(at: at + 20, label: "first") # same label, same minute: locked out
     @deploy.mark!(at: at + 25, label: "second") # different label, same minute: stamp already set
 
     marks = @deploy.fetch(at.to_date)

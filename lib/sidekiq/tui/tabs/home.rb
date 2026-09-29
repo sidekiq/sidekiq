@@ -49,7 +49,7 @@ module Sidekiq
             direction: :vertical,
             constraints: [
               tui.constraint_length(4), # Stats
-              tui.constraint_fill(1),   # Graph
+              tui.constraint_fill(1), # Graph
               tui.constraint_length(4) # Redis
             ]
           )

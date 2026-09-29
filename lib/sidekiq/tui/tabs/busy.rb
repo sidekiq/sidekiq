@@ -59,7 +59,7 @@ module Sidekiq
             constraints: [
               tui.constraint_length(4), # Stats
               tui.constraint_length(4), # Status
-              tui.constraint_fill(1)   # Graph
+              tui.constraint_fill(1) # Graph
             ]
           )
 

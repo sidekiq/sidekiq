@@ -4,6 +4,11 @@
 
 Please see [sidekiq.org](https://sidekiq.org/) for more details and how to buy.
 
+HEAD
+---------
+
+- Throttle batch-died cleanup [#7080]
+
 8.1.6
 ---------
 

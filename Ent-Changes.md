@@ -7,9 +7,11 @@ Please see [sidekiq.org](https://sidekiq.org) for more details and how to buy.
 HEAD
 ---------
 
+- Rate limiters can now target a specific Redis shard via `Sidekiq::Limiter.via`, similar to `Sidekiq::Client.via`. See wiki page for more detail.
 - Add Ukranian locale
-- Vendor code to remove `gserver` gem dependency
-- Make the `einhorn` dependency optional since it is only required for rolling restarts
+- Vendor code to remove `gserver` gem dependency [#7084]
+- Vendor code to remove `get_process_mem` gem dependency [#7084]
+- Make the `einhorn` dependency optional since it is only required for rolling restarts [#7084]
 
 8.1.2
 ---------
