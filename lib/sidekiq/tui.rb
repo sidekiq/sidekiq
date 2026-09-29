@@ -60,12 +60,14 @@ module Sidekiq
       track_fps do
         if @showing == :main
           @tui.draw do |frame|
+            # Borders take 2 columns, and 2 rows along with the footer line.
+            control_rows = current_tab.control_rows(frame.area.width - 4)
             main_area, controls_area = @tui.layout_split(
               frame.area,
               direction: :vertical,
               constraints: [
                 @tui.constraint_fill(1),
-                @tui.constraint_length(5)
+                @tui.constraint_length([control_rows.size, 2].max + 3)
               ]
             )
 
@@ -91,7 +93,7 @@ module Sidekiq
             frame.render_widget(tabs, tabs_area)
 
             render_content_area(frame, content_area)
-            render_controls(frame, controls_area)
+            render_controls(frame, controls_area, control_rows)
           end
         end
 
@@ -160,35 +162,8 @@ module Sidekiq
       current_tab.render(@tui, frame, content_area)
     end
 
-    def render_controls(frame, area)
-      active_keys = current_tab.controls.filter { |hash| hash[:description] }
-
-      # Dynamically split controls based on terminal width
-      # Estimate space needed: each control needs ~key_length + description_length + 4 chars for ": " and spacing
-      available_width = area.width - 4 # Account for borders
-
-      lines = []
-      current_line = []
-      current_width = 0
-
-      active_keys.each do |hash|
-        # Estimate control width: key + ": " + description + "  " (spacing)
-        key_text = hash[:display] || hash[:code]
-        control_width = key_text.length + 2 + t(hash[:description]).length + 2
-
-        if current_width + control_width > available_width && !current_line.empty?
-          # Start a new line
-          lines << controls_line(current_line)
-          current_line = [hash]
-          current_width = control_width
-        else
-          current_line << hash
-          current_width += control_width
-        end
-      end
-
-      # Add the last line
-      lines << controls_line(current_line) unless current_line.empty?
+    def render_controls(frame, area, control_rows)
+      lines = control_rows.map { |keys| controls_line(keys) }
 
       # Ensure we have at least 2 lines for layout consistency
       while lines.length < 2
