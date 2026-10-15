@@ -150,6 +150,14 @@ describe Sidekiq::JobUtil do
       end
     end
 
+    it "flags non-finite Floats that JSON cannot encode" do
+      [Float::NAN, Float::INFINITY, -Float::INFINITY].each do |val|
+        assert_same val, @util.send(:json_unsafe?, val)
+        assert_same val, @util.send(:json_unsafe?, [1, val])
+        assert_same val, @util.send(:json_unsafe?, {"n" => val})
+      end
+    end
+
     it "treats nested arrays and hashes of safe values as safe" do
       assert_nil @util.send(:json_unsafe?, [1, "two", [3, [4]], {"k" => "v"}])
       assert_nil @util.send(:json_unsafe?, {"a" => [1, {"b" => 2}]})
@@ -187,6 +195,16 @@ describe Sidekiq::JobUtil do
         @util.verify_json({"class" => "SomeJob", "args" => [:not_json]})
       end
       assert_match(/must be native JSON types/, err.message)
+    end
+
+    it "raises for NaN and Infinity under the default :raise mode" do
+      [Float::NAN, Float::INFINITY, -Float::INFINITY].each do |val|
+        err = assert_raises(ArgumentError) do
+          @util.verify_json({"class" => "SomeJob", "args" => [val]})
+        end
+        assert_match(/must be native JSON types/, err.message)
+        assert_match(/is a Float/, err.message)
+      end
     end
 
     it "names the wrapped class in the error message" do
