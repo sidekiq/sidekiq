@@ -79,7 +79,12 @@ module Sidekiq
 
     RECURSIVE_JSON_UNSAFE = {
       Integer => ->(val) {},
-      Float => ->(val) {},
+      Float => ->(val) {
+        # JSON does not allow NaN / Infinity; reject them so strict_args!
+        # raises ArgumentError instead of a cryptic JSON::GeneratorError later.
+        return val unless val.finite?
+        nil
+      },
       TrueClass => ->(val) {},
       FalseClass => ->(val) {},
       NilClass => ->(val) {},
