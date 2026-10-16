@@ -55,9 +55,9 @@
         <tr>
           <td class="box">
             <%= "#{process['hostname']}:#{process['pid']}" %>
-            <span class="label label-success"><%= process.tag %></span>
+            <span class="label label-success"><%= h process.tag %></span>
             <% process.labels.each do |label| %>
-              <span class="label label-info"><%= label %></span>
+              <span class="label label-info"><%= h label %></span>
             <% end %>
             <% if process.embedded? %>
               <span class="label label-default">embedded</span>
@@ -130,12 +130,12 @@
           <tr>
             <td><%= process %></td>
             <td><%= thread %></td>
-            <td><%= job.jid %></td>
+            <td><%= h job.jid %></td>
             <td>
               <a href="<%= root_path %>queues/<%= CGI.escape(work.queue) %>"><%= h work.queue %></a>
             </td>
             <td>
-              <%= job.display_class %>
+              <%= h job.display_class %>
               <%= display_tags(job, nil) %>
             </td>
             <td>

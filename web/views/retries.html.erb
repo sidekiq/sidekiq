@@ -37,12 +37,12 @@
               <td>
                 <a href="<%= root_path %>retries/<%= job_params(entry.item, entry.score) %>"><%= relative_time(entry.at) %></a>
               </td>
-              <td><%= entry['retry_count'] %></td>
+              <td><%= h entry['retry_count'] %></td>
               <td>
                 <a href="<%= root_path %>queues/<%= CGI.escape(entry.queue) %>"><%= h entry.queue %></a>
               </td>
               <td>
-                <%= entry.display_class %>
+                <%= h entry.display_class %>
                 <%= display_tags(entry, "retries") %>
               </td>
               <td>

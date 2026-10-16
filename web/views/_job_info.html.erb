@@ -15,7 +15,7 @@
         <tr>
           <th><%= t('Job') %></th>
           <td>
-            <%= job.display_class %>
+            <%= h job.display_class %>
             <%= display_tags(job) %>
           </td>
         </tr>
@@ -31,7 +31,7 @@
         <tr>
           <th>JID</th>
           <td>
-            <code><%= job.jid %></code>
+            <code><%= h job.jid %></code>
           </td>
         </tr>
         <% if (state = job.iterable_state) %>
@@ -46,7 +46,7 @@
         <tr>
           <th>BID</th>
           <td>
-            <a href="<%= root_path %>batches/<%= job.bid %>"><%= job.bid %></a>
+            <a href="<%= root_path %>batches/<%= CGI.escape(job.bid) %>"><%= h job.bid %></a>
           </td>
         </tr>
         <% end %>
@@ -72,7 +72,7 @@
           <% if job['retry_count'] && job['retry_count'] > 0 %>
             <tr>
               <th><%= t('RetryCount') %></th>
-              <td><%= job['retry_count'] %></td>
+              <td><%= h job['retry_count'] %></td>
             </tr>
             <tr>
               <th><%= t('LastRetry') %></th>
@@ -104,8 +104,8 @@
         <% config.custom_job_info_rows&.each do |helper| %>
           <% helper.add_pair(job) do |name, value| %>
             <tr>
-              <th><%= name %></th>
-              <td><%= value %></td>
+              <th><%= h name %></th>
+              <td><%= h value %></td>
             </tr>
           <% end %>
         <% end %>
