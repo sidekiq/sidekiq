@@ -79,6 +79,10 @@ module Sidekiq
       config.handle_exception(ex, ctx)
     end
 
+    def notify(name, payload = {}) # :nodoc:
+      config.notify(name, payload)
+    end
+
     def fire_event(event, options = {})
       oneshot = options.fetch(:oneshot, true)
       reverse = options[:reverse]
