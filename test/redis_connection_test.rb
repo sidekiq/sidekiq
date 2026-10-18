@@ -153,6 +153,37 @@ describe Sidekiq::RedisConnection do
         assert_includes(output, '"REDACTED"')
       end
 
+      it "redacts the password in a URL" do
+        output = capture_logging(@config) do |logger|
+          Sidekiq::RedisConnection.create(url: "redis://:secret@localhost:6379/0", logger: logger)
+        end
+
+        refute_includes(output, "secret")
+        assert_includes(output, "redis://:REDACTED@localhost:6379/0")
+      end
+
+      it "redacts a URL which can't be parsed" do
+        output = capture_logging(@config) do |logger|
+          Sidekiq::RedisConnection.create(url: "redis://:s3cr^t@localhost:6379/0", logger: logger)
+        rescue URI::InvalidURIError
+          # redis-client rejects the URL after the options are logged
+        end
+
+        refute_includes(output, "s3cr")
+        assert_includes(output, "REDACTED")
+      end
+
+      it "redacts a sentinel URL which can't be parsed" do
+        options = {
+          url: "redis://mymaster",
+          sentinels: ["redis://:s3cr^t@host1:26379", "redis://:secret@host2:26379"]
+        }
+        scrubbed = Sidekiq::RedisConnection.send(:scrub, options)
+
+        assert_equal ["REDACTED", "redis://:REDACTED@host2:26379"], scrubbed[:sentinels]
+        assert_equal ["redis://:s3cr^t@host1:26379", "redis://:secret@host2:26379"], options[:sentinels]
+      end
+
       it "prunes SSL parameters from the logging" do
         output = capture_logging(@config) do |logger|
           options = {
