@@ -21,7 +21,7 @@ module Sidekiq
     # A precise time histogram stores every time. Instead we break times into a set of
     # known buckets and increment counts of the associated time bucket. Even if we call
     # the histogram a million times, we'll still only store 26 buckets.
-    # NB: needs to be thread-safe or resiliant to races.
+    # NB: needs to be thread-safe or resilient to races.
     #
     # To store this data, we use Redis' BITFIELD command to store unsigned 16-bit counters
     # per bucket per klass per minute. It's unlikely that most people will be executing more

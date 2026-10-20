@@ -1358,7 +1358,7 @@ module Sidekiq
       @records = Sidekiq.redis do |c|
         # This throws away expired profiles
         c.zremrangebyscore("profiles", "-inf", Time.now.to_f.to_s)
-        # retreive records, newest to oldest
+        # retrieve records, newest to oldest
         c.zrange("profiles", "+inf", 0, "byscore", "rev")
       end
     end
