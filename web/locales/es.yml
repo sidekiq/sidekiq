@@ -37,6 +37,7 @@ es:
   Kill: Matar
   KillAll: Matar Todo
   Language: Idioma
+  LastDashboardUpdateTemplateLiteral: "Último sondeo: Procesadas: PROCESSED_COUNT. Fallidas: FAILED_COUNT."
   LastRetry: Último Reintento
   Latency: Latencia
   LivePoll: Sondeo en Vivo
@@ -107,3 +108,4 @@ es:
   View: Vista
   Token: Token
   ElapsedTime: Tiempo transcurrido
+  ClickToLearnMore: Haz clic para saber más

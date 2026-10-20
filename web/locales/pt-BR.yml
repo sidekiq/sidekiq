@@ -37,6 +37,8 @@ pt-BR:
   Jobs: Tarefas
   Kill: Matar
   KillAll: Matar todas
+  Language: Idioma
+  LastDashboardUpdateTemplateLiteral: "Última consulta: Processados: PROCESSED_COUNT. Falhas: FAILED_COUNT."
   LastRetry: Última tentativa
   Latency: Latência
   LivePoll: Live Poll
@@ -48,6 +50,14 @@ pt-BR:
   NoDataFound: Nenhum dado encontrado
   NoDeadJobsFound: Nenhuma tarefa morta foi encontrada
   NoJobMetricsFound: Nenhuma métrica de tarefa encontrada
+  Filter: Filtro
+  AnyJobContent: Qualquer conteúdo da tarefa
+  Profiles: Perfis
+  Data: Dados
+  View: Ver
+  Token: Token
+  ElapsedTime: Tempo decorrido
+  ClickToLearnMore: Clique para saber mais
   NoRetriesFound: Nenhuma tentativa encontrada
   NoScheduledFound: Nenhuma tarefa agendada foi encontrada
   NotYetEnqueued: Ainda não enfileirado
@@ -60,6 +70,7 @@ pt-BR:
   Uptime: Tempo de atividade
   Plugins: Plug-ins
   PollingInterval: Intervalo de Polling
+  PollingIntervalMilliseconds: Intervalo de Polling em milissegundos
   Process: Processo
   Processed: Processados
   Processes: Processos
@@ -81,6 +92,7 @@ pt-BR:
   SixMonths: 6 meses
   Size: Tamanho
   Started: Iniciado
+  Status: Status
   Stop: Parar
   StopAll: Parar Todos
   StopPolling: Parar Polling
@@ -89,6 +101,7 @@ pt-BR:
   Thread: Thread
   Threads: Threads
   ThreeMonths: 3 meses
+  Time: Hora
   TotalExecutionTime: Tempo total de execução
   Unpause: Despausar
   Utilization: Utilização

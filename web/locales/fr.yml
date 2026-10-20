@@ -36,6 +36,8 @@ fr:
   Jobs: Tâches
   Kill: Tuer
   KillAll: Tout tuer
+  Language: Langue
+  LastDashboardUpdateTemplateLiteral: "Dernier rafraîchissement : Traitées : PROCESSED_COUNT. Échouées : FAILED_COUNT."
   LastRetry: Dernier essai
   Latency: Latence
   LivePoll: Temps réel
@@ -55,6 +57,7 @@ fr:
   PeakMemoryUsage: Mémoire utilisée (max.)
   Plugins: Plugins
   PollingInterval: Intervalle de rafraîchissement
+  PollingIntervalMilliseconds: Intervalle de rafraîchissement en millisecondes
   Process: Processus
   Processed: Traitées
   Processes: Processus
@@ -98,3 +101,11 @@ fr:
   AvgExecutionTime: Temps d'exécution moyen
   Context: Contexte
   NoJobMetricsFound: Aucune statistique de tâche récente n'a été trouvée
+  Filter: Filtre
+  AnyJobContent: Tout contenu de tâche
+  Profiles: Profils
+  Data: Données
+  View: Voir
+  Token: Jeton
+  ElapsedTime: Temps écoulé
+  ClickToLearnMore: Cliquez pour en savoir plus
