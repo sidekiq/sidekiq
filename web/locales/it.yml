@@ -37,6 +37,7 @@ it:
   Kill: Uccidere
   KillAll: Uccidere tutti
   Language: Lingua
+  LastDashboardUpdateTemplateLiteral: "Ultimo polling: Processati: PROCESSED_COUNT. Falliti: FAILED_COUNT."
   LastRetry: Ultimo tentativo
   Latency: Latenza
   LivePoll: Live poll
@@ -107,3 +108,4 @@ it:
   View: Vista
   Token: Token
   ElapsedTime: Tempo Trascorso
+  ClickToLearnMore: Clicca per saperne di più
