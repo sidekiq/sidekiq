@@ -155,7 +155,7 @@ module Sidekiq
       if within.nil?
         hstr
       else
-        "<a href='#{root_path}#{within}?substr=#{hstr}'>#{hstr}</a>"
+        "<a href='#{root_path}#{within}?substr=#{CGI.escape(str.to_s)}'>#{hstr}</a>"
       end
     end
 
