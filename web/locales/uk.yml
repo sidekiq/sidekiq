@@ -36,6 +36,8 @@ uk:
   Jobs: Задачі
   Kill: Зупинити
   KillAll: Зупинити все
+  Language: Мова
+  LastDashboardUpdateTemplateLiteral: "Останнє опитування: Опрацьовано: PROCESSED_COUNT. Невдалих: FAILED_COUNT."
   LastRetry: Остання спроба
   Latency: Затримка
   LivePoll: Постійне опитування
@@ -55,6 +57,7 @@ uk:
   PeakMemoryUsage: Максимальне використання пам'яті
   Plugins: Плагіни
   PollingInterval: Інтервал опитування
+  PollingIntervalMilliseconds: Інтервал опитування в мілісекундах
   Process: Процес
   Processed: Опрацьовано
   Processes: Процеси
@@ -100,3 +103,9 @@ uk:
   NoJobMetricsFound: Недавніх метрик задачі не знайдено
   Filter: Фільтр
   AnyJobContent: Будь-який атрибут задачі
+  Profiles: Профілі
+  Data: Дані
+  View: Переглянути
+  Token: Токен
+  ElapsedTime: Витрачений час
+  ClickToLearnMore: Натисніть, щоб дізнатися більше

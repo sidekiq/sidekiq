@@ -36,6 +36,8 @@ zh-CN: # <---- change this to your locale code
   Jobs: 任务
   Kill: 终止
   KillAll: 全部终止
+  Language: 语言
+  LastDashboardUpdateTemplateLiteral: "最近一次轮询：已处理：PROCESSED_COUNT。失败：FAILED_COUNT。"
   LastRetry: 上次重试
   Latency: 延迟
   LivePoll: 实时轮询
@@ -55,6 +57,7 @@ zh-CN: # <---- change this to your locale code
   PeakMemoryUsage: 内存占用峰值
   Plugins: 插件
   PollingInterval: 轮询周期
+  PollingIntervalMilliseconds: 轮询周期（毫秒）
   Process: 进程
   Processed: 已处理
   Processes: 进程
@@ -105,3 +108,4 @@ zh-CN: # <---- change this to your locale code
   View: 查看
   Token: 标记
   ElapsedTime: 已用时间
+  ClickToLearnMore: 点击了解更多

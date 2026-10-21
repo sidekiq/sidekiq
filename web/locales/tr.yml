@@ -36,6 +36,8 @@ tr:
   Jobs: İşler
   Kill: Sonlandır
   KillAll: Hepsini Sonlandır
+  Language: Dil
+  LastDashboardUpdateTemplateLiteral: "Son anket: İşlendi: PROCESSED_COUNT. Başarısız: FAILED_COUNT."
   LastRetry: Son Yeniden Deneme
   Latency: Gecikme
   LivePoll: Canlı Anket
@@ -55,6 +57,7 @@ tr:
   PeakMemoryUsage: Maksimum Bellek Kullanımı
   Plugins: Eklentiler
   PollingInterval: Anket Aralığı
+  PollingIntervalMilliseconds: Milisaniye cinsinden anket aralığı
   Process: Süreç
   Processed: İşlendi
   Processes: Süreçler
@@ -100,3 +103,9 @@ tr:
   NoJobMetricsFound: Son iş metrikleri bulunamadı
   Filter: Filtre
   AnyJobContent: Herhangi bir iş içeriği
+  Profiles: Profiller
+  Data: Veri
+  View: Görüntüle
+  Token: Belirteç
+  ElapsedTime: Geçen Süre
+  ClickToLearnMore: Daha fazla bilgi için tıklayın
