@@ -240,7 +240,12 @@ describe "Web helpers" do
   describe "#filter_link" do
     it "escapes the value and wraps it in a filter link by default" do
       obj = Helpers.new
-      assert_equal "<a href='/retries?substr=ab&lt;c'>ab&lt;c</a>", obj.filter_link("ab<c")
+      assert_equal "<a href='/retries?substr=ab%3Cc'>ab&lt;c</a>", obj.filter_link("ab<c")
+    end
+
+    it "URL encodes the value in the link" do
+      obj = Helpers.new
+      assert_equal "<a href='/morgue?substr=a%26b+c%2B%2B%23x'>a&amp;b c++#x</a>", obj.filter_link("a&b c++#x", "morgue")
     end
 
     it "returns only the escaped value when within is nil" do
@@ -255,7 +260,7 @@ describe "Web helpers" do
       job = Struct.new(:tags).new(["a<b"])
       result = obj.display_tags(job)
       assert_includes result, "jobtag-a&lt;b"
-      assert_includes result, "substr=a&lt;b"
+      assert_includes result, "substr=a%3Cb"
     end
   end
 
