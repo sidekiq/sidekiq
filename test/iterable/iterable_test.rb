@@ -27,6 +27,7 @@ describe Sidekiq::Job::Iterable do
       klass.around_iteration_called = 0
       klass.on_resume_called = 0
       klass.on_stop_called = 0
+      klass.on_cancel_called = 0
       klass.on_complete_called = 0
     end
     Sidekiq::Job.clear_all
@@ -275,6 +276,33 @@ describe Sidekiq::Job::Iterable do
   end
 
   describe "cancellation" do
+    [:client, :job].each do |source|
+      it "can cancel before the first checkpoint through the #{source}" do
+        jid = ArrayIterableJob.perform_async
+
+        if source == :client
+          Sidekiq::Client.new.cancel!(jid)
+        else
+          job = ArrayIterableJob.new
+          job.jid = jid
+          job.cancel!
+        end
+
+        assert_equal ["cancelled"], fetch_iteration_state(jid).keys
+
+        ArrayIterableJob.perform_one
+
+        assert_empty ArrayIterableJob.iterated_objects
+        assert_equal 1, ArrayIterableJob.on_start_called
+        assert_equal 0, ArrayIterableJob.around_iteration_called
+        assert_equal 0, ArrayIterableJob.on_resume_called
+        assert_equal 1, ArrayIterableJob.on_cancel_called
+        assert_equal 1, ArrayIterableJob.on_stop_called
+        assert_equal 1, ArrayIterableJob.on_complete_called
+        assert_empty fetch_iteration_state(jid)
+      end
+    end
+
     it "can cancel midway" do
       jid = iterate_exact_times(ArrayIterableJob, 2)
       assert_equal [10, 11], ArrayIterableJob.iterated_objects
