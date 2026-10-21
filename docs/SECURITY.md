@@ -71,6 +71,6 @@ Severity is determined using the **CVSS v3.1** scoring system.
 ## References
 
 - [RubySec Advisory Database](https://github.com/rubysec/ruby-advisory-db)
-- [OWASP Vulnerability Management Guide](https://owasp.org/www-project-vulnerability-management/)
+- [OWASP Vulnerability Management Guide](https://owasp.org/www-project-vulnerability-management-guide/)
 - [GitHub Security Advisories](https://docs.github.com/en/code-security/security-advisories)
 - [CVSS v3.1 Specification](https://www.first.org/cvss/specification-document)
