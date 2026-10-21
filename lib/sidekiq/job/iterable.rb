@@ -185,7 +185,7 @@ module Sidekiq
 
         unless state.empty?
           @_executions = state["ex"].to_i
-          @_cursor = Sidekiq.load_json(state["c"])
+          @_cursor = Sidekiq.load_json(state["c"]) if state.key?("c")
           @_runtime = state["rt"].to_f
         end
       end

@@ -5,6 +5,7 @@
 HEAD
 ----------
 
+- Fix cancellation of iterable jobs before their first checkpoint [#7099]
 - Misc bug fixes
 
 8.1.7
