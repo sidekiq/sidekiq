@@ -136,8 +136,12 @@ describe Sidekiq do
   end
 
   describe "ractor support" do
+    # Ractor#value replaced Ractor#take in Ruby 3.5
+    def ractor_result(r)
+      r.respond_to?(:value) ? r.value : r.take
+    end
+
     it "allows Redis access within a Ractor" do
-      skip "TODO"
       cfg = Sidekiq::Config.new
       pool = cfg.redis_pool
       pool.with { |c| c.ping }
@@ -146,13 +150,17 @@ describe Sidekiq do
         po = Sidekiq::RedisConnection.create(cfgh)
         po.with { |c| c.ping }
       end
-      val = r.value
+      val = ractor_result(r)
       assert_equal "PONG", val
+    end
 
+    it "allows sharing a pool with a Ractor" do
+      skip "ConnectionPool holds a Proc, Mutexes and sockets so it can't be shared across Ractors"
+      pool = Sidekiq::Config.new.redis_pool
       r = Ractor.new(pool) do |p|
         p.with { |c| c.ping }
       end
-      val = r.value
+      val = ractor_result(r)
       assert_equal "PONG", val
     end
   end

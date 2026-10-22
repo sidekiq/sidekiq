@@ -33,7 +33,10 @@ module Sidekiq
         symbolized_options[:timeout] ||= 3
 
         redis_config = Sidekiq::RedisClientAdapter.new(symbolized_options)
-        ConnectionPool.new(timeout: pool_timeout, size: size) do
+        # Only the main Ractor can fork, and connection_pool's fork registry
+        # is a non-shareable constant other Ractors can't touch.
+        main = Ractor.current == Ractor.main
+        ConnectionPool.new(timeout: pool_timeout, size: size, auto_reload_after_fork: main) do
           redis_config.new_client
         end
       end
