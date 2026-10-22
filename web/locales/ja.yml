@@ -36,6 +36,8 @@ ja:
   Jobs: ジョブ
   Kill: 強制終了
   KillAll: 全て強制終了
+  Language: 言語
+  LastDashboardUpdateTemplateLiteral: "最新のポーリング: 完了: PROCESSED_COUNT。失敗: FAILED_COUNT。"
   LastRetry: 再試行履歴
   Latency: レイテンシ
   LivePoll: ポーリング開始
@@ -55,6 +57,7 @@ ja:
   PeakMemoryUsage: 最大メモリー使用量
   Plugins: プラグイン
   PollingInterval: ポーリング間隔
+  PollingIntervalMilliseconds: ポーリング間隔 (ミリ秒)
   Process: プロセス
   Processed: 完了
   Processes: プロセス
@@ -79,14 +82,30 @@ ja:
   StopAll: すべて停止
   StopPolling: ポーリング停止
   Success: 成功
+  Summary: 概要
   Thread: スレッド
   Threads: スレッド
   ThreeMonths: 3 ヶ月
   Time: 時間
   Unpause: 一時停止を解除
+  Uptime: 稼働時間 (日)
+  Utilization: 使用率
+  Version: バージョン
+  When: 日時
+  Worker: ワーカー
+  active: アクティブ
+  idle: アイドル
   Metrics: メトリクス
   NoDataFound: データが見つかりませんでした
   TotalExecutionTime: 合計実行時間
   AvgExecutionTime: 平均実行時間
   Context: コンテキスト
   NoJobMetricsFound: 直近のジョブメトリクスが見つかりませんでした
+  Filter: フィルター
+  AnyJobContent: 任意のジョブ内容
+  Profiles: プロファイル
+  Data: データ
+  View: 表示
+  Token: トークン
+  ElapsedTime: 経過時間
+  ClickToLearnMore: クリックして詳細を表示
