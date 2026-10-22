@@ -287,6 +287,8 @@ module Sidekiq
 
       begin
         yield
+      rescue JobRetry::Skip
+        raise
       rescue Exception
         FAILURE.incr
         raise
