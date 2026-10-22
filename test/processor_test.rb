@@ -336,5 +336,46 @@ describe Sidekiq::Processor do
       successful_job
       assert_equal 1, Sidekiq::Processor::PROCESSED.reset
     end
+
+    it "increments the failure stat when the job raises" do
+      Sidekiq::Processor::PROCESSED.reset
+      Sidekiq::Processor::FAILURE.reset
+      msg = Sidekiq.dump_json({"class" => MockJob.to_s, "args" => ["boom"], "retry" => 1})
+
+      assert_raises TestProcessorException do
+        @processor.send(:process, work(msg))
+      end
+
+      assert_equal 1, Sidekiq::Processor::FAILURE.reset
+      assert_equal 1, Sidekiq::Processor::PROCESSED.reset
+    end
+
+    it "does not count an interrupted iterable job as a failure" do
+      @config[:max_iteration_runtime] = 0
+      @config.server_middleware do |chain|
+        chain.add Sidekiq::Job::InterruptHandler
+      end
+
+      output = StringIO.new
+      logger = Sidekiq::Logger.new(output, level: :info)
+      logger.formatter = Sidekiq::Logger::Formatters::Pretty.new
+      @config.logger = logger
+      processor = ::Sidekiq::Processor.new(@config.default_capsule) { |*| }
+
+      Sidekiq::Processor::PROCESSED.reset
+      Sidekiq::Processor::FAILURE.reset
+      msg = Sidekiq.dump_json({"class" => MockIterableJob.to_s, "args" => []})
+
+      assert_raises Sidekiq::JobRetry::Skip do
+        processor.send(:process, work(msg))
+      end
+
+      assert_equal 0, Sidekiq::Processor::FAILURE.reset
+      assert_equal 1, Sidekiq::Processor::PROCESSED.reset
+      refute_match(/fail/, output.string)
+      assert_match(/start/, output.string)
+      refute_match(/done/, output.string)
+      assert_equal 1, @config.redis { |c| c.llen("queue:default") }
+    end
   end
 end

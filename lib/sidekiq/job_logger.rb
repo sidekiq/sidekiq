@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "sidekiq/job_retry"
+
 module Sidekiq
   class JobLogger
     def initialize(config)
@@ -16,6 +18,9 @@ module Sidekiq
 
       Sidekiq::Context.add(:elapsed, elapsed(start))
       @logger.info { "done" } unless @skip
+    rescue JobRetry::Skip
+      Sidekiq::Context.add(:elapsed, elapsed(start))
+      raise
     rescue Exception
       Sidekiq::Context.add(:elapsed, elapsed(start))
       @logger.info { "fail" } unless @skip

@@ -6,6 +6,7 @@ HEAD
 ----------
 
 - Fix cancellation of iterable jobs before their first checkpoint [#7099]
+- Do not count or log an interrupted iterable job as a failure [#7103]
 - Misc bug fixes
 
 8.1.7

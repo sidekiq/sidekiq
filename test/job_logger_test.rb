@@ -132,6 +132,25 @@ describe "Job logger" do
     end
   end
 
+  it "does not log fail when an iterable job is interrupted" do
+    jl = Sidekiq::JobLogger.new(@cfg)
+    job = {"jid" => "1234abc", "class" => "IterableJob"}
+    elapsed_seen = nil
+
+    assert_raises(Sidekiq::JobRetry::Skip) do
+      jl.prepare(job) do
+        jl.call(job, "queue") { raise Sidekiq::JobRetry::Skip }
+      ensure
+        elapsed_seen = Sidekiq::Context.current[:elapsed]
+      end
+    end
+
+    assert_match(/start/, @output.string)
+    refute_match(/fail/, @output.string)
+    refute_match(/done/, @output.string)
+    assert_kind_of Float, elapsed_seen
+  end
+
   it "logs 'fail' and records elapsed when the job block raises" do
     jl = Sidekiq::JobLogger.new(@cfg)
     job = {"jid" => "1234abc", "class" => "FailJob"}
