@@ -8,42 +8,63 @@ pt:
   AreYouSureDeleteJob: Tem a certeza que deseja eliminar esta tarefa?
   AreYouSureDeleteQueue: Tem a certeza que deseja eliminar a fila %{queue}?
   Arguments: Argumentos
+  BackToApp: Voltar à aplicação
   Busy: Ocupado
   Class: Classe
   Connections: Conexões
+  CreatedAt: Criado em
   CurrentMessagesInQueue: Mensagens na fila <span class='title'>%{queue}</span>
   Dashboard: Dashboard
   Dead: Morto
   DeadJobs: Tarefas mortas
   Delete: Apagar
   DeleteAll: Eliminar todos
+  Deploy: Deploy
   Enqueued: Em espera
   Error: Erro
   ErrorBacktrace: Backtrace do Erro
   ErrorClass: Classe de Erro
   ErrorMessage: Mensagem de erro
+  ExecutionTime: Tempo de execução
+  Extras: Extras
   Failed: Falhados
   Failures: Falhas
+  Failure: Falha
   GoBack: ← Voltar
   History: Histórico
   Job: Tarefa
   Jobs: Tarefas
+  Kill: Matar
+  KillAll: Matar todas
+  Language: Idioma
+  LastDashboardUpdateTemplateLiteral: "Última actualização: Processados: PROCESSED_COUNT. Falhados: FAILED_COUNT."
   LastRetry: Última Tentativa
+  Latency: Latência
   LivePoll: Live Poll
   MemoryUsage: Utilização de Memória
+  Name: Nome
   Namespace: Namespace
   NextRetry: Próxima Tentativa
   NoDeadJobsFound: Não foram encontradas tarefas mortas
   NoRetriesFound: Não foram encontradas tentativas
   NoScheduledFound: Não foram encontradas tarefas agendadas
+  NotYetEnqueued: Ainda não está na fila
   OneMonth: 1 mês
   OneWeek: 1 semana
   OriginallyFailed: Falhou inicialmente
+  Pause: Pausar
+  Paused: Em pausa
   PeakMemoryUsage: Pico de utilização de memória
+  Plugins: Plugins
+  PollingInterval: Intervalo de actualização
+  PollingIntervalMilliseconds: Intervalo de actualização em milissegundos
+  Process: Processo
   Processed: Processados
   Processes: Processos
   Queue: Fila
   Queues: Filas
+  Quiet: Silenciar
+  QuietAll: Silenciar todos
   Realtime: Tempo real
   Retries: Tentativas
   RetryAll: Tentar tudo novamente
@@ -51,19 +72,40 @@ pt:
   RetryNow: Tentar novamente
   Scheduled: Agendados
   ScheduledJobs: Tarefas agendadas
+  Seconds: Segundos
   ShowAll: Mostrar todos
   SixMonths: 6 meses
   Size: Tamanho
   Started: Iniciados
   Status: Estado
+  Stop: Parar
+  StopAll: Parar todos
   StopPolling: Desactivar Live Poll
+  Success: Sucesso
+  Summary: Resumo
   Thread: Thread
   Threads: Threads
   ThreeMonths: 3 meses
   Time: Tempo
+  Unpause: Retomar
   Uptime: Uptime (em dias)
+  Utilization: Utilização
   Version: Versão
   When: Quando
   Worker: Worker
   active: activo
   idle: livre
+  Metrics: Métricas
+  NoDataFound: Não foram encontrados dados
+  TotalExecutionTime: Tempo total de execução
+  AvgExecutionTime: Tempo médio de execução
+  Context: Contexto
+  NoJobMetricsFound: Não foram encontradas métricas de tarefas recentes
+  Filter: Filtrar
+  AnyJobContent: Qualquer conteúdo da tarefa
+  Profiles: Perfis
+  Data: Dados
+  View: Ver
+  Token: Token
+  ElapsedTime: Tempo decorrido
+  ClickToLearnMore: Clique para saber mais
