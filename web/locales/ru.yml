@@ -19,24 +19,30 @@ ru:
   DeadJobs: Убитые задачи
   Delete: Удалить
   DeleteAll: Удалить все
+  Deploy: Развёртывание
   Enqueued: В очереди
   Error: Ошибка
   ErrorBacktrace: Трассировка ошибки
   ErrorClass: Класс ошибки
   ErrorMessage: Сообщение об ошибке
+  ExecutionTime: Время выполнения
   Extras: Дополнительно
   Failed: Провалено
   Failures: Провалы
+  Failure: Провал
   GoBack: ← Назад
   History: История
   Job: Задача
   Jobs: Задачи
   Kill: Убиваем
   KillAll: Убить всё
+  Language: Язык
+  LastDashboardUpdateTemplateLiteral: "Последний опрос: Обработано: PROCESSED_COUNT. Провалено: FAILED_COUNT."
   LastRetry: Последняя попытка
   Latency: Задержка
   LivePoll: Постоянный опрос
   MemoryUsage: Использование памяти
+  Name: Имя
   Namespace: Пространство имен
   NextRetry: Следующая попытка
   NoDeadJobsFound: Нет убитых задач
@@ -51,6 +57,8 @@ ru:
   PeakMemoryUsage: Максимальный расход памяти
   Plugins: Плагины
   PollingInterval: Интервал опроса
+  PollingIntervalMilliseconds: Интервал опроса (мс)
+  Process: Процесс
   Processed: Обработано
   Processes: Процессы
   Queue: Очередь
@@ -64,6 +72,7 @@ ru:
   RetryNow: Повторить сейчас
   Scheduled: Запланировано
   ScheduledJobs: Запланированные задачи
+  Seconds: Секунды
   ShowAll: Показать все
   SixMonths: 6 месяцев
   Size: Размер
@@ -72,14 +81,31 @@ ru:
   Stop: Остановить
   StopAll: Остановить все
   StopPolling: Остановить опрос
+  Success: Успех
+  Summary: Сводка
   Thread: Поток
   Threads: Потоки
   ThreeMonths: 3 месяца
   Time: Время
   Unpause: Возобновить
   Uptime: Дня(ей) бесперебойной работы
+  Utilization: Загрузка
   Version: Версия
   When: Когда
   Worker: Обработчик
   active: активен
   idle: отдыхает
+  Metrics: Метрики
+  NoDataFound: Данные не найдены
+  TotalExecutionTime: Общее время выполнения
+  AvgExecutionTime: Среднее время выполнения
+  Context: Контекст
+  NoJobMetricsFound: Недавние метрики задач не найдены
+  Filter: Фильтр
+  AnyJobContent: Любое содержимое задачи
+  Profiles: Профили
+  Data: Данные
+  View: Открыть
+  Token: Токен
+  ElapsedTime: Прошедшее время
+  ClickToLearnMore: Нажмите, чтобы узнать больше
