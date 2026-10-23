@@ -8,43 +8,64 @@ ko:
   AreYouSureDeleteJob: 이 작업을 삭제하시겠습니까?
   AreYouSureDeleteQueue: 이 %{queue} 큐를 삭제하시겠습니까?
   Arguments: 인자
+  BackToApp: 앱으로 돌아가기
   Batches: 배치
   Busy: 작동
   Class: 클래스
   Connections: 커넥션
+  CreatedAt: 생성 시각
   CurrentMessagesInQueue: <span class='title'>%{queue}</span>에 대기 중인 메시지
   Dashboard: 대시보드
   Dead: 죽음
   DeadJobs: 죽은 작업
   Delete: 삭제
   DeleteAll: 모두 삭제
+  Deploy: 배포
   Enqueued: 대기 중
   Error: 에러
   ErrorBacktrace: 에러 Backtrace
   ErrorClass: 에러 클래스
   ErrorMessage: 에러 메시지
+  ExecutionTime: 실행 시간
+  Extras: 기타
   Failed: 실패
   Failures: 실패
+  Failure: 실패
   GoBack: ← 뒤로
   History: 히스토리
   Job: 작업
   Jobs: 작업
+  Kill: 강제 종료
+  KillAll: 모두 강제 종료
+  Language: 언어
+  LastDashboardUpdateTemplateLiteral: "최근 폴링: 처리완료: PROCESSED_COUNT. 실패: FAILED_COUNT."
   LastRetry: 최근 재시도
+  Latency: 지연 시간
   LivePoll: 폴링 시작
   MemoryUsage: 메모리 사용량
+  Name: 이름
   Namespace: 네임스페이스
   NextRetry: 다음 재시도
   NoDeadJobsFound: 죽은 작업이 없습니다
   NoRetriesFound: 재시도 내역이 없습니다
   NoScheduledFound: 예약된 작업이 없습니다
+  NotYetEnqueued: 아직 큐에 추가되지 않음
   OneMonth: 1 달
   OneWeek: 1 주
   OriginallyFailed: 실패
+  Pause: 일시 정지
+  Paused: 일시 정지됨
   PeakMemoryUsage: 최대 메모리 사용량
+  Plugins: 플러그인
+  PollingInterval: 폴링 간격
+  PollingIntervalMilliseconds: 폴링 간격 (밀리초)
+  Process: 프로세스
   Processed: 처리완료
   Processes: 프로세스
   Queue: 큐
   Queues: 큐
+  Quiet: 수신 중지
+  QuietAll: 모두 수신 중지
   Realtime: 실시간
   Retries: 재시도
   RetryAll: 모두 재시도
@@ -52,19 +73,40 @@ ko:
   RetryNow: 지금 재시도
   Scheduled: 예약
   ScheduledJobs: 예약된 작업
+  Seconds: 초
   ShowAll: 모두 보기
   SixMonths: 6 달
   Size: 크기
   Started: 시작
   Status: 상태
+  Stop: 중지
+  StopAll: 모두 중지
   StopPolling: 폴링 중단
+  Success: 성공
+  Summary: 요약
   Thread: 스레드
   Threads: 스레드
   ThreeMonths: 3 달
   Time: 시간
+  Unpause: 일시 정지 해제
   Uptime: 업타임 (일)
+  Utilization: 사용률
   Version: 버전
   When: 언제
   Worker: 워커
   active: 동작 중
   idle: 대기 중
+  Metrics: 메트릭
+  NoDataFound: 데이터가 없습니다
+  TotalExecutionTime: 총 실행 시간
+  AvgExecutionTime: 평균 실행 시간
+  Context: 컨텍스트
+  NoJobMetricsFound: 최근 작업 메트릭이 없습니다
+  Filter: 필터
+  AnyJobContent: 모든 작업 내용
+  Profiles: 프로파일
+  Data: 데이터
+  View: 보기
+  Token: 토큰
+  ElapsedTime: 경과 시간
+  ClickToLearnMore: 자세히 알아보려면 클릭하세요
