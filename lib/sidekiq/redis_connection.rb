@@ -6,10 +6,13 @@ require "sidekiq/redis_client_adapter"
 
 module Sidekiq
   module RedisConnection
+    LOCATION_KEYS = %i[url host port path sentinels].freeze
+
     class << self
       def create(options = {})
         symbolized_options = deep_symbolize_keys(options)
         symbolized_options[:url] ||= determine_redis_provider
+        verify_location!(symbolized_options) if ENV["SIDEKIQ_REQUIRE_REDIS_CONFIG"]
         symbolized_options[:password] = wrap(symbolized_options[:password]) if symbolized_options.key?(:password)
         symbolized_options[:sentinel_password] = wrap(symbolized_options[:sentinel_password]) if symbolized_options.key?(:sentinel_password)
 
@@ -42,6 +45,25 @@ module Sidekiq
       end
 
       private
+
+      # SIDEKIQ_REQUIRE_REDIS_CONFIG=1 refuses to build a pool when no Redis
+      # location was given, instead of letting redis-client default to
+      # localhost:6379. In a Rails app this catches code that uses Sidekiq.redis
+      # before the configure block in config/initializers has run; without it
+      # the first pool is memoized against localhost and the configuration that
+      # arrives later is ignored. It is an environment variable rather than a
+      # config option because an option set in an initializer would have the
+      # same ordering problem it is meant to catch.
+      def verify_location!(options)
+        return if LOCATION_KEYS.any? { |key| present?(options[key]) }
+
+        raise ArgumentError, "SIDEKIQ_REQUIRE_REDIS_CONFIG is set and no Redis location is configured. " \
+          "Set `config.redis = { url: ... }` before Sidekiq.redis is used, or set REDIS_URL."
+      end
+
+      def present?(value)
+        value.is_a?(String) ? !value.empty? : !value.nil?
+      end
 
       # Wrap hard-coded passwords in a Proc to avoid logging the value
       def wrap(pwd)

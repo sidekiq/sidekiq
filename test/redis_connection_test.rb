@@ -23,6 +23,42 @@ describe Sidekiq::RedisConnection do
       end
     end
 
+    describe "SIDEKIQ_REQUIRE_REDIS_CONFIG" do
+      before do
+        @old_env = ENV.to_hash
+        ENV["SIDEKIQ_REQUIRE_REDIS_CONFIG"] = "1"
+        ENV["REDIS_URL"] = nil
+        ENV["REDIS_PROVIDER"] = nil
+      end
+
+      after do
+        ENV["SIDEKIQ_REQUIRE_REDIS_CONFIG"] = nil
+        ENV.update(@old_env)
+      end
+
+      it "refuses to build a pool with no Redis location" do
+        error = assert_raises(ArgumentError) { Sidekiq::RedisConnection.create }
+        assert_match(/SIDEKIQ_REQUIRE_REDIS_CONFIG/, error.message)
+      end
+
+      it "treats an empty url as missing" do
+        assert_raises(ArgumentError) { Sidekiq::RedisConnection.create(url: "") }
+      end
+
+      it "accepts an explicit url" do
+        assert_equal 5, Sidekiq::RedisConnection.create(url: "redis://redis.example.test:6379/0").size
+      end
+
+      it "accepts a host" do
+        assert_equal 5, Sidekiq::RedisConnection.create(host: "redis.example.test").size
+      end
+
+      it "accepts REDIS_URL from the environment" do
+        ENV["REDIS_URL"] = "redis://redis.example.test:6379/0"
+        assert_equal 5, Sidekiq::RedisConnection.create.size
+      end
+    end
+
     # Readers for these ivars should be available in the next release of
     # `connection_pool`, until then we need to reach into the internal state to
     # verify the setting.
