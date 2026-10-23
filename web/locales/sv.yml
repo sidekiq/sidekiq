@@ -8,43 +8,63 @@ sv:
   AreYouSureDeleteJob: Är du säker på att du vill ta bort detta jobb?
   AreYouSureDeleteQueue: Är du säker på att du vill ta bort kön %{queue}?
   Arguments: Argument
+  BackToApp: Tillbaka till appen
   Busy: Upptagen
   Class: Klass
   Connections: Anslutningar
+  CreatedAt: Skapad
   CurrentMessagesInQueue: Jobb i <span class='title'>%{queue}</span>
   Dashboard: Panel
   Dead: Död
   DeadJobs: Döda jobb
   Delete: Ta bort
   DeleteAll: Ta bort alla
+  Deploy: Driftsättning
   Enqueued: Köad
   Error: Fel
   ErrorBacktrace: Backtrace för fel
   ErrorClass: Felklass
   ErrorMessage: Felmeddelande
+  ExecutionTime: Körtid
   Extras: Extra
   Failed: Misslyckad
   Failures: Failures
+  Failure: Misslyckad
   GoBack: ← Bakåt
   History: Historik
   Job: Jobb
   Jobs: Jobb
+  Kill: Döda
+  KillAll: Döda alla
+  Language: Språk
+  LastDashboardUpdateTemplateLiteral: "Senaste poll: Processerade: PROCESSED_COUNT. Misslyckade: FAILED_COUNT."
   LastRetry: Senaste försök
+  Latency: Latens
   LivePoll: Live poll
   MemoryUsage: Minnesanvändning
+  Name: Namn
   Namespace: Namnrymd
   NextRetry: Nästa försök
   NoDeadJobsFound: Inga döda jobb hittades
   NoRetriesFound: Inga försök hittades
   NoScheduledFound: Inga schemalagda jobb hittades
+  NotYetEnqueued: Inte köad än
   OneMonth: 1 månad
   OneWeek: 1 vecka
   OriginallyFailed: Misslyckades ursprungligen
+  Pause: Pausa
+  Paused: Pausad
   PeakMemoryUsage: Minnesanvändning (peak)
+  Plugins: Plugins
+  PollingInterval: Pollningsintervall
+  PollingIntervalMilliseconds: Pollningsintervall i millisekunder
+  Process: Process
   Processed: Processerad
   Processes: Processer
   Queue: Kö
   Queues: Köer
+  Quiet: Tysta
+  QuietAll: Tysta alla
   Realtime: Realtid
   Retries: Försök
   RetryAll: Försök alla igen
@@ -52,19 +72,40 @@ sv:
   RetryNow: Försök nu
   Scheduled: Schemalagd
   ScheduledJobs: Schemalagda jobb
+  Seconds: Sekunder
   ShowAll: Visa alla
   SixMonths: 6 månader
   Size: Storlek
   Started: Startad
   Status: Status
+  Stop: Stoppa
+  StopAll: Stoppa alla
   StopPolling: Stoppa polling
+  Success: Lyckad
+  Summary: Sammanfattning
   Thread: Tråd
   Threads: Trådar
   ThreeMonths: 3 månader
   Time: Tid
+  Unpause: Återuppta
   Uptime: Upptid (dagar)
+  Utilization: Användning
   Version: Version
   When: När
   Worker: Worker
   active: aktiv
   idle: avvaktande
+  Metrics: Mätvärden
+  NoDataFound: Ingen data hittades
+  TotalExecutionTime: Total körtid
+  AvgExecutionTime: Genomsnittlig körtid
+  Context: Kontext
+  NoJobMetricsFound: Inga mätvärden för nyliga jobb hittades
+  Filter: Filter
+  AnyJobContent: Valfritt jobbinnehåll
+  Profiles: Profiler
+  Data: Data
+  View: Visa
+  Token: Token
+  ElapsedTime: Förfluten tid
+  ClickToLearnMore: Klicka för att läsa mer
