@@ -144,6 +144,13 @@ module Sidekiq
     # All capsules must use the same Redis configuration
     def redis=(hash)
       @redis_config = @redis_config.merge(hash)
+      return unless @redis
+
+      # The internal pool was built before this configuration arrived, so it
+      # points at the previous (possibly default) Redis. Drop it so the next
+      # use rebuilds it with the merged configuration.
+      logger.warn { "Sidekiq.redis was used before config.redis= ran; rebuilding the internal pool" }
+      @redis = nil
     end
 
     def reap_idle_redis_connections(timeout = 60)
