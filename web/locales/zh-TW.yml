@@ -101,3 +101,21 @@ zh-TW: # <---- change this to your locale code
   AvgExecutionTime: 平均執行時間
   Context: 上下文
   NoJobMetricsFound: 找無工作相關計量資料
+  DeadJobs: 停滯的工作
+  Deploy: 部署
+  ExecutionTime: 執行時間
+  Failure: 失敗
+  Language: 語言
+  LastDashboardUpdateTemplateLiteral: "最新輪詢: 已處理: PROCESSED_COUNT。已失敗: FAILED_COUNT。"
+  PollingIntervalMilliseconds: 輪詢週期 (毫秒)
+  Seconds: 秒
+  Success: 成功
+  Summary: 摘要
+  Filter: 篩選
+  AnyJobContent: 任何工作內容
+  Profiles: 效能分析
+  Data: 資料
+  View: 檢視
+  Token: 權杖
+  ElapsedTime: 經過時間
+  ClickToLearnMore: 點擊以了解更多
