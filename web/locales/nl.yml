@@ -8,43 +8,63 @@ nl:
   AreYouSureDeleteJob: Weet u zeker dat u deze taak wilt verwijderen?
   AreYouSureDeleteQueue: Weet u zeker dat u wachtrij %{queue} wilt verwijderen?
   Arguments: Argumenten
+  BackToApp: Terug naar app
   Busy: Bezet
   Class: Klasse
   Connections: Verbindingen
+  CreatedAt: Aangemaakt op
   CurrentMessagesInQueue: Aantal berichten in <span class='title'>%{queue}</span>
   Dashboard: Dashboard
   Dead: Overleden
   DeadJobs: Overleden taken
   Delete: Verwijderen
   DeleteAll: Alle verwijderen
+  Deploy: Deploy
   Enqueued: In de wachtrij
   Error: Fout
   ErrorBacktrace: Fout Backtrace
   ErrorClass: Fout Klasse
   ErrorMessage: Foutmelding
+  ExecutionTime: Uitvoeringstijd
   Extras: Extra's
   Failed: Mislukt
   Failures: Mislukt
+  Failure: Mislukt
   GoBack: ← Terug
   History: Geschiedenis
   Job: Taak
   Jobs: Taken
+  Kill: Beëindigen
+  KillAll: Alle beëindigen
+  Language: Taal
+  LastDashboardUpdateTemplateLiteral: "Laatste update: Verwerkt: PROCESSED_COUNT. Mislukt: FAILED_COUNT."
   LastRetry: Laatste poging
+  Latency: Latentie
   LivePoll: Live bijwerken
   MemoryUsage: Geheugengebruik
+  Name: Naam
   Namespace: Namespace
   NextRetry: Volgende opnieuw proberen
   NoDeadJobsFound: Geen overleden taken gevonden
   NoRetriesFound: Geen opnieuw te proberen taken gevonden
   NoScheduledFound: Geen geplande taken gevonden
+  NotYetEnqueued: Nog niet in de wachtrij
   OneMonth: 1 maand
   OneWeek: 1 week
   OriginallyFailed: Oorspronkelijk mislukt
+  Pause: Pauzeren
+  Paused: Gepauzeerd
   PeakMemoryUsage: Piek geheugengebruik
+  Plugins: Plugins
+  PollingInterval: Bijwerkinterval
+  PollingIntervalMilliseconds: Bijwerkinterval in milliseconden
+  Process: Proces
   Processed: Verwerkt
   Processes: Processen
   Queue: Wachtrij
   Queues: Wachtrijen
+  Quiet: Stilleggen
+  QuietAll: Alle stilleggen
   Realtime: Real-time
   Retries: Opnieuw proberen
   RetryAll: Alle opnieuw proberen
@@ -52,19 +72,40 @@ nl:
   RetryNow: Nu opnieuw proberen
   Scheduled: Gepland
   ScheduledJobs: Geplande taken
+  Seconds: Seconden
   ShowAll: Toon alle
   SixMonths: 6 maanden
   Size: Grootte
   Started: Gestart
   Status: Status
+  Stop: Stoppen
+  StopAll: Alle stoppen
   StopPolling: Stop live bijwerken
+  Success: Gelukt
+  Summary: Samenvatting
   Thread: Thread
   Threads: Threads
   ThreeMonths: 3 maanden
   Time: Tijd
+  Unpause: Hervatten
   Uptime: Looptijd (dagen)
+  Utilization: Benutting
   Version: Versie
   When: Wanneer
   Worker: Werker
   active: actief
   idle: inactief
+  Metrics: Statistieken
+  NoDataFound: Geen gegevens gevonden
+  TotalExecutionTime: Totale uitvoeringstijd
+  AvgExecutionTime: Gemiddelde uitvoeringstijd
+  Context: Context
+  NoJobMetricsFound: Geen recente taakstatistieken gevonden
+  Filter: Filteren
+  AnyJobContent: Alle taakinhoud
+  Profiles: Profielen
+  Data: Gegevens
+  View: Bekijken
+  Token: Token
+  ElapsedTime: Verstreken tijd
+  ClickToLearnMore: Klik voor meer informatie
