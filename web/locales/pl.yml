@@ -8,36 +8,63 @@ pl:
   AreYouSureDeleteJob: Czy na pewno usunąć to zadanie?
   AreYouSureDeleteQueue: Czy na pewno usunąć kolejkę %{queue}?
   Arguments: Argumenty
+  BackToApp: Powrót do aplikacji
   Busy: Zajęte
   Class: Klasa
   Connections: Połączenia
+  CreatedAt: Utworzono
   CurrentMessagesInQueue: Aktualne wiadomości w kolejce <span class='title'>%{queue}</span>
   Dashboard: Kokpit
+  Dead: Martwe
+  DeadJobs: Martwe zadania
   Delete: Usuń
   DeleteAll: Usuń wszystko
+  Deploy: Wdrożenie
   Enqueued: Zakolejkowane
   Error: Błąd
   ErrorBacktrace: Wyjście błędu
   ErrorClass: Klasa błędu
   ErrorMessage: Wiadomosć błędu
+  ExecutionTime: Czas wykonania
+  Extras: Dodatki
   Failed: Nieudane
+  Failures: Niepowodzenia
+  Failure: Niepowodzenie
   GoBack: ← Wróć
   History: Historia
   Job: Zadanie
+  Jobs: Zadania
+  Kill: Zabij
+  KillAll: Zabij wszystkie
+  Language: Język
+  LastDashboardUpdateTemplateLiteral: "Ostatnie odświeżenie: Ukończone: PROCESSED_COUNT. Nieudane: FAILED_COUNT."
   LastRetry: Ostatnie ponowienie
+  Latency: Opóźnienie
   LivePoll: Wczytuj na żywo
   MemoryUsage: Wykorzystanie pamięci
+  Name: Nazwa
   Namespace: Przestrzeń nazw
   NextRetry: Następne ponowienie
+  NoDeadJobsFound: Brak martwych zadań
   NoRetriesFound: Brak zadań do ponowienia
   NoScheduledFound: Brak zaplanowanych zadań
+  NotYetEnqueued: Jeszcze nie zakolejkowane
   OneMonth: 1 miesiąc
   OneWeek: 1 tydzień
   OriginallyFailed: Ostatnio nieudane
+  Pause: Wstrzymaj
+  Paused: Wstrzymane
   PeakMemoryUsage: Największe wykorzystanie pamięci
+  Plugins: Wtyczki
+  PollingInterval: Częstotliwość odświeżania
+  PollingIntervalMilliseconds: Częstotliwość odświeżania w milisekundach
+  Process: Proces
   Processed: Ukończone
+  Processes: Procesy
   Queue: Kolejka
   Queues: Kolejki
+  Quiet: Wycisz
+  QuietAll: Wycisz wszystkie
   Realtime: Czas rzeczywisty
   Retries: Do ponowienia
   RetryAll: Powtórz wszystko
@@ -45,17 +72,40 @@ pl:
   RetryNow: Ponów teraz
   Scheduled: Zaplanowane
   ScheduledJobs: Zaplanowane zadania
+  Seconds: Sekundy
   ShowAll: Pokaż wszystko
   SixMonths: 6 miesięcy
   Size: Rozmiar
   Started: Rozpoczęte
   Status: Status
+  Stop: Zatrzymaj
+  StopAll: Zatrzymaj wszystkie
   StopPolling: Zatrzymaj wczytywanie na żywo
+  Success: Sukces
+  Summary: Podsumowanie
+  Thread: Wątek
+  Threads: Wątki
   ThreeMonths: 3 miesiące
   Time: Czas
+  Unpause: Wznów
   Uptime: Uptime (dni)
+  Utilization: Wykorzystanie
   Version: Wersja
   When: Kiedy
   Worker: Worker
   active: aktywne
   idle: bezczynne
+  Metrics: Metryki
+  NoDataFound: Brak danych
+  TotalExecutionTime: Całkowity czas wykonania
+  AvgExecutionTime: Średni czas wykonania
+  Context: Kontekst
+  NoJobMetricsFound: Brak ostatnich metryk zadań
+  Filter: Filtr
+  AnyJobContent: Dowolna treść zadania
+  Profiles: Profile
+  Data: Dane
+  View: Pokaż
+  Token: Token
+  ElapsedTime: Czas trwania
+  ClickToLearnMore: Kliknij, aby dowiedzieć się więcej
