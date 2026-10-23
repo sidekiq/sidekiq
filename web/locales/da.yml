@@ -8,21 +8,26 @@ da:
   AreYouSureDeleteJob: Er du sikker på at du vil slette dette job?
   AreYouSureDeleteQueue: Er du sikker på at du vil slette %{queue} køen?
   Arguments: Argumenter
+  BackToApp: Tilbage til app
   AvgExecutionTime: Gennemsnitlig eksekveringstid
+  Context: Kontekst
   Busy: Travl
   Class: Klasse
   Connections: Forbindelser
+  CreatedAt: Oprettet
   CurrentMessagesInQueue: Nuværende beskeder i <span class='title'>%{queue}</span>
   Dashboard: Instrumentbræt
   Dead: Død
   DeadJobs: Døde jobs
   Delete: Slet
   DeleteAll: Slet alle
+  Deploy: Udrulning
   Enqueued: I kø
   Error: Fejl
   ErrorBacktrace: Fejl backtrace
   ErrorClass: Fejlklasse
   ErrorMessage: Fejlbesked
+  ExecutionTime: Eksekveringstid
   Extras: Ekstra
   Failed: Fejlet
   Failure: Fejl
@@ -31,6 +36,10 @@ da:
   History: Historik
   Job: Job
   Jobs: Jobs
+  Kill: Dræb
+  KillAll: Dræb alle
+  Language: Sprog
+  LastDashboardUpdateTemplateLiteral: "Seneste poll: Processeret: PROCESSED_COUNT. Fejlet: FAILED_COUNT."
   Latency: Forsinkelse
   LastRetry: Sidste forsøg
   LivePoll: Live Poll
@@ -40,16 +49,33 @@ da:
   NextRetry: Næste forsøg
   NoDeadJobsFound: Ingen døde jobs fundet
   NoJobMetricsFound: Ingen nylig job-metrics blev fundet
+  Filter: Filter
+  AnyJobContent: Vilkårligt jobindhold
+  Profiles: Profiler
+  Data: Data
+  View: Vis
+  Token: Token
+  ElapsedTime: Forløbet tid
+  ClickToLearnMore: Klik for at læse mere
   NoRetriesFound: Ingen gen-forsøg var fundet
   NoScheduledFound: Ingen jobs i kø fundet
+  NotYetEnqueued: Ikke i kø endnu
   OneMonth: 1 måned
   OneWeek: 1 uge
   OriginallyFailed: Oprindeligt fejlet
+  Pause: Pause
+  Paused: Sat på pause
   PeakMemoryUsage: Peak RAM forbrug
+  Plugins: Plugins
+  PollingInterval: Polling-interval
+  PollingIntervalMilliseconds: Polling-interval i millisekunder
+  Process: Proces
   Processed: Processeret
   Processes: Processer
   Queue: Kø
   Queues: Køer
+  Quiet: Dæmp
+  QuietAll: Dæmp alle
   Realtime: Realtid
   Retries: Forsøg
   RetryAll: Forsøg alle
@@ -57,21 +83,29 @@ da:
   RetryNow: Prøv igen nu
   Scheduled: Planlagt
   ScheduledJobs: Jobs i kø
+  Seconds: Sekunder
   ShowAll: Vis alle
   SixMonths: 6 måneder
   Size: Størrelse
   Started: Startet
   Status: Status
+  Stop: Stop
+  StopAll: Stop alle
   StopPolling: Stop Polling
   Success: Succes
+  Summary: Oversigt
   Thread: Tråd
   Threads: Tråde
   ThreeMonths: 3 måneder
   Time: Tid
+  Unpause: Genoptag
   TotalExecutionTime: Total eksekveringstid
   Uptime: Oppetid (dage)
+  Utilization: Udnyttelse
   Version: Version
   When: Når
   Worker: Arbejder
   active: aktiv
   idle: idle
+  Metrics: Metrics
+  NoDataFound: Ingen data fundet
