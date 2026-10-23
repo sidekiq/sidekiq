@@ -8,31 +8,41 @@ nb:
   AreYouSureDeleteJob: Er du sikker på at du vil slette denne jobben?
   AreYouSureDeleteQueue: Er du sikker på at du vil slette køen %{queue}?
   Arguments: Argumenter
+  BackToApp: Tilbake til appen
   Busy: Opptatt
   Class: Klasse
   Connections: Tilkoblinger
+  CreatedAt: Opprettet
   CurrentMessagesInQueue: Nåværende melding i <span class='title'>%{queue}</span>
   Dashboard: Oversikt
   Dead: Død
   DeadJobs: Døde jobber
   Delete: Slett
   DeleteAll: Slett alle
+  Deploy: Utrulling
   Enqueued: I kø
   Error: Feil
   ErrorBacktrace: Feilbakgrunn
   ErrorClass: Feilklasse
   ErrorMessage: Feilmelding
+  ExecutionTime: Kjøretid
   Extras: Ekstra
   Failed: Mislykket
   Failures: Feil
+  Failure: Feil
   GoBack: ← Tilbake
   History: Historikk
   Job: Jobb
   Jobs: Jobber
   Kill: Kill
+  KillAll: Kill alle
+  Language: Språk
+  LastDashboardUpdateTemplateLiteral: "Siste oppdatering: Prosessert: PROCESSED_COUNT. Mislykket: FAILED_COUNT."
   LastRetry: Forrige forsøk
+  Latency: Forsinkelse
   LivePoll: Automatisk oppdatering
   MemoryUsage: Minneforbruk
+  Name: Navn
   Namespace: Navnerom
   NextRetry: Neste forsøk
   NoDeadJobsFound: Ingen døde jobber funnet
@@ -42,10 +52,13 @@ nb:
   OneMonth: 1 måned
   OneWeek: 1 uke
   OriginallyFailed: Feilet opprinnelig
+  Pause: Pause
   Paused: Pauset
   PeakMemoryUsage: Høyeste minneforbruk
   Plugins: Innstikk
   PollingInterval: Oppdateringsintervall
+  PollingIntervalMilliseconds: Oppdateringsintervall i millisekunder
+  Process: Prosess
   Processed: Prosessert
   Processes: Prosesser
   Queue: Kø
@@ -59,6 +72,7 @@ nb:
   RetryNow: Forsøk igjen nå
   Scheduled: Planlagt
   ScheduledJobs: Planlagte jobber
+  Seconds: Sekunder
   ShowAll: Vis alle
   SixMonths: 6 måneder
   Size: Størrelse
@@ -67,13 +81,31 @@ nb:
   Stop: Stopp
   StopAll: Stopp alle
   StopPolling: Stopp automatisk oppdatering
+  Success: Vellykket
+  Summary: Sammendrag
   Thread: Tråd
   Threads: Tråder
   ThreeMonths: 3 måneder
   Time: Tid
+  Unpause: Gjenoppta
   Uptime: Oppetid (dager)
+  Utilization: Utnyttelse
   Version: Versjon
   When: Når
   Worker: Arbeider
   active: aktiv
   idle: uvirksom
+  Metrics: Målinger
+  NoDataFound: Ingen data funnet
+  TotalExecutionTime: Total kjøretid
+  AvgExecutionTime: Gjennomsnittlig kjøretid
+  Context: Kontekst
+  NoJobMetricsFound: Ingen nylige jobbmålinger funnet
+  Filter: Filter
+  AnyJobContent: Hvilket som helst jobbinnhold
+  Profiles: Profiler
+  Data: Data
+  View: Vis
+  Token: Token
+  ElapsedTime: Medgått tid
+  ClickToLearnMore: Klikk for å lese mer
