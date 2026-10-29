@@ -1,5 +1,6 @@
 <section>
   <header>
+    <% @page_title = "#{t('Retries')} (#{@total_size})" %>
     <h1><%= t('Retries') %></h1>
     <% if @retries.size > 0 && @total_size > @count %>
       <%= erb :_paging, locals: { url: "#{root_path}retries" } %>

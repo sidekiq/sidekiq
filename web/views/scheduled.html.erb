@@ -1,5 +1,6 @@
 <section>
   <header>
+    <% @page_title = "#{t('ScheduledJobs')} (#{@total_size})" %>
     <h1><%= t('ScheduledJobs') %></h1>
     <% if @scheduled.size > 0 && @total_size > @count %>
       <%= erb :_paging, locals: { url: "#{root_path}scheduled" } %>

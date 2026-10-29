@@ -1,5 +1,6 @@
 <section>
   <header>
+    <% @page_title = "#{t('DeadJobs')} (#{@total_size})" %>
     <h1><%= t('DeadJobs') %></h1>
     <% if @dead.size > 0 && @total_size > @count %>
       <%= erb :_paging, locals: { url: "#{root_path}morgue" } %>

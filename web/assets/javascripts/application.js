@@ -171,6 +171,7 @@ function replacePage(text) {
 
   var page = doc.querySelector('#page')
   document.querySelector("#page").replaceWith(page)
+  document.title = doc.title
 
   addListeners();
 }
