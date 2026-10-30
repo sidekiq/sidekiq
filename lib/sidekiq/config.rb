@@ -148,9 +148,15 @@ module Sidekiq
     # All capsules must use the same Redis configuration
     def redis=(hash)
       if @redis
-        raise "Sidekiq's Redis connection pool was already created, so `config.redis = ...` can no longer take effect. " \
-          "Configure Redis before anything uses Sidekiq, often an initializer or gem which runs before yours. " \
-          "The pool was created from:\n  #{@redis_origin.join("\n  ")}"
+        raise <<~MESSAGE
+          An attempt was made to configure Sidekiq Redis with `config.redis = ...` after the
+          connection pool was already created. This might come from another initializer,
+          or a background process started by a gem.
+
+          The pool was created from:
+          #{@redis_origin.join("\n  ")}
+
+        MESSAGE
       end
 
       @redis_config = @redis_config.merge(hash)
@@ -173,8 +179,7 @@ module Sidekiq
       @redis = new_redis_pool(10, "internal")
     end
 
-    # The frames outside Sidekiq which led to the first use of the internal
-    # pool, so a late redis= can say who built it.
+    # Remember which code created the pool, so a future error message can possibly reference it
     def pool_origin
       frames = caller_locations(1, 30)
       app = frames.reject { |loc| loc.path.start_with?(LIB_DIR) }
