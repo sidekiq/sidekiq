@@ -8,8 +8,6 @@ module Sidekiq
   class Config
     extend Forwardable
 
-    LIB_DIR = File.expand_path("..", __dir__)
-
     DEFAULTS = {
       labels: Set.new,
       require: ".",
@@ -181,8 +179,9 @@ module Sidekiq
 
     # Remember which code created the pool, so a future error message can possibly reference it
     def pool_origin
+      lib_dir = File.expand_path("..", __dir__)
       frames = caller_locations(1, 30)
-      app = frames.reject { |loc| loc.path.start_with?(LIB_DIR) }
+      app = frames.reject { |loc| loc.path.start_with?(lib_dir) }
       (app.empty? ? frames : app).first(5)
     end
 
