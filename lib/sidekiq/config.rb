@@ -167,10 +167,10 @@ module Sidekiq
     def local_redis_pool
       # this is our internal client/housekeeping pool. each capsule has its
       # own pool for executing threads.
-      @redis ||= begin
-        @redis_origin = pool_origin
-        new_redis_pool(10, "internal")
-      end
+      return @redis if @redis
+
+      @redis_origin = pool_origin
+      @redis = new_redis_pool(10, "internal")
     end
 
     # The frames outside Sidekiq which led to the first use of the internal
