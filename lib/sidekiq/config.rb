@@ -154,7 +154,7 @@ module Sidekiq
           or a background process started by a gem.
 
           The pool was created from:
-          #{@redis_origin.join("\n  ")}
+            #{@redis_origin.join("\n  ")}
 
         MESSAGE
       end
