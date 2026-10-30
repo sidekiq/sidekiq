@@ -17,14 +17,18 @@ describe Sidekiq::Config do
     assert_equal 3, @config.redis_pool.size
   end
 
-  it "rebuilds the internal pool when redis= runs after the pool was used" do
-    @config.redis = {}
-    stale = @config.redis_pool
-
+  it "merges repeated redis= calls made before the pool is created" do
+    @config.redis = {size: 2}
     @config.redis = {size: 3}
-
-    refute_same stale, @config.redis_pool
     assert_equal 3, @config.redis_pool.size
+  end
+
+  it "raises when redis= runs after the pool was created" do
+    @config.redis = {}
+    @config.redis_pool
+
+    error = assert_raises(RuntimeError) { @config.redis = {size: 3} }
+    assert_includes error.message, "Configure Redis before anything uses Sidekiq"
   end
 
   it "keeps #inspect output manageable" do
