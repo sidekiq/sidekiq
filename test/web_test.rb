@@ -121,6 +121,7 @@ describe Sidekiq::Web do
 
       get "/busy"
       assert_equal 200, last_response.status
+      assert_includes last_response.body, "Busy (4/0) | Sidekiq</title>"
       assert_match(/critical/, last_response.body)
       assert_match(/WebJob/, last_response.body)
       assert_match(/#{@jid}/, last_response.body)
@@ -677,6 +678,21 @@ describe Sidekiq::Web do
   it "can display home" do
     get "/"
     assert_equal 200, last_response.status
+    assert_match(%r{<title>(\[\w+\] )?Sidekiq</title>}, last_response.body)
+  end
+
+  it "includes counts in the page title" do
+    Sidekiq::Client.push("queue" => :foo, "class" => WebJob, "args" => [1, 3])
+
+    {
+      "/queues" => "Queues (1)",
+      "/retries" => "Retries (0)",
+      "/scheduled" => "Scheduled Jobs (0)",
+      "/morgue" => "Dead Jobs (0)"
+    }.each do |path, title|
+      get path
+      assert_includes last_response.body, "#{title} | Sidekiq</title>"
+    end
   end
 
   it "can change the locale" do

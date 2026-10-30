@@ -440,6 +440,19 @@ module Sidekiq
       "[#{environment.upcase}] " unless environment == "production"
     end
 
+    def active_tab?(url)
+      (url == "") ? current_path == url : current_path.start_with?(url)
+    end
+
+    # Browser tab title, e.g. "Busy (5/25) | Sidekiq". Views may set @page_title
+    # to override the default, which is the label of the active nav tab.
+    # The dashboard is the home page and gets the bare product name.
+    def page_title
+      tab = config.tabs.find { |_, url| active_tab?(url) }
+      title = @page_title || (t(tab[0]) if tab && tab[1] != "")
+      [title, Sidekiq::NAME].compact.join(" | ")
+    end
+
     def product_version
       "Sidekiq v#{Sidekiq::VERSION}"
     end
