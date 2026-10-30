@@ -7,7 +7,7 @@ HEAD
 
 - Fix cancellation of iterable jobs before their first checkpoint [#7099]
 - Do not count or log an interrupted iterable job as a failure [#7103]
-- `config.redis=` now raises if the Redis connection pool was already created, instead of silently ignoring the new settings. The error names the code which created the pool. Apps which configure Sidekiq inside `Rails.application.reloader.to_prepare` should move that code out: `to_prepare` runs again on every code reload in development, and the second run will raise [#7115]
+- `config.redis=` now raises if the Redis connection pool was already created, instead of silently ignoring the new settings. The error names the code which created the pool. Apps which configure Sidekiq inside `Rails.application.reloader.to_prepare` should move that code out: `to_prepare` runs again on every code reload in development, and the second run will raise. `Sidekiq::CurrentAttributes.persist("Current")` takes a String, so it does not need `to_prepare` either [#7115]
 - Misc bug fixes
 
 8.1.7
