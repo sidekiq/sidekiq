@@ -65,6 +65,8 @@ module Sidekiq
       @options[:error_handlers] << ERROR_HANDLER if @options[:error_handlers].empty?
       @directory = {}
       @redis_config = {}
+      @redis = nil
+      @redis_origin = nil
       @capsules = {}
     end
 
@@ -143,6 +145,18 @@ module Sidekiq
 
     # All capsules must use the same Redis configuration
     def redis=(hash)
+      if @redis
+        raise <<~MESSAGE
+          An attempt was made to configure Sidekiq Redis with `config.redis = ...` after the
+          connection pool was already created. This might come from another initializer,
+          or a background process started by a gem.
+
+          The pool was created from:
+            #{@redis_origin.join("\n  ")}
+
+        MESSAGE
+      end
+
       @redis_config = @redis_config.merge(hash)
     end
 
@@ -157,7 +171,18 @@ module Sidekiq
     def local_redis_pool
       # this is our internal client/housekeeping pool. each capsule has its
       # own pool for executing threads.
-      @redis ||= new_redis_pool(10, "internal")
+      return @redis if @redis
+
+      @redis_origin = pool_origin
+      @redis = new_redis_pool(10, "internal")
+    end
+
+    # Remember which code created the pool, so a future error message can possibly reference it
+    def pool_origin
+      lib_dir = File.expand_path("..", __dir__)
+      frames = caller_locations(1, 30)
+      app = frames.reject { |loc| loc.path.start_with?(lib_dir) }
+      (app.empty? ? frames : app).first(5)
     end
 
     def new_redis_pool(size, name = "unset")
