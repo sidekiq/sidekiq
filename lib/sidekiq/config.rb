@@ -8,6 +8,8 @@ module Sidekiq
   class Config
     extend Forwardable
 
+    LIB_DIR = File.expand_path("..", __dir__)
+
     DEFAULTS = {
       labels: Set.new,
       require: ".",
@@ -66,6 +68,7 @@ module Sidekiq
       @directory = {}
       @redis_config = {}
       @redis = nil
+      @redis_origin = nil
       @capsules = {}
     end
 
@@ -146,8 +149,8 @@ module Sidekiq
     def redis=(hash)
       if @redis
         raise "Sidekiq's Redis connection pool was already created, so `config.redis = ...` can no longer take effect. " \
-          "Configure Redis before anything uses Sidekiq. Look for code which uses Sidekiq during boot, " \
-          "before your Sidekiq initializer runs: enqueuing a job, a health check, or a monitoring gem."
+          "Configure Redis before anything uses Sidekiq, often an initializer or gem which runs before yours. " \
+          "The pool was created from:\n  #{@redis_origin.join("\n  ")}"
       end
 
       @redis_config = @redis_config.merge(hash)
@@ -164,7 +167,18 @@ module Sidekiq
     def local_redis_pool
       # this is our internal client/housekeeping pool. each capsule has its
       # own pool for executing threads.
-      @redis ||= new_redis_pool(10, "internal")
+      @redis ||= begin
+        @redis_origin = pool_origin
+        new_redis_pool(10, "internal")
+      end
+    end
+
+    # The frames outside Sidekiq which led to the first use of the internal
+    # pool, so a late redis= can say who built it.
+    def pool_origin
+      frames = caller_locations(1, 30)
+      app = frames.reject { |loc| loc.path.start_with?(LIB_DIR) }
+      (app.empty? ? frames : app).first(5)
     end
 
     def new_redis_pool(size, name = "unset")

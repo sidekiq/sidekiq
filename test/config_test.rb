@@ -29,6 +29,7 @@ describe Sidekiq::Config do
 
     error = assert_raises(RuntimeError) { @config.redis = {size: 3} }
     assert_includes error.message, "Configure Redis before anything uses Sidekiq"
+    assert_includes error.message, "config_test.rb"
   end
 
   it "keeps #inspect output manageable" do
