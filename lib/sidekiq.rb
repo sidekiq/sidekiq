@@ -27,6 +27,7 @@ begin
 rescue LoadError
 end
 
+require "sidekiq/notification"
 require "sidekiq/config"
 require "sidekiq/logger"
 require "sidekiq/loader"
