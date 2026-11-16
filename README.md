@@ -32,7 +32,7 @@ Installation
 Getting Started
 -----------------
 
-See the [Getting Started wiki page](https://github.com/sidekiq/sidekiq/wiki/Getting-Started) and follow the simple setup process.
+See the [Getting Started wiki page](https://sidekiq.org/wiki/Getting-Started) and follow the simple setup process.
 You can watch [this YouTube playlist](https://www.youtube.com/playlist?list=PLjeHh2LSCFrWGT5uVjUuFKAcrcj5kSai1) to learn all about
 Sidekiq and see its features in action.  Here's the Web UI:
 
@@ -78,7 +78,7 @@ Problems?
 **Do not directly email any Sidekiq committers with questions or problems.**
 A community is best served when discussions are held in public.
 
-If you have a problem, please review the [FAQ](https://github.com/sidekiq/sidekiq/wiki/FAQ) and [Troubleshooting](https://github.com/sidekiq/sidekiq/wiki/Problems-and-Troubleshooting) wiki pages.
+If you have a problem, please review the [FAQ](https://sidekiq.org/wiki/FAQ) and [Troubleshooting](https://sidekiq.org/wiki/Problems-and-Troubleshooting) wiki pages.
 Searching the [issues](https://github.com/sidekiq/sidekiq/issues) for your problem is also a good idea.
 
 Sidekiq Pro and Sidekiq Enterprise customers get private email support.
@@ -86,7 +86,7 @@ You can purchase at https://sidekiq.org; email support@contribsys.com for help.
 
 Useful resources:
 
-* Product documentation is in the [wiki](https://github.com/sidekiq/sidekiq/wiki).
+* Product documentation is in the [wiki](https://sidekiq.org/wiki).
 * Occasional announcements are made to the [@sidekiq](https://ruby.social/@sidekiq) Mastodon account.
 * The [Sidekiq tag](https://stackoverflow.com/questions/tagged/sidekiq) on Stack Overflow has lots of useful Q &amp; A.
 * Join us in the `sidekiq` tag on the [Ruby Users Forum](https://www.rubyforum.org/tag/sidekiq).

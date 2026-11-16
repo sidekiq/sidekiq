@@ -52,7 +52,7 @@ module Sidekiq
 
           WARNING: Your Redis instance will evict Sidekiq data under heavy load.
           The 'noeviction' maxmemory policy is recommended (current policy: '#{maxmemory_policy}').
-          See: https://github.com/sidekiq/sidekiq/wiki/Using-Redis#memory
+          See: https://sidekiq.org/wiki/Using-Redis#memory
 
         EOM
       end
