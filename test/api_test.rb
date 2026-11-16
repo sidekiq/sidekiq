@@ -26,6 +26,12 @@ class JobWithTags
   sidekiq_options tags: ["foo"]
 end
 
+class FailingClientMiddleware
+  def call(*args)
+    raise "boom"
+  end
+end
+
 SERIALIZED_JOBS = {
   "5.x" => [
     '{"class":"ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper","wrapped":"ApiAjJob","queue":"default","args":[{"job_class":"ApiAjJob","job_id":"f1bde53f-3852-4ae4-a879-c12eacebbbb0","provider_job_id":null,"queue_name":"default","priority":null,"arguments":[1,2,3],"executions":0,"locale":"en"}],"retry":true,"jid":"099eee72911085a511d0e312","created_at":1568305542339,"enqueued_at":1568305542339}',
@@ -627,6 +633,25 @@ describe "API" do
       assert_equal 1, job["retry_count"]
     end
 
+    it "when retry is failed other jobs with same score are preserved" do
+      at = Time.now.to_f
+      add_retry("test1", at, args: [1])
+      add_retry("test2", at, args: [2])
+      r = Sidekiq::RetrySet.new
+      assert_equal 2, r.size
+
+      @cfg.client_middleware.add(FailingClientMiddleware)
+      assert_raises(RuntimeError) do
+        job = r.first
+        assert_equal [2], job.args
+        job.retry
+      end
+
+      assert_equal 1, r.size
+      job = r.first
+      assert_equal [1], job.args
+    end
+
     it "can clear retries" do
       add_retry
       add_retry("test")
@@ -1093,8 +1118,8 @@ def timing(str)
   # p [str, (a = Time.now; yield; (Time.now - a))]
 end
 
-def add_retry(jid = "bob", at = Time.now.to_f)
-  payload = Sidekiq.dump_json("class" => "ApiJob", "args" => [1, "mike"], "queue" => "default", "jid" => jid, "retry_count" => 2, "failed_at" => Time.now.to_f, "error_backtrace" => ["line1", "line2"])
+def add_retry(jid = "bob", at = Time.now.to_f, args: [1, "mike"])
+  payload = Sidekiq.dump_json("class" => "ApiJob", "args" => args, "queue" => "default", "jid" => jid, "retry_count" => 2, "failed_at" => Time.now.to_f, "error_backtrace" => ["line1", "line2"])
   @cfg.redis do |conn|
     conn.zadd("retry", at.to_s, payload)
   end

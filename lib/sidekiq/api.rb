@@ -857,15 +857,17 @@ module Sidekiq
           }
 
           msg = matched.first
-          if msg
-            yield msg
-            @_size -= 1
-          end
-
-          # push the rest back onto the sorted set
-          conn.multi do |transaction|
-            nonmatched.each do |message|
-              transaction.zadd(name, score.to_f.to_s, message)
+          begin
+            if msg
+              yield msg
+              @_size -= 1
+            end
+          ensure
+            # push the rest back onto the sorted set
+            conn.multi do |transaction|
+              nonmatched.each do |message|
+                transaction.zadd(name, score.to_f.to_s, message)
+              end
             end
           end
         end
