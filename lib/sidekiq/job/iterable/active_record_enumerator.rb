@@ -35,7 +35,7 @@ module Sidekiq
             options[:of] ||= options.delete(:batch_size)
 
             @relation.in_batches(**options, start: @cursor) do |relation|
-              first_record = relation.first
+              first_record = (options[:order] == :desc) ? relation.last : relation.first
               yielder.yield(relation, first_record.id)
             end
           end

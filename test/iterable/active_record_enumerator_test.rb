@@ -101,6 +101,18 @@ describe Sidekiq::Job::Iterable::ActiveRecordEnumerator do
       end
     end
 
+    it "yields relations with the first record's cursor position in descending order" do
+      enum = build_enumerator(order: :desc).relations
+
+      product_batches = Product.order(id: :desc).take(4).in_groups_of(2)
+
+      enum.first(2).each_with_index do |(relation, cursor), index|
+        expected_records = product_batches[index]
+        assert_equal expected_records.map(&:id).sort, relation.ids.sort
+        assert_equal expected_records.first.id, cursor
+      end
+    end
+
     it "yields unloaded relations" do
       enum = build_enumerator.relations
       relation, = enum.first
@@ -132,7 +144,7 @@ describe Sidekiq::Job::Iterable::ActiveRecordEnumerator do
 
   private
 
-  def build_enumerator(relation: Product.all, batch_size: 2, cursor: nil)
-    Sidekiq::Job::Iterable::ActiveRecordEnumerator.new(relation, batch_size: batch_size, cursor: cursor)
+  def build_enumerator(relation: Product.all, batch_size: 2, cursor: nil, **)
+    Sidekiq::Job::Iterable::ActiveRecordEnumerator.new(relation, batch_size: batch_size, cursor: cursor, **)
   end
 end
