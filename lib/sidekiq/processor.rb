@@ -71,8 +71,11 @@ module Sidekiq
     private
 
     def run
-      # By setting this thread-local, Sidekiq.redis will access +Sidekiq::Capsule#redis_pool+
+      # By setting this thread variable, Sidekiq.redis will access +Sidekiq::Capsule#redis_pool+
       # instead of the global pool in +Sidekiq::Config#redis_pool+.
+      # Thread.current[] is fiber-local, so a Fiber started by a job would not see it;
+      # a thread variable is shared by every fiber of the processor thread.
+      Thread.current.thread_variable_set(:sidekiq_capsule, @capsule)
       Thread.current[:sidekiq_capsule] = @capsule
 
       process_one until @done
