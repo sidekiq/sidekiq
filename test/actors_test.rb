@@ -17,6 +17,15 @@ class JoeJob
   end
 end
 
+class FiberPoolJob
+  include Sidekiq::Job
+
+  def perform
+    $thread_pool = Sidekiq.redis_pool
+    $fiber_pool = Fiber.new { Sidekiq.redis_pool }.resume
+  end
+end
+
 describe "Actors" do
   before do
     @config = reset!
@@ -100,6 +109,25 @@ describe "Actors" do
       assert_equal false, pr.thread.status
       assert_equal "boom", @latest_error.message
       assert_equal RuntimeError, @latest_error.class
+    end
+
+    it "uses the capsule redis pool inside a fiber started by the job" do
+      $thread_pool = $fiber_pool = nil
+      FiberPoolJob.perform_async
+      pr = Sidekiq::Processor.new(@cap) do |prc, ex|
+        result(prc, ex)
+      end
+
+      pr.start
+      deadline = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) + 5
+      sleep 0.01 until $fiber_pool || ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) > deadline
+      # let the blocking fetch time out so no BRPOP is left waiting on the server
+      pr.terminate(true)
+
+      refute @latest_error, @latest_error.to_s
+      refute_equal Sidekiq.default_configuration.redis_pool, @cap.redis_pool
+      assert_same @cap.redis_pool, $thread_pool
+      assert_same @cap.redis_pool, $fiber_pool
     end
 
     it "gracefully kills" do
