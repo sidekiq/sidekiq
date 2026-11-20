@@ -156,8 +156,7 @@ module Sidekiq
         at = args.map { now + rand * spread_interval }
       end
 
-      # Use a smaller batch size by default for scheduled jobs since adding to sorted sets is more costly.
-      batch_size = items.delete(:batch_size) || items.delete("batch_size") || (at ? 100 : 1_000)
+      batch_size = items.delete(:batch_size) || items.delete("batch_size") || (at ? SCHEDULED_BATCH_SIZE : BATCH_SIZE)
 
       normed = normalize_item(items)
       slice_index = 0
@@ -219,8 +218,8 @@ module Sidekiq
       end
 
       scheduled, immediate = payloads.compact.partition { |payload| payload.key?("at") }
-      immediate.each_slice(batch_size || 1_000) { |slice| raw_push(slice) }
-      scheduled.each_slice(batch_size || 100) { |slice| raw_push(slice) }
+      immediate.each_slice(batch_size || BATCH_SIZE) { |slice| raw_push(slice) }
+      scheduled.each_slice(batch_size || SCHEDULED_BATCH_SIZE) { |slice| raw_push(slice) }
 
       payloads.map { |payload| payload&.[]("jid") }
     end
@@ -301,6 +300,13 @@ module Sidekiq
     end
 
     private
+
+    # Default number of jobs pushed per round trip by push_bulk and push_all.
+    # Adding to the schedule sorted set is O(log N) per job, compared with O(1)
+    # for a queue list, so scheduled jobs are pushed in smaller batches.
+    BATCH_SIZE = 1_000
+    SCHEDULED_BATCH_SIZE = 100
+    private_constant :BATCH_SIZE, :SCHEDULED_BATCH_SIZE
 
     def raw_push(payloads)
       @redis_pool.with do |conn|
