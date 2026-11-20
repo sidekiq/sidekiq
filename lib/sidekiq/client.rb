@@ -156,8 +156,7 @@ module Sidekiq
         at = args.map { now + rand * spread_interval }
       end
 
-      # Use a smaller batch size by default for scheduled jobs since adding to sorted sets is more costly.
-      batch_size = items.delete(:batch_size) || items.delete("batch_size") || (at ? 100 : 1_000)
+      batch_size = items.delete(:batch_size) || items.delete("batch_size") || (at ? SCHEDULED_BATCH_SIZE : BATCH_SIZE)
 
       normed = normalize_item(items)
       slice_index = 0
@@ -182,6 +181,47 @@ module Sidekiq
       end
 
       result.is_a?(Enumerator::Lazy) ? result.force : result
+    end
+
+    ##
+    # Push many jobs in one Redis round trip per batch, even when they differ in
+    # class, queue and options. #push_bulk takes one class, queue and set of
+    # options per call, so it needs a call (and a round trip) for each variant.
+    #
+    # `items` is an Array of job hashes, each taking the same keys as #push,
+    # including `at` to schedule it. Every job is validated and run through the
+    # client middleware pipeline, in order, before any is pushed. All jobs are
+    # pushed to this client's Redis pool; a job class's `pool` option is not used.
+    #
+    # Immediate and scheduled jobs are pushed in separate round trips, each
+    # holding up to `batch_size` jobs. `batch_size` defaults to 1000 for
+    # immediate jobs and 100 for scheduled jobs, as adding to the schedule
+    # sorted set is more costly.
+    #
+    # Returns an array of jids in the same order as `items`, with nil for any
+    # job a client middleware stopped.
+    #
+    # Example:
+    #   push_all([
+    #     {"class" => FooJob, "args" => [1]},
+    #     {"class" => BarJob, "args" => [2], "queue" => "critical"}
+    #   ])
+    #
+    def push_all(items, batch_size: nil)
+      payloads = items.map do |item|
+        normed = normalize_item(item)
+        payload = middleware.invoke(item["class"], normed, normed["queue"], @redis_pool) do
+          verify_json(normed)
+          normed
+        end
+        payload || nil # a middleware may stop the job by returning false
+      end
+
+      scheduled, immediate = payloads.compact.partition { |payload| payload.key?("at") }
+      immediate.each_slice(batch_size || BATCH_SIZE) { |slice| raw_push(slice) }
+      scheduled.each_slice(batch_size || SCHEDULED_BATCH_SIZE) { |slice| raw_push(slice) }
+
+      payloads.map { |payload| payload&.[]("jid") }
     end
 
     # Allows sharding of jobs across any number of Redis instances.  All jobs
@@ -212,6 +252,10 @@ module Sidekiq
 
       def push_bulk(...)
         new.push_bulk(...)
+      end
+
+      def push_all(...)
+        new.push_all(...)
       end
 
       # Resque compatibility helpers.  Note all helpers
@@ -256,6 +300,13 @@ module Sidekiq
     end
 
     private
+
+    # Default number of jobs pushed per round trip by push_bulk and push_all.
+    # Adding to the schedule sorted set is O(log N) per job, compared with O(1)
+    # for a queue list, so scheduled jobs are pushed in smaller batches.
+    BATCH_SIZE = 1_000
+    SCHEDULED_BATCH_SIZE = 100
+    private_constant :BATCH_SIZE, :SCHEDULED_BATCH_SIZE
 
     def raw_push(payloads)
       @redis_pool.with do |conn|

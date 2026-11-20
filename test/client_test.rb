@@ -77,28 +77,6 @@ class ChildHash < Hash
   end
 end
 
-# Records the batches of commands sent to Redis via pipelining so tests can
-# observe how many round-trips an operation performed. Not registered globally:
-# attach it to a dedicated pool via RedisClient's `middlewares:` config option.
-module PipelinedCommandRecorder
-  class << self
-    attr_accessor :pipelines
-
-    def record
-      self.pipelines = []
-      yield
-      pipelines
-    ensure
-      self.pipelines = nil
-    end
-  end
-
-  def call_pipelined(commands, config)
-    PipelinedCommandRecorder.pipelines&.push(commands)
-    super
-  end
-end
-
 describe Sidekiq::Client do
   before do
     @config = reset!
@@ -597,6 +575,177 @@ describe Sidekiq::Client do
           assert_equal 1_001, jids.size
         end
       end
+    end
+  end
+
+  describe "push_all" do
+    before do
+      @recorded_pool = PipelinedCommandRecorder.create_pool(connect: true)
+      @recorded_client = Sidekiq::Client.new(pool: @recorded_pool)
+    end
+
+    after do
+      @recorded_pool.shutdown(&:close)
+    end
+
+    it "pushes jobs of different classes to their own queues in one round trip" do
+      pipelines = PipelinedCommandRecorder.record do
+        @recorded_client.push_all([
+          {"class" => MyJob, "args" => [1]},
+          {"class" => QueuedJob, "args" => [2]},
+          {"class" => "Blah", "args" => [3], "queue" => "critical"}
+        ])
+      end
+
+      assert_equal 1, pipelines.size
+      assert_equal 1, Sidekiq::Queue.new("default").size
+      assert_equal 1, Sidekiq::Queue.new("flimflam").size
+      assert_equal 1, Sidekiq::Queue.new("critical").size
+    end
+
+    it "returns the jids in the same order as the items" do
+      jids = @client.push_all([
+        {"class" => MyJob, "args" => [1]},
+        {"class" => QueuedJob, "args" => [2]}
+      ])
+
+      assert_equal "MyJob", Sidekiq::Queue.new("default").find_job(jids[0]).klass
+      assert_equal "QueuedJob", Sidekiq::Queue.new("flimflam").find_job(jids[1]).klass
+    end
+
+    it "pushes interleaved immediate and scheduled items in two round trips, with jids in item order" do
+      at = Time.new(2030, 1, 1).to_f
+
+      jids = nil
+      pipelines = PipelinedCommandRecorder.record do
+        jids = @recorded_client.push_all([
+          {"class" => QueuedJob, "args" => [1], "at" => at},
+          {"class" => MyJob, "args" => [2]},
+          {"class" => QueuedJob, "args" => [3], "at" => at},
+          {"class" => MyJob, "args" => [4]}
+        ])
+      end
+
+      assert_equal 2, pipelines.size
+      assert_equal Time.at(at), Sidekiq::ScheduledSet.new.find_job(jids[0]).at
+      assert_equal "MyJob", Sidekiq::Queue.new("default").find_job(jids[1]).klass
+      assert_equal Time.at(at), Sidekiq::ScheduledSet.new.find_job(jids[2]).at
+      assert_equal "MyJob", Sidekiq::Queue.new("default").find_job(jids[3]).klass
+    end
+
+    it "passes each job's own class and queue to the middleware" do
+      seen = []
+      recorder = Class.new do
+        def initialize(seen) = @seen = seen
+
+        def call(job_class, _job, queue, _redis)
+          @seen << [job_class, queue]
+          yield
+        end
+      end
+      @client.middleware { |chain| chain.add recorder, seen }
+
+      @client.push_all([
+        {"class" => MyJob, "args" => [1]},
+        {"class" => QueuedJob, "args" => [2]}
+      ])
+
+      assert_equal [[MyJob, "default"], [QueuedJob, "flimflam"]], seen
+    end
+
+    it "runs the middleware over items in their given order" do
+      seen = []
+      recorder = Class.new do
+        def initialize(seen) = @seen = seen
+
+        def call(_job_class, job, _queue, _redis)
+          @seen << job["args"].first
+          yield
+        end
+      end
+      @client.middleware { |chain| chain.add recorder, seen }
+
+      @client.push_all([
+        {"class" => MyJob, "args" => [1]},
+        {"class" => MyJob, "args" => [2], "at" => Time.now.to_f + 60},
+        {"class" => MyJob, "args" => [3]}
+      ])
+
+      assert_equal [1, 2, 3], seen
+    end
+
+    it "validates every item before pushing any" do
+      assert_raises(ArgumentError) do
+        @client.push_all([
+          {"class" => MyJob, "args" => [1]},
+          {"class" => MyJob, "args" => [2], "at" => Time.now + 60}
+        ])
+      end
+
+      assert_equal 0, Sidekiq::Queue.new("default").size
+    end
+
+    it "returns nil for jobs a middleware stops, whether it returns nil or false, and pushes the rest" do
+      stopper = Class.new do
+        def call(_job_class, job, _queue, _redis)
+          case job["args"].first
+          when 0 then nil
+          when 1 then false
+          else yield
+          end
+        end
+      end
+      @client.middleware { |chain| chain.add stopper }
+
+      jids = @client.push_all([
+        {"class" => MyJob, "args" => [0]},
+        {"class" => MyJob, "args" => [1]},
+        {"class" => QueuedJob, "args" => [2]}
+      ])
+
+      assert_nil jids[0]
+      assert_nil jids[1]
+      assert_match(/\A\h{24}\z/, jids[2])
+      assert_equal 0, Sidekiq::Queue.new("default").size
+      assert_equal 1, Sidekiq::Queue.new("flimflam").size
+    end
+
+    it "pushes at most batch_size items per round trip" do
+      items = 5.times.map { |i| {"class" => MyJob, "args" => [i]} }
+
+      pipelines = PipelinedCommandRecorder.record do
+        @recorded_client.push_all(items, batch_size: 2)
+      end
+
+      assert_equal 3, pipelines.size
+      assert_equal 5, Sidekiq::Queue.new("default").size
+    end
+
+    it "pushes up to 100 scheduled items per round trip by default" do
+      at = Time.now.to_f + 60
+      items = 101.times.map { |i| {"class" => MyJob, "args" => [i], "at" => at} }
+
+      pipelines = PipelinedCommandRecorder.record do
+        @recorded_client.push_all(items)
+      end
+
+      assert_equal 2, pipelines.size
+      assert_equal 101, Sidekiq::ScheduledSet.new.size
+    end
+
+    it "pushes up to 1000 immediate items per round trip by default" do
+      items = 1_001.times.map { |i| {"class" => MyJob, "args" => [i]} }
+
+      pipelines = PipelinedCommandRecorder.record do
+        @recorded_client.push_all(items)
+      end
+
+      assert_equal 2, pipelines.size
+      assert_equal 1_001, Sidekiq::Queue.new("default").size
+    end
+
+    it "returns an empty array for no items" do
+      assert_equal [], @client.push_all([])
     end
   end
 

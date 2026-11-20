@@ -80,38 +80,63 @@ begin
 
         # @api private
         def enqueue_all(jobs)
+          jids = push_jobs(jobs)
+
           enqueued_count = 0
-          jobs.group_by(&:class).each do |job_class, same_class_jobs|
-            same_class_jobs.group_by(&:queue_name).each do |queue, same_class_and_queue_jobs|
-              immediate_jobs, scheduled_jobs = same_class_and_queue_jobs.partition { |job| job.scheduled_at.nil? }
+          jobs.each_with_index do |job, index|
+            jid = jids[index]
+            enqueued_count += 1 if jid
 
-              if immediate_jobs.any?
-                jids = Sidekiq::Client.push_bulk(
-                  "class" => Sidekiq::ActiveJob::Wrapper,
-                  "wrapped" => job_class,
-                  "queue" => queue,
-                  "args" => immediate_jobs.map { |job| [job.serialize] }
-                )
-                enqueued_count += jids.compact.size
-              end
-
-              if scheduled_jobs.any?
-                jids = Sidekiq::Client.push_bulk(
-                  "class" => Sidekiq::ActiveJob::Wrapper,
-                  "wrapped" => job_class,
-                  "queue" => queue,
-                  "args" => scheduled_jobs.map { |job| [job.serialize] },
-                  "at" => scheduled_jobs.map { |job| job.scheduled_at&.to_f }
-                )
-                enqueued_count += jids.compact.size
-              end
-            end
+            job.provider_job_id = jid
+            job.successfully_enqueued = !jid.nil?
           end
+
           enqueued_count
         end
 
         # @api private
         def stopping?(job = nil) = !!@@stopping
+
+        private
+
+        def push_jobs(jobs)
+          return [] if jobs.empty?
+
+          if homogeneous?(jobs)
+            Sidekiq::Client.push_bulk(bulk_items(jobs))
+          else
+            Sidekiq::Client.push_all(jobs.map { |job| bulk_item(job) })
+          end
+        end
+
+        # Jobs of one class and queue, all immediate or all scheduled, go through
+        # the push_bulk fast-path, which normalises the job options once instead of for every job.
+        def homogeneous?(jobs)
+          first = jobs.first
+          immediate = first.scheduled_at.nil?
+
+          jobs.all? do |job|
+            job.instance_of?(first.class) && job.queue_name == first.queue_name && job.scheduled_at.nil? == immediate
+          end
+        end
+
+        def bulk_items(jobs)
+          items = bulk_item(jobs.first)
+          items["args"] = jobs.map { |job| [job.serialize] }
+          items["at"] = jobs.map { |job| job.scheduled_at.to_f } if items.key?("at")
+          items
+        end
+
+        def bulk_item(job)
+          item = {
+            "class" => Sidekiq::ActiveJob::Wrapper,
+            "wrapped" => job.class,
+            "queue" => job.queue_name,
+            "args" => [job.serialize]
+          }
+          item["at"] = job.scheduled_at.to_f if job.scheduled_at
+          item
+        end
 
         # Defines a class alias for backwards compatibility with enqueued Active Job jobs.
         # @api private

@@ -126,4 +126,18 @@ class TestTransactionAwareClient < Minitest::Test
     end
     assert_equal 1, q.size
   end
+
+  def test_push_all_pushes_immediately_within_active_transactions
+    Sidekiq.transactional_push!
+    client = Sidekiq::TransactionAwareClient.new
+    q = Sidekiq::Queue.new
+
+    @app.executor.wrap do
+      ActiveRecord::Base.transaction do
+        client.push_all([{"class" => PostJob, "args" => []}])
+        raise ActiveRecord::Rollback
+      end
+    end
+    assert_equal 1, q.size
+  end
 end
