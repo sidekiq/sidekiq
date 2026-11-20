@@ -81,7 +81,17 @@ begin
         # @api private
         def enqueue_all(jobs)
           jids = push_jobs(jobs)
-          jids.count { |jid| !jid.nil? }
+
+          enqueued_count = 0
+          jobs.each_with_index do |job, index|
+            jid = jids[index]
+            enqueued_count += 1 if jid
+
+            job.provider_job_id = jid
+            job.successfully_enqueued = !jid.nil?
+          end
+
+          enqueued_count
         end
 
         # @api private

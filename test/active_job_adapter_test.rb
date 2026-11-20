@@ -193,6 +193,42 @@ describe "SidekiqAdapter" do
     ensure
       recorded_pool&.shutdown(&:close)
     end
+
+    it "sets provider_job_id and successfully_enqueued on each job" do
+      jobs = [AjJob.new(1), AjJob2.new(2, 3)]
+
+      ActiveJob.perform_all_later(jobs)
+
+      jobs.each do |job|
+        assert_equal 24, job.provider_job_id.size
+        assert job.successfully_enqueued?
+      end
+    end
+
+    it "marks a job a client middleware stops as not enqueued" do
+      stopper = Class.new do
+        def call(_job_class, job, _queue, _redis)
+          yield unless job["wrapped"].to_s == "AjJob2"
+        end
+      end
+      @config.client_middleware.add stopper
+
+      allowed, stopped = jobs = [AjJob.new(1), AjJob2.new(2, 3)]
+      enqueued_count = nil
+      subscriber = proc { |*, payload| enqueued_count = payload[:enqueued_count] }
+
+      ActiveSupport::Notifications.subscribed(subscriber, "enqueue_all.active_job") do
+        ActiveJob.perform_all_later(jobs)
+      end
+
+      assert_equal 1, enqueued_count
+
+      assert allowed.successfully_enqueued?
+      refute stopped.successfully_enqueued?
+
+      assert_equal 24, allowed.provider_job_id.size
+      assert_nil stopped.provider_job_id
+    end
   end
 
   describe "#stopping?" do
