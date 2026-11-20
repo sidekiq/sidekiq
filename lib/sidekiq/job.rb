@@ -46,16 +46,48 @@ module Sidekiq
     # The Options module is extracted so we can include it in ActiveJob::Base
     # and allow native AJs to configure Sidekiq features/internals.
     module Options
+      ATTRIBUTES = %i[sidekiq_options_hash sidekiq_retry_in_block sidekiq_retries_exhausted_block].freeze
+
       def self.included(base)
         base.extend(ClassMethods)
-        base.sidekiq_class_attribute :sidekiq_options_hash
-        base.sidekiq_class_attribute :sidekiq_retry_in_block
-        base.sidekiq_class_attribute :sidekiq_retries_exhausted_block
+        # Including this module (again) starts the class over with default
+        # options, even when a superclass has set some.
+        ATTRIBUTES.each { |name| base.instance_variable_set(:"@#{name}", nil) }
+      end
+
+      # The readers fall back to the superclass, so a subclass sees its
+      # parent's value until it sets its own.
+      def self.define_class_attribute(mod, name)
+        mod.class_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def #{name}
+            if instance_variable_defined?(:@#{name})
+              @#{name}
+            elsif (parent = superclass).respond_to?(:#{name})
+              parent.#{name}
+            end
+          end
+
+          def #{name}=(val)
+            @#{name} = val
+          end
+        RUBY
+      end
+
+      def self.define_instance_attribute(mod, name)
+        mod.class_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def #{name}
+            if instance_variable_defined?(:@#{name})
+              @#{name}
+            else
+              self.class.#{name}
+            end
+          end
+
+          attr_writer :#{name}
+        RUBY
       end
 
       module ClassMethods
-        ACCESSOR_MUTEX = Mutex.new
-
         ##
         # Allows customization for this type of Job.
         # Legal options:
@@ -89,71 +121,30 @@ module Sidekiq
           self.sidekiq_options_hash ||= Sidekiq.default_job_options
         end
 
+        # Defines class-level attributes that subclasses inherit and can
+        # override, with instance-level readers and writers.
+        #
+        # Values are stored in instance variables on the class that set them,
+        # and readers fall back to the superclass. This defines each method
+        # once, on the class that declares the attribute, rather than a new
+        # closure every time a subclass sets a value.
         def sidekiq_class_attribute(*attrs)
-          instance_reader = true
-          instance_writer = true
-
           attrs.each do |name|
-            synchronized_getter = "__synchronized_#{name}"
-
-            singleton_class.instance_eval do
-              undef_method(name) if method_defined?(name) || private_method_defined?(name)
-            end
-
-            define_singleton_method(synchronized_getter) { nil }
-            singleton_class.class_eval do
-              private(synchronized_getter)
-            end
-
-            define_singleton_method(name) { ACCESSOR_MUTEX.synchronize { send synchronized_getter } }
-
-            ivar = "@#{name}"
-
-            singleton_class.instance_eval do
-              m = "#{name}="
-              undef_method(m) if method_defined?(m) || private_method_defined?(m)
-            end
-            define_singleton_method(:"#{name}=") do |val|
-              singleton_class.class_eval do
-                ACCESSOR_MUTEX.synchronize do
-                  undef_method(synchronized_getter) if method_defined?(synchronized_getter) || private_method_defined?(synchronized_getter)
-                  define_method(synchronized_getter) { val }
-                end
-              end
-
-              if singleton_class?
-                class_eval do
-                  undef_method(name) if method_defined?(name) || private_method_defined?(name)
-                  define_method(name) do
-                    if instance_variable_defined? ivar
-                      instance_variable_get ivar
-                    else
-                      singleton_class.send name
-                    end
-                  end
-                end
-              end
-              val
-            end
-
-            if instance_reader
-              undef_method(name) if method_defined?(name) || private_method_defined?(name)
-              define_method(name) do
-                if instance_variable_defined?(ivar)
-                  instance_variable_get ivar
-                else
-                  self.class.public_send name
-                end
+            [singleton_class, self].each do |mod|
+              [name, :"#{name}="].each do |meth|
+                mod.undef_method(meth) if mod.method_defined?(meth) || mod.private_method_defined?(meth)
               end
             end
-
-            if instance_writer
-              m = "#{name}="
-              undef_method(m) if method_defined?(m) || private_method_defined?(m)
-              attr_writer name
-            end
+            Options.define_class_attribute(singleton_class, name)
+            Options.define_instance_attribute(self, name)
+            instance_variable_set(:"@#{name}", nil)
           end
         end
+      end
+
+      ATTRIBUTES.each do |name|
+        define_class_attribute(ClassMethods, name)
+        define_instance_attribute(self, name)
       end
     end
 
