@@ -42,6 +42,37 @@ def reset!
   cfg
 end
 
+# Records the batches of commands sent to Redis via pipelining so tests can
+# observe how many round-trips an operation performed. Not registered globally:
+# attach it to a dedicated pool via RedisClient's `middlewares:` config option.
+module PipelinedCommandRecorder
+  class << self
+    attr_accessor :pipelines
+
+    # A single-connection pool that records its pipelines. Pass `connect: true`
+    # to connect up front when counting round trips: the connection prelude is
+    # pipelined and would otherwise be recorded as an extra one.
+    def create_pool(connect: false)
+      pool = Sidekiq::RedisConnection.create(size: 1, middlewares: [self])
+      pool.with { |conn| conn.call("PING") } if connect
+      pool
+    end
+
+    def record
+      self.pipelines = []
+      yield
+      pipelines
+    ensure
+      self.pipelines = nil
+    end
+  end
+
+  def call_pipelined(commands, config)
+    PipelinedCommandRecorder.pipelines&.push(commands)
+    super
+  end
+end
+
 def capture_logging(cfg, lvl = Logger::INFO)
   old = cfg.logger
   begin

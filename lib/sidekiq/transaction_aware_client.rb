@@ -37,6 +37,12 @@ module Sidekiq
     def push_bulk(items)
       @redis_client.push_bulk(items)
     end
+
+    ##
+    # Like push_bulk, push_all is not transactional.
+    def push_all(...)
+      @redis_client.push_all(...)
+    end
   end
 end
 
