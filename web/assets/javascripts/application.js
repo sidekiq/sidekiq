@@ -170,10 +170,34 @@ function replacePage(text) {
   var doc = parser.parseFromString(text, "text/html");
 
   var page = doc.querySelector('#page')
+  var restoreFilter = keepFilterInput(page)
   document.querySelector("#page").replaceWith(page)
   document.title = doc.title
+  restoreFilter()
 
   addListeners();
+}
+
+// The server renders the filter with the submitted value, so a poll would
+// discard text the user typed but did not submit yet. Move the live input
+// into the new page, then restore its focus and selection.
+function keepFilterInput(newPage) {
+  var selector = '.filter input[name="substr"]'
+  var input = document.querySelector(selector)
+  var serverInput = newPage.querySelector(selector)
+  if (!input || !serverInput) { return () => {} }
+
+  var focused = document.activeElement === input
+  var start = input.selectionStart
+  var end = input.selectionEnd
+  var direction = input.selectionDirection
+  serverInput.replaceWith(input)
+
+  return () => {
+    if (!focused) { return }
+    input.focus({ preventScroll: true })
+    input.setSelectionRange(start, end, direction)
+  }
 }
 
 function showError(error) {
