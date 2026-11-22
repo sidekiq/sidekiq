@@ -248,7 +248,7 @@ def run(number_of_processes, total_queues)
     Process.fork do
       # First process only consumes from it's own queue but monitors all queues.
       # It works as a synchronization point. Once all processes finish
-      # (that is, when all queues are emptied) it prints the the stats.
+      # (that is, when all queues are emptied) it prints the stats.
       if idx == 0
         queue = "q#{idx}"
         consume(queues, queue, true)
