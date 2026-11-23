@@ -187,6 +187,48 @@ describe Sidekiq::Job do
     end
   end
 
+  describe "class attributes" do
+    it "does not define methods on each class that includes Sidekiq::Job" do
+      job = Class.new { include Sidekiq::Job }
+      job.sidekiq_options queue: "x"
+      job.sidekiq_retry_in { 10 }
+
+      assert_empty job.singleton_methods(false)
+      assert_empty job.instance_methods(false)
+    end
+
+    it "inherits values until a subclass sets its own" do
+      parent = Class.new { include Sidekiq::Job }
+      parent.sidekiq_options queue: "parent"
+      child = Class.new(parent)
+
+      assert_equal "parent", child.get_sidekiq_options["queue"]
+
+      child.sidekiq_options queue: "child"
+      assert_equal "child", child.get_sidekiq_options["queue"]
+      assert_equal "parent", parent.get_sidekiq_options["queue"]
+    end
+
+    it "starts over with defaults when a subclass includes Sidekiq::Job again" do
+      parent = Class.new { include Sidekiq::Job }
+      parent.sidekiq_options queue: "parent"
+      child = Class.new(parent) { include Sidekiq::Job }
+
+      assert_equal "default", child.get_sidekiq_options["queue"]
+    end
+
+    it "lets an instance override the class value" do
+      job = Class.new { include Sidekiq::Job }
+      job.sidekiq_retry_in { 10 }
+      instance = job.new
+      override = proc { 20 }
+      instance.sidekiq_retry_in_block = override
+
+      assert_equal override, instance.sidekiq_retry_in_block
+      refute_equal override, job.sidekiq_retry_in_block
+    end
+  end
+
   describe "#perform_inline" do
     $my_recorder = []
 
