@@ -75,11 +75,17 @@ module Sidekiq
   end
 
   def self.redis_pool
-    (Thread.current[:sidekiq_capsule] || default_configuration).redis_pool
+    (current_capsule || default_configuration).redis_pool
   end
 
   def self.redis(&block)
-    (Thread.current[:sidekiq_capsule] || default_configuration).redis(&block)
+    (current_capsule || default_configuration).redis(&block)
+  end
+
+  # The capsule of the processor thread that runs the current job, if any.
+  # It is a thread variable so that fibers started by a job see it too.
+  def self.current_capsule
+    Thread.current.thread_variable_get(:sidekiq_capsule) || Thread.current[:sidekiq_capsule]
   end
 
   def self.strict_args!(mode = :raise)
